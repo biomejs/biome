@@ -127,21 +127,40 @@ impl Rule for UseTailwindShorthandClasses {
                 .build();
                 mutation.replace_node(to_modify.clone(), new_full);
             } else {
-                let base_token = to_modify
-                    .candidate()
-                    .ok()?
-                    .as_tw_functional_candidate()?
-                    .base_token()
-                    .ok()?;
-                mutation.replace_token(
-                    base_token,
-                    TailwindSyntaxToken::new_detached(
-                        TailwindSyntaxKind::TW_BASE,
-                        replacement_base,
-                        [],
-                        [],
-                    ),
-                );
+                match to_modify.candidate().ok()? {
+                    AnyTwCandidate::TwFunctionalCandidate(func) => {
+                        // Functional candidate: replace just the base token.
+                        // The `-value` part (e.g. `-4` in `border-x-4`) stays intact.
+                        let base_token = func.base_token().ok()?;
+                        mutation.replace_token(
+                            base_token,
+                            TailwindSyntaxToken::new_detached(
+                                TailwindSyntaxKind::TW_BASE,
+                                replacement_base,
+                                [],
+                                [],
+                            ),
+                        );
+                    }
+                    AnyTwCandidate::TwStaticCandidate(_) => {
+                        // Static candidate (e.g. bare `border-x` with no value):
+                        // replace the whole node since there is no value slot to keep.
+                        let new_base = TailwindSyntaxToken::new_detached(
+                            TailwindSyntaxKind::TW_BASE,
+                            replacement_base,
+                            [],
+                            [],
+                        );
+                        let new_static = make::tw_static_candidate(new_base);
+                        let new_full = make::tw_full_candidate(
+                            to_modify.variants(),
+                            AnyTwCandidate::TwStaticCandidate(new_static),
+                        )
+                        .build();
+                        mutation.replace_node(to_modify.clone(), new_full);
+                    }
+                    _ => return None,
+                }
             }
         }
 

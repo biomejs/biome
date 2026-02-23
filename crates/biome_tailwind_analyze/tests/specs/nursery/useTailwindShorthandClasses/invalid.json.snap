@@ -162,7 +162,7 @@ border-x border-y
 
 # Diagnostics
 ```
-invalid.json:1:1 lint/nursery/useTailwindShorthandClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:1 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer Tailwind shorthand utilities over multiple longhand utilities.
   
@@ -178,6 +178,10 @@ invalid.json:1:1 lint/nursery/useTailwindShorthandClasses ━━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Safe fix: Use this simplified class instead.
+  
+    1 │ border-x·border-y
+      │ ---------      --
 
 ```
 
@@ -377,7 +381,7 @@ border-x border-y overflow-hidden text-ellipsis whitespace-nowrap w-8 h-8
 
 # Diagnostics
 ```
-invalid.json:1:1 lint/nursery/useTailwindShorthandClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:1 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer Tailwind shorthand utilities over multiple longhand utilities.
   
@@ -393,6 +397,10 @@ invalid.json:1:1 lint/nursery/useTailwindShorthandClasses ━━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Safe fix: Use this simplified class instead.
+  
+    1 │ border-x·border-y·overflow-hidden·text-ellipsis·whitespace-nowrap·w-8·h-8
+      │ ---------      --                                                        
 
 ```
 
