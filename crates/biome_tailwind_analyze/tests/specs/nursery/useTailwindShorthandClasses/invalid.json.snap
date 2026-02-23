@@ -212,7 +212,7 @@ invalid.json:1:1 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━
   i Safe fix: Use this simplified class instead.
   
   - overflow-hidden·text-ellipsis·whitespace-nowrap
-  + truncate·
+  + truncate
   
 
 ```

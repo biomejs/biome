@@ -7,6 +7,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, Direction, WalkEvent};
 use biome_rule_options::use_tailwind_shorthand_classes::UseTailwindShorthandClassesOptions;
+use biome_tailwind_factory::make;
 use biome_tailwind_syntax::{
     AnyTwCandidate, AnyTwModifier, AnyTwValue, TailwindSyntaxKind, TailwindSyntaxNode,
     TailwindSyntaxToken, TwCandidateList, TwFullCandidate, TwRoot, TwVariantList,
@@ -104,21 +105,42 @@ impl Rule for UseTailwindShorthandClasses {
             let Some(to_modify) = old_candidates.next() else {
                 break;
             };
-            let base_token = to_modify
-                .candidate()
-                .ok()?
-                .as_tw_functional_candidate()?
-                .base_token()
-                .ok()?;
-            mutation.replace_token(
-                base_token,
-                TailwindSyntaxToken::new_detached(
+            if state.replace_whole_node {
+                // The replacement is a static class (e.g. `truncate`), but the candidate
+                // being replaced is a functional candidate (e.g. `whitespace-nowrap`).
+                // We must replace the entire TwFullCandidate node, not just the base token,
+                // because changing the node kind from functional to static requires
+                // rebuilding the whole subtree.
+                let new_base_token = TailwindSyntaxToken::new_detached(
                     TailwindSyntaxKind::TW_BASE,
                     replacement_base,
                     [],
                     [],
-                ),
-            );
+                );
+                let new_static = make::tw_static_candidate(new_base_token);
+                let new_full = make::tw_full_candidate(
+                    to_modify.variants(),
+                    AnyTwCandidate::TwStaticCandidate(new_static),
+                )
+                .build();
+                mutation.replace_node(to_modify.clone(), new_full);
+            } else {
+                let base_token = to_modify
+                    .candidate()
+                    .ok()?
+                    .as_tw_functional_candidate()?
+                    .base_token()
+                    .ok()?;
+                mutation.replace_token(
+                    base_token,
+                    TailwindSyntaxToken::new_detached(
+                        TailwindSyntaxKind::TW_BASE,
+                        replacement_base,
+                        [],
+                        [],
+                    ),
+                );
+            }
         }
 
         for to_remove in old_candidates {
@@ -138,6 +160,10 @@ impl Rule for UseTailwindShorthandClasses {
 pub struct TailwindShorthandViolation {
     pub uncompressed_nodes: Vec<TwFullCandidate>,
     pub replacement_bases: &'static [&'static str],
+    /// When true, the action replaces the entire `TwFullCandidate` node rather
+    /// than just its base token. This is needed when the input candidates are
+    /// functional (base + value) but the replacement is a static class name.
+    pub replace_whole_node: bool,
 }
 
 #[derive(Debug, Clone, Eq)]
@@ -197,6 +223,63 @@ fn hash_node<H: std::hash::Hasher>(node: &TailwindSyntaxNode, state: &mut H) {
     }
 }
 
+/// Returns the full class text of a candidate (e.g. `"overflow-hidden"` for a
+/// functional candidate with base `"overflow"` and value `"hidden"`).
+fn candidate_text(full: &TwFullCandidate) -> Option<String> {
+    match full.candidate().ok()? {
+        AnyTwCandidate::TwFunctionalCandidate(func) => {
+            let base = func.base_token().ok()?;
+            let value = func.value().ok()?;
+            Some(format!(
+                "{}-{}",
+                base.text_trimmed(),
+                value.syntax().text_trimmed()
+            ))
+        }
+        AnyTwCandidate::TwStaticCandidate(st) => {
+            Some(st.base_token().ok()?.text_trimmed().to_string())
+        }
+        _ => None,
+    }
+}
+
+/// Special-case detection for `overflow-hidden text-ellipsis whitespace-nowrap` → `truncate`.
+///
+/// These three classes cannot be handled by the general value-grouping logic
+/// because each has a different value (`hidden`, `ellipsis`, `nowrap`), so
+/// they never end up in the same group.
+fn check_truncate_shorthand(
+    all_candidates: &[TwFullCandidate],
+) -> Option<TailwindShorthandViolation> {
+    const TRUNCATE_PARTS: &[&str] = &["overflow-hidden", "text-ellipsis", "whitespace-nowrap"];
+
+    // Find the first part to establish the variants/negative/important context.
+    let first = all_candidates.iter().find(|c| {
+        candidate_text(c).as_deref() == Some("overflow-hidden")
+            && c.negative_token().is_none()
+            && c.excl_token().is_none()
+    })?;
+
+    let first_variants_text = first.variants().syntax().text_trimmed().to_string();
+
+    let mut matched: Vec<TwFullCandidate> = Vec::with_capacity(TRUNCATE_PARTS.len());
+    for &part in TRUNCATE_PARTS {
+        let candidate = all_candidates.iter().find(|c| {
+            candidate_text(c).as_deref() == Some(part)
+                && c.negative_token().is_none()
+                && c.excl_token().is_none()
+                && c.variants().syntax().text_trimmed() == first_variants_text.as_str()
+        })?;
+        matched.push(candidate.clone());
+    }
+
+    Some(TailwindShorthandViolation {
+        uncompressed_nodes: matched,
+        replacement_bases: &["truncate"],
+        replace_whole_node: true,
+    })
+}
+
 fn analyze_tailwind_shorthand(candidates: TwCandidateList) -> Vec<TailwindShorthandViolation> {
     fn extract_key(full: &TwFullCandidate) -> Option<GroupKey> {
         let variants = full.variants();
@@ -206,26 +289,6 @@ fn analyze_tailwind_shorthand(candidates: TwCandidateList) -> Vec<TailwindShorth
         if let Some(func) = candidate.as_tw_functional_candidate() {
             let value = func.value().ok()?;
             let modifier = func.modifier();
-
-            // let combined: Option<&'static str> = match (base, value) {
-            //     ("overflow", "hidden") => Some("overflow-hidden"),
-            //     ("text", "ellipsis") => Some("text-ellipsis"),
-            //     ("whitespace", "nowrap") => Some("whitespace-nowrap"),
-            //     _ => None,
-            // };
-
-            // if let Some(b) = combined {
-            //     Some((
-            //         b,
-            //         GroupKey {
-            //             variants,
-            //             negative,
-            //             important,
-            //             value: None,
-            //             modifier,
-            //         },
-            //     ))
-            // } else {
             Some(GroupKey {
                 variants,
                 negative,
@@ -233,7 +296,6 @@ fn analyze_tailwind_shorthand(candidates: TwCandidateList) -> Vec<TailwindShorth
                 value: Some(value),
                 modifier,
             })
-            // }
         } else if let Some(_) = candidate.as_tw_static_candidate() {
             Some(GroupKey {
                 variants,
@@ -247,15 +309,17 @@ fn analyze_tailwind_shorthand(candidates: TwCandidateList) -> Vec<TailwindShorth
         }
     }
 
+    let all_full_candidates: Vec<TwFullCandidate> = candidates
+        .iter()
+        .filter_map(|c| c.as_tw_full_candidate().cloned())
+        .collect();
+
     let mut groups: HashMap<GroupKey, Vec<TwFullCandidate>> = HashMap::new();
-    for candidate in candidates.iter() {
-        let Some(candidate) = candidate.as_tw_full_candidate().cloned() else {
+    for candidate in &all_full_candidates {
+        let Some(key) = extract_key(candidate) else {
             continue;
         };
-        let Some(key) = extract_key(&candidate) else {
-            continue;
-        };
-        groups.entry(key).or_default().push(candidate);
+        groups.entry(key).or_default().push(candidate.clone());
     }
 
     let mut violations: Vec<TailwindShorthandViolation> = Vec::new();
@@ -321,9 +385,17 @@ fn analyze_tailwind_shorthand(candidates: TwCandidateList) -> Vec<TailwindShorth
                 violations.push(TailwindShorthandViolation {
                     uncompressed_nodes: flagged_candidates,
                     replacement_bases,
+                    replace_whole_node: false,
                 });
             }
         }
+    }
+
+    // Special case: `overflow-hidden text-ellipsis whitespace-nowrap` → `truncate`.
+    // These classes cannot be handled by the general value-grouping logic because
+    // each has a different value, so they never end up in the same group.
+    if let Some(violation) = check_truncate_shorthand(&all_full_candidates) {
+        violations.push(violation);
     }
 
     violations
@@ -444,8 +516,4 @@ pub static TW_COMPRESSABLES: &[&[(&[&str], &[&str])]] = &[
         (&["items", "justify-items"], &["place-items"]),
         (&["self", "justify-self"], &["place-self"]),
     ],
-    &[(
-        &["overflow-hidden", "text-ellipsis", "whitespace-nowrap"],
-        &["truncate"],
-    )],
 ];
