@@ -18,11 +18,11 @@ Use this skill when creating new lint rules or assist actions for Biome. It prov
 **CRITICAL: No Emojis**
 
 Emojis are BANNED in all lint rule code:
-- ❌ NO emojis in rustdoc comments
-- ❌ NO emojis in diagnostic messages
-- ❌ NO emojis in code action descriptions
-- ❌ NO emojis in test files or test comments
-- ❌ NO emojis anywhere in the rule implementation
+- NO emojis in rustdoc comments
+- NO emojis in diagnostic messages
+- NO emojis in code action descriptions
+- NO emojis in test files or test comments
+- NO emojis anywhere in the rule implementation
 
 Keep all code and documentation professional and emoji-free.
 
@@ -348,9 +348,9 @@ For rules that analyze relationships between multiple files (e.g., import cycles
 - Files without `expect_diagnostic` provide context but aren't expected to trigger the rule
 
 **Supported languages:**
-- ✅ JavaScript/TypeScript/JSX/TSX
-- ✅ CSS (module graph automatically populated from `file=` blocks)
-- ❌ HTML with `<style>` blocks (requires embedded snippet parsing - not yet implemented)
+- Supported: JavaScript/TypeScript/JSX/TSX
+- Supported: CSS (module graph automatically populated from `file=` blocks)
+- Not supported: HTML with `<style>` blocks (requires embedded snippet parsing - not yet implemented)
 
 ### The `ignore` Directive
 

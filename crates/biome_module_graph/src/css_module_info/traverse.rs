@@ -78,7 +78,8 @@ impl<'a> Iterator for ImportTreeTraversal<'a> {
         while let Some(current_path) = self.stack.pop() {
             let data = self.module_graph.data();
 
-            // Find the first unvisited file that imports current_path
+            // Find ALL unvisited files that import current_path
+            // We need to process all of them, not just the first one
             for (file_path, module_info) in data.iter() {
                 if self.visited.contains(file_path) {
                     continue;
@@ -141,9 +142,8 @@ impl<'a> Iterator for ImportTreeTraversal<'a> {
                         return self.next();
                     }
 
-                    // If no CSS files, continue with the next iteration
-                    // The parent was pushed to stack, so we'll find its parents next
-                    break;
+                    // Continue checking other files that might also import current_path
+                    // Don't break - we need to find ALL importers
                 }
             }
         }

@@ -18,10 +18,10 @@ Use this skill when implementing configurable options for lint rules. Covers def
 **CRITICAL: No Emojis**
 
 Emojis are BANNED in all rule options code:
-- ❌ NO emojis in code comments
-- ❌ NO emojis in rustdoc documentation
-- ❌ NO emojis in JSON schema descriptions
-- ❌ NO emojis in test files (options.json, etc.)
+- NO emojis in code comments
+- NO emojis in rustdoc documentation
+- NO emojis in JSON schema descriptions
+- NO emojis in test files (options.json, etc.)
 
 Keep all code professional and emoji-free.
 
@@ -281,12 +281,12 @@ This updates:
 ### Option Naming
 
 ```rust
-// ✅ Good - clear, semantic names
+// Good: Good - clear, semantic names
 allow_single_line: bool
 max_depth: u8
 ignore_patterns: Box<[Box<str>]>
 
-// ❌ Bad - unclear, technical names
+// Bad: Bad - unclear, technical names
 flag: bool
 n: u8
 list: Vec<String>

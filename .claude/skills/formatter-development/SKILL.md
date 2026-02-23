@@ -18,10 +18,10 @@ Use this skill when implementing or modifying Biome's formatters. It covers the 
 **CRITICAL: No Emojis**
 
 Emojis are BANNED in all formatter code:
-- ❌ NO emojis in code comments
-- ❌ NO emojis in rustdoc documentation
-- ❌ NO emojis in test files
-- ❌ NO emojis in debug output or error messages
+- NO emojis in code comments
+- NO emojis in rustdoc documentation
+- NO emojis in test files
+- NO emojis in debug output or error messages
 
 Keep all code professional and emoji-free.
 

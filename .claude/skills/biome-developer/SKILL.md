@@ -20,14 +20,14 @@ This skill provides general development best practices, common gotchas, and Biom
 **Emojis are absolutely BANNED in all code contributions.**
 
 This applies to:
-- ❌ Source code (Rust, JavaScript, TypeScript, etc.)
-- ❌ Code comments and documentation (inline comments, rustdoc, JSDoc, etc.)
-- ❌ Diagnostic messages and error text
-- ❌ Test files and test data
-- ❌ Commit messages
-- ❌ Pull request titles and descriptions
-- ❌ Any generated code or scaffolding
-- ❌ Configuration files and JSON data
+- Source code (Rust, JavaScript, TypeScript, etc.)
+- Code comments and documentation (inline comments, rustdoc, JSDoc, etc.)
+- Diagnostic messages and error text
+- Test files and test data
+- Commit messages
+- Pull request titles and descriptions
+- Any generated code or scaffolding
+- Configuration files and JSON data
 
 **Why:**
 - Professional codebase standards
@@ -38,20 +38,20 @@ This applies to:
 **Examples:**
 
 ```rust
-// ❌ WRONG - Contains emoji
-/// This function is super cool! 🚀
+// Bad: WRONG - Contains emoji
+/// This function is super cool!
 fn calculate() { }
 
-// ✅ CORRECT - No emoji
+// Good: CORRECT - No emoji
 /// Calculates the optimal value using binary search.
 fn calculate() { }
 ```
 
 ```rust
-// ❌ WRONG - Emoji in diagnostic
-markup! { "This is not allowed! ⛔" }
+// Bad: WRONG - Emoji in diagnostic
+markup! { "This is not allowed!" }
 
-// ✅ CORRECT - Clear text
+// Good: CORRECT - Clear text
 markup! { "This syntax is not allowed." }
 ```
 
@@ -62,16 +62,16 @@ markup! { "This syntax is not allowed." }
 ### Working with AST and Syntax Nodes
 
 **DO:**
-- ✅ Use parser crate's `quick_test` to inspect AST structure before implementing
-- ✅ Understand the node hierarchy and parent-child relationships
-- ✅ Check both general cases AND specific types (e.g., Vue has both `VueDirective` and `VueV*ShorthandDirective`)
-- ✅ Verify your solution works for all relevant variant types, not just the first one you find
-- ✅ Extract helper functions that return `Option<T>` or `SyntaxResult<T>` instead of scattering early returns throughout the caller — this makes code more readable and composable
+- Use parser crate's `quick_test` to inspect AST structure before implementing
+- Understand the node hierarchy and parent-child relationships
+- Check both general cases AND specific types (e.g., Vue has both `VueDirective` and `VueV*ShorthandDirective`)
+- Verify your solution works for all relevant variant types, not just the first one you find
+- Extract helper functions that return `Option<T>` or `SyntaxResult<T>` instead of scattering early returns throughout the caller — this makes code more readable and composable
 
 **DON'T:**
-- ❌ Build the full Biome binary just to inspect syntax (expensive) - use parser crate's `quick_test` instead
-- ❌ Assume syntax patterns without inspecting the AST first
-- ❌ Write functions with many `let Ok(...) else { return }` scattered throughout when you can extract a helper that returns `Option<T>` instead
+- Build the full Biome binary just to inspect syntax (expensive) - use parser crate's `quick_test` instead
+- Assume syntax patterns without inspecting the AST first
+- Write functions with many `let Ok(...) else { return }` scattered throughout when you can extract a helper that returns `Option<T>` instead
 
 **Example - Inspecting AST:**
 ```rust
@@ -136,17 +136,17 @@ The helper uses `?` operator and `Option` combinators — much cleaner than scat
 ### String Extraction and Text Handling
 
 **DO:**
-- ✅ Use `inner_string_text()` when extracting content from quoted strings — it strips the surrounding quotes and returns a `TokenText` backed by the same green token (no allocation)
-- ✅ Use `text_trimmed()` when you need the full token text without leading/trailing whitespace
-- ✅ Use `token_text_trimmed()` on nodes like `HtmlAttributeName` to get the text content
-- ✅ Verify whether values use `HtmlString` (quotes) or `HtmlTextExpression` (curly braces)
-- ✅ Use `TokenText::slice()` or `inner_string_text()` to get sub-ranges of a token — both return a `TokenText` backed by the same `GreenToken` (ref-count bump only, no heap allocation)
+- Use `inner_string_text()` when extracting content from quoted strings — it strips the surrounding quotes and returns a `TokenText` backed by the same green token (no allocation)
+- Use `text_trimmed()` when you need the full token text without leading/trailing whitespace
+- Use `token_text_trimmed()` on nodes like `HtmlAttributeName` to get the text content
+- Verify whether values use `HtmlString` (quotes) or `HtmlTextExpression` (curly braces)
+- Use `TokenText::slice()` or `inner_string_text()` to get sub-ranges of a token — both return a `TokenText` backed by the same `GreenToken` (ref-count bump only, no heap allocation)
 
 **DON'T:**
-- ❌ Use `text_trimmed()` when you need `inner_string_text()` for extracting quoted string contents
-- ❌ Call `.text()` on a `SyntaxToken` — it returns raw text including surrounding trivia (whitespace, newlines). Always use `.text_trimmed()` instead.
-- ❌ Strip quotes manually with `&s[1..s.len()-1]` — use `inner_string_text()` instead; it is correct, allocation-free, and communicates intent
-- ❌ Use `word.to_string()` or `String::from(word)` to store individual words split out of a string token — store the `TokenText` of the whole token plus a token-relative `TextRange` instead (see below)
+- Use `text_trimmed()` when you need `inner_string_text()` for extracting quoted string contents
+- Call `.text()` on a `SyntaxToken` — it returns raw text including surrounding trivia (whitespace, newlines). Always use `.text_trimmed()` instead.
+- Strip quotes manually with `&s[1..s.len()-1]` — use `inner_string_text()` instead; it is correct, allocation-free, and communicates intent
+- Use `word.to_string()` or `String::from(word)` to store individual words split out of a string token — store the `TokenText` of the whole token plus a token-relative `TextRange` instead (see below)
 
 **Example - String Extraction:**
 ```rust
@@ -213,14 +213,14 @@ Key points:
 ### Working with Embedded Languages
 
 **DO:**
-- ✅ Verify changes work for different value formats (quoted strings vs text expressions) when handling multiple frameworks
-- ✅ Use appropriate `EmbeddingKind` for context (Vue, Svelte, Astro, etc.)
-- ✅ Check if embedded content needs `is_source: true` (script tags) vs `is_source: false` (template expressions)
-- ✅ Calculate offsets correctly: token start + 1 for opening quote, or use `text_range().start()` for text expressions
+- Verify changes work for different value formats (quoted strings vs text expressions) when handling multiple frameworks
+- Use appropriate `EmbeddingKind` for context (Vue, Svelte, Astro, etc.)
+- Check if embedded content needs `is_source: true` (script tags) vs `is_source: false` (template expressions)
+- Calculate offsets correctly: token start + 1 for opening quote, or use `text_range().start()` for text expressions
 
 **DON'T:**
-- ❌ Assume all frameworks use the same syntax (Vue uses quotes, Svelte uses curly braces)
-- ❌ Implement features for "widely used" patterns without evidence - ask the user first
+- Assume all frameworks use the same syntax (Vue uses quotes, Svelte uses curly braces)
+- Implement features for "widely used" patterns without evidence - ask the user first
 
 **Example - Different Value Formats:**
 ```rust
@@ -236,11 +236,11 @@ let expression = text_expression.expression().ok()?;
 ### Borrow Checker and Temporary Values
 
 **DO:**
-- ✅ Use intermediate `let` bindings to avoid temporary value borrows that get dropped
-- ✅ Store method results that return owned values before calling methods on them
+- Use intermediate `let` bindings to avoid temporary value borrows that get dropped
+- Store method results that return owned values before calling methods on them
 
 **DON'T:**
-- ❌ Create temporary value borrows that get dropped before use
+- Create temporary value borrows that get dropped before use
 
 **Example - Avoiding Borrow Issues:**
 ```rust
@@ -257,12 +257,12 @@ let token = html_string.value_token().ok()?; // OK
 ### Clippy and Code Style
 
 **DO:**
-- ✅ Use `let` chains to collapse nested `if let` statements (cleaner and follows Rust idioms)
-- ✅ Run `just l` before committing to catch clippy warnings
-- ✅ Fix clippy suggestions unless there's a good reason not to
+- Use `let` chains to collapse nested `if let` statements (cleaner and follows Rust idioms)
+- Run `just l` before committing to catch clippy warnings
+- Fix clippy suggestions unless there's a good reason not to
 
 **DON'T:**
-- ❌ Ignore clippy warnings - they often catch real issues or suggest better patterns
+- Ignore clippy warnings - they often catch real issues or suggest better patterns
 
 **Example - Collapsible If:**
 ```rust
@@ -284,13 +284,13 @@ if let Some(directive) = VueDirective::cast_ref(&element)
 ### Legacy and Deprecated Syntax
 
 **DO:**
-- ✅ Ask users before implementing deprecated/legacy syntax support
-- ✅ Wait for user demand before spending time on legacy features
-- ✅ Document when features are intentionally not supported due to being legacy
+- Ask users before implementing deprecated/legacy syntax support
+- Wait for user demand before spending time on legacy features
+- Document when features are intentionally not supported due to being legacy
 
 **DON'T:**
-- ❌ Implement legacy/deprecated syntax without checking with the user first
-- ❌ Claim patterns are "widely used" or "common" without evidence
+- Implement legacy/deprecated syntax without checking with the user first
+- Claim patterns are "widely used" or "common" without evidence
 
 **Example:**
 Svelte's `on:click` event handler syntax is legacy (Svelte 3/4). Modern Svelte 5 runes mode uses regular attributes. Unless users specifically request it, don't implement legacy syntax support.
@@ -298,15 +298,15 @@ Svelte's `on:click` event handler syntax is legacy (Svelte 3/4). Modern Svelte 5
 ### Testing and Development
 
 **DO:**
-- ✅ Use `just qt <package>` to run quick tests (handles test execution automatically)
-- ✅ Review snapshot changes carefully - don't blindly accept
-- ✅ Test with multiple variants when working with enums (e.g., all `VueV*ShorthandDirective` types)
-- ✅ Add tests for both valid and invalid cases
-- ✅ Use CLI tests for testing embedded languages (Vue/Svelte directives, etc.)
+- Use `just qt <package>` to run quick tests (handles test execution automatically)
+- Review snapshot changes carefully - don't blindly accept
+- Test with multiple variants when working with enums (e.g., all `VueV*ShorthandDirective` types)
+- Add tests for both valid and invalid cases
+- Use CLI tests for testing embedded languages (Vue/Svelte directives, etc.)
 
 **DON'T:**
-- ❌ Blindly accept all snapshot changes
-- ❌ Try to test embedded languages in analyzer packages (they don't have embedding capabilities)
+- Blindly accept all snapshot changes
+- Try to test embedded languages in analyzer packages (they don't have embedding capabilities)
 
 ## Pattern Matching Tips
 
@@ -387,12 +387,12 @@ if let Some(directive) = VueDirective::cast_ref(&element) {
 ## Documentation and Markdown Formatting
 
 **DO:**
-- ✅ Use spaces around table separators: `| --- | --- | --- |` (not `|---|---|---|`)
-- ✅ Ensure all Markdown tables follow "compact" style with proper spacing
-- ✅ Test documentation changes with markdown linters before committing
+- Use spaces around table separators: `| --- | --- | --- |` (not `|---|---|---|`)
+- Ensure all Markdown tables follow "compact" style with proper spacing
+- Test documentation changes with markdown linters before committing
 
 **DON'T:**
-- ❌ Use compact table separators without spaces (causes CI linting failures)
+- Use compact table separators without spaces (causes CI linting failures)
 
 **Example - Table Formatting:**
 ```markdown

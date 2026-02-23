@@ -1046,32 +1046,7 @@ impl WorkspaceServer {
                     self.module_graph.update_graph_for_html_paths(
                         self.fs.as_ref(),
                         &self.project_layout,
-                        path,
-                        html_root,
-                        &embedded_css_roots,
-                    )
-                } else if let Some(html_root) =
-                    SendNode::into_language_root::<HtmlRoot>(root.clone())
-                {
-                    // Collect embedded CSS roots from the stored document's snippets.
-                    let embedded_css_roots: Vec<AnyCssRoot> = self
-                        .documents
-                        .pin()
-                        .get(path.as_path())
-                        .map(|doc| {
-                            doc.embedded_snippets
-                                .iter()
-                                .filter_map(|s| s.as_css_embedded_snippet())
-                                .map(|s| s.parse.tree())
-                                .collect()
-                        })
-                        .unwrap_or_default();
-                    self.module_graph.update_graph_for_html_paths(
-                        self.fs.as_ref(),
-                        &self.project_layout,
-                        path,
-                        html_root,
-                        &embedded_css_roots,
+                        &[(path, html_root, embedded_css_roots)],
                     )
                 } else {
                     Default::default()
@@ -2211,9 +2186,9 @@ impl Workspace for WorkspaceServer {
             inline_config,
         } = params;
 
-        let settings = self
+        let (working_directory, settings) = self
             .projects
-            .get_settings_based_on_path(project_key, &path)
+            .get_settings_and_wd_based_on_path(project_key, &path)
             .ok_or_else(WorkspaceError::no_project)?;
         let capabilities =
             self.get_file_capabilities(&path, settings.experimental_full_html_support_enabled());
@@ -2274,6 +2249,7 @@ impl Workspace for WorkspaceServer {
                     enabled_rules: &enabled_rules,
                     plugins: plugins.clone(),
                     document_services: &services,
+                    working_directory: Some(working_directory.as_path()),
                 })?;
 
                 actions.extend(results.actions);
@@ -2306,6 +2282,7 @@ impl Workspace for WorkspaceServer {
             enabled_rules: &enabled_rules,
             plugins: plugins.clone(),
             document_services: &services,
+            working_directory: Some(working_directory.as_path()),
         })?;
 
         actions.extend(fix_result.actions);

@@ -17,16 +17,17 @@ Skills complement the specialized **agents** in `.claude/agents/` - agents are p
 
 **CRITICAL: No Emojis Policy**
 
-Emojis are BANNED in all code contributions:
-- ❌ NO emojis in source code
-- ❌ NO emojis in comments (code comments, rustdoc, etc.)
-- ❌ NO emojis in diagnostic messages
-- ❌ NO emojis in test files
-- ❌ NO emojis in commit messages
-- ❌ NO emojis in PR descriptions
-- ❌ NO emojis in any generated code or text
+Emojis are BANNED in all code contributions and documentation:
+- NO emojis in source code
+- NO emojis in comments (code comments, rustdoc, etc.)
+- NO emojis in diagnostic messages
+- NO emojis in test files
+- NO emojis in commit messages
+- NO emojis in PR descriptions
+- NO emojis in skill documents or agent instructions
+- NO emojis in any generated code or text
 
-This applies to all agents, all skills, and all contributions. Keep code professional and emoji-free.
+This applies to all agents, all skills, and all contributions. Keep code and documentation professional and emoji-free.
 
 ## Available Skills
 

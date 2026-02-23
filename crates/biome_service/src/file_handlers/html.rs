@@ -1533,7 +1533,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         .as_linter_rules(params.biome_path.as_path());
     let analyzer_options = params.settings.analyzer_options::<HtmlLanguage>(
         params.biome_path,
-        None,
+        params.working_directory,
         &params.document_file_source,
         params.suppression_reason.as_deref(),
     );

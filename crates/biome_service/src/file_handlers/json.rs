@@ -519,7 +519,7 @@ fn lint(params: LintParams) -> LintResults {
 
     let analyzer_options = params.settings.analyzer_options::<JsonLanguage>(
         params.path,
-        None,
+        params.working_directory,
         &params.language,
         params.suppression_reason.as_deref(),
     );
@@ -669,7 +669,7 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
         .as_linter_rules(params.biome_path.as_path());
     let analyzer_options = params.settings.analyzer_options::<JsonLanguage>(
         params.biome_path,
-        None,
+        params.working_directory,
         &params.document_file_source,
         params.suppression_reason.as_deref(),
     );

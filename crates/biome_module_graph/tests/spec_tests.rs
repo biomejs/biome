@@ -2772,7 +2772,7 @@ export function App() {
     // Should have one traversal step (direct import)
     assert_eq!(traversal.len(), 1, "Should have 1 CSS file in traversal");
     assert_eq!(
-        traversal[0].css_path.as_str(),
+        traversal[0].css_path.as_str().replace('\\', "/"),
         "/src/styles.css",
         "Should show styles.css in traversal"
     );

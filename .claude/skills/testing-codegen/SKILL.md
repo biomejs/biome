@@ -18,10 +18,10 @@ Use this skill for testing, code generation, and preparing contributions. Covers
 **CRITICAL: No Emojis**
 
 Emojis are BANNED in all test and generated code:
-- ❌ NO emojis in test files
-- ❌ NO emojis in snapshot files
-- ❌ NO emojis in changeset files
-- ❌ NO emojis in generated code or scaffolding
+- NO emojis in test files
+- NO emojis in snapshot files
+- NO emojis in changeset files
+- NO emojis in generated code or scaffolding
 
 Keep all code and documentation professional and emoji-free.
 

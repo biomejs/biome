@@ -1,6 +1,10 @@
-use std::collections::BTreeSet;
-
+use biome_css_formatter::context::CssFormatOptions;
+use biome_css_parser::CssParserOptions;
+use biome_css_syntax::CssFileSource;
 use biome_fs::MemoryFileSystem;
+use biome_html_formatter::HtmlFormatOptions;
+use biome_html_parser::HtmlParseOptions;
+use biome_html_syntax::HtmlFileSource;
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_formatter::format_node;
 use biome_js_parser::{JsParserOptions, parse};
@@ -10,15 +14,7 @@ use biome_resolver::ResolvedPath;
 use biome_rowan::AstNode;
 use biome_test_utils::{dump_registered_module_types, dump_registered_types};
 use camino::Utf8PathBuf;
-
-/// Returns `true` for file extensions that are handled as JS/TS by the
-/// snapshot helper. CSS and HTML files are handled separately.
-fn is_js_like_extension(ext: &str) -> bool {
-    matches!(
-        ext,
-        "js" | "jsx" | "ts" | "tsx" | "mjs" | "cjs" | "mts" | "cts" | "d.ts"
-    )
-}
+use std::collections::BTreeSet;
 
 pub struct ModuleGraphSnapshot<'a> {
     module_graph: &'a ModuleGraph,
@@ -83,11 +79,10 @@ impl<'a> ModuleGraphSnapshot<'a> {
             content.push_str(extension);
             content.push('\n');
 
-            if is_js_like_extension(extension) {
-                let source_type: JsFileSource = file_name.as_path().try_into().unwrap();
+            if let Ok(file_source) = JsFileSource::try_from(file_name.as_path()) {
                 let tree = parse(
                     source_code.as_str(),
-                    source_type,
+                    file_source,
                     JsParserOptions::default(),
                 );
                 let formatted =
@@ -96,10 +91,38 @@ impl<'a> ModuleGraphSnapshot<'a> {
                         .print()
                         .unwrap();
                 content.push_str(formatted.as_code().trim());
+            } else if let Ok(file_source) = CssFileSource::try_from(file_name.as_path()) {
+                let tree = biome_css_parser::parse_css(
+                    source_code.as_str(),
+                    file_source,
+                    CssParserOptions::default(),
+                );
+                let formatted = biome_css_formatter::format_node(
+                    CssFormatOptions::default(),
+                    tree.tree().syntax(),
+                )
+                .unwrap()
+                .print()
+                .unwrap();
+                content.push_str(formatted.as_code().trim());
+            } else if let Ok(file_source) = HtmlFileSource::try_from(file_name.as_path()) {
+                let tree = biome_html_parser::parse_html(
+                    source_code.as_str(),
+                    HtmlParseOptions::from(&file_source),
+                );
+                let formatted = biome_html_formatter::format_node(
+                    HtmlFormatOptions::default(),
+                    tree.tree().syntax(),
+                    false,
+                )
+                .unwrap()
+                .print()
+                .unwrap();
+                content.push_str(formatted.as_code().trim());
             } else {
-                // For CSS/HTML just show the raw source trimmed.
                 content.push_str(source_code.trim());
             }
+
             content.push_str("\n```");
 
             if let Some(data) = dependency_data.get(file_name.as_path()) {

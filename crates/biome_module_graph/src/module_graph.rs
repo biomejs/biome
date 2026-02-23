@@ -194,7 +194,11 @@ impl ModuleGraph {
                         }
                         // Add all JS/TS imports to check transitively
                         // (components imported by this file might use the class)
-                        for (_, import_path) in &js_info.static_import_paths {
+                        for import_path in js_info
+                            .static_import_paths
+                            .values()
+                            .chain(js_info.dynamic_import_paths.values())
+                        {
                             if let Some(path) = import_path.as_path() {
                                 queue.push_back(path.to_path_buf());
                             }
@@ -300,7 +304,11 @@ impl ModuleGraph {
                             new_chain.push(file_path.clone());
 
                             // Collect CSS files imported by this parent JS file
-                            for (_, import_path) in &js_info.static_import_paths {
+                            for import_path in js_info
+                                .static_import_paths
+                                .values()
+                                .chain(js_info.dynamic_import_paths.values())
+                            {
                                 if let Some(path) = import_path.as_path()
                                     && let Some(css_info) = self.css_module_info_for_path(path)
                                 {
@@ -547,7 +555,11 @@ impl ModuleGraph {
 
         // Start with the JS file itself - collect directly imported CSS
         if let Some(js_info) = self.js_module_info_for_path(js_path) {
-            for (_, import_path) in &js_info.static_import_paths {
+            for import_path in js_info
+                .static_import_paths
+                .values()
+                .chain(js_info.dynamic_import_paths.values())
+            {
                 if let Some(path) = import_path.as_path()
                     && let Some(css_info) = self.css_module_info_for_path(path)
                 {
@@ -600,7 +612,11 @@ impl ModuleGraph {
                             new_chain.push(file_path.clone());
 
                             // Collect CSS files imported by this parent JS file
-                            for (_, import_path) in &js_info.static_import_paths {
+                            for import_path in js_info
+                                .static_import_paths
+                                .values()
+                                .chain(js_info.dynamic_import_paths.values())
+                            {
                                 if let Some(path) = import_path.as_path()
                                     && let Some(css_info) = self.css_module_info_for_path(path)
                                 {
@@ -782,47 +798,54 @@ impl ModuleGraph {
         &self,
         fs: &dyn FsWithResolverProxy,
         project_layout: &ProjectLayout,
-        path: &BiomePath,
-        html_root: HtmlRoot,
-        embedded_css_roots: &[AnyCssRoot],
+        added_or_updated_paths: &[(&BiomePath, HtmlRoot, Vec<AnyCssRoot>)],
     ) -> (ModuleDependencies, Vec<ModuleDiagnostic>) {
         // Register directory path info (same pattern as CSS/JS).
         let path_info = self.path_info.pin();
-        let mut parent = path.parent();
-        while let Some(p) = parent {
-            let mut inserted = false;
-            path_info.get_or_insert_with(p.to_path_buf(), || {
-                inserted = true;
-                fs.path_info(p).ok()
-            });
-            if !inserted {
-                break;
+        for (path, _, _) in added_or_updated_paths {
+            let mut parent = path.parent();
+            while let Some(path) = parent {
+                let mut inserted = false;
+                path_info.get_or_insert_with(path.to_path_buf(), || {
+                    inserted = true;
+                    fs.path_info(path).ok()
+                });
+                if !inserted {
+                    break;
+                }
+                parent = path.parent();
             }
-            parent = p.parent();
         }
 
         let fs_proxy = ModuleGraphFsProxy::new(fs, self, project_layout);
-        let directory = path.parent().unwrap_or(path);
-        let visitor = HtmlModuleVisitor::new(
-            html_root,
-            embedded_css_roots,
-            path.to_path_buf(),
-            directory,
-            &fs_proxy,
-        );
-        let module = visitor.visit();
-
         let mut dependencies = ModuleDependencies::default();
-        for resolved_path in &module.imported_stylesheets {
-            if let Some(p) = resolved_path.as_path() {
-                dependencies.insert(p.to_path_buf());
+        let diagnostics = Vec::new();
+
+        // Traverse all the added and updated paths and insert their module info.
+        let modules = self.data.pin();
+
+        for (path, html_root, embedded_css_roots) in added_or_updated_paths {
+            let directory = path.parent().unwrap_or(path);
+            let visitor = HtmlModuleVisitor::new(
+                html_root.clone(),
+                embedded_css_roots,
+                path.to_path_buf(),
+                directory,
+                &fs_proxy,
+            );
+
+            let module = visitor.visit();
+
+            for resolved_path in &module.imported_stylesheets {
+                if let Some(p) = resolved_path.as_path() {
+                    dependencies.insert(p.to_path_buf());
+                }
             }
+
+            modules.insert(path.to_path_buf(), module.into());
         }
 
-        let modules = self.data.pin();
-        modules.insert(path.to_path_buf(), module.into());
-
-        (dependencies, vec![])
+        (dependencies, diagnostics)
     }
 
     pub fn update_graph_for_removed_paths(&self, removed_paths: &[&BiomePath]) {

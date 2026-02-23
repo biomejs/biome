@@ -13,6 +13,8 @@ use biome_css_syntax::AnyCssRoot;
 use biome_diagnostics::termcolor::Buffer;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
 use biome_fs::{BiomePath, FileSystem, OsFileSystem};
+use biome_html_parser::HtmlParseOptions;
+use biome_html_syntax::HtmlRoot;
 use biome_js_parser::{AnyJsRoot, JsParserOptions};
 use biome_js_type_info::{TypeData, TypeResolver};
 use biome_json_parser::ParseDiagnostic;
@@ -369,6 +371,38 @@ pub fn get_css_added_paths<'a>(
                 parsed.tree()
             })?;
             Some((path, root))
+        })
+        .collect()
+}
+
+/// Loads and parses files from the file system to pass them to service methods.
+pub fn get_html_added_paths<'a>(
+    fs: &dyn FileSystem,
+    paths: &'a [BiomePath],
+) -> Vec<(&'a BiomePath, HtmlRoot, Vec<AnyCssRoot>)> {
+    paths
+        .iter()
+        .filter_map(|path| {
+            let DocumentFileSource::Html(file_source) =
+                DocumentFileSource::from_path(path.as_path(), false)
+            else {
+                return None;
+            };
+            let root = fs.read_file_from_path(path).ok().map(|content| {
+                let parsed =
+                    biome_html_parser::parse_html(&content, HtmlParseOptions::from(&file_source));
+                let diagnostics = parsed.diagnostics();
+                assert!(
+                    diagnostics.is_empty(),
+                    "Unexpected diagnostics: {diagnostics:?}\nWhile parsing:\n{content}"
+                );
+                parsed.tree()
+            })?;
+            // For test utilities, we don't parse embedded CSS in HTML files.
+            // In real scenarios, the workspace server handles this by parsing
+            // embedded CSS blocks separately and passing them to update_graph_for_html_paths.
+            let embedded_css_roots = Vec::new();
+            Some((path, root, embedded_css_roots))
         })
         .collect()
 }

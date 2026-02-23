@@ -18,9 +18,9 @@ Use `packages/prettier-compare/` to inspect any differences between Biome and Pr
 **CRITICAL: No Emojis**
 
 Emojis are BANNED in all Prettier comparison code and output:
-- ❌ NO emojis in comparison scripts
-- ❌ NO emojis in test files
-- ❌ NO emojis in output or diagnostic messages
+- NO emojis in comparison scripts
+- NO emojis in test files
+- NO emojis in output or diagnostic messages
 
 Keep all code professional and emoji-free.
 
