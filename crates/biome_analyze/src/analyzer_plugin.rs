@@ -37,6 +37,17 @@ pub enum PluginTargetLanguage {
     Json,
 }
 
+/// Cached result of checking whether a plugin applies to the current file.
+#[derive(Copy, Clone, Debug)]
+enum FileApplicability {
+    /// Not yet checked for this file.
+    Unknown,
+    /// Plugin applies to the current file.
+    Applicable,
+    /// Plugin does not apply to the current file.
+    NotApplicable,
+}
+
 /// A syntax visitor that queries nodes and evaluates in a plugin.
 /// Based on [`crate::SyntaxVisitor`].
 pub struct PluginVisitor<L: Language> {
@@ -44,7 +55,7 @@ pub struct PluginVisitor<L: Language> {
     plugin: Arc<Box<dyn AnalyzerPlugin>>,
     skip_subtree: Option<SyntaxNode<L>>,
     /// Cached result of `applies_to_file` for the current file path.
-    applies_to_file: Option<bool>,
+    applies_to_file: FileApplicability,
 }
 
 impl<L> PluginVisitor<L>
@@ -63,7 +74,7 @@ where
             query,
             plugin,
             skip_subtree: None,
-            applies_to_file: None,
+            applies_to_file: FileApplicability::Unknown,
         }
     }
 }
@@ -110,11 +121,17 @@ where
             return;
         }
 
-        let applies = *self
-            .applies_to_file
-            .get_or_insert_with(|| self.plugin.applies_to_file(&ctx.options.file_path));
-        if !applies {
-            return;
+        match self.applies_to_file {
+            FileApplicability::NotApplicable => return,
+            FileApplicability::Unknown => {
+                if self.plugin.applies_to_file(&ctx.options.file_path) {
+                    self.applies_to_file = FileApplicability::Applicable;
+                } else {
+                    self.applies_to_file = FileApplicability::NotApplicable;
+                    return;
+                }
+            }
+            FileApplicability::Applicable => {}
         }
 
         let rule_timer = profiling::start_plugin_rule("plugin");
