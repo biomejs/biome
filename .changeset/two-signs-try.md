@@ -2,10 +2,11 @@
 "@biomejs/biome": patch
 ---
 
-Added `graphql` to valid embedded graphql template tags inside JavaScript files, when the feature experimentalEmbeddedSnippetsEnabled is enabled. This allows proper support for graphql tags used in RelayJS.
-Following example will work:
+Added `graphql` to valid embedded graphql template tags inside JavaScript files, when the feature `javascript.experimentalEmbeddedSnippetsEnabled` is enabled. This allows proper support for graphql tags used in RelayJS.
 
-```javascript
+Now, code snippets like the following are correctly formatted and limited:
+
+```js
 import { graphql } from "@biomejs/biome";
 
 const query = graphql`
