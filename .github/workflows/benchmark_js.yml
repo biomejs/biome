@@ -1,4 +1,4 @@
-name: Benchmarks JS/GritQL
+name: Benchmarks JS
 
 on:
   workflow_dispatch:
@@ -17,7 +17,6 @@ on:
       - 'crates/biome_formatter/**/*.rs'
       - 'crates/biome_rowan/**/*.rs'
       - 'crates/biome_parser/**/*.rs'
-      - 'crates/biome_grit_patterns/**/*.rs'
   push:
     branches:
       - main
@@ -31,7 +30,6 @@ on:
       - 'crates/biome_formatter/**/*.rs'
       - 'crates/biome_rowan/**/*.rs'
       - 'crates/biome_parser/**/*.rs'
-      - 'crates/biome_grit_patterns/**/*.rs'
 
 env:
   RUST_LOG: info
@@ -45,12 +43,10 @@ jobs:
     runs-on: depot-ubuntu-24.04-arm-16
     strategy:
       matrix:
-        include:
-          - package: biome_js_parser
-          - package: biome_js_formatter
-          - package: biome_js_analyze
-          - package: biome_grit_patterns
-            features: testing
+        package:
+          - biome_js_parser
+          - biome_js_formatter
+          - biome_js_analyze
 
     steps:
 
@@ -71,7 +67,7 @@ jobs:
 
       - name: Compile
         timeout-minutes: 20
-        run: cargo codspeed build -p ${{ matrix.package }} ${{ matrix.features && format('--features {0}', matrix.features) || '' }}
+        run: cargo codspeed build -p ${{ matrix.package }}
         env:
           CARGO_BUILD_JOBS: 3  # Default is 4 (equals to the vCPU count of the runner), which leads OOM on cargo build
 
