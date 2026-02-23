@@ -361,16 +361,6 @@ impl ModuleGraph {
     /// This allows consumers to stop iteration early if a class is found, avoiding
     /// unnecessary traversal of the entire tree. For diagnostic information including
     /// component chains, use `build_diagnostic_traversal_chain()` instead.
-    ///
-    /// # Example
-    /// ```ignore
-    /// for step in module_graph.traverse_import_tree_for_classes(js_path) {
-    ///     if step.css_classes.contains("my-class") {
-    ///         // Found it! Can stop early
-    ///         break;
-    ///     }
-    /// }
-    /// ```
     pub fn traverse_import_tree_for_classes(
         &self,
         js_path: &Utf8Path,
