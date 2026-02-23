@@ -104,7 +104,13 @@ impl JsModuleInfo {
     /// Returns the scope to be used for the given `range`.
     ///
     /// This finds the most specific scope that covers the given text range.
+    /// If the range is empty, returns the global scope.
     pub fn scope_for_range(&self, range: TextRange) -> JsScope {
+        // Guard against empty ranges - semantic_model.scope_for_range debug-asserts on empty ranges
+        if range.len() == 0.into() {
+            return self.global_scope();
+        }
+
         JsScope {
             info: self.0.clone(),
             scope: self.0.semantic_model.scope_for_range(range),
