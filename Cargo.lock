@@ -1755,6 +1755,7 @@ dependencies = [
  "biome_fs",
  "biome_js_analyze",
  "biome_js_parser",
+ "biome_js_semantic",
  "biome_js_type_info",
  "biome_json_parser",
  "biome_module_graph",

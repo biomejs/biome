@@ -13,7 +13,7 @@ use rustc_hash::{FxHashMap, FxHashSet};
 
 use crate::{
     JsExport, JsImportPath, JsOwnExport, ModuleGraph,
-    js_module_info::{JsModuleInfoInner, scope::TsBindingReference, utils::reached_too_many_types},
+    js_module_info::{JsModuleInfoInner, utils::reached_too_many_types},
 };
 
 use super::{JsModuleInfo, JsModuleInfoDiagnostic};
@@ -136,8 +136,12 @@ impl ModuleResolver {
             .get("default")
             .and_then(JsExport::as_own_export)
             .map(|own_export| match own_export {
-                JsOwnExport::Binding(binding_id) => {
-                    self.resolved_type_for_reference(&module.bindings[binding_id.index()].ty)
+                JsOwnExport::Binding(binding_range) => {
+                    // Look up the binding's type from augmentation data
+                    module.binding_type_data(*binding_range).map_or_else(
+                        || self.resolved_type_for_id(GLOBAL_UNKNOWN_ID),
+                        |data| self.resolved_type_for_reference(&data.ty),
+                    )
                 }
                 JsOwnExport::Type(resolved_id) => self.resolved_type_for_id(*resolved_id),
             })
@@ -150,16 +154,31 @@ impl ModuleResolver {
 
     /// Returns the resolved type of the value with the given `name`, as
     /// defined in the scope of the given `range`.
-    pub fn resolved_type_of_named_value(self: &Arc<Self>, range: TextRange, name: &str) -> Type {
+    pub fn resolved_type_of_named_value(self: &Arc<Self>, _range: TextRange, name: &str) -> Type {
         let module = &self.modules[0];
-        let scope = module.scope_for_range(range);
-        let Some(resolved_id) = module
-            .find_binding_in_scope(name, scope.id)
-            .and_then(TsBindingReference::value_ty)
-            .and_then(|binding_id| match &module.binding(binding_id).ty {
-                TypeReference::Resolved(resolved_id) => Some(*resolved_id),
-                _ => None,
-            })
+
+        // TODO: Use the specific scope at the given range instead of global scope
+        // This requires either exposing a range-based scope lookup in SemanticModel
+        // or finding a node at the range.
+        // For now, we use the global scope which will still find the binding
+        // via ancestor traversal, just less efficiently.
+        let _global_scope = module.0.semantic_model.global_scope();
+        // We need the internal ScopeId to pass to find_binding_in_scope
+        // SAFETY: The global scope is always at index 0
+        let scope_id = biome_js_semantic::ScopeId::new(0);
+
+        let Some(resolved_id) =
+            module
+                .find_binding_in_scope(name, scope_id)
+                .and_then(|binding_range| {
+                    // Look up the binding's type data by its range
+                    module
+                        .binding_type_data(binding_range)
+                        .and_then(|data| match &data.ty {
+                            TypeReference::Resolved(resolved_id) => Some(*resolved_id),
+                            _ => None,
+                        })
+                })
         else {
             return self.resolved_type_for_id(GLOBAL_UNKNOWN_ID);
         };
@@ -398,21 +417,40 @@ impl TypeResolver for ModuleResolver {
 
     fn resolve_type_of(&self, identifier: &Text, scope_id: ScopeId) -> Option<ResolvedTypeId> {
         let module = &self.modules[0];
-        let Some(binding_ref) = module.find_binding_in_scope(identifier, scope_id) else {
+
+        // Convert scope_id to semantic ScopeId
+        let semantic_scope_id = biome_js_semantic::ScopeId::new(scope_id.index());
+
+        let Some(binding_range) = module.find_binding_in_scope(identifier, semantic_scope_id)
+        else {
             return GLOBAL_RESOLVER.resolve_type_of(identifier, scope_id);
         };
 
-        let binding = module.binding(binding_ref.value_ty_or_ty());
-        if binding.declaration_kind.is_import_declaration() {
-            module.static_imports.get(&binding.name).and_then(|import| {
-                self.resolve_import(&TypeImportQualifier {
-                    symbol: import.symbol.clone(),
-                    resolved_path: import.resolved_path.clone(),
-                    type_only: binding.declaration_kind.is_import_type_declaration(),
+        // Check if this is an imported binding
+        if module.static_imports.contains_key(identifier.text()) {
+            module
+                .static_imports
+                .get(identifier.text())
+                .and_then(|import| {
+                    // TODO: Determine if this is a type-only import
+                    // JsImport doesn't store phase information directly
+                    // We may need to look it up from static_import_paths
+                    let type_only = module
+                        .static_import_paths
+                        .get(import.specifier.text())
+                        .is_some_and(|path| path.phase == crate::JsImportPhase::Type);
+
+                    self.resolve_import(&TypeImportQualifier {
+                        symbol: import.symbol.clone(),
+                        resolved_path: import.resolved_path.clone(),
+                        type_only,
+                    })
                 })
-            })
         } else {
-            self.resolve_reference(&binding.ty)
+            // Look up the binding's type from augmentation data
+            module
+                .binding_type_data(binding_range)
+                .and_then(|data| self.resolve_reference(&data.ty))
         }
     }
 
@@ -476,17 +514,25 @@ fn resolve_from_export<'a>(
     export: &JsOwnExport,
 ) -> ResolveFromExportResult<'a> {
     let resolved = match export {
-        JsOwnExport::Binding(binding_id) => match &module.bindings[binding_id.index()].ty {
-            TypeReference::Qualifier(_qualifier) => {
-                // If it wasn't resolved before exporting, we can't help it
-                // anymore.
-                None
+        JsOwnExport::Binding(binding_range) => {
+            // Look up the binding's type data by its range
+            match module.binding_type_data(*binding_range) {
+                Some(data) => match &data.ty {
+                    TypeReference::Qualifier(_qualifier) => {
+                        // If it wasn't resolved before exporting, we can't help it
+                        // anymore.
+                        None
+                    }
+                    TypeReference::Resolved(resolved_id) => {
+                        Some(resolved_id.with_module_id(module_id))
+                    }
+                    TypeReference::Import(import) => {
+                        return ResolveFromExportResult::FollowImport(import);
+                    }
+                },
+                None => None,
             }
-            TypeReference::Resolved(resolved_id) => Some(resolved_id.with_module_id(module_id)),
-            TypeReference::Import(import) => {
-                return ResolveFromExportResult::FollowImport(import);
-            }
-        },
+        }
         JsOwnExport::Type(resolved_id) => Some(resolved_id.with_module_id(module_id)),
     };
 

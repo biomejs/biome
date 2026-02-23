@@ -1013,11 +1013,23 @@ impl WorkspaceServer {
         match update_kind {
             UpdateKind::AddedOrChanged(_, root, services) => {
                 // NOTE: add a new else if branch to handle other language roots
-                if let Some(js_root) = SendNode::into_language_root::<AnyJsRoot>(root.clone()) {
+                if let (Some(js_root), Some(services)) = (
+                    SendNode::into_language_root::<AnyJsRoot>(root.clone()),
+                    services.as_js_services(),
+                ) {
                     self.module_graph.update_graph_for_js_paths(
                         self.fs.as_ref(),
                         &self.project_layout,
-                        &[(path, js_root)],
+                        &[(
+                            path,
+                            js_root,
+                            std::sync::Arc::new(
+                                services
+                                    .semantic_model
+                                    .clone()
+                                    .expect("SemanticModel should be available for JS files"),
+                            ),
+                        )],
                         infer_types,
                     )
                 } else if let (Some(css_root), Some(services)) = (

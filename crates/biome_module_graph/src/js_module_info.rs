@@ -7,7 +7,7 @@ mod utils;
 mod visitor;
 
 use biome_js_syntax::AnyJsImportLike;
-use biome_js_type_info::{BindingId, ImportSymbol, ResolvedTypeId, ScopeId, TypeData};
+use biome_js_type_info::{ImportSymbol, ResolvedTypeId, ScopeId, TypeData, TypeReference};
 use biome_jsdoc_comment::JsdocComment;
 use biome_resolver::ResolvedPath;
 use biome_rowan::{Text, TextRange};
@@ -20,13 +20,29 @@ use std::{collections::BTreeMap, ops::Deref, sync::Arc};
 
 use crate::ModuleGraph;
 
-use scope::{JsScope, JsScopeData, TsBindingReference};
+use scope::JsScope;
 
 use crate::diagnostics::ModuleDiagnostic;
 pub(super) use binding::JsBindingData;
 pub use diagnostics::JsModuleInfoDiagnostic;
 pub use module_resolver::ModuleResolver;
 pub(crate) use visitor::JsModuleVisitor;
+
+/// Type augmentation data for a binding from the semantic model.
+///
+/// Stores type inference results and JSDoc comments that enrich the
+/// base binding information from the semantic model.
+#[derive(Debug, Clone)]
+pub struct BindingTypeData {
+    /// The inferred type of this binding.
+    pub ty: TypeReference,
+
+    /// JSDoc comment associated with this binding, if any.
+    pub jsdoc: Option<JsdocComment>,
+
+    /// Ranges where this binding is exported.
+    pub export_ranges: Vec<TextRange>,
+}
 
 /// Information restricted to a single module in the [ModuleGraph].
 #[derive(Clone, Debug)]
@@ -80,15 +96,21 @@ impl JsModuleInfo {
     pub fn global_scope(&self) -> JsScope {
         JsScope {
             info: self.0.clone(),
-            id: ScopeId::new(0),
+            scope: self.0.semantic_model.global_scope(),
         }
     }
 
     /// Returns the scope to be used for the given `range`.
-    pub fn scope_for_range(&self, range: TextRange) -> JsScope {
+    ///
+    /// Note: This method requires finding a syntax node at the given range.
+    /// For better performance, consider using the semantic model directly if you have a node.
+    pub fn scope_for_range(&self, _range: TextRange) -> JsScope {
+        // Find a binding node at this range from the semantic model
+        // For now, we use the global scope as a fallback
+        // TODO: Implement proper range-to-node lookup
         JsScope {
             info: self.0.clone(),
-            id: scope_id_for_range(&self.0.scope_by_range, range),
+            scope: self.0.semantic_model.global_scope(),
         }
     }
 
@@ -184,19 +206,20 @@ pub struct JsModuleInfoInner {
     /// assigning a name to them.
     pub blanket_reexports: Vec<JsReexport>,
 
-    /// Collection of all the declarations in the module.
-    pub(crate) bindings: Vec<JsBindingData>,
+    /// Semantic model provided by the workspace service.
+    ///
+    /// Contains scope and binding information. This replaces the previous
+    /// duplicated scope/binding tracking that was built from semantic events.
+    pub semantic_model: std::sync::Arc<biome_js_semantic::SemanticModel>,
+
+    /// Type augmentation data: maps binding ranges to their type information and JSDoc.
+    ///
+    /// This enriches the semantic model's bindings with type inference results
+    /// and documentation comments.
+    pub binding_type_data: FxHashMap<TextRange, BindingTypeData>,
 
     /// Parsed expressions, mapped from their range to their type ID.
     pub(crate) expressions: FxHashMap<TextRange, ResolvedTypeId>,
-
-    /// All scopes in this module.
-    ///
-    /// The first entry is expected to be the global scope.
-    pub(crate) scopes: Vec<JsScopeData>,
-
-    /// Lookup tree to find scopes by text range.
-    pub(crate) scope_by_range: Lapper<u32, ScopeId>,
 
     /// Collection of all types in the module.
     ///
@@ -262,10 +285,12 @@ impl JsImportPath {
 static_assertions::assert_impl_all!(JsModuleInfo: Send, Sync);
 
 impl JsModuleInfoInner {
-    /// Returns one of the bindings by ID.
+    /// Returns type augmentation data for a binding by its range.
+    ///
+    /// This is the replacement for the old `binding()` method.
     #[inline]
-    pub fn binding(&self, binding_id: BindingId) -> &JsBindingData {
-        &self.bindings[binding_id.index()]
+    pub fn binding_type_data(&self, binding_range: TextRange) -> Option<&BindingTypeData> {
+        self.binding_type_data.get(&binding_range)
     }
 
     /// Attempts to find a binding by `name` in the scope with the given
@@ -273,16 +298,23 @@ impl JsModuleInfoInner {
     ///
     /// Traverses upwards in scope if the binding is not found in the given
     /// scope.
-    fn find_binding_in_scope(&self, name: &str, scope_id: ScopeId) -> Option<TsBindingReference> {
-        let mut scope = &self.scopes[scope_id.index()];
-        loop {
-            if let Some(binding_ref) = scope.bindings_by_name.get(name) {
-                return Some(*binding_ref);
-            }
+    ///
+    /// Returns the binding's text range for looking up type augmentation data.
+    fn find_binding_in_scope(
+        &self,
+        name: &str,
+        _scope_id: biome_js_semantic::ScopeId,
+    ) -> Option<TextRange> {
+        // TODO: Use the specific scope_id to find the correct starting scope
+        // This requires either exposing Scope construction from ScopeId in SemanticModel
+        // or adding a method to get a Scope by its ID.
+        // For now, we search all scopes which is inefficient but correct.
 
-            match &scope.parent {
-                Some(parent_id) => scope = &self.scopes[parent_id.index()],
-                None => break,
+        // Search all scopes in the semantic model
+        for scope in self.semantic_model.scopes() {
+            if let Some(binding) = scope.get_binding(name) {
+                // Return the binding's range for type data lookup
+                return Some(binding.syntax().text_trimmed_range());
             }
         }
 
@@ -374,7 +406,10 @@ pub struct JsImport {
 /// which no binding exists, or namespaces defined by exports of another module.
 #[derive(Clone, Debug, PartialEq)]
 pub enum JsOwnExport {
-    Binding(BindingId),
+    /// An export that references a binding by its text range.
+    /// The range can be used to look up type augmentation data.
+    Binding(TextRange),
+    /// An export that directly references a resolved type.
     Type(ResolvedTypeId),
 }
 

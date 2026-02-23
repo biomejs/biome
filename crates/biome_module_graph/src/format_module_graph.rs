@@ -310,14 +310,17 @@ impl Format<FormatTypeContext> for JsOwnExport {
         f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
     ) -> FormatResult<()> {
         match self {
-            Self::Binding(binding_id) => write!(
-                f,
-                [&format_args![
-                    token("JsOwnExport::Binding("),
-                    text(&binding_id.index().to_string(), TextSize::default()),
-                    token(")")
-                ]]
-            ),
+            Self::Binding(binding_range) => {
+                let range_str = std::format!("{:?}", binding_range);
+                write!(
+                    f,
+                    [&format_args![
+                        token("JsOwnExport::Binding("),
+                        text(&range_str, TextSize::default()),
+                        token(")")
+                    ]]
+                )
+            }
             Self::Type(resolved_type_id) => write!(
                 f,
                 [&format_args![
