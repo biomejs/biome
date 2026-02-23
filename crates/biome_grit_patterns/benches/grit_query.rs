@@ -50,7 +50,10 @@ fn bench_execute(criterion: &mut Criterion) {
             "where_clause",
             r#"`console.log($msg)` where { $msg <: `"start"` }"#,
         ),
-        ("or_pattern", "or { `console.log($msg)`, `console.warn($msg)` }"),
+        (
+            "or_pattern",
+            "or { `console.log($msg)`, `console.warn($msg)` }",
+        ),
     ];
 
     for (name, pattern_src) in &patterns {
@@ -82,7 +85,10 @@ fn bench_anchor_extraction(criterion: &mut Criterion) {
 
     let patterns = [
         ("code_snippet", "`console.log($msg)`"),
-        ("or_pattern", "or { `console.log($msg)`, `console.warn($msg)` }"),
+        (
+            "or_pattern",
+            "or { `console.log($msg)`, `console.warn($msg)` }",
+        ),
         ("metavariable", "$x"),
     ];
 
