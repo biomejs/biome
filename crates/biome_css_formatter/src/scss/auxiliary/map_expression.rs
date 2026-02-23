@@ -18,7 +18,8 @@ impl FormatNodeRule<ScssMapExpression> for FormatScssMapExpression {
                 indent(&format_args![soft_line_break(), pairs.format()]),
                 soft_line_break(),
                 r_paren_token.format()
-            ]).should_expand(!pairs.is_empty())]
+            ])
+            .should_expand(!pairs.is_empty())]
         )
     }
 }
