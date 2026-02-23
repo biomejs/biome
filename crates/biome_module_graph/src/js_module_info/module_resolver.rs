@@ -426,8 +426,9 @@ impl TypeResolver for ModuleResolver {
             return GLOBAL_RESOLVER.resolve_type_of(identifier, scope_id);
         };
 
-        // Check if this is an imported binding
-        if module.static_imports.contains_key(identifier.text()) {
+        // Check if the binding is actually an import declaration
+        // This prevents incorrectly treating local bindings that shadow imported names as imports
+        if module.is_binding_imported(identifier, semantic_scope_id) {
             module
                 .static_imports
                 .get(identifier.text())

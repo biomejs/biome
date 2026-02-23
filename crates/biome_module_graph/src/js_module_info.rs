@@ -318,6 +318,29 @@ impl JsModuleInfoInner {
         None
     }
 
+    /// Checks if a binding with the given name in the specified scope is imported.
+    ///
+    /// Returns `true` if the binding is an import declaration, `false` otherwise.
+    fn is_binding_imported(&self, name: &str, scope_id: ScopeId) -> bool {
+        // Start from the specified scope and walk up the scope chain
+        let mut scope = self.semantic_model.scope_from_id(scope_id);
+
+        loop {
+            // Check if this scope has a binding with the given name
+            if let Some(binding) = scope.get_binding(name) {
+                return binding.is_imported();
+            }
+
+            // Move to parent scope
+            match scope.parent() {
+                Some(parent) => scope = parent,
+                None => break,
+            }
+        }
+
+        false
+    }
+
     /// Returns the information about a given import by its syntax node.
     pub fn get_import_path_by_js_node(&self, node: &AnyJsImportLike) -> Option<&JsImportPath> {
         let specifier_text = node.inner_string_text()?;
