@@ -347,9 +347,23 @@ fn analyze_tailwind_shorthand(candidates: TwCandidateList) -> Vec<TailwindShorth
 
     for pattern_group in TW_COMPRESSABLES {
         for (required_bases, replacement_bases) in *pattern_group {
+            // Special case: `w`/`h` → `size` must skip values that `size` doesn't support
+            // (e.g. `screen`, container sizes like `xs`/`sm`/`md`/...).
+            let is_size_pattern = *required_bases == ["w", "h"];
+
             for (key, candidates) in &groups {
                 if candidates.len() < required_bases.len() {
                     // Not enough candidates to match the required bases
+                    continue;
+                }
+
+                // Skip if the value is a keyword that `size` doesn't support
+                if is_size_pattern
+                    && let Some(value) = &key.value
+                    && let Some(value) = value.as_tw_named_value()
+                    && let Some(value) = value.value_token().ok()
+                    && SIZE_BLOCKED_VALUES.contains(value.text_trimmed())
+                {
                     continue;
                 }
 
@@ -403,9 +417,27 @@ fn analyze_tailwind_shorthand(candidates: TwCandidateList) -> Vec<TailwindShorth
                         .map(|c| c.syntax().to_string())
                         .collect::<Vec<_>>()
                 );
+                // If the shorthand is already present in the class list, just
+                // remove the longhands rather than adding a duplicate shorthand.
+                let effective_replacement_bases: &[&str] = if replacement_bases.iter().any(|&rb| {
+                    candidates.iter().any(|c| match c.candidate().ok() {
+                        Some(AnyTwCandidate::TwFunctionalCandidate(func)) => func
+                            .base_token()
+                            .ok()
+                            .is_some_and(|t| t.text_trimmed() == rb),
+                        Some(AnyTwCandidate::TwStaticCandidate(st)) => {
+                            st.base_token().ok().is_some_and(|t| t.text_trimmed() == rb)
+                        }
+                        _ => false,
+                    })
+                }) {
+                    &[]
+                } else {
+                    replacement_bases
+                };
                 violations.push(TailwindShorthandViolation {
                     uncompressed_nodes: flagged_candidates,
-                    replacement_bases,
+                    replacement_bases: effective_replacement_bases,
                     replace_whole_node: false,
                 });
             }
@@ -538,3 +570,10 @@ pub static TW_COMPRESSABLES: &[&[(&[&str], &[&str])]] = &[
         (&["self", "justify-self"], &["place-self"]),
     ],
 ];
+
+/// Values supported by `w`/`h` but NOT by `size`.
+/// These keyword values exist as width/height utilities but have no `size-*` equivalent,
+/// so `w-screen h-screen` should NOT be compressed to `size-screen`.
+static SIZE_BLOCKED_VALUES: phf::Set<&'static str> = phf::phf_set! {
+    "screen", "3xs", "2xs", "xs", "sm", "md", "lg", "xl", "2xl", "3xl", "4xl", "5xl", "6xl", "7xl",
+};

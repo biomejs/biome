@@ -46,3 +46,18 @@ mx-2 mr-2
 ```tw
 pt-2 mr-3
 ```
+
+# Input
+```tw
+focus:w-4 hover:h-4
+```
+
+# Input
+```tw
+w-[10px] h-[20px]
+```
+
+# Input
+```tw
+w-screen h-screen
+```

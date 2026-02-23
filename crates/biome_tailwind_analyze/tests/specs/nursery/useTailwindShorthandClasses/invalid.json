@@ -10,5 +10,10 @@
   "border-x border-y overflow-hidden text-ellipsis whitespace-nowrap w-8 h-8",
   "hover:w-10 hover:h-10 bg-gray-100 p-4",
   "-mt-2 -mb-2",
-  "pl-6 pr-6 py-6"
+  "pl-6 pr-6 py-6",
+  "w-4 h-4",
+  "pt-4 pr-2 pb-4 pl-4",
+  "w-[10px] h-[10px]",
+  "sm:hover:w-4 sm:hover:h-4",
+  "size-4 w-4 h-4"
 ]

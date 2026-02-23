@@ -1726,6 +1726,7 @@ dependencies = [
  "camino",
  "filetime",
  "insta",
+ "phf 0.13.1",
  "schemars",
  "serde",
  "tests_macros",
