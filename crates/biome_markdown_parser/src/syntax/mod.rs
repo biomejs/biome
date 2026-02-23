@@ -849,7 +849,7 @@ fn classify_quote_break_after_newline(
 }
 
 /// Check if the current position is a paragraph break (setext underline,
-/// thematic break, fence, or block interrupt).
+/// thematic break, fence, block interrupt, or textual list marker).
 ///
 /// This shared predicate consolidates the duplicate break-condition checks
 /// in [`handle_inline_newline`] and [`inline_list_source_len`].
