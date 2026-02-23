@@ -105,43 +105,17 @@ impl AnalyzerPlugin for AnalyzerGritPlugin {
 
         match self.grit_query.execute(file) {
             Ok(result) => {
-                let mut diagnostics: Vec<_> = result
-                    .logs
-                    .iter()
-                    .map(|log| {
-                        (
-                            RuleDiagnostic::new(
-                                category!("plugin"),
-                                log.range.map(from_grit_range),
-                                markup!(<Emphasis>{name}</Emphasis>" logged: "<Info>{log.message}</Info>),
-                            )
-                            .verbose(),
-                            Applicability::MaybeIncorrect,
-                        )
-                    })
-                    .chain(result.diagnostics)
-                    .map(|(diagnostic, applicability)| {
-                        (diagnostic.subcategory(name.to_string()), applicability)
-                    })
-                    .collect();
-
-                if diagnostics
-                    .iter()
-                    .any(|(diagnostic, _)| diagnostic.span().is_none())
-                {
-                    diagnostics.push((
-                        RuleDiagnostic::new(
-                            category!("plugin"),
-                            None::<TextRange>,
-                            markup!(
-                                "Plugin "<Emphasis>{name}</Emphasis>" reported one or more diagnostics, "
-                                "but it didn't specify a valid "<Emphasis>"span"</Emphasis>". "
-                                "Diagnostics have been shown without context."
-                            ),
-                        ),
-                        Applicability::MaybeIncorrect,
-                    ));
-                }
+                // Log entries never consume actions.
+                let log_entries = result.logs.iter().map(|log| PluginDiagnosticEntry {
+                    diagnostic: RuleDiagnostic::new(
+                        category!("plugin"),
+                        log.range.map(from_grit_range),
+                        markup!(<Emphasis>{name}</Emphasis>" logged: "<Info>{log.message}</Info>),
+                    )
+                    .verbose()
+                    .subcategory(name.to_string()),
+                    action: None,
+                });
 
                 // Convert rewrite effects to plugin actions.
                 let mut actions: Vec<_> = result
@@ -159,18 +133,39 @@ impl AnalyzerPlugin for AnalyzerGritPlugin {
                     })
                     .collect();
 
-                // Pair each diagnostic with its action by position.
+                // Pair each real diagnostic with its action by position.
                 let mut action_iter = actions.drain(..);
-                let entries = diagnostics
-                    .into_iter()
-                    .map(|(diagnostic, applicability)| {
-                        let mut action = action_iter.next();
-                        if let Some(ref mut action) = action {
-                            action.applicability = applicability;
-                        }
-                        PluginDiagnosticEntry { diagnostic, action }
-                    })
-                    .collect();
+                let diag_entries =
+                    result
+                        .diagnostics
+                        .into_iter()
+                        .map(|(diagnostic, applicability)| {
+                            let mut action = action_iter.next();
+                            if let Some(ref mut action) = action {
+                                action.applicability = applicability;
+                            }
+                            PluginDiagnosticEntry {
+                                diagnostic: diagnostic.subcategory(name.to_string()),
+                                action,
+                            }
+                        });
+
+                let mut entries: Vec<_> = log_entries.chain(diag_entries).collect();
+
+                if entries.iter().any(|e| e.diagnostic.span().is_none()) {
+                    entries.push(PluginDiagnosticEntry {
+                        diagnostic: RuleDiagnostic::new(
+                            category!("plugin"),
+                            None::<TextRange>,
+                            markup!(
+                                "Plugin "<Emphasis>{name}</Emphasis>" reported one or more diagnostics, "
+                                "but it didn't specify a valid "<Emphasis>"span"</Emphasis>". "
+                                "Diagnostics have been shown without context."
+                            ),
+                        ),
+                        action: None,
+                    });
+                }
 
                 PluginEvalResult { entries }
             }
