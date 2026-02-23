@@ -497,40 +497,6 @@ fn bump_textual_link_def(p: &mut MarkdownParser) {
     item.complete(p, MD_TEXTUAL);
 }
 
-/// Controls whether tokens are consumed with CST node creation (Parse)
-/// or silently advanced (Scan, for lookahead validation).
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
-enum BumpMode {
-    /// Lookahead: advance without creating CST nodes.
-    Scan,
-    /// Real parse: wrap each token in MD_TEXTUAL CST nodes.
-    Parse,
-}
-
-impl BumpMode {
-    fn bump_token(self, p: &mut MarkdownParser) {
-        match self {
-            Self::Scan => {
-                p.bump_link_definition();
-            }
-            Self::Parse => {
-                bump_textual_link_def(p);
-            }
-        }
-    }
-
-    fn bump_separator(self, p: &mut MarkdownParser) {
-        match self {
-            Self::Scan => {
-                skip_link_def_separator_tokens(p);
-            }
-            Self::Parse => {
-                bump_link_def_separator(p);
-            }
-        }
-    }
-}
-
 fn is_whitespace_token(p: &MarkdownParser) -> bool {
     let text = p.cur_text();
     !text.is_empty() && text.chars().all(|c| c == ' ' || c == '\t')
@@ -566,9 +532,14 @@ fn inline_link_is_valid(p: &mut MarkdownParser) -> InlineLinkValidation {
         }
 
         p.bump(L_PAREN);
-        p.re_lex_link_definition();
 
-        let destination_result = scan_inline_link_destination_tokens(p);
+        // Skip leading whitespace before angle bracket check
+        // (parse_inline_link_destination_tokens only skips whitespace in the raw path).
+        while is_title_separator_token(p) {
+            bump_link_def_separator(p);
+        }
+
+        let destination_result = parse_inline_link_destination_tokens(p);
 
         // If depth exceeded, link is valid but truncated - no need to check for closing paren
         if destination_result == DestinationScanResult::DepthExceeded {
@@ -581,20 +552,20 @@ fn inline_link_is_valid(p: &mut MarkdownParser) -> InlineLinkValidation {
 
         let mut saw_separator = false;
         while is_title_separator_token(p) {
-            skip_link_def_separator_tokens(p);
+            bump_link_def_separator(p);
             saw_separator = true;
         }
         let has_title = saw_separator && get_title_close_char(p).is_some();
         while is_title_separator_token(p) {
-            skip_link_def_separator_tokens(p);
+            bump_link_def_separator(p);
         }
 
         if has_title {
-            scan_title_content(p, get_title_close_char(p));
+            parse_title_content(p, get_title_close_char(p));
         }
 
         while is_title_separator_token(p) {
-            skip_link_def_separator_tokens(p);
+            bump_link_def_separator(p);
         }
 
         if p.at(R_PAREN) {
@@ -617,29 +588,14 @@ enum DestinationScanResult {
     DepthExceeded,
 }
 
-fn scan_inline_link_destination_tokens(p: &mut MarkdownParser) -> DestinationScanResult {
-    destination_tokens_core(p, BumpMode::Scan)
-}
-
-fn destination_tokens_core(p: &mut MarkdownParser, mode: BumpMode) -> DestinationScanResult {
+fn parse_inline_link_destination_tokens(p: &mut MarkdownParser) -> DestinationScanResult {
     const MAX_PAREN_DEPTH: i32 = MAX_LINK_DESTINATION_PAREN_DEPTH;
 
-    // Parse mode: re-lex into LinkDefinition context (scan caller does this externally).
-    if mode == BumpMode::Parse {
-        p.re_lex_link_definition();
-    }
-
-    // Scan mode: skip leading whitespace before angle bracket check.
-    // Parse mode: whitespace is skipped only in the raw path below.
-    if mode == BumpMode::Scan {
-        while is_title_separator_token(p) {
-            mode.bump_separator(p);
-        }
-    }
+    p.re_lex_link_definition();
 
     // Enclosed destination: <url>
     if p.at(L_ANGLE) {
-        mode.bump_token(p);
+        bump_textual_link_def(p);
         let mut pending_escape = false;
         loop {
             if p.at(EOF) || p.at(NEWLINE) {
@@ -654,10 +610,10 @@ fn destination_tokens_core(p: &mut MarkdownParser, mode: BumpMode) -> Destinatio
                     ) {
                         return DestinationScanResult::Invalid;
                     }
-                    mode.bump_token(p);
+                    bump_textual_link_def(p);
                     continue;
                 }
-                mode.bump_token(p);
+                bump_textual_link_def(p);
                 return DestinationScanResult::Valid;
             }
             if !validate_link_destination_text(
@@ -667,7 +623,7 @@ fn destination_tokens_core(p: &mut MarkdownParser, mode: BumpMode) -> Destinatio
             ) {
                 return DestinationScanResult::Invalid;
             }
-            mode.bump_token(p);
+            bump_textual_link_def(p);
         }
     }
 
@@ -675,11 +631,9 @@ fn destination_tokens_core(p: &mut MarkdownParser, mode: BumpMode) -> Destinatio
     let mut paren_depth: i32 = 0;
     let mut pending_escape = false;
 
-    // Parse mode: skip leading whitespace in raw path.
-    if mode == BumpMode::Parse {
-        while is_title_separator_token(p) {
-            mode.bump_separator(p);
-        }
+    // Skip leading whitespace in raw path.
+    while is_title_separator_token(p) {
+        bump_link_def_separator(p);
     }
 
     while !p.at(EOF) && !p.at(NEWLINE) {
@@ -693,7 +647,7 @@ fn destination_tokens_core(p: &mut MarkdownParser, mode: BumpMode) -> Destinatio
         match try_update_paren_depth(text, paren_depth, MAX_PAREN_DEPTH) {
             ParenDepthResult::Ok(next_depth) => {
                 paren_depth = next_depth;
-                mode.bump_token(p);
+                bump_textual_link_def(p);
             }
             ParenDepthResult::DepthExceeded => {
                 return DestinationScanResult::DepthExceeded;
@@ -714,10 +668,6 @@ fn destination_tokens_core(p: &mut MarkdownParser, mode: BumpMode) -> Destinatio
         };
     }
     DestinationScanResult::Valid
-}
-
-fn scan_title_content(p: &mut MarkdownParser, close_char: Option<char>) {
-    title_content_core(p, close_char, BumpMode::Scan);
 }
 
 fn skip_link_def_separator_tokens(p: &mut MarkdownParser) {
@@ -742,10 +692,6 @@ fn bump_link_def_separator(p: &mut MarkdownParser) {
     }
 }
 
-fn parse_inline_link_destination_tokens(p: &mut MarkdownParser) -> DestinationScanResult {
-    destination_tokens_core(p, BumpMode::Parse)
-}
-
 fn get_title_close_char(p: &MarkdownParser) -> Option<char> {
     let text = p.cur_text();
     if text.starts_with('"') {
@@ -759,7 +705,7 @@ fn get_title_close_char(p: &MarkdownParser) -> Option<char> {
     }
 }
 
-fn title_content_core(p: &mut MarkdownParser, close_char: Option<char>, mode: BumpMode) {
+fn parse_title_content(p: &mut MarkdownParser, close_char: Option<char>) {
     let Some(close_char) = close_char else {
         return;
     };
@@ -767,7 +713,7 @@ fn title_content_core(p: &mut MarkdownParser, close_char: Option<char>, mode: Bu
     let text = p.cur_text();
     let is_complete = text.len() >= 2 && ends_with_unescaped_close(text, close_char);
 
-    mode.bump_token(p);
+    bump_textual_link_def(p);
     if is_complete {
         return;
     }
@@ -780,22 +726,18 @@ fn title_content_core(p: &mut MarkdownParser, close_char: Option<char>, mode: Bu
 
         // Continue through single newlines (titles can span non-blank lines)
         if p.at(NEWLINE) {
-            mode.bump_separator(p);
+            bump_link_def_separator(p);
             continue;
         }
 
         let text = p.cur_text();
         if ends_with_unescaped_close(text, close_char) {
-            mode.bump_token(p);
+            bump_textual_link_def(p);
             return;
         }
 
-        mode.bump_token(p);
+        bump_textual_link_def(p);
     }
-}
-
-fn parse_title_content(p: &mut MarkdownParser, close_char: Option<char>) {
-    title_content_core(p, close_char, BumpMode::Parse);
 }
 
 /// Parse inline image (`![alt](url)`).
