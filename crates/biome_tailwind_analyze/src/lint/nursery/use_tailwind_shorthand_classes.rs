@@ -2,7 +2,8 @@ use std::collections::HashMap;
 use std::hash::Hash;
 
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext,
+    declare_lint_rule,
 };
 use biome_console::markup;
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, Direction, WalkEvent};
@@ -57,6 +58,7 @@ declare_lint_rule! {
         recommended: false,
         sources: &[RuleSource::EslintBetterTailwindcss("enforce-shorthand-classes").inspired()],
         fix_kind: FixKind::Safe,
+        domains: &[RuleDomain::Tailwind],
     }
 }
 
