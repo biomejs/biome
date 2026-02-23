@@ -307,26 +307,26 @@ fn analyze_tailwind_shorthand(candidates: TwCandidateList) -> Vec<TailwindShorth
         let negative = full.negative_token().is_some();
         let important = full.excl_token().is_some();
         let candidate = full.candidate().ok()?;
-        if let Some(func) = candidate.as_tw_functional_candidate() {
-            let value = func.value().ok()?;
-            let modifier = func.modifier();
-            Some(GroupKey {
-                variants,
-                negative,
-                important,
-                value: Some(value),
-                modifier,
-            })
-        } else if let Some(_) = candidate.as_tw_static_candidate() {
-            Some(GroupKey {
+        match candidate {
+            AnyTwCandidate::TwFunctionalCandidate(func) => {
+                let value = func.value().ok()?;
+                let modifier = func.modifier();
+                Some(GroupKey {
+                    variants,
+                    negative,
+                    important,
+                    value: Some(value),
+                    modifier,
+                })
+            }
+            AnyTwCandidate::TwStaticCandidate(_) => Some(GroupKey {
                 variants,
                 negative,
                 important,
                 value: None,
                 modifier: None,
-            })
-        } else {
-            None
+            }),
+            _ => None,
         }
     }
 
