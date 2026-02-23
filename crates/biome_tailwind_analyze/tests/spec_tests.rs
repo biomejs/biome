@@ -141,6 +141,22 @@ pub(crate) fn analyze_and_snap(
         "tw",
         parsed.diagnostics().len(),
     );
+
+    let expect_diagnostics = input_file
+        .file_name()
+        .is_some_and(|f| f.contains("invalid"));
+    if expect_diagnostics {
+        assert!(
+            !diagnostics.is_empty(),
+            "Expected diagnostics, but none were found. Input code: {input_code}"
+        );
+    } else {
+        assert!(
+            diagnostics.is_empty(),
+            "Expected no diagnostics, but some were found:\n{}\nInput code: {input_code}",
+            diagnostics.join("\n")
+        );
+    }
 }
 
 fn check_code_action(path: &Utf8Path, source: &str, action: &AnalyzerAction<TailwindLanguage>) {
