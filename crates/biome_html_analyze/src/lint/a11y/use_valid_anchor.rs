@@ -81,7 +81,7 @@ pub enum UseValidAnchorState {
     MissingHrefAttribute(TextRange),
     /// The value assigned to attribute `href` is not valid
     IncorrectHref(TextRange),
-    /// The element has `href` and `onClick`
+    /// The element has `onClick` without `href`
     CantBeAnchor(TextRange),
 }
 
