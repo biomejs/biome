@@ -124,6 +124,7 @@ impl Deserializable for PluginConfiguration {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PluginWithOptions {
     /// The path to the plugin.
+    #[deserializable(required)]
     pub path: String,
 
     /// A list of glob patterns. The plugin will only run on files matching
@@ -135,6 +136,8 @@ pub struct PluginWithOptions {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use biome_deserialize::json::deserialize_from_json_str;
+    use biome_json_parser::JsonParserOptions;
 
     #[test]
     fn normalize_relative_paths_makes_paths_base_dir_relative_and_normalized() {
@@ -210,6 +213,17 @@ mod tests {
             serde_json::from_str(r#"{ "path": "my-plugin.grit" }"#).unwrap();
         assert_eq!(config.path(), "my-plugin.grit");
         assert!(config.includes().is_none());
+    }
+
+    #[test]
+    fn deserialize_object_missing_path_emits_error() {
+        let source = r#"{ "includes": ["src/**"] }"#;
+        let result = deserialize_from_json_str::<PluginWithOptions>(
+            source,
+            JsonParserOptions::default(),
+            "",
+        );
+        assert!(result.has_errors());
     }
 
     #[test]
