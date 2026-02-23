@@ -1,0 +1,37 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_customOrder.js
+---
+# Input
+```js
+/* should generate diagnostics */
+class InvalidCustom {
+    name;
+    constructor() {}
+}
+
+```
+
+# Diagnostics
+```
+invalid_customOrder.js:4:5 lint/nursery/useMemberOrdering ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This member should be placed before the property member.
+  
+    2 │ class InvalidCustom {
+    3 │     name;
+  > 4 │     constructor() {}
+      │     ^^^^^^^^^^^^^^^^
+    5 │ }
+    6 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Members should be ordered by:
+  
+  - constructors
+  - methods
+  - properties
+  
+
+```

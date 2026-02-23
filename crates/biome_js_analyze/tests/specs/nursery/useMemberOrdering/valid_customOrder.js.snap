@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid_customOrder.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+class ValidCustom {
+    constructor() {}
+    method() {}
+    name;
+}
+
+```

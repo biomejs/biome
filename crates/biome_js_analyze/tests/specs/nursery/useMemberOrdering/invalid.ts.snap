@@ -1,0 +1,288 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+// method before property
+class MethodBeforeProperty {
+    method(): void {}
+    name: string;
+}
+
+// constructor before static property
+class ConstructorBeforeStatic {
+    constructor() {}
+    static count: number;
+}
+
+// instance property before static property
+class InstanceBeforeStatic {
+    name: string;
+    static count: number;
+}
+
+// private method before constructor
+class PrivateMethodBeforeConstructor {
+    private doSomething(): void {}
+    constructor() {}
+}
+
+// complex accessibility violation
+class ComplexViolation {
+    public method(): void {}
+    protected _name: string;
+    private _id: number;
+    constructor() {}
+}
+
+// getter before property
+class GetterBeforeProperty {
+    get value(): number { return 0; }
+    name: string;
+}
+
+// method before constructor
+class MethodBeforeConstructor {
+    method(): void {}
+    constructor() {}
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:6:5 lint/nursery/useMemberOrdering ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This member should be placed before the method member.
+  
+    4 │ class MethodBeforeProperty {
+    5 │     method(): void {}
+  > 6 │     name: string;
+      │     ^^^^^^^^^^^^^
+    7 │ }
+    8 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Members should be ordered by:
+  
+  - index signatures
+  - properties
+  - accessors
+  - methods
+  - constructors
+  - static blocks
+  
+
+```
+
+```
+invalid.ts:12:5 lint/nursery/useMemberOrdering ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This member should be placed before the constructor member.
+  
+    10 │ class ConstructorBeforeStatic {
+    11 │     constructor() {}
+  > 12 │     static count: number;
+       │     ^^^^^^^^^^^^^^^^^^^^^
+    13 │ }
+    14 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Members should be ordered by:
+  
+  - index signatures
+  - properties
+  - accessors
+  - methods
+  - constructors
+  - static blocks
+  
+
+```
+
+```
+invalid.ts:18:5 lint/nursery/useMemberOrdering ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This member should be placed before the property member.
+  
+    16 │ class InstanceBeforeStatic {
+    17 │     name: string;
+  > 18 │     static count: number;
+       │     ^^^^^^^^^^^^^^^^^^^^^
+    19 │ }
+    20 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Members should be ordered by:
+  
+  - index signatures
+  - properties
+  - accessors
+  - methods
+  - constructors
+  - static blocks
+  
+
+```
+
+```
+invalid.ts:24:5 lint/nursery/useMemberOrdering ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This member should be placed before the private method member.
+  
+    22 │ class PrivateMethodBeforeConstructor {
+    23 │     private doSomething(): void {}
+  > 24 │     constructor() {}
+       │     ^^^^^^^^^^^^^^^^
+    25 │ }
+    26 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Members should be ordered by:
+  
+  - index signatures
+  - properties
+  - accessors
+  - methods
+  - constructors
+  - static blocks
+  
+
+```
+
+```
+invalid.ts:30:5 lint/nursery/useMemberOrdering ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This member should be placed before the method member.
+  
+    28 │ class ComplexViolation {
+    29 │     public method(): void {}
+  > 30 │     protected _name: string;
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │     private _id: number;
+    32 │     constructor() {}
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Members should be ordered by:
+  
+  - index signatures
+  - properties
+  - accessors
+  - methods
+  - constructors
+  - static blocks
+  
+
+```
+
+```
+invalid.ts:31:5 lint/nursery/useMemberOrdering ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This member should be placed before the method member.
+  
+    29 │     public method(): void {}
+    30 │     protected _name: string;
+  > 31 │     private _id: number;
+       │     ^^^^^^^^^^^^^^^^^^^^
+    32 │     constructor() {}
+    33 │ }
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Members should be ordered by:
+  
+  - index signatures
+  - properties
+  - accessors
+  - methods
+  - constructors
+  - static blocks
+  
+
+```
+
+```
+invalid.ts:32:5 lint/nursery/useMemberOrdering ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This member should be placed before the method member.
+  
+    30 │     protected _name: string;
+    31 │     private _id: number;
+  > 32 │     constructor() {}
+       │     ^^^^^^^^^^^^^^^^
+    33 │ }
+    34 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Members should be ordered by:
+  
+  - index signatures
+  - properties
+  - accessors
+  - methods
+  - constructors
+  - static blocks
+  
+
+```
+
+```
+invalid.ts:38:5 lint/nursery/useMemberOrdering ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This member should be placed before the get accessor member.
+  
+    36 │ class GetterBeforeProperty {
+    37 │     get value(): number { return 0; }
+  > 38 │     name: string;
+       │     ^^^^^^^^^^^^^
+    39 │ }
+    40 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Members should be ordered by:
+  
+  - index signatures
+  - properties
+  - accessors
+  - methods
+  - constructors
+  - static blocks
+  
+
+```
+
+```
+invalid.ts:44:5 lint/nursery/useMemberOrdering ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This member should be placed before the method member.
+  
+    42 │ class MethodBeforeConstructor {
+    43 │     method(): void {}
+  > 44 │     constructor() {}
+       │     ^^^^^^^^^^^^^^^^
+    45 │ }
+    46 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Members should be ordered by:
+  
+  - index signatures
+  - properties
+  - accessors
+  - methods
+  - constructors
+  - static blocks
+  
+
+```

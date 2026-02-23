@@ -1,0 +1,15 @@
+{
+	"$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+	"linter": {
+		"rules": {
+			"nursery": {
+				"useMemberOrdering": {
+					"level": "error",
+					"options": {
+						"groups": ["constructor", "method", "property"]
+					}
+				}
+			}
+		}
+	}
+}

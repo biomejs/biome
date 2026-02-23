@@ -2400,8 +2400,13 @@ See https://biomejs.dev/linter/rules/use-lone-executable-definition
 	 */
 	useLoneExecutableDefinition?: UseLoneExecutableDefinitionConfiguration;
 	/**
+	* Enforce a consistent ordering of class members.
+See https://biomejs.dev/linter/rules/use-member-ordering
+	 */
+	useMemberOrdering?: UseMemberOrderingConfiguration;
+	/**
 	* Enforce valid describe() callback.
-See https://biomejs.dev/linter/rules/use-playwright-valid-describe-callback 
+See https://biomejs.dev/linter/rules/use-playwright-valid-describe-callback
 	 */
 	usePlaywrightValidDescribeCallback?: UsePlaywrightValidDescribeCallbackConfiguration;
 	/**
@@ -4248,6 +4253,9 @@ export type UseLoneAnonymousOperationConfiguration =
 export type UseLoneExecutableDefinitionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseLoneExecutableDefinitionOptions;
+export type UseMemberOrderingConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseMemberOrderingOptions;
 export type UsePlaywrightValidDescribeCallbackConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUsePlaywrightValidDescribeCallbackOptions;
@@ -5942,6 +5950,10 @@ export interface RuleWithUseLoneExecutableDefinitionOptions {
 	level: RulePlainConfiguration;
 	options?: UseLoneExecutableDefinitionOptions;
 }
+export interface RuleWithUseMemberOrderingOptions {
+	level: RulePlainConfiguration;
+	options?: UseMemberOrderingOptions;
+}
 export interface RuleWithUsePlaywrightValidDescribeCallbackOptions {
 	level: RulePlainConfiguration;
 	options?: UsePlaywrightValidDescribeCallbackOptions;
@@ -7379,6 +7391,13 @@ export interface UseInputNameOptions {
 }
 export type UseLoneAnonymousOperationOptions = {};
 export type UseLoneExecutableDefinitionOptions = {};
+export interface UseMemberOrderingOptions {
+	/**
+	* Custom order of member groups.
+If not provided, the default order is used.
+	 */
+	groups?: MemberGroup[];
+}
 export type UsePlaywrightValidDescribeCallbackOptions = {};
 export type UseRegexpExecOptions = {};
 export interface UseRequiredScriptsOptions {
@@ -7888,6 +7907,54 @@ export type Regex = string;
 export type UseConsistentGraphqlDescriptionsStyle = "block" | "inline";
 export type MethodSignatureStyle = "property" | "method";
 export type CheckInputType = "off" | "loose" | "strict";
+/**
+ * Represents a category of class member for ordering purposes.
+ */
+export type MemberGroup =
+	| "index-signature"
+	| "static-index-signature"
+	| "property"
+	| "static-property"
+	| "protected-property"
+	| "protected-static-property"
+	| "private-property"
+	| "private-static-property"
+	| "#private-property"
+	| "#private-static-property"
+	| "accessor"
+	| "static-accessor"
+	| "protected-accessor"
+	| "protected-static-accessor"
+	| "private-accessor"
+	| "private-static-accessor"
+	| "#private-accessor"
+	| "#private-static-accessor"
+	| "get-accessor"
+	| "static-get-accessor"
+	| "protected-get-accessor"
+	| "protected-static-get-accessor"
+	| "private-get-accessor"
+	| "private-static-get-accessor"
+	| "#private-get-accessor"
+	| "#private-static-get-accessor"
+	| "set-accessor"
+	| "static-set-accessor"
+	| "protected-set-accessor"
+	| "protected-static-set-accessor"
+	| "private-set-accessor"
+	| "private-static-set-accessor"
+	| "#private-set-accessor"
+	| "#private-static-set-accessor"
+	| "constructor"
+	| "method"
+	| "static-method"
+	| "protected-method"
+	| "protected-static-method"
+	| "private-method"
+	| "private-static-method"
+	| "#private-method"
+	| "#private-static-method"
+	| "static-block";
 export type DeclarationStyle = "type" | "runtime";
 export type VueDirectiveStyle = "shorthand" | "longhand";
 export type VueDirectiveStyle2 = "shorthand" | "longhand";
@@ -8349,6 +8416,7 @@ export type Category =
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useLoneAnonymousOperation"
 	| "lint/nursery/useLoneExecutableDefinition"
+	| "lint/nursery/useMemberOrdering"
 	| "lint/nursery/usePlaywrightValidDescribeCallback"
 	| "lint/nursery/useRegexpExec"
 	| "lint/nursery/useRequiredScripts"

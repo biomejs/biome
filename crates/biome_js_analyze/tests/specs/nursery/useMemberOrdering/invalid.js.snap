@@ -1,0 +1,165 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+// method before property
+class MethodBeforeProperty {
+    method() {}
+    name;
+}
+
+// method before constructor
+class MethodBeforeConstructor {
+    method() {}
+    constructor() {}
+}
+
+// constructor before property
+class ConstructorBeforeProperty {
+    constructor() {}
+    name;
+}
+
+// multiple violations: method -> constructor -> property
+class MultipleViolations {
+    method() {}
+    constructor() {}
+    name;
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:6:5 lint/nursery/useMemberOrdering ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This member should be placed before the method member.
+  
+    4 │ class MethodBeforeProperty {
+    5 │     method() {}
+  > 6 │     name;
+      │     ^^^^^
+    7 │ }
+    8 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Members should be ordered by:
+  
+  - index signatures
+  - properties
+  - accessors
+  - methods
+  - constructors
+  - static blocks
+  
+
+```
+
+```
+invalid.js:12:5 lint/nursery/useMemberOrdering ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This member should be placed before the method member.
+  
+    10 │ class MethodBeforeConstructor {
+    11 │     method() {}
+  > 12 │     constructor() {}
+       │     ^^^^^^^^^^^^^^^^
+    13 │ }
+    14 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Members should be ordered by:
+  
+  - index signatures
+  - properties
+  - accessors
+  - methods
+  - constructors
+  - static blocks
+  
+
+```
+
+```
+invalid.js:18:5 lint/nursery/useMemberOrdering ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This member should be placed before the constructor member.
+  
+    16 │ class ConstructorBeforeProperty {
+    17 │     constructor() {}
+  > 18 │     name;
+       │     ^^^^^
+    19 │ }
+    20 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Members should be ordered by:
+  
+  - index signatures
+  - properties
+  - accessors
+  - methods
+  - constructors
+  - static blocks
+  
+
+```
+
+```
+invalid.js:24:5 lint/nursery/useMemberOrdering ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This member should be placed before the method member.
+  
+    22 │ class MultipleViolations {
+    23 │     method() {}
+  > 24 │     constructor() {}
+       │     ^^^^^^^^^^^^^^^^
+    25 │     name;
+    26 │ }
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Members should be ordered by:
+  
+  - index signatures
+  - properties
+  - accessors
+  - methods
+  - constructors
+  - static blocks
+  
+
+```
+
+```
+invalid.js:25:5 lint/nursery/useMemberOrdering ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This member should be placed before the method member.
+  
+    23 │     method() {}
+    24 │     constructor() {}
+  > 25 │     name;
+       │     ^^^^^
+    26 │ }
+    27 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Members should be ordered by:
+  
+  - index signatures
+  - properties
+  - accessors
+  - methods
+  - constructors
+  - static blocks
+  
+
+```
