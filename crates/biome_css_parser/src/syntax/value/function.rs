@@ -232,17 +232,7 @@ pub(crate) fn parse_any_expression(p: &mut CssParser) -> ParsedSyntax {
         return Absent;
     }
 
-    let param = if is_at_unary_operator(p) {
-        parse_unary_expression(p)
-    } else if CssSyntaxFeatures::Scss.is_supported(p) && is_at_parenthesized(p) {
-        parse_list_of_component_values_expression(p)
-    } else if is_at_parenthesized(p) {
-        parse_parenthesized_expression(p)
-    } else if is_at_comma_separated_value(p) {
-        parse_comma_separated_value(p)
-    } else {
-        parse_list_of_component_values_expression(p)
-    };
+    let param = parse_unary_expression_operand(p);
 
     if is_at_binary_operator(p) {
         let binary_expression = param.precede(p);
@@ -291,8 +281,10 @@ pub(crate) fn parse_unary_expression(p: &mut CssParser) -> ParsedSyntax {
 fn parse_unary_expression_operand(p: &mut CssParser) -> ParsedSyntax {
     if is_at_unary_operator(p) {
         parse_unary_expression(p)
-    } else if CssSyntaxFeatures::Scss.is_supported(p) && is_at_parenthesized(p) {
-        parse_list_of_component_values_expression(p)
+    } else if CssSyntaxFeatures::Scss.is_supported(p)
+        && (is_at_parenthesized(p) || is_at_any_value(p))
+    {
+        parse_scss_expression(p)
     } else if is_at_parenthesized(p) {
         parse_parenthesized_expression(p)
     } else if is_at_comma_separated_value(p) {
@@ -334,21 +326,13 @@ pub(crate) fn parse_parenthesized_expression(p: &mut CssParser) -> ParsedSyntax 
 /// in various CSS properties. It is called when the parser is at the start of such a list.
 #[inline]
 pub(crate) fn parse_list_of_component_values_expression(p: &mut CssParser) -> ParsedSyntax {
-    if CssSyntaxFeatures::Scss.is_supported(p) {
-        if !is_at_any_value(p) && !p.at(T!['(']) {
-            return Absent;
-        }
-
-        parse_scss_expression(p)
-    } else {
-        if !is_at_any_value(p) {
-            return Absent;
-        }
-
-        let m = p.start();
-        CssComponentValueList.parse_list(p);
-        Present(m.complete(p, CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION))
+    if !is_at_any_value(p) {
+        return Absent;
     }
+
+    let m = p.start();
+    CssComponentValueList.parse_list(p);
+    Present(m.complete(p, CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION))
 }
 
 /// Parses theme references: --tab-size-*
