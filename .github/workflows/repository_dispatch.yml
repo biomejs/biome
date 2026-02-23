@@ -1,10 +1,9 @@
 name: Repository dispatch on main
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-      - next
+  schedule:
+    # This cron schedule runs the workflow at midnight (00:00) on Mondays, Wednesdays, and Fridays.
+    - cron: '0 0 * * 1,3,5'
 
 permissions:
   contents: read
@@ -81,7 +80,7 @@ jobs:
         working-directory: packages/@biomejs/wasm-web
         run: |
           npm pkg set name='@biomejs/wasm-web'
-          npm pkg set version='0.0.0-rev.${{ github.event.head_commit.id }}'
+          npm pkg set version='0.0.0-rev.${{ github.sha }}'
 
       - name: Verify WASM artifact exists
         working-directory: packages/@biomejs/wasm-web
@@ -97,17 +96,7 @@ jobs:
     needs: build-wasm
     runs-on: depot-ubuntu-24.04
     steps:
-      - name: Dispatch event on push
-        if: ${{ github.event_name == 'push' }}
-        uses: peter-evans/repository-dispatch@28959ce8df70de7be546dd1250a005dd32156697 # v4.0.1
-        with:
-          token: ${{ secrets.BIOME_REPOSITORY_DISPATCH }}
-          repository: ${{ env.BIOME_WEBSITE_REPO }}
-          event-type: ${{ env.BIOME_PUSH_ON_MAIN_EVENT_TYPE }}
-          client-payload: '{"event": ${{ toJSON(github.event) }}}'
-      # For testing only, the payload is mocked
-      - name: Dispatch event on workflow dispatch
-        if: ${{ github.event_name == 'workflow_dispatch' }}
+      - name: Dispatch event
         uses: peter-evans/repository-dispatch@28959ce8df70de7be546dd1250a005dd32156697 # v4.0.1
         with:
           token: ${{ secrets.BIOME_REPOSITORY_DISPATCH }}
