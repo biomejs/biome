@@ -9,26 +9,26 @@ ml-2 mr-2
 
 # Diagnostics
 ```
-invalid.json:1:1 lint/nursery/useTailwindShorthandClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:1 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer Tailwind shorthand utilities over multiple longhand utilities.
   
   > 1 │ ml-2 mr-2
       │ ^^^^
   
-  i Longhand utility ml-2 used here.
-  
-  > 1 │ ml-2 mr-2
-      │ ^^^^
-  
-  i Longhand utility mr-2 used here.
+  i Compressable utility used here.
   
   > 1 │ ml-2 mr-2
       │      ^^^^
   
-  i You can replace them with the shorthand mx-2 to reduce duplication and improve readability.
+  i You can use less classes to reduce duplication and improve readability.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use this simplified class instead.
+  
+  - ml-2·mr-2
+  + mx-2
   
 
 ```
@@ -40,36 +40,86 @@ pl-2 pr-2 pt-2 pb-2
 
 # Diagnostics
 ```
-invalid.json:1:1 lint/nursery/useTailwindShorthandClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:1 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer Tailwind shorthand utilities over multiple longhand utilities.
   
   > 1 │ pl-2 pr-2 pt-2 pb-2
       │ ^^^^
   
-  i Longhand utility pl-2 used here.
-  
-  > 1 │ pl-2 pr-2 pt-2 pb-2
-      │ ^^^^
-  
-  i Longhand utility pr-2 used here.
+  i Compressable utility used here.
   
   > 1 │ pl-2 pr-2 pt-2 pb-2
       │      ^^^^
   
-  i Longhand utility pt-2 used here.
+  i Compressable utility used here.
   
   > 1 │ pl-2 pr-2 pt-2 pb-2
       │           ^^^^
   
-  i Longhand utility pb-2 used here.
+  i Compressable utility used here.
   
   > 1 │ pl-2 pr-2 pt-2 pb-2
       │                ^^^^
   
-  i You can replace them with the shorthand p-2 to reduce duplication and improve readability.
+  i You can use less classes to reduce duplication and improve readability.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use this simplified class instead.
+  
+  - pl-2·pr-2·pt-2·pb-2
+  + p-2
+  
+
+```
+
+```
+invalid.json:1:1 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer Tailwind shorthand utilities over multiple longhand utilities.
+  
+  > 1 │ pl-2 pr-2 pt-2 pb-2
+      │ ^^^^
+  
+  i Compressable utility used here.
+  
+  > 1 │ pl-2 pr-2 pt-2 pb-2
+      │      ^^^^
+  
+  i You can use less classes to reduce duplication and improve readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use this simplified class instead.
+  
+  - pl-2·pr-2·pt-2·pb-2
+  + px-2·pt-2·pb-2
+  
+
+```
+
+```
+invalid.json:1:11 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer Tailwind shorthand utilities over multiple longhand utilities.
+  
+  > 1 │ pl-2 pr-2 pt-2 pb-2
+      │           ^^^^
+  
+  i Compressable utility used here.
+  
+  > 1 │ pl-2 pr-2 pt-2 pb-2
+      │                ^^^^
+  
+  i You can use less classes to reduce duplication and improve readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use this simplified class instead.
+  
+  - pl-2·pr-2·pt-2·pb-2
+  + pl-2·pr-2·py-2
   
 
 ```
@@ -81,26 +131,26 @@ hover:w-4 hover:h-4
 
 # Diagnostics
 ```
-invalid.json:1:1 lint/nursery/useTailwindShorthandClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:1 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer Tailwind shorthand utilities over multiple longhand utilities.
   
   > 1 │ hover:w-4 hover:h-4
       │ ^^^^^^^^^
   
-  i Longhand utility hover:w-4 used here.
-  
-  > 1 │ hover:w-4 hover:h-4
-      │ ^^^^^^^^^
-  
-  i Longhand utility hover:h-4 used here.
+  i Compressable utility used here.
   
   > 1 │ hover:w-4 hover:h-4
       │           ^^^^^^^^^
   
-  i You can replace them with the shorthand hover:size-4 to reduce duplication and improve readability.
+  i You can use less classes to reduce duplication and improve readability.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use this simplified class instead.
+  
+  - hover:w-4·hover:h-4
+  + hover:size-4
   
 
 ```
@@ -115,37 +165,6 @@ border-x border-y
 overflow-hidden text-ellipsis whitespace-nowrap
 ```
 
-# Diagnostics
-```
-invalid.json:1:1 lint/nursery/useTailwindShorthandClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Prefer Tailwind shorthand utilities over multiple longhand utilities.
-  
-  > 1 │ overflow-hidden text-ellipsis whitespace-nowrap
-      │ ^^^^^^^^^^^^^^^
-  
-  i Longhand utility overflow-hidden used here.
-  
-  > 1 │ overflow-hidden text-ellipsis whitespace-nowrap
-      │ ^^^^^^^^^^^^^^^
-  
-  i Longhand utility text-ellipsis used here.
-  
-  > 1 │ overflow-hidden text-ellipsis whitespace-nowrap
-      │                 ^^^^^^^^^^^^^
-  
-  i Longhand utility whitespace-nowrap used here.
-  
-  > 1 │ overflow-hidden text-ellipsis whitespace-nowrap
-      │                               ^^^^^^^^^^^^^^^^^
-  
-  i You can replace them with the shorthand truncate to reduce duplication and improve readability.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
 # Input
 ```tw
 ml-2 mr-2 text-blue-500 font-bold
@@ -153,26 +172,26 @@ ml-2 mr-2 text-blue-500 font-bold
 
 # Diagnostics
 ```
-invalid.json:1:1 lint/nursery/useTailwindShorthandClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:1 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer Tailwind shorthand utilities over multiple longhand utilities.
   
   > 1 │ ml-2 mr-2 text-blue-500 font-bold
       │ ^^^^
   
-  i Longhand utility ml-2 used here.
-  
-  > 1 │ ml-2 mr-2 text-blue-500 font-bold
-      │ ^^^^
-  
-  i Longhand utility mr-2 used here.
+  i Compressable utility used here.
   
   > 1 │ ml-2 mr-2 text-blue-500 font-bold
       │      ^^^^
   
-  i You can replace them with the shorthand mx-2 to reduce duplication and improve readability.
+  i You can use less classes to reduce duplication and improve readability.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use this simplified class instead.
+  
+  - ml-2·mr-2·text-blue-500·font-bold
+  + mx-2·text-blue-500·font-bold
   
 
 ```
@@ -184,26 +203,26 @@ mr-3 ml-3
 
 # Diagnostics
 ```
-invalid.json:1:6 lint/nursery/useTailwindShorthandClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:6 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer Tailwind shorthand utilities over multiple longhand utilities.
   
   > 1 │ mr-3 ml-3
       │      ^^^^
   
-  i Longhand utility ml-3 used here.
-  
-  > 1 │ mr-3 ml-3
-      │      ^^^^
-  
-  i Longhand utility mr-3 used here.
+  i Compressable utility used here.
   
   > 1 │ mr-3 ml-3
       │ ^^^^
   
-  i You can replace them with the shorthand mx-3 to reduce duplication and improve readability.
+  i You can use less classes to reduce duplication and improve readability.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use this simplified class instead.
+  
+  - mr-3·ml-3
+  + mx-3·
   
 
 ```
@@ -215,36 +234,86 @@ pt-1 pr-1 pb-1 pl-1
 
 # Diagnostics
 ```
-invalid.json:1:16 lint/nursery/useTailwindShorthandClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:1 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer Tailwind shorthand utilities over multiple longhand utilities.
+  
+  > 1 │ pt-1 pr-1 pb-1 pl-1
+      │ ^^^^
+  
+  i Compressable utility used here.
+  
+  > 1 │ pt-1 pr-1 pb-1 pl-1
+      │           ^^^^
+  
+  i You can use less classes to reduce duplication and improve readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use this simplified class instead.
+  
+  - pt-1·pr-1·pb-1·pl-1
+  + pr-1·py-1·pl-1
+  
+
+```
+
+```
+invalid.json:1:16 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer Tailwind shorthand utilities over multiple longhand utilities.
   
   > 1 │ pt-1 pr-1 pb-1 pl-1
       │                ^^^^
   
-  i Longhand utility pl-1 used here.
-  
-  > 1 │ pt-1 pr-1 pb-1 pl-1
-      │                ^^^^
-  
-  i Longhand utility pr-1 used here.
+  i Compressable utility used here.
   
   > 1 │ pt-1 pr-1 pb-1 pl-1
       │      ^^^^
   
-  i Longhand utility pt-1 used here.
+  i You can use less classes to reduce duplication and improve readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use this simplified class instead.
+  
+  - pt-1·pr-1·pb-1·pl-1
+  + pt-1·px-1·pb-1·
+  
+
+```
+
+```
+invalid.json:1:16 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer Tailwind shorthand utilities over multiple longhand utilities.
+  
+  > 1 │ pt-1 pr-1 pb-1 pl-1
+      │                ^^^^
+  
+  i Compressable utility used here.
+  
+  > 1 │ pt-1 pr-1 pb-1 pl-1
+      │      ^^^^
+  
+  i Compressable utility used here.
   
   > 1 │ pt-1 pr-1 pb-1 pl-1
       │ ^^^^
   
-  i Longhand utility pb-1 used here.
+  i Compressable utility used here.
   
   > 1 │ pt-1 pr-1 pb-1 pl-1
       │           ^^^^
   
-  i You can replace them with the shorthand p-1 to reduce duplication and improve readability.
+  i You can use less classes to reduce duplication and improve readability.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use this simplified class instead.
+  
+  - pt-1·pr-1·pb-1·pl-1
+  + p-1·
   
 
 ```
@@ -256,56 +325,26 @@ border-x border-y overflow-hidden text-ellipsis whitespace-nowrap w-8 h-8
 
 # Diagnostics
 ```
-invalid.json:1:19 lint/nursery/useTailwindShorthandClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Prefer Tailwind shorthand utilities over multiple longhand utilities.
-  
-  > 1 │ border-x border-y overflow-hidden text-ellipsis whitespace-nowrap w-8 h-8
-      │                   ^^^^^^^^^^^^^^^
-  
-  i Longhand utility overflow-hidden used here.
-  
-  > 1 │ border-x border-y overflow-hidden text-ellipsis whitespace-nowrap w-8 h-8
-      │                   ^^^^^^^^^^^^^^^
-  
-  i Longhand utility text-ellipsis used here.
-  
-  > 1 │ border-x border-y overflow-hidden text-ellipsis whitespace-nowrap w-8 h-8
-      │                                   ^^^^^^^^^^^^^
-  
-  i Longhand utility whitespace-nowrap used here.
-  
-  > 1 │ border-x border-y overflow-hidden text-ellipsis whitespace-nowrap w-8 h-8
-      │                                                 ^^^^^^^^^^^^^^^^^
-  
-  i You can replace them with the shorthand truncate to reduce duplication and improve readability.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.json:1:67 lint/nursery/useTailwindShorthandClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:67 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer Tailwind shorthand utilities over multiple longhand utilities.
   
   > 1 │ border-x border-y overflow-hidden text-ellipsis whitespace-nowrap w-8 h-8
       │                                                                   ^^^
   
-  i Longhand utility w-8 used here.
-  
-  > 1 │ border-x border-y overflow-hidden text-ellipsis whitespace-nowrap w-8 h-8
-      │                                                                   ^^^
-  
-  i Longhand utility h-8 used here.
+  i Compressable utility used here.
   
   > 1 │ border-x border-y overflow-hidden text-ellipsis whitespace-nowrap w-8 h-8
       │                                                                       ^^^
   
-  i You can replace them with the shorthand size-8 to reduce duplication and improve readability.
+  i You can use less classes to reduce duplication and improve readability.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use this simplified class instead.
+  
+  - border-x·border-y·overflow-hidden·text-ellipsis·whitespace-nowrap·w-8·h-8
+  + border-x·border-y·overflow-hidden·text-ellipsis·whitespace-nowrap·size-8
   
 
 ```
@@ -317,26 +356,26 @@ hover:w-10 hover:h-10 bg-gray-100 p-4
 
 # Diagnostics
 ```
-invalid.json:1:1 lint/nursery/useTailwindShorthandClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:1 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer Tailwind shorthand utilities over multiple longhand utilities.
   
   > 1 │ hover:w-10 hover:h-10 bg-gray-100 p-4
       │ ^^^^^^^^^^
   
-  i Longhand utility hover:w-10 used here.
-  
-  > 1 │ hover:w-10 hover:h-10 bg-gray-100 p-4
-      │ ^^^^^^^^^^
-  
-  i Longhand utility hover:h-10 used here.
+  i Compressable utility used here.
   
   > 1 │ hover:w-10 hover:h-10 bg-gray-100 p-4
       │            ^^^^^^^^^^
   
-  i You can replace them with the shorthand hover:size-10 to reduce duplication and improve readability.
+  i You can use less classes to reduce duplication and improve readability.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use this simplified class instead.
+  
+  - hover:w-10·hover:h-10·bg-gray-100·p-4
+  + hover:size-10·bg-gray-100·p-4
   
 
 ```
@@ -348,26 +387,26 @@ invalid.json:1:1 lint/nursery/useTailwindShorthandClasses ━━━━━━━�
 
 # Diagnostics
 ```
-invalid.json:1:1 lint/nursery/useTailwindShorthandClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:1 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer Tailwind shorthand utilities over multiple longhand utilities.
   
   > 1 │ -mt-2 -mb-2
       │ ^^^^^
   
-  i Longhand utility -mt-2 used here.
-  
-  > 1 │ -mt-2 -mb-2
-      │ ^^^^^
-  
-  i Longhand utility -mb-2 used here.
+  i Compressable utility used here.
   
   > 1 │ -mt-2 -mb-2
       │       ^^^^^
   
-  i You can replace them with the shorthand -my-2 to reduce duplication and improve readability.
+  i You can use less classes to reduce duplication and improve readability.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use this simplified class instead.
+  
+  - -mt-2·-mb-2
+  + -my-2
   
 
 ```
@@ -379,26 +418,26 @@ pl-6 pr-6 py-6
 
 # Diagnostics
 ```
-invalid.json:1:1 lint/nursery/useTailwindShorthandClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:1 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer Tailwind shorthand utilities over multiple longhand utilities.
   
   > 1 │ pl-6 pr-6 py-6
       │ ^^^^
   
-  i Longhand utility pl-6 used here.
-  
-  > 1 │ pl-6 pr-6 py-6
-      │ ^^^^
-  
-  i Longhand utility pr-6 used here.
+  i Compressable utility used here.
   
   > 1 │ pl-6 pr-6 py-6
       │      ^^^^
   
-  i You can replace them with the shorthand px-6 to reduce duplication and improve readability.
+  i You can use less classes to reduce duplication and improve readability.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use this simplified class instead.
+  
+  - pl-6·pr-6·py-6
+  + px-6·py-6
   
 
 ```

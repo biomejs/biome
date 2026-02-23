@@ -1,1 +1,0 @@
-pub mod use_tailwind_shorthand_classes;
