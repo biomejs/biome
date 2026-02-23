@@ -1675,6 +1675,9 @@ fn extract_alt_text_inline(inline: &AnyMdInline, ctx: &HtmlRenderContext, out: &
         AnyMdInline::MdInlineHtml(_) | AnyMdInline::MdHtmlBlock(_) => {
             // HTML tags are stripped in alt text
         }
+        AnyMdInline::MdQuotePrefix(_) => {
+            // Quote prefixes don't contribute text to alt attributes
+        }
     }
 }
 

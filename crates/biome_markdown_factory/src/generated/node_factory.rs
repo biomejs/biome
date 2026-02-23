@@ -421,14 +421,48 @@ impl MdParagraphBuilder {
         ))
     }
 }
-pub fn md_quote(marker_token: SyntaxToken, content: MdBlockList) -> MdQuote {
+pub fn md_quote(prefix: MdQuotePrefix, content: MdBlockList) -> MdQuote {
     MdQuote::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_QUOTE,
         [
-            Some(SyntaxElement::Token(marker_token)),
+            Some(SyntaxElement::Node(prefix.into_syntax())),
             Some(SyntaxElement::Node(content.into_syntax())),
         ],
     ))
+}
+pub fn md_quote_prefix(marker_token: SyntaxToken) -> MdQuotePrefixBuilder {
+    MdQuotePrefixBuilder {
+        marker_token,
+        pre_marker_indent_token: None,
+        post_marker_space_token: None,
+    }
+}
+pub struct MdQuotePrefixBuilder {
+    marker_token: SyntaxToken,
+    pre_marker_indent_token: Option<SyntaxToken>,
+    post_marker_space_token: Option<SyntaxToken>,
+}
+impl MdQuotePrefixBuilder {
+    pub fn with_pre_marker_indent_token(mut self, pre_marker_indent_token: SyntaxToken) -> Self {
+        self.pre_marker_indent_token = Some(pre_marker_indent_token);
+        self
+    }
+    pub fn with_post_marker_space_token(mut self, post_marker_space_token: SyntaxToken) -> Self {
+        self.post_marker_space_token = Some(post_marker_space_token);
+        self
+    }
+    pub fn build(self) -> MdQuotePrefix {
+        MdQuotePrefix::unwrap_cast(SyntaxNode::new_detached(
+            MarkdownSyntaxKind::MD_QUOTE_PREFIX,
+            [
+                self.pre_marker_indent_token
+                    .map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Token(self.marker_token)),
+                self.post_marker_space_token
+                    .map(|token| SyntaxElement::Token(token)),
+            ],
+        ))
+    }
 }
 pub fn md_reference_image(
     excl_token: SyntaxToken,

@@ -84,7 +84,11 @@ MdDocument {
                     bullet: MINUS@45..46 "-" [] [],
                     content: MdBlockList [
                         MdQuote {
-                            marker_token: R_ANGLE@46..48 ">" [Skipped(" ")] [],
+                            prefix: MdQuotePrefix {
+                                pre_marker_indent_token: missing (optional),
+                                marker_token: R_ANGLE@46..48 ">" [Skipped(" ")] [],
+                                post_marker_space_token: missing (optional),
+                            },
                             content: MdBlockList [
                                 MdParagraph {
                                     list: MdInlineItemList [
@@ -97,13 +101,23 @@ MdDocument {
                                     ],
                                     hard_line: missing (optional),
                                 },
+                                MdQuotePrefix {
+                                    pre_marker_indent_token: missing (optional),
+                                    marker_token: R_ANGLE@61..64 ">" [Skipped(" "), Skipped(" ")] [],
+                                    post_marker_space_token: missing (optional),
+                                },
                                 MdNewline {
-                                    value_token: NEWLINE@61..65 "\n" [Skipped(" "), Skipped(" "), Skipped(">")] [],
+                                    value_token: NEWLINE@64..65 "\n" [] [],
+                                },
+                                MdQuotePrefix {
+                                    pre_marker_indent_token: missing (optional),
+                                    marker_token: R_ANGLE@65..68 ">" [Skipped(" "), Skipped(" ")] [],
+                                    post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@68..69 " " [] [],
                                 },
                                 MdParagraph {
                                     list: MdInlineItemList [
                                         MdTextual {
-                                            value_token: MD_TEXTUAL_LITERAL@65..89 "continued quote line" [Skipped(" "), Skipped(" "), Skipped(">"), Skipped(" ")] [],
+                                            value_token: MD_TEXTUAL_LITERAL@69..89 "continued quote line" [] [],
                                         },
                                         MdTextual {
                                             value_token: MD_TEXTUAL_LITERAL@89..90 "\n" [] [],
@@ -421,7 +435,10 @@ MdDocument {
           0: MINUS@45..46 "-" [] []
           1: MD_BLOCK_LIST@46..91
             0: MD_QUOTE@46..90
-              0: R_ANGLE@46..48 ">" [Skipped(" ")] []
+              0: MD_QUOTE_PREFIX@46..48
+                0: (empty)
+                1: R_ANGLE@46..48 ">" [Skipped(" ")] []
+                2: (empty)
               1: MD_BLOCK_LIST@48..90
                 0: MD_PARAGRAPH@48..61
                   0: MD_INLINE_ITEM_LIST@48..61
@@ -430,12 +447,20 @@ MdDocument {
                     1: MD_TEXTUAL@60..61
                       0: MD_TEXTUAL_LITERAL@60..61 "\n" [] []
                   1: (empty)
-                1: MD_NEWLINE@61..65
-                  0: NEWLINE@61..65 "\n" [Skipped(" "), Skipped(" "), Skipped(">")] []
-                2: MD_PARAGRAPH@65..90
-                  0: MD_INLINE_ITEM_LIST@65..90
-                    0: MD_TEXTUAL@65..89
-                      0: MD_TEXTUAL_LITERAL@65..89 "continued quote line" [Skipped(" "), Skipped(" "), Skipped(">"), Skipped(" ")] []
+                1: MD_QUOTE_PREFIX@61..64
+                  0: (empty)
+                  1: R_ANGLE@61..64 ">" [Skipped(" "), Skipped(" ")] []
+                  2: (empty)
+                2: MD_NEWLINE@64..65
+                  0: NEWLINE@64..65 "\n" [] []
+                3: MD_QUOTE_PREFIX@65..69
+                  0: (empty)
+                  1: R_ANGLE@65..68 ">" [Skipped(" "), Skipped(" ")] []
+                  2: MD_QUOTE_POST_MARKER_SPACE@68..69 " " [] []
+                4: MD_PARAGRAPH@69..90
+                  0: MD_INLINE_ITEM_LIST@69..90
+                    0: MD_TEXTUAL@69..89
+                      0: MD_TEXTUAL_LITERAL@69..89 "continued quote line" [] []
                     1: MD_TEXTUAL@89..90
                       0: MD_TEXTUAL_LITERAL@89..90 "\n" [] []
                   1: (empty)

@@ -21,18 +21,27 @@ MdDocument {
     bom_token: missing (optional),
     value: MdBlockList [
         MdQuote {
-            marker_token: R_ANGLE@0..1 ">" [] [],
+            prefix: MdQuotePrefix {
+                pre_marker_indent_token: missing (optional),
+                marker_token: R_ANGLE@0..1 ">" [] [],
+                post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@1..2 " " [] [],
+            },
             content: MdBlockList [
                 MdParagraph {
                     list: MdInlineItemList [
                         MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@1..17 "This is a quote" [Skipped(" ")] [],
+                            value_token: MD_TEXTUAL_LITERAL@2..17 "This is a quote" [] [],
                         },
                         MdTextual {
                             value_token: MD_TEXTUAL_LITERAL@17..18 "\n" [] [],
                         },
+                        MdQuotePrefix {
+                            pre_marker_indent_token: missing (optional),
+                            marker_token: R_ANGLE@18..19 ">" [] [],
+                            post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@19..20 " " [] [],
+                        },
                         MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@18..37 "It continues here" [Skipped(">"), Skipped(" ")] [],
+                            value_token: MD_TEXTUAL_LITERAL@20..37 "It continues here" [] [],
                         },
                         MdTextual {
                             value_token: MD_TEXTUAL_LITERAL@37..38 "\n" [] [],
@@ -46,12 +55,16 @@ MdDocument {
             value_token: NEWLINE@38..39 "\n" [] [],
         },
         MdQuote {
-            marker_token: R_ANGLE@39..40 ">" [] [],
+            prefix: MdQuotePrefix {
+                pre_marker_indent_token: missing (optional),
+                marker_token: R_ANGLE@39..40 ">" [] [],
+                post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@40..41 " " [] [],
+            },
             content: MdBlockList [
                 MdParagraph {
                     list: MdInlineItemList [
                         MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@40..60 "Another quote block" [Skipped(" ")] [],
+                            value_token: MD_TEXTUAL_LITERAL@41..60 "Another quote block" [] [],
                         },
                         MdTextual {
                             value_token: MD_TEXTUAL_LITERAL@60..61 "\n" [] [],
@@ -73,28 +86,38 @@ MdDocument {
   0: (empty)
   1: MD_BLOCK_LIST@0..61
     0: MD_QUOTE@0..38
-      0: R_ANGLE@0..1 ">" [] []
-      1: MD_BLOCK_LIST@1..38
-        0: MD_PARAGRAPH@1..38
-          0: MD_INLINE_ITEM_LIST@1..38
-            0: MD_TEXTUAL@1..17
-              0: MD_TEXTUAL_LITERAL@1..17 "This is a quote" [Skipped(" ")] []
+      0: MD_QUOTE_PREFIX@0..2
+        0: (empty)
+        1: R_ANGLE@0..1 ">" [] []
+        2: MD_QUOTE_POST_MARKER_SPACE@1..2 " " [] []
+      1: MD_BLOCK_LIST@2..38
+        0: MD_PARAGRAPH@2..38
+          0: MD_INLINE_ITEM_LIST@2..38
+            0: MD_TEXTUAL@2..17
+              0: MD_TEXTUAL_LITERAL@2..17 "This is a quote" [] []
             1: MD_TEXTUAL@17..18
               0: MD_TEXTUAL_LITERAL@17..18 "\n" [] []
-            2: MD_TEXTUAL@18..37
-              0: MD_TEXTUAL_LITERAL@18..37 "It continues here" [Skipped(">"), Skipped(" ")] []
-            3: MD_TEXTUAL@37..38
+            2: MD_QUOTE_PREFIX@18..20
+              0: (empty)
+              1: R_ANGLE@18..19 ">" [] []
+              2: MD_QUOTE_POST_MARKER_SPACE@19..20 " " [] []
+            3: MD_TEXTUAL@20..37
+              0: MD_TEXTUAL_LITERAL@20..37 "It continues here" [] []
+            4: MD_TEXTUAL@37..38
               0: MD_TEXTUAL_LITERAL@37..38 "\n" [] []
           1: (empty)
     1: MD_NEWLINE@38..39
       0: NEWLINE@38..39 "\n" [] []
     2: MD_QUOTE@39..61
-      0: R_ANGLE@39..40 ">" [] []
-      1: MD_BLOCK_LIST@40..61
-        0: MD_PARAGRAPH@40..61
-          0: MD_INLINE_ITEM_LIST@40..61
-            0: MD_TEXTUAL@40..60
-              0: MD_TEXTUAL_LITERAL@40..60 "Another quote block" [Skipped(" ")] []
+      0: MD_QUOTE_PREFIX@39..41
+        0: (empty)
+        1: R_ANGLE@39..40 ">" [] []
+        2: MD_QUOTE_POST_MARKER_SPACE@40..41 " " [] []
+      1: MD_BLOCK_LIST@41..61
+        0: MD_PARAGRAPH@41..61
+          0: MD_INLINE_ITEM_LIST@41..61
+            0: MD_TEXTUAL@41..60
+              0: MD_TEXTUAL_LITERAL@41..60 "Another quote block" [] []
             1: MD_TEXTUAL@60..61
               0: MD_TEXTUAL_LITERAL@60..61 "\n" [] []
           1: (empty)

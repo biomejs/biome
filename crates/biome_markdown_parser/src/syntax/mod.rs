@@ -56,7 +56,7 @@ use list::{
 };
 use quote::{
     at_quote, consume_quote_prefix, consume_quote_prefix_without_virtual, has_quote_prefix,
-    parse_quote,
+    line_has_quote_prefix_at_current, parse_quote,
 };
 use thematic_break_block::{at_thematic_break_block, parse_thematic_break_block};
 
@@ -757,7 +757,7 @@ fn allow_setext_heading(p: &MarkdownParser) -> bool {
         return true;
     }
 
-    line_has_quote_prefix(p, depth)
+    line_has_quote_prefix_at_current(p, depth)
 }
 
 /// Compute the real leading indent of the current line from source text.
@@ -781,51 +781,6 @@ fn real_line_indent_from_source(p: &MarkdownParser) -> usize {
         }
     }
     column
-}
-
-fn line_has_quote_prefix(p: &MarkdownParser, depth: usize) -> bool {
-    // Tokens may have consumed whitespace as trivia; scan source to recover columns.
-    if depth == 0 {
-        return false;
-    }
-
-    let source = p.source().source_text();
-    let start: usize = p.cur_range().start().into();
-    let line_start = source[..start].rfind('\n').map_or(0, |idx| idx + 1);
-
-    let mut idx = line_start;
-    let mut indent = 0usize;
-    while idx < start {
-        match source.as_bytes()[idx] {
-            b' ' => {
-                indent += 1;
-                idx += 1;
-            }
-            b'\t' => {
-                indent += 4;
-                idx += 1;
-            }
-            _ => break,
-        }
-        if indent > 3 {
-            return false;
-        }
-    }
-
-    for _ in 0..depth {
-        if idx >= start || source.as_bytes()[idx] != b'>' {
-            return false;
-        }
-        idx += 1;
-        if idx < start {
-            let c = source.as_bytes()[idx];
-            if c == b' ' || c == b'\t' {
-                idx += 1;
-            }
-        }
-    }
-
-    true
 }
 
 fn classify_quote_break_after_newline(

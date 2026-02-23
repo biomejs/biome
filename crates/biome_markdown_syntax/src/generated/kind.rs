@@ -46,6 +46,8 @@ pub enum MarkdownSyntaxKind {
     MD_ORDERED_LIST_MARKER,
     MD_ERROR_LITERAL,
     MD_ENTITY_LITERAL,
+    MD_QUOTE_PRE_MARKER_INDENT,
+    MD_QUOTE_POST_MARKER_SPACE,
     ERROR_TOKEN,
     NEWLINE,
     WHITESPACE,
@@ -68,6 +70,7 @@ pub enum MarkdownSyntaxKind {
     MD_LINK_DESTINATION,
     MD_LINK_TITLE,
     MD_QUOTE,
+    MD_QUOTE_PREFIX,
     MD_ORDERED_LIST_ITEM,
     MD_BULLET_LIST_ITEM,
     MD_BULLET_LIST,
@@ -144,6 +147,8 @@ impl MarkdownSyntaxKind {
                 | MD_ORDERED_LIST_MARKER
                 | MD_ERROR_LITERAL
                 | MD_ENTITY_LITERAL
+                | MD_QUOTE_PRE_MARKER_INDENT
+                | MD_QUOTE_POST_MARKER_SPACE
         )
     }
     pub const fn is_list(self) -> bool {

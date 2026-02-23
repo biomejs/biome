@@ -50,6 +50,7 @@ MdBlockList = AnyMdBlock*
 AnyMdBlock =
 	AnyMdLeafBlock
 	| AnyMdContainerBlock
+	| MdQuotePrefix
 
 AnyMdLeafBlock =
 	MdThematicBreakBlock
@@ -154,9 +155,24 @@ MdLinkBlock = label: MdTextual
                 url: MdTextual
                 title: MdTextual?
 
+// Block quote container per CommonMark §5.1
+// The first-line `>` is the `prefix` child. Continuation prefixes are interleaved
+// in source order at the MdBlockList level (between blocks) and within
+// MdInlineItemList (within paragraphs).
 MdQuote =
-	marker: '>'
+	prefix: MdQuotePrefix
 	content: MdBlockList
+
+// Per-physical-line quote prefix: [indent?] '>' [space?]
+// Interleaved in source order alongside content nodes.
+// Lazy continuation is represented by the ABSENCE of MdQuotePrefix after a line break.
+// Pre-marker indent captures 0-3 spaces before '>' per CommonMark §5.1.
+// Post-marker space captures exactly 0 or 1 space after '>';
+// additional spaces are content indentation, not part of the prefix.
+MdQuotePrefix =
+	pre_marker_indent: 'md_quote_pre_marker_indent'?
+	marker: '>'
+	post_marker_space: 'md_quote_post_marker_space'?
 
 MdBulletListItem = MdBulletList
 MdOrderedListItem = MdBulletList
@@ -196,6 +212,7 @@ AnyMdInline =
 	| MdHardLine
 	| MdSoftBreak
 	| MdTextual
+	| MdQuotePrefix
 
 
 // *italic*

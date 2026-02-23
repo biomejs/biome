@@ -773,7 +773,7 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
-                    && element.kind() == T ! [>]
+                    && MdQuotePrefix::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -790,6 +790,39 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                     return RawSyntaxNode::new(MD_QUOTE.to_bogus(), children.into_iter().map(Some));
                 }
                 slots.into_node(MD_QUOTE, children)
+            }
+            MD_QUOTE_PREFIX => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == MD_QUOTE_PRE_MARKER_INDENT
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [>]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == MD_QUOTE_POST_MARKER_SPACE
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        MD_QUOTE_PREFIX.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(MD_QUOTE_PREFIX, children)
             }
             MD_REFERENCE_IMAGE => {
                 let mut elements = (&children).into_iter();

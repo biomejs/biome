@@ -18,6 +18,7 @@ impl FormatRule<AnyMdInline> for FormatAnyMdInline {
             AnyMdInline::MdInlineImage(node) => node.format().fmt(f),
             AnyMdInline::MdInlineItalic(node) => node.format().fmt(f),
             AnyMdInline::MdInlineLink(node) => node.format().fmt(f),
+            AnyMdInline::MdQuotePrefix(node) => node.format().fmt(f),
             AnyMdInline::MdReferenceImage(node) => node.format().fmt(f),
             AnyMdInline::MdReferenceLink(node) => node.format().fmt(f),
             AnyMdInline::MdSoftBreak(node) => node.format().fmt(f),

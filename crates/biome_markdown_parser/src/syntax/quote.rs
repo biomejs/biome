@@ -65,13 +65,11 @@ pub(crate) fn at_quote(p: &mut MarkdownParser) -> bool {
 
 /// Parse a block quote.
 ///
-/// Grammar: MdQuote = marker: '>' content: AnyMdBlock
+/// Grammar: `MdQuote = prefix: MdQuotePrefix content: MdBlockList`
 ///
-/// A block quote starts with `>` at line start and contains block content.
-/// Multi-line quotes: consecutive `>` lines continue the same quote's content.
-/// Nested quotes: `>>` creates a nested quote inside the outer quote.
-///
-/// Nesting is limited to `MarkdownParseOptions::max_nesting_depth` to prevent stack overflow.
+/// The first-line `>` is emitted as an `MdQuotePrefix` child of `MdQuote`.
+/// Continuation `>` markers become `MdQuotePrefix` nodes interleaved in
+/// the block list (between blocks) or inline item list (within paragraphs).
 pub(crate) fn parse_quote(p: &mut MarkdownParser) -> ParsedSyntax {
     if !at_quote(p) {
         return Absent;
@@ -94,22 +92,13 @@ pub(crate) fn parse_quote(p: &mut MarkdownParser) -> ParsedSyntax {
     }
 
     let m = p.start();
-
-    p.skip_line_indent(3);
-
-    // Increment quote depth
     p.state_mut().block_quote_depth += 1;
 
-    // Bump the `>` marker token
-    p.bump(T![>]);
-
-    let has_indented_code = at_quote_indented_code_start(p);
-    let marker_space = skip_optional_marker_space(p, has_indented_code);
+    let marker_space = emit_quote_prefix_node(p);
     p.set_virtual_line_start();
 
     parse_quote_block_list(p);
 
-    // Decrement quote depth
     p.state_mut().block_quote_depth -= 1;
 
     let completed = m.complete(p, MD_QUOTE);
@@ -119,7 +108,78 @@ pub(crate) fn parse_quote(p: &mut MarkdownParser) -> ParsedSyntax {
     Present(completed)
 }
 
-/// Struct implementing `ParseNodeList` for quote block content.
+/// Emit an `MdQuotePrefix` node for a single `>` marker.
+///
+/// Consumes: [0-3 spaces as pre-marker indent] `>` [optional space as post-marker space]
+/// Returns whether a post-marker space was consumed.
+fn emit_quote_prefix_node(p: &mut MarkdownParser) -> bool {
+    let prefix_m = p.start();
+    let Some(marker_space) = emit_quote_prefix_tokens(p, false) else {
+        prefix_m.abandon(p);
+        return false;
+    };
+
+    prefix_m.complete(p, MD_QUOTE_PREFIX);
+    marker_space
+}
+
+/// Emit one quote prefix token sequence: [indent?] `>` [optional space/tab].
+///
+/// Returns whether a post-marker separator was consumed.
+fn emit_quote_prefix_tokens(p: &mut MarkdownParser, use_virtual_line_start: bool) -> Option<bool> {
+    // TODO: Emit MD_QUOTE_PRE_MARKER_INDENT directly instead of skipping indent trivia.
+    // This is intentionally deferred from Step 1b to keep parser migration scope narrow.
+    let saved_virtual = if use_virtual_line_start {
+        let prev = p.state().virtual_line_start;
+        p.state_mut().virtual_line_start = Some(p.cur_range().start());
+        Some(prev)
+    } else {
+        None
+    };
+    p.skip_line_indent(3);
+    if let Some(prev) = saved_virtual {
+        p.state_mut().virtual_line_start = prev;
+    }
+
+    if p.at(T![>]) {
+        p.bump(T![>]);
+    } else if p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == ">" {
+        p.bump_remap(T![>]);
+    } else {
+        return None;
+    }
+
+    let has_indented_code = at_quote_indented_code_start(p);
+    let marker_space = emit_post_marker_space(p, has_indented_code);
+    Some(marker_space)
+}
+
+/// Consume the optional space after `>` as an `MD_QUOTE_POST_MARKER_SPACE` token.
+///
+/// Returns `true` if a space was consumed.
+fn emit_post_marker_space(p: &mut MarkdownParser, preserve_tab: bool) -> bool {
+    if !p.at(MD_TEXTUAL_LITERAL) {
+        return false;
+    }
+
+    match p.cur_text() {
+        " " => {
+            p.bump_remap(MD_QUOTE_POST_MARKER_SPACE);
+            true
+        }
+        "\t" => {
+            // When preserve_tab is true (e.g. indented code in quote), the tab still
+            // semantically counts as the optional post-marker separator, but remains
+            // in the stream so the child block can claim it as indentation.
+            if !preserve_tab {
+                p.bump_remap(MD_QUOTE_POST_MARKER_SPACE);
+            }
+            true
+        }
+        _ => false,
+    }
+}
+
 struct QuoteBlockList {
     depth: usize,
     first_line: bool,
@@ -145,13 +205,11 @@ impl ParseNodeList for QuoteBlockList {
     const LIST_KIND: Self::Kind = MD_BLOCK_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        // Handle quote depth exceeded
         if p.state().quote_depth_exceeded {
             p.state_mut().quote_depth_exceeded = false;
             return Absent;
         }
 
-        // Check/consume quote prefix for non-first lines
         self.line_started_with_prefix = self.first_line;
         if !self.first_line && !p.at(NEWLINE) && (p.at_line_start() || p.has_preceding_line_break())
         {
@@ -164,7 +222,6 @@ impl ParseNodeList for QuoteBlockList {
         }
         self.first_line = false;
 
-        // Handle NEWLINE tokens
         if p.at(NEWLINE) {
             if !self.line_started_with_prefix && line_has_quote_prefix_at_current(p, self.depth) {
                 self.line_started_with_prefix = true;
@@ -188,14 +245,12 @@ impl ParseNodeList for QuoteBlockList {
             return Present(text_m.complete(p, MD_NEWLINE));
         }
 
-        // Handle indented code blocks inside quotes
         if at_quote_indented_code_start(p) {
             let parsed = parse_quote_indented_code_block(p, self.depth);
             self.last_block_was_paragraph = false;
             return parsed;
         }
 
-        // Parse regular block
         // Treat content after '>' as column 0 for block parsing (fence detection).
         let prev_virtual = p.state().virtual_line_start;
         p.state_mut().virtual_line_start = Some(p.cur_range().start());
@@ -376,7 +431,7 @@ pub(crate) fn consume_quote_prefix(p: &mut MarkdownParser, depth: usize) -> bool
     consume_quote_prefix_impl(p, depth, true)
 }
 
-/// Check if a quote prefix starts at the current position.
+/// Consume quote prefix tokens without updating virtual line start.
 pub(crate) fn consume_quote_prefix_without_virtual(p: &mut MarkdownParser, depth: usize) -> bool {
     if depth == 0 || !has_quote_prefix(p, depth) {
         return false;
@@ -395,19 +450,13 @@ fn consume_quote_prefix_impl(
     }
 
     for _ in 0..depth {
-        let prev_virtual = p.state().virtual_line_start;
-        p.state_mut().virtual_line_start = Some(p.cur_range().start());
-        p.skip_line_indent(3);
-        p.state_mut().virtual_line_start = prev_virtual;
-        if p.at(T![>]) {
-            p.parse_as_skipped_trivia_tokens(|p| p.bump(T![>]));
-        } else if p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == ">" {
-            p.parse_as_skipped_trivia_tokens(|p| p.bump_remap(T![>]));
-        } else {
+        let prefix_m = p.start();
+        if emit_quote_prefix_tokens(p, true).is_none() {
+            prefix_m.abandon(p);
             return false;
         }
-        let has_indented_code = at_quote_indented_code_start(p);
-        skip_optional_marker_space(p, has_indented_code);
+
+        prefix_m.complete(p, MD_QUOTE_PREFIX);
     }
 
     if set_virtual_line_start {
