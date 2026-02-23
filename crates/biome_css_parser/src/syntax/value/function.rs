@@ -279,13 +279,14 @@ pub(crate) fn parse_unary_expression(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 fn parse_unary_expression_operand(p: &mut CssParser) -> ParsedSyntax {
+    let scss_enabled = CssSyntaxFeatures::Scss.is_supported(p);
+
     if is_at_unary_operator(p) {
         parse_unary_expression(p)
-    } else if CssSyntaxFeatures::Scss.is_supported(p)
-        && (is_at_parenthesized(p) || is_at_any_value(p))
-    {
+    } else if scss_enabled && (is_at_parenthesized(p) || is_at_any_value(p)) {
         parse_scss_expression(p)
-    } else if is_at_parenthesized(p) {
+    } else if !scss_enabled && is_at_parenthesized(p) {
+        // In SCSS mode, parenthesized values are consumed as SCSS expressions above.
         parse_parenthesized_expression(p)
     } else if is_at_comma_separated_value(p) {
         parse_comma_separated_value(p)
