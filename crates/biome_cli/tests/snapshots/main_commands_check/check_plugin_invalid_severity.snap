@@ -34,7 +34,7 @@ console.log("hello");
 ```block
 input.js plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i badSeverity errored: Found unexpected value (invalid), valid values are: info, warn, error.
+  i badSeverity errored: invalid severity "invalid", expected "hint", "info", "warn", or "error"
   
 
 ```

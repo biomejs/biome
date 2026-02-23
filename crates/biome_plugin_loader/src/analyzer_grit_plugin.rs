@@ -239,7 +239,11 @@ fn register_diagnostic<'a>(
             let text = severity
                 .text(&state.files, &context.lang)
                 .map_err(|e| GritPatternError::new(format!("failed to read severity: {e}")))?;
-            Severity::from_str(text.as_ref()).map_err(|e| GritPatternError::new(e))?
+            Severity::from_str(text.as_ref()).map_err(|_| {
+                GritPatternError::new(format!(
+                    "invalid severity \"{text}\", expected \"hint\", \"info\", \"warn\", or \"error\""
+                ))
+            })?
         }
     };
 
