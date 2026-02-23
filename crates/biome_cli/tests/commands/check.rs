@@ -3914,6 +3914,91 @@ fn check_plugin_safe_fix_no_write() {
 }
 
 #[test]
+fn check_plugin_invalid_fix_kind() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        br#"{
+    "plugins": ["badFixKind.grit"],
+    "formatter": { "enabled": false }
+}
+"#,
+    );
+
+    fs.insert(
+        Utf8PathBuf::from("badFixKind.grit"),
+        br#"language js
+
+`console.log($msg)` as $call where {
+    register_diagnostic(span = $call, message = "Use console.info instead.", fix_kind = "invalid"),
+    $call => `console.info($msg)`
+}
+"#,
+    );
+
+    let file_path = Utf8Path::new("input.js");
+    fs.insert(file_path.into(), b"console.log(\"hello\");\n");
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["check", file_path.as_str()].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_plugin_invalid_fix_kind",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn check_plugin_invalid_severity() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        br#"{
+    "plugins": ["badSeverity.grit"],
+    "formatter": { "enabled": false }
+}
+"#,
+    );
+
+    fs.insert(
+        Utf8PathBuf::from("badSeverity.grit"),
+        br#"language js
+
+`console.log($msg)` as $call where {
+    register_diagnostic(span = $call, message = "Use console.info instead.", severity = "invalid")
+}
+"#,
+    );
+
+    let file_path = Utf8Path::new("input.js");
+    fs.insert(file_path.into(), b"console.log(\"hello\");\n");
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["check", file_path.as_str()].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_plugin_invalid_severity",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn check_plugin_apply_rewrite_json() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
