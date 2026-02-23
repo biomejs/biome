@@ -45,7 +45,9 @@ pub(crate) fn linearize_binding<'a>(
                 match memo.get(br) {
                     Some(Some(cached_text)) => {
                         let byte_range = binding.range(language).ok_or_else(|| {
-                            GritPatternError::new("expected binding to have a range")
+                            GritPatternError::new(
+                                "failed to apply rewrite: binding has no byte range",
+                            )
                         })?;
                         replacements.push((byte_range.start, byte_range.end, cached_text.clone()));
                         continue;
@@ -71,9 +73,9 @@ pub(crate) fn linearize_binding<'a>(
             memo.insert(br.clone(), Some(res.to_string()));
         }
 
-        let byte_range = binding
-            .range(language)
-            .ok_or_else(|| GritPatternError::new("expected binding to have a range"))?;
+        let byte_range = binding.range(language).ok_or_else(|| {
+            GritPatternError::new("failed to apply rewrite: binding has no byte range")
+        })?;
         replacements.push((byte_range.start, byte_range.end, res.into_owned()));
     }
 
