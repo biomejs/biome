@@ -1213,9 +1213,7 @@ fn next_quote_content_indent(p: &MarkdownParser, depth: usize) -> Option<usize> 
     }
 }
 
-// ---------------------------------------------------------------------------
-// Supporting types for `parse_list_item_block_content` refactor
-// ---------------------------------------------------------------------------
+// #region Supporting types for `parse_list_item_block_content`
 
 /// Outcome of a loop-body phase in the list-item parser.
 enum LoopAction {
@@ -1281,9 +1279,9 @@ enum NestedListMarker {
     Ordered,
 }
 
-// ---------------------------------------------------------------------------
-// Helper functions for `parse_list_item_block_content`
-// ---------------------------------------------------------------------------
+// #endregion
+
+// #region Helper functions for `parse_list_item_block_content`
 
 /// Handle all blank-line detection and classification (phases 1-5).
 ///
@@ -1342,9 +1340,6 @@ fn handle_blank_lines(p: &mut MarkdownParser, state: &mut ListItemLoopState) -> 
         let action = classify_blank_line(p, state.required_indent, state.marker_indent);
         let is_blank = list_newline_is_blank_line(p);
         let result = apply_blank_line_action(p, state, action, is_blank);
-        if !matches!(result, LoopAction::Break | LoopAction::Continue) {
-            unreachable!("apply_blank_line_action always produces Break or Continue");
-        }
         return (result, false);
     }
 
@@ -1956,9 +1951,9 @@ fn parse_continuation_block(
     }
 }
 
-// ---------------------------------------------------------------------------
-// Orchestrator
-// ---------------------------------------------------------------------------
+// #endregion
+
+// #region Orchestrator
 
 /// Parse block content for a list item.
 ///
@@ -2009,7 +2004,7 @@ fn parse_list_item_block_content(
         match parse_first_line_blocks(p, &mut state, spaces_after_marker) {
             LoopAction::Continue => continue,
             LoopAction::FallThrough => {}
-            _ => unreachable!("parse_first_line_blocks does not return Break"),
+            LoopAction::Break => break,
         }
 
         // Continuation indent check
@@ -2492,3 +2487,5 @@ where
         has_marker(p)
     })
 }
+
+// #endregion
