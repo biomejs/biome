@@ -35,7 +35,7 @@ Button.jsx:2:45 lint/nursery/noUndeclaredStyles ━━━━━━━━━━�
   
   i Checked import tree:
     
-    <TEMP_DIR>/no_undeclared_styles_shows_checked_import_chain/Button.jsx (this file) -> which imports <TEMP_DIR>/no_undeclared_styles_shows_checked_import_chain/button.css
+    Button.jsx (this file) -> which imports button.css
   
   
   i Either import a CSS file that defines this class or remove this class name.

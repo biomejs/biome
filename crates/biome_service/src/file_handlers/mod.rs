@@ -582,6 +582,7 @@ pub(crate) struct DiagnosticsAndActionsParams<'a> {
     pub(crate) diagnostic_offset: Option<TextSize>,
     #[expect(unused)]
     pub(crate) document_services: &'a DocumentServices,
+    pub(crate) working_directory: Option<&'a Utf8Path>,
 }
 
 pub(crate) struct LintResults {

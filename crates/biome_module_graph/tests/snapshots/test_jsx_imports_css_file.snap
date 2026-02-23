@@ -9,10 +9,10 @@ expression: content
 
 ```css
 .button {
-    color: red;
+	color: red;
 }
 .header {
-    font-size: 24px;
+	font-size: 24px;
 }
 ```
 

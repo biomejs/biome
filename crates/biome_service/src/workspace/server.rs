@@ -1863,9 +1863,9 @@ impl Workspace for WorkspaceServer {
             enabled_rules,
             inline_config,
         } = params;
-        let settings = self
+        let (working_directory, settings) = self
             .projects
-            .get_settings_based_on_path(project_key, &path)
+            .get_settings_and_wd_based_on_path(project_key, &path)
             .ok_or_else(WorkspaceError::no_project)?;
         let (parse, embedded_snippets, services) =
             self.get_parse_with_snippets_and_services(&path)?;
@@ -1901,6 +1901,7 @@ impl Workspace for WorkspaceServer {
                 plugins: plugins.clone(),
                 diagnostic_offset: None,
                 document_services: &services,
+                working_directory: Some(working_directory.as_path()),
             });
 
             for embedded_node in embedded_snippets {
@@ -1929,6 +1930,7 @@ impl Workspace for WorkspaceServer {
                     plugins: plugins.clone(),
                     diagnostic_offset: Some(embedded_node.content_offset()),
                     document_services: &services,
+                    working_directory: Some(working_directory.as_path()),
                 });
 
                 final_result.diagnostics.extend(snippet_result.diagnostics);

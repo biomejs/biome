@@ -1396,7 +1396,7 @@ fn lint(params: LintParams) -> LintResults {
     let workspace_settings = &params.settings;
     let analyzer_options = workspace_settings.analyzer_options::<HtmlLanguage>(
         params.path,
-        None,
+        params.working_directory,
         &params.language,
         params.suppression_reason.as_deref(),
     );

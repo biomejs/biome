@@ -86,6 +86,8 @@ impl AnalyzerServicesBuilder {
                     ),
                 }
             }
+
+            fs.insert(path_buf, src);
         }
 
         let module_graph = ModuleGraph::default();

@@ -901,7 +901,7 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
     let tree = params.parse.tree();
     let analyzer_options = params.settings.analyzer_options::<JsLanguage>(
         params.path,
-        None,
+        params.working_directory,
         &params.language,
         params.suppression_reason.as_deref(),
     );
@@ -1272,11 +1272,12 @@ pub(crate) fn pull_diagnostics_and_actions(
         plugins,
         diagnostic_offset,
         document_services: _,
+        working_directory,
     } = params;
     let tree = parse.tree();
     let analyzer_options = settings.analyzer_options::<JsLanguage>(
         path,
-        None,
+        working_directory,
         &language,
         suppression_reason.as_deref(),
     );
