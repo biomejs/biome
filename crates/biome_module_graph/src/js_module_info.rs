@@ -6,8 +6,9 @@ mod scope;
 mod utils;
 mod visitor;
 
+use biome_js_semantic::ScopeId;
 use biome_js_syntax::AnyJsImportLike;
-use biome_js_type_info::{ImportSymbol, ResolvedTypeId, ScopeId, TypeData, TypeReference};
+use biome_js_type_info::{ImportSymbol, ResolvedTypeId, TypeData, TypeReference};
 use biome_jsdoc_comment::JsdocComment;
 use biome_resolver::ResolvedPath;
 use biome_rowan::{Text, TextRange};
@@ -102,15 +103,11 @@ impl JsModuleInfo {
 
     /// Returns the scope to be used for the given `range`.
     ///
-    /// Note: This method requires finding a syntax node at the given range.
-    /// For better performance, consider using the semantic model directly if you have a node.
-    pub fn scope_for_range(&self, _range: TextRange) -> JsScope {
-        // Find a binding node at this range from the semantic model
-        // For now, we use the global scope as a fallback
-        // TODO: Implement proper range-to-node lookup
+    /// This finds the most specific scope that covers the given text range.
+    pub fn scope_for_range(&self, range: TextRange) -> JsScope {
         JsScope {
             info: self.0.clone(),
-            scope: self.0.semantic_model.global_scope(),
+            scope: self.0.semantic_model.scope_for_range(range),
         }
     }
 
@@ -300,21 +297,21 @@ impl JsModuleInfoInner {
     /// scope.
     ///
     /// Returns the binding's text range for looking up type augmentation data.
-    fn find_binding_in_scope(
-        &self,
-        name: &str,
-        _scope_id: biome_js_semantic::ScopeId,
-    ) -> Option<TextRange> {
-        // TODO: Use the specific scope_id to find the correct starting scope
-        // This requires either exposing Scope construction from ScopeId in SemanticModel
-        // or adding a method to get a Scope by its ID.
-        // For now, we search all scopes which is inefficient but correct.
+    fn find_binding_in_scope(&self, name: &str, scope_id: ScopeId) -> Option<TextRange> {
+        // Start from the specified scope and walk up the scope chain
+        let mut scope = self.semantic_model.scope_from_id(scope_id);
 
-        // Search all scopes in the semantic model
-        for scope in self.semantic_model.scopes() {
+        loop {
+            // Check if this scope has a binding with the given name
             if let Some(binding) = scope.get_binding(name) {
                 // Return the binding's range for type data lookup
                 return Some(binding.syntax().text_trimmed_range());
+            }
+
+            // Move to parent scope
+            match scope.parent() {
+                Some(parent) => scope = parent,
+                None => break,
             }
         }
 

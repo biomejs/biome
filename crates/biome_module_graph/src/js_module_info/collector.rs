@@ -1,6 +1,6 @@
 use std::{borrow::Cow, collections::BTreeSet, sync::Arc};
 
-use biome_js_semantic::{SemanticEvent, SemanticEventExtractor};
+use biome_js_semantic::{BindingId, ScopeId, SemanticEvent, SemanticEventExtractor};
 use biome_js_syntax::{
     AnyJsCombinedSpecifier, AnyJsDeclaration, AnyJsExportDefaultDeclaration, AnyJsExpression,
     AnyJsImportClause, JsAssignmentExpression, JsForVariableDeclaration, JsFormalParameter,
@@ -9,10 +9,10 @@ use biome_js_syntax::{
     inner_string_text,
 };
 use biome_js_type_info::{
-    BindingId, FunctionParameter, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, GenericTypeParameter,
-    MAX_FLATTEN_DEPTH, Module, Namespace, Resolvable, ResolvedTypeData, ResolvedTypeId, ScopeId,
-    TypeData, TypeId, TypeImportQualifier, TypeMember, TypeMemberKind, TypeReference,
-    TypeReferenceQualifier, TypeResolver, TypeResolverLevel, TypeStore,
+    FunctionParameter, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, GenericTypeParameter, MAX_FLATTEN_DEPTH,
+    Module, Namespace, Resolvable, ResolvedTypeData, ResolvedTypeId, TypeData, TypeId,
+    TypeImportQualifier, TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier,
+    TypeResolver, TypeResolverLevel, TypeStore,
 };
 use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::{AstNode, Text, TextRange, TextSize, TokenText};
@@ -396,7 +396,7 @@ impl JsModuleInfoCollector {
 
                 self.scopes.push(JsScopeData {
                     range,
-                    parent: parent_scope_id.map(|id| ScopeId::new(id.index())),
+                    parent: parent_scope_id,
                     children: Vec::new(),
                     bindings: Vec::new(),
                     bindings_by_name: FxHashMap::default(),

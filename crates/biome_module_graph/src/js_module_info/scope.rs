@@ -1,7 +1,8 @@
 use std::{iter::FusedIterator, sync::Arc};
 
+use biome_js_semantic::{BindingId, ScopeId};
 use biome_js_syntax::TextRange;
-use biome_js_type_info::{BindingId, ScopeId, TypeReferenceQualifier};
+use biome_js_type_info::TypeReferenceQualifier;
 use biome_rowan::TokenText;
 use rustc_hash::FxHashMap;
 

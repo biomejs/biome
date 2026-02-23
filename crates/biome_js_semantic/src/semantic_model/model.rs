@@ -7,13 +7,13 @@ use std::sync::Arc;
 pub struct BindingId(pub(crate) u32);
 
 impl BindingId {
-    pub fn new(index: usize) -> Self {
+    pub const fn new(index: usize) -> Self {
         // SAFETY: We didn't handle files exceeding `u32::MAX` bytes.
         // Thus, it isn't possible to exceed `u32::MAX` bindings.
         Self(index as u32)
     }
 
-    pub fn index(self) -> usize {
+    pub const fn index(self) -> usize {
         self.0 as usize
     }
 }
@@ -45,7 +45,9 @@ pub struct ScopeId(pub(crate) std::num::NonZeroU32);
 // We don't implement `From<usize> for ScopeId` and `From<ScopeId> for usize`
 // to ensure that the API consumers don't create `ScopeId`.
 impl ScopeId {
-    pub fn new(index: usize) -> Self {
+    pub const GLOBAL: Self = Self::new(0);
+
+    pub const fn new(index: usize) -> Self {
         // SAFETY: We didn't handle files exceeding `u32::MAX` bytes.
         // Thus, it isn't possible to exceed `u32::MAX` scopes.
         //
@@ -57,7 +59,7 @@ impl ScopeId {
         Self(unsafe { std::num::NonZeroU32::new_unchecked(index.unchecked_add(1) as u32) })
     }
 
-    pub fn index(self) -> usize {
+    pub const fn index(self) -> usize {
         // SAFETY: The internal representation ensures that the value is never equal to 0.
         // Thus, it is safe to subtract 1.
         (unsafe { self.0.get().unchecked_sub(1) }) as usize
@@ -236,6 +238,40 @@ impl SemanticModel {
         Scope {
             data: self.data.clone(),
             id,
+        }
+    }
+
+    /// Returns the most specific [Scope] that covers the given range.
+    ///
+    /// This is useful when you have a text range but not a syntax node.
+    /// If you have a syntax node, prefer using [SemanticModel::scope] instead.
+    ///
+    /// # Panics
+    /// Panics if the range is empty (has zero length).
+    pub fn scope_for_range(&self, range: TextRange) -> Scope {
+        let id = self.data.scope(range);
+        Scope {
+            data: self.data.clone(),
+            id,
+        }
+    }
+
+    /// Creates a [Scope] from a [ScopeId].
+    ///
+    /// This is useful when you have a scope ID and need to access its data.
+    ///
+    /// # Panics
+    /// Panics in debug mode if the scope_id is invalid.
+    pub fn scope_from_id(&self, scope_id: ScopeId) -> Scope {
+        debug_assert!(
+            scope_id.index() < self.data.scopes.len(),
+            "Invalid scope_id: index {} is out of bounds (max: {})",
+            scope_id.index(),
+            self.data.scopes.len()
+        );
+        Scope {
+            data: self.data.clone(),
+            id: scope_id,
         }
     }
 
