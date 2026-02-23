@@ -719,9 +719,19 @@ impl BiomeCommand {
                 {
                     return Some(&ColorsArg::Off);
                 }
-                // We want force colors in CI, to give e better UX experience
+                // We want force colors in CI, to give a better UX experience
                 // Unless users explicitly set the colors flag
                 if matches!(self, Self::Ci { .. }) && cli_options.colors.is_none() {
+                    // When running in GitHub Actions, the github reporter is
+                    // auto-enabled. Disable colors so that ::error/::warning
+                    // workflow commands aren't wrapped in ANSI escape codes.
+                    if !cfg!(debug_assertions)
+                        && std::env::var("GITHUB_ACTIONS")
+                            .ok()
+                            .is_some_and(|v| v == "true")
+                    {
+                        return Some(&ColorsArg::Off);
+                    }
                     return Some(&ColorsArg::Force);
                 }
                 // Normal behaviors
