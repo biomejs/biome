@@ -1,7 +1,7 @@
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{JsStaticMemberExpression, global_identifier};
+use biome_js_syntax::{JsImport, JsStaticMemberExpression, global_identifier};
 use biome_rowan::AstNode;
 use biome_rule_options::no_process_env::NoProcessEnvOptions;
 
@@ -66,7 +66,12 @@ impl Rule for NoProcessEnv {
         if name.text() != "process" {
             return None;
         }
-        model.binding(&reference).is_none().then_some(())
+        match model.binding(&reference) {
+            // No binding: `process` is a global — flag it
+            None => Some(()),
+            // Has a binding: flag it only if imported from "process" or "node:process"
+            Some(binding) => is_process_module_import(&binding).then_some(()),
+        }
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
@@ -84,4 +89,14 @@ impl Rule for NoProcessEnv {
             }),
         )
     }
+}
+
+/// Returns `true` if the binding comes from an import of the `"process"` or `"node:process"` module.
+fn is_process_module_import(binding: &biome_js_semantic::Binding) -> bool {
+    const PROCESS_MODULE_NAMES: [&str; 2] = ["process", "node:process"];
+    binding
+        .syntax()
+        .ancestors()
+        .find_map(|ancestor| JsImport::cast(ancestor)?.source_text().ok())
+        .is_some_and(|source| PROCESS_MODULE_NAMES.contains(&source.text()))
 }

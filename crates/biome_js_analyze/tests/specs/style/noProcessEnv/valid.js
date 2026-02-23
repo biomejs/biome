@@ -8,3 +8,6 @@ const process = {
 	env() {}
 };
 process.env;
+
+import process from "some-other-module";
+process.env;
