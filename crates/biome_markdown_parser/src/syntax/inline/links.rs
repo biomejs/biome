@@ -556,9 +556,6 @@ fn inline_link_is_valid(p: &mut MarkdownParser) -> InlineLinkValidation {
             saw_separator = true;
         }
         let has_title = saw_separator && get_title_close_char(p).is_some();
-        while is_title_separator_token(p) {
-            bump_link_def_separator(p);
-        }
 
         if has_title {
             parse_title_content(p, get_title_close_char(p));
