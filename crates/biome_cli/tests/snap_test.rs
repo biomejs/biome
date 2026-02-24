@@ -22,6 +22,10 @@ use std::sync::LazyLock;
 static TIME_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new("\\s[0-9]+[mµn]?s\\.").unwrap());
 static TIME_JUNIT_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new("time=\\\"[.0-9]+\\\"").unwrap());
+static DURATION_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new("\"duration\":\\s*[0-9]+").unwrap());
+static SCANNER_DURATION_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new("\"scannerDuration\":\\s*[0-9]+").unwrap());
 
 #[derive(Default)]
 struct InMessages {
@@ -166,6 +170,41 @@ fn redact_snapshot(input: &str) -> Option<Cow<'_, str>> {
         .map(|f| f.start()..f.end());
     if let Some(found) = the_match {
         output.to_mut().replace_range(found, "time=\"<TIME>\"");
+    }
+
+    // Redact duration fields in JSON output
+    while let Some(matched) = DURATION_REGEX.find(&output) {
+        let found = matched.start()..matched.end();
+        let matched_text = matched.as_str();
+        // Preserve the whitespace after the colon
+        let whitespace = matched_text
+            .split_once(':')
+            .map(|(_, after)| {
+                after
+                    .chars()
+                    .take_while(|c| c.is_whitespace())
+                    .collect::<String>()
+            })
+            .unwrap_or_default();
+        let replacement = format!("\"duration\":{whitespace}\"<TIME>\"");
+        output.to_mut().replace_range(found, &replacement);
+    }
+
+    while let Some(matched) = SCANNER_DURATION_REGEX.find(&output) {
+        let found = matched.start()..matched.end();
+        let matched_text = matched.as_str();
+        // Preserve the whitespace after the colon
+        let whitespace = matched_text
+            .split_once(':')
+            .map(|(_, after)| {
+                after
+                    .chars()
+                    .take_while(|c| c.is_whitespace())
+                    .collect::<String>()
+            })
+            .unwrap_or_default();
+        let replacement = format!("\"scannerDuration\":{whitespace}\"<TIME>\"");
+        output.to_mut().replace_range(found, &replacement);
     }
 
     // Normalize the name of the current executable to "biome"

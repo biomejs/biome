@@ -16,7 +16,7 @@ use biome_diagnostics::{Diagnostic, Error, Severity};
 use biome_fs::BiomePath;
 use biome_json_factory::make::{
     json_member, json_member_list, json_member_name, json_number_literal, json_number_value,
-    json_object_value, json_string_literal, json_string_value, token,
+    json_object_value, json_string_literal, token,
 };
 use biome_json_syntax::{AnyJsonMemberName, AnyJsonValue, JsonMember, T};
 use camino::Utf8Path;
@@ -55,12 +55,8 @@ pub struct TraversalSummary {
 
 impl TraversalSummary {
     pub(crate) fn json_member(&self) -> JsonMember {
-        #[cfg(debug_assertions)]
-        let duration_value =
-            AnyJsonValue::JsonStringValue(json_string_value(json_string_literal("<TIME>")));
-        #[cfg(not(debug_assertions))]
         let duration_value = AnyJsonValue::JsonNumberValue(json_number_value(json_number_literal(
-            self.duration.as_millis(),
+            self.duration.as_nanos(),
         )));
 
         let mut members = vec![
@@ -135,12 +131,8 @@ impl TraversalSummary {
         ];
 
         if let Some(_scanner_duration) = self.scanner_duration {
-            #[cfg(debug_assertions)]
-            let scanner_duration_value =
-                AnyJsonValue::JsonStringValue(json_string_value(json_string_literal("<TIME>")));
-            #[cfg(not(debug_assertions))]
             let scanner_duration_value = AnyJsonValue::JsonNumberValue(json_number_value(
-                json_number_literal(_scanner_duration.as_millis()),
+                json_number_literal(_scanner_duration.as_nanos()),
             ));
 
             members.push(json_member(
