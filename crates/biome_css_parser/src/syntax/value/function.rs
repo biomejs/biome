@@ -10,8 +10,7 @@ use crate::syntax::parse_error::{
 use crate::syntax::property::parse_generic_component_value;
 use crate::syntax::scss::{
     SCSS_UNARY_OPERATOR_TOKEN_SET, is_at_scss_qualified_name, is_nth_at_scss_qualified_name,
-    parse_scss_expression_in_args_until, parse_scss_function_name,
-    parse_scss_expression,
+    parse_scss_expression, parse_scss_expression_in_args_until, parse_scss_function_name,
 };
 use crate::syntax::value::attr::{is_at_attr_function, parse_attr_function};
 use crate::syntax::value::r#if::parse_if_function;

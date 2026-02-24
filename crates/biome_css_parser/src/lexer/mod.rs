@@ -691,9 +691,8 @@ impl<'src> CssLexer<'src> {
         // If the next input code points are U+002E FULL STOP (.)...
         if matches!(self.current_byte(), Some(b'.')) {
             // In SCSS, leave the dot for the ellipsis token (e.g., `10...` or `$args...`).
-            let is_scss_ellipsis = self.is_scss()
-                && self.peek_byte() == Some(b'.')
-                && self.byte_at(2) == Some(b'.');
+            let is_scss_ellipsis =
+                self.is_scss() && self.peek_byte() == Some(b'.') && self.byte_at(2) == Some(b'.');
 
             if !is_scss_ellipsis {
                 // Consume the dot.
@@ -1296,8 +1295,7 @@ impl<'src> CssLexer<'src> {
     fn consume_prd(&mut self, current: u8) -> CssSyntaxKind {
         self.assert_byte(b'.');
 
-        if self.is_scss() && self.peek_byte() == Some(b'.') && self.byte_at(2) == Some(b'.')
-        {
+        if self.is_scss() && self.peek_byte() == Some(b'.') && self.byte_at(2) == Some(b'.') {
             self.advance(2);
             self.consume_byte(T![...])
         } else if self.is_number_start() {
