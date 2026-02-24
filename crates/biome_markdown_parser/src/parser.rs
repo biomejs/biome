@@ -8,6 +8,7 @@ use biome_rowan::{TextRange, TextSize};
 use std::collections::HashSet;
 
 use crate::lexer::{MarkdownLexContext, MarkdownReLexContext};
+use crate::syntax::TAB_STOP_SPACES;
 use crate::syntax::inline::EmphasisContext;
 use crate::syntax::parse_error::DEFAULT_MAX_NESTING_DEPTH;
 use crate::token_source::{MarkdownTokenSource, MarkdownTokenSourceCheckpoint};
@@ -338,7 +339,7 @@ impl<'source> MarkdownParser<'source> {
 
             let indent = text
                 .chars()
-                .map(|c| if c == '\t' { 4 } else { 1 })
+                .map(|c| if c == '\t' { TAB_STOP_SPACES } else { 1 })
                 .sum::<usize>();
 
             if consumed + indent > max_indent {

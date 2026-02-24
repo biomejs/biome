@@ -57,6 +57,7 @@ use std::collections::HashMap;
 
 use crate::parser::{ListItemIndent, ListTightness, QuoteIndent};
 use crate::syntax::reference::normalize_reference_label;
+use crate::syntax::{INDENT_CODE_BLOCK_SPACES, MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES};
 
 // ============================================================================
 // Line Handling Utilities
@@ -102,8 +103,8 @@ fn expand_tabs(text: &str) -> String {
     for c in text.chars() {
         match c {
             '\t' => {
-                // Expand to next 4-space tab stop
-                let spaces = 4 - (column % 4);
+                // Expand to next tab stop
+                let spaces = TAB_STOP_SPACES - (column % TAB_STOP_SPACES);
                 for _ in 0..spaces {
                     result.push(' ');
                 }
@@ -153,7 +154,7 @@ fn strip_indent_preserve_tabs_with_offset(
             }
             match c {
                 '\t' => {
-                    let next_col = col + (4 - (col % 4));
+                    let next_col = col + (TAB_STOP_SPACES - (col % TAB_STOP_SPACES));
                     if next_col > strip_cols {
                         // Tab crosses the strip boundary - add remaining spaces
                         let spaces = next_col - strip_cols;
@@ -198,13 +199,13 @@ fn strip_quote_prefixes(text: &str, quote_indent: usize) -> String {
                         idx += 1;
                     }
                     b'\t' => {
-                        col += 4 - (col % 4);
+                        col += TAB_STOP_SPACES - (col % TAB_STOP_SPACES);
                         idx += 1;
                     }
                     _ => break,
                 }
 
-                if col > 3 {
+                if col > MAX_BLOCK_PREFIX_INDENT {
                     idx = 0;
                     break;
                 }
@@ -1138,7 +1139,7 @@ fn render_fenced_code_block(
             for c in text.chars() {
                 match c {
                     ' ' => indent += 1,
-                    '\t' => indent += 4 - (indent % 4),
+                    '\t' => indent += TAB_STOP_SPACES - (indent % TAB_STOP_SPACES),
                     '\n' | '\r' => indent = 0, // Reset at newlines
                     _ => {}
                 }
@@ -1725,8 +1726,6 @@ fn is_newline_block(block: &AnyMdBlock) -> bool {
 fn is_empty_content(blocks: &[AnyMdBlock]) -> bool {
     blocks.is_empty() || blocks.iter().all(is_newline_block)
 }
-
-const INDENT_CODE_BLOCK_SPACES: usize = 4;
 
 fn list_item_required_indent(entry: &ListItemIndent) -> usize {
     if entry.spaces_after_marker > INDENT_CODE_BLOCK_SPACES {

@@ -66,9 +66,9 @@ use crate::MarkdownParser;
 pub(crate) const MAX_LINK_DESTINATION_PAREN_DEPTH: i32 = 32;
 
 /// CommonMark requires 4 or more spaces for indented code blocks.
-const INDENT_CODE_BLOCK_SPACES: usize = 4;
+pub(crate) const INDENT_CODE_BLOCK_SPACES: usize = 4;
 /// Tabs advance to the next 4-space tab stop in CommonMark parsing.
-const TAB_STOP_SPACES: usize = 4;
+pub(crate) const TAB_STOP_SPACES: usize = 4;
 /// CommonMark allows 0-3 spaces of optional indentation before block-level
 /// markers (blockquotes §5.1, list items §5.2/§5.3, ATX headings §4.2, etc.).
 pub(crate) const MAX_BLOCK_PREFIX_INDENT: usize = 3;
@@ -605,7 +605,7 @@ pub(crate) fn parse_paragraph(p: &mut MarkdownParser) -> ParsedSyntax {
     // MD_THEMATIC_BREAK_LITERAL with only `-` is also a setext underline (H2)
     let completed = if allow_setext && p.at(MD_SETEXT_UNDERLINE_LITERAL) {
         let indent = real_line_indent_from_source(p);
-        if indent < 4 {
+        if indent < INDENT_CODE_BLOCK_SPACES {
             // This is a setext heading (H1 with `=`) - consume the underline
             p.bump(MD_SETEXT_UNDERLINE_LITERAL);
             m.complete(p, MD_SETEXT_HEADER)
@@ -615,7 +615,7 @@ pub(crate) fn parse_paragraph(p: &mut MarkdownParser) -> ParsedSyntax {
         }
     } else if allow_setext && p.at(MD_THEMATIC_BREAK_LITERAL) && is_dash_only_thematic_break(p) {
         let indent = real_line_indent_from_source(p);
-        if indent < 4 {
+        if indent < INDENT_CODE_BLOCK_SPACES {
             // This is a setext heading (H2 with `-`) - remap token and consume
             p.bump_remap(MD_SETEXT_UNDERLINE_LITERAL);
             m.complete(p, MD_SETEXT_HEADER)
@@ -677,7 +677,7 @@ pub(crate) fn at_setext_underline_after_newline(p: &mut MarkdownParser) -> Optio
         for c in p.cur_text().chars() {
             match c {
                 ' ' => columns += 1,
-                '\t' => columns += 4 - (columns % 4),
+                '\t' => columns += TAB_STOP_SPACES - (columns % TAB_STOP_SPACES),
                 _ => {}
             }
         }
@@ -779,7 +779,7 @@ fn real_line_indent_from_source(p: &MarkdownParser) -> usize {
     for c in source[line_start..].chars() {
         match c {
             ' ' => column += 1,
-            '\t' => column += 4 - (column % 4),
+            '\t' => column += TAB_STOP_SPACES - (column % TAB_STOP_SPACES),
             _ => break,
         }
     }
@@ -1102,12 +1102,12 @@ fn is_quote_only_blank_line_from_source(p: &MarkdownParser, depth: usize) -> boo
                 idx += 1;
             }
             b'\t' => {
-                indent += 4 - (indent % 4);
+                indent += TAB_STOP_SPACES - (indent % TAB_STOP_SPACES);
                 idx += 1;
             }
             _ => break,
         }
-        if indent > 3 {
+        if indent > MAX_BLOCK_PREFIX_INDENT {
             return false;
         }
     }
@@ -1225,7 +1225,7 @@ fn inline_list_source_len(p: &mut MarkdownParser) -> usize {
 
                         let indent = text
                             .chars()
-                            .map(|c| if c == '\t' { 4 } else { 1 })
+                            .map(|c| if c == '\t' { TAB_STOP_SPACES } else { 1 })
                             .sum::<usize>();
 
                         if consumed + indent > required_indent {
@@ -1267,10 +1267,10 @@ fn line_starts_with_fence(p: &mut MarkdownParser) -> bool {
     }
 
     p.lookahead(|p| {
-        if p.line_start_leading_indent() > 3 {
+        if p.line_start_leading_indent() > MAX_BLOCK_PREFIX_INDENT {
             return false;
         }
-        p.skip_line_indent(3);
+        p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
         let rest = p.source_after_current();
         let Some((fence_char, _len)) = fenced_code_block::detect_fence(rest) else {
             return false;
@@ -1340,7 +1340,7 @@ pub(crate) fn at_block_interrupt(p: &mut MarkdownParser) -> bool {
     // Per CommonMark, lines indented 4+ spaces cannot start block constructs
     // that interrupt paragraphs - they would be indented code blocks.
     // Tabs count as 4 spaces per CommonMark §2.2.
-    if p.line_start_leading_indent() >= 4 {
+    if p.line_start_leading_indent() >= INDENT_CODE_BLOCK_SPACES {
         // Inside list items, allow list markers at the current indent to
         // interrupt paragraphs (nested lists).
         if (p.state().list_nesting_depth > 0 || p.state().list_item_required_indent > 0)
@@ -1494,7 +1494,7 @@ fn at_bullet_list_item_at_any_indent(p: &mut MarkdownParser) -> bool {
 
         // Top-level list items can have 0-3 spaces of leading indent
         let indent = p.line_start_leading_indent();
-        if indent > 3 {
+        if indent > MAX_BLOCK_PREFIX_INDENT {
             return false;
         }
 
@@ -1534,7 +1534,7 @@ fn at_order_list_item_at_any_indent(p: &mut MarkdownParser) -> bool {
 
         // Top-level list items can have 0-3 spaces of leading indent
         let indent = p.line_start_leading_indent();
-        if indent > 3 {
+        if indent > MAX_BLOCK_PREFIX_INDENT {
             return false;
         }
 
@@ -1564,10 +1564,10 @@ fn at_order_list_item_textual(p: &mut MarkdownParser) -> bool {
         };
 
         if base_indent == 0 {
-            if indent > 3 {
+            if indent > MAX_BLOCK_PREFIX_INDENT {
                 return false;
             }
-        } else if indent < base_indent || indent > base_indent + 3 {
+        } else if indent < base_indent || indent > base_indent + MAX_BLOCK_PREFIX_INDENT {
             return false;
         }
 
@@ -1682,7 +1682,7 @@ fn is_whitespace_only(text: &str) -> bool {
 /// This is used to emit a diagnostic BEFORE `try_parse` which would lose it on rewind.
 fn check_too_many_hashes(p: &mut MarkdownParser) -> Option<(biome_rowan::TextRange, usize)> {
     p.lookahead(|p| {
-        p.skip_line_indent(3);
+        p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
 
         if !p.at(T![#]) {
             return None;
@@ -1705,7 +1705,7 @@ fn check_too_many_hashes(p: &mut MarkdownParser) -> Option<(biome_rowan::TextRan
 /// Uses lookahead to verify without consuming tokens.
 fn is_valid_atx_heading_start(p: &mut MarkdownParser) -> bool {
     p.lookahead(|p| {
-        p.skip_line_indent(3);
+        p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
 
         // The lexer emits all consecutive `#` as a single HASH token.
         // Count hash characters from the token's text length.
