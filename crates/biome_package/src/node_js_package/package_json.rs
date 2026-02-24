@@ -777,6 +777,55 @@ catalogs:
     }
 
     #[test]
+    fn parse_pnpm_workspace_catalog_fail_safe_for_unsupported_format() {
+        let yaml = r#"
+- catalog
+- react
+"#;
+
+        let result = std::panic::catch_unwind(|| PackageJson::parse_pnpm_workspace_catalog(yaml));
+        assert!(result.is_ok(), "parser should not panic");
+        assert!(result.expect("result should be present").is_none());
+    }
+
+    #[test]
+    fn parse_pnpm_workspace_catalog_fail_safe_for_unknown_keys() {
+        let yaml = r#"
+packages:
+  - "packages/*"
+unknown:
+  nested:
+    value: "ignored"
+catalog:
+  react: 19.0.0
+"#;
+
+        let result = std::panic::catch_unwind(|| PackageJson::parse_pnpm_workspace_catalog(yaml));
+        assert!(result.is_ok(), "parser should not panic");
+
+        let catalog = result
+            .expect("result should be present")
+            .expect("catalog should still be parsed");
+        let default = catalog.default.expect("default catalog");
+        assert_eq!(default.get("react"), Some("19.0.0"));
+    }
+
+    #[test]
+    fn parse_pnpm_workspace_catalog_fail_safe_for_invalid_values() {
+        let yaml = r#"
+packages:
+  - "packages/*"
+catalog: true
+catalogs:
+  react19: 123
+"#;
+
+        let result = std::panic::catch_unwind(|| PackageJson::parse_pnpm_workspace_catalog(yaml));
+        assert!(result.is_ok(), "parser should not panic");
+        assert!(result.expect("result should be present").is_none());
+    }
+
+    #[test]
     fn resolve_dependency_version_prefers_named_catalog() {
         let catalog = Catalogs {
             default: Some(Dependencies(Box::new([("react".into(), "19.0.0".into())]))),
