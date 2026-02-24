@@ -10,6 +10,7 @@ expression: invalid.html
 <a href>invalid</a>
 <a href={undefined}>invalid</a>
 <a onclick={something}>invalid</a>
+<a>invalid</a>
 
 ```
 
@@ -46,7 +47,7 @@ invalid.html:3:4 lint/a11y/useValidAnchor ━━━━━━━━━━━━�
     4 │ <a href>invalid</a>
     5 │ <a href={undefined}>invalid</a>
   
-  i The href attribute should be a valid a URL
+  i The href attribute should be a valid URL
   
   i Check this thorough explanation to better understand the context.
   
@@ -65,7 +66,7 @@ invalid.html:4:4 lint/a11y/useValidAnchor ━━━━━━━━━━━━�
     5 │ <a href={undefined}>invalid</a>
     6 │ <a onclick={something}>invalid</a>
   
-  i The href attribute should be a valid a URL
+  i The href attribute should be a valid URL
   
   i Check this thorough explanation to better understand the context.
   
@@ -82,7 +83,7 @@ invalid.html:5:1 lint/a11y/useValidAnchor ━━━━━━━━━━━━�
   > 5 │ <a href={undefined}>invalid</a>
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │ <a onclick={something}>invalid</a>
-    7 │ 
+    7 │ <a>invalid</a>
   
   i An anchor element should always have a href
   
@@ -100,7 +101,26 @@ invalid.html:6:1 lint/a11y/useValidAnchor ━━━━━━━━━━━━�
     5 │ <a href={undefined}>invalid</a>
   > 6 │ <a onclick={something}>invalid</a>
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    7 │ 
+    7 │ <a>invalid</a>
+    8 │ 
+  
+  i An anchor element should always have a href
+  
+  i Check this thorough explanation to better understand the context.
+  
+
+```
+
+```
+invalid.html:7:1 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a href attribute for the a element.
+  
+    5 │ <a href={undefined}>invalid</a>
+    6 │ <a onclick={something}>invalid</a>
+  > 7 │ <a>invalid</a>
+      │ ^^^
+    8 │ 
   
   i An anchor element should always have a href
   

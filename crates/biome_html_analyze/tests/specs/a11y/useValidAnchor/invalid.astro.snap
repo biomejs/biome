@@ -8,6 +8,7 @@ expression: invalid.astro
 <a href="javascript:void(0)">invalid</a>
 <a href>invalid</a>
 <a onclick={something}>invalid</a>
+<a>invalid</a>
 
 ```
 
@@ -23,7 +24,7 @@ invalid.astro:2:4 lint/a11y/useValidAnchor ━━━━━━━━━━━━�
     3 │ <a href>invalid</a>
     4 │ <a onclick={something}>invalid</a>
   
-  i The href attribute should be a valid a URL
+  i The href attribute should be a valid URL
   
   i Check this thorough explanation to better understand the context.
   
@@ -40,9 +41,9 @@ invalid.astro:3:4 lint/a11y/useValidAnchor ━━━━━━━━━━━━�
   > 3 │ <a href>invalid</a>
       │    ^^^^
     4 │ <a onclick={something}>invalid</a>
-    5 │ 
+    5 │ <a>invalid</a>
   
-  i The href attribute should be a valid a URL
+  i The href attribute should be a valid URL
   
   i Check this thorough explanation to better understand the context.
   
@@ -58,9 +59,28 @@ invalid.astro:4:4 lint/a11y/useValidAnchor ━━━━━━━━━━━━�
     3 │ <a href>invalid</a>
   > 4 │ <a onclick={something}>invalid</a>
       │    ^^^^^^^^^^^^^^^^^^^
-    5 │ 
+    5 │ <a>invalid</a>
+    6 │ 
   
   i Anchor elements should only be used for default sections or page navigation
+  
+  i Check this thorough explanation to better understand the context.
+  
+
+```
+
+```
+invalid.astro:5:1 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a href attribute for the a element.
+  
+    3 │ <a href>invalid</a>
+    4 │ <a onclick={something}>invalid</a>
+  > 5 │ <a>invalid</a>
+      │ ^^^
+    6 │ 
+  
+  i An anchor element should always have a href
   
   i Check this thorough explanation to better understand the context.
   

@@ -8,6 +8,7 @@ expression: invalid.vue
 <a href="javascript:void(0)">invalid</a>
 <a href>invalid</a>
 <a onclick={something}>invalid</a>
+<a>invalid</a>
 
 ```
 
@@ -25,7 +26,7 @@ invalid.vue:2:4 lint/a11y/useValidAnchor ━━━━━━━━━━━━━
     3 │ <a href>invalid</a>
     4 │ <a onclick={something}>invalid</a>
   
-  i The href attribute should be a valid a URL
+  i The href attribute should be a valid URL
   
   i Check this thorough explanation to better understand the context.
   
@@ -42,9 +43,9 @@ invalid.vue:3:4 lint/a11y/useValidAnchor ━━━━━━━━━━━━━
   > 3 │ <a href>invalid</a>
       │    ^^^^
     4 │ <a onclick={something}>invalid</a>
-    5 │ 
+    5 │ <a>invalid</a>
   
-  i The href attribute should be a valid a URL
+  i The href attribute should be a valid URL
   
   i Check this thorough explanation to better understand the context.
   
@@ -60,7 +61,26 @@ invalid.vue:4:1 lint/a11y/useValidAnchor ━━━━━━━━━━━━━
     3 │ <a href>invalid</a>
   > 4 │ <a onclick={something}>invalid</a>
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    5 │ 
+    5 │ <a>invalid</a>
+    6 │ 
+  
+  i An anchor element should always have a href
+  
+  i Check this thorough explanation to better understand the context.
+  
+
+```
+
+```
+invalid.vue:5:1 lint/a11y/useValidAnchor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a href attribute for the a element.
+  
+    3 │ <a href>invalid</a>
+    4 │ <a onclick={something}>invalid</a>
+  > 5 │ <a>invalid</a>
+      │ ^^^
+    6 │ 
   
   i An anchor element should always have a href
   

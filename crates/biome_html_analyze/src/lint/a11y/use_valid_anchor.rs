@@ -14,7 +14,7 @@ declare_lint_rule! {
     /// that allows users to navigate pages, in the same page, same website or on another website.
     ///
     /// While before it was possible to attach logic to an anchor element, with the advent of JSX libraries,
-    /// it's now  easier to attach logic to any HTML element, anchors included.
+    /// it's now easier to attach logic to any HTML element, anchors included.
     ///
     /// This rule is designed to prevent users from attaching logic at the click of anchors when the `href`
     /// provided to the anchor element is not valid. Avoid using `#` symbol inside the `href` when you are
@@ -27,7 +27,7 @@ declare_lint_rule! {
     /// There are **many reasons** why an anchor should not have a logic with an incorrect `href` attribute:
     /// - it can disrupt the correct flow of the user navigation e.g. a user that wants to open the link
     /// in another tab, but the default "click" behavior is prevented
-    /// - it can source of invalid links, and crawlers can't navigate the website, risking to penalize
+    /// - it can be a source of invalid links, and crawlers can't navigate the website, risking to penalize
     /// SEO ranking
     ///
     ///
@@ -109,12 +109,17 @@ impl Rule for UseValidAnchor {
                         return Some(UseValidAnchorState::IncorrectHref(anchor_attribute.range()));
                     }
 
-                    let static_value = anchor_attribute.value();
-                    if static_value.is_none_or(|const_str| {
-                        const_str.is_empty()
-                            || const_str == "#"
-                            || const_str.starts_with("javascript:")
-                    }) {
+                    let attribute_value = anchor_attribute
+                        .initializer()?
+                        .value()
+                        .ok()?
+                        .string_value()?;
+                    let static_value = attribute_value.trim();
+
+                    if static_value.is_empty()
+                        || static_value == "#"
+                        || static_value.starts_with("javascript:")
+                    {
                         return Some(UseValidAnchorState::IncorrectHref(anchor_attribute.range()));
                     }
                 }
@@ -161,7 +166,7 @@ impl Rule for UseValidAnchor {
                     })
                     .to_owned(),
                     Self::State::IncorrectHref(_) => (markup! {
-                        "The href attribute should be a valid a URL"
+                        "The href attribute should be a valid URL"
                     })
                     .to_owned(),
                     Self::State::CantBeAnchor(_) => (markup! {
