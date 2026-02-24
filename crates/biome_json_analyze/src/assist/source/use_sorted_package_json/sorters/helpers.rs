@@ -307,11 +307,11 @@ pub fn uniq_and_sort_array(array: &AnyJsonValue) -> Option<AnyJsonValue> {
     let new_count = unique_sorted.len() + non_string_elements.len();
 
     // Check if order changed
-    let current_strings: Vec<TokenText> = elements
+    let current_strings: Vec<_> = elements
         .iter()
         .filter_map(|e| e.ok()?.as_json_string_value()?.inner_string_text().ok())
         .collect();
-    let sorted_strings: Vec<&TokenText> = unique_sorted.iter().map(|(s, _)| s).collect();
+    let sorted_strings: Vec<_> = unique_sorted.iter().map(|(s, _)| s).collect();
 
     if original_count == new_count && current_strings.iter().eq(sorted_strings.iter().copied()) {
         return None;

@@ -371,14 +371,13 @@ fn organize_members(
     members: &JsonMemberList,
     root_object: &JsonObjectValue,
 ) -> Option<JsonMemberList> {
-    let member_map: HashMap<TokenText, JsonMember> = members
-        .iter()
-        .filter_map(|member| {
-            let member = member.ok()?;
-            let name = member.name().ok()?.inner_string_text()?;
-            Some((name, member))
-        })
-        .collect();
+    // Preserve all members, including duplicates, in their original order
+    let mut member_map: HashMap<TokenText, Vec<JsonMember>> = HashMap::new();
+    for member in members.iter().filter_map(|m| m.ok()) {
+        if let Some(name) = member.name().ok().and_then(|n| n.inner_string_text()) {
+            member_map.entry(name).or_default().push(member);
+        }
+    }
 
     if member_map.is_empty() {
         return None;
@@ -387,16 +386,26 @@ fn organize_members(
     let field_names = extract_field_names(members);
     let sorted_names = get_sorted_field_order(&field_names);
 
+    // Deduplicate sorted_names while preserving order - we'll handle duplicates via member_map
+    let mut seen = std::collections::HashSet::new();
+    let unique_sorted_names: Vec<&TokenText> = sorted_names
+        .iter()
+        .filter(|name| seen.insert(name.text()))
+        .collect();
+
     let mut elements = Vec::new();
     let mut separators = Vec::new();
 
-    for (i, field_name) in sorted_names.iter().enumerate() {
-        if let Some(member) = member_map.get(field_name) {
-            let transformed_member = apply_field_transformer(member, field_name, root_object);
-            elements.push(transformed_member);
+    for field_name in unique_sorted_names.iter() {
+        if let Some(member_list) = member_map.get(*field_name) {
+            // Process all occurrences of this key in their original order
+            for member in member_list {
+                let transformed_member = apply_field_transformer(member, field_name, root_object);
 
-            if i < sorted_names.len() - 1 {
-                separators.push(make::token(T![,]));
+                if !elements.is_empty() {
+                    separators.push(make::token(T![,]));
+                }
+                elements.push(transformed_member);
             }
         }
     }
@@ -491,5 +500,84 @@ mod tests {
         let sorted = get_sorted_field_order(&fields);
 
         assert_eq!(sorted, vec!["name", "version", "apple", "zebra"]);
+    }
+
+    #[test]
+    fn test_organize_members_preserves_duplicate_keys() {
+        use biome_json_parser::{JsonParserOptions, parse_json};
+
+        // Test that duplicate keys are preserved in their original order
+        let json_str = r#"{"z": 1, "name": "first", "name": "second", "a": 2}"#;
+        let parsed = parse_json(json_str, JsonParserOptions::default());
+        let root = parsed.tree().value().ok().unwrap();
+        let object = root.as_json_object_value().unwrap();
+        let members = object.json_member_list();
+
+        // Count input members
+        let input_count = members.iter().filter_map(|m| m.ok()).count();
+        let input_names: Vec<String> = members
+            .iter()
+            .filter_map(|m| {
+                m.ok()
+                    .and_then(|m| m.name().ok()?.inner_string_text())
+                    .map(|t| t.text().to_string())
+            })
+            .collect();
+        let input_name_count = input_names.iter().filter(|n| *n == "name").count();
+
+        let organized = organize_members(&members, object).expect("Should reorganize members");
+
+        // Extract member names AND values in the resulting order
+        let result_data: Vec<(String, String)> = organized
+            .iter()
+            .filter_map(|m| {
+                let member = m.ok()?;
+                let name = member.name().ok()?.inner_string_text()?.text().to_string();
+                let value = member.value().ok()?;
+                let value_text = value.to_string();
+                Some((name, value_text))
+            })
+            .collect();
+
+        let result_names: Vec<String> = result_data.iter().map(|(n, _)| n.clone()).collect();
+
+        // Count result members
+        let result_name_count = result_names.iter().filter(|n| *n == "name").count();
+
+        // Check that we have BOTH name values, not just duplicates of one
+        let name_values: Vec<&str> = result_data
+            .iter()
+            .filter(|(n, _)| n == "name")
+            .map(|(_, v)| v.as_str())
+            .collect();
+
+        // CRITICAL: Both "name" entries should be preserved WITH THEIR ORIGINAL VALUES
+        assert_eq!(
+            result_name_count, input_name_count,
+            "Expected {} 'name' entries but got {}. Duplicate keys must be preserved!",
+            input_name_count, result_name_count
+        );
+
+        // CRITICAL: The values should be different (first and second, not second twice)
+        assert_eq!(name_values.len(), 2, "Should have two name entries");
+        assert!(
+            name_values.contains(&"\"first\"") && name_values.contains(&"\"second\""),
+            "Both 'first' and 'second' values should be preserved, but got: {:?}",
+            name_values
+        );
+
+        // Total count should match
+        assert_eq!(
+            result_names.len(),
+            input_count,
+            "Total member count should be preserved"
+        );
+
+        // Total count should match
+        assert_eq!(
+            result_names.len(),
+            input_count,
+            "Total member count should be preserved"
+        );
     }
 }

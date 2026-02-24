@@ -211,7 +211,7 @@ impl Rule for UseSortedKeys {
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let options = ctx.options();
-        // Skip package.json files - they have specialized sorting via useSortedPackageJson.
+        // package.json files have specialized sorting via useSortedPackageJson; add a note.
         let path = ctx.file_path();
 
         let message = if options.group_by_nesting.unwrap_or(false) {
