@@ -148,6 +148,9 @@ fn parse_scss_primary_expression(p: &mut CssParser) -> ParsedSyntax {
     }
 }
 
+/// Returns the precedence level for the current SCSS binary operator token.
+///
+/// Docs: https://sass-lang.com/documentation/operators/#order-of-operations
 #[inline]
 fn scss_binary_precedence(p: &mut CssParser) -> Option<u8> {
     if !p.at_ts(SCSS_BINARY_OPERATOR_TOKEN_SET) {
