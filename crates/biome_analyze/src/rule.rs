@@ -292,9 +292,9 @@ impl<'a> RuleSource<'a> {
             Self::Stylelint(_) => 36,
             Self::EslintTurbo(_) => 37,
             Self::HtmlEslint(_) => 38,
-            Self::EslintE18e(_) => 38,
-            Self::EslintBetterTailwindcss(_) => 39,
-            Self::SortPackageJson => 40,
+            Self::EslintE18e(_) => 39,
+            Self::EslintBetterTailwindcss(_) => 40,
+            Self::SortPackageJson => 41,
         }
     }
 
@@ -479,6 +479,7 @@ impl<'a> RuleSource<'a> {
                 | Self::Eslint(_)
                 | Self::GraphqlSchemaLinter(_)
                 | Self::Stylelint(_)
+                | Self::SortPackageJson
         )
     }
 

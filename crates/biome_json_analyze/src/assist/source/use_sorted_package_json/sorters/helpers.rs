@@ -289,6 +289,12 @@ pub fn uniq_and_sort_array(array: &AnyJsonValue) -> Option<AnyJsonValue> {
         }
     }
 
+    // Bail out if there are non-string elements to avoid reordering them
+    // This function is designed to work only on arrays of strings
+    if !non_string_elements.is_empty() {
+        return None;
+    }
+
     // Remove duplicates and sort
     let mut seen: std::collections::HashSet<TokenText> = std::collections::HashSet::new();
     let mut unique_sorted: Vec<(TokenText, AnyJsonValue)> = string_values
@@ -570,5 +576,34 @@ mod tests {
             .collect();
 
         assert_eq!(values, vec!["a", "m", "z"]);
+    }
+
+    #[test]
+    fn test_uniq_and_sort_array_with_mixed_types_returns_none() {
+        // Test that arrays with mixed types (strings and non-strings) are not modified
+        // to avoid reordering non-string elements
+        let array_str = r#"["z", 42, "a", true, "m"]"#;
+        let parsed = parse_json(array_str, JsonParserOptions::default());
+        let value = parsed.tree().value().ok().unwrap();
+
+        let result = uniq_and_sort_array(&value);
+        assert!(
+            result.is_none(),
+            "Should return None for mixed-type arrays to avoid reordering non-string elements"
+        );
+    }
+
+    #[test]
+    fn test_uniq_and_sort_array_with_only_non_strings_returns_none() {
+        // Test that arrays with only non-string values are not modified
+        let array_str = r#"[42, true, null, 3.14]"#;
+        let parsed = parse_json(array_str, JsonParserOptions::default());
+        let value = parsed.tree().value().ok().unwrap();
+
+        let result = uniq_and_sort_array(&value);
+        assert!(
+            result.is_none(),
+            "Should return None for arrays with only non-string values"
+        );
     }
 }

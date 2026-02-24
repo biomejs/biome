@@ -134,15 +134,14 @@ fn sort_override_entry(
             .and_then(|n| n.inner_string_text())
             .is_some_and(|t| t == "options");
 
-        if is_options {
-            if let Ok(opt_value) = m.value()
-                && let Some(opt_obj) = opt_value.as_json_object_value()
-                && let Some(sorted_opts) = sort_alphabetically(opt_obj)
-            {
-                any_nested_changed = true;
-                patched_elements.push(m.clone().with_value(AnyJsonValue::from(sorted_opts)));
-                continue;
-            }
+        if is_options
+            && let Ok(opt_value) = m.value()
+            && let Some(opt_obj) = opt_value.as_json_object_value()
+            && let Some(sorted_opts) = sort_alphabetically(opt_obj)
+        {
+            any_nested_changed = true;
+            patched_elements.push(m.clone().with_value(AnyJsonValue::from(sorted_opts)));
+            continue;
         }
         patched_elements.push(m.clone());
     }
