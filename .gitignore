@@ -4,7 +4,6 @@ Profile-*.json
 .vscode/*
 .idea
 .vs
-.serena
 .zed/*
 .opencode/plans/
 # Release artifacts
