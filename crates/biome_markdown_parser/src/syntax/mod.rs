@@ -69,6 +69,9 @@ pub(crate) const MAX_LINK_DESTINATION_PAREN_DEPTH: i32 = 32;
 const INDENT_CODE_BLOCK_SPACES: usize = 4;
 /// Tabs advance to the next 4-space tab stop in CommonMark parsing.
 const TAB_STOP_SPACES: usize = 4;
+/// CommonMark allows 0-3 spaces of optional indentation before block-level
+/// markers (blockquotes §5.1, list items §5.2/§5.3, ATX headings §4.2, etc.).
+pub(crate) const MAX_BLOCK_PREFIX_INDENT: usize = 3;
 
 pub(crate) fn parse_document(p: &mut MarkdownParser) {
     let m = p.start();
