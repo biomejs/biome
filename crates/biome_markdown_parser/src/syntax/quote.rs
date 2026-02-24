@@ -127,8 +127,6 @@ fn emit_quote_prefix_node(p: &mut MarkdownParser) -> bool {
 ///
 /// Returns whether a post-marker separator was consumed.
 fn emit_quote_prefix_tokens(p: &mut MarkdownParser, use_virtual_line_start: bool) -> Option<bool> {
-    // TODO: Emit MD_QUOTE_PRE_MARKER_INDENT directly instead of skipping indent trivia.
-    // This is intentionally deferred from Step 1b to keep parser migration scope narrow.
     let saved_virtual = if use_virtual_line_start {
         let prev = p.state().virtual_line_start;
         p.state_mut().virtual_line_start = Some(p.cur_range().start());
@@ -136,7 +134,26 @@ fn emit_quote_prefix_tokens(p: &mut MarkdownParser, use_virtual_line_start: bool
     } else {
         None
     };
-    p.skip_line_indent(3);
+
+    // Emit pre-marker indent as MdQuoteIndentList > MdQuoteIndent nodes
+    let indent_list_m = p.start();
+    let mut consumed = 0usize;
+    while p.at(MD_TEXTUAL_LITERAL) {
+        let text = p.cur_text();
+        if text.is_empty() || !text.chars().all(|c| c == ' ' || c == '\t') {
+            break;
+        }
+        let indent: usize = text.chars().map(|c| if c == '\t' { 4 } else { 1 }).sum();
+        if consumed + indent > 3 {
+            break;
+        }
+        consumed += indent;
+        let indent_m = p.start();
+        p.bump_remap(MD_QUOTE_PRE_MARKER_INDENT);
+        indent_m.complete(p, MD_QUOTE_INDENT);
+    }
+    indent_list_m.complete(p, MD_QUOTE_INDENT_LIST);
+
     if let Some(prev) = saved_virtual {
         p.state_mut().virtual_line_start = prev;
     }

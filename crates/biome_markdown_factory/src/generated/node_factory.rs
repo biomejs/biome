@@ -430,23 +430,28 @@ pub fn md_quote(prefix: MdQuotePrefix, content: MdBlockList) -> MdQuote {
         ],
     ))
 }
-pub fn md_quote_prefix(marker_token: SyntaxToken) -> MdQuotePrefixBuilder {
+pub fn md_quote_indent(md_quote_pre_marker_indent_token: SyntaxToken) -> MdQuoteIndent {
+    MdQuoteIndent::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_QUOTE_INDENT,
+        [Some(SyntaxElement::Token(md_quote_pre_marker_indent_token))],
+    ))
+}
+pub fn md_quote_prefix(
+    pre_marker_indent: MdQuoteIndentList,
+    marker_token: SyntaxToken,
+) -> MdQuotePrefixBuilder {
     MdQuotePrefixBuilder {
+        pre_marker_indent,
         marker_token,
-        pre_marker_indent_token: None,
         post_marker_space_token: None,
     }
 }
 pub struct MdQuotePrefixBuilder {
+    pre_marker_indent: MdQuoteIndentList,
     marker_token: SyntaxToken,
-    pre_marker_indent_token: Option<SyntaxToken>,
     post_marker_space_token: Option<SyntaxToken>,
 }
 impl MdQuotePrefixBuilder {
-    pub fn with_pre_marker_indent_token(mut self, pre_marker_indent_token: SyntaxToken) -> Self {
-        self.pre_marker_indent_token = Some(pre_marker_indent_token);
-        self
-    }
     pub fn with_post_marker_space_token(mut self, post_marker_space_token: SyntaxToken) -> Self {
         self.post_marker_space_token = Some(post_marker_space_token);
         self
@@ -455,8 +460,7 @@ impl MdQuotePrefixBuilder {
         MdQuotePrefix::unwrap_cast(SyntaxNode::new_detached(
             MarkdownSyntaxKind::MD_QUOTE_PREFIX,
             [
-                self.pre_marker_indent_token
-                    .map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Node(self.pre_marker_indent.into_syntax())),
                 Some(SyntaxElement::Token(self.marker_token)),
                 self.post_marker_space_token
                     .map(|token| SyntaxElement::Token(token)),
@@ -636,6 +640,18 @@ where
 {
     MdInlineItemList::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_INLINE_ITEM_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn md_quote_indent_list<I>(items: I) -> MdQuoteIndentList
+where
+    I: IntoIterator<Item = MdQuoteIndent>,
+    I::IntoIter: ExactSizeIterator,
+{
+    MdQuoteIndentList::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_QUOTE_INDENT_LIST,
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),
