@@ -6,7 +6,7 @@ use crate::settings::{
 use crate::workspace::DocumentFileSource;
 use biome_analyze::RuleFilter;
 use biome_configuration::analyzer::{GroupPlainConfiguration, SeverityOrGroup, Style};
-use biome_configuration::javascript::JsxRuntime;
+use biome_configuration::javascript::{JsResolverConfiguration, JsxRuntime};
 use biome_configuration::json::{JsonAssistConfiguration, JsonLinterConfiguration};
 use biome_configuration::max_size::MaxSize;
 use biome_configuration::{
@@ -87,6 +87,30 @@ fn correctly_computes_analyzer_options() {
         options.jsx_runtime(),
         Some(biome_analyze::options::JsxRuntime::ReactClassic)
     );
+}
+
+#[test]
+fn javascript_resolver_experimental_pnpm_catalogs_is_opt_in() {
+    let mut default_settings = Settings::default();
+    default_settings
+        .merge_with_configuration(Configuration::default(), None, vec![])
+        .expect("valid configuration");
+    assert!(!default_settings.use_pnpm_workspace_catalogs());
+
+    let configuration = Configuration {
+        javascript: Some(JsConfiguration {
+            resolver: Some(JsResolverConfiguration {
+                experimental_pnpm_catalogs: Some(true.into()),
+            }),
+            ..Default::default()
+        }),
+        ..Default::default()
+    };
+    let mut settings = Settings::default();
+    settings
+        .merge_with_configuration(configuration, None, vec![])
+        .expect("valid configuration");
+    assert!(settings.use_pnpm_workspace_catalogs());
 }
 
 #[test]

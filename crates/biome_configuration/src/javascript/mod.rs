@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
 pub type ExperimentalEmbeddedSnippetsEnabled = Bool<false>;
+pub type ExperimentalPnpmCatalogsEnabled = Bool<false>;
 
 /// A set of options applied to the JavaScript files
 #[derive(
@@ -35,6 +36,11 @@ pub struct JsConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub assist: Option<JsAssistConfiguration>,
 
+    /// Module/dependency resolver options
+    #[bpaf(external(js_resolver_configuration), optional)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub resolver: Option<JsResolverConfiguration>,
+
     /// A list of global bindings that should be ignored by the analyzers
     ///
     /// If defined here, they should not emit diagnostics.
@@ -51,6 +57,22 @@ pub struct JsConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(hide)]
     pub experimental_embedded_snippets_enabled: Option<ExperimentalEmbeddedSnippetsEnabled>,
+}
+
+/// Resolver options specific to JavaScript files
+#[derive(
+    Bpaf, Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
+pub struct JsResolverConfiguration {
+    /// Enables reading `pnpm-workspace.yaml` catalogs (`catalog:` / `catalogs:`)
+    /// when resolving `catalog:` dependency versions from `package.json`.
+    ///
+    /// Default: `false`.
+    #[bpaf(hide)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub experimental_pnpm_catalogs: Option<ExperimentalPnpmCatalogsEnabled>,
 }
 
 pub type UnsafeParameterDecoratorsEnabled = Bool<false>;

@@ -132,6 +132,11 @@ catalogs:
         Utf8Path::new("biome.json").into(),
         r#"
 {
+  "javascript": {
+    "resolver": {
+      "experimentalPnpmCatalogs": true
+    }
+  },
     "linter": {
     "rules": {
       "suspicious": {

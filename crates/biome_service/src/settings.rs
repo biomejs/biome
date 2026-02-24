@@ -7,7 +7,9 @@ use biome_configuration::bool::Bool;
 use biome_configuration::diagnostics::InvalidIgnorePattern;
 use biome_configuration::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
 use biome_configuration::html::{ExperimentalFullSupportEnabled, HtmlConfiguration};
-use biome_configuration::javascript::{ExperimentalEmbeddedSnippetsEnabled, JsxRuntime};
+use biome_configuration::javascript::{
+    ExperimentalEmbeddedSnippetsEnabled, ExperimentalPnpmCatalogsEnabled, JsxRuntime,
+};
 use biome_configuration::max_size::MaxSize;
 use biome_configuration::vcs::{VcsClientKind, VcsConfiguration, VcsEnabled, VcsUseIgnoreFile};
 use biome_configuration::{
@@ -79,6 +81,9 @@ pub struct Settings {
 
     // TODO: remove once embedded snippets support is stable
     pub experimental_js_embedded_snippets_enabled: Option<ExperimentalEmbeddedSnippetsEnabled>,
+
+    // TODO: remove once pnpm workspace catalogs support is stable
+    pub experimental_pnpm_catalogs_enabled: Option<ExperimentalPnpmCatalogsEnabled>,
 }
 
 impl Settings {
@@ -168,6 +173,10 @@ impl Settings {
         if let Some(javascript) = configuration.javascript {
             self.experimental_js_embedded_snippets_enabled =
                 javascript.experimental_embedded_snippets_enabled;
+            self.experimental_pnpm_catalogs_enabled = javascript
+                .resolver
+                .as_ref()
+                .and_then(|resolver| resolver.experimental_pnpm_catalogs);
             self.languages.javascript = javascript.into()
         }
         // json settings
@@ -216,6 +225,15 @@ impl Settings {
     #[inline]
     pub fn ignore_unknown_enabled(&self) -> bool {
         self.files.ignore_unknown.unwrap_or_default().into()
+    }
+
+    /// Whether `pnpm-workspace.yaml` catalogs should be used to resolve
+    /// `catalog:` dependency versions.
+    #[inline]
+    pub fn use_pnpm_workspace_catalogs(&self) -> bool {
+        self.experimental_pnpm_catalogs_enabled
+            .unwrap_or_default()
+            .value()
     }
 
     /// Retrieves the settings of the linter

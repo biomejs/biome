@@ -948,12 +948,53 @@ impl WorkspaceServer {
         None
     }
 
+    /// Applies (or clears) pnpm workspace catalogs for the `package.json`
+    /// manifest stored at `package_path`, based on the current project settings.
+    fn apply_pnpm_workspace_catalog_to_package(
+        &self,
+        project_key: ProjectKey,
+        package_path: &Utf8Path,
+    ) {
+        let use_pnpm_workspace_catalogs = self
+            .projects
+            .get_settings_based_on_path(project_key, package_path)
+            .is_some_and(|settings| settings.use_pnpm_workspace_catalogs());
+
+        if let Some(mut manifest) = self
+            .project_layout
+            .get_node_manifest_for_package(package_path)
+        {
+            if use_pnpm_workspace_catalogs {
+                manifest.catalog = self.load_pnpm_workspace_catalog(package_path);
+            } else {
+                manifest.catalog = None;
+            }
+
+            self.project_layout
+                .insert_node_manifest(package_path.to_path_buf(), manifest);
+        }
+    }
+
+    /// Re-applies pnpm workspace catalogs to all packages under `scope_root`.
+    fn refresh_pnpm_workspace_catalogs_for_scope(
+        &self,
+        project_key: ProjectKey,
+        scope_root: &Utf8Path,
+    ) {
+        for package_path in self.project_layout.package_paths() {
+            if package_path.starts_with(scope_root) {
+                self.apply_pnpm_workspace_catalog_to_package(project_key, &package_path);
+            }
+        }
+    }
+
     /// Updates the [ProjectLayout] for the given `path`.
     #[instrument(level = "debug", skip(self))]
     fn update_project_layout(
         &self,
         path: &Utf8Path,
         update_kind: &UpdateKind,
+        project_key: ProjectKey,
     ) -> Result<(), WorkspaceError> {
         let filename = path.file_name();
         if filename.is_some_and(|filename| filename == "package.json") {
@@ -962,23 +1003,11 @@ impl WorkspaceServer {
                 .map(|parent| parent.to_path_buf())
                 .ok_or_else(WorkspaceError::not_found)?;
 
-            let pnpm_catalog = self.load_pnpm_workspace_catalog(&package_path);
-
             match update_kind {
                 UpdateKind::AddedOrChanged(_, root, _) => {
                     self.project_layout
                         .insert_serialized_node_manifest(package_path.clone(), root);
-
-                    if let Some(catalogs) = pnpm_catalog
-                        && let Some(mut manifest) = self
-                            .project_layout
-                            .get_node_manifest_for_package(&package_path)
-                        && manifest.catalog.is_none()
-                    {
-                        manifest.catalog = Some(catalogs);
-                        self.project_layout
-                            .insert_node_manifest(package_path.clone(), manifest);
-                    }
+                    self.apply_pnpm_workspace_catalog_to_package(project_key, &package_path);
                 }
                 UpdateKind::Removed => {
                     self.project_layout.remove_package(&package_path);
@@ -1026,21 +1055,13 @@ impl WorkspaceServer {
                 .parent()
                 .map(|parent| parent.to_path_buf())
                 .unwrap_or_default();
-            let pnpm_catalog = self.load_pnpm_workspace_catalog(&workspace_root);
 
             for package_path in self.project_layout.package_paths() {
                 if !package_path.starts_with(&workspace_root) {
                     continue;
                 }
 
-                if let Some(mut manifest) = self
-                    .project_layout
-                    .get_node_manifest_for_package(&package_path)
-                {
-                    manifest.catalog.clone_from(&pnpm_catalog);
-                    self.project_layout
-                        .insert_node_manifest(package_path.clone(), manifest);
-                }
+                self.apply_pnpm_workspace_catalog_to_package(project_key, &package_path);
             }
         }
 
@@ -1103,7 +1124,7 @@ impl WorkspaceServer {
     ) -> Result<(ModuleDependencies, Vec<ModuleDiagnostic>), WorkspaceError> {
         let path = BiomePath::from(path);
         if path.is_manifest() {
-            self.update_project_layout(&path, &update_kind)?;
+            self.update_project_layout(&path, &update_kind, project_key)?;
         }
         let settings = self
             .projects
@@ -1263,10 +1284,15 @@ impl Workspace for WorkspaceServer {
         );
 
         if !is_root {
+            let nested_workspace_directory = workspace_directory.clone().unwrap_or_default();
             self.projects.set_nested_settings(
                 project_key,
-                workspace_directory.unwrap_or_default(),
+                nested_workspace_directory.clone(),
                 settings,
+            );
+            self.refresh_pnpm_workspace_catalogs_for_scope(
+                project_key,
+                nested_workspace_directory.as_path(),
             );
         } else {
             // If the configuration is a root one, we also load the ignore files
@@ -1303,6 +1329,9 @@ impl Workspace for WorkspaceServer {
             }
 
             self.projects.set_root_settings(project_key, settings);
+            if let Some(project_path) = self.projects.get_project_path(project_key) {
+                self.refresh_pnpm_workspace_catalogs_for_scope(project_key, project_path.as_path());
+            }
         }
 
         Ok(UpdateSettingsResult { diagnostics })
