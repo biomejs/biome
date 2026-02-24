@@ -6318,17 +6318,17 @@
 						{ "type": "null" }
 					]
 				},
-<<<<<<< HEAD
+				"useTailwindShorthandClasses": {
+					"description": "Enforce using fewer Tailwind utilities instead of multiple utilities that are functionally the same.\nSee https://biomejs.dev/linter/rules/use-tailwind-shorthand-classes",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseTailwindShorthandClassesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useUnicodeRegex": {
 					"description": "Enforce the use of the u or v flag for regular expressions.\nSee https://biomejs.dev/linter/rules/use-unicode-regex",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseUnicodeRegexConfiguration" },
-=======
-				"useTailwindShorthandClasses": {
-					"description": "Enforce using less Tailwind utilities instead of multiple utilities that are functionally the same.\nSee https://biomejs.dev/linter/rules/use-tailwind-shorthand-classes",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseTailwindShorthandClassesConfiguration" },
->>>>>>> de0c380049 (feat(analyze): add useTailwindShorthandClasses using biome_tailwind_parser)
 						{ "type": "null" }
 					]
 				},
