@@ -31,7 +31,7 @@ declare_lint_rule! {
     /// SEO ranking
     ///
     ///
-    /// For a detailed explanation, check out <https://marcysutton.com/links-vs-buttons-in-modern-web-applications>
+    /// For a detailed explanation, check out [this article by Marcy Sutton](https://marcysutton.com/links-vs-buttons-in-modern-web-applications)
     ///
     /// ## Examples
     ///
@@ -55,9 +55,6 @@ declare_lint_rule! {
     /// ```html
     /// <a href={`https://www.javascript.com`}>navigate here</a>
     /// ```
-    /// ```astro
-    /// <a href={somewhere}>navigate here</a>
-    /// ```
     ///
     /// ## Accessibility guidelines
     ///
@@ -71,18 +68,6 @@ declare_lint_rule! {
         recommended: true,
         severity: Severity::Error,
     }
-}
-
-/// Representation of the various states
-///
-/// The `TextRange` of each variant represents the range of where the issue is found.
-pub enum UseValidAnchorState {
-    /// The anchor element has not `href` attribute
-    MissingHrefAttribute(TextRange),
-    /// The value assigned to attribute `href` is not valid
-    IncorrectHref(TextRange),
-    /// The element has `onClick` without `href`
-    CantBeAnchor(TextRange),
 }
 
 impl Rule for UseValidAnchor {
@@ -183,6 +168,18 @@ impl Rule for UseValidAnchor {
 
         Some(diagnostic)
     }
+}
+
+/// Representation of the various states
+///
+/// The `TextRange` of each variant represents the range of where the issue is found.
+pub enum UseValidAnchorState {
+    /// The anchor element has not `href` attribute
+    MissingHrefAttribute(TextRange),
+    /// The value assigned to attribute `href` is not valid
+    IncorrectHref(TextRange),
+    /// The element has `onClick` without `href`
+    CantBeAnchor(TextRange),
 }
 
 impl UseValidAnchorState {
