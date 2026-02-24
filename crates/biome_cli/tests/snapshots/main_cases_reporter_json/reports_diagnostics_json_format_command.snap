@@ -2,10 +2,32 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
-## `format.js`
+## `index.ts`
 
-```js
-  statement(  )  
+```ts
+import { z} from "z"
+import { z, b , a} from "lodash"
+
+a ==b
+
+debugger
+
+let f;
+		let f;
+```
+
+## `main.ts`
+
+```ts
+import { z} from "z"
+import { z, b , a} from "lodash"
+
+a ==b
+
+debugger
+
+let f;
+		let f;
 ```
 
 # Termination Message
@@ -29,10 +51,10 @@ The --json option is unstable/experimental and its output might change between p
 {
 	"summary": {
 		"changed": 0,
-		"unchanged": 1,
+		"unchanged": 2,
 		"matches": 0,
 		"duration": "<TIME>",
-		"errors": 1,
+		"errors": 2,
 		"warnings": 0,
 		"infos": 0,
 		"skipped": 0,
@@ -46,7 +68,18 @@ The --json option is unstable/experimental and its output might change between p
 			"message": "Formatter would have printed the following content:",
 			"category": "format",
 			"location": {
-				"path": "format.js",
+				"path": "index.ts",
+				"start": { "line": 0, "column": 0 },
+				"end": { "line": 0, "column": 0 }
+			},
+			"advices": []
+		},
+		{
+			"severity": "error",
+			"message": "Formatter would have printed the following content:",
+			"category": "format",
+			"location": {
+				"path": "main.ts",
 				"start": { "line": 0, "column": 0 },
 				"end": { "line": 0, "column": 0 }
 			},

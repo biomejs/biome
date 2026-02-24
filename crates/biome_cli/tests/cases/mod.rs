@@ -36,6 +36,7 @@ mod regression_tests;
 mod reporter_checkstyle;
 mod reporter_github;
 mod reporter_gitlab;
+mod reporter_json;
 mod reporter_junit;
 mod reporter_rdjson;
 mod reporter_sarif;

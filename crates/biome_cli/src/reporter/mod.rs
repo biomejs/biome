@@ -16,7 +16,7 @@ use biome_diagnostics::{Diagnostic, Error, Severity};
 use biome_fs::BiomePath;
 use biome_json_factory::make::{
     json_member, json_member_list, json_member_name, json_number_literal, json_number_value,
-    json_object_value, json_string_literal, token,
+    json_object_value, json_string_literal, json_string_value, token,
 };
 use biome_json_syntax::{AnyJsonMemberName, AnyJsonValue, JsonMember, T};
 use camino::Utf8Path;
@@ -55,7 +55,15 @@ pub struct TraversalSummary {
 
 impl TraversalSummary {
     pub(crate) fn json_member(&self) -> JsonMember {
-        let members = vec![
+        #[cfg(debug_assertions)]
+        let duration_value =
+            AnyJsonValue::JsonStringValue(json_string_value(json_string_literal("<TIME>")));
+        #[cfg(not(debug_assertions))]
+        let duration_value = AnyJsonValue::JsonNumberValue(json_number_value(json_number_literal(
+            self.duration.as_millis(),
+        )));
+
+        let mut members = vec![
             json_member(
                 AnyJsonMemberName::JsonMemberName(json_member_name(json_string_literal("changed"))),
                 token(T![:]),
@@ -74,6 +82,13 @@ impl TraversalSummary {
                 AnyJsonMemberName::JsonMemberName(json_member_name(json_string_literal("matches"))),
                 token(T![:]),
                 AnyJsonValue::JsonNumberValue(json_number_value(json_number_literal(self.matches))),
+            ),
+            json_member(
+                AnyJsonMemberName::JsonMemberName(json_member_name(json_string_literal(
+                    "duration",
+                ))),
+                token(T![:]),
+                duration_value,
             ),
             json_member(
                 AnyJsonMemberName::JsonMemberName(json_member_name(json_string_literal("errors"))),
@@ -118,6 +133,24 @@ impl TraversalSummary {
                 ))),
             ),
         ];
+
+        if let Some(_scanner_duration) = self.scanner_duration {
+            #[cfg(debug_assertions)]
+            let scanner_duration_value =
+                AnyJsonValue::JsonStringValue(json_string_value(json_string_literal("<TIME>")));
+            #[cfg(not(debug_assertions))]
+            let scanner_duration_value = AnyJsonValue::JsonNumberValue(json_number_value(
+                json_number_literal(_scanner_duration.as_millis()),
+            ));
+
+            members.push(json_member(
+                AnyJsonMemberName::JsonMemberName(json_member_name(json_string_literal(
+                    "scannerDuration",
+                ))),
+                token(T![:]),
+                scanner_duration_value,
+            ));
+        }
 
         let separators = vec![token(T![,]); members.len() - 1];
 

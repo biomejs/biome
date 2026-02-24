@@ -1,0 +1,364 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `file.json`
+
+```json
+
+```
+
+## `index.ts`
+
+```ts
+import { z} from "z"
+import { z, b , a} from "lodash"
+
+a ==b
+
+debugger
+
+let f;
+		let f;
+```
+
+## `main.ts`
+
+```ts
+import { z} from "z"
+import { z, b , a} from "lodash"
+
+a ==b
+
+debugger
+
+let f;
+		let f;
+```
+
+# Termination Message
+
+```block
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+The --json option is unstable/experimental and its output might change between patches/minor releases.
+```
+
+```block
+{
+	"summary": {
+		"changed": 0,
+		"unchanged": 2,
+		"matches": 0,
+		"duration": "<TIME>",
+		"errors": 16,
+		"warnings": 8,
+		"infos": 0,
+		"skipped": 0,
+		"suggestedFixesSkipped": 0,
+		"diagnosticsNotPrinted": 0,
+		"scannerDuration": "<TIME>"
+	},
+	"diagnostics": [
+		{
+			"severity": "warning",
+			"message": "This import is unused.",
+			"category": "lint/correctness/noUnusedImports",
+			"location": {
+				"path": "index.ts",
+				"start": { "line": 1, "column": 8 },
+				"end": { "line": 1, "column": 12 }
+			},
+			"advices": []
+		},
+		{
+			"severity": "warning",
+			"message": "Several of these imports are unused.",
+			"category": "lint/correctness/noUnusedImports",
+			"location": {
+				"path": "index.ts",
+				"start": { "line": 2, "column": 10 },
+				"end": { "line": 2, "column": 11 }
+			},
+			"advices": []
+		},
+		{
+			"severity": "warning",
+			"message": "This variable f is unused.",
+			"category": "lint/correctness/noUnusedVariables",
+			"location": {
+				"path": "index.ts",
+				"start": { "line": 8, "column": 5 },
+				"end": { "line": 8, "column": 6 }
+			},
+			"advices": []
+		},
+		{
+			"severity": "warning",
+			"message": "This variable f is unused.",
+			"category": "lint/correctness/noUnusedVariables",
+			"location": {
+				"path": "index.ts",
+				"start": { "line": 9, "column": 7 },
+				"end": { "line": 9, "column": 8 }
+			},
+			"advices": []
+		},
+		{
+			"severity": "warning",
+			"message": "This import is unused.",
+			"category": "lint/correctness/noUnusedImports",
+			"location": {
+				"path": "main.ts",
+				"start": { "line": 1, "column": 8 },
+				"end": { "line": 1, "column": 12 }
+			},
+			"advices": []
+		},
+		{
+			"severity": "warning",
+			"message": "Several of these imports are unused.",
+			"category": "lint/correctness/noUnusedImports",
+			"location": {
+				"path": "main.ts",
+				"start": { "line": 2, "column": 10 },
+				"end": { "line": 2, "column": 11 }
+			},
+			"advices": []
+		},
+		{
+			"severity": "warning",
+			"message": "This variable f is unused.",
+			"category": "lint/correctness/noUnusedVariables",
+			"location": {
+				"path": "main.ts",
+				"start": { "line": 8, "column": 5 },
+				"end": { "line": 8, "column": 6 }
+			},
+			"advices": []
+		},
+		{
+			"severity": "warning",
+			"message": "This variable f is unused.",
+			"category": "lint/correctness/noUnusedVariables",
+			"location": {
+				"path": "main.ts",
+				"start": { "line": 9, "column": 7 },
+				"end": { "line": 9, "column": 8 }
+			},
+			"advices": []
+		},
+		{
+			"severity": "error",
+			"message": "The imports and exports are not sorted.",
+			"category": "assist/source/organizeImports",
+			"location": {
+				"path": "index.ts",
+				"start": { "line": 1, "column": 1 },
+				"end": { "line": 1, "column": 21 }
+			},
+			"advices": []
+		},
+		{
+			"severity": "error",
+			"message": "Using == may be unsafe if you are relying on type coercion.",
+			"category": "lint/suspicious/noDoubleEquals",
+			"location": {
+				"path": "index.ts",
+				"start": { "line": 4, "column": 3 },
+				"end": { "line": 4, "column": 5 }
+			},
+			"advices": []
+		},
+		{
+			"severity": "error",
+			"message": "This is an unexpected use of the debugger statement.",
+			"category": "lint/suspicious/noDebugger",
+			"location": {
+				"path": "index.ts",
+				"start": { "line": 6, "column": 1 },
+				"end": { "line": 6, "column": 9 }
+			},
+			"advices": []
+		},
+		{
+			"severity": "error",
+			"message": "This variable implicitly has the any type.",
+			"category": "lint/suspicious/noImplicitAnyLet",
+			"location": {
+				"path": "index.ts",
+				"start": { "line": 8, "column": 5 },
+				"end": { "line": 8, "column": 6 }
+			},
+			"advices": []
+		},
+		{
+			"severity": "error",
+			"message": "This variable implicitly has the any type.",
+			"category": "lint/suspicious/noImplicitAnyLet",
+			"location": {
+				"path": "index.ts",
+				"start": { "line": 9, "column": 7 },
+				"end": { "line": 9, "column": 8 }
+			},
+			"advices": []
+		},
+		{
+			"severity": "error",
+			"message": "Shouldn't redeclare 'z'. Consider to delete it or rename it.",
+			"category": "lint/suspicious/noRedeclare",
+			"location": {
+				"path": "index.ts",
+				"start": { "line": 2, "column": 10 },
+				"end": { "line": 2, "column": 11 }
+			},
+			"advices": [
+				{
+					"start": { "line": 1, "column": 10 },
+					"end": { "line": 1, "column": 11 },
+					"text": "'z' is defined here:"
+				}
+			]
+		},
+		{
+			"severity": "error",
+			"message": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
+			"category": "lint/suspicious/noRedeclare",
+			"location": {
+				"path": "index.ts",
+				"start": { "line": 9, "column": 7 },
+				"end": { "line": 9, "column": 8 }
+			},
+			"advices": [
+				{
+					"start": { "line": 8, "column": 5 },
+					"end": { "line": 8, "column": 6 },
+					"text": "'f' is defined here:"
+				}
+			]
+		},
+		{
+			"severity": "error",
+			"message": "Formatter would have printed the following content:",
+			"category": "format",
+			"location": {
+				"path": "index.ts",
+				"start": { "line": 0, "column": 0 },
+				"end": { "line": 0, "column": 0 }
+			},
+			"advices": []
+		},
+		{
+			"severity": "error",
+			"message": "The imports and exports are not sorted.",
+			"category": "assist/source/organizeImports",
+			"location": {
+				"path": "main.ts",
+				"start": { "line": 1, "column": 1 },
+				"end": { "line": 1, "column": 21 }
+			},
+			"advices": []
+		},
+		{
+			"severity": "error",
+			"message": "Using == may be unsafe if you are relying on type coercion.",
+			"category": "lint/suspicious/noDoubleEquals",
+			"location": {
+				"path": "main.ts",
+				"start": { "line": 4, "column": 3 },
+				"end": { "line": 4, "column": 5 }
+			},
+			"advices": []
+		},
+		{
+			"severity": "error",
+			"message": "This is an unexpected use of the debugger statement.",
+			"category": "lint/suspicious/noDebugger",
+			"location": {
+				"path": "main.ts",
+				"start": { "line": 6, "column": 1 },
+				"end": { "line": 6, "column": 9 }
+			},
+			"advices": []
+		},
+		{
+			"severity": "error",
+			"message": "This variable implicitly has the any type.",
+			"category": "lint/suspicious/noImplicitAnyLet",
+			"location": {
+				"path": "main.ts",
+				"start": { "line": 8, "column": 5 },
+				"end": { "line": 8, "column": 6 }
+			},
+			"advices": []
+		},
+		{
+			"severity": "error",
+			"message": "This variable implicitly has the any type.",
+			"category": "lint/suspicious/noImplicitAnyLet",
+			"location": {
+				"path": "main.ts",
+				"start": { "line": 9, "column": 7 },
+				"end": { "line": 9, "column": 8 }
+			},
+			"advices": []
+		},
+		{
+			"severity": "error",
+			"message": "Shouldn't redeclare 'z'. Consider to delete it or rename it.",
+			"category": "lint/suspicious/noRedeclare",
+			"location": {
+				"path": "main.ts",
+				"start": { "line": 2, "column": 10 },
+				"end": { "line": 2, "column": 11 }
+			},
+			"advices": [
+				{
+					"start": { "line": 1, "column": 10 },
+					"end": { "line": 1, "column": 11 },
+					"text": "'z' is defined here:"
+				}
+			]
+		},
+		{
+			"severity": "error",
+			"message": "Shouldn't redeclare 'f'. Consider to delete it or rename it.",
+			"category": "lint/suspicious/noRedeclare",
+			"location": {
+				"path": "main.ts",
+				"start": { "line": 9, "column": 7 },
+				"end": { "line": 9, "column": 8 }
+			},
+			"advices": [
+				{
+					"start": { "line": 8, "column": 5 },
+					"end": { "line": 8, "column": 6 },
+					"text": "'f' is defined here:"
+				}
+			]
+		},
+		{
+			"severity": "error",
+			"message": "Formatter would have printed the following content:",
+			"category": "format",
+			"location": {
+				"path": "main.ts",
+				"start": { "line": 0, "column": 0 },
+				"end": { "line": 0, "column": 0 }
+			},
+			"advices": []
+		}
+	],
+	"command": "check"
+}
+
+```
