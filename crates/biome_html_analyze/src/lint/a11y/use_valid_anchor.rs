@@ -44,7 +44,7 @@ declare_lint_rule! {
     /// <a href="javascript:void(0)">navigate here</a>
     /// ```
     /// ```html,expect_diagnostic
-    /// <a onclick={something}>navigate here</a>
+    /// <a onclick="func()">navigate here</a>
     /// ```
     ///
     /// ### Valid
