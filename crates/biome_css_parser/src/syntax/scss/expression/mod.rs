@@ -28,7 +28,8 @@ const SCSS_BINARY_OPERATOR_TOKEN_SET: TokenSet<CssSyntaxKind> = token_set![
     T![and],
     T![or],
 ];
-const SCSS_UNARY_OPERATOR_TOKEN_SET: TokenSet<CssSyntaxKind> = token_set![T![+], T![-], T![not]];
+pub(crate) const SCSS_UNARY_OPERATOR_TOKEN_SET: TokenSet<CssSyntaxKind> =
+    token_set![T![+], T![-], T![not]];
 
 const SCSS_MAP_EXPRESSION_KEY_END_TOKEN_SET: TokenSet<CssSyntaxKind> =
     token_set![T![,], T![:], T![')']];
