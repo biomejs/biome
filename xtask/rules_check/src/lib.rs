@@ -601,7 +601,7 @@ fn get_first_member<V: Into<AnyJsonValue>>(parent: V, expected_name: &str) -> Op
         .into_iter()
         .next()?
         .ok()?;
-    let member_name = member.name().ok()?.inner_string_text()?.ok()?.to_string();
+    let member_name = member.name().ok()?.inner_string_text()?.to_string();
 
     if member_name.as_str() == expected_name {
         member.value().ok()
