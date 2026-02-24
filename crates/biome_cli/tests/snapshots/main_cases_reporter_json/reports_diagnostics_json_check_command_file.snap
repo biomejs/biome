@@ -5,55 +5,6 @@ expression: redactor(content)
 ## `file.json`
 
 ```json
-
-```
-
-## `index.ts`
-
-```ts
-import { z} from "z"
-import { z, b , a} from "lodash"
-
-a ==b
-
-debugger
-
-let f;
-		let f;
-```
-
-## `main.ts`
-
-```ts
-import { z} from "z"
-import { z, b , a} from "lodash"
-
-a ==b
-
-debugger
-
-let f;
-		let f;
-```
-
-# Termination Message
-
-```block
-check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Some errors were emitted while running checks.
-  
-
-
-```
-
-# Emitted Messages
-
-```block
-The --json option is unstable/experimental and its output might change between patches/minor releases.
-```
-
-```block
 {
 	"summary": {
 		"changed": 0,
@@ -361,4 +312,49 @@ The --json option is unstable/experimental and its output might change between p
 	"command": "check"
 }
 
+```
+
+## `index.ts`
+
+```ts
+import { z} from "z"
+import { z, b , a} from "lodash"
+
+a ==b
+
+debugger
+
+let f;
+		let f;
+```
+
+## `main.ts`
+
+```ts
+import { z} from "z"
+import { z, b , a} from "lodash"
+
+a ==b
+
+debugger
+
+let f;
+		let f;
+```
+
+# Termination Message
+
+```block
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+The --json option is unstable/experimental and its output might change between patches/minor releases.
 ```
