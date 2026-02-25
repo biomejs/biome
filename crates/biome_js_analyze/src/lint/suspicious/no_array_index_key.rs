@@ -48,6 +48,12 @@ declare_lint_rule! {
     ///
     /// ```jsx,expect_diagnostic
     /// something.forEach((Element, index) => {
+    ///     <Component key={`${index}-test-key`} >foo</Component>
+    /// });
+    /// ```
+    ///
+    /// ```jsx,expect_diagnostic
+    /// something.forEach((Element, index) => {
     ///     <Component key={"test" + index} >foo</Component>
     /// });
     /// ```
@@ -140,33 +146,58 @@ impl Rule for NoArrayIndexKey {
         let model = ctx.model();
         let reference = node.as_js_expression()?;
 
-        let mut capture_array_index = None;
+        let mut candidate_references: Vec<JsReferenceIdentifier> = Vec::new();
 
         match reference {
             AnyJsExpression::JsIdentifierExpression(identifier_expression) => {
-                capture_array_index = Some(identifier_expression.name().ok()?);
+                if let Ok(name) = identifier_expression.name() {
+                    candidate_references.push(name);
+                }
             }
             AnyJsExpression::JsTemplateExpression(template_expression) => {
                 let template_elements = template_expression.elements();
                 for element in template_elements {
                     if let AnyJsTemplateElement::JsTemplateElement(template_element) = element {
-                        let cap_index_value = template_element
+                        if let Some(name) = template_element
                             .expression()
-                            .ok()?
-                            .as_js_identifier_expression()?
-                            .name()
-                            .ok();
-                        capture_array_index = cap_index_value;
+                            .ok()
+                            .and_then(|expr| expr.as_js_identifier_expression().cloned())
+                            .and_then(|ident| ident.name().ok())
+                        {
+                            candidate_references.push(name);
+                        }
                     }
                 }
             }
             AnyJsExpression::JsBinaryExpression(binary_expression) => {
+                let mut capture_array_index = None;
                 let _ = cap_array_index_value(&binary_expression, &mut capture_array_index);
+                if let Some(reference) = capture_array_index {
+                    candidate_references.push(reference);
+                }
             }
             _ => {}
         };
 
-        let reference = capture_array_index?;
+        // Find the first candidate that resolves to an array index parameter
+        let reference = candidate_references.into_iter().find(|candidate| {
+            model
+                .binding(candidate)
+                .and_then(|declaration| declaration.syntax().parent())
+                .and_then(JsFormalParameter::cast)
+                .and_then(|param| {
+                    let function = param
+                        .parent::<JsParameterList>()
+                        .and_then(|list| list.parent::<JsParameters>())
+                        .and_then(|parameters| parameters.parent::<AnyJsFunction>())?;
+                    let call_expr = function
+                        .parent::<JsCallArgumentList>()
+                        .and_then(|arguments| arguments.parent::<JsCallArguments>())
+                        .and_then(|arguments| arguments.parent::<JsCallExpression>())?;
+                    is_array_method_index(&param, &call_expr)
+                })
+                .unwrap_or(false)
+        })?;
 
         // Given the reference identifier retrieved from the key property,
         // find the declaration and ensure it resolves to the parameter of a function,

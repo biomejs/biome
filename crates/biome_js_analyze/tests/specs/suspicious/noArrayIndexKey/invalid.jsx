@@ -132,3 +132,10 @@ function Component10() {
         </HoC>
     );
 }
+function Component11() {
+    return (
+        <HoC>
+            {({ things }) => things.map((item, index) => <Component key={`${index}-${item}`} />)}
+        </HoC>
+    );
+}
