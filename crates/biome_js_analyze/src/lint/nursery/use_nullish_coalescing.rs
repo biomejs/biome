@@ -3,7 +3,7 @@ use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_diagnostics::Severity;
+use biome_diagnostics::{Applicability, Severity};
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, JsBinaryExpression, JsBinaryOperator,
@@ -104,6 +104,10 @@ pub enum UseNullishCoalescingState {
     },
     Ternary {
         range: TextRange,
+        /// Whether we can offer any fix (false when subject has call expressions).
+        can_fix: bool,
+        /// Whether the fix is semantically safe (true for loose/compound checks).
+        is_safe_fix: bool,
     },
 }
 
@@ -182,9 +186,17 @@ impl Rule for UseNullishCoalescing {
                 ))
             }
             (
-                UseNullishCoalescingState::Ternary { .. },
+                UseNullishCoalescingState::Ternary {
+                    can_fix,
+                    is_safe_fix,
+                    ..
+                },
                 AnyNullishCoalescingQuery::JsConditionalExpression(conditional),
             ) => {
+                if !can_fix {
+                    return None;
+                }
+
                 let info = extract_ternary_nullish_check(conditional)?;
 
                 let mut mutation = ctx.root().begin();
@@ -211,9 +223,17 @@ impl Rule for UseNullishCoalescing {
                     AnyJsExpression::JsLogicalExpression(replacement),
                 );
 
+                // Strict single checks (=== / !==) only test one of null/undefined,
+                // but ?? covers both — mark as unsafe in that case.
+                let applicability = if *is_safe_fix {
+                    Applicability::Always
+                } else {
+                    Applicability::MaybeIncorrect
+                };
+
                 Some(JsRuleAction::new(
                     ctx.metadata().action_category(ctx.category(), ctx.group()),
-                    ctx.metadata().applicability(),
+                    applicability,
                     markup! { "Use "<Emphasis>"??"</Emphasis>" instead." }.to_owned(),
                     mutation,
                 ))
@@ -262,10 +282,19 @@ fn run_ternary(
         return None;
     }
 
-    extract_ternary_nullish_check(conditional)?;
+    let info = extract_ternary_nullish_check(conditional)?;
+
+    // Don't offer any fix when the subject contains call expressions,
+    // because `??` evaluates the subject once while the ternary evaluates it twice.
+    let can_fix = !contains_call_expression(&info.subject);
+    // The fix is only semantically safe when the check already covers both
+    // null and undefined (loose equality or compound strict check).
+    let is_safe_fix = can_fix && info.covers_both_nullish;
 
     Some(UseNullishCoalescingState::Ternary {
         range: conditional.syntax().text_trimmed_range(),
+        can_fix,
+        is_safe_fix,
     })
 }
 
@@ -274,6 +303,8 @@ struct TernaryNullishInfo {
     subject: AnyJsExpression,
     /// The fallback expression (e.g. `b` in `a ?? b`).
     fallback: AnyJsExpression,
+    /// Whether the check covers both null and undefined (loose equality or compound strict).
+    covers_both_nullish: bool,
 }
 
 /// Extract info from a ternary's test expression if it performs a nullish check.
@@ -285,16 +316,17 @@ fn extract_ternary_nullish_check(
     let consequent = conditional.consequent().ok()?;
     let alternate = conditional.alternate().ok()?;
 
-    // Extract the check subject and equality direction from the test expression.
-    let (check_subject, is_equality) =
+    // Extract the check subject, equality direction, and whether the check covers
+    // both null and undefined (compound or loose equality).
+    let (check_subject, is_equality, covers_both_nullish) =
         if let AnyJsExpression::JsLogicalExpression(logical) = &test {
             // Compound: `a === null || a === undefined` or `a !== null && a !== undefined`
             let info = try_extract_compound_nullish_check(logical)?;
-            (info.check_subject, info.is_equality)
+            (info.check_subject, info.is_equality, true)
         } else if let AnyJsExpression::JsBinaryExpression(binary) = &test {
             // Simple: `a !== null`, `a === undefined`, `null !== a`, etc.
             let check = try_extract_simple_nullish_check(binary)?;
-            (check.subject, check.is_equality)
+            (check.subject, check.is_equality, check.is_loose)
         } else {
             return None;
         };
@@ -317,6 +349,7 @@ fn extract_ternary_nullish_check(
     Some(TernaryNullishInfo {
         subject: non_nullish_branch.clone(),
         fallback: fallback_branch,
+        covers_both_nullish,
     })
 }
 
@@ -467,6 +500,15 @@ fn expressions_are_equivalent(a: &AnyJsExpression, b: &AnyJsExpression) -> bool 
     let a = a.clone().omit_parentheses();
     let b = b.clone().omit_parentheses();
     a.syntax().text_trimmed() == b.syntax().text_trimmed()
+}
+
+/// Check whether an expression contains a call expression anywhere in its subtree.
+/// When the subject contains calls, the ternary evaluates them twice (test + branch)
+/// while `??` would only evaluate once, changing side-effect semantics.
+fn contains_call_expression(expr: &AnyJsExpression) -> bool {
+    expr.syntax()
+        .descendants()
+        .any(|node| node.kind() == JsSyntaxKind::JS_CALL_EXPRESSION)
 }
 
 fn is_safe_type_for_replacement(ty: &biome_js_type_info::Type) -> bool {
