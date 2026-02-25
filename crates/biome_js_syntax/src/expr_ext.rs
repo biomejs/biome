@@ -2086,7 +2086,7 @@ impl JsCallExpression {
                     if is_function_with_block_body(&second)? {
                         return Ok(matches!(
                             third,
-                            None | Some(Ok(AnyJsCallArgument::AnyJsExpression(
+                            Some(Ok(AnyJsCallArgument::AnyJsExpression(
                                 AnyJsLiteralExpression(
                                     self::AnyJsLiteralExpression::JsNumberLiteralExpression(_)
                                 )
@@ -2378,7 +2378,8 @@ mod test {
             extract_call_expression("describe.only('bar', { timeout: 42*1000 }, () => {})");
         assert_eq!(call_expression.is_test_call_expression(), Ok(true));
 
-        let call_expression = extract_call_expression("it('bar', { timeout: 5000 }, function() {})");
+        let call_expression =
+            extract_call_expression("it('bar', { timeout: 5000 }, function() {})");
         assert_eq!(call_expression.is_test_call_expression(), Ok(true));
 
         // Negative cases for TestOptions pattern
