@@ -918,8 +918,7 @@ fn correctly_scope_plugin_with_includes() {
         ("/project/src/foo.ts", 1),
         ("/project/lib/bar.ts", 0),
         ("/project/src/foo.test.ts", 0),
-    ]
-    {
+    ] {
         workspace
             .open_file(OpenFileParams {
                 project_key,

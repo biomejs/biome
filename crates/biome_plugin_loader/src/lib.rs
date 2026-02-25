@@ -132,10 +132,7 @@ impl BiomePlugin {
 ///
 /// Returns `true` if `includes` is `None` (no restriction).
 /// When `includes` is `Some`, delegates to `CandidatePath::matches_with_exceptions`.
-pub(crate) fn file_matches_includes(
-    includes: Option<&[NormalizedGlob]>,
-    path: &Utf8Path,
-) -> bool {
+pub(crate) fn file_matches_includes(includes: Option<&[NormalizedGlob]>, path: &Utf8Path) -> bool {
     let Some(includes) = includes else {
         return true;
     };
