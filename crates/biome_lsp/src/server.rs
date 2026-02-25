@@ -155,6 +155,13 @@ impl LSPServer {
                             },
                             FileSystemWatcher {
                                 glob_pattern: GlobPattern::Relative(RelativePattern {
+                                    pattern: "pnpm-workspace.yaml".to_string(),
+                                    base_uri: OneOf::Left(folder.clone()),
+                                }),
+                                kind: Some(WatchKind::all()),
+                            },
+                            FileSystemWatcher {
+                                glob_pattern: GlobPattern::Relative(RelativePattern {
                                     pattern: "**/.gitignore".to_string(),
                                     base_uri: OneOf::Left(folder.clone()),
                                 }),
@@ -186,6 +193,13 @@ impl LSPServer {
                         FileSystemWatcher {
                             glob_pattern: GlobPattern::String(format!(
                                 "{}/.editorconfig",
+                                base_path.as_path().as_str()
+                            )),
+                            kind: Some(WatchKind::all()),
+                        },
+                        FileSystemWatcher {
+                            glob_pattern: GlobPattern::String(format!(
+                                "{}/pnpm-workspace.yaml",
                                 base_path.as_path().as_str()
                             )),
                             kind: Some(WatchKind::all()),
@@ -378,6 +392,7 @@ impl LanguageServer for LSPServer {
                         .iter()
                         .any(|file_name| watched_file.ends_with(file_name))
                         || (watched_file.ends_with(".editorconfig"))
+                        || watched_file.ends_with("pnpm-workspace.yaml")
                         || watched_file.ends_with(".gitignore")
                         || watched_file.ends_with(".ignore"))
                 {
