@@ -719,15 +719,11 @@ impl BiomeCommand {
                 {
                     return Some(&ColorsArg::Off);
                 }
-                // We want force colors in CI, to give a better UX experience
-                // Unless users explicitly set the colors flag
+                // In CI, we force colors for a better UX unless users explicitly set `--colors`.
+                // In GitHub Actions, we disable colors so the auto-enabled GitHub reporter
+                // output is not corrupted by ANSI escape codes.
                 if matches!(self, Self::Ci { .. }) && cli_options.colors.is_none() {
-                    // Disable colors when the github reporter is auto-enabled
-                    if !cfg!(debug_assertions)
-                        && std::env::var("GITHUB_ACTIONS")
-                            .ok()
-                            .is_some_and(|v| v == "true")
-                    {
+                    if is_github_actions() {
                         return Some(&ColorsArg::Off);
                     }
                     return Some(&ColorsArg::Force);
@@ -767,6 +763,20 @@ impl BiomeCommand {
         self.log_options()
             .map_or(LoggingKind::default(), |log_options| log_options.log_kind)
     }
+}
+
+/// Returns `true` when running in GitHub Actions in release builds.
+///
+/// In debug builds, this always returns `false` to avoid false positives in
+/// tests that run `biome ci` under CI (CI-ception).
+fn is_github_actions() -> bool {
+    if cfg!(debug_assertions) {
+        return false;
+    }
+    // Ref: https://docs.github.com/actions/learn-github-actions/variables#default-environment-variables
+    std::env::var("GITHUB_ACTIONS")
+        .ok()
+        .is_some_and(|v| v == "true")
 }
 
 /// It accepts a [LoadedConfiguration] and it prints the diagnostics emitted during parsing and deserialization.
