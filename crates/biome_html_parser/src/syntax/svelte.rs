@@ -1,5 +1,5 @@
 use crate::parser::HtmlParser;
-use crate::syntax::HtmlSyntaxFeatures::Svelte;
+use crate::syntax::HtmlSyntaxFeatures::{SingleTextExpressions, Svelte};
 use crate::syntax::parse_error::{
     expected_child_or_block, expected_expression, expected_name, expected_svelte_closing_block,
     expected_svelte_property, expected_text_expression, expected_valid_directive,
@@ -341,7 +341,7 @@ fn parse_each_opening_block(p: &mut HtmlParser, parent_marker: Marker) -> (Parse
 
 /// Parses a spread attribute or a single text expression.
 pub(crate) fn parse_svelte_spread_or_expression(p: &mut HtmlParser) -> ParsedSyntax {
-    if !Svelte.is_supported(p) {
+    if !SingleTextExpressions.is_supported(p) {
         return Absent;
     }
 
@@ -363,12 +363,12 @@ pub(crate) fn parse_svelte_spread_or_expression(p: &mut HtmlParser) -> ParsedSyn
             .parse_element(p)
             .or_add_diagnostic(p, expected_expression);
 
-        p.expect_with_context(T!['}'], HtmlLexContext::InsideTag);
+        p.expect_with_context(T!['}'], HtmlLexContext::InsideTagSvelte);
         Present(m.complete(p, HTML_SPREAD_ATTRIBUTE))
     } else {
         p.rewind(checkpoint);
         m.abandon(p);
-        parse_single_text_expression(p, HtmlLexContext::InsideTag)
+        parse_single_text_expression(p, HtmlLexContext::InsideTagSvelte)
     }
 }
 
@@ -880,7 +880,7 @@ pub(crate) fn parse_attach_attribute(p: &mut HtmlParser) -> ParsedSyntax {
 
     parse_single_text_expression_content(p).or_add_diagnostic(p, expected_text_expression);
 
-    p.expect_with_context(T!['}'], HtmlLexContext::InsideTag);
+    p.expect_with_context(T!['}'], HtmlLexContext::InsideTagSvelte);
 
     Present(m.complete(p, SVELTE_ATTACH_ATTRIBUTE))
 }
@@ -958,7 +958,7 @@ fn parse_svelte_name(p: &mut HtmlParser) -> ParsedSyntax {
 
 fn parse_binding_literal(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
-    p.bump_with_context(HTML_LITERAL, HtmlLexContext::InsideTag);
+    p.bump_with_context(HTML_LITERAL, HtmlLexContext::InsideTagSvelte);
     Present(m.complete(p, SVELTE_LITERAL))
 }
 

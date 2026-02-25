@@ -1,4 +1,5 @@
 mod declaration;
+mod expression;
 
 use crate::parser::CssParser;
 use crate::syntax::{CssSyntaxFeatures, is_nth_at_identifier, parse_regular_identifier};
@@ -14,6 +15,10 @@ use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 pub(crate) use declaration::{
     is_at_scss_declaration, is_at_scss_nesting_declaration, parse_scss_declaration,
     parse_scss_nesting_declaration,
+};
+pub(crate) use expression::{
+    SCSS_UNARY_OPERATOR_TOKEN_SET, parse_scss_expression, parse_scss_expression_in_args_until,
+    parse_scss_expression_until,
 };
 
 #[inline]

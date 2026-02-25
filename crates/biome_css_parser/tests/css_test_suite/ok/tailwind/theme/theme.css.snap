@@ -153,39 +153,33 @@ CssRoot {
                                             },
                                             l_paren_token: L_PAREN@253..254 "(" [] [],
                                             items: CssParameterList [
-                                                CssParameter {
-                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                        css_component_value_list: CssComponentValueList [
-                                                            CssIdentifier {
-                                                                value_token: IDENT@254..257 "to" [] [Whitespace(" ")],
-                                                            },
-                                                            CssIdentifier {
-                                                                value_token: IDENT@257..262 "right" [] [],
-                                                            },
-                                                        ],
-                                                    },
+                                                CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssIdentifier {
+                                                            value_token: IDENT@254..257 "to" [] [Whitespace(" ")],
+                                                        },
+                                                        CssIdentifier {
+                                                            value_token: IDENT@257..262 "right" [] [],
+                                                        },
+                                                    ],
                                                 },
                                                 COMMA@262..264 "," [] [Whitespace(" ")],
-                                                CssParameter {
-                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                        css_component_value_list: CssComponentValueList [
-                                                            CssColor {
-                                                                hash_token: HASH@264..265 "#" [] [],
-                                                                value_token: CSS_COLOR_LITERAL@265..271 "3b82f6" [] [],
-                                                            },
-                                                        ],
-                                                    },
+                                                CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssColor {
+                                                            hash_token: HASH@264..265 "#" [] [],
+                                                            value_token: CSS_COLOR_LITERAL@265..271 "3b82f6" [] [],
+                                                        },
+                                                    ],
                                                 },
                                                 COMMA@271..273 "," [] [Whitespace(" ")],
-                                                CssParameter {
-                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                        css_component_value_list: CssComponentValueList [
-                                                            CssColor {
-                                                                hash_token: HASH@273..274 "#" [] [],
-                                                                value_token: CSS_COLOR_LITERAL@274..280 "10b981" [] [],
-                                                            },
-                                                        ],
-                                                    },
+                                                CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssColor {
+                                                            hash_token: HASH@273..274 "#" [] [],
+                                                            value_token: CSS_COLOR_LITERAL@274..280 "10b981" [] [],
+                                                        },
+                                                    ],
                                                 },
                                             ],
                                             r_paren_token: R_PAREN@280..281 ")" [] [],
@@ -225,44 +219,36 @@ CssRoot {
                                             },
                                             l_paren_token: L_PAREN@319..320 "(" [] [],
                                             items: CssParameterList [
-                                                CssParameter {
-                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                        css_component_value_list: CssComponentValueList [
-                                                            CssNumber {
-                                                                value_token: CSS_NUMBER_LITERAL@320..321 "0" [] [],
-                                                            },
-                                                        ],
-                                                    },
+                                                CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssNumber {
+                                                            value_token: CSS_NUMBER_LITERAL@320..321 "0" [] [],
+                                                        },
+                                                    ],
                                                 },
                                                 COMMA@321..323 "," [] [Whitespace(" ")],
-                                                CssParameter {
-                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                        css_component_value_list: CssComponentValueList [
-                                                            CssNumber {
-                                                                value_token: CSS_NUMBER_LITERAL@323..324 "0" [] [],
-                                                            },
-                                                        ],
-                                                    },
+                                                CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssNumber {
+                                                            value_token: CSS_NUMBER_LITERAL@323..324 "0" [] [],
+                                                        },
+                                                    ],
                                                 },
                                                 COMMA@324..326 "," [] [Whitespace(" ")],
-                                                CssParameter {
-                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                        css_component_value_list: CssComponentValueList [
-                                                            CssNumber {
-                                                                value_token: CSS_NUMBER_LITERAL@326..327 "0" [] [],
-                                                            },
-                                                        ],
-                                                    },
+                                                CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssNumber {
+                                                            value_token: CSS_NUMBER_LITERAL@326..327 "0" [] [],
+                                                        },
+                                                    ],
                                                 },
                                                 COMMA@327..329 "," [] [Whitespace(" ")],
-                                                CssParameter {
-                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                        css_component_value_list: CssComponentValueList [
-                                                            CssNumber {
-                                                                value_token: CSS_NUMBER_LITERAL@329..332 "0.1" [] [],
-                                                            },
-                                                        ],
-                                                    },
+                                                CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssNumber {
+                                                            value_token: CSS_NUMBER_LITERAL@329..332 "0.1" [] [],
+                                                        },
+                                                    ],
                                                 },
                                             ],
                                             r_paren_token: R_PAREN@332..333 ")" [] [],
@@ -287,25 +273,23 @@ CssRoot {
                                             },
                                             l_paren_token: L_PAREN@359..360 "(" [] [],
                                             items: CssParameterList [
-                                                CssParameter {
-                                                    any_css_expression: CssBinaryExpression {
-                                                        left: CssListOfComponentValuesExpression {
-                                                            css_component_value_list: CssComponentValueList [
-                                                                CssRegularDimension {
-                                                                    value_token: CSS_NUMBER_LITERAL@360..361 "1" [] [],
-                                                                    unit_token: IDENT@361..365 "rem" [] [Whitespace(" ")],
-                                                                },
-                                                            ],
-                                                        },
-                                                        operator_token: PLUS@365..367 "+" [] [Whitespace(" ")],
-                                                        right: CssListOfComponentValuesExpression {
-                                                            css_component_value_list: CssComponentValueList [
-                                                                CssRegularDimension {
-                                                                    value_token: CSS_NUMBER_LITERAL@367..368 "2" [] [],
-                                                                    unit_token: IDENT@368..370 "px" [] [],
-                                                                },
-                                                            ],
-                                                        },
+                                                CssBinaryExpression {
+                                                    left: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssRegularDimension {
+                                                                value_token: CSS_NUMBER_LITERAL@360..361 "1" [] [],
+                                                                unit_token: IDENT@361..365 "rem" [] [Whitespace(" ")],
+                                                            },
+                                                        ],
+                                                    },
+                                                    operator_token: PLUS@365..367 "+" [] [Whitespace(" ")],
+                                                    right: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssRegularDimension {
+                                                                value_token: CSS_NUMBER_LITERAL@367..368 "2" [] [],
+                                                                unit_token: IDENT@368..370 "px" [] [],
+                                                            },
+                                                        ],
                                                     },
                                                 },
                                             ],
@@ -419,27 +403,24 @@ CssRoot {
                         0: IDENT@238..253 "linear-gradient" [] []
                       1: L_PAREN@253..254 "(" [] []
                       2: CSS_PARAMETER_LIST@254..280
-                        0: CSS_PARAMETER@254..262
-                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@254..262
-                            0: CSS_COMPONENT_VALUE_LIST@254..262
-                              0: CSS_IDENTIFIER@254..257
-                                0: IDENT@254..257 "to" [] [Whitespace(" ")]
-                              1: CSS_IDENTIFIER@257..262
-                                0: IDENT@257..262 "right" [] []
+                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@254..262
+                          0: CSS_COMPONENT_VALUE_LIST@254..262
+                            0: CSS_IDENTIFIER@254..257
+                              0: IDENT@254..257 "to" [] [Whitespace(" ")]
+                            1: CSS_IDENTIFIER@257..262
+                              0: IDENT@257..262 "right" [] []
                         1: COMMA@262..264 "," [] [Whitespace(" ")]
-                        2: CSS_PARAMETER@264..271
-                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@264..271
-                            0: CSS_COMPONENT_VALUE_LIST@264..271
-                              0: CSS_COLOR@264..271
-                                0: HASH@264..265 "#" [] []
-                                1: CSS_COLOR_LITERAL@265..271 "3b82f6" [] []
+                        2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@264..271
+                          0: CSS_COMPONENT_VALUE_LIST@264..271
+                            0: CSS_COLOR@264..271
+                              0: HASH@264..265 "#" [] []
+                              1: CSS_COLOR_LITERAL@265..271 "3b82f6" [] []
                         3: COMMA@271..273 "," [] [Whitespace(" ")]
-                        4: CSS_PARAMETER@273..280
-                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@273..280
-                            0: CSS_COMPONENT_VALUE_LIST@273..280
-                              0: CSS_COLOR@273..280
-                                0: HASH@273..274 "#" [] []
-                                1: CSS_COLOR_LITERAL@274..280 "10b981" [] []
+                        4: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@273..280
+                          0: CSS_COMPONENT_VALUE_LIST@273..280
+                            0: CSS_COLOR@273..280
+                              0: HASH@273..274 "#" [] []
+                              1: CSS_COLOR_LITERAL@274..280 "10b981" [] []
                       3: R_PAREN@280..281 ")" [] []
                 1: (empty)
               1: SEMICOLON@281..282 ";" [] []
@@ -466,29 +447,25 @@ CssRoot {
                         0: IDENT@315..319 "rgba" [] []
                       1: L_PAREN@319..320 "(" [] []
                       2: CSS_PARAMETER_LIST@320..332
-                        0: CSS_PARAMETER@320..321
-                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@320..321
-                            0: CSS_COMPONENT_VALUE_LIST@320..321
-                              0: CSS_NUMBER@320..321
-                                0: CSS_NUMBER_LITERAL@320..321 "0" [] []
+                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@320..321
+                          0: CSS_COMPONENT_VALUE_LIST@320..321
+                            0: CSS_NUMBER@320..321
+                              0: CSS_NUMBER_LITERAL@320..321 "0" [] []
                         1: COMMA@321..323 "," [] [Whitespace(" ")]
-                        2: CSS_PARAMETER@323..324
-                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@323..324
-                            0: CSS_COMPONENT_VALUE_LIST@323..324
-                              0: CSS_NUMBER@323..324
-                                0: CSS_NUMBER_LITERAL@323..324 "0" [] []
+                        2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@323..324
+                          0: CSS_COMPONENT_VALUE_LIST@323..324
+                            0: CSS_NUMBER@323..324
+                              0: CSS_NUMBER_LITERAL@323..324 "0" [] []
                         3: COMMA@324..326 "," [] [Whitespace(" ")]
-                        4: CSS_PARAMETER@326..327
-                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@326..327
-                            0: CSS_COMPONENT_VALUE_LIST@326..327
-                              0: CSS_NUMBER@326..327
-                                0: CSS_NUMBER_LITERAL@326..327 "0" [] []
+                        4: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@326..327
+                          0: CSS_COMPONENT_VALUE_LIST@326..327
+                            0: CSS_NUMBER@326..327
+                              0: CSS_NUMBER_LITERAL@326..327 "0" [] []
                         5: COMMA@327..329 "," [] [Whitespace(" ")]
-                        6: CSS_PARAMETER@329..332
-                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@329..332
-                            0: CSS_COMPONENT_VALUE_LIST@329..332
-                              0: CSS_NUMBER@329..332
-                                0: CSS_NUMBER_LITERAL@329..332 "0.1" [] []
+                        6: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@329..332
+                          0: CSS_COMPONENT_VALUE_LIST@329..332
+                            0: CSS_NUMBER@329..332
+                              0: CSS_NUMBER_LITERAL@329..332 "0.1" [] []
                       3: R_PAREN@332..333 ")" [] []
                 1: (empty)
               1: SEMICOLON@333..334 ";" [] []
@@ -504,19 +481,18 @@ CssRoot {
                         0: IDENT@355..359 "calc" [] []
                       1: L_PAREN@359..360 "(" [] []
                       2: CSS_PARAMETER_LIST@360..370
-                        0: CSS_PARAMETER@360..370
-                          0: CSS_BINARY_EXPRESSION@360..370
-                            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@360..365
-                              0: CSS_COMPONENT_VALUE_LIST@360..365
-                                0: CSS_REGULAR_DIMENSION@360..365
-                                  0: CSS_NUMBER_LITERAL@360..361 "1" [] []
-                                  1: IDENT@361..365 "rem" [] [Whitespace(" ")]
-                            1: PLUS@365..367 "+" [] [Whitespace(" ")]
-                            2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@367..370
-                              0: CSS_COMPONENT_VALUE_LIST@367..370
-                                0: CSS_REGULAR_DIMENSION@367..370
-                                  0: CSS_NUMBER_LITERAL@367..368 "2" [] []
-                                  1: IDENT@368..370 "px" [] []
+                        0: CSS_BINARY_EXPRESSION@360..370
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@360..365
+                            0: CSS_COMPONENT_VALUE_LIST@360..365
+                              0: CSS_REGULAR_DIMENSION@360..365
+                                0: CSS_NUMBER_LITERAL@360..361 "1" [] []
+                                1: IDENT@361..365 "rem" [] [Whitespace(" ")]
+                          1: PLUS@365..367 "+" [] [Whitespace(" ")]
+                          2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@367..370
+                            0: CSS_COMPONENT_VALUE_LIST@367..370
+                              0: CSS_REGULAR_DIMENSION@367..370
+                                0: CSS_NUMBER_LITERAL@367..368 "2" [] []
+                                1: IDENT@368..370 "px" [] []
                       3: R_PAREN@370..371 ")" [] []
                 1: (empty)
               1: SEMICOLON@371..372 ";" [] []

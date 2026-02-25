@@ -27,9 +27,13 @@ pub(crate) enum HtmlLexContext {
     Regular,
     /// When the lexer is inside a tag, special characters are lexed as tag tokens.
     InsideTag,
-    /// Like [InsideTag], but with Vue-specific tokens enabled.
-    /// This enables parsing of Component directives (v-bind, :, @, #, etc.)
-    InsideTagWithDirectives,
+    /// Like [InsideTag], but with Vue-style directive tokens enabled (`.`, `:`, `@`, `#`, etc.).
+    /// When `svelte` is `true`, also recognizes `//` and `/* */` as JS-style comments (for Svelte
+    /// component names which need both member-expression `.` support and comment support).
+    InsideTagWithDirectives { svelte: bool },
+    /// Like [InsideTag], but with Svelte-specific tokens enabled.
+    /// This enables parsing of JS-style `//` and `/* */` comments as trivia.
+    InsideTagSvelte,
     /// Like [InsideTag], but with Astro-specific tokens enabled.
     /// This enables parsing of Astro directives (client:, set:, class:, is:, server:)
     InsideTagAstro,

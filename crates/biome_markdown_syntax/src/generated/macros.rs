@@ -125,6 +125,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::MdQuote::new_unchecked(node) };
                     $body
                 }
+                $crate::MarkdownSyntaxKind::MD_QUOTE_PREFIX => {
+                    let $pattern = unsafe { $crate::MdQuotePrefix::new_unchecked(node) };
+                    $body
+                }
                 $crate::MarkdownSyntaxKind::MD_REFERENCE_IMAGE => {
                     let $pattern = unsafe { $crate::MdReferenceImage::new_unchecked(node) };
                     $body

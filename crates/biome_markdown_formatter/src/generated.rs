@@ -1025,6 +1025,44 @@ impl IntoFormat<MarkdownFormatContext> for biome_markdown_syntax::MdQuote {
         )
     }
 }
+impl FormatRule<biome_markdown_syntax::MdQuotePrefix>
+    for crate::markdown::auxiliary::quote_prefix::FormatMdQuotePrefix
+{
+    type Context = MarkdownFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_markdown_syntax::MdQuotePrefix,
+        f: &mut MarkdownFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_markdown_syntax::MdQuotePrefix>::fmt(self, node, f)
+    }
+}
+impl AsFormat<MarkdownFormatContext> for biome_markdown_syntax::MdQuotePrefix {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_markdown_syntax::MdQuotePrefix,
+        crate::markdown::auxiliary::quote_prefix::FormatMdQuotePrefix,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::markdown::auxiliary::quote_prefix::FormatMdQuotePrefix::default(),
+        )
+    }
+}
+impl IntoFormat<MarkdownFormatContext> for biome_markdown_syntax::MdQuotePrefix {
+    type Format = FormatOwnedWithRule<
+        biome_markdown_syntax::MdQuotePrefix,
+        crate::markdown::auxiliary::quote_prefix::FormatMdQuotePrefix,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::markdown::auxiliary::quote_prefix::FormatMdQuotePrefix::default(),
+        )
+    }
+}
 impl FormatRule<biome_markdown_syntax::MdReferenceImage>
     for crate::markdown::auxiliary::reference_image::FormatMdReferenceImage
 {

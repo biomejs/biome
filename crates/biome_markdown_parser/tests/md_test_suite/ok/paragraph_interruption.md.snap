@@ -111,12 +111,16 @@ MdDocument {
             hard_line: missing (optional),
         },
         MdQuote {
-            marker_token: R_ANGLE@84..85 ">" [] [],
+            prefix: MdQuotePrefix {
+                pre_marker_indent_token: missing (optional),
+                marker_token: R_ANGLE@84..85 ">" [] [],
+                post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@85..86 " " [] [],
+            },
             content: MdBlockList [
                 MdParagraph {
                     list: MdInlineItemList [
                         MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@85..102 "Quote interrupts" [Skipped(" ")] [],
+                            value_token: MD_TEXTUAL_LITERAL@86..102 "Quote interrupts" [] [],
                         },
                         MdTextual {
                             value_token: MD_TEXTUAL_LITERAL@102..103 "\n" [] [],
@@ -240,12 +244,15 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@83..84 "\n" [] []
       1: (empty)
     8: MD_QUOTE@84..103
-      0: R_ANGLE@84..85 ">" [] []
-      1: MD_BLOCK_LIST@85..103
-        0: MD_PARAGRAPH@85..103
-          0: MD_INLINE_ITEM_LIST@85..103
-            0: MD_TEXTUAL@85..102
-              0: MD_TEXTUAL_LITERAL@85..102 "Quote interrupts" [Skipped(" ")] []
+      0: MD_QUOTE_PREFIX@84..86
+        0: (empty)
+        1: R_ANGLE@84..85 ">" [] []
+        2: MD_QUOTE_POST_MARKER_SPACE@85..86 " " [] []
+      1: MD_BLOCK_LIST@86..103
+        0: MD_PARAGRAPH@86..103
+          0: MD_INLINE_ITEM_LIST@86..103
+            0: MD_TEXTUAL@86..102
+              0: MD_TEXTUAL_LITERAL@86..102 "Quote interrupts" [] []
             1: MD_TEXTUAL@102..103
               0: MD_TEXTUAL_LITERAL@102..103 "\n" [] []
           1: (empty)

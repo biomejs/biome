@@ -582,15 +582,13 @@ CssRoot {
                                 },
                                 l_paren_token: L_PAREN@670..671 "(" [] [],
                                 items: CssParameterList [
-                                    CssParameter {
-                                        any_css_expression: CssListOfComponentValuesExpression {
-                                            css_component_value_list: CssComponentValueList [
-                                                CssRegularDimension {
-                                                    value_token: CSS_NUMBER_LITERAL@671..674 "200" [] [],
-                                                    unit_token: IDENT@674..676 "px" [] [],
-                                                },
-                                            ],
-                                        },
+                                    CssListOfComponentValuesExpression {
+                                        css_component_value_list: CssComponentValueList [
+                                            CssRegularDimension {
+                                                value_token: CSS_NUMBER_LITERAL@671..674 "200" [] [],
+                                                unit_token: IDENT@674..676 "px" [] [],
+                                            },
+                                        ],
                                     },
                                 ],
                                 r_paren_token: R_PAREN@676..677 ")" [] [],
@@ -786,14 +784,12 @@ CssRoot {
                         },
                         l_paren_token: L_PAREN@920..921 "(" [] [],
                         items: CssParameterList [
-                            CssParameter {
-                                any_css_expression: CssListOfComponentValuesExpression {
-                                    css_component_value_list: CssComponentValueList [
-                                        CssIdentifier {
-                                            value_token: IDENT@921..926 "stuck" [] [],
-                                        },
-                                    ],
-                                },
+                            CssListOfComponentValuesExpression {
+                                css_component_value_list: CssComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@921..926 "stuck" [] [],
+                                    },
+                                ],
                             },
                         ],
                         r_paren_token: R_PAREN@926..928 ")" [] [Whitespace(" ")],
@@ -822,14 +818,12 @@ CssRoot {
                             },
                             l_paren_token: L_PAREN@962..963 "(" [] [],
                             items: CssParameterList [
-                                CssParameter {
-                                    any_css_expression: CssListOfComponentValuesExpression {
-                                        css_component_value_list: CssComponentValueList [
-                                            CssIdentifier {
-                                                value_token: IDENT@963..968 "stuck" [] [],
-                                            },
-                                        ],
-                                    },
+                                CssListOfComponentValuesExpression {
+                                    css_component_value_list: CssComponentValueList [
+                                        CssIdentifier {
+                                            value_token: IDENT@963..968 "stuck" [] [],
+                                        },
+                                    ],
                                 },
                             ],
                             r_paren_token: R_PAREN@968..969 ")" [] [],
@@ -860,14 +854,12 @@ CssRoot {
                                 },
                                 l_paren_token: L_PAREN@1005..1006 "(" [] [],
                                 items: CssParameterList [
-                                    CssParameter {
-                                        any_css_expression: CssListOfComponentValuesExpression {
-                                            css_component_value_list: CssComponentValueList [
-                                                CssIdentifier {
-                                                    value_token: IDENT@1006..1011 "stuck" [] [],
-                                                },
-                                            ],
-                                        },
+                                    CssListOfComponentValuesExpression {
+                                        css_component_value_list: CssComponentValueList [
+                                            CssIdentifier {
+                                                value_token: IDENT@1006..1011 "stuck" [] [],
+                                            },
+                                        ],
                                     },
                                 ],
                                 r_paren_token: R_PAREN@1011..1012 ")" [] [],
@@ -1260,12 +1252,11 @@ CssRoot {
                   0: IDENT@666..670 "calc" [] []
                 1: L_PAREN@670..671 "(" [] []
                 2: CSS_PARAMETER_LIST@671..676
-                  0: CSS_PARAMETER@671..676
-                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@671..676
-                      0: CSS_COMPONENT_VALUE_LIST@671..676
-                        0: CSS_REGULAR_DIMENSION@671..676
-                          0: CSS_NUMBER_LITERAL@671..674 "200" [] []
-                          1: IDENT@674..676 "px" [] []
+                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@671..676
+                    0: CSS_COMPONENT_VALUE_LIST@671..676
+                      0: CSS_REGULAR_DIMENSION@671..676
+                        0: CSS_NUMBER_LITERAL@671..674 "200" [] []
+                        1: IDENT@674..676 "px" [] []
                 3: R_PAREN@676..677 ")" [] []
             2: R_PAREN@677..679 ")" [] [Whitespace(" ")]
         1: CSS_RULE_BLOCK@679..682
@@ -1399,11 +1390,10 @@ CssRoot {
               0: IDENT@908..920 "scroll-state" [] []
             1: L_PAREN@920..921 "(" [] []
             2: CSS_PARAMETER_LIST@921..926
-              0: CSS_PARAMETER@921..926
-                0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@921..926
-                  0: CSS_COMPONENT_VALUE_LIST@921..926
-                    0: CSS_IDENTIFIER@921..926
-                      0: IDENT@921..926 "stuck" [] []
+              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@921..926
+                0: CSS_COMPONENT_VALUE_LIST@921..926
+                  0: CSS_IDENTIFIER@921..926
+                    0: IDENT@921..926 "stuck" [] []
             3: R_PAREN@926..928 ")" [] [Whitespace(" ")]
         1: CSS_RULE_BLOCK@928..932
           0: L_CURLY@928..931 "{" [] [Whitespace("  ")]
@@ -1423,11 +1413,10 @@ CssRoot {
                 0: IDENT@950..962 "scroll-state" [] []
               1: L_PAREN@962..963 "(" [] []
               2: CSS_PARAMETER_LIST@963..968
-                0: CSS_PARAMETER@963..968
-                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@963..968
-                    0: CSS_COMPONENT_VALUE_LIST@963..968
-                      0: CSS_IDENTIFIER@963..968
-                        0: IDENT@963..968 "stuck" [] []
+                0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@963..968
+                  0: CSS_COMPONENT_VALUE_LIST@963..968
+                    0: CSS_IDENTIFIER@963..968
+                      0: IDENT@963..968 "stuck" [] []
               3: R_PAREN@968..969 ")" [] []
             2: R_PAREN@969..971 ")" [] [Whitespace(" ")]
         1: CSS_RULE_BLOCK@971..975
@@ -1449,11 +1438,10 @@ CssRoot {
                   0: IDENT@993..1005 "scroll-state" [] []
                 1: L_PAREN@1005..1006 "(" [] []
                 2: CSS_PARAMETER_LIST@1006..1011
-                  0: CSS_PARAMETER@1006..1011
-                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1006..1011
-                      0: CSS_COMPONENT_VALUE_LIST@1006..1011
-                        0: CSS_IDENTIFIER@1006..1011
-                          0: IDENT@1006..1011 "stuck" [] []
+                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1006..1011
+                    0: CSS_COMPONENT_VALUE_LIST@1006..1011
+                      0: CSS_IDENTIFIER@1006..1011
+                        0: IDENT@1006..1011 "stuck" [] []
                 3: R_PAREN@1011..1012 ")" [] []
             2: R_PAREN@1012..1014 ")" [] [Whitespace(" ")]
         1: CSS_RULE_BLOCK@1014..1018

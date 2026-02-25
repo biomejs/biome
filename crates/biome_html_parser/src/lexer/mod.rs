@@ -175,14 +175,24 @@ impl<'src> HtmlLexer<'src> {
 
     /// Consume a token in the [HtmlLexContext::InsideTagWithDirectives] context.
     /// This context is used for Vue files with Vue-specific directives.
-    fn consume_token_inside_tag_directives(&mut self, current: u8) -> HtmlSyntaxKind {
+    /// When `svelte` is `true`, also handles `//` and `/* */` as JS-style comments.
+    fn consume_token_inside_tag_directives(&mut self, current: u8, svelte: bool) -> HtmlSyntaxKind {
         let dispatched = lookup_byte(current);
 
         match dispatched {
             WHS => self.consume_newline_or_whitespaces(),
             LSS => self.consume_l_angle(),
             MOR => self.consume_byte(T![>]),
-            SLH => self.consume_byte(T![/]),
+            SLH => {
+                if svelte {
+                    match self.byte_at(1).map(lookup_byte) {
+                        Some(SLH) => return self.consume_js_line_comment(),
+                        Some(MUL) => return self.consume_js_block_comment(),
+                        _ => {}
+                    }
+                }
+                self.consume_byte(T![/])
+            }
             EQL => self.consume_byte(T![=]),
             EXL => self.consume_byte(T![!]),
             BEO => {
@@ -259,6 +269,21 @@ impl<'src> HtmlLexer<'src> {
         } else {
             ERROR_TOKEN
         }
+    }
+
+    /// Consume a token in the [HtmlLexContext::InsideTagSvelte] context.
+    /// This context is used for Svelte files with JS-style comment support.
+    fn consume_token_inside_tag_svelte(&mut self, current: u8) -> HtmlSyntaxKind {
+        let dispatched = lookup_byte(current);
+
+        if dispatched == SLH {
+            match self.byte_at(1).map(lookup_byte) {
+                Some(SLH) => return self.consume_js_line_comment(),
+                Some(MUL) => return self.consume_js_block_comment(),
+                _ => {}
+            }
+        }
+        self.consume_token_inside_tag(current)
     }
 
     /// Consume a token in the [HtmlLexContext::Regular] context.
@@ -538,6 +563,49 @@ impl<'src> HtmlLexer<'src> {
             self.advance_byte_or_char(char);
         }
 
+        COMMENT
+    }
+
+    /// Consumes a `//` single-line comment, returning COMMENT.
+    /// Does NOT consume the terminating newline — it must be emitted as a
+    /// separate NEWLINE trivia token to preserve leading/trailing trivia boundaries.
+    fn consume_js_line_comment(&mut self) -> HtmlSyntaxKind {
+        self.advance(2);
+        while let Some(chr) = self.current_byte() {
+            match chr {
+                b'\n' | b'\r' => break,
+                _ if chr.is_ascii() => self.advance(1),
+                _ => {
+                    let c = self.current_char_unchecked();
+                    if is_linebreak(c) {
+                        break;
+                    }
+                    self.advance(c.len_utf8());
+                }
+            }
+        }
+        COMMENT
+    }
+
+    /// Consumes a `/* */` block comment, returning COMMENT.
+    fn consume_js_block_comment(&mut self) -> HtmlSyntaxKind {
+        self.advance(2);
+        while let Some(chr) = self.current_byte() {
+            let dispatched = lookup_byte(chr);
+            match dispatched {
+                MUL if self.byte_at(1).map(lookup_byte) == Some(SLH) => {
+                    self.advance(2);
+                    return COMMENT;
+                }
+                IDT | ZER | DIG | WHS | COL | SLH | MIN | MUL => self.advance(1),
+                _ if chr.is_ascii() => self.advance(1),
+                _ => self.advance(self.current_char_unchecked().len_utf8()),
+            }
+        }
+        self.push_diagnostic(ParseDiagnostic::new(
+            "Unterminated block comment, expected `*/`",
+            self.current_start..self.text_position(),
+        ));
         COMMENT
     }
 
@@ -1271,10 +1339,13 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
                 Some(current) => match context {
                     HtmlLexContext::Regular => self.consume_token(current),
                     HtmlLexContext::InsideTag => self.consume_token_inside_tag(current),
-                    HtmlLexContext::InsideTagWithDirectives => {
-                        self.consume_token_inside_tag_directives(current)
+                    HtmlLexContext::InsideTagWithDirectives { svelte } => {
+                        self.consume_token_inside_tag_directives(current, svelte)
                     }
                     HtmlLexContext::InsideTagAstro => self.consume_token_inside_tag_astro(current),
+                    HtmlLexContext::InsideTagSvelte => {
+                        self.consume_token_inside_tag_svelte(current)
+                    }
                     HtmlLexContext::VueDirectiveArgument => {
                         self.consume_token_vue_directive_argument()
                     }
@@ -1436,6 +1507,11 @@ fn is_astro_directive_keyword_bytes(bytes: &[u8]) -> bool {
 
 fn is_vue_directive_prefix_bytes(bytes: &[u8]) -> bool {
     bytes.starts_with(b"v-")
+}
+
+/// Check if a char is a linebreak (for JS-style comments in Svelte)
+fn is_linebreak(chr: char) -> bool {
+    matches!(chr, '\n' | '\r' | '\u{2028}' | '\u{2029}')
 }
 
 /// Identifiers can contain letters, numbers and `_`

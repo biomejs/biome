@@ -83,18 +83,27 @@ MdDocument {
             value_token: NEWLINE@34..35 "\n" [] [],
         },
         MdQuote {
-            marker_token: R_ANGLE@35..36 ">" [] [],
+            prefix: MdQuotePrefix {
+                pre_marker_indent_token: missing (optional),
+                marker_token: R_ANGLE@35..36 ">" [] [],
+                post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@36..37 " " [] [],
+            },
             content: MdBlockList [
                 MdParagraph {
                     list: MdInlineItemList [
                         MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@36..40 "Foo" [Skipped(" ")] [],
+                            value_token: MD_TEXTUAL_LITERAL@37..40 "Foo" [] [],
                         },
                         MdTextual {
                             value_token: MD_TEXTUAL_LITERAL@40..41 "\n" [] [],
                         },
+                        MdQuotePrefix {
+                            pre_marker_indent_token: missing (optional),
+                            marker_token: R_ANGLE@41..42 ">" [] [],
+                            post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@42..43 " " [] [],
+                        },
                         MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@41..44 "-" [Skipped(">"), Skipped(" ")] [],
+                            value_token: MD_TEXTUAL_LITERAL@43..44 "-" [] [],
                         },
                         MdTextual {
                             value_token: MD_TEXTUAL_LITERAL@44..45 "-" [] [],
@@ -121,7 +130,7 @@ MdDocument {
                         MdSetextHeader {
                             content: MdInlineItemList [
                                 MdTextual {
-                                    value_token: MD_TEXTUAL_LITERAL@49..53 "Foo" [Skipped(" ")] [],
+                                    value_token: MD_TEXTUAL_LITERAL@49..53 " Foo" [] [],
                                 },
                                 MdTextual {
                                     value_token: MD_TEXTUAL_LITERAL@53..54 "\n" [] [],
@@ -192,21 +201,28 @@ MdDocument {
     8: MD_NEWLINE@34..35
       0: NEWLINE@34..35 "\n" [] []
     9: MD_QUOTE@35..47
-      0: R_ANGLE@35..36 ">" [] []
-      1: MD_BLOCK_LIST@36..47
-        0: MD_PARAGRAPH@36..47
-          0: MD_INLINE_ITEM_LIST@36..47
-            0: MD_TEXTUAL@36..40
-              0: MD_TEXTUAL_LITERAL@36..40 "Foo" [Skipped(" ")] []
+      0: MD_QUOTE_PREFIX@35..37
+        0: (empty)
+        1: R_ANGLE@35..36 ">" [] []
+        2: MD_QUOTE_POST_MARKER_SPACE@36..37 " " [] []
+      1: MD_BLOCK_LIST@37..47
+        0: MD_PARAGRAPH@37..47
+          0: MD_INLINE_ITEM_LIST@37..47
+            0: MD_TEXTUAL@37..40
+              0: MD_TEXTUAL_LITERAL@37..40 "Foo" [] []
             1: MD_TEXTUAL@40..41
               0: MD_TEXTUAL_LITERAL@40..41 "\n" [] []
-            2: MD_TEXTUAL@41..44
-              0: MD_TEXTUAL_LITERAL@41..44 "-" [Skipped(">"), Skipped(" ")] []
-            3: MD_TEXTUAL@44..45
+            2: MD_QUOTE_PREFIX@41..43
+              0: (empty)
+              1: R_ANGLE@41..42 ">" [] []
+              2: MD_QUOTE_POST_MARKER_SPACE@42..43 " " [] []
+            3: MD_TEXTUAL@43..44
+              0: MD_TEXTUAL_LITERAL@43..44 "-" [] []
+            4: MD_TEXTUAL@44..45
               0: MD_TEXTUAL_LITERAL@44..45 "-" [] []
-            4: MD_TEXTUAL@45..46
+            5: MD_TEXTUAL@45..46
               0: MD_TEXTUAL_LITERAL@45..46 "-" [] []
-            5: MD_TEXTUAL@46..47
+            6: MD_TEXTUAL@46..47
               0: MD_TEXTUAL_LITERAL@46..47 "\n" [] []
           1: (empty)
     10: MD_NEWLINE@47..48
@@ -219,7 +235,7 @@ MdDocument {
             0: MD_SETEXT_HEADER@49..59
               0: MD_INLINE_ITEM_LIST@49..54
                 0: MD_TEXTUAL@49..53
-                  0: MD_TEXTUAL_LITERAL@49..53 "Foo" [Skipped(" ")] []
+                  0: MD_TEXTUAL_LITERAL@49..53 " Foo" [] []
                 1: MD_TEXTUAL@53..54
                   0: MD_TEXTUAL_LITERAL@53..54 "\n" [] []
               1: MD_SETEXT_UNDERLINE_LITERAL@54..59 "---" [Skipped(" "), Skipped(" ")] []

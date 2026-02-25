@@ -10,10 +10,8 @@ use biome_diagnostics::{
 use biome_json_factory::make::*;
 use biome_json_syntax::{AnyJsonMemberName, AnyJsonValue, JsonRoot, JsonSyntaxKind, T};
 use camino::{Utf8Path, Utf8PathBuf};
-use serde::Serialize;
 
-#[derive(Debug, Default, Serialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Default)]
 pub(crate) struct JsonReporterVisitor {
     summary: TraversalSummary,
     diagnostics: Vec<JsonReport>,
@@ -212,13 +210,6 @@ fn report_to_json(report: &JsonReport) -> AnyJsonValue {
     ))
 }
 
-impl Display for JsonReporterVisitor {
-    fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
-        let content = serde_json::to_string(&self)?;
-        fmt.write_str(content.as_str())
-    }
-}
-
 pub struct JsonReporter<'a> {
     pub execution: &'a dyn Execution,
     pub diagnostics_payload: &'a DiagnosticsPayload,
@@ -344,34 +335,29 @@ fn to_location(location: &Location) -> Option<LocationReport> {
     })
 }
 
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug)]
 struct JsonReport {
     category: Option<&'static Category>,
     severity: Severity,
     message: String,
     advices: Vec<JsonSuggestion>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     location: Option<LocationReport>,
 }
 
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug)]
 struct LocationReport {
     path: String,
     start: LocationSpan,
     end: LocationSpan,
 }
 
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug)]
 struct LocationSpan {
     column: usize,
     line: usize,
 }
 
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug)]
 struct JsonSuggestion {
     start: LocationSpan,
     end: LocationSpan,

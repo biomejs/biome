@@ -1,8 +1,8 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
+
 ## Input
 
 ```css
@@ -57,12 +57,14 @@ CssRoot {
                                 },
                             },
                             colon_token: COLON@24..26 ":" [] [Whitespace(" ")],
-                            value: CssGenericComponentValueList [
-                                CssRegularDimension {
-                                    value_token: CSS_NUMBER_LITERAL@26..28 "12" [] [],
-                                    unit_token: IDENT@28..31 "px" [] [Whitespace(" ")],
-                                },
-                            ],
+                            value: ScssExpression {
+                                items: ScssExpressionItemList [
+                                    CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@26..28 "12" [] [],
+                                        unit_token: IDENT@28..31 "px" [] [Whitespace(" ")],
+                                    },
+                                ],
+                            },
                             modifiers: ScssVariableModifierList [
                                 ScssVariableModifier {
                                     excl_token: BANG@31..32 "!" [] [],
@@ -136,12 +138,14 @@ CssRoot {
                                             },
                                         },
                                         colon_token: COLON@119..121 ":" [] [Whitespace(" ")],
-                                        value: CssGenericComponentValueList [
-                                            CssRegularDimension {
-                                                value_token: CSS_NUMBER_LITERAL@121..122 "4" [] [],
-                                                unit_token: IDENT@122..125 "px" [] [Whitespace(" ")],
-                                            },
-                                        ],
+                                        value: ScssExpression {
+                                            items: ScssExpressionItemList [
+                                                CssRegularDimension {
+                                                    value_token: CSS_NUMBER_LITERAL@121..122 "4" [] [],
+                                                    unit_token: IDENT@122..125 "px" [] [Whitespace(" ")],
+                                                },
+                                            ],
+                                        },
                                         modifiers: ScssVariableModifierList [
                                             ScssVariableModifier {
                                                 excl_token: BANG@125..126 "!" [] [],
@@ -211,10 +215,11 @@ CssRoot {
                 1: CSS_IDENTIFIER@17..24
                   0: IDENT@17..24 "padding" [] []
               1: COLON@24..26 ":" [] [Whitespace(" ")]
-              2: CSS_GENERIC_COMPONENT_VALUE_LIST@26..31
-                0: CSS_REGULAR_DIMENSION@26..31
-                  0: CSS_NUMBER_LITERAL@26..28 "12" [] []
-                  1: IDENT@28..31 "px" [] [Whitespace(" ")]
+              2: SCSS_EXPRESSION@26..31
+                0: SCSS_EXPRESSION_ITEM_LIST@26..31
+                  0: CSS_REGULAR_DIMENSION@26..31
+                    0: CSS_NUMBER_LITERAL@26..28 "12" [] []
+                    1: IDENT@28..31 "px" [] [Whitespace(" ")]
               3: SCSS_VARIABLE_MODIFIER_LIST@31..39
                 0: SCSS_VARIABLE_MODIFIER@31..39
                   0: BANG@31..32 "!" [] []
@@ -266,10 +271,11 @@ CssRoot {
                       1: CSS_IDENTIFIER@113..119
                         0: IDENT@113..119 "margin" [] []
                     1: COLON@119..121 ":" [] [Whitespace(" ")]
-                    2: CSS_GENERIC_COMPONENT_VALUE_LIST@121..125
-                      0: CSS_REGULAR_DIMENSION@121..125
-                        0: CSS_NUMBER_LITERAL@121..122 "4" [] []
-                        1: IDENT@122..125 "px" [] [Whitespace(" ")]
+                    2: SCSS_EXPRESSION@121..125
+                      0: SCSS_EXPRESSION_ITEM_LIST@121..125
+                        0: CSS_REGULAR_DIMENSION@121..125
+                          0: CSS_NUMBER_LITERAL@121..122 "4" [] []
+                          1: IDENT@122..125 "px" [] [Whitespace(" ")]
                     3: SCSS_VARIABLE_MODIFIER_LIST@125..132
                       0: SCSS_VARIABLE_MODIFIER@125..132
                         0: BANG@125..126 "!" [] []

@@ -1302,32 +1302,30 @@ CssRoot {
                                                     },
                                                     l_paren_token: L_PAREN@727..728 "(" [] [],
                                                     items: CssParameterList [
-                                                        CssParameter {
-                                                            any_css_expression: CssBinaryExpression {
-                                                                left: CssListOfComponentValuesExpression {
-                                                                    css_component_value_list: CssComponentValueList [
-                                                                        CssNumber {
-                                                                            value_token: CSS_NUMBER_LITERAL@728..730 "0" [] [Whitespace(" ")],
-                                                                        },
-                                                                        CssPercentage {
-                                                                            value_token: CSS_NUMBER_LITERAL@730..731 "0" [] [],
-                                                                            percent_token: PERCENT@731..733 "%" [] [Whitespace(" ")],
-                                                                        },
-                                                                        CssPercentage {
-                                                                            value_token: CSS_NUMBER_LITERAL@733..734 "0" [] [],
-                                                                            percent_token: PERCENT@734..736 "%" [] [Whitespace(" ")],
-                                                                        },
-                                                                    ],
-                                                                },
-                                                                operator_token: SLASH@736..738 "/" [] [Whitespace(" ")],
-                                                                right: CssListOfComponentValuesExpression {
-                                                                    css_component_value_list: CssComponentValueList [
-                                                                        CssPercentage {
-                                                                            value_token: CSS_NUMBER_LITERAL@738..740 "50" [] [],
-                                                                            percent_token: PERCENT@740..741 "%" [] [],
-                                                                        },
-                                                                    ],
-                                                                },
+                                                        CssBinaryExpression {
+                                                            left: CssListOfComponentValuesExpression {
+                                                                css_component_value_list: CssComponentValueList [
+                                                                    CssNumber {
+                                                                        value_token: CSS_NUMBER_LITERAL@728..730 "0" [] [Whitespace(" ")],
+                                                                    },
+                                                                    CssPercentage {
+                                                                        value_token: CSS_NUMBER_LITERAL@730..731 "0" [] [],
+                                                                        percent_token: PERCENT@731..733 "%" [] [Whitespace(" ")],
+                                                                    },
+                                                                    CssPercentage {
+                                                                        value_token: CSS_NUMBER_LITERAL@733..734 "0" [] [],
+                                                                        percent_token: PERCENT@734..736 "%" [] [Whitespace(" ")],
+                                                                    },
+                                                                ],
+                                                            },
+                                                            operator_token: SLASH@736..738 "/" [] [Whitespace(" ")],
+                                                            right: CssListOfComponentValuesExpression {
+                                                                css_component_value_list: CssComponentValueList [
+                                                                    CssPercentage {
+                                                                        value_token: CSS_NUMBER_LITERAL@738..740 "50" [] [],
+                                                                        percent_token: PERCENT@740..741 "%" [] [],
+                                                                    },
+                                                                ],
                                                             },
                                                         },
                                                     ],
@@ -3899,24 +3897,23 @@ CssRoot {
                             0: IDENT@724..727 "hsl" [] []
                           1: L_PAREN@727..728 "(" [] []
                           2: CSS_PARAMETER_LIST@728..741
-                            0: CSS_PARAMETER@728..741
-                              0: CSS_BINARY_EXPRESSION@728..741
-                                0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@728..736
-                                  0: CSS_COMPONENT_VALUE_LIST@728..736
-                                    0: CSS_NUMBER@728..730
-                                      0: CSS_NUMBER_LITERAL@728..730 "0" [] [Whitespace(" ")]
-                                    1: CSS_PERCENTAGE@730..733
-                                      0: CSS_NUMBER_LITERAL@730..731 "0" [] []
-                                      1: PERCENT@731..733 "%" [] [Whitespace(" ")]
-                                    2: CSS_PERCENTAGE@733..736
-                                      0: CSS_NUMBER_LITERAL@733..734 "0" [] []
-                                      1: PERCENT@734..736 "%" [] [Whitespace(" ")]
-                                1: SLASH@736..738 "/" [] [Whitespace(" ")]
-                                2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@738..741
-                                  0: CSS_COMPONENT_VALUE_LIST@738..741
-                                    0: CSS_PERCENTAGE@738..741
-                                      0: CSS_NUMBER_LITERAL@738..740 "50" [] []
-                                      1: PERCENT@740..741 "%" [] []
+                            0: CSS_BINARY_EXPRESSION@728..741
+                              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@728..736
+                                0: CSS_COMPONENT_VALUE_LIST@728..736
+                                  0: CSS_NUMBER@728..730
+                                    0: CSS_NUMBER_LITERAL@728..730 "0" [] [Whitespace(" ")]
+                                  1: CSS_PERCENTAGE@730..733
+                                    0: CSS_NUMBER_LITERAL@730..731 "0" [] []
+                                    1: PERCENT@731..733 "%" [] [Whitespace(" ")]
+                                  2: CSS_PERCENTAGE@733..736
+                                    0: CSS_NUMBER_LITERAL@733..734 "0" [] []
+                                    1: PERCENT@734..736 "%" [] [Whitespace(" ")]
+                              1: SLASH@736..738 "/" [] [Whitespace(" ")]
+                              2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@738..741
+                                0: CSS_COMPONENT_VALUE_LIST@738..741
+                                  0: CSS_PERCENTAGE@738..741
+                                    0: CSS_NUMBER_LITERAL@738..740 "50" [] []
+                                    1: PERCENT@740..741 "%" [] []
                           3: R_PAREN@741..742 ")" [] []
                     1: (empty)
                   1: SEMICOLON@742..743 ";" [] []

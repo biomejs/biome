@@ -1131,12 +1131,12 @@ impl MdQuote {
     }
     pub fn as_fields(&self) -> MdQuoteFields {
         MdQuoteFields {
-            marker_token: self.marker_token(),
+            prefix: self.prefix(),
             content: self.content(),
         }
     }
-    pub fn marker_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
+    pub fn prefix(&self) -> SyntaxResult<MdQuotePrefix> {
+        support::required_node(&self.syntax, 0usize)
     }
     pub fn content(&self) -> MdBlockList {
         support::list(&self.syntax, 1usize)
@@ -1152,8 +1152,53 @@ impl Serialize for MdQuote {
 }
 #[derive(Serialize)]
 pub struct MdQuoteFields {
-    pub marker_token: SyntaxResult<SyntaxToken>,
+    pub prefix: SyntaxResult<MdQuotePrefix>,
     pub content: MdBlockList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct MdQuotePrefix {
+    pub(crate) syntax: SyntaxNode,
+}
+impl MdQuotePrefix {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> MdQuotePrefixFields {
+        MdQuotePrefixFields {
+            pre_marker_indent_token: self.pre_marker_indent_token(),
+            marker_token: self.marker_token(),
+            post_marker_space_token: self.post_marker_space_token(),
+        }
+    }
+    pub fn pre_marker_indent_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 0usize)
+    }
+    pub fn marker_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn post_marker_space_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for MdQuotePrefix {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct MdQuotePrefixFields {
+    pub pre_marker_indent_token: Option<SyntaxToken>,
+    pub marker_token: SyntaxResult<SyntaxToken>,
+    pub post_marker_space_token: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct MdReferenceImage {
@@ -1454,6 +1499,7 @@ pub struct MdThematicBreakBlockFields {
 pub enum AnyMdBlock {
     AnyMdContainerBlock(AnyMdContainerBlock),
     AnyMdLeafBlock(AnyMdLeafBlock),
+    MdQuotePrefix(MdQuotePrefix),
 }
 impl AnyMdBlock {
     pub fn as_any_md_container_block(&self) -> Option<&AnyMdContainerBlock> {
@@ -1465,6 +1511,12 @@ impl AnyMdBlock {
     pub fn as_any_md_leaf_block(&self) -> Option<&AnyMdLeafBlock> {
         match &self {
             Self::AnyMdLeafBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_md_quote_prefix(&self) -> Option<&MdQuotePrefix> {
+        match &self {
+            Self::MdQuotePrefix(item) => Some(item),
             _ => None,
         }
     }
@@ -1526,6 +1578,7 @@ pub enum AnyMdInline {
     MdInlineImage(MdInlineImage),
     MdInlineItalic(MdInlineItalic),
     MdInlineLink(MdInlineLink),
+    MdQuotePrefix(MdQuotePrefix),
     MdReferenceImage(MdReferenceImage),
     MdReferenceLink(MdReferenceLink),
     MdSoftBreak(MdSoftBreak),
@@ -1589,6 +1642,12 @@ impl AnyMdInline {
     pub fn as_md_inline_link(&self) -> Option<&MdInlineLink> {
         match &self {
             Self::MdInlineLink(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_md_quote_prefix(&self) -> Option<&MdQuotePrefix> {
+        match &self {
+            Self::MdQuotePrefix(item) => Some(item),
             _ => None,
         }
     }
@@ -3038,10 +3097,7 @@ impl std::fmt::Debug for MdQuote {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("MdQuote")
-                .field(
-                    "marker_token",
-                    &support::DebugSyntaxResult(self.marker_token()),
-                )
+                .field("prefix", &support::DebugSyntaxResult(self.prefix()))
                 .field("content", &self.content())
                 .finish()
         } else {
@@ -3058,6 +3114,64 @@ impl From<MdQuote> for SyntaxNode {
 }
 impl From<MdQuote> for SyntaxElement {
     fn from(n: MdQuote) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for MdQuotePrefix {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MD_QUOTE_PREFIX as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MD_QUOTE_PREFIX
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for MdQuotePrefix {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdQuotePrefix")
+                .field(
+                    "pre_marker_indent_token",
+                    &support::DebugOptionalElement(self.pre_marker_indent_token()),
+                )
+                .field(
+                    "marker_token",
+                    &support::DebugSyntaxResult(self.marker_token()),
+                )
+                .field(
+                    "post_marker_space_token",
+                    &support::DebugOptionalElement(self.post_marker_space_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("MdQuotePrefix").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<MdQuotePrefix> for SyntaxNode {
+    fn from(n: MdQuotePrefix) -> Self {
+        n.syntax
+    }
+}
+impl From<MdQuotePrefix> for SyntaxElement {
+    fn from(n: MdQuotePrefix) -> Self {
         n.syntax.into()
     }
 }
@@ -3430,37 +3544,52 @@ impl From<MdThematicBreakBlock> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl From<MdQuotePrefix> for AnyMdBlock {
+    fn from(node: MdQuotePrefix) -> Self {
+        Self::MdQuotePrefix(node)
+    }
+}
 impl AstNode for AnyMdBlock {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        AnyMdContainerBlock::KIND_SET.union(AnyMdLeafBlock::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = AnyMdContainerBlock::KIND_SET
+        .union(AnyMdLeafBlock::KIND_SET)
+        .union(MdQuotePrefix::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
+            MD_QUOTE_PREFIX => true,
             k if AnyMdContainerBlock::can_cast(k) => true,
             k if AnyMdLeafBlock::can_cast(k) => true,
             _ => false,
         }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
-        let syntax = match AnyMdContainerBlock::try_cast(syntax) {
-            Ok(any_md_container_block) => {
-                return Some(Self::AnyMdContainerBlock(any_md_container_block));
+        let res = match syntax.kind() {
+            MD_QUOTE_PREFIX => Self::MdQuotePrefix(MdQuotePrefix { syntax }),
+            _ => {
+                let syntax = match AnyMdContainerBlock::try_cast(syntax) {
+                    Ok(any_md_container_block) => {
+                        return Some(Self::AnyMdContainerBlock(any_md_container_block));
+                    }
+                    Err(syntax) => syntax,
+                };
+                if let Some(any_md_leaf_block) = AnyMdLeafBlock::cast(syntax) {
+                    return Some(Self::AnyMdLeafBlock(any_md_leaf_block));
+                }
+                return None;
             }
-            Err(syntax) => syntax,
         };
-        if let Some(any_md_leaf_block) = AnyMdLeafBlock::cast(syntax) {
-            return Some(Self::AnyMdLeafBlock(any_md_leaf_block));
-        }
-        None
+        Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            Self::MdQuotePrefix(it) => it.syntax(),
             Self::AnyMdContainerBlock(it) => it.syntax(),
             Self::AnyMdLeafBlock(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            Self::MdQuotePrefix(it) => it.into_syntax(),
             Self::AnyMdContainerBlock(it) => it.into_syntax(),
             Self::AnyMdLeafBlock(it) => it.into_syntax(),
         }
@@ -3471,6 +3600,7 @@ impl std::fmt::Debug for AnyMdBlock {
         match self {
             Self::AnyMdContainerBlock(it) => std::fmt::Debug::fmt(it, f),
             Self::AnyMdLeafBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::MdQuotePrefix(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -3479,6 +3609,7 @@ impl From<AnyMdBlock> for SyntaxNode {
         match n {
             AnyMdBlock::AnyMdContainerBlock(it) => it.into_syntax(),
             AnyMdBlock::AnyMdLeafBlock(it) => it.into_syntax(),
+            AnyMdBlock::MdQuotePrefix(it) => it.into_syntax(),
         }
     }
 }
@@ -3669,6 +3800,11 @@ impl From<MdInlineLink> for AnyMdInline {
         Self::MdInlineLink(node)
     }
 }
+impl From<MdQuotePrefix> for AnyMdInline {
+    fn from(node: MdQuotePrefix) -> Self {
+        Self::MdQuotePrefix(node)
+    }
+}
 impl From<MdReferenceImage> for AnyMdInline {
     fn from(node: MdReferenceImage) -> Self {
         Self::MdReferenceImage(node)
@@ -3701,6 +3837,7 @@ impl AstNode for AnyMdInline {
         .union(MdInlineImage::KIND_SET)
         .union(MdInlineItalic::KIND_SET)
         .union(MdInlineLink::KIND_SET)
+        .union(MdQuotePrefix::KIND_SET)
         .union(MdReferenceImage::KIND_SET)
         .union(MdReferenceLink::KIND_SET)
         .union(MdSoftBreak::KIND_SET)
@@ -3718,6 +3855,7 @@ impl AstNode for AnyMdInline {
                 | MD_INLINE_IMAGE
                 | MD_INLINE_ITALIC
                 | MD_INLINE_LINK
+                | MD_QUOTE_PREFIX
                 | MD_REFERENCE_IMAGE
                 | MD_REFERENCE_LINK
                 | MD_SOFT_BREAK
@@ -3736,6 +3874,7 @@ impl AstNode for AnyMdInline {
             MD_INLINE_IMAGE => Self::MdInlineImage(MdInlineImage { syntax }),
             MD_INLINE_ITALIC => Self::MdInlineItalic(MdInlineItalic { syntax }),
             MD_INLINE_LINK => Self::MdInlineLink(MdInlineLink { syntax }),
+            MD_QUOTE_PREFIX => Self::MdQuotePrefix(MdQuotePrefix { syntax }),
             MD_REFERENCE_IMAGE => Self::MdReferenceImage(MdReferenceImage { syntax }),
             MD_REFERENCE_LINK => Self::MdReferenceLink(MdReferenceLink { syntax }),
             MD_SOFT_BREAK => Self::MdSoftBreak(MdSoftBreak { syntax }),
@@ -3756,6 +3895,7 @@ impl AstNode for AnyMdInline {
             Self::MdInlineImage(it) => it.syntax(),
             Self::MdInlineItalic(it) => it.syntax(),
             Self::MdInlineLink(it) => it.syntax(),
+            Self::MdQuotePrefix(it) => it.syntax(),
             Self::MdReferenceImage(it) => it.syntax(),
             Self::MdReferenceLink(it) => it.syntax(),
             Self::MdSoftBreak(it) => it.syntax(),
@@ -3774,6 +3914,7 @@ impl AstNode for AnyMdInline {
             Self::MdInlineImage(it) => it.into_syntax(),
             Self::MdInlineItalic(it) => it.into_syntax(),
             Self::MdInlineLink(it) => it.into_syntax(),
+            Self::MdQuotePrefix(it) => it.into_syntax(),
             Self::MdReferenceImage(it) => it.into_syntax(),
             Self::MdReferenceLink(it) => it.into_syntax(),
             Self::MdSoftBreak(it) => it.into_syntax(),
@@ -3794,6 +3935,7 @@ impl std::fmt::Debug for AnyMdInline {
             Self::MdInlineImage(it) => std::fmt::Debug::fmt(it, f),
             Self::MdInlineItalic(it) => std::fmt::Debug::fmt(it, f),
             Self::MdInlineLink(it) => std::fmt::Debug::fmt(it, f),
+            Self::MdQuotePrefix(it) => std::fmt::Debug::fmt(it, f),
             Self::MdReferenceImage(it) => std::fmt::Debug::fmt(it, f),
             Self::MdReferenceLink(it) => std::fmt::Debug::fmt(it, f),
             Self::MdSoftBreak(it) => std::fmt::Debug::fmt(it, f),
@@ -3814,6 +3956,7 @@ impl From<AnyMdInline> for SyntaxNode {
             AnyMdInline::MdInlineImage(it) => it.into_syntax(),
             AnyMdInline::MdInlineItalic(it) => it.into_syntax(),
             AnyMdInline::MdInlineLink(it) => it.into_syntax(),
+            AnyMdInline::MdQuotePrefix(it) => it.into_syntax(),
             AnyMdInline::MdReferenceImage(it) => it.into_syntax(),
             AnyMdInline::MdReferenceLink(it) => it.into_syntax(),
             AnyMdInline::MdSoftBreak(it) => it.into_syntax(),
@@ -4132,6 +4275,11 @@ impl std::fmt::Display for MdParagraph {
     }
 }
 impl std::fmt::Display for MdQuote {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for MdQuotePrefix {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

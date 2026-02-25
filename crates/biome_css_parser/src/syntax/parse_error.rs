@@ -229,6 +229,20 @@ pub(crate) fn expected_component_value(p: &CssParser, range: TextRange) -> Parse
     .into_diagnostic(p)
 }
 
+pub(crate) fn expected_scss_expression(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    expected_node("SCSS expression", range, p)
+}
+
+pub(crate) fn scss_ellipsis_not_allowed(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder(
+        "SCSS arbitrary arguments (`...`) are only allowed in function call arguments.",
+        range,
+    )
+    .with_hint(markup! {
+        "Use `...` only for function arguments, for example `fn($args...)`."
+    })
+}
+
 pub(crate) fn expected_declaration(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expected_node("<declaration>", range, p)
 }

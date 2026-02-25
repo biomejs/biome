@@ -4032,40 +4032,6 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssPageSelectorPseudo {
         )
     }
 }
-impl FormatRule<biome_css_syntax::CssParameter>
-    for crate::css::auxiliary::parameter::FormatCssParameter
-{
-    type Context = CssFormatContext;
-    #[inline(always)]
-    fn fmt(&self, node: &biome_css_syntax::CssParameter, f: &mut CssFormatter) -> FormatResult<()> {
-        FormatNodeRule::<biome_css_syntax::CssParameter>::fmt(self, node, f)
-    }
-}
-impl AsFormat<CssFormatContext> for biome_css_syntax::CssParameter {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_css_syntax::CssParameter,
-        crate::css::auxiliary::parameter::FormatCssParameter,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(
-            self,
-            crate::css::auxiliary::parameter::FormatCssParameter::default(),
-        )
-    }
-}
-impl IntoFormat<CssFormatContext> for biome_css_syntax::CssParameter {
-    type Format = FormatOwnedWithRule<
-        biome_css_syntax::CssParameter,
-        crate::css::auxiliary::parameter::FormatCssParameter,
-    >;
-    fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(
-            self,
-            crate::css::auxiliary::parameter::FormatCssParameter::default(),
-        )
-    }
-}
 impl FormatRule<biome_css_syntax::CssParenthesizedExpression>
     for crate::css::auxiliary::parenthesized_expression::FormatCssParenthesizedExpression
 {
@@ -6996,6 +6962,82 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssViewTransitionAtRuleD
         FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: view_transition_at_rule_declarator :: FormatCssViewTransitionAtRuleDeclarator :: default ())
     }
 }
+impl FormatRule<biome_css_syntax::ScssArbitraryArgument>
+    for crate::scss::auxiliary::arbitrary_argument::FormatScssArbitraryArgument
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssArbitraryArgument,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssArbitraryArgument>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssArbitraryArgument {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssArbitraryArgument,
+        crate::scss::auxiliary::arbitrary_argument::FormatScssArbitraryArgument,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::auxiliary::arbitrary_argument::FormatScssArbitraryArgument::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssArbitraryArgument {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssArbitraryArgument,
+        crate::scss::auxiliary::arbitrary_argument::FormatScssArbitraryArgument,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::auxiliary::arbitrary_argument::FormatScssArbitraryArgument::default(),
+        )
+    }
+}
+impl FormatRule<biome_css_syntax::ScssBinaryExpression>
+    for crate::scss::auxiliary::binary_expression::FormatScssBinaryExpression
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssBinaryExpression,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssBinaryExpression>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssBinaryExpression {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssBinaryExpression,
+        crate::scss::auxiliary::binary_expression::FormatScssBinaryExpression,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::auxiliary::binary_expression::FormatScssBinaryExpression::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssBinaryExpression {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssBinaryExpression,
+        crate::scss::auxiliary::binary_expression::FormatScssBinaryExpression,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::auxiliary::binary_expression::FormatScssBinaryExpression::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::ScssDeclaration>
     for crate::scss::auxiliary::declaration::FormatScssDeclaration
 {
@@ -7034,6 +7076,44 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssDeclaration {
         )
     }
 }
+impl FormatRule<biome_css_syntax::ScssExpression>
+    for crate::scss::auxiliary::expression::FormatScssExpression
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssExpression,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssExpression>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssExpression {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssExpression,
+        crate::scss::auxiliary::expression::FormatScssExpression,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::auxiliary::expression::FormatScssExpression::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssExpression {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssExpression,
+        crate::scss::auxiliary::expression::FormatScssExpression,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::auxiliary::expression::FormatScssExpression::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::ScssIdentifier>
     for crate::scss::value::identifier::FormatScssIdentifier
 {
@@ -7069,6 +7149,190 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssIdentifier {
         FormatOwnedWithRule::new(
             self,
             crate::scss::value::identifier::FormatScssIdentifier::default(),
+        )
+    }
+}
+impl FormatRule<biome_css_syntax::ScssKeywordArgument>
+    for crate::scss::auxiliary::keyword_argument::FormatScssKeywordArgument
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssKeywordArgument,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssKeywordArgument>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssKeywordArgument {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssKeywordArgument,
+        crate::scss::auxiliary::keyword_argument::FormatScssKeywordArgument,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::auxiliary::keyword_argument::FormatScssKeywordArgument::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssKeywordArgument {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssKeywordArgument,
+        crate::scss::auxiliary::keyword_argument::FormatScssKeywordArgument,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::auxiliary::keyword_argument::FormatScssKeywordArgument::default(),
+        )
+    }
+}
+impl FormatRule<biome_css_syntax::ScssListExpression>
+    for crate::scss::auxiliary::list_expression::FormatScssListExpression
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssListExpression,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssListExpression>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssListExpression {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssListExpression,
+        crate::scss::auxiliary::list_expression::FormatScssListExpression,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::auxiliary::list_expression::FormatScssListExpression::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssListExpression {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssListExpression,
+        crate::scss::auxiliary::list_expression::FormatScssListExpression,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::auxiliary::list_expression::FormatScssListExpression::default(),
+        )
+    }
+}
+impl FormatRule<biome_css_syntax::ScssListExpressionElement>
+    for crate::scss::auxiliary::list_expression_element::FormatScssListExpressionElement
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssListExpressionElement,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssListExpressionElement>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssListExpressionElement {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssListExpressionElement,
+        crate::scss::auxiliary::list_expression_element::FormatScssListExpressionElement,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: scss :: auxiliary :: list_expression_element :: FormatScssListExpressionElement :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssListExpressionElement {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssListExpressionElement,
+        crate::scss::auxiliary::list_expression_element::FormatScssListExpressionElement,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: scss :: auxiliary :: list_expression_element :: FormatScssListExpressionElement :: default ())
+    }
+}
+impl FormatRule<biome_css_syntax::ScssMapExpression>
+    for crate::scss::auxiliary::map_expression::FormatScssMapExpression
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssMapExpression,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssMapExpression>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssMapExpression {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssMapExpression,
+        crate::scss::auxiliary::map_expression::FormatScssMapExpression,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::auxiliary::map_expression::FormatScssMapExpression::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssMapExpression {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssMapExpression,
+        crate::scss::auxiliary::map_expression::FormatScssMapExpression,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::auxiliary::map_expression::FormatScssMapExpression::default(),
+        )
+    }
+}
+impl FormatRule<biome_css_syntax::ScssMapExpressionPair>
+    for crate::scss::auxiliary::map_expression_pair::FormatScssMapExpressionPair
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssMapExpressionPair,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssMapExpressionPair>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssMapExpressionPair {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssMapExpressionPair,
+        crate::scss::auxiliary::map_expression_pair::FormatScssMapExpressionPair,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::auxiliary::map_expression_pair::FormatScssMapExpressionPair::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssMapExpressionPair {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssMapExpressionPair,
+        crate::scss::auxiliary::map_expression_pair::FormatScssMapExpressionPair,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::auxiliary::map_expression_pair::FormatScssMapExpressionPair::default(),
         )
     }
 }
@@ -7186,6 +7450,38 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssParentSelectorValue 
         )
     }
 }
+impl FormatRule<biome_css_syntax::ScssParenthesizedExpression>
+    for crate::scss::auxiliary::parenthesized_expression::FormatScssParenthesizedExpression
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssParenthesizedExpression,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssParenthesizedExpression>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssParenthesizedExpression {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssParenthesizedExpression,
+        crate::scss::auxiliary::parenthesized_expression::FormatScssParenthesizedExpression,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: scss :: auxiliary :: parenthesized_expression :: FormatScssParenthesizedExpression :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssParenthesizedExpression {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssParenthesizedExpression,
+        crate::scss::auxiliary::parenthesized_expression::FormatScssParenthesizedExpression,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: scss :: auxiliary :: parenthesized_expression :: FormatScssParenthesizedExpression :: default ())
+    }
+}
 impl FormatRule<biome_css_syntax::ScssQualifiedName>
     for crate::scss::auxiliary::qualified_name::FormatScssQualifiedName
 {
@@ -7221,6 +7517,44 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssQualifiedName {
         FormatOwnedWithRule::new(
             self,
             crate::scss::auxiliary::qualified_name::FormatScssQualifiedName::default(),
+        )
+    }
+}
+impl FormatRule<biome_css_syntax::ScssUnaryExpression>
+    for crate::scss::auxiliary::unary_expression::FormatScssUnaryExpression
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssUnaryExpression,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssUnaryExpression>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssUnaryExpression {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssUnaryExpression,
+        crate::scss::auxiliary::unary_expression::FormatScssUnaryExpression,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::auxiliary::unary_expression::FormatScssUnaryExpression::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssUnaryExpression {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssUnaryExpression,
+        crate::scss::auxiliary::unary_expression::FormatScssUnaryExpression,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::auxiliary::unary_expression::FormatScssUnaryExpression::default(),
         )
     }
 }
@@ -8623,6 +8957,77 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssValueAtRulePropertyLi
     >;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule :: new (self , crate :: css :: lists :: value_at_rule_property_list :: FormatCssValueAtRulePropertyList :: default ())
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssExpressionItemList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssExpressionItemList,
+        crate::scss::lists::expression_item_list::FormatScssExpressionItemList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::lists::expression_item_list::FormatScssExpressionItemList::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssExpressionItemList {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssExpressionItemList,
+        crate::scss::lists::expression_item_list::FormatScssExpressionItemList,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::lists::expression_item_list::FormatScssExpressionItemList::default(),
+        )
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssListExpressionElementList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssListExpressionElementList,
+        crate::scss::lists::list_expression_element_list::FormatScssListExpressionElementList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: scss :: lists :: list_expression_element_list :: FormatScssListExpressionElementList :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssListExpressionElementList {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssListExpressionElementList,
+        crate::scss::lists::list_expression_element_list::FormatScssListExpressionElementList,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: scss :: lists :: list_expression_element_list :: FormatScssListExpressionElementList :: default ())
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssMapExpressionPairList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssMapExpressionPairList,
+        crate::scss::lists::map_expression_pair_list::FormatScssMapExpressionPairList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::lists::map_expression_pair_list::FormatScssMapExpressionPairList::default(
+            ),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssMapExpressionPairList {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssMapExpressionPairList,
+        crate::scss::lists::map_expression_pair_list::FormatScssMapExpressionPairList,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::lists::map_expression_pair_list::FormatScssMapExpressionPairList::default(
+            ),
+        )
     }
 }
 impl AsFormat<CssFormatContext> for biome_css_syntax::ScssVariableModifierList {
@@ -12358,6 +12763,56 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyScssDeclarationName {
         FormatOwnedWithRule::new(
             self,
             crate::scss::any::declaration_name::FormatAnyScssDeclarationName::default(),
+        )
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyScssExpression {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyScssExpression,
+        crate::scss::any::expression::FormatAnyScssExpression,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::any::expression::FormatAnyScssExpression::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyScssExpression {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyScssExpression,
+        crate::scss::any::expression::FormatAnyScssExpression,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::any::expression::FormatAnyScssExpression::default(),
+        )
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyScssExpressionItem {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyScssExpressionItem,
+        crate::scss::any::expression_item::FormatAnyScssExpressionItem,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::any::expression_item::FormatAnyScssExpressionItem::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyScssExpressionItem {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyScssExpressionItem,
+        crate::scss::any::expression_item::FormatAnyScssExpressionItem,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::any::expression_item::FormatAnyScssExpressionItem::default(),
         )
     }
 }

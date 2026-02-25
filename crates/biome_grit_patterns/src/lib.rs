@@ -21,6 +21,8 @@ mod grit_target_node;
 mod grit_tree;
 mod pattern_compiler;
 mod source_location_ext;
+#[doc(hidden)]
+pub mod testing;
 mod util;
 mod variables;
 

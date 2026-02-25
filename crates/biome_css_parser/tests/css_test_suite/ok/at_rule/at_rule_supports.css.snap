@@ -856,15 +856,13 @@ CssRoot {
                                             },
                                             l_paren_token: L_PAREN@758..759 "(" [] [],
                                             items: CssParameterList [
-                                                CssParameter {
-                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                        css_component_value_list: CssComponentValueList [
-                                                            CssRegularDimension {
-                                                                value_token: CSS_NUMBER_LITERAL@759..761 "10" [] [],
-                                                                unit_token: IDENT@761..764 "deg" [] [],
-                                                            },
-                                                        ],
-                                                    },
+                                                CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssRegularDimension {
+                                                            value_token: CSS_NUMBER_LITERAL@759..761 "10" [] [],
+                                                            unit_token: IDENT@761..764 "deg" [] [],
+                                                        },
+                                                    ],
                                                 },
                                             ],
                                             r_paren_token: R_PAREN@764..765 ")" [] [],
@@ -946,15 +944,13 @@ CssRoot {
                                                     },
                                                     l_paren_token: L_PAREN@857..858 "(" [] [],
                                                     items: CssParameterList [
-                                                        CssParameter {
-                                                            any_css_expression: CssListOfComponentValuesExpression {
-                                                                css_component_value_list: CssComponentValueList [
-                                                                    CssRegularDimension {
-                                                                        value_token: CSS_NUMBER_LITERAL@858..860 "10" [] [],
-                                                                        unit_token: IDENT@860..863 "deg" [] [],
-                                                                    },
-                                                                ],
-                                                            },
+                                                        CssListOfComponentValuesExpression {
+                                                            css_component_value_list: CssComponentValueList [
+                                                                CssRegularDimension {
+                                                                    value_token: CSS_NUMBER_LITERAL@858..860 "10" [] [],
+                                                                    unit_token: IDENT@860..863 "deg" [] [],
+                                                                },
+                                                            ],
                                                         },
                                                     ],
                                                     r_paren_token: R_PAREN@863..864 ")" [] [],
@@ -1039,15 +1035,13 @@ CssRoot {
                                                     },
                                                     l_paren_token: L_PAREN@1001..1002 "(" [] [],
                                                     items: CssParameterList [
-                                                        CssParameter {
-                                                            any_css_expression: CssListOfComponentValuesExpression {
-                                                                css_component_value_list: CssComponentValueList [
-                                                                    CssRegularDimension {
-                                                                        value_token: CSS_NUMBER_LITERAL@1002..1004 "10" [] [],
-                                                                        unit_token: IDENT@1004..1007 "deg" [] [],
-                                                                    },
-                                                                ],
-                                                            },
+                                                        CssListOfComponentValuesExpression {
+                                                            css_component_value_list: CssComponentValueList [
+                                                                CssRegularDimension {
+                                                                    value_token: CSS_NUMBER_LITERAL@1002..1004 "10" [] [],
+                                                                    unit_token: IDENT@1004..1007 "deg" [] [],
+                                                                },
+                                                            ],
                                                         },
                                                     ],
                                                     r_paren_token: R_PAREN@1007..1011 ")" [] [Whitespace("   ")],
@@ -1132,15 +1126,13 @@ CssRoot {
                                                     },
                                                     l_paren_token: L_PAREN@1103..1104 "(" [] [],
                                                     items: CssParameterList [
-                                                        CssParameter {
-                                                            any_css_expression: CssListOfComponentValuesExpression {
-                                                                css_component_value_list: CssComponentValueList [
-                                                                    CssRegularDimension {
-                                                                        value_token: CSS_NUMBER_LITERAL@1104..1106 "10" [] [],
-                                                                        unit_token: IDENT@1106..1109 "deg" [] [],
-                                                                    },
-                                                                ],
-                                                            },
+                                                        CssListOfComponentValuesExpression {
+                                                            css_component_value_list: CssComponentValueList [
+                                                                CssRegularDimension {
+                                                                    value_token: CSS_NUMBER_LITERAL@1104..1106 "10" [] [],
+                                                                    unit_token: IDENT@1106..1109 "deg" [] [],
+                                                                },
+                                                            ],
                                                         },
                                                     ],
                                                     r_paren_token: R_PAREN@1109..1110 ")" [] [],
@@ -1331,15 +1323,13 @@ CssRoot {
                                             },
                                             l_paren_token: L_PAREN@1307..1308 "(" [] [],
                                             items: CssParameterList [
-                                                CssParameter {
-                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                        css_component_value_list: CssComponentValueList [
-                                                            CssRegularDimension {
-                                                                value_token: CSS_NUMBER_LITERAL@1308..1310 "10" [] [],
-                                                                unit_token: IDENT@1310..1313 "deg" [] [],
-                                                            },
-                                                        ],
-                                                    },
+                                                CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssRegularDimension {
+                                                            value_token: CSS_NUMBER_LITERAL@1308..1310 "10" [] [],
+                                                            unit_token: IDENT@1310..1313 "deg" [] [],
+                                                        },
+                                                    ],
                                                 },
                                             ],
                                             r_paren_token: R_PAREN@1313..1314 ")" [] [],
@@ -1421,15 +1411,13 @@ CssRoot {
                                                     },
                                                     l_paren_token: L_PAREN@1406..1407 "(" [] [],
                                                     items: CssParameterList [
-                                                        CssParameter {
-                                                            any_css_expression: CssListOfComponentValuesExpression {
-                                                                css_component_value_list: CssComponentValueList [
-                                                                    CssRegularDimension {
-                                                                        value_token: CSS_NUMBER_LITERAL@1407..1409 "10" [] [],
-                                                                        unit_token: IDENT@1409..1412 "deg" [] [],
-                                                                    },
-                                                                ],
-                                                            },
+                                                        CssListOfComponentValuesExpression {
+                                                            css_component_value_list: CssComponentValueList [
+                                                                CssRegularDimension {
+                                                                    value_token: CSS_NUMBER_LITERAL@1407..1409 "10" [] [],
+                                                                    unit_token: IDENT@1409..1412 "deg" [] [],
+                                                                },
+                                                            ],
                                                         },
                                                     ],
                                                     r_paren_token: R_PAREN@1412..1413 ")" [] [],
@@ -1681,14 +1669,12 @@ CssRoot {
                             },
                             l_paren_token: L_PAREN@1638..1639 "(" [] [],
                             items: CssParameterList [
-                                CssParameter {
-                                    any_css_expression: CssListOfComponentValuesExpression {
-                                        css_component_value_list: CssComponentValueList [
-                                            CssString {
-                                                value_token: CSS_STRING_LITERAL@1639..1650 "\".minwidth\"" [] [],
-                                            },
-                                        ],
-                                    },
+                                CssListOfComponentValuesExpression {
+                                    css_component_value_list: CssComponentValueList [
+                                        CssString {
+                                            value_token: CSS_STRING_LITERAL@1639..1650 "\".minwidth\"" [] [],
+                                        },
+                                    ],
                                 },
                             ],
                             r_paren_token: R_PAREN@1650..1651 ")" [] [],
@@ -1990,34 +1976,28 @@ CssRoot {
                         },
                         l_paren_token: L_PAREN@1885..1886 "(" [] [],
                         items: CssParameterList [
-                            CssParameter {
-                                any_css_expression: CssListOfComponentValuesExpression {
-                                    css_component_value_list: CssComponentValueList [
-                                        CssNumber {
-                                            value_token: CSS_NUMBER_LITERAL@1886..1888 "10" [] [],
-                                        },
-                                    ],
-                                },
+                            CssListOfComponentValuesExpression {
+                                css_component_value_list: CssComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@1886..1888 "10" [] [],
+                                    },
+                                ],
                             },
                             COMMA@1888..1890 "," [] [Whitespace(" ")],
-                            CssParameter {
-                                any_css_expression: CssListOfComponentValuesExpression {
-                                    css_component_value_list: CssComponentValueList [
-                                        CssNumber {
-                                            value_token: CSS_NUMBER_LITERAL@1890..1892 "20" [] [],
-                                        },
-                                    ],
-                                },
+                            CssListOfComponentValuesExpression {
+                                css_component_value_list: CssComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@1890..1892 "20" [] [],
+                                    },
+                                ],
                             },
                             COMMA@1892..1894 "," [] [Whitespace(" ")],
-                            CssParameter {
-                                any_css_expression: CssListOfComponentValuesExpression {
-                                    css_component_value_list: CssComponentValueList [
-                                        CssNumber {
-                                            value_token: CSS_NUMBER_LITERAL@1894..1896 "40" [] [],
-                                        },
-                                    ],
-                                },
+                            CssListOfComponentValuesExpression {
+                                css_component_value_list: CssComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@1894..1896 "40" [] [],
+                                    },
+                                ],
                             },
                         ],
                         r_paren_token: R_PAREN@1896..1898 ")" [] [Whitespace(" ")],
@@ -2079,34 +2059,28 @@ CssRoot {
                             },
                             l_paren_token: L_PAREN@1942..1943 "(" [] [],
                             items: CssParameterList [
-                                CssParameter {
-                                    any_css_expression: CssListOfComponentValuesExpression {
-                                        css_component_value_list: CssComponentValueList [
-                                            CssNumber {
-                                                value_token: CSS_NUMBER_LITERAL@1943..1945 "10" [] [],
-                                            },
-                                        ],
-                                    },
+                                CssListOfComponentValuesExpression {
+                                    css_component_value_list: CssComponentValueList [
+                                        CssNumber {
+                                            value_token: CSS_NUMBER_LITERAL@1943..1945 "10" [] [],
+                                        },
+                                    ],
                                 },
                                 COMMA@1945..1947 "," [] [Whitespace(" ")],
-                                CssParameter {
-                                    any_css_expression: CssListOfComponentValuesExpression {
-                                        css_component_value_list: CssComponentValueList [
-                                            CssNumber {
-                                                value_token: CSS_NUMBER_LITERAL@1947..1949 "20" [] [],
-                                            },
-                                        ],
-                                    },
+                                CssListOfComponentValuesExpression {
+                                    css_component_value_list: CssComponentValueList [
+                                        CssNumber {
+                                            value_token: CSS_NUMBER_LITERAL@1947..1949 "20" [] [],
+                                        },
+                                    ],
                                 },
                                 COMMA@1949..1951 "," [] [Whitespace(" ")],
-                                CssParameter {
-                                    any_css_expression: CssListOfComponentValuesExpression {
-                                        css_component_value_list: CssComponentValueList [
-                                            CssNumber {
-                                                value_token: CSS_NUMBER_LITERAL@1951..1953 "40" [] [],
-                                            },
-                                        ],
-                                    },
+                                CssListOfComponentValuesExpression {
+                                    css_component_value_list: CssComponentValueList [
+                                        CssNumber {
+                                            value_token: CSS_NUMBER_LITERAL@1951..1953 "40" [] [],
+                                        },
+                                    ],
                                 },
                             ],
                             r_paren_token: R_PAREN@1953..1954 ")" [] [],
@@ -2170,34 +2144,28 @@ CssRoot {
                             },
                             l_paren_token: L_PAREN@2003..2007 "(" [] [Whitespace("   ")],
                             items: CssParameterList [
-                                CssParameter {
-                                    any_css_expression: CssListOfComponentValuesExpression {
-                                        css_component_value_list: CssComponentValueList [
-                                            CssNumber {
-                                                value_token: CSS_NUMBER_LITERAL@2007..2012 "10" [] [Whitespace("   ")],
-                                            },
-                                        ],
-                                    },
+                                CssListOfComponentValuesExpression {
+                                    css_component_value_list: CssComponentValueList [
+                                        CssNumber {
+                                            value_token: CSS_NUMBER_LITERAL@2007..2012 "10" [] [Whitespace("   ")],
+                                        },
+                                    ],
                                 },
                                 COMMA@2012..2016 "," [] [Whitespace("   ")],
-                                CssParameter {
-                                    any_css_expression: CssListOfComponentValuesExpression {
-                                        css_component_value_list: CssComponentValueList [
-                                            CssNumber {
-                                                value_token: CSS_NUMBER_LITERAL@2016..2021 "20" [] [Whitespace("   ")],
-                                            },
-                                        ],
-                                    },
+                                CssListOfComponentValuesExpression {
+                                    css_component_value_list: CssComponentValueList [
+                                        CssNumber {
+                                            value_token: CSS_NUMBER_LITERAL@2016..2021 "20" [] [Whitespace("   ")],
+                                        },
+                                    ],
                                 },
                                 COMMA@2021..2025 "," [] [Whitespace("   ")],
-                                CssParameter {
-                                    any_css_expression: CssListOfComponentValuesExpression {
-                                        css_component_value_list: CssComponentValueList [
-                                            CssNumber {
-                                                value_token: CSS_NUMBER_LITERAL@2025..2030 "40" [] [Whitespace("   ")],
-                                            },
-                                        ],
-                                    },
+                                CssListOfComponentValuesExpression {
+                                    css_component_value_list: CssComponentValueList [
+                                        CssNumber {
+                                            value_token: CSS_NUMBER_LITERAL@2025..2030 "40" [] [Whitespace("   ")],
+                                        },
+                                    ],
                                 },
                             ],
                             r_paren_token: R_PAREN@2030..2033 ")" [] [Whitespace("  ")],
@@ -2412,14 +2380,12 @@ CssRoot {
                                                         },
                                                         l_paren_token: L_PAREN@2228..2229 "(" [] [],
                                                         items: CssParameterList [
-                                                            CssParameter {
-                                                                any_css_expression: CssListOfComponentValuesExpression {
-                                                                    css_component_value_list: CssComponentValueList [
-                                                                        CssDashedIdentifier {
-                                                                            value_token: IDENT@2229..2238 "--varName" [] [],
-                                                                        },
-                                                                    ],
-                                                                },
+                                                            CssListOfComponentValuesExpression {
+                                                                css_component_value_list: CssComponentValueList [
+                                                                    CssDashedIdentifier {
+                                                                        value_token: IDENT@2229..2238 "--varName" [] [],
+                                                                    },
+                                                                ],
                                                             },
                                                         ],
                                                         r_paren_token: R_PAREN@2238..2239 ")" [] [],
@@ -2985,15 +2951,13 @@ CssRoot {
                                         },
                                         l_paren_token: L_PAREN@2681..2682 "(" [] [],
                                         items: CssParameterList [
-                                            CssParameter {
-                                                any_css_expression: CssListOfComponentValuesExpression {
-                                                    css_component_value_list: CssComponentValueList [
-                                                        CssRegularDimension {
-                                                            value_token: CSS_NUMBER_LITERAL@2682..2685 "100" [] [],
-                                                            unit_token: IDENT@2685..2687 "px" [] [],
-                                                        },
-                                                    ],
-                                                },
+                                            CssListOfComponentValuesExpression {
+                                                css_component_value_list: CssComponentValueList [
+                                                    CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@2682..2685 "100" [] [],
+                                                        unit_token: IDENT@2685..2687 "px" [] [],
+                                                    },
+                                                ],
                                             },
                                         ],
                                         r_paren_token: R_PAREN@2687..2688 ")" [] [],
@@ -3063,14 +3027,12 @@ CssRoot {
                             },
                             l_paren_token: L_PAREN@2739..2740 "(" [] [],
                             items: CssParameterList [
-                                CssParameter {
-                                    any_css_expression: CssListOfComponentValuesExpression {
-                                        css_component_value_list: CssComponentValueList [
-                                            CssNumber {
-                                                value_token: CSS_NUMBER_LITERAL@2740..2741 "1" [] [],
-                                            },
-                                        ],
-                                    },
+                                CssListOfComponentValuesExpression {
+                                    css_component_value_list: CssComponentValueList [
+                                        CssNumber {
+                                            value_token: CSS_NUMBER_LITERAL@2740..2741 "1" [] [],
+                                        },
+                                    ],
                                 },
                             ],
                             r_paren_token: R_PAREN@2741..2742 ")" [] [],
@@ -3237,14 +3199,12 @@ CssRoot {
                             },
                             l_paren_token: L_PAREN@2884..2885 "(" [] [],
                             items: CssParameterList [
-                                CssParameter {
-                                    any_css_expression: CssListOfComponentValuesExpression {
-                                        css_component_value_list: CssComponentValueList [
-                                            CssString {
-                                                value_token: CSS_STRING_LITERAL@2885..2894 "\"example\"" [] [],
-                                            },
-                                        ],
-                                    },
+                                CssListOfComponentValuesExpression {
+                                    css_component_value_list: CssComponentValueList [
+                                        CssString {
+                                            value_token: CSS_STRING_LITERAL@2885..2894 "\"example\"" [] [],
+                                        },
+                                    ],
                                 },
                             ],
                             r_paren_token: R_PAREN@2894..2898 ")" [] [Whitespace("   ")],
@@ -3431,14 +3391,12 @@ CssRoot {
                             },
                             l_paren_token: L_PAREN@3059..3060 "(" [] [],
                             items: CssParameterList [
-                                CssParameter {
-                                    any_css_expression: CssListOfComponentValuesExpression {
-                                        css_component_value_list: CssComponentValueList [
-                                            CssString {
-                                                value_token: CSS_STRING_LITERAL@3060..3071 "\".minwidth\"" [] [],
-                                            },
-                                        ],
-                                    },
+                                CssListOfComponentValuesExpression {
+                                    css_component_value_list: CssComponentValueList [
+                                        CssString {
+                                            value_token: CSS_STRING_LITERAL@3060..3071 "\".minwidth\"" [] [],
+                                        },
+                                    ],
                                 },
                             ],
                             r_paren_token: R_PAREN@3071..3072 ")" [] [],
@@ -3966,12 +3924,11 @@ CssRoot {
                         0: IDENT@752..758 "rotate" [] []
                       1: L_PAREN@758..759 "(" [] []
                       2: CSS_PARAMETER_LIST@759..764
-                        0: CSS_PARAMETER@759..764
-                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@759..764
-                            0: CSS_COMPONENT_VALUE_LIST@759..764
-                              0: CSS_REGULAR_DIMENSION@759..764
-                                0: CSS_NUMBER_LITERAL@759..761 "10" [] []
-                                1: IDENT@761..764 "deg" [] []
+                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@759..764
+                          0: CSS_COMPONENT_VALUE_LIST@759..764
+                            0: CSS_REGULAR_DIMENSION@759..764
+                              0: CSS_NUMBER_LITERAL@759..761 "10" [] []
+                              1: IDENT@761..764 "deg" [] []
                       3: R_PAREN@764..765 ")" [] []
                 1: (empty)
               2: R_PAREN@765..767 ")" [] [Whitespace(" ")]
@@ -4027,12 +3984,11 @@ CssRoot {
                             0: IDENT@851..857 "rotate" [] []
                           1: L_PAREN@857..858 "(" [] []
                           2: CSS_PARAMETER_LIST@858..863
-                            0: CSS_PARAMETER@858..863
-                              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@858..863
-                                0: CSS_COMPONENT_VALUE_LIST@858..863
-                                  0: CSS_REGULAR_DIMENSION@858..863
-                                    0: CSS_NUMBER_LITERAL@858..860 "10" [] []
-                                    1: IDENT@860..863 "deg" [] []
+                            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@858..863
+                              0: CSS_COMPONENT_VALUE_LIST@858..863
+                                0: CSS_REGULAR_DIMENSION@858..863
+                                  0: CSS_NUMBER_LITERAL@858..860 "10" [] []
+                                  1: IDENT@860..863 "deg" [] []
                           3: R_PAREN@863..864 ")" [] []
                     1: (empty)
                   2: R_PAREN@864..865 ")" [] []
@@ -4089,12 +4045,11 @@ CssRoot {
                             0: IDENT@995..1001 "rotate" [] []
                           1: L_PAREN@1001..1002 "(" [] []
                           2: CSS_PARAMETER_LIST@1002..1007
-                            0: CSS_PARAMETER@1002..1007
-                              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1002..1007
-                                0: CSS_COMPONENT_VALUE_LIST@1002..1007
-                                  0: CSS_REGULAR_DIMENSION@1002..1007
-                                    0: CSS_NUMBER_LITERAL@1002..1004 "10" [] []
-                                    1: IDENT@1004..1007 "deg" [] []
+                            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1002..1007
+                              0: CSS_COMPONENT_VALUE_LIST@1002..1007
+                                0: CSS_REGULAR_DIMENSION@1002..1007
+                                  0: CSS_NUMBER_LITERAL@1002..1004 "10" [] []
+                                  1: IDENT@1004..1007 "deg" [] []
                           3: R_PAREN@1007..1011 ")" [] [Whitespace("   ")]
                     1: (empty)
                   2: R_PAREN@1011..1015 ")" [] [Whitespace("   ")]
@@ -4151,12 +4106,11 @@ CssRoot {
                             0: IDENT@1097..1103 "rotate" [] []
                           1: L_PAREN@1103..1104 "(" [] []
                           2: CSS_PARAMETER_LIST@1104..1109
-                            0: CSS_PARAMETER@1104..1109
-                              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1104..1109
-                                0: CSS_COMPONENT_VALUE_LIST@1104..1109
-                                  0: CSS_REGULAR_DIMENSION@1104..1109
-                                    0: CSS_NUMBER_LITERAL@1104..1106 "10" [] []
-                                    1: IDENT@1106..1109 "deg" [] []
+                            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1104..1109
+                              0: CSS_COMPONENT_VALUE_LIST@1104..1109
+                                0: CSS_REGULAR_DIMENSION@1104..1109
+                                  0: CSS_NUMBER_LITERAL@1104..1106 "10" [] []
+                                  1: IDENT@1106..1109 "deg" [] []
                           3: R_PAREN@1109..1110 ")" [] []
                     1: (empty)
                   2: R_PAREN@1110..1111 ")" [] []
@@ -4284,12 +4238,11 @@ CssRoot {
                         0: IDENT@1301..1307 "rotate" [] []
                       1: L_PAREN@1307..1308 "(" [] []
                       2: CSS_PARAMETER_LIST@1308..1313
-                        0: CSS_PARAMETER@1308..1313
-                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1308..1313
-                            0: CSS_COMPONENT_VALUE_LIST@1308..1313
-                              0: CSS_REGULAR_DIMENSION@1308..1313
-                                0: CSS_NUMBER_LITERAL@1308..1310 "10" [] []
-                                1: IDENT@1310..1313 "deg" [] []
+                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1308..1313
+                          0: CSS_COMPONENT_VALUE_LIST@1308..1313
+                            0: CSS_REGULAR_DIMENSION@1308..1313
+                              0: CSS_NUMBER_LITERAL@1308..1310 "10" [] []
+                              1: IDENT@1310..1313 "deg" [] []
                       3: R_PAREN@1313..1314 ")" [] []
                 1: (empty)
               2: R_PAREN@1314..1316 ")" [] [Whitespace(" ")]
@@ -4345,12 +4298,11 @@ CssRoot {
                             0: IDENT@1400..1406 "rotate" [] []
                           1: L_PAREN@1406..1407 "(" [] []
                           2: CSS_PARAMETER_LIST@1407..1412
-                            0: CSS_PARAMETER@1407..1412
-                              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1407..1412
-                                0: CSS_COMPONENT_VALUE_LIST@1407..1412
-                                  0: CSS_REGULAR_DIMENSION@1407..1412
-                                    0: CSS_NUMBER_LITERAL@1407..1409 "10" [] []
-                                    1: IDENT@1409..1412 "deg" [] []
+                            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1407..1412
+                              0: CSS_COMPONENT_VALUE_LIST@1407..1412
+                                0: CSS_REGULAR_DIMENSION@1407..1412
+                                  0: CSS_NUMBER_LITERAL@1407..1409 "10" [] []
+                                  1: IDENT@1409..1412 "deg" [] []
                           3: R_PAREN@1412..1413 ")" [] []
                     1: (empty)
                   2: R_PAREN@1413..1414 ")" [] []
@@ -4514,11 +4466,10 @@ CssRoot {
                 0: IDENT@1629..1638 "--element" [] []
               1: L_PAREN@1638..1639 "(" [] []
               2: CSS_PARAMETER_LIST@1639..1650
-                0: CSS_PARAMETER@1639..1650
-                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1639..1650
-                    0: CSS_COMPONENT_VALUE_LIST@1639..1650
-                      0: CSS_STRING@1639..1650
-                        0: CSS_STRING_LITERAL@1639..1650 "\".minwidth\"" [] []
+                0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1639..1650
+                  0: CSS_COMPONENT_VALUE_LIST@1639..1650
+                    0: CSS_STRING@1639..1650
+                      0: CSS_STRING_LITERAL@1639..1650 "\".minwidth\"" [] []
               3: R_PAREN@1650..1651 ")" [] []
             2: R_PAREN@1651..1653 ")" [] [Whitespace(" ")]
         1: CSS_RULE_BLOCK@1653..1657
@@ -4717,23 +4668,20 @@ CssRoot {
               0: IDENT@1881..1885 "func" [] []
             1: L_PAREN@1885..1886 "(" [] []
             2: CSS_PARAMETER_LIST@1886..1896
-              0: CSS_PARAMETER@1886..1888
-                0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1886..1888
-                  0: CSS_COMPONENT_VALUE_LIST@1886..1888
-                    0: CSS_NUMBER@1886..1888
-                      0: CSS_NUMBER_LITERAL@1886..1888 "10" [] []
+              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1886..1888
+                0: CSS_COMPONENT_VALUE_LIST@1886..1888
+                  0: CSS_NUMBER@1886..1888
+                    0: CSS_NUMBER_LITERAL@1886..1888 "10" [] []
               1: COMMA@1888..1890 "," [] [Whitespace(" ")]
-              2: CSS_PARAMETER@1890..1892
-                0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1890..1892
-                  0: CSS_COMPONENT_VALUE_LIST@1890..1892
-                    0: CSS_NUMBER@1890..1892
-                      0: CSS_NUMBER_LITERAL@1890..1892 "20" [] []
+              2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1890..1892
+                0: CSS_COMPONENT_VALUE_LIST@1890..1892
+                  0: CSS_NUMBER@1890..1892
+                    0: CSS_NUMBER_LITERAL@1890..1892 "20" [] []
               3: COMMA@1892..1894 "," [] [Whitespace(" ")]
-              4: CSS_PARAMETER@1894..1896
-                0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1894..1896
-                  0: CSS_COMPONENT_VALUE_LIST@1894..1896
-                    0: CSS_NUMBER@1894..1896
-                      0: CSS_NUMBER_LITERAL@1894..1896 "40" [] []
+              4: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1894..1896
+                0: CSS_COMPONENT_VALUE_LIST@1894..1896
+                  0: CSS_NUMBER@1894..1896
+                    0: CSS_NUMBER_LITERAL@1894..1896 "40" [] []
             3: R_PAREN@1896..1898 ")" [] [Whitespace(" ")]
         1: CSS_RULE_BLOCK@1898..1925
           0: L_CURLY@1898..1899 "{" [] []
@@ -4774,23 +4722,20 @@ CssRoot {
                 0: IDENT@1938..1942 "func" [] []
               1: L_PAREN@1942..1943 "(" [] []
               2: CSS_PARAMETER_LIST@1943..1953
-                0: CSS_PARAMETER@1943..1945
-                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1943..1945
-                    0: CSS_COMPONENT_VALUE_LIST@1943..1945
-                      0: CSS_NUMBER@1943..1945
-                        0: CSS_NUMBER_LITERAL@1943..1945 "10" [] []
+                0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1943..1945
+                  0: CSS_COMPONENT_VALUE_LIST@1943..1945
+                    0: CSS_NUMBER@1943..1945
+                      0: CSS_NUMBER_LITERAL@1943..1945 "10" [] []
                 1: COMMA@1945..1947 "," [] [Whitespace(" ")]
-                2: CSS_PARAMETER@1947..1949
-                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1947..1949
-                    0: CSS_COMPONENT_VALUE_LIST@1947..1949
-                      0: CSS_NUMBER@1947..1949
-                        0: CSS_NUMBER_LITERAL@1947..1949 "20" [] []
+                2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1947..1949
+                  0: CSS_COMPONENT_VALUE_LIST@1947..1949
+                    0: CSS_NUMBER@1947..1949
+                      0: CSS_NUMBER_LITERAL@1947..1949 "20" [] []
                 3: COMMA@1949..1951 "," [] [Whitespace(" ")]
-                4: CSS_PARAMETER@1951..1953
-                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1951..1953
-                    0: CSS_COMPONENT_VALUE_LIST@1951..1953
-                      0: CSS_NUMBER@1951..1953
-                        0: CSS_NUMBER_LITERAL@1951..1953 "40" [] []
+                4: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1951..1953
+                  0: CSS_COMPONENT_VALUE_LIST@1951..1953
+                    0: CSS_NUMBER@1951..1953
+                      0: CSS_NUMBER_LITERAL@1951..1953 "40" [] []
               3: R_PAREN@1953..1954 ")" [] []
             2: R_PAREN@1954..1956 ")" [] [Whitespace(" ")]
         1: CSS_RULE_BLOCK@1956..1983
@@ -4832,23 +4777,20 @@ CssRoot {
                 0: IDENT@1999..2003 "func" [] []
               1: L_PAREN@2003..2007 "(" [] [Whitespace("   ")]
               2: CSS_PARAMETER_LIST@2007..2030
-                0: CSS_PARAMETER@2007..2012
-                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@2007..2012
-                    0: CSS_COMPONENT_VALUE_LIST@2007..2012
-                      0: CSS_NUMBER@2007..2012
-                        0: CSS_NUMBER_LITERAL@2007..2012 "10" [] [Whitespace("   ")]
+                0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@2007..2012
+                  0: CSS_COMPONENT_VALUE_LIST@2007..2012
+                    0: CSS_NUMBER@2007..2012
+                      0: CSS_NUMBER_LITERAL@2007..2012 "10" [] [Whitespace("   ")]
                 1: COMMA@2012..2016 "," [] [Whitespace("   ")]
-                2: CSS_PARAMETER@2016..2021
-                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@2016..2021
-                    0: CSS_COMPONENT_VALUE_LIST@2016..2021
-                      0: CSS_NUMBER@2016..2021
-                        0: CSS_NUMBER_LITERAL@2016..2021 "20" [] [Whitespace("   ")]
+                2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@2016..2021
+                  0: CSS_COMPONENT_VALUE_LIST@2016..2021
+                    0: CSS_NUMBER@2016..2021
+                      0: CSS_NUMBER_LITERAL@2016..2021 "20" [] [Whitespace("   ")]
                 3: COMMA@2021..2025 "," [] [Whitespace("   ")]
-                4: CSS_PARAMETER@2025..2030
-                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@2025..2030
-                    0: CSS_COMPONENT_VALUE_LIST@2025..2030
-                      0: CSS_NUMBER@2025..2030
-                        0: CSS_NUMBER_LITERAL@2025..2030 "40" [] [Whitespace("   ")]
+                4: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@2025..2030
+                  0: CSS_COMPONENT_VALUE_LIST@2025..2030
+                    0: CSS_NUMBER@2025..2030
+                      0: CSS_NUMBER_LITERAL@2025..2030 "40" [] [Whitespace("   ")]
               3: R_PAREN@2030..2033 ")" [] [Whitespace("  ")]
             2: R_PAREN@2033..2035 ")" [] [Whitespace(" ")]
         1: CSS_RULE_BLOCK@2035..2062
@@ -4991,11 +4933,10 @@ CssRoot {
                               0: IDENT@2225..2228 "var" [] []
                             1: L_PAREN@2228..2229 "(" [] []
                             2: CSS_PARAMETER_LIST@2229..2238
-                              0: CSS_PARAMETER@2229..2238
-                                0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@2229..2238
-                                  0: CSS_COMPONENT_VALUE_LIST@2229..2238
-                                    0: CSS_DASHED_IDENTIFIER@2229..2238
-                                      0: IDENT@2229..2238 "--varName" [] []
+                              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@2229..2238
+                                0: CSS_COMPONENT_VALUE_LIST@2229..2238
+                                  0: CSS_DASHED_IDENTIFIER@2229..2238
+                                    0: IDENT@2229..2238 "--varName" [] []
                             3: R_PAREN@2238..2239 ")" [] []
                       1: (empty)
                     1: SEMICOLON@2239..2240 ";" [] []
@@ -5371,12 +5312,11 @@ CssRoot {
                       0: IDENT@2677..2681 "calc" [] []
                     1: L_PAREN@2681..2682 "(" [] []
                     2: CSS_PARAMETER_LIST@2682..2687
-                      0: CSS_PARAMETER@2682..2687
-                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@2682..2687
-                          0: CSS_COMPONENT_VALUE_LIST@2682..2687
-                            0: CSS_REGULAR_DIMENSION@2682..2687
-                              0: CSS_NUMBER_LITERAL@2682..2685 "100" [] []
-                              1: IDENT@2685..2687 "px" [] []
+                      0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@2682..2687
+                        0: CSS_COMPONENT_VALUE_LIST@2682..2687
+                          0: CSS_REGULAR_DIMENSION@2682..2687
+                            0: CSS_NUMBER_LITERAL@2682..2685 "100" [] []
+                            1: IDENT@2685..2687 "px" [] []
                     3: R_PAREN@2687..2688 ")" [] []
               1: (empty)
             2: R_PAREN@2688..2690 ")" [] [Whitespace(" ")]
@@ -5420,11 +5360,10 @@ CssRoot {
                 0: IDENT@2735..2739 "func" [] []
               1: L_PAREN@2739..2740 "(" [] []
               2: CSS_PARAMETER_LIST@2740..2741
-                0: CSS_PARAMETER@2740..2741
-                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@2740..2741
-                    0: CSS_COMPONENT_VALUE_LIST@2740..2741
-                      0: CSS_NUMBER@2740..2741
-                        0: CSS_NUMBER_LITERAL@2740..2741 "1" [] []
+                0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@2740..2741
+                  0: CSS_COMPONENT_VALUE_LIST@2740..2741
+                    0: CSS_NUMBER@2740..2741
+                      0: CSS_NUMBER_LITERAL@2740..2741 "1" [] []
               3: R_PAREN@2741..2742 ")" [] []
             2: R_PAREN@2742..2744 ")" [] [Whitespace(" ")]
         1: CSS_RULE_BLOCK@2744..2771
@@ -5535,11 +5474,10 @@ CssRoot {
                 0: IDENT@2880..2884 "func" [] []
               1: L_PAREN@2884..2885 "(" [] []
               2: CSS_PARAMETER_LIST@2885..2894
-                0: CSS_PARAMETER@2885..2894
-                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@2885..2894
-                    0: CSS_COMPONENT_VALUE_LIST@2885..2894
-                      0: CSS_STRING@2885..2894
-                        0: CSS_STRING_LITERAL@2885..2894 "\"example\"" [] []
+                0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@2885..2894
+                  0: CSS_COMPONENT_VALUE_LIST@2885..2894
+                    0: CSS_STRING@2885..2894
+                      0: CSS_STRING_LITERAL@2885..2894 "\"example\"" [] []
               3: R_PAREN@2894..2898 ")" [] [Whitespace("   ")]
             2: R_PAREN@2898..2900 ")" [] [Whitespace(" ")]
         1: CSS_RULE_BLOCK@2900..2927
@@ -5662,11 +5600,10 @@ CssRoot {
                 0: IDENT@3050..3059 "--element" [] []
               1: L_PAREN@3059..3060 "(" [] []
               2: CSS_PARAMETER_LIST@3060..3071
-                0: CSS_PARAMETER@3060..3071
-                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@3060..3071
-                    0: CSS_COMPONENT_VALUE_LIST@3060..3071
-                      0: CSS_STRING@3060..3071
-                        0: CSS_STRING_LITERAL@3060..3071 "\".minwidth\"" [] []
+                0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@3060..3071
+                  0: CSS_COMPONENT_VALUE_LIST@3060..3071
+                    0: CSS_STRING@3060..3071
+                      0: CSS_STRING_LITERAL@3060..3071 "\".minwidth\"" [] []
               3: R_PAREN@3071..3072 ")" [] []
             2: R_PAREN@3072..3074 ")" [] [Whitespace(" ")]
         1: CSS_RULE_BLOCK@3074..3119

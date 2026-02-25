@@ -4,7 +4,9 @@ mod svelte;
 mod vue;
 
 use crate::parser::HtmlParser;
-use crate::syntax::HtmlSyntaxFeatures::{Astro, DoubleTextExpressions, Svelte, Vue};
+use crate::syntax::HtmlSyntaxFeatures::{
+    Astro, DoubleTextExpressions, SingleTextExpressions, Svelte, Vue,
+};
 use crate::syntax::astro::{
     is_at_astro_directive_keyword, is_at_astro_directive_start, parse_astro_directive,
     parse_astro_fence, parse_astro_spread_or_expression,
@@ -37,6 +39,8 @@ pub(crate) enum HtmlSyntaxFeatures {
     /// Exclusive to those documents that support text expressions with {{ }}
     DoubleTextExpressions,
     /// Exclusive to those documents that support text expressions with { }
+    SingleTextExpressions,
+    /// Exclusive to Svelte files (for Svelte-specific directives)
     Svelte,
     /// Exclusive to those documents that support Vue
     Vue,
@@ -51,7 +55,10 @@ impl SyntaxFeature for HtmlSyntaxFeatures {
             DoubleTextExpressions => {
                 p.options().text_expression == Some(TextExpressionKind::Double)
             }
-            Svelte => p.options().text_expression == Some(TextExpressionKind::Single),
+            SingleTextExpressions => {
+                p.options().text_expression == Some(TextExpressionKind::Single)
+            }
+            Svelte => p.options().svelte,
             Vue => p.options().vue,
         }
     }
@@ -142,10 +149,10 @@ fn parse_doc_type(p: &mut HtmlParser) -> ParsedSyntax {
 /// will emit diagnostics. We want to allow them if they have no special meaning.
 #[inline(always)]
 fn inside_tag_context(p: &HtmlParser) -> HtmlLexContext {
-    // Only Vue files use InsideTagVue context, which has Vue-specific directive parsing (v-bind, :, @, etc.)
-    // Svelte and Astro use regular InsideTag context as they have different directive syntax
     if Vue.is_supported(p) {
-        HtmlLexContext::InsideTagWithDirectives
+        HtmlLexContext::InsideTagWithDirectives { svelte: false }
+    } else if Svelte.is_supported(p) {
+        HtmlLexContext::InsideTagSvelte
     } else {
         HtmlLexContext::InsideTag
     }
@@ -165,11 +172,13 @@ fn is_possible_component(p: &HtmlParser, tag_name: &str) -> bool {
 /// for parsing component names, not for parsing attributes.
 #[inline(always)]
 fn component_name_context(p: &HtmlParser) -> HtmlLexContext {
-    if Vue.is_supported(p) || Svelte.is_supported(p) {
+    if Vue.is_supported(p) || Svelte.is_supported(p) || Astro.is_supported(p) {
         // Use HtmlLexContext::InsideTagWithDirectives for all component-supporting files when parsing component names
         // This allows `.` to be lexed properly for member expressions
         // Note: This is safe because we only use this context for tag names, not attributes
-        HtmlLexContext::InsideTagWithDirectives
+        HtmlLexContext::InsideTagWithDirectives {
+            svelte: Svelte.is_supported(p),
+        }
     } else {
         HtmlLexContext::InsideTag
     }
@@ -478,7 +487,7 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
             parse_vue_v_slot_shorthand_directive,
             |p, m| disabled_vue(p, m.range(p)),
         ),
-        T!['{'] if Svelte.is_supported(p) => parse_svelte_spread_or_expression(p),
+        T!['{'] if SingleTextExpressions.is_supported(p) => parse_svelte_spread_or_expression(p),
         T!['{'] if Astro.is_supported(p) => parse_astro_spread_or_expression(p),
         // Keep previous behaviour so that invalid documents are still parsed.
         T!['{'] => Svelte.parse_exclusive_syntax(
@@ -595,13 +604,16 @@ fn parse_attribute_initializer(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
     p.bump_with_context(T![=], HtmlLexContext::AttributeValue);
     if p.at(T!['{']) {
-        HtmlSyntaxFeatures::Svelte
+        HtmlSyntaxFeatures::SingleTextExpressions
             .parse_exclusive_syntax(
                 p,
                 |p| parse_single_text_expression(p, inside_tag_context(p)),
                 |p, m| {
-                    p.err_builder("Expressions are only valid inside Astro files.", m.range(p))
-                        .with_hint("Remove it or rename the file to have the .astro extension.")
+                    p.err_builder(
+                        "Text expressions are not supported in this context.",
+                        m.range(p),
+                    )
+                    .with_hint("Remove the expression or use a supported file type.")
                 },
             )
             .or_recover_with_token_set(
@@ -668,7 +680,7 @@ fn parse_double_text_expression(p: &mut HtmlParser, context: HtmlLexContext) -> 
     if p.at(T!["}}"]) {
         p.expect_with_context(T!["}}"], context);
         if context == HtmlLexContext::InsideTag
-            || context == HtmlLexContext::InsideTagWithDirectives
+            || matches!(context, HtmlLexContext::InsideTagWithDirectives { .. })
         {
             Present(m.complete(p, HTML_ATTRIBUTE_DOUBLE_TEXT_EXPRESSION))
         } else {
@@ -703,7 +715,7 @@ pub(crate) fn parse_single_text_expression(
     p: &mut HtmlParser,
     context: HtmlLexContext,
 ) -> ParsedSyntax {
-    if !Svelte.is_supported(p) {
+    if !SingleTextExpressions.is_supported(p) {
         return Absent;
     }
 
@@ -721,8 +733,9 @@ pub(crate) fn parse_single_text_expression(
     if p.at(T!['}']) {
         p.bump_remap_with_context(T!['}'], context);
         if context == HtmlLexContext::InsideTag
-            || context == HtmlLexContext::InsideTagWithDirectives
+            || matches!(context, HtmlLexContext::InsideTagWithDirectives { .. })
             || context == HtmlLexContext::InsideTagAstro
+            || context == HtmlLexContext::InsideTagSvelte
         {
             Present(m.complete(p, HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION))
         } else {

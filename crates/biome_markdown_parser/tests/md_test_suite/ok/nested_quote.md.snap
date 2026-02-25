@@ -22,12 +22,16 @@ MdDocument {
     bom_token: missing (optional),
     value: MdBlockList [
         MdQuote {
-            marker_token: R_ANGLE@0..1 ">" [] [],
+            prefix: MdQuotePrefix {
+                pre_marker_indent_token: missing (optional),
+                marker_token: R_ANGLE@0..1 ">" [] [],
+                post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@1..2 " " [] [],
+            },
             content: MdBlockList [
                 MdParagraph {
                     list: MdInlineItemList [
                         MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@1..13 "Outer quote" [Skipped(" ")] [],
+                            value_token: MD_TEXTUAL_LITERAL@2..13 "Outer quote" [] [],
                         },
                         MdTextual {
                             value_token: MD_TEXTUAL_LITERAL@13..14 "\n" [] [],
@@ -35,13 +39,22 @@ MdDocument {
                     ],
                     hard_line: missing (optional),
                 },
+                MdQuotePrefix {
+                    pre_marker_indent_token: missing (optional),
+                    marker_token: R_ANGLE@14..15 ">" [] [],
+                    post_marker_space_token: missing (optional),
+                },
                 MdQuote {
-                    marker_token: R_ANGLE@14..16 ">" [Skipped(">")] [],
+                    prefix: MdQuotePrefix {
+                        pre_marker_indent_token: missing (optional),
+                        marker_token: R_ANGLE@15..16 ">" [] [],
+                        post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@16..17 " " [] [],
+                    },
                     content: MdBlockList [
                         MdParagraph {
                             list: MdInlineItemList [
                                 MdTextual {
-                                    value_token: MD_TEXTUAL_LITERAL@16..29 "Nested quote" [Skipped(" ")] [],
+                                    value_token: MD_TEXTUAL_LITERAL@17..29 "Nested quote" [] [],
                                 },
                                 MdTextual {
                                     value_token: MD_TEXTUAL_LITERAL@29..30 "\n" [] [],
@@ -49,13 +62,27 @@ MdDocument {
                             ],
                             hard_line: missing (optional),
                         },
+                        MdQuotePrefix {
+                            pre_marker_indent_token: missing (optional),
+                            marker_token: R_ANGLE@30..31 ">" [] [],
+                            post_marker_space_token: missing (optional),
+                        },
+                        MdQuotePrefix {
+                            pre_marker_indent_token: missing (optional),
+                            marker_token: R_ANGLE@31..32 ">" [] [],
+                            post_marker_space_token: missing (optional),
+                        },
                         MdQuote {
-                            marker_token: R_ANGLE@30..33 ">" [Skipped(">"), Skipped(">")] [],
+                            prefix: MdQuotePrefix {
+                                pre_marker_indent_token: missing (optional),
+                                marker_token: R_ANGLE@32..33 ">" [] [],
+                                post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@33..34 " " [] [],
+                            },
                             content: MdBlockList [
                                 MdParagraph {
                                     list: MdInlineItemList [
                                         MdTextual {
-                                            value_token: MD_TEXTUAL_LITERAL@33..47 "Deeply nested" [Skipped(" ")] [],
+                                            value_token: MD_TEXTUAL_LITERAL@34..47 "Deeply nested" [] [],
                                         },
                                         MdTextual {
                                             value_token: MD_TEXTUAL_LITERAL@47..48 "\n" [] [],
@@ -73,12 +100,16 @@ MdDocument {
             value_token: NEWLINE@48..49 "\n" [] [],
         },
         MdQuote {
-            marker_token: R_ANGLE@49..50 ">" [] [],
+            prefix: MdQuotePrefix {
+                pre_marker_indent_token: missing (optional),
+                marker_token: R_ANGLE@49..50 ">" [] [],
+                post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@50..51 " " [] [],
+            },
             content: MdBlockList [
                 MdParagraph {
                     list: MdInlineItemList [
                         MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@50..64 "Back to outer" [Skipped(" ")] [],
+                            value_token: MD_TEXTUAL_LITERAL@51..64 "Back to outer" [] [],
                         },
                         MdTextual {
                             value_token: MD_TEXTUAL_LITERAL@64..65 "\n" [] [],
@@ -100,44 +131,68 @@ MdDocument {
   0: (empty)
   1: MD_BLOCK_LIST@0..65
     0: MD_QUOTE@0..48
-      0: R_ANGLE@0..1 ">" [] []
-      1: MD_BLOCK_LIST@1..48
-        0: MD_PARAGRAPH@1..14
-          0: MD_INLINE_ITEM_LIST@1..14
-            0: MD_TEXTUAL@1..13
-              0: MD_TEXTUAL_LITERAL@1..13 "Outer quote" [Skipped(" ")] []
+      0: MD_QUOTE_PREFIX@0..2
+        0: (empty)
+        1: R_ANGLE@0..1 ">" [] []
+        2: MD_QUOTE_POST_MARKER_SPACE@1..2 " " [] []
+      1: MD_BLOCK_LIST@2..48
+        0: MD_PARAGRAPH@2..14
+          0: MD_INLINE_ITEM_LIST@2..14
+            0: MD_TEXTUAL@2..13
+              0: MD_TEXTUAL_LITERAL@2..13 "Outer quote" [] []
             1: MD_TEXTUAL@13..14
               0: MD_TEXTUAL_LITERAL@13..14 "\n" [] []
           1: (empty)
-        1: MD_QUOTE@14..48
-          0: R_ANGLE@14..16 ">" [Skipped(">")] []
-          1: MD_BLOCK_LIST@16..48
-            0: MD_PARAGRAPH@16..30
-              0: MD_INLINE_ITEM_LIST@16..30
-                0: MD_TEXTUAL@16..29
-                  0: MD_TEXTUAL_LITERAL@16..29 "Nested quote" [Skipped(" ")] []
+        1: MD_QUOTE_PREFIX@14..15
+          0: (empty)
+          1: R_ANGLE@14..15 ">" [] []
+          2: (empty)
+        2: MD_QUOTE@15..48
+          0: MD_QUOTE_PREFIX@15..17
+            0: (empty)
+            1: R_ANGLE@15..16 ">" [] []
+            2: MD_QUOTE_POST_MARKER_SPACE@16..17 " " [] []
+          1: MD_BLOCK_LIST@17..48
+            0: MD_PARAGRAPH@17..30
+              0: MD_INLINE_ITEM_LIST@17..30
+                0: MD_TEXTUAL@17..29
+                  0: MD_TEXTUAL_LITERAL@17..29 "Nested quote" [] []
                 1: MD_TEXTUAL@29..30
                   0: MD_TEXTUAL_LITERAL@29..30 "\n" [] []
               1: (empty)
-            1: MD_QUOTE@30..48
-              0: R_ANGLE@30..33 ">" [Skipped(">"), Skipped(">")] []
-              1: MD_BLOCK_LIST@33..48
-                0: MD_PARAGRAPH@33..48
-                  0: MD_INLINE_ITEM_LIST@33..48
-                    0: MD_TEXTUAL@33..47
-                      0: MD_TEXTUAL_LITERAL@33..47 "Deeply nested" [Skipped(" ")] []
+            1: MD_QUOTE_PREFIX@30..31
+              0: (empty)
+              1: R_ANGLE@30..31 ">" [] []
+              2: (empty)
+            2: MD_QUOTE_PREFIX@31..32
+              0: (empty)
+              1: R_ANGLE@31..32 ">" [] []
+              2: (empty)
+            3: MD_QUOTE@32..48
+              0: MD_QUOTE_PREFIX@32..34
+                0: (empty)
+                1: R_ANGLE@32..33 ">" [] []
+                2: MD_QUOTE_POST_MARKER_SPACE@33..34 " " [] []
+              1: MD_BLOCK_LIST@34..48
+                0: MD_PARAGRAPH@34..48
+                  0: MD_INLINE_ITEM_LIST@34..48
+                    0: MD_TEXTUAL@34..47
+                      0: MD_TEXTUAL_LITERAL@34..47 "Deeply nested" [] []
                     1: MD_TEXTUAL@47..48
                       0: MD_TEXTUAL_LITERAL@47..48 "\n" [] []
                   1: (empty)
     1: MD_NEWLINE@48..49
       0: NEWLINE@48..49 "\n" [] []
     2: MD_QUOTE@49..65
-      0: R_ANGLE@49..50 ">" [] []
-      1: MD_BLOCK_LIST@50..65
-        0: MD_PARAGRAPH@50..65
-          0: MD_INLINE_ITEM_LIST@50..65
-            0: MD_TEXTUAL@50..64
-              0: MD_TEXTUAL_LITERAL@50..64 "Back to outer" [Skipped(" ")] []
+      0: MD_QUOTE_PREFIX@49..51
+        0: (empty)
+        1: R_ANGLE@49..50 ">" [] []
+        2: MD_QUOTE_POST_MARKER_SPACE@50..51 " " [] []
+      1: MD_BLOCK_LIST@51..65
+        0: MD_PARAGRAPH@51..65
+          0: MD_INLINE_ITEM_LIST@51..65
+            0: MD_TEXTUAL@51..64
+              0: MD_TEXTUAL_LITERAL@51..64 "Back to outer" [] []
             1: MD_TEXTUAL@64..65
               0: MD_TEXTUAL_LITERAL@64..65 "\n" [] []
           1: (empty)

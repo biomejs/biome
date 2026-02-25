@@ -96,7 +96,6 @@ pub(crate) struct CssLexer<'src> {
     diagnostics: Vec<ParseDiagnostic>,
 
     options: CssParserOptions,
-
     source_type: CssFileSource,
 }
 
@@ -249,6 +248,34 @@ impl<'src> CssLexer<'src> {
         tok
     }
 
+    /// Returns true when lexing SCSS so SCSS-only tokens (`==`, `!=`, `...`, `//`) are enabled.
+    ///
+    /// Example:
+    /// ```scss
+    /// @if $a == $b { @include foo($args...); }
+    /// ```
+    ///
+    /// Docs: https://sass-lang.com/documentation/operators
+    #[inline]
+    fn is_scss(&self) -> bool {
+        self.source_type.is_scss()
+    }
+
+    /// Enables `//` line-comment lexing only for SCSS (or permissive mode), since
+    /// plain CSS treats `//` as two delimiters, not a comment.
+    ///
+    /// Example:
+    /// ```scss
+    /// // overrides
+    /// $color: red;
+    /// ```
+    ///
+    /// Docs: https://sass-lang.com/documentation/syntax/comments
+    #[inline]
+    fn is_line_comment_enabled(&self) -> bool {
+        self.options.allow_wrong_line_comments || self.is_scss()
+    }
+
     /// Get the UTF8 char which starts at the current byte
     ///
     /// ## Safety
@@ -333,21 +360,11 @@ impl<'src> CssLexer<'src> {
                 }
             }
 
-            PRD => {
-                if self.is_number_start() {
-                    self.consume_number(current)
-                } else {
-                    self.consume_byte(T![.])
-                }
-            }
+            PRD => self.consume_prd(current),
 
             LSS => self.consume_lss(),
 
-            IDT | DOL if self.peek_byte() == Some(b'=') => {
-                self.advance(1);
-                self.consume_byte(T!["$="])
-            }
-            DOL => self.consume_byte(T![$]),
+            DOL => self.consume_dol(),
             UNI if self.options.is_metavariable_enabled() && self.is_metavariable_start() => {
                 self.consume_metavariable(GRIT_METAVARIABLE)
             }
@@ -369,8 +386,8 @@ impl<'src> CssLexer<'src> {
             MOR => self.consume_mor(),
             TLD => self.consume_tilde(),
             PIP => self.consume_pipe(),
-            EQL => self.consume_byte(T![=]),
-            EXL => self.consume_byte(T![!]),
+            EQL => self.consume_eql(),
+            EXL => self.consume_exl(),
             PRC => self.consume_byte(T![%]),
             Dispatch::AMP => self.consume_byte(T![&]),
 
@@ -673,16 +690,21 @@ impl<'src> CssLexer<'src> {
         // However we want to parse numbers like `1.` and `1.e10` where we don't have a number after (.)
         // If the next input code points are U+002E FULL STOP (.)...
         if matches!(self.current_byte(), Some(b'.')) {
-            // Consume it.
-            self.advance(1);
+            // In SCSS, leave the dot for the ellipsis token (e.g., `10...` or `$args...`).
+            let is_scss_ellipsis =
+                self.is_scss() && self.peek_byte() == Some(b'.') && self.byte_at(2) == Some(b'.');
 
-            // U+002E FULL STOP (.) followed by a digit...
-            if self
-                .current_byte()
-                .is_some_and(|byte| byte.is_ascii_digit())
-            {
-                // While the next input code point is a digit, consume it.
-                self.consume_number_sequence();
+            if !is_scss_ellipsis {
+                // Consume the dot.
+                self.advance(1);
+
+                // If U+002E FULL STOP (.) is followed by a digit, consume the number sequence.
+                if self
+                    .current_byte()
+                    .is_some_and(|byte| byte.is_ascii_digit())
+                {
+                    self.consume_number_sequence();
+                }
             }
         }
 
@@ -1120,7 +1142,7 @@ impl<'src> CssLexer<'src> {
                 self.advance(2);
 
                 let mut has_newline = false;
-                let is_scss = self.source_type.is_scss();
+                let is_scss = self.is_scss();
                 let mut depth = 1u32;
 
                 while let Some(chr) = self.current_byte() {
@@ -1168,7 +1190,7 @@ impl<'src> CssLexer<'src> {
                     COMMENT
                 }
             }
-            Some(b'/') if self.options.allow_wrong_line_comments || self.source_type.is_scss() => {
+            Some(b'/') if self.is_line_comment_enabled() => {
                 self.advance(2);
 
                 while let Some(chr) = self.current_byte() {
@@ -1181,6 +1203,30 @@ impl<'src> CssLexer<'src> {
                 COMMENT
             }
             _ => self.consume_byte(T![/]),
+        }
+    }
+
+    #[inline]
+    fn consume_eql(&mut self) -> CssSyntaxKind {
+        self.assert_byte(b'=');
+
+        if self.is_scss() && self.peek_byte() == Some(b'=') {
+            self.advance(1);
+            self.consume_byte(T![==])
+        } else {
+            self.consume_byte(T![=])
+        }
+    }
+
+    #[inline]
+    fn consume_exl(&mut self) -> CssSyntaxKind {
+        self.assert_byte(b'!');
+
+        if self.is_scss() && self.peek_byte() == Some(b'=') {
+            self.advance(1);
+            self.consume_byte(T![!=])
+        } else {
+            self.consume_byte(T![!])
         }
     }
 
@@ -1242,6 +1288,30 @@ impl<'src> CssLexer<'src> {
         match self.next_byte() {
             Some(b'=') => self.consume_byte(T![^=]),
             _ => T![^],
+        }
+    }
+
+    #[inline]
+    fn consume_prd(&mut self, current: u8) -> CssSyntaxKind {
+        self.assert_byte(b'.');
+
+        if self.is_scss() && self.peek_byte() == Some(b'.') && self.byte_at(2) == Some(b'.') {
+            self.advance(2);
+            self.consume_byte(T![...])
+        } else if self.is_number_start() {
+            self.consume_number(current)
+        } else {
+            self.consume_byte(T![.])
+        }
+    }
+
+    #[inline]
+    fn consume_dol(&mut self) -> CssSyntaxKind {
+        self.assert_byte(b'$');
+
+        match self.next_byte() {
+            Some(b'=') => self.consume_byte(T!["$="]),
+            _ => T![$],
         }
     }
 

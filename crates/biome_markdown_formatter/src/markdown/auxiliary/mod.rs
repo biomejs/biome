@@ -27,6 +27,7 @@ pub(crate) mod newline;
 pub(crate) mod ordered_list_item;
 pub(crate) mod paragraph;
 pub(crate) mod quote;
+pub(crate) mod quote_prefix;
 pub(crate) mod reference_image;
 pub(crate) mod reference_link;
 pub(crate) mod reference_link_label;

@@ -1941,13 +1941,7 @@ AnyCssUrlValue =
 	CssUrlValueRaw
 	| CssString
 
-CssParameterList = CssParameter (',' CssParameter)* ','?
-
-// cubic-bezier(0.1, 0.7, 1.0, 0.1)
-//			    ^^^
-// repeating-radial-gradient(red, yellow 10%, green 15%);
-//                                ^^^^^^^^^^
-CssParameter = AnyCssExpression
+CssParameterList = AnyCssExpression (',' AnyCssExpression)* ','?
 
 // https://drafts.csswg.org/css-values-5/#if-notation
 // <if()> = if( [ <if-branch> ; ]* <if-branch> ;? )
@@ -2090,9 +2084,11 @@ AnyCssExpression =
 	| CssUnaryExpression
 	| CssParenthesizedExpression
 	| CssListOfComponentValuesExpression
+	| ScssExpression
 	| CssCommaSeparatedValue
 
-CssListOfComponentValuesExpression = CssComponentValueList
+CssListOfComponentValuesExpression =
+	CssComponentValueList
 
 CssCommaSeparatedValue =
 	'{'
@@ -2485,7 +2481,7 @@ TwSlotAtRule =
 ScssDeclaration =
 	name: AnyScssDeclarationName
 	':'
-	value: CssGenericComponentValueList
+	value: ScssExpression
 	modifiers: ScssVariableModifierList
 	';'?
 
@@ -2509,6 +2505,114 @@ ScssNestingDeclaration =
 	':'
 	value: CssGenericComponentValueList
 	block: AnyCssDeclarationOrRuleBlock
+
+// border: 1px solid $color;
+//         ^^^^^^^^^^^^^^^^
+ScssExpression =
+	items: ScssExpressionItemList
+
+// border: 1px solid $color;
+//         ^^^^^^^^^^^^^^^^
+ScssExpressionItemList = AnyScssExpressionItem*
+
+// border: 1px solid $color;
+//         ^^^^^^^^^^^^^^^^
+AnyScssExpressionItem =
+	AnyCssValue
+	| CssGenericDelimiter
+	| ScssKeywordArgument
+	| ScssArbitraryArgument
+	| ScssBinaryExpression
+	| ScssUnaryExpression
+	| ScssParenthesizedExpression
+	| ScssListExpression
+	| ScssMapExpression
+
+// @include fn($name: 1);
+//             ^^^^^^^^
+ScssKeywordArgument =
+	name: ScssIdentifier
+	':'
+	value: AnyScssExpression
+
+// @include fn($args...);
+//             ^^^^^^^^
+ScssArbitraryArgument =
+	value: AnyScssExpression
+	'...'
+
+// width: $a + $b;
+//        ^^^^^^
+ScssBinaryExpression =
+	left: AnyScssExpression
+	operator: (
+		'*' | '/' | '%'
+		| '+' | '-'
+		| '>' | '>=' | '<' | '<='
+		| '==' | '!='
+		| 'and' | 'or'
+	)
+	right: AnyScssExpression
+
+// width: -$a;
+//        ^^^
+// @if not $condition {}
+//     ^^^^^^^^^^^^^^
+ScssUnaryExpression =
+	operator: ('+' | '-' | 'not')
+	expression: AnyScssExpression
+
+// width: ($a);
+//        ^^^^
+ScssParenthesizedExpression =
+	'('
+	expression: AnyScssExpression
+	')'
+
+// box-shadow: 1px, 2px, 3px;
+//             ^^^^^^^^^^^^^
+ScssListExpression =
+	elements: ScssListExpressionElementList
+
+// list: 1px, 2px, 3px;
+//       ^^^^^^^^^^^^^
+ScssListExpressionElementList = (ScssListExpressionElement (',' ScssListExpressionElement)* ','?)
+
+// list: 1px, 2px, 3px;
+//       ^^^  ^^^  ^^^
+ScssListExpressionElement =
+	value: AnyScssExpression
+
+// $map: (key1: value1, key2: value2);
+//       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssMapExpression =
+	'('
+	pairs: ScssMapExpressionPairList
+	')'
+
+// $map: (key1: value1, key2: value2);
+//        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssMapExpressionPairList = (ScssMapExpressionPair (',' ScssMapExpressionPair)* ','?)
+
+// $map: (key: value);
+//        ^^^^^^^^^^
+ScssMapExpressionPair =
+	key: AnyScssExpression
+	':'
+	value: AnyScssExpression
+
+// width: $a;
+//        ^^
+AnyScssExpression =
+	ScssExpression
+	| ScssKeywordArgument
+	| ScssArbitraryArgument
+	| ScssBinaryExpression
+	| ScssUnaryExpression
+	| ScssParenthesizedExpression
+	| ScssListExpression
+	| ScssMapExpression
+	| AnyCssValue
 
 // $a: &;
 //     ^
