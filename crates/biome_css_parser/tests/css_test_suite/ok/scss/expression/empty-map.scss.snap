@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
 
@@ -52,16 +51,14 @@ CssRoot {
                                         },
                                         l_paren_token: L_PAREN@20..21 "(" [] [],
                                         items: CssParameterList [
-                                            CssParameter {
-                                                any_css_expression: ScssExpression {
-                                                    items: ScssExpressionItemList [
-                                                        ScssMapExpression {
-                                                            l_paren_token: L_PAREN@21..22 "(" [] [],
-                                                            pairs: ScssMapExpressionPairList [],
-                                                            r_paren_token: R_PAREN@22..23 ")" [] [],
-                                                        },
-                                                    ],
-                                                },
+                                            ScssExpression {
+                                                items: ScssExpressionItemList [
+                                                    ScssMapExpression {
+                                                        l_paren_token: L_PAREN@21..22 "(" [] [],
+                                                        pairs: ScssMapExpressionPairList [],
+                                                        r_paren_token: R_PAREN@22..23 ")" [] [],
+                                                    },
+                                                ],
                                             },
                                         ],
                                         r_paren_token: R_PAREN@23..24 ")" [] [],
@@ -112,13 +109,12 @@ CssRoot {
                       0: IDENT@18..20 "fn" [] []
                     1: L_PAREN@20..21 "(" [] []
                     2: CSS_PARAMETER_LIST@21..23
-                      0: CSS_PARAMETER@21..23
-                        0: SCSS_EXPRESSION@21..23
-                          0: SCSS_EXPRESSION_ITEM_LIST@21..23
-                            0: SCSS_MAP_EXPRESSION@21..23
-                              0: L_PAREN@21..22 "(" [] []
-                              1: SCSS_MAP_EXPRESSION_PAIR_LIST@22..22
-                              2: R_PAREN@22..23 ")" [] []
+                      0: SCSS_EXPRESSION@21..23
+                        0: SCSS_EXPRESSION_ITEM_LIST@21..23
+                          0: SCSS_MAP_EXPRESSION@21..23
+                            0: L_PAREN@21..22 "(" [] []
+                            1: SCSS_MAP_EXPRESSION_PAIR_LIST@22..22
+                            2: R_PAREN@22..23 ")" [] []
                     3: R_PAREN@23..24 ")" [] []
               1: (empty)
             1: SEMICOLON@24..25 ";" [] []

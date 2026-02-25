@@ -1949,14 +1949,6 @@ impl CssPageSelectorPseudo {
         )
     }
 }
-impl CssParameter {
-    pub fn with_any_css_expression(self, element: AnyCssExpression) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
-        )
-    }
-}
 impl CssParenthesizedExpression {
     pub fn with_l_paren_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(

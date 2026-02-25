@@ -166,65 +166,59 @@ CssRoot {
                                             },
                                             l_paren_token: L_PAREN@59..60 "(" [] [],
                                             items: CssParameterList [
-                                                CssParameter {
-                                                    any_css_expression: CssBinaryExpression {
-                                                        left: CssListOfComponentValuesExpression {
-                                                            css_component_value_list: CssComponentValueList [
-                                                                CssIdentifier {
-                                                                    value_token: IDENT@60..65 "from" [] [Whitespace(" ")],
+                                                CssBinaryExpression {
+                                                    left: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssIdentifier {
+                                                                value_token: IDENT@60..65 "from" [] [Whitespace(" ")],
+                                                            },
+                                                            CssFunction {
+                                                                name: CssIdentifier {
+                                                                    value_token: IDENT@65..68 "var" [] [],
                                                                 },
-                                                                CssFunction {
-                                                                    name: CssIdentifier {
-                                                                        value_token: IDENT@65..68 "var" [] [],
-                                                                    },
-                                                                    l_paren_token: L_PAREN@68..69 "(" [] [],
-                                                                    items: CssParameterList [
-                                                                        CssParameter {
-                                                                            any_css_expression: CssListOfComponentValuesExpression {
-                                                                                css_component_value_list: CssComponentValueList [
-                                                                                    CssDashedIdentifier {
-                                                                                        value_token: IDENT@69..76 "--color" [] [],
-                                                                                    },
-                                                                                ],
+                                                                l_paren_token: L_PAREN@68..69 "(" [] [],
+                                                                items: CssParameterList [
+                                                                    CssListOfComponentValuesExpression {
+                                                                        css_component_value_list: CssComponentValueList [
+                                                                            CssDashedIdentifier {
+                                                                                value_token: IDENT@69..76 "--color" [] [],
                                                                             },
-                                                                        },
-                                                                    ],
-                                                                    r_paren_token: R_PAREN@76..78 ")" [] [Whitespace(" ")],
-                                                                },
-                                                                CssIdentifier {
-                                                                    value_token: IDENT@78..80 "l" [] [Whitespace(" ")],
-                                                                },
-                                                                CssIdentifier {
-                                                                    value_token: IDENT@80..82 "c" [] [Whitespace(" ")],
-                                                                },
-                                                                CssIdentifier {
-                                                                    value_token: IDENT@82..84 "h" [] [Whitespace(" ")],
-                                                                },
-                                                            ],
-                                                        },
-                                                        operator_token: SLASH@84..86 "/" [] [Whitespace(" ")],
-                                                        right: CssListOfComponentValuesExpression {
-                                                            css_component_value_list: CssComponentValueList [
-                                                                CssFunction {
-                                                                    name: CssIdentifier {
-                                                                        value_token: IDENT@86..89 "var" [] [],
+                                                                        ],
                                                                     },
-                                                                    l_paren_token: L_PAREN@89..90 "(" [] [],
-                                                                    items: CssParameterList [
-                                                                        CssParameter {
-                                                                            any_css_expression: CssListOfComponentValuesExpression {
-                                                                                css_component_value_list: CssComponentValueList [
-                                                                                    CssDashedIdentifier {
-                                                                                        value_token: IDENT@90..97 "--alpha" [] [],
-                                                                                    },
-                                                                                ],
-                                                                            },
-                                                                        },
-                                                                    ],
-                                                                    r_paren_token: R_PAREN@97..98 ")" [] [],
+                                                                ],
+                                                                r_paren_token: R_PAREN@76..78 ")" [] [Whitespace(" ")],
+                                                            },
+                                                            CssIdentifier {
+                                                                value_token: IDENT@78..80 "l" [] [Whitespace(" ")],
+                                                            },
+                                                            CssIdentifier {
+                                                                value_token: IDENT@80..82 "c" [] [Whitespace(" ")],
+                                                            },
+                                                            CssIdentifier {
+                                                                value_token: IDENT@82..84 "h" [] [Whitespace(" ")],
+                                                            },
+                                                        ],
+                                                    },
+                                                    operator_token: SLASH@84..86 "/" [] [Whitespace(" ")],
+                                                    right: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssFunction {
+                                                                name: CssIdentifier {
+                                                                    value_token: IDENT@86..89 "var" [] [],
                                                                 },
-                                                            ],
-                                                        },
+                                                                l_paren_token: L_PAREN@89..90 "(" [] [],
+                                                                items: CssParameterList [
+                                                                    CssListOfComponentValuesExpression {
+                                                                        css_component_value_list: CssComponentValueList [
+                                                                            CssDashedIdentifier {
+                                                                                value_token: IDENT@90..97 "--alpha" [] [],
+                                                                            },
+                                                                        ],
+                                                                    },
+                                                                ],
+                                                                r_paren_token: R_PAREN@97..98 ")" [] [],
+                                                            },
+                                                        ],
                                                     },
                                                 },
                                             ],
@@ -289,39 +283,33 @@ CssRoot {
                                         },
                                         l_paren_token: L_PAREN@172..173 "(" [] [],
                                         items: CssParameterList [
-                                            CssParameter {
-                                                any_css_expression: CssListOfComponentValuesExpression {
-                                                    css_component_value_list: CssComponentValueList [
-                                                        CssFunction {
-                                                            name: CssIdentifier {
-                                                                value_token: IDENT@173..176 "var" [] [],
-                                                            },
-                                                            l_paren_token: L_PAREN@176..177 "(" [] [],
-                                                            items: CssParameterList [
-                                                                CssParameter {
-                                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                                        css_component_value_list: CssComponentValueList [
-                                                                            CssDashedIdentifier {
-                                                                                value_token: IDENT@177..189 "--base-color" [] [],
-                                                                            },
-                                                                        ],
-                                                                    },
-                                                                },
-                                                            ],
-                                                            r_paren_token: R_PAREN@189..190 ")" [] [],
+                                            CssListOfComponentValuesExpression {
+                                                css_component_value_list: CssComponentValueList [
+                                                    CssFunction {
+                                                        name: CssIdentifier {
+                                                            value_token: IDENT@173..176 "var" [] [],
                                                         },
-                                                    ],
-                                                },
+                                                        l_paren_token: L_PAREN@176..177 "(" [] [],
+                                                        items: CssParameterList [
+                                                            CssListOfComponentValuesExpression {
+                                                                css_component_value_list: CssComponentValueList [
+                                                                    CssDashedIdentifier {
+                                                                        value_token: IDENT@177..189 "--base-color" [] [],
+                                                                    },
+                                                                ],
+                                                            },
+                                                        ],
+                                                        r_paren_token: R_PAREN@189..190 ")" [] [],
+                                                    },
+                                                ],
                                             },
                                             COMMA@190..192 "," [] [Whitespace(" ")],
-                                            CssParameter {
-                                                any_css_expression: CssListOfComponentValuesExpression {
-                                                    css_component_value_list: CssComponentValueList [
-                                                        CssNumber {
-                                                            value_token: CSS_NUMBER_LITERAL@192..195 "0.8" [] [],
-                                                        },
-                                                    ],
-                                                },
+                                            CssListOfComponentValuesExpression {
+                                                css_component_value_list: CssComponentValueList [
+                                                    CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@192..195 "0.8" [] [],
+                                                    },
+                                                ],
                                             },
                                         ],
                                         r_paren_token: R_PAREN@195..196 ")" [] [],
@@ -430,65 +418,59 @@ CssRoot {
                                             },
                                             l_paren_token: L_PAREN@316..317 "(" [] [],
                                             items: CssParameterList [
-                                                CssParameter {
-                                                    any_css_expression: CssBinaryExpression {
-                                                        left: CssListOfComponentValuesExpression {
-                                                            css_component_value_list: CssComponentValueList [
-                                                                CssIdentifier {
-                                                                    value_token: IDENT@317..322 "from" [] [Whitespace(" ")],
+                                                CssBinaryExpression {
+                                                    left: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssIdentifier {
+                                                                value_token: IDENT@317..322 "from" [] [Whitespace(" ")],
+                                                            },
+                                                            CssFunction {
+                                                                name: CssIdentifier {
+                                                                    value_token: IDENT@322..325 "var" [] [],
                                                                 },
-                                                                CssFunction {
-                                                                    name: CssIdentifier {
-                                                                        value_token: IDENT@322..325 "var" [] [],
-                                                                    },
-                                                                    l_paren_token: L_PAREN@325..326 "(" [] [],
-                                                                    items: CssParameterList [
-                                                                        CssParameter {
-                                                                            any_css_expression: CssListOfComponentValuesExpression {
-                                                                                css_component_value_list: CssComponentValueList [
-                                                                                    CssDashedIdentifier {
-                                                                                        value_token: IDENT@326..333 "--color" [] [],
-                                                                                    },
-                                                                                ],
+                                                                l_paren_token: L_PAREN@325..326 "(" [] [],
+                                                                items: CssParameterList [
+                                                                    CssListOfComponentValuesExpression {
+                                                                        css_component_value_list: CssComponentValueList [
+                                                                            CssDashedIdentifier {
+                                                                                value_token: IDENT@326..333 "--color" [] [],
                                                                             },
-                                                                        },
-                                                                    ],
-                                                                    r_paren_token: R_PAREN@333..335 ")" [] [Whitespace(" ")],
-                                                                },
-                                                                CssIdentifier {
-                                                                    value_token: IDENT@335..337 "l" [] [Whitespace(" ")],
-                                                                },
-                                                                CssIdentifier {
-                                                                    value_token: IDENT@337..339 "c" [] [Whitespace(" ")],
-                                                                },
-                                                                CssIdentifier {
-                                                                    value_token: IDENT@339..341 "h" [] [Whitespace(" ")],
-                                                                },
-                                                            ],
-                                                        },
-                                                        operator_token: SLASH@341..343 "/" [] [Whitespace(" ")],
-                                                        right: CssListOfComponentValuesExpression {
-                                                            css_component_value_list: CssComponentValueList [
-                                                                CssFunction {
-                                                                    name: CssIdentifier {
-                                                                        value_token: IDENT@343..346 "var" [] [],
+                                                                        ],
                                                                     },
-                                                                    l_paren_token: L_PAREN@346..347 "(" [] [],
-                                                                    items: CssParameterList [
-                                                                        CssParameter {
-                                                                            any_css_expression: CssListOfComponentValuesExpression {
-                                                                                css_component_value_list: CssComponentValueList [
-                                                                                    CssDashedIdentifier {
-                                                                                        value_token: IDENT@347..354 "--alpha" [] [],
-                                                                                    },
-                                                                                ],
-                                                                            },
-                                                                        },
-                                                                    ],
-                                                                    r_paren_token: R_PAREN@354..355 ")" [] [],
+                                                                ],
+                                                                r_paren_token: R_PAREN@333..335 ")" [] [Whitespace(" ")],
+                                                            },
+                                                            CssIdentifier {
+                                                                value_token: IDENT@335..337 "l" [] [Whitespace(" ")],
+                                                            },
+                                                            CssIdentifier {
+                                                                value_token: IDENT@337..339 "c" [] [Whitespace(" ")],
+                                                            },
+                                                            CssIdentifier {
+                                                                value_token: IDENT@339..341 "h" [] [Whitespace(" ")],
+                                                            },
+                                                        ],
+                                                    },
+                                                    operator_token: SLASH@341..343 "/" [] [Whitespace(" ")],
+                                                    right: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssFunction {
+                                                                name: CssIdentifier {
+                                                                    value_token: IDENT@343..346 "var" [] [],
                                                                 },
-                                                            ],
-                                                        },
+                                                                l_paren_token: L_PAREN@346..347 "(" [] [],
+                                                                items: CssParameterList [
+                                                                    CssListOfComponentValuesExpression {
+                                                                        css_component_value_list: CssComponentValueList [
+                                                                            CssDashedIdentifier {
+                                                                                value_token: IDENT@347..354 "--alpha" [] [],
+                                                                            },
+                                                                        ],
+                                                                    },
+                                                                ],
+                                                                r_paren_token: R_PAREN@354..355 ")" [] [],
+                                                            },
+                                                        ],
                                                     },
                                                 },
                                             ],
@@ -553,40 +535,34 @@ CssRoot {
                                         },
                                         l_paren_token: L_PAREN@429..430 "(" [] [],
                                         items: CssParameterList [
-                                            CssParameter {
-                                                any_css_expression: CssListOfComponentValuesExpression {
-                                                    css_component_value_list: CssComponentValueList [
-                                                        CssFunction {
-                                                            name: CssIdentifier {
-                                                                value_token: IDENT@430..433 "var" [] [],
-                                                            },
-                                                            l_paren_token: L_PAREN@433..434 "(" [] [],
-                                                            items: CssParameterList [
-                                                                CssParameter {
-                                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                                        css_component_value_list: CssComponentValueList [
-                                                                            CssDashedIdentifier {
-                                                                                value_token: IDENT@434..446 "--base-color" [] [],
-                                                                            },
-                                                                        ],
-                                                                    },
-                                                                },
-                                                            ],
-                                                            r_paren_token: R_PAREN@446..447 ")" [] [],
+                                            CssListOfComponentValuesExpression {
+                                                css_component_value_list: CssComponentValueList [
+                                                    CssFunction {
+                                                        name: CssIdentifier {
+                                                            value_token: IDENT@430..433 "var" [] [],
                                                         },
-                                                    ],
-                                                },
+                                                        l_paren_token: L_PAREN@433..434 "(" [] [],
+                                                        items: CssParameterList [
+                                                            CssListOfComponentValuesExpression {
+                                                                css_component_value_list: CssComponentValueList [
+                                                                    CssDashedIdentifier {
+                                                                        value_token: IDENT@434..446 "--base-color" [] [],
+                                                                    },
+                                                                ],
+                                                            },
+                                                        ],
+                                                        r_paren_token: R_PAREN@446..447 ")" [] [],
+                                                    },
+                                                ],
                                             },
                                             COMMA@447..449 "," [] [Whitespace(" ")],
-                                            CssParameter {
-                                                any_css_expression: CssListOfComponentValuesExpression {
-                                                    css_component_value_list: CssComponentValueList [
-                                                        CssPercentage {
-                                                            value_token: CSS_NUMBER_LITERAL@449..451 "50" [] [],
-                                                            percent_token: PERCENT@451..452 "%" [] [],
-                                                        },
-                                                    ],
-                                                },
+                                            CssListOfComponentValuesExpression {
+                                                css_component_value_list: CssComponentValueList [
+                                                    CssPercentage {
+                                                        value_token: CSS_NUMBER_LITERAL@449..451 "50" [] [],
+                                                        percent_token: PERCENT@451..452 "%" [] [],
+                                                    },
+                                                ],
                                             },
                                         ],
                                         r_paren_token: R_PAREN@452..453 ")" [] [],
@@ -682,65 +658,59 @@ CssRoot {
                                             },
                                             l_paren_token: L_PAREN@555..556 "(" [] [],
                                             items: CssParameterList [
-                                                CssParameter {
-                                                    any_css_expression: CssBinaryExpression {
-                                                        left: CssListOfComponentValuesExpression {
-                                                            css_component_value_list: CssComponentValueList [
-                                                                CssIdentifier {
-                                                                    value_token: IDENT@556..561 "from" [] [Whitespace(" ")],
+                                                CssBinaryExpression {
+                                                    left: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssIdentifier {
+                                                                value_token: IDENT@556..561 "from" [] [Whitespace(" ")],
+                                                            },
+                                                            CssFunction {
+                                                                name: CssIdentifier {
+                                                                    value_token: IDENT@561..564 "var" [] [],
                                                                 },
-                                                                CssFunction {
-                                                                    name: CssIdentifier {
-                                                                        value_token: IDENT@561..564 "var" [] [],
-                                                                    },
-                                                                    l_paren_token: L_PAREN@564..565 "(" [] [],
-                                                                    items: CssParameterList [
-                                                                        CssParameter {
-                                                                            any_css_expression: CssListOfComponentValuesExpression {
-                                                                                css_component_value_list: CssComponentValueList [
-                                                                                    CssDashedIdentifier {
-                                                                                        value_token: IDENT@565..572 "--color" [] [],
-                                                                                    },
-                                                                                ],
+                                                                l_paren_token: L_PAREN@564..565 "(" [] [],
+                                                                items: CssParameterList [
+                                                                    CssListOfComponentValuesExpression {
+                                                                        css_component_value_list: CssComponentValueList [
+                                                                            CssDashedIdentifier {
+                                                                                value_token: IDENT@565..572 "--color" [] [],
                                                                             },
-                                                                        },
-                                                                    ],
-                                                                    r_paren_token: R_PAREN@572..574 ")" [] [Whitespace(" ")],
-                                                                },
-                                                                CssIdentifier {
-                                                                    value_token: IDENT@574..576 "l" [] [Whitespace(" ")],
-                                                                },
-                                                                CssIdentifier {
-                                                                    value_token: IDENT@576..578 "c" [] [Whitespace(" ")],
-                                                                },
-                                                                CssIdentifier {
-                                                                    value_token: IDENT@578..580 "h" [] [Whitespace(" ")],
-                                                                },
-                                                            ],
-                                                        },
-                                                        operator_token: SLASH@580..582 "/" [] [Whitespace(" ")],
-                                                        right: CssListOfComponentValuesExpression {
-                                                            css_component_value_list: CssComponentValueList [
-                                                                CssFunction {
-                                                                    name: CssIdentifier {
-                                                                        value_token: IDENT@582..585 "var" [] [],
+                                                                        ],
                                                                     },
-                                                                    l_paren_token: L_PAREN@585..586 "(" [] [],
-                                                                    items: CssParameterList [
-                                                                        CssParameter {
-                                                                            any_css_expression: CssListOfComponentValuesExpression {
-                                                                                css_component_value_list: CssComponentValueList [
-                                                                                    CssDashedIdentifier {
-                                                                                        value_token: IDENT@586..593 "--alpha" [] [],
-                                                                                    },
-                                                                                ],
-                                                                            },
-                                                                        },
-                                                                    ],
-                                                                    r_paren_token: R_PAREN@593..594 ")" [] [],
+                                                                ],
+                                                                r_paren_token: R_PAREN@572..574 ")" [] [Whitespace(" ")],
+                                                            },
+                                                            CssIdentifier {
+                                                                value_token: IDENT@574..576 "l" [] [Whitespace(" ")],
+                                                            },
+                                                            CssIdentifier {
+                                                                value_token: IDENT@576..578 "c" [] [Whitespace(" ")],
+                                                            },
+                                                            CssIdentifier {
+                                                                value_token: IDENT@578..580 "h" [] [Whitespace(" ")],
+                                                            },
+                                                        ],
+                                                    },
+                                                    operator_token: SLASH@580..582 "/" [] [Whitespace(" ")],
+                                                    right: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssFunction {
+                                                                name: CssIdentifier {
+                                                                    value_token: IDENT@582..585 "var" [] [],
                                                                 },
-                                                            ],
-                                                        },
+                                                                l_paren_token: L_PAREN@585..586 "(" [] [],
+                                                                items: CssParameterList [
+                                                                    CssListOfComponentValuesExpression {
+                                                                        css_component_value_list: CssComponentValueList [
+                                                                            CssDashedIdentifier {
+                                                                                value_token: IDENT@586..593 "--alpha" [] [],
+                                                                            },
+                                                                        ],
+                                                                    },
+                                                                ],
+                                                                r_paren_token: R_PAREN@593..594 ")" [] [],
+                                                            },
+                                                        ],
                                                     },
                                                 },
                                             ],
@@ -805,29 +775,25 @@ CssRoot {
                                         },
                                         l_paren_token: L_PAREN@668..669 "(" [] [],
                                         items: CssParameterList [
-                                            CssParameter {
-                                                any_css_expression: CssListOfComponentValuesExpression {
-                                                    css_component_value_list: CssComponentValueList [
-                                                        CssFunction {
-                                                            name: CssIdentifier {
-                                                                value_token: IDENT@669..672 "var" [] [],
-                                                            },
-                                                            l_paren_token: L_PAREN@672..673 "(" [] [],
-                                                            items: CssParameterList [
-                                                                CssParameter {
-                                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                                        css_component_value_list: CssComponentValueList [
-                                                                            CssDashedIdentifier {
-                                                                                value_token: IDENT@673..685 "--base-color" [] [],
-                                                                            },
-                                                                        ],
-                                                                    },
-                                                                },
-                                                            ],
-                                                            r_paren_token: R_PAREN@685..686 ")" [] [],
+                                            CssListOfComponentValuesExpression {
+                                                css_component_value_list: CssComponentValueList [
+                                                    CssFunction {
+                                                        name: CssIdentifier {
+                                                            value_token: IDENT@669..672 "var" [] [],
                                                         },
-                                                    ],
-                                                },
+                                                        l_paren_token: L_PAREN@672..673 "(" [] [],
+                                                        items: CssParameterList [
+                                                            CssListOfComponentValuesExpression {
+                                                                css_component_value_list: CssComponentValueList [
+                                                                    CssDashedIdentifier {
+                                                                        value_token: IDENT@673..685 "--base-color" [] [],
+                                                                    },
+                                                                ],
+                                                            },
+                                                        ],
+                                                        r_paren_token: R_PAREN@685..686 ")" [] [],
+                                                    },
+                                                ],
                                             },
                                         ],
                                         r_paren_token: R_PAREN@686..687 ")" [] [],
@@ -908,68 +874,60 @@ CssRoot {
                                             },
                                             l_paren_token: L_PAREN@763..764 "(" [] [],
                                             items: CssParameterList [
-                                                CssParameter {
-                                                    any_css_expression: CssBinaryExpression {
-                                                        left: CssListOfComponentValuesExpression {
-                                                            css_component_value_list: CssComponentValueList [
-                                                                CssFunction {
-                                                                    name: CssIdentifier {
-                                                                        value_token: IDENT@764..767 "max" [] [],
-                                                                    },
-                                                                    l_paren_token: L_PAREN@767..768 "(" [] [],
-                                                                    items: CssParameterList [
-                                                                        CssParameter {
-                                                                            any_css_expression: CssListOfComponentValuesExpression {
-                                                                                css_component_value_list: CssComponentValueList [
-                                                                                    CssFunction {
-                                                                                        name: CssIdentifier {
-                                                                                            value_token: IDENT@768..771 "var" [] [],
-                                                                                        },
-                                                                                        l_paren_token: L_PAREN@771..772 "(" [] [],
-                                                                                        items: CssParameterList [
-                                                                                            CssParameter {
-                                                                                                any_css_expression: CssListOfComponentValuesExpression {
-                                                                                                    css_component_value_list: CssComponentValueList [
-                                                                                                        CssDashedIdentifier {
-                                                                                                            value_token: IDENT@772..778 "--list" [] [],
-                                                                                                        },
-                                                                                                    ],
-                                                                                                },
+                                                CssBinaryExpression {
+                                                    left: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssFunction {
+                                                                name: CssIdentifier {
+                                                                    value_token: IDENT@764..767 "max" [] [],
+                                                                },
+                                                                l_paren_token: L_PAREN@767..768 "(" [] [],
+                                                                items: CssParameterList [
+                                                                    CssListOfComponentValuesExpression {
+                                                                        css_component_value_list: CssComponentValueList [
+                                                                            CssFunction {
+                                                                                name: CssIdentifier {
+                                                                                    value_token: IDENT@768..771 "var" [] [],
+                                                                                },
+                                                                                l_paren_token: L_PAREN@771..772 "(" [] [],
+                                                                                items: CssParameterList [
+                                                                                    CssListOfComponentValuesExpression {
+                                                                                        css_component_value_list: CssComponentValueList [
+                                                                                            CssDashedIdentifier {
+                                                                                                value_token: IDENT@772..778 "--list" [] [],
                                                                                             },
                                                                                         ],
-                                                                                        r_paren_token: R_PAREN@778..779 ")" [] [],
                                                                                     },
                                                                                 ],
+                                                                                r_paren_token: R_PAREN@778..779 ")" [] [],
                                                                             },
-                                                                        },
-                                                                    ],
-                                                                    r_paren_token: R_PAREN@779..781 ")" [] [Whitespace(" ")],
-                                                                },
-                                                            ],
-                                                        },
-                                                        operator_token: PLUS@781..783 "+" [] [Whitespace(" ")],
-                                                        right: CssListOfComponentValuesExpression {
-                                                            css_component_value_list: CssComponentValueList [
-                                                                CssFunction {
-                                                                    name: CssIdentifier {
-                                                                        value_token: IDENT@783..786 "var" [] [],
+                                                                        ],
                                                                     },
-                                                                    l_paren_token: L_PAREN@786..787 "(" [] [],
-                                                                    items: CssParameterList [
-                                                                        CssParameter {
-                                                                            any_css_expression: CssListOfComponentValuesExpression {
-                                                                                css_component_value_list: CssComponentValueList [
-                                                                                    CssDashedIdentifier {
-                                                                                        value_token: IDENT@787..790 "--x" [] [],
-                                                                                    },
-                                                                                ],
-                                                                            },
-                                                                        },
-                                                                    ],
-                                                                    r_paren_token: R_PAREN@790..791 ")" [] [],
+                                                                ],
+                                                                r_paren_token: R_PAREN@779..781 ")" [] [Whitespace(" ")],
+                                                            },
+                                                        ],
+                                                    },
+                                                    operator_token: PLUS@781..783 "+" [] [Whitespace(" ")],
+                                                    right: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssFunction {
+                                                                name: CssIdentifier {
+                                                                    value_token: IDENT@783..786 "var" [] [],
                                                                 },
-                                                            ],
-                                                        },
+                                                                l_paren_token: L_PAREN@786..787 "(" [] [],
+                                                                items: CssParameterList [
+                                                                    CssListOfComponentValuesExpression {
+                                                                        css_component_value_list: CssComponentValueList [
+                                                                            CssDashedIdentifier {
+                                                                                value_token: IDENT@787..790 "--x" [] [],
+                                                                            },
+                                                                        ],
+                                                                    },
+                                                                ],
+                                                                r_paren_token: R_PAREN@790..791 ")" [] [],
+                                                            },
+                                                        ],
                                                     },
                                                 },
                                             ],
@@ -1018,42 +976,38 @@ CssRoot {
                                         },
                                         l_paren_token: L_PAREN@842..843 "(" [] [],
                                         items: CssParameterList [
-                                            CssParameter {
-                                                any_css_expression: CssCommaSeparatedValue {
-                                                    l_curly_token: L_CURLY@843..844 "{" [] [],
-                                                    items: CssGenericComponentValueList [
-                                                        CssRegularDimension {
-                                                            value_token: CSS_NUMBER_LITERAL@844..845 "1" [] [],
-                                                            unit_token: IDENT@845..847 "px" [] [],
-                                                        },
-                                                        CssGenericDelimiter {
-                                                            value: COMMA@847..849 "," [] [Whitespace(" ")],
-                                                        },
-                                                        CssRegularDimension {
-                                                            value_token: CSS_NUMBER_LITERAL@849..850 "7" [] [],
-                                                            unit_token: IDENT@850..852 "px" [] [],
-                                                        },
-                                                        CssGenericDelimiter {
-                                                            value: COMMA@852..854 "," [] [Whitespace(" ")],
-                                                        },
-                                                        CssRegularDimension {
-                                                            value_token: CSS_NUMBER_LITERAL@854..855 "2" [] [],
-                                                            unit_token: IDENT@855..857 "px" [] [],
-                                                        },
-                                                    ],
-                                                    r_curly_token: R_CURLY@857..858 "}" [] [],
-                                                },
+                                            CssCommaSeparatedValue {
+                                                l_curly_token: L_CURLY@843..844 "{" [] [],
+                                                items: CssGenericComponentValueList [
+                                                    CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@844..845 "1" [] [],
+                                                        unit_token: IDENT@845..847 "px" [] [],
+                                                    },
+                                                    CssGenericDelimiter {
+                                                        value: COMMA@847..849 "," [] [Whitespace(" ")],
+                                                    },
+                                                    CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@849..850 "7" [] [],
+                                                        unit_token: IDENT@850..852 "px" [] [],
+                                                    },
+                                                    CssGenericDelimiter {
+                                                        value: COMMA@852..854 "," [] [Whitespace(" ")],
+                                                    },
+                                                    CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@854..855 "2" [] [],
+                                                        unit_token: IDENT@855..857 "px" [] [],
+                                                    },
+                                                ],
+                                                r_curly_token: R_CURLY@857..858 "}" [] [],
                                             },
                                             COMMA@858..860 "," [] [Whitespace(" ")],
-                                            CssParameter {
-                                                any_css_expression: CssListOfComponentValuesExpression {
-                                                    css_component_value_list: CssComponentValueList [
-                                                        CssRegularDimension {
-                                                            value_token: CSS_NUMBER_LITERAL@860..861 "3" [] [],
-                                                            unit_token: IDENT@861..863 "px" [] [],
-                                                        },
-                                                    ],
-                                                },
+                                            CssListOfComponentValuesExpression {
+                                                css_component_value_list: CssComponentValueList [
+                                                    CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@860..861 "3" [] [],
+                                                        unit_token: IDENT@861..863 "px" [] [],
+                                                    },
+                                                ],
                                             },
                                         ],
                                         r_paren_token: R_PAREN@863..864 ")" [] [],
@@ -1100,28 +1054,24 @@ CssRoot {
                                         },
                                         l_paren_token: L_PAREN@921..922 "(" [] [],
                                         items: CssParameterList [
-                                            CssParameter {
-                                                any_css_expression: CssCommaSeparatedValue {
-                                                    l_curly_token: L_CURLY@922..923 "{" [] [],
-                                                    items: CssGenericComponentValueList [
-                                                        CssRegularDimension {
-                                                            value_token: CSS_NUMBER_LITERAL@923..924 "1" [] [],
-                                                            unit_token: IDENT@924..926 "px" [] [],
-                                                        },
-                                                    ],
-                                                    r_curly_token: R_CURLY@926..927 "}" [] [],
-                                                },
+                                            CssCommaSeparatedValue {
+                                                l_curly_token: L_CURLY@922..923 "{" [] [],
+                                                items: CssGenericComponentValueList [
+                                                    CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@923..924 "1" [] [],
+                                                        unit_token: IDENT@924..926 "px" [] [],
+                                                    },
+                                                ],
+                                                r_curly_token: R_CURLY@926..927 "}" [] [],
                                             },
                                             COMMA@927..929 "," [] [Whitespace(" ")],
-                                            CssParameter {
-                                                any_css_expression: CssListOfComponentValuesExpression {
-                                                    css_component_value_list: CssComponentValueList [
-                                                        CssRegularDimension {
-                                                            value_token: CSS_NUMBER_LITERAL@929..930 "3" [] [],
-                                                            unit_token: IDENT@930..932 "px" [] [],
-                                                        },
-                                                    ],
-                                                },
+                                            CssListOfComponentValuesExpression {
+                                                css_component_value_list: CssComponentValueList [
+                                                    CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@929..930 "3" [] [],
+                                                        unit_token: IDENT@930..932 "px" [] [],
+                                                    },
+                                                ],
                                             },
                                         ],
                                         r_paren_token: R_PAREN@932..933 ")" [] [],
@@ -1217,14 +1167,12 @@ CssRoot {
                                             },
                                             l_paren_token: L_PAREN@1033..1034 "(" [] [],
                                             items: CssParameterList [
-                                                CssParameter {
-                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                        css_component_value_list: CssComponentValueList [
-                                                            CssDashedIdentifier {
-                                                                value_token: IDENT@1034..1045 "--animation" [] [],
-                                                            },
-                                                        ],
-                                                    },
+                                                CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssDashedIdentifier {
+                                                            value_token: IDENT@1034..1045 "--animation" [] [],
+                                                        },
+                                                    ],
                                                 },
                                             ],
                                             r_paren_token: R_PAREN@1045..1047 ")" [] [Whitespace(" ")],
@@ -1235,14 +1183,12 @@ CssRoot {
                                             },
                                             l_paren_token: L_PAREN@1050..1051 "(" [] [],
                                             items: CssParameterList [
-                                                CssParameter {
-                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                        css_component_value_list: CssComponentValueList [
-                                                            CssDashedIdentifier {
-                                                                value_token: IDENT@1051..1061 "--duration" [] [],
-                                                            },
-                                                        ],
-                                                    },
+                                                CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssDashedIdentifier {
+                                                            value_token: IDENT@1051..1061 "--duration" [] [],
+                                                        },
+                                                    ],
                                                 },
                                             ],
                                             r_paren_token: R_PAREN@1061..1063 ")" [] [Whitespace(" ")],
@@ -1253,14 +1199,12 @@ CssRoot {
                                             },
                                             l_paren_token: L_PAREN@1066..1067 "(" [] [],
                                             items: CssParameterList [
-                                                CssParameter {
-                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                        css_component_value_list: CssComponentValueList [
-                                                            CssDashedIdentifier {
-                                                                value_token: IDENT@1067..1074 "--count" [] [],
-                                                            },
-                                                        ],
-                                                    },
+                                                CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssDashedIdentifier {
+                                                            value_token: IDENT@1067..1074 "--count" [] [],
+                                                        },
+                                                    ],
                                                 },
                                             ],
                                             r_paren_token: R_PAREN@1074..1076 ")" [] [Whitespace(" ")],
@@ -1271,14 +1215,12 @@ CssRoot {
                                             },
                                             l_paren_token: L_PAREN@1079..1080 "(" [] [],
                                             items: CssParameterList [
-                                                CssParameter {
-                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                        css_component_value_list: CssComponentValueList [
-                                                            CssDashedIdentifier {
-                                                                value_token: IDENT@1080..1088 "--easing" [] [],
-                                                            },
-                                                        ],
-                                                    },
+                                                CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssDashedIdentifier {
+                                                            value_token: IDENT@1080..1088 "--easing" [] [],
+                                                        },
+                                                    ],
                                                 },
                                             ],
                                             r_paren_token: R_PAREN@1088..1089 ")" [] [],
@@ -1404,53 +1346,47 @@ CssRoot {
                                             },
                                             l_paren_token: L_PAREN@1224..1225 "(" [] [],
                                             items: CssParameterList [
-                                                CssParameter {
-                                                    any_css_expression: CssBinaryExpression {
-                                                        left: CssListOfComponentValuesExpression {
-                                                            css_component_value_list: CssComponentValueList [
-                                                                CssFunction {
-                                                                    name: CssIdentifier {
-                                                                        value_token: IDENT@1225..1228 "var" [] [],
-                                                                    },
-                                                                    l_paren_token: L_PAREN@1228..1229 "(" [] [],
-                                                                    items: CssParameterList [
-                                                                        CssParameter {
-                                                                            any_css_expression: CssListOfComponentValuesExpression {
-                                                                                css_component_value_list: CssComponentValueList [
-                                                                                    CssDashedIdentifier {
-                                                                                        value_token: IDENT@1229..1240 "--outer-arg" [] [],
-                                                                                    },
-                                                                                ],
-                                                                            },
-                                                                        },
-                                                                    ],
-                                                                    r_paren_token: R_PAREN@1240..1242 ")" [] [Whitespace(" ")],
+                                                CssBinaryExpression {
+                                                    left: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssFunction {
+                                                                name: CssIdentifier {
+                                                                    value_token: IDENT@1225..1228 "var" [] [],
                                                                 },
-                                                            ],
-                                                        },
-                                                        operator_token: PLUS@1242..1244 "+" [] [Whitespace(" ")],
-                                                        right: CssListOfComponentValuesExpression {
-                                                            css_component_value_list: CssComponentValueList [
-                                                                CssFunction {
-                                                                    name: CssIdentifier {
-                                                                        value_token: IDENT@1244..1247 "var" [] [],
-                                                                    },
-                                                                    l_paren_token: L_PAREN@1247..1248 "(" [] [],
-                                                                    items: CssParameterList [
-                                                                        CssParameter {
-                                                                            any_css_expression: CssListOfComponentValuesExpression {
-                                                                                css_component_value_list: CssComponentValueList [
-                                                                                    CssDashedIdentifier {
-                                                                                        value_token: IDENT@1248..1261 "--outer-local" [] [],
-                                                                                    },
-                                                                                ],
+                                                                l_paren_token: L_PAREN@1228..1229 "(" [] [],
+                                                                items: CssParameterList [
+                                                                    CssListOfComponentValuesExpression {
+                                                                        css_component_value_list: CssComponentValueList [
+                                                                            CssDashedIdentifier {
+                                                                                value_token: IDENT@1229..1240 "--outer-arg" [] [],
                                                                             },
-                                                                        },
-                                                                    ],
-                                                                    r_paren_token: R_PAREN@1261..1262 ")" [] [],
+                                                                        ],
+                                                                    },
+                                                                ],
+                                                                r_paren_token: R_PAREN@1240..1242 ")" [] [Whitespace(" ")],
+                                                            },
+                                                        ],
+                                                    },
+                                                    operator_token: PLUS@1242..1244 "+" [] [Whitespace(" ")],
+                                                    right: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssFunction {
+                                                                name: CssIdentifier {
+                                                                    value_token: IDENT@1244..1247 "var" [] [],
                                                                 },
-                                                            ],
-                                                        },
+                                                                l_paren_token: L_PAREN@1247..1248 "(" [] [],
+                                                                items: CssParameterList [
+                                                                    CssListOfComponentValuesExpression {
+                                                                        css_component_value_list: CssComponentValueList [
+                                                                            CssDashedIdentifier {
+                                                                                value_token: IDENT@1248..1261 "--outer-local" [] [],
+                                                                            },
+                                                                        ],
+                                                                    },
+                                                                ],
+                                                                r_paren_token: R_PAREN@1261..1262 ")" [] [],
+                                                            },
+                                                        ],
                                                     },
                                                 },
                                             ],
@@ -1497,14 +1433,12 @@ CssRoot {
                                         },
                                         l_paren_token: L_PAREN@1292..1293 "(" [] [],
                                         items: CssParameterList [
-                                            CssParameter {
-                                                any_css_expression: CssListOfComponentValuesExpression {
-                                                    css_component_value_list: CssComponentValueList [
-                                                        CssNumber {
-                                                            value_token: CSS_NUMBER_LITERAL@1293..1294 "1" [] [],
-                                                        },
-                                                    ],
-                                                },
+                                            CssListOfComponentValuesExpression {
+                                                css_component_value_list: CssComponentValueList [
+                                                    CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@1293..1294 "1" [] [],
+                                                    },
+                                                ],
                                             },
                                         ],
                                         r_paren_token: R_PAREN@1294..1295 ")" [] [],
@@ -1561,38 +1495,34 @@ CssRoot {
                                             },
                                             l_paren_token: L_PAREN@1356..1357 "(" [] [],
                                             items: CssParameterList [
-                                                CssParameter {
-                                                    any_css_expression: CssBinaryExpression {
-                                                        left: CssListOfComponentValuesExpression {
-                                                            css_component_value_list: CssComponentValueList [
-                                                                CssFunction {
-                                                                    name: CssIdentifier {
-                                                                        value_token: IDENT@1357..1360 "var" [] [],
-                                                                    },
-                                                                    l_paren_token: L_PAREN@1360..1361 "(" [] [],
-                                                                    items: CssParameterList [
-                                                                        CssParameter {
-                                                                            any_css_expression: CssListOfComponentValuesExpression {
-                                                                                css_component_value_list: CssComponentValueList [
-                                                                                    CssDashedIdentifier {
-                                                                                        value_token: IDENT@1361..1364 "--z" [] [],
-                                                                                    },
-                                                                                ],
+                                                CssBinaryExpression {
+                                                    left: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssFunction {
+                                                                name: CssIdentifier {
+                                                                    value_token: IDENT@1357..1360 "var" [] [],
+                                                                },
+                                                                l_paren_token: L_PAREN@1360..1361 "(" [] [],
+                                                                items: CssParameterList [
+                                                                    CssListOfComponentValuesExpression {
+                                                                        css_component_value_list: CssComponentValueList [
+                                                                            CssDashedIdentifier {
+                                                                                value_token: IDENT@1361..1364 "--z" [] [],
                                                                             },
-                                                                        },
-                                                                    ],
-                                                                    r_paren_token: R_PAREN@1364..1366 ")" [] [Whitespace(" ")],
-                                                                },
-                                                            ],
-                                                        },
-                                                        operator_token: STAR@1366..1368 "*" [] [Whitespace(" ")],
-                                                        right: CssListOfComponentValuesExpression {
-                                                            css_component_value_list: CssComponentValueList [
-                                                                CssNumber {
-                                                                    value_token: CSS_NUMBER_LITERAL@1368..1369 "2" [] [],
-                                                                },
-                                                            ],
-                                                        },
+                                                                        ],
+                                                                    },
+                                                                ],
+                                                                r_paren_token: R_PAREN@1364..1366 ")" [] [Whitespace(" ")],
+                                                            },
+                                                        ],
+                                                    },
+                                                    operator_token: STAR@1366..1368 "*" [] [Whitespace(" ")],
+                                                    right: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@1368..1369 "2" [] [],
+                                                            },
+                                                        ],
                                                     },
                                                 },
                                             ],
@@ -1731,77 +1661,69 @@ CssRoot {
                                             },
                                             l_paren_token: L_PAREN@1479..1480 "(" [] [],
                                             items: CssParameterList [
-                                                CssParameter {
-                                                    any_css_expression: CssBinaryExpression {
+                                                CssBinaryExpression {
+                                                    left: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssFunction {
+                                                                name: CssIdentifier {
+                                                                    value_token: IDENT@1480..1483 "var" [] [],
+                                                                },
+                                                                l_paren_token: L_PAREN@1483..1484 "(" [] [],
+                                                                items: CssParameterList [
+                                                                    CssListOfComponentValuesExpression {
+                                                                        css_component_value_list: CssComponentValueList [
+                                                                            CssDashedIdentifier {
+                                                                                value_token: IDENT@1484..1487 "--a" [] [],
+                                                                            },
+                                                                        ],
+                                                                    },
+                                                                ],
+                                                                r_paren_token: R_PAREN@1487..1489 ")" [] [Whitespace(" ")],
+                                                            },
+                                                        ],
+                                                    },
+                                                    operator_token: PLUS@1489..1491 "+" [] [Whitespace(" ")],
+                                                    right: CssBinaryExpression {
                                                         left: CssListOfComponentValuesExpression {
                                                             css_component_value_list: CssComponentValueList [
                                                                 CssFunction {
                                                                     name: CssIdentifier {
-                                                                        value_token: IDENT@1480..1483 "var" [] [],
+                                                                        value_token: IDENT@1491..1494 "var" [] [],
                                                                     },
-                                                                    l_paren_token: L_PAREN@1483..1484 "(" [] [],
+                                                                    l_paren_token: L_PAREN@1494..1495 "(" [] [],
                                                                     items: CssParameterList [
-                                                                        CssParameter {
-                                                                            any_css_expression: CssListOfComponentValuesExpression {
-                                                                                css_component_value_list: CssComponentValueList [
-                                                                                    CssDashedIdentifier {
-                                                                                        value_token: IDENT@1484..1487 "--a" [] [],
-                                                                                    },
-                                                                                ],
-                                                                            },
+                                                                        CssListOfComponentValuesExpression {
+                                                                            css_component_value_list: CssComponentValueList [
+                                                                                CssDashedIdentifier {
+                                                                                    value_token: IDENT@1495..1498 "--b" [] [],
+                                                                                },
+                                                                            ],
                                                                         },
                                                                     ],
-                                                                    r_paren_token: R_PAREN@1487..1489 ")" [] [Whitespace(" ")],
+                                                                    r_paren_token: R_PAREN@1498..1500 ")" [] [Whitespace(" ")],
                                                                 },
                                                             ],
                                                         },
-                                                        operator_token: PLUS@1489..1491 "+" [] [Whitespace(" ")],
-                                                        right: CssBinaryExpression {
-                                                            left: CssListOfComponentValuesExpression {
-                                                                css_component_value_list: CssComponentValueList [
-                                                                    CssFunction {
-                                                                        name: CssIdentifier {
-                                                                            value_token: IDENT@1491..1494 "var" [] [],
-                                                                        },
-                                                                        l_paren_token: L_PAREN@1494..1495 "(" [] [],
-                                                                        items: CssParameterList [
-                                                                            CssParameter {
-                                                                                any_css_expression: CssListOfComponentValuesExpression {
-                                                                                    css_component_value_list: CssComponentValueList [
-                                                                                        CssDashedIdentifier {
-                                                                                            value_token: IDENT@1495..1498 "--b" [] [],
-                                                                                        },
-                                                                                    ],
-                                                                                },
-                                                                            },
-                                                                        ],
-                                                                        r_paren_token: R_PAREN@1498..1500 ")" [] [Whitespace(" ")],
+                                                        operator_token: PLUS@1500..1502 "+" [] [Whitespace(" ")],
+                                                        right: CssListOfComponentValuesExpression {
+                                                            css_component_value_list: CssComponentValueList [
+                                                                CssFunction {
+                                                                    name: CssIdentifier {
+                                                                        value_token: IDENT@1502..1505 "var" [] [],
                                                                     },
-                                                                ],
-                                                            },
-                                                            operator_token: PLUS@1500..1502 "+" [] [Whitespace(" ")],
-                                                            right: CssListOfComponentValuesExpression {
-                                                                css_component_value_list: CssComponentValueList [
-                                                                    CssFunction {
-                                                                        name: CssIdentifier {
-                                                                            value_token: IDENT@1502..1505 "var" [] [],
-                                                                        },
-                                                                        l_paren_token: L_PAREN@1505..1506 "(" [] [],
-                                                                        items: CssParameterList [
-                                                                            CssParameter {
-                                                                                any_css_expression: CssListOfComponentValuesExpression {
-                                                                                    css_component_value_list: CssComponentValueList [
-                                                                                        CssDashedIdentifier {
-                                                                                            value_token: IDENT@1506..1509 "--c" [] [],
-                                                                                        },
-                                                                                    ],
+                                                                    l_paren_token: L_PAREN@1505..1506 "(" [] [],
+                                                                    items: CssParameterList [
+                                                                        CssListOfComponentValuesExpression {
+                                                                            css_component_value_list: CssComponentValueList [
+                                                                                CssDashedIdentifier {
+                                                                                    value_token: IDENT@1506..1509 "--c" [] [],
                                                                                 },
-                                                                            },
-                                                                        ],
-                                                                        r_paren_token: R_PAREN@1509..1510 ")" [] [],
-                                                                    },
-                                                                ],
-                                                            },
+                                                                            ],
+                                                                        },
+                                                                    ],
+                                                                    r_paren_token: R_PAREN@1509..1510 ")" [] [],
+                                                                },
+                                                            ],
                                                         },
                                                     },
                                                 },
@@ -1900,24 +1822,20 @@ CssRoot {
                                         },
                                         l_paren_token: L_PAREN@1574..1575 "(" [] [],
                                         items: CssParameterList [
-                                            CssParameter {
-                                                any_css_expression: CssListOfComponentValuesExpression {
-                                                    css_component_value_list: CssComponentValueList [
-                                                        CssNumber {
-                                                            value_token: CSS_NUMBER_LITERAL@1575..1577 "20" [] [],
-                                                        },
-                                                    ],
-                                                },
+                                            CssListOfComponentValuesExpression {
+                                                css_component_value_list: CssComponentValueList [
+                                                    CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@1575..1577 "20" [] [],
+                                                    },
+                                                ],
                                             },
                                             COMMA@1577..1579 "," [] [Whitespace(" ")],
-                                            CssParameter {
-                                                any_css_expression: CssListOfComponentValuesExpression {
-                                                    css_component_value_list: CssComponentValueList [
-                                                        CssNumber {
-                                                            value_token: CSS_NUMBER_LITERAL@1579..1581 "30" [] [],
-                                                        },
-                                                    ],
-                                                },
+                                            CssListOfComponentValuesExpression {
+                                                css_component_value_list: CssComponentValueList [
+                                                    CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@1579..1581 "30" [] [],
+                                                    },
+                                                ],
                                             },
                                         ],
                                         r_paren_token: R_PAREN@1581..1582 ")" [] [],
@@ -1978,14 +1896,12 @@ CssRoot {
                                             },
                                             l_paren_token: L_PAREN@1644..1645 "(" [] [],
                                             items: CssParameterList [
-                                                CssParameter {
-                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                        css_component_value_list: CssComponentValueList [
-                                                            CssDashedIdentifier {
-                                                                value_token: IDENT@1645..1651 "--wide" [] [],
-                                                            },
-                                                        ],
-                                                    },
+                                                CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssDashedIdentifier {
+                                                            value_token: IDENT@1645..1651 "--wide" [] [],
+                                                        },
+                                                    ],
                                                 },
                                             ],
                                             r_paren_token: R_PAREN@1651..1652 ")" [] [],
@@ -2039,14 +1955,12 @@ CssRoot {
                                                             },
                                                             l_paren_token: L_PAREN@1696..1697 "(" [] [],
                                                             items: CssParameterList [
-                                                                CssParameter {
-                                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                                        css_component_value_list: CssComponentValueList [
-                                                                            CssDashedIdentifier {
-                                                                                value_token: IDENT@1697..1705 "--narrow" [] [],
-                                                                            },
-                                                                        ],
-                                                                    },
+                                                                CssListOfComponentValuesExpression {
+                                                                    css_component_value_list: CssComponentValueList [
+                                                                        CssDashedIdentifier {
+                                                                            value_token: IDENT@1697..1705 "--narrow" [] [],
+                                                                        },
+                                                                    ],
                                                                 },
                                                             ],
                                                             r_paren_token: R_PAREN@1705..1706 ")" [] [],
@@ -2137,14 +2051,12 @@ CssRoot {
                                                             },
                                                             l_paren_token: L_PAREN@1797..1798 "(" [] [],
                                                             items: CssParameterList [
-                                                                CssParameter {
-                                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                                        css_component_value_list: CssComponentValueList [
-                                                                            CssDashedIdentifier {
-                                                                                value_token: IDENT@1798..1806 "--narrow" [] [],
-                                                                            },
-                                                                        ],
-                                                                    },
+                                                                CssListOfComponentValuesExpression {
+                                                                    css_component_value_list: CssComponentValueList [
+                                                                        CssDashedIdentifier {
+                                                                            value_token: IDENT@1798..1806 "--narrow" [] [],
+                                                                        },
+                                                                    ],
                                                                 },
                                                             ],
                                                             r_paren_token: R_PAREN@1806..1808 ")" [] [Whitespace(" ")],
@@ -2164,14 +2076,12 @@ CssRoot {
                                                             },
                                                             l_paren_token: L_PAREN@1819..1820 "(" [] [],
                                                             items: CssParameterList [
-                                                                CssParameter {
-                                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                                        css_component_value_list: CssComponentValueList [
-                                                                            CssDashedIdentifier {
-                                                                                value_token: IDENT@1820..1826 "--wide" [] [],
-                                                                            },
-                                                                        ],
-                                                                    },
+                                                                CssListOfComponentValuesExpression {
+                                                                    css_component_value_list: CssComponentValueList [
+                                                                        CssDashedIdentifier {
+                                                                            value_token: IDENT@1820..1826 "--wide" [] [],
+                                                                        },
+                                                                    ],
                                                                 },
                                                             ],
                                                             r_paren_token: R_PAREN@1826..1827 ")" [] [],
@@ -2230,38 +2140,34 @@ CssRoot {
                                             },
                                             l_paren_token: L_PAREN@1877..1878 "(" [] [],
                                             items: CssParameterList [
-                                                CssParameter {
-                                                    any_css_expression: CssBinaryExpression {
-                                                        left: CssListOfComponentValuesExpression {
-                                                            css_component_value_list: CssComponentValueList [
-                                                                CssFunction {
-                                                                    name: CssIdentifier {
-                                                                        value_token: IDENT@1878..1881 "var" [] [],
-                                                                    },
-                                                                    l_paren_token: L_PAREN@1881..1882 "(" [] [],
-                                                                    items: CssParameterList [
-                                                                        CssParameter {
-                                                                            any_css_expression: CssListOfComponentValuesExpression {
-                                                                                css_component_value_list: CssComponentValueList [
-                                                                                    CssDashedIdentifier {
-                                                                                        value_token: IDENT@1882..1889 "--value" [] [],
-                                                                                    },
-                                                                                ],
+                                                CssBinaryExpression {
+                                                    left: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssFunction {
+                                                                name: CssIdentifier {
+                                                                    value_token: IDENT@1878..1881 "var" [] [],
+                                                                },
+                                                                l_paren_token: L_PAREN@1881..1882 "(" [] [],
+                                                                items: CssParameterList [
+                                                                    CssListOfComponentValuesExpression {
+                                                                        css_component_value_list: CssComponentValueList [
+                                                                            CssDashedIdentifier {
+                                                                                value_token: IDENT@1882..1889 "--value" [] [],
                                                                             },
-                                                                        },
-                                                                    ],
-                                                                    r_paren_token: R_PAREN@1889..1891 ")" [] [Whitespace(" ")],
-                                                                },
-                                                            ],
-                                                        },
-                                                        operator_token: STAR@1891..1893 "*" [] [Whitespace(" ")],
-                                                        right: CssListOfComponentValuesExpression {
-                                                            css_component_value_list: CssComponentValueList [
-                                                                CssNumber {
-                                                                    value_token: CSS_NUMBER_LITERAL@1893..1894 "2" [] [],
-                                                                },
-                                                            ],
-                                                        },
+                                                                        ],
+                                                                    },
+                                                                ],
+                                                                r_paren_token: R_PAREN@1889..1891 ")" [] [Whitespace(" ")],
+                                                            },
+                                                        ],
+                                                    },
+                                                    operator_token: STAR@1891..1893 "*" [] [Whitespace(" ")],
+                                                    right: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@1893..1894 "2" [] [],
+                                                            },
+                                                        ],
                                                     },
                                                 },
                                             ],
@@ -2326,14 +2232,12 @@ CssRoot {
                                         },
                                         l_paren_token: L_PAREN@1948..1949 "(" [] [],
                                         items: CssParameterList [
-                                            CssParameter {
-                                                any_css_expression: CssListOfComponentValuesExpression {
-                                                    css_component_value_list: CssComponentValueList [
-                                                        CssDashedIdentifier {
-                                                            value_token: IDENT@1949..1963 "--base-spacing" [] [],
-                                                        },
-                                                    ],
-                                                },
+                                            CssListOfComponentValuesExpression {
+                                                css_component_value_list: CssComponentValueList [
+                                                    CssDashedIdentifier {
+                                                        value_token: IDENT@1949..1963 "--base-spacing" [] [],
+                                                    },
+                                                ],
                                             },
                                         ],
                                         r_paren_token: R_PAREN@1963..1964 ")" [] [],
@@ -2358,29 +2262,25 @@ CssRoot {
                                         },
                                         l_paren_token: L_PAREN@1985..1986 "(" [] [],
                                         items: CssParameterList [
-                                            CssParameter {
-                                                any_css_expression: CssListOfComponentValuesExpression {
-                                                    css_component_value_list: CssComponentValueList [
-                                                        CssFunction {
-                                                            name: CssIdentifier {
-                                                                value_token: IDENT@1986..1989 "var" [] [],
-                                                            },
-                                                            l_paren_token: L_PAREN@1989..1990 "(" [] [],
-                                                            items: CssParameterList [
-                                                                CssParameter {
-                                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                                        css_component_value_list: CssComponentValueList [
-                                                                            CssDashedIdentifier {
-                                                                                value_token: IDENT@1990..2004 "--base-spacing" [] [],
-                                                                            },
-                                                                        ],
-                                                                    },
-                                                                },
-                                                            ],
-                                                            r_paren_token: R_PAREN@2004..2005 ")" [] [],
+                                            CssListOfComponentValuesExpression {
+                                                css_component_value_list: CssComponentValueList [
+                                                    CssFunction {
+                                                        name: CssIdentifier {
+                                                            value_token: IDENT@1986..1989 "var" [] [],
                                                         },
-                                                    ],
-                                                },
+                                                        l_paren_token: L_PAREN@1989..1990 "(" [] [],
+                                                        items: CssParameterList [
+                                                            CssListOfComponentValuesExpression {
+                                                                css_component_value_list: CssComponentValueList [
+                                                                    CssDashedIdentifier {
+                                                                        value_token: IDENT@1990..2004 "--base-spacing" [] [],
+                                                                    },
+                                                                ],
+                                                            },
+                                                        ],
+                                                        r_paren_token: R_PAREN@2004..2005 ")" [] [],
+                                                    },
+                                                ],
                                             },
                                         ],
                                         r_paren_token: R_PAREN@2005..2006 ")" [] [],
@@ -2528,43 +2428,40 @@ CssRoot {
                         0: IDENT@54..59 "oklch" [] []
                       1: L_PAREN@59..60 "(" [] []
                       2: CSS_PARAMETER_LIST@60..98
-                        0: CSS_PARAMETER@60..98
-                          0: CSS_BINARY_EXPRESSION@60..98
-                            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@60..84
-                              0: CSS_COMPONENT_VALUE_LIST@60..84
-                                0: CSS_IDENTIFIER@60..65
-                                  0: IDENT@60..65 "from" [] [Whitespace(" ")]
-                                1: CSS_FUNCTION@65..78
-                                  0: CSS_IDENTIFIER@65..68
-                                    0: IDENT@65..68 "var" [] []
-                                  1: L_PAREN@68..69 "(" [] []
-                                  2: CSS_PARAMETER_LIST@69..76
-                                    0: CSS_PARAMETER@69..76
-                                      0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@69..76
-                                        0: CSS_COMPONENT_VALUE_LIST@69..76
-                                          0: CSS_DASHED_IDENTIFIER@69..76
-                                            0: IDENT@69..76 "--color" [] []
-                                  3: R_PAREN@76..78 ")" [] [Whitespace(" ")]
-                                2: CSS_IDENTIFIER@78..80
-                                  0: IDENT@78..80 "l" [] [Whitespace(" ")]
-                                3: CSS_IDENTIFIER@80..82
-                                  0: IDENT@80..82 "c" [] [Whitespace(" ")]
-                                4: CSS_IDENTIFIER@82..84
-                                  0: IDENT@82..84 "h" [] [Whitespace(" ")]
-                            1: SLASH@84..86 "/" [] [Whitespace(" ")]
-                            2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@86..98
-                              0: CSS_COMPONENT_VALUE_LIST@86..98
-                                0: CSS_FUNCTION@86..98
-                                  0: CSS_IDENTIFIER@86..89
-                                    0: IDENT@86..89 "var" [] []
-                                  1: L_PAREN@89..90 "(" [] []
-                                  2: CSS_PARAMETER_LIST@90..97
-                                    0: CSS_PARAMETER@90..97
-                                      0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@90..97
-                                        0: CSS_COMPONENT_VALUE_LIST@90..97
-                                          0: CSS_DASHED_IDENTIFIER@90..97
-                                            0: IDENT@90..97 "--alpha" [] []
-                                  3: R_PAREN@97..98 ")" [] []
+                        0: CSS_BINARY_EXPRESSION@60..98
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@60..84
+                            0: CSS_COMPONENT_VALUE_LIST@60..84
+                              0: CSS_IDENTIFIER@60..65
+                                0: IDENT@60..65 "from" [] [Whitespace(" ")]
+                              1: CSS_FUNCTION@65..78
+                                0: CSS_IDENTIFIER@65..68
+                                  0: IDENT@65..68 "var" [] []
+                                1: L_PAREN@68..69 "(" [] []
+                                2: CSS_PARAMETER_LIST@69..76
+                                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@69..76
+                                    0: CSS_COMPONENT_VALUE_LIST@69..76
+                                      0: CSS_DASHED_IDENTIFIER@69..76
+                                        0: IDENT@69..76 "--color" [] []
+                                3: R_PAREN@76..78 ")" [] [Whitespace(" ")]
+                              2: CSS_IDENTIFIER@78..80
+                                0: IDENT@78..80 "l" [] [Whitespace(" ")]
+                              3: CSS_IDENTIFIER@80..82
+                                0: IDENT@80..82 "c" [] [Whitespace(" ")]
+                              4: CSS_IDENTIFIER@82..84
+                                0: IDENT@82..84 "h" [] [Whitespace(" ")]
+                          1: SLASH@84..86 "/" [] [Whitespace(" ")]
+                          2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@86..98
+                            0: CSS_COMPONENT_VALUE_LIST@86..98
+                              0: CSS_FUNCTION@86..98
+                                0: CSS_IDENTIFIER@86..89
+                                  0: IDENT@86..89 "var" [] []
+                                1: L_PAREN@89..90 "(" [] []
+                                2: CSS_PARAMETER_LIST@90..97
+                                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@90..97
+                                    0: CSS_COMPONENT_VALUE_LIST@90..97
+                                      0: CSS_DASHED_IDENTIFIER@90..97
+                                        0: IDENT@90..97 "--alpha" [] []
+                                3: R_PAREN@97..98 ")" [] []
                       3: R_PAREN@98..99 ")" [] []
                 1: (empty)
               1: SEMICOLON@99..100 ";" [] []
@@ -2605,26 +2502,23 @@ CssRoot {
                       0: IDENT@159..172 "--transparent" [] []
                     1: L_PAREN@172..173 "(" [] []
                     2: CSS_PARAMETER_LIST@173..195
-                      0: CSS_PARAMETER@173..190
-                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@173..190
-                          0: CSS_COMPONENT_VALUE_LIST@173..190
-                            0: CSS_FUNCTION@173..190
-                              0: CSS_IDENTIFIER@173..176
-                                0: IDENT@173..176 "var" [] []
-                              1: L_PAREN@176..177 "(" [] []
-                              2: CSS_PARAMETER_LIST@177..189
-                                0: CSS_PARAMETER@177..189
-                                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@177..189
-                                    0: CSS_COMPONENT_VALUE_LIST@177..189
-                                      0: CSS_DASHED_IDENTIFIER@177..189
-                                        0: IDENT@177..189 "--base-color" [] []
-                              3: R_PAREN@189..190 ")" [] []
+                      0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@173..190
+                        0: CSS_COMPONENT_VALUE_LIST@173..190
+                          0: CSS_FUNCTION@173..190
+                            0: CSS_IDENTIFIER@173..176
+                              0: IDENT@173..176 "var" [] []
+                            1: L_PAREN@176..177 "(" [] []
+                            2: CSS_PARAMETER_LIST@177..189
+                              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@177..189
+                                0: CSS_COMPONENT_VALUE_LIST@177..189
+                                  0: CSS_DASHED_IDENTIFIER@177..189
+                                    0: IDENT@177..189 "--base-color" [] []
+                            3: R_PAREN@189..190 ")" [] []
                       1: COMMA@190..192 "," [] [Whitespace(" ")]
-                      2: CSS_PARAMETER@192..195
-                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@192..195
-                          0: CSS_COMPONENT_VALUE_LIST@192..195
-                            0: CSS_NUMBER@192..195
-                              0: CSS_NUMBER_LITERAL@192..195 "0.8" [] []
+                      2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@192..195
+                        0: CSS_COMPONENT_VALUE_LIST@192..195
+                          0: CSS_NUMBER@192..195
+                            0: CSS_NUMBER_LITERAL@192..195 "0.8" [] []
                     3: R_PAREN@195..196 ")" [] []
               1: (empty)
             1: SEMICOLON@196..197 ";" [] []
@@ -2699,43 +2593,40 @@ CssRoot {
                         0: IDENT@311..316 "oklch" [] []
                       1: L_PAREN@316..317 "(" [] []
                       2: CSS_PARAMETER_LIST@317..355
-                        0: CSS_PARAMETER@317..355
-                          0: CSS_BINARY_EXPRESSION@317..355
-                            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@317..341
-                              0: CSS_COMPONENT_VALUE_LIST@317..341
-                                0: CSS_IDENTIFIER@317..322
-                                  0: IDENT@317..322 "from" [] [Whitespace(" ")]
-                                1: CSS_FUNCTION@322..335
-                                  0: CSS_IDENTIFIER@322..325
-                                    0: IDENT@322..325 "var" [] []
-                                  1: L_PAREN@325..326 "(" [] []
-                                  2: CSS_PARAMETER_LIST@326..333
-                                    0: CSS_PARAMETER@326..333
-                                      0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@326..333
-                                        0: CSS_COMPONENT_VALUE_LIST@326..333
-                                          0: CSS_DASHED_IDENTIFIER@326..333
-                                            0: IDENT@326..333 "--color" [] []
-                                  3: R_PAREN@333..335 ")" [] [Whitespace(" ")]
-                                2: CSS_IDENTIFIER@335..337
-                                  0: IDENT@335..337 "l" [] [Whitespace(" ")]
-                                3: CSS_IDENTIFIER@337..339
-                                  0: IDENT@337..339 "c" [] [Whitespace(" ")]
-                                4: CSS_IDENTIFIER@339..341
-                                  0: IDENT@339..341 "h" [] [Whitespace(" ")]
-                            1: SLASH@341..343 "/" [] [Whitespace(" ")]
-                            2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@343..355
-                              0: CSS_COMPONENT_VALUE_LIST@343..355
-                                0: CSS_FUNCTION@343..355
-                                  0: CSS_IDENTIFIER@343..346
-                                    0: IDENT@343..346 "var" [] []
-                                  1: L_PAREN@346..347 "(" [] []
-                                  2: CSS_PARAMETER_LIST@347..354
-                                    0: CSS_PARAMETER@347..354
-                                      0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@347..354
-                                        0: CSS_COMPONENT_VALUE_LIST@347..354
-                                          0: CSS_DASHED_IDENTIFIER@347..354
-                                            0: IDENT@347..354 "--alpha" [] []
-                                  3: R_PAREN@354..355 ")" [] []
+                        0: CSS_BINARY_EXPRESSION@317..355
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@317..341
+                            0: CSS_COMPONENT_VALUE_LIST@317..341
+                              0: CSS_IDENTIFIER@317..322
+                                0: IDENT@317..322 "from" [] [Whitespace(" ")]
+                              1: CSS_FUNCTION@322..335
+                                0: CSS_IDENTIFIER@322..325
+                                  0: IDENT@322..325 "var" [] []
+                                1: L_PAREN@325..326 "(" [] []
+                                2: CSS_PARAMETER_LIST@326..333
+                                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@326..333
+                                    0: CSS_COMPONENT_VALUE_LIST@326..333
+                                      0: CSS_DASHED_IDENTIFIER@326..333
+                                        0: IDENT@326..333 "--color" [] []
+                                3: R_PAREN@333..335 ")" [] [Whitespace(" ")]
+                              2: CSS_IDENTIFIER@335..337
+                                0: IDENT@335..337 "l" [] [Whitespace(" ")]
+                              3: CSS_IDENTIFIER@337..339
+                                0: IDENT@337..339 "c" [] [Whitespace(" ")]
+                              4: CSS_IDENTIFIER@339..341
+                                0: IDENT@339..341 "h" [] [Whitespace(" ")]
+                          1: SLASH@341..343 "/" [] [Whitespace(" ")]
+                          2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@343..355
+                            0: CSS_COMPONENT_VALUE_LIST@343..355
+                              0: CSS_FUNCTION@343..355
+                                0: CSS_IDENTIFIER@343..346
+                                  0: IDENT@343..346 "var" [] []
+                                1: L_PAREN@346..347 "(" [] []
+                                2: CSS_PARAMETER_LIST@347..354
+                                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@347..354
+                                    0: CSS_COMPONENT_VALUE_LIST@347..354
+                                      0: CSS_DASHED_IDENTIFIER@347..354
+                                        0: IDENT@347..354 "--alpha" [] []
+                                3: R_PAREN@354..355 ")" [] []
                       3: R_PAREN@355..356 ")" [] []
                 1: (empty)
               1: SEMICOLON@356..357 ";" [] []
@@ -2776,27 +2667,24 @@ CssRoot {
                       0: IDENT@416..429 "--transparent" [] []
                     1: L_PAREN@429..430 "(" [] []
                     2: CSS_PARAMETER_LIST@430..452
-                      0: CSS_PARAMETER@430..447
-                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@430..447
-                          0: CSS_COMPONENT_VALUE_LIST@430..447
-                            0: CSS_FUNCTION@430..447
-                              0: CSS_IDENTIFIER@430..433
-                                0: IDENT@430..433 "var" [] []
-                              1: L_PAREN@433..434 "(" [] []
-                              2: CSS_PARAMETER_LIST@434..446
-                                0: CSS_PARAMETER@434..446
-                                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@434..446
-                                    0: CSS_COMPONENT_VALUE_LIST@434..446
-                                      0: CSS_DASHED_IDENTIFIER@434..446
-                                        0: IDENT@434..446 "--base-color" [] []
-                              3: R_PAREN@446..447 ")" [] []
+                      0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@430..447
+                        0: CSS_COMPONENT_VALUE_LIST@430..447
+                          0: CSS_FUNCTION@430..447
+                            0: CSS_IDENTIFIER@430..433
+                              0: IDENT@430..433 "var" [] []
+                            1: L_PAREN@433..434 "(" [] []
+                            2: CSS_PARAMETER_LIST@434..446
+                              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@434..446
+                                0: CSS_COMPONENT_VALUE_LIST@434..446
+                                  0: CSS_DASHED_IDENTIFIER@434..446
+                                    0: IDENT@434..446 "--base-color" [] []
+                            3: R_PAREN@446..447 ")" [] []
                       1: COMMA@447..449 "," [] [Whitespace(" ")]
-                      2: CSS_PARAMETER@449..452
-                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@449..452
-                          0: CSS_COMPONENT_VALUE_LIST@449..452
-                            0: CSS_PERCENTAGE@449..452
-                              0: CSS_NUMBER_LITERAL@449..451 "50" [] []
-                              1: PERCENT@451..452 "%" [] []
+                      2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@449..452
+                        0: CSS_COMPONENT_VALUE_LIST@449..452
+                          0: CSS_PERCENTAGE@449..452
+                            0: CSS_NUMBER_LITERAL@449..451 "50" [] []
+                            1: PERCENT@451..452 "%" [] []
                     3: R_PAREN@452..453 ")" [] []
               1: (empty)
             1: SEMICOLON@453..454 ";" [] []
@@ -2861,43 +2749,40 @@ CssRoot {
                         0: IDENT@550..555 "oklch" [] []
                       1: L_PAREN@555..556 "(" [] []
                       2: CSS_PARAMETER_LIST@556..594
-                        0: CSS_PARAMETER@556..594
-                          0: CSS_BINARY_EXPRESSION@556..594
-                            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@556..580
-                              0: CSS_COMPONENT_VALUE_LIST@556..580
-                                0: CSS_IDENTIFIER@556..561
-                                  0: IDENT@556..561 "from" [] [Whitespace(" ")]
-                                1: CSS_FUNCTION@561..574
-                                  0: CSS_IDENTIFIER@561..564
-                                    0: IDENT@561..564 "var" [] []
-                                  1: L_PAREN@564..565 "(" [] []
-                                  2: CSS_PARAMETER_LIST@565..572
-                                    0: CSS_PARAMETER@565..572
-                                      0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@565..572
-                                        0: CSS_COMPONENT_VALUE_LIST@565..572
-                                          0: CSS_DASHED_IDENTIFIER@565..572
-                                            0: IDENT@565..572 "--color" [] []
-                                  3: R_PAREN@572..574 ")" [] [Whitespace(" ")]
-                                2: CSS_IDENTIFIER@574..576
-                                  0: IDENT@574..576 "l" [] [Whitespace(" ")]
-                                3: CSS_IDENTIFIER@576..578
-                                  0: IDENT@576..578 "c" [] [Whitespace(" ")]
-                                4: CSS_IDENTIFIER@578..580
-                                  0: IDENT@578..580 "h" [] [Whitespace(" ")]
-                            1: SLASH@580..582 "/" [] [Whitespace(" ")]
-                            2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@582..594
-                              0: CSS_COMPONENT_VALUE_LIST@582..594
-                                0: CSS_FUNCTION@582..594
-                                  0: CSS_IDENTIFIER@582..585
-                                    0: IDENT@582..585 "var" [] []
-                                  1: L_PAREN@585..586 "(" [] []
-                                  2: CSS_PARAMETER_LIST@586..593
-                                    0: CSS_PARAMETER@586..593
-                                      0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@586..593
-                                        0: CSS_COMPONENT_VALUE_LIST@586..593
-                                          0: CSS_DASHED_IDENTIFIER@586..593
-                                            0: IDENT@586..593 "--alpha" [] []
-                                  3: R_PAREN@593..594 ")" [] []
+                        0: CSS_BINARY_EXPRESSION@556..594
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@556..580
+                            0: CSS_COMPONENT_VALUE_LIST@556..580
+                              0: CSS_IDENTIFIER@556..561
+                                0: IDENT@556..561 "from" [] [Whitespace(" ")]
+                              1: CSS_FUNCTION@561..574
+                                0: CSS_IDENTIFIER@561..564
+                                  0: IDENT@561..564 "var" [] []
+                                1: L_PAREN@564..565 "(" [] []
+                                2: CSS_PARAMETER_LIST@565..572
+                                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@565..572
+                                    0: CSS_COMPONENT_VALUE_LIST@565..572
+                                      0: CSS_DASHED_IDENTIFIER@565..572
+                                        0: IDENT@565..572 "--color" [] []
+                                3: R_PAREN@572..574 ")" [] [Whitespace(" ")]
+                              2: CSS_IDENTIFIER@574..576
+                                0: IDENT@574..576 "l" [] [Whitespace(" ")]
+                              3: CSS_IDENTIFIER@576..578
+                                0: IDENT@576..578 "c" [] [Whitespace(" ")]
+                              4: CSS_IDENTIFIER@578..580
+                                0: IDENT@578..580 "h" [] [Whitespace(" ")]
+                          1: SLASH@580..582 "/" [] [Whitespace(" ")]
+                          2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@582..594
+                            0: CSS_COMPONENT_VALUE_LIST@582..594
+                              0: CSS_FUNCTION@582..594
+                                0: CSS_IDENTIFIER@582..585
+                                  0: IDENT@582..585 "var" [] []
+                                1: L_PAREN@585..586 "(" [] []
+                                2: CSS_PARAMETER_LIST@586..593
+                                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@586..593
+                                    0: CSS_COMPONENT_VALUE_LIST@586..593
+                                      0: CSS_DASHED_IDENTIFIER@586..593
+                                        0: IDENT@586..593 "--alpha" [] []
+                                3: R_PAREN@593..594 ")" [] []
                       3: R_PAREN@594..595 ")" [] []
                 1: (empty)
               1: SEMICOLON@595..596 ";" [] []
@@ -2938,20 +2823,18 @@ CssRoot {
                       0: IDENT@655..668 "--transparent" [] []
                     1: L_PAREN@668..669 "(" [] []
                     2: CSS_PARAMETER_LIST@669..686
-                      0: CSS_PARAMETER@669..686
-                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@669..686
-                          0: CSS_COMPONENT_VALUE_LIST@669..686
-                            0: CSS_FUNCTION@669..686
-                              0: CSS_IDENTIFIER@669..672
-                                0: IDENT@669..672 "var" [] []
-                              1: L_PAREN@672..673 "(" [] []
-                              2: CSS_PARAMETER_LIST@673..685
-                                0: CSS_PARAMETER@673..685
-                                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@673..685
-                                    0: CSS_COMPONENT_VALUE_LIST@673..685
-                                      0: CSS_DASHED_IDENTIFIER@673..685
-                                        0: IDENT@673..685 "--base-color" [] []
-                              3: R_PAREN@685..686 ")" [] []
+                      0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@669..686
+                        0: CSS_COMPONENT_VALUE_LIST@669..686
+                          0: CSS_FUNCTION@669..686
+                            0: CSS_IDENTIFIER@669..672
+                              0: IDENT@669..672 "var" [] []
+                            1: L_PAREN@672..673 "(" [] []
+                            2: CSS_PARAMETER_LIST@673..685
+                              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@673..685
+                                0: CSS_COMPONENT_VALUE_LIST@673..685
+                                  0: CSS_DASHED_IDENTIFIER@673..685
+                                    0: IDENT@673..685 "--base-color" [] []
+                            3: R_PAREN@685..686 ")" [] []
                     3: R_PAREN@686..687 ")" [] []
               1: (empty)
             1: SEMICOLON@687..688 ";" [] []
@@ -3006,44 +2889,40 @@ CssRoot {
                         0: IDENT@759..763 "calc" [] []
                       1: L_PAREN@763..764 "(" [] []
                       2: CSS_PARAMETER_LIST@764..791
-                        0: CSS_PARAMETER@764..791
-                          0: CSS_BINARY_EXPRESSION@764..791
-                            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@764..781
-                              0: CSS_COMPONENT_VALUE_LIST@764..781
-                                0: CSS_FUNCTION@764..781
-                                  0: CSS_IDENTIFIER@764..767
-                                    0: IDENT@764..767 "max" [] []
-                                  1: L_PAREN@767..768 "(" [] []
-                                  2: CSS_PARAMETER_LIST@768..779
-                                    0: CSS_PARAMETER@768..779
-                                      0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@768..779
-                                        0: CSS_COMPONENT_VALUE_LIST@768..779
-                                          0: CSS_FUNCTION@768..779
-                                            0: CSS_IDENTIFIER@768..771
-                                              0: IDENT@768..771 "var" [] []
-                                            1: L_PAREN@771..772 "(" [] []
-                                            2: CSS_PARAMETER_LIST@772..778
-                                              0: CSS_PARAMETER@772..778
-                                                0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@772..778
-                                                  0: CSS_COMPONENT_VALUE_LIST@772..778
-                                                    0: CSS_DASHED_IDENTIFIER@772..778
-                                                      0: IDENT@772..778 "--list" [] []
-                                            3: R_PAREN@778..779 ")" [] []
-                                  3: R_PAREN@779..781 ")" [] [Whitespace(" ")]
-                            1: PLUS@781..783 "+" [] [Whitespace(" ")]
-                            2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@783..791
-                              0: CSS_COMPONENT_VALUE_LIST@783..791
-                                0: CSS_FUNCTION@783..791
-                                  0: CSS_IDENTIFIER@783..786
-                                    0: IDENT@783..786 "var" [] []
-                                  1: L_PAREN@786..787 "(" [] []
-                                  2: CSS_PARAMETER_LIST@787..790
-                                    0: CSS_PARAMETER@787..790
-                                      0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@787..790
-                                        0: CSS_COMPONENT_VALUE_LIST@787..790
-                                          0: CSS_DASHED_IDENTIFIER@787..790
-                                            0: IDENT@787..790 "--x" [] []
-                                  3: R_PAREN@790..791 ")" [] []
+                        0: CSS_BINARY_EXPRESSION@764..791
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@764..781
+                            0: CSS_COMPONENT_VALUE_LIST@764..781
+                              0: CSS_FUNCTION@764..781
+                                0: CSS_IDENTIFIER@764..767
+                                  0: IDENT@764..767 "max" [] []
+                                1: L_PAREN@767..768 "(" [] []
+                                2: CSS_PARAMETER_LIST@768..779
+                                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@768..779
+                                    0: CSS_COMPONENT_VALUE_LIST@768..779
+                                      0: CSS_FUNCTION@768..779
+                                        0: CSS_IDENTIFIER@768..771
+                                          0: IDENT@768..771 "var" [] []
+                                        1: L_PAREN@771..772 "(" [] []
+                                        2: CSS_PARAMETER_LIST@772..778
+                                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@772..778
+                                            0: CSS_COMPONENT_VALUE_LIST@772..778
+                                              0: CSS_DASHED_IDENTIFIER@772..778
+                                                0: IDENT@772..778 "--list" [] []
+                                        3: R_PAREN@778..779 ")" [] []
+                                3: R_PAREN@779..781 ")" [] [Whitespace(" ")]
+                          1: PLUS@781..783 "+" [] [Whitespace(" ")]
+                          2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@783..791
+                            0: CSS_COMPONENT_VALUE_LIST@783..791
+                              0: CSS_FUNCTION@783..791
+                                0: CSS_IDENTIFIER@783..786
+                                  0: IDENT@783..786 "var" [] []
+                                1: L_PAREN@786..787 "(" [] []
+                                2: CSS_PARAMETER_LIST@787..790
+                                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@787..790
+                                    0: CSS_COMPONENT_VALUE_LIST@787..790
+                                      0: CSS_DASHED_IDENTIFIER@787..790
+                                        0: IDENT@787..790 "--x" [] []
+                                3: R_PAREN@790..791 ")" [] []
                       3: R_PAREN@791..792 ")" [] []
                 1: (empty)
               1: SEMICOLON@792..793 ";" [] []
@@ -3073,31 +2952,29 @@ CssRoot {
                       0: IDENT@830..842 "--max-plus-x" [] []
                     1: L_PAREN@842..843 "(" [] []
                     2: CSS_PARAMETER_LIST@843..863
-                      0: CSS_PARAMETER@843..858
-                        0: CSS_COMMA_SEPARATED_VALUE@843..858
-                          0: L_CURLY@843..844 "{" [] []
-                          1: CSS_GENERIC_COMPONENT_VALUE_LIST@844..857
-                            0: CSS_REGULAR_DIMENSION@844..847
-                              0: CSS_NUMBER_LITERAL@844..845 "1" [] []
-                              1: IDENT@845..847 "px" [] []
-                            1: CSS_GENERIC_DELIMITER@847..849
-                              0: COMMA@847..849 "," [] [Whitespace(" ")]
-                            2: CSS_REGULAR_DIMENSION@849..852
-                              0: CSS_NUMBER_LITERAL@849..850 "7" [] []
-                              1: IDENT@850..852 "px" [] []
-                            3: CSS_GENERIC_DELIMITER@852..854
-                              0: COMMA@852..854 "," [] [Whitespace(" ")]
-                            4: CSS_REGULAR_DIMENSION@854..857
-                              0: CSS_NUMBER_LITERAL@854..855 "2" [] []
-                              1: IDENT@855..857 "px" [] []
-                          2: R_CURLY@857..858 "}" [] []
+                      0: CSS_COMMA_SEPARATED_VALUE@843..858
+                        0: L_CURLY@843..844 "{" [] []
+                        1: CSS_GENERIC_COMPONENT_VALUE_LIST@844..857
+                          0: CSS_REGULAR_DIMENSION@844..847
+                            0: CSS_NUMBER_LITERAL@844..845 "1" [] []
+                            1: IDENT@845..847 "px" [] []
+                          1: CSS_GENERIC_DELIMITER@847..849
+                            0: COMMA@847..849 "," [] [Whitespace(" ")]
+                          2: CSS_REGULAR_DIMENSION@849..852
+                            0: CSS_NUMBER_LITERAL@849..850 "7" [] []
+                            1: IDENT@850..852 "px" [] []
+                          3: CSS_GENERIC_DELIMITER@852..854
+                            0: COMMA@852..854 "," [] [Whitespace(" ")]
+                          4: CSS_REGULAR_DIMENSION@854..857
+                            0: CSS_NUMBER_LITERAL@854..855 "2" [] []
+                            1: IDENT@855..857 "px" [] []
+                        2: R_CURLY@857..858 "}" [] []
                       1: COMMA@858..860 "," [] [Whitespace(" ")]
-                      2: CSS_PARAMETER@860..863
-                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@860..863
-                          0: CSS_COMPONENT_VALUE_LIST@860..863
-                            0: CSS_REGULAR_DIMENSION@860..863
-                              0: CSS_NUMBER_LITERAL@860..861 "3" [] []
-                              1: IDENT@861..863 "px" [] []
+                      2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@860..863
+                        0: CSS_COMPONENT_VALUE_LIST@860..863
+                          0: CSS_REGULAR_DIMENSION@860..863
+                            0: CSS_NUMBER_LITERAL@860..861 "3" [] []
+                            1: IDENT@861..863 "px" [] []
                     3: R_PAREN@863..864 ")" [] []
               1: (empty)
             1: SEMICOLON@864..865 ";" [] []
@@ -3127,21 +3004,19 @@ CssRoot {
                       0: IDENT@909..921 "--max-plus-x" [] []
                     1: L_PAREN@921..922 "(" [] []
                     2: CSS_PARAMETER_LIST@922..932
-                      0: CSS_PARAMETER@922..927
-                        0: CSS_COMMA_SEPARATED_VALUE@922..927
-                          0: L_CURLY@922..923 "{" [] []
-                          1: CSS_GENERIC_COMPONENT_VALUE_LIST@923..926
-                            0: CSS_REGULAR_DIMENSION@923..926
-                              0: CSS_NUMBER_LITERAL@923..924 "1" [] []
-                              1: IDENT@924..926 "px" [] []
-                          2: R_CURLY@926..927 "}" [] []
+                      0: CSS_COMMA_SEPARATED_VALUE@922..927
+                        0: L_CURLY@922..923 "{" [] []
+                        1: CSS_GENERIC_COMPONENT_VALUE_LIST@923..926
+                          0: CSS_REGULAR_DIMENSION@923..926
+                            0: CSS_NUMBER_LITERAL@923..924 "1" [] []
+                            1: IDENT@924..926 "px" [] []
+                        2: R_CURLY@926..927 "}" [] []
                       1: COMMA@927..929 "," [] [Whitespace(" ")]
-                      2: CSS_PARAMETER@929..932
-                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@929..932
-                          0: CSS_COMPONENT_VALUE_LIST@929..932
-                            0: CSS_REGULAR_DIMENSION@929..932
-                              0: CSS_NUMBER_LITERAL@929..930 "3" [] []
-                              1: IDENT@930..932 "px" [] []
+                      2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@929..932
+                        0: CSS_COMPONENT_VALUE_LIST@929..932
+                          0: CSS_REGULAR_DIMENSION@929..932
+                            0: CSS_NUMBER_LITERAL@929..930 "3" [] []
+                            1: IDENT@930..932 "px" [] []
                     3: R_PAREN@932..933 ")" [] []
               1: (empty)
             1: SEMICOLON@933..934 ";" [] []
@@ -3206,44 +3081,40 @@ CssRoot {
                         0: IDENT@1030..1033 "var" [] []
                       1: L_PAREN@1033..1034 "(" [] []
                       2: CSS_PARAMETER_LIST@1034..1045
-                        0: CSS_PARAMETER@1034..1045
-                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1034..1045
-                            0: CSS_COMPONENT_VALUE_LIST@1034..1045
-                              0: CSS_DASHED_IDENTIFIER@1034..1045
-                                0: IDENT@1034..1045 "--animation" [] []
+                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1034..1045
+                          0: CSS_COMPONENT_VALUE_LIST@1034..1045
+                            0: CSS_DASHED_IDENTIFIER@1034..1045
+                              0: IDENT@1034..1045 "--animation" [] []
                       3: R_PAREN@1045..1047 ")" [] [Whitespace(" ")]
                     1: CSS_FUNCTION@1047..1063
                       0: CSS_IDENTIFIER@1047..1050
                         0: IDENT@1047..1050 "var" [] []
                       1: L_PAREN@1050..1051 "(" [] []
                       2: CSS_PARAMETER_LIST@1051..1061
-                        0: CSS_PARAMETER@1051..1061
-                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1051..1061
-                            0: CSS_COMPONENT_VALUE_LIST@1051..1061
-                              0: CSS_DASHED_IDENTIFIER@1051..1061
-                                0: IDENT@1051..1061 "--duration" [] []
+                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1051..1061
+                          0: CSS_COMPONENT_VALUE_LIST@1051..1061
+                            0: CSS_DASHED_IDENTIFIER@1051..1061
+                              0: IDENT@1051..1061 "--duration" [] []
                       3: R_PAREN@1061..1063 ")" [] [Whitespace(" ")]
                     2: CSS_FUNCTION@1063..1076
                       0: CSS_IDENTIFIER@1063..1066
                         0: IDENT@1063..1066 "var" [] []
                       1: L_PAREN@1066..1067 "(" [] []
                       2: CSS_PARAMETER_LIST@1067..1074
-                        0: CSS_PARAMETER@1067..1074
-                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1067..1074
-                            0: CSS_COMPONENT_VALUE_LIST@1067..1074
-                              0: CSS_DASHED_IDENTIFIER@1067..1074
-                                0: IDENT@1067..1074 "--count" [] []
+                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1067..1074
+                          0: CSS_COMPONENT_VALUE_LIST@1067..1074
+                            0: CSS_DASHED_IDENTIFIER@1067..1074
+                              0: IDENT@1067..1074 "--count" [] []
                       3: R_PAREN@1074..1076 ")" [] [Whitespace(" ")]
                     3: CSS_FUNCTION@1076..1089
                       0: CSS_IDENTIFIER@1076..1079
                         0: IDENT@1076..1079 "var" [] []
                       1: L_PAREN@1079..1080 "(" [] []
                       2: CSS_PARAMETER_LIST@1080..1088
-                        0: CSS_PARAMETER@1080..1088
-                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1080..1088
-                            0: CSS_COMPONENT_VALUE_LIST@1080..1088
-                              0: CSS_DASHED_IDENTIFIER@1080..1088
-                                0: IDENT@1080..1088 "--easing" [] []
+                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1080..1088
+                          0: CSS_COMPONENT_VALUE_LIST@1080..1088
+                            0: CSS_DASHED_IDENTIFIER@1080..1088
+                              0: IDENT@1080..1088 "--easing" [] []
                       3: R_PAREN@1088..1089 ")" [] []
                 1: (empty)
               1: SEMICOLON@1089..1090 ";" [] []
@@ -3328,35 +3199,32 @@ CssRoot {
                         0: IDENT@1220..1224 "calc" [] []
                       1: L_PAREN@1224..1225 "(" [] []
                       2: CSS_PARAMETER_LIST@1225..1262
-                        0: CSS_PARAMETER@1225..1262
-                          0: CSS_BINARY_EXPRESSION@1225..1262
-                            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1225..1242
-                              0: CSS_COMPONENT_VALUE_LIST@1225..1242
-                                0: CSS_FUNCTION@1225..1242
-                                  0: CSS_IDENTIFIER@1225..1228
-                                    0: IDENT@1225..1228 "var" [] []
-                                  1: L_PAREN@1228..1229 "(" [] []
-                                  2: CSS_PARAMETER_LIST@1229..1240
-                                    0: CSS_PARAMETER@1229..1240
-                                      0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1229..1240
-                                        0: CSS_COMPONENT_VALUE_LIST@1229..1240
-                                          0: CSS_DASHED_IDENTIFIER@1229..1240
-                                            0: IDENT@1229..1240 "--outer-arg" [] []
-                                  3: R_PAREN@1240..1242 ")" [] [Whitespace(" ")]
-                            1: PLUS@1242..1244 "+" [] [Whitespace(" ")]
-                            2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1244..1262
-                              0: CSS_COMPONENT_VALUE_LIST@1244..1262
-                                0: CSS_FUNCTION@1244..1262
-                                  0: CSS_IDENTIFIER@1244..1247
-                                    0: IDENT@1244..1247 "var" [] []
-                                  1: L_PAREN@1247..1248 "(" [] []
-                                  2: CSS_PARAMETER_LIST@1248..1261
-                                    0: CSS_PARAMETER@1248..1261
-                                      0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1248..1261
-                                        0: CSS_COMPONENT_VALUE_LIST@1248..1261
-                                          0: CSS_DASHED_IDENTIFIER@1248..1261
-                                            0: IDENT@1248..1261 "--outer-local" [] []
-                                  3: R_PAREN@1261..1262 ")" [] []
+                        0: CSS_BINARY_EXPRESSION@1225..1262
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1225..1242
+                            0: CSS_COMPONENT_VALUE_LIST@1225..1242
+                              0: CSS_FUNCTION@1225..1242
+                                0: CSS_IDENTIFIER@1225..1228
+                                  0: IDENT@1225..1228 "var" [] []
+                                1: L_PAREN@1228..1229 "(" [] []
+                                2: CSS_PARAMETER_LIST@1229..1240
+                                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1229..1240
+                                    0: CSS_COMPONENT_VALUE_LIST@1229..1240
+                                      0: CSS_DASHED_IDENTIFIER@1229..1240
+                                        0: IDENT@1229..1240 "--outer-arg" [] []
+                                3: R_PAREN@1240..1242 ")" [] [Whitespace(" ")]
+                          1: PLUS@1242..1244 "+" [] [Whitespace(" ")]
+                          2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1244..1262
+                            0: CSS_COMPONENT_VALUE_LIST@1244..1262
+                              0: CSS_FUNCTION@1244..1262
+                                0: CSS_IDENTIFIER@1244..1247
+                                  0: IDENT@1244..1247 "var" [] []
+                                1: L_PAREN@1247..1248 "(" [] []
+                                2: CSS_PARAMETER_LIST@1248..1261
+                                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1248..1261
+                                    0: CSS_COMPONENT_VALUE_LIST@1248..1261
+                                      0: CSS_DASHED_IDENTIFIER@1248..1261
+                                        0: IDENT@1248..1261 "--outer-local" [] []
+                                3: R_PAREN@1261..1262 ")" [] []
                       3: R_PAREN@1262..1263 ")" [] []
                 1: (empty)
               1: SEMICOLON@1263..1264 ";" [] []
@@ -3385,11 +3253,10 @@ CssRoot {
                       0: IDENT@1285..1292 "--outer" [] []
                     1: L_PAREN@1292..1293 "(" [] []
                     2: CSS_PARAMETER_LIST@1293..1294
-                      0: CSS_PARAMETER@1293..1294
-                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1293..1294
-                          0: CSS_COMPONENT_VALUE_LIST@1293..1294
-                            0: CSS_NUMBER@1293..1294
-                              0: CSS_NUMBER_LITERAL@1293..1294 "1" [] []
+                      0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1293..1294
+                        0: CSS_COMPONENT_VALUE_LIST@1293..1294
+                          0: CSS_NUMBER@1293..1294
+                            0: CSS_NUMBER_LITERAL@1293..1294 "1" [] []
                     3: R_PAREN@1294..1295 ")" [] []
               1: (empty)
             1: SEMICOLON@1295..1296 ";" [] []
@@ -3428,26 +3295,24 @@ CssRoot {
                         0: IDENT@1352..1356 "calc" [] []
                       1: L_PAREN@1356..1357 "(" [] []
                       2: CSS_PARAMETER_LIST@1357..1369
-                        0: CSS_PARAMETER@1357..1369
-                          0: CSS_BINARY_EXPRESSION@1357..1369
-                            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1357..1366
-                              0: CSS_COMPONENT_VALUE_LIST@1357..1366
-                                0: CSS_FUNCTION@1357..1366
-                                  0: CSS_IDENTIFIER@1357..1360
-                                    0: IDENT@1357..1360 "var" [] []
-                                  1: L_PAREN@1360..1361 "(" [] []
-                                  2: CSS_PARAMETER_LIST@1361..1364
-                                    0: CSS_PARAMETER@1361..1364
-                                      0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1361..1364
-                                        0: CSS_COMPONENT_VALUE_LIST@1361..1364
-                                          0: CSS_DASHED_IDENTIFIER@1361..1364
-                                            0: IDENT@1361..1364 "--z" [] []
-                                  3: R_PAREN@1364..1366 ")" [] [Whitespace(" ")]
-                            1: STAR@1366..1368 "*" [] [Whitespace(" ")]
-                            2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1368..1369
-                              0: CSS_COMPONENT_VALUE_LIST@1368..1369
-                                0: CSS_NUMBER@1368..1369
-                                  0: CSS_NUMBER_LITERAL@1368..1369 "2" [] []
+                        0: CSS_BINARY_EXPRESSION@1357..1369
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1357..1366
+                            0: CSS_COMPONENT_VALUE_LIST@1357..1366
+                              0: CSS_FUNCTION@1357..1366
+                                0: CSS_IDENTIFIER@1357..1360
+                                  0: IDENT@1357..1360 "var" [] []
+                                1: L_PAREN@1360..1361 "(" [] []
+                                2: CSS_PARAMETER_LIST@1361..1364
+                                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1361..1364
+                                    0: CSS_COMPONENT_VALUE_LIST@1361..1364
+                                      0: CSS_DASHED_IDENTIFIER@1361..1364
+                                        0: IDENT@1361..1364 "--z" [] []
+                                3: R_PAREN@1364..1366 ")" [] [Whitespace(" ")]
+                          1: STAR@1366..1368 "*" [] [Whitespace(" ")]
+                          2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1368..1369
+                            0: CSS_COMPONENT_VALUE_LIST@1368..1369
+                              0: CSS_NUMBER@1368..1369
+                                0: CSS_NUMBER_LITERAL@1368..1369 "2" [] []
                       3: R_PAREN@1369..1370 ")" [] []
                 1: (empty)
               1: SEMICOLON@1370..1371 ";" [] []
@@ -3539,50 +3404,46 @@ CssRoot {
                         0: IDENT@1475..1479 "calc" [] []
                       1: L_PAREN@1479..1480 "(" [] []
                       2: CSS_PARAMETER_LIST@1480..1510
-                        0: CSS_PARAMETER@1480..1510
-                          0: CSS_BINARY_EXPRESSION@1480..1510
-                            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1480..1489
-                              0: CSS_COMPONENT_VALUE_LIST@1480..1489
-                                0: CSS_FUNCTION@1480..1489
-                                  0: CSS_IDENTIFIER@1480..1483
-                                    0: IDENT@1480..1483 "var" [] []
-                                  1: L_PAREN@1483..1484 "(" [] []
-                                  2: CSS_PARAMETER_LIST@1484..1487
-                                    0: CSS_PARAMETER@1484..1487
-                                      0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1484..1487
-                                        0: CSS_COMPONENT_VALUE_LIST@1484..1487
-                                          0: CSS_DASHED_IDENTIFIER@1484..1487
-                                            0: IDENT@1484..1487 "--a" [] []
-                                  3: R_PAREN@1487..1489 ")" [] [Whitespace(" ")]
-                            1: PLUS@1489..1491 "+" [] [Whitespace(" ")]
-                            2: CSS_BINARY_EXPRESSION@1491..1510
-                              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1491..1500
-                                0: CSS_COMPONENT_VALUE_LIST@1491..1500
-                                  0: CSS_FUNCTION@1491..1500
-                                    0: CSS_IDENTIFIER@1491..1494
-                                      0: IDENT@1491..1494 "var" [] []
-                                    1: L_PAREN@1494..1495 "(" [] []
-                                    2: CSS_PARAMETER_LIST@1495..1498
-                                      0: CSS_PARAMETER@1495..1498
-                                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1495..1498
-                                          0: CSS_COMPONENT_VALUE_LIST@1495..1498
-                                            0: CSS_DASHED_IDENTIFIER@1495..1498
-                                              0: IDENT@1495..1498 "--b" [] []
-                                    3: R_PAREN@1498..1500 ")" [] [Whitespace(" ")]
-                              1: PLUS@1500..1502 "+" [] [Whitespace(" ")]
-                              2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1502..1510
-                                0: CSS_COMPONENT_VALUE_LIST@1502..1510
-                                  0: CSS_FUNCTION@1502..1510
-                                    0: CSS_IDENTIFIER@1502..1505
-                                      0: IDENT@1502..1505 "var" [] []
-                                    1: L_PAREN@1505..1506 "(" [] []
-                                    2: CSS_PARAMETER_LIST@1506..1509
-                                      0: CSS_PARAMETER@1506..1509
-                                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1506..1509
-                                          0: CSS_COMPONENT_VALUE_LIST@1506..1509
-                                            0: CSS_DASHED_IDENTIFIER@1506..1509
-                                              0: IDENT@1506..1509 "--c" [] []
-                                    3: R_PAREN@1509..1510 ")" [] []
+                        0: CSS_BINARY_EXPRESSION@1480..1510
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1480..1489
+                            0: CSS_COMPONENT_VALUE_LIST@1480..1489
+                              0: CSS_FUNCTION@1480..1489
+                                0: CSS_IDENTIFIER@1480..1483
+                                  0: IDENT@1480..1483 "var" [] []
+                                1: L_PAREN@1483..1484 "(" [] []
+                                2: CSS_PARAMETER_LIST@1484..1487
+                                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1484..1487
+                                    0: CSS_COMPONENT_VALUE_LIST@1484..1487
+                                      0: CSS_DASHED_IDENTIFIER@1484..1487
+                                        0: IDENT@1484..1487 "--a" [] []
+                                3: R_PAREN@1487..1489 ")" [] [Whitespace(" ")]
+                          1: PLUS@1489..1491 "+" [] [Whitespace(" ")]
+                          2: CSS_BINARY_EXPRESSION@1491..1510
+                            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1491..1500
+                              0: CSS_COMPONENT_VALUE_LIST@1491..1500
+                                0: CSS_FUNCTION@1491..1500
+                                  0: CSS_IDENTIFIER@1491..1494
+                                    0: IDENT@1491..1494 "var" [] []
+                                  1: L_PAREN@1494..1495 "(" [] []
+                                  2: CSS_PARAMETER_LIST@1495..1498
+                                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1495..1498
+                                      0: CSS_COMPONENT_VALUE_LIST@1495..1498
+                                        0: CSS_DASHED_IDENTIFIER@1495..1498
+                                          0: IDENT@1495..1498 "--b" [] []
+                                  3: R_PAREN@1498..1500 ")" [] [Whitespace(" ")]
+                            1: PLUS@1500..1502 "+" [] [Whitespace(" ")]
+                            2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1502..1510
+                              0: CSS_COMPONENT_VALUE_LIST@1502..1510
+                                0: CSS_FUNCTION@1502..1510
+                                  0: CSS_IDENTIFIER@1502..1505
+                                    0: IDENT@1502..1505 "var" [] []
+                                  1: L_PAREN@1505..1506 "(" [] []
+                                  2: CSS_PARAMETER_LIST@1506..1509
+                                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1506..1509
+                                      0: CSS_COMPONENT_VALUE_LIST@1506..1509
+                                        0: CSS_DASHED_IDENTIFIER@1506..1509
+                                          0: IDENT@1506..1509 "--c" [] []
+                                  3: R_PAREN@1509..1510 ")" [] []
                       3: R_PAREN@1510..1511 ")" [] []
                 1: (empty)
               1: SEMICOLON@1511..1512 ";" [] []
@@ -3644,17 +3505,15 @@ CssRoot {
                       0: IDENT@1563..1574 "--add-a-b-c" [] []
                     1: L_PAREN@1574..1575 "(" [] []
                     2: CSS_PARAMETER_LIST@1575..1581
-                      0: CSS_PARAMETER@1575..1577
-                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1575..1577
-                          0: CSS_COMPONENT_VALUE_LIST@1575..1577
-                            0: CSS_NUMBER@1575..1577
-                              0: CSS_NUMBER_LITERAL@1575..1577 "20" [] []
+                      0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1575..1577
+                        0: CSS_COMPONENT_VALUE_LIST@1575..1577
+                          0: CSS_NUMBER@1575..1577
+                            0: CSS_NUMBER_LITERAL@1575..1577 "20" [] []
                       1: COMMA@1577..1579 "," [] [Whitespace(" ")]
-                      2: CSS_PARAMETER@1579..1581
-                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1579..1581
-                          0: CSS_COMPONENT_VALUE_LIST@1579..1581
-                            0: CSS_NUMBER@1579..1581
-                              0: CSS_NUMBER_LITERAL@1579..1581 "30" [] []
+                      2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1579..1581
+                        0: CSS_COMPONENT_VALUE_LIST@1579..1581
+                          0: CSS_NUMBER@1579..1581
+                            0: CSS_NUMBER_LITERAL@1579..1581 "30" [] []
                     3: R_PAREN@1581..1582 ")" [] []
               1: (empty)
             1: SEMICOLON@1582..1583 ";" [] []
@@ -3696,11 +3555,10 @@ CssRoot {
                         0: IDENT@1641..1644 "var" [] []
                       1: L_PAREN@1644..1645 "(" [] []
                       2: CSS_PARAMETER_LIST@1645..1651
-                        0: CSS_PARAMETER@1645..1651
-                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1645..1651
-                            0: CSS_COMPONENT_VALUE_LIST@1645..1651
-                              0: CSS_DASHED_IDENTIFIER@1645..1651
-                                0: IDENT@1645..1651 "--wide" [] []
+                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1645..1651
+                          0: CSS_COMPONENT_VALUE_LIST@1645..1651
+                            0: CSS_DASHED_IDENTIFIER@1645..1651
+                              0: IDENT@1645..1651 "--wide" [] []
                       3: R_PAREN@1651..1652 ")" [] []
                 1: (empty)
               1: SEMICOLON@1652..1653 ";" [] []
@@ -3737,11 +3595,10 @@ CssRoot {
                                 0: IDENT@1693..1696 "var" [] []
                               1: L_PAREN@1696..1697 "(" [] []
                               2: CSS_PARAMETER_LIST@1697..1705
-                                0: CSS_PARAMETER@1697..1705
-                                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1697..1705
-                                    0: CSS_COMPONENT_VALUE_LIST@1697..1705
-                                      0: CSS_DASHED_IDENTIFIER@1697..1705
-                                        0: IDENT@1697..1705 "--narrow" [] []
+                                0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1697..1705
+                                  0: CSS_COMPONENT_VALUE_LIST@1697..1705
+                                    0: CSS_DASHED_IDENTIFIER@1697..1705
+                                      0: IDENT@1697..1705 "--narrow" [] []
                               3: R_PAREN@1705..1706 ")" [] []
                         1: (empty)
                       1: SEMICOLON@1706..1707 ";" [] []
@@ -3803,11 +3660,10 @@ CssRoot {
                                 0: IDENT@1794..1797 "var" [] []
                               1: L_PAREN@1797..1798 "(" [] []
                               2: CSS_PARAMETER_LIST@1798..1806
-                                0: CSS_PARAMETER@1798..1806
-                                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1798..1806
-                                    0: CSS_COMPONENT_VALUE_LIST@1798..1806
-                                      0: CSS_DASHED_IDENTIFIER@1798..1806
-                                        0: IDENT@1798..1806 "--narrow" [] []
+                                0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1798..1806
+                                  0: CSS_COMPONENT_VALUE_LIST@1798..1806
+                                    0: CSS_DASHED_IDENTIFIER@1798..1806
+                                      0: IDENT@1798..1806 "--narrow" [] []
                               3: R_PAREN@1806..1808 ")" [] [Whitespace(" ")]
                         1: SEMICOLON@1808..1810 ";" [] [Whitespace(" ")]
                         2: CSS_IF_BRANCH@1810..1827
@@ -3820,11 +3676,10 @@ CssRoot {
                                 0: IDENT@1816..1819 "var" [] []
                               1: L_PAREN@1819..1820 "(" [] []
                               2: CSS_PARAMETER_LIST@1820..1826
-                                0: CSS_PARAMETER@1820..1826
-                                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1820..1826
-                                    0: CSS_COMPONENT_VALUE_LIST@1820..1826
-                                      0: CSS_DASHED_IDENTIFIER@1820..1826
-                                        0: IDENT@1820..1826 "--wide" [] []
+                                0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1820..1826
+                                  0: CSS_COMPONENT_VALUE_LIST@1820..1826
+                                    0: CSS_DASHED_IDENTIFIER@1820..1826
+                                      0: IDENT@1820..1826 "--wide" [] []
                               3: R_PAREN@1826..1827 ")" [] []
                       3: R_PAREN@1827..1828 ")" [] []
                 1: (empty)
@@ -3861,26 +3716,24 @@ CssRoot {
                         0: IDENT@1873..1877 "calc" [] []
                       1: L_PAREN@1877..1878 "(" [] []
                       2: CSS_PARAMETER_LIST@1878..1894
-                        0: CSS_PARAMETER@1878..1894
-                          0: CSS_BINARY_EXPRESSION@1878..1894
-                            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1878..1891
-                              0: CSS_COMPONENT_VALUE_LIST@1878..1891
-                                0: CSS_FUNCTION@1878..1891
-                                  0: CSS_IDENTIFIER@1878..1881
-                                    0: IDENT@1878..1881 "var" [] []
-                                  1: L_PAREN@1881..1882 "(" [] []
-                                  2: CSS_PARAMETER_LIST@1882..1889
-                                    0: CSS_PARAMETER@1882..1889
-                                      0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1882..1889
-                                        0: CSS_COMPONENT_VALUE_LIST@1882..1889
-                                          0: CSS_DASHED_IDENTIFIER@1882..1889
-                                            0: IDENT@1882..1889 "--value" [] []
-                                  3: R_PAREN@1889..1891 ")" [] [Whitespace(" ")]
-                            1: STAR@1891..1893 "*" [] [Whitespace(" ")]
-                            2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1893..1894
-                              0: CSS_COMPONENT_VALUE_LIST@1893..1894
-                                0: CSS_NUMBER@1893..1894
-                                  0: CSS_NUMBER_LITERAL@1893..1894 "2" [] []
+                        0: CSS_BINARY_EXPRESSION@1878..1894
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1878..1891
+                            0: CSS_COMPONENT_VALUE_LIST@1878..1891
+                              0: CSS_FUNCTION@1878..1891
+                                0: CSS_IDENTIFIER@1878..1881
+                                  0: IDENT@1878..1881 "var" [] []
+                                1: L_PAREN@1881..1882 "(" [] []
+                                2: CSS_PARAMETER_LIST@1882..1889
+                                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1882..1889
+                                    0: CSS_COMPONENT_VALUE_LIST@1882..1889
+                                      0: CSS_DASHED_IDENTIFIER@1882..1889
+                                        0: IDENT@1882..1889 "--value" [] []
+                                3: R_PAREN@1889..1891 ")" [] [Whitespace(" ")]
+                          1: STAR@1891..1893 "*" [] [Whitespace(" ")]
+                          2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1893..1894
+                            0: CSS_COMPONENT_VALUE_LIST@1893..1894
+                              0: CSS_NUMBER@1893..1894
+                                0: CSS_NUMBER_LITERAL@1893..1894 "2" [] []
                       3: R_PAREN@1894..1895 ")" [] []
                 1: (empty)
               1: SEMICOLON@1895..1896 ";" [] []
@@ -3921,11 +3774,10 @@ CssRoot {
                       0: IDENT@1945..1948 "var" [] []
                     1: L_PAREN@1948..1949 "(" [] []
                     2: CSS_PARAMETER_LIST@1949..1963
-                      0: CSS_PARAMETER@1949..1963
-                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1949..1963
-                          0: CSS_COMPONENT_VALUE_LIST@1949..1963
-                            0: CSS_DASHED_IDENTIFIER@1949..1963
-                              0: IDENT@1949..1963 "--base-spacing" [] []
+                      0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1949..1963
+                        0: CSS_COMPONENT_VALUE_LIST@1949..1963
+                          0: CSS_DASHED_IDENTIFIER@1949..1963
+                            0: IDENT@1949..1963 "--base-spacing" [] []
                     3: R_PAREN@1963..1964 ")" [] []
               1: (empty)
             1: SEMICOLON@1964..1965 ";" [] []
@@ -3941,20 +3793,18 @@ CssRoot {
                       0: IDENT@1977..1985 "--double" [] []
                     1: L_PAREN@1985..1986 "(" [] []
                     2: CSS_PARAMETER_LIST@1986..2005
-                      0: CSS_PARAMETER@1986..2005
-                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1986..2005
-                          0: CSS_COMPONENT_VALUE_LIST@1986..2005
-                            0: CSS_FUNCTION@1986..2005
-                              0: CSS_IDENTIFIER@1986..1989
-                                0: IDENT@1986..1989 "var" [] []
-                              1: L_PAREN@1989..1990 "(" [] []
-                              2: CSS_PARAMETER_LIST@1990..2004
-                                0: CSS_PARAMETER@1990..2004
-                                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1990..2004
-                                    0: CSS_COMPONENT_VALUE_LIST@1990..2004
-                                      0: CSS_DASHED_IDENTIFIER@1990..2004
-                                        0: IDENT@1990..2004 "--base-spacing" [] []
-                              3: R_PAREN@2004..2005 ")" [] []
+                      0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1986..2005
+                        0: CSS_COMPONENT_VALUE_LIST@1986..2005
+                          0: CSS_FUNCTION@1986..2005
+                            0: CSS_IDENTIFIER@1986..1989
+                              0: IDENT@1986..1989 "var" [] []
+                            1: L_PAREN@1989..1990 "(" [] []
+                            2: CSS_PARAMETER_LIST@1990..2004
+                              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1990..2004
+                                0: CSS_COMPONENT_VALUE_LIST@1990..2004
+                                  0: CSS_DASHED_IDENTIFIER@1990..2004
+                                    0: IDENT@1990..2004 "--base-spacing" [] []
+                            3: R_PAREN@2004..2005 ")" [] []
                     3: R_PAREN@2005..2006 ")" [] []
               1: (empty)
             1: SEMICOLON@2006..2007 ";" [] []

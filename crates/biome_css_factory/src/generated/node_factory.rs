@@ -1719,12 +1719,6 @@ pub fn css_page_selector_pseudo(
         ],
     ))
 }
-pub fn css_parameter(any_css_expression: AnyCssExpression) -> CssParameter {
-    CssParameter::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_PARAMETER,
-        [Some(SyntaxElement::Node(any_css_expression.into_syntax()))],
-    ))
-}
 pub fn css_parenthesized_expression(
     l_paren_token: SyntaxToken,
     r_paren_token: SyntaxToken,
@@ -3888,7 +3882,7 @@ where
 }
 pub fn css_parameter_list<I, S>(items: I, separators: S) -> CssParameterList
 where
-    I: IntoIterator<Item = CssParameter>,
+    I: IntoIterator<Item = AnyCssExpression>,
     I::IntoIter: ExactSizeIterator,
     S: IntoIterator<Item = CssSyntaxToken>,
     S::IntoIter: ExactSizeIterator,

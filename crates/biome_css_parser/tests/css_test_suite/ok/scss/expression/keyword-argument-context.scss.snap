@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
 
@@ -53,27 +52,25 @@ CssRoot {
                                         },
                                         l_paren_token: L_PAREN@19..20 "(" [] [],
                                         items: CssParameterList [
-                                            CssParameter {
-                                                any_css_expression: ScssExpression {
-                                                    items: ScssExpressionItemList [
-                                                        ScssKeywordArgument {
-                                                            name: ScssIdentifier {
-                                                                dollar_token: DOLLAR@20..21 "$" [] [],
-                                                                name: CssIdentifier {
-                                                                    value_token: IDENT@21..25 "name" [] [],
-                                                                },
-                                                            },
-                                                            colon_token: COLON@25..27 ":" [] [Whitespace(" ")],
-                                                            value: ScssExpression {
-                                                                items: ScssExpressionItemList [
-                                                                    CssNumber {
-                                                                        value_token: CSS_NUMBER_LITERAL@27..28 "1" [] [],
-                                                                    },
-                                                                ],
+                                            ScssExpression {
+                                                items: ScssExpressionItemList [
+                                                    ScssKeywordArgument {
+                                                        name: ScssIdentifier {
+                                                            dollar_token: DOLLAR@20..21 "$" [] [],
+                                                            name: CssIdentifier {
+                                                                value_token: IDENT@21..25 "name" [] [],
                                                             },
                                                         },
-                                                    ],
-                                                },
+                                                        colon_token: COLON@25..27 ":" [] [Whitespace(" ")],
+                                                        value: ScssExpression {
+                                                            items: ScssExpressionItemList [
+                                                                CssNumber {
+                                                                    value_token: CSS_NUMBER_LITERAL@27..28 "1" [] [],
+                                                                },
+                                                            ],
+                                                        },
+                                                    },
+                                                ],
                                             },
                                         ],
                                         r_paren_token: R_PAREN@28..29 ")" [] [],
@@ -98,53 +95,49 @@ CssRoot {
                                         },
                                         l_paren_token: L_PAREN@43..44 "(" [] [],
                                         items: CssParameterList [
-                                            CssParameter {
-                                                any_css_expression: ScssExpression {
-                                                    items: ScssExpressionItemList [
-                                                        ScssMapExpression {
-                                                            l_paren_token: L_PAREN@44..45 "(" [] [],
-                                                            pairs: ScssMapExpressionPairList [
-                                                                ScssMapExpressionPair {
-                                                                    key: ScssExpression {
-                                                                        items: ScssExpressionItemList [
-                                                                            ScssIdentifier {
-                                                                                dollar_token: DOLLAR@45..46 "$" [] [],
-                                                                                name: CssIdentifier {
-                                                                                    value_token: IDENT@46..50 "name" [] [],
-                                                                                },
+                                            ScssExpression {
+                                                items: ScssExpressionItemList [
+                                                    ScssMapExpression {
+                                                        l_paren_token: L_PAREN@44..45 "(" [] [],
+                                                        pairs: ScssMapExpressionPairList [
+                                                            ScssMapExpressionPair {
+                                                                key: ScssExpression {
+                                                                    items: ScssExpressionItemList [
+                                                                        ScssIdentifier {
+                                                                            dollar_token: DOLLAR@45..46 "$" [] [],
+                                                                            name: CssIdentifier {
+                                                                                value_token: IDENT@46..50 "name" [] [],
                                                                             },
-                                                                        ],
-                                                                    },
-                                                                    colon_token: COLON@50..52 ":" [] [Whitespace(" ")],
-                                                                    value: ScssExpression {
-                                                                        items: ScssExpressionItemList [
-                                                                            CssNumber {
-                                                                                value_token: CSS_NUMBER_LITERAL@52..53 "1" [] [],
-                                                                            },
-                                                                        ],
-                                                                    },
+                                                                        },
+                                                                    ],
                                                                 },
-                                                            ],
-                                                            r_paren_token: R_PAREN@53..54 ")" [] [],
-                                                        },
-                                                    ],
-                                                },
-                                            },
-                                            COMMA@54..56 "," [] [Whitespace(" ")],
-                                            CssParameter {
-                                                any_css_expression: ScssExpression {
-                                                    items: ScssExpressionItemList [
-                                                        ScssArbitraryArgument {
-                                                            value: ScssIdentifier {
-                                                                dollar_token: DOLLAR@56..57 "$" [] [],
-                                                                name: CssIdentifier {
-                                                                    value_token: IDENT@57..61 "args" [] [],
+                                                                colon_token: COLON@50..52 ":" [] [Whitespace(" ")],
+                                                                value: ScssExpression {
+                                                                    items: ScssExpressionItemList [
+                                                                        CssNumber {
+                                                                            value_token: CSS_NUMBER_LITERAL@52..53 "1" [] [],
+                                                                        },
+                                                                    ],
                                                                 },
                                                             },
-                                                            dotdotdot_token: DOT3@61..64 "..." [] [],
+                                                        ],
+                                                        r_paren_token: R_PAREN@53..54 ")" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            COMMA@54..56 "," [] [Whitespace(" ")],
+                                            ScssExpression {
+                                                items: ScssExpressionItemList [
+                                                    ScssArbitraryArgument {
+                                                        value: ScssIdentifier {
+                                                            dollar_token: DOLLAR@56..57 "$" [] [],
+                                                            name: CssIdentifier {
+                                                                value_token: IDENT@57..61 "args" [] [],
+                                                            },
                                                         },
-                                                    ],
-                                                },
+                                                        dotdotdot_token: DOT3@61..64 "..." [] [],
+                                                    },
+                                                ],
                                             },
                                         ],
                                         r_paren_token: R_PAREN@64..65 ")" [] [],
@@ -195,19 +188,18 @@ CssRoot {
                       0: IDENT@17..19 "fn" [] []
                     1: L_PAREN@19..20 "(" [] []
                     2: CSS_PARAMETER_LIST@20..28
-                      0: CSS_PARAMETER@20..28
-                        0: SCSS_EXPRESSION@20..28
-                          0: SCSS_EXPRESSION_ITEM_LIST@20..28
-                            0: SCSS_KEYWORD_ARGUMENT@20..28
-                              0: SCSS_IDENTIFIER@20..25
-                                0: DOLLAR@20..21 "$" [] []
-                                1: CSS_IDENTIFIER@21..25
-                                  0: IDENT@21..25 "name" [] []
-                              1: COLON@25..27 ":" [] [Whitespace(" ")]
-                              2: SCSS_EXPRESSION@27..28
-                                0: SCSS_EXPRESSION_ITEM_LIST@27..28
-                                  0: CSS_NUMBER@27..28
-                                    0: CSS_NUMBER_LITERAL@27..28 "1" [] []
+                      0: SCSS_EXPRESSION@20..28
+                        0: SCSS_EXPRESSION_ITEM_LIST@20..28
+                          0: SCSS_KEYWORD_ARGUMENT@20..28
+                            0: SCSS_IDENTIFIER@20..25
+                              0: DOLLAR@20..21 "$" [] []
+                              1: CSS_IDENTIFIER@21..25
+                                0: IDENT@21..25 "name" [] []
+                            1: COLON@25..27 ":" [] [Whitespace(" ")]
+                            2: SCSS_EXPRESSION@27..28
+                              0: SCSS_EXPRESSION_ITEM_LIST@27..28
+                                0: CSS_NUMBER@27..28
+                                  0: CSS_NUMBER_LITERAL@27..28 "1" [] []
                     3: R_PAREN@28..29 ")" [] []
               1: (empty)
             1: SEMICOLON@29..30 ";" [] []
@@ -223,35 +215,33 @@ CssRoot {
                       0: IDENT@41..43 "fn" [] []
                     1: L_PAREN@43..44 "(" [] []
                     2: CSS_PARAMETER_LIST@44..64
-                      0: CSS_PARAMETER@44..54
-                        0: SCSS_EXPRESSION@44..54
-                          0: SCSS_EXPRESSION_ITEM_LIST@44..54
-                            0: SCSS_MAP_EXPRESSION@44..54
-                              0: L_PAREN@44..45 "(" [] []
-                              1: SCSS_MAP_EXPRESSION_PAIR_LIST@45..53
-                                0: SCSS_MAP_EXPRESSION_PAIR@45..53
-                                  0: SCSS_EXPRESSION@45..50
-                                    0: SCSS_EXPRESSION_ITEM_LIST@45..50
-                                      0: SCSS_IDENTIFIER@45..50
-                                        0: DOLLAR@45..46 "$" [] []
-                                        1: CSS_IDENTIFIER@46..50
-                                          0: IDENT@46..50 "name" [] []
-                                  1: COLON@50..52 ":" [] [Whitespace(" ")]
-                                  2: SCSS_EXPRESSION@52..53
-                                    0: SCSS_EXPRESSION_ITEM_LIST@52..53
-                                      0: CSS_NUMBER@52..53
-                                        0: CSS_NUMBER_LITERAL@52..53 "1" [] []
-                              2: R_PAREN@53..54 ")" [] []
+                      0: SCSS_EXPRESSION@44..54
+                        0: SCSS_EXPRESSION_ITEM_LIST@44..54
+                          0: SCSS_MAP_EXPRESSION@44..54
+                            0: L_PAREN@44..45 "(" [] []
+                            1: SCSS_MAP_EXPRESSION_PAIR_LIST@45..53
+                              0: SCSS_MAP_EXPRESSION_PAIR@45..53
+                                0: SCSS_EXPRESSION@45..50
+                                  0: SCSS_EXPRESSION_ITEM_LIST@45..50
+                                    0: SCSS_IDENTIFIER@45..50
+                                      0: DOLLAR@45..46 "$" [] []
+                                      1: CSS_IDENTIFIER@46..50
+                                        0: IDENT@46..50 "name" [] []
+                                1: COLON@50..52 ":" [] [Whitespace(" ")]
+                                2: SCSS_EXPRESSION@52..53
+                                  0: SCSS_EXPRESSION_ITEM_LIST@52..53
+                                    0: CSS_NUMBER@52..53
+                                      0: CSS_NUMBER_LITERAL@52..53 "1" [] []
+                            2: R_PAREN@53..54 ")" [] []
                       1: COMMA@54..56 "," [] [Whitespace(" ")]
-                      2: CSS_PARAMETER@56..64
-                        0: SCSS_EXPRESSION@56..64
-                          0: SCSS_EXPRESSION_ITEM_LIST@56..64
-                            0: SCSS_ARBITRARY_ARGUMENT@56..64
-                              0: SCSS_IDENTIFIER@56..61
-                                0: DOLLAR@56..57 "$" [] []
-                                1: CSS_IDENTIFIER@57..61
-                                  0: IDENT@57..61 "args" [] []
-                              1: DOT3@61..64 "..." [] []
+                      2: SCSS_EXPRESSION@56..64
+                        0: SCSS_EXPRESSION_ITEM_LIST@56..64
+                          0: SCSS_ARBITRARY_ARGUMENT@56..64
+                            0: SCSS_IDENTIFIER@56..61
+                              0: DOLLAR@56..57 "$" [] []
+                              1: CSS_IDENTIFIER@57..61
+                                0: IDENT@57..61 "args" [] []
+                            1: DOT3@61..64 "..." [] []
                     3: R_PAREN@64..65 ")" [] []
               1: (empty)
             1: SEMICOLON@65..66 ";" [] []

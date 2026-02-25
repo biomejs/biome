@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
 
@@ -52,30 +51,28 @@ CssRoot {
                                         },
                                         l_paren_token: L_PAREN@36..37 "(" [] [],
                                         items: CssParameterList [
-                                            CssParameter {
-                                                any_css_expression: CssUnaryExpression {
-                                                    operator: MINUS@37..38 "-" [] [],
-                                                    expression: CssParenthesizedExpression {
-                                                        l_paren_token: L_PAREN@38..39 "(" [] [],
-                                                        expression: CssBinaryExpression {
-                                                            left: CssListOfComponentValuesExpression {
-                                                                css_component_value_list: CssComponentValueList [
-                                                                    CssNumber {
-                                                                        value_token: CSS_NUMBER_LITERAL@39..41 "1" [] [Whitespace(" ")],
-                                                                    },
-                                                                ],
-                                                            },
-                                                            operator_token: PLUS@41..43 "+" [] [Whitespace(" ")],
-                                                            right: CssListOfComponentValuesExpression {
-                                                                css_component_value_list: CssComponentValueList [
-                                                                    CssNumber {
-                                                                        value_token: CSS_NUMBER_LITERAL@43..44 "2" [] [],
-                                                                    },
-                                                                ],
-                                                            },
+                                            CssUnaryExpression {
+                                                operator: MINUS@37..38 "-" [] [],
+                                                expression: CssParenthesizedExpression {
+                                                    l_paren_token: L_PAREN@38..39 "(" [] [],
+                                                    expression: CssBinaryExpression {
+                                                        left: CssListOfComponentValuesExpression {
+                                                            css_component_value_list: CssComponentValueList [
+                                                                CssNumber {
+                                                                    value_token: CSS_NUMBER_LITERAL@39..41 "1" [] [Whitespace(" ")],
+                                                                },
+                                                            ],
                                                         },
-                                                        r_paren_token: R_PAREN@44..45 ")" [] [],
+                                                        operator_token: PLUS@41..43 "+" [] [Whitespace(" ")],
+                                                        right: CssListOfComponentValuesExpression {
+                                                            css_component_value_list: CssComponentValueList [
+                                                                CssNumber {
+                                                                    value_token: CSS_NUMBER_LITERAL@43..44 "2" [] [],
+                                                                },
+                                                            ],
+                                                        },
                                                     },
+                                                    r_paren_token: R_PAREN@44..45 ")" [] [],
                                                 },
                                             },
                                         ],
@@ -127,22 +124,21 @@ CssRoot {
                       0: IDENT@32..36 "calc" [] []
                     1: L_PAREN@36..37 "(" [] []
                     2: CSS_PARAMETER_LIST@37..45
-                      0: CSS_PARAMETER@37..45
-                        0: CSS_UNARY_EXPRESSION@37..45
-                          0: MINUS@37..38 "-" [] []
-                          1: CSS_PARENTHESIZED_EXPRESSION@38..45
-                            0: L_PAREN@38..39 "(" [] []
-                            1: CSS_BINARY_EXPRESSION@39..44
-                              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@39..41
-                                0: CSS_COMPONENT_VALUE_LIST@39..41
-                                  0: CSS_NUMBER@39..41
-                                    0: CSS_NUMBER_LITERAL@39..41 "1" [] [Whitespace(" ")]
-                              1: PLUS@41..43 "+" [] [Whitespace(" ")]
-                              2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@43..44
-                                0: CSS_COMPONENT_VALUE_LIST@43..44
-                                  0: CSS_NUMBER@43..44
-                                    0: CSS_NUMBER_LITERAL@43..44 "2" [] []
-                            2: R_PAREN@44..45 ")" [] []
+                      0: CSS_UNARY_EXPRESSION@37..45
+                        0: MINUS@37..38 "-" [] []
+                        1: CSS_PARENTHESIZED_EXPRESSION@38..45
+                          0: L_PAREN@38..39 "(" [] []
+                          1: CSS_BINARY_EXPRESSION@39..44
+                            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@39..41
+                              0: CSS_COMPONENT_VALUE_LIST@39..41
+                                0: CSS_NUMBER@39..41
+                                  0: CSS_NUMBER_LITERAL@39..41 "1" [] [Whitespace(" ")]
+                            1: PLUS@41..43 "+" [] [Whitespace(" ")]
+                            2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@43..44
+                              0: CSS_COMPONENT_VALUE_LIST@43..44
+                                0: CSS_NUMBER@43..44
+                                  0: CSS_NUMBER_LITERAL@43..44 "2" [] []
+                          2: R_PAREN@44..45 ")" [] []
                     3: R_PAREN@45..46 ")" [] []
               1: (empty)
             1: SEMICOLON@46..47 ";" [] []

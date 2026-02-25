@@ -504,10 +504,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssPageSelectorPseudo::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_PARAMETER => {
-                    let $pattern = unsafe { $crate::CssParameter::new_unchecked(node) };
-                    $body
-                }
                 $crate::CssSyntaxKind::CSS_PARENTHESIZED_EXPRESSION => {
                     let $pattern =
                         unsafe { $crate::CssParenthesizedExpression::new_unchecked(node) };

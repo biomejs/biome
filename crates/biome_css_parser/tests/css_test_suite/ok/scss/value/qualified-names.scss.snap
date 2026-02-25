@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
 
@@ -64,25 +63,21 @@ CssRoot {
                                         },
                                         l_paren_token: L_PAREN@25..26 "(" [] [],
                                         items: CssParameterList [
-                                            CssParameter {
-                                                any_css_expression: ScssExpression {
-                                                    items: ScssExpressionItemList [
-                                                        CssRegularDimension {
-                                                            value_token: CSS_NUMBER_LITERAL@26..28 "10" [] [],
-                                                            unit_token: IDENT@28..30 "px" [] [],
-                                                        },
-                                                    ],
-                                                },
+                                            ScssExpression {
+                                                items: ScssExpressionItemList [
+                                                    CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@26..28 "10" [] [],
+                                                        unit_token: IDENT@28..30 "px" [] [],
+                                                    },
+                                                ],
                                             },
                                             COMMA@30..32 "," [] [Whitespace(" ")],
-                                            CssParameter {
-                                                any_css_expression: ScssExpression {
-                                                    items: ScssExpressionItemList [
-                                                        CssNumber {
-                                                            value_token: CSS_NUMBER_LITERAL@32..33 "2" [] [],
-                                                        },
-                                                    ],
-                                                },
+                                            ScssExpression {
+                                                items: ScssExpressionItemList [
+                                                    CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@32..33 "2" [] [],
+                                                    },
+                                                ],
                                             },
                                         ],
                                         r_paren_token: R_PAREN@33..34 ")" [] [],
@@ -113,15 +108,13 @@ CssRoot {
                                         },
                                         l_paren_token: L_PAREN@55..56 "(" [] [],
                                         items: CssParameterList [
-                                            CssParameter {
-                                                any_css_expression: ScssExpression {
-                                                    items: ScssExpressionItemList [
-                                                        CssRegularDimension {
-                                                            value_token: CSS_NUMBER_LITERAL@56..59 "3.5" [] [],
-                                                            unit_token: IDENT@59..61 "px" [] [],
-                                                        },
-                                                    ],
-                                                },
+                                            ScssExpression {
+                                                items: ScssExpressionItemList [
+                                                    CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@56..59 "3.5" [] [],
+                                                        unit_token: IDENT@59..61 "px" [] [],
+                                                    },
+                                                ],
                                             },
                                         ],
                                         r_paren_token: R_PAREN@61..62 ")" [] [],
@@ -152,27 +145,23 @@ CssRoot {
                                         },
                                         l_paren_token: L_PAREN@80..81 "(" [] [],
                                         items: CssParameterList [
-                                            CssParameter {
-                                                any_css_expression: ScssExpression {
-                                                    items: ScssExpressionItemList [
-                                                        ScssIdentifier {
-                                                            dollar_token: DOLLAR@81..82 "$" [] [],
-                                                            name: CssIdentifier {
-                                                                value_token: IDENT@82..85 "map" [] [],
-                                                            },
+                                            ScssExpression {
+                                                items: ScssExpressionItemList [
+                                                    ScssIdentifier {
+                                                        dollar_token: DOLLAR@81..82 "$" [] [],
+                                                        name: CssIdentifier {
+                                                            value_token: IDENT@82..85 "map" [] [],
                                                         },
-                                                    ],
-                                                },
+                                                    },
+                                                ],
                                             },
                                             COMMA@85..87 "," [] [Whitespace(" ")],
-                                            CssParameter {
-                                                any_css_expression: ScssExpression {
-                                                    items: ScssExpressionItemList [
-                                                        CssIdentifier {
-                                                            value_token: IDENT@87..88 "a" [] [],
-                                                        },
-                                                    ],
-                                                },
+                                            ScssExpression {
+                                                items: ScssExpressionItemList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@87..88 "a" [] [],
+                                                    },
+                                                ],
                                             },
                                         ],
                                         r_paren_token: R_PAREN@88..89 ")" [] [],
@@ -253,18 +242,16 @@ CssRoot {
                         0: IDENT@22..25 "div" [] []
                     1: L_PAREN@25..26 "(" [] []
                     2: CSS_PARAMETER_LIST@26..33
-                      0: CSS_PARAMETER@26..30
-                        0: SCSS_EXPRESSION@26..30
-                          0: SCSS_EXPRESSION_ITEM_LIST@26..30
-                            0: CSS_REGULAR_DIMENSION@26..30
-                              0: CSS_NUMBER_LITERAL@26..28 "10" [] []
-                              1: IDENT@28..30 "px" [] []
+                      0: SCSS_EXPRESSION@26..30
+                        0: SCSS_EXPRESSION_ITEM_LIST@26..30
+                          0: CSS_REGULAR_DIMENSION@26..30
+                            0: CSS_NUMBER_LITERAL@26..28 "10" [] []
+                            1: IDENT@28..30 "px" [] []
                       1: COMMA@30..32 "," [] [Whitespace(" ")]
-                      2: CSS_PARAMETER@32..33
-                        0: SCSS_EXPRESSION@32..33
-                          0: SCSS_EXPRESSION_ITEM_LIST@32..33
-                            0: CSS_NUMBER@32..33
-                              0: CSS_NUMBER_LITERAL@32..33 "2" [] []
+                      2: SCSS_EXPRESSION@32..33
+                        0: SCSS_EXPRESSION_ITEM_LIST@32..33
+                          0: CSS_NUMBER@32..33
+                            0: CSS_NUMBER_LITERAL@32..33 "2" [] []
                     3: R_PAREN@33..34 ")" [] []
               1: (empty)
             1: SEMICOLON@34..35 ";" [] []
@@ -284,12 +271,11 @@ CssRoot {
                         0: IDENT@51..55 "ceil" [] []
                     1: L_PAREN@55..56 "(" [] []
                     2: CSS_PARAMETER_LIST@56..61
-                      0: CSS_PARAMETER@56..61
-                        0: SCSS_EXPRESSION@56..61
-                          0: SCSS_EXPRESSION_ITEM_LIST@56..61
-                            0: CSS_REGULAR_DIMENSION@56..61
-                              0: CSS_NUMBER_LITERAL@56..59 "3.5" [] []
-                              1: IDENT@59..61 "px" [] []
+                      0: SCSS_EXPRESSION@56..61
+                        0: SCSS_EXPRESSION_ITEM_LIST@56..61
+                          0: CSS_REGULAR_DIMENSION@56..61
+                            0: CSS_NUMBER_LITERAL@56..59 "3.5" [] []
+                            1: IDENT@59..61 "px" [] []
                     3: R_PAREN@61..62 ")" [] []
               1: (empty)
             1: SEMICOLON@62..63 ";" [] []
@@ -309,19 +295,17 @@ CssRoot {
                         0: IDENT@77..80 "get" [] []
                     1: L_PAREN@80..81 "(" [] []
                     2: CSS_PARAMETER_LIST@81..88
-                      0: CSS_PARAMETER@81..85
-                        0: SCSS_EXPRESSION@81..85
-                          0: SCSS_EXPRESSION_ITEM_LIST@81..85
-                            0: SCSS_IDENTIFIER@81..85
-                              0: DOLLAR@81..82 "$" [] []
-                              1: CSS_IDENTIFIER@82..85
-                                0: IDENT@82..85 "map" [] []
+                      0: SCSS_EXPRESSION@81..85
+                        0: SCSS_EXPRESSION_ITEM_LIST@81..85
+                          0: SCSS_IDENTIFIER@81..85
+                            0: DOLLAR@81..82 "$" [] []
+                            1: CSS_IDENTIFIER@82..85
+                              0: IDENT@82..85 "map" [] []
                       1: COMMA@85..87 "," [] [Whitespace(" ")]
-                      2: CSS_PARAMETER@87..88
-                        0: SCSS_EXPRESSION@87..88
-                          0: SCSS_EXPRESSION_ITEM_LIST@87..88
-                            0: CSS_IDENTIFIER@87..88
-                              0: IDENT@87..88 "a" [] []
+                      2: SCSS_EXPRESSION@87..88
+                        0: SCSS_EXPRESSION_ITEM_LIST@87..88
+                          0: CSS_IDENTIFIER@87..88
+                            0: IDENT@87..88 "a" [] []
                     3: R_PAREN@88..89 ")" [] []
               1: (empty)
             1: SEMICOLON@89..90 ";" [] []
