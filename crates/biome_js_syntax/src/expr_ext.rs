@@ -2384,6 +2384,9 @@ mod test {
 
         let call_expression = extract_call_expression("test('foo', { retry: 3 }, 42)");
         assert_eq!(call_expression.is_test_call_expression(), Ok(false));
+
+        let call_expression = extract_call_expression("test('foo', x => x, 1000)");
+        assert_eq!(call_expression.is_test_call_expression(), Ok(false));
     }
 
     #[test]
