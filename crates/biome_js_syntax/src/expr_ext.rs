@@ -2370,7 +2370,7 @@ mod test {
             extract_call_expression("test.skip.sequential.only.todo.each([])(name, () => {});");
         assert_eq!(call_expression.is_test_call_expression(), Ok(true));
 
-        // Positive cases for TesOptions pattern
+        // Positive cases for TestOptions pattern
         let call_expression = extract_call_expression("test('foo', { retry: 3 }, () => {})");
         assert_eq!(call_expression.is_test_call_expression(), Ok(true));
 
