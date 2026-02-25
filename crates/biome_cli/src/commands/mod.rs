@@ -719,8 +719,19 @@ impl BiomeCommand {
                 {
                     return Some(&ColorsArg::Off);
                 }
-                // We want force colors in CI, to give e better UX experience
-                // Unless users explicitly set the colors flag
+
+                // `biome ci` can auto-enable the GitHub reporter when running inside
+                // GitHub Actions. In that case we also need to disable colors, otherwise
+                // ANSI reset sequences can break workflow command parsing.
+                if matches!(self, Self::Ci { .. })
+                    && cli_options.colors.is_none()
+                    && is_github_actions_environment()
+                {
+                    return Some(&ColorsArg::Off);
+                }
+
+                // We want force colors in CI, to give a better UX experience,
+                // unless users explicitly set the colors flag.
                 if matches!(self, Self::Ci { .. }) && cli_options.colors.is_none() {
                     return Some(&ColorsArg::Force);
                 }
@@ -904,6 +915,17 @@ pub(crate) fn determine_fix_file_mode(
 }
 
 /// Checks if the fix file options are incompatible.
+fn is_github_actions_environment() -> bool {
+    // Keep behavior aligned with `ci.rs` to avoid CI-ception in debug/test builds.
+    if cfg!(debug_assertions) {
+        false
+    } else {
+        std::env::var("GITHUB_ACTIONS")
+            .ok()
+            .is_some_and(|value| value == "true")
+    }
+}
+
 fn check_fix_incompatible_arguments(options: FixFileModeOptions) -> Result<(), CliDiagnostic> {
     let FixFileModeOptions {
         write,
@@ -1018,5 +1040,11 @@ mod tests {
     #[test]
     fn check_options() {
         biome_command().check_invariants(false);
+    }
+
+    #[test]
+    fn github_actions_env_is_disabled_in_debug_builds() {
+        // This prevents CI-ception for test runs in GitHub Actions.
+        assert!(!is_github_actions_environment());
     }
 }
