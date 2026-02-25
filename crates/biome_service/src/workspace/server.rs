@@ -323,6 +323,14 @@ impl WorkspaceServer {
         let path: Utf8PathBuf = biome_path.clone().into();
 
         if document_file_source.is_none() && !DocumentFileSource::can_read(path.as_path()) {
+            if reason.is_index()
+                && path
+                    .file_name()
+                    .is_some_and(|filename| filename == "pnpm-workspace.yaml")
+                && let Some(workspace_root) = path.parent()
+            {
+                self.refresh_pnpm_workspace_catalogs_for_scope(project_key, workspace_root);
+            }
             return Ok(Default::default());
         }
 
@@ -583,27 +591,38 @@ impl WorkspaceServer {
             reason.is_index() || self.is_indexed(&path)
         };
 
-        // Manifest files need to update the module graph
-        if is_indexed
-            && let Some(root) = syntax
+        // Manifest files need to update the module graph.
+        if is_indexed {
+            if let Some(root) = syntax
                 .and_then(Result::ok)
                 .map(|node| node.unwrap_as_send_node())
-        {
-            let (dependencies, diagnostics) = self.update_service_data(
-                &path,
-                UpdateKind::AddedOrChanged(reason, root, services),
-                project_key,
-            )?;
+            {
+                let (dependencies, diagnostics) = self.update_service_data(
+                    &path,
+                    UpdateKind::AddedOrChanged(reason, root, services),
+                    project_key,
+                )?;
 
-            Ok(InternalOpenFileResult {
-                dependencies,
-                diagnostics,
-            })
-        } else {
-            // If the document was never opened by the scanner, we don't care
-            // about updating service data.
-            Ok(InternalOpenFileResult::default())
+                return Ok(InternalOpenFileResult {
+                    dependencies,
+                    diagnostics,
+                });
+            }
+
+            // pnpm-workspace.yaml is not a parsed manifest, but updates still need to
+            // re-apply catalogs to indexed package.json manifests in the same scope.
+            if path
+                .file_name()
+                .is_some_and(|filename| filename == "pnpm-workspace.yaml")
+                && let Some(workspace_root) = path.parent()
+            {
+                self.refresh_pnpm_workspace_catalogs_for_scope(project_key, workspace_root);
+            }
         }
+
+        // If the document was never opened by the scanner, we don't care
+        // about updating service data.
+        Ok(InternalOpenFileResult::default())
     }
 
     /// Retrieves the parser result for a given file.
@@ -2537,6 +2556,12 @@ impl WorkspaceScannerBridge for WorkspaceServer {
             Some("package.json" | "tsconfig.json" | "turbo.json" | "turbo.jsonc") => {
                 self.project_layout.is_indexed(path)
             }
+            Some("pnpm-workspace.yaml") => path.parent().is_some_and(|workspace_root| {
+                self.project_layout
+                    .package_paths()
+                    .into_iter()
+                    .any(|package_path| package_path.starts_with(workspace_root))
+            }),
             _ => self.module_graph.contains(path),
         }
     }
