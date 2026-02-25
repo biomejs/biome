@@ -41,6 +41,11 @@ impl PartialEq for Scope {
 impl Eq for Scope {}
 
 impl Scope {
+    /// Returns the unique identifier for this scope.
+    pub fn id(&self) -> ScopeId {
+        self.id
+    }
+
     pub fn is_global_scope(&self) -> bool {
         self.id.index() == 0
     }

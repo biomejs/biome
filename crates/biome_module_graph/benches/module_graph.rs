@@ -1,6 +1,6 @@
 use biome_fs::{BiomePath, FileSystem, MemoryFileSystem};
 use biome_js_parser::JsParserOptions;
-use biome_js_semantic::SemanticModelBuilder;
+use biome_js_semantic::{SemanticModelBuilder, SemanticModelOptions, semantic_model};
 use biome_js_syntax::{AnyJsRoot, JsFileSource};
 use biome_module_graph::ModuleGraph;
 use biome_project_layout::ProjectLayout;
@@ -67,7 +67,7 @@ fn bench_index_d_ts(bencher: Bencher, name: &str) {
 
             let path = BiomePath::new(name);
             let root = get_js_root(&fs, &path);
-            let semantic_model = Arc::new(SemanticModelBuilder::new(root.clone()).build());
+            let semantic_model = Arc::new(semantic_model(&root, SemanticModelOptions::default()));
             (fs, path, root, semantic_model)
         })
         .bench_local_values(|(fs, path, root, semantic_model)| {

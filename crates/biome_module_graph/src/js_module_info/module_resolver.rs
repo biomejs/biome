@@ -154,18 +154,12 @@ impl ModuleResolver {
 
     /// Returns the resolved type of the value with the given `name`, as
     /// defined in the scope of the given `range`.
-    pub fn resolved_type_of_named_value(self: &Arc<Self>, _range: TextRange, name: &str) -> Type {
+    pub fn resolved_type_of_named_value(self: &Arc<Self>, range: TextRange, name: &str) -> Type {
         let module = &self.modules[0];
 
-        // TODO: Use the specific scope at the given range instead of global scope
-        // This requires either exposing a range-based scope lookup in SemanticModel
-        // or finding a node at the range.
-        // For now, we use the global scope which will still find the binding
-        // via ancestor traversal, just less efficiently.
-        let _global_scope = module.0.semantic_model.global_scope();
-        // We need the internal ScopeId to pass to find_binding_in_scope
-        // SAFETY: The global scope is always at index 0
-        let scope_id = biome_js_semantic::ScopeId::new(0);
+        // Get the scope at the specified range for correct lexical scoping
+        let scope = module.scope_for_range(range);
+        let scope_id = scope.scope.id();
 
         let Some(resolved_id) =
             module
@@ -174,16 +168,14 @@ impl ModuleResolver {
                     // Look up the binding's type data by its range
                     module
                         .binding_type_data(binding_range)
-                        .and_then(|data| match &data.ty {
-                            TypeReference::Resolved(resolved_id) => Some(*resolved_id),
-                            _ => None,
-                        })
+                        // Resolve the type reference, handling Resolved, Import, and Qualifier cases
+                        .and_then(|data| self.resolve_reference(&data.ty))
                 })
         else {
             return self.resolved_type_for_id(GLOBAL_UNKNOWN_ID);
         };
 
-        self.resolved_type_for_id(self.mapped_resolved_id(resolved_id))
+        self.resolved_type_for_id(resolved_id)
     }
 
     fn find_module(&self, path: &ResolvedPath) -> Option<ModuleId> {
