@@ -481,6 +481,37 @@ impl SemanticModel {
         }
     }
 
+    /// Resolve a reference given its raw syntax node.
+    ///
+    /// Returns the [`Binding`] that the reference points to, if found.
+    /// This is a handle-friendly alternative to [`SemanticModel::binding`]
+    /// that does not require a typed AST node.
+    pub fn resolve_reference_node(&self, node: &JsSyntaxNode) -> Option<Binding> {
+        let range = node.text_trimmed_range();
+        let id = *self.data.declared_at_by_start.get(&range.start())?;
+        Some(Binding {
+            data: self.data.clone(),
+            id,
+        })
+    }
+
+    /// Look up a [`Binding`] by its declaration syntax node.
+    ///
+    /// Returns `None` if the node does not correspond to a known binding.
+    pub fn binding_by_node(&self, node: &JsSyntaxNode) -> Option<Binding> {
+        let range = node.text_trimmed_range();
+        let id = *self.data.bindings_by_start.get(&range.start())?;
+        Some(Binding {
+            data: self.data.clone(),
+            id,
+        })
+    }
+
+    /// Check whether a binding (identified by its declaration node) is exported.
+    pub fn is_binding_exported(&self, node: &JsSyntaxNode) -> bool {
+        self.data.is_exported(node.text_trimmed_range())
+    }
+
     /// Returns all [FunctionCall] of a [AnyJsFunction].
     ///
     /// ```rust

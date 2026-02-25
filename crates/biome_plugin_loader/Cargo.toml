@@ -21,6 +21,9 @@ biome_diagnostics        = { workspace = true }
 biome_fs                 = { workspace = true }
 biome_grit_patterns      = { workspace = true }
 biome_js_runtime         = { workspace = true, optional = true }
+biome_js_semantic        = { workspace = true, optional = true }
+biome_wasm_plugin        = { workspace = true, optional = true }
+biome_module_graph       = { workspace = true, optional = true }
 biome_js_syntax          = { workspace = true }
 biome_json_parser        = { workspace = true }
 biome_json_syntax        = { workspace = true }
@@ -29,6 +32,7 @@ biome_resolver           = { workspace = true }
 biome_rowan              = { workspace = true }
 biome_text_size          = { workspace = true }
 boa_engine               = { workspace = true, optional = true }
+wasmtime                 = { workspace = true, optional = true }
 camino                   = { workspace = true }
 grit-pattern-matcher     = { workspace = true }
 grit-util                = { workspace = true }
@@ -36,10 +40,12 @@ papaya                   = { workspace = true }
 rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true }
+serde_json               = { workspace = true }
 
 [dev-dependencies]
-biome_js_parser = { workspace = true }
-insta           = { workspace = true }
+biome_css_parser = { workspace = true }
+biome_js_parser  = { workspace = true }
+insta            = { workspace = true }
 
 [target.'cfg(unix)'.dependencies]
 libc = { workspace = true, optional = true }
@@ -49,8 +55,9 @@ windows = { workspace = true, features = ["Win32_System_Threading"], optional = 
 
 [features]
 default   = []
-js_plugin = ["dep:biome_js_runtime", "dep:boa_engine", "dep:libc", "dep:windows"]
-schema    = ["dep:schemars"]
+js_plugin   = ["dep:biome_js_runtime", "dep:boa_engine", "dep:libc", "dep:windows"]
+wasm_plugin = ["dep:biome_wasm_plugin", "dep:wasmtime", "dep:biome_module_graph", "dep:biome_js_semantic"]
+schema      = ["dep:schemars"]
 
 [lints]
 workspace = true

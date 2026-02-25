@@ -1,0 +1,44 @@
+[package]
+name                 = "biome_wasm_plugin"
+version              = "0.0.1"
+authors.workspace    = true
+edition.workspace    = true
+description          = "WebAssembly runtime for Biome plugins"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = true
+
+[dependencies]
+biome_analyze       = { workspace = true }
+biome_aria          = { workspace = true }
+biome_aria_metadata = { workspace = true }
+biome_console       = { workspace = true }
+biome_css_syntax    = { workspace = true }
+biome_diagnostics   = { workspace = true }
+biome_js_semantic   = { workspace = true }
+biome_js_syntax     = { workspace = true }
+biome_js_type_info  = { workspace = true }
+biome_json_syntax   = { workspace = true }
+biome_module_graph  = { workspace = true }
+biome_rowan         = { workspace = true }
+biome_text_size     = { workspace = true }
+regex               = { workspace = true }
+wasmtime            = { workspace = true }
+wasmtime-wasi       = { workspace = true }
+
+[dev-dependencies]
+biome_css_parser     = { workspace = true }
+biome_fs             = { workspace = true }
+biome_js_parser      = { workspace = true }
+biome_json_parser    = { workspace = true }
+biome_plugin_sdk     = { path = "../biome_plugin_sdk" }
+biome_project_layout = { workspace = true }
+biome_test_utils     = { workspace = true }
+camino               = { workspace = true }
+insta                = { workspace = true }
+
+[lints]
+workspace = true

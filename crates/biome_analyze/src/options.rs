@@ -1,10 +1,34 @@
+use biome_diagnostics::Severity;
 use camino::Utf8PathBuf;
 use rustc_hash::FxHashMap;
 
+use crate::rule::RuleDomain;
 use crate::{FixKind, Rule, RuleKey};
 use std::any::{Any, TypeId};
 use std::borrow::Cow;
 use std::sync::Arc;
+
+/// Override configuration for a single plugin rule.
+#[derive(Debug, Clone)]
+pub struct PluginRuleOverride {
+    /// When `true`, the rule is disabled and should produce no diagnostics.
+    pub disabled: bool,
+    /// Severity override. When `Some`, replaces the plugin's default severity.
+    pub severity: Option<Severity>,
+    /// Fix kind override. When `Some`, replaces the plugin's default fix kind.
+    pub fix_kind: Option<FixKind>,
+}
+
+/// Controls which plugin rules are active within a linter domain.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PluginDomainFilter {
+    /// All rules in the domain are active.
+    All,
+    /// Only recommended rules in the domain are active.
+    Recommended,
+    /// No rules in the domain are active.
+    Disabled,
+}
 
 /// A convenient new type data structure to store the options that belong to a rule
 #[derive(Debug)]
@@ -82,6 +106,12 @@ pub struct AnalyzerConfiguration {
     /// The JSX fragment factory function identifier (e.g., "Fragment")
     /// Only applies when jsx_runtime is ReactClassic.
     jsx_fragment_factory: Option<Box<str>>,
+
+    /// Per-rule overrides for plugin rules, keyed by rule name.
+    plugin_rule_overrides: FxHashMap<Box<str>, PluginRuleOverride>,
+
+    /// Domain-level filtering for linter domains that affects plugin rules.
+    linter_domains: FxHashMap<RuleDomain, PluginDomainFilter>,
 }
 
 impl AnalyzerConfiguration {
@@ -128,6 +158,21 @@ impl AnalyzerConfiguration {
     ) -> Self {
         self.preferred_indentation = preferred_indentation;
         self
+    }
+
+    /// Adds a per-rule override for a plugin rule.
+    pub fn push_plugin_rule_override(
+        &mut self,
+        name: impl Into<Box<str>>,
+        rule_override: PluginRuleOverride,
+    ) {
+        self.plugin_rule_overrides
+            .insert(name.into(), rule_override);
+    }
+
+    /// Sets the domain-level filtering map for plugin rules.
+    pub fn set_linter_domains(&mut self, domains: FxHashMap<RuleDomain, PluginDomainFilter>) {
+        self.linter_domains = domains;
     }
 }
 
@@ -229,6 +274,31 @@ impl AnalyzerOptions {
 
     pub fn preferred_indentation(&self) -> PreferredIndentation {
         self.configuration.preferred_indentation
+    }
+
+    /// Returns the override for the given plugin rule, if configured.
+    pub fn plugin_rule_override(&self, name: &str) -> Option<&PluginRuleOverride> {
+        self.configuration.plugin_rule_overrides.get(name)
+    }
+
+    /// Returns the domain-level filtering map for plugin rules.
+    pub fn linter_domains(&self) -> &FxHashMap<RuleDomain, PluginDomainFilter> {
+        &self.configuration.linter_domains
+    }
+
+    /// Returns the raw plugin rule overrides map.
+    pub fn plugin_rule_overrides_map(&self) -> &FxHashMap<Box<str>, PluginRuleOverride> {
+        &self.configuration.plugin_rule_overrides
+    }
+
+    /// Adds a per-rule override for a plugin rule.
+    pub fn push_plugin_rule_override(
+        &mut self,
+        name: impl Into<Box<str>>,
+        rule_override: PluginRuleOverride,
+    ) {
+        self.configuration
+            .push_plugin_rule_override(name, rule_override);
     }
 }
 

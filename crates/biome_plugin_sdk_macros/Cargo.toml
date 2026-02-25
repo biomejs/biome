@@ -1,0 +1,21 @@
+[package]
+name                 = "biome_plugin_sdk_macros"
+version              = "0.0.1"
+authors.workspace    = true
+edition.workspace    = true
+description          = "Proc macros for the Biome plugin SDK"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = true
+
+[lib]
+proc-macro = true
+
+[dependencies]
+# No dependencies — uses only proc_macro and include_str!.
+
+[lints]
+workspace = true

@@ -146,9 +146,14 @@ impl<D: Diagnostic + ?Sized> fmt::Display for PrintHeader<'_, D> {
         }
 
         // Print the category of the diagnostic, with a hyperlink if
-        // the category has an associated link
+        // the category has an associated link.
+        // If a subcategory is present (e.g. plugin rule name), append it
+        // to the category: "plugin/booleanNaming"
         if let Some(category) = diagnostic.category() {
-            if let Some(link) = category.link() {
+            if let Some(subcategory) = diagnostic.subcategory() {
+                let full_name = format!("{}/{}", category.name(), subcategory);
+                fmt.write_markup(markup! { {full_name.as_str()}" " })?;
+            } else if let Some(link) = category.link() {
                 fmt.write_markup(markup! {
                     <Hyperlink href={link}>{category.name()}</Hyperlink>" "
                 })?;

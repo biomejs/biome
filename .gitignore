@@ -33,3 +33,6 @@ dhat-heap.json
 !/crates/biome_json_formatter/tests/specs/prettier/**/*
 !/crates/biome_css_formatter/tests/specs/prettier/**/*
 !/crates/biome_graphql_formatter/tests/specs/prettier/**/*
+
+# Compiled WASM plugin test fixtures (built by biome_plugin_loader/build.rs)
+crates/biome_plugin_loader/tests/fixtures/*.wasm

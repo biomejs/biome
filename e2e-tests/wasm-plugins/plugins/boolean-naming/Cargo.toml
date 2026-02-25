@@ -1,0 +1,11 @@
+[package]
+name    = "boolean-naming"
+version = "0.0.1"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+biome_plugin_sdk = { path = "../../../../crates/biome_plugin_sdk" }
+wit-bindgen      = "0.39"

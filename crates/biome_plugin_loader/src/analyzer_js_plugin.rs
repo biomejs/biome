@@ -6,7 +6,9 @@ use boa_engine::object::builtins::JsFunction;
 use boa_engine::{JsNativeError, JsResult, JsString, JsValue};
 use camino::{Utf8Path, Utf8PathBuf};
 
-use biome_analyze::{AnalyzerPlugin, PluginTargetLanguage, RuleDiagnostic};
+use biome_analyze::{
+    AnalyzerPlugin, PluginEvaluationResult, PluginTargetLanguage, RuleDiagnostic, ServiceBag,
+};
 use biome_console::markup;
 use biome_diagnostics::category;
 use biome_js_runtime::JsExecContext;
@@ -73,6 +75,10 @@ impl AnalyzerJsPlugin {
 }
 
 impl AnalyzerPlugin for AnalyzerJsPlugin {
+    fn rule_name(&self) -> &str {
+        self.path.file_stem().unwrap_or("anonymous")
+    }
+
     fn language(&self) -> PluginTargetLanguage {
         PluginTargetLanguage::JavaScript
     }
@@ -85,25 +91,30 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
             .collect()
     }
 
-    fn evaluate(&self, _node: AnySyntaxNode, path: Arc<Utf8PathBuf>) -> Vec<RuleDiagnostic> {
+    fn evaluate(
+        &self,
+        _node: AnySyntaxNode,
+        path: Arc<Utf8PathBuf>,
+        _services: &ServiceBag,
+    ) -> PluginEvaluationResult {
         let mut plugin = match self
             .loaded
             .get_mut_or_try_init(|| load_plugin(self.fs.clone(), &self.path))
         {
             Ok(plugin) => plugin,
             Err(err) => {
-                return vec![RuleDiagnostic::new(
+                return PluginEvaluationResult::from_diagnostics(vec![RuleDiagnostic::new(
                     category!("plugin"),
                     None::<TextRange>,
                     markup!("Could not load the plugin: "<Error>{err.to_string()}</Error>),
-                )];
+                )]);
             }
         };
 
         let plugin = plugin.deref_mut();
 
         // TODO: pass the AST to the plugin
-        plugin
+        let diagnostics = plugin
             .ctx
             .call_function(
                 &plugin.entrypoint,
@@ -119,13 +130,15 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
                     )]
                 },
                 |_| plugin.ctx.pull_diagnostics(),
-            )
+            );
+        PluginEvaluationResult::from_diagnostics(diagnostics)
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use biome_analyze::ServiceBag;
     use biome_diagnostics::{Error, print_diagnostic_to_string};
     use biome_fs::MemoryFileSystem;
     use biome_js_parser::{JsFileSource, JsParserOptions};
@@ -172,7 +185,11 @@ mod tests {
                     JsParserOptions::default(),
                 );
 
-                plugin.evaluate(parse.syntax().into(), Arc::new("/foo.js".into()))
+                plugin.evaluate(
+                    parse.syntax().into(),
+                    Arc::new("/foo.js".into()),
+                    &ServiceBag::default(),
+                )
             })
         };
 
@@ -186,17 +203,24 @@ mod tests {
                     JsParserOptions::default(),
                 );
 
-                plugin.evaluate(parse.syntax().into(), Arc::new("/bar.js".into()))
+                plugin.evaluate(
+                    parse.syntax().into(),
+                    Arc::new("/bar.js".into()),
+                    &ServiceBag::default(),
+                )
             })
         };
 
-        let mut diagnostics = worker1.join().unwrap();
-        diagnostics.extend(worker2.join().unwrap());
+        let mut diagnostics = worker1.join().unwrap().diagnostics;
+        diagnostics.extend(worker2.join().unwrap().diagnostics);
 
         assert_eq!(diagnostics.len(), 2);
         snap_diagnostics(
             "evaluate_in_worker_threads",
-            diagnostics.into_iter().map(|diag| diag.into()).collect(),
+            diagnostics
+                .into_iter()
+                .map(|diag| diag.diagnostic.into())
+                .collect(),
         );
     }
 }

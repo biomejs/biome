@@ -283,6 +283,16 @@ ready:
 new-changeset:
   pnpm changeset
 
+# Build test WASM plugin fixtures (also done automatically by build.rs)
+build-test-wasm-plugins:
+  rustup target add wasm32-wasip2
+  cargo build --manifest-path e2e-tests/wasm-plugins/plugins/boolean-naming/Cargo.toml --target wasm32-wasip2 --release
+  cp e2e-tests/wasm-plugins/plugins/boolean-naming/target/wasm32-wasip2/release/boolean_naming.wasm crates/biome_plugin_loader/tests/fixtures/
+  cargo build --manifest-path e2e-tests/wasm-plugins/plugins/css-style-conventions/Cargo.toml --target wasm32-wasip2 --release
+  cp e2e-tests/wasm-plugins/plugins/css-style-conventions/target/wasm32-wasip2/release/css_style_conventions.wasm crates/biome_plugin_loader/tests/fixtures/
+  cargo build --manifest-path e2e-tests/wasm-plugins/plugins/json-naming/Cargo.toml --target wasm32-wasip2 --release
+  cp e2e-tests/wasm-plugins/plugins/json-naming/target/wasm32-wasip2/release/json_naming.wasm crates/biome_plugin_loader/tests/fixtures/
+
 # Create new crate
 new-crate name:
   cargo new crates/{{name}} --lib

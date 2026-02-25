@@ -32,6 +32,11 @@ impl Error {
         self.as_diagnostic().category()
     }
 
+    /// Calls [Diagnostic::subcategory] on the [Diagnostic] wrapped by this [Error].
+    pub fn subcategory(&self) -> Option<&str> {
+        self.as_diagnostic().subcategory()
+    }
+
     /// Calls [Diagnostic::severity] on the [Diagnostic] wrapped by this [Error].
     pub fn severity(&self) -> Severity {
         self.as_diagnostic().severity()

@@ -1,5 +1,5 @@
 use crate::{AnalyzerPlugin, PluginDiagnostic};
-use biome_analyze::{PluginTargetLanguage, RuleDiagnostic};
+use biome_analyze::{PluginEvaluationResult, PluginTargetLanguage, RuleDiagnostic, ServiceBag};
 use biome_console::markup;
 use biome_css_syntax::{CssRoot, CssSyntaxNode};
 use biome_diagnostics::{Severity, category};
@@ -44,6 +44,10 @@ impl AnalyzerGritPlugin {
 }
 
 impl AnalyzerPlugin for AnalyzerGritPlugin {
+    fn rule_name(&self) -> &str {
+        self.grit_query.name.as_deref().unwrap_or("anonymous")
+    }
+
     fn language(&self) -> PluginTargetLanguage {
         match &self.grit_query.language {
             GritTargetLanguage::JsTargetLanguage(_) => PluginTargetLanguage::JavaScript,
@@ -68,7 +72,12 @@ impl AnalyzerPlugin for AnalyzerGritPlugin {
         }
     }
 
-    fn evaluate(&self, node: AnySyntaxNode, path: Arc<Utf8PathBuf>) -> Vec<RuleDiagnostic> {
+    fn evaluate(
+        &self,
+        node: AnySyntaxNode,
+        path: Arc<Utf8PathBuf>,
+        _services: &ServiceBag,
+    ) -> PluginEvaluationResult {
         let name: &str = self.grit_query.name.as_deref().unwrap_or("anonymous");
 
         let root = match self.language() {
@@ -118,13 +127,13 @@ impl AnalyzerPlugin for AnalyzerGritPlugin {
                     ));
                 }
 
-                diagnostics
+                PluginEvaluationResult::from_diagnostics(diagnostics)
             }
-            Err(error) => vec![RuleDiagnostic::new(
+            Err(error) => PluginEvaluationResult::from_diagnostics(vec![RuleDiagnostic::new(
                 category!("plugin"),
                 None::<TextRange>,
                 markup!(<Emphasis>{name}</Emphasis>" errored: "<Error>{error.to_string()}</Error>),
-            )],
+            )]),
         }
     }
 }

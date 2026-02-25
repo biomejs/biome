@@ -1,0 +1,18 @@
+[package]
+name                 = "biome_plugin_sdk"
+version              = "0.0.1"
+authors.workspace    = true
+edition.workspace    = true
+description          = "Guest SDK for writing Biome WASM plugins"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = true
+
+[dependencies]
+biome_plugin_sdk_macros = { version = "0.0.1", path = "../biome_plugin_sdk_macros" }
+
+[lints]
+workspace = true

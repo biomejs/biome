@@ -1,0 +1,279 @@
+package biome:plugin;
+
+/// Shared types used by both host and guest.
+interface types {
+    /// Diagnostic severity levels.
+    enum severity {
+        error,
+        warning,
+        information,
+        hint,
+    }
+
+    /// A text replacement.
+    record text-edit {
+        start: u32,
+        end: u32,
+        replacement: string,
+    }
+
+    /// A code fix that can be applied to resolve a diagnostic.
+    record code-action {
+        message: string,
+        /// Whether this fix is safe to apply automatically.
+        safe: bool,
+        edits: list<text-edit>,
+    }
+
+    /// A secondary label pointing to a related location in the source.
+    record label {
+        start: u32,
+        end: u32,
+        message: string,
+    }
+
+    /// A diagnostic result returned by a check.
+    record check-result {
+        start: u32,
+        end: u32,
+        message: string,
+        sev: severity,
+        /// Code actions to fix the diagnostic.
+        actions: list<code-action>,
+        /// Secondary labels pointing to related locations.
+        labels: list<label>,
+        /// Informational notes appended to the diagnostic.
+        notes: list<string>,
+        /// Warning-level footer messages.
+        warnings: list<string>,
+        /// Mark the flagged code as unnecessary (e.g. unused imports).
+        unnecessary: option<bool>,
+        /// Mark the flagged code as deprecated.
+        deprecated: option<bool>,
+        /// Mark diagnostic as verbose (only shown in verbose mode).
+        verbose: option<bool>,
+    }
+
+    /// Structured type information returned by `expression-type-info`.
+    record type-info {
+        /// The type category tag (same values as `expression-type`).
+        tag: string,
+        /// For literal types, the string representation of the literal value.
+        literal-value: option<string>,
+        /// For union types, the tags of each union member.
+        union-members: option<list<string>>,
+    }
+
+    /// Metadata about a rule exported by the plugin.
+    record rule-metadata {
+        /// The version when this rule was first introduced (e.g. "2.1.0").
+        version: string,
+        /// Source rules this was inspired by (e.g. "eslint/no-console").
+        sources: list<string>,
+        /// Whether this rule is recommended by default.
+        recommended: bool,
+        /// Fix kind if the rule provides autofixes (e.g. "safe" or "unsafe").
+        fix-kind: option<string>,
+        /// Rule category: "lint" (default), "action", "syntax", or "transformation".
+        category: option<string>,
+        /// Domains this rule belongs to (e.g. "react", "test", "next").
+        domains: list<string>,
+        /// If set, the rule is deprecated. The string is the deprecation reason.
+        deprecated: option<string>,
+        /// Default severity: "error", "warning", "information", or "hint".
+        severity: option<string>,
+        /// GitHub issue number for rules still under development.
+        issue-number: option<string>,
+    }
+}
+
+interface host {
+    /// All `node` parameters are opaque u32 handles allocated by the host.
+    /// Handle 0 is the root node passed to `check`. New handles are returned
+    /// by navigation functions (e.g. `node-children`, `node-parent`).
+    /// Handles are valid for the duration of a single `check` invocation.
+    ///
+    /// Byte offsets (e.g. `start`/`end` in `node-range`) are UTF-8 byte
+    /// offsets relative to the start of the source file.
+
+    /// Get the syntax kind of a node (raw u32 value).
+    node-kind: func(node: u32) -> u32;
+
+    /// Get the full source text of a node (including trivia).
+    node-text: func(node: u32) -> string;
+
+    /// Get the trimmed text (excluding leading/trailing trivia).
+    node-trimmed-text: func(node: u32) -> string;
+
+    /// Get byte offset range [start, end).
+    node-range: func(node: u32) -> tuple<u32, u32>;
+
+    /// Navigate to parent. Returns none if root.
+    node-parent: func(node: u32) -> option<u32>;
+
+    /// Get number of children.
+    node-child-count: func(node: u32) -> u32;
+
+    /// Get nth child. Returns none if out of bounds.
+    node-nth-child: func(node: u32, index: u32) -> option<u32>;
+
+    /// Get all children as a list of node handles.
+    node-children: func(node: u32) -> list<u32>;
+
+    /// Find first child with a specific syntax kind. Returns none if not found.
+    node-child-by-kind: func(node: u32, kind: u32) -> option<u32>;
+
+    /// Check if a handle refers to a token (true) or a node (false).
+    element-is-token: func(handle: u32) -> bool;
+
+    /// Get all children including tokens. Returns mixed node/token handles.
+    node-children-with-tokens: func(node: u32) -> list<u32>;
+
+    /// Get the trimmed text range [start, end) excluding leading/trailing trivia.
+    node-trimmed-range: func(node: u32) -> tuple<u32, u32>;
+
+    // --- Semantic model access (JS only; returns none/empty for CSS/JSON) ---
+
+    /// Resolve a reference node to the syntax node of its binding declaration.
+    resolve-reference: func(node: u32) -> option<u32>;
+
+    /// Given a binding declaration node, return all reference nodes.
+    all-references: func(node: u32) -> list<u32>;
+
+    /// Check whether a binding declaration node is exported.
+    is-exported: func(node: u32) -> bool;
+
+    /// Get the scope node that contains the given node.
+    node-scope: func(node: u32) -> option<u32>;
+
+    /// Given a scope node, return the declaration nodes of all bindings in that scope.
+    scope-bindings: func(node: u32) -> list<u32>;
+
+    /// Given a scope node, return the parent scope node.
+    parent-scope-node: func(node: u32) -> option<u32>;
+
+    // --- Enhanced semantic model (JS only) ---
+
+    /// Check if a reference node is a read reference.
+    reference-is-read: func(node: u32) -> bool;
+
+    /// Check if a reference node is a write reference.
+    reference-is-write: func(node: u32) -> bool;
+
+    /// Given a binding declaration node, return all read reference nodes.
+    all-read-references: func(node: u32) -> list<u32>;
+
+    /// Given a binding declaration node, return all write reference nodes.
+    all-write-references: func(node: u32) -> list<u32>;
+
+    /// Check whether a binding declaration node is imported.
+    is-imported: func(node: u32) -> bool;
+
+    /// Look up a binding by name within the given scope node.
+    scope-get-binding-by-name: func(scope-node: u32, name: string) -> option<u32>;
+
+    /// Check if the given scope node is the global scope.
+    is-global-scope: func(scope-node: u32) -> bool;
+
+    /// Return ancestor scope nodes from the given scope up to (and including) the global scope.
+    scope-ancestors: func(scope-node: u32) -> list<u32>;
+
+    /// Return immediate child scope nodes of the given scope.
+    scope-children: func(scope-node: u32) -> list<u32>;
+
+    /// Check if an expression node is constant (no variable dependencies).
+    is-constant-expression: func(node: u32) -> bool;
+
+    /// Return captured variable nodes for a closure (function/arrow).
+    /// Each entry is a tuple: (reference-node-handle, binding-node-handle, is-by-reference).
+    closure-captures: func(node: u32) -> list<tuple<u32, u32, bool>>;
+
+    // --- Type inference (JS only, may return "unknown" if unavailable) ---
+
+    /// Get the inferred type of a JS expression node as a string tag.
+    /// Returns one of: "boolean", "number", "string", "bigint", "null",
+    /// "undefined", "symbol", "object", "function", "class", "array",
+    /// "union", "intersection", "never", "unknown".
+    expression-type: func(node: u32) -> string;
+
+    // --- Structured type inference (JS only) ---
+
+    use types.{type-info};
+
+    /// Get structured type information for an expression node.
+    /// Unlike `expression-type` which returns just a tag string, this also
+    /// provides literal values and union member types when available.
+    expression-type-info: func(node: u32) -> type-info;
+
+    // --- Global reference detection (JS only) ---
+
+    /// Check if a reference node refers to a global (unresolved) binding.
+    /// Returns true if the reference has no local binding in any scope.
+    /// Also handles `globalThis.X` and `window.X` patterns.
+    is-global-reference: func(node: u32) -> bool;
+
+    // --- Trivia access ---
+
+    /// Get leading trivia (whitespace/comments) of a node or token.
+    /// Returns empty string if no leading trivia exists.
+    node-leading-trivia: func(node: u32) -> string;
+
+    /// Get trailing trivia (whitespace/comments) of a node or token.
+    /// Returns empty string if no trailing trivia exists.
+    node-trailing-trivia: func(node: u32) -> string;
+
+    // --- Regex utilities ---
+
+    /// Test if text matches a regex pattern.
+    /// Returns false for invalid patterns.
+    regex-matches: func(text: string, pattern: string) -> bool;
+
+    /// Find all matches: returns list of (start, end) byte offsets.
+    /// Returns empty list for invalid patterns.
+    regex-find-all: func(text: string, pattern: string) -> list<tuple<u32, u32>>;
+
+    // --- Control flow (heuristic) ---
+
+    /// Check if a node is reachable (not preceded by return/throw/break/continue
+    /// in the same block). Uses heuristic ancestor-walk; not a full CFG analysis.
+    is-reachable: func(node: u32) -> bool;
+
+    // --- Accessibility (JS/JSX only) ---
+
+    /// Get the implicit ARIA role for a JSX element node.
+    /// Returns none for non-JSX elements or elements without an implicit role.
+    aria-implicit-role: func(node: u32) -> option<string>;
+
+    // --- File context ---
+
+    /// Get the file path of the current file being analyzed.
+    file-path: func() -> string;
+}
+
+world plugin {
+    import host;
+    use types.{check-result, rule-metadata};
+
+    /// Target language: "javascript", "css", or "json".
+    export target-language: func() -> string;
+
+    /// List of rule names exposed by this plugin (e.g. ["noConsoleLog"]).
+    /// Each name is used for suppression comments and configuration.
+    export rule-names: func() -> list<string>;
+
+    /// Syntax node kinds a specific rule cares about. The host calls `check`
+    /// only for nodes whose raw kind is in this list.
+    export query-kinds-for-rule: func(rule: string) -> list<u32>;
+
+    /// Receive rule options as a JSON string for a specific rule.
+    /// Called once before any `check` calls for that rule.
+    /// Plugins that do not accept options should implement this as a no-op.
+    export configure: func(rule: string, options-json: string);
+
+    /// Check a single matched node for a specific rule. Returns diagnostics.
+    export check: func(node: u32, rule: string) -> list<check-result>;
+
+    /// Return metadata for a specific rule. Provides version, sources,
+    /// whether the rule is recommended, and the fix kind if applicable.
+    export rule-metadata: func(rule: string) -> rule-metadata;
+}

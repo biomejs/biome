@@ -1,0 +1,17 @@
+/* Should trigger customPropertyPattern (bad kebab-case) */
+:root {
+  --camelCase: red;
+  --UPPER: blue;
+}
+
+/* Should trigger noImportantInCustomProperties */
+.foo {
+  --valid-prop: red !important;
+}
+
+/* Should NOT trigger (valid names, no !important on custom) */
+:root {
+  --valid-name: red;
+  --another-valid: 10px;
+  color: red !important;  /* !important on regular prop is fine */
+}

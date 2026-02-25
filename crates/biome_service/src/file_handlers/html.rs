@@ -1488,7 +1488,8 @@ fn lint(params: LintParams) -> LintResults {
         range: None,
     };
 
-    let mut process_lint = ProcessLint::new(&params);
+    let mut process_lint = ProcessLint::new(&params)
+        .with_plugin_overrides(analyzer_options.plugin_rule_overrides_map());
 
     let source_type = params.language.to_html_file_source().unwrap_or_default();
     let html_services = HtmlAnalyzerServices {

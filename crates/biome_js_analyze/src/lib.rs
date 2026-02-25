@@ -9,7 +9,8 @@ use crate::suppression_action::JsSuppressionAction;
 use biome_analyze::{
     AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerPluginSlice,
     AnalyzerSignal, AnalyzerSuppression, BatchPluginVisitor, ControlFlow, InspectMatcher,
-    LanguageRoot, MatchQueryParams, MetadataRegistry, Phases, PluginTargetLanguage, RuleAction,
+    LanguageRoot, MatchQueryParams, MetadataRegistry, Phases, PluginTargetLanguage, PluginVisitor,
+    RuleAction,
     RuleRegistry, to_analyzer_suppressions,
 };
 use biome_aria::AriaRoles;

@@ -1,6 +1,6 @@
 use biome_analyze::{
-    AnalysisFilter, AnalyzerAction, AnalyzerPluginSlice, ControlFlow, Never, Queryable,
-    RegistryVisitor, Rule, RuleDomain, RuleFilter, RuleGroup,
+    AnalysisFilter, AnalyzerAction, AnalyzerPlugin, AnalyzerPluginSlice, ControlFlow, Never,
+    Queryable, RegistryVisitor, Rule, RuleDomain, RuleFilter, RuleGroup,
 };
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_fs::OsFileSystem;
@@ -521,7 +521,7 @@ fn run_plugin_test(input: &'static str, _: &str, _: &str, _: &str) {
         &input_path,
         CheckActionType::Lint,
         JsParserOptions::default(),
-        &[Arc::new(Box::new(plugin))],
+        &[Arc::new(plugin) as Arc<dyn AnalyzerPlugin>],
     );
 
     insta::with_settings!({

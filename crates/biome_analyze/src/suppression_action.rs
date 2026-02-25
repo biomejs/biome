@@ -1,7 +1,9 @@
 use crate::SuppressionCommentEmitterPayload;
+use crate::rule::SuppressAction;
+use biome_console::markup;
 use biome_rowan::{
-    BatchMutation, Language, SyntaxToken, TextLen, TextRange, TokenAtOffset, TriviaPiece,
-    TriviaPieceKind,
+    AstNode, BatchMutation, BatchMutationExt, Language, SyntaxToken, TextLen, TextRange,
+    TokenAtOffset, TriviaPiece, TriviaPieceKind,
 };
 
 pub trait SuppressionAction {
@@ -173,4 +175,284 @@ fn new_trivia_for_top_suppression<L: Language>(
     }
     text.push_str(token.text_trimmed());
     new_trivia
+}
+
+/// Build an inline suppression (`biome-ignore`) action for the given rule category.
+///
+/// This is a shared helper used by both the native `Rule` trait and the plugin
+/// signal path so the suppression text/message format is defined in one place.
+pub(crate) fn make_inline_suppression<L: Language>(
+    rule_category: &str,
+    kind_label: &str,
+    root: &<L as Language>::Root,
+    text_range: &TextRange,
+    suppression_action: &dyn SuppressionAction<Language = L>,
+    suppression_reason: &str,
+) -> SuppressAction<L> {
+    let suppression_text = format!("biome-ignore {rule_category}");
+    let root = root.clone();
+    let token = root.syntax().token_at_offset(text_range.start());
+    let mut mutation = root.begin();
+    suppression_action.inline_suppression(SuppressionCommentEmitterPayload {
+        suppression_text: suppression_text.as_str(),
+        mutation: &mut mutation,
+        token_offset: token,
+        diagnostic_text_range: text_range,
+        suppression_reason,
+    });
+    SuppressAction {
+        mutation,
+        message: markup! { "Suppress " {kind_label} " " {rule_category} " for this line." }
+            .to_owned(),
+    }
+}
+
+/// Build a top-level suppression (`biome-ignore-all`) action for the given rule category.
+///
+/// Returns `None` when the root has no tokens (empty file).
+pub(crate) fn make_top_level_suppression<L: Language>(
+    rule_category: &str,
+    kind_label: &str,
+    root: &<L as Language>::Root,
+    suppression_action: &dyn SuppressionAction<Language = L>,
+) -> Option<SuppressAction<L>> {
+    let suppression_text = format!("biome-ignore-all {rule_category}");
+    let root = root.clone();
+    let first_token = root.syntax().first_token()?;
+    let mut mutation = root.begin();
+    let comment = suppression_action.suppression_top_level_comment(suppression_text.as_str());
+    suppression_action.apply_top_level_suppression(&mut mutation, first_token, comment.as_str());
+    Some(SuppressAction {
+        mutation,
+        message: markup! { "Suppress " {kind_label} " " {rule_category} " for the whole file." }
+            .to_owned(),
+    })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use biome_console::MarkupBuf;
+    use biome_rowan::TriviaPiece;
+    use biome_rowan::raw_language::{
+        RawLanguage, RawLanguageKind, RawLanguageRoot, RawSyntaxTreeBuilder,
+    };
+    use std::cell::Cell;
+
+    /// Extract the plain text content from a `MarkupBuf` (ignoring markup tags).
+    fn markup_to_string(markup: &MarkupBuf) -> String {
+        markup.0.iter().map(|node| node.content.as_str()).collect()
+    }
+
+    /// A stub `SuppressionAction` for `RawLanguage` that records whether its
+    /// methods were called but otherwise performs no real mutations.
+    struct RecordingAction {
+        top_level_comment_called: Cell<bool>,
+        top_level_comment_arg: Cell<Option<String>>,
+    }
+
+    impl RecordingAction {
+        fn new() -> Self {
+            Self {
+                top_level_comment_called: Cell::new(false),
+                top_level_comment_arg: Cell::new(None),
+            }
+        }
+    }
+
+    impl SuppressionAction for RecordingAction {
+        type Language = RawLanguage;
+
+        fn find_token_for_inline_suppression(
+            &self,
+            _: SyntaxToken<Self::Language>,
+        ) -> Option<ApplySuppression<Self::Language>> {
+            // Return None — inline suppression is a no-op at the mutation level
+            // but the helper still exercises the code path.
+            None
+        }
+
+        fn apply_inline_suppression(
+            &self,
+            _: &mut BatchMutation<Self::Language>,
+            _: ApplySuppression<Self::Language>,
+            _: &str,
+            _: &str,
+        ) {
+            unreachable!("apply_inline_suppression should not be called when find returns None")
+        }
+
+        fn apply_top_level_suppression(
+            &self,
+            _: &mut BatchMutation<Self::Language>,
+            _: SyntaxToken<Self::Language>,
+            _: &str,
+        ) {
+            // no-op — we only care that the method was reached
+        }
+
+        fn suppression_top_level_comment(&self, suppression_text: &str) -> String {
+            self.top_level_comment_called.set(true);
+            self.top_level_comment_arg
+                .set(Some(suppression_text.to_string()));
+            format!("// {suppression_text}")
+        }
+    }
+
+    /// Build a minimal `RawLanguageRoot` with a single token.
+    fn make_root_with_token() -> RawLanguageRoot {
+        let mut builder = RawSyntaxTreeBuilder::new();
+        builder.start_node(RawLanguageKind::ROOT);
+        builder.start_node(RawLanguageKind::EXPRESSION_LIST);
+        builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+        builder.token_with_trivia(
+            RawLanguageKind::STRING_TOKEN,
+            "\n\"hello\"",
+            &[TriviaPiece::newline(1)],
+            &[],
+        );
+        builder.finish_node();
+        builder.finish_node();
+        builder.finish_node();
+        RawLanguageRoot::unwrap_cast(builder.finish())
+    }
+
+    /// Build an empty `RawLanguageRoot` with no tokens.
+    fn make_empty_root() -> RawLanguageRoot {
+        let mut builder = RawSyntaxTreeBuilder::new();
+        builder.start_node(RawLanguageKind::ROOT);
+        builder.start_node(RawLanguageKind::EXPRESSION_LIST);
+        builder.finish_node();
+        builder.finish_node();
+        RawLanguageRoot::unwrap_cast(builder.finish())
+    }
+
+    #[test]
+    fn inline_suppression_message_contains_rule_category() {
+        let root = make_root_with_token();
+        let action = RecordingAction::new();
+        let range = TextRange::new(1.into(), 8.into());
+
+        let result = make_inline_suppression::<RawLanguage>(
+            "lint/complexity/useWhile",
+            "rule",
+            &root,
+            &range,
+            &action,
+            "<explanation>",
+        );
+
+        let msg = markup_to_string(&result.message);
+        assert!(
+            msg.contains("lint/complexity/useWhile"),
+            "expected category in message, got: {msg}"
+        );
+        assert!(
+            msg.contains("for this line"),
+            "expected 'for this line' in message, got: {msg}"
+        );
+    }
+
+    #[test]
+    fn inline_suppression_message_uses_action_label() {
+        let root = make_root_with_token();
+        let action = RecordingAction::new();
+        let range = TextRange::new(1.into(), 8.into());
+
+        let result = make_inline_suppression::<RawLanguage>(
+            "action/source/organizeImports",
+            "action",
+            &root,
+            &range,
+            &action,
+            "<explanation>",
+        );
+
+        let msg = markup_to_string(&result.message);
+        assert!(
+            msg.contains("Suppress action"),
+            "expected 'Suppress action' in message, got: {msg}"
+        );
+    }
+
+    #[test]
+    fn inline_suppression_plugin_category() {
+        let root = make_root_with_token();
+        let action = RecordingAction::new();
+        let range = TextRange::new(1.into(), 8.into());
+
+        let result = make_inline_suppression::<RawLanguage>(
+            "lint/plugin/myRule",
+            "rule",
+            &root,
+            &range,
+            &action,
+            "<explanation>",
+        );
+
+        let msg = markup_to_string(&result.message);
+        assert!(
+            msg.contains("lint/plugin/myRule"),
+            "expected plugin category in message, got: {msg}"
+        );
+    }
+
+    #[test]
+    fn top_level_suppression_message_format() {
+        let root = make_root_with_token();
+        let action = RecordingAction::new();
+
+        let result = make_top_level_suppression::<RawLanguage>(
+            "lint/complexity/useWhile",
+            "rule",
+            &root,
+            &action,
+        );
+
+        let result = result.expect("should return Some for non-empty root");
+        let msg = markup_to_string(&result.message);
+        assert!(
+            msg.contains("for the whole file"),
+            "expected 'for the whole file' in message, got: {msg}"
+        );
+        assert!(
+            msg.contains("lint/complexity/useWhile"),
+            "expected category in message, got: {msg}"
+        );
+    }
+
+    #[test]
+    fn top_level_suppression_returns_none_for_empty_root() {
+        let root = make_empty_root();
+        let action = RecordingAction::new();
+
+        let result = make_top_level_suppression::<RawLanguage>(
+            "lint/complexity/useWhile",
+            "rule",
+            &root,
+            &action,
+        );
+
+        assert!(result.is_none(), "expected None for empty root");
+    }
+
+    #[test]
+    fn top_level_suppression_calls_suppression_action() {
+        let root = make_root_with_token();
+        let action = RecordingAction::new();
+        let category = "lint/style/useConst";
+
+        let _ = make_top_level_suppression::<RawLanguage>(category, "rule", &root, &action);
+
+        assert!(
+            action.top_level_comment_called.get(),
+            "suppression_top_level_comment should have been called"
+        );
+        let arg = action.top_level_comment_arg.take().unwrap();
+        assert_eq!(
+            arg,
+            format!("biome-ignore-all {category}"),
+            "suppression_top_level_comment was called with wrong text"
+        );
+    }
 }

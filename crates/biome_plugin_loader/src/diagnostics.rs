@@ -63,6 +63,18 @@ impl From<boa_engine::JsError> for PluginDiagnostic {
     }
 }
 
+#[cfg(feature = "wasm_plugin")]
+impl From<wasmtime::Error> for PluginDiagnostic {
+    fn from(value: wasmtime::Error) -> Self {
+        Self::Compile(CompileDiagnostic {
+            message: MessageAndDescription::from(
+                markup! {"Failed to load WASM plugin: "{value.to_string()}}.to_owned(),
+            ),
+            source: None,
+        })
+    }
+}
+
 impl From<DeserializationDiagnostic> for PluginDiagnostic {
     fn from(value: DeserializationDiagnostic) -> Self {
         Self::Deserialization(value)
@@ -147,11 +159,11 @@ impl From<PluginDiagnostic> for biome_diagnostics::serde::Diagnostic {
 pub struct CompileDiagnostic {
     #[message]
     #[description]
-    message: MessageAndDescription,
+    pub(crate) message: MessageAndDescription,
 
     #[serde(skip)]
     #[source]
-    source: Option<Error>,
+    pub(crate) source: Option<Error>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]

@@ -1,19 +1,24 @@
+use crate::analyzer_plugin::{PluginCodeAction, PluginTextEdit};
 use crate::categories::{
     SUPPRESSION_INLINE_ACTION_CATEGORY, SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY,
 };
+use crate::registry::LanguageRoot;
 use crate::{
-    AnalyzerDiagnostic, AnalyzerOptions, OtherActionCategory, Queryable, RuleDiagnostic, RuleGroup,
-    ServiceBag, SuppressionAction,
+    AnalyzerDiagnostic, AnalyzerOptions, OtherActionCategory, Queryable, RuleCategory,
+    RuleDiagnostic, RuleGroup, ServiceBag, SuppressionAction,
     categories::ActionCategory,
     context::RuleContext,
     registry::{RuleLanguage, RuleRoot},
     rule::Rule,
+    suppression_action::{make_inline_suppression, make_top_level_suppression},
 };
 use biome_console::{MarkupBuf, markup};
 use biome_diagnostics::{Applicability, CodeSuggestion, Error, advice::CodeSuggestionAdvice};
-use biome_rowan::{BatchMutation, Language};
+use biome_rowan::{AstNode, BatchMutation, Language, TextRange};
+use biome_text_edit::TextEdit;
 use std::iter::FusedIterator;
 use std::marker::PhantomData;
+use std::sync::Arc;
 use std::vec::IntoIter;
 
 /// Event raised by the analyzer when a [Rule](crate::Rule)
@@ -109,27 +114,222 @@ where
 /// Unlike [DiagnosticSignal] which converts through [Error] into
 /// [DiagnosticKind::Raw](crate::diagnostics::DiagnosticKind::Raw), this type
 /// directly converts via `AnalyzerDiagnostic::from(RuleDiagnostic)`.
-pub struct PluginSignal<L> {
+pub struct PluginSignal<'phase, L: Language> {
     diagnostic: RuleDiagnostic,
-    _phantom: PhantomData<L>,
+    actions: Vec<PluginCodeAction>,
+    /// Full source text of the file being analyzed — needed to construct
+    /// `TextEdit` diffs for plugin code actions. Wrapped in `Arc` to avoid
+    /// cloning the full source string for each diagnostic signal.
+    source_text: Arc<str>,
+    root: &'phase LanguageRoot<L>,
+    suppression_action: &'phase dyn SuppressionAction<Language = L>,
+    options: &'phase AnalyzerOptions,
+    category: RuleCategory,
+    deprecated: Option<Arc<str>>,
+    issue_number: Option<Arc<str>>,
 }
 
-impl<L: Language> PluginSignal<L> {
-    pub fn new(diagnostic: RuleDiagnostic) -> Self {
+impl<'phase, L: Language> PluginSignal<'phase, L> {
+    pub fn new(
+        diagnostic: RuleDiagnostic,
+        actions: Vec<PluginCodeAction>,
+        source_text: Arc<str>,
+        root: &'phase LanguageRoot<L>,
+        suppression_action: &'phase dyn SuppressionAction<Language = L>,
+        options: &'phase AnalyzerOptions,
+    ) -> Self {
         Self {
             diagnostic,
-            _phantom: PhantomData,
+            actions,
+            source_text,
+            root,
+            suppression_action,
+            options,
+            category: RuleCategory::Lint,
+            deprecated: None,
+            issue_number: None,
         }
+    }
+
+    pub fn with_category(mut self, category: RuleCategory) -> Self {
+        self.category = category;
+        self
+    }
+
+    pub fn with_deprecated(mut self, deprecated: Option<Arc<str>>) -> Self {
+        self.deprecated = deprecated;
+        self
+    }
+
+    pub fn with_issue_number(mut self, issue_number: Option<Arc<str>>) -> Self {
+        self.issue_number = issue_number;
+        self
     }
 }
 
-impl<L: Language> AnalyzerSignal<L> for PluginSignal<L> {
+/// Apply plugin text edits to a source string, returning the (spanning range, TextEdit diff).
+///
+/// The edits are sorted by start position and applied from last to first so that
+/// earlier offsets remain valid. The spanning range covers the union of all edits.
+fn apply_plugin_edits(source: &str, edits: &[PluginTextEdit]) -> Option<(TextRange, TextEdit)> {
+    if edits.is_empty() {
+        return None;
+    }
+
+    // Sort by start offset (ascending).
+    let mut sorted: Vec<&PluginTextEdit> = edits.iter().collect();
+    sorted.sort_by_key(|e| e.range.start());
+
+    // Compute the spanning range over all edits.
+    let span_start = sorted.first()?.range.start();
+    let span_end = sorted.iter().map(|e| e.range.end()).max()?;
+    let span = TextRange::new(span_start, span_end);
+
+    let old_slice = source.get(usize::from(span_start)..usize::from(span_end))?;
+
+    // Build the new text by applying edits within the span.
+    let mut new_text = String::new();
+    let mut cursor = span_start;
+    for edit in &sorted {
+        // Copy text before this edit.
+        if edit.range.start() > cursor {
+            let before = source.get(usize::from(cursor)..usize::from(edit.range.start()))?;
+            new_text.push_str(before);
+        }
+        new_text.push_str(&edit.replacement);
+        cursor = edit.range.end();
+    }
+    // Copy remaining text after the last edit within the span.
+    if cursor < span_end {
+        let after = source.get(usize::from(cursor)..usize::from(span_end))?;
+        new_text.push_str(after);
+    }
+
+    let text_edit = TextEdit::from_unicode_words(old_slice, &new_text);
+    Some((span, text_edit))
+}
+
+impl<L: Language> AnalyzerSignal<L> for PluginSignal<'_, L> {
     fn diagnostic(&self) -> Option<AnalyzerDiagnostic> {
-        Some(AnalyzerDiagnostic::from(self.diagnostic.clone()))
+        let mut rule_diag = self.diagnostic.clone();
+
+        if let Some(issue_number) = &self.issue_number {
+            let url = format!("https://github.com/biomejs/biome/issues/{issue_number}");
+            rule_diag = rule_diag.note(markup! {
+                "This rule is still under development. Visit "<Hyperlink href={url.as_str()}>{url.as_str()}</Hyperlink>" for details."
+            });
+        }
+        if let Some(reason) = &self.deprecated {
+            let reason: &str = reason;
+            rule_diag = rule_diag.note(markup! { "Deprecated: " {reason} });
+        }
+
+        let mut diag = AnalyzerDiagnostic::from(rule_diag);
+
+        for action in &self.actions {
+            if let Some((_span, text_edit)) = apply_plugin_edits(&self.source_text, &action.edits) {
+                let suggestion = CodeSuggestionAdvice {
+                    applicability: action.applicability,
+                    msg: markup!({ action.message }).to_owned(),
+                    suggestion: text_edit,
+                };
+                diag = diag.add_code_suggestion(suggestion);
+            }
+        }
+
+        Some(diag)
     }
 
     fn actions(&self) -> AnalyzerActionIter<L> {
-        AnalyzerActionIter::new(vec![])
+        let mut actions = Vec::new();
+
+        let plugin_name = self
+            .diagnostic
+            .subcategory
+            .as_deref()
+            .unwrap_or("anonymous");
+        let suppression_prefix = self.category.as_suppression_category();
+        let rule_category = format!("{suppression_prefix}/plugin/{plugin_name}");
+        let kind_label = if self.category == RuleCategory::Action {
+            "action"
+        } else {
+            "rule"
+        };
+        let suppression_reason = self
+            .options
+            .suppression_reason
+            .as_deref()
+            .unwrap_or("<explanation>");
+
+        // Inline suppression
+        if let Some(text_range) = self.diagnostic.span() {
+            let suppress = make_inline_suppression(
+                &rule_category,
+                kind_label,
+                self.root,
+                &text_range,
+                self.suppression_action,
+                suppression_reason,
+            );
+            actions.push(AnalyzerAction {
+                rule_name: None,
+                category: ActionCategory::Other(OtherActionCategory::InlineSuppression),
+                applicability: Applicability::Always,
+                mutation: suppress.mutation,
+                message: suppress.message,
+                text_edit: None,
+            });
+        }
+
+        // Top-level suppression
+        if let Some(suppress) = make_top_level_suppression(
+            &rule_category,
+            kind_label,
+            self.root,
+            self.suppression_action,
+        ) {
+            actions.push(AnalyzerAction {
+                rule_name: None,
+                category: ActionCategory::Other(OtherActionCategory::ToplevelSuppression),
+                applicability: Applicability::Always,
+                mutation: suppress.mutation,
+                message: suppress.message,
+                text_edit: None,
+            });
+        }
+
+        // Plugin fix actions (quick-fixes from code actions)
+        let fix_kind_override = self
+            .options
+            .plugin_rule_override(plugin_name)
+            .and_then(|o| o.fix_kind);
+
+        if fix_kind_override != Some(crate::FixKind::None) && !self.actions.is_empty() {
+            let noop_mutation = BatchMutation::new(self.root.syntax().clone());
+            for plugin_action in &self.actions {
+                if let Some((span, text_edit)) =
+                    apply_plugin_edits(&self.source_text, &plugin_action.edits)
+                {
+                    let applicability = match fix_kind_override {
+                        Some(crate::FixKind::Safe) => Applicability::Always,
+                        Some(crate::FixKind::Unsafe) => Applicability::MaybeIncorrect,
+                        _ => plugin_action.applicability,
+                    };
+                    actions.push(AnalyzerAction {
+                        rule_name: None,
+                        category: ActionCategory::QuickFix(std::borrow::Cow::Borrowed(
+                            "quickfix.plugin",
+                        )),
+                        applicability,
+                        message: markup!({ plugin_action.message }).to_owned(),
+                        mutation: noop_mutation.clone(),
+                        text_edit: Some((span, text_edit)),
+                    });
+                }
+            }
+        }
+
+        AnalyzerActionIter::new(actions)
     }
 
     fn transformations(&self) -> AnalyzerTransformationIter<L> {
@@ -149,6 +349,9 @@ pub struct AnalyzerAction<L: Language> {
     pub applicability: Applicability,
     pub message: MarkupBuf,
     pub mutation: BatchMutation<L>,
+    /// Plugin text edit — when `Some`, `process_action` applies this instead of
+    /// `mutation`. The tuple contains the spanning range and the text edit diff.
+    pub text_edit: Option<(TextRange, TextEdit)>,
 }
 
 impl<L: Language> AnalyzerAction<L> {
@@ -179,7 +382,12 @@ impl<L: Language> Default for AnalyzerActionIter<L> {
 
 impl<L: Language> From<AnalyzerAction<L>> for CodeSuggestionAdvice<MarkupBuf> {
     fn from(action: AnalyzerAction<L>) -> Self {
-        let (_, suggestion) = action.mutation.to_text_range_and_edit().unwrap_or_default();
+        let suggestion = if let Some((_range, text_edit)) = action.text_edit {
+            text_edit
+        } else {
+            let (_, suggestion) = action.mutation.to_text_range_and_edit().unwrap_or_default();
+            suggestion
+        };
         Self {
             applicability: action.applicability,
             msg: action.message,
@@ -190,7 +398,11 @@ impl<L: Language> From<AnalyzerAction<L>> for CodeSuggestionAdvice<MarkupBuf> {
 
 impl<L: Language> From<AnalyzerAction<L>> for CodeSuggestionItem {
     fn from(action: AnalyzerAction<L>) -> Self {
-        let (range, suggestion) = action.mutation.to_text_range_and_edit().unwrap_or_default();
+        let (range, suggestion) = if let Some((range, text_edit)) = action.text_edit {
+            (range, text_edit)
+        } else {
+            action.mutation.to_text_range_and_edit().unwrap_or_default()
+        };
 
         Self {
             rule_name: action.rule_name,
@@ -471,6 +683,7 @@ where
                     category: action.category,
                     mutation: action.mutation,
                     message: action.message,
+                    text_edit: None,
                 });
             };
             if let Some(text_range) = R::text_range(&ctx, &self.state)
@@ -487,6 +700,7 @@ where
                     applicability: Applicability::Always,
                     mutation: suppression_action.mutation,
                     message: suppression_action.message,
+                    text_edit: None,
                 };
                 actions.push(action);
             }
@@ -500,6 +714,7 @@ where
                     applicability: Applicability::Always,
                     mutation: suppression_action.mutation,
                     message: suppression_action.message,
+                    text_edit: None,
                 };
                 actions.push(action);
             }
