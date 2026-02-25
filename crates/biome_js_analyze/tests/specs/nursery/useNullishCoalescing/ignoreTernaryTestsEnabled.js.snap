@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: ignoreTernaryTestsEnabled.js
+---
+# Input
+```js
+// should NOT generate diagnostics when ignoreTernaryTests is true
+
+// All ternary nullish checks should be ignored
+const v1 = a !== null ? a : 'default';
+const v2 = a === null ? 'default' : a;
+const v3 = a != null ? a : 'default';
+const v4 = a === null || a === undefined ? 'default' : a;
+const v5 = a !== null && a !== undefined ? a : 'default';
+
+```

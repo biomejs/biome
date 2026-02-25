@@ -2400,7 +2400,7 @@ See https://biomejs.dev/linter/rules/use-lone-executable-definition
 	 */
 	useLoneExecutableDefinition?: UseLoneExecutableDefinitionConfiguration;
 	/**
-	* Enforce using nullish coalescing operator (??) instead of logical or (||).
+	* Enforce using nullish coalescing operator (??) instead of logical or (||) or ternary expressions that perform explicit nullish checks.
 See https://biomejs.dev/linter/rules/use-nullish-coalescing 
 	 */
 	useNullishCoalescing?: UseNullishCoalescingConfiguration;
@@ -7403,6 +7403,15 @@ that appear in places where the falsy-checking behavior may be intentional.
 Default: `true` 
 	 */
 	ignoreConditionalTests?: boolean;
+	/**
+	* Whether to skip detecting ternary expressions that perform explicit
+nullish checks (e.g. `a !== null ? a : b`).
+
+When `true`, the rule will not suggest replacing such ternaries with `??`.
+
+Default: `false` 
+	 */
+	ignoreTernaryTests?: boolean;
 }
 export type UsePlaywrightValidDescribeCallbackOptions = {};
 export type UseRegexpExecOptions = {};

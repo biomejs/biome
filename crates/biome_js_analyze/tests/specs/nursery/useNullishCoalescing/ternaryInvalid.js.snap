@@ -1,0 +1,723 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: ternaryInvalid.js
+---
+# Input
+```js
+// should generate diagnostics for ternary nullish checks
+
+// === Simple strict inequality with null ===
+// a !== null ? a : b  ->  a ?? b
+const v1 = a !== null ? a : 'default';
+
+// a !== undefined ? a : b  ->  a ?? b
+const v2 = a !== undefined ? a : 'default';
+
+// === Simple strict equality with null (inverted) ===
+// a === null ? b : a  ->  a ?? b
+const v3 = a === null ? 'default' : a;
+
+// a === undefined ? b : a  ->  a ?? b
+const v4 = a === undefined ? 'default' : a;
+
+// === Loose equality ===
+// a != null ? a : b  ->  a ?? b (covers both null and undefined)
+const v5 = a != null ? a : 'default';
+
+// a != undefined ? a : b  ->  a ?? b
+const v6 = a != undefined ? a : 'default';
+
+// a == null ? b : a  ->  a ?? b (inverted, loose)
+const v7 = a == null ? 'default' : a;
+
+// a == undefined ? b : a  ->  a ?? b
+const v8 = a == undefined ? 'default' : a;
+
+// === Null on the left side ===
+// null !== a ? a : b  ->  a ?? b
+const v9 = null !== a ? a : 'default';
+
+// null === a ? b : a  ->  a ?? b
+const v10 = null === a ? 'default' : a;
+
+// undefined !== a ? a : b  ->  a ?? b
+const v11 = undefined !== a ? a : 'default';
+
+// undefined === a ? b : a  ->  a ?? b
+const v12 = undefined === a ? 'default' : a;
+
+// === Compound checks ===
+// a === null || a === undefined ? b : a  ->  a ?? b
+const v13 = a === null || a === undefined ? 'default' : a;
+
+// a !== null && a !== undefined ? a : b  ->  a ?? b
+const v14 = a !== null && a !== undefined ? a : 'default';
+
+// === Member expressions ===
+const v15 = obj.prop !== null ? obj.prop : 'default';
+const v16 = obj.prop === undefined ? 'default' : obj.prop;
+
+// === Computed member expressions ===
+const v17 = arr[0] !== null ? arr[0] : 'default';
+
+// === Parenthesized test subject ===
+const v18 = (a) !== null ? a : 'default';
+
+// === Nested in assignment ===
+let result;
+result = a !== null ? a : 'fallback';
+
+// === In variable declaration ===
+const v19 = foo() !== undefined ? foo() : 'default';
+
+// === Compound with undefined on left of || ===
+const v20 = a === undefined || a === null ? 'default' : a;
+
+// === Compound with reversed null/undefined order ===
+const v21 = a !== undefined && a !== null ? a : 'default';
+
+```
+
+# Diagnostics
+```
+ternaryInvalid.js:5:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? instead of a ternary expression with an explicit nullish check.
+  
+    3 │ // === Simple strict inequality with null ===
+    4 │ // a !== null ? a : b  ->  a ?? b
+  > 5 │ const v1 = a !== null ? a : 'default';
+      │            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ // a !== undefined ? a : b  ->  a ?? b
+  
+  i This ternary can be simplified to the nullish coalescing operator.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ?? instead.
+  
+     3  3 │   // === Simple strict inequality with null ===
+     4  4 │   // a !== null ? a : b  ->  a ?? b
+     5    │ - const·v1·=·a·!==·null·?·a·:·'default';
+        5 │ + const·v1·=·a·??·'default';
+     6  6 │   
+     7  7 │   // a !== undefined ? a : b  ->  a ?? b
+  
+
+```
+
+```
+ternaryInvalid.js:8:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? instead of a ternary expression with an explicit nullish check.
+  
+     7 │ // a !== undefined ? a : b  ->  a ?? b
+   > 8 │ const v2 = a !== undefined ? a : 'default';
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ // === Simple strict equality with null (inverted) ===
+  
+  i This ternary can be simplified to the nullish coalescing operator.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ?? instead.
+  
+     6  6 │   
+     7  7 │   // a !== undefined ? a : b  ->  a ?? b
+     8    │ - const·v2·=·a·!==·undefined·?·a·:·'default';
+        8 │ + const·v2·=·a·??·'default';
+     9  9 │   
+    10 10 │   // === Simple strict equality with null (inverted) ===
+  
+
+```
+
+```
+ternaryInvalid.js:12:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? instead of a ternary expression with an explicit nullish check.
+  
+    10 │ // === Simple strict equality with null (inverted) ===
+    11 │ // a === null ? b : a  ->  a ?? b
+  > 12 │ const v3 = a === null ? 'default' : a;
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 
+    14 │ // a === undefined ? b : a  ->  a ?? b
+  
+  i This ternary can be simplified to the nullish coalescing operator.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ?? instead.
+  
+    10 10 │   // === Simple strict equality with null (inverted) ===
+    11 11 │   // a === null ? b : a  ->  a ?? b
+    12    │ - const·v3·=·a·===·null·?·'default'·:·a;
+       12 │ + const·v3·=·a·??·'default';
+    13 13 │   
+    14 14 │   // a === undefined ? b : a  ->  a ?? b
+  
+
+```
+
+```
+ternaryInvalid.js:15:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? instead of a ternary expression with an explicit nullish check.
+  
+    14 │ // a === undefined ? b : a  ->  a ?? b
+  > 15 │ const v4 = a === undefined ? 'default' : a;
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 
+    17 │ // === Loose equality ===
+  
+  i This ternary can be simplified to the nullish coalescing operator.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ?? instead.
+  
+    13 13 │   
+    14 14 │   // a === undefined ? b : a  ->  a ?? b
+    15    │ - const·v4·=·a·===·undefined·?·'default'·:·a;
+       15 │ + const·v4·=·a·??·'default';
+    16 16 │   
+    17 17 │   // === Loose equality ===
+  
+
+```
+
+```
+ternaryInvalid.js:19:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? instead of a ternary expression with an explicit nullish check.
+  
+    17 │ // === Loose equality ===
+    18 │ // a != null ? a : b  ->  a ?? b (covers both null and undefined)
+  > 19 │ const v5 = a != null ? a : 'default';
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ 
+    21 │ // a != undefined ? a : b  ->  a ?? b
+  
+  i This ternary can be simplified to the nullish coalescing operator.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ?? instead.
+  
+    17 17 │   // === Loose equality ===
+    18 18 │   // a != null ? a : b  ->  a ?? b (covers both null and undefined)
+    19    │ - const·v5·=·a·!=·null·?·a·:·'default';
+       19 │ + const·v5·=·a·??·'default';
+    20 20 │   
+    21 21 │   // a != undefined ? a : b  ->  a ?? b
+  
+
+```
+
+```
+ternaryInvalid.js:22:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? instead of a ternary expression with an explicit nullish check.
+  
+    21 │ // a != undefined ? a : b  ->  a ?? b
+  > 22 │ const v6 = a != undefined ? a : 'default';
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ 
+    24 │ // a == null ? b : a  ->  a ?? b (inverted, loose)
+  
+  i This ternary can be simplified to the nullish coalescing operator.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ?? instead.
+  
+    20 20 │   
+    21 21 │   // a != undefined ? a : b  ->  a ?? b
+    22    │ - const·v6·=·a·!=·undefined·?·a·:·'default';
+       22 │ + const·v6·=·a·??·'default';
+    23 23 │   
+    24 24 │   // a == null ? b : a  ->  a ?? b (inverted, loose)
+  
+
+```
+
+```
+ternaryInvalid.js:25:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? instead of a ternary expression with an explicit nullish check.
+  
+    24 │ // a == null ? b : a  ->  a ?? b (inverted, loose)
+  > 25 │ const v7 = a == null ? 'default' : a;
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ 
+    27 │ // a == undefined ? b : a  ->  a ?? b
+  
+  i This ternary can be simplified to the nullish coalescing operator.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ?? instead.
+  
+    23 23 │   
+    24 24 │   // a == null ? b : a  ->  a ?? b (inverted, loose)
+    25    │ - const·v7·=·a·==·null·?·'default'·:·a;
+       25 │ + const·v7·=·a·??·'default';
+    26 26 │   
+    27 27 │   // a == undefined ? b : a  ->  a ?? b
+  
+
+```
+
+```
+ternaryInvalid.js:28:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? instead of a ternary expression with an explicit nullish check.
+  
+    27 │ // a == undefined ? b : a  ->  a ?? b
+  > 28 │ const v8 = a == undefined ? 'default' : a;
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ 
+    30 │ // === Null on the left side ===
+  
+  i This ternary can be simplified to the nullish coalescing operator.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ?? instead.
+  
+    26 26 │   
+    27 27 │   // a == undefined ? b : a  ->  a ?? b
+    28    │ - const·v8·=·a·==·undefined·?·'default'·:·a;
+       28 │ + const·v8·=·a·??·'default';
+    29 29 │   
+    30 30 │   // === Null on the left side ===
+  
+
+```
+
+```
+ternaryInvalid.js:32:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? instead of a ternary expression with an explicit nullish check.
+  
+    30 │ // === Null on the left side ===
+    31 │ // null !== a ? a : b  ->  a ?? b
+  > 32 │ const v9 = null !== a ? a : 'default';
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    33 │ 
+    34 │ // null === a ? b : a  ->  a ?? b
+  
+  i This ternary can be simplified to the nullish coalescing operator.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ?? instead.
+  
+    30 30 │   // === Null on the left side ===
+    31 31 │   // null !== a ? a : b  ->  a ?? b
+    32    │ - const·v9·=·null·!==·a·?·a·:·'default';
+       32 │ + const·v9·=·a·??·'default';
+    33 33 │   
+    34 34 │   // null === a ? b : a  ->  a ?? b
+  
+
+```
+
+```
+ternaryInvalid.js:35:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? instead of a ternary expression with an explicit nullish check.
+  
+    34 │ // null === a ? b : a  ->  a ?? b
+  > 35 │ const v10 = null === a ? 'default' : a;
+       │             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    36 │ 
+    37 │ // undefined !== a ? a : b  ->  a ?? b
+  
+  i This ternary can be simplified to the nullish coalescing operator.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ?? instead.
+  
+    33 33 │   
+    34 34 │   // null === a ? b : a  ->  a ?? b
+    35    │ - const·v10·=·null·===·a·?·'default'·:·a;
+       35 │ + const·v10·=·a·??·'default';
+    36 36 │   
+    37 37 │   // undefined !== a ? a : b  ->  a ?? b
+  
+
+```
+
+```
+ternaryInvalid.js:38:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? instead of a ternary expression with an explicit nullish check.
+  
+    37 │ // undefined !== a ? a : b  ->  a ?? b
+  > 38 │ const v11 = undefined !== a ? a : 'default';
+       │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    39 │ 
+    40 │ // undefined === a ? b : a  ->  a ?? b
+  
+  i This ternary can be simplified to the nullish coalescing operator.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ?? instead.
+  
+    36 36 │   
+    37 37 │   // undefined !== a ? a : b  ->  a ?? b
+    38    │ - const·v11·=·undefined·!==·a·?·a·:·'default';
+       38 │ + const·v11·=·a·??·'default';
+    39 39 │   
+    40 40 │   // undefined === a ? b : a  ->  a ?? b
+  
+
+```
+
+```
+ternaryInvalid.js:41:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? instead of a ternary expression with an explicit nullish check.
+  
+    40 │ // undefined === a ? b : a  ->  a ?? b
+  > 41 │ const v12 = undefined === a ? 'default' : a;
+       │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    42 │ 
+    43 │ // === Compound checks ===
+  
+  i This ternary can be simplified to the nullish coalescing operator.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ?? instead.
+  
+    39 39 │   
+    40 40 │   // undefined === a ? b : a  ->  a ?? b
+    41    │ - const·v12·=·undefined·===·a·?·'default'·:·a;
+       41 │ + const·v12·=·a·??·'default';
+    42 42 │   
+    43 43 │   // === Compound checks ===
+  
+
+```
+
+```
+ternaryInvalid.js:45:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? instead of a ternary expression with an explicit nullish check.
+  
+    43 │ // === Compound checks ===
+    44 │ // a === null || a === undefined ? b : a  ->  a ?? b
+  > 45 │ const v13 = a === null || a === undefined ? 'default' : a;
+       │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    46 │ 
+    47 │ // a !== null && a !== undefined ? a : b  ->  a ?? b
+  
+  i This ternary can be simplified to the nullish coalescing operator.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ?? instead.
+  
+    43 43 │   // === Compound checks ===
+    44 44 │   // a === null || a === undefined ? b : a  ->  a ?? b
+    45    │ - const·v13·=·a·===·null·||·a·===·undefined·?·'default'·:·a;
+       45 │ + const·v13·=·a·??·'default';
+    46 46 │   
+    47 47 │   // a !== null && a !== undefined ? a : b  ->  a ?? b
+  
+
+```
+
+```
+ternaryInvalid.js:48:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? instead of a ternary expression with an explicit nullish check.
+  
+    47 │ // a !== null && a !== undefined ? a : b  ->  a ?? b
+  > 48 │ const v14 = a !== null && a !== undefined ? a : 'default';
+       │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    49 │ 
+    50 │ // === Member expressions ===
+  
+  i This ternary can be simplified to the nullish coalescing operator.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ?? instead.
+  
+    46 46 │   
+    47 47 │   // a !== null && a !== undefined ? a : b  ->  a ?? b
+    48    │ - const·v14·=·a·!==·null·&&·a·!==·undefined·?·a·:·'default';
+       48 │ + const·v14·=·a·??·'default';
+    49 49 │   
+    50 50 │   // === Member expressions ===
+  
+
+```
+
+```
+ternaryInvalid.js:51:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? instead of a ternary expression with an explicit nullish check.
+  
+    50 │ // === Member expressions ===
+  > 51 │ const v15 = obj.prop !== null ? obj.prop : 'default';
+       │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    52 │ const v16 = obj.prop === undefined ? 'default' : obj.prop;
+    53 │ 
+  
+  i This ternary can be simplified to the nullish coalescing operator.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ?? instead.
+  
+    49 49 │   
+    50 50 │   // === Member expressions ===
+    51    │ - const·v15·=·obj.prop·!==·null·?·obj.prop·:·'default';
+       51 │ + const·v15·=·obj.prop·??·'default';
+    52 52 │   const v16 = obj.prop === undefined ? 'default' : obj.prop;
+    53 53 │   
+  
+
+```
+
+```
+ternaryInvalid.js:52:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? instead of a ternary expression with an explicit nullish check.
+  
+    50 │ // === Member expressions ===
+    51 │ const v15 = obj.prop !== null ? obj.prop : 'default';
+  > 52 │ const v16 = obj.prop === undefined ? 'default' : obj.prop;
+       │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    53 │ 
+    54 │ // === Computed member expressions ===
+  
+  i This ternary can be simplified to the nullish coalescing operator.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ?? instead.
+  
+    50 50 │   // === Member expressions ===
+    51 51 │   const v15 = obj.prop !== null ? obj.prop : 'default';
+    52    │ - const·v16·=·obj.prop·===·undefined·?·'default'·:·obj.prop;
+       52 │ + const·v16·=·obj.prop·??·'default';
+    53 53 │   
+    54 54 │   // === Computed member expressions ===
+  
+
+```
+
+```
+ternaryInvalid.js:55:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? instead of a ternary expression with an explicit nullish check.
+  
+    54 │ // === Computed member expressions ===
+  > 55 │ const v17 = arr[0] !== null ? arr[0] : 'default';
+       │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    56 │ 
+    57 │ // === Parenthesized test subject ===
+  
+  i This ternary can be simplified to the nullish coalescing operator.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ?? instead.
+  
+    53 53 │   
+    54 54 │   // === Computed member expressions ===
+    55    │ - const·v17·=·arr[0]·!==·null·?·arr[0]·:·'default';
+       55 │ + const·v17·=·arr[0]·??·'default';
+    56 56 │   
+    57 57 │   // === Parenthesized test subject ===
+  
+
+```
+
+```
+ternaryInvalid.js:58:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? instead of a ternary expression with an explicit nullish check.
+  
+    57 │ // === Parenthesized test subject ===
+  > 58 │ const v18 = (a) !== null ? a : 'default';
+       │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    59 │ 
+    60 │ // === Nested in assignment ===
+  
+  i This ternary can be simplified to the nullish coalescing operator.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ?? instead.
+  
+    56 56 │   
+    57 57 │   // === Parenthesized test subject ===
+    58    │ - const·v18·=·(a)·!==·null·?·a·:·'default';
+       58 │ + const·v18·=·a·??·'default';
+    59 59 │   
+    60 60 │   // === Nested in assignment ===
+  
+
+```
+
+```
+ternaryInvalid.js:62:10 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? instead of a ternary expression with an explicit nullish check.
+  
+    60 │ // === Nested in assignment ===
+    61 │ let result;
+  > 62 │ result = a !== null ? a : 'fallback';
+       │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    63 │ 
+    64 │ // === In variable declaration ===
+  
+  i This ternary can be simplified to the nullish coalescing operator.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ?? instead.
+  
+    60 60 │   // === Nested in assignment ===
+    61 61 │   let result;
+    62    │ - result·=·a·!==·null·?·a·:·'fallback';
+       62 │ + result·=·a·??·'fallback';
+    63 63 │   
+    64 64 │   // === In variable declaration ===
+  
+
+```
+
+```
+ternaryInvalid.js:65:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? instead of a ternary expression with an explicit nullish check.
+  
+    64 │ // === In variable declaration ===
+  > 65 │ const v19 = foo() !== undefined ? foo() : 'default';
+       │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    66 │ 
+    67 │ // === Compound with undefined on left of || ===
+  
+  i This ternary can be simplified to the nullish coalescing operator.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ?? instead.
+  
+    63 63 │   
+    64 64 │   // === In variable declaration ===
+    65    │ - const·v19·=·foo()·!==·undefined·?·foo()·:·'default';
+       65 │ + const·v19·=·foo()·??·'default';
+    66 66 │   
+    67 67 │   // === Compound with undefined on left of || ===
+  
+
+```
+
+```
+ternaryInvalid.js:68:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? instead of a ternary expression with an explicit nullish check.
+  
+    67 │ // === Compound with undefined on left of || ===
+  > 68 │ const v20 = a === undefined || a === null ? 'default' : a;
+       │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    69 │ 
+    70 │ // === Compound with reversed null/undefined order ===
+  
+  i This ternary can be simplified to the nullish coalescing operator.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ?? instead.
+  
+    66 66 │   
+    67 67 │   // === Compound with undefined on left of || ===
+    68    │ - const·v20·=·a·===·undefined·||·a·===·null·?·'default'·:·a;
+       68 │ + const·v20·=·a·??·'default';
+    69 69 │   
+    70 70 │   // === Compound with reversed null/undefined order ===
+  
+
+```
+
+```
+ternaryInvalid.js:71:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer ?? instead of a ternary expression with an explicit nullish check.
+  
+    70 │ // === Compound with reversed null/undefined order ===
+  > 71 │ const v21 = a !== undefined && a !== null ? a : 'default';
+       │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    72 │ 
+  
+  i This ternary can be simplified to the nullish coalescing operator.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use ?? instead.
+  
+    69 69 │   
+    70 70 │   // === Compound with reversed null/undefined order ===
+    71    │ - const·v21·=·a·!==·undefined·&&·a·!==·null·?·a·:·'default';
+       71 │ + const·v21·=·a·??·'default';
+    72 72 │   
+  
+
+```

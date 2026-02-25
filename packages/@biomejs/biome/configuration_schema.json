@@ -6254,7 +6254,7 @@
 					]
 				},
 				"useNullishCoalescing": {
-					"description": "Enforce using nullish coalescing operator (??) instead of logical or (||).\nSee https://biomejs.dev/linter/rules/use-nullish-coalescing",
+					"description": "Enforce using nullish coalescing operator (??) instead of logical or (||) or ternary expressions that perform explicit nullish checks.\nSee https://biomejs.dev/linter/rules/use-nullish-coalescing",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseNullishCoalescingConfiguration" },
 						{ "type": "null" }
@@ -13849,6 +13849,11 @@
 			"properties": {
 				"ignoreConditionalTests": {
 					"description": "Whether to ignore `||` expressions in conditional test positions\n(if/while/for/do-while/ternary conditions).\n\nWhen `true` (the default), the rule will not report `||` expressions\nthat appear in places where the falsy-checking behavior may be intentional.\n\nDefault: `true`",
+					"type": ["boolean", "null"],
+					"default": null
+				},
+				"ignoreTernaryTests": {
+					"description": "Whether to skip detecting ternary expressions that perform explicit\nnullish checks (e.g. `a !== null ? a : b`).\n\nWhen `true`, the rule will not suggest replacing such ternaries with `??`.\n\nDefault: `false`",
 					"type": ["boolean", "null"],
 					"default": null
 				}
