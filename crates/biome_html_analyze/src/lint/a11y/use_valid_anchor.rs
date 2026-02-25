@@ -50,10 +50,10 @@ declare_lint_rule! {
     /// ### Valid
     ///
     /// ```html
-    /// <a href="https://example.com" onclick={something}>navigate here</a>
+    /// <a href="https://example.com">navigate here</a>
     /// ```
     /// ```html
-    /// <a href={`https://www.javascript.com`}>navigate here</a>
+    /// <a href="https://www.javascript.com">navigate here</a>
     /// ```
     ///
     /// ## Accessibility guidelines
