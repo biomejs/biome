@@ -2022,7 +2022,7 @@ impl JsCallExpression {
     /// [callee]: crate::AnyJsExpression
     /// [arguments]: crate::JsCallArgumentList
     /// [arrow function expression]: crate::JsArrowFunctionExpression
-    /// [function expression]: crate::JsCallArgumentList
+    /// [function expression]: crate::JsFunctionExpression
     pub fn is_test_call_expression(&self) -> SyntaxResult<bool> {
         use AnyJsExpression::*;
 
@@ -2376,6 +2376,9 @@ mod test {
 
         let call_expression =
             extract_call_expression("describe.only('bar', { timeout: 42*1000 }, () => {})");
+        assert_eq!(call_expression.is_test_call_expression(), Ok(true));
+
+        let call_expression = extract_call_expression("it('bar', { timeout: 5000 }, function() {})");
         assert_eq!(call_expression.is_test_call_expression(), Ok(true));
 
         // Negative cases for TestOptions pattern
