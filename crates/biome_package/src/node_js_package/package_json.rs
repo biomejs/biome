@@ -182,11 +182,41 @@ impl PackageJson {
     }
 }
 
+/// Parsed catalogs from `pnpm-workspace.yaml`.
+///
+/// Mapping from YAML to this type:
+/// ```yaml
+/// catalog:
+///   <dep>: <version>
+/// catalogs:
+///   <name>:
+///     <dep>: <version>
+/// ```
+/// - top-level `catalog` -> [`Catalogs::default`]
+/// - top-level `catalogs` -> [`Catalogs::named`]
+///
 #[derive(Debug, Default, Clone)]
 pub struct Catalogs {
-    /// Dependencies listed under the top-level `catalog:` key in pnpm-workspace.yaml.
+    /// Dependency map declared under the top-level `catalog:` key.
+    ///
+    /// Example:
+    /// ```yaml
+    /// catalog:
+    ///   react: 19.2.0
+    /// ```
+    /// -> `default["react"] == "19.2.0"`.
     pub default: Option<Dependencies>,
-    /// Named catalogs listed under `catalogs:` in pnpm-workspace.yaml, keyed by catalog name.
+
+    /// Dependency maps declared under top-level `catalogs:`.
+    ///
+    /// The key is the catalog name, and the value is its dependencies map.
+    /// Example:
+    /// ```yaml
+    /// catalogs:
+    ///   react19:
+    ///     react: 19.2.0
+    /// ```
+    /// -> `named["react19"]["react"] == "19.2.0"`.
     pub named: FxHashMap<Box<str>, Dependencies>,
 }
 
