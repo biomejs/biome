@@ -90,7 +90,7 @@ impl Rule for NoQuickfixBiome {
         for default_path in DEFAULT_PATHS {
             if path.ends_with(default_path) {
                 let name = node.name().ok()?;
-                let value = name.value_token()?.ok()?;
+                let value = name.value_token()?;
                 if inner_string_text(&value) == "quickfix.biome" {
                     return Some(name.range());
                 }
@@ -100,7 +100,7 @@ impl Rule for NoQuickfixBiome {
         for default_path in options.additional_paths.iter() {
             if path.ends_with(default_path) {
                 let name = node.name().ok()?;
-                let value = name.value_token()?.ok()?;
+                let value = name.value_token()?;
                 if inner_string_text(&value) == "quickfix.biome" {
                     return Some(name.range());
                 }
@@ -140,7 +140,6 @@ impl Rule for NoQuickfixBiome {
                 .name()
                 .ok()
                 .and_then(|name| name.value_token())
-                .and_then(|token| token.ok())
                 .is_some_and(|token| inner_string_text(&token) == "source.fixAll.biome")
         });
 
