@@ -91,8 +91,6 @@ ternaryInvalid.js:5:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━�
     6 │ 
     7 │ // a !== undefined ? a : b  ->  a ?? b
   
-  i This ternary can be simplified to the nullish coalescing operator.
-  
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -119,8 +117,6 @@ ternaryInvalid.js:8:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━�
        │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
      9 │ 
     10 │ // === Simple strict equality with null (inverted) ===
-  
-  i This ternary can be simplified to the nullish coalescing operator.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
@@ -150,8 +146,6 @@ ternaryInvalid.js:12:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
     13 │ 
     14 │ // a === undefined ? b : a  ->  a ?? b
   
-  i This ternary can be simplified to the nullish coalescing operator.
-  
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -178,8 +172,6 @@ ternaryInvalid.js:15:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
        │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     16 │ 
     17 │ // === Loose equality ===
-  
-  i This ternary can be simplified to the nullish coalescing operator.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
@@ -209,8 +201,6 @@ ternaryInvalid.js:19:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
     20 │ 
     21 │ // a != undefined ? a : b  ->  a ?? b
   
-  i This ternary can be simplified to the nullish coalescing operator.
-  
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -237,8 +227,6 @@ ternaryInvalid.js:22:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
        │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     23 │ 
     24 │ // a == null ? b : a  ->  a ?? b (inverted, loose)
-  
-  i This ternary can be simplified to the nullish coalescing operator.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
@@ -267,8 +255,6 @@ ternaryInvalid.js:25:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
     26 │ 
     27 │ // a == undefined ? b : a  ->  a ?? b
   
-  i This ternary can be simplified to the nullish coalescing operator.
-  
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -295,8 +281,6 @@ ternaryInvalid.js:28:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
        │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     29 │ 
     30 │ // === Null on the left side ===
-  
-  i This ternary can be simplified to the nullish coalescing operator.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
@@ -326,8 +310,6 @@ ternaryInvalid.js:32:12 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
     33 │ 
     34 │ // null === a ? b : a  ->  a ?? b
   
-  i This ternary can be simplified to the nullish coalescing operator.
-  
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -354,8 +336,6 @@ ternaryInvalid.js:35:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
        │             ^^^^^^^^^^^^^^^^^^^^^^^^^^
     36 │ 
     37 │ // undefined !== a ? a : b  ->  a ?? b
-  
-  i This ternary can be simplified to the nullish coalescing operator.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
@@ -384,8 +364,6 @@ ternaryInvalid.js:38:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
     39 │ 
     40 │ // undefined === a ? b : a  ->  a ?? b
   
-  i This ternary can be simplified to the nullish coalescing operator.
-  
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -412,8 +390,6 @@ ternaryInvalid.js:41:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
        │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     42 │ 
     43 │ // === Compound checks ===
-  
-  i This ternary can be simplified to the nullish coalescing operator.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
@@ -443,8 +419,6 @@ ternaryInvalid.js:45:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
     46 │ 
     47 │ // a !== null && a !== undefined ? a : b  ->  a ?? b
   
-  i This ternary can be simplified to the nullish coalescing operator.
-  
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -472,8 +446,6 @@ ternaryInvalid.js:48:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
     49 │ 
     50 │ // === Member expressions ===
   
-  i This ternary can be simplified to the nullish coalescing operator.
-  
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -500,8 +472,6 @@ ternaryInvalid.js:51:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
        │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     52 │ const v16 = obj.prop === undefined ? 'default' : obj.prop;
     53 │ 
-  
-  i This ternary can be simplified to the nullish coalescing operator.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
@@ -531,8 +501,6 @@ ternaryInvalid.js:52:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
     53 │ 
     54 │ // === Computed member expressions ===
   
-  i This ternary can be simplified to the nullish coalescing operator.
-  
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -560,8 +528,6 @@ ternaryInvalid.js:55:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
     56 │ 
     57 │ // === Parenthesized test subject ===
   
-  i This ternary can be simplified to the nullish coalescing operator.
-  
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -588,8 +554,6 @@ ternaryInvalid.js:58:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
        │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     59 │ 
     60 │ // === Nested in assignment ===
-  
-  i This ternary can be simplified to the nullish coalescing operator.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
@@ -619,8 +583,6 @@ ternaryInvalid.js:62:10 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
     63 │ 
     64 │ // === In variable declaration ===
   
-  i This ternary can be simplified to the nullish coalescing operator.
-  
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -648,8 +610,6 @@ ternaryInvalid.js:65:13 lint/nursery/useNullishCoalescing ━━━━━━━�
     66 │ 
     67 │ // === Compound with undefined on left of || ===
   
-  i This ternary can be simplified to the nullish coalescing operator.
-  
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -667,8 +627,6 @@ ternaryInvalid.js:68:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
        │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     69 │ 
     70 │ // === Compound with reversed null/undefined order ===
-  
-  i This ternary can be simplified to the nullish coalescing operator.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
@@ -695,8 +653,6 @@ ternaryInvalid.js:71:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━
   > 71 │ const v21 = a !== undefined && a !== null ? a : 'default';
        │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     72 │ 
-  
-  i This ternary can be simplified to the nullish coalescing operator.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   

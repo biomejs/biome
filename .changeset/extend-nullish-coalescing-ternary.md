@@ -15,4 +15,4 @@ const v = a === null || a === undefined ? 'default' : a;
 
 All of these can be simplified to `a ?? 'default'`.
 
-Added a new `ignoreTernaryTests` option (default: `false`) to allow disabling this check independently from the existing logical OR detection.
+Added a new `ignoreTernaryTests` option (default: `false`) to allow disabling this check independently of the existing logical OR detection.

@@ -44,7 +44,7 @@ commentTrivia.ts:8:34 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use ?? instead.
+  i Unsafe fix: Use ?? instead.
   
      6  6 │   
      7  7 │   // Comments should be preserved when replacing || with ??
@@ -74,7 +74,7 @@ commentTrivia.ts:9:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use ?? instead.
+  i Unsafe fix: Use ?? instead.
   
      7  7 │   // Comments should be preserved when replacing || with ??
      8  8 │   const x = a /* inline comment */ || {};
@@ -104,7 +104,7 @@ commentTrivia.ts:10:26 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use ?? instead.
+  i Unsafe fix: Use ?? instead.
   
      8  8 │   const x = a /* inline comment */ || {};
      9  9 │   const y = a || /* inline comment */ {};
@@ -134,7 +134,7 @@ commentTrivia.ts:15:3 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use ?? instead.
+  i Unsafe fix: Use ?? instead.
   
     13 13 │   const w = b
     14 14 │     // line comment before
@@ -164,7 +164,7 @@ commentTrivia.ts:17:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use ?? instead.
+  i Unsafe fix: Use ?? instead.
   
     15 15 │     || {};
     16 16 │   

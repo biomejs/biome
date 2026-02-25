@@ -93,7 +93,7 @@ invalid.ts:5:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use ?? instead.
+  i Unsafe fix: Use ?? instead.
   
      3  3 │   // Nullish literals
      4  4 │   const a: null = null;
@@ -122,7 +122,7 @@ invalid.ts:8:13 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use ?? instead.
+  i Unsafe fix: Use ?? instead.
   
      6  6 │   
      7  7 │   const c: undefined = undefined;

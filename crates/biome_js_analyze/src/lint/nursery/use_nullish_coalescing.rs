@@ -12,7 +12,9 @@ use biome_js_syntax::{
     JsWhileStatement, T,
 };
 use biome_js_type_info::ConditionalType;
-use biome_rowan::{AstNode, BatchMutationExt, TextRange, TriviaPieceKind, declare_node_union};
+use biome_rowan::{
+    AstNode, BatchMutationExt, Direction, TextRange, TriviaPieceKind, declare_node_union,
+};
 use biome_rule_options::use_nullish_coalescing::UseNullishCoalescingOptions;
 
 declare_lint_rule! {
@@ -40,40 +42,37 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```ts
+    /// ```ts,expect_diagnostic,file=logical-or-null.ts
     /// declare const maybeString: string | null;
-    /// const value = maybeString || 'default'; // should use ??
+    /// const value = maybeString || 'default';
     /// ```
     ///
-    /// ```ts
+    /// ```ts,expect_diagnostic,file=logical-or-undefined.ts
     /// declare const maybeNumber: number | undefined;
-    /// const value = maybeNumber || 0; // should use ??
+    /// const value = maybeNumber || 0;
     /// ```
     ///
-    /// ```js,expect_diagnostic
-    /// const value = a !== null ? a : 'default'; // should use ??
+    /// ```js,expect_diagnostic,file=ternary-strict-null.js
+    /// const value = a !== null ? a : 'default';
     /// ```
     ///
-    /// ```js,expect_diagnostic
-    /// const value = a === undefined ? 'default' : a; // should use ??
+    /// ```js,expect_diagnostic,file=ternary-strict-undefined.js
+    /// const value = a === undefined ? 'default' : a;
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```ts
-    /// // Already using ??
+    /// ```ts,file=valid-nullish-coalescing.ts
     /// declare const maybeString: string | null;
     /// const value = maybeString ?? 'default';
     /// ```
     ///
-    /// ```ts
-    /// // Type is not nullish - no null or undefined in union
+    /// ```ts,file=valid-non-nullish.ts
     /// declare const definiteString: string;
     /// const value = definiteString || 'fallback';
     /// ```
     ///
-    /// ```ts
-    /// // In conditional test position (ignored by default)
+    /// ```ts,file=valid-conditional-test.ts
     /// declare const cond: string | null;
     /// if (cond || 'fallback') {
     ///   console.log('in if');
@@ -87,7 +86,7 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintTypeScript("prefer-nullish-coalescing").inspired()],
         recommended: false,
         severity: Severity::Information,
-        fix_kind: FixKind::Safe,
+        fix_kind: FixKind::Unsafe,
         domains: &[RuleDomain::Types],
         issue_number: Some("8043"),
     }
@@ -95,20 +94,6 @@ declare_lint_rule! {
 
 declare_node_union! {
     pub AnyNullishCoalescingQuery = JsLogicalExpression | JsConditionalExpression
-}
-
-pub enum UseNullishCoalescingState {
-    LogicalOr {
-        operator_range: TextRange,
-        can_fix: bool,
-    },
-    Ternary {
-        range: TextRange,
-        /// Whether we can offer any fix (false when subject has call expressions).
-        can_fix: bool,
-        /// Whether the fix is semantically safe (true for loose/compound checks).
-        is_safe_fix: bool,
-    },
 }
 
 impl Rule for UseNullishCoalescing {
@@ -150,10 +135,7 @@ impl Rule for UseNullishCoalescing {
                     markup! {
                         "Prefer "<Emphasis>"??"</Emphasis>" instead of a ternary expression with an explicit nullish check."
                     },
-                )
-                .note(markup! {
-                    "This ternary can be simplified to the nullish coalescing operator."
-                }),
+                ),
             ),
         }
     }
@@ -189,6 +171,8 @@ impl Rule for UseNullishCoalescing {
                 UseNullishCoalescingState::Ternary {
                     can_fix,
                     is_safe_fix,
+                    subject,
+                    fallback,
                     ..
                 },
                 AnyNullishCoalescingQuery::JsConditionalExpression(conditional),
@@ -197,17 +181,13 @@ impl Rule for UseNullishCoalescing {
                     return None;
                 }
 
-                let info = extract_ternary_nullish_check(conditional)?;
-
                 let mut mutation = ctx.root().begin();
                 // Build clean subject and fallback without contextual trivia.
-                let clean_subject = info
-                    .subject
+                let clean_subject = subject
                     .clone()
                     .with_leading_trivia_pieces([])?
                     .with_trailing_trivia_pieces([])?;
-                let clean_fallback = info
-                    .fallback
+                let clean_fallback = fallback
                     .clone()
                     .with_leading_trivia_pieces([])?
                     .with_trailing_trivia_pieces([])?;
@@ -243,6 +223,24 @@ impl Rule for UseNullishCoalescing {
     }
 }
 
+pub enum UseNullishCoalescingState {
+    LogicalOr {
+        operator_range: TextRange,
+        can_fix: bool,
+    },
+    Ternary {
+        range: TextRange,
+        /// The subject expression to use as the left side of `??`.
+        subject: AnyJsExpression,
+        /// The fallback expression to use as the right side of `??`.
+        fallback: AnyJsExpression,
+        /// Whether we can offer any fix (false when subject has call expressions).
+        can_fix: bool,
+        /// Whether the fix is semantically safe (true for loose/compound checks).
+        is_safe_fix: bool,
+    },
+}
+
 fn run_logical_or(
     ctx: &RuleContext<UseNullishCoalescing>,
     logical: &JsLogicalExpression,
@@ -273,6 +271,8 @@ fn run_logical_or(
     })
 }
 
+/// Detect ternary expressions (`condition ? consequent : alternate`) where the
+/// condition is a nullish check and the expression can be simplified to `??`.
 fn run_ternary(
     ctx: &RuleContext<UseNullishCoalescing>,
     conditional: &JsConditionalExpression,
@@ -293,6 +293,8 @@ fn run_ternary(
 
     Some(UseNullishCoalescingState::Ternary {
         range: conditional.syntax().text_trimmed_range(),
+        subject: info.subject,
+        fallback: info.fallback,
         can_fix,
         is_safe_fix,
     })
@@ -307,24 +309,33 @@ struct TernaryNullishInfo {
     covers_both_nullish: bool,
 }
 
-/// Extract info from a ternary's test expression if it performs a nullish check.
-/// Returns `Some` only if the ternary can be simplified to `subject ?? fallback`.
+/// Analyze the condition of a ternary expression to determine if it performs a
+/// nullish check that can be simplified to `subject ?? fallback`.
+///
+/// Recognized patterns:
+/// - **Simple check**: `a !== null`, `a === undefined`, `null == a`, etc.
+///   A single binary comparison against `null` or `undefined`.
+/// - **Compound check**: `a === null || a === undefined` or
+///   `a !== null && a !== undefined`. Two strict comparisons joined by `||` / `&&`.
+///
+/// Returns `None` if the condition is not a recognized nullish check or if the
+/// non-nullish branch does not match the checked subject expression.
 fn extract_ternary_nullish_check(
     conditional: &JsConditionalExpression,
 ) -> Option<TernaryNullishInfo> {
-    let test = conditional.test().ok()?.omit_parentheses();
+    let condition = conditional.test().ok()?.omit_parentheses();
     let consequent = conditional.consequent().ok()?;
     let alternate = conditional.alternate().ok()?;
 
-    // Extract the check subject, equality direction, and whether the check covers
-    // both null and undefined (compound or loose equality).
+    // Determine the subject being checked, the equality direction, and whether
+    // the check covers both null and undefined.
     let (check_subject, is_equality, covers_both_nullish) =
-        if let AnyJsExpression::JsLogicalExpression(logical) = &test {
-            // Compound: `a === null || a === undefined` or `a !== null && a !== undefined`
+        if let AnyJsExpression::JsLogicalExpression(logical) = &condition {
+            // Compound check: `a === null || a === undefined`
             let info = try_extract_compound_nullish_check(logical)?;
             (info.check_subject, info.is_equality, true)
-        } else if let AnyJsExpression::JsBinaryExpression(binary) = &test {
-            // Simple: `a !== null`, `a === undefined`, `null !== a`, etc.
+        } else if let AnyJsExpression::JsBinaryExpression(binary) = &condition {
+            // Simple check: `a !== null`, `a === undefined`, `null !== a`, etc.
             let check = try_extract_simple_nullish_check(binary)?;
             (check.subject, check.is_equality, check.is_loose)
         } else {
@@ -362,7 +373,17 @@ struct SimpleNullishCheck {
     is_loose: bool,
 }
 
-/// Try to extract a nullish check from a binary expression like `a !== null` or `null === a`.
+/// Try to extract a nullish check from a single binary comparison.
+///
+/// A "simple nullish check" is a binary expression that compares an expression
+/// against `null` or `undefined` using `===`, `!==`, `==`, or `!=`.
+///
+/// Examples: `a !== null`, `undefined === x`, `null != value`.
+///
+/// The nullish literal (`null` or `undefined`) may appear on either side of the
+/// operator. We check the right operand first because the most common convention
+/// is `expr === null` (subject on the left, literal on the right), but we also
+/// handle the reversed form `null === expr`.
 fn try_extract_simple_nullish_check(binary: &JsBinaryExpression) -> Option<SimpleNullishCheck> {
     let operator = binary.operator().ok()?;
     let (is_equality, is_loose) = match operator {
@@ -376,7 +397,8 @@ fn try_extract_simple_nullish_check(binary: &JsBinaryExpression) -> Option<Simpl
     let left = binary.left().ok()?.omit_parentheses();
     let right = binary.right().ok()?.omit_parentheses();
 
-    // Determine which side is the nullish literal and which is the subject.
+    // Check the right operand first (common case: `a !== null`), then
+    // fall back to checking the left operand (reversed: `null !== a`).
     if is_null_or_undefined(&right) {
         Some(SimpleNullishCheck {
             subject: left,
@@ -401,7 +423,17 @@ struct CompoundNullishCheck {
     is_equality: bool,
 }
 
-/// Try to extract a compound nullish check like `a === null || a === undefined`.
+/// Try to extract a compound nullish check from a logical expression.
+///
+/// A "compound nullish check" combines two strict comparisons against `null`
+/// and `undefined` with a logical operator. This covers both nullish values in
+/// a single condition. Two forms are recognized:
+///
+/// - Equality form:  `a === null || a === undefined`  (logical OR)
+/// - Inequality form: `a !== null && a !== undefined`  (logical AND)
+///
+/// Both sides must test the same subject, use strict equality/inequality
+/// (not loose), and check different nullish values (one `null`, one `undefined`).
 fn try_extract_compound_nullish_check(
     logical: &JsLogicalExpression,
 ) -> Option<CompoundNullishCheck> {
@@ -484,6 +516,11 @@ fn is_null_literal(expr: &AnyJsExpression) -> bool {
     )
 }
 
+/// Check if an expression is the `undefined` identifier.
+///
+/// Note: this does not account for `undefined` being shadowed by a local
+/// binding (e.g. `let undefined = 42`). A scope-aware check would be needed
+/// for full correctness.
 fn is_undefined_identifier(expr: &AnyJsExpression) -> bool {
     match expr {
         AnyJsExpression::JsIdentifierExpression(ident) => ident
@@ -494,12 +531,36 @@ fn is_undefined_identifier(expr: &AnyJsExpression) -> bool {
     }
 }
 
-/// Compare two expressions for structural equivalence by comparing their trimmed text
-/// after stripping parentheses.
+/// Compare two expressions for structural equivalence by comparing their tokens
+/// one-by-one, ignoring trivia (whitespace, comments) attached to each token.
+///
+/// This avoids false results from `SyntaxNode::text_trimmed()`, which only
+/// strips trivia at the edges of a node but preserves internal trivia between
+/// tokens (e.g. `a . b` vs `a.b` would differ at the node level).
 fn expressions_are_equivalent(a: &AnyJsExpression, b: &AnyJsExpression) -> bool {
     let a = a.clone().omit_parentheses();
     let b = b.clone().omit_parentheses();
-    a.syntax().text_trimmed() == b.syntax().text_trimmed()
+    let mut a_tokens = a
+        .syntax()
+        .descendants_with_tokens(Direction::Next)
+        .filter_map(|el| el.into_token());
+    let mut b_tokens = b
+        .syntax()
+        .descendants_with_tokens(Direction::Next)
+        .filter_map(|el| el.into_token());
+    loop {
+        match (a_tokens.next(), b_tokens.next()) {
+            (Some(a_tok), Some(b_tok)) => {
+                if a_tok.kind() != b_tok.kind()
+                    || a_tok.text_trimmed() != b_tok.text_trimmed()
+                {
+                    return false;
+                }
+            }
+            (None, None) => return true,
+            _ => return false,
+        }
+    }
 }
 
 /// Check whether an expression contains a call expression anywhere in its subtree.
