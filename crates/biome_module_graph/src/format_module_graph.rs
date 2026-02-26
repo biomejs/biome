@@ -419,7 +419,7 @@ struct TypedRange(TextRange);
 
 impl From<&TextRange> for TypedRange {
     fn from(value: &TextRange) -> Self {
-        Self(value.clone())
+        Self(*value)
     }
 }
 
@@ -428,7 +428,7 @@ struct TypedSize(TextSize);
 
 impl From<TextSize> for TypedSize {
     fn from(value: TextSize) -> Self {
-        Self(value.clone())
+        Self(value)
     }
 }
 

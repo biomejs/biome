@@ -113,10 +113,7 @@ impl<'a> ModuleGraphSnapshot<'a> {
                                         .all_bindings()
                                         .find(|b| b.syntax().text_trimmed_range() == binding_range)
                                         .and_then(|b| b.tree().name_token().ok())
-                                        .map_or_else(
-                                            || "<unknown>".to_string(),
-                                            |b| format!("{}", b.to_string()),
-                                        );
+                                        .map_or_else(|| "<unknown>".to_string(), |b| b.to_string());
 
                                     content.push_str(&format!(
                                         "\n{} => {}\n",

@@ -623,14 +623,14 @@ impl JsModuleInfoCollector {
         let binding_name = &binding.name.clone();
 
         // If this binding is an import, create a TypeReference::Import directly
-        if binding.declaration_kind.is_import_declaration() {
-            if let Some(import) = self.static_imports.get(binding_name) {
-                return TypeReference::from(TypeImportQualifier {
-                    symbol: import.symbol.clone(),
-                    resolved_path: import.resolved_path.clone(),
-                    type_only: binding.declaration_kind.is_import_type_declaration(),
-                });
-            }
+        if binding.declaration_kind.is_import_declaration()
+            && let Some(import) = self.static_imports.get(binding_name)
+        {
+            return TypeReference::from(TypeImportQualifier {
+                symbol: import.symbol.clone(),
+                resolved_path: import.resolved_path.clone(),
+                type_only: binding.declaration_kind.is_import_type_declaration(),
+            });
         }
 
         for ancestor in node.ancestors() {
