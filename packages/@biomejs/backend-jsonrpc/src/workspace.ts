@@ -320,6 +320,10 @@ If defined here, they should not emit diagnostics.
 	 * Parsing options
 	 */
 	parser?: JsParserConfiguration;
+	/**
+	 * Module/dependency resolver options
+	 */
+	resolver?: JsResolverConfiguration;
 }
 /**
  * Options applied to JSON files
@@ -828,6 +832,37 @@ Defaults to `true`.
 These decorators belong to an old proposal, and they are subject to change. 
 	 */
 	unsafeParameterDecoratorsEnabled?: Bool;
+}
+/**
+ * Resolver options specific to JavaScript files
+ */
+export interface JsResolverConfiguration {
+	/**
+	* Enables pnpm workspace catalog resolution for JavaScript package manifests.
+
+Opt-in:
+- Set `javascript.resolver.experimentalPnpmCatalogs` to `true`.
+
+Scope:
+- Resolves `catalog:` and `catalog:<name>` dependency versions from
+  `package.json`.
+- Applies to `dependencies`, `devDependencies`, and `peerDependencies`.
+
+Fail-safe behavior:
+- If `pnpm-workspace.yaml` is missing, unreadable, or cannot be parsed,
+  Biome silently falls back to the default behavior (as if this option
+  were disabled).
+- Unknown keys and unsupported value shapes in `pnpm-workspace.yaml` are
+  ignored.
+
+Limitations:
+- Only `pnpm-workspace.yaml` is read.
+- Biome only reads top-level `catalog` / `catalogs` mappings and scalar
+  string entries.
+
+Default: `false`. 
+	 */
+	experimentalPnpmCatalogs?: Bool;
 }
 /**
  * Assist options specific to the JSON linter
