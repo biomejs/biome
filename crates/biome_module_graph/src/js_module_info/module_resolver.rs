@@ -12,7 +12,7 @@ use biome_rowan::{AstNode, RawSyntaxKind, Text, TextRange, TokenText};
 use rustc_hash::{FxHashMap, FxHashSet};
 
 use crate::{
-    JsExport, JsImportPath, JsImportPhase, JsOwnExport, ModuleGraph,
+    JsExport, JsImportPath, JsOwnExport, ModuleGraph,
     js_module_info::{JsModuleInfoInner, utils::reached_too_many_types},
 };
 
@@ -137,41 +137,14 @@ impl ModuleResolver {
             .and_then(JsExport::as_own_export)
             .map(|own_export| match own_export {
                 JsOwnExport::Binding(binding_range) => {
-                    // Try to find the binding in the semantic model to get its name
-                    if let Some(binding) = module
-                        .semantic_model
-                        .scope_from_id(ScopeId::GLOBAL)
-                        .bindings()
-                        .find(|b| b.syntax().text_trimmed_range() == *binding_range)
+                    // Check if this binding is an import and resolve it
+                    if let Some(import_qualifier) =
+                        resolve_binding_as_import(module, *binding_range)
                     {
-                        // Get the binding name as Text
-                        let name = binding.syntax().text_trimmed().into_text();
-                        // Check if this binding is an import
-                        if module.is_binding_imported(name.text(), ScopeId::GLOBAL) {
-                            // Resolve the import directly from static_imports.
-                            // Note: We don't need to check dynamic_import_paths because:
-                            // - Dynamic imports (import('./foo')) return Promises and don't create direct bindings
-                            // - CommonJS require() calls are expressions that return values, not import bindings
-                            // - Only static imports (import { foo } from '...') create bindings that
-                            //   is_binding_imported() recognizes as imported
-                            if let Some(import) = module.static_imports.get(name.text()) {
-                                let type_only = module
-                                    .static_import_paths
-                                    .get(import.specifier.text())
-                                    .is_some_and(|path| path.phase == JsImportPhase::Type);
-
-                                return self
-                                    .resolve_import(&TypeImportQualifier {
-                                        symbol: import.symbol.clone(),
-                                        resolved_path: import.resolved_path.clone(),
-                                        type_only,
-                                    })
-                                    .map_or_else(
-                                        || self.resolved_type_for_id(GLOBAL_UNKNOWN_ID),
-                                        |resolved_id| self.resolved_type_for_id(resolved_id),
-                                    );
-                            }
-                        }
+                        return self.resolve_import(&import_qualifier).map_or_else(
+                            || self.resolved_type_for_id(GLOBAL_UNKNOWN_ID),
+                            |resolved_id| self.resolved_type_for_id(resolved_id),
+                        );
                     }
 
                     // Not an import, look up the binding's type from augmentation data
@@ -361,7 +334,7 @@ impl ModuleResolver {
                 ResolveFromExportResult::Resolved(resolved) => return resolved,
                 ResolveFromExportResult::FollowImport(import) => {
                     module_id = self.find_module(&import.resolved_path)?;
-                    symbol = Cow::Owned(import.symbol.clone());
+                    symbol = Cow::Owned(import.symbol);
                     type_only = if import.type_only { true } else { type_only };
                 }
             }
@@ -530,9 +503,50 @@ impl TypeResolver for ModuleResolver {
     }
 }
 
-enum ResolveFromExportResult<'a> {
+/// Attempts to resolve a binding to an import qualifier if the binding is imported.
+///
+/// Returns `Some(TypeImportQualifier)` if the binding at `binding_range` is an imported
+/// binding, `None` otherwise.
+fn resolve_binding_as_import(
+    module: &JsModuleInfoInner,
+    binding_range: TextRange,
+) -> Option<TypeImportQualifier> {
+    // Find the binding in the semantic model to get its name
+    let binding = module
+        .semantic_model
+        .scope_from_id(ScopeId::GLOBAL)
+        .bindings()
+        .find(|b| b.syntax().text_trimmed_range() == binding_range)?;
+
+    let name = binding.syntax().text_trimmed().into_text();
+
+    // Check if this binding is an import
+    if !module.is_binding_imported(name.text(), ScopeId::GLOBAL) {
+        return None;
+    }
+
+    // Resolve the import directly from static_imports.
+    // Note: We don't need to check dynamic_import_paths because:
+    // - Dynamic imports (import('./foo')) return Promises and don't create direct bindings
+    // - CommonJS require() calls are expressions that return values, not import bindings
+    // - Only static imports (import { foo } from '...') create bindings that
+    //   is_binding_imported() recognizes as imported
+    let import = module.static_imports.get(name.text())?;
+    let type_only = module
+        .static_import_paths
+        .get(import.specifier.text())
+        .is_some_and(|path| path.phase == crate::JsImportPhase::Type);
+
+    Some(TypeImportQualifier {
+        symbol: import.symbol.clone(),
+        resolved_path: import.resolved_path.clone(),
+        type_only,
+    })
+}
+
+enum ResolveFromExportResult {
     Resolved(Option<ResolvedTypeId>),
-    FollowImport(&'a TypeImportQualifier),
+    FollowImport(TypeImportQualifier),
 }
 
 /// Resolves an export from the given `module` with the given `module_id`.
@@ -541,11 +555,11 @@ enum ResolveFromExportResult<'a> {
 /// [`ResolvedTypeId`] is returned. If the export references another module, it
 /// returns the [`TypeImportQualifier`] to follow.
 #[inline]
-fn resolve_from_export<'a>(
+fn resolve_from_export(
     module_id: ModuleId,
-    module: &'a JsModuleInfoInner,
+    module: &JsModuleInfoInner,
     export: &JsOwnExport,
-) -> ResolveFromExportResult<'a> {
+) -> ResolveFromExportResult {
     let resolved = match export {
         JsOwnExport::Binding(binding_range) => {
             // Look up the binding's type data by its range
@@ -560,10 +574,20 @@ fn resolve_from_export<'a>(
                         Some(resolved_id.with_module_id(module_id))
                     }
                     TypeReference::Import(import) => {
-                        return ResolveFromExportResult::FollowImport(import);
+                        return ResolveFromExportResult::FollowImport(*import.clone());
                     }
                 },
-                None => None,
+                None => {
+                    // If there's no binding_type_data, check if this binding is an import.
+                    // Imported bindings don't have local type data - their types come from
+                    // the imported module.
+                    if let Some(import_qualifier) =
+                        resolve_binding_as_import(module, *binding_range)
+                    {
+                        return ResolveFromExportResult::FollowImport(import_qualifier);
+                    }
+                    None
+                }
             }
         }
         JsOwnExport::Type(resolved_id) => Some(resolved_id.with_module_id(module_id)),

@@ -621,6 +621,18 @@ impl JsModuleInfoCollector {
         scope_id: ScopeId,
     ) -> TypeReference {
         let binding_name = &binding.name.clone();
+
+        // If this binding is an import, create a TypeReference::Import directly
+        if binding.declaration_kind.is_import_declaration() {
+            if let Some(import) = self.static_imports.get(binding_name) {
+                return TypeReference::from(TypeImportQualifier {
+                    symbol: import.symbol.clone(),
+                    resolved_path: import.resolved_path.clone(),
+                    type_only: binding.declaration_kind.is_import_type_declaration(),
+                });
+            }
+        }
+
         for ancestor in node.ancestors() {
             if let Some(decl) = AnyJsDeclaration::cast_ref(&ancestor) {
                 let ty = if let Some(typed_bindings) = decl

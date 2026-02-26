@@ -34,7 +34,7 @@ Imports {
 
 ```
 foo => BindingTypeData {
-  Type: Resolved(unknown),
+  Type: Import(TypeImportQualifier { symbol: Named("foo"), resolved_path: ResolvedPath(Ok("/src/foo.ts")), type_only: false }),
   Export ranges: [73..76, 73..76]
 }
 ```
