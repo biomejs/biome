@@ -6260,17 +6260,17 @@
 						{ "type": "null" }
 					]
 				},
-				"useNullishCoalescing": {
-					"description": "Enforce using nullish coalescing operator (??) instead of logical or (||).\nSee https://biomejs.dev/linter/rules/use-nullish-coalescing",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseNullishCoalescingConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useNamedCaptureGroup": {
 					"description": "Enforce using named capture groups in regular expression.\nSee https://biomejs.dev/linter/rules/use-named-capture-group",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseNamedCaptureGroupConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useNullishCoalescing": {
+					"description": "Enforce using nullish coalescing operator (??) instead of logical or (||).\nSee https://biomejs.dev/linter/rules/use-nullish-coalescing",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseNullishCoalescingConfiguration" },
 						{ "type": "null" }
 					]
 				},

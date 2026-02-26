@@ -2405,15 +2405,15 @@ See https://biomejs.dev/linter/rules/use-lone-executable-definition
 	 */
 	useLoneExecutableDefinition?: UseLoneExecutableDefinitionConfiguration;
 	/**
-	* Enforce using nullish coalescing operator (??) instead of logical or (||).
-See https://biomejs.dev/linter/rules/use-nullish-coalescing 
-	 */
-	useNullishCoalescing?: UseNullishCoalescingConfiguration;
-	/**
 	* Enforce using named capture groups in regular expression.
 See https://biomejs.dev/linter/rules/use-named-capture-group 
 	 */
 	useNamedCaptureGroup?: UseNamedCaptureGroupConfiguration;
+	/**
+	* Enforce using nullish coalescing operator (??) instead of logical or (||).
+See https://biomejs.dev/linter/rules/use-nullish-coalescing 
+	 */
+	useNullishCoalescing?: UseNullishCoalescingConfiguration;
 	/**
 	* Enforce valid describe() callback.
 See https://biomejs.dev/linter/rules/use-playwright-valid-describe-callback 
@@ -4266,12 +4266,12 @@ export type UseLoneAnonymousOperationConfiguration =
 export type UseLoneExecutableDefinitionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseLoneExecutableDefinitionOptions;
-export type UseNullishCoalescingConfiguration =
-	| RulePlainConfiguration
-	| RuleWithUseNullishCoalescingOptions;
 export type UseNamedCaptureGroupConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseNamedCaptureGroupOptions;
+export type UseNullishCoalescingConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseNullishCoalescingOptions;
 export type UsePlaywrightValidDescribeCallbackConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUsePlaywrightValidDescribeCallbackOptions;
@@ -5971,14 +5971,14 @@ export interface RuleWithUseLoneExecutableDefinitionOptions {
 	level: RulePlainConfiguration;
 	options?: UseLoneExecutableDefinitionOptions;
 }
+export interface RuleWithUseNamedCaptureGroupOptions {
+	level: RulePlainConfiguration;
+	options?: UseNamedCaptureGroupOptions;
+}
 export interface RuleWithUseNullishCoalescingOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseNullishCoalescingOptions;
-}
-export interface RuleWithUseNamedCaptureGroupOptions {
-	level: RulePlainConfiguration;
-	options?: UseNamedCaptureGroupOptions;
 }
 export interface RuleWithUsePlaywrightValidDescribeCallbackOptions {
 	level: RulePlainConfiguration;
@@ -7418,6 +7418,7 @@ export interface UseInputNameOptions {
 }
 export type UseLoneAnonymousOperationOptions = {};
 export type UseLoneExecutableDefinitionOptions = {};
+export type UseNamedCaptureGroupOptions = {};
 export interface UseNullishCoalescingOptions {
 	/**
 	* Whether to ignore `||` expressions in conditional test positions
@@ -7430,7 +7431,6 @@ Default: `true`
 	 */
 	ignoreConditionalTests?: boolean;
 }
-export type UseNamedCaptureGroupOptions = {};
 export type UsePlaywrightValidDescribeCallbackOptions = {};
 export type UseRegexpExecOptions = {};
 export interface UseRequiredScriptsOptions {
@@ -8403,6 +8403,7 @@ export type Category =
 	| "lint/nursery/useLoneAnonymousOperation"
 	| "lint/nursery/useLoneExecutableDefinition"
 	| "lint/nursery/useNullishCoalescing"
+	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useNamedCaptureGroup"
 	| "lint/nursery/usePlaywrightValidDescribeCallback"
 	| "lint/nursery/useQwikMethodUsage"
