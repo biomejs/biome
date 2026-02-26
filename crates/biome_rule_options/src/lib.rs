@@ -305,6 +305,7 @@ pub mod use_aria_activedescendant_with_tabindex;
 pub mod use_aria_props_for_role;
 pub mod use_aria_props_supported_by_role;
 pub mod use_array_literals;
+pub mod use_array_some;
 pub mod use_array_sort_compare;
 pub mod use_arrow_function;
 pub mod use_as_const_assertion;

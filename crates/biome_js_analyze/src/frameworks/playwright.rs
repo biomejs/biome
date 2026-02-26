@@ -1,5 +1,7 @@
+use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsExpression, JsCallArguments, JsCallExpression, JsObjectExpression, JsSyntaxKind,
+    binding_ext::AnyJsBindingDeclaration,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TokenText};
 
@@ -353,6 +355,48 @@ pub(crate) fn is_playwright_call_chain(expr: &AnyJsExpression) -> bool {
 
         _ => false,
     }
+}
+
+/// Like `is_playwright_call_chain`, but also resolves identifiers through the
+/// semantic model to handle extracted Playwright locators:
+/// ```js
+/// const loc = page.locator('.item');
+/// expect(loc).toBeVisible(); // still recognized as Playwright
+/// ```
+pub(crate) fn is_playwright_call_chain_or_resolved(
+    expr: &AnyJsExpression,
+    model: &SemanticModel,
+) -> bool {
+    if is_playwright_call_chain(expr) {
+        return true;
+    }
+    let AnyJsExpression::JsIdentifierExpression(id) = expr else {
+        return false;
+    };
+    let Ok(reference) = id.name() else {
+        return false;
+    };
+    let Some(binding) = model.binding(&reference) else {
+        return false;
+    };
+    // If the variable has been reassigned we can't trust the initializer.
+    if binding.all_writes().next().is_some() {
+        return false;
+    }
+    let Some(decl) = binding.tree().declaration() else {
+        return false;
+    };
+    let decl = decl.parent_binding_pattern_declaration().unwrap_or(decl);
+    let AnyJsBindingDeclaration::JsVariableDeclarator(declarator) = decl else {
+        return false;
+    };
+    let Some(initializer) = declarator.initializer() else {
+        return false;
+    };
+    let Ok(init_expr) = initializer.expression() else {
+        return false;
+    };
+    is_playwright_call_chain(&init_expr)
 }
 
 /// Checks if an object expression has a boolean property with the given key and value.
