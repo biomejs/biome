@@ -1,5 +1,7 @@
 use super::*;
+use crate::format_semantic_model::FormatSemanticModelContext;
 use biome_js_syntax::{TextRange, TsTypeParameterName, binding_ext::AnyJsIdentifierBinding};
+use std::fmt::{Display, Formatter};
 use std::sync::Arc;
 
 /// Internal type with all the semantic data of a specific binding
@@ -52,6 +54,19 @@ pub struct Binding {
 impl std::fmt::Debug for Binding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Binding").field("id", &self.id).finish()
+    }
+}
+
+impl Display for Binding {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let formatted = biome_formatter::format!(FormatSemanticModelContext, [&self])
+            .expect("Formatting not to throw any FormatErrors");
+        f.write_str(
+            formatted
+                .print()
+                .expect("Expected a valid document")
+                .as_code(),
+        )
     }
 }
 

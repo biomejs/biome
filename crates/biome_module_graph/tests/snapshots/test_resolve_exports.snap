@@ -118,66 +118,66 @@ Imports {
 
 ```
 foo => BindingTypeData {
-  Type: Resolved(Module(0) TypeId(10)),
-  JSDoc comment: JsDoc(
+  Types Module(0) TypeId(10),
+  JsDoc(
     @returns {string}
   ),
-  Export ranges: [118..121]
+  Exported Ranges: (118..121)
 }
 
 bar => BindingTypeData {
-  Type: Resolved(Module(0) TypeId(11)),
-  JSDoc comment: JsDoc(
+  Types Module(0) TypeId(11),
+  JsDoc(
     @package
   ),
-  Export ranges: [187..190]
+  Exported Ranges: (187..190)
 }
 
-quz => BindingTypeData {
-  Type: Resolved(Module(0) TypeId(0)),
-  JSDoc comment: JsDoc(
+quz  => BindingTypeData {
+  Types Module(0) TypeId(0),
+  JsDoc(
     @private
   ),
-  Export ranges: [250..253]
+  Exported Ranges: (250..253)
 }
 
 baz => BindingTypeData {
-  Type: Resolved(Module(0) TypeId(13)),
-  Export ranges: [363..366]
+  Types Module(0) TypeId(13),
+  Exported Ranges: (363..366)
 }
 
-qux => BindingTypeData {
-  Type: Resolved(Module(0) TypeId(1)),
-  Export ranges: [123..126]
+qux  => BindingTypeData {
+  Types Module(0) TypeId(1),
+  Exported Ranges: (123..126)
 }
 
 a => BindingTypeData {
-  Type: Resolved(Module(0) TypeId(4)),
-  Export ranges: [426..427]
+  Types Module(0) TypeId(4),
+  Exported Ranges: (426..427)
 }
 
 b => BindingTypeData {
-  Type: Resolved(Module(0) TypeId(5)),
-  Export ranges: [429..430]
+  Types Module(0) TypeId(5),
+  Exported Ranges: (429..430)
 }
 
 d => BindingTypeData {
-  Type: Resolved(Module(0) TypeId(7)),
-  Export ranges: [436..437]
+  Types Module(0) TypeId(7),
+  Exported Ranges: (436..437)
 }
 
 e => BindingTypeData {
-  Type: Resolved(Module(0) TypeId(8)),
-  Export ranges: [439..440]
+  Types Module(0) TypeId(8),
+  Exported Ranges: (439..440)
 }
 
 Component => BindingTypeData {
-  Type: Resolved(Module(0) TypeId(17)),
-  JSDoc comment: JsDoc(
+  Types Module(0) TypeId(17),
+  JsDoc(
     @public
     @returns {JSX.Element}
   ),
-  Export ranges: [909..918]
+  Exported Ranges: (909..918)
 }
 ```
 
@@ -305,8 +305,8 @@ Imports {
 
 ```
 ohNo => BindingTypeData {
-  Type: Resolved(Module(0) TypeId(1)),
-  Export ranges: [29..33]
+  Types Module(0) TypeId(1),
+  Exported Ranges: (29..33)
 }
 ```
 

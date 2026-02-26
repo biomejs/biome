@@ -33,11 +33,11 @@ Imports {
 
 ```
 foo => BindingTypeData {
-  Type: Resolved(Module(0) TypeId(1)),
-  JSDoc comment: JsDoc(
+  Types Module(0) TypeId(1),
+  JsDoc(
     @returns {string}
   ),
-  Export ranges: [118..121]
+  Exported Ranges: (118..121)
 }
 ```
 

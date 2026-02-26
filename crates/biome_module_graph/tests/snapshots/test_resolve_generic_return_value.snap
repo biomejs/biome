@@ -39,19 +39,19 @@ Imports {
 ## Exported Bindings
 
 ```
-makePromise => BindingTypeData {
-  Type: Resolved(Module(0) TypeId(6)),
-  Export ranges: [105..116]
+makePromise  => BindingTypeData {
+  Types Module(0) TypeId(6),
+  Exported Ranges: (105..116)
 }
 
-makePromiseCb => BindingTypeData {
-  Type: Resolved(Module(0) TypeId(6)),
-  Export ranges: [168..181]
+makePromiseCb  => BindingTypeData {
+  Types Module(0) TypeId(6),
+  Exported Ranges: (168..181)
 }
 
-promise => BindingTypeData {
-  Type: Resolved(Module(0) TypeId(7)),
-  Export ranges: [224..231]
+promise  => BindingTypeData {
+  Types Module(0) TypeId(7),
+  Exported Ranges: (224..231)
 }
 ```
 

@@ -95,21 +95,23 @@ Imports {
 
 ```
 subdivision => BindingTypeData {
-  Type: Resolved(Module(0) TypeId(15)),
+  Types Module(0) TypeId(15),
+  Exported Ranges: 
 }
 
 country => BindingTypeData {
-  Type: Resolved(Module(0) TypeId(18)),
+  Types Module(0) TypeId(18),
+  Exported Ranges: 
 }
 
 data => BindingTypeData {
-  Type: Resolved(Module(0) TypeId(1)),
-  Export ranges: [1336..1340]
+  Types Module(0) TypeId(1),
+  Exported Ranges: (1336..1340)
 }
 
 codes => BindingTypeData {
-  Type: Resolved(Module(0) TypeId(2)),
-  Export ranges: [1414..1419]
+  Types Module(0) TypeId(2),
+  Exported Ranges: (1414..1419)
 }
 ```
 

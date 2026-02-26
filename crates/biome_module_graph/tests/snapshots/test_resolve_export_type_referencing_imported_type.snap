@@ -38,8 +38,8 @@ Imports {
 
 ```
 returnPromiseResult => BindingTypeData {
-  Type: Resolved(Module(0) TypeId(7)),
-  Export ranges: [215..234]
+  Types Module(0) TypeId(7),
+  Exported Ranges: (215..234)
 }
 ```
 
@@ -104,9 +104,9 @@ Imports {
 ## Exported Bindings
 
 ```
-PromisedResult => BindingTypeData {
-  Type: Resolved(Module(0) TypeId(4)),
-  Export ranges: [12..26]
+PromisedResult  => BindingTypeData {
+  Types Module(0) TypeId(4),
+  Exported Ranges: (12..26)
 }
 ```
 

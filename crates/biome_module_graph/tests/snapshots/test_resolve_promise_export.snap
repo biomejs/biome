@@ -31,9 +31,9 @@ Imports {
 ## Exported Bindings
 
 ```
-promise => BindingTypeData {
-  Type: Resolved(Module(0) TypeId(2)),
-  Export ranges: [119..126]
+promise  => BindingTypeData {
+  Types Module(0) TypeId(2),
+  Exported Ranges: (119..126)
 }
 ```
 

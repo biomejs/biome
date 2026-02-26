@@ -47,14 +47,14 @@ Imports {
 ## Exported Bindings
 
 ```
-Union => BindingTypeData {
-  Type: Resolved(Module(0) TypeId(5)),
-  Export ranges: [54..59]
+Union  => BindingTypeData {
+  Types Module(0) TypeId(5),
+  Exported Ranges: (54..59)
 }
 
-Union2 => BindingTypeData {
-  Type: Resolved(Module(0) TypeId(9)),
-  Export ranges: [131..137]
+Union2  => BindingTypeData {
+  Types Module(0) TypeId(9),
+  Exported Ranges: (131..137)
 }
 ```
 

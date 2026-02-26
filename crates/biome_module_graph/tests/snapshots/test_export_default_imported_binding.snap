@@ -33,9 +33,9 @@ Imports {
 ## Exported Bindings
 
 ```
-foo => BindingTypeData {
-  Type: Import(TypeImportQualifier { symbol: Named("foo"), resolved_path: ResolvedPath(Ok("/src/foo.ts")), type_only: false }),
-  Export ranges: [73..76, 73..76]
+foo  => BindingTypeData {
+  Types Import Symbol: foo from "/src/foo.ts",
+  Exported Ranges: (73..76)(73..76)
 }
 ```
 
@@ -75,11 +75,11 @@ Imports {
 
 ```
 foo => BindingTypeData {
-  Type: Resolved(Module(0) TypeId(1)),
-  JSDoc comment: JsDoc(
+  Types Module(0) TypeId(1),
+  JsDoc(
     @returns {number}
   ),
-  Export ranges: [94..97]
+  Exported Ranges: (94..97)
 }
 ```
 

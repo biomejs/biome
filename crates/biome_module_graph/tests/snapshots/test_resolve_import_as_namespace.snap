@@ -65,8 +65,8 @@ Imports {
 
 ```
 foo => BindingTypeData {
-  Type: Resolved(Module(0) TypeId(1)),
-  Export ranges: [25..28]
+  Types Module(0) TypeId(1),
+  Exported Ranges: (25..28)
 }
 ```
 

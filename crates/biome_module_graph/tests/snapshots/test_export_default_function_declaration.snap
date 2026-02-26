@@ -32,12 +32,12 @@ Imports {
 
 ```
 Component => BindingTypeData {
-  Type: Resolved(Module(0) TypeId(1)),
-  JSDoc comment: JsDoc(
+  Types Module(0) TypeId(1),
+  JsDoc(
     @public
     @returns {JSX.Element}
   ),
-  Export ranges: [130..139]
+  Exported Ranges: (130..139)
 }
 ```
 

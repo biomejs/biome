@@ -27,9 +27,9 @@ Imports {
 ## Exported Bindings
 
 ```
-Bar => BindingTypeData {
-  Type: Resolved(Module(0) TypeId(1)),
-  Export ranges: [21..24]
+Bar  => BindingTypeData {
+  Types Module(0) TypeId(1),
+  Exported Ranges: (21..24)
 }
 ```
 
@@ -131,7 +131,8 @@ Imports {
 
 ```
 foo => BindingTypeData {
-  Type: Resolved(Module(0) TypeId(3)),
+  Types Module(0) TypeId(3),
+  Exported Ranges: 
 }
 ```
 

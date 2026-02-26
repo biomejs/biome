@@ -58,14 +58,14 @@ Imports {
 ## Exported Bindings
 
 ```
-theAnswer => BindingTypeData {
-  Type: Resolved(Module(0) TypeId(0)),
-  Export ranges: [26..35]
+theAnswer  => BindingTypeData {
+  Types Module(0) TypeId(0),
+  Exported Ranges: (26..35)
 }
 
-superComputer => BindingTypeData {
-  Type: Resolved(Module(0) TypeId(5)),
-  Export ranges: [1077..1090]
+superComputer  => BindingTypeData {
+  Types Module(0) TypeId(5),
+  Exported Ranges: (1077..1090)
 }
 ```
 

@@ -6,9 +6,12 @@ mod scope;
 mod utils;
 mod visitor;
 
+use crate::ModuleGraph;
 use biome_js_semantic::ScopeId;
 use biome_js_syntax::AnyJsImportLike;
-use biome_js_type_info::{ImportSymbol, ResolvedTypeId, TypeData, TypeReference};
+use biome_js_type_info::{
+    FormatTypeContext, ImportSymbol, ResolvedTypeId, TypeData, TypeReference,
+};
 use biome_jsdoc_comment::JsdocComment;
 use biome_resolver::ResolvedPath;
 use biome_rowan::{Text, TextRange};
@@ -17,9 +20,8 @@ use indexmap::IndexMap;
 use rust_lapper::Lapper;
 use rustc_hash::FxHashMap;
 use std::collections::BTreeSet;
+use std::fmt::{Display, Formatter};
 use std::{collections::BTreeMap, ops::Deref, sync::Arc};
-
-use crate::ModuleGraph;
 
 use scope::JsScope;
 
@@ -43,6 +45,19 @@ pub struct BindingTypeData {
 
     /// Ranges where this binding is exported.
     pub export_ranges: Vec<TextRange>,
+}
+
+impl Display for BindingTypeData {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let formatted = biome_formatter::format!(FormatTypeContext, [&self])
+            .expect("Formatting not to throw any FormatErrors");
+        f.write_str(
+            formatted
+                .print()
+                .expect("Expected a valid document")
+                .as_code(),
+        )
+    }
 }
 
 /// Information restricted to a single module in the [ModuleGraph].
