@@ -9,6 +9,7 @@ use biome_js_syntax::{
 };
 use biome_js_type_info::{Type, TypeMemberKind};
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
+use biome_rule_options::no_misused_promises::NoMisusedPromisesOptions;
 
 use crate::{JsRuleAction, ast_utils::is_in_async_function, services::typed::Typed};
 
@@ -103,7 +104,7 @@ impl Rule for NoMisusedPromises {
     type Query = Typed<AnyJsExpression>;
     type State = NoMisusedPromisesState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoMisusedPromisesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let expression = ctx.query();
