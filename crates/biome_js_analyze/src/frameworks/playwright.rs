@@ -371,6 +371,10 @@ pub(crate) fn is_playwright_call_chain_or_resolved(
     let Some(binding) = model.binding(&reference) else {
         return false;
     };
+    // If the variable has been reassigned we can't trust the initializer.
+    if binding.all_writes().next().is_some() {
+        return false;
+    }
     let Some(decl) = binding.tree().declaration() else {
         return false;
     };
