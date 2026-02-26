@@ -13935,6 +13935,11 @@
 					"description": "Whether to ignore `||` expressions in conditional test positions\n(if/while/for/do-while/ternary conditions).\n\nWhen `true` (the default), the rule will not report `||` expressions\nthat appear in places where the falsy-checking behavior may be intentional.\n\nDefault: `true`",
 					"type": ["boolean", "null"],
 					"default": null
+				},
+				"ignoreTernaryTests": {
+					"description": "Whether to ignore ternary expressions that could be simplified\nusing the nullish coalescing operator.\n\nDefault: `false`",
+					"type": ["boolean", "null"],
+					"default": null
 				}
 			},
 			"additionalProperties": false
