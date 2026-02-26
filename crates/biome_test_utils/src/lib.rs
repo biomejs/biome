@@ -17,7 +17,7 @@ use biome_js_parser::{AnyJsRoot, JsParserOptions};
 use biome_js_type_info::{TypeData, TypeResolver};
 use biome_json_parser::ParseDiagnostic;
 use biome_module_graph::ModuleGraph;
-use biome_package::{Manifest, PackageJson, TsConfigJson, TurboJson};
+use biome_package::{Catalogs, Manifest, PackageJson, TsConfigJson, TurboJson};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{Direction, Language, SyntaxKind, SyntaxNode, SyntaxSlot};
 use biome_service::WorkspaceError;
@@ -331,12 +331,30 @@ fn get_js_like_paths_in_dir(dir: &Utf8Path) -> Vec<BiomePath> {
         .collect()
 }
 
+/// Searches for a `pnpm-workspace.yaml` file adjacent to the input file
+/// and parses its catalog section if present.
+///
+/// Returns `None` if the workspace file is not found or parsing fails.
+fn find_pnpm_workspace_catalog(fs: &dyn FileSystem, input_file: &Utf8Path) -> Option<Catalogs> {
+    let workspace_file = input_file.with_file_name("pnpm-workspace.yaml");
+    if !fs.path_is_file(&workspace_file) {
+        return None;
+    }
+
+    if let Ok(content) = fs.read_file_from_path(&workspace_file) {
+        return PackageJson::parse_pnpm_workspace_catalog(&content);
+    }
+
+    None
+}
+
 pub fn project_layout_for_test_file(
     input_file: &Utf8Path,
     diagnostics: &mut Vec<String>,
 ) -> Arc<ProjectLayout> {
     let project_layout = ProjectLayout::default();
     let fs = OsFileSystem::new(input_file.parent().unwrap().to_path_buf());
+    let pnpm_catalog = find_pnpm_workspace_catalog(&fs, input_file);
 
     let package_json_file = input_file.with_extension("package.json");
     if let Ok(json) = std::fs::read_to_string(&package_json_file) {
@@ -355,12 +373,17 @@ pub fn project_layout_for_test_file(
                     }),
             );
         } else {
+            let mut manifest = deserialized.into_deserialized().unwrap_or_default();
+            if manifest.catalog.is_none() {
+                manifest.catalog.clone_from(&pnpm_catalog);
+            }
+
             project_layout.insert_node_manifest(
                 input_file
                     .parent()
                     .map(|dir_path| dir_path.to_path_buf())
                     .unwrap_or_default(),
-                deserialized.into_deserialized().unwrap_or_default(),
+                manifest,
             );
         }
     }
@@ -771,5 +794,31 @@ pub fn assert_diagnostics_expectation_comment<L: Language>(
                 );
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use biome_fs::MemoryFileSystem;
+
+    #[test]
+    fn finds_catalog_from_workspace_file() {
+        let fs = MemoryFileSystem::default();
+        fs.insert(
+            Utf8Path::new("project/src/pnpm-workspace.yaml").into(),
+            b"catalog:\n  react: 19.0.0\n".to_vec(),
+        );
+
+        let catalog = find_pnpm_workspace_catalog(&fs, Utf8Path::new("project/src/input.js"))
+            .expect("catalog should be parsed");
+        let default = catalog.default.expect("default catalog present");
+        assert_eq!(default.get("react"), Some("19.0.0"));
+    }
+
+    #[test]
+    fn no_catalog_when_workspace_missing() {
+        let fs = MemoryFileSystem::default();
+        assert!(find_pnpm_workspace_catalog(&fs, Utf8Path::new("project/src/input.js")).is_none());
     }
 }

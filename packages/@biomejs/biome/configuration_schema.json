@@ -2156,6 +2156,13 @@
 						{ "$ref": "#/$defs/JsParserConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"resolver": {
+					"description": "Module/dependency resolver options",
+					"anyOf": [
+						{ "$ref": "#/$defs/JsResolverConfiguration" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -2260,6 +2267,17 @@
 				},
 				"unsafeParameterDecoratorsEnabled": {
 					"description": "It enables the experimental and unsafe parsing of parameter decorators\n\nThese decorators belong to an old proposal, and they are subject to change.",
+					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"JsResolverConfiguration": {
+			"description": "Resolver options specific to JavaScript files",
+			"type": "object",
+			"properties": {
+				"experimentalPnpmCatalogs": {
+					"description": "Enables pnpm workspace catalog resolution for JavaScript package manifests.\n\nOpt-in:\n- Set `javascript.resolver.experimentalPnpmCatalogs` to `true`.\n\nScope:\n- Resolves `catalog:` and `catalog:<name>` dependency versions from\n  `package.json`.\n- Applies to `dependencies`, `devDependencies`, and `peerDependencies`.\n\nFail-safe behavior:\n- If `pnpm-workspace.yaml` is missing, unreadable, or cannot be parsed,\n  Biome silently falls back to the default behavior (as if this option\n  were disabled).\n- Unknown keys and unsupported value shapes in `pnpm-workspace.yaml` are\n  ignored.\n\nLimitations:\n- Only `pnpm-workspace.yaml` is read.\n- Biome only reads top-level `catalog` / `catalogs` mappings and scalar\n  string entries.\n\nDefault: `false`.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				}
 			},

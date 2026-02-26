@@ -3,11 +3,12 @@ use crate::settings::ModuleGraphResolutionKind;
 use crate::test_utils::setup_workspace_and_open_project;
 use biome_configuration::{
     FormatterConfiguration, JsConfiguration,
-    javascript::{JsFormatterConfiguration, JsParserConfiguration},
+    javascript::{JsFormatterConfiguration, JsParserConfiguration, JsResolverConfiguration},
 };
 use biome_formatter::{IndentStyle, LineWidth};
 use biome_fs::MemoryFileSystem;
 use biome_rowan::TextSize;
+use camino::Utf8Path;
 
 #[test]
 fn commonjs_file_rejects_import_statement() {
@@ -64,6 +65,103 @@ fn commonjs_file_rejects_import_statement() {
         }
         Err(error) => panic!("File not available: {error}"),
     }
+}
+
+#[test]
+fn pnpm_workspace_update_reapplies_catalogs() {
+    const PACKAGE_JSON: &[u8] = br#"{
+  "name": "app",
+  "dependencies": {
+    "react": "catalog:react19"
+  }
+}"#;
+    const WORKSPACE_V1: &[u8] = br#"catalogs:
+  react19:
+    react: 19.0.0
+"#;
+    const WORKSPACE_V2: &[u8] = br#"catalogs:
+  react19:
+    react: 18.3.1
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from("/project/package.json"), PACKAGE_JSON);
+    fs.insert(
+        Utf8PathBuf::from("/project/pnpm-workspace.yaml"),
+        WORKSPACE_V1,
+    );
+
+    let fs_for_updates = MemoryFileSystem::from_files(fs.files.0.clone());
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration {
+                javascript: Some(JsConfiguration {
+                    resolver: Some(JsResolverConfiguration {
+                        experimental_pnpm_catalogs: Some(Bool(true)),
+                    }),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+
+    let package_manifest = workspace
+        .project_layout
+        .get_node_manifest_for_package(Utf8Path::new("/project"))
+        .expect("package manifest should be indexed");
+    let initial_react = package_manifest
+        .catalog
+        .as_ref()
+        .and_then(|catalogs| catalogs.named.get("react19"))
+        .and_then(|dependencies| dependencies.get("react"));
+    assert_eq!(initial_react, Some("19.0.0"));
+
+    fs_for_updates.insert(
+        Utf8PathBuf::from("/project/pnpm-workspace.yaml"),
+        WORKSPACE_V2,
+    );
+
+    workspace
+        .open_file_internal(
+            OpenFileReason::Index(IndexTrigger::Update),
+            OpenFileParams {
+                project_key,
+                path: BiomePath::new("/project/pnpm-workspace.yaml"),
+                content: FileContent::FromServer,
+                document_file_source: None,
+                persist_node_cache: false,
+                inline_config: None,
+            },
+        )
+        .unwrap();
+
+    let package_manifest = workspace
+        .project_layout
+        .get_node_manifest_for_package(Utf8Path::new("/project"))
+        .expect("package manifest should be indexed");
+    let updated_react = package_manifest
+        .catalog
+        .as_ref()
+        .and_then(|catalogs| catalogs.named.get("react19"))
+        .and_then(|dependencies| dependencies.get("react"));
+    assert_eq!(updated_react, Some("18.3.1"));
 }
 
 #[test]
