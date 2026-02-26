@@ -63,6 +63,41 @@ declare_lint_rule! {
     }
 }
 
+impl Rule for UseNamedCaptureGroup {
+    type Query = Semantic<AnyJsExpression>;
+    type State = TextRange;
+    type Signals = Box<[Self::State]>;
+    type Options = UseNamedCaptureGroupOptions;
+
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let node = ctx.query();
+        match node {
+            AnyJsExpression::AnyJsLiteralExpression(
+                biome_js_syntax::AnyJsLiteralExpression::JsRegexLiteralExpression(regex),
+            ) => run_regex_literal(regex),
+            AnyJsExpression::JsNewExpression(_) | AnyJsExpression::JsCallExpression(_) => {
+                run_regexp_constructor(node, ctx.model())
+            }
+            _ => Default::default(),
+        }
+    }
+
+    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                state,
+                markup! {
+                    "Capture group is not named."
+                },
+            )
+            .note(markup! {
+                "Named capture groups improve readability by associating a descriptive name with each match. Use "<Emphasis>"(?<name>...)"</Emphasis>" instead of "<Emphasis>"(...)"</Emphasis>"."
+            }),
+        )
+    }
+}
+
 /// Find byte offsets of unnamed capture groups in a regex pattern.
 ///
 /// Returns a list of byte offsets (relative to pattern start) for each
@@ -166,41 +201,6 @@ fn try_precise_string_ranges(arg_expr: &AnyJsExpression) -> Option<Box<[TextRang
             })
             .collect(),
     )
-}
-
-impl Rule for UseNamedCaptureGroup {
-    type Query = Semantic<AnyJsExpression>;
-    type State = TextRange;
-    type Signals = Box<[Self::State]>;
-    type Options = UseNamedCaptureGroupOptions;
-
-    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let node = ctx.query();
-        match node {
-            AnyJsExpression::AnyJsLiteralExpression(
-                biome_js_syntax::AnyJsLiteralExpression::JsRegexLiteralExpression(regex),
-            ) => run_regex_literal(regex),
-            AnyJsExpression::JsNewExpression(_) | AnyJsExpression::JsCallExpression(_) => {
-                run_regexp_constructor(node, ctx.model())
-            }
-            _ => Default::default(),
-        }
-    }
-
-    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                state,
-                markup! {
-                    "Capture group is not named."
-                },
-            )
-            .note(markup! {
-                "Named capture groups improve readability by associating a descriptive name with each match. Use "<Emphasis>"(?<name>...)"</Emphasis>" instead of "<Emphasis>"(...)"</Emphasis>"."
-            }),
-        )
-    }
 }
 
 fn run_regex_literal(node: &JsRegexLiteralExpression) -> Box<[TextRange]> {
