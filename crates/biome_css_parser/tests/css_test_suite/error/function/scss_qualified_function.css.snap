@@ -1,0 +1,215 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
+expression: snapshot
+---
+
+## Input
+
+```css
+.foo {
+  color: mod.fn(1, 2);
+  background-image: url(mod.fn.svg);
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..1 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@1..5 "foo" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@5..6 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssBogusProperty {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@6..14 "color" [Newline("\n"), Whitespace("  ")] [],
+                                    },
+                                    COLON@14..16 ":" [] [Whitespace(" ")],
+                                    CssBogus {
+                                        items: [
+                                            CssBogusSupportsCondition {
+                                                items: [
+                                                    CssBogusSupportsCondition {
+                                                        items: [
+                                                            CssIdentifier {
+                                                                value_token: IDENT@16..19 "mod" [] [],
+                                                            },
+                                                            DOT@19..20 "." [] [],
+                                                            CssIdentifier {
+                                                                value_token: IDENT@20..22 "fn" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                    L_PAREN@22..23 "(" [] [],
+                                                    CssParameterList [
+                                                        CssParameter {
+                                                            any_css_expression: CssListOfComponentValuesExpression {
+                                                                css_component_value_list: CssComponentValueList [
+                                                                    CssNumber {
+                                                                        value_token: CSS_NUMBER_LITERAL@23..24 "1" [] [],
+                                                                    },
+                                                                ],
+                                                            },
+                                                        },
+                                                        COMMA@24..26 "," [] [Whitespace(" ")],
+                                                        CssParameter {
+                                                            any_css_expression: CssListOfComponentValuesExpression {
+                                                                css_component_value_list: CssComponentValueList [
+                                                                    CssNumber {
+                                                                        value_token: CSS_NUMBER_LITERAL@26..27 "2" [] [],
+                                                                    },
+                                                                ],
+                                                            },
+                                                        },
+                                                    ],
+                                                    R_PAREN@27..28 ")" [] [],
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@28..29 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@29..48 "background-image" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@48..50 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssUrlFunction {
+                                        name: URL_KW@50..53 "url" [] [],
+                                        l_paren_token: L_PAREN@53..54 "(" [] [],
+                                        value: CssUrlValueRaw {
+                                            value_token: CSS_URL_VALUE_RAW_LITERAL@54..64 "mod.fn.svg" [] [],
+                                        },
+                                        modifiers: CssUrlModifierList [],
+                                        r_paren_token: R_PAREN@64..65 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@65..66 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@66..68 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@68..69 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..69
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..68
+    0: CSS_QUALIFIED_RULE@0..68
+      0: CSS_SELECTOR_LIST@0..5
+        0: CSS_COMPOUND_SELECTOR@0..5
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..5
+            0: CSS_CLASS_SELECTOR@0..5
+              0: DOT@0..1 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@1..5
+                0: IDENT@1..5 "foo" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@5..68
+        0: L_CURLY@5..6 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@6..66
+          0: CSS_DECLARATION_WITH_SEMICOLON@6..29
+            0: CSS_DECLARATION@6..28
+              0: CSS_BOGUS_PROPERTY@6..28
+                0: CSS_IDENTIFIER@6..14
+                  0: IDENT@6..14 "color" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@14..16 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@16..28
+                  0: CSS_BOGUS_SUPPORTS_CONDITION@16..28
+                    0: CSS_BOGUS_SUPPORTS_CONDITION@16..22
+                      0: CSS_IDENTIFIER@16..19
+                        0: IDENT@16..19 "mod" [] []
+                      1: DOT@19..20 "." [] []
+                      2: CSS_IDENTIFIER@20..22
+                        0: IDENT@20..22 "fn" [] []
+                    1: L_PAREN@22..23 "(" [] []
+                    2: CSS_PARAMETER_LIST@23..27
+                      0: CSS_PARAMETER@23..24
+                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@23..24
+                          0: CSS_COMPONENT_VALUE_LIST@23..24
+                            0: CSS_NUMBER@23..24
+                              0: CSS_NUMBER_LITERAL@23..24 "1" [] []
+                      1: COMMA@24..26 "," [] [Whitespace(" ")]
+                      2: CSS_PARAMETER@26..27
+                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@26..27
+                          0: CSS_COMPONENT_VALUE_LIST@26..27
+                            0: CSS_NUMBER@26..27
+                              0: CSS_NUMBER_LITERAL@26..27 "2" [] []
+                    3: R_PAREN@27..28 ")" [] []
+              1: (empty)
+            1: SEMICOLON@28..29 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@29..66
+            0: CSS_DECLARATION@29..65
+              0: CSS_GENERIC_PROPERTY@29..65
+                0: CSS_IDENTIFIER@29..48
+                  0: IDENT@29..48 "background-image" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@48..50 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@50..65
+                  0: CSS_URL_FUNCTION@50..65
+                    0: URL_KW@50..53 "url" [] []
+                    1: L_PAREN@53..54 "(" [] []
+                    2: CSS_URL_VALUE_RAW@54..64
+                      0: CSS_URL_VALUE_RAW_LITERAL@54..64 "mod.fn.svg" [] []
+                    3: CSS_URL_MODIFIER_LIST@64..64
+                    4: R_PAREN@64..65 ")" [] []
+              1: (empty)
+            1: SEMICOLON@65..66 ";" [] []
+        2: R_CURLY@66..68 "}" [Newline("\n")] []
+  2: EOF@68..69 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+scss_qualified_function.css:2:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × SCSS qualified function names are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  
+    1 │ .foo {
+  > 2 │   color: mod.fn(1, 2);
+      │          ^^^^^^
+    3 │   background-image: url(mod.fn.svg);
+    4 │ }
+  
+  i SCSS only syntax
+  
+```

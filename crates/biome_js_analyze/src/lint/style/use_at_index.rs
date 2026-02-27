@@ -79,7 +79,10 @@ declare_lint_rule! {
         language: "js",
         recommended: false,
         severity: Severity::Information,
-        sources: &[RuleSource::EslintUnicorn("prefer-at").inspired()],
+        sources: &[
+            RuleSource::EslintUnicorn("prefer-at").inspired(),
+            RuleSource::EslintE18e("prefer-array-at").same(),
+        ],
         fix_kind: FixKind::Unsafe,
     }
 }

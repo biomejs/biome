@@ -1,0 +1,37 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```js
+{ }
+
+```
+
+
+## AST
+
+```
+JsExpressionTemplateRoot {
+    expression: JsObjectExpression {
+        l_curly_token: L_CURLY@0..2 "{" [] [Whitespace(" ")],
+        members: JsObjectMemberList [],
+        r_curly_token: R_CURLY@2..3 "}" [] [],
+    },
+    eof_token: EOF@3..4 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_EXPRESSION_TEMPLATE_ROOT@0..4
+  0: JS_OBJECT_EXPRESSION@0..3
+    0: L_CURLY@0..2 "{" [] [Whitespace(" ")]
+    1: JS_OBJECT_MEMBER_LIST@2..2
+    2: R_CURLY@2..3 "}" [] []
+  1: EOF@3..4 "" [Newline("\n")] []
+
+```

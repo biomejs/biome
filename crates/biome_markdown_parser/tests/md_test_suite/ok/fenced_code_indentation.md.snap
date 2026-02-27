@@ -1,0 +1,77 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+```
+  indented
+```
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdFencedCodeBlock {
+            l_fence: TRIPLE_BACKTICK@0..3 "```" [] [],
+            code_list: MdCodeNameList [],
+            content: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@3..4 "\n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@4..5 " " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@5..6 " " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@6..14 "indented" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@14..15 "\n" [] [],
+                },
+            ],
+            r_fence: TRIPLE_BACKTICK@15..18 "```" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@18..19 "\n" [] [],
+        },
+    ],
+    eof_token: EOF@19..19 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..19
+  0: (empty)
+  1: MD_BLOCK_LIST@0..19
+    0: MD_FENCED_CODE_BLOCK@0..18
+      0: TRIPLE_BACKTICK@0..3 "```" [] []
+      1: MD_CODE_NAME_LIST@3..3
+      2: MD_INLINE_ITEM_LIST@3..15
+        0: MD_TEXTUAL@3..4
+          0: MD_TEXTUAL_LITERAL@3..4 "\n" [] []
+        1: MD_TEXTUAL@4..5
+          0: MD_TEXTUAL_LITERAL@4..5 " " [] []
+        2: MD_TEXTUAL@5..6
+          0: MD_TEXTUAL_LITERAL@5..6 " " [] []
+        3: MD_TEXTUAL@6..14
+          0: MD_TEXTUAL_LITERAL@6..14 "indented" [] []
+        4: MD_TEXTUAL@14..15
+          0: MD_TEXTUAL_LITERAL@14..15 "\n" [] []
+      3: TRIPLE_BACKTICK@15..18 "```" [] []
+    1: MD_NEWLINE@18..19
+      0: NEWLINE@18..19 "\n" [] []
+  2: EOF@19..19 "" [] []
+
+```

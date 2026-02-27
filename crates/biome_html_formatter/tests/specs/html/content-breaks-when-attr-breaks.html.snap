@@ -1,8 +1,8 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: content-breaks-when-attr-breaks.html
-snapshot_kind: text
 ---
+
 # Input
 
 ```html
@@ -31,6 +31,7 @@ Bracket same line: false
 Whitespace sensitivity: css
 Indent script and style: false
 Self close void elements: never
+Trailing newline: true
 -----
 
 ```html
@@ -41,4 +42,5 @@ Self close void elements: never
 >
 	short content
 </div>
+
 ```

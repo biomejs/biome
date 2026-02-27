@@ -31,6 +31,7 @@ pub enum JsonSyntaxKind {
     IDENT,
     COMMENT,
     MULTILINE_COMMENT,
+    GRIT_METAVARIABLE,
     JSON_ROOT,
     JSON_NUMBER_VALUE,
     JSON_STRING_VALUE,
@@ -42,8 +43,9 @@ pub enum JsonSyntaxKind {
     JSON_MEMBER,
     JSON_MEMBER_NAME,
     JSON_ARRAY_ELEMENT_LIST,
+    JSON_METAVARIABLE,
     JSON_BOGUS,
-    JSON_BOGUS_MEMBER_NAME,
+    JSON_BOGUS_NAME,
     JSON_BOGUS_VALUE,
     #[doc(hidden)]
     __LAST,
@@ -84,7 +86,7 @@ impl JsonSyntaxKind {
             NULL_KW => "null",
             TRUE_KW => "true",
             FALSE_KW => "false",
-            EOF => "EOF",
+            EOF => "",
             JSON_STRING_LITERAL => "string literal",
             _ => return None,
         };

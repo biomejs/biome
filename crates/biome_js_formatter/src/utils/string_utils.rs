@@ -315,7 +315,9 @@ impl<'token> LiteralStringNormaliser<'token> {
         file_source: SourceFileKind,
     ) -> Cow<'token, str> {
         let quoteless = self.raw_content();
+        let is_new_keyword = quoteless == "new";
         let can_remove_quotes = !self.is_preserve_quote_properties()
+            && !is_new_keyword
             && (self.can_remove_number_quotes_by_file_type(file_source) || is_js_ident(quoteless));
         if can_remove_quotes {
             Cow::Owned(quoteless.to_string())

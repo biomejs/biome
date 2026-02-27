@@ -1,0 +1,138 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: with-functions.jsx
+---
+# Input
+```jsx
+// With functions option configured, utility functions should be checked
+
+// Should detect duplicates in cn()
+cn("flex flex");
+cn("p-4 m-2 p-4");
+
+// Should detect duplicates in clsx()
+clsx("hover:bg-blue hover:bg-blue");
+
+// Should detect duplicates in cva()
+cva("text-red text-red");
+
+// Should detect duplicates in object keys
+cn({ "flex flex": isActive });
+
+// Valid: no duplicates
+cn("flex p-4 m-2");
+clsx("hover:bg-blue focus:bg-red");
+
+```
+
+# Diagnostics
+```
+with-functions.jsx:4:4 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string contains a duplicate class.
+  
+    3 │ // Should detect duplicates in cn()
+  > 4 │ cn("flex flex");
+      │    ^^^^^^^^^^^
+    5 │ cn("p-4 m-2 p-4");
+    6 │ 
+  
+  i The class flex appears multiple times.
+  
+  i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
+  
+  i Safe fix: Remove the duplicate classes.
+  
+    4 │ cn("flex·flex");
+      │         -----   
+
+```
+
+```
+with-functions.jsx:5:4 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string contains a duplicate class.
+  
+    3 │ // Should detect duplicates in cn()
+    4 │ cn("flex flex");
+  > 5 │ cn("p-4 m-2 p-4");
+      │    ^^^^^^^^^^^^^
+    6 │ 
+    7 │ // Should detect duplicates in clsx()
+  
+  i The class p-4 appears multiple times.
+  
+  i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
+  
+  i Safe fix: Remove the duplicate classes.
+  
+    5 │ cn("p-4·m-2·p-4");
+      │            ----   
+
+```
+
+```
+with-functions.jsx:8:6 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string contains a duplicate class.
+  
+     7 │ // Should detect duplicates in clsx()
+   > 8 │ clsx("hover:bg-blue hover:bg-blue");
+       │      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ // Should detect duplicates in cva()
+  
+  i The class hover:bg-blue appears multiple times.
+  
+  i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
+  
+  i Safe fix: Remove the duplicate classes.
+  
+    8 │ clsx("hover:bg-blue·hover:bg-blue");
+      │                    --------------   
+
+```
+
+```
+with-functions.jsx:11:5 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string contains a duplicate class.
+  
+    10 │ // Should detect duplicates in cva()
+  > 11 │ cva("text-red text-red");
+       │     ^^^^^^^^^^^^^^^^^^^
+    12 │ 
+    13 │ // Should detect duplicates in object keys
+  
+  i The class text-red appears multiple times.
+  
+  i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
+  
+  i Safe fix: Remove the duplicate classes.
+  
+    11 │ cva("text-red·text-red");
+       │              ---------   
+
+```
+
+```
+with-functions.jsx:14:6 assist/source/noDuplicateClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string contains a duplicate class.
+  
+    13 │ // Should detect duplicates in object keys
+  > 14 │ cn({ "flex flex": isActive });
+       │      ^^^^^^^^^^^
+    15 │ 
+    16 │ // Valid: no duplicates
+  
+  i The class flex appears multiple times.
+  
+  i Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
+  
+  i Safe fix: Remove the duplicate classes.
+  
+    14 │ cn({·"flex·flex":·isActive·});
+       │           -----               
+
+```

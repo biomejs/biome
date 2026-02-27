@@ -15,7 +15,7 @@ fn quick_test() {
 d { font: 1em SF Mono, Liberation Mono, sans-serif; }
 "#;
 
-    let parsed = parse_css(SOURCE, CssParserOptions::default());
+    let parsed = parse_css(SOURCE, CssFileSource::css(), CssParserOptions::default());
 
     let mut error_ranges: Vec<TextRange> = Vec::new();
     let options = AnalyzerOptions::default();

@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: long-inline-elements.html
 ---
+
 # Input
 
 ```html
@@ -40,6 +41,7 @@ Bracket same line: false
 Whitespace sensitivity: css
 Indent script and style: false
 Self close void elements: never
+Trailing newline: true
 -----
 
 ```html
@@ -60,4 +62,5 @@ ut risus vel sollicitudin. Maecenas eu bibendum lorem.<span
 	>Sed porttitor commodo commodo. Morbi luctus consequat maximus. Vestibulum
 	viverra libero quis lacus euismod, ut consequat ante convallis.
 </span>
+
 ```

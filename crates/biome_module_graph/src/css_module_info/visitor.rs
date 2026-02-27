@@ -1,6 +1,6 @@
 use crate::css_module_info::{CssImport, CssImports, CssModuleInfo};
 use crate::module_graph::ModuleGraphFsProxy;
-use biome_css_syntax::{AnyCssImportUrl, CssRoot};
+use biome_css_syntax::{AnyCssImportUrl, AnyCssRoot};
 use biome_resolver::{ResolveOptions, ResolvedPath, resolve};
 use biome_rowan::{AstNode, Text, WalkEvent};
 use camino::Utf8Path;
@@ -9,14 +9,14 @@ use std::ops::DerefMut;
 pub const SUPPORTED_EXTENSIONS: &[&str] = &["css"];
 
 pub(crate) struct CssModuleVisitor<'a> {
-    root: CssRoot,
+    root: AnyCssRoot,
     directory: &'a Utf8Path,
     fs_proxy: &'a ModuleGraphFsProxy<'a>,
 }
 
 impl<'a> CssModuleVisitor<'a> {
     pub(crate) fn new(
-        root: CssRoot,
+        root: AnyCssRoot,
         directory: &'a Utf8Path,
         fs_proxy: &'a ModuleGraphFsProxy,
     ) -> Self {

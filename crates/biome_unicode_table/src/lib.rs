@@ -4,9 +4,11 @@ use crate::bytes::DISPATCHER;
 use crate::tables::derived_property::{ID_Continue, ID_Start};
 
 mod bytes;
+mod punctuation;
 mod tables;
 
 pub use crate::bytes::Dispatch;
+pub use crate::punctuation::is_unicode_punctuation;
 
 /// Tests if `c` is a valid start of a CSS identifier
 #[inline]

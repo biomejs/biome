@@ -9,8 +9,9 @@ use crate::file_handlers::graphql::GraphqlFileHandler;
 use crate::file_handlers::ignore::IgnoreFileHandler;
 pub use crate::file_handlers::svelte::SvelteFileHandler;
 pub use crate::file_handlers::vue::VueFileHandler;
-use crate::settings::Settings;
+use crate::settings::{Settings, SettingsWithEditor};
 use crate::utils::growth_guard::GrowthGuard;
+use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
 use crate::workspace::{
     AnyEmbeddedSnippet, CodeAction, DocumentServices, FixAction, FixFileMode, FixFileResult,
     GetSyntaxTreeResult, PullActionsResult, PullDiagnosticsAndActionsResult, RenameResult,
@@ -42,6 +43,7 @@ use biome_js_syntax::{
 };
 use biome_json_analyze::METADATA as json_metadata;
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
+use biome_markdown_syntax::MdFileSource;
 use biome_module_graph::ModuleGraph;
 use biome_package::PackageJson;
 use biome_parser::AnyParse;
@@ -53,6 +55,7 @@ use either::Either;
 use grit::GritFileHandler;
 use html::HtmlFileHandler;
 pub use javascript::JsFormatterSettings;
+use markdown::MarkdownFileHandler;
 use rustc_hash::FxHashSet;
 use std::borrow::Cow;
 use std::collections::HashSet;
@@ -67,6 +70,7 @@ pub(crate) mod html;
 mod ignore;
 pub(crate) mod javascript;
 pub(crate) mod json;
+pub(crate) mod markdown;
 pub mod svelte;
 mod unknown;
 pub mod vue;
@@ -82,6 +86,7 @@ pub enum DocumentFileSource {
     Graphql(GraphqlFileSource),
     Html(HtmlFileSource),
     Grit(GritFileSource),
+    Markdown(MdFileSource),
     // Ignore files
     Ignore,
     #[default]
@@ -121,6 +126,12 @@ impl From<HtmlFileSource> for DocumentFileSource {
 impl From<GritFileSource> for DocumentFileSource {
     fn from(value: GritFileSource) -> Self {
         Self::Grit(value)
+    }
+}
+
+impl From<MdFileSource> for DocumentFileSource {
+    fn from(value: MdFileSource) -> Self {
+        Self::Markdown(value)
     }
 }
 
@@ -204,6 +215,9 @@ impl DocumentFileSource {
         if let Ok(file_source) = GritFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
+        if let Ok(file_source) = MdFileSource::try_from_extension(extension) {
+            return Ok(file_source.into());
+        }
         Err(FileSourceError::UnknownExtension)
     }
 
@@ -230,6 +244,9 @@ impl DocumentFileSource {
             return Ok(file_source.into());
         }
         if let Ok(file_source) = GritFileSource::try_from_language_id(language_id) {
+            return Ok(file_source.into());
+        }
+        if let Ok(file_source) = MdFileSource::try_from_language_id(language_id) {
             return Ok(file_source.into());
         }
         Err(FileSourceError::UnknownLanguageId)
@@ -370,6 +387,13 @@ impl DocumentFileSource {
         }
     }
 
+    pub fn to_markdown_file_source(&self) -> Option<MdFileSource> {
+        match self {
+            Self::Markdown(markdown) => Some(*markdown),
+            _ => None,
+        }
+    }
+
     /// The file can be parsed
     pub fn can_parse(path: &Utf8Path) -> bool {
         let file_source = Self::from(path);
@@ -379,7 +403,8 @@ impl DocumentFileSource {
             | Self::Graphql(_)
             | Self::Json(_)
             | Self::Html(_)
-            | Self::Grit(_) => true,
+            | Self::Grit(_)
+            | Self::Markdown(_) => true,
             Self::Ignore => false,
             Self::Unknown => false,
         }
@@ -394,7 +419,8 @@ impl DocumentFileSource {
             | Self::Graphql(_)
             | Self::Json(_)
             | Self::Html(_)
-            | Self::Grit(_) => true,
+            | Self::Grit(_)
+            | Self::Markdown(_) => true,
             Self::Ignore => true,
             Self::Unknown => false,
         }
@@ -404,12 +430,12 @@ impl DocumentFileSource {
     pub fn can_contain_embeds(path: &Utf8Path, experimental_full_html_support: bool) -> bool {
         let file_source = Self::from_path(path, experimental_full_html_support);
         match file_source {
-            Self::Html(_) => true,
-            Self::Js(_)
-            | Self::Css(_)
+            Self::Html(_) | Self::Js(_) => true,
+            Self::Css(_)
             | Self::Graphql(_)
             | Self::Json(_)
             | Self::Grit(_)
+            | Self::Markdown(_)
             | Self::Ignore
             | Self::Unknown => false,
         }
@@ -444,6 +470,7 @@ impl std::fmt::Display for DocumentFileSource {
             Self::Graphql(_) => write!(fmt, "GraphQL"),
             Self::Html(_) => write!(fmt, "HTML"),
             Self::Grit(_) => write!(fmt, "Grit"),
+            Self::Markdown(_) => write!(fmt, "Markdown"),
             Self::Ignore => write!(fmt, "Ignore"),
             Self::Unknown => write!(fmt, "Unknown"),
         }
@@ -459,7 +486,7 @@ impl biome_console::fmt::Display for DocumentFileSource {
 pub struct FixAllParams<'a> {
     pub(crate) parse: AnyParse,
     pub(crate) fix_file_mode: FixFileMode,
-    pub(crate) settings: &'a Settings,
+    pub(crate) settings: &'a SettingsWithEditor<'a>,
     /// Whether it should format the code action
     pub(crate) should_format: bool,
     pub(crate) biome_path: &'a BiomePath,
@@ -492,13 +519,21 @@ pub struct ParseResult {
     pub(crate) language: Option<DocumentFileSource>,
 }
 
+#[derive(Default)]
 pub struct ParseEmbedResult {
     pub(crate) nodes: Vec<(AnyEmbeddedSnippet, DocumentFileSource)>,
 }
 
-type Parse = fn(&BiomePath, DocumentFileSource, &str, &Settings, &mut NodeCache) -> ParseResult;
-type ParseEmbeddedNodes =
-    fn(&AnyParse, &BiomePath, &DocumentFileSource, &Settings, &mut NodeCache) -> ParseEmbedResult;
+type Parse =
+    fn(&BiomePath, DocumentFileSource, &str, &SettingsWithEditor, &mut NodeCache) -> ParseResult;
+type ParseEmbeddedNodes = fn(
+    &AnyParse,
+    &BiomePath,
+    &DocumentFileSource,
+    &SettingsWithEditor,
+    &mut NodeCache,
+    &mut EmbeddedBuilder,
+) -> ParseEmbedResult;
 #[derive(Default)]
 pub struct ParserCapabilities {
     /// Parse a file
@@ -509,8 +544,12 @@ pub struct ParserCapabilities {
 
 type DebugSyntaxTree = fn(&BiomePath, AnyParse) -> GetSyntaxTreeResult;
 type DebugControlFlow = fn(AnyParse, TextSize) -> String;
-type DebugFormatterIR =
-    fn(&BiomePath, &DocumentFileSource, AnyParse, &Settings) -> Result<String, WorkspaceError>;
+type DebugFormatterIR = fn(
+    &BiomePath,
+    &DocumentFileSource,
+    AnyParse,
+    &SettingsWithEditor,
+) -> Result<String, WorkspaceError>;
 type DebugTypeInfo =
     fn(&BiomePath, Option<AnyParse>, Arc<ModuleGraph>) -> Result<String, WorkspaceError>;
 type DebugRegisteredTypes = fn(&BiomePath, AnyParse) -> Result<String, WorkspaceError>;
@@ -535,7 +574,7 @@ pub struct DebugCapabilities {
 #[derive(Debug)]
 pub(crate) struct LintParams<'a> {
     pub(crate) parse: AnyParse,
-    pub(crate) settings: &'a Settings,
+    pub(crate) settings: &'a SettingsWithEditor<'a>,
     pub(crate) language: DocumentFileSource,
     pub(crate) path: &'a BiomePath,
     pub(crate) only: &'a [AnalyzerSelector],
@@ -549,11 +588,12 @@ pub(crate) struct LintParams<'a> {
     pub(crate) pull_code_actions: bool,
     pub(crate) diagnostic_offset: Option<TextSize>,
     pub(crate) document_services: &'a DocumentServices,
+    pub(crate) snippet_services: Option<&'a DocumentServices>,
 }
 
 pub(crate) struct DiagnosticsAndActionsParams<'a> {
     pub(crate) parse: AnyParse,
-    pub(crate) settings: &'a Settings,
+    pub(crate) settings: &'a SettingsWithEditor<'a>,
     pub(crate) language: DocumentFileSource,
     pub(crate) path: &'a BiomePath,
     pub(crate) only: &'a [AnalyzerSelector],
@@ -565,7 +605,6 @@ pub(crate) struct DiagnosticsAndActionsParams<'a> {
     pub(crate) enabled_selectors: &'a [AnalyzerSelector],
     pub(crate) plugins: AnalyzerPluginVec,
     pub(crate) diagnostic_offset: Option<TextSize>,
-    #[expect(unused)]
     pub(crate) document_services: &'a DocumentServices,
 }
 
@@ -596,7 +635,10 @@ impl<'a> ProcessLint<'a> {
             // - if a single rule is run.
             ignores_suppression_comment: !params.categories.contains(RuleCategory::Lint)
                 || !params.only.is_empty(),
-            rules: params.settings.as_linter_rules(params.path.as_path()),
+            rules: params
+                .settings
+                .as_ref()
+                .as_linter_rules(params.path.as_path()),
             pull_code_actions: params.pull_code_actions,
             diagnostic_offset: params.diagnostic_offset,
         }
@@ -899,7 +941,7 @@ impl ProcessDiagnosticsAndActions {
 pub(crate) struct CodeActionsParams<'a> {
     pub(crate) parse: AnyParse,
     pub(crate) range: Option<TextRange>,
-    pub(crate) settings: &'a Settings,
+    pub(crate) settings: &'a SettingsWithEditor<'a>,
     pub(crate) path: &'a BiomePath,
     pub(crate) module_graph: Arc<ModuleGraph>,
     pub(crate) project_layout: Arc<ProjectLayout>,
@@ -942,20 +984,24 @@ pub struct AnalyzerCapabilities {
     pub(crate) pull_diagnostics_and_actions: Option<PullDiagnosticsAndActions>,
 }
 
-type Format =
-    fn(&BiomePath, &DocumentFileSource, AnyParse, &Settings) -> Result<Printed, WorkspaceError>;
+type Format = fn(
+    &BiomePath,
+    &DocumentFileSource,
+    AnyParse,
+    &SettingsWithEditor,
+) -> Result<Printed, WorkspaceError>;
 type FormatRange = fn(
     &BiomePath,
     &DocumentFileSource,
     AnyParse,
-    &Settings,
+    &SettingsWithEditor,
     TextRange,
 ) -> Result<Printed, WorkspaceError>;
 type FormatOnType = fn(
     &BiomePath,
     &DocumentFileSource,
     AnyParse,
-    &Settings,
+    &SettingsWithEditor,
     TextSize,
 ) -> Result<Printed, WorkspaceError>;
 
@@ -963,7 +1009,7 @@ type FormatEmbedded = fn(
     &BiomePath,
     &DocumentFileSource,
     AnyParse,
-    &Settings,
+    &SettingsWithEditor,
     Vec<FormatEmbedNode>,
 ) -> Result<Printed, WorkspaceError>;
 
@@ -986,14 +1032,14 @@ pub(crate) struct FormatterCapabilities {
     pub(crate) format_embedded: Option<FormatEmbedded>,
 }
 
-type Enabled = fn(&Utf8Path, &Settings) -> bool;
+type Enabled = fn(&Utf8Path, &SettingsWithEditor) -> bool;
 
 type Search = fn(
     &BiomePath,
     &DocumentFileSource,
     AnyParse,
     &GritQuery,
-    &Settings,
+    &SettingsWithEditor,
 ) -> Result<Vec<TextRange>, WorkspaceError>;
 
 #[derive(Default)]
@@ -1030,6 +1076,7 @@ pub(crate) struct Features {
     graphql: GraphqlFileHandler,
     html: HtmlFileHandler,
     grit: GritFileHandler,
+    markdown: MarkdownFileHandler,
     ignore: IgnoreFileHandler,
 }
 
@@ -1045,6 +1092,7 @@ impl Features {
             graphql: GraphqlFileHandler {},
             html: HtmlFileHandler {},
             grit: GritFileHandler {},
+            markdown: MarkdownFileHandler {},
             ignore: IgnoreFileHandler {},
             unknown: UnknownFileHandler::default(),
         }
@@ -1057,7 +1105,7 @@ impl Features {
             DocumentFileSource::Js(source) => match source.as_embedding_kind() {
                 EmbeddingKind::Astro { .. } => self.astro.capabilities(),
                 EmbeddingKind::Vue { .. } => self.vue.capabilities(),
-                EmbeddingKind::Svelte => self.svelte.capabilities(),
+                EmbeddingKind::Svelte { .. } => self.svelte.capabilities(),
                 EmbeddingKind::None => self.js.capabilities(),
             },
             DocumentFileSource::Json(_) => self.json.capabilities(),
@@ -1065,6 +1113,7 @@ impl Features {
             DocumentFileSource::Graphql(_) => self.graphql.capabilities(),
             DocumentFileSource::Html(_) => self.html.capabilities(),
             DocumentFileSource::Grit(_) => self.grit.capabilities(),
+            DocumentFileSource::Markdown(_) => self.markdown.capabilities(),
             DocumentFileSource::Ignore => self.ignore.capabilities(),
             DocumentFileSource::Unknown => self.unknown.capabilities(),
         }
@@ -1186,7 +1235,7 @@ pub(crate) fn search(
     _file_source: &DocumentFileSource,
     parse: AnyParse,
     query: &GritQuery,
-    _settings: &Settings,
+    _settings: &SettingsWithEditor,
 ) -> Result<Vec<TextRange>, WorkspaceError> {
     let result = query
         .execute(GritTargetFile::new(path.as_path(), parse))
@@ -1901,6 +1950,34 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
             .and_then(|path| self.project_layout.find_node_manifest_for_path(path))
             .map(|(_, manifest)| manifest);
 
+        // Query tsconfig.json for JSX factory settings if jsx_runtime is ReactClassic
+        // and the factory settings are not already set
+        if let Some(path) = self.path
+            && analyzer_options.jsx_runtime()
+                == Some(biome_analyze::options::JsxRuntime::ReactClassic)
+        {
+            if analyzer_options.jsx_factory().is_none() {
+                let factory = self
+                    .project_layout
+                    .query_tsconfig_for_path(path, |tsconfig| {
+                        tsconfig.jsx_factory_identifier().map(|s| s.to_string())
+                    })
+                    .flatten();
+                analyzer_options.set_jsx_factory(factory.map(|s| s.into()));
+            }
+            if analyzer_options.jsx_fragment_factory().is_none() {
+                let fragment_factory = self
+                    .project_layout
+                    .query_tsconfig_for_path(path, |tsconfig| {
+                        tsconfig
+                            .jsx_fragment_factory_identifier()
+                            .map(|s| s.to_string())
+                    })
+                    .flatten();
+                analyzer_options.set_jsx_fragment_factory(fragment_factory.map(|s| s.into()));
+            }
+        }
+
         let mut lint = LintVisitor::new(
             self.only,
             self.skip,
@@ -1931,5 +2008,43 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
         disabled_rules.extend(assists_disabled_rules);
 
         (enabled_rules, disabled_rules, analyzer_options)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{DocumentFileSource, Features};
+    use camino::Utf8Path;
+
+    #[test]
+    fn markdown_file_source_detection_and_capabilities() {
+        let source = DocumentFileSource::from_path(Utf8Path::new("docs/readme.md"), false);
+        assert!(matches!(source, DocumentFileSource::Unknown));
+
+        let language_source = DocumentFileSource::from_language_id("markdown");
+        assert!(matches!(language_source, DocumentFileSource::Unknown));
+
+        assert!(!DocumentFileSource::can_parse(Utf8Path::new(
+            "docs/readme.md"
+        )));
+        assert!(!DocumentFileSource::can_read(Utf8Path::new(
+            "docs/readme.md"
+        )));
+        assert!(!DocumentFileSource::can_contain_embeds(
+            Utf8Path::new("docs/readme.md"),
+            false
+        ));
+    }
+
+    #[test]
+    fn markdown_features_provide_formatter_capabilities() {
+        let features = Features::new();
+        let capabilities = features.get_capabilities(DocumentFileSource::from_path(
+            Utf8Path::new("doc.md"),
+            false,
+        ));
+
+        assert!(capabilities.formatter.format.is_none());
+        assert!(capabilities.parser.parse.is_none());
     }
 }

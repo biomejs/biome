@@ -1,5 +1,6 @@
 use super::*;
 use biome_js_syntax::{AnyJsRoot, JsSyntaxNode, TextRange, TsConditionalType, TsTypeParameterName};
+use biome_rowan::SyntaxNodePtr;
 use rustc_hash::{FxHashMap, FxHashSet};
 use std::collections::hash_map::Entry;
 
@@ -66,6 +67,7 @@ impl SemanticModelBuilder {
             // Accessible from scopes, closures
             JS_MODULE
             | JS_SCRIPT
+            | JS_EXPRESSION_TEMPLATE_ROOT
             | TS_DECLARATION_MODULE
             | JS_FUNCTION_DECLARATION
             | JS_FUNCTION_EXPRESSION
@@ -337,7 +339,7 @@ impl SemanticModelBuilder {
     #[inline]
     pub fn build(self) -> SemanticModel {
         let data = SemanticModelData {
-            root: self.root,
+            root: self.root.syntax().as_send().expect("To be a root node"),
             scopes: self.scopes,
             scope_by_range: Lapper::new(
                 self.scope_range_by_start
@@ -347,8 +349,16 @@ impl SemanticModelBuilder {
                     .collect(),
             ),
             scope_hoisted_to_by_range: self.scope_hoisted_to_by_range,
-            binding_node_by_start: self.binding_node_by_start,
-            scope_node_by_range: self.scope_node_by_range,
+            binding_node_by_start: self
+                .binding_node_by_start
+                .into_iter()
+                .map(|(pos, node)| (pos, SyntaxNodePtr::new(&node)))
+                .collect(),
+            scope_node_by_range: self
+                .scope_node_by_range
+                .into_iter()
+                .map(|(pos, node)| (pos, SyntaxNodePtr::new(&node)))
+                .collect(),
             bindings: self.bindings,
             bindings_by_start: self.bindings_by_start,
             declared_at_by_start: self.declared_at_by_start,

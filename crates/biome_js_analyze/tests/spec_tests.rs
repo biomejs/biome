@@ -1,3 +1,4 @@
+#![expect(clippy::large_stack_arrays)]
 use biome_analyze::{
     AnalysisFilter, AnalyzerAction, AnalyzerPluginSlice, ControlFlow, Never, Queryable,
     RegistryVisitor, Rule, RuleDomain, RuleFilter, RuleGroup,
@@ -6,6 +7,7 @@ use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_fs::OsFileSystem;
 use biome_js_analyze::JsAnalyzerServices;
 use biome_js_parser::{JsParserOptions, parse};
+use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_js_syntax::{AnyJsRoot, JsFileSource, JsLanguage, ModuleKind};
 use biome_package::PackageType;
 use biome_plugin_loader::AnalyzerGritPlugin;
@@ -58,7 +60,8 @@ impl RegistryVisitor<JsLanguage> for NeedsModuleGraph<'_> {
         if self
             .enabled_rules
             .is_some_and(|enabled_rules| enabled_rules.contains(&filter))
-            && R::METADATA.domains.contains(&RuleDomain::Project)
+            && (R::METADATA.domains.contains(&RuleDomain::Project)
+                || R::METADATA.domains.contains(&RuleDomain::Types))
         {
             self.needs_module_graph = true;
         }
@@ -180,7 +183,31 @@ pub(crate) fn analyze_and_snap(
     let parsed = parse(input_code, source_type, parser_options);
     let root = parsed.tree();
 
-    let options = create_analyzer_options::<JsLanguage>(input_file, &mut diagnostics);
+    let mut options = create_analyzer_options::<JsLanguage>(input_file, &mut diagnostics);
+
+    // Query tsconfig.json for JSX factory settings if jsx_runtime is ReactClassic
+    // and the factory settings are not already set
+    use biome_analyze::options::JsxRuntime;
+    if options.jsx_runtime() == Some(JsxRuntime::ReactClassic) {
+        if options.jsx_factory().is_none() {
+            let factory = project_layout
+                .query_tsconfig_for_path(input_file, |tsconfig| {
+                    tsconfig.jsx_factory_identifier().map(|s| s.to_string())
+                })
+                .flatten();
+            options.set_jsx_factory(factory.map(|s| s.into()));
+        }
+        if options.jsx_fragment_factory().is_none() {
+            let fragment_factory = project_layout
+                .query_tsconfig_for_path(input_file, |tsconfig| {
+                    tsconfig
+                        .jsx_fragment_factory_identifier()
+                        .map(|s| s.to_string())
+                })
+                .flatten();
+            options.set_jsx_fragment_factory(fragment_factory.map(|s| s.into()));
+        }
+    }
 
     let needs_module_graph = NeedsModuleGraph::new(filter.enabled_rules).compute();
     let module_graph = if needs_module_graph {
@@ -188,8 +215,14 @@ pub(crate) fn analyze_and_snap(
     } else {
         Default::default()
     };
+    let semantic_model = semantic_model(&root, SemanticModelOptions::default());
 
-    let services = JsAnalyzerServices::from((module_graph, project_layout, source_type));
+    let services = JsAnalyzerServices::from((
+        module_graph,
+        project_layout,
+        source_type,
+        Some(semantic_model),
+    ));
 
     let (_, errors) =
         biome_js_analyze::analyze(&root, filter, &options, plugins, services, |event| {

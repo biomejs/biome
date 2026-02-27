@@ -39,6 +39,11 @@ declare_lint_rule! {
     /// var { bar } = foo;
     /// ```
     ///
+    /// ```ts
+    /// // Variables with type annotations are ignored
+    /// const foo: string = object.foo;
+    /// ```
+    ///
     pub UseDestructuring {
         version: "2.3.9",
         name: "useDestructuring",
@@ -81,6 +86,10 @@ impl Rule for UseDestructuring {
                 let declaration = JsVariableDeclaration::cast(node.syntax().parent()?.parent()?)?;
                 let has_await_using = declaration.await_token().is_some();
                 if declaration.kind().ok()?.text_trimmed() == "using" || has_await_using {
+                    return None;
+                }
+
+                if node.variable_annotation().is_some() {
                     return None;
                 }
 

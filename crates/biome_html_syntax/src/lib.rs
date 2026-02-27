@@ -2,12 +2,16 @@
 
 #[macro_use]
 mod attr_ext;
+pub mod attribute_ext;
+mod directive_ext;
 pub mod element_ext;
 mod file_source;
 mod generated;
 mod script_type;
+pub mod static_value;
 mod string_ext;
 mod syntax_node;
+mod text_ext;
 
 pub use biome_rowan::{TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent};
 pub use file_source::{HtmlFileSource, HtmlTextExpressions, HtmlVariant};

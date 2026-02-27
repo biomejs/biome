@@ -1,0 +1,248 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+doThing().then(function() { a.then() })
+
+doThing().then(function() { b.catch() })
+
+doThing().then(function() { return a.then() })
+
+doThing().then(function() { return b.catch() })
+
+doThing().then(() => { a.then() })
+
+doThing().then(() => { b.catch() })
+
+doThing().then(() => a.then())
+
+doThing().then(() => b.catch())
+
+// references vars in closure but doesn't use them
+doThing()
+  .then(a => getB(a)
+    .then(b => getC(b))
+  )
+
+doThing()
+  .then(a => getB(a)
+    .then(b => getC(a, b)
+      .then(c => getD(a, c))
+    )
+  )
+```
+
+# Diagnostics
+```
+invalid.js:3:31 lint/nursery/noNestedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid nesting promises.
+  
+    1 │ /* should generate diagnostics */
+    2 │ 
+  > 3 │ doThing().then(function() { a.then() })
+      │                               ^^^^
+    4 │ 
+    5 │ doThing().then(function() { b.catch() })
+  
+  i Nesting promises can lead to harder-to-read code because it creates multiple levels of indentation and makes the flow of asynchronous operations less clear.
+  
+  i Consider refactoring the code to use promise chaining (foo.then().then()) instead of nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:31 lint/nursery/noNestedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid nesting promises.
+  
+    3 │ doThing().then(function() { a.then() })
+    4 │ 
+  > 5 │ doThing().then(function() { b.catch() })
+      │                               ^^^^^
+    6 │ 
+    7 │ doThing().then(function() { return a.then() })
+  
+  i Nesting promises can lead to harder-to-read code because it creates multiple levels of indentation and makes the flow of asynchronous operations less clear.
+  
+  i Consider refactoring the code to use promise chaining (foo.then().then()) instead of nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:38 lint/nursery/noNestedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid nesting promises.
+  
+    5 │ doThing().then(function() { b.catch() })
+    6 │ 
+  > 7 │ doThing().then(function() { return a.then() })
+      │                                      ^^^^
+    8 │ 
+    9 │ doThing().then(function() { return b.catch() })
+  
+  i Nesting promises can lead to harder-to-read code because it creates multiple levels of indentation and makes the flow of asynchronous operations less clear.
+  
+  i Consider refactoring the code to use promise chaining (foo.then().then()) instead of nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:38 lint/nursery/noNestedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid nesting promises.
+  
+     7 │ doThing().then(function() { return a.then() })
+     8 │ 
+   > 9 │ doThing().then(function() { return b.catch() })
+       │                                      ^^^^^
+    10 │ 
+    11 │ doThing().then(() => { a.then() })
+  
+  i Nesting promises can lead to harder-to-read code because it creates multiple levels of indentation and makes the flow of asynchronous operations less clear.
+  
+  i Consider refactoring the code to use promise chaining (foo.then().then()) instead of nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:26 lint/nursery/noNestedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid nesting promises.
+  
+     9 │ doThing().then(function() { return b.catch() })
+    10 │ 
+  > 11 │ doThing().then(() => { a.then() })
+       │                          ^^^^
+    12 │ 
+    13 │ doThing().then(() => { b.catch() })
+  
+  i Nesting promises can lead to harder-to-read code because it creates multiple levels of indentation and makes the flow of asynchronous operations less clear.
+  
+  i Consider refactoring the code to use promise chaining (foo.then().then()) instead of nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:26 lint/nursery/noNestedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid nesting promises.
+  
+    11 │ doThing().then(() => { a.then() })
+    12 │ 
+  > 13 │ doThing().then(() => { b.catch() })
+       │                          ^^^^^
+    14 │ 
+    15 │ doThing().then(() => a.then())
+  
+  i Nesting promises can lead to harder-to-read code because it creates multiple levels of indentation and makes the flow of asynchronous operations less clear.
+  
+  i Consider refactoring the code to use promise chaining (foo.then().then()) instead of nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:24 lint/nursery/noNestedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid nesting promises.
+  
+    13 │ doThing().then(() => { b.catch() })
+    14 │ 
+  > 15 │ doThing().then(() => a.then())
+       │                        ^^^^
+    16 │ 
+    17 │ doThing().then(() => b.catch())
+  
+  i Nesting promises can lead to harder-to-read code because it creates multiple levels of indentation and makes the flow of asynchronous operations less clear.
+  
+  i Consider refactoring the code to use promise chaining (foo.then().then()) instead of nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:24 lint/nursery/noNestedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid nesting promises.
+  
+    15 │ doThing().then(() => a.then())
+    16 │ 
+  > 17 │ doThing().then(() => b.catch())
+       │                        ^^^^^
+    18 │ 
+    19 │ // references vars in closure but doesn't use them
+  
+  i Nesting promises can lead to harder-to-read code because it creates multiple levels of indentation and makes the flow of asynchronous operations less clear.
+  
+  i Consider refactoring the code to use promise chaining (foo.then().then()) instead of nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:6 lint/nursery/noNestedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid nesting promises.
+  
+    20 │ doThing()
+    21 │   .then(a => getB(a)
+  > 22 │     .then(b => getC(b))
+       │      ^^^^
+    23 │   )
+    24 │ 
+  
+  i Nesting promises can lead to harder-to-read code because it creates multiple levels of indentation and makes the flow of asynchronous operations less clear.
+  
+  i Consider refactoring the code to use promise chaining (foo.then().then()) instead of nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:28:8 lint/nursery/noNestedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid nesting promises.
+  
+    26 │   .then(a => getB(a)
+    27 │     .then(b => getC(a, b)
+  > 28 │       .then(c => getD(a, c))
+       │        ^^^^
+    29 │     )
+    30 │   )
+  
+  i Nesting promises can lead to harder-to-read code because it creates multiple levels of indentation and makes the flow of asynchronous operations less clear.
+  
+  i Consider refactoring the code to use promise chaining (foo.then().then()) instead of nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

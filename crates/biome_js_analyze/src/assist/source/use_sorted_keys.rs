@@ -1,4 +1,4 @@
-use std::{borrow::Cow, ops::Not};
+use std::{borrow::Cow, cmp::Ordering, ops::Not};
 
 use biome_analyze::{
     Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource,
@@ -10,8 +10,10 @@ use biome_console::markup;
 use biome_deserialize::TextRange;
 use biome_diagnostics::{Applicability, category};
 use biome_js_factory::make;
-use biome_js_syntax::{JsObjectExpression, JsObjectMemberList, T};
-use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind};
+use biome_js_syntax::{
+    AnyJsExpression, AnyJsObjectMember, JsLanguage, JsObjectExpression, JsObjectMemberList, T,
+};
+use biome_rowan::{AstNode, BatchMutationExt, SyntaxResult, SyntaxToken, TriviaPieceKind};
 use biome_rule_options::use_sorted_keys::{SortOrder, UseSortedKeysOptions};
 use biome_string_case::comparable_token::ComparableToken;
 
@@ -129,6 +131,31 @@ declare_source_rule! {
     /// };
     /// ```
     ///
+    /// ### `groupByNesting`
+    /// When enabled, groups object keys by their value's nesting depth before sorting alphabetically.
+    /// Simple values (primitives, single-line arrays, and single-line objects) are sorted first,
+    /// followed by nested values (multi-line arrays and multi-line objects).
+    ///
+    /// > Default: `false`
+    ///
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "groupByNesting": true
+    ///     }
+    /// }
+    /// ```
+    /// ```js,use_options,expect_diagnostic
+    /// const obj = {
+    ///     name: "Sample",
+    ///     details: {
+    ///         description: "nested"
+    ///     },
+    ///     id: 123
+    /// };
+    /// ```
+    ///
     pub UseSortedKeys {
         version: "2.0.0",
         name: "useSortedKeys",
@@ -136,6 +163,67 @@ declare_source_rule! {
         recommended: false,
         sources: &[RuleSource::EslintPerfectionist("sort-objects").inspired()],
         fix_kind: FixKind::Safe,
+    }
+}
+
+/// Checks if an object/array spans multiple lines by examining CST trivia.
+/// For non-empty containers, checks the first token of the members/elements.
+/// For empty containers, checks the closing brace/bracket token.
+fn has_multiline_content(
+    members_first_token: Option<SyntaxToken<JsLanguage>>,
+    closing_token: SyntaxResult<SyntaxToken<JsLanguage>>,
+) -> bool {
+    members_first_token.map_or_else(
+        || {
+            closing_token
+                .map(|token| token.has_leading_newline())
+                .unwrap_or(false)
+        },
+        |token| token.has_leading_newline(),
+    )
+}
+
+/// Determines the nesting depth of a JavaScript expression for grouping purposes.
+fn get_nesting_depth(value: &AnyJsExpression) -> Ordering {
+    match value {
+        AnyJsExpression::JsObjectExpression(obj) => {
+            let members = obj.members();
+            if has_multiline_content(members.syntax().first_token(), obj.r_curly_token()) {
+                Ordering::Greater
+            } else {
+                Ordering::Equal
+            }
+        }
+        AnyJsExpression::JsArrayExpression(array) => {
+            let elements = array.elements();
+            if has_multiline_content(elements.syntax().first_token(), array.r_brack_token()) {
+                Ordering::Greater
+            } else {
+                Ordering::Equal
+            }
+        }
+        // Function and class expressions are treated as nested
+        AnyJsExpression::JsArrowFunctionExpression(_)
+        | AnyJsExpression::JsFunctionExpression(_)
+        | AnyJsExpression::JsClassExpression(_) => Ordering::Greater,
+        _ => Ordering::Equal,
+    }
+}
+
+/// Determines the nesting depth for an object member:
+/// - properties: based on value expression;
+/// - methods/getters/setters: treat as nested (1);
+/// - spreads/computed or unnamed: non-sortable (None).
+fn get_member_depth(node: &AnyJsObjectMember) -> Option<Ordering> {
+    match node {
+        AnyJsObjectMember::JsPropertyObjectMember(prop) => {
+            let value = prop.value().ok()?;
+            Some(get_nesting_depth(&value))
+        }
+        AnyJsObjectMember::JsMethodObjectMember(_)
+        | AnyJsObjectMember::JsGetterObjectMember(_)
+        | AnyJsObjectMember::JsSetterObjectMember(_) => Some(Ordering::Greater),
+        _ => None,
     }
 }
 
@@ -153,23 +241,46 @@ impl Rule for UseSortedKeys {
             SortOrder::Lexicographic => ComparableToken::lexicographic_cmp,
         };
 
-        is_separated_list_sorted_by(
-            ctx.query(),
-            |node| node.name().map(ComparableToken::new),
-            comparator,
-        )
-        .ok()?
-        .not()
-        .then_some(())
+        if options.group_by_nesting.unwrap_or(false) {
+            is_separated_list_sorted_by(
+                ctx.query(),
+                |node| {
+                    let depth = get_member_depth(node)?;
+                    let name = node.name().map(ComparableToken::new)?;
+                    Some((depth, name))
+                },
+                |(d1, n1), (d2, n2)| d1.cmp(d2).then_with(|| comparator(n1, n2)),
+            )
+            .ok()?
+            .not()
+            .then_some(())
+        } else {
+            is_separated_list_sorted_by(
+                ctx.query(),
+                |node| node.name().map(ComparableToken::new),
+                comparator,
+            )
+            .ok()?
+            .not()
+            .then_some(())
+        }
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
+        let options = ctx.options();
+        let message = if options.group_by_nesting.unwrap_or(false) {
+            markup! {
+                "The object properties are not sorted by nesting level and key."
+            }
+        } else {
+            markup! {
+                "The object properties are not sorted by key."
+            }
+        };
         Some(RuleDiagnostic::new(
             category!("assist/source/useSortedKeys"),
             ctx.query().range(),
-            markup! {
-                "The object properties are not sorted by key."
-            },
+            message,
         ))
     }
 
@@ -190,13 +301,27 @@ impl Rule for UseSortedKeys {
             SortOrder::Lexicographic => ComparableToken::lexicographic_cmp,
         };
 
-        let new_list = sorted_separated_list_by(
-            list,
-            |node| node.name().map(ComparableToken::new),
-            || make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-            comparator,
-        )
-        .ok()?;
+        let new_list = if options.group_by_nesting.unwrap_or(false) {
+            sorted_separated_list_by(
+                list,
+                |node| {
+                    let depth = get_member_depth(node)?;
+                    let name = node.name().map(ComparableToken::new)?;
+                    Some((depth, name))
+                },
+                || make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                |(d1, n1), (d2, n2)| d1.cmp(d2).then_with(|| comparator(n1, n2)),
+            )
+            .ok()?
+        } else {
+            sorted_separated_list_by(
+                list,
+                |node| node.name().map(ComparableToken::new),
+                || make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                comparator,
+            )
+            .ok()?
+        };
 
         let mut mutation = ctx.root().begin();
         mutation.replace_node_discard_trivia(list.clone(), new_list);

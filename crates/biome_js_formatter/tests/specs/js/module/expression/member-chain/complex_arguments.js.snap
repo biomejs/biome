@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/module/expression/member-chain/complex_arguments.js
 ---
+
 # Input
 
 ```js
@@ -36,10 +37,12 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
 client.execute(
 	Post.selectAll().where(Post.id.eq(42)).where(Post.published.eq(true)),
 );
+
 ```

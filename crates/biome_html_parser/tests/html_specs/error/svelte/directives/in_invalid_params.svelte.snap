@@ -1,0 +1,143 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<div in:fly={{ y: >Incomplete</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlBogusAttribute {
+                        items: [
+                            IN_KW@5..7 "in" [] [],
+                            HtmlBogus {
+                                items: [
+                                    COLON@7..8 ":" [] [],
+                                    SvelteName {
+                                        ident_token: IDENT@8..11 "fly" [] [],
+                                    },
+                                    SvelteDirectiveModifierList [],
+                                    HtmlBogus {
+                                        items: [
+                                            EQ@11..12 "=" [] [],
+                                            HtmlBogusTextExpression {
+                                                items: [
+                                                    L_CURLY@12..13 "{" [] [],
+                                                    L_CURLY@13..15 "{" [] [Whitespace(" ")],
+                                                    HTML_LITERAL@15..29 "y: >Incomplete" [] [],
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+                r_angle_token: missing (required),
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@29..30 "<" [] [],
+                slash_token: SLASH@30..31 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@31..34 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@34..35 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@35..36 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..36
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..35
+    0: HTML_ELEMENT@0..35
+      0: HTML_OPENING_ELEMENT@0..29
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..29
+          0: HTML_BOGUS_ATTRIBUTE@5..29
+            0: IN_KW@5..7 "in" [] []
+            1: HTML_BOGUS@7..29
+              0: COLON@7..8 ":" [] []
+              1: SVELTE_NAME@8..11
+                0: IDENT@8..11 "fly" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@11..11
+              3: HTML_BOGUS@11..29
+                0: EQ@11..12 "=" [] []
+                1: HTML_BOGUS_TEXT_EXPRESSION@12..29
+                  0: L_CURLY@12..13 "{" [] []
+                  1: L_CURLY@13..15 "{" [] [Whitespace(" ")]
+                  2: HTML_LITERAL@15..29 "y: >Incomplete" [] []
+        3: (empty)
+      1: HTML_ELEMENT_LIST@29..29
+      2: HTML_CLOSING_ELEMENT@29..35
+        0: L_ANGLE@29..30 "<" [] []
+        1: SLASH@30..31 "/" [] []
+        2: HTML_TAG_NAME@31..34
+          0: HTML_LITERAL@31..34 "div" [] []
+        3: R_ANGLE@34..35 ">" [] []
+  4: EOF@35..36 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+in_invalid_params.svelte:1:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Found a text expression that doesn't have the closing expression:
+  
+  > 1 │ <div in:fly={{ y: >Incomplete</div>
+      │             ^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i This is where the opening expression was found:
+  
+  > 1 │ <div in:fly={{ y: >Incomplete</div>
+      │             ^
+    2 │ 
+  
+in_invalid_params.svelte:1:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an attribute but instead found '<'.
+  
+  > 1 │ <div in:fly={{ y: >Incomplete</div>
+      │                              ^
+    2 │ 
+  
+  i Expected an attribute here.
+  
+  > 1 │ <div in:fly={{ y: >Incomplete</div>
+      │                              ^
+    2 │ 
+  
+```

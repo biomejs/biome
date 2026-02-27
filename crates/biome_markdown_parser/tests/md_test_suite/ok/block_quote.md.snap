@@ -1,0 +1,126 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+> This is a quote
+> It continues here
+
+> Another quote block
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdQuote {
+            prefix: MdQuotePrefix {
+                pre_marker_indent_token: missing (optional),
+                marker_token: R_ANGLE@0..1 ">" [] [],
+                post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@1..2 " " [] [],
+            },
+            content: MdBlockList [
+                MdParagraph {
+                    list: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@2..17 "This is a quote" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@17..18 "\n" [] [],
+                        },
+                        MdQuotePrefix {
+                            pre_marker_indent_token: missing (optional),
+                            marker_token: R_ANGLE@18..19 ">" [] [],
+                            post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@19..20 " " [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@20..37 "It continues here" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@37..38 "\n" [] [],
+                        },
+                    ],
+                    hard_line: missing (optional),
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@38..39 "\n" [] [],
+        },
+        MdQuote {
+            prefix: MdQuotePrefix {
+                pre_marker_indent_token: missing (optional),
+                marker_token: R_ANGLE@39..40 ">" [] [],
+                post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@40..41 " " [] [],
+            },
+            content: MdBlockList [
+                MdParagraph {
+                    list: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@41..60 "Another quote block" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@60..61 "\n" [] [],
+                        },
+                    ],
+                    hard_line: missing (optional),
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@61..61 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..61
+  0: (empty)
+  1: MD_BLOCK_LIST@0..61
+    0: MD_QUOTE@0..38
+      0: MD_QUOTE_PREFIX@0..2
+        0: (empty)
+        1: R_ANGLE@0..1 ">" [] []
+        2: MD_QUOTE_POST_MARKER_SPACE@1..2 " " [] []
+      1: MD_BLOCK_LIST@2..38
+        0: MD_PARAGRAPH@2..38
+          0: MD_INLINE_ITEM_LIST@2..38
+            0: MD_TEXTUAL@2..17
+              0: MD_TEXTUAL_LITERAL@2..17 "This is a quote" [] []
+            1: MD_TEXTUAL@17..18
+              0: MD_TEXTUAL_LITERAL@17..18 "\n" [] []
+            2: MD_QUOTE_PREFIX@18..20
+              0: (empty)
+              1: R_ANGLE@18..19 ">" [] []
+              2: MD_QUOTE_POST_MARKER_SPACE@19..20 " " [] []
+            3: MD_TEXTUAL@20..37
+              0: MD_TEXTUAL_LITERAL@20..37 "It continues here" [] []
+            4: MD_TEXTUAL@37..38
+              0: MD_TEXTUAL_LITERAL@37..38 "\n" [] []
+          1: (empty)
+    1: MD_NEWLINE@38..39
+      0: NEWLINE@38..39 "\n" [] []
+    2: MD_QUOTE@39..61
+      0: MD_QUOTE_PREFIX@39..41
+        0: (empty)
+        1: R_ANGLE@39..40 ">" [] []
+        2: MD_QUOTE_POST_MARKER_SPACE@40..41 " " [] []
+      1: MD_BLOCK_LIST@41..61
+        0: MD_PARAGRAPH@41..61
+          0: MD_INLINE_ITEM_LIST@41..61
+            0: MD_TEXTUAL@41..60
+              0: MD_TEXTUAL_LITERAL@41..60 "Another quote block" [] []
+            1: MD_TEXTUAL@60..61
+              0: MD_TEXTUAL_LITERAL@60..61 "\n" [] []
+          1: (empty)
+  2: EOF@61..61 "" [] []
+
+```

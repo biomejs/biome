@@ -1,0 +1,72 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/list/nested-checkbox.md
+---
+# Input
+
+```md
+* parent list item parent list item parent list item parent list item parent list item parent list item
+
+     * child list item child list item child list item child list item child list item child list item
+
+    paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph
+
+* [x] parent task list item parent task list item parent task list item parent task list item
+
+     * [x] child task list item child task list item child task list item child task list item
+
+    paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,9 +1,11 @@
+-- parent list item parent list item parent list item parent list item parent list item parent list item
+-  - child list item child list item child list item child list item child list item child list item
++* parent list item parent list item parent list item parent list item parent list item parent list item
++
++     * child list item child list item child list item child list item child list item child list item
++
++    paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph
+ 
+-  paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph
++* [x] parent task list item parent task list item parent task list item parent task list item
+ 
+-- [x] parent task list item parent task list item parent task list item parent task list item
+-  - [x] child task list item child task list item child task list item child task list item
++     * [x] child task list item child task list item child task list item child task list item
+ 
+-  paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph
++    paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph
+```
+
+# Output
+
+```md
+* parent list item parent list item parent list item parent list item parent list item parent list item
+
+     * child list item child list item child list item child list item child list item child list item
+
+    paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph
+
+* [x] parent task list item parent task list item parent task list item parent task list item
+
+     * [x] child task list item child task list item child task list item child task list item
+
+    paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph
+```
+
+# Lines exceeding max width of 80 characters
+```
+    1: * parent list item parent list item parent list item parent list item parent list item parent list item
+    3:      * child list item child list item child list item child list item child list item child list item
+    5:     paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph
+    7: * [x] parent task list item parent task list item parent task list item parent task list item
+    9:      * [x] child task list item child task list item child task list item child task list item
+   11:     paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph paragraph
+```

@@ -1,0 +1,74 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```js
+let x = 5
+
+```
+
+
+## AST
+
+```
+JsExpressionTemplateRoot {
+    expression: JsBogusExpression {
+        items: [
+            JsBogusExpression {
+                items: [
+                    JsBogus {
+                        items: [
+                            IDENT@0..4 "let" [] [Whitespace(" ")],
+                        ],
+                    },
+                ],
+            },
+            IDENT@4..6 "x" [] [Whitespace(" ")],
+            EQ@6..8 "=" [] [Whitespace(" ")],
+            JS_NUMBER_LITERAL@8..9 "5" [] [],
+        ],
+    },
+    eof_token: EOF@9..10 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_EXPRESSION_TEMPLATE_ROOT@0..10
+  0: JS_BOGUS_EXPRESSION@0..9
+    0: JS_BOGUS_EXPRESSION@0..4
+      0: JS_BOGUS@0..4
+        0: IDENT@0..4 "let" [] [Whitespace(" ")]
+    1: IDENT@4..6 "x" [] [Whitespace(" ")]
+    2: EQ@6..8 "=" [] [Whitespace(" ")]
+    3: JS_NUMBER_LITERAL@8..9 "5" [] []
+  1: EOF@9..10 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+statement.inline_expr.js:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Illegal use of reserved keyword `let` as an identifier in strict mode
+  
+  > 1 │ let x = 5
+      │ ^^^
+    2 │ 
+  
+statement.inline_expr.js:1:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Template expressions can only contain a single expression
+  
+  > 1 │ let x = 5
+      │     ^
+    2 │ 
+  
+  i Remove the extra code or split into multiple template expressions.
+  
+```

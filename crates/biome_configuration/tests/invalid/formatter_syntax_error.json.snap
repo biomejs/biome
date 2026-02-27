@@ -1,5 +1,5 @@
 ---
-source: crates/biome_service/tests/spec_tests.rs
+source: crates/biome_configuration/tests/spec_tests.rs
 expression: formatter_syntax_error.json
 ---
 formatter_syntax_error.json:4:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -14,6 +14,3 @@ formatter_syntax_error.json:4:2 parse ━━━━━━━━━━━━━━
     6 │ 
   
   i Remove }
-  
-
-

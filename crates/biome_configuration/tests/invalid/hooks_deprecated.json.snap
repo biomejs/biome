@@ -1,5 +1,5 @@
 ---
-source: crates/biome_service/tests/spec_tests.rs
+source: crates/biome_configuration/tests/spec_tests.rs
 expression: hooks_deprecated.json
 ---
 hooks_deprecated.json:9:16 deserialize  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -19,6 +19,3 @@ hooks_deprecated.json:9:16 deserialize  DEPRECATED  ━━━━━━━━━�
     18 │ 				}
   
   i useHookAtTopLevel now uses the React hook naming convention to determine hook calls.
-  
-
-

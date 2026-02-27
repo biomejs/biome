@@ -1,0 +1,53 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/scss/declaration/global-flag.scss
+---
+
+# Input
+
+```scss
+$global-var:initial;
+
+.component {
+  $global-var:
+		modified !global;
+  $another-var: value      !default         !global;
+  $third-var:value!global!default;
+  $fourth-var:test!default!global!default;
+  $fifth-var  :   value
+
+    !global    !default;
+  color:         $global-var;
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+Trailing newline: true
+-----
+
+```scss
+$global-var: initial;
+
+.component {
+	$global-var: modified !global;
+	$another-var: value !default !global;
+	$third-var: value !default !global;
+	$fourth-var: test !default !default !global;
+	$fifth-var: value !default !global;
+	color: $global-var;
+}
+
+```

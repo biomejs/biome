@@ -2,6 +2,7 @@
 source: crates/biome_html_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```svelte
@@ -23,15 +24,13 @@ HtmlRoot {
         SvelteDebugBlock {
             sv_curly_at_token: SV_CURLY_AT@0..2 "{@" [] [],
             debug_token: DEBUG_KW@2..7 "debug" [] [],
+            bindings: SvelteBindingList [],
+            r_curly_token: missing (required),
+        },
+        SvelteDebugBlock {
+            sv_curly_at_token: SV_CURLY_AT@7..10 "{@" [Newline("\n")] [],
+            debug_token: DEBUG_KW@10..16 "debug" [] [Whitespace(" ")],
             bindings: SvelteBindingList [
-                SvelteName {
-                    ident_token: IDENT@7..10 "{@" [Newline("\n")] [],
-                },
-                missing separator,
-                SvelteName {
-                    ident_token: IDENT@10..16 "debug" [] [Whitespace(" ")],
-                },
-                missing separator,
                 SvelteName {
                     ident_token: IDENT@16..25 "something" [] [],
                 },
@@ -61,20 +60,19 @@ HtmlRoot {
   1: (empty)
   2: (empty)
   3: HTML_ELEMENT_LIST@0..41
-    0: SVELTE_DEBUG_BLOCK@0..26
+    0: SVELTE_DEBUG_BLOCK@0..7
       0: SV_CURLY_AT@0..2 "{@" [] []
       1: DEBUG_KW@2..7 "debug" [] []
-      2: SVELTE_BINDING_LIST@7..25
-        0: SVELTE_NAME@7..10
-          0: IDENT@7..10 "{@" [Newline("\n")] []
-        1: (empty)
-        2: SVELTE_NAME@10..16
-          0: IDENT@10..16 "debug" [] [Whitespace(" ")]
-        3: (empty)
-        4: SVELTE_NAME@16..25
+      2: SVELTE_BINDING_LIST@7..7
+      3: (empty)
+    1: SVELTE_DEBUG_BLOCK@7..26
+      0: SV_CURLY_AT@7..10 "{@" [Newline("\n")] []
+      1: DEBUG_KW@10..16 "debug" [] [Whitespace(" ")]
+      2: SVELTE_BINDING_LIST@16..25
+        0: SVELTE_NAME@16..25
           0: IDENT@16..25 "something" [] []
       3: R_CURLY@25..26 "}" [] []
-    1: SVELTE_DEBUG_BLOCK@26..41
+    2: SVELTE_DEBUG_BLOCK@26..41
       0: SV_CURLY_AT@26..29 "{@" [Newline("\n")] []
       1: DEBUG_KW@29..35 "debug" [] [Whitespace(" ")]
       2: SVELTE_BINDING_LIST@35..40
@@ -88,28 +86,19 @@ HtmlRoot {
 ## Diagnostics
 
 ```
-debug.svelte:2:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+debug.svelte:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `debug`
+  × Unexpected value or character.
   
     1 │ {@debug
   > 2 │ {@debug something}
-      │   ^^^^^
+      │ ^^
     3 │ {@debug debug}
     4 │ 
   
-  i Remove debug
+  i Expected one of:
   
-debug.svelte:2:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `something`
-  
-    1 │ {@debug
-  > 2 │ {@debug something}
-      │         ^^^^^^^^^
-    3 │ {@debug debug}
-    4 │ 
-  
-  i Remove something
+  - name
+  - closing block
   
 ```

@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/declaration/interface.ts
 ---
+
 # Input
 
 ```ts
@@ -78,6 +79,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -138,4 +140,5 @@ x.y(() => {
 });
 
 interface A<> {}
+
 ```

@@ -1,0 +1,102 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: jsxDependencies.jsx
+---
+# Input
+```jsx
+import { getSubComponent } from "@external"
+import { useCallback, useEffect, useState } from "react"
+
+export function Component() {
+  const Sub = getSubComponent()
+
+  // Missing dependency 'Sub'
+  const renderItem = useCallback(() => <Sub />, [])
+
+  return renderItem
+}
+
+export function ComponentCorrect() {
+  const Sub = getSubComponent()
+
+  // Correct dependency
+  const renderItem = useCallback(() => <Sub />, [Sub])
+
+  return renderItem
+}
+
+export function LocalComponent() {
+    const [count, setCount] = useState(0);
+
+    const LocalSub = () => <div>{count}</div>
+
+    // Missing dependency 'LocalSub'
+    const memoized = useCallback(() => <LocalSub />, []);
+}
+
+```
+
+# Diagnostics
+```
+jsxDependencies.jsx:8:22 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook does not specify its dependency on Sub.
+  
+     7 │   // Missing dependency 'Sub'
+   > 8 │   const renderItem = useCallback(() => <Sub />, [])
+       │                      ^^^^^^^^^^^
+     9 │ 
+    10 │   return renderItem
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+     7 │   // Missing dependency 'Sub'
+   > 8 │   const renderItem = useCallback(() => <Sub />, [])
+       │                                         ^^^
+     9 │ 
+    10 │   return renderItem
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
+  i Either include it or remove the dependency array.
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    8 │ ··const·renderItem·=·useCallback(()·=>·<Sub·/>,·[Sub·])
+      │                                                  ++++  
+
+```
+
+```
+jsxDependencies.jsx:28:22 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook does not specify its dependency on LocalSub.
+  
+    27 │     // Missing dependency 'LocalSub'
+  > 28 │     const memoized = useCallback(() => <LocalSub />, []);
+       │                      ^^^^^^^^^^^
+    29 │ }
+    30 │ 
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    27 │     // Missing dependency 'LocalSub'
+  > 28 │     const memoized = useCallback(() => <LocalSub />, []);
+       │                                         ^^^^^^^^
+    29 │ }
+    30 │ 
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
+  i Either include it or remove the dependency array.
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    28 │ ····const·memoized·=·useCallback(()·=>·<LocalSub·/>,·[LocalSub·]);
+       │                                                       +++++++++   
+
+```

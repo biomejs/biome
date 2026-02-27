@@ -299,12 +299,16 @@ impl TypeData {
 
     /// Returns whether the given type has been inferred.
     ///
-    /// A type is considered inferred if it is anything except `Self::Unknown`
-    /// or an unknown reference, including an unexplicit `unknown` keyword.
+    /// A type is considered inferred if it is anything except `Self::Unknown`,
+    /// an unknown reference, or an unresolved typeof expression. Unresolved
+    /// typeof expressions represent type computations (e.g., return types of
+    /// cross-module function calls) that could not be flattened, so their
+    /// actual type is unknown.
     pub fn is_inferred(&self) -> bool {
         match self {
             Self::Reference(TypeReference::Resolved(resolved)) => *resolved != GLOBAL_UNKNOWN_ID,
             Self::Unknown => false,
+            Self::TypeofExpression(_) => false,
             _ => true,
         }
     }

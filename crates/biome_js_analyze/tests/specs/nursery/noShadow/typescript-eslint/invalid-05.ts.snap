@@ -15,7 +15,7 @@ const x = 1;
 ```
 invalid-05.ts:3:8 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable shadows another variable with the same name in the outer scope.
+  ! This variable shadows another variable with the same name in the outer scope.
   
     1 │ const x = 1;
     2 │ {

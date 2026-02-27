@@ -334,7 +334,7 @@ impl LanguageServer for LSPServer {
     #[tracing::instrument(level = "debug", skip_all)]
     async fn initialized(&self, _params: InitializedParams) {
         info!("Attempting to load the configuration from 'biome.json' file");
-        self.session.load_extension_settings().await;
+        self.session.load_extension_settings(None).await;
         self.session.load_workspace_settings(false).await;
 
         self.session.set_initialized();
@@ -356,8 +356,8 @@ impl LanguageServer for LSPServer {
 
     #[tracing::instrument(level = "debug", skip(self))]
     async fn did_change_configuration(&self, params: DidChangeConfigurationParams) {
-        let _ = params;
-        self.session.load_extension_settings().await;
+        let settings = params.settings;
+        self.session.load_extension_settings(Some(settings)).await;
         self.setup_capabilities().await;
         self.session.update_all_diagnostics().await;
     }
@@ -381,7 +381,7 @@ impl LanguageServer for LSPServer {
                         || watched_file.ends_with(".gitignore")
                         || watched_file.ends_with(".ignore"))
                 {
-                    self.session.load_extension_settings().await;
+                    self.session.load_extension_settings(None).await;
                     self.session.load_workspace_settings(true).await;
                     self.setup_capabilities().await;
                     self.session.update_all_diagnostics().await;

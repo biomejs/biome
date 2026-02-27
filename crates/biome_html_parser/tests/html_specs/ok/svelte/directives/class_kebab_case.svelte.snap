@@ -1,0 +1,220 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<div class:is-active={active}>Kebab case</div>
+<div class:has-error={error} class:is-loading={loading}>Multiple kebab</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteClassDirective {
+                        class_token: CLASS_KW@5..10 "class" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@10..11 ":" [] [],
+                            property: SvelteLiteral {
+                                value_token: HTML_LITERAL@11..20 "is-active" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@20..21 "=" [] [],
+                                value: HtmlAttributeSingleTextExpression {
+                                    l_curly_token: L_CURLY@21..22 "{" [] [],
+                                    expression: HtmlTextExpression {
+                                        html_literal_token: HTML_LITERAL@22..28 "active" [] [],
+                                    },
+                                    r_curly_token: R_CURLY@28..29 "}" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@29..30 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@30..40 "Kebab case" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@40..41 "<" [] [],
+                slash_token: SLASH@41..42 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@42..45 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@45..46 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@46..48 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@48..52 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteClassDirective {
+                        class_token: CLASS_KW@52..57 "class" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@57..58 ":" [] [],
+                            property: SvelteLiteral {
+                                value_token: HTML_LITERAL@58..67 "has-error" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@67..68 "=" [] [],
+                                value: HtmlAttributeSingleTextExpression {
+                                    l_curly_token: L_CURLY@68..69 "{" [] [],
+                                    expression: HtmlTextExpression {
+                                        html_literal_token: HTML_LITERAL@69..74 "error" [] [],
+                                    },
+                                    r_curly_token: R_CURLY@74..76 "}" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                    },
+                    SvelteClassDirective {
+                        class_token: CLASS_KW@76..81 "class" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@81..82 ":" [] [],
+                            property: SvelteLiteral {
+                                value_token: HTML_LITERAL@82..92 "is-loading" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@92..93 "=" [] [],
+                                value: HtmlAttributeSingleTextExpression {
+                                    l_curly_token: L_CURLY@93..94 "{" [] [],
+                                    expression: HtmlTextExpression {
+                                        html_literal_token: HTML_LITERAL@94..101 "loading" [] [],
+                                    },
+                                    r_curly_token: R_CURLY@101..102 "}" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@102..103 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@103..117 "Multiple kebab" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@117..118 "<" [] [],
+                slash_token: SLASH@118..119 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@119..122 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@122..123 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@123..124 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..124
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..123
+    0: HTML_ELEMENT@0..46
+      0: HTML_OPENING_ELEMENT@0..30
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..29
+          0: SVELTE_CLASS_DIRECTIVE@5..29
+            0: CLASS_KW@5..10 "class" [] []
+            1: SVELTE_DIRECTIVE_VALUE@10..29
+              0: COLON@10..11 ":" [] []
+              1: SVELTE_LITERAL@11..20
+                0: HTML_LITERAL@11..20 "is-active" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@20..20
+              3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@20..29
+                0: EQ@20..21 "=" [] []
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@21..29
+                  0: L_CURLY@21..22 "{" [] []
+                  1: HTML_TEXT_EXPRESSION@22..28
+                    0: HTML_LITERAL@22..28 "active" [] []
+                  2: R_CURLY@28..29 "}" [] []
+        3: R_ANGLE@29..30 ">" [] []
+      1: HTML_ELEMENT_LIST@30..40
+        0: HTML_CONTENT@30..40
+          0: HTML_LITERAL@30..40 "Kebab case" [] []
+      2: HTML_CLOSING_ELEMENT@40..46
+        0: L_ANGLE@40..41 "<" [] []
+        1: SLASH@41..42 "/" [] []
+        2: HTML_TAG_NAME@42..45
+          0: HTML_LITERAL@42..45 "div" [] []
+        3: R_ANGLE@45..46 ">" [] []
+    1: HTML_ELEMENT@46..123
+      0: HTML_OPENING_ELEMENT@46..103
+        0: L_ANGLE@46..48 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@48..52
+          0: HTML_LITERAL@48..52 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@52..102
+          0: SVELTE_CLASS_DIRECTIVE@52..76
+            0: CLASS_KW@52..57 "class" [] []
+            1: SVELTE_DIRECTIVE_VALUE@57..76
+              0: COLON@57..58 ":" [] []
+              1: SVELTE_LITERAL@58..67
+                0: HTML_LITERAL@58..67 "has-error" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@67..67
+              3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@67..76
+                0: EQ@67..68 "=" [] []
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@68..76
+                  0: L_CURLY@68..69 "{" [] []
+                  1: HTML_TEXT_EXPRESSION@69..74
+                    0: HTML_LITERAL@69..74 "error" [] []
+                  2: R_CURLY@74..76 "}" [] [Whitespace(" ")]
+          1: SVELTE_CLASS_DIRECTIVE@76..102
+            0: CLASS_KW@76..81 "class" [] []
+            1: SVELTE_DIRECTIVE_VALUE@81..102
+              0: COLON@81..82 ":" [] []
+              1: SVELTE_LITERAL@82..92
+                0: HTML_LITERAL@82..92 "is-loading" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@92..92
+              3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@92..102
+                0: EQ@92..93 "=" [] []
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@93..102
+                  0: L_CURLY@93..94 "{" [] []
+                  1: HTML_TEXT_EXPRESSION@94..101
+                    0: HTML_LITERAL@94..101 "loading" [] []
+                  2: R_CURLY@101..102 "}" [] []
+        3: R_ANGLE@102..103 ">" [] []
+      1: HTML_ELEMENT_LIST@103..117
+        0: HTML_CONTENT@103..117
+          0: HTML_LITERAL@103..117 "Multiple kebab" [] []
+      2: HTML_CLOSING_ELEMENT@117..123
+        0: L_ANGLE@117..118 "<" [] []
+        1: SLASH@118..119 "/" [] []
+        2: HTML_TAG_NAME@119..122
+          0: HTML_LITERAL@119..122 "div" [] []
+        3: R_ANGLE@122..123 ">" [] []
+  4: EOF@123..124 "" [Newline("\n")] []
+
+```

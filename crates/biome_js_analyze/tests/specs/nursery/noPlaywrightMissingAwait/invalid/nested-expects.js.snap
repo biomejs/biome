@@ -1,0 +1,126 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: nested-expects.js
+---
+# Input
+```js
+/* should generate diagnostics */
+// Test nested expect calls and chaining
+test('nested not operator', async ({ page }) => {
+    expect(page).not.toBeVisible();
+});
+
+test('chained not and soft', async ({ page }) => {
+    expect.soft(page).not.toHaveText("foo");
+});
+
+test('multiple not calls', async ({ page }) => {
+    expect(page).not.not.toBeEnabled();
+});
+
+test('expect inside inner function is not returned by outer return', async ({ page }) => {
+    return async function() {
+        expect(page).toBeVisible();
+    }
+});
+
+```
+
+# Diagnostics
+```
+nested-expects.js:4:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Async matcher toBeVisible must be awaited or returned.
+  
+    2 │ // Test nested expect calls and chaining
+    3 │ test('nested not operator', async ({ page }) => {
+  > 4 │     expect(page).not.toBeVisible();
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ });
+    6 │ 
+  
+  i Async matchers return a Promise that must be handled.
+  
+  i Add await before the expression or return it from the function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await before the call.
+  
+    4 │ ····await·expect(page).not.toBeVisible();
+      │     ++++++                               
+
+```
+
+```
+nested-expects.js:8:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Async matcher toHaveText must be awaited or returned.
+  
+     7 │ test('chained not and soft', async ({ page }) => {
+   > 8 │     expect.soft(page).not.toHaveText("foo");
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ });
+    10 │ 
+  
+  i Async matchers return a Promise that must be handled.
+  
+  i Add await before the expression or return it from the function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await before the call.
+  
+    8 │ ····await·expect.soft(page).not.toHaveText("foo");
+      │     ++++++                                        
+
+```
+
+```
+nested-expects.js:12:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Async matcher toBeEnabled must be awaited or returned.
+  
+    11 │ test('multiple not calls', async ({ page }) => {
+  > 12 │     expect(page).not.not.toBeEnabled();
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ });
+    14 │ 
+  
+  i Async matchers return a Promise that must be handled.
+  
+  i Add await before the expression or return it from the function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await before the call.
+  
+    12 │ ····await·expect(page).not.not.toBeEnabled();
+       │     ++++++                                   
+
+```
+
+```
+nested-expects.js:17:9 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Async matcher toBeVisible must be awaited or returned.
+  
+    15 │ test('expect inside inner function is not returned by outer return', async ({ page }) => {
+    16 │     return async function() {
+  > 17 │         expect(page).toBeVisible();
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │     }
+    19 │ });
+  
+  i Async matchers return a Promise that must be handled.
+  
+  i Add await before the expression or return it from the function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await before the call.
+  
+    17 │ ········await·expect(page).toBeVisible();
+       │         ++++++                           
+
+```

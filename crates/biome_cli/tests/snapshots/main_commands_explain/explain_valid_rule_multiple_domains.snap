@@ -56,12 +56,24 @@ Invalid
  }
  ```
 
+ ```js,expect_diagnostic
+ function notAHook() {
+     useEffect();
+ }
+ ```
+
 Valid
 
  ```js
  function Component1() {
      useEffect();
  }
+ ```
+
+ ```js
+ test("the hook", () => {
+     renderHook(() => useHook());
+ });
  ```
 
 

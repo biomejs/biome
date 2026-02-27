@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: vue/component.vue
 ---
+
 # Input
 
 ```vue
@@ -27,8 +28,10 @@ Bracket same line: false
 Whitespace sensitivity: css
 Indent script and style: false
 Self close void elements: never
+Trailing newline: true
 -----
 
 ```vue
-<Base title="500"></Base>
+<Base title="500"> </Base>
+
 ```

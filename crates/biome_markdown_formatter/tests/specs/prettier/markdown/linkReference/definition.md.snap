@@ -1,0 +1,58 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/linkReference/definition.md
+---
+# Input
+
+```md
+[just-url]: https://example.com
+[url-with-short-title]: https://example.com "title"
+[url-with-long-title]: https://example.com "a long, long title. It's really really long. Here have words."
+[empty-title]: https://example.com "" 
+
+[long]: https://example.com/a-long-url/another-segment/yet-another-segment/a-really-long-file-name.php.aspx 
+[long-with-title]: https://example.com/a-long-url/another-segment/yet-another-segment/a-really-long-file-name.php.aspx "look a title!"
+[long-with-empty-title]: https://example.com/a-long-url/another-segment/yet-another-segment/a-really-long-file-name.php.aspx ""
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,7 +1,8 @@
+ [just-url]: https://example.com
+ [url-with-short-title]: https://example.com "title"
+ [url-with-long-title]: https://example.com "a long, long title. It's really really long. Here have words."
+-[empty-title]: https://example.com
+-[long]: https://example.com/a-long-url/another-segment/yet-another-segment/a-really-long-file-name.php.aspx
++[empty-title]: https://example.com "" 
++
++[long]: https://example.com/a-long-url/another-segment/yet-another-segment/a-really-long-file-name.php.aspx 
+ [long-with-title]: https://example.com/a-long-url/another-segment/yet-another-segment/a-really-long-file-name.php.aspx "look a title!"
+-[long-with-empty-title]: https://example.com/a-long-url/another-segment/yet-another-segment/a-really-long-file-name.php.aspx
++[long-with-empty-title]: https://example.com/a-long-url/another-segment/yet-another-segment/a-really-long-file-name.php.aspx ""
+```
+
+# Output
+
+```md
+[just-url]: https://example.com
+[url-with-short-title]: https://example.com "title"
+[url-with-long-title]: https://example.com "a long, long title. It's really really long. Here have words."
+[empty-title]: https://example.com "" 
+
+[long]: https://example.com/a-long-url/another-segment/yet-another-segment/a-really-long-file-name.php.aspx 
+[long-with-title]: https://example.com/a-long-url/another-segment/yet-another-segment/a-really-long-file-name.php.aspx "look a title!"
+[long-with-empty-title]: https://example.com/a-long-url/another-segment/yet-another-segment/a-really-long-file-name.php.aspx ""
+```
+
+# Lines exceeding max width of 80 characters
+```
+    3: [url-with-long-title]: https://example.com "a long, long title. It's really really long. Here have words."
+    6: [long]: https://example.com/a-long-url/another-segment/yet-another-segment/a-really-long-file-name.php.aspx 
+    7: [long-with-title]: https://example.com/a-long-url/another-segment/yet-another-segment/a-really-long-file-name.php.aspx "look a title!"
+    8: [long-with-empty-title]: https://example.com/a-long-url/another-segment/yet-another-segment/a-really-long-file-name.php.aspx ""
+```

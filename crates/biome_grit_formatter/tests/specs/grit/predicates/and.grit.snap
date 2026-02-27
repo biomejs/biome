@@ -1,8 +1,8 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: grit/predicates/and.grit
-snapshot_kind: text
 ---
+
 # Input
 
 ```grit
@@ -27,10 +27,12 @@ Indent width: 2
 Line ending: LF
 Line width: 80
 Attribute Position: Auto
+Trailing newline: true
 -----
 
 ```grit
 `console.$method('$message');` => `console.warn('$message');` where {
 	and { $message <: r"Hello, .*!", $method <: `log` }
 }
+
 ```

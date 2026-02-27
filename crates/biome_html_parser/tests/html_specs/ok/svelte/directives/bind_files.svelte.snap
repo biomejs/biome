@@ -1,0 +1,186 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<input type="file" bind:files={fileList} />
+<input type="file" multiple bind:files={files} />
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@0..1 "<" [] [],
+            name: HtmlTagName {
+                value_token: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [
+                HtmlAttribute {
+                    name: HtmlAttributeName {
+                        value_token: HTML_LITERAL@7..11 "type" [] [],
+                    },
+                    initializer: HtmlAttributeInitializerClause {
+                        eq_token: EQ@11..12 "=" [] [],
+                        value: HtmlString {
+                            value_token: HTML_STRING_LITERAL@12..19 "\"file\"" [] [Whitespace(" ")],
+                        },
+                    },
+                },
+                SvelteBindDirective {
+                    bind_token: BIND_KW@19..23 "bind" [] [],
+                    value: SvelteDirectiveValue {
+                        colon_token: COLON@23..24 ":" [] [],
+                        property: SvelteName {
+                            ident_token: IDENT@24..29 "files" [] [],
+                        },
+                        modifiers: SvelteDirectiveModifierList [],
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@29..30 "=" [] [],
+                            value: HtmlAttributeSingleTextExpression {
+                                l_curly_token: L_CURLY@30..31 "{" [] [],
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@31..39 "fileList" [] [],
+                                },
+                                r_curly_token: R_CURLY@39..41 "}" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                },
+            ],
+            slash_token: SLASH@41..42 "/" [] [],
+            r_angle_token: R_ANGLE@42..43 ">" [] [],
+        },
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@43..45 "<" [Newline("\n")] [],
+            name: HtmlTagName {
+                value_token: HTML_LITERAL@45..51 "input" [] [Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [
+                HtmlAttribute {
+                    name: HtmlAttributeName {
+                        value_token: HTML_LITERAL@51..55 "type" [] [],
+                    },
+                    initializer: HtmlAttributeInitializerClause {
+                        eq_token: EQ@55..56 "=" [] [],
+                        value: HtmlString {
+                            value_token: HTML_STRING_LITERAL@56..63 "\"file\"" [] [Whitespace(" ")],
+                        },
+                    },
+                },
+                HtmlAttribute {
+                    name: HtmlAttributeName {
+                        value_token: HTML_LITERAL@63..72 "multiple" [] [Whitespace(" ")],
+                    },
+                    initializer: missing (optional),
+                },
+                SvelteBindDirective {
+                    bind_token: BIND_KW@72..76 "bind" [] [],
+                    value: SvelteDirectiveValue {
+                        colon_token: COLON@76..77 ":" [] [],
+                        property: SvelteName {
+                            ident_token: IDENT@77..82 "files" [] [],
+                        },
+                        modifiers: SvelteDirectiveModifierList [],
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@82..83 "=" [] [],
+                            value: HtmlAttributeSingleTextExpression {
+                                l_curly_token: L_CURLY@83..84 "{" [] [],
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@84..89 "files" [] [],
+                                },
+                                r_curly_token: R_CURLY@89..91 "}" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                },
+            ],
+            slash_token: SLASH@91..92 "/" [] [],
+            r_angle_token: R_ANGLE@92..93 ">" [] [],
+        },
+    ],
+    eof_token: EOF@93..94 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..94
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..93
+    0: HTML_SELF_CLOSING_ELEMENT@0..43
+      0: L_ANGLE@0..1 "<" [] []
+      1: HTML_TAG_NAME@1..7
+        0: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@7..41
+        0: HTML_ATTRIBUTE@7..19
+          0: HTML_ATTRIBUTE_NAME@7..11
+            0: HTML_LITERAL@7..11 "type" [] []
+          1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@11..19
+            0: EQ@11..12 "=" [] []
+            1: HTML_STRING@12..19
+              0: HTML_STRING_LITERAL@12..19 "\"file\"" [] [Whitespace(" ")]
+        1: SVELTE_BIND_DIRECTIVE@19..41
+          0: BIND_KW@19..23 "bind" [] []
+          1: SVELTE_DIRECTIVE_VALUE@23..41
+            0: COLON@23..24 ":" [] []
+            1: SVELTE_NAME@24..29
+              0: IDENT@24..29 "files" [] []
+            2: SVELTE_DIRECTIVE_MODIFIER_LIST@29..29
+            3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@29..41
+              0: EQ@29..30 "=" [] []
+              1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@30..41
+                0: L_CURLY@30..31 "{" [] []
+                1: HTML_TEXT_EXPRESSION@31..39
+                  0: HTML_LITERAL@31..39 "fileList" [] []
+                2: R_CURLY@39..41 "}" [] [Whitespace(" ")]
+      3: SLASH@41..42 "/" [] []
+      4: R_ANGLE@42..43 ">" [] []
+    1: HTML_SELF_CLOSING_ELEMENT@43..93
+      0: L_ANGLE@43..45 "<" [Newline("\n")] []
+      1: HTML_TAG_NAME@45..51
+        0: HTML_LITERAL@45..51 "input" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@51..91
+        0: HTML_ATTRIBUTE@51..63
+          0: HTML_ATTRIBUTE_NAME@51..55
+            0: HTML_LITERAL@51..55 "type" [] []
+          1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@55..63
+            0: EQ@55..56 "=" [] []
+            1: HTML_STRING@56..63
+              0: HTML_STRING_LITERAL@56..63 "\"file\"" [] [Whitespace(" ")]
+        1: HTML_ATTRIBUTE@63..72
+          0: HTML_ATTRIBUTE_NAME@63..72
+            0: HTML_LITERAL@63..72 "multiple" [] [Whitespace(" ")]
+          1: (empty)
+        2: SVELTE_BIND_DIRECTIVE@72..91
+          0: BIND_KW@72..76 "bind" [] []
+          1: SVELTE_DIRECTIVE_VALUE@76..91
+            0: COLON@76..77 ":" [] []
+            1: SVELTE_NAME@77..82
+              0: IDENT@77..82 "files" [] []
+            2: SVELTE_DIRECTIVE_MODIFIER_LIST@82..82
+            3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@82..91
+              0: EQ@82..83 "=" [] []
+              1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@83..91
+                0: L_CURLY@83..84 "{" [] []
+                1: HTML_TEXT_EXPRESSION@84..89
+                  0: HTML_LITERAL@84..89 "files" [] []
+                2: R_CURLY@89..91 "}" [] [Whitespace(" ")]
+      3: SLASH@91..92 "/" [] []
+      4: R_ANGLE@92..93 ">" [] []
+  4: EOF@93..94 "" [Newline("\n")] []
+
+```

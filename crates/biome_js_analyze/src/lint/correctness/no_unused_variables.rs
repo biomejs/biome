@@ -1,4 +1,6 @@
 use crate::JsRuleAction;
+use crate::services::embedded_bindings::EmbeddedBindings;
+use crate::services::embedded_value_references::EmbeddedValueReferences;
 use crate::{services::semantic::Semantic, utils::rename::RenameSymbolExtensions};
 use biome_analyze::RuleSource;
 use biome_analyze::{FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
@@ -8,9 +10,10 @@ use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
 use biome_js_syntax::declaration_ext::is_in_ambient_context;
 use biome_js_syntax::{
-    AnyJsExpression, JsClassExpression, JsFileSource, JsForStatement, JsFunctionExpression,
-    JsIdentifierExpression, JsModuleItemList, JsSequenceExpression, JsSyntaxKind, JsSyntaxNode,
-    TsConditionalType, TsDeclarationModule, TsInferType,
+    AnyJsExpression, EmbeddingKind, JsClassExpression, JsFileSource, JsForStatement,
+    JsFunctionExpression, JsIdentifierExpression, JsModuleItemList, JsSequenceExpression,
+    JsSyntaxKind, JsSyntaxNode, TsConditionalType, TsDeclarationModule, TsInferType,
+    TsInterfaceDeclaration, TsTypeAliasDeclaration,
 };
 use biome_rowan::{AstNode, BatchMutationExt, Direction, SyntaxResult};
 use biome_rule_options::no_unused_variables::NoUnusedVariablesOptions;
@@ -90,6 +93,19 @@ declare_lint_rule! {
     /// const car = { brand: "Tesla", year: 2019, countryCode: "US" };
     /// const { brand, ...rest } = car;
     /// console.log(rest);
+    /// ```
+    ///
+    /// In Astro files, a top-level interface or a type alias named `Props` is always ignored
+    /// as it's implicitly read by the framework.
+    /// ```astro,ignore
+    /// ---
+    /// interface Props {
+    ///   name: string;
+    ///   greeting?: string;
+    /// }
+    ///
+    /// const { name, greeting } = Astro.props;
+    /// ---
     /// ```
     ///
     /// ## Options
@@ -292,10 +308,16 @@ impl Rule for NoUnusedVariables {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let binding = ctx.query();
         let model = ctx.model();
-        let is_declaration_file = ctx
-            .source_type::<JsFileSource>()
-            .language()
-            .is_definition_file();
+        let embedded_bindings = ctx
+            .get_service::<EmbeddedBindings>()
+            .expect("embedded bindings service");
+        let embedded_references = ctx
+            .get_service::<EmbeddedValueReferences>()
+            .expect("embedded references service");
+
+        let file_source = ctx.source_type::<JsFileSource>();
+
+        let is_declaration_file = file_source.language().is_definition_file();
         if is_declaration_file
             && let Some(items) = binding
                 .syntax()
@@ -312,9 +334,31 @@ impl Rule for NoUnusedVariables {
             }
         }
 
+        let binding_name = binding.name_token().ok()?;
+        let binding_name = binding_name.text_trimmed();
+
         // Ignore name prefixed with `_`
-        let is_underscore_prefixed = binding.name_token().ok()?.text_trimmed().starts_with('_');
-        if !is_underscore_prefixed && is_unused(model, binding) {
+        let is_underscore_prefixed = binding_name.starts_with('_');
+        let is_defined_in_embedded_binding = embedded_bindings.contains_binding(binding_name);
+        let is_used_as_reference = embedded_references.is_used_as_value(binding_name);
+
+        if is_underscore_prefixed || is_defined_in_embedded_binding || is_used_as_reference {
+            return None;
+        }
+
+        // In Astro files, a top-level type/interface `Props` is always ignored as it's implicitly
+        // read by the framework.
+        if binding_name == "Props"
+            && let EmbeddingKind::Astro { .. } = file_source.as_embedding_kind()
+            && let AnyJsIdentifierBinding::TsIdentifierBinding(binding) = binding
+            && (TsInterfaceDeclaration::can_cast(binding.syntax().parent()?.kind())
+                || TsTypeAliasDeclaration::can_cast(binding.syntax().parent()?.kind()))
+            && JsModuleItemList::can_cast(binding.syntax().grand_parent()?.kind())
+        {
+            return None;
+        }
+
+        if is_unused(model, binding) {
             suggested_fix_if_unused(binding, ctx.options())
         } else {
             None
@@ -341,15 +385,13 @@ impl Rule for NoUnusedVariables {
             AnyJsIdentifierBinding::TsLiteralEnumMemberName(node) => node.value().ok()?,
         };
 
-        let diag = RuleDiagnostic::new(
+        let mut diag = RuleDiagnostic::new(
             rule_category!(),
             binding.syntax().text_trimmed_range(),
             markup! {
                 "This "{symbol_type}" "<Emphasis>{binding_name.text_trimmed()}</Emphasis>" is unused."
             },
-        );
-
-        let mut diag = diag.note(
+        ).note(
             markup! {
                 "Unused variables are often the result of typos, incomplete refactors, or other sources of bugs."
             },

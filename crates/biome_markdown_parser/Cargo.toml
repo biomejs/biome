@@ -22,16 +22,31 @@ biome_markdown_factory = { workspace = true }
 biome_markdown_syntax  = { workspace = true }
 biome_parser           = { workspace = true }
 biome_rowan            = { workspace = true }
+biome_string_case      = { workspace = true }
 biome_unicode_table    = { workspace = true }
+# Optional dependency for test_utils feature (HTML rendering for spec tests)
+htmlize                = { version = "1.0.6", features = ["unescape"], optional = true }
+percent-encoding       = { version = "2.3.2", optional = true }
 tracing                = { workspace = true }
 unicode-bom            = { workspace = true }
 
 [dev-dependencies]
-biome_test_utils  = { path = "../biome_test_utils" }
-insta             = { workspace = true }
-quickcheck        = { workspace = true }
-quickcheck_macros = { workspace = true }
-tests_macros      = { path = "../tests_macros" }
+# Self-dependency to enable test_utils for integration tests.
+# Integration tests are compiled as separate crates and can only access public API,
+# so we need to enable the feature here to make to_html available for spec tests.
+biome_markdown_parser = { path = ".", features = ["test_utils"] }
+biome_test_utils      = { path = "../biome_test_utils" }
+insta                 = { workspace = true }
+quickcheck            = { workspace = true }
+quickcheck_macros     = { workspace = true }
+serde                 = { workspace = true, features = ["derive"] }
+serde_json            = { workspace = true }
+tests_macros          = { path = "../tests_macros" }
+
+[features]
+# Enables test utilities (to_html module) for CommonMark spec compliance testing.
+# Not included in production builds to avoid unnecessary dependencies and code.
+test_utils = ["dep:htmlize", "dep:percent-encoding"]
 
 [lints]
 workspace = true

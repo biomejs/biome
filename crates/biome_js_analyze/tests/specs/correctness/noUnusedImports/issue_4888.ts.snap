@@ -1,0 +1,49 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue_4888.ts
+---
+# Input
+```ts
+// Removing the last import should add `export {}` to preserve module context
+
+import {foo as _foo} from "foo";
+
+function foo():number {
+  return 0;
+}
+
+declare module "react" {
+  interface ImgHTMLAttributes<T> extends HTMLAttributes<T> {
+    fetchpriority?: "high" | "low" | "auto";
+  }
+}
+
+```
+
+# Diagnostics
+```
+issue_4888.ts:3:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    1 │ // Removing the last import should add `export {}` to preserve module context
+    2 │ 
+  > 3 │ import {foo as _foo} from "foo";
+      │        ^^^^^^^^^^^^^
+    4 │ 
+    5 │ function foo():number {
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+     1  1 │   // Removing the last import should add `export {}` to preserve module context
+     2  2 │   
+     3    │ - import·{foo·as·_foo}·from·"foo";
+        3 │ + export·{}//·Removing·the·last·import·should·add·`export·{}`·to·preserve·module·context
+        4 │ + 
+     4  5 │   
+     5  6 │   function foo():number {
+  
+
+```

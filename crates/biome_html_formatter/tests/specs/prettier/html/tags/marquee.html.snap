@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: html/tags/marquee.html
 ---
+
 # Input
 
 ```html
@@ -34,7 +35,7 @@ info: html/tags/marquee.html
 +  style="border:solid"
  >
 -  <marquee behavior="alternate">This text will bounce</marquee>
-+  <marquee behavior="alternate">This text will bounce </marquee>
++  <marquee behavior="alternate"> This text will bounce </marquee>
  </marquee>
 ```
 
@@ -52,6 +53,6 @@ info: html/tags/marquee.html
   behavior="alternate"
   style="border:solid"
 >
-  <marquee behavior="alternate">This text will bounce </marquee>
+  <marquee behavior="alternate"> This text will bounce </marquee>
 </marquee>
 ```

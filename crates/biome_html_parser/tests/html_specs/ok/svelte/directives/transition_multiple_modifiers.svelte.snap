@@ -1,0 +1,117 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<div transition:fade|global|local>Multiple modifiers</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteTransitionDirective {
+                        transition_token: TRANSITION_KW@5..15 "transition" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@15..16 ":" [] [],
+                            property: SvelteName {
+                                ident_token: IDENT@16..20 "fade" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [
+                                SvelteDirectiveModifier {
+                                    bitwise_or_token: PIPE@20..21 "|" [] [],
+                                    name: SvelteName {
+                                        ident_token: IDENT@21..27 "global" [] [],
+                                    },
+                                },
+                                SvelteDirectiveModifier {
+                                    bitwise_or_token: PIPE@27..28 "|" [] [],
+                                    name: SvelteName {
+                                        ident_token: IDENT@28..33 "local" [] [],
+                                    },
+                                },
+                            ],
+                            initializer: missing (optional),
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@33..34 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@34..52 "Multiple modifiers" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@52..53 "<" [] [],
+                slash_token: SLASH@53..54 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@54..57 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@57..58 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@58..59 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..59
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..58
+    0: HTML_ELEMENT@0..58
+      0: HTML_OPENING_ELEMENT@0..34
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..33
+          0: SVELTE_TRANSITION_DIRECTIVE@5..33
+            0: TRANSITION_KW@5..15 "transition" [] []
+            1: SVELTE_DIRECTIVE_VALUE@15..33
+              0: COLON@15..16 ":" [] []
+              1: SVELTE_NAME@16..20
+                0: IDENT@16..20 "fade" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@20..33
+                0: SVELTE_DIRECTIVE_MODIFIER@20..27
+                  0: PIPE@20..21 "|" [] []
+                  1: SVELTE_NAME@21..27
+                    0: IDENT@21..27 "global" [] []
+                1: SVELTE_DIRECTIVE_MODIFIER@27..33
+                  0: PIPE@27..28 "|" [] []
+                  1: SVELTE_NAME@28..33
+                    0: IDENT@28..33 "local" [] []
+              3: (empty)
+        3: R_ANGLE@33..34 ">" [] []
+      1: HTML_ELEMENT_LIST@34..52
+        0: HTML_CONTENT@34..52
+          0: HTML_LITERAL@34..52 "Multiple modifiers" [] []
+      2: HTML_CLOSING_ELEMENT@52..58
+        0: L_ANGLE@52..53 "<" [] []
+        1: SLASH@53..54 "/" [] []
+        2: HTML_TAG_NAME@54..57
+          0: HTML_LITERAL@54..57 "div" [] []
+        3: R_ANGLE@57..58 ">" [] []
+  4: EOF@58..59 "" [Newline("\n")] []
+
+```

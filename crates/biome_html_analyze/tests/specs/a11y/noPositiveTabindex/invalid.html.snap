@@ -1,0 +1,128 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<div tabindex="1"></div>
+<div tabindex="5"></div>
+<button tabindex="2"></button>
+<a href="#" tabindex="10"></a>
+<input tabindex="99" />
+
+```
+
+# Diagnostics
+```
+invalid.html:2:15 lint/a11y/noPositiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid positive values for the tabindex attribute.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <div tabindex="1"></div>
+      │               ^^^
+    3 │ <div tabindex="5"></div>
+    4 │ <button tabindex="2"></button>
+  
+  i Elements with a positive tabindex override natural page content order. This causes elements without a positive tab index to come last when navigating using a keyboard.
+  
+  i Use only 0 and -1 as tabindex values. Avoid using tabindex values greater than 0 and CSS properties that can change the order of focusable HTML elements.
+  
+  i Unsafe fix: Remove the tabindex attribute.
+  
+    2 │ <div·tabindex="1"></div>
+      │      ------------       
+
+```
+
+```
+invalid.html:3:15 lint/a11y/noPositiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid positive values for the tabindex attribute.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <div tabindex="1"></div>
+  > 3 │ <div tabindex="5"></div>
+      │               ^^^
+    4 │ <button tabindex="2"></button>
+    5 │ <a href="#" tabindex="10"></a>
+  
+  i Elements with a positive tabindex override natural page content order. This causes elements without a positive tab index to come last when navigating using a keyboard.
+  
+  i Use only 0 and -1 as tabindex values. Avoid using tabindex values greater than 0 and CSS properties that can change the order of focusable HTML elements.
+  
+  i Unsafe fix: Remove the tabindex attribute.
+  
+    3 │ <div·tabindex="5"></div>
+      │      ------------       
+
+```
+
+```
+invalid.html:4:18 lint/a11y/noPositiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid positive values for the tabindex attribute.
+  
+    2 │ <div tabindex="1"></div>
+    3 │ <div tabindex="5"></div>
+  > 4 │ <button tabindex="2"></button>
+      │                  ^^^
+    5 │ <a href="#" tabindex="10"></a>
+    6 │ <input tabindex="99" />
+  
+  i Elements with a positive tabindex override natural page content order. This causes elements without a positive tab index to come last when navigating using a keyboard.
+  
+  i Use only 0 and -1 as tabindex values. Avoid using tabindex values greater than 0 and CSS properties that can change the order of focusable HTML elements.
+  
+  i Unsafe fix: Remove the tabindex attribute.
+  
+    4 │ <button·tabindex="2"></button>
+      │         ------------          
+
+```
+
+```
+invalid.html:5:22 lint/a11y/noPositiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid positive values for the tabindex attribute.
+  
+    3 │ <div tabindex="5"></div>
+    4 │ <button tabindex="2"></button>
+  > 5 │ <a href="#" tabindex="10"></a>
+      │                      ^^^^
+    6 │ <input tabindex="99" />
+    7 │ 
+  
+  i Elements with a positive tabindex override natural page content order. This causes elements without a positive tab index to come last when navigating using a keyboard.
+  
+  i Use only 0 and -1 as tabindex values. Avoid using tabindex values greater than 0 and CSS properties that can change the order of focusable HTML elements.
+  
+  i Unsafe fix: Remove the tabindex attribute.
+  
+    5 │ <a·href="#"·tabindex="10"></a>
+      │             -------------     
+
+```
+
+```
+invalid.html:6:17 lint/a11y/noPositiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid positive values for the tabindex attribute.
+  
+    4 │ <button tabindex="2"></button>
+    5 │ <a href="#" tabindex="10"></a>
+  > 6 │ <input tabindex="99" />
+      │                 ^^^^
+    7 │ 
+  
+  i Elements with a positive tabindex override natural page content order. This causes elements without a positive tab index to come last when navigating using a keyboard.
+  
+  i Use only 0 and -1 as tabindex values. Avoid using tabindex values greater than 0 and CSS properties that can change the order of focusable HTML elements.
+  
+  i Unsafe fix: Remove the tabindex attribute.
+  
+    6 │ <input·tabindex="99"·/>
+      │        --------------  
+
+```

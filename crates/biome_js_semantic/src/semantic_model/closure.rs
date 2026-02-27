@@ -5,7 +5,7 @@ use biome_js_syntax::{
     JsMethodObjectMember, JsSetterClassMember, JsSetterObjectMember,
 };
 use biome_rowan::{AstNode, SyntaxNodeCast};
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// Marker trait that groups all "AstNode" that have closure
 pub trait HasClosureAstNode {
@@ -80,7 +80,7 @@ pub enum CaptureType {
 /// Provides all information regarding a specific closure capture.
 #[derive(Clone)]
 pub struct Capture {
-    data: Rc<SemanticModelData>,
+    data: Arc<SemanticModelData>,
     ty: CaptureType,
     node: JsSyntaxNode,
     binding_id: BindingId,
@@ -117,7 +117,7 @@ impl Capture {
 }
 
 pub struct AllCapturesIter {
-    data: Rc<SemanticModelData>,
+    data: Arc<SemanticModelData>,
     closure_range: TextRange,
     scopes: Vec<ScopeId>,
     references: Vec<ReferenceId>,
@@ -135,7 +135,8 @@ impl Iterator for AllCapturesIter {
                     let reference = &binding.references[reference.index()];
                     return Some(Capture {
                         data: self.data.clone(),
-                        node: self.data.binding_node_by_start[&reference.range_start].clone(), // TODO change node to store the range
+                        node: self.data.binding_node_by_start[&reference.range_start]
+                            .to_node(self.data.to_root().syntax()), // TODO change node to store the range
                         ty: CaptureType::ByReference,
                         binding_id,
                     });
@@ -166,7 +167,7 @@ impl FusedIterator for AllCapturesIter {}
 
 /// Iterate all immediate children closures of a specific closure
 pub struct ChildrenIter {
-    data: Rc<SemanticModelData>,
+    data: Arc<SemanticModelData>,
     scopes: Vec<ScopeId>,
 }
 
@@ -194,7 +195,7 @@ impl FusedIterator for ChildrenIter {}
 
 /// Iterate all descendents closures of a specific closure
 pub struct DescendentsIter {
-    data: Rc<SemanticModelData>,
+    data: Arc<SemanticModelData>,
     scopes: Vec<ScopeId>,
 }
 
@@ -222,19 +223,19 @@ impl FusedIterator for DescendentsIter {}
 /// Provides all information regarding a specific closure.
 #[derive(Clone)]
 pub struct Closure {
-    data: Rc<SemanticModelData>,
+    data: Arc<SemanticModelData>,
     scope_id: ScopeId,
 }
 
 impl Closure {
-    pub(super) fn from_node(data: Rc<SemanticModelData>, node: &impl HasClosureAstNode) -> Self {
+    pub(super) fn from_node(data: Arc<SemanticModelData>, node: &impl HasClosureAstNode) -> Self {
         let closure_range = node.node_text_range();
         let scope_id = data.scope(closure_range);
 
         Self { data, scope_id }
     }
 
-    pub(super) fn from_scope(data: Rc<SemanticModelData>, scope_id: ScopeId) -> Option<Self> {
+    pub(super) fn from_scope(data: Arc<SemanticModelData>, scope_id: ScopeId) -> Option<Self> {
         let node = &data.scope_node_by_range[&data.scopes[scope_id.index()].range];
         match node.kind() {
             JsSyntaxKind::JS_FUNCTION_DECLARATION

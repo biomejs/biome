@@ -67,7 +67,7 @@ impl Rule for Monorepo {
         let mut list: VecDeque<_> = member_list.iter().flatten().collect();
 
         list.push_front(json_member(
-            json_member_name(json_string_literal("root")),
+            json_member_name(json_string_literal("root")).into(),
             token(T![:]).with_trailing_trivia(vec![(TriviaPieceKind::Whitespace, " ")]),
             AnyJsonValue::JsonBooleanValue(json_boolean_value(token(T![false]))),
         ));

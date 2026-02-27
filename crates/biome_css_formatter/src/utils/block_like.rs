@@ -61,13 +61,10 @@ impl Format<CssFormatContext> for FormatCssBlockLike<'_> {
             } else {
                 // we still need to write items because the block may have empty declarations
                 self.write_items(f)?;
-                write!(f, [soft_line_break()])?;
+                write!(f, [hard_line_break()])?;
             }
         } else {
-            write!(
-                f,
-                [soft_block_indent(&format_with(|f| self.write_items(f)))]
-            )?;
+            write!(f, [block_indent(&format_with(|f| self.write_items(f)))])?;
         }
         write!(f, [self.block.r_curly_token().format()])
     }

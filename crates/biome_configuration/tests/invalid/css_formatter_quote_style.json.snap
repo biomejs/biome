@@ -1,5 +1,5 @@
 ---
-source: crates/biome_service/tests/spec_tests.rs
+source: crates/biome_configuration/tests/spec_tests.rs
 expression: css_formatter_quote_style.json
 ---
 css_formatter_quote_style.json:4:27 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -17,6 +17,3 @@ css_formatter_quote_style.json:4:27 deserialize ━━━━━━━━━━�
   
   - double
   - single
-  
-
-

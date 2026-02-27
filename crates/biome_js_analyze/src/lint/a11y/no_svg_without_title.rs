@@ -1,10 +1,10 @@
-use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
+use crate::services::aria::Aria;
+use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsxAttribute, JsxChildList, JsxElement, jsx_ext::AnyJsxElement};
 use biome_rowan::{AstNode, AstNodeList};
 use biome_rule_options::no_svg_without_title::NoSvgWithoutTitleOptions;
-use biome_string_case::StrLikeExtension;
 
 declare_lint_rule! {
     /// Enforces the usage of the `title` element for the `svg` element.
@@ -33,33 +33,24 @@ declare_lint_rule! {
     /// <svg>foo</svg>
     /// ```
     ///
-    /// ```jsx
-    /// <svg role="img" aria-label="">
-    ///     <span id="">Pass</span>
-    /// </svg>
-    /// ```
-    ///
-    /// ```jsx
-    /// <svg role="presentation">foo</svg>
-    /// ```
-    ///
-    /// ### Valid
-    ///
-    /// ```jsx
+    /// ```jsx,expect_diagnostic
     /// <svg>
     ///     <rect />
     ///     <rect />
     ///     <g>
+    ///         <title>foo</title>
     ///         <circle />
     ///         <circle />
-    ///         <g>
-    ///             <title>Pass</title>
-    ///             <circle />
-    ///             <circle />
-    ///         </g>
     ///     </g>
     /// </svg>
     /// ```
+    ///
+    /// ```jsx,expect_diagnostic
+    /// <svg role="graphics-symbol"><rect /></svg>
+    /// ```
+    ///
+    /// ### Valid
+    ///
     ///
     /// ```jsx
     /// <svg>
@@ -79,16 +70,26 @@ declare_lint_rule! {
     ///     <span id="title">Pass</span>
     /// </svg>
     /// ```
-    /// ```jsx
-    /// <svg role="graphics-symbol"><rect /></svg>
-    /// ```
     ///
     /// ```jsx
-    /// <svg role="graphics-symbol img"><rect /></svg>
+    /// <svg role="graphics-symbol">
+    ///     <title>Pass</title>
+    ///     <rect />
+    /// </svg>
     /// ```
     ///
     /// ```jsx
     /// <svg aria-hidden="true"><rect /></svg>
+    /// ```
+    ///
+    /// ```jsx
+    /// <svg role="img" aria-label="">
+    ///     <span id="">Pass</span>
+    /// </svg>
+    /// ```
+    ///
+    /// ```jsx
+    /// <svg role="presentation">foo</svg>
     /// ```
     ///
     ///
@@ -109,13 +110,14 @@ declare_lint_rule! {
 }
 
 impl Rule for NoSvgWithoutTitle {
-    type Query = Ast<AnyJsxElement>;
+    type Query = Aria<AnyJsxElement>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = NoSvgWithoutTitleOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
+        let aria_roles = ctx.aria_roles();
 
         if node.name_value_token().ok()?.text_trimmed() != "svg" {
             return None;
@@ -139,36 +141,21 @@ impl Rule for NoSvgWithoutTitle {
             }
         }
 
-        // Checks if a `svg` element has role='img' and title/aria-label/aria-labelledby attribute
-        let Some(role_attribute) = node.find_attribute_by_name("role") else {
-            return Some(());
-        };
+        let has_name_required_role = aria_roles.has_name_required_image_role(node);
 
-        let role_attribute_value = role_attribute.initializer()?.value().ok()?;
-        let Some(role_attribute_text) = role_attribute_value
-            .as_jsx_string()?
-            .inner_string_text()
-            .ok()
-        else {
-            return Some(());
-        };
-
-        match role_attribute_text.to_ascii_lowercase_cow().as_ref() {
-            "img" => {
-                let [aria_label, aria_labelledby] = node
-                    .attributes()
-                    .find_by_names(["aria-label", "aria-labelledby"]);
-                let is_valid_a11y_attribute = aria_label.is_some()
-                    || is_valid_attribute_value(aria_labelledby, &jsx_element.children())
-                        .unwrap_or(false);
-                if is_valid_a11y_attribute {
-                    return None;
-                }
-                Some(())
+        if has_name_required_role {
+            let [aria_label, aria_labelledby] = node
+                .attributes()
+                .find_by_names(["aria-label", "aria-labelledby"]);
+            let is_valid_a11y_attribute = aria_label.is_some()
+                || is_valid_attribute_value(aria_labelledby, &jsx_element.children())
+                    .unwrap_or(false);
+            if is_valid_a11y_attribute {
+                return None;
             }
-            // if role attribute is empty, the svg element should have title element
-            "" => Some(()),
-            _ => None,
+            Some(())
+        } else {
+            None
         }
     }
 
@@ -209,18 +196,17 @@ fn is_valid_attribute_value(
     Some(is_used_attribute)
 }
 
-/// Checks if the given `JsxChildList` has a valid `title` element.
+/// Checks if the first element of the given `JsxChildList` is a valid `title` element.
 fn has_valid_title_element(jsx_child_list: &JsxChildList) -> Option<bool> {
-    jsx_child_list.iter().find_map(|child| {
-        let jsx_element = child.as_jsx_element()?;
-        let opening_element = jsx_element.opening_element().ok()?;
-        let name = opening_element.name().ok()?;
-        let name = name.as_jsx_name()?.value_token().ok()?;
-        let has_title_name = name.text_trimmed() == "title";
-        if !has_title_name {
-            return has_valid_title_element(&jsx_element.children());
-        }
-        let is_empty_child = jsx_element.children().is_empty();
-        Some(has_title_name && !is_empty_child)
-    })
+    let first_child = jsx_child_list.iter().nth(1)?;
+    let jsx_element = first_child.as_jsx_element()?;
+    let opening_element = jsx_element.opening_element().ok()?;
+    let name = opening_element.name().ok()?;
+    let name = name.as_jsx_name()?.value_token().ok()?;
+    let has_title_name = name.text_trimmed() == "title";
+    if !has_title_name {
+        return Some(false);
+    }
+    let is_empty_child = jsx_element.children().is_empty();
+    Some(!is_empty_child)
 }

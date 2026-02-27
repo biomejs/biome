@@ -1,0 +1,122 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<div in:fly|global={{ y: 200 }}>Global with params</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteInDirective {
+                        in_token: IN_KW@5..7 "in" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@7..8 ":" [] [],
+                            property: SvelteName {
+                                ident_token: IDENT@8..11 "fly" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [
+                                SvelteDirectiveModifier {
+                                    bitwise_or_token: PIPE@11..12 "|" [] [],
+                                    name: SvelteName {
+                                        ident_token: IDENT@12..18 "global" [] [],
+                                    },
+                                },
+                            ],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@18..19 "=" [] [],
+                                value: HtmlAttributeSingleTextExpression {
+                                    l_curly_token: L_CURLY@19..20 "{" [] [],
+                                    expression: HtmlTextExpression {
+                                        html_literal_token: HTML_LITERAL@20..30 "{ y: 200 }" [] [],
+                                    },
+                                    r_curly_token: R_CURLY@30..31 "}" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@31..32 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@32..50 "Global with params" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@50..51 "<" [] [],
+                slash_token: SLASH@51..52 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@52..55 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@55..56 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@56..57 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..57
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..56
+    0: HTML_ELEMENT@0..56
+      0: HTML_OPENING_ELEMENT@0..32
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..31
+          0: SVELTE_IN_DIRECTIVE@5..31
+            0: IN_KW@5..7 "in" [] []
+            1: SVELTE_DIRECTIVE_VALUE@7..31
+              0: COLON@7..8 ":" [] []
+              1: SVELTE_NAME@8..11
+                0: IDENT@8..11 "fly" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@11..18
+                0: SVELTE_DIRECTIVE_MODIFIER@11..18
+                  0: PIPE@11..12 "|" [] []
+                  1: SVELTE_NAME@12..18
+                    0: IDENT@12..18 "global" [] []
+              3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@18..31
+                0: EQ@18..19 "=" [] []
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@19..31
+                  0: L_CURLY@19..20 "{" [] []
+                  1: HTML_TEXT_EXPRESSION@20..30
+                    0: HTML_LITERAL@20..30 "{ y: 200 }" [] []
+                  2: R_CURLY@30..31 "}" [] []
+        3: R_ANGLE@31..32 ">" [] []
+      1: HTML_ELEMENT_LIST@32..50
+        0: HTML_CONTENT@32..50
+          0: HTML_LITERAL@32..50 "Global with params" [] []
+      2: HTML_CLOSING_ELEMENT@50..56
+        0: L_ANGLE@50..51 "<" [] []
+        1: SLASH@51..52 "/" [] []
+        2: HTML_TAG_NAME@52..55
+          0: HTML_LITERAL@52..55 "div" [] []
+        3: R_ANGLE@55..56 ">" [] []
+  4: EOF@56..57 "" [Newline("\n")] []
+
+```

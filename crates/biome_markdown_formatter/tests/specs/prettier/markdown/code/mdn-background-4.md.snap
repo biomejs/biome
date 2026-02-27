@@ -1,0 +1,62 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/code/mdn-background-4.md
+---
+# Input
+
+```md
+
+```css
+
+
+.multi-bg-example {
+  width: 100%;  height: 400px;
+  background-image: url(firefox.png),       url(bubbles.png), linear-gradient(to right, rgb(30
+          75 115 / 100%), rgb(255 255 255 / 0%));
+    background-repeat: no-repeat, no-repeat, no-repeat;
+background-position:
+    bottom right,
+    left,
+    right;
+}
+```
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,3 +1,4 @@
++
+ ```css
+ 
+ 
+```
+
+# Output
+
+```md
+
+```css
+
+
+.multi-bg-example {
+  width: 100%;  height: 400px;
+  background-image: url(firefox.png),       url(bubbles.png), linear-gradient(to right, rgb(30
+          75 115 / 100%), rgb(255 255 255 / 0%));
+    background-repeat: no-repeat, no-repeat, no-repeat;
+background-position:
+    bottom right,
+    left,
+    right;
+}
+```
+```
+
+# Lines exceeding max width of 80 characters
+```
+    7:   background-image: url(firefox.png),       url(bubbles.png), linear-gradient(to right, rgb(30
+```

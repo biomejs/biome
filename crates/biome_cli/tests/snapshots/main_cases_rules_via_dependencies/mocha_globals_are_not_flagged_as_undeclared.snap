@@ -1,0 +1,55 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `package.json`
+
+```json
+{
+    "dependencies": {
+        "mocha": "10.0.0"
+    }
+}
+
+```
+
+## `test.js`
+
+```js
+
+// BDD interface
+describe("bdd suite", () => {
+    context("a context block", () => {
+        before(() => {});
+        after(() => {});
+        beforeEach(() => {});
+        afterEach(() => {});
+
+        it("passes", () => {});
+        specify("also passes", () => {});
+
+        xit("is pending", () => {});
+        xspecify("also pending", () => {});
+    });
+
+    xdescribe("pending suite", () => {});
+    xcontext("pending context", () => {});
+});
+
+// TDD interface
+suite("tdd suite", () => {
+    suiteSetup(() => {});
+    suiteTeardown(() => {});
+    setup(() => {});
+    teardown(() => {});
+
+    test("passes", () => {});
+});
+    
+```
+
+# Emitted Messages
+
+```block
+Checked 2 files in <TIME>. No fixes applied.
+```

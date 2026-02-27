@@ -5,14 +5,14 @@ use biome_test_utils::has_bogus_nodes_or_empty_slots;
 #[ignore]
 #[test]
 pub fn quick_test() {
-    let code = r#"---
-import Base from "$layouts/Base.astro";
----
+    let code = r#"<Component
+	bind:value
 
-<Base title="500"></Base>
+/>
+
 "#;
 
-    let source_type = HtmlFileSource::astro();
+    let source_type = HtmlFileSource::svelte();
     let options = HtmlParseOptions::from(&source_type);
     let root = parse_html(code, options);
     let syntax = root.syntax();

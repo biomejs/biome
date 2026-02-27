@@ -1,12 +1,8 @@
 use crate::changed::{get_changed_files, get_staged_files};
-use crate::cli_options::{CliOptions, CliReporter, ColorsArg, cli_options};
-use crate::commands::scan_kind::derive_best_scan_kind;
-use crate::execute::Stdin;
-use crate::logging::LoggingKind;
-use crate::{
-    CliDiagnostic, CliSession, Execution, LoggingLevel, TraversalMode, VERSION, execute_mode,
-    setup_cli_subscriber,
-};
+use crate::cli_options::{CliOptions, CliReporterKind, ColorsArg, cli_options};
+use crate::logging::log_options;
+use crate::logging::{LogOptions, LoggingKind};
+use crate::{CliDiagnostic, LoggingLevel, VERSION};
 use biome_configuration::analyzer::assist::AssistEnabled;
 use biome_configuration::analyzer::{AnalyzerSelector, LinterEnabled};
 use biome_configuration::css::{
@@ -36,25 +32,15 @@ use biome_configuration::{
     vcs::vcs_configuration,
 };
 use biome_console::{Console, ConsoleExt, markup};
-use biome_deserialize::Merge;
 use biome_diagnostics::{Diagnostic, PrintDiagnostic, Severity};
-use biome_fs::{BiomePath, FileSystem};
+use biome_fs::FileSystem;
 use biome_grit_patterns::GritTargetLanguage;
-use biome_resolver::FsWithResolverProxy;
-use biome_service::configuration::{
-    LoadedConfiguration, ProjectScanComputer, load_configuration, load_editorconfig,
-};
+use biome_service::configuration::LoadedConfiguration;
 use biome_service::documentation::Doc;
-use biome_service::projects::ProjectKey;
-use biome_service::workspace::{
-    FixFileMode, OpenProjectParams, ScanKind, ScanProjectParams, UpdateSettingsParams,
-};
-use biome_service::{Workspace, WorkspaceError};
+use biome_service::workspace::FixFileMode;
+use biome_service::{WatcherOptions, watcher_options};
 use bpaf::Bpaf;
-use camino::{Utf8Path, Utf8PathBuf};
 use std::ffi::OsString;
-use std::time::Duration;
-use tracing::info;
 
 pub(crate) mod check;
 pub(crate) mod ci;
@@ -66,7 +52,6 @@ pub(crate) mod init;
 pub(crate) mod lint;
 pub(crate) mod migrate;
 pub(crate) mod rage;
-mod scan_kind;
 pub(crate) mod search;
 pub(crate) mod version;
 
@@ -82,6 +67,7 @@ pub enum BiomeCommand {
     /// Prints information for debugging.
     Rage(
         #[bpaf(external(cli_options), hide_usage)] CliOptions,
+        #[bpaf(external(log_options), hide_usage)] LogOptions,
         /// Prints the Biome daemon server logs
         #[bpaf(long("daemon-logs"), switch)]
         bool,
@@ -95,26 +81,11 @@ pub enum BiomeCommand {
     /// Starts the Biome daemon server process.
     #[bpaf(command)]
     Start {
-        /// Allows to change the prefix applied to the file name of the logs.
-        #[bpaf(
-            env("BIOME_LOG_PREFIX_NAME"),
-            long("log-prefix-name"),
-            argument("STRING"),
-            hide_usage,
-            fallback(String::from("server.log")),
-            display_fallback
-        )]
-        log_prefix_name: String,
+        #[bpaf(external(log_options))]
+        log_options: LogOptions,
 
-        /// Allows to change the folder where logs are stored.
-        #[bpaf(
-            env("BIOME_LOG_PATH"),
-            long("log-path"),
-            argument("PATH"),
-            hide_usage,
-            fallback(biome_fs::ensure_cache_dir().join("biome-logs")),
-        )]
-        log_path: Utf8PathBuf,
+        #[bpaf(external(watcher_options))]
+        watcher_options: WatcherOptions,
     },
 
     /// Stops the Biome daemon server process.
@@ -171,6 +142,15 @@ pub enum BiomeCommand {
         configuration: Option<Configuration>,
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
+
+        #[bpaf(external, hide_usage)]
+        log_options: LogOptions,
+
+        /// Enable rule profiling output.
+        /// Captures timing only for rule execution, not preprocessing such as querying or building the semantic model.
+        #[bpaf(long("profile-rules"), switch)]
+        profile_rules: bool,
+
         /// Use this option when you want to format code piped from `stdin`, and
         /// print the output to `stdout`.
         ///
@@ -207,6 +187,29 @@ pub enum BiomeCommand {
         /// flag and the `defaultBranch` is not set in your `biome.json`
         #[bpaf(long("since"), argument("REF"))]
         since: Option<String>,
+
+        /// Run only the given lint rule, assist action, group of rules and actions, or domain.
+        /// If the severity level of a rule is `off`,
+        /// then the severity level of the rule is set to `error` if it is a recommended rule or `warn` otherwise.
+        ///
+        /// Example:
+        ///
+        /// ```shell
+        /// biome check --only=correctness/noUnusedVariables --only=suspicious --only=test
+        /// ```
+        #[bpaf(long("only"), argument("GROUP|RULE|DOMAIN|ACTION"))]
+        only: Vec<AnalyzerSelector>,
+
+        /// Skip the given lint rule, assist action, group of rules and actions, or domain by setting the severity level of the rules to `off`.
+        /// This option takes precedence over `--only`.
+        ///
+        /// Example:
+        ///
+        /// ```shell
+        /// biome check --skip=correctness/noUnusedVariables --skip=suspicious --skip=project
+        /// ```
+        #[bpaf(long("skip"), argument("GROUP|RULE|DOMAIN|ACTION"))]
+        skip: Vec<AnalyzerSelector>,
 
         /// Single file, single path or list of paths
         #[bpaf(positional("PATH"), many)]
@@ -265,7 +268,10 @@ pub enum BiomeCommand {
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
 
-        /// Run only the given rule, group of rules or domain.
+        #[bpaf(external, hide_usage)]
+        log_options: LogOptions,
+
+        /// Run only the given lint rule, assist action, group of rules and actions, or domain.
         /// If the severity level of a rule is `off`,
         /// then the severity level of the rule is set to `error` if it is a recommended rule or `warn` otherwise.
         ///
@@ -274,10 +280,10 @@ pub enum BiomeCommand {
         /// ```shell
         /// biome lint --only=correctness/noUnusedVariables --only=suspicious --only=test
         /// ```
-        #[bpaf(long("only"), argument("GROUP|RULE|DOMAIN"))]
+        #[bpaf(long("only"), argument("GROUP|RULE|DOMAIN|ACTION"))]
         only: Vec<AnalyzerSelector>,
 
-        /// Skip the given rule, group of rules or domain by setting the severity level of the rules to `off`.
+        /// Skip the given lint rule, assist action, group of rules and actions, or domain by setting the severity level of the rules to `off`.
         /// This option takes precedence over `--only`.
         ///
         /// Example:
@@ -285,7 +291,7 @@ pub enum BiomeCommand {
         /// ```shell
         /// biome lint --skip=correctness/noUnusedVariables --skip=suspicious --skip=project
         /// ```
-        #[bpaf(long("skip"), argument("GROUP|RULE|DOMAIN"))]
+        #[bpaf(long("skip"), argument("GROUP|RULE|DOMAIN|ACTION"))]
         skip: Vec<AnalyzerSelector>,
 
         /// Use this option when you want to format code piped from `stdin`, and print the output to `stdout`.
@@ -315,6 +321,11 @@ pub enum BiomeCommand {
         /// flag and the `defaultBranch` is not set in your biome.json
         #[bpaf(long("since"), argument("REF"))]
         since: Option<String>,
+        /// Enable rule profiling output.
+        /// Captures timing only for rule execution, not preprocessing such as querying or building the semantic model.
+        #[bpaf(long("profile-rules"), switch)]
+        profile_rules: bool,
+
         /// Single file, single path or list of paths
         #[bpaf(positional("PATH"), many)]
         paths: Vec<OsString>,
@@ -334,16 +345,16 @@ pub enum BiomeCommand {
         #[bpaf(external(json_parser_configuration), optional, hide_usage)]
         json_parser: Option<JsonParserConfiguration>,
 
-        #[bpaf(external(css_parser_configuration), optional, hide_usage, hide)]
+        #[bpaf(external(css_parser_configuration), optional, hide_usage)]
         css_parser: Option<CssParserConfiguration>,
 
-        #[bpaf(external(graphql_formatter_configuration), optional, hide_usage, hide)]
+        #[bpaf(external(graphql_formatter_configuration), optional, hide_usage)]
         graphql_formatter: Option<GraphqlFormatterConfiguration>,
 
-        #[bpaf(external(css_formatter_configuration), optional, hide_usage, hide)]
+        #[bpaf(external(css_formatter_configuration), optional, hide_usage)]
         css_formatter: Option<CssFormatterConfiguration>,
 
-        #[bpaf(external(html_formatter_configuration), optional, hide_usage, hide)]
+        #[bpaf(external(html_formatter_configuration), optional, hide_usage)]
         html_formatter: Option<HtmlFormatterConfiguration>,
 
         #[bpaf(external(vcs_configuration), optional, hide_usage)]
@@ -369,6 +380,9 @@ pub enum BiomeCommand {
 
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
+
+        #[bpaf(external, hide_usage)]
+        log_options: LogOptions,
 
         /// Writes formatted files to a file system.
         #[bpaf(long("write"), switch)]
@@ -433,6 +447,9 @@ pub enum BiomeCommand {
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
 
+        #[bpaf(external, hide_usage)]
+        log_options: LogOptions,
+
         /// When set to true, only the files that have been changed compared to your `defaultBranch`
         /// configuration will be linted.
         #[bpaf(long("changed"), switch)]
@@ -454,6 +471,29 @@ pub enum BiomeCommand {
         )]
         threads: Option<usize>,
 
+        /// Run only the given lint rule, assist action, group of rules and actions, or domain.
+        /// If the severity level of a rule is `off`,
+        /// then the severity level of the rule is set to `error` if it is a recommended rule or `warn` otherwise.
+        ///
+        /// Example:
+        ///
+        /// ```shell
+        /// biome ci --only=correctness/noUnusedVariables --only=suspicious --only=test
+        /// ```
+        #[bpaf(long("only"), argument("GROUP|RULE|DOMAIN|ACTION"))]
+        only: Vec<AnalyzerSelector>,
+
+        /// Skip the given lint rule, assist action, group of rules and actions, or domain by setting the severity level of the rules to `off`.
+        /// This option takes precedence over `--only`.
+        ///
+        /// Example:
+        ///
+        /// ```shell
+        /// biome ci --skip=correctness/noUnusedVariables --skip=suspicious --skip=project
+        /// ```
+        #[bpaf(long("skip"), argument("GROUP|RULE|DOMAIN|ACTION"))]
+        skip: Vec<AnalyzerSelector>,
+
         /// Single file, single path or list of paths
         #[bpaf(positional("PATH"), many)]
         paths: Vec<OsString>,
@@ -469,34 +509,24 @@ pub enum BiomeCommand {
     /// Acts as a server for the Language Server Protocol over stdin/stdout.
     #[bpaf(command("lsp-proxy"))]
     LspProxy {
-        /// Allows to change the prefix applied to the file name of the logs.
-        #[bpaf(
-            env("BIOME_LOG_PREFIX_NAME"),
-            long("log-prefix-name"),
-            argument("STRING"),
-            hide_usage,
-            fallback(String::from("server.log")),
-            display_fallback
-        )]
-        log_prefix_name: String,
-        /// Allows to change the folder where logs are stored.
-        #[bpaf(
-            env("BIOME_LOG_PATH"),
-            long("log-path"),
-            argument("PATH"),
-            hide_usage,
-            fallback(biome_fs::ensure_cache_dir().join("biome-logs")),
-        )]
-        log_path: Utf8PathBuf,
         /// Bogus argument to make the command work with vscode-languageclient
         #[bpaf(long("stdio"), hide, hide_usage, switch)]
         stdio: bool,
+
+        #[bpaf(external(log_options))]
+        log_options: LogOptions,
+
+        #[bpaf(external(watcher_options))]
+        watcher_options: WatcherOptions,
     },
     /// Updates the configuration when there are breaking changes.
     #[bpaf(command)]
     Migrate {
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
+
+        #[bpaf(external, hide_usage)]
+        log_options: LogOptions,
 
         /// Writes the new configuration file to disk
         #[bpaf(long("write"), switch)]
@@ -525,6 +555,9 @@ pub enum BiomeCommand {
     Search {
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
+
+        #[bpaf(external, hide_usage)]
+        log_options: LogOptions,
 
         #[bpaf(external(files_configuration), optional, hide_usage)]
         files_configuration: Option<FilesConfiguration>,
@@ -591,30 +624,14 @@ pub enum BiomeCommand {
 
     #[bpaf(command("__run_server"), hide)]
     RunServer {
-        /// Allows changing the prefix applied to the file name of the logs.
-        #[bpaf(
-            env("BIOME_LOG_PREFIX_NAME"),
-            long("log-prefix-name"),
-            argument("STRING"),
-            hide_usage,
-            fallback(String::from("server.log")),
-            display_fallback
-        )]
-        log_prefix_name: String,
-        /// Allows changing the folder where logs are stored.
-        #[bpaf(
-            env("BIOME_LOG_PATH"),
-            long("log-path"),
-            argument("PATH"),
-            hide_usage,
-            fallback(
-                biome_fs::ensure_cache_dir().join("biome-logs")
-            ),
-        )]
-        log_path: Utf8PathBuf,
+        #[bpaf(external(log_options))]
+        log_options: LogOptions,
 
         #[bpaf(long("stop-on-disconnect"), hide_usage)]
         stop_on_disconnect: bool,
+
+        #[bpaf(external(watcher_options))]
+        watcher_options: WatcherOptions,
     },
     #[bpaf(command("__print_socket"), hide)]
     PrintSocket,
@@ -669,11 +686,37 @@ impl BiomeCommand {
         }
     }
 
-    pub const fn get_color(&self) -> Option<&ColorsArg> {
+    const fn log_options(&self) -> Option<&LogOptions> {
+        match self {
+            Self::Check { log_options, .. }
+            | Self::Lint { log_options, .. }
+            | Self::Ci { log_options, .. }
+            | Self::Format { log_options, .. }
+            | Self::Migrate { log_options, .. }
+            | Self::Rage(_, log_options, ..)
+            | Self::Search { log_options, .. } => Some(log_options),
+            Self::Version(_)
+            | Self::LspProxy { .. }
+            | Self::Start { .. }
+            | Self::Stop
+            | Self::Init(_)
+            | Self::Explain { .. }
+            | Self::RunServer { .. }
+            | Self::Clean { .. }
+            | Self::PrintSocket => None,
+            Self::WhereAmI => None,
+        }
+    }
+
+    pub fn get_color(&self) -> Option<&ColorsArg> {
         match self.cli_options() {
             Some(cli_options) => {
                 // To properly display GitHub annotations we need to disable colors
-                if matches!(cli_options.reporter, CliReporter::GitHub) {
+                if cli_options
+                    .cli_reporter
+                    .iter()
+                    .any(|r| r.kind == CliReporterKind::GitHub)
+                {
                     return Some(&ColorsArg::Off);
                 }
                 // We want force colors in CI, to give e better UX experience
@@ -708,13 +751,13 @@ impl BiomeCommand {
     }
 
     pub fn log_level(&self) -> LoggingLevel {
-        self.cli_options()
-            .map_or(LoggingLevel::default(), |cli_options| cli_options.log_level)
+        self.log_options()
+            .map_or(LoggingLevel::default(), |log_options| log_options.log_level)
     }
 
     pub fn log_kind(&self) -> LoggingKind {
-        self.cli_options()
-            .map_or(LoggingKind::default(), |cli_options| cli_options.log_kind)
+        self.log_options()
+            .map_or(LoggingKind::default(), |log_options| log_options.log_kind)
     }
 }
 
@@ -894,360 +937,6 @@ fn check_fix_incompatible_arguments(options: FixFileModeOptions) -> Result<(), C
         ));
     };
     Ok(())
-}
-
-/// Generic interface for executing commands.
-///
-/// Consumers must implement the following methods:
-///
-/// - [CommandRunner::merge_configuration]
-/// - [CommandRunner::get_files_to_process]
-/// - [CommandRunner::get_stdin_file_path]
-/// - [CommandRunner::should_write]
-/// - [CommandRunner::get_execution]
-///
-/// Optional methods:
-/// - [CommandRunner::check_incompatible_arguments]
-pub(crate) trait CommandRunner: Sized {
-    const COMMAND_NAME: &'static str;
-
-    /// The main command to use.
-    fn run(&mut self, session: CliSession, cli_options: &CliOptions) -> Result<(), CliDiagnostic> {
-        setup_cli_subscriber(
-            cli_options.log_file.as_deref(),
-            cli_options.log_level,
-            cli_options.log_kind,
-            cli_options.colors.as_ref(),
-        );
-        let console = &mut *session.app.console;
-        let workspace = &*session.app.workspace;
-        let fs = workspace.fs();
-        self.check_incompatible_arguments()?;
-        let ConfiguredWorkspace {
-            execution,
-            paths,
-            duration,
-            configuration_files,
-            project_key,
-        } = self.configure_workspace(fs, console, workspace, cli_options)?;
-        execute_mode(
-            execution,
-            session,
-            cli_options,
-            paths,
-            duration,
-            configuration_files,
-            project_key,
-        )
-    }
-
-    /// This function prepares the workspace with the following:
-    /// - Loading the configuration file.
-    /// - Configure the VCS integration
-    /// - Computes the paths to traverse/handle. This changes based on the VCS arguments that were passed.
-    /// - Register a project folder using the working directory.
-    /// - Updates the settings that belong to the project registered
-    fn configure_workspace(
-        &mut self,
-        fs: &dyn FsWithResolverProxy,
-        console: &mut dyn Console,
-        workspace: &dyn Workspace,
-        cli_options: &CliOptions,
-    ) -> Result<ConfiguredWorkspace, CliDiagnostic> {
-        let working_dir = fs.working_directory().unwrap_or_default();
-        // Load configuration
-        let configuration_path_hint = cli_options.as_configuration_path_hint(working_dir.as_path());
-        let loaded_configuration = load_configuration(fs, configuration_path_hint)?;
-        if self.should_validate_configuration_diagnostics() {
-            validate_configuration_diagnostics(
-                &loaded_configuration,
-                console,
-                cli_options.verbose,
-            )?;
-        }
-        info!(
-            "Configuration file loaded: {:?}, diagnostics detected {}",
-            loaded_configuration.file_path,
-            loaded_configuration.diagnostics.len(),
-        );
-        let LoadedConfiguration {
-            extended_configurations,
-            configuration,
-            diagnostics: _,
-            directory_path,
-            file_path,
-        } = loaded_configuration;
-
-        // Merge the FS configuration with the CLI arguments
-        let configuration = self.merge_configuration(
-            configuration,
-            directory_path.clone(),
-            file_path,
-            fs,
-            console,
-        )?;
-
-        let execution = self.get_execution(cli_options, console, workspace)?;
-
-        let root_configuration_dir = directory_path
-            .clone()
-            .unwrap_or_else(|| working_dir.clone());
-        // Using `--config-path`, users can point to a (root) config file that
-        // is not actually at the root of the project. So between the working
-        // directory and configuration directory, we use whichever one is higher
-        // up in the file system.
-        let project_dir = if root_configuration_dir.starts_with(&working_dir) {
-            &working_dir
-        } else {
-            &root_configuration_dir
-        };
-
-        let paths = self.get_files_to_process(fs, &configuration)?;
-        let paths = validated_paths_for_execution(paths, &execution, &working_dir)?;
-
-        // Open the project
-        let open_project_result = workspace.open_project(OpenProjectParams {
-            path: BiomePath::new(project_dir),
-            open_uninitialized: true,
-        })?;
-
-        let scan_kind_computer =
-            if let TraversalMode::Lint { only, skip, .. } = execution.traversal_mode() {
-                ProjectScanComputer::new(&configuration).with_rule_selectors(skip, only)
-            } else {
-                ProjectScanComputer::new(&configuration)
-            };
-        let scan_kind = derive_best_scan_kind(
-            scan_kind_computer.compute(),
-            &execution,
-            &root_configuration_dir,
-            &working_dir,
-            &configuration,
-        );
-
-        // Update the settings of the project
-        let result = workspace.update_settings(UpdateSettingsParams {
-            project_key: open_project_result.project_key,
-            workspace_directory: Some(BiomePath::new(project_dir)),
-            configuration,
-            extended_configurations: extended_configurations
-                .into_iter()
-                .map(|(path, config)| (BiomePath::from(path), config))
-                .collect(),
-        })?;
-        if self.should_validate_configuration_diagnostics() {
-            print_diagnostics_from_workspace_result(
-                result.diagnostics.as_slice(),
-                console,
-                cli_options.verbose,
-            )?;
-        }
-
-        // Scan the project
-        let scan_kind = match (scan_kind, execution.traversal_mode()) {
-            (scan_kind, TraversalMode::Migrate { .. }) => scan_kind,
-            (ScanKind::KnownFiles, _) => {
-                let target_paths = paths
-                    .iter()
-                    .map(|path| BiomePath::new(working_dir.join(path)))
-                    .collect();
-                ScanKind::TargetedKnownFiles {
-                    target_paths,
-                    descend_from_targets: true,
-                }
-            }
-            (scan_kind, _) => scan_kind,
-        };
-        let result = workspace.scan_project(ScanProjectParams {
-            project_key: open_project_result.project_key,
-            watch: cli_options.use_server,
-            force: false, // TODO: Maybe we'll want a CLI flag for this.
-            scan_kind,
-            verbose: cli_options.verbose,
-        })?;
-
-        if self.should_validate_configuration_diagnostics() {
-            print_diagnostics_from_workspace_result(
-                result.diagnostics.as_slice(),
-                console,
-                cli_options.verbose,
-            )?;
-        }
-
-        Ok(ConfiguredWorkspace {
-            execution,
-            paths,
-            duration: Some(result.duration),
-            configuration_files: result.configuration_files,
-            project_key: open_project_result.project_key,
-        })
-    }
-
-    /// Computes [Stdin] if the CLI has the necessary information.
-    ///
-    /// ## Errors
-    /// - If the user didn't provide anything via `stdin` but the option `--stdin-file-path` is passed.
-    fn get_stdin(&self, console: &mut dyn Console) -> Result<Option<Stdin>, CliDiagnostic> {
-        let stdin = if let Some(stdin_file_path) = self.get_stdin_file_path() {
-            let input_code = console.read();
-            if let Some(input_code) = input_code {
-                let path = Utf8PathBuf::from(stdin_file_path);
-                Some((path, input_code).into())
-            } else {
-                // we provided the argument without a piped stdin, we bail
-                return Err(CliDiagnostic::missing_argument("stdin", Self::COMMAND_NAME));
-            }
-        } else {
-            None
-        };
-
-        Ok(stdin)
-    }
-
-    // #region Methods that consumers must implement
-
-    /// Implements this method if you need to merge CLI arguments to the loaded configuration.
-    ///
-    /// The CLI arguments take precedence over the option configured in the configuration file.
-    fn merge_configuration(
-        &mut self,
-        loaded_configuration: Configuration,
-        loaded_directory: Option<Utf8PathBuf>,
-        loaded_file: Option<Utf8PathBuf>,
-        fs: &dyn FileSystem,
-        console: &mut dyn Console,
-    ) -> Result<Configuration, WorkspaceError>;
-
-    /// It returns the paths that need to be handled/traversed.
-    fn get_files_to_process(
-        &self,
-        fs: &dyn FileSystem,
-        configuration: &Configuration,
-    ) -> Result<Vec<OsString>, CliDiagnostic>;
-
-    /// It returns the file path to use in `stdin` mode.
-    fn get_stdin_file_path(&self) -> Option<&str>;
-
-    /// Whether the command should write the files.
-    fn should_write(&self) -> bool;
-
-    /// Returns the [Execution] mode.
-    fn get_execution(
-        &self,
-        cli_options: &CliOptions,
-        console: &mut dyn Console,
-        workspace: &dyn Workspace,
-    ) -> Result<Execution, CliDiagnostic>;
-
-    // Below, methods that consumers can implement
-
-    /// Optional method that can be implemented to check if some CLI arguments aren't compatible.
-    ///
-    /// The method is called before loading the configuration from disk.
-    fn check_incompatible_arguments(&self) -> Result<(), CliDiagnostic> {
-        Ok(())
-    }
-
-    /// Checks whether the configuration has errors.
-    fn should_validate_configuration_diagnostics(&self) -> bool {
-        true
-    }
-
-    // #endregion
-}
-
-/// Validates `paths` so they can be safely passed to the given `execution`.
-///
-/// - Converts paths from `OsString` to `String`.
-/// - If the `execution` expects paths to be given, we may initialise them with
-///   the current directory if they were empty otherwise.
-fn validated_paths_for_execution(
-    paths: Vec<OsString>,
-    execution: &Execution,
-    working_dir: &Utf8Path,
-) -> Result<Vec<String>, CliDiagnostic> {
-    let mut paths = paths
-        .into_iter()
-        .map(|path| path.into_string().map_err(WorkspaceError::non_utf8_path))
-        .collect::<Result<Vec<_>, _>>()?;
-
-    if paths.is_empty() {
-        match execution.traversal_mode() {
-            TraversalMode::Check { .. }
-            | TraversalMode::Lint { .. }
-            | TraversalMode::Format { .. }
-            | TraversalMode::CI { .. }
-            | TraversalMode::Search { .. } => {
-                if execution.is_vcs_targeted() {
-                    // If `--staged` or `--changed` is specified, it's
-                    // acceptable for them to be empty, so ignore it.
-                } else {
-                    paths.push(working_dir.to_string());
-                }
-            }
-            TraversalMode::Migrate { .. } => {
-                // Migrate doesn't do any traversal, so it doesn't care.
-            }
-        }
-    }
-
-    Ok(paths)
-}
-
-pub(crate) struct ConfiguredWorkspace {
-    /// Execution context
-    pub execution: Execution,
-    /// Paths to crawl
-    pub paths: Vec<String>,
-    /// The duration of the scanning
-    pub duration: Option<Duration>,
-    /// Configuration files found inside the project
-    pub configuration_files: Vec<BiomePath>,
-    /// The unique identifier of the project
-    pub project_key: ProjectKey,
-}
-
-pub trait LoadEditorConfig: CommandRunner {
-    /// Whether this command should load the `.editorconfig` file.
-    fn should_load_editor_config(&self, fs_configuration: &Configuration) -> bool;
-
-    /// It loads the `.editorconfig` from the file system, parses it and deserialize it into a [Configuration]
-    fn load_editor_config(
-        &self,
-        configuration_path: Option<Utf8PathBuf>,
-        fs_configuration: &Configuration,
-        fs: &dyn FileSystem,
-    ) -> Result<Option<Configuration>, WorkspaceError> {
-        Ok(if self.should_load_editor_config(fs_configuration) {
-            let (editorconfig, _editorconfig_diagnostics) = {
-                let search_path = fs.working_directory().unwrap_or_default();
-
-                load_editorconfig(fs, search_path, configuration_path)?
-            };
-            editorconfig
-        } else {
-            Default::default()
-        })
-    }
-
-    fn combine_configuration(
-        &self,
-        configuration_path: Option<Utf8PathBuf>,
-        biome_configuration: Configuration,
-        fs: &dyn FileSystem,
-    ) -> Result<Configuration, WorkspaceError> {
-        Ok(
-            if let Some(mut fs_configuration) =
-                self.load_editor_config(configuration_path, &biome_configuration, fs)?
-            {
-                // If both `biome.json` and `.editorconfig` exist, formatter settings from the biome.json take precedence.
-                fs_configuration.merge_with(biome_configuration);
-                fs_configuration
-            } else {
-                biome_configuration
-            },
-        )
-    }
 }
 
 #[cfg(test)]

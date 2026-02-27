@@ -1,39 +1,37 @@
 #![deny(clippy::use_self)]
 
-use std::ffi::c_int;
-use std::fmt::Write;
-use std::sync::{Arc, Once};
+mod bench_case;
 
+pub use bench_case::BenchCase;
 use biome_analyze::options::{JsxRuntime, PreferredQuote};
 use biome_analyze::{AnalyzerAction, AnalyzerConfiguration, AnalyzerOptions};
 use biome_configuration::{Configuration, ConfigurationPathHint};
 use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
+use biome_css_parser::CssParserOptions;
+use biome_css_syntax::AnyCssRoot;
 use biome_diagnostics::termcolor::Buffer;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
 use biome_fs::{BiomePath, FileSystem, OsFileSystem};
-use biome_js_parser::{AnyJsRoot, JsFileSource, JsParserOptions};
+use biome_js_parser::{AnyJsRoot, JsParserOptions};
 use biome_js_type_info::{TypeData, TypeResolver};
 use biome_json_parser::ParseDiagnostic;
 use biome_module_graph::ModuleGraph;
 use biome_package::{Manifest, PackageJson, TsConfigJson, TurboJson};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{Direction, Language, SyntaxKind, SyntaxNode, SyntaxSlot};
+use biome_service::WorkspaceError;
+use biome_service::configuration::{LoadedConfiguration, load_configuration};
 use biome_service::file_handlers::DocumentFileSource;
 use biome_service::projects::Projects;
-use biome_service::settings::{ServiceLanguage, Settings};
+use biome_service::settings::{ServiceLanguage, Settings, SettingsHandle};
 use biome_string_case::StrLikeExtension;
 use camino::{Utf8Path, Utf8PathBuf};
 use json_comments::StripComments;
 use similar::{DiffableStr, TextDiff};
-
-mod bench_case;
-
-pub use bench_case::BenchCase;
-use biome_css_parser::CssParserOptions;
-use biome_css_syntax::CssRoot;
-use biome_service::WorkspaceError;
-use biome_service::configuration::{LoadedConfiguration, load_configuration};
+use std::ffi::c_int;
+use std::fmt::Write;
+use std::sync::{Arc, Once};
 
 pub fn scripts_from_json(extension: &str, input_code: &str) -> Option<Vec<String>> {
     if extension == "json" || extension == "jsonc" {
@@ -136,6 +134,54 @@ pub fn load_configuration_for_test_file(
     }
 }
 
+pub fn create_parser_options<L: ServiceLanguage>(
+    input_file: &Utf8Path,
+    diagnostics: &mut Vec<String>,
+) -> Option<L::ParserOptions> {
+    let Ok((source, loaded_configuration)) = load_configuration_for_test_file(input_file) else {
+        return None;
+    };
+
+    let projects = Projects::default();
+    let key = projects.insert_project(Utf8PathBuf::from(""));
+
+    if loaded_configuration.has_errors() {
+        let configuration_path = loaded_configuration.file_path.unwrap().clone();
+        diagnostics.extend(
+            loaded_configuration
+                .diagnostics
+                .into_iter()
+                .map(|diagnostic| {
+                    diagnostic_to_string(
+                        configuration_path.file_stem().unwrap(),
+                        &source,
+                        diagnostic,
+                    )
+                })
+                .collect::<Vec<_>>(),
+        );
+
+        Default::default()
+    } else {
+        let configuration = loaded_configuration.configuration;
+        let mut settings = projects.get_root_settings(key).unwrap_or_default();
+        settings
+            .merge_with_configuration(
+                configuration,
+                None,
+                loaded_configuration.extended_configurations,
+            )
+            .unwrap();
+
+        let document_file_source = DocumentFileSource::from_path(
+            input_file,
+            settings.experimental_full_html_support_enabled(),
+        );
+        let handle = SettingsHandle::new(&settings, None);
+        Some(handle.parse_options::<L>(&input_file.into(), &document_file_source))
+    }
+}
+
 pub fn create_formatting_options<L>(
     input_file: &Utf8Path,
     diagnostics: &mut Vec<String>,
@@ -181,7 +227,8 @@ where
             input_file,
             settings.experimental_full_html_support_enabled(),
         );
-        settings.format_options::<L>(&input_file.into(), &document_file_source)
+        let handle = SettingsHandle::new(&settings, None);
+        handle.format_options::<L>(&input_file.into(), &document_file_source)
     }
 }
 
@@ -202,23 +249,28 @@ pub fn module_graph_for_test_file(
     let dir = input_file.parent().unwrap().to_path_buf();
     let paths = get_js_like_paths_in_dir(&dir);
     let fs = OsFileSystem::new(dir);
-    let paths = get_added_paths(&fs, &paths);
+    let paths = get_added_js_paths(&fs, &paths);
 
-    module_graph.update_graph_for_js_paths(&fs, project_layout, &paths);
+    module_graph.update_graph_for_js_paths(&fs, project_layout, &paths, true);
 
     Arc::new(module_graph)
 }
 
 /// Loads and parses files from the file system to pass them to service methods.
-pub fn get_added_paths<'a>(
+pub fn get_added_js_paths<'a>(
     fs: &dyn FileSystem,
     paths: &'a [BiomePath],
 ) -> Vec<(&'a BiomePath, AnyJsRoot)> {
     paths
         .iter()
         .filter_map(|path| {
+            let DocumentFileSource::Js(file_source) =
+                DocumentFileSource::from_path(path.as_path(), false)
+            else {
+                return None;
+            };
+
             let root = fs.read_file_from_path(path).ok().and_then(|content| {
-                let file_source = JsFileSource::try_from(path.as_path()).unwrap_or_default();
                 let parsed =
                     biome_js_parser::parse(&content, file_source, JsParserOptions::default());
                 let diagnostics = parsed.diagnostics();
@@ -237,12 +289,18 @@ pub fn get_added_paths<'a>(
 pub fn get_css_added_paths<'a>(
     fs: &dyn FileSystem,
     paths: &'a [BiomePath],
-) -> Vec<(&'a BiomePath, CssRoot)> {
+) -> Vec<(&'a BiomePath, AnyCssRoot)> {
     paths
         .iter()
         .filter_map(|path| {
+            let DocumentFileSource::Css(file_source) =
+                DocumentFileSource::from_path(path.as_path(), false)
+            else {
+                return None;
+            };
             let root = fs.read_file_from_path(path).ok().map(|content| {
-                let parsed = biome_css_parser::parse_css(&content, CssParserOptions::default());
+                let parsed =
+                    biome_css_parser::parse_css(&content, file_source, CssParserOptions::default());
                 let diagnostics = parsed.diagnostics();
                 assert!(
                     diagnostics.is_empty(),

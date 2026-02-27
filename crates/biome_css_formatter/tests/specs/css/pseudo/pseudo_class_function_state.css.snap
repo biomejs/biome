@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/pseudo/pseudo_class_function_state.css
 ---
+
 # Input
 
 ```css
@@ -34,6 +35,7 @@ Indent width: 2
 Line ending: LF
 Line width: 80
 Quote style: Double Quotes
+Trailing newline: true
 -----
 
 ```css
@@ -50,4 +52,5 @@ custom-selector:state(checked) {
 }
 :host(:state(checked))::before {
 }
+
 ```

@@ -1,0 +1,36 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/spec/example-96.md
+---
+# Input
+
+```md
+```
+
+  
+```
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,4 @@
+ ```
+ 
+-
++  
+ ```
+```
+
+# Output
+
+```md
+```
+
+  
+```
+```

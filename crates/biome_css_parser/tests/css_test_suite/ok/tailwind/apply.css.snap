@@ -2,6 +2,7 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```css
@@ -45,7 +46,7 @@ expression: snapshot
 ```
 CssRoot {
     bom_token: missing (optional),
-    rules: CssRuleList [
+    items: CssRootItemList [
         CssAtRule {
             at_token: AT@0..24 "@" [Comments("/* @apply directive */"), Newline("\n")] [],
             rule: TwApplyAtRule {
@@ -242,7 +243,7 @@ CssRoot {
 ```
 0: CSS_ROOT@0..734
   0: (empty)
-  1: CSS_RULE_LIST@0..733
+  1: CSS_ROOT_ITEM_LIST@0..733
     0: CSS_AT_RULE@0..48
       0: AT@0..24 "@" [Comments("/* @apply directive */"), Newline("\n")] []
       1: TW_APPLY_AT_RULE@24..48

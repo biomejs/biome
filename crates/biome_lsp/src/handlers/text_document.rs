@@ -37,49 +37,57 @@ pub(crate) async fn did_open(
         None => {
             info!("No open project for path: {path:?}. Opening new project.");
 
-            let project_path = path
-                .parent()
-                .map(|parent| parent.to_path_buf())
-                .unwrap_or_default();
-
-            // First check if the current file belongs to any registered workspace folder.
-            // If so, return that folder; otherwise, use the folder computed by did_open.
-            let project_path = if let Some(workspace_folders) = session.get_workspace_folders() {
-                if let Some(ws_root) = workspace_folders
-                    .iter()
-                    .filter_map(|folder| {
-                        folder.uri.to_file_path().map(|p| {
-                            Utf8PathBuf::from_path_buf(p.to_path_buf())
-                                .expect("To have a valid UTF-8 path")
-                        })
-                    })
-                    .find(|ws| project_path.starts_with(ws))
-                {
-                    ws_root
-                } else {
-                    project_path.clone()
-                }
-            } else if let Some(base_path) = session.base_path() {
-                if project_path.starts_with(&base_path) {
-                    base_path
-                } else {
-                    project_path.clone()
-                }
-            } else {
-                project_path
-            };
-
             session.set_configuration_status(ConfigurationStatus::Loading);
-            eprintln!(
-                "Loading configuration from text_document {:?}",
-                &project_path
-            );
             if !session.has_initialized() {
-                session.load_extension_settings().await;
+                session.load_extension_settings(None).await;
             }
-            let status = session
-                .load_biome_configuration_file(ConfigurationPathHint::FromLsp(project_path), false)
-                .await;
+
+            let status = if let Some(path) = session.get_settings_configuration_path() {
+                info!("Loading user configuration from text_document {}", &path);
+                session
+                    .load_biome_configuration_file(ConfigurationPathHint::FromUser(path), false)
+                    .await
+            } else {
+                let project_path = path
+                    .parent()
+                    .map(|parent| parent.to_path_buf())
+                    .unwrap_or_default();
+                info!("Loading configuration from text_document {}", &project_path);
+                // First check if the current file belongs to any registered workspace folder.
+                // If so, return that folder; otherwise, use the folder computed by did_open.
+                let project_path = if let Some(workspace_folders) = session.get_workspace_folders()
+                {
+                    if let Some(ws_root) = workspace_folders
+                        .iter()
+                        .filter_map(|folder| {
+                            folder.uri.to_file_path().map(|p| {
+                                Utf8PathBuf::from_path_buf(p.to_path_buf())
+                                    .expect("To have a valid UTF-8 path")
+                            })
+                        })
+                        .find(|ws| project_path.starts_with(ws))
+                    {
+                        ws_root
+                    } else {
+                        project_path.clone()
+                    }
+                } else if let Some(base_path) = session.base_path() {
+                    if project_path.starts_with(&base_path) {
+                        base_path
+                    } else {
+                        project_path.clone()
+                    }
+                } else {
+                    project_path
+                };
+
+                session
+                    .load_biome_configuration_file(
+                        ConfigurationPathHint::FromLsp(project_path),
+                        false,
+                    )
+                    .await
+            };
 
             session.set_configuration_status(status);
 
@@ -123,6 +131,7 @@ pub(crate) async fn did_open(
         content: FileContent::FromClient { content, version },
         document_file_source: Some(language_hint),
         persist_node_cache: true,
+        inline_config: session.inline_config(),
     })?;
 
     session.insert_document(url.clone(), doc);
@@ -180,6 +189,7 @@ pub(crate) async fn did_change(
         path,
         version,
         content: text,
+        inline_config: session.inline_config(),
     })?;
 
     if let Err(err) = session.update_diagnostics(url).await {
@@ -210,6 +220,7 @@ pub(crate) async fn did_save(
             path,
             content: text.clone(),
             version: doc.version,
+            inline_config: None,
         })?;
 
         session.insert_document(

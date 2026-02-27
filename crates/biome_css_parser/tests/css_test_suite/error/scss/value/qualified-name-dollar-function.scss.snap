@@ -1,0 +1,246 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+.test {
+  width: math.$div(10px, 2);
+  value: map.$get($map, a);
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..1 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@1..6 "test" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@6..7 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssBogusProperty {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@7..15 "width" [Newline("\n"), Whitespace("  ")] [],
+                                    },
+                                    COLON@15..17 ":" [] [Whitespace(" ")],
+                                    CssBogus {
+                                        items: [
+                                            ScssQualifiedName {
+                                                module: CssIdentifier {
+                                                    value_token: IDENT@17..21 "math" [] [],
+                                                },
+                                                dot_token: DOT@21..22 "." [] [],
+                                                member: ScssIdentifier {
+                                                    dollar_token: DOLLAR@22..23 "$" [] [],
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@23..26 "div" [] [],
+                                                    },
+                                                },
+                                            },
+                                            CssBogusPropertyValue {
+                                                items: [
+                                                    L_PAREN@26..27 "(" [] [],
+                                                    CSS_DIMENSION_VALUE@27..29 "10" [] [],
+                                                    PX_KW@29..31 "px" [] [],
+                                                    COMMA@31..33 "," [] [Whitespace(" ")],
+                                                    CSS_NUMBER_LITERAL@33..34 "2" [] [],
+                                                    R_PAREN@34..35 ")" [] [],
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@35..36 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssBogusProperty {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@36..44 "value" [Newline("\n"), Whitespace("  ")] [],
+                                    },
+                                    COLON@44..46 ":" [] [Whitespace(" ")],
+                                    CssBogus {
+                                        items: [
+                                            ScssQualifiedName {
+                                                module: CssIdentifier {
+                                                    value_token: IDENT@46..49 "map" [] [],
+                                                },
+                                                dot_token: DOT@49..50 "." [] [],
+                                                member: ScssIdentifier {
+                                                    dollar_token: DOLLAR@50..51 "$" [] [],
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@51..54 "get" [] [],
+                                                    },
+                                                },
+                                            },
+                                            CssBogusPropertyValue {
+                                                items: [
+                                                    L_PAREN@54..55 "(" [] [],
+                                                    DOLLAR@55..56 "$" [] [],
+                                                    IDENT@56..59 "map" [] [],
+                                                    COMMA@59..61 "," [] [Whitespace(" ")],
+                                                    IDENT@61..62 "a" [] [],
+                                                    R_PAREN@62..63 ")" [] [],
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@63..64 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@64..66 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@66..67 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..67
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..66
+    0: CSS_QUALIFIED_RULE@0..66
+      0: CSS_SELECTOR_LIST@0..6
+        0: CSS_COMPOUND_SELECTOR@0..6
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..6
+            0: CSS_CLASS_SELECTOR@0..6
+              0: DOT@0..1 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@1..6
+                0: IDENT@1..6 "test" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@6..66
+        0: L_CURLY@6..7 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@7..64
+          0: CSS_DECLARATION_WITH_SEMICOLON@7..36
+            0: CSS_DECLARATION@7..35
+              0: CSS_BOGUS_PROPERTY@7..35
+                0: CSS_IDENTIFIER@7..15
+                  0: IDENT@7..15 "width" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@15..17 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@17..35
+                  0: SCSS_QUALIFIED_NAME@17..26
+                    0: CSS_IDENTIFIER@17..21
+                      0: IDENT@17..21 "math" [] []
+                    1: DOT@21..22 "." [] []
+                    2: SCSS_IDENTIFIER@22..26
+                      0: DOLLAR@22..23 "$" [] []
+                      1: CSS_IDENTIFIER@23..26
+                        0: IDENT@23..26 "div" [] []
+                  1: CSS_BOGUS_PROPERTY_VALUE@26..35
+                    0: L_PAREN@26..27 "(" [] []
+                    1: CSS_DIMENSION_VALUE@27..29 "10" [] []
+                    2: PX_KW@29..31 "px" [] []
+                    3: COMMA@31..33 "," [] [Whitespace(" ")]
+                    4: CSS_NUMBER_LITERAL@33..34 "2" [] []
+                    5: R_PAREN@34..35 ")" [] []
+              1: (empty)
+            1: SEMICOLON@35..36 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@36..64
+            0: CSS_DECLARATION@36..63
+              0: CSS_BOGUS_PROPERTY@36..63
+                0: CSS_IDENTIFIER@36..44
+                  0: IDENT@36..44 "value" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@44..46 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@46..63
+                  0: SCSS_QUALIFIED_NAME@46..54
+                    0: CSS_IDENTIFIER@46..49
+                      0: IDENT@46..49 "map" [] []
+                    1: DOT@49..50 "." [] []
+                    2: SCSS_IDENTIFIER@50..54
+                      0: DOLLAR@50..51 "$" [] []
+                      1: CSS_IDENTIFIER@51..54
+                        0: IDENT@51..54 "get" [] []
+                  1: CSS_BOGUS_PROPERTY_VALUE@54..63
+                    0: L_PAREN@54..55 "(" [] []
+                    1: DOLLAR@55..56 "$" [] []
+                    2: IDENT@56..59 "map" [] []
+                    3: COMMA@59..61 "," [] [Whitespace(" ")]
+                    4: IDENT@61..62 "a" [] []
+                    5: R_PAREN@62..63 ")" [] []
+              1: (empty)
+            1: SEMICOLON@63..64 ";" [] []
+        2: R_CURLY@64..66 "}" [Newline("\n")] []
+  2: EOF@66..67 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+qualified-name-dollar-function.scss:2:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    1 │ .test {
+  > 2 │   width: math.$div(10px, 2);
+      │                   ^^^^^^^^^
+    3 │   value: map.$get($map, a);
+    4 │ }
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+qualified-name-dollar-function.scss:3:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    1 │ .test {
+    2 │   width: math.$div(10px, 2);
+  > 3 │   value: map.$get($map, a);
+      │                  ^^^^^^^^^
+    4 │ }
+    5 │ 
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+```

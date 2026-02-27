@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-define-component.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+import {defineComponent} from 'vue';
+
+export default defineComponent({
+    props: ['foo']
+});
+
+```

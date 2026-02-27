@@ -5,7 +5,9 @@ use biome_json_factory::make::{
     json_boolean_value, json_member, json_member_list, json_member_name, json_string_literal,
     json_string_value, token,
 };
-use biome_json_syntax::{AnyJsonValue, JsonMember, JsonObjectValue, T, inner_string_text};
+use biome_json_syntax::{
+    AnyJsonMemberName, AnyJsonValue, JsonMember, JsonObjectValue, T, inner_string_text,
+};
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TextRange, TriviaPieceKind};
 use biome_rule_options::no_quickfix_biome::NoQuickfixBiomeOptions;
 
@@ -88,7 +90,7 @@ impl Rule for NoQuickfixBiome {
         for default_path in DEFAULT_PATHS {
             if path.ends_with(default_path) {
                 let name = node.name().ok()?;
-                let value = name.value_token().ok()?;
+                let value = name.value_token()?.ok()?;
                 if inner_string_text(&value) == "quickfix.biome" {
                     return Some(name.range());
                 }
@@ -98,7 +100,7 @@ impl Rule for NoQuickfixBiome {
         for default_path in options.additional_paths.iter() {
             if path.ends_with(default_path) {
                 let name = node.name().ok()?;
-                let value = name.value_token().ok()?;
+                let value = name.value_token()?.ok()?;
                 if inner_string_text(&value) == "quickfix.biome" {
                     return Some(name.range());
                 }
@@ -136,12 +138,10 @@ impl Rule for NoQuickfixBiome {
         let has_fix_all = parent_list.iter().flatten().any(|member| {
             member
                 .name()
-                .map(|name| {
-                    name.value_token()
-                        .map(|token| inner_string_text(&token) == "source.fixAll.biome")
-                        .unwrap_or(false)
-                })
-                .unwrap_or(false)
+                .ok()
+                .and_then(|name| name.value_token())
+                .and_then(|token| token.ok())
+                .is_some_and(|token| inner_string_text(&token) == "source.fixAll.biome")
         });
 
         let new_list = parent_list
@@ -169,7 +169,9 @@ impl Rule for NoQuickfixBiome {
         } else {
             let mut new_list = vec![];
             new_list.push(json_member(
-                json_member_name(json_string_literal("source.fixAll.biome")),
+                AnyJsonMemberName::JsonMemberName(json_member_name(json_string_literal(
+                    "source.fixAll.biome",
+                ))),
                 token(T![:]).with_trailing_trivia(vec![(TriviaPieceKind::Whitespace, " ")]),
                 if path.as_str().contains("zed") || path.as_str().contains(".zed") {
                     AnyJsonValue::JsonBooleanValue(json_boolean_value(token(T![true])))

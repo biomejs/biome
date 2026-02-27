@@ -41,5 +41,3 @@ class C { #field; foo() { this.#field === this['#field']; } }
 ```cjs
 class C { #field; foo() { this['#field'] === this.#field; } }
 ```
-
-

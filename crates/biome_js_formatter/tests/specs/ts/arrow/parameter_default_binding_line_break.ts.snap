@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/arrow/parameter_default_binding_line_break.ts
 ---
+
 # Input
 
 ```ts
@@ -51,6 +52,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -68,6 +70,7 @@ class T {
 		getName: (timestamp: number) => number = (timestamp) => timestamp * 1000,
 	) {}
 }
+
 ```
 
 ## Output 1
@@ -88,6 +91,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -105,4 +109,5 @@ class T {
 		getName: (timestamp: number) => number = timestamp => timestamp * 1000,
 	) {}
 }
+
 ```

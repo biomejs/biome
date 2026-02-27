@@ -1,0 +1,46 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "html": {
+    "linter": { "enabled": true },
+    "experimentalFullSupportEnabled": true
+  }
+}
+```
+
+## `file.svelte`
+
+```svelte
+<script>
+  let x = 1;
+</script>
+
+<!-- Comma operator in template expression - should be flagged -->
+<p>{(console.log("side effect"), x)}</p>
+```
+
+# Emitted Messages
+
+```block
+file.svelte:6:32 lint/complexity/noCommaOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The comma operator is disallowed.
+  
+    5 │ <!-- Comma operator in template expression - should be flagged -->
+  > 6 │ <p>{(console.log("side effect"), x)}</p>
+      │                                ^
+  
+  i Its use is often confusing and obscures side effects.
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 warning.
+```

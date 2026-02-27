@@ -1,7 +1,5 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-//! Generated file, do not edit by hand, see `xtask/codegen`
-
 pub mod correctness;
 pub mod nursery;
 pub mod style;

@@ -1,0 +1,54 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: mixed_literals.ts
+---
+# Input
+```ts
+interface _MixedLiteralsInterface {
+	"zebra": string;
+	apple: number;
+	99: boolean;
+	"banana": string;
+	5: number;
+	charlie: object;
+}
+
+```
+
+# Diagnostics
+```
+mixed_literals.ts:1:1 assist/source/useSortedInterfaceMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The interface members are not sorted by key.
+  
+  > 1 │ interface _MixedLiteralsInterface {
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 2 │ 	"zebra": string;
+  > 3 │ 	apple: number;
+  > 4 │ 	99: boolean;
+  > 5 │ 	"banana": string;
+  > 6 │ 	5: number;
+  > 7 │ 	charlie: object;
+  > 8 │ }
+      │ ^
+    9 │ 
+  
+  i Safe fix: Sort the interface members by key.
+  
+    1 1 │   interface _MixedLiteralsInterface {
+    2   │ - → "zebra":·string;
+    3   │ - → apple:·number;
+    4   │ - → 99:·boolean;
+      2 │ + → 5:·number;
+      3 │ + → 99:·boolean;
+      4 │ + → apple:·number;
+    5 5 │   	"banana": string;
+    6   │ - → 5:·number;
+    7   │ - → charlie:·object;
+      6 │ + → charlie:·object;
+      7 │ + → "zebra":·string;
+    8 8 │   }
+    9 9 │   
+  
+
+```

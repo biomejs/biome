@@ -10,6 +10,7 @@ use biome_grit_patterns::{
     compile_pattern_with_options,
 };
 use biome_js_syntax::{AnyJsRoot, JsSyntaxNode};
+use biome_json_syntax::{JsonRoot, JsonSyntaxNode};
 use biome_parser::{AnyParse, NodeParse};
 use biome_rowan::{AnySyntaxNode, AstNode, RawSyntaxKind, SyntaxKind, TextRange};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -47,6 +48,7 @@ impl AnalyzerPlugin for AnalyzerGritPlugin {
         match &self.grit_query.language {
             GritTargetLanguage::JsTargetLanguage(_) => PluginTargetLanguage::JavaScript,
             GritTargetLanguage::CssTargetLanguage(_) => PluginTargetLanguage::Css,
+            GritTargetLanguage::JsonTargetLanguage(_) => PluginTargetLanguage::Json,
         }
     }
 
@@ -59,6 +61,10 @@ impl AnalyzerPlugin for AnalyzerGritPlugin {
             PluginTargetLanguage::Css => {
                 CssRoot::KIND_SET.iter().map(|kind| kind.to_raw()).collect()
             }
+            PluginTargetLanguage::Json => JsonRoot::KIND_SET
+                .iter()
+                .map(|kind| kind.to_raw())
+                .collect(),
         }
     }
 
@@ -72,12 +78,15 @@ impl AnalyzerPlugin for AnalyzerGritPlugin {
             PluginTargetLanguage::Css => node
                 .downcast_ref::<CssSyntaxNode>()
                 .and_then(|node| node.as_send()),
+            PluginTargetLanguage::Json => node
+                .downcast_ref::<JsonSyntaxNode>()
+                .and_then(|node| node.as_send()),
         };
 
         let parse = AnyParse::Node(NodeParse::new(root.unwrap(), vec![]));
         let file = GritTargetFile { parse, path };
 
-        match self.grit_query.execute(file) {
+        match self.grit_query.execute_optimized(file) {
             Ok(result) => {
                 let mut diagnostics: Vec<_> = result
                     .logs

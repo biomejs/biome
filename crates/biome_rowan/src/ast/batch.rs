@@ -314,6 +314,38 @@ where
         self.push_change(prev_element, None)
     }
 
+    /// Push a change to remove the specified node, transferring its trivia
+    /// (leading + trailing combined) to the next token's leading trivia.
+    /// The next token always exists (EOF token can have leading trivia).
+    pub fn remove_node_keep_trivia<T>(&mut self, prev_node: T)
+    where
+        T: AstNode<Language = L>,
+    {
+        let node = prev_node.into_syntax();
+
+        let leading_pieces = node
+            .first_leading_trivia()
+            .map(|t| t.pieces().collect::<Vec<_>>())
+            .unwrap_or_default();
+        let trailing_pieces = node
+            .last_trailing_trivia()
+            .map(|t| t.pieces().collect::<Vec<_>>())
+            .unwrap_or_default();
+
+        let combined_trivia =
+            chain_trivia_pieces(leading_pieces.into_iter(), trailing_pieces.into_iter());
+
+        if let Some(next_token) = node.last_token().and_then(|t| t.next_token()) {
+            let new_next_token = next_token.with_leading_trivia_pieces(chain_trivia_pieces(
+                combined_trivia,
+                next_token.leading_trivia().pieces(),
+            ));
+            self.replace_token_discard_trivia(next_token, new_next_token);
+        }
+
+        self.remove_element(node.into());
+    }
+
     fn push_change(
         &mut self,
         prev_element: SyntaxElement<L>,
@@ -595,7 +627,7 @@ where
 #[cfg(test)]
 pub mod test {
     use crate::{
-        AstNode, BatchMutationExt, SyntaxNodeCast,
+        AstNode, BatchMutationExt, SyntaxNodeCast, TriviaPiece,
         raw_language::{LiteralExpression, RawLanguageKind, RawLanguageRoot, RawSyntaxTreeBuilder},
     };
 
@@ -700,5 +732,125 @@ pub mod test {
         let after = batch.commit();
 
         assert_eq!(expected_debug, format!("{after:#?}"));
+    }
+
+    /// Builds a tree with two LITERAL_EXPRESSION nodes where the first node's
+    /// token has leading and trailing whitespace trivia:
+    ///
+    /// ```
+    /// ROOT
+    ///   LITERAL_EXPRESSION  (token: " a " with leading=1ws, trailing=1ws)
+    ///   LITERAL_EXPRESSION  (token: "b" with no trivia)
+    /// ```
+    ///
+    /// After `remove_node_keep_trivia` on node "a", the trivia from "a"'s token
+    /// (leading ws + trailing ws) should be prepended to "b"'s leading trivia.
+    #[test]
+    pub fn ok_remove_node_keep_trivia_transfers_trivia_to_next() {
+        // Build tree: [" a "] ["b"] where " a " has leading+trailing whitespace
+        let mut builder = RawSyntaxTreeBuilder::new();
+        builder.start_node(RawLanguageKind::ROOT);
+        builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+        builder.token_with_trivia(
+            RawLanguageKind::STRING_TOKEN,
+            " a ",
+            &[TriviaPiece::whitespace(1)],
+            &[TriviaPiece::whitespace(1)],
+        );
+        builder.finish_node();
+        builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+        builder.token(RawLanguageKind::STRING_TOKEN, "b");
+        builder.finish_node();
+        builder.finish_node();
+        let root = builder.finish().cast::<RawLanguageRoot>().unwrap();
+
+        let node_a = find(&root, "a");
+        let mut batch = root.begin();
+        batch.remove_node_keep_trivia(node_a);
+        let after = batch.commit();
+
+        // "b"'s token should now have the trivia from "a" prepended:
+        // leading = ws(1) from "a"'s leading + ws(1) from "a"'s trailing
+        let b_token = after
+            .descendants_tokens(crate::Direction::Next)
+            .find(|t| t.text_trimmed() == "b")
+            .expect("token 'b' should still exist");
+
+        let leading: Vec<_> = b_token.leading_trivia().pieces().collect();
+        assert_eq!(leading.len(), 2, "expected 2 leading trivia pieces on 'b'");
+        assert!(leading[0].is_whitespace());
+        assert!(leading[1].is_whitespace());
+
+        // "a" node should be gone
+        let has_a = after
+            .descendants_tokens(crate::Direction::Next)
+            .any(|t| t.text_trimmed() == "a");
+        assert!(!has_a, "node 'a' should have been removed");
+    }
+
+    /// Removes the only real node in a tree; its comment trivia must migrate to
+    /// the EOF token's leading trivia.
+    ///
+    /// Tree shape:
+    /// ```
+    /// ROOT
+    ///   LITERAL_EXPRESSION
+    ///     STRING_TOKEN "a"  leading=[comment("// hi\n", 7)]  trailing=[]
+    ///   EOF               leading=[]  trailing=[]
+    /// ```
+    ///
+    /// After `remove_node_keep_trivia`, the EOF token must carry the comment as
+    /// leading trivia and the LITERAL_EXPRESSION must be gone.
+    #[test]
+    pub fn ok_remove_node_keep_trivia_transfers_to_eof() {
+        let comment = "// hi\n";
+        let comment_len = comment.len() as u32;
+
+        let mut builder = RawSyntaxTreeBuilder::new();
+        builder.start_node(RawLanguageKind::ROOT);
+        builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+        builder.token_with_trivia(
+            RawLanguageKind::STRING_TOKEN,
+            // full token text: leading trivia + trimmed text + trailing trivia
+            &format!("{comment}a"),
+            &[TriviaPiece::single_line_comment(comment_len)],
+            &[],
+        );
+        builder.finish_node();
+        // EOF token — no trivia initially
+        builder.token_with_trivia(RawLanguageKind::EOF, "", &[], &[]);
+        builder.finish_node();
+
+        let root = builder.finish().cast::<RawLanguageRoot>().unwrap();
+
+        let node_a = find(&root, "a");
+        let mut batch = root.begin();
+        batch.remove_node_keep_trivia(node_a);
+        let after = batch.commit();
+
+        // The EOF token must now carry the comment as its leading trivia.
+        let eof = after.last_token().expect("EOF token must exist");
+        assert_eq!(eof.kind(), RawLanguageKind::EOF);
+
+        let leading: Vec<_> = eof.leading_trivia().pieces().collect();
+        assert_eq!(
+            leading.len(),
+            1,
+            "EOF should have exactly one leading trivia piece"
+        );
+        assert!(
+            leading[0].is_comments(),
+            "the trivia piece should be a comment"
+        );
+        assert_eq!(
+            leading[0].text_len(),
+            biome_text_size::TextSize::from(comment_len)
+        );
+
+        // The LITERAL_EXPRESSION must be gone.
+        let has_a = after
+            .descendants_tokens(crate::Direction::Next)
+            .any(|t: crate::SyntaxToken<_>| t.text_trimmed() == "a");
+        assert!(!has_a, "node 'a' should have been removed");
     }
 }

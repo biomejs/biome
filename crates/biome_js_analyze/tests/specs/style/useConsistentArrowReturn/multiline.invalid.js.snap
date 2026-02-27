@@ -1,0 +1,307 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: multiline.invalid.js
+---
+# Input
+```js
+const chainedOnNewLine = (l) =>
+  l
+    .split('\n')
+
+const multipleChainedMethods = (arr) =>
+  arr
+    .filter(x => x > 0)
+    .map(x => x * 2)
+
+const objectWithMultipleProperties = () =>
+  ({
+    prop1: 'value1',
+    prop2: 'value2'
+  })
+
+const arrayWithMultipleElements = () =>
+  [
+    1,
+    2,
+    3
+  ]
+
+const nested = () =>
+  someFunction(
+    arg1,
+    arg2
+  )
+
+const withInlineComment = (l) =>
+  l
+    /* keep this comment */
+    .split('\n')
+
+const withLineComment = (arr) =>
+  arr
+    // this comment is important
+    .filter(x => x > 0)
+
+const withCommentInObject = () =>
+  ({
+    // important note
+    prop1: 'value1',
+    prop2: 'value2'
+  })
+
+const withCommentInArray = () =>
+  [
+    // first element
+    1,
+    2,
+    3
+  ]
+
+```
+
+# Diagnostics
+```
+multiline.invalid.js:1:26 lint/style/useConsistentArrowReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This arrow function body should be a block statement.
+  
+  > 1 │ const chainedOnNewLine = (l) =>
+      │                          ^^^^^^
+  > 2 │   l
+  > 3 │     .split('\n')
+      │     ^^^^^^^^^^^^
+    4 │ 
+    5 │ const multipleChainedMethods = (arr) =>
+  
+  i Safe fix: Add braces to the arrow function body.
+  
+     1  1 │   const chainedOnNewLine = (l) =>
+     2    │ - ··l
+     3    │ - ····.split('\n')
+        2 │ + ··{
+        3 │ + → return·l
+        4 │ + ····.split('\n');
+        5 │ + }
+     4  6 │   
+     5  7 │   const multipleChainedMethods = (arr) =>
+  
+
+```
+
+```
+multiline.invalid.js:5:32 lint/style/useConsistentArrowReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This arrow function body should be a block statement.
+  
+     3 │     .split('\n')
+     4 │ 
+   > 5 │ const multipleChainedMethods = (arr) =>
+       │                                ^^^^^^^^
+   > 6 │   arr
+   > 7 │     .filter(x => x > 0)
+   > 8 │     .map(x => x * 2)
+       │     ^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ const objectWithMultipleProperties = () =>
+  
+  i Safe fix: Add braces to the arrow function body.
+  
+     4  4 │   
+     5  5 │   const multipleChainedMethods = (arr) =>
+     6    │ - ··arr
+        6 │ + ··{
+        7 │ + → return·arr
+     7  8 │       .filter(x => x > 0)
+     8    │ - ····.map(x·=>·x·*·2)
+        9 │ + ····.map(x·=>·x·*·2);
+       10 │ + }
+     9 11 │   
+    10 12 │   const objectWithMultipleProperties = () =>
+  
+
+```
+
+```
+multiline.invalid.js:7:13 lint/style/useConsistentArrowReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This arrow function body should be a block statement.
+  
+    5 │ const multipleChainedMethods = (arr) =>
+    6 │   arr
+  > 7 │     .filter(x => x > 0)
+      │             ^^^^^^^^^^
+    8 │     .map(x => x * 2)
+    9 │ 
+  
+  i Safe fix: Add braces to the arrow function body.
+  
+     5  5 │   const multipleChainedMethods = (arr) =>
+     6  6 │     arr
+     7    │ - ····.filter(x·=>·x·>·0)
+        7 │ + ····.filter(x·=>·{
+        8 │ + → return·x·>·0;
+        9 │ + })
+     8 10 │       .map(x => x * 2)
+     9 11 │   
+  
+
+```
+
+```
+multiline.invalid.js:8:10 lint/style/useConsistentArrowReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This arrow function body should be a block statement.
+  
+     6 │   arr
+     7 │     .filter(x => x > 0)
+   > 8 │     .map(x => x * 2)
+       │          ^^^^^^^^^^
+     9 │ 
+    10 │ const objectWithMultipleProperties = () =>
+  
+  i Safe fix: Add braces to the arrow function body.
+  
+     6  6 │     arr
+     7  7 │       .filter(x => x > 0)
+     8    │ - ····.map(x·=>·x·*·2)
+        8 │ + ····.map(x·=>·{
+        9 │ + → return·x·*·2;
+       10 │ + })
+     9 11 │   
+    10 12 │   const objectWithMultipleProperties = () =>
+  
+
+```
+
+```
+multiline.invalid.js:10:38 lint/style/useConsistentArrowReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This arrow function body should be a block statement.
+  
+     8 │     .map(x => x * 2)
+     9 │ 
+  > 10 │ const objectWithMultipleProperties = () =>
+       │                                      ^^^^^
+  > 11 │   ({
+  > 12 │     prop1: 'value1',
+  > 13 │     prop2: 'value2'
+  > 14 │   })
+       │   ^^
+    15 │ 
+    16 │ const arrayWithMultipleElements = () =>
+  
+  i Safe fix: Add braces to the arrow function body.
+  
+     9  9 │   
+    10 10 │   const objectWithMultipleProperties = () =>
+    11    │ - ··({
+       11 │ + ··{
+       12 │ + → return·{
+    12 13 │       prop1: 'value1',
+    13 14 │       prop2: 'value2'
+    14    │ - ··})
+       15 │ + ··};
+       16 │ + }
+    15 17 │   
+    16 18 │   const arrayWithMultipleElements = () =>
+  
+
+```
+
+```
+multiline.invalid.js:16:35 lint/style/useConsistentArrowReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This arrow function body should be a block statement.
+  
+    14 │   })
+    15 │ 
+  > 16 │ const arrayWithMultipleElements = () =>
+       │                                   ^^^^^
+  > 17 │   [
+  > 18 │     1,
+  > 19 │     2,
+  > 20 │     3
+  > 21 │   ]
+       │   ^
+    22 │ 
+    23 │ const nested = () =>
+  
+  i Safe fix: Add braces to the arrow function body.
+  
+    15 15 │   
+    16 16 │   const arrayWithMultipleElements = () =>
+    17    │ - ··[
+       17 │ + ··{
+       18 │ + → return·[
+    18 19 │       1,
+    19 20 │       2,
+    20 21 │       3
+    21    │ - ··]
+       22 │ + ··];
+       23 │ + }
+    22 24 │   
+    23 25 │   const nested = () =>
+  
+
+```
+
+```
+multiline.invalid.js:23:16 lint/style/useConsistentArrowReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This arrow function body should be a block statement.
+  
+    21 │   ]
+    22 │ 
+  > 23 │ const nested = () =>
+       │                ^^^^^
+  > 24 │   someFunction(
+  > 25 │     arg1,
+  > 26 │     arg2
+  > 27 │   )
+       │   ^
+    28 │ 
+    29 │ const withInlineComment = (l) =>
+  
+  i Safe fix: Add braces to the arrow function body.
+  
+    22 22 │   
+    23 23 │   const nested = () =>
+    24    │ - ··someFunction(
+       24 │ + ··{
+       25 │ + → return·someFunction(
+    25 26 │       arg1,
+    26 27 │       arg2
+    27    │ - ··)
+       28 │ + ··);
+       29 │ + }
+    28 30 │   
+    29 31 │   const withInlineComment = (l) =>
+  
+
+```
+
+```
+multiline.invalid.js:37:13 lint/style/useConsistentArrowReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This arrow function body should be a block statement.
+  
+    35 │   arr
+    36 │     // this comment is important
+  > 37 │     .filter(x => x > 0)
+       │             ^^^^^^^^^^
+    38 │ 
+    39 │ const withCommentInObject = () =>
+  
+  i Safe fix: Add braces to the arrow function body.
+  
+    35 35 │     arr
+    36 36 │       // this comment is important
+    37    │ - ····.filter(x·=>·x·>·0)
+       37 │ + ····.filter(x·=>·{
+       38 │ + → return·x·>·0;
+       39 │ + })
+    38 40 │   
+    39 41 │   const withCommentInObject = () =>
+  
+
+```

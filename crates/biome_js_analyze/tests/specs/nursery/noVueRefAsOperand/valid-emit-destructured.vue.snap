@@ -1,0 +1,22 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-emit-destructured.vue
+---
+# Input
+```ts
+import { ref, defineComponent } from 'vue'
+
+export default defineComponent({
+  emits: ['incremented'],
+  setup(_, { emit }) {
+    const counter = ref(0)
+
+    emit('incremented', counter.value)
+
+    return {
+      counter
+    }
+  }
+})
+
+```

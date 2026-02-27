@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: jsx/bracket_same_line/bracket_same_line.jsx
 ---
+
 # Input
 
 ```jsx
@@ -74,6 +75,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```jsx
@@ -120,6 +122,7 @@ const a = <div></div>;
 
 <div className="hi" />;
 <div className="hi"></div>;
+
 ```
 
 ## Output 1
@@ -140,6 +143,7 @@ Bracket same line: true
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```jsx
@@ -184,4 +188,5 @@ const a = <div></div>;
 
 <div className="hi" />;
 <div className="hi"></div>;
+
 ```

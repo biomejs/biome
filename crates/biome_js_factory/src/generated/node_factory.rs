@@ -1289,12 +1289,12 @@ impl JsExportNamedSpecifierBuilder {
         ))
     }
 }
-pub fn js_expression_snipped(
+pub fn js_expression_snippet(
     expression: AnyJsExpression,
     eof_token: SyntaxToken,
-) -> JsExpressionSnipped {
-    JsExpressionSnipped::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JS_EXPRESSION_SNIPPED,
+) -> JsExpressionSnippet {
+    JsExpressionSnippet::unwrap_cast(SyntaxNode::new_detached(
+        JsSyntaxKind::JS_EXPRESSION_SNIPPET,
         [
             Some(SyntaxElement::Node(expression.into_syntax())),
             Some(SyntaxElement::Token(eof_token)),
@@ -1326,6 +1326,18 @@ impl JsExpressionStatementBuilder {
             ],
         ))
     }
+}
+pub fn js_expression_template_root(
+    expression: AnyJsExpression,
+    eof_token: SyntaxToken,
+) -> JsExpressionTemplateRoot {
+    JsExpressionTemplateRoot::unwrap_cast(SyntaxNode::new_detached(
+        JsSyntaxKind::JS_EXPRESSION_TEMPLATE_ROOT,
+        [
+            Some(SyntaxElement::Node(expression.into_syntax())),
+            Some(SyntaxElement::Token(eof_token)),
+        ],
+    ))
 }
 pub fn js_extends_clause(
     extends_token: SyntaxToken,

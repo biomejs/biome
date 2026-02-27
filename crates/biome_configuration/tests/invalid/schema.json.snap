@@ -1,5 +1,5 @@
 ---
-source: crates/biome_service/tests/spec_tests.rs
+source: crates/biome_configuration/tests/spec_tests.rs
 expression: schema.json
 ---
 schema.json:2:13 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -10,7 +10,4 @@ schema.json:2:13 deserialize ━━━━━━━━━━━━━━━━━
   > 2 │ 	"$schema": false
       │ 	           ^^^^^
     3 │ }
-    4 │ 
-  
-
-
+    4 │

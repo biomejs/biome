@@ -180,7 +180,8 @@ pub enum JsSyntaxKind {
     JS_MODULE_ITEM_LIST,
     JS_SCRIPT,
     TS_DECLARATION_MODULE,
-    JS_EXPRESSION_SNIPPED,
+    JS_EXPRESSION_SNIPPET,
+    JS_EXPRESSION_TEMPLATE_ROOT,
     JS_DIRECTIVE,
     JS_DIRECTIVE_LIST,
     JS_STATEMENT_LIST,
@@ -880,7 +881,7 @@ impl JsSyntaxKind {
             OUT_KW => "out",
             USING_KW => "using",
             META_KW => "meta",
-            EOF => "EOF",
+            EOF => "",
             JS_STRING_LITERAL => "string literal",
             _ => return None,
         };

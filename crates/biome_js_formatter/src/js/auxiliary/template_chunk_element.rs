@@ -3,6 +3,7 @@ use biome_formatter::write;
 
 use biome_js_syntax::{JsSyntaxToken, JsTemplateChunkElement, TsTemplateChunkElement};
 use biome_rowan::{SyntaxResult, declare_node_union};
+use biome_text_size::TextRange;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsTemplateChunkElement;
@@ -14,6 +15,17 @@ impl FormatNodeRule<JsTemplateChunkElement> for FormatJsTemplateChunkElement {
         formatter: &mut JsFormatter,
     ) -> FormatResult<()> {
         AnyTemplateChunkElement::from(node.clone()).fmt(formatter)
+    }
+
+    fn embedded_node_range(
+        &self,
+        node: &JsTemplateChunkElement,
+        f: &mut JsFormatter,
+    ) -> Option<TextRange> {
+        if !f.context().should_delegate_fmt_embedded_nodes() {
+            return None;
+        }
+        Some(node.template_chunk_token().ok()?.text_range())
     }
 }
 
