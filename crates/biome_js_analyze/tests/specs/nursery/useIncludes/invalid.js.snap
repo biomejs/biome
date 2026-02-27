@@ -40,6 +40,8 @@ invalid.js:4:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━
     5 │ "foo".indexOf(bar) >= 0;
     6 │ 
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Safe fix: Replace with 'includes()'
   
      2  2 │   
@@ -64,6 +66,8 @@ invalid.js:5:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━
     6 │ 
     7 │ // Basic indexOf patterns - equal to -1 (negated)
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Safe fix: Replace with 'includes()'
   
      3  3 │   // Basic indexOf patterns - not equal to -1
@@ -86,6 +90,8 @@ invalid.js:8:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
      9 │ ["a", "b", "c"].indexOf(bar) < 0;
     10 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace with 'includes()'
   
@@ -111,6 +117,8 @@ invalid.js:9:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━
     10 │ 
     11 │ // Greater than or equal to 0
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Safe fix: Replace with 'includes()'
   
      7  7 │   // Basic indexOf patterns - equal to -1 (negated)
@@ -133,6 +141,8 @@ invalid.js:12:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^
     13 │ 
     14 │ // Less than 0 (negated)
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace with 'includes()'
   
@@ -157,6 +167,8 @@ invalid.js:15:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━�
     16 │ 
     17 │ // Not equal to -1
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Safe fix: Replace with 'includes()'
   
     13 13 │   
@@ -180,6 +192,8 @@ invalid.js:18:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━�
     19 │ 
     20 │ // Equal to -1 (negated)
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Safe fix: Replace with 'includes()'
   
     16 16 │   
@@ -201,6 +215,8 @@ invalid.js:21:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━�
   > 21 │ "test".indexOf("x") == -1;
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^
     22 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace with 'includes()'
   

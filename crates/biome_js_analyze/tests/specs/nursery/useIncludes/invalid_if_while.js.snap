@@ -39,6 +39,8 @@ invalid_if_while.js:4:5 lint/nursery/useIncludes  FIXABLE  ━━━━━━━
     5 │ while (["a", "b", "c"].indexOf("a") === -1) {}
     6 │ if (("foo".indexOf("o")) !== -1) {}
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Safe fix: Replace with 'includes()'
   
      2  2 │   
@@ -62,6 +64,8 @@ invalid_if_while.js:5:8 lint/nursery/useIncludes  FIXABLE  ━━━━━━━
       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │ if (("foo".indexOf("o")) !== -1) {}
     7 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace with 'includes()'
   
@@ -87,6 +91,8 @@ invalid_if_while.js:6:5 lint/nursery/useIncludes  FIXABLE  ━━━━━━━
     7 │ 
     8 │ // With parentheses
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Safe fix: Replace with 'includes()'
   
      4  4 │   if ("foo".indexOf("o") !== -1) {}
@@ -109,6 +115,8 @@ invalid_if_while.js:9:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     10 │ 
     11 │ // Basic regex patterns
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace with 'includes()'
   
@@ -133,6 +141,8 @@ invalid_if_while.js:12:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━�
     13 │ 
     14 │ // Unicode characters in regex
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Safe fix: Replace with 'includes()'
   
     10 10 │   
@@ -155,6 +165,8 @@ invalid_if_while.js:15:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━�
        │ ^^^^^^^^^^^^^^^^
     16 │ /😀/.test("hello 😀");
     17 │ /中/.test("中文");
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace with 'includes()'
   
@@ -180,6 +192,8 @@ invalid_if_while.js:16:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━�
     17 │ /中/.test("中文");
     18 │ 
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Safe fix: Replace with 'includes()'
   
     14 14 │   // Unicode characters in regex
@@ -204,6 +218,8 @@ invalid_if_while.js:17:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━�
     18 │ 
     19 │ // Whitespace in regex
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Safe fix: Replace with 'includes()'
   
     15 15 │   /á/.test("café");
@@ -225,6 +241,8 @@ invalid_if_while.js:20:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━�
   > 20 │ / /.test("hello world");
        │ ^^^^^^^^^^^^^^^^^^^^^^^
     21 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace with 'includes()'
   

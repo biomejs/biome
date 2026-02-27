@@ -22,6 +22,8 @@ invalid_complex_conditions.js:2:5 lint/nursery/useIncludes  FIXABLE  ━━━�
     3 │ const F = "foo".indexOf("o") !== -1 && bar > 4
     4 │ 
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i Safe fix: Replace with 'includes()'
   
     1 1 │   // should generate diagnostics
@@ -43,6 +45,8 @@ invalid_complex_conditions.js:3:11 lint/nursery/useIncludes  FIXABLE  ━━━�
   > 3 │ const F = "foo".indexOf("o") !== -1 && bar > 4
       │           ^^^^^^^^^^^^^^^^^^^^^^^^^
     4 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Replace with 'includes()'
   

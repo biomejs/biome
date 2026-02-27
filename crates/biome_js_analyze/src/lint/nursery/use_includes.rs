@@ -466,20 +466,23 @@ fn collect_trailing_trivia_for_indexof(
     binary_expression: &JsBinaryExpression,
 ) -> Vec<SyntaxTriviaPiece<JsLanguage>> {
     let mut trailing_trivia = Vec::new();
-    if let Ok(left) = binary_expression.left() {
-        if let Some(trivia) = left.syntax().last_trailing_trivia() {
-            trailing_trivia.extend(trivia.pieces());
-        }
+    if let Ok(left) = binary_expression.left()
+        && let Some(trivia) = left.syntax().last_trailing_trivia()
+    {
+        trailing_trivia.extend(trivia.pieces());
     }
+
     if let Ok(operator_token) = binary_expression.operator_token() {
         trailing_trivia.extend(operator_token.leading_trivia().pieces());
         trailing_trivia.extend(operator_token.trailing_trivia().pieces());
     }
-    if let Ok(right) = binary_expression.right() {
-        if let Some(trivia) = right.syntax().first_leading_trivia() {
-            trailing_trivia.extend(trivia.pieces());
-        }
+
+    if let Ok(right) = binary_expression.right()
+        && let Some(trivia) = right.syntax().first_leading_trivia()
+    {
+        trailing_trivia.extend(trivia.pieces());
     }
+
     if let Some(trivia) = binary_expression.syntax().last_trailing_trivia() {
         trailing_trivia.extend(trivia.pieces());
     }
@@ -523,10 +526,10 @@ fn collect_trailing_trivia_for_regextest(
             e.member().ok().map(|m| m.into_syntax())
         }
     };
-    if let Some(member_syntax) = member_syntax {
-        if let Some(trivia) = member_syntax.last_trailing_trivia() {
-            trailing_trivia.extend(trivia.pieces());
-        }
+    if let Some(member_syntax) = member_syntax
+        && let Some(trivia) = member_syntax.last_trailing_trivia()
+    {
+        trailing_trivia.extend(trivia.pieces());
     }
     println!("Trailing trivia collected: {:?}", trailing_trivia);
     trailing_trivia
