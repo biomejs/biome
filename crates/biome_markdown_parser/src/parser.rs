@@ -470,7 +470,7 @@ fn count_leading_indent(text: &str) -> usize {
     for c in text.chars() {
         match c {
             ' ' => count += 1,
-            '\t' => count += 4,
+            '\t' => count += TAB_STOP_SPACES,
             _ => break,
         }
     }

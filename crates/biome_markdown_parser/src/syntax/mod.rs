@@ -534,7 +534,7 @@ fn consume_indent_prefix(p: &mut MarkdownParser, indent: usize) {
         if text == " " {
             consumed += 1;
         } else if text == "\t" {
-            consumed += 4;
+            consumed += TAB_STOP_SPACES;
         } else {
             break;
         }

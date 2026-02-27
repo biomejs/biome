@@ -1148,7 +1148,9 @@ fn render_fenced_code_block(
         indent
     });
     let container_indent = list_indent + quote_indent;
-    let fence_indent = fence_leading_indent.saturating_sub(container_indent).min(3);
+    let fence_indent = fence_leading_indent
+        .saturating_sub(container_indent)
+        .min(MAX_BLOCK_PREFIX_INDENT);
     let content_indent = container_indent + fence_indent;
 
     // Get info string (language) - process escapes
