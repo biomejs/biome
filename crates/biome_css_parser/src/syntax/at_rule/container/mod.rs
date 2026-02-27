@@ -3,6 +3,7 @@ pub(crate) mod error;
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::container::error::{
+    expected_any_container_scroll_state_in_parens, expected_any_container_scroll_state_query,
     expected_any_container_style_in_parens, expected_any_container_style_query,
 };
 use crate::syntax::at_rule::error::{
@@ -13,7 +14,7 @@ use crate::syntax::block::parse_conditional_block;
 use crate::syntax::parse_error::expected_non_css_wide_keyword_identifier;
 use crate::syntax::value::function::is_nth_at_function;
 use crate::syntax::{
-    is_at_declaration, parse_any_value, parse_custom_identifier, parse_declaration,
+    is_at_declaration, parse_custom_identifier, parse_declaration, parse_regular_identifier,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -213,7 +214,179 @@ fn parse_container_scroll_state_query(p: &mut CssParser) -> ParsedSyntax {
         return Absent;
     }
 
-    parse_any_value(p)
+    let m = p.start();
+
+    parse_regular_identifier(p).ok();
+    p.bump(T!['(']);
+    parse_any_container_scroll_state_query(p)
+        .or_recover(
+            p,
+            &AnyInParensParseRecovery,
+            expected_any_container_scroll_state_query,
+        )
+        .ok();
+    p.expect(T![')']);
+
+    Present(m.complete(p, CSS_CONTAINER_SCROLL_STATE_QUERY_IN_PARENS))
+}
+
+#[inline]
+fn parse_any_container_scroll_state_query(p: &mut CssParser) -> ParsedSyntax {
+    if is_at_container_scroll_state_not_query(p) {
+        return parse_container_scroll_state_not_query(p);
+    }
+
+    if is_at_container_scroll_state_in_parens(p) {
+        return parse_container_scroll_state_in_parens(p).map(|lhs| match p.cur() {
+            T![and] => parse_container_scroll_state_combinable_and_query(p, lhs),
+            T![or] => parse_container_scroll_state_combinable_or_query(p, lhs),
+            _ => lhs,
+        });
+    }
+
+    parse_any_query_feature(p)
+}
+
+#[inline]
+fn is_at_container_scroll_state_not_query(p: &mut CssParser) -> bool {
+    p.at(T![not])
+}
+
+#[inline]
+fn parse_container_scroll_state_not_query(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_container_scroll_state_not_query(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    p.bump(T![not]);
+
+    parse_container_scroll_state_in_parens(p)
+        .or_recover(
+            p,
+            &AnyInParensParseRecovery,
+            expected_any_container_scroll_state_in_parens,
+        )
+        .ok();
+
+    Present(m.complete(p, CSS_CONTAINER_SCROLL_STATE_NOT_QUERY))
+}
+
+#[inline]
+fn parse_container_scroll_state_combinable_and_query(
+    p: &mut CssParser,
+    lhs: CompletedMarker,
+) -> CompletedMarker {
+    if !p.at(T![and]) {
+        return lhs;
+    }
+
+    let m = lhs.precede(p);
+    p.bump(T![and]);
+
+    let recovery_result = parse_container_scroll_state_in_parens(p)
+        .or_recover(
+            p,
+            &AnyContainerScrollStateQueryInParensChainParseRecovery::new(T![and]),
+            expected_any_container_scroll_state_in_parens,
+        )
+        .map(|rhs| parse_container_scroll_state_combinable_and_query(p, rhs));
+
+    if recovery_result.is_err() && p.at(T![and]) {
+        // If we're here, it seems that we have
+        // @container scroll-state((stuck) and <missing exp> and <missing exp> and ...
+        // parse_container_scroll_state_in_parens failed to parse,
+        // but the parser is already at a recovered position.
+        let m = p.start();
+        let rhs = m.complete(p, CSS_BOGUS);
+        parse_container_scroll_state_combinable_and_query(p, rhs);
+    }
+
+    m.complete(p, CSS_CONTAINER_SCROLL_STATE_AND_QUERY)
+}
+
+#[inline]
+fn parse_container_scroll_state_combinable_or_query(
+    p: &mut CssParser,
+    lhs: CompletedMarker,
+) -> CompletedMarker {
+    if !p.at(T![or]) {
+        return lhs;
+    }
+
+    let m = lhs.precede(p);
+    p.bump(T![or]);
+
+    let recovery_result = parse_container_scroll_state_in_parens(p)
+        .or_recover(
+            p,
+            &AnyContainerScrollStateQueryInParensChainParseRecovery::new(T![or]),
+            expected_any_container_scroll_state_in_parens,
+        )
+        .map(|rhs| parse_container_scroll_state_combinable_or_query(p, rhs));
+
+    if recovery_result.is_err() && p.at(T![or]) {
+        // If we're here, it seems that we have
+        // @container scroll-state((stuck) or <missing exp> or <missing exp> or ...
+        // parse_container_scroll_state_in_parens failed to parse,
+        // but the parser is already at a recovered position.
+        let m = p.start();
+        let rhs = m.complete(p, CSS_BOGUS);
+        parse_container_scroll_state_combinable_or_query(p, rhs);
+    }
+
+    m.complete(p, CSS_CONTAINER_SCROLL_STATE_OR_QUERY)
+}
+
+struct AnyContainerScrollStateQueryInParensChainParseRecovery {
+    chain_kind: CssSyntaxKind,
+}
+
+impl AnyContainerScrollStateQueryInParensChainParseRecovery {
+    fn new(chain_kind: CssSyntaxKind) -> Self {
+        Self { chain_kind }
+    }
+}
+
+impl ParseRecovery for AnyContainerScrollStateQueryInParensChainParseRecovery {
+    type Kind = CssSyntaxKind;
+    type Parser<'source> = CssParser<'source>;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
+
+    fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at(T!['('])
+            || p.at(T![')'])
+            || p.at(T!['{'])
+            || p.at(self.chain_kind)
+            || p.has_preceding_line_break()
+    }
+}
+
+#[inline]
+fn is_at_container_scroll_state_in_parens(p: &mut CssParser) -> bool {
+    p.at(T!['('])
+}
+
+#[inline]
+fn parse_container_scroll_state_in_parens(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_container_scroll_state_in_parens(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump(T!['(']);
+
+    parse_any_container_scroll_state_query(p)
+        .or_recover(
+            p,
+            &AnyInParensParseRecovery,
+            expected_any_container_scroll_state_query,
+        )
+        .ok();
+
+    p.expect(T![')']);
+    Present(m.complete(p, CSS_CONTAINER_SCROLL_STATE_IN_PARENS))
 }
 
 /// Parses a negated container query using the `not(...)` syntax.
