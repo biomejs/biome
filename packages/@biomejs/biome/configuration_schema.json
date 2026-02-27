@@ -6259,6 +6259,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useScopedStyles": {
+					"description": "Enforce that \\<style> blocks in Vue SFCs have the scoped attribute and that \\<style> blocks in Astro components do not have the is:global directive.\nSee https://biomejs.dev/linter/rules/use-scoped-styles",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseScopedStylesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useSortedClasses": {
 					"description": "Enforce the sorting of CSS utility classes.\nSee https://biomejs.dev/linter/rules/use-sorted-classes",
 					"anyOf": [
@@ -6314,13 +6321,6 @@
 					"description": "Enforce multi-word component names in Vue components.\nSee https://biomejs.dev/linter/rules/use-vue-multi-word-component-names",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseVueMultiWordComponentNamesConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useVueScopedStyles": {
-					"description": "Enforce that \\<style> blocks in Vue SFCs have the scoped attribute.\nSee https://biomejs.dev/linter/rules/use-vue-scoped-styles",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseVueScopedStylesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10722,6 +10722,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseScopedStylesOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseScopedStylesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseSelfClosingElementsOptions": {
 			"type": "object",
 			"properties": {
@@ -11057,16 +11067,6 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseVueMultiWordComponentNamesOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
-		"RuleWithUseVueScopedStylesOptions": {
-			"type": "object",
-			"properties": {
-				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/UseVueScopedStylesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -13983,6 +13983,16 @@
 			},
 			"additionalProperties": false
 		},
+		"UseScopedStylesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseScopedStylesOptions" }
+			]
+		},
+		"UseScopedStylesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseSelfClosingElementsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -14474,16 +14484,6 @@
 					"items": { "type": "string" }
 				}
 			},
-			"additionalProperties": false
-		},
-		"UseVueScopedStylesConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithUseVueScopedStylesOptions" }
-			]
-		},
-		"UseVueScopedStylesOptions": {
-			"type": "object",
 			"additionalProperties": false
 		},
 		"UseVueVForKeyConfiguration": {

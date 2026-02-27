@@ -2410,6 +2410,11 @@ See https://biomejs.dev/linter/rules/use-required-scripts
 	 */
 	useRequiredScripts?: UseRequiredScriptsConfiguration;
 	/**
+	* Enforce that \<style> blocks in Vue SFCs have the scoped attribute and that \<style> blocks in Astro components do not have the is:global directive.
+See https://biomejs.dev/linter/rules/use-scoped-styles 
+	 */
+	useScopedStyles?: UseScopedStylesConfiguration;
+	/**
 	* Enforce the sorting of CSS utility classes.
 See https://biomejs.dev/linter/rules/use-sorted-classes 
 	 */
@@ -2449,11 +2454,6 @@ See https://biomejs.dev/linter/rules/use-vue-hyphenated-attributes
 See https://biomejs.dev/linter/rules/use-vue-multi-word-component-names 
 	 */
 	useVueMultiWordComponentNames?: UseVueMultiWordComponentNamesConfiguration;
-	/**
-	* Enforce that \<style> blocks in Vue SFCs have the scoped attribute.
-See https://biomejs.dev/linter/rules/use-vue-scoped-styles 
-	 */
-	useVueScopedStyles?: UseVueScopedStylesConfiguration;
 	/**
 	* Enforce that elements using v-for also specify a unique key.
 See https://biomejs.dev/linter/rules/use-vue-v-for-key 
@@ -4254,6 +4254,9 @@ export type UseRegexpExecConfiguration =
 export type UseRequiredScriptsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseRequiredScriptsOptions;
+export type UseScopedStylesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseScopedStylesOptions;
 export type UseSortedClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSortedClassesOptions;
@@ -4278,9 +4281,6 @@ export type UseVueHyphenatedAttributesConfiguration =
 export type UseVueMultiWordComponentNamesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueMultiWordComponentNamesOptions;
-export type UseVueScopedStylesConfiguration =
-	| RulePlainConfiguration
-	| RuleWithUseVueScopedStylesOptions;
 export type UseVueVForKeyConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueVForKeyOptions;
@@ -5950,6 +5950,11 @@ export interface RuleWithUseRequiredScriptsOptions {
 	level: RulePlainConfiguration;
 	options?: UseRequiredScriptsOptions;
 }
+export interface RuleWithUseScopedStylesOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseScopedStylesOptions;
+}
 export interface RuleWithUseSortedClassesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -5987,11 +5992,6 @@ export interface RuleWithUseVueHyphenatedAttributesOptions {
 export interface RuleWithUseVueMultiWordComponentNamesOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueMultiWordComponentNamesOptions;
-}
-export interface RuleWithUseVueScopedStylesOptions {
-	fix?: FixKind;
-	level: RulePlainConfiguration;
-	options?: UseVueScopedStylesOptions;
 }
 export interface RuleWithUseVueVForKeyOptions {
 	level: RulePlainConfiguration;
@@ -7387,6 +7387,7 @@ export interface UseRequiredScriptsOptions {
 	 */
 	requiredScripts?: string[];
 }
+export type UseScopedStylesOptions = {};
 export interface UseSortedClassesOptions {
 	/**
 	 * Additional attributes that will be sorted.
@@ -7437,7 +7438,6 @@ export interface UseVueMultiWordComponentNamesOptions {
 	 */
 	ignores?: string[];
 }
-export type UseVueScopedStylesOptions = {};
 export type UseVueVForKeyOptions = {};
 export type UseVueValidTemplateRootOptions = {};
 export type UseVueValidVBindOptions = {};
@@ -8365,7 +8365,7 @@ export type Category =
 	| "lint/nursery/useVueDefineMacrosOrder"
 	| "lint/nursery/useVueHyphenatedAttributes"
 	| "lint/nursery/useVueMultiWordComponentNames"
-	| "lint/nursery/useVueScopedStyles"
+	| "lint/nursery/useScopedStyles"
 	| "lint/nursery/useVueVForKey"
 	| "lint/nursery/useVueValidTemplateRoot"
 	| "lint/nursery/useVueValidVBind"
