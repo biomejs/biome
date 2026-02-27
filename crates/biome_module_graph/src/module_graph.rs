@@ -256,6 +256,7 @@ impl ModuleGraph {
                     .binding_type_data(*binding_range)
                     .and_then(|data| data.jsdoc.clone()),
                 JsOwnExport::Type(_) => None,
+                JsOwnExport::Namespace(reexport) => reexport.jsdoc_comment.clone(),
             },
         )
     }
@@ -338,11 +339,31 @@ fn find_exported_symbol_with_seen_paths<'a>(
             Some((module, own_export))
         }
         Some(JsExport::Reexport(reexport) | JsExport::ReexportType(reexport)) => {
-            if reexport.import.symbol == ImportSymbol::All {
-                // TODO: Follow namespace exports.
-                None
-            } else {
-                match reexport.import.resolved_path.as_deref() {
+            match &reexport.import.symbol {
+                ImportSymbol::All => {
+                    // TODO: Follow namespace exports.
+                    None
+                }
+                // The source-side name may differ from the export name when the
+                // reexport uses an alias, e.g. `export { l as beforeEach } from
+                // './tasks'`. In that case we must look up the source-side name
+                // (`l`) in the target module, not the alias (`beforeEach`).
+                ImportSymbol::Named(source_name) => {
+                    let lookup = source_name.text();
+                    match reexport.import.resolved_path.as_deref() {
+                        Ok(path) if seen_paths.insert(path) => data.get(path).and_then(|module| {
+                            if let ModuleInfo::Js(module) = module {
+                                find_exported_symbol_with_seen_paths(
+                                    data, module, lookup, seen_paths,
+                                )
+                            } else {
+                                None
+                            }
+                        }),
+                        _ => None,
+                    }
+                }
+                ImportSymbol::Default => match reexport.import.resolved_path.as_deref() {
                     Ok(path) if seen_paths.insert(path) => data.get(path).and_then(|module| {
                         if let ModuleInfo::Js(module) = module {
                             find_exported_symbol_with_seen_paths(
@@ -356,7 +377,7 @@ fn find_exported_symbol_with_seen_paths<'a>(
                         }
                     }),
                     _ => None,
-                }
+                },
             }
         }
         None => module.blanket_reexports.iter().find_map(|reexport| {
