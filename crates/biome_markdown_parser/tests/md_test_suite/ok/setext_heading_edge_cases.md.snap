@@ -84,7 +84,7 @@ MdDocument {
         },
         MdQuote {
             prefix: MdQuotePrefix {
-                pre_marker_indent_token: missing (optional),
+                pre_marker_indent: MdQuoteIndentList [],
                 marker_token: R_ANGLE@35..36 ">" [] [],
                 post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@36..37 " " [] [],
             },
@@ -98,7 +98,7 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@40..41 "\n" [] [],
                         },
                         MdQuotePrefix {
-                            pre_marker_indent_token: missing (optional),
+                            pre_marker_indent: MdQuoteIndentList [],
                             marker_token: R_ANGLE@41..42 ">" [] [],
                             post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@42..43 " " [] [],
                         },
@@ -202,7 +202,7 @@ MdDocument {
       0: NEWLINE@34..35 "\n" [] []
     9: MD_QUOTE@35..47
       0: MD_QUOTE_PREFIX@35..37
-        0: (empty)
+        0: MD_QUOTE_INDENT_LIST@35..35
         1: R_ANGLE@35..36 ">" [] []
         2: MD_QUOTE_POST_MARKER_SPACE@36..37 " " [] []
       1: MD_BLOCK_LIST@37..47
@@ -213,7 +213,7 @@ MdDocument {
             1: MD_TEXTUAL@40..41
               0: MD_TEXTUAL_LITERAL@40..41 "\n" [] []
             2: MD_QUOTE_PREFIX@41..43
-              0: (empty)
+              0: MD_QUOTE_INDENT_LIST@41..41
               1: R_ANGLE@41..42 ">" [] []
               2: MD_QUOTE_POST_MARKER_SPACE@42..43 " " [] []
             3: MD_TEXTUAL@43..44

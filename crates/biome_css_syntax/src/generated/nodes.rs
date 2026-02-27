@@ -4896,41 +4896,6 @@ pub struct CssPageSelectorPseudoFields {
     pub selector: SyntaxResult<CssIdentifier>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct CssParameter {
-    pub(crate) syntax: SyntaxNode,
-}
-impl CssParameter {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> CssParameterFields {
-        CssParameterFields {
-            any_css_expression: self.any_css_expression(),
-        }
-    }
-    pub fn any_css_expression(&self) -> SyntaxResult<AnyCssExpression> {
-        support::required_node(&self.syntax, 0usize)
-    }
-}
-impl Serialize for CssParameter {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct CssParameterFields {
-    pub any_css_expression: SyntaxResult<AnyCssExpression>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssParenthesizedExpression {
     pub(crate) syntax: SyntaxNode,
 }
@@ -19301,56 +19266,6 @@ impl From<CssPageSelectorPseudo> for SyntaxNode {
 }
 impl From<CssPageSelectorPseudo> for SyntaxElement {
     fn from(n: CssPageSelectorPseudo) -> Self {
-        n.syntax.into()
-    }
-}
-impl AstNode for CssParameter {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_PARAMETER as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_PARAMETER
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssParameter {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("CssParameter")
-                .field(
-                    "any_css_expression",
-                    &support::DebugSyntaxResult(self.any_css_expression()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("CssParameter").finish()
-        };
-        DEPTH.set(current_depth);
-        result
-    }
-}
-impl From<CssParameter> for SyntaxNode {
-    fn from(n: CssParameter) -> Self {
-        n.syntax
-    }
-}
-impl From<CssParameter> for SyntaxElement {
-    fn from(n: CssParameter) -> Self {
         n.syntax.into()
     }
 }
@@ -35874,11 +35789,6 @@ impl std::fmt::Display for CssPageSelectorPseudo {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for CssParameter {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for CssParenthesizedExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -40556,7 +40466,7 @@ impl Serialize for CssParameterList {
 }
 impl AstSeparatedList for CssParameterList {
     type Language = Language;
-    type Node = CssParameter;
+    type Node = AnyCssExpression;
     fn syntax_list(&self) -> &SyntaxList {
         &self.syntax_list
     }
@@ -40571,15 +40481,15 @@ impl Debug for CssParameterList {
     }
 }
 impl IntoIterator for CssParameterList {
-    type Item = SyntaxResult<CssParameter>;
-    type IntoIter = AstSeparatedListNodesIterator<Language, CssParameter>;
+    type Item = SyntaxResult<AnyCssExpression>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, AnyCssExpression>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
 }
 impl IntoIterator for &CssParameterList {
-    type Item = SyntaxResult<CssParameter>;
-    type IntoIter = AstSeparatedListNodesIterator<Language, CssParameter>;
+    type Item = SyntaxResult<AnyCssExpression>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, AnyCssExpression>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

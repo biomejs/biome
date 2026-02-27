@@ -1025,6 +1025,44 @@ impl IntoFormat<MarkdownFormatContext> for biome_markdown_syntax::MdQuote {
         )
     }
 }
+impl FormatRule<biome_markdown_syntax::MdQuoteIndent>
+    for crate::markdown::auxiliary::quote_indent::FormatMdQuoteIndent
+{
+    type Context = MarkdownFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_markdown_syntax::MdQuoteIndent,
+        f: &mut MarkdownFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_markdown_syntax::MdQuoteIndent>::fmt(self, node, f)
+    }
+}
+impl AsFormat<MarkdownFormatContext> for biome_markdown_syntax::MdQuoteIndent {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_markdown_syntax::MdQuoteIndent,
+        crate::markdown::auxiliary::quote_indent::FormatMdQuoteIndent,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::markdown::auxiliary::quote_indent::FormatMdQuoteIndent::default(),
+        )
+    }
+}
+impl IntoFormat<MarkdownFormatContext> for biome_markdown_syntax::MdQuoteIndent {
+    type Format = FormatOwnedWithRule<
+        biome_markdown_syntax::MdQuoteIndent,
+        crate::markdown::auxiliary::quote_indent::FormatMdQuoteIndent,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::markdown::auxiliary::quote_indent::FormatMdQuoteIndent::default(),
+        )
+    }
+}
 impl FormatRule<biome_markdown_syntax::MdQuotePrefix>
     for crate::markdown::auxiliary::quote_prefix::FormatMdQuotePrefix
 {
@@ -1451,6 +1489,31 @@ impl IntoFormat<MarkdownFormatContext> for biome_markdown_syntax::MdInlineItemLi
         FormatOwnedWithRule::new(
             self,
             crate::markdown::lists::inline_item_list::FormatMdInlineItemList::default(),
+        )
+    }
+}
+impl AsFormat<MarkdownFormatContext> for biome_markdown_syntax::MdQuoteIndentList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_markdown_syntax::MdQuoteIndentList,
+        crate::markdown::lists::quote_indent_list::FormatMdQuoteIndentList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::markdown::lists::quote_indent_list::FormatMdQuoteIndentList::default(),
+        )
+    }
+}
+impl IntoFormat<MarkdownFormatContext> for biome_markdown_syntax::MdQuoteIndentList {
+    type Format = FormatOwnedWithRule<
+        biome_markdown_syntax::MdQuoteIndentList,
+        crate::markdown::lists::quote_indent_list::FormatMdQuoteIndentList,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::markdown::lists::quote_indent_list::FormatMdQuoteIndentList::default(),
         )
     }
 }

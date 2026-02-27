@@ -55,8 +55,8 @@ use crate::syntax::quote::{
 use crate::syntax::thematic_break_block::parse_thematic_break_block;
 use crate::syntax::with_virtual_line_start;
 use crate::syntax::{
-    INDENT_CODE_BLOCK_SPACES, TAB_STOP_SPACES, at_block_interrupt, at_indent_code_block,
-    is_paragraph_like,
+    INDENT_CODE_BLOCK_SPACES, MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES, at_block_interrupt,
+    at_indent_code_block, is_paragraph_like,
 };
 
 /// Tokens that start a new block (used for recovery)
@@ -137,9 +137,9 @@ fn list_item_within_indent(p: &mut MarkdownParser, base_indent: usize) -> bool {
         };
 
     if base_indent == 0 {
-        indent <= 3
+        indent <= MAX_BLOCK_PREFIX_INDENT
     } else {
-        indent >= base_indent && indent <= base_indent + 3
+        indent >= base_indent && indent <= base_indent + MAX_BLOCK_PREFIX_INDENT
     }
 }
 
@@ -480,9 +480,9 @@ impl ParseNodeList for BulletList {
                     }
                     // Check indent matches this list's marker indent
                     let indent_ok = if marker_indent == 0 {
-                        indent <= 3
+                        indent <= MAX_BLOCK_PREFIX_INDENT
                     } else {
-                        indent >= marker_indent && indent <= marker_indent + 3
+                        indent >= marker_indent && indent <= marker_indent + MAX_BLOCK_PREFIX_INDENT
                     };
                     if !indent_ok {
                         return false;
@@ -2170,7 +2170,7 @@ fn classify_blank_line(
         }
 
         // If next non-blank line starts a new list item, this is a blank line between items.
-        if indent <= marker_indent + 3
+        if indent <= marker_indent + MAX_BLOCK_PREFIX_INDENT
             && (at_bullet_list_item_with_base_indent(p, marker_indent)
                 || at_order_list_item_with_base_indent(p, marker_indent))
         {
@@ -2253,7 +2253,7 @@ fn classify_blank_line_in_quote(
             return BlankLineAction::ContinueItem;
         }
 
-        if indent <= marker_indent + 3 {
+        if indent <= marker_indent + MAX_BLOCK_PREFIX_INDENT {
             let is_list_marker = p.lookahead(|p| {
                 skip_leading_whitespace_tokens(p);
 
@@ -2416,10 +2416,10 @@ where
 
         // Check indent matches the list's marker indent range
         if expected_indent == 0 {
-            if indent > 3 {
+            if indent > MAX_BLOCK_PREFIX_INDENT {
                 return false;
             }
-        } else if indent < expected_indent || indent > expected_indent + 3 {
+        } else if indent < expected_indent || indent > expected_indent + MAX_BLOCK_PREFIX_INDENT {
             return false;
         }
 
@@ -2480,7 +2480,7 @@ where
         }
 
         // More than 3 spaces indent = indented code block, not a list item
-        if indent > 3 {
+        if indent > MAX_BLOCK_PREFIX_INDENT {
             return false;
         }
 

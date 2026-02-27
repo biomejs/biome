@@ -64,6 +64,8 @@ pub const MARKDOWN_KINDS_SRC: KindsSrc = KindsSrc {
         "MD_LINK_TITLE",
         "MD_QUOTE",
         "MD_QUOTE_PREFIX",
+        "MD_QUOTE_INDENT",
+        "MD_QUOTE_INDENT_LIST",
         "MD_ORDERED_LIST_ITEM",
         "MD_BULLET_LIST_ITEM",
         "MD_BULLET_LIST",

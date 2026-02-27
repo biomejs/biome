@@ -1,6 +1,7 @@
 mod utils;
 
-use biome_js_type_info::{GlobalsResolver, ScopeId, TypeData};
+use biome_js_semantic::ScopeId;
+use biome_js_type_info::{GlobalsResolver, TypeData};
 
 use utils::{
     assert_type_data_snapshot, assert_typed_bindings_snapshot, get_expression,

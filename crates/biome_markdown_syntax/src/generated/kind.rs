@@ -71,6 +71,8 @@ pub enum MarkdownSyntaxKind {
     MD_LINK_TITLE,
     MD_QUOTE,
     MD_QUOTE_PREFIX,
+    MD_QUOTE_INDENT,
+    MD_QUOTE_INDENT_LIST,
     MD_ORDERED_LIST_ITEM,
     MD_BULLET_LIST_ITEM,
     MD_BULLET_LIST,
@@ -157,6 +159,7 @@ impl MarkdownSyntaxKind {
             MD_BLOCK_LIST
                 | MD_HASH_LIST
                 | MD_CODE_NAME_LIST
+                | MD_QUOTE_INDENT_LIST
                 | MD_BULLET_LIST
                 | MD_INLINE_ITEM_LIST
                 | MD_INDENTED_CODE_LINE_LIST

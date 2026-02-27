@@ -1,9 +1,9 @@
 use crate::js_module_info::{Exports, Imports, JsBindingData};
-use crate::{JsExport, JsImport, JsModuleInfo, JsOwnExport, JsReexport};
+use crate::{BindingTypeData, JsExport, JsImport, JsModuleInfo, JsOwnExport, JsReexport};
 use biome_formatter::prelude::*;
 use biome_formatter::{format_args, write};
 use biome_js_type_info::FormatTypeContext;
-use biome_rowan::TextSize;
+use biome_rowan::{TextRange, TextSize};
 use std::fmt::Formatter;
 use std::ops::Deref;
 
@@ -17,6 +17,52 @@ impl std::fmt::Display for JsModuleInfo {
                 .expect("Expected a valid document")
                 .as_code(),
         )
+    }
+}
+
+impl Format<FormatTypeContext> for BindingTypeData {
+    fn fmt(
+        &self,
+        f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
+    ) -> FormatResult<()> {
+        let ranges: Vec<TypedRange> = self
+            .export_ranges
+            .iter()
+            .map(|range| range.into())
+            .collect();
+        let export_ranges = format_with(|f| {
+            let mut join = f.join();
+
+            for range in ranges.clone() {
+                join.entry(&range);
+            }
+            join.finish()
+        });
+
+        let jsdoc = format_with(|f| {
+            if self.jsdoc.is_some() {
+                write!(f, [&self.jsdoc, token(","), hard_line_break()])?;
+            };
+            Ok(())
+        });
+        write!(
+            f,
+            [
+                token("BindingTypeData {"),
+                &group(&block_indent(&format_args![
+                    token("Types "),
+                    &self.ty,
+                    token(","),
+                    hard_line_break(),
+                    jsdoc,
+                    token("Exported Ranges: "),
+                    &export_ranges
+                ])),
+                token("}")
+            ]
+        )?;
+
+        Ok(())
     }
 }
 
@@ -310,14 +356,17 @@ impl Format<FormatTypeContext> for JsOwnExport {
         f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
     ) -> FormatResult<()> {
         match self {
-            Self::Binding(binding_id) => write!(
-                f,
-                [&format_args![
-                    token("JsOwnExport::Binding("),
-                    text(&binding_id.index().to_string(), TextSize::default()),
-                    token(")")
-                ]]
-            ),
+            Self::Binding(binding_range) => {
+                let range_str = std::format!("{:?}", binding_range);
+                write!(
+                    f,
+                    [&format_args![
+                        token("JsOwnExport::Binding("),
+                        text(&range_str, TextSize::default()),
+                        token(")")
+                    ]]
+                )
+            }
             Self::Type(resolved_type_id) => write!(
                 f,
                 [&format_args![
@@ -363,5 +412,50 @@ impl Format<FormatTypeContext> for JsImport {
 
         write!(f, [hard_line_break()])?;
         Ok(())
+    }
+}
+#[derive(Clone)]
+struct TypedRange(TextRange);
+
+impl From<&TextRange> for TypedRange {
+    fn from(value: &TextRange) -> Self {
+        Self(*value)
+    }
+}
+
+#[derive(Clone)]
+struct TypedSize(TextSize);
+
+impl From<TextSize> for TypedSize {
+    fn from(value: TextSize) -> Self {
+        Self(value)
+    }
+}
+
+impl Format<FormatTypeContext> for TypedSize {
+    fn fmt(
+        &self,
+        f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
+    ) -> FormatResult<()> {
+        let value = std::format!("{}", self.0);
+        write!(f, [text(&value, TextSize::default())])
+    }
+}
+
+impl Format<FormatTypeContext> for TypedRange {
+    fn fmt(
+        &self,
+        f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
+    ) -> FormatResult<()> {
+        write!(
+            f,
+            [
+                token("("),
+                TypedSize::from(self.0.start()),
+                token(".."),
+                TypedSize::from(self.0.end()),
+                token(")")
+            ]
+        )
     }
 }

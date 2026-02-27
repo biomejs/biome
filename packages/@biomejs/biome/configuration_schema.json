@@ -6141,6 +6141,13 @@
 					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
+				"useArraySome": {
+					"description": "Prefer Array.prototype.some() over verbose existence checks.\nSee https://biomejs.dev/linter/rules/use-array-some",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseArraySomeConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useArraySortCompare": {
 					"description": "Require Array#sort and Array#toSorted calls to always provide a compareFunction.\nSee https://biomejs.dev/linter/rules/use-array-sort-compare",
 					"anyOf": [
@@ -6257,6 +6264,13 @@
 					"description": "Require queries, mutations, subscriptions or fragments each to be located in separate files.\nSee https://biomejs.dev/linter/rules/use-lone-executable-definition",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseLoneExecutableDefinitionConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useNamedCaptureGroup": {
+					"description": "Enforce using named capture groups in regular expression.\nSee https://biomejs.dev/linter/rules/use-named-capture-group",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseNamedCaptureGroupConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9814,6 +9828,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseArraySomeOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseArraySomeOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseArraySortCompareOptions": {
 			"type": "object",
 			"properties": {
@@ -10566,6 +10590,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseMediaCaptionOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseNamedCaptureGroupOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseNamedCaptureGroupOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -12857,6 +12890,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseArraySomeConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseArraySomeOptions" }
+			]
+		},
+		"UseArraySomeOptions": { "type": "object", "additionalProperties": false },
 		"UseArraySortCompareConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -13803,6 +13843,16 @@
 			]
 		},
 		"UseMediaCaptionOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseNamedCaptureGroupConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseNamedCaptureGroupOptions" }
+			]
+		},
+		"UseNamedCaptureGroupOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

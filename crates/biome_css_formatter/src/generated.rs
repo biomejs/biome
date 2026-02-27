@@ -4032,40 +4032,6 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssPageSelectorPseudo {
         )
     }
 }
-impl FormatRule<biome_css_syntax::CssParameter>
-    for crate::css::auxiliary::parameter::FormatCssParameter
-{
-    type Context = CssFormatContext;
-    #[inline(always)]
-    fn fmt(&self, node: &biome_css_syntax::CssParameter, f: &mut CssFormatter) -> FormatResult<()> {
-        FormatNodeRule::<biome_css_syntax::CssParameter>::fmt(self, node, f)
-    }
-}
-impl AsFormat<CssFormatContext> for biome_css_syntax::CssParameter {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_css_syntax::CssParameter,
-        crate::css::auxiliary::parameter::FormatCssParameter,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(
-            self,
-            crate::css::auxiliary::parameter::FormatCssParameter::default(),
-        )
-    }
-}
-impl IntoFormat<CssFormatContext> for biome_css_syntax::CssParameter {
-    type Format = FormatOwnedWithRule<
-        biome_css_syntax::CssParameter,
-        crate::css::auxiliary::parameter::FormatCssParameter,
-    >;
-    fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(
-            self,
-            crate::css::auxiliary::parameter::FormatCssParameter::default(),
-        )
-    }
-}
 impl FormatRule<biome_css_syntax::CssParenthesizedExpression>
     for crate::css::auxiliary::parenthesized_expression::FormatCssParenthesizedExpression
 {

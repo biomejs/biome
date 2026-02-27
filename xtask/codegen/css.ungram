@@ -1941,13 +1941,7 @@ AnyCssUrlValue =
 	CssUrlValueRaw
 	| CssString
 
-CssParameterList = CssParameter (',' CssParameter)* ','?
-
-// cubic-bezier(0.1, 0.7, 1.0, 0.1)
-//			    ^^^
-// repeating-radial-gradient(red, yellow 10%, green 15%);
-//                                ^^^^^^^^^^
-CssParameter = AnyCssExpression
+CssParameterList = AnyCssExpression (',' AnyCssExpression)* ','?
 
 // https://drafts.csswg.org/css-values-5/#if-notation
 // <if()> = if( [ <if-branch> ; ]* <if-branch> ;? )

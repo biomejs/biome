@@ -1,5 +1,3 @@
-use std::collections::BTreeSet;
-
 use biome_fs::MemoryFileSystem;
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_formatter::format_node;
@@ -10,6 +8,7 @@ use biome_resolver::ResolvedPath;
 use biome_rowan::AstNode;
 use biome_test_utils::{dump_registered_module_types, dump_registered_types};
 use camino::Utf8PathBuf;
+use std::collections::BTreeSet;
 
 pub struct ModuleGraphSnapshot<'a> {
     module_graph: &'a ModuleGraph,
@@ -94,23 +93,33 @@ impl<'a> ModuleGraphSnapshot<'a> {
                         content.push_str(&data.to_string());
                         content.push_str("\n```\n\n");
 
-                        let exported_binding_ids: BTreeSet<_> = data
+                        let exported_binding_ranges: BTreeSet<_> = data
                             .exports
                             .values()
                             .filter_map(JsExport::as_own_export)
                             .filter_map(|export| match export {
-                                JsOwnExport::Binding(binding_id) => Some(*binding_id),
+                                JsOwnExport::Binding(binding_range) => Some(*binding_range),
                                 JsOwnExport::Type(_) => None,
                             })
                             .collect();
-                        if !exported_binding_ids.is_empty() {
+                        if !exported_binding_ranges.is_empty() {
                             content.push_str("## Exported Bindings\n\n");
                             content.push_str("```");
-                            for binding_id in exported_binding_ids {
-                                content.push_str(&format!(
-                                    "\n{binding_id:?} => {}\n",
-                                    data.binding(binding_id)
-                                ));
+                            for binding_range in exported_binding_ranges {
+                                if let Some(type_data) = data.binding_type_data(binding_range) {
+                                    // Get the binding name from the semantic model
+                                    let binding_name = data
+                                        .semantic_model
+                                        .all_bindings()
+                                        .find(|b| b.syntax().text_trimmed_range() == binding_range)
+                                        .and_then(|b| b.tree().name_token().ok())
+                                        .map_or_else(|| "<unknown>".to_string(), |b| b.to_string());
+
+                                    content.push_str(&format!(
+                                        "\n{} => {}\n",
+                                        binding_name, type_data
+                                    ));
+                                }
                             }
                             content.push_str("```\n\n");
                         }

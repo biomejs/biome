@@ -40,24 +40,20 @@ CssRoot {
                         },
                         l_paren_token: L_PAREN@18..19 "(" [] [],
                         items: CssParameterList [
-                            CssParameter {
-                                any_css_expression: ScssExpression {
-                                    items: ScssExpressionItemList [
-                                        CssNumber {
-                                            value_token: CSS_NUMBER_LITERAL@19..20 "1" [] [],
-                                        },
-                                    ],
-                                },
+                            ScssExpression {
+                                items: ScssExpressionItemList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@19..20 "1" [] [],
+                                    },
+                                ],
                             },
                             COMMA@20..22 "," [] [Whitespace(" ")],
-                            CssParameter {
-                                any_css_expression: ScssExpression {
-                                    items: ScssExpressionItemList [
-                                        CssNumber {
-                                            value_token: CSS_NUMBER_LITERAL@22..23 "2" [] [],
-                                        },
-                                    ],
-                                },
+                            ScssExpression {
+                                items: ScssExpressionItemList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@22..23 "2" [] [],
+                                    },
+                                ],
                             },
                         ],
                         r_paren_token: R_PAREN@23..24 ")" [] [],
@@ -89,29 +85,25 @@ CssRoot {
                         },
                         l_paren_token: L_PAREN@47..48 "(" [] [],
                         items: CssParameterList [
-                            CssParameter {
-                                any_css_expression: ScssExpression {
-                                    items: ScssExpressionItemList [
-                                        CssFunction {
-                                            name: CssIdentifier {
-                                                value_token: IDENT@48..51 "var" [] [],
-                                            },
-                                            l_paren_token: L_PAREN@51..52 "(" [] [],
-                                            items: CssParameterList [
-                                                CssParameter {
-                                                    any_css_expression: ScssExpression {
-                                                        items: ScssExpressionItemList [
-                                                            CssDashedIdentifier {
-                                                                value_token: IDENT@52..59 "--token" [] [],
-                                                            },
-                                                        ],
-                                                    },
-                                                },
-                                            ],
-                                            r_paren_token: R_PAREN@59..60 ")" [] [],
+                            ScssExpression {
+                                items: ScssExpressionItemList [
+                                    CssFunction {
+                                        name: CssIdentifier {
+                                            value_token: IDENT@48..51 "var" [] [],
                                         },
-                                    ],
-                                },
+                                        l_paren_token: L_PAREN@51..52 "(" [] [],
+                                        items: CssParameterList [
+                                            ScssExpression {
+                                                items: ScssExpressionItemList [
+                                                    CssDashedIdentifier {
+                                                        value_token: IDENT@52..59 "--token" [] [],
+                                                    },
+                                                ],
+                                            },
+                                        ],
+                                        r_paren_token: R_PAREN@59..60 ")" [] [],
+                                    },
+                                ],
                             },
                         ],
                         r_paren_token: R_PAREN@60..61 ")" [] [],
@@ -149,17 +141,15 @@ CssRoot {
                 0: IDENT@16..18 "fn" [] []
             1: L_PAREN@18..19 "(" [] []
             2: CSS_PARAMETER_LIST@19..23
-              0: CSS_PARAMETER@19..20
-                0: SCSS_EXPRESSION@19..20
-                  0: SCSS_EXPRESSION_ITEM_LIST@19..20
-                    0: CSS_NUMBER@19..20
-                      0: CSS_NUMBER_LITERAL@19..20 "1" [] []
+              0: SCSS_EXPRESSION@19..20
+                0: SCSS_EXPRESSION_ITEM_LIST@19..20
+                  0: CSS_NUMBER@19..20
+                    0: CSS_NUMBER_LITERAL@19..20 "1" [] []
               1: COMMA@20..22 "," [] [Whitespace(" ")]
-              2: CSS_PARAMETER@22..23
-                0: SCSS_EXPRESSION@22..23
-                  0: SCSS_EXPRESSION_ITEM_LIST@22..23
-                    0: CSS_NUMBER@22..23
-                      0: CSS_NUMBER_LITERAL@22..23 "2" [] []
+              2: SCSS_EXPRESSION@22..23
+                0: SCSS_EXPRESSION_ITEM_LIST@22..23
+                  0: CSS_NUMBER@22..23
+                    0: CSS_NUMBER_LITERAL@22..23 "2" [] []
             3: R_PAREN@23..24 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@24..24
       4: SEMICOLON@24..25 ";" [] []
@@ -180,20 +170,18 @@ CssRoot {
                 0: IDENT@45..47 "fn" [] []
             1: L_PAREN@47..48 "(" [] []
             2: CSS_PARAMETER_LIST@48..60
-              0: CSS_PARAMETER@48..60
-                0: SCSS_EXPRESSION@48..60
-                  0: SCSS_EXPRESSION_ITEM_LIST@48..60
-                    0: CSS_FUNCTION@48..60
-                      0: CSS_IDENTIFIER@48..51
-                        0: IDENT@48..51 "var" [] []
-                      1: L_PAREN@51..52 "(" [] []
-                      2: CSS_PARAMETER_LIST@52..59
-                        0: CSS_PARAMETER@52..59
-                          0: SCSS_EXPRESSION@52..59
-                            0: SCSS_EXPRESSION_ITEM_LIST@52..59
-                              0: CSS_DASHED_IDENTIFIER@52..59
-                                0: IDENT@52..59 "--token" [] []
-                      3: R_PAREN@59..60 ")" [] []
+              0: SCSS_EXPRESSION@48..60
+                0: SCSS_EXPRESSION_ITEM_LIST@48..60
+                  0: CSS_FUNCTION@48..60
+                    0: CSS_IDENTIFIER@48..51
+                      0: IDENT@48..51 "var" [] []
+                    1: L_PAREN@51..52 "(" [] []
+                    2: CSS_PARAMETER_LIST@52..59
+                      0: SCSS_EXPRESSION@52..59
+                        0: SCSS_EXPRESSION_ITEM_LIST@52..59
+                          0: CSS_DASHED_IDENTIFIER@52..59
+                            0: IDENT@52..59 "--token" [] []
+                    3: R_PAREN@59..60 ")" [] []
             3: R_PAREN@60..61 ")" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@61..61
       4: SEMICOLON@61..62 ";" [] []

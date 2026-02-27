@@ -1013,13 +1013,24 @@ impl WorkspaceServer {
         match update_kind {
             UpdateKind::AddedOrChanged(_, root, services) => {
                 // NOTE: add a new else if branch to handle other language roots
-                if let Some(js_root) = SendNode::into_language_root::<AnyJsRoot>(root.clone()) {
-                    self.module_graph.update_graph_for_js_paths(
-                        self.fs.as_ref(),
-                        &self.project_layout,
-                        &[(path, js_root)],
-                        infer_types,
-                    )
+                if let (Some(js_root), Some(services)) = (
+                    SendNode::into_language_root::<AnyJsRoot>(root.clone()),
+                    services.as_js_services(),
+                ) {
+                    // Module graph requires a semantic model to operate.
+                    // If the semantic model is not available (e.g., due to parse errors),
+                    // we skip module graph updates for this file.
+                    if let Some(semantic_model) = services.semantic_model.clone() {
+                        self.module_graph.update_graph_for_js_paths(
+                            self.fs.as_ref(),
+                            &self.project_layout,
+                            &[(path, js_root, Arc::new(semantic_model))],
+                            infer_types,
+                        )
+                    } else {
+                        // No semantic model available - return empty result
+                        Default::default()
+                    }
                 } else if let (Some(css_root), Some(services)) = (
                     SendNode::into_language_root::<AnyCssRoot>(root.clone()),
                     services.as_css_services(),

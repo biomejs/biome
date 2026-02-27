@@ -9,7 +9,8 @@ use std::sync::Arc;
 use crate::snap::ModuleGraphSnapshot;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_fs::{BiomePath, FileSystem, MemoryFileSystem, OsFileSystem, normalize_path};
-use biome_js_type_info::{ScopeId, TypeData, TypeResolver};
+use biome_js_semantic::ScopeId;
+use biome_js_type_info::{TypeData, TypeResolver};
 use biome_jsdoc_comment::JsdocComment;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_value::{JsonObject, JsonString};
@@ -371,6 +372,59 @@ fn test_export_default_function_declaration() {
 
     let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
     snapshot.assert_snapshot("test_export_default_function_declaration");
+}
+
+#[test]
+fn test_export_default_imported_binding() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/foo.ts".into(),
+        r#"
+            /**
+             * @returns {number}
+             */
+            export function foo(): number {
+                return 42;
+            }
+        "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            import { foo } from "./foo.ts";
+
+            export default foo;
+        "#,
+    );
+
+    let added_paths = [
+        BiomePath::new("/src/foo.ts"),
+        BiomePath::new("/src/index.ts"),
+    ];
+    let added_paths = get_added_js_paths(&fs, &added_paths);
+
+    let module_graph = Arc::new(ModuleGraph::default());
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, true);
+
+    let index_module = module_graph
+        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let resolver = Arc::new(ModuleResolver::for_module(
+        index_module,
+        module_graph.clone(),
+    ));
+
+    // Test that the default export's type is correctly resolved as a function returning number
+    let default_export_ty = resolver
+        .resolved_type_of_default_export()
+        .expect("default export must exist");
+    assert!(
+        default_export_ty.is_function(),
+        "Default export should be a function, got: {default_export_ty:?}"
+    );
+
+    let snapshot = ModuleGraphSnapshot::new(module_graph.as_ref(), &fs).with_resolver(&resolver);
+    snapshot.assert_snapshot("test_export_default_imported_binding");
 }
 
 #[test]

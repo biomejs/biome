@@ -13,6 +13,8 @@ use biome_rowan::{SyntaxKind, TextSize};
 use biome_unicode_table::Dispatch::{self, AMP, *};
 use biome_unicode_table::lookup_byte;
 
+use crate::syntax::{MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES};
+
 /// Lexer context for different markdown parsing modes.
 ///
 /// Different contexts affect how the lexer tokenizes input:
@@ -676,8 +678,8 @@ impl<'src> MarkdownLexer<'src> {
 
         while let Some(&c) = chars.peek() {
             if c == ' ' || c == '\t' {
-                indent += if c == '\t' { 4 } else { 1 };
-                if indent > 3 {
+                indent += if c == '\t' { TAB_STOP_SPACES } else { 1 };
+                if indent > MAX_BLOCK_PREFIX_INDENT {
                     return false;
                 }
                 chars.next();

@@ -143,7 +143,6 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssPageAtRuleBlock" => lang::CssPageAtRuleBlock::KIND_SET.iter().next(),
         "CssPageSelector" => lang::CssPageSelector::KIND_SET.iter().next(),
         "CssPageSelectorPseudo" => lang::CssPageSelectorPseudo::KIND_SET.iter().next(),
-        "CssParameter" => lang::CssParameter::KIND_SET.iter().next(),
         "CssParenthesizedExpression" => lang::CssParenthesizedExpression::KIND_SET.iter().next(),
         "CssPercentage" => lang::CssPercentage::KIND_SET.iter().next(),
         "CssPositionTryAtRule" => lang::CssPositionTryAtRule::KIND_SET.iter().next(),

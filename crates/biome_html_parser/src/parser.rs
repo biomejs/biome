@@ -116,6 +116,7 @@ pub struct HtmlParseOptions {
     pub(crate) frontmatter: bool,
     pub(crate) text_expression: Option<TextExpressionKind>,
     pub(crate) vue: bool,
+    pub(crate) svelte: bool,
     pub(crate) is_html: bool,
 }
 
@@ -152,6 +153,11 @@ impl HtmlParseOptions {
         self
     }
 
+    pub fn with_svelte(mut self) -> Self {
+        self.svelte = true;
+        self
+    }
+
     pub fn is_html(&self) -> bool {
         self.is_html
     }
@@ -178,7 +184,7 @@ impl From<&HtmlFileSource> for HtmlParseOptions {
                 options = options.with_double_text_expression().with_vue();
             }
             HtmlVariant::Svelte => {
-                options = options.with_single_text_expression();
+                options = options.with_single_text_expression().with_svelte();
             }
         }
 

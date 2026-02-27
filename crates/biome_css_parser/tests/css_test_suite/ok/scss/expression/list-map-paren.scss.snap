@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
 
@@ -55,25 +54,23 @@ CssRoot {
                                         },
                                         l_paren_token: L_PAREN@19..20 "(" [] [],
                                         items: CssParameterList [
-                                            CssParameter {
-                                                any_css_expression: ScssExpression {
-                                                    items: ScssExpressionItemList [
-                                                        ScssParenthesizedExpression {
-                                                            l_paren_token: L_PAREN@20..21 "(" [] [],
-                                                            expression: ScssExpression {
-                                                                items: ScssExpressionItemList [
-                                                                    CssNumber {
-                                                                        value_token: CSS_NUMBER_LITERAL@21..23 "1" [] [Whitespace(" ")],
-                                                                    },
-                                                                    CssNumber {
-                                                                        value_token: CSS_NUMBER_LITERAL@23..24 "2" [] [],
-                                                                    },
-                                                                ],
-                                                            },
-                                                            r_paren_token: R_PAREN@24..25 ")" [] [],
+                                            ScssExpression {
+                                                items: ScssExpressionItemList [
+                                                    ScssParenthesizedExpression {
+                                                        l_paren_token: L_PAREN@20..21 "(" [] [],
+                                                        expression: ScssExpression {
+                                                            items: ScssExpressionItemList [
+                                                                CssNumber {
+                                                                    value_token: CSS_NUMBER_LITERAL@21..23 "1" [] [Whitespace(" ")],
+                                                                },
+                                                                CssNumber {
+                                                                    value_token: CSS_NUMBER_LITERAL@23..24 "2" [] [],
+                                                                },
+                                                            ],
                                                         },
-                                                    ],
-                                                },
+                                                        r_paren_token: R_PAREN@24..25 ")" [] [],
+                                                    },
+                                                ],
                                             },
                                         ],
                                         r_paren_token: R_PAREN@25..26 ")" [] [],
@@ -98,48 +95,46 @@ CssRoot {
                                         },
                                         l_paren_token: L_PAREN@40..41 "(" [] [],
                                         items: CssParameterList [
-                                            CssParameter {
-                                                any_css_expression: ScssExpression {
-                                                    items: ScssExpressionItemList [
-                                                        ScssParenthesizedExpression {
-                                                            l_paren_token: L_PAREN@41..42 "(" [] [],
-                                                            expression: ScssListExpression {
-                                                                elements: ScssListExpressionElementList [
-                                                                    ScssListExpressionElement {
-                                                                        value: ScssExpression {
-                                                                            items: ScssExpressionItemList [
-                                                                                CssNumber {
-                                                                                    value_token: CSS_NUMBER_LITERAL@42..43 "1" [] [],
-                                                                                },
-                                                                            ],
-                                                                        },
+                                            ScssExpression {
+                                                items: ScssExpressionItemList [
+                                                    ScssParenthesizedExpression {
+                                                        l_paren_token: L_PAREN@41..42 "(" [] [],
+                                                        expression: ScssListExpression {
+                                                            elements: ScssListExpressionElementList [
+                                                                ScssListExpressionElement {
+                                                                    value: ScssExpression {
+                                                                        items: ScssExpressionItemList [
+                                                                            CssNumber {
+                                                                                value_token: CSS_NUMBER_LITERAL@42..43 "1" [] [],
+                                                                            },
+                                                                        ],
                                                                     },
-                                                                    COMMA@43..45 "," [] [Whitespace(" ")],
-                                                                    ScssListExpressionElement {
-                                                                        value: ScssExpression {
-                                                                            items: ScssExpressionItemList [
-                                                                                CssNumber {
-                                                                                    value_token: CSS_NUMBER_LITERAL@45..46 "2" [] [],
-                                                                                },
-                                                                            ],
-                                                                        },
+                                                                },
+                                                                COMMA@43..45 "," [] [Whitespace(" ")],
+                                                                ScssListExpressionElement {
+                                                                    value: ScssExpression {
+                                                                        items: ScssExpressionItemList [
+                                                                            CssNumber {
+                                                                                value_token: CSS_NUMBER_LITERAL@45..46 "2" [] [],
+                                                                            },
+                                                                        ],
                                                                     },
-                                                                    COMMA@46..48 "," [] [Whitespace(" ")],
-                                                                    ScssListExpressionElement {
-                                                                        value: ScssExpression {
-                                                                            items: ScssExpressionItemList [
-                                                                                CssNumber {
-                                                                                    value_token: CSS_NUMBER_LITERAL@48..49 "3" [] [],
-                                                                                },
-                                                                            ],
-                                                                        },
+                                                                },
+                                                                COMMA@46..48 "," [] [Whitespace(" ")],
+                                                                ScssListExpressionElement {
+                                                                    value: ScssExpression {
+                                                                        items: ScssExpressionItemList [
+                                                                            CssNumber {
+                                                                                value_token: CSS_NUMBER_LITERAL@48..49 "3" [] [],
+                                                                            },
+                                                                        ],
                                                                     },
-                                                                ],
-                                                            },
-                                                            r_paren_token: R_PAREN@49..50 ")" [] [],
+                                                                },
+                                                            ],
                                                         },
-                                                    ],
-                                                },
+                                                        r_paren_token: R_PAREN@49..50 ")" [] [],
+                                                    },
+                                                ],
                                             },
                                         ],
                                         r_paren_token: R_PAREN@50..51 ")" [] [],
@@ -164,52 +159,50 @@ CssRoot {
                                         },
                                         l_paren_token: L_PAREN@65..66 "(" [] [],
                                         items: CssParameterList [
-                                            CssParameter {
-                                                any_css_expression: ScssExpression {
-                                                    items: ScssExpressionItemList [
-                                                        ScssMapExpression {
-                                                            l_paren_token: L_PAREN@66..67 "(" [] [],
-                                                            pairs: ScssMapExpressionPairList [
-                                                                ScssMapExpressionPair {
-                                                                    key: ScssExpression {
-                                                                        items: ScssExpressionItemList [
-                                                                            CssIdentifier {
-                                                                                value_token: IDENT@67..74 "primary" [] [],
-                                                                            },
-                                                                        ],
-                                                                    },
-                                                                    colon_token: COLON@74..76 ":" [] [Whitespace(" ")],
-                                                                    value: ScssExpression {
-                                                                        items: ScssExpressionItemList [
-                                                                            CssIdentifier {
-                                                                                value_token: IDENT@76..79 "red" [] [],
-                                                                            },
-                                                                        ],
-                                                                    },
+                                            ScssExpression {
+                                                items: ScssExpressionItemList [
+                                                    ScssMapExpression {
+                                                        l_paren_token: L_PAREN@66..67 "(" [] [],
+                                                        pairs: ScssMapExpressionPairList [
+                                                            ScssMapExpressionPair {
+                                                                key: ScssExpression {
+                                                                    items: ScssExpressionItemList [
+                                                                        CssIdentifier {
+                                                                            value_token: IDENT@67..74 "primary" [] [],
+                                                                        },
+                                                                    ],
                                                                 },
-                                                                COMMA@79..81 "," [] [Whitespace(" ")],
-                                                                ScssMapExpressionPair {
-                                                                    key: ScssExpression {
-                                                                        items: ScssExpressionItemList [
-                                                                            CssIdentifier {
-                                                                                value_token: IDENT@81..90 "secondary" [] [],
-                                                                            },
-                                                                        ],
-                                                                    },
-                                                                    colon_token: COLON@90..92 ":" [] [Whitespace(" ")],
-                                                                    value: ScssExpression {
-                                                                        items: ScssExpressionItemList [
-                                                                            CssIdentifier {
-                                                                                value_token: IDENT@92..96 "blue" [] [],
-                                                                            },
-                                                                        ],
-                                                                    },
+                                                                colon_token: COLON@74..76 ":" [] [Whitespace(" ")],
+                                                                value: ScssExpression {
+                                                                    items: ScssExpressionItemList [
+                                                                        CssIdentifier {
+                                                                            value_token: IDENT@76..79 "red" [] [],
+                                                                        },
+                                                                    ],
                                                                 },
-                                                            ],
-                                                            r_paren_token: R_PAREN@96..97 ")" [] [],
-                                                        },
-                                                    ],
-                                                },
+                                                            },
+                                                            COMMA@79..81 "," [] [Whitespace(" ")],
+                                                            ScssMapExpressionPair {
+                                                                key: ScssExpression {
+                                                                    items: ScssExpressionItemList [
+                                                                        CssIdentifier {
+                                                                            value_token: IDENT@81..90 "secondary" [] [],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                                colon_token: COLON@90..92 ":" [] [Whitespace(" ")],
+                                                                value: ScssExpression {
+                                                                    items: ScssExpressionItemList [
+                                                                        CssIdentifier {
+                                                                            value_token: IDENT@92..96 "blue" [] [],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                            },
+                                                        ],
+                                                        r_paren_token: R_PAREN@96..97 ")" [] [],
+                                                    },
+                                                ],
                                             },
                                         ],
                                         r_paren_token: R_PAREN@97..98 ")" [] [],
@@ -234,16 +227,14 @@ CssRoot {
                                         },
                                         l_paren_token: L_PAREN@115..116 "(" [] [],
                                         items: CssParameterList [
-                                            CssParameter {
-                                                any_css_expression: ScssExpression {
-                                                    items: ScssExpressionItemList [
-                                                        ScssMapExpression {
-                                                            l_paren_token: L_PAREN@116..117 "(" [] [],
-                                                            pairs: ScssMapExpressionPairList [],
-                                                            r_paren_token: R_PAREN@117..118 ")" [] [],
-                                                        },
-                                                    ],
-                                                },
+                                            ScssExpression {
+                                                items: ScssExpressionItemList [
+                                                    ScssMapExpression {
+                                                        l_paren_token: L_PAREN@116..117 "(" [] [],
+                                                        pairs: ScssMapExpressionPairList [],
+                                                        r_paren_token: R_PAREN@117..118 ")" [] [],
+                                                    },
+                                                ],
                                             },
                                         ],
                                         r_paren_token: R_PAREN@118..119 ")" [] [],
@@ -294,18 +285,17 @@ CssRoot {
                       0: IDENT@17..19 "fn" [] []
                     1: L_PAREN@19..20 "(" [] []
                     2: CSS_PARAMETER_LIST@20..25
-                      0: CSS_PARAMETER@20..25
-                        0: SCSS_EXPRESSION@20..25
-                          0: SCSS_EXPRESSION_ITEM_LIST@20..25
-                            0: SCSS_PARENTHESIZED_EXPRESSION@20..25
-                              0: L_PAREN@20..21 "(" [] []
-                              1: SCSS_EXPRESSION@21..24
-                                0: SCSS_EXPRESSION_ITEM_LIST@21..24
-                                  0: CSS_NUMBER@21..23
-                                    0: CSS_NUMBER_LITERAL@21..23 "1" [] [Whitespace(" ")]
-                                  1: CSS_NUMBER@23..24
-                                    0: CSS_NUMBER_LITERAL@23..24 "2" [] []
-                              2: R_PAREN@24..25 ")" [] []
+                      0: SCSS_EXPRESSION@20..25
+                        0: SCSS_EXPRESSION_ITEM_LIST@20..25
+                          0: SCSS_PARENTHESIZED_EXPRESSION@20..25
+                            0: L_PAREN@20..21 "(" [] []
+                            1: SCSS_EXPRESSION@21..24
+                              0: SCSS_EXPRESSION_ITEM_LIST@21..24
+                                0: CSS_NUMBER@21..23
+                                  0: CSS_NUMBER_LITERAL@21..23 "1" [] [Whitespace(" ")]
+                                1: CSS_NUMBER@23..24
+                                  0: CSS_NUMBER_LITERAL@23..24 "2" [] []
+                            2: R_PAREN@24..25 ")" [] []
                     3: R_PAREN@25..26 ")" [] []
               1: (empty)
             1: SEMICOLON@26..27 ";" [] []
@@ -321,31 +311,30 @@ CssRoot {
                       0: IDENT@38..40 "fn" [] []
                     1: L_PAREN@40..41 "(" [] []
                     2: CSS_PARAMETER_LIST@41..50
-                      0: CSS_PARAMETER@41..50
-                        0: SCSS_EXPRESSION@41..50
-                          0: SCSS_EXPRESSION_ITEM_LIST@41..50
-                            0: SCSS_PARENTHESIZED_EXPRESSION@41..50
-                              0: L_PAREN@41..42 "(" [] []
-                              1: SCSS_LIST_EXPRESSION@42..49
-                                0: SCSS_LIST_EXPRESSION_ELEMENT_LIST@42..49
-                                  0: SCSS_LIST_EXPRESSION_ELEMENT@42..43
-                                    0: SCSS_EXPRESSION@42..43
-                                      0: SCSS_EXPRESSION_ITEM_LIST@42..43
-                                        0: CSS_NUMBER@42..43
-                                          0: CSS_NUMBER_LITERAL@42..43 "1" [] []
-                                  1: COMMA@43..45 "," [] [Whitespace(" ")]
-                                  2: SCSS_LIST_EXPRESSION_ELEMENT@45..46
-                                    0: SCSS_EXPRESSION@45..46
-                                      0: SCSS_EXPRESSION_ITEM_LIST@45..46
-                                        0: CSS_NUMBER@45..46
-                                          0: CSS_NUMBER_LITERAL@45..46 "2" [] []
-                                  3: COMMA@46..48 "," [] [Whitespace(" ")]
-                                  4: SCSS_LIST_EXPRESSION_ELEMENT@48..49
-                                    0: SCSS_EXPRESSION@48..49
-                                      0: SCSS_EXPRESSION_ITEM_LIST@48..49
-                                        0: CSS_NUMBER@48..49
-                                          0: CSS_NUMBER_LITERAL@48..49 "3" [] []
-                              2: R_PAREN@49..50 ")" [] []
+                      0: SCSS_EXPRESSION@41..50
+                        0: SCSS_EXPRESSION_ITEM_LIST@41..50
+                          0: SCSS_PARENTHESIZED_EXPRESSION@41..50
+                            0: L_PAREN@41..42 "(" [] []
+                            1: SCSS_LIST_EXPRESSION@42..49
+                              0: SCSS_LIST_EXPRESSION_ELEMENT_LIST@42..49
+                                0: SCSS_LIST_EXPRESSION_ELEMENT@42..43
+                                  0: SCSS_EXPRESSION@42..43
+                                    0: SCSS_EXPRESSION_ITEM_LIST@42..43
+                                      0: CSS_NUMBER@42..43
+                                        0: CSS_NUMBER_LITERAL@42..43 "1" [] []
+                                1: COMMA@43..45 "," [] [Whitespace(" ")]
+                                2: SCSS_LIST_EXPRESSION_ELEMENT@45..46
+                                  0: SCSS_EXPRESSION@45..46
+                                    0: SCSS_EXPRESSION_ITEM_LIST@45..46
+                                      0: CSS_NUMBER@45..46
+                                        0: CSS_NUMBER_LITERAL@45..46 "2" [] []
+                                3: COMMA@46..48 "," [] [Whitespace(" ")]
+                                4: SCSS_LIST_EXPRESSION_ELEMENT@48..49
+                                  0: SCSS_EXPRESSION@48..49
+                                    0: SCSS_EXPRESSION_ITEM_LIST@48..49
+                                      0: CSS_NUMBER@48..49
+                                        0: CSS_NUMBER_LITERAL@48..49 "3" [] []
+                            2: R_PAREN@49..50 ")" [] []
                     3: R_PAREN@50..51 ")" [] []
               1: (empty)
             1: SEMICOLON@51..52 ";" [] []
@@ -361,34 +350,33 @@ CssRoot {
                       0: IDENT@63..65 "fn" [] []
                     1: L_PAREN@65..66 "(" [] []
                     2: CSS_PARAMETER_LIST@66..97
-                      0: CSS_PARAMETER@66..97
-                        0: SCSS_EXPRESSION@66..97
-                          0: SCSS_EXPRESSION_ITEM_LIST@66..97
-                            0: SCSS_MAP_EXPRESSION@66..97
-                              0: L_PAREN@66..67 "(" [] []
-                              1: SCSS_MAP_EXPRESSION_PAIR_LIST@67..96
-                                0: SCSS_MAP_EXPRESSION_PAIR@67..79
-                                  0: SCSS_EXPRESSION@67..74
-                                    0: SCSS_EXPRESSION_ITEM_LIST@67..74
-                                      0: CSS_IDENTIFIER@67..74
-                                        0: IDENT@67..74 "primary" [] []
-                                  1: COLON@74..76 ":" [] [Whitespace(" ")]
-                                  2: SCSS_EXPRESSION@76..79
-                                    0: SCSS_EXPRESSION_ITEM_LIST@76..79
-                                      0: CSS_IDENTIFIER@76..79
-                                        0: IDENT@76..79 "red" [] []
-                                1: COMMA@79..81 "," [] [Whitespace(" ")]
-                                2: SCSS_MAP_EXPRESSION_PAIR@81..96
-                                  0: SCSS_EXPRESSION@81..90
-                                    0: SCSS_EXPRESSION_ITEM_LIST@81..90
-                                      0: CSS_IDENTIFIER@81..90
-                                        0: IDENT@81..90 "secondary" [] []
-                                  1: COLON@90..92 ":" [] [Whitespace(" ")]
-                                  2: SCSS_EXPRESSION@92..96
-                                    0: SCSS_EXPRESSION_ITEM_LIST@92..96
-                                      0: CSS_IDENTIFIER@92..96
-                                        0: IDENT@92..96 "blue" [] []
-                              2: R_PAREN@96..97 ")" [] []
+                      0: SCSS_EXPRESSION@66..97
+                        0: SCSS_EXPRESSION_ITEM_LIST@66..97
+                          0: SCSS_MAP_EXPRESSION@66..97
+                            0: L_PAREN@66..67 "(" [] []
+                            1: SCSS_MAP_EXPRESSION_PAIR_LIST@67..96
+                              0: SCSS_MAP_EXPRESSION_PAIR@67..79
+                                0: SCSS_EXPRESSION@67..74
+                                  0: SCSS_EXPRESSION_ITEM_LIST@67..74
+                                    0: CSS_IDENTIFIER@67..74
+                                      0: IDENT@67..74 "primary" [] []
+                                1: COLON@74..76 ":" [] [Whitespace(" ")]
+                                2: SCSS_EXPRESSION@76..79
+                                  0: SCSS_EXPRESSION_ITEM_LIST@76..79
+                                    0: CSS_IDENTIFIER@76..79
+                                      0: IDENT@76..79 "red" [] []
+                              1: COMMA@79..81 "," [] [Whitespace(" ")]
+                              2: SCSS_MAP_EXPRESSION_PAIR@81..96
+                                0: SCSS_EXPRESSION@81..90
+                                  0: SCSS_EXPRESSION_ITEM_LIST@81..90
+                                    0: CSS_IDENTIFIER@81..90
+                                      0: IDENT@81..90 "secondary" [] []
+                                1: COLON@90..92 ":" [] [Whitespace(" ")]
+                                2: SCSS_EXPRESSION@92..96
+                                  0: SCSS_EXPRESSION_ITEM_LIST@92..96
+                                    0: CSS_IDENTIFIER@92..96
+                                      0: IDENT@92..96 "blue" [] []
+                            2: R_PAREN@96..97 ")" [] []
                     3: R_PAREN@97..98 ")" [] []
               1: (empty)
             1: SEMICOLON@98..99 ";" [] []
@@ -404,13 +392,12 @@ CssRoot {
                       0: IDENT@113..115 "fn" [] []
                     1: L_PAREN@115..116 "(" [] []
                     2: CSS_PARAMETER_LIST@116..118
-                      0: CSS_PARAMETER@116..118
-                        0: SCSS_EXPRESSION@116..118
-                          0: SCSS_EXPRESSION_ITEM_LIST@116..118
-                            0: SCSS_MAP_EXPRESSION@116..118
-                              0: L_PAREN@116..117 "(" [] []
-                              1: SCSS_MAP_EXPRESSION_PAIR_LIST@117..117
-                              2: R_PAREN@117..118 ")" [] []
+                      0: SCSS_EXPRESSION@116..118
+                        0: SCSS_EXPRESSION_ITEM_LIST@116..118
+                          0: SCSS_MAP_EXPRESSION@116..118
+                            0: L_PAREN@116..117 "(" [] []
+                            1: SCSS_MAP_EXPRESSION_PAIR_LIST@117..117
+                            2: R_PAREN@117..118 ")" [] []
                     3: R_PAREN@118..119 ")" [] []
               1: (empty)
             1: SEMICOLON@119..120 ";" [] []

@@ -81,12 +81,16 @@ impl ModuleGraph {
         &self,
         fs: &dyn FsWithResolverProxy,
         project_layout: &ProjectLayout,
-        added_or_updated_paths: &[(&BiomePath, AnyJsRoot)],
+        added_or_updated_paths: &[(
+            &BiomePath,
+            AnyJsRoot,
+            std::sync::Arc<biome_js_semantic::SemanticModel>,
+        )],
         enable_type_inference: bool,
     ) -> (ModuleDependencies, Vec<ModuleDiagnostic>) {
         // Make sure all directories are registered for the added/updated paths.
         let path_info = self.path_info.pin();
-        for (path, _) in added_or_updated_paths {
+        for (path, _, _) in added_or_updated_paths {
             let mut parent = path.parent();
             while let Some(path) = parent {
                 let mut inserted = false;
@@ -108,10 +112,15 @@ impl ModuleGraph {
         // Traverse all the added and updated paths and insert their module
         // info.
         let modules = self.data.pin();
-        for (path, root) in added_or_updated_paths {
+        for (path, root, semantic_model) in added_or_updated_paths {
             let directory = path.parent().unwrap_or(path);
-            let visitor =
-                JsModuleVisitor::new(root.clone(), directory, &fs_proxy, enable_type_inference);
+            let visitor = JsModuleVisitor::new(
+                root.clone(),
+                directory,
+                &fs_proxy,
+                semantic_model.clone(),
+                enable_type_inference,
+            );
 
             let module_info = visitor.collect_info();
             for import_path in module_info.all_import_paths() {
@@ -243,9 +252,9 @@ impl ModuleGraph {
 
         find_exported_symbol_with_seen_paths(&data, module, symbol_name, &mut seen_paths).and_then(
             |(module, export)| match export {
-                JsOwnExport::Binding(binding_id) => {
-                    module.bindings[binding_id.index()].jsdoc.clone()
-                }
+                JsOwnExport::Binding(binding_range) => module
+                    .binding_type_data(*binding_range)
+                    .and_then(|data| data.jsdoc.clone()),
                 JsOwnExport::Type(_) => None,
             },
         )

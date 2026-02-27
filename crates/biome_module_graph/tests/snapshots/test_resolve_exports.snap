@@ -62,34 +62,34 @@ export * as renamed2 from "./renamed-reexports";
 ```
 Exports {
   "foo" => {
-    ExportOwnExport => JsOwnExport::Binding(0)
+    ExportOwnExport => JsOwnExport::Binding(87..90)
   }
   "qux" => {
-    ExportOwnExport => JsOwnExport::Binding(4)
+    ExportOwnExport => JsOwnExport::Binding(389..392)
   }
   "bar" => {
-    ExportOwnExport => JsOwnExport::Binding(1)
+    ExportOwnExport => JsOwnExport::Binding(187..190)
   }
   "quz" => {
-    ExportOwnExport => JsOwnExport::Binding(2)
+    ExportOwnExport => JsOwnExport::Binding(250..253)
   }
   "baz" => {
-    ExportOwnExport => JsOwnExport::Binding(3)
+    ExportOwnExport => JsOwnExport::Binding(363..366)
   }
   "a" => {
-    ExportOwnExport => JsOwnExport::Binding(5)
+    ExportOwnExport => JsOwnExport::Binding(426..427)
   }
   "b" => {
-    ExportOwnExport => JsOwnExport::Binding(6)
+    ExportOwnExport => JsOwnExport::Binding(429..430)
   }
   "d" => {
-    ExportOwnExport => JsOwnExport::Binding(7)
+    ExportOwnExport => JsOwnExport::Binding(436..437)
   }
   "e" => {
-    ExportOwnExport => JsOwnExport::Binding(8)
+    ExportOwnExport => JsOwnExport::Binding(439..440)
   }
   "default" => {
-    ExportOwnExport => JsOwnExport::Binding(11)
+    ExportOwnExport => JsOwnExport::Binding(909..918)
   }
   "oh\nno" => {
     ExportReexport => Reexport(
@@ -117,77 +117,67 @@ Imports {
 ## Exported Bindings
 
 ```
-BindingId(0) => JsBindingData {
-  Name: foo,
-  Type: Module(0) TypeId(10),
-  JSDoc comment: JsDoc(
+foo => BindingTypeData {
+  Types Module(0) TypeId(10),
+  JsDoc(
     @returns {string}
   ),
-  Declaration kind: HoistedValue
+  Exported Ranges: (118..121)
 }
 
-BindingId(1) => JsBindingData {
-  Name: bar,
-  Type: Module(0) TypeId(11),
-  JSDoc comment: JsDoc(
+bar => BindingTypeData {
+  Types Module(0) TypeId(11),
+  JsDoc(
     @package
   ),
-  Declaration kind: HoistedValue
+  Exported Ranges: (187..190)
 }
 
-BindingId(2) => JsBindingData {
-  Name: quz,
-  Type: Module(0) TypeId(0),
-  JSDoc comment: JsDoc(
+quz  => BindingTypeData {
+  Types Module(0) TypeId(0),
+  JsDoc(
     @private
   ),
-  Declaration kind: Value
+  Exported Ranges: (250..253)
 }
 
-BindingId(3) => JsBindingData {
-  Name: baz,
-  Type: Module(0) TypeId(13),
-  Declaration kind: HoistedValue
+baz => BindingTypeData {
+  Types Module(0) TypeId(13),
+  Exported Ranges: (363..366)
 }
 
-BindingId(4) => JsBindingData {
-  Name: qux,
-  Type: Module(0) TypeId(1),
-  Declaration kind: HoistedValue
+qux  => BindingTypeData {
+  Types Module(0) TypeId(1),
+  Exported Ranges: (123..126)
 }
 
-BindingId(5) => JsBindingData {
-  Name: a,
-  Type: Module(0) TypeId(4),
-  Declaration kind: Value
+a => BindingTypeData {
+  Types Module(0) TypeId(4),
+  Exported Ranges: (426..427)
 }
 
-BindingId(6) => JsBindingData {
-  Name: b,
-  Type: Module(0) TypeId(5),
-  Declaration kind: Value
+b => BindingTypeData {
+  Types Module(0) TypeId(5),
+  Exported Ranges: (429..430)
 }
 
-BindingId(7) => JsBindingData {
-  Name: d,
-  Type: Module(0) TypeId(7),
-  Declaration kind: Value
+d => BindingTypeData {
+  Types Module(0) TypeId(7),
+  Exported Ranges: (436..437)
 }
 
-BindingId(8) => JsBindingData {
-  Name: e,
-  Type: Module(0) TypeId(8),
-  Declaration kind: Value
+e => BindingTypeData {
+  Types Module(0) TypeId(8),
+  Exported Ranges: (439..440)
 }
 
-BindingId(11) => JsBindingData {
-  Name: Component,
-  Type: Module(0) TypeId(17),
-  JSDoc comment: JsDoc(
+Component => BindingTypeData {
+  Types Module(0) TypeId(17),
+  JsDoc(
     @public
     @returns {JSX.Element}
   ),
-  Declaration kind: Unknown
+  Exported Ranges: (909..918)
 }
 ```
 
@@ -303,7 +293,7 @@ export function ohNo() {}
 ```
 Exports {
   "ohNo" => {
-    ExportOwnExport => JsOwnExport::Binding(0)
+    ExportOwnExport => JsOwnExport::Binding(29..33)
   }
 }
 Imports {
@@ -314,10 +304,9 @@ Imports {
 ## Exported Bindings
 
 ```
-BindingId(0) => JsBindingData {
-  Name: ohNo,
-  Type: Module(0) TypeId(1),
-  Declaration kind: HoistedValue
+ohNo => BindingTypeData {
+  Types Module(0) TypeId(1),
+  Exported Ranges: (29..33)
 }
 ```
 

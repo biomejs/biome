@@ -227,7 +227,7 @@ missingDependenciesInvalid.jsx:19:5 lint/correctness/useExhaustiveDependencies  
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency a to the list.
   
     21 │ ····},·[a]);
        │         +   
@@ -261,7 +261,7 @@ missingDependenciesInvalid.jsx:19:5 lint/correctness/useExhaustiveDependencies  
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency b to the list.
   
     21 │ ····},·[b]);
        │         +   
@@ -295,7 +295,7 @@ missingDependenciesInvalid.jsx:34:3 lint/correctness/useExhaustiveDependencies  
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency deferredValue to the list.
   
     48 │ ··},·[deferredValue]);
        │       +++++++++++++   
@@ -329,7 +329,7 @@ missingDependenciesInvalid.jsx:34:3 lint/correctness/useExhaustiveDependencies  
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency memoizedCallback to the list.
   
     48 │ ··},·[memoizedCallback]);
        │       ++++++++++++++++   
@@ -363,7 +363,7 @@ missingDependenciesInvalid.jsx:34:3 lint/correctness/useExhaustiveDependencies  
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency state to the list.
   
     48 │ ··},·[state]);
        │       +++++   
@@ -397,7 +397,7 @@ missingDependenciesInvalid.jsx:34:3 lint/correctness/useExhaustiveDependencies  
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency name to the list.
   
     48 │ ··},·[name]);
        │       ++++   
@@ -431,7 +431,7 @@ missingDependenciesInvalid.jsx:34:3 lint/correctness/useExhaustiveDependencies  
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency isPending to the list.
   
     48 │ ··},·[isPending]);
        │       +++++++++   
@@ -464,7 +464,7 @@ missingDependenciesInvalid.jsx:34:3 lint/correctness/useExhaustiveDependencies  
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency memoizedValue to the list.
   
     48 │ ··},·[memoizedValue]);
        │       +++++++++++++   
@@ -498,7 +498,7 @@ missingDependenciesInvalid.jsx:55:3 lint/correctness/useExhaustiveDependencies  
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency a to the list.
   
     55 │ ··useEffect(()·=>·console.log(a),·[a]);
        │                                    +   
@@ -532,7 +532,7 @@ missingDependenciesInvalid.jsx:56:3 lint/correctness/useExhaustiveDependencies  
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency a to the list.
   
     56 │ ··useCallback(()·=>·console.log(a),·[a]);
        │                                      +   
@@ -566,7 +566,7 @@ missingDependenciesInvalid.jsx:57:3 lint/correctness/useExhaustiveDependencies  
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency a to the list.
   
     57 │ ··useMemo(()·=>·console.log(a),·[a]);
        │                                  +   
@@ -600,7 +600,7 @@ missingDependenciesInvalid.jsx:58:3 lint/correctness/useExhaustiveDependencies  
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency a to the list.
   
     58 │ ··useImperativeHandle(ref,·()·=>·console.log(a),·[a]);
        │                                                   +   
@@ -634,7 +634,7 @@ missingDependenciesInvalid.jsx:59:3 lint/correctness/useExhaustiveDependencies  
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency a to the list.
   
     59 │ ··useLayoutEffect(()·=>·console.log(a),·[a]);
        │                                          +   
@@ -668,7 +668,7 @@ missingDependenciesInvalid.jsx:60:3 lint/correctness/useExhaustiveDependencies  
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency a to the list.
   
     60 │ ··useInsertionEffect(()·=>·console.log(a),·[a]);
        │                                             +   
@@ -702,7 +702,7 @@ missingDependenciesInvalid.jsx:67:3 lint/correctness/useExhaustiveDependencies  
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency a to the list.
   
     69 │ ··},·[a]);
        │       +   
@@ -745,7 +745,7 @@ missingDependenciesInvalid.jsx:76:3 lint/correctness/useExhaustiveDependencies  
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency a to the list.
   
     79 │ ··},·[a]);
        │       +   
@@ -779,7 +779,7 @@ missingDependenciesInvalid.jsx:86:3 lint/correctness/useExhaustiveDependencies  
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency someObj.name to the list.
   
     88 │ ··},·[someObj.name]);
        │       ++++++++++++   
@@ -812,7 +812,7 @@ missingDependenciesInvalid.jsx:92:3 lint/correctness/useExhaustiveDependencies  
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency a to the list.
   
     94 │ ··},·[a]);
        │       +   
@@ -845,7 +845,7 @@ missingDependenciesInvalid.jsx:98:3 lint/correctness/useExhaustiveDependencies  
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency a to the list.
   
     100 │ ··},·[a]);
         │       +   
@@ -879,7 +879,7 @@ missingDependenciesInvalid.jsx:106:3 lint/correctness/useExhaustiveDependencies 
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency a to the list.
   
     108 │ ··},·[a]);
         │       +   
@@ -913,7 +913,7 @@ missingDependenciesInvalid.jsx:113:3 lint/correctness/useExhaustiveDependencies 
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency a to the list.
   
     115 │ ··},·[a]);
         │       +   
@@ -947,7 +947,7 @@ missingDependenciesInvalid.jsx:121:3 lint/correctness/useExhaustiveDependencies 
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency a to the list.
   
     123 │ ··},·[a]);
         │       +   
@@ -981,7 +981,7 @@ missingDependenciesInvalid.jsx:128:3 lint/correctness/useExhaustiveDependencies 
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency a to the list.
   
     130 │ ··},·[a]);
         │       +   
@@ -1015,7 +1015,7 @@ missingDependenciesInvalid.jsx:136:9 lint/correctness/useExhaustiveDependencies 
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency a to the list.
   
     138 │ ··},·[a]);
         │       +   
@@ -1049,7 +1049,7 @@ missingDependenciesInvalid.jsx:144:2 lint/correctness/useExhaustiveDependencies 
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency ref.current to the list.
   
     146 │ → },·[ref.current]);
         │       +++++++++++   
@@ -1083,7 +1083,7 @@ missingDependenciesInvalid.jsx:155:2 lint/correctness/useExhaustiveDependencies 
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency ref.current to the list.
   
     157 │ → },·[ref.current]);
         │       +++++++++++   
@@ -1116,7 +1116,7 @@ missingDependenciesInvalid.jsx:168:3 lint/correctness/useExhaustiveDependencies 
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency func to the list.
   
     170 │ ··},·[func])
         │       ++++  
@@ -1149,7 +1149,7 @@ missingDependenciesInvalid.jsx:176:2 lint/correctness/useExhaustiveDependencies 
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency a to the list.
   
     178 │ → },·[a]);
         │       +   
@@ -1182,7 +1182,7 @@ missingDependenciesInvalid.jsx:185:2 lint/correctness/useExhaustiveDependencies 
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency a to the list.
   
     187 │ → },·[a]);
         │       +   
@@ -1215,7 +1215,7 @@ missingDependenciesInvalid.jsx:185:2 lint/correctness/useExhaustiveDependencies 
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency b to the list.
   
     187 │ → },·[b]);
         │       +   

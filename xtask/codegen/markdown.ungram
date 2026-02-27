@@ -170,9 +170,13 @@ MdQuote =
 // Post-marker space captures exactly 0 or 1 space after '>';
 // additional spaces are content indentation, not part of the prefix.
 MdQuotePrefix =
-	pre_marker_indent: 'md_quote_pre_marker_indent'?
+	pre_marker_indent: MdQuoteIndentList
 	marker: '>'
 	post_marker_space: 'md_quote_post_marker_space'?
+
+// Single pre-marker indent token (MdHash/MdHashList pattern).
+MdQuoteIndent = 'md_quote_pre_marker_indent'
+MdQuoteIndentList = MdQuoteIndent*
 
 MdBulletListItem = MdBulletList
 MdOrderedListItem = MdBulletList

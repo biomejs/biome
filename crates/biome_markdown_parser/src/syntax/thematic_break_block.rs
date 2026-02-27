@@ -14,6 +14,7 @@
 //! ```
 
 use crate::parser::MarkdownParser;
+use crate::syntax::MAX_BLOCK_PREFIX_INDENT;
 use biome_markdown_syntax::MarkdownSyntaxKind::*;
 use biome_markdown_syntax::T;
 use biome_parser::{
@@ -27,10 +28,10 @@ const THEMATIC_BREAK_MIN_CHARS: usize = 3;
 pub(crate) fn at_thematic_break_block(p: &mut MarkdownParser) -> bool {
     p.lookahead(|p| {
         if p.at_line_start() || p.at_start_of_input() {
-            if p.line_start_leading_indent() > 3 {
+            if p.line_start_leading_indent() > MAX_BLOCK_PREFIX_INDENT {
                 return false;
             }
-            p.skip_line_indent(3);
+            p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
             return p.at(MD_THEMATIC_BREAK_LITERAL);
         }
 
@@ -151,7 +152,7 @@ pub(crate) fn parse_thematic_break_block(p: &mut MarkdownParser) -> ParsedSyntax
     }
     let m = p.start();
 
-    p.skip_line_indent(3);
+    p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
 
     // If the lexer produced MD_THEMATIC_BREAK_LITERAL, use it directly.
     // Otherwise, parse the thematic break pattern from individual tokens and

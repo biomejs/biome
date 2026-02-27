@@ -33,6 +33,7 @@ use biome_parser::{
 };
 
 use crate::syntax::parse_error::unterminated_fenced_code;
+use crate::syntax::{MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES};
 
 /// Minimum number of fence characters required per CommonMark §4.5.
 const MIN_FENCE_LENGTH: usize = 3;
@@ -50,7 +51,7 @@ fn consume_indent(source: &[u8], mut idx: usize, limit: usize, required: bool) -
                 idx += 1;
             }
             Some(b'\t') => {
-                let tab_width = 4 - (column % 4);
+                let tab_width = TAB_STOP_SPACES - (column % TAB_STOP_SPACES);
                 // For optional indent, don't exceed limit with tab
                 if !required && column + tab_width > limit {
                     break;
@@ -153,10 +154,10 @@ pub(crate) fn detect_fence(s: &str) -> Option<(char, usize)> {
 /// Check if we're at a fenced code block (``` or ~~~).
 pub(crate) fn at_fenced_code_block(p: &mut MarkdownParser) -> bool {
     p.lookahead(|p| {
-        if !p.at_start_of_input() && !is_line_start_within_indent(p, 3) {
+        if !p.at_start_of_input() && !is_line_start_within_indent(p, MAX_BLOCK_PREFIX_INDENT) {
             return false;
         }
-        p.skip_line_indent(3);
+        p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
 
         let rest = p.source_after_current();
         let Some((fence_char, _)) = detect_fence(rest) else {
@@ -198,7 +199,7 @@ fn parse_fenced_code_block_impl(p: &mut MarkdownParser, force: bool) -> ParsedSy
     {
         fence_indent += p.state().list_item_required_indent;
     }
-    p.skip_line_indent(3);
+    p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
 
     // Detect fence type and length (must close with same type and >= length per CommonMark §4.5)
     let text = p.cur_text();
@@ -226,7 +227,7 @@ fn parse_fenced_code_block_impl(p: &mut MarkdownParser, force: bool) -> ParsedSy
         if p.state().list_item_required_indent > 0 && p.at_line_start() {
             p.skip_line_indent(p.state().list_item_required_indent);
         }
-        p.skip_line_indent(3);
+        p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
         bump_fence(p, is_tilde_fence);
     } else {
         // Emit diagnostic for unterminated code block
@@ -278,7 +279,7 @@ fn parse_code_content(
         if at_line_start && quote_depth > 0 {
             let prev_virtual = p.state().virtual_line_start;
             p.state_mut().virtual_line_start = Some(p.cur_range().start());
-            p.skip_line_indent(3);
+            p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
             p.state_mut().virtual_line_start = prev_virtual;
 
             let mut ok = true;
@@ -381,7 +382,7 @@ fn skip_fenced_content_indent(p: &mut MarkdownParser, indent: usize) {
 
         let width = text
             .chars()
-            .map(|c| if c == '\t' { 4 } else { 1 })
+            .map(|c| if c == '\t' { TAB_STOP_SPACES } else { 1 })
             .sum::<usize>();
 
         if consumed + width > indent {
@@ -413,7 +414,7 @@ fn line_has_closing_fence(p: &MarkdownParser, is_tilde_fence: bool, fence_len: u
 
     // Skip optional extra indent (up to 3 spaces per CommonMark)
     // This always succeeds since required=false
-    let idx = consume_indent(source.as_bytes(), idx, 3, false).unwrap();
+    let idx = consume_indent(source.as_bytes(), idx, MAX_BLOCK_PREFIX_INDENT, false).unwrap();
 
     let fence_char = if is_tilde_fence { b'~' } else { b'`' };
     let mut fence_count = 0usize;
@@ -453,7 +454,9 @@ fn is_line_start_within_indent(p: &MarkdownParser, max_indent: usize) -> bool {
 
     let mut indent = source[virtual_start..start]
         .chars()
-        .fold(0usize, |count, c| count + if c == '\t' { 4 } else { 1 });
+        .fold(0usize, |count, c| {
+            count + if c == '\t' { TAB_STOP_SPACES } else { 1 }
+        });
 
     if p.state().virtual_line_start.is_none() && p.state().list_item_required_indent > 0 {
         indent = indent.saturating_sub(p.state().list_item_required_indent);

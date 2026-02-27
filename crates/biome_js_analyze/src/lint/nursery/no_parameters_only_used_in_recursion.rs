@@ -10,6 +10,7 @@ use biome_js_syntax::{
     JsVariableDeclarator, binding_ext::AnyJsParameterParentFunction, function_ext::AnyFunctionLike,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TokenText};
+use biome_rule_options::no_parameters_only_used_in_recursion::NoParametersOnlyUsedInRecursionOptions;
 
 declare_lint_rule! {
     /// Disallow function parameters that are only used in recursive calls.
@@ -98,7 +99,7 @@ impl Rule for NoParametersOnlyUsedInRecursion {
     type Query = Semantic<JsIdentifierBinding>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoParametersOnlyUsedInRecursionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let binding = ctx.query();

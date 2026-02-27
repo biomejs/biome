@@ -2320,6 +2320,11 @@ See https://biomejs.dev/linter/rules/no-vue-v-if-with-v-for
 	 */
 	recommended?: boolean;
 	/**
+	* Prefer Array.prototype.some() over verbose existence checks.
+See https://biomejs.dev/linter/rules/use-array-some 
+	 */
+	useArraySome?: UseArraySomeConfiguration;
+	/**
 	* Require Array#sort and Array#toSorted calls to always provide a compareFunction.
 See https://biomejs.dev/linter/rules/use-array-sort-compare 
 	 */
@@ -2404,6 +2409,11 @@ See https://biomejs.dev/linter/rules/use-lone-anonymous-operation
 See https://biomejs.dev/linter/rules/use-lone-executable-definition 
 	 */
 	useLoneExecutableDefinition?: UseLoneExecutableDefinitionConfiguration;
+	/**
+	* Enforce using named capture groups in regular expression.
+See https://biomejs.dev/linter/rules/use-named-capture-group 
+	 */
+	useNamedCaptureGroup?: UseNamedCaptureGroupConfiguration;
 	/**
 	* Enforce using nullish coalescing operator (??) instead of logical or (||).
 See https://biomejs.dev/linter/rules/use-nullish-coalescing 
@@ -4210,6 +4220,9 @@ export type NoVueRefAsOperandConfiguration =
 export type NoVueVIfWithVForConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueVIfWithVForOptions;
+export type UseArraySomeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseArraySomeOptions;
 export type UseArraySortCompareConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseArraySortCompareOptions;
@@ -4261,6 +4274,9 @@ export type UseLoneAnonymousOperationConfiguration =
 export type UseLoneExecutableDefinitionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseLoneExecutableDefinitionOptions;
+export type UseNamedCaptureGroupConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseNamedCaptureGroupOptions;
 export type UseNullishCoalescingConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseNullishCoalescingOptions;
@@ -5893,6 +5909,11 @@ export interface RuleWithNoVueVIfWithVForOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueVIfWithVForOptions;
 }
+export interface RuleWithUseArraySomeOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseArraySomeOptions;
+}
 export interface RuleWithUseArraySortCompareOptions {
 	level: RulePlainConfiguration;
 	options?: UseArraySortCompareOptions;
@@ -5962,6 +5983,10 @@ export interface RuleWithUseLoneAnonymousOperationOptions {
 export interface RuleWithUseLoneExecutableDefinitionOptions {
 	level: RulePlainConfiguration;
 	options?: UseLoneExecutableDefinitionOptions;
+}
+export interface RuleWithUseNamedCaptureGroupOptions {
+	level: RulePlainConfiguration;
+	options?: UseNamedCaptureGroupOptions;
 }
 export interface RuleWithUseNullishCoalescingOptions {
 	fix?: FixKind;
@@ -7361,6 +7386,7 @@ export type NoVueArrowFuncInWatchOptions = {};
 export type NoVueOptionsApiOptions = {};
 export type NoVueRefAsOperandOptions = {};
 export type NoVueVIfWithVForOptions = {};
+export type UseArraySomeOptions = {};
 export type UseArraySortCompareOptions = {};
 export type UseAwaitThenableOptions = {};
 export type UseConsistentEnumValueTypeOptions = {};
@@ -7406,6 +7432,7 @@ export interface UseInputNameOptions {
 }
 export type UseLoneAnonymousOperationOptions = {};
 export type UseLoneExecutableDefinitionOptions = {};
+export type UseNamedCaptureGroupOptions = {};
 export interface UseNullishCoalescingOptions {
 	/**
 	* Whether to ignore `||` expressions in conditional test positions
@@ -8368,6 +8395,7 @@ export type Category =
 	| "lint/nursery/noVueOptionsApi"
 	| "lint/nursery/noVueRefAsOperand"
 	| "lint/nursery/noVueVIfWithVFor"
+	| "lint/nursery/useArraySome"
 	| "lint/nursery/useArraySortCompare"
 	| "lint/nursery/useAwaitThenable"
 	| "lint/nursery/useBiomeSuppressionComment"
@@ -8390,7 +8418,11 @@ export type Category =
 	| "lint/nursery/useLoneAnonymousOperation"
 	| "lint/nursery/useLoneExecutableDefinition"
 	| "lint/nursery/useNullishCoalescing"
+	| "lint/nursery/useMaxParams"
+	| "lint/nursery/useNamedCaptureGroup"
 	| "lint/nursery/usePlaywrightValidDescribeCallback"
+	| "lint/nursery/useQwikMethodUsage"
+	| "lint/nursery/useQwikValidLexicalScope"
 	| "lint/nursery/useRegexpExec"
 	| "lint/nursery/useRequiredScripts"
 	| "lint/nursery/useSortedClasses"

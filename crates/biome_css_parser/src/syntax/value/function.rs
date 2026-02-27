@@ -211,13 +211,11 @@ pub(crate) fn parse_parameter(p: &mut CssParser) -> ParsedSyntax {
         return Absent;
     }
 
-    let param = p.start();
     if CssSyntaxFeatures::Scss.is_supported(p) {
-        parse_scss_expression_in_args_until(p, token_set![T![,], T![')'], T![;], T!['}']]).ok();
+        parse_scss_expression_in_args_until(p, token_set![T![,], T![')'], T![;], T!['}']])
     } else {
-        parse_any_expression(p).ok();
+        parse_any_expression(p)
     }
-    Present(param.complete(p, CSS_PARAMETER))
 }
 
 /// Determines if the current position in the CSS parser is at the start of any CSS expression.

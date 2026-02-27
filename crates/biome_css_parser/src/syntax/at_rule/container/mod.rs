@@ -90,7 +90,7 @@ pub(crate) fn parse_container_at_rule_declarator(p: &mut CssParser) -> ParsedSyn
     let m = p.start();
     p.bump(T![container]);
 
-    if !is_at_container_style_query_in_parens(p) {
+    if !is_at_container_style_query_in_parens(p) && !is_at_container_scroll_state_query(p) {
         let name = parse_custom_identifier(p, CssLexContext::Regular);
         // Because the name is optional, we have to indirectly check if it's
         // a CSS-wide keyword that can't be used. If it was required, we could

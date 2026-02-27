@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
 
@@ -64,24 +63,20 @@ CssRoot {
                                                     },
                                                     L_PAREN@22..23 "(" [] [],
                                                     CssParameterList [
-                                                        CssParameter {
-                                                            any_css_expression: CssListOfComponentValuesExpression {
-                                                                css_component_value_list: CssComponentValueList [
-                                                                    CssNumber {
-                                                                        value_token: CSS_NUMBER_LITERAL@23..24 "1" [] [],
-                                                                    },
-                                                                ],
-                                                            },
+                                                        CssListOfComponentValuesExpression {
+                                                            css_component_value_list: CssComponentValueList [
+                                                                CssNumber {
+                                                                    value_token: CSS_NUMBER_LITERAL@23..24 "1" [] [],
+                                                                },
+                                                            ],
                                                         },
                                                         COMMA@24..26 "," [] [Whitespace(" ")],
-                                                        CssParameter {
-                                                            any_css_expression: CssListOfComponentValuesExpression {
-                                                                css_component_value_list: CssComponentValueList [
-                                                                    CssNumber {
-                                                                        value_token: CSS_NUMBER_LITERAL@26..27 "2" [] [],
-                                                                    },
-                                                                ],
-                                                            },
+                                                        CssListOfComponentValuesExpression {
+                                                            css_component_value_list: CssComponentValueList [
+                                                                CssNumber {
+                                                                    value_token: CSS_NUMBER_LITERAL@26..27 "2" [] [],
+                                                                },
+                                                            ],
                                                         },
                                                     ],
                                                     R_PAREN@27..28 ")" [] [],
@@ -162,17 +157,15 @@ CssRoot {
                         0: IDENT@20..22 "fn" [] []
                     1: L_PAREN@22..23 "(" [] []
                     2: CSS_PARAMETER_LIST@23..27
-                      0: CSS_PARAMETER@23..24
-                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@23..24
-                          0: CSS_COMPONENT_VALUE_LIST@23..24
-                            0: CSS_NUMBER@23..24
-                              0: CSS_NUMBER_LITERAL@23..24 "1" [] []
+                      0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@23..24
+                        0: CSS_COMPONENT_VALUE_LIST@23..24
+                          0: CSS_NUMBER@23..24
+                            0: CSS_NUMBER_LITERAL@23..24 "1" [] []
                       1: COMMA@24..26 "," [] [Whitespace(" ")]
-                      2: CSS_PARAMETER@26..27
-                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@26..27
-                          0: CSS_COMPONENT_VALUE_LIST@26..27
-                            0: CSS_NUMBER@26..27
-                              0: CSS_NUMBER_LITERAL@26..27 "2" [] []
+                      2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@26..27
+                        0: CSS_COMPONENT_VALUE_LIST@26..27
+                          0: CSS_NUMBER@26..27
+                            0: CSS_NUMBER_LITERAL@26..27 "2" [] []
                     3: R_PAREN@27..28 ")" [] []
               1: (empty)
             1: SEMICOLON@28..29 ";" [] []

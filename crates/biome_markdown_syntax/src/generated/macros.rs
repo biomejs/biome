@@ -125,6 +125,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::MdQuote::new_unchecked(node) };
                     $body
                 }
+                $crate::MarkdownSyntaxKind::MD_QUOTE_INDENT => {
+                    let $pattern = unsafe { $crate::MdQuoteIndent::new_unchecked(node) };
+                    $body
+                }
                 $crate::MarkdownSyntaxKind::MD_QUOTE_PREFIX => {
                     let $pattern = unsafe { $crate::MdQuotePrefix::new_unchecked(node) };
                     $body
@@ -179,6 +183,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::MarkdownSyntaxKind::MD_INLINE_ITEM_LIST => {
                     let $pattern = unsafe { $crate::MdInlineItemList::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MD_QUOTE_INDENT_LIST => {
+                    let $pattern = unsafe { $crate::MdQuoteIndentList::new_unchecked(node) };
                     $body
                 }
                 _ => unreachable!(),

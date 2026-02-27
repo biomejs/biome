@@ -1,3 +1,4 @@
+use biome_js_semantic::ScopeId;
 use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsBinding, AnyJsBindingPattern, AnyJsDeclarationClause,
     AnyJsExportClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportClause,
@@ -5,7 +6,7 @@ use biome_js_syntax::{
     AnyTsModuleName, JsExportFromClause, JsExportNamedFromClause, JsExportNamedSpecifierList,
     JsIdentifierBinding, JsVariableDeclaratorList, TsExportAssignmentClause, unescape_js_string,
 };
-use biome_js_type_info::{ImportSymbol, ScopeId, TypeData, TypeReference, TypeResolver};
+use biome_js_type_info::{ImportSymbol, TypeData, TypeReference, TypeResolver};
 use biome_jsdoc_comment::JsdocComment;
 use biome_resolver::{ResolveOptions, resolve};
 use biome_rowan::{AstNode, TokenText, WalkEvent};
@@ -30,6 +31,7 @@ pub(crate) struct JsModuleVisitor<'a> {
     root: AnyJsRoot,
     directory: &'a Utf8Path,
     fs_proxy: &'a ModuleGraphFsProxy<'a>,
+    semantic_model: std::sync::Arc<biome_js_semantic::SemanticModel>,
     infer_types: bool,
 }
 
@@ -38,12 +40,14 @@ impl<'a> JsModuleVisitor<'a> {
         root: AnyJsRoot,
         directory: &'a Utf8Path,
         fs_proxy: &'a ModuleGraphFsProxy,
+        semantic_model: std::sync::Arc<biome_js_semantic::SemanticModel>,
         infer_types: bool,
     ) -> Self {
         Self {
             root,
             directory,
             fs_proxy,
+            semantic_model,
             infer_types,
         }
     }
@@ -69,7 +73,7 @@ impl<'a> JsModuleVisitor<'a> {
             }
         }
 
-        JsModuleInfo::new(collector, self.infer_types)
+        JsModuleInfo::new(collector, self.semantic_model, self.infer_types)
     }
 
     fn visit_import(&self, node: AnyJsImportLike, collector: &mut JsModuleInfoCollector) {
