@@ -292,6 +292,58 @@ impl<'src> Lexer<'src> {
         self.position >= self.source.len()
     }
 
+    /// Check if the current position is at the start of a GritQL metavariable (µ prefix).
+    fn is_metavariable_start(&mut self) -> bool {
+        let current_char = self.current_char_unchecked();
+        if current_char == 'µ' {
+            let current_char_length = current_char.len_utf8();
+            // µ[a-zA-Z_][a-zA-Z0-9_]*
+            if matches!(
+                self.byte_at(current_char_length),
+                Some(b'a'..=b'z' | b'A'..=b'Z' | b'_')
+            ) {
+                return true;
+            }
+
+            // µ... (spread operator)
+            if self.byte_at(current_char_length) == Some(b'.')
+                && self.byte_at(current_char_length + 1) == Some(b'.')
+                && self.byte_at(current_char_length + 2) == Some(b'.')
+            {
+                return true;
+            }
+        }
+        false
+    }
+
+    /// Consume a GritQL metavariable (µ[a-zA-Z_][a-zA-Z0-9_]*|µ...)
+    /// <https://github.com/getgrit/gritql/blob/8f3f077d078ccaf0618510bba904a06309c2435e/resources/language-metavariables/tree-sitter-css/grammar.js#L388>
+    fn consume_metavariable<T>(&mut self, kind: T) -> T {
+        debug_assert!(self.is_metavariable_start());
+
+        // SAFETY: We know the current character is µ.
+        let current_char = self.current_char_unchecked();
+        self.advance(current_char.len_utf8());
+
+        if self.current_byte() == Some(b'.') {
+            // SAFETY: We know that the current token is µ...
+            self.advance(3);
+        } else {
+            // µ[a-zA-Z_][a-zA-Z0-9_]*
+            self.advance(1);
+            while let Some(chr) = self.current_byte() {
+                match chr {
+                    b'a'..=b'z' | b'A'..=b'Z' | b'0'..=b'9' | b'_' => {
+                        self.advance(1);
+                    }
+                    _ => break,
+                }
+            }
+        }
+
+        kind
+    }
+
     /// Lexes the next token
     ///
     /// Guaranteed to not be at the end of the file
@@ -319,7 +371,10 @@ impl<'src> Lexer<'src> {
             UNI => {
                 let chr = self.current_char_unchecked();
 
-                if is_js_id_start(chr) {
+                // Check for GritQL metavariables (µ prefix) when enabled
+                if self.options.is_metavariable_enabled() && self.is_metavariable_start() {
+                    self.consume_metavariable(GRIT_METAVARIABLE)
+                } else if is_js_id_start(chr) {
                     self.lex_identifier(current)
                 } else if self.position == 0 && self.consume_potential_bom().is_some() {
                     // A BOM can only appear at the start of a file, so if we haven't advanced at all yet,

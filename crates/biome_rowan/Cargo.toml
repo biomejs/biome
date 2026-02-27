@@ -1,15 +1,19 @@
 [package]
-authors.workspace    = true
-categories.workspace = true
-description          = "Biome's custom Rowan definition"
-edition.workspace    = true
-homepage.workspace   = true
-keywords.workspace   = true
-license.workspace    = true
 name                 = "biome_rowan"
-publish              = true
-repository.workspace = true
 version              = "0.5.7"
+authors.workspace    = true
+edition.workspace    = true
+description          = "Biome's custom Rowan definition"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = true
+
+[[bench]]
+harness = false
+name    = "mutation"
 
 [dependencies]
 biome_text_edit = { workspace = true }
@@ -29,11 +33,7 @@ serde_json        = { workspace = true }
 [features]
 countme = ["dep:countme"]
 schema  = ["dep:schemars", "serde"]
-serde   = ["dep:serde", "biome_text_size/serde", "biome_text_size/serde"]
-
-[[bench]]
-harness = false
-name    = "mutation"
+serde   = ["biome_text_size/serde", "biome_text_size/serde", "dep:serde"]
 
 [lints]
 workspace = true

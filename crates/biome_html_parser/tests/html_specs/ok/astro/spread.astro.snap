@@ -1,0 +1,100 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```astro
+<input {...props} >
+<Component {...props} />
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@0..1 "<" [] [],
+            name: HtmlTagName {
+                value_token: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [
+                HtmlSpreadAttribute {
+                    l_curly_token: L_CURLY@7..8 "{" [] [],
+                    dotdotdot_token: DOT3@8..11 "..." [] [],
+                    argument: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@11..16 "props" [] [],
+                    },
+                    r_curly_token: R_CURLY@16..18 "}" [] [Whitespace(" ")],
+                },
+            ],
+            slash_token: missing (optional),
+            r_angle_token: R_ANGLE@18..19 ">" [] [],
+        },
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@19..21 "<" [Newline("\n")] [],
+            name: HtmlComponentName {
+                value_token: HTML_LITERAL@21..31 "Component" [] [Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [
+                HtmlSpreadAttribute {
+                    l_curly_token: L_CURLY@31..32 "{" [] [],
+                    dotdotdot_token: DOT3@32..35 "..." [] [],
+                    argument: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@35..40 "props" [] [],
+                    },
+                    r_curly_token: R_CURLY@40..42 "}" [] [Whitespace(" ")],
+                },
+            ],
+            slash_token: SLASH@42..43 "/" [] [],
+            r_angle_token: R_ANGLE@43..44 ">" [] [],
+        },
+    ],
+    eof_token: EOF@44..45 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..45
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..44
+    0: HTML_SELF_CLOSING_ELEMENT@0..19
+      0: L_ANGLE@0..1 "<" [] []
+      1: HTML_TAG_NAME@1..7
+        0: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@7..18
+        0: HTML_SPREAD_ATTRIBUTE@7..18
+          0: L_CURLY@7..8 "{" [] []
+          1: DOT3@8..11 "..." [] []
+          2: HTML_TEXT_EXPRESSION@11..16
+            0: HTML_LITERAL@11..16 "props" [] []
+          3: R_CURLY@16..18 "}" [] [Whitespace(" ")]
+      3: (empty)
+      4: R_ANGLE@18..19 ">" [] []
+    1: HTML_SELF_CLOSING_ELEMENT@19..44
+      0: L_ANGLE@19..21 "<" [Newline("\n")] []
+      1: HTML_COMPONENT_NAME@21..31
+        0: HTML_LITERAL@21..31 "Component" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@31..42
+        0: HTML_SPREAD_ATTRIBUTE@31..42
+          0: L_CURLY@31..32 "{" [] []
+          1: DOT3@32..35 "..." [] []
+          2: HTML_TEXT_EXPRESSION@35..40
+            0: HTML_LITERAL@35..40 "props" [] []
+          3: R_CURLY@40..42 "}" [] [Whitespace(" ")]
+      3: SLASH@42..43 "/" [] []
+      4: R_ANGLE@43..44 ">" [] []
+  4: EOF@44..45 "" [Newline("\n")] []
+
+```

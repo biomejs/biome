@@ -83,6 +83,9 @@ pub(crate) fn parse_variant(p: &mut TailwindParser) -> ParsedSyntax {
         // variants can't start with a negative sign
         return Absent;
     }
+    if p.at(T![data]) {
+        return parse_data_attribute(p);
+    }
     if p.at(T!['[']) {
         return parse_arbitrary_variant(p);
     }
@@ -134,4 +137,17 @@ fn parse_static_or_functional_variant(p: &mut TailwindParser) -> ParsedSyntax {
     }
 
     Present(m.complete(p, TW_FUNCTIONAL_VARIANT))
+}
+
+pub(crate) fn parse_data_attribute(p: &mut TailwindParser) -> ParsedSyntax {
+    if !p.at(T![data]) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump(T![data]);
+    p.expect(T![-]);
+    parse_value(p).or_add_diagnostic(p, expected_value);
+
+    Present(m.complete(p, TW_DATA_ATTRIBUTE))
 }

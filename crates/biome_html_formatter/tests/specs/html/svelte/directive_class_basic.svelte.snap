@@ -1,0 +1,40 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/directive_class_basic.svelte
+---
+
+# Input
+
+```svelte
+<div class:active={isActive}>Toggle class</div>
+<div class:selected>Shorthand class</div>
+<p class:red={hasError} class:bold={isImportant}>Multiple classes</p>
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+Bracket same line: false
+Whitespace sensitivity: css
+Indent script and style: false
+Self close void elements: never
+Trailing newline: true
+-----
+
+```svelte
+<div class:active={isActive}>Toggle class</div>
+<div class:selected>Shorthand class</div>
+<p class:red={hasError} class:bold={isImportant}>Multiple classes</p>
+
+```

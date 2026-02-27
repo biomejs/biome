@@ -107,6 +107,8 @@ invalid.ts:13:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
   
   i Some variants of the union type are not handled here.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i These cases are missing:
   
   - "Tuesday"
@@ -149,6 +151,8 @@ invalid.ts:20:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
     23 │ type A = 'a';
   
   i Some variants of the union type are not handled here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i These cases are missing:
   
@@ -195,6 +199,8 @@ invalid.ts:29:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
   
   i Some variants of the union type are not handled here.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i These cases are missing:
   
   - "b"
@@ -230,6 +236,8 @@ invalid.ts:42:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
     47 │ 
   
   i Some variants of the union type are not handled here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i These cases are missing:
   
@@ -267,6 +275,8 @@ invalid.ts:51:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
   
   i Some variants of the union type are not handled here.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i These cases are missing:
   
   - "B"
@@ -299,6 +309,8 @@ invalid.ts:58:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
   
   i Some variants of the union type are not handled here.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i These cases are missing:
   
   - "literal"
@@ -324,6 +336,8 @@ invalid.ts:62:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
     65 │ declare const value3: ('literal' & { _brand: true }) | 1;
   
   i Some variants of the union type are not handled here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i These cases are missing:
   
@@ -352,6 +366,8 @@ invalid.ts:66:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
     71 │ declare const value4: '1' | '2' | number;
   
   i Some variants of the union type are not handled here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i These cases are missing:
   
@@ -387,6 +403,8 @@ invalid.ts:72:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
   
   i Some variants of the union type are not handled here.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
   i These cases are missing:
   
   - "2"
@@ -417,6 +435,8 @@ invalid.ts:78:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
     80 │ 
   
   i Some variants of the union type are not handled here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i These cases are missing:
   

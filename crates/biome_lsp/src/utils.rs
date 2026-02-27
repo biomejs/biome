@@ -1,4 +1,3 @@
-#![expect(clippy::mutable_key_type)]
 use anyhow::{Context, Result, ensure};
 use biome_analyze::ActionCategory;
 use biome_console::fmt::Termcolor;
@@ -22,8 +21,7 @@ use std::ops::{Add, Range};
 use std::str::FromStr;
 use std::{io, mem};
 use tower_lsp_server::jsonrpc::Error as LspError;
-use tower_lsp_server::lsp_types;
-use tower_lsp_server::lsp_types::{self as lsp, CodeDescription, Uri};
+use tower_lsp_server::ls_types::{self as lsp, CodeDescription, Uri};
 use tracing::error;
 
 pub(crate) fn text_edit(
@@ -361,7 +359,7 @@ pub(crate) fn panic_to_lsp_error(err: Box<dyn Any + Send>) -> LspError {
 pub(crate) fn apply_document_changes(
     position_encoding: PositionEncoding,
     current_content: String,
-    mut content_changes: Vec<lsp_types::TextDocumentContentChangeEvent>,
+    mut content_changes: Vec<lsp::TextDocumentContentChangeEvent>,
 ) -> String {
     // Skip to the last full document change, as it invalidates all previous changes anyways.
     let mut start = content_changes
@@ -372,7 +370,7 @@ pub(crate) fn apply_document_changes(
 
     let mut text: String = match content_changes.get_mut(start) {
         // peek at the first content change as an optimization
-        Some(lsp_types::TextDocumentContentChangeEvent {
+        Some(lsp::TextDocumentContentChangeEvent {
             range: None, text, ..
         }) => {
             let text = mem::take(text);
@@ -417,8 +415,9 @@ mod tests {
     use biome_line_index::{LineIndex, WideEncoding};
     use biome_lsp_converters::PositionEncoding;
     use biome_text_edit::TextEdit;
-    use tower_lsp_server::lsp_types as lsp;
-    use tower_lsp_server::lsp_types::{Position, Range, TextDocumentContentChangeEvent};
+    use tower_lsp_server::ls_types::{
+        self as lsp, Position, Range, TextDocumentContentChangeEvent,
+    };
 
     #[test]
     fn test_diff_1() {

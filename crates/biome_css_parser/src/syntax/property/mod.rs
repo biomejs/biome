@@ -69,7 +69,7 @@ fn parse_composes_property(p: &mut CssParser) -> ParsedSyntax {
         return Absent;
     }
 
-    if p.options().is_css_modules_disabled() {
+    if CssSyntaxFeatures::CssModules.is_unsupported(p) {
         // `composes` is not a standard CSS feature.
         // Provide a hint on how to enable parsing of the `composes` declaration.
         p.error(composes_not_allowed(p, p.cur_range()));
@@ -209,7 +209,7 @@ fn parse_generic_property(p: &mut CssParser) -> ParsedSyntax {
 }
 const END_OF_PROPERTY_VALUE_TOKEN_SET: TokenSet<CssSyntaxKind> = token_set!(T!['}'], T![;]);
 
-struct GenericComponentValueList;
+pub(crate) struct GenericComponentValueList;
 
 impl ParseNodeList for GenericComponentValueList {
     type Kind = CssSyntaxKind;
@@ -239,12 +239,12 @@ impl ParseNodeList for GenericComponentValueList {
 }
 
 #[inline]
-fn is_at_generic_component_value(p: &mut CssParser) -> bool {
+pub(crate) fn is_at_generic_component_value(p: &mut CssParser) -> bool {
     is_at_any_value(p) || is_at_generic_delimiter(p)
 }
 
 #[inline]
-fn parse_generic_component_value(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_generic_component_value(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_generic_component_value(p) {
         return Absent;
     }

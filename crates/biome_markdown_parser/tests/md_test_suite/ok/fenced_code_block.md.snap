@@ -1,0 +1,202 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+```javascript
+const x = 1;
+```
+
+```
+No language
+```
+
+~~~python
+x = 1
+~~~
+
+~~~
+Tilde no language
+~~~
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdFencedCodeBlock {
+            l_fence: TRIPLE_BACKTICK@0..3 "```" [] [],
+            code_list: MdCodeNameList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@3..13 "javascript" [] [],
+                },
+            ],
+            content: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@13..14 "\n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@14..26 "const x = 1;" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@26..27 "\n" [] [],
+                },
+            ],
+            r_fence: TRIPLE_BACKTICK@27..30 "```" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@30..31 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@31..32 "\n" [] [],
+        },
+        MdFencedCodeBlock {
+            l_fence: TRIPLE_BACKTICK@32..35 "```" [] [],
+            code_list: MdCodeNameList [],
+            content: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@35..36 "\n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@36..47 "No language" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@47..48 "\n" [] [],
+                },
+            ],
+            r_fence: TRIPLE_BACKTICK@48..51 "```" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@51..52 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@52..53 "\n" [] [],
+        },
+        MdFencedCodeBlock {
+            l_fence: TRIPLE_TILDE@53..56 "~~~" [] [],
+            code_list: MdCodeNameList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@56..62 "python" [] [],
+                },
+            ],
+            content: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@62..63 "\n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@63..68 "x = 1" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@68..69 "\n" [] [],
+                },
+            ],
+            r_fence: TRIPLE_TILDE@69..72 "~~~" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@72..73 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@73..74 "\n" [] [],
+        },
+        MdFencedCodeBlock {
+            l_fence: TRIPLE_TILDE@74..77 "~~~" [] [],
+            code_list: MdCodeNameList [],
+            content: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@77..78 "\n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@78..95 "Tilde no language" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@95..96 "\n" [] [],
+                },
+            ],
+            r_fence: TRIPLE_TILDE@96..99 "~~~" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@99..100 "\n" [] [],
+        },
+    ],
+    eof_token: EOF@100..100 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..100
+  0: (empty)
+  1: MD_BLOCK_LIST@0..100
+    0: MD_FENCED_CODE_BLOCK@0..30
+      0: TRIPLE_BACKTICK@0..3 "```" [] []
+      1: MD_CODE_NAME_LIST@3..13
+        0: MD_TEXTUAL@3..13
+          0: MD_TEXTUAL_LITERAL@3..13 "javascript" [] []
+      2: MD_INLINE_ITEM_LIST@13..27
+        0: MD_TEXTUAL@13..14
+          0: MD_TEXTUAL_LITERAL@13..14 "\n" [] []
+        1: MD_TEXTUAL@14..26
+          0: MD_TEXTUAL_LITERAL@14..26 "const x = 1;" [] []
+        2: MD_TEXTUAL@26..27
+          0: MD_TEXTUAL_LITERAL@26..27 "\n" [] []
+      3: TRIPLE_BACKTICK@27..30 "```" [] []
+    1: MD_NEWLINE@30..31
+      0: NEWLINE@30..31 "\n" [] []
+    2: MD_NEWLINE@31..32
+      0: NEWLINE@31..32 "\n" [] []
+    3: MD_FENCED_CODE_BLOCK@32..51
+      0: TRIPLE_BACKTICK@32..35 "```" [] []
+      1: MD_CODE_NAME_LIST@35..35
+      2: MD_INLINE_ITEM_LIST@35..48
+        0: MD_TEXTUAL@35..36
+          0: MD_TEXTUAL_LITERAL@35..36 "\n" [] []
+        1: MD_TEXTUAL@36..47
+          0: MD_TEXTUAL_LITERAL@36..47 "No language" [] []
+        2: MD_TEXTUAL@47..48
+          0: MD_TEXTUAL_LITERAL@47..48 "\n" [] []
+      3: TRIPLE_BACKTICK@48..51 "```" [] []
+    4: MD_NEWLINE@51..52
+      0: NEWLINE@51..52 "\n" [] []
+    5: MD_NEWLINE@52..53
+      0: NEWLINE@52..53 "\n" [] []
+    6: MD_FENCED_CODE_BLOCK@53..72
+      0: TRIPLE_TILDE@53..56 "~~~" [] []
+      1: MD_CODE_NAME_LIST@56..62
+        0: MD_TEXTUAL@56..62
+          0: MD_TEXTUAL_LITERAL@56..62 "python" [] []
+      2: MD_INLINE_ITEM_LIST@62..69
+        0: MD_TEXTUAL@62..63
+          0: MD_TEXTUAL_LITERAL@62..63 "\n" [] []
+        1: MD_TEXTUAL@63..68
+          0: MD_TEXTUAL_LITERAL@63..68 "x = 1" [] []
+        2: MD_TEXTUAL@68..69
+          0: MD_TEXTUAL_LITERAL@68..69 "\n" [] []
+      3: TRIPLE_TILDE@69..72 "~~~" [] []
+    7: MD_NEWLINE@72..73
+      0: NEWLINE@72..73 "\n" [] []
+    8: MD_NEWLINE@73..74
+      0: NEWLINE@73..74 "\n" [] []
+    9: MD_FENCED_CODE_BLOCK@74..99
+      0: TRIPLE_TILDE@74..77 "~~~" [] []
+      1: MD_CODE_NAME_LIST@77..77
+      2: MD_INLINE_ITEM_LIST@77..96
+        0: MD_TEXTUAL@77..78
+          0: MD_TEXTUAL_LITERAL@77..78 "\n" [] []
+        1: MD_TEXTUAL@78..95
+          0: MD_TEXTUAL_LITERAL@78..95 "Tilde no language" [] []
+        2: MD_TEXTUAL@95..96
+          0: MD_TEXTUAL_LITERAL@95..96 "\n" [] []
+      3: TRIPLE_TILDE@96..99 "~~~" [] []
+    10: MD_NEWLINE@99..100
+      0: NEWLINE@99..100 "\n" [] []
+  2: EOF@100..100 "" [] []
+
+```

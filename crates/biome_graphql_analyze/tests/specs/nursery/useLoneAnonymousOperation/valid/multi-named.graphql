@@ -1,0 +1,7 @@
+# should not generate diagnostics
+query Foo {
+	field
+}
+query Bar {
+	field
+}

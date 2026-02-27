@@ -1,3 +1,4 @@
+use crate::logging::LogOptions;
 use crate::{
     CliDiagnostic, CliSession, open_transport,
     service::{self, ensure_daemon, open_socket, run_daemon},
@@ -5,8 +6,10 @@ use crate::{
 use biome_console::{ConsoleExt, markup};
 use biome_fs::OsFileSystem;
 use biome_lsp::ServerFactory;
-use biome_service::{TransportError, Watcher, WorkspaceError, workspace::WorkspaceClient};
-use camino::{Utf8Path, Utf8PathBuf};
+use biome_service::{
+    TransportError, Watcher, WatcherOptions, WorkspaceError, workspace::WorkspaceClient,
+};
+use camino::Utf8PathBuf;
 use std::{env, fs, process};
 use tokio::io;
 use tokio::runtime::Runtime;
@@ -23,11 +26,11 @@ use tracing_tree::HierarchicalLayer;
 
 pub(crate) fn start(
     session: CliSession,
-    log_path: Option<Utf8PathBuf>,
-    log_file_name_prefix: Option<String>,
+    watcher_options: WatcherOptions,
+    log_options: LogOptions,
 ) -> Result<(), CliDiagnostic> {
     let rt = Runtime::new()?;
-    let did_spawn = rt.block_on(ensure_daemon(false, log_path, log_file_name_prefix))?;
+    let did_spawn = rt.block_on(ensure_daemon(false, watcher_options, log_options))?;
 
     if did_spawn {
         session.app.console.log(markup! {
@@ -68,21 +71,26 @@ pub(crate) fn stop(session: CliSession) -> Result<(), CliDiagnostic> {
 
 pub(crate) fn run_server(
     stop_on_disconnect: bool,
-    log_path: Option<Utf8PathBuf>,
-    log_file_name_prefix: Option<String>,
+    watcher_options: WatcherOptions,
+    log_options: LogOptions,
 ) -> Result<(), CliDiagnostic> {
-    setup_tracing_subscriber(log_path.as_deref(), log_file_name_prefix.as_deref());
+    setup_tracing_subscriber(
+        log_options.log_path.clone(),
+        log_options.log_prefix_name.clone(),
+    );
 
-    let (watcher, instruction_channel) = Watcher::new()?;
+    let span = debug_span!(
+        "Running Server",
+        pid = std::process::id(),
+        log_path = &log_options.log_path.as_str(),
+        log_file_name_prefix = &log_options.log_prefix_name.as_str(),
+    );
+
+    let (watcher, instruction_channel) = Watcher::new(watcher_options)?;
 
     let rt = Runtime::new()?;
     let factory = ServerFactory::new(stop_on_disconnect, instruction_channel.sender.clone());
     let cancellation = factory.cancellation();
-    let span = debug_span!("Running Server",
-        pid = std::process::id(),
-        log_path = ?log_path.as_ref(),
-        log_file_name_prefix = &log_file_name_prefix.as_deref(),
-    );
 
     let workspace = factory.workspace();
     rt.spawn_blocking(move || {
@@ -114,11 +122,11 @@ pub(crate) fn print_socket() -> Result<(), CliDiagnostic> {
 }
 
 pub(crate) fn lsp_proxy(
-    log_path: Option<Utf8PathBuf>,
-    log_file_name_prefix: Option<String>,
+    watcher_options: WatcherOptions,
+    log_options: LogOptions,
 ) -> Result<(), CliDiagnostic> {
     let rt = Runtime::new()?;
-    rt.block_on(start_lsp_proxy(&rt, log_path, log_file_name_prefix))?;
+    rt.block_on(start_lsp_proxy(&rt, watcher_options, log_options))?;
 
     Ok(())
 }
@@ -128,10 +136,10 @@ pub(crate) fn lsp_proxy(
 /// Copy to the process on `stdout` when the LSP responds to a message
 async fn start_lsp_proxy(
     rt: &Runtime,
-    log_path: Option<Utf8PathBuf>,
-    log_file_name_prefix: Option<String>,
+    watcher_options: WatcherOptions,
+    log_options: LogOptions,
 ) -> Result<(), CliDiagnostic> {
-    ensure_daemon(true, log_path, log_file_name_prefix).await?;
+    ensure_daemon(true, watcher_options, log_options).await?;
 
     match open_socket().await? {
         Some((mut owned_read_half, mut owned_write_half)) => {
@@ -206,17 +214,13 @@ pub(crate) fn read_most_recent_log_file(
 /// is written to log files rotated on a hourly basis (in
 /// `biome-logs/server.log.yyyy-MM-dd-HH` files inside the system temporary
 /// directory)
-fn setup_tracing_subscriber(log_path: Option<&Utf8Path>, log_file_name_prefix: Option<&str>) {
-    let biome_log_path = log_path.map_or_else(
-        || biome_fs::ensure_cache_dir().join("biome-logs"),
-        |path| path.to_path_buf(),
-    );
+fn setup_tracing_subscriber(log_path: Utf8PathBuf, log_file_name_prefix: String) {
     let appender_builder = tracing_appender::rolling::RollingFileAppender::builder();
     let file_appender = appender_builder
-        .filename_prefix(log_file_name_prefix.map_or(String::from("server.log"), Into::into))
+        .filename_prefix(log_file_name_prefix)
         .max_log_files(7)
         .rotation(Rotation::HOURLY)
-        .build(biome_log_path)
+        .build(log_path)
         .expect("Failed to start the logger for the daemon.");
 
     registry()

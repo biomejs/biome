@@ -164,17 +164,17 @@ pub(crate) fn parse_font_family_name(p: &mut CssParser) -> ParsedSyntax {
         parse_string(p)
     } else {
         let m = p.start();
-        CssCustomIdentifierList.parse_list(p);
+        CssCustomIdentifierSpaceSeparatedList.parse_list(p);
         Present(m.complete(p, CSS_FONT_FAMILY_NAME))
     }
 }
 
-struct CssCustomIdentifierList;
+struct CssCustomIdentifierSpaceSeparatedList;
 
-impl ParseNodeList for CssCustomIdentifierList {
+impl ParseNodeList for CssCustomIdentifierSpaceSeparatedList {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
-    const LIST_KIND: Self::Kind = CSS_CUSTOM_IDENTIFIER_LIST;
+    const LIST_KIND: Self::Kind = CSS_CUSTOM_IDENTIFIER_SPACE_SEPARATED_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         parse_custom_identifier(p, CssLexContext::Regular)
@@ -191,15 +191,15 @@ impl ParseNodeList for CssCustomIdentifierList {
     ) -> RecoveryResult {
         parsed_element.or_recover(
             p,
-            &CssCustomIdentifierListParseRecovery,
+            &CssCustomIdentifierSpaceSeparatedListParseRecovery,
             expected_non_css_wide_keyword_identifier,
         )
     }
 }
 
-struct CssCustomIdentifierListParseRecovery;
+struct CssCustomIdentifierSpaceSeparatedListParseRecovery;
 
-impl ParseRecovery for CssCustomIdentifierListParseRecovery {
+impl ParseRecovery for CssCustomIdentifierSpaceSeparatedListParseRecovery {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
     const RECOVERED_KIND: Self::Kind = CSS_BOGUS_CUSTOM_IDENTIFIER;

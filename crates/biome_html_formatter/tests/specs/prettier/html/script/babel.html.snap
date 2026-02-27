@@ -2,10 +2,20 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: html/script/babel.html
 ---
+
 # Input
 
 ```html
 <script type="text/babel" data-presets="react" data-type="module">
+import { h, 
+         render } from 'https://unpkg.com/preact?module';
+render(
+<h1>Hello World!</h1>,
+         document.body
+);
+</script>
+
+<script type="text/jsx" data-presets="react" data-type="module">
 import { h, 
          render } from 'https://unpkg.com/preact?module';
 render(
@@ -28,8 +38,19 @@ alert(1)
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,10 +1,14 @@
+@@ -1,15 +1,23 @@
  <script type="text/babel" data-presets="react" data-type="module">
+-  import { h, render } from "https://unpkg.com/preact?module";
+-  render(<h1>Hello World!</h1>, document.body);
++import { h, 
++         render } from 'https://unpkg.com/preact?module';
++render(
++<h1>Hello World!</h1>,
++         document.body
++);
+ </script>
+ 
+ <script type="text/jsx" data-presets="react" data-type="module">
 -  import { h, render } from "https://unpkg.com/preact?module";
 -  render(<h1>Hello World!</h1>, document.body);
 +import { h, 
@@ -54,6 +75,15 @@ alert(1)
 
 ```html
 <script type="text/babel" data-presets="react" data-type="module">
+import { h, 
+         render } from 'https://unpkg.com/preact?module';
+render(
+<h1>Hello World!</h1>,
+         document.body
+);
+</script>
+
+<script type="text/jsx" data-presets="react" data-type="module">
 import { h, 
          render } from 'https://unpkg.com/preact?module';
 render(

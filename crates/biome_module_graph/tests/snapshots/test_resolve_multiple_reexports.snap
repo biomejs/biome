@@ -2,6 +2,7 @@
 source: crates/biome_module_graph/tests/snap/mod.rs
 expression: content
 ---
+
 # `/src/bar.ts` (Module 3)
 
 ## Source
@@ -38,7 +39,7 @@ BindingId(0) => JsBindingData {
 ## Registered types
 
 ```
-Module TypeId(0) => value: bar
+Module TypeId(0) => string: bar
 
 Module TypeId(1) => sync Function "bar" {
   accepts: {
@@ -131,7 +132,7 @@ BindingId(0) => JsBindingData {
 ## Registered types
 
 ```
-Module TypeId(0) => value: 1
+Module TypeId(0) => number: 1
 
 Module TypeId(1) => sync Function "foo" {
   accepts: {

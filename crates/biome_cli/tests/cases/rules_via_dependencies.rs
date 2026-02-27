@@ -94,6 +94,72 @@ describe("foo", () => {
 }
 
 #[test]
+fn mocha_globals_are_not_flagged_as_undeclared() {
+    let mut console = BufferConsole::default();
+    let mut fs = TemporaryFs::new("mocha_globals_are_not_flagged_as_undeclared");
+    fs.create_file(
+        "package.json",
+        r#"{
+    "dependencies": {
+        "mocha": "10.0.0"
+    }
+}
+"#,
+    );
+
+    // Exercise globals from the BDD interface (describe, it, before/after hooks,
+    // aliases and pending variants) and the TDD interface (suite, test, setup/teardown
+    // hooks) so that none of them are reported as undeclared variables.
+    let content = r#"
+// BDD interface
+describe("bdd suite", () => {
+    context("a context block", () => {
+        before(() => {});
+        after(() => {});
+        beforeEach(() => {});
+        afterEach(() => {});
+
+        it("passes", () => {});
+        specify("also passes", () => {});
+
+        xit("is pending", () => {});
+        xspecify("also pending", () => {});
+    });
+
+    xdescribe("pending suite", () => {});
+    xcontext("pending context", () => {});
+});
+
+// TDD interface
+suite("tdd suite", () => {
+    suiteSetup(() => {});
+    suiteTeardown(() => {});
+    setup(() => {});
+    teardown(() => {});
+
+    test("passes", () => {});
+});
+    "#;
+    fs.create_file("test.js", content);
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["lint", fs.cli_path()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "mocha_globals_are_not_flagged_as_undeclared",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn enables_rules_via_dependencies_but_disable_rule_from_config() {
     let mut console = BufferConsole::default();
     let mut fs = TemporaryFs::new("enables_rules_via_dependencies_but_disable_rule_from_config");

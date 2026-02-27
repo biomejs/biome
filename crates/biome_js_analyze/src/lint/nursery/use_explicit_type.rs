@@ -331,6 +331,7 @@ declare_lint_rule! {
             RuleSource::EslintTypeScript("explicit-function-return-type").inspired(),
             RuleSource::EslintTypeScript("explicit-module-boundary-types").inspired(),
         ],
+        issue_number: Some("2017"),
     }
 }
 

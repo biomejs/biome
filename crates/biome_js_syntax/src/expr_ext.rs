@@ -12,7 +12,7 @@ use crate::{
     JsObjectExpression, JsPostUpdateExpression, JsPreUpdateExpression, JsReferenceIdentifier,
     JsRegexLiteralExpression, JsStaticMemberExpression, JsStringLiteralExpression, JsSyntaxKind,
     JsSyntaxNode, JsSyntaxToken, JsTemplateChunkElement, JsTemplateExpression, JsUnaryExpression,
-    JsWhileStatement, OperatorPrecedence, T, TsStringLiteralType, inner_string_text,
+    JsWhileStatement, OperatorPrecedence, TsStringLiteralType, inner_string_text,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, NodeOrToken, SyntaxNodeCast, SyntaxResult, TextRange,
@@ -915,16 +915,18 @@ impl AnyJsExpression {
 
     /// This function checks if a call expressions has one of the following members:
     ///
-    /// - `it.(only|skip|todo|fails|failing|concurrent|sequential)`
-    /// - `it.(only|skip|todo|fails|failing|concurrent|sequential).(only|skip|todo|fails|failing|concurrent|sequential)`
-    /// - `test.(only|skip|todo|fails|failing|concurrent|sequential)`
-    /// - `test.(only|skip|todo|fails|failing|concurrent|sequential).(only|skip|todo|fails|failing|concurrent|sequential)`
-    /// - `describe.(only|skip|todo|shuffle|concurrent|sequential)`
-    /// - `describe.(only|skip|todo|shuffle|concurrent|sequential).(only|skip|todo|shuffle|concurrent|sequential)`
+    /// - `it.(only|skip|fixme|todo|fails|failing|concurrent|sequential)`
+    /// - `it.(only|skip|fixme|todo|fails|failing|concurrent|sequential).(only|skip|fixme|todo|fails|failing|concurrent|sequential)`
+    /// - `test.(only|skip|fixme|todo|fails|failing|concurrent|sequential)`
+    /// - `test.(only|skip|fixme|todo|fails|failing|concurrent|sequential).(only|skip|fixme|todo|fails|failing|concurrent|sequential)`
+    /// - `describe.(only|skip|fixme|todo|shuffle|concurrent|sequential)`
+    /// - `describe.(only|skip|fixme|todo|shuffle|concurrent|sequential).(only|skip|fixme|todo|shuffle|concurrent|sequential)`
+    /// - `test.step`
+    /// - `test.step.(skip|fixme)`
     /// - `test.describe`
-    /// - `test.describe.(only|skip)`
+    /// - `test.describe.(only|skip|fixme)`
     /// - `test.describe.(parallel|serial)`
-    /// - `test.describe.(parallel|serial).only`
+    /// - `test.describe.(parallel|serial).(only|skip|fixme)`
     /// - `skip`
     /// - `xit`
     /// - `xdescribe`
@@ -961,11 +963,19 @@ impl AnyJsExpression {
         match first {
             Some("describe") => match second {
                 None => true,
-                Some("concurrent" | "sequential" | "only" | "skip" | "todo" | "shuffle") => {
+                Some(
+                    "concurrent" | "sequential" | "only" | "skip" | "fixme" | "todo" | "shuffle",
+                ) => {
                     matches!(
                         third,
                         None | Some(
-                            "concurrent" | "sequential" | "only" | "skip" | "todo" | "shuffle",
+                            "concurrent"
+                                | "sequential"
+                                | "only"
+                                | "skip"
+                                | "fixme"
+                                | "todo"
+                                | "shuffle",
                         )
                     )
                 }
@@ -973,9 +983,14 @@ impl AnyJsExpression {
             },
             Some("it" | "test") => match second {
                 None => true,
-                Some("step") => third.is_none(),
+                Some("step") => match third {
+                    None => true,
+                    Some("skip" | "fixme") => fourth.is_none(),
+                    _ => false,
+                },
                 Some(
-                    "concurrent" | "sequential" | "only" | "skip" | "todo" | "fails" | "failing",
+                    "concurrent" | "sequential" | "only" | "skip" | "fixme" | "todo" | "fails"
+                    | "failing",
                 ) => matches!(
                     third,
                     None | Some(
@@ -983,6 +998,7 @@ impl AnyJsExpression {
                             | "sequential"
                             | "only"
                             | "skip"
+                            | "fixme"
                             | "todo"
                             | "fails"
                             | "failing",
@@ -990,10 +1006,10 @@ impl AnyJsExpression {
                 ),
                 Some("describe") => match third {
                     None => true,
-                    Some("only" | "skip") => fourth.is_none(),
+                    Some("only" | "skip" | "fixme") => fourth.is_none(),
                     Some("parallel" | "serial") => match fourth {
                         None => true,
-                        Some("only") => fifth.is_none(),
+                        Some("only" | "skip" | "fixme") => fifth.is_none(),
                         _ => false,
                     },
                     _ => false,
@@ -1345,11 +1361,29 @@ impl AnyJsExpression {
             Self::TsNonNullAssertionExpression(expression) => expression.expression().ok(),
             Self::TsTypeAssertionExpression(expression) => expression.expression().ok(),
             Self::TsInstantiationExpression(expression) => expression.expression().ok(),
+            Self::JsSequenceExpression(expression) => expression.right().ok(),
             _ => return Some(self.clone()),
         })
         .as_ref()
         .and_then(Self::inner_expression)
     }
+}
+
+/// Returns `true` if this node is a transparent wrapper expression.
+///
+/// A transparent wrapper expression wraps another expression without
+/// affecting the result of the expression.
+pub fn is_transparent_expression_wrapper(node: &JsSyntaxNode) -> bool {
+    matches!(
+        node.kind(),
+        JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION
+            | JsSyntaxKind::JS_SEQUENCE_EXPRESSION
+            | JsSyntaxKind::TS_AS_EXPRESSION
+            | JsSyntaxKind::TS_SATISFIES_EXPRESSION
+            | JsSyntaxKind::TS_NON_NULL_ASSERTION_EXPRESSION
+            | JsSyntaxKind::TS_TYPE_ASSERTION_EXPRESSION
+            | JsSyntaxKind::TS_INSTANTIATION_EXPRESSION
+    )
 }
 
 /// Iterator that returns the callee names in "top down order".
@@ -1392,6 +1426,16 @@ impl Iterator for CalleeNamesIterator {
                 }
                 _ => None,
             },
+            JsComputedMemberExpression(member_expression) => {
+                let member = member_expression.member().ok()?;
+                if let AnyJsExpression::AnyJsLiteralExpression(lit) = &member
+                    && let Some(string_lit) = lit.as_js_string_literal_expression()
+                {
+                    self.next = member_expression.object().ok();
+                    return string_lit.inner_string_text().ok();
+                }
+                None
+            }
             _ => None,
         }
     }

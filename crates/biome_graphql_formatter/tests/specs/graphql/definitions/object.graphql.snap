@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: graphql/definitions/object.graphql
 ---
+
 # Input
 
 ```graphql
@@ -119,6 +120,7 @@ Line ending: LF
 Line width: 80
 Bracket spacing: true
 Quote style: Double Quotes
+Trailing newline: true
 -----
 
 ```graphql
@@ -172,4 +174,5 @@ type Person {
 type type implements type {
 	type: type
 }
+
 ```

@@ -4,11 +4,12 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_factory::make;
+use biome_js_syntax::JsLanguage;
 use biome_js_syntax::{
-    AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression, AnyJsMemberExpression, JsBinaryExpression, JsBinaryOperator, JsCallExpression, JsUnaryOperator, T,
+    AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression, AnyJsMemberExpression,
+    JsBinaryExpression, JsBinaryOperator, JsCallExpression, JsUnaryOperator, T,
 };
 use biome_rowan::{AstNode, BatchMutationExt, SyntaxTriviaPiece, declare_node_union};
-use biome_js_syntax::JsLanguage;
 use biome_rule_options::use_includes::UseIncludesOptions;
 
 declare_lint_rule! {
@@ -43,7 +44,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("prefer-includes").same()],
         recommended: false,
-        domains: &[RuleDomain::Project],
+        domains: &[RuleDomain::Types],
         fix_kind: FixKind::Safe,
     }
 }
@@ -260,12 +261,16 @@ impl Rule for UseIncludes {
                     make::js_call_expression(AnyJsExpression::from(new_callee), new_arguments)
                         .build();
 
-                let leading_trivia = collect_leading_trivia_for_regextest(&data.call_expression, &first_arg);
+                let leading_trivia =
+                    collect_leading_trivia_for_regextest(&data.call_expression, &first_arg);
                 new_call_expr = new_call_expr.with_leading_trivia_pieces(leading_trivia)?;
 
-                let trailing_trivia = collect_trailing_trivia_for_regextest(&data.call_expression, &object, &data.member_expression);
+                let trailing_trivia = collect_trailing_trivia_for_regextest(
+                    &data.call_expression,
+                    &object,
+                    &data.member_expression,
+                );
                 new_call_expr = new_call_expr.with_trailing_trivia_pieces(trailing_trivia)?;
-
 
                 mutation.replace_node(
                     AnyJsExpression::from(data.call_expression.clone()),
@@ -417,7 +422,6 @@ fn is_receiver_known_to_have_includes(receiver: Option<AnyJsExpression>) -> bool
         return false;
     };
 
-
     if matches!(
         receiver_expr,
         AnyJsExpression::AnyJsLiteralExpression(AnyJsLiteralExpression::JsStringLiteralExpression(
@@ -446,7 +450,9 @@ fn is_simple_regex(pattern: &str, flags: &str) -> bool {
 }
 
 // Trivia collection helpers
-fn collect_leading_trivia_for_indexof(binary_expression: &JsBinaryExpression) -> Vec<SyntaxTriviaPiece<JsLanguage>> {
+fn collect_leading_trivia_for_indexof(
+    binary_expression: &JsBinaryExpression,
+) -> Vec<SyntaxTriviaPiece<JsLanguage>> {
     let mut leading_trivia = Vec::new();
     if let Some(trivia) = binary_expression.syntax().first_leading_trivia() {
         leading_trivia.extend(trivia.pieces());
@@ -456,7 +462,9 @@ fn collect_leading_trivia_for_indexof(binary_expression: &JsBinaryExpression) ->
     leading_trivia
 }
 
-fn collect_trailing_trivia_for_indexof(binary_expression: &JsBinaryExpression) -> Vec<SyntaxTriviaPiece<JsLanguage>> {
+fn collect_trailing_trivia_for_indexof(
+    binary_expression: &JsBinaryExpression,
+) -> Vec<SyntaxTriviaPiece<JsLanguage>> {
     let mut trailing_trivia = Vec::new();
     if let Ok(left) = binary_expression.left() {
         if let Some(trivia) = left.syntax().last_trailing_trivia() {
@@ -480,7 +488,10 @@ fn collect_trailing_trivia_for_indexof(binary_expression: &JsBinaryExpression) -
     trailing_trivia
 }
 
-fn collect_leading_trivia_for_regextest(call_expression: &JsCallExpression, first_arg: &AnyJsExpression) -> Vec<SyntaxTriviaPiece<JsLanguage>> {
+fn collect_leading_trivia_for_regextest(
+    call_expression: &JsCallExpression,
+    first_arg: &AnyJsExpression,
+) -> Vec<SyntaxTriviaPiece<JsLanguage>> {
     let mut leading_trivia = Vec::new();
     if let Some(trivia) = call_expression.syntax().first_leading_trivia() {
         leading_trivia.extend(trivia.pieces());
@@ -492,7 +503,11 @@ fn collect_leading_trivia_for_regextest(call_expression: &JsCallExpression, firs
     leading_trivia
 }
 
-fn collect_trailing_trivia_for_regextest(call_expression: &JsCallExpression, object: &AnyJsExpression, member_expression: &AnyJsMemberExpression) -> Vec<SyntaxTriviaPiece<JsLanguage>> {
+fn collect_trailing_trivia_for_regextest(
+    call_expression: &JsCallExpression,
+    object: &AnyJsExpression,
+    member_expression: &AnyJsMemberExpression,
+) -> Vec<SyntaxTriviaPiece<JsLanguage>> {
     let mut trailing_trivia = Vec::new();
     if let Some(trivia) = call_expression.syntax().last_trailing_trivia() {
         trailing_trivia.extend(trivia.pieces());

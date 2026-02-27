@@ -68,7 +68,7 @@ impl biome_rowan::SyntaxKind for TailwindSyntaxKind {
     }
 
     fn is_trivia(self) -> bool {
-        matches!(self, Self::NEWLINE)
+        matches!(self, Self::NEWLINE | Self::WHITESPACE)
     }
 
     fn to_string(&self) -> Option<&'static str> {
@@ -81,10 +81,9 @@ impl TryFrom<TailwindSyntaxKind> for TriviaPieceKind {
 
     fn try_from(value: TailwindSyntaxKind) -> Result<Self, Self::Error> {
         if value.is_trivia() {
-            // We intentionally don't consider whitespace to be trivia because it's a required part of the syntax.
-            // There must be spaces between Candidates in order for tailwind to parse them.
             match value {
                 TailwindSyntaxKind::NEWLINE => Ok(Self::Newline),
+                TailwindSyntaxKind::WHITESPACE => Ok(Self::Whitespace),
                 _ => unreachable!("Not Trivia"),
             }
         } else {

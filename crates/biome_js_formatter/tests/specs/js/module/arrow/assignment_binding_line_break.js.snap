@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/module/arrow/assignment_binding_line_break.js
 ---
+
 # Input
 
 ```js
@@ -34,6 +35,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -44,6 +46,7 @@ and then a newline`;
 
 const foo = (bar) =>
 	`This is a string that's long enough to wrap and contains an interpolated value ${bar} and then a newline`;
+
 ```
 
 # Lines exceeding max width of 80 characters
@@ -70,6 +73,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -79,6 +83,7 @@ and then a newline`;
 
 const foo = bar =>
 	`This is a string that's long enough to wrap and contains an interpolated value ${bar} and then a newline`;
+
 ```
 
 # Lines exceeding max width of 80 characters

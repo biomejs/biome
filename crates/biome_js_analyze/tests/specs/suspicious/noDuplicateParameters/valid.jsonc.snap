@@ -31,5 +31,3 @@ function foo([[a, b], [c, d]]) {}
 ```cjs
 function test(a = function (a) {}) {}
 ```
-
-

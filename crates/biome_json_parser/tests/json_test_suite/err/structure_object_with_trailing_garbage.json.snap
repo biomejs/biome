@@ -83,5 +83,3 @@ structure_object_with_trailing_garbage.json:1:13 parse ━━━━━━━━�
   i Use an array for a sequence of values: `[1, 2]`
   
 ```
-
-

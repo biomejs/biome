@@ -2,6 +2,7 @@
 source: crates/biome_module_graph/tests/snap/mod.rs
 expression: content
 ---
+
 # `/src/index.ts`
 
 ## Source
@@ -120,7 +121,7 @@ Module TypeId(16) => Module(0) TypeId(18)
 
 Module TypeId(17) => Module(0) TypeId(22)
 
-Module TypeId(18) => value: foo
+Module TypeId(18) => string: foo
 
 Module TypeId(19) => sync Function "fooGetter" {
   accepts: {

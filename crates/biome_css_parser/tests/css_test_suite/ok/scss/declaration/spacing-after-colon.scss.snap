@@ -1,0 +1,479 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+.test {
+  font:bold {
+    color: red;
+  }
+
+  font: bold {
+    family: serif;
+  }
+
+  font:
+  bold {
+    family: sans-serif;
+  }
+
+  font:/*comment*/bold {
+    color: blue;
+  }
+
+  font:/*comment*/ bold {
+    family: monospace;
+  }
+
+  font:/*comment*/
+  bold {
+    family: fantasy;
+  }
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..1 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@1..6 "test" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@6..7 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssNestedQualifiedRule {
+                        prelude: CssRelativeSelectorList [
+                            CssRelativeSelector {
+                                combinator: missing (optional),
+                                selector: CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: CssTypeSelector {
+                                        namespace: missing (optional),
+                                        ident: CssIdentifier {
+                                            value_token: IDENT@7..14 "font" [Newline("\n"), Whitespace("  ")] [],
+                                        },
+                                    },
+                                    sub_selectors: CssSubSelectorList [
+                                        CssPseudoClassSelector {
+                                            colon_token: COLON@14..15 ":" [] [],
+                                            class: CssPseudoClassIdentifier {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@15..20 "bold" [] [Whitespace(" ")],
+                                                },
+                                            },
+                                        },
+                                    ],
+                                },
+                            },
+                        ],
+                        block: CssDeclarationOrRuleBlock {
+                            l_curly_token: L_CURLY@20..21 "{" [] [],
+                            items: CssDeclarationOrRuleList [
+                                CssDeclarationWithSemicolon {
+                                    declaration: CssDeclaration {
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@21..31 "color" [Newline("\n"), Whitespace("    ")] [],
+                                            },
+                                            colon_token: COLON@31..33 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@33..36 "red" [] [],
+                                                },
+                                            ],
+                                        },
+                                        important: missing (optional),
+                                    },
+                                    semicolon_token: SEMICOLON@36..37 ";" [] [],
+                                },
+                            ],
+                            r_curly_token: R_CURLY@37..41 "}" [Newline("\n"), Whitespace("  ")] [],
+                        },
+                    },
+                    ScssNestingDeclaration {
+                        name: CssIdentifier {
+                            value_token: IDENT@41..49 "font" [Newline("\n"), Newline("\n"), Whitespace("  ")] [],
+                        },
+                        colon_token: COLON@49..51 ":" [] [Whitespace(" ")],
+                        value: CssGenericComponentValueList [
+                            CssIdentifier {
+                                value_token: IDENT@51..56 "bold" [] [Whitespace(" ")],
+                            },
+                        ],
+                        block: CssDeclarationOrRuleBlock {
+                            l_curly_token: L_CURLY@56..57 "{" [] [],
+                            items: CssDeclarationOrRuleList [
+                                CssDeclarationWithSemicolon {
+                                    declaration: CssDeclaration {
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@57..68 "family" [Newline("\n"), Whitespace("    ")] [],
+                                            },
+                                            colon_token: COLON@68..70 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@70..75 "serif" [] [],
+                                                },
+                                            ],
+                                        },
+                                        important: missing (optional),
+                                    },
+                                    semicolon_token: SEMICOLON@75..76 ";" [] [],
+                                },
+                            ],
+                            r_curly_token: R_CURLY@76..80 "}" [Newline("\n"), Whitespace("  ")] [],
+                        },
+                    },
+                    ScssNestingDeclaration {
+                        name: CssIdentifier {
+                            value_token: IDENT@80..88 "font" [Newline("\n"), Newline("\n"), Whitespace("  ")] [],
+                        },
+                        colon_token: COLON@88..89 ":" [] [],
+                        value: CssGenericComponentValueList [
+                            CssIdentifier {
+                                value_token: IDENT@89..97 "bold" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                            },
+                        ],
+                        block: CssDeclarationOrRuleBlock {
+                            l_curly_token: L_CURLY@97..98 "{" [] [],
+                            items: CssDeclarationOrRuleList [
+                                CssDeclarationWithSemicolon {
+                                    declaration: CssDeclaration {
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@98..109 "family" [Newline("\n"), Whitespace("    ")] [],
+                                            },
+                                            colon_token: COLON@109..111 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@111..121 "sans-serif" [] [],
+                                                },
+                                            ],
+                                        },
+                                        important: missing (optional),
+                                    },
+                                    semicolon_token: SEMICOLON@121..122 ";" [] [],
+                                },
+                            ],
+                            r_curly_token: R_CURLY@122..126 "}" [Newline("\n"), Whitespace("  ")] [],
+                        },
+                    },
+                    CssNestedQualifiedRule {
+                        prelude: CssRelativeSelectorList [
+                            CssRelativeSelector {
+                                combinator: missing (optional),
+                                selector: CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: CssTypeSelector {
+                                        namespace: missing (optional),
+                                        ident: CssIdentifier {
+                                            value_token: IDENT@126..134 "font" [Newline("\n"), Newline("\n"), Whitespace("  ")] [],
+                                        },
+                                    },
+                                    sub_selectors: CssSubSelectorList [
+                                        CssPseudoClassSelector {
+                                            colon_token: COLON@134..146 ":" [] [Comments("/*comment*/")],
+                                            class: CssPseudoClassIdentifier {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@146..151 "bold" [] [Whitespace(" ")],
+                                                },
+                                            },
+                                        },
+                                    ],
+                                },
+                            },
+                        ],
+                        block: CssDeclarationOrRuleBlock {
+                            l_curly_token: L_CURLY@151..152 "{" [] [],
+                            items: CssDeclarationOrRuleList [
+                                CssDeclarationWithSemicolon {
+                                    declaration: CssDeclaration {
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@152..162 "color" [Newline("\n"), Whitespace("    ")] [],
+                                            },
+                                            colon_token: COLON@162..164 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@164..168 "blue" [] [],
+                                                },
+                                            ],
+                                        },
+                                        important: missing (optional),
+                                    },
+                                    semicolon_token: SEMICOLON@168..169 ";" [] [],
+                                },
+                            ],
+                            r_curly_token: R_CURLY@169..173 "}" [Newline("\n"), Whitespace("  ")] [],
+                        },
+                    },
+                    ScssNestingDeclaration {
+                        name: CssIdentifier {
+                            value_token: IDENT@173..181 "font" [Newline("\n"), Newline("\n"), Whitespace("  ")] [],
+                        },
+                        colon_token: COLON@181..194 ":" [] [Comments("/*comment*/"), Whitespace(" ")],
+                        value: CssGenericComponentValueList [
+                            CssIdentifier {
+                                value_token: IDENT@194..199 "bold" [] [Whitespace(" ")],
+                            },
+                        ],
+                        block: CssDeclarationOrRuleBlock {
+                            l_curly_token: L_CURLY@199..200 "{" [] [],
+                            items: CssDeclarationOrRuleList [
+                                CssDeclarationWithSemicolon {
+                                    declaration: CssDeclaration {
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@200..211 "family" [Newline("\n"), Whitespace("    ")] [],
+                                            },
+                                            colon_token: COLON@211..213 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@213..222 "monospace" [] [],
+                                                },
+                                            ],
+                                        },
+                                        important: missing (optional),
+                                    },
+                                    semicolon_token: SEMICOLON@222..223 ";" [] [],
+                                },
+                            ],
+                            r_curly_token: R_CURLY@223..227 "}" [Newline("\n"), Whitespace("  ")] [],
+                        },
+                    },
+                    ScssNestingDeclaration {
+                        name: CssIdentifier {
+                            value_token: IDENT@227..235 "font" [Newline("\n"), Newline("\n"), Whitespace("  ")] [],
+                        },
+                        colon_token: COLON@235..247 ":" [] [Comments("/*comment*/")],
+                        value: CssGenericComponentValueList [
+                            CssIdentifier {
+                                value_token: IDENT@247..255 "bold" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                            },
+                        ],
+                        block: CssDeclarationOrRuleBlock {
+                            l_curly_token: L_CURLY@255..256 "{" [] [],
+                            items: CssDeclarationOrRuleList [
+                                CssDeclarationWithSemicolon {
+                                    declaration: CssDeclaration {
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@256..267 "family" [Newline("\n"), Whitespace("    ")] [],
+                                            },
+                                            colon_token: COLON@267..269 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@269..276 "fantasy" [] [],
+                                                },
+                                            ],
+                                        },
+                                        important: missing (optional),
+                                    },
+                                    semicolon_token: SEMICOLON@276..277 ";" [] [],
+                                },
+                            ],
+                            r_curly_token: R_CURLY@277..281 "}" [Newline("\n"), Whitespace("  ")] [],
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@281..283 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@283..284 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..284
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..283
+    0: CSS_QUALIFIED_RULE@0..283
+      0: CSS_SELECTOR_LIST@0..6
+        0: CSS_COMPOUND_SELECTOR@0..6
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..6
+            0: CSS_CLASS_SELECTOR@0..6
+              0: DOT@0..1 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@1..6
+                0: IDENT@1..6 "test" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@6..283
+        0: L_CURLY@6..7 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@7..281
+          0: CSS_NESTED_QUALIFIED_RULE@7..41
+            0: CSS_RELATIVE_SELECTOR_LIST@7..20
+              0: CSS_RELATIVE_SELECTOR@7..20
+                0: (empty)
+                1: CSS_COMPOUND_SELECTOR@7..20
+                  0: CSS_NESTED_SELECTOR_LIST@7..7
+                  1: CSS_TYPE_SELECTOR@7..14
+                    0: (empty)
+                    1: CSS_IDENTIFIER@7..14
+                      0: IDENT@7..14 "font" [Newline("\n"), Whitespace("  ")] []
+                  2: CSS_SUB_SELECTOR_LIST@14..20
+                    0: CSS_PSEUDO_CLASS_SELECTOR@14..20
+                      0: COLON@14..15 ":" [] []
+                      1: CSS_PSEUDO_CLASS_IDENTIFIER@15..20
+                        0: CSS_IDENTIFIER@15..20
+                          0: IDENT@15..20 "bold" [] [Whitespace(" ")]
+            1: CSS_DECLARATION_OR_RULE_BLOCK@20..41
+              0: L_CURLY@20..21 "{" [] []
+              1: CSS_DECLARATION_OR_RULE_LIST@21..37
+                0: CSS_DECLARATION_WITH_SEMICOLON@21..37
+                  0: CSS_DECLARATION@21..36
+                    0: CSS_GENERIC_PROPERTY@21..36
+                      0: CSS_IDENTIFIER@21..31
+                        0: IDENT@21..31 "color" [Newline("\n"), Whitespace("    ")] []
+                      1: COLON@31..33 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@33..36
+                        0: CSS_IDENTIFIER@33..36
+                          0: IDENT@33..36 "red" [] []
+                    1: (empty)
+                  1: SEMICOLON@36..37 ";" [] []
+              2: R_CURLY@37..41 "}" [Newline("\n"), Whitespace("  ")] []
+          1: SCSS_NESTING_DECLARATION@41..80
+            0: CSS_IDENTIFIER@41..49
+              0: IDENT@41..49 "font" [Newline("\n"), Newline("\n"), Whitespace("  ")] []
+            1: COLON@49..51 ":" [] [Whitespace(" ")]
+            2: CSS_GENERIC_COMPONENT_VALUE_LIST@51..56
+              0: CSS_IDENTIFIER@51..56
+                0: IDENT@51..56 "bold" [] [Whitespace(" ")]
+            3: CSS_DECLARATION_OR_RULE_BLOCK@56..80
+              0: L_CURLY@56..57 "{" [] []
+              1: CSS_DECLARATION_OR_RULE_LIST@57..76
+                0: CSS_DECLARATION_WITH_SEMICOLON@57..76
+                  0: CSS_DECLARATION@57..75
+                    0: CSS_GENERIC_PROPERTY@57..75
+                      0: CSS_IDENTIFIER@57..68
+                        0: IDENT@57..68 "family" [Newline("\n"), Whitespace("    ")] []
+                      1: COLON@68..70 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@70..75
+                        0: CSS_IDENTIFIER@70..75
+                          0: IDENT@70..75 "serif" [] []
+                    1: (empty)
+                  1: SEMICOLON@75..76 ";" [] []
+              2: R_CURLY@76..80 "}" [Newline("\n"), Whitespace("  ")] []
+          2: SCSS_NESTING_DECLARATION@80..126
+            0: CSS_IDENTIFIER@80..88
+              0: IDENT@80..88 "font" [Newline("\n"), Newline("\n"), Whitespace("  ")] []
+            1: COLON@88..89 ":" [] []
+            2: CSS_GENERIC_COMPONENT_VALUE_LIST@89..97
+              0: CSS_IDENTIFIER@89..97
+                0: IDENT@89..97 "bold" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+            3: CSS_DECLARATION_OR_RULE_BLOCK@97..126
+              0: L_CURLY@97..98 "{" [] []
+              1: CSS_DECLARATION_OR_RULE_LIST@98..122
+                0: CSS_DECLARATION_WITH_SEMICOLON@98..122
+                  0: CSS_DECLARATION@98..121
+                    0: CSS_GENERIC_PROPERTY@98..121
+                      0: CSS_IDENTIFIER@98..109
+                        0: IDENT@98..109 "family" [Newline("\n"), Whitespace("    ")] []
+                      1: COLON@109..111 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@111..121
+                        0: CSS_IDENTIFIER@111..121
+                          0: IDENT@111..121 "sans-serif" [] []
+                    1: (empty)
+                  1: SEMICOLON@121..122 ";" [] []
+              2: R_CURLY@122..126 "}" [Newline("\n"), Whitespace("  ")] []
+          3: CSS_NESTED_QUALIFIED_RULE@126..173
+            0: CSS_RELATIVE_SELECTOR_LIST@126..151
+              0: CSS_RELATIVE_SELECTOR@126..151
+                0: (empty)
+                1: CSS_COMPOUND_SELECTOR@126..151
+                  0: CSS_NESTED_SELECTOR_LIST@126..126
+                  1: CSS_TYPE_SELECTOR@126..134
+                    0: (empty)
+                    1: CSS_IDENTIFIER@126..134
+                      0: IDENT@126..134 "font" [Newline("\n"), Newline("\n"), Whitespace("  ")] []
+                  2: CSS_SUB_SELECTOR_LIST@134..151
+                    0: CSS_PSEUDO_CLASS_SELECTOR@134..151
+                      0: COLON@134..146 ":" [] [Comments("/*comment*/")]
+                      1: CSS_PSEUDO_CLASS_IDENTIFIER@146..151
+                        0: CSS_IDENTIFIER@146..151
+                          0: IDENT@146..151 "bold" [] [Whitespace(" ")]
+            1: CSS_DECLARATION_OR_RULE_BLOCK@151..173
+              0: L_CURLY@151..152 "{" [] []
+              1: CSS_DECLARATION_OR_RULE_LIST@152..169
+                0: CSS_DECLARATION_WITH_SEMICOLON@152..169
+                  0: CSS_DECLARATION@152..168
+                    0: CSS_GENERIC_PROPERTY@152..168
+                      0: CSS_IDENTIFIER@152..162
+                        0: IDENT@152..162 "color" [Newline("\n"), Whitespace("    ")] []
+                      1: COLON@162..164 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@164..168
+                        0: CSS_IDENTIFIER@164..168
+                          0: IDENT@164..168 "blue" [] []
+                    1: (empty)
+                  1: SEMICOLON@168..169 ";" [] []
+              2: R_CURLY@169..173 "}" [Newline("\n"), Whitespace("  ")] []
+          4: SCSS_NESTING_DECLARATION@173..227
+            0: CSS_IDENTIFIER@173..181
+              0: IDENT@173..181 "font" [Newline("\n"), Newline("\n"), Whitespace("  ")] []
+            1: COLON@181..194 ":" [] [Comments("/*comment*/"), Whitespace(" ")]
+            2: CSS_GENERIC_COMPONENT_VALUE_LIST@194..199
+              0: CSS_IDENTIFIER@194..199
+                0: IDENT@194..199 "bold" [] [Whitespace(" ")]
+            3: CSS_DECLARATION_OR_RULE_BLOCK@199..227
+              0: L_CURLY@199..200 "{" [] []
+              1: CSS_DECLARATION_OR_RULE_LIST@200..223
+                0: CSS_DECLARATION_WITH_SEMICOLON@200..223
+                  0: CSS_DECLARATION@200..222
+                    0: CSS_GENERIC_PROPERTY@200..222
+                      0: CSS_IDENTIFIER@200..211
+                        0: IDENT@200..211 "family" [Newline("\n"), Whitespace("    ")] []
+                      1: COLON@211..213 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@213..222
+                        0: CSS_IDENTIFIER@213..222
+                          0: IDENT@213..222 "monospace" [] []
+                    1: (empty)
+                  1: SEMICOLON@222..223 ";" [] []
+              2: R_CURLY@223..227 "}" [Newline("\n"), Whitespace("  ")] []
+          5: SCSS_NESTING_DECLARATION@227..281
+            0: CSS_IDENTIFIER@227..235
+              0: IDENT@227..235 "font" [Newline("\n"), Newline("\n"), Whitespace("  ")] []
+            1: COLON@235..247 ":" [] [Comments("/*comment*/")]
+            2: CSS_GENERIC_COMPONENT_VALUE_LIST@247..255
+              0: CSS_IDENTIFIER@247..255
+                0: IDENT@247..255 "bold" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+            3: CSS_DECLARATION_OR_RULE_BLOCK@255..281
+              0: L_CURLY@255..256 "{" [] []
+              1: CSS_DECLARATION_OR_RULE_LIST@256..277
+                0: CSS_DECLARATION_WITH_SEMICOLON@256..277
+                  0: CSS_DECLARATION@256..276
+                    0: CSS_GENERIC_PROPERTY@256..276
+                      0: CSS_IDENTIFIER@256..267
+                        0: IDENT@256..267 "family" [Newline("\n"), Whitespace("    ")] []
+                      1: COLON@267..269 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@269..276
+                        0: CSS_IDENTIFIER@269..276
+                          0: IDENT@269..276 "fantasy" [] []
+                    1: (empty)
+                  1: SEMICOLON@276..277 ";" [] []
+              2: R_CURLY@277..281 "}" [Newline("\n"), Whitespace("  ")] []
+        2: R_CURLY@281..283 "}" [Newline("\n")] []
+  2: EOF@283..284 "" [Newline("\n")] []
+
+```

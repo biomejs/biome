@@ -4,7 +4,7 @@ const userName = 'testUser';
 const count = 10;
 const nonSecret = "hello world"
 const nonSecretLong = "hello world, this is a looong string which I needed to create for some reason"
-const dbUrl = `postgres://user:${process.env.DB_PASSWORD}@example.com:5432/dbname`;
+const dbUrl = `postgres://user:${process.env.ACME_DB_CREDS}@example.com:5432/dbname`;
 const NOT_A_SECRET = "I'm not a secret, I think";
 const NOT_A_SECRET_TEMPLATE = `A template that isn't a secret. ${1+1} = 2`;
 const CSS_CLASSNAME = "hey-it-s-a-css-class-not-a-secret and-neither-this-one";
@@ -34,6 +34,13 @@ const tailwindConfigOptions = {
   }
 }
 export const url = 'https://www.nytimes.com/2024/03/05/arts/design/pritzker-prize-riken-yamamoto-architecture.html'
+
+// CamelCase/PascalCase identifiers - should NOT trigger (fix for #8809, #7985, #8136)
+const paddingBottomValue = "paddingBottom";
+const bgColorProperty = "backgroundColor";
+const rejectionHandler = "unhandledRejection";
+const exceptionType = "uncaughtException";
+const logGroupName = "IngestGatewayLogGroup";
 
 // TODO: Remove these false positives, they unfortunately hurt the user experience.
 // const NAMESPACE_CLASSNAME = 'Validation.JSONSchemaValidationUtilsImplFactory';

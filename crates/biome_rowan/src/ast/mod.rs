@@ -276,6 +276,15 @@ pub trait AstNode: Clone {
         Self::cast(self.into_syntax().append_trivia_pieces(trivia)?)
     }
 
+    /// Returns a new version of this node with *all* trivia stripped.
+    fn trim_comments_and_trivia(self) -> Option<Self> {
+        Self::cast(
+            self.into_syntax()
+                .with_leading_trivia_pieces([])?
+                .with_trailing_trivia_pieces([])?,
+        )
+    }
+
     /// Return a new version of this node without leading and trailing newlines and whitespaces.
     fn trim_trivia(self) -> Option<Self> {
         Self::cast(

@@ -18,6 +18,7 @@ pub mod grit;
 pub mod html;
 pub mod javascript;
 pub mod json;
+pub mod markdown;
 pub mod max_size;
 mod overrides;
 pub mod vcs;
@@ -34,18 +35,19 @@ use crate::graphql::{GraphqlFormatterConfiguration, GraphqlLinterConfiguration};
 pub use crate::grit::{GritConfiguration, grit_configuration};
 use crate::javascript::{JsFormatterConfiguration, JsLinterConfiguration};
 use crate::json::{JsonFormatterConfiguration, JsonLinterConfiguration};
+pub use crate::markdown::{MarkdownConfiguration, markdown_configuration};
 use crate::max_size::MaxSize;
 use crate::vcs::{VcsConfiguration, vcs_configuration};
 pub use analyzer::{
     LinterConfiguration, RuleConfiguration, RuleFixConfiguration, RulePlainConfiguration,
     RuleWithFixOptions, RuleWithOptions, Rules, linter_configuration,
 };
+use biome_analyze::ExtendedConfigurationProvider;
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{KeyValuePair, markup};
 use biome_deserialize::{
     Deserializable, DeserializableTypes, DeserializableValidator, DeserializableValue,
-    DeserializationContext, DeserializationDiagnostic, DeserializationVisitor, Deserialized, Text,
-    TextRange,
+    DeserializationContext, DeserializationDiagnostic, DeserializationVisitor, Text, TextRange,
 };
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_diagnostics::Severity;
@@ -66,6 +68,8 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 use std::fmt::Debug;
+use std::iter::FusedIterator;
+use std::slice::Iter;
 use std::str::FromStr;
 use std::sync::LazyLock;
 use vcs::VcsClientKind;
@@ -471,8 +475,8 @@ impl Deserializable for Schema {
                                         .with_range(range)
                                         .with_custom_severity(Severity::Information)
                                         .with_note(markup!(
-                                        {KeyValuePair("Expected", markup!({VERSION}))}
-                                        {KeyValuePair("Found", markup!({config_version_str}))}
+                                        {KeyValuePair::new("Expected", markup!({VERSION}))}
+                                        {KeyValuePair::new("Found", markup!({config_version_str}))}
                                     ))
                                         .with_note(markup!("Run the command "<Emphasis>"biome migrate"</Emphasis>" to migrate the configuration file."))
                                 )
@@ -671,16 +675,6 @@ impl biome_deserialize::Deserializable for FilesConfiguration {
     }
 }
 
-#[derive(Debug)]
-pub struct ConfigurationPayload {
-    /// The result of the deserialization
-    pub deserialized: Deserialized<Configuration>,
-    /// The path of where the `biome.json` or `biome.jsonc` file was found. This contains the file name.
-    pub configuration_file_path: Utf8PathBuf,
-    /// The base path where the external configuration in a package should be resolved from
-    pub external_resolution_base_path: Utf8PathBuf,
-}
-
 #[derive(Debug, Default, PartialEq, Clone, Eq, Hash)]
 pub enum ConfigurationPathHint {
     /// The default mode, not having a configuration file is not an error.
@@ -735,5 +729,91 @@ impl ConfigurationPathHint {
                 Some(path.to_path_buf())
             }
         }
+    }
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct ConfigurationSource {
+    /// It contains [Configuration] and the folder where it was found.
+    pub source: Option<(Configuration, Option<Utf8PathBuf>)>,
+
+    /// It contains possible extended configuration. If the configuration comes from a npm module,
+    ///  its URL will be its specifier e.g. `org/core`
+    pub extended_configurations: ExtendedConfigurations,
+}
+
+impl ConfigurationSource {
+    pub fn as_configuration(&self) -> Option<&Configuration> {
+        self.source.as_ref().map(|(config, _)| config)
+    }
+
+    pub fn extended_configurations(&self) -> ExtendedConfigurationIterator<'_> {
+        ExtendedConfigurationIterator {
+            inner: self.extended_configurations.0.iter(),
+        }
+    }
+}
+
+pub struct ExtendedConfigurationIterator<'a> {
+    inner: Iter<'a, (Utf8PathBuf, Configuration)>,
+}
+
+impl<'a> Iterator for ExtendedConfigurationIterator<'a> {
+    type Item = &'a Configuration;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.inner.next().map(|(_, config)| config)
+    }
+}
+
+impl FusedIterator for ExtendedConfigurationIterator<'_> {}
+
+impl DoubleEndedIterator for ExtendedConfigurationIterator<'_> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        self.inner.next_back().map(|(_, config)| config)
+    }
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct ExtendedConfigurations(Vec<(Utf8PathBuf, Configuration)>);
+
+impl<Path> From<Vec<(Path, Configuration)>> for ExtendedConfigurations
+where
+    Path: Into<Utf8PathBuf>,
+{
+    fn from(value: Vec<(Path, Configuration)>) -> Self {
+        Self(
+            value
+                .into_iter()
+                .map(|(path, config)| (path.into(), config))
+                .collect(),
+        )
+    }
+}
+
+impl ConfigurationSource {
+    pub fn source(&self) -> Option<Configuration> {
+        self.source.as_ref().map(|source| {
+            let (config, _) = source.clone();
+            config
+        })
+    }
+
+    pub fn source_path(&self) -> Option<Utf8PathBuf> {
+        self.source.as_ref().and_then(|source| {
+            let (_, path) = source.clone();
+            path.map(|p| p.as_path().to_path_buf())
+        })
+    }
+}
+
+impl ExtendedConfigurationProvider for ConfigurationSource {
+    fn any_extended_starts_with_catch_all(&self) -> bool {
+        self.extended_configurations().any(|c| {
+            c.files
+                .as_ref()
+                .and_then(|files| files.includes.as_deref())
+                .is_some_and(|globs| globs.first().is_some_and(|glob| glob.as_str() == "**"))
+        })
     }
 }

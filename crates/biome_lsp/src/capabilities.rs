@@ -1,7 +1,7 @@
 use biome_analyze::{SUPPRESSION_INLINE_ACTION_CATEGORY, SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY};
 use biome_line_index::WideEncoding;
 use biome_lsp_converters::{PositionEncoding, negotiated_encoding};
-use tower_lsp_server::lsp_types::{
+use tower_lsp_server::ls_types::{
     ClientCapabilities, CodeActionKind, CodeActionOptions, CodeActionProviderCapability,
     DocumentOnTypeFormattingOptions, OneOf, PositionEncodingKind, ServerCapabilities,
     TextDocumentSyncCapability, TextDocumentSyncKind, WorkspaceFoldersServerCapabilities,

@@ -26,5 +26,7 @@ invalid-has-name.vue:2:8 lint/nursery/useVueMultiWordComponentNames ━━━━
   
   i Rename the component to have 2 or more words (e.g. "FooItem", or "BarView").
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```

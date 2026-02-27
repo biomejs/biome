@@ -76,6 +76,8 @@ a {
 
 ```
 
+_Note: The parser emitted 2 diagnostics which are not shown here._
+
 # Diagnostics
 ```
 invalid.css:4:12 lint/correctness/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

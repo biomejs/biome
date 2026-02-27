@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/module/object/property_key.js
 ---
+
 # Input
 
 ```js
@@ -42,6 +43,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -56,4 +58,5 @@ const foo = {
 	"実用文・会話文": "長文読解",
 	"実用文･会話文": "長文読解",
 };
+
 ```

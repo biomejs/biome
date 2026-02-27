@@ -11,3 +11,5 @@ foo.void = bar;
 delete foo;
 
 ```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._

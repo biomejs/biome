@@ -40,17 +40,17 @@ declare_lint_rule! {
     /// - **EC Private Key**: Key blocks that start with `-----BEGIN EC PRIVATE KEY-----`
     /// - **PGP Private Key Block**: Key blocks that start with `-----BEGIN PGP PRIVATE KEY BLOCK-----`
     ///
-    /// ## Entropy Check
+    /// ### Entropy Check
     ///
-    /// In addition to detecting the above patterns, we also employ a **string entropy checker** to catch potential secrets based on their entropy (randomness). The entropy checker is configurable through the `Options`, allowing customization of thresholds for string entropy to fine-tune detection and minimize false positives.
+    /// In addition to detecting the above patterns, we also employ a **string entropy checker** to catch potential secrets based on their entropy (randomness). The entropy checker is configurable through the `entropyThreshold` option (see below), allowing customization of thresholds for string entropy to fine-tune detection and minimize false positives.
     ///
-    /// ## Disclaimer
+    /// ### Disclaimer
     ///
     /// While this rule helps with most common cases, it is not intended to handle all of them.
     /// Therefore, always review your code carefully and consider implementing additional security
     /// measures, such as automated secret scanning in your CI/CD and git pipeline.
     ///
-    /// ## Recommendations
+    /// ### Recommendations
     ///
     /// Some recommended tools for more comprehensive secret detection include:
     /// - [SonarQube](https://www.sonarsource.com/products/sonarqube/downloads/): Clean Code scanning solution with a secret scanner (Community version).
@@ -70,6 +70,39 @@ declare_lint_rule! {
     ///
     /// ```js
     /// const nonSecret = "hello world";
+    /// ```
+    ///
+    /// ## Options
+    ///
+    /// The rule supports the following option:
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "entropyThreshold": 41
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ### `entropyThreshold`
+    ///
+    /// Sets the sensitivity threshold for the high‑entropy detection pass.
+    /// The underlying algorithm computes an adjusted entropy score for string tokens; if the score
+    /// exceeds `entropyThreshold / 10` (e.g. `41` => `4.1`), and the string does not match any known
+    /// safe pattern, it is reported as a potential secret.
+    ///
+    /// Increase the value to reduce false positives (stricter: fewer strings flagged).
+    /// Decrease the value to increase sensitivity (more strings flagged).
+    ///
+    /// > **Default:** `41`
+    ///
+    /// Example raising the threshold (fewer detections):
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "entropyThreshold": 50
+    ///   }
+    /// }
     /// ```
     pub NoSecrets {
         version: "1.9.0",
@@ -385,11 +418,18 @@ Uses Shannon Entropy as a base algorithm, then adds "boosts" for special pattern
 For example, Continuous mixed cases (lIkE tHiS) are more likely to contribute to a higher score than single cases.
 Symbols also contribute highly to secrets.
 
-TODO: This needs work. False positives/negatives are highlighted in valid.js and invalid.js.
+Key insight: CamelCase/PascalCase has a predictable pattern where uppercase letters start "words"
+and are followed by runs of lowercase letters. Random/suspicious strings have more frequent
+case switches with shorter runs between them.
+
+We measure "average run length" - the average number of same-case letters before a switch.
+CamelCase has longer runs (e.g., "Gateway" = 1 upper + 6 lower = avg 3.5)
+Random alternating has short runs (e.g., "aBcDeF" = all runs of length 1)
 
 References:
 - ChatGPT chat: https://chatgpt.com/share/670370bf-3e18-8011-8454-f3bd01be0319
 - Original paper for Shannon Entropy: https://ieeexplore.ieee.org/abstract/document/6773024/
+- Fix for false positives on CamelCase: https://github.com/biomejs/biome/issues/8809
 */
 fn calculate_entropy_with_case_and_classes(data: &str) -> f64 {
     let shannon_entropy = shannon_entropy(data);
@@ -401,25 +441,26 @@ fn calculate_entropy_with_case_and_classes(data: &str) -> f64 {
     let mut digit_count = 0;
     let mut symbol_count = 0;
     let mut case_switches = 0;
-    let mut previous_char_was_upper = false;
+    let mut previous_was_upper: Option<bool> = None;
 
-    // Letter classification and case switching
-    for (i, c) in data.chars().enumerate() {
+    for c in data.chars() {
         if c.is_ascii_alphabetic() {
             letter_count += 1;
-            if c.is_uppercase() {
+            let is_upper = c.is_uppercase();
+
+            if is_upper {
                 uppercase_count += 1;
-                if i > 0 && !previous_char_was_upper {
-                    case_switches += 1;
-                }
-                previous_char_was_upper = true;
             } else {
                 lowercase_count += 1;
-                if i > 0 && previous_char_was_upper {
-                    case_switches += 1;
-                }
-                previous_char_was_upper = false;
             }
+
+            // Count case switches (transitions between upper and lower)
+            if let Some(prev_upper) = previous_was_upper
+                && prev_upper != is_upper
+            {
+                case_switches += 1;
+            }
+            previous_was_upper = Some(is_upper);
         } else if c.is_ascii_digit() {
             digit_count += 1;
         } else if !c.is_whitespace() {
@@ -427,9 +468,29 @@ fn calculate_entropy_with_case_and_classes(data: &str) -> f64 {
         }
     }
 
-    // Adjust entropy: case switches and symbol boosts
-    let case_entropy_boost = if uppercase_count > 0 && lowercase_count > 0 {
-        (case_switches as f64 / letter_count as f64) * 2.0
+    // Calculate case entropy boost based on case switch frequency
+    // The key metric is "average run length" = letters / (switches + 1)
+    // CamelCase has longer runs (lower boost), random alternating has short runs (higher boost)
+    let case_entropy_boost = if uppercase_count > 0 && lowercase_count > 0 && letter_count > 0 {
+        // average_run_length: higher = more CamelCase-like, lower = more random
+        // For "IngestGatewayLogGroup" (21 letters, 7 switches): avg_run = 21/8 = 2.625
+        // For "aBcDeFgHiJk" (11 letters, 10 switches): avg_run = 11/11 = 1.0
+        let average_run_length = letter_count as f64 / (case_switches + 1) as f64;
+
+        // Normalize: if avg_run >= 2.5, it's likely CamelCase (no boost)
+        // if avg_run = 1, it's perfectly alternating (full boost)
+        // Linear scale between 1 and 2.5, clamped
+        let camel_factor = if average_run_length >= 2.5 {
+            0.0 // CamelCase-like, no case boost
+        } else if average_run_length <= 1.0 {
+            1.0 // Perfectly alternating, full boost
+        } else {
+            // Linear interpolation: (2.5 - avg) / 1.5
+            (2.5 - average_run_length) / 1.5
+        };
+
+        let switch_density = case_switches as f64 / letter_count as f64;
+        switch_density * 2.0 * camel_factor
     } else {
         0.0
     };
@@ -522,6 +583,55 @@ mod tests {
         assert!(
             entropy > 3.0,
             "Expected some entropy for digits, got {entropy}"
+        );
+    }
+
+    #[test]
+    fn test_camelcase_entropy() {
+        // CamelCase/PascalCase identifiers should have low entropy (below 4.1 threshold)
+        // These are common programming identifiers that should NOT trigger false positives
+        let entropy = calculate_entropy_with_case_and_classes("paddingBottom");
+        assert!(entropy < 4.1, "paddingBottom should not trigger: {entropy}");
+
+        let entropy = calculate_entropy_with_case_and_classes("IngestGatewayLogGroup");
+        assert!(
+            entropy < 4.1,
+            "IngestGatewayLogGroup should not trigger: {entropy}"
+        );
+
+        let entropy = calculate_entropy_with_case_and_classes("unhandledRejection");
+        assert!(
+            entropy < 4.1,
+            "unhandledRejection should not trigger: {entropy}"
+        );
+
+        let entropy = calculate_entropy_with_case_and_classes("backgroundColor");
+        assert!(
+            entropy < 4.1,
+            "backgroundColor should not trigger: {entropy}"
+        );
+
+        let entropy = calculate_entropy_with_case_and_classes("uncaughtException");
+        assert!(
+            entropy < 4.1,
+            "uncaughtException should not trigger: {entropy}"
+        );
+    }
+
+    #[test]
+    fn test_alternating_case_entropy() {
+        // Alternating case patterns should have high entropy (suspicious)
+        let entropy = calculate_entropy_with_case_and_classes("aBcDeFgHiJkLmNoPq");
+        assert!(entropy > 4.1, "Alternating case should trigger: {entropy}");
+    }
+
+    #[test]
+    fn test_secret_detection_unchanged() {
+        // Ensure real secrets with mixed case, digits, and symbols still trigger
+        let entropy = calculate_entropy_with_case_and_classes("AKIaSyD9mP+e2KqZ2S");
+        assert!(
+            entropy > 6.5,
+            "AWS-like key should still trigger: {entropy}"
         );
     }
 }

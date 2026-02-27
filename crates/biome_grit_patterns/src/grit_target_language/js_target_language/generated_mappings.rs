@@ -67,7 +67,7 @@ pub const LEGACY_TREESITTER_COMPATIBILITY_PATTERNS: &[LegacyTreeSitterPattern] =
     LegacyTreeSitterPattern {
         name: "arrow_function",
         kind: JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION,
-        slots: &[("body", 5)],
+        slots: &[("parameters", 2), ("body", 5)],
     },
     LegacyTreeSitterPattern {
         name: "object",
@@ -127,7 +127,7 @@ pub const LEGACY_TREESITTER_COMPATIBILITY_PATTERNS: &[LegacyTreeSitterPattern] =
     LegacyTreeSitterPattern {
         name: "jsx_attribute",
         kind: JsSyntaxKind::JSX_ATTRIBUTE,
-        slots: &[],
+        slots: &[("name", 0), ("value", 1)],
     },
     LegacyTreeSitterPattern {
         name: "jsx_element",
@@ -137,12 +137,12 @@ pub const LEGACY_TREESITTER_COMPATIBILITY_PATTERNS: &[LegacyTreeSitterPattern] =
     LegacyTreeSitterPattern {
         name: "jsx_self_closing_element",
         kind: JsSyntaxKind::JSX_SELF_CLOSING_ELEMENT,
-        slots: &[],
+        slots: &[("name", 1), ("type_arguments", 2), ("attributes", 3)],
     },
     LegacyTreeSitterPattern {
         name: "jsx_opening_element",
         kind: JsSyntaxKind::JSX_OPENING_ELEMENT,
-        slots: &[],
+        slots: &[("name", 1), ("type_arguments", 2), ("attributes", 3)],
     },
     LegacyTreeSitterPattern {
         name: "jsx_closing_element",
@@ -281,8 +281,9 @@ pub fn kind_by_name(node_name: &str) -> Option<JsSyntaxKind> {
             .iter()
             .next(),
         "JsExportNamedSpecifier" => lang::JsExportNamedSpecifier::KIND_SET.iter().next(),
-        "JsExpressionSnipped" => lang::JsExpressionSnipped::KIND_SET.iter().next(),
+        "JsExpressionSnippet" => lang::JsExpressionSnippet::KIND_SET.iter().next(),
         "JsExpressionStatement" => lang::JsExpressionStatement::KIND_SET.iter().next(),
+        "JsExpressionTemplateRoot" => lang::JsExpressionTemplateRoot::KIND_SET.iter().next(),
         "JsExtendsClause" => lang::JsExtendsClause::KIND_SET.iter().next(),
         "JsFinallyClause" => lang::JsFinallyClause::KIND_SET.iter().next(),
         "JsForInStatement" => lang::JsForInStatement::KIND_SET.iter().next(),

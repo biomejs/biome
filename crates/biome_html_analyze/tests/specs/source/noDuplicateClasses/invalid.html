@@ -1,0 +1,32 @@
+<!-- Invalid: exact duplicates -->
+<div class="flex flex"></div>
+<div class="p-4 text-red-500 p-4 bg-white"></div>
+
+<!-- Invalid: multiple duplicates -->
+<div class="flex p-4 flex m-2 p-4"></div>
+
+<!-- Invalid: duplicates with complex classes -->
+<div class="hover:focus:m-2 foo hover:focus:m-2"></div>
+
+<!-- Invalid: duplicates in the middle -->
+<div class="text-lg text-center text-lg font-bold"></div>
+
+<!-- Invalid: single-quoted strings (should preserve quotes) -->
+<div class='mt-4 mt-4'></div>
+
+<!-- Invalid: duplicates with newlines (preserves original whitespace) -->
+<div class="foo
+bar
+foo"></div>
+
+<!-- Invalid: duplicates with tabs -->
+<div class="flex	p-4	flex"></div>
+
+<!-- Invalid: multiple spaces (should preserve spacing) -->
+<div class="flex  p-4  flex"></div>
+
+<!-- Invalid: leading/trailing whitespace (should preserve) -->
+<div class=" flex flex "></div>
+
+<!-- Invalid: triple duplicate -->
+<div class="flex flex flex"></div>

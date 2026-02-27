@@ -20,5 +20,5 @@ Call Global TypeId(0)(Global TypeId(1))
 ```
 Global TypeId(0) => Promise.resolve
 
-Global TypeId(1) => value: value
+Global TypeId(1) => string: value
 ```

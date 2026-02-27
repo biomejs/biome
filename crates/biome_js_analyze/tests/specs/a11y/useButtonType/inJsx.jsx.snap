@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: inJsx.jsx
-snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -27,6 +26,8 @@ snapshot_kind: text
     <button {...props}></button>
 </>
 ```
+
+_Note: The parser emitted 7 diagnostics which are not shown here._
 
 # Diagnostics
 ```

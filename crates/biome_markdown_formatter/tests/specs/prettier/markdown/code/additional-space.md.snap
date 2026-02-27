@@ -1,0 +1,105 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/code/additional-space.md
+---
+# Input
+
+```md
+1. Fork the repo and create your branch from `master`.
+
+   Open terminal (e.g. Terminal, iTerm, Git Bash or Git Shell) and type:
+   ```sh
+   git clone https://github.com/<your_username>/jest
+   cd jest
+   git checkout -b my_branch
+   ```
+   Note:
+   Replace `<your_username>` with your GitHub username
+
+3. Run `yarn install`.
+   On Windows:
+   To install [Yarn](https://yarnpkg.com/en/docs/install#windows-tab) on Windows you may need to download either node.js or Chocolatey<br />
+
+    ```sh
+    yarn install
+    ```
+    To check your version of Yarn and ensure it's installed you can type:
+    ```sh
+    yarn --version
+    ```
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,26 +1,22 @@
+ 1. Fork the repo and create your branch from `master`.
+ 
+    Open terminal (e.g. Terminal, iTerm, Git Bash or Git Shell) and type:
+-
+    ```sh
+    git clone https://github.com/<your_username>/jest
+    cd jest
+    git checkout -b my_branch
+    ```
+-
+    Note:
+    Replace `<your_username>` with your GitHub username
+ 
+-2. Run `yarn install`.
++3. Run `yarn install`.
+    On Windows:
+    To install [Yarn](https://yarnpkg.com/en/docs/install#windows-tab) on Windows you may need to download either node.js or Chocolatey<br />
+ 
+-   ```sh
+-   yarn install
+-   ```
+-
+-   To check your version of Yarn and ensure it's installed you can type:
+-
+-   ```sh
+-   yarn --version
+-   ```
++    ```sh
++    yarn install
++    ```
++    To check your version of Yarn and ensure it's installed you can type:
++    ```sh
++    yarn --version
++    ```
+\ No newline at end of file
+```
+
+# Output
+
+```md
+1. Fork the repo and create your branch from `master`.
+
+   Open terminal (e.g. Terminal, iTerm, Git Bash or Git Shell) and type:
+   ```sh
+   git clone https://github.com/<your_username>/jest
+   cd jest
+   git checkout -b my_branch
+   ```
+   Note:
+   Replace `<your_username>` with your GitHub username
+
+3. Run `yarn install`.
+   On Windows:
+   To install [Yarn](https://yarnpkg.com/en/docs/install#windows-tab) on Windows you may need to download either node.js or Chocolatey<br />
+
+    ```sh
+    yarn install
+    ```
+    To check your version of Yarn and ensure it's installed you can type:
+    ```sh
+    yarn --version
+    ``````
+
+# Lines exceeding max width of 80 characters
+```
+   14:    To install [Yarn](https://yarnpkg.com/en/docs/install#windows-tab) on Windows you may need to download either node.js or Chocolatey<br />
+```

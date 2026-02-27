@@ -21,6 +21,7 @@ pub enum TailwindSyntaxKind {
     L_PAREN,
     R_PAREN,
     WHITESPACE,
+    DATA_KW,
     TW_BASE,
     TW_VALUE,
     TW_SELECTOR,
@@ -41,6 +42,7 @@ pub enum TailwindSyntaxKind {
     TW_ARBITRARY_VALUE,
     TW_CSS_VARIABLE_VALUE,
     TW_MODIFIER,
+    TW_DATA_ATTRIBUTE,
     TW_BOGUS,
     TW_BOGUS_CANDIDATE,
     TW_BOGUS_VARIANT,
@@ -63,8 +65,12 @@ impl TailwindSyntaxKind {
     pub const fn is_list(self) -> bool {
         matches!(self, TW_CANDIDATE_LIST | TW_VARIANT_LIST)
     }
-    pub fn from_keyword(_ident: &str) -> Option<Self> {
-        None
+    pub fn from_keyword(ident: &str) -> Option<Self> {
+        let kw = match ident {
+            "data" => DATA_KW,
+            _ => return None,
+        };
+        Some(kw)
     }
     pub const fn to_string(&self) -> Option<&'static str> {
         let tok = match self {
@@ -88,4 +94,4 @@ impl TailwindSyntaxKind {
 }
 #[doc = r" Utility macro for creating a SyntaxKind through simple macro syntax"]
 #[macro_export]
-macro_rules ! T { [/] => { $ crate :: TailwindSyntaxKind :: SLASH } ; [!] => { $ crate :: TailwindSyntaxKind :: BANG } ; [-] => { $ crate :: TailwindSyntaxKind :: DASH } ; [:] => { $ crate :: TailwindSyntaxKind :: COLON } ; ['['] => { $ crate :: TailwindSyntaxKind :: L_BRACKET } ; [']'] => { $ crate :: TailwindSyntaxKind :: R_BRACKET } ; ['('] => { $ crate :: TailwindSyntaxKind :: L_PAREN } ; [')'] => { $ crate :: TailwindSyntaxKind :: R_PAREN } ; [' '] => { $ crate :: TailwindSyntaxKind :: WHITESPACE } ; [ident] => { $ crate :: TailwindSyntaxKind :: IDENT } ; [EOF] => { $ crate :: TailwindSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: TailwindSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: TailwindSyntaxKind :: HASH } ; }
+macro_rules ! T { [/] => { $ crate :: TailwindSyntaxKind :: SLASH } ; [!] => { $ crate :: TailwindSyntaxKind :: BANG } ; [-] => { $ crate :: TailwindSyntaxKind :: DASH } ; [:] => { $ crate :: TailwindSyntaxKind :: COLON } ; ['['] => { $ crate :: TailwindSyntaxKind :: L_BRACKET } ; [']'] => { $ crate :: TailwindSyntaxKind :: R_BRACKET } ; ['('] => { $ crate :: TailwindSyntaxKind :: L_PAREN } ; [')'] => { $ crate :: TailwindSyntaxKind :: R_PAREN } ; [' '] => { $ crate :: TailwindSyntaxKind :: WHITESPACE } ; [data] => { $ crate :: TailwindSyntaxKind :: DATA_KW } ; [ident] => { $ crate :: TailwindSyntaxKind :: IDENT } ; [EOF] => { $ crate :: TailwindSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: TailwindSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: TailwindSyntaxKind :: HASH } ; }

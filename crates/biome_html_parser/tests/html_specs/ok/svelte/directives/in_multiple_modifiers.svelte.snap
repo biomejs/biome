@@ -1,0 +1,117 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<div in:fly|global|local>Multiple modifiers</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteInDirective {
+                        in_token: IN_KW@5..7 "in" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@7..8 ":" [] [],
+                            property: SvelteName {
+                                ident_token: IDENT@8..11 "fly" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [
+                                SvelteDirectiveModifier {
+                                    bitwise_or_token: PIPE@11..12 "|" [] [],
+                                    name: SvelteName {
+                                        ident_token: IDENT@12..18 "global" [] [],
+                                    },
+                                },
+                                SvelteDirectiveModifier {
+                                    bitwise_or_token: PIPE@18..19 "|" [] [],
+                                    name: SvelteName {
+                                        ident_token: IDENT@19..24 "local" [] [],
+                                    },
+                                },
+                            ],
+                            initializer: missing (optional),
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@24..25 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@25..43 "Multiple modifiers" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@43..44 "<" [] [],
+                slash_token: SLASH@44..45 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@45..48 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@48..49 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@49..50 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..50
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..49
+    0: HTML_ELEMENT@0..49
+      0: HTML_OPENING_ELEMENT@0..25
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..24
+          0: SVELTE_IN_DIRECTIVE@5..24
+            0: IN_KW@5..7 "in" [] []
+            1: SVELTE_DIRECTIVE_VALUE@7..24
+              0: COLON@7..8 ":" [] []
+              1: SVELTE_NAME@8..11
+                0: IDENT@8..11 "fly" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@11..24
+                0: SVELTE_DIRECTIVE_MODIFIER@11..18
+                  0: PIPE@11..12 "|" [] []
+                  1: SVELTE_NAME@12..18
+                    0: IDENT@12..18 "global" [] []
+                1: SVELTE_DIRECTIVE_MODIFIER@18..24
+                  0: PIPE@18..19 "|" [] []
+                  1: SVELTE_NAME@19..24
+                    0: IDENT@19..24 "local" [] []
+              3: (empty)
+        3: R_ANGLE@24..25 ">" [] []
+      1: HTML_ELEMENT_LIST@25..43
+        0: HTML_CONTENT@25..43
+          0: HTML_LITERAL@25..43 "Multiple modifiers" [] []
+      2: HTML_CLOSING_ELEMENT@43..49
+        0: L_ANGLE@43..44 "<" [] []
+        1: SLASH@44..45 "/" [] []
+        2: HTML_TAG_NAME@45..48
+          0: HTML_LITERAL@45..48 "div" [] []
+        3: R_ANGLE@48..49 ">" [] []
+  4: EOF@49..50 "" [Newline("\n")] []
+
+```

@@ -22,5 +22,7 @@ invalid-single-a.vue:1:70 lint/nursery/useVueDefineMacrosOrder ━━━━━�
   
   i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```

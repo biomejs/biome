@@ -2,6 +2,7 @@
 source: crates/biome_module_graph/tests/snap/mod.rs
 expression: content
 ---
+
 # `/src/index.ts`
 
 ## Source
@@ -71,7 +72,7 @@ Imports {
 ## Registered types
 
 ```
-Module TypeId(0) => value: foo
+Module TypeId(0) => string: foo
 
 Module TypeId(1) => unknown
 

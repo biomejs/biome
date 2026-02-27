@@ -1,14 +1,12 @@
-use crate::LoggingLevel;
-use crate::logging::LoggingKind;
 use biome_configuration::ConfigurationPathHint;
 use biome_diagnostics::Severity;
 use bpaf::Bpaf;
-use camino::Utf8PathBuf;
+use camino::{Utf8Path, Utf8PathBuf};
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 
 /// Global options applied to all commands
-#[derive(Debug, Clone, Bpaf)]
+#[derive(Debug, Default, Clone, Bpaf)]
 pub struct CliOptions {
     /// Set the formatting mode for markup: "off" prints everything as plain text, "force" forces the formatting of markup using ANSI even if the console output is determined to be incompatible
     #[bpaf(long("colors"), argument("off|force"))]
@@ -54,39 +52,8 @@ pub struct CliOptions {
     pub error_on_warnings: bool,
 
     /// Allows to change how diagnostics and summary are reported.
-    #[bpaf(
-        long("reporter"),
-        argument("json|json-pretty|github|junit|summary|gitlab|checkstyle|rdjson"),
-        fallback(CliReporter::default())
-    )]
-    pub reporter: CliReporter,
-
-    /// Optional path to redirect log messages to.
-    ///
-    /// If omitted, logs are printed to stdout.
-    #[bpaf(long("log-file"))]
-    pub log_file: Option<String>,
-
-    /// The level of logging. In order, from the most verbose to the least
-    /// verbose: debug, info, warn, error.
-    ///
-    /// The value `none` won't show any logging.
-    #[bpaf(
-        long("log-level"),
-        argument("none|debug|info|warn|error"),
-        fallback(LoggingLevel::default()),
-        display_fallback
-    )]
-    pub log_level: LoggingLevel,
-
-    /// How the log should look like.
-    #[bpaf(
-        long("log-kind"),
-        argument("pretty|compact|json"),
-        fallback(LoggingKind::default()),
-        display_fallback
-    )]
-    pub log_kind: LoggingKind,
+    #[bpaf(external, many)]
+    pub cli_reporter: Vec<CliReporter>,
 
     /// The level of diagnostics to show. In order, from the lowest to the most important: info, warn, error. Passing `--diagnostic-level=error` will cause Biome to print only diagnostics that contain only errors.
     #[bpaf(
@@ -100,13 +67,20 @@ pub struct CliOptions {
 
 impl CliOptions {
     /// Computes the [ConfigurationPathHint] based on the options passed by the user
-    pub(crate) fn as_configuration_path_hint(&self) -> ConfigurationPathHint {
+    pub(crate) fn as_configuration_path_hint(
+        &self,
+        working_directory: &Utf8Path,
+    ) -> ConfigurationPathHint {
         match self.config_path.as_ref() {
             None => ConfigurationPathHint::default(),
             Some(path) => {
                 let path = Utf8PathBuf::from(path);
                 let path = path.strip_prefix("./").unwrap_or(&path);
-                ConfigurationPathHint::FromUser(path.to_path_buf())
+                if path.is_absolute() {
+                    ConfigurationPathHint::FromUser(path.to_path_buf())
+                } else {
+                    ConfigurationPathHint::FromUser(working_directory.join(path))
+                }
             }
         }
     }
@@ -141,8 +115,28 @@ impl FromStr for ColorsArg {
     }
 }
 
+#[derive(Debug, Default, Clone, Eq, PartialEq, Bpaf)]
+#[bpaf(adjacent)]
+pub struct CliReporter {
+    #[bpaf(
+        long("reporter"),
+        argument("default|json|json-pretty|github|junit|summary|gitlab|checkstyle|rdjson|sarif"),
+        fallback(CliReporterKind::default())
+    )]
+    pub(crate) kind: CliReporterKind,
+
+    #[bpaf(long("reporter-file"), argument("PATH"))]
+    pub(crate) destination: Option<Utf8PathBuf>,
+}
+
+impl CliReporter {
+    pub(crate) fn is_file_report(&self) -> bool {
+        self.destination.is_some()
+    }
+}
+
 #[derive(Debug, Default, Clone, Eq, PartialEq)]
-pub enum CliReporter {
+pub enum CliReporterKind {
     /// The default reporter
     #[default]
     Default,
@@ -162,19 +156,22 @@ pub enum CliReporter {
     Checkstyle,
     /// Reports diagnostics using the [Reviewdog JSON format](https://deepwiki.com/reviewdog/reviewdog/3.2-reviewdog-diagnostic-format)
     RdJson,
+    /// Reports diagnostics using the SARIF format
+    Sarif,
 }
 
 impl CliReporter {
     pub(crate) const fn is_default(&self) -> bool {
-        matches!(self, Self::Default)
+        matches!(self.kind, CliReporterKind::Default)
     }
 }
 
-impl FromStr for CliReporter {
+impl FromStr for CliReporterKind {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
+            "default" => Ok(Self::Default),
             "json" => Ok(Self::Json),
             "json-pretty" => Ok(Self::JsonPretty),
             "summary" => Ok(Self::Summary),
@@ -183,6 +180,7 @@ impl FromStr for CliReporter {
             "gitlab" => Ok(Self::GitLab),
             "checkstyle" => Ok(Self::Checkstyle),
             "rdjson" => Ok(Self::RdJson),
+            "sarif" => Ok(Self::Sarif),
             _ => Err(format!(
                 "value {s:?} is not valid for the --reporter argument"
             )),
@@ -190,18 +188,19 @@ impl FromStr for CliReporter {
     }
 }
 
-impl Display for CliReporter {
+impl Display for CliReporterKind {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Default => f.write_str("default"),
-            Self::Json => f.write_str("json"),
-            Self::JsonPretty => f.write_str("json-pretty"),
-            Self::Summary => f.write_str("summary"),
-            Self::GitHub => f.write_str("github"),
-            Self::Junit => f.write_str("junit"),
-            Self::GitLab => f.write_str("gitlab"),
-            Self::Checkstyle => f.write_str("checkstyle"),
-            Self::RdJson => f.write_str("rdjson"),
+            Self::Default { .. } => f.write_str("default"),
+            Self::Json { .. } => f.write_str("json"),
+            Self::JsonPretty { .. } => f.write_str("json-pretty"),
+            Self::Summary { .. } => f.write_str("summary"),
+            Self::GitHub { .. } => f.write_str("github"),
+            Self::Junit { .. } => f.write_str("junit"),
+            Self::GitLab { .. } => f.write_str("gitlab"),
+            Self::Checkstyle { .. } => f.write_str("checkstyle"),
+            Self::RdJson { .. } => f.write_str("rdjson"),
+            Self::Sarif { .. } => f.write_str("sarif"),
         }
     }
 }

@@ -1,0 +1,93 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `file.json`
+
+```json
+{
+  "source": {
+    "name": "Biome",
+    "url": "https://biomejs.dev"
+  },
+  "diagnostics": [
+    {
+      "code": {
+        "url": "https://biomejs.dev/linter/rules/no-debugger",
+        "value": "lint/suspicious/noDebugger"
+      },
+      "location": {
+        "path": "main.ts",
+        "range": {
+          "end": {
+            "column": 9,
+            "line": 1
+          },
+          "start": {
+            "column": 1,
+            "line": 1
+          }
+        }
+      },
+      "message": "This is an unexpected use of the debugger statement."
+    },
+    {
+      "code": {
+        "value": "format"
+      },
+      "message": "Formatter would have printed the following content:"
+    }
+  ]
+}
+```
+
+## `main.ts`
+
+```ts
+debugger
+```
+
+# Termination Message
+
+```block
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+main.ts:1:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This is an unexpected use of the debugger statement.
+  
+  > 1 │ debugger
+      │ ^^^^^^^^
+  
+  i Unsafe fix: Remove debugger statement
+  
+    1 │ debugger
+      │ --------
+
+```
+
+```block
+main.ts format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    1   │ - debugger
+      1 │ + debugger;
+      2 │ + 
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 2 errors.
+```

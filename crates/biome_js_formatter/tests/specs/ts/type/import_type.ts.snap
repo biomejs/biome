@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/type/import_type.ts
 ---
+
 # Input
 
 ```ts
@@ -39,6 +40,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -53,6 +55,7 @@ type ActionLogsQ =
 
 type LongImportType =
 	typeof import("./long/long/long/long/long/long/long/long/path/long/long/long/long/path").default;
+
 ```
 
 # Lines exceeding max width of 80 characters

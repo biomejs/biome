@@ -3,7 +3,7 @@ use biome_service::workspace::{
     FeaturesBuilder, GetSyntaxTreeParams, IgnoreKind, PathIsIgnoredParams,
 };
 use serde::{Deserialize, Serialize};
-use tower_lsp_server::lsp_types::{TextDocumentIdentifier, Uri};
+use tower_lsp_server::ls_types::{TextDocumentIdentifier, Uri};
 use tracing::info;
 
 pub const SYNTAX_TREE_REQUEST: &str = "biome_lsp/syntaxTree";

@@ -1,18 +1,15 @@
 [package]
-authors.workspace    = true
-categories.workspace = true
-description          = "Mutable JSON values constructable from biome_json_syntax"
-edition.workspace    = true
-homepage.workspace   = true
-keywords.workspace   = true
-license.workspace    = true
 name                 = "biome_json_value"
-publish              = true
-repository.workspace = true
 version              = "0.1.0"
-
-[lints]
-workspace = true
+authors.workspace    = true
+edition.workspace    = true
+description          = "Mutable JSON values constructable from biome_json_syntax"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = true
 
 [dependencies]
 biome_deserialize        = { workspace = true, features = ["indexmap"] }
@@ -25,3 +22,6 @@ static_assertions        = { workspace = true }
 
 [dev-dependencies]
 biome_json_parser = { workspace = true }
+
+[lints]
+workspace = true

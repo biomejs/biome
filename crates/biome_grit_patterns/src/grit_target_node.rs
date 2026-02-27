@@ -2,6 +2,7 @@ use crate::grit_tree::GritTargetTree;
 use crate::util::TextRangeGritExt;
 use biome_css_syntax::{CssSyntaxKind, CssSyntaxNode, CssSyntaxToken};
 use biome_js_syntax::{JsSyntaxKind, JsSyntaxNode, JsSyntaxToken};
+use biome_json_syntax::{JsonSyntaxKind, JsonSyntaxNode, JsonSyntaxToken};
 use biome_rowan::{NodeOrToken, SyntaxKind, SyntaxSlot, TextRange};
 use grit_util::{AstCursor, AstNode as GritAstNode, ByteRange, CodeRange, error::GritResult};
 use std::{borrow::Cow, fmt::Debug, ops::Deref};
@@ -183,7 +184,8 @@ macro_rules! generate_target_node {
 
 generate_target_node! {
     [CssLanguage, CssSyntaxNode, CssSyntaxToken, CssSyntaxKind],
-    [JsLanguage, JsSyntaxNode, JsSyntaxToken, JsSyntaxKind]
+    [JsLanguage, JsSyntaxNode, JsSyntaxToken, JsSyntaxKind],
+    [JsonLanguage, JsonSyntaxNode, JsonSyntaxToken, JsonSyntaxKind]
 }
 
 #[derive(Clone, PartialEq)]
@@ -398,6 +400,13 @@ impl GritTargetSyntaxKind {
     pub fn as_js_kind(&self) -> Option<JsSyntaxKind> {
         match self {
             Self::JsSyntaxKind(kind) => Some(*kind),
+            _ => None,
+        }
+    }
+
+    pub fn as_json_kind(&self) -> Option<JsonSyntaxKind> {
+        match self {
+            Self::JsonSyntaxKind(kind) => Some(*kind),
             _ => None,
         }
     }

@@ -1,0 +1,11 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: valid.graphql
+---
+# Input
+```graphql
+# should not generate diagnostics
+query A($x: Int, $y: String) { __typename }
+query B($x: String, $y: Int) { __typename }
+
+```

@@ -1,6 +1,3 @@
-use std::num::IntErrorKind;
-use std::ops::RangeInclusive;
-
 use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
@@ -120,21 +117,68 @@ fn is_precision_lost_in_base_10(num: &str) -> Option<bool> {
 }
 
 fn is_precision_lost_in_base_other(num: &str, radix: u8) -> bool {
-    let parsed = match i64::from_str_radix(num, radix as u32) {
-        Ok(x) => x,
-        Err(e) => {
-            return matches!(
-                e.kind(),
-                IntErrorKind::PosOverflow | IntErrorKind::NegOverflow
-            );
-        }
+    // radix is passed down from split_into_radix_and_number which guarantees
+    // that radix is 2, 8, 16. We've already filtered out the 10 case.
+    let bits_per_digit = match radix {
+        16 => 4,
+        8 => 3,
+        2 => 1,
+        // Shouldn't ever happen
+        _ => return false,
     };
 
-    const MAX_SAFE_INTEGER: i64 = 2_i64.pow(53) - 1;
-    const MIN_SAFE_INTEGER: i64 = -MAX_SAFE_INTEGER;
-    const SAFE_RANGE: RangeInclusive<i64> = MIN_SAFE_INTEGER..=MAX_SAFE_INTEGER;
+    // We want to find the positions of the last set bit and the first set bit.
+    // The distance between them (max - min + 1) is the number of significant bits.
+    // If this distance > 53, the number cannot be exactly represented in an f64 (which has 53 bits of significand).
+    let mut min_bit_index: Option<u32> = None;
+    let mut current_bit_index: u32 = 0;
 
-    !SAFE_RANGE.contains(&parsed)
+    // Iterate over digits in reverse order (from last to first digit)
+    for c in num.chars().rev() {
+        let digit = match c.to_digit(radix as u32) {
+            Some(d) => d,
+            None => return false,
+        };
+
+        if digit != 0 {
+            if min_bit_index.is_none() {
+                // Found the first non-zero digit (contains the first set bit of the number)
+                let trailing_zeros = digit.trailing_zeros();
+                min_bit_index = Some(current_bit_index + trailing_zeros);
+            }
+
+            // Calculate the last set bit for the current digit
+            let last_bit_in_digit = (u32::BITS - digit.leading_zeros()) - 1;
+            let max_bit_index = current_bit_index + last_bit_in_digit;
+
+            // Check for overflow (exponent > 1023)
+            // In IEEE 754 double precision:
+            // - The exponent bias is 1023.
+            // - The maximum valid exponent is 1023 (representing 2^1023).
+            // - 2^1024 overflows to Infinity.
+            // Thus, if the last set bit is at index 1024 or greater, the number overflows.
+            if max_bit_index >= 1024 {
+                return true;
+            }
+
+            // Check for precision loss
+            // In IEEE 754 double precision:
+            // - The significand (mantissa) has 53 bits of precision (52 stored bits + 1 implicit leading bit).
+            // - If the distance between the last set bit and the first set bit
+            //   exceeds 53 bits, the number cannot be exactly represented, as the lower bits would be truncated.
+            // Span = max - min + 1
+            // We know min_bit_index is Some because we set it above if it was None
+            if let Some(min) = min_bit_index
+                && max_bit_index - min + 1 > 53
+            {
+                return true;
+            }
+        }
+
+        current_bit_index += bits_per_digit;
+    }
+
+    false
 }
 
 fn remove_leading_zeros(num: &str) -> &str {

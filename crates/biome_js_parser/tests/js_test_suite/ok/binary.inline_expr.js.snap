@@ -1,0 +1,46 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```js
+count + 1
+
+```
+
+
+## AST
+
+```
+JsExpressionTemplateRoot {
+    expression: JsBinaryExpression {
+        left: JsIdentifierExpression {
+            name: JsReferenceIdentifier {
+                value_token: IDENT@0..6 "count" [] [Whitespace(" ")],
+            },
+        },
+        operator_token: PLUS@6..8 "+" [] [Whitespace(" ")],
+        right: JsNumberLiteralExpression {
+            value_token: JS_NUMBER_LITERAL@8..9 "1" [] [],
+        },
+    },
+    eof_token: EOF@9..10 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_EXPRESSION_TEMPLATE_ROOT@0..10
+  0: JS_BINARY_EXPRESSION@0..9
+    0: JS_IDENTIFIER_EXPRESSION@0..6
+      0: JS_REFERENCE_IDENTIFIER@0..6
+        0: IDENT@0..6 "count" [] [Whitespace(" ")]
+    1: PLUS@6..8 "+" [] [Whitespace(" ")]
+    2: JS_NUMBER_LITERAL_EXPRESSION@8..9
+      0: JS_NUMBER_LITERAL@8..9 "1" [] []
+  1: EOF@9..10 "" [Newline("\n")] []
+
+```

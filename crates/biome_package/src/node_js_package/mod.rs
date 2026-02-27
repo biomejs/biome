@@ -1,11 +1,14 @@
 mod package_json;
 mod tsconfig_json;
+mod turbo_json;
 
 use camino::Utf8Path;
 pub use package_json::{Dependencies, PackageJson, PackageType, Version};
 pub use tsconfig_json::{CompilerOptions, TsConfigJson};
+pub use turbo_json::TurboJson;
 
 use biome_rowan::Language;
+use std::sync::Arc;
 
 use crate::{LICENSE_LIST, Manifest, Package, PackageAnalyzeResult, ProjectAnalyzeDiagnostic};
 
@@ -20,6 +23,9 @@ pub struct NodeJsPackage {
 
     /// The `tsconfig.json` manifest
     pub tsconfig: Option<TsConfigJson>,
+
+    /// The `turbo.json` manifest for Turborepo projects.
+    pub turbo_json: Option<Arc<TurboJson>>,
 }
 
 impl NodeJsPackage {
@@ -37,11 +43,35 @@ impl NodeJsPackage {
             .collect();
     }
 
+    pub fn insert_serialized_turbo_json(
+        &mut self,
+        content: &ProjectLanguageRoot<TurboJson>,
+        path: &Utf8Path,
+    ) {
+        let turbo_json = TurboJson::deserialize_manifest(content, path);
+        let (turbo_json, deserialize_diagnostics) = turbo_json.consume();
+        self.turbo_json = Some(Arc::new(turbo_json.unwrap_or_default()));
+        self.diagnostics = deserialize_diagnostics
+            .into_iter()
+            .map(biome_diagnostics::serde::Diagnostic::new)
+            .collect();
+    }
+
     pub fn without_tsconfig(&self) -> Self {
         Self {
             manifest: self.manifest.clone(),
             diagnostics: self.diagnostics.clone(),
             tsconfig: None,
+            turbo_json: self.turbo_json.clone(),
+        }
+    }
+
+    pub fn without_turbo_json(&self) -> Self {
+        Self {
+            manifest: self.manifest.clone(),
+            diagnostics: self.diagnostics.clone(),
+            tsconfig: self.tsconfig.clone(),
+            turbo_json: None,
         }
     }
 }

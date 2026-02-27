@@ -16,3 +16,5 @@ const baz = 1;
 export {foo as __dirname}
 
 ```
+
+_Note: The parser emitted 2 diagnostics which are not shown here._

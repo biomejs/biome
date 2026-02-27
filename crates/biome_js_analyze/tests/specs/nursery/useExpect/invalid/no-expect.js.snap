@@ -1,0 +1,93 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: no-expect.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+test("no assertion", async ({ page }) => {
+    await page.goto("/");
+});
+
+test.skip("skipped without assertion", async ({ page }) => {
+    await page.click("button");
+});
+
+it("it function without assertion", async ({ page }) => {
+    await page.fill("input", "value");
+});
+
+```
+
+# Diagnostics
+```
+no-expect.js:3:1 lint/nursery/useExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Test callback is missing an expect() assertion.
+  
+    1 │ /* should generate diagnostics */
+    2 │ 
+  > 3 │ test("no assertion", async ({ page }) => {
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 4 │     await page.goto("/");
+  > 5 │ });
+      │ ^^
+    6 │ 
+    7 │ test.skip("skipped without assertion", async ({ page }) => {
+  
+  i Tests without assertions may pass even when the behavior is broken.
+  
+  i Add an assertion using expect() to verify the expected behavior.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+no-expect.js:7:1 lint/nursery/useExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Test callback is missing an expect() assertion.
+  
+     5 │ });
+     6 │ 
+   > 7 │ test.skip("skipped without assertion", async ({ page }) => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 8 │     await page.click("button");
+   > 9 │ });
+       │ ^^
+    10 │ 
+    11 │ it("it function without assertion", async ({ page }) => {
+  
+  i Tests without assertions may pass even when the behavior is broken.
+  
+  i Add an assertion using expect() to verify the expected behavior.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+no-expect.js:11:1 lint/nursery/useExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Test callback is missing an expect() assertion.
+  
+     9 │ });
+    10 │ 
+  > 11 │ it("it function without assertion", async ({ page }) => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 12 │     await page.fill("input", "value");
+  > 13 │ });
+       │ ^^
+    14 │ 
+  
+  i Tests without assertions may pass even when the behavior is broken.
+  
+  i Add an assertion using expect() to verify the expected behavior.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

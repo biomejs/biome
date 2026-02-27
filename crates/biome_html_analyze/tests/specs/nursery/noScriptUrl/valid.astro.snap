@@ -1,0 +1,17 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.astro
+---
+# Input
+```html
+---
+// Astro valid cases - should NOT trigger the rule
+---
+
+<a href="/docs">Docs</a>
+<a href="https://astro.build">Astro</a>
+<a href="#footer">Footer</a>
+<!-- Not an anchor tag -->
+<p href="javascript:void(0)">Not a link</p>
+
+```

@@ -114,11 +114,11 @@ impl DeriveInput {
                             })
                             .collect();
 
-                        if rest_field.is_some()
+                        if let Some(ref rest_field) = rest_field
                             && matches!(attrs.unknown_fields, Some(UnknownFields::Deny))
                         {
                             abort!(
-                                rest_field.unwrap(),
+                                rest_field,
                                 "Cannot have a field with #[deserializable(rest)] and #[deserializable(unknown_fields = \"deny\")]"
                             )
                         }

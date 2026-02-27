@@ -5,3 +5,5 @@ let a = <html lang="en"></html>;
 let a = <html lang={lang}></html>;
 let a = <html lang="nb"></html>;
 let a = <html lang="nn"></html>;
+let a = <html lang="zh-Hant"></html>;
+let a = <html lang="zh-Hans-CN"></html>;

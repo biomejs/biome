@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-assertion_line: 423
-expression: content
+expression: redactor(content)
 ---
 ## `fix.js`
 

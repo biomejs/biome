@@ -53,6 +53,17 @@ if (case15!!) {}
 
 if (!case16!!) {}
 
+// Test cases for issue #7927: nested assertions in compound assignments should be flagged
+const arr1: number[] = [1, 2, 3];
+arr1[0]!! ^= arr1[1];
+
+const arr2: number[] = [1, 2, 3];
+arr2[0] ^= arr2[1]!!;
+
+// Test case for issue #8475
+const _d2 = (blob.b!)!.d!.length;
+const _d2 = ((blob.b!))!.d!.length;
+
 ```
 
 # Diagnostics
@@ -284,14 +295,14 @@ invalid.ts:42:1 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
     40 │ case12!?.[a.b!!];
     41 │ 
   > 42 │ case13!!! = null
-       │ ^^^^^^^^
+       │ ^^^^^^^
     43 │ 
     44 │ case14!! = null
   
   i Safe fix: Remove extra non-null assertion.
   
     42 │ case13!!!·=·null
-       │        -        
+       │       -         
 
 ```
 
@@ -303,14 +314,14 @@ invalid.ts:42:1 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
     40 │ case12!?.[a.b!!];
     41 │ 
   > 42 │ case13!!! = null
-       │ ^^^^^^^
+       │ ^^^^^^^^
     43 │ 
     44 │ case14!! = null
   
   i Safe fix: Remove extra non-null assertion.
   
     42 │ case13!!!·=·null
-       │       -         
+       │        -        
 
 ```
 
@@ -362,10 +373,84 @@ invalid.ts:48:6 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━�
   > 48 │ if (!case16!!) {}
        │      ^^^^^^^
     49 │ 
+    50 │ // Test cases for issue #7927: nested assertions in compound assignments should be flagged
   
   i Safe fix: Remove extra non-null assertion.
   
     48 │ if·(!case16!!)·{}
        │            -     
+
+```
+
+```
+invalid.ts:52:1 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Forbidden extra non-null assertion.
+  
+    50 │ // Test cases for issue #7927: nested assertions in compound assignments should be flagged
+    51 │ const arr1: number[] = [1, 2, 3];
+  > 52 │ arr1[0]!! ^= arr1[1];
+       │ ^^^^^^^^
+    53 │ 
+    54 │ const arr2: number[] = [1, 2, 3];
+  
+  i Safe fix: Remove extra non-null assertion.
+  
+    52 │ arr1[0]!!·^=·arr1[1];
+       │        -             
+
+```
+
+```
+invalid.ts:55:12 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Forbidden extra non-null assertion.
+  
+    54 │ const arr2: number[] = [1, 2, 3];
+  > 55 │ arr2[0] ^= arr2[1]!!;
+       │            ^^^^^^^^
+    56 │ 
+    57 │ // Test case for issue #8475
+  
+  i Safe fix: Remove extra non-null assertion.
+  
+    55 │ arr2[0]·^=·arr2[1]!!;
+       │                   -  
+
+```
+
+```
+invalid.ts:58:14 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Forbidden extra non-null assertion.
+  
+    57 │ // Test case for issue #8475
+  > 58 │ const _d2 = (blob.b!)!.d!.length;
+       │              ^^^^^^^
+    59 │ const _d2 = ((blob.b!))!.d!.length;
+    60 │ 
+  
+  i Safe fix: Remove extra non-null assertion.
+  
+    58 │ const·_d2·=·(blob.b!)!.d!.length;
+       │                    -             
+
+```
+
+```
+invalid.ts:59:15 lint/suspicious/noExtraNonNullAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Forbidden extra non-null assertion.
+  
+    57 │ // Test case for issue #8475
+    58 │ const _d2 = (blob.b!)!.d!.length;
+  > 59 │ const _d2 = ((blob.b!))!.d!.length;
+       │               ^^^^^^^
+    60 │ 
+  
+  i Safe fix: Remove extra non-null assertion.
+  
+    59 │ const·_d2·=·((blob.b!))!.d!.length;
+       │                     -              
 
 ```

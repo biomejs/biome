@@ -1,0 +1,26 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: zero-classes-option.js
+---
+# Input
+```js
+/* should generate diagnostics */
+class InvalidClass1 { }
+
+```
+
+# Diagnostics
+```
+zero-classes-option.options:9:27 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The number should be an integer between 1 and 65535.
+  
+     7 │           "level": "on",
+     8 │           "options": {
+   > 9 │             "maxClasses": 0
+       │                           ^
+    10 │           }
+    11 │         }
+  
+
+```

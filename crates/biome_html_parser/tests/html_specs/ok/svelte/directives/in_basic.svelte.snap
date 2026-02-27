@@ -1,0 +1,96 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<div in:fly>Flies in</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteInDirective {
+                        in_token: IN_KW@5..7 "in" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@7..8 ":" [] [],
+                            property: SvelteName {
+                                ident_token: IDENT@8..11 "fly" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: missing (optional),
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@11..12 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@12..20 "Flies in" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@20..21 "<" [] [],
+                slash_token: SLASH@21..22 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@22..25 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@25..26 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@26..27 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..27
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..26
+    0: HTML_ELEMENT@0..26
+      0: HTML_OPENING_ELEMENT@0..12
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..11
+          0: SVELTE_IN_DIRECTIVE@5..11
+            0: IN_KW@5..7 "in" [] []
+            1: SVELTE_DIRECTIVE_VALUE@7..11
+              0: COLON@7..8 ":" [] []
+              1: SVELTE_NAME@8..11
+                0: IDENT@8..11 "fly" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@11..11
+              3: (empty)
+        3: R_ANGLE@11..12 ">" [] []
+      1: HTML_ELEMENT_LIST@12..20
+        0: HTML_CONTENT@12..20
+          0: HTML_LITERAL@12..20 "Flies in" [] []
+      2: HTML_CLOSING_ELEMENT@20..26
+        0: L_ANGLE@20..21 "<" [] []
+        1: SLASH@21..22 "/" [] []
+        2: HTML_TAG_NAME@22..25
+          0: HTML_LITERAL@22..25 "div" [] []
+        3: R_ANGLE@25..26 ">" [] []
+  4: EOF@26..27 "" [Newline("\n")] []
+
+```

@@ -1,8 +1,7 @@
 html:active-view-transition-type(
-		backwards
-		 		forwards
-		 		 		backwards
-
+		backwards,
+		 		forwards,
+		 		 		backwards,
 
 
 		 		 		forwards) {
@@ -10,30 +9,30 @@ html:active-view-transition-type(
 
 
 html:active-view-transition-type(
-		backwards
-		 		forwards
-		 		 		backwards
+		backwards,
+		 		forwards,
+		 		 		backwards,
 
 
 
-		 		 		forwards
-		 		 				backwards
-		 		forwards
-		 		 		backwards
+		 		 		forwards,
+		 		 				backwards,
+		 		forwards,
+		 		 		backwards,
 
 
 
-		 		 		forwards
-		 		 				backwards
-		 		forwards
-		 		 		backwards
+		 		 		forwards,
+		 		 				backwards,
+		 		forwards,
+		 		 		backwards,
 
 
 
-		 		 		forwards
-		 		 				backwards
-		 		forwards
-		 		 		backwards
+		 		 		forwards,
+		 		 				backwards,
+		 		forwards,
+		 		 		backwards,
 
 
 

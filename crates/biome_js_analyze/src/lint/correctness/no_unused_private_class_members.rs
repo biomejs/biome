@@ -1,9 +1,8 @@
-use crate::JsRuleAction;
-use crate::services::semantic_class::{
-    AccessKind, AnyNamedClassMember, ClassMemberReference, ClassMemberReferences, SemanticClass,
-    SemanticClassModel,
+use crate::{
+    JsRuleAction,
+    services::semantic::Semantic,
+    utils::{is_node_equal, rename::RenameSymbolExtensions},
 };
-use crate::utils::rename::RenameSymbolExtensions;
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -11,11 +10,13 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
-    AnyJsClassMember, AnyJsClassMemberName, AnyJsFormalParameter, JsClassDeclaration,
-    TsAccessibilityModifier, TsPropertyParameter,
+    AnyJsClassMember, AnyJsClassMemberName, AnyJsComputedMember, AnyJsExpression,
+    AnyJsFormalParameter, AnyJsName, JsAssignmentExpression, JsClassDeclaration, JsSyntaxKind,
+    JsSyntaxNode, TsAccessibilityModifier, TsPropertyParameter,
 };
 use biome_rowan::{
-    AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, Text, TextRange, declare_node_union,
+    AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, SyntaxNodeOptionExt, TextRange,
+    declare_node_union,
 };
 use biome_rule_options::no_unused_private_class_members::NoUnusedPrivateClassMembersOptions;
 
@@ -34,7 +35,7 @@ declare_lint_rule! {
     ///   #usedOnlyInWrite = 5;
     ///
     ///   method() {
-    ///        this.#usedOnlyInWrite = 212;
+    ///	    this.#usedOnlyInWrite = 212;
     ///   }
     /// }
     /// ```
@@ -58,7 +59,7 @@ declare_lint_rule! {
     ///   #usedMember = 42;
     ///
     ///   method() {
-    ///        return this.#usedMember;
+    ///	    return this.#usedMember;
     ///   }
     /// }
     /// ```
@@ -71,10 +72,9 @@ declare_lint_rule! {
     /// ```ts
     ///  class TsBioo {
     ///    private member: number;
-    ///    private anotherMember: number;
     ///
-    ///    set_with_name(name: 'member' | 'anotherMember', value: number) {
-    ///      this[name]();
+    ///    set_with_name(name: string, value: number) {
+    ///      this[name] = value;
     ///    }
     ///  }
     /// ```
@@ -96,9 +96,7 @@ declare_node_union! {
 
 #[derive(Debug, Clone)]
 pub enum UnusedMemberAction {
-    RemoveMember {
-        member: AnyMember,
-    },
+    RemoveMember(AnyMember),
     RemovePrivateModifier {
         member: AnyMember,
         rename_with_underscore: bool,
@@ -106,16 +104,16 @@ pub enum UnusedMemberAction {
 }
 
 impl UnusedMemberAction {
-    fn property_range(&self, semantic_class: &SemanticClassModel) -> Option<TextRange> {
+    fn property_range(&self) -> Option<TextRange> {
         match self {
-            Self::RemoveMember { member } => member.member_range(semantic_class),
-            Self::RemovePrivateModifier { member, .. } => member.member_range(semantic_class),
+            Self::RemoveMember(member) => member.property_range(),
+            Self::RemovePrivateModifier { member, .. } => member.property_range(),
         }
     }
 }
 
 impl Rule for NoUnusedPrivateClassMembers {
-    type Query = SemanticClass<JsClassDeclaration>;
+    type Query = Semantic<JsClassDeclaration>;
     type State = UnusedMemberAction;
     type Signals = Box<[Self::State]>;
     type Options = NoUnusedPrivateClassMembersOptions;
@@ -127,20 +125,12 @@ impl Rule for NoUnusedPrivateClassMembers {
             Box::default()
         } else {
             let mut results = Vec::new();
-            let semantic_class = ctx.semantic_class();
-
-            let class_member_references = semantic_class.class_member_references(&node.members());
-
-            let unused_members = traverse_meaningful_read_members_usage(
-                semantic_class,
-                private_members,
-                &class_member_references,
-            );
+            let unused_members = traverse_members_usage(node.syntax(), private_members);
 
             for member in unused_members {
                 match &member {
                     AnyMember::AnyJsClassMember(_) => {
-                        results.push(UnusedMemberAction::RemoveMember { member });
+                        results.push(UnusedMemberAction::RemoveMember(member));
                     }
                     AnyMember::TsPropertyParameter(ts_property_param) => {
                         // Check if the parameter is also unused in constructor body using semantic analysis
@@ -157,11 +147,11 @@ impl Rule for NoUnusedPrivateClassMembers {
         }
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         match state {
-            UnusedMemberAction::RemoveMember { .. } => Some(RuleDiagnostic::new(
+            UnusedMemberAction::RemoveMember(_) => Some(RuleDiagnostic::new(
                 rule_category!(),
-                state.property_range(ctx.semantic_class()),
+                state.property_range(),
                 markup! {
                     "This private class member is defined but never used."
                 },
@@ -173,7 +163,7 @@ impl Rule for NoUnusedPrivateClassMembers {
                 if *rename_with_underscore {
                     Some(RuleDiagnostic::new(
                         rule_category!(),
-                        state.property_range(ctx.semantic_class()),
+                        state.property_range(),
                         markup! {
                             "This private class member is defined but never used."
                         },
@@ -181,7 +171,7 @@ impl Rule for NoUnusedPrivateClassMembers {
                 } else {
                     Some(RuleDiagnostic::new(
                         rule_category!(),
-                        state.property_range(ctx.semantic_class()),
+                        state.property_range(),
                         markup! {
                             "This parameter is never used outside of the constructor."
                         },
@@ -195,7 +185,7 @@ impl Rule for NoUnusedPrivateClassMembers {
         let mut mutation = ctx.root().begin();
 
         match state {
-            UnusedMemberAction::RemoveMember { member, .. } => {
+            UnusedMemberAction::RemoveMember(member) => {
                 mutation.remove_node(member.clone());
                 Some(JsRuleAction::new(
                     ctx.metadata().action_category(ctx.category(), ctx.group()),
@@ -207,7 +197,6 @@ impl Rule for NoUnusedPrivateClassMembers {
             UnusedMemberAction::RemovePrivateModifier {
                 member,
                 rename_with_underscore,
-                ..
             } => {
                 if let AnyMember::TsPropertyParameter(ts_property_param) = member {
                     // Remove the private modifier
@@ -233,7 +222,7 @@ impl Rule for NoUnusedPrivateClassMembers {
                         let name_trimmed = name_token.text_trimmed();
                         let new_name = format!("_{name_trimmed}");
                         if !mutation.rename_node_declaration(
-                            ctx.semantic(),
+                            ctx.model(),
                             identifier_binding,
                             &new_name,
                         ) {
@@ -252,33 +241,65 @@ impl Rule for NoUnusedPrivateClassMembers {
     }
 }
 
-/// Filters out private class members that are read meaningfully in the class.
-///
-/// Returns only private members **not read meaningfully**.
-fn traverse_meaningful_read_members_usage(
-    semantic_class: &SemanticClassModel,
-    private_members: Vec<AnyMember>,
-    class_member_references: &ClassMemberReferences,
+/// Check for private member usage
+/// if the member usage is found, we remove it from the hashmap
+fn traverse_members_usage(
+    syntax: &JsSyntaxNode,
+    mut private_members: Vec<AnyMember>,
 ) -> Vec<AnyMember> {
-    let ClassMemberReferences { reads, .. } = class_member_references;
+    // `true` is at least one member is a TypeScript private member like `private member`.
+    // The other private members are sharp members `#member`.
+    let mut ts_private_count = private_members
+        .iter()
+        .filter(|member| !member.is_private_sharp())
+        .count();
+
+    for node in syntax.descendants() {
+        match AnyJsName::try_cast(node) {
+            Ok(js_name) => {
+                private_members.retain(|private_member| {
+                    let member_being_used = private_member.match_js_name(&js_name) == Some(true);
+
+                    if !member_being_used {
+                        return true;
+                    }
+
+                    let is_write_only =
+                        is_write_only(&js_name) == Some(true) && !private_member.is_accessor();
+                    let is_in_update_expression = is_in_update_expression(&js_name);
+
+                    if is_in_update_expression || is_write_only {
+                        return true;
+                    }
+
+                    if !private_member.is_private_sharp() {
+                        ts_private_count -= 1;
+                    }
+
+                    false
+                });
+
+                if private_members.is_empty() {
+                    break;
+                }
+            }
+            Err(node) => {
+                if ts_private_count != 0
+                    && let Some(computed_member) = AnyJsComputedMember::cast(node)
+                    && matches!(
+                        computed_member.object(),
+                        Ok(AnyJsExpression::JsThisExpression(_))
+                    )
+                {
+                    // We consider that all TypeScript private members are used in expressions like `this[something]`.
+                    private_members.retain(|private_member| private_member.is_private_sharp());
+                    ts_private_count = 0;
+                }
+            }
+        }
+    }
 
     private_members
-        .into_iter()
-        .filter_map(|private_member| {
-            if !reads
-                .iter()
-                .filter(|read| read.access_kind == AccessKind::MeaningfulRead)
-                .any(|reference| {
-                    let ClassMemberReference { name, .. } = reference;
-                    private_member.matches_name(semantic_class, name)
-                })
-            {
-                Some(private_member)
-            } else {
-                None
-            }
-        })
-        .collect()
 }
 
 /// Check if a TsPropertyParameter is also unused as a function parameter
@@ -304,7 +325,7 @@ fn check_ts_property_parameter_usage(
         }
 
         if identifier_binding
-            .all_references(ctx.semantic())
+            .all_references(ctx.model())
             .next()
             .is_some()
         {
@@ -353,7 +374,81 @@ fn get_constructor_params(
         })
 }
 
+/// Check whether the provided `AnyJsName` is part of a potentially write-only assignment expression.
+/// This function inspects the syntax tree around the given `AnyJsName` to check whether it is involved in an assignment operation and whether that assignment can be write-only.
+///
+/// # Returns
+///
+/// - `Some(true)`: If the `js_name` is in a write-only assignment.
+/// - `Some(false)`: If the `js_name` is in a assignments that also reads like shorthand operators
+/// - `None`: If the parent is not present or grand parent is not a JsAssignmentExpression
+///
+/// # Examples of write only expressions
+///
+/// ```js
+/// this.usedOnlyInWrite = 2;
+/// this.usedOnlyInWrite = this.usedOnlyInWrite;
+/// ```
+///
+/// # Examples of expressions that are NOT write-only
+///
+/// ```js
+/// return this.#val++;   // increment expression used as return value
+/// return this.#val = 1; // assignment used as expression
+/// ```
+///
+fn is_write_only(js_name: &AnyJsName) -> Option<bool> {
+    let parent = js_name.syntax().parent()?;
+    let grand_parent = parent.parent()?;
+    let assignment_expression = JsAssignmentExpression::cast(grand_parent)?;
+    let left = assignment_expression.left().ok()?;
+
+    if !is_node_equal(left.syntax(), &parent) {
+        return Some(false);
+    }
+
+    // If it's not a direct child of expression statement, its result is being used
+    let kind = assignment_expression.syntax().parent().kind();
+    Some(kind.is_some_and(|kind| matches!(kind, JsSyntaxKind::JS_EXPRESSION_STATEMENT)))
+}
+
+fn is_in_update_expression(js_name: &AnyJsName) -> bool {
+    let Some(grand_parent) = js_name.syntax().grand_parent() else {
+        return false;
+    };
+
+    // If it's not a direct child of expression statement, its result is being used
+    let kind = grand_parent.parent().kind();
+    if !kind.is_some_and(|kind| matches!(kind, JsSyntaxKind::JS_EXPRESSION_STATEMENT)) {
+        return false;
+    }
+
+    matches!(
+        grand_parent.kind(),
+        JsSyntaxKind::JS_POST_UPDATE_EXPRESSION | JsSyntaxKind::JS_PRE_UPDATE_EXPRESSION
+    )
+}
+
 impl AnyMember {
+    fn is_accessor(&self) -> bool {
+        matches!(
+            self.syntax().kind(),
+            JsSyntaxKind::JS_SETTER_CLASS_MEMBER | JsSyntaxKind::JS_GETTER_CLASS_MEMBER
+        )
+    }
+
+    /// Returns `true` if it is a private property starting with `#`.
+    fn is_private_sharp(&self) -> bool {
+        if let Self::AnyJsClassMember(member) = self {
+            matches!(
+                member.name(),
+                Ok(Some(AnyJsClassMemberName::JsPrivateClassMemberName(_)))
+            )
+        } else {
+            false
+        }
+    }
+
     fn is_private(&self) -> Option<bool> {
         match self {
             Self::AnyJsClassMember(member) => {
@@ -397,23 +492,69 @@ impl AnyMember {
         }
     }
 
-    fn member_range(&self, semantic_class: &SemanticClassModel) -> Option<TextRange> {
-        if let Some(any_named_class_member) = AnyNamedClassMember::cast(self.syntax().clone())
-            && let Some(prop_name) = semantic_class.extract_named_member(&any_named_class_member)
-        {
-            return Some(prop_name.range);
+    fn property_range(&self) -> Option<TextRange> {
+        match self {
+            Self::AnyJsClassMember(member) => match member {
+                AnyJsClassMember::JsGetterClassMember(member) => Some(member.name().ok()?.range()),
+                AnyJsClassMember::JsMethodClassMember(member) => Some(member.name().ok()?.range()),
+                AnyJsClassMember::JsPropertyClassMember(member) => {
+                    Some(member.name().ok()?.range())
+                }
+                AnyJsClassMember::JsSetterClassMember(member) => Some(member.name().ok()?.range()),
+                _ => None,
+            },
+            Self::TsPropertyParameter(ts_property) => match ts_property.formal_parameter().ok()? {
+                AnyJsFormalParameter::JsBogusParameter(_)
+                | AnyJsFormalParameter::JsMetavariable(_) => None,
+                AnyJsFormalParameter::JsFormalParameter(param) => Some(
+                    param
+                        .binding()
+                        .ok()?
+                        .as_any_js_binding()?
+                        .as_js_identifier_binding()?
+                        .name_token()
+                        .ok()?
+                        .text_range(),
+                ),
+            },
         }
-
-        None
     }
 
-    fn matches_name(&self, semantic_class: &SemanticClassModel, name: &Text) -> bool {
-        if let Some(any_named_class_member) = AnyNamedClassMember::cast(self.syntax().clone())
-            && let Some(prop_name) = semantic_class.extract_named_member(&any_named_class_member)
-        {
-            return prop_name.name.eq(name);
-        }
+    fn match_js_name(&self, js_name: &AnyJsName) -> Option<bool> {
+        let value_token = js_name.value_token().ok()?;
+        let token = value_token.text_trimmed();
 
-        false
+        match self {
+            Self::AnyJsClassMember(member) => match member {
+                AnyJsClassMember::JsGetterClassMember(member) => {
+                    Some(member.name().ok()?.name()?.text() == token)
+                }
+                AnyJsClassMember::JsMethodClassMember(member) => {
+                    Some(member.name().ok()?.name()?.text() == token)
+                }
+                AnyJsClassMember::JsPropertyClassMember(member) => {
+                    Some(member.name().ok()?.name()?.text() == token)
+                }
+                AnyJsClassMember::JsSetterClassMember(member) => {
+                    Some(member.name().ok()?.name()?.text() == token)
+                }
+                _ => None,
+            },
+            Self::TsPropertyParameter(ts_property) => match ts_property.formal_parameter().ok()? {
+                AnyJsFormalParameter::JsBogusParameter(_)
+                | AnyJsFormalParameter::JsMetavariable(_) => None,
+                AnyJsFormalParameter::JsFormalParameter(param) => Some(
+                    param
+                        .binding()
+                        .ok()?
+                        .as_any_js_binding()?
+                        .as_js_identifier_binding()?
+                        .name_token()
+                        .ok()?
+                        .text_trimmed()
+                        == token,
+                ),
+            },
+        }
     }
 }

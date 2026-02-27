@@ -35,3 +35,5 @@ try {} catch(name4: name4.T) {}
 try {} catch(other4: other4.T) {}
 
 ```
+
+_Note: The parser emitted 2 diagnostics which are not shown here._

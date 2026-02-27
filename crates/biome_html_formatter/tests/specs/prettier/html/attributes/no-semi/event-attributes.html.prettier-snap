@@ -1,0 +1,2 @@
+<button onclick="[foo, bar].forEach((fn) => void fn())"></button>
+<button onclick="[foo, bar].forEach((fn) => void fn()); alert(1)"></button>

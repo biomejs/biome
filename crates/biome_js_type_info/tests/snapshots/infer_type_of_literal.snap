@@ -12,12 +12,12 @@ const a = 123.45;
 ## Result
 
 ```
-a => value: 123.45
+a => number: 123.45
 
 ```
 
 ## Registered types
 
 ```
-Global TypeId(0) => value: 123.45
+Global TypeId(0) => number: 123.45
 ```

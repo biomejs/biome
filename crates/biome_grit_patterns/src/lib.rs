@@ -11,6 +11,7 @@ mod grit_css_parser;
 mod grit_definitions;
 mod grit_file;
 mod grit_js_parser;
+mod grit_json_parser;
 mod grit_node;
 mod grit_node_patterns;
 mod grit_query;
@@ -20,6 +21,8 @@ mod grit_target_node;
 mod grit_tree;
 mod pattern_compiler;
 mod source_location_ext;
+#[doc(hidden)]
+pub mod testing;
 mod util;
 mod variables;
 
@@ -33,7 +36,7 @@ pub use grit_query::{
     CreateFile, GritQuery, GritQueryEffect, GritQueryResult, Message, OutputFile,
 };
 pub use grit_resolved_pattern::GritResolvedPattern;
-pub use grit_target_language::{GritTargetLanguage, JsTargetLanguage};
+pub use grit_target_language::{GritTargetLanguage, JsTargetLanguage, JsonTargetLanguage};
 pub use grit_target_node::{GritTargetLanguageNode, GritTargetNode, GritTargetSyntaxKind};
 
 use biome_grit_parser::parse_grit;

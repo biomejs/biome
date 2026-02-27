@@ -39,7 +39,7 @@ nested.invalid.css:8:1 lint/style/noDescendingSpecificity ━━━━━━━�
     4 │         color: red;
     5 │     }
   
-  i Descending specificity selector may not applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
   
 
 ```

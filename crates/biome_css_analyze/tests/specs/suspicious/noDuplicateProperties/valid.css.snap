@@ -1,7 +1,6 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: valid.css
-snapshot_kind: text
 ---
 # Input
 ```css
@@ -69,3 +68,5 @@ a {
 } */
 
 ```
+
+_Note: The parser emitted 2 diagnostics which are not shown here._

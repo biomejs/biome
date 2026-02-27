@@ -1,7 +1,7 @@
 use biome_formatter::prelude::*;
 use biome_formatter::{
     FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth,
-    TransformSourceMap,
+    SourceMapGeneration, TrailingNewline, TransformSourceMap,
 };
 use biome_formatter::{format_args, write};
 use biome_js_syntax::TextSize;
@@ -27,12 +27,17 @@ impl FormatOptions for FormatSemanticModelOptions {
         LineEnding::Lf
     }
 
+    fn trailing_newline(&self) -> TrailingNewline {
+        TrailingNewline::default()
+    }
+
     fn as_print_options(&self) -> PrinterOptions {
         PrinterOptions {
             indent_width: self.indent_width(),
             print_width: self.line_width().into(),
             line_ending: self.line_ending(),
             indent_style: self.indent_style(),
+            source_map_generation: SourceMapGeneration::default(),
         }
     }
 }

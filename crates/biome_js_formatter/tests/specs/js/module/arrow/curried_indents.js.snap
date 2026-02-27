@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/module/arrow/curried_indents.js
 ---
+
 # Input
 
 ```js
@@ -74,6 +75,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -124,6 +126,7 @@ const bifornCringer2 =
 import("./someComponent").then(({ default: TheComponent }) => (props) => (
 	<TheComponent {...someInjectedProps} />
 ));
+
 ```
 
 ## Output 1
@@ -144,6 +147,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -194,4 +198,5 @@ const bifornCringer2 =
 import("./someComponent").then(({ default: TheComponent }) => props => (
 	<TheComponent {...someInjectedProps} />
 ));
+
 ```

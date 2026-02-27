@@ -14,7 +14,7 @@ pub const TAILWIND_KINDS_SRC: KindsSrc = KindsSrc {
     ],
     literals: &["TW_BASE", "TW_VALUE", "TW_SELECTOR", "TW_PROPERTY"],
     tokens: &["ERROR_TOKEN", "NEWLINE"],
-    keywords: &[],
+    keywords: &["data"],
     nodes: &[
         "TW_ROOT",
         "TW_CANDIDATE_LIST",
@@ -30,6 +30,8 @@ pub const TAILWIND_KINDS_SRC: KindsSrc = KindsSrc {
         "TW_ARBITRARY_VALUE",
         "TW_CSS_VARIABLE_VALUE",
         "TW_MODIFIER",
+        "TW_DATA_ATTRIBUTE",
+        // "TW_DATA_ATTRIBUTE_ARBITRARY_VALUE",
         // Bogus nodes
         "TW_BOGUS",
         "TW_BOGUS_CANDIDATE",

@@ -1,4 +1,6 @@
 use crate::JsRuleAction;
+use crate::services::embedded_bindings::EmbeddedBindings;
+use crate::services::embedded_value_references::EmbeddedValueReferences;
 use crate::{services::semantic::Semantic, utils::rename::RenameSymbolExtensions};
 use biome_analyze::RuleSource;
 use biome_analyze::{FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
@@ -8,9 +10,10 @@ use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
 use biome_js_syntax::declaration_ext::is_in_ambient_context;
 use biome_js_syntax::{
-    AnyJsExpression, JsClassExpression, JsFileSource, JsForStatement, JsFunctionExpression,
-    JsIdentifierExpression, JsModuleItemList, JsSequenceExpression, JsSyntaxKind, JsSyntaxNode,
-    TsConditionalType, TsDeclarationModule, TsInferType,
+    AnyJsExpression, EmbeddingKind, JsClassExpression, JsFileSource, JsForStatement,
+    JsFunctionExpression, JsIdentifierExpression, JsModuleItemList, JsSequenceExpression,
+    JsSyntaxKind, JsSyntaxNode, TsConditionalType, TsDeclarationModule, TsInferType,
+    TsInterfaceDeclaration, TsTypeAliasDeclaration,
 };
 use biome_rowan::{AstNode, BatchMutationExt, Direction, SyntaxResult};
 use biome_rule_options::no_unused_variables::NoUnusedVariablesOptions;
@@ -83,21 +86,38 @@ declare_lint_rule! {
     /// used_overloaded();
     /// ```
     ///
+    /// By default, unused variables declared inside destructured objects are ignored
+    /// if the destructuring pattern also contains a rest property.
+    /// (See the [rule options](#options) if you want to enable these checks).
     /// ```js
     /// const car = { brand: "Tesla", year: 2019, countryCode: "US" };
     /// const { brand, ...rest } = car;
-    /// console.log(brand, rest);
+    /// console.log(rest);
+    /// ```
+    ///
+    /// In Astro files, a top-level interface or a type alias named `Props` is always ignored
+    /// as it's implicitly read by the framework.
+    /// ```astro,ignore
+    /// ---
+    /// interface Props {
+    ///   name: string;
+    ///   greeting?: string;
+    /// }
+    ///
+    /// const { name, greeting } = Astro.props;
+    /// ---
     /// ```
     ///
     /// ## Options
     ///
-    /// The rule has the following options
-    ///
     /// ### `ignoreRestSiblings`
     ///
-    /// Whether to ignore unused variables from an object destructuring with a spread (i.e.: `a` and `b` in `const { a, b, ...rest } = obj` should be ignored by this rule).
+    /// Whether to ignore unused variables declared inside destructured objects
+    /// containing rest properties (such as `const { a, b, ...rest } = obj`.
     ///
-    /// Defaults to `true`.
+    /// Default: `true`
+    ///
+    /// #### Example
     ///
     /// ```json,options
     /// {
@@ -108,8 +128,15 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```js,expect_diagnostic,use_options
+    /// const car = { brand: "Tesla", year: 2019, countryCode: "US" };
     /// const { brand, ...other } = car;
-    /// console.log(brand);
+    /// console.log(other);
+    /// ```
+    ///
+    /// ```js,use_options
+    /// const car = { brand: "Tesla", year: 2019, countryCode: "US" };
+    /// const { brand: _, ...other } = car;
+    /// console.log(other);
     /// ```
     pub NoUnusedVariables {
         version: "1.0.0",
@@ -219,9 +246,16 @@ fn suggested_fix_if_unused(
         }
 
         // Bindings under catch are never ok to be unused
-        AnyJsBindingDeclaration::JsCatchDeclaration(_)
-        // Type parameters are never ok to be unused
-        | AnyJsBindingDeclaration::TsTypeParameter(_) => Some(SuggestedFix::PrefixUnderscore),
+        AnyJsBindingDeclaration::JsCatchDeclaration(_) => Some(SuggestedFix::PrefixUnderscore),
+
+        // Type parameters are never ok to be unused unless they are declared in an ambient context
+        node @ AnyJsBindingDeclaration::TsTypeParameter(_) => {
+            if is_in_ambient_context(node.syntax()) {
+                None
+            } else {
+                Some(SuggestedFix::PrefixUnderscore)
+            }
+        }
 
         AnyJsBindingDeclaration::TsInferType(_) => {
             let binding_name_token = binding.name_token().ok()?;
@@ -274,10 +308,16 @@ impl Rule for NoUnusedVariables {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let binding = ctx.query();
         let model = ctx.model();
-        let is_declaration_file = ctx
-            .source_type::<JsFileSource>()
-            .language()
-            .is_definition_file();
+        let embedded_bindings = ctx
+            .get_service::<EmbeddedBindings>()
+            .expect("embedded bindings service");
+        let embedded_references = ctx
+            .get_service::<EmbeddedValueReferences>()
+            .expect("embedded references service");
+
+        let file_source = ctx.source_type::<JsFileSource>();
+
+        let is_declaration_file = file_source.language().is_definition_file();
         if is_declaration_file
             && let Some(items) = binding
                 .syntax()
@@ -294,9 +334,31 @@ impl Rule for NoUnusedVariables {
             }
         }
 
+        let binding_name = binding.name_token().ok()?;
+        let binding_name = binding_name.text_trimmed();
+
         // Ignore name prefixed with `_`
-        let is_underscore_prefixed = binding.name_token().ok()?.text_trimmed().starts_with('_');
-        if !is_underscore_prefixed && is_unused(model, binding) {
+        let is_underscore_prefixed = binding_name.starts_with('_');
+        let is_defined_in_embedded_binding = embedded_bindings.contains_binding(binding_name);
+        let is_used_as_reference = embedded_references.is_used_as_value(binding_name);
+
+        if is_underscore_prefixed || is_defined_in_embedded_binding || is_used_as_reference {
+            return None;
+        }
+
+        // In Astro files, a top-level type/interface `Props` is always ignored as it's implicitly
+        // read by the framework.
+        if binding_name == "Props"
+            && let EmbeddingKind::Astro { .. } = file_source.as_embedding_kind()
+            && let AnyJsIdentifierBinding::TsIdentifierBinding(binding) = binding
+            && (TsInterfaceDeclaration::can_cast(binding.syntax().parent()?.kind())
+                || TsTypeAliasDeclaration::can_cast(binding.syntax().parent()?.kind()))
+            && JsModuleItemList::can_cast(binding.syntax().grand_parent()?.kind())
+        {
+            return None;
+        }
+
+        if is_unused(model, binding) {
             suggested_fix_if_unused(binding, ctx.options())
         } else {
             None
@@ -323,24 +385,27 @@ impl Rule for NoUnusedVariables {
             AnyJsIdentifierBinding::TsLiteralEnumMemberName(node) => node.value().ok()?,
         };
 
-        let diag = RuleDiagnostic::new(
+        let mut diag = RuleDiagnostic::new(
             rule_category!(),
             binding.syntax().text_trimmed_range(),
             markup! {
                 "This "{symbol_type}" "<Emphasis>{binding_name.text_trimmed()}</Emphasis>" is unused."
             },
+        ).note(
+            markup! {
+                "Unused variables are often the result of typos, incomplete refactors, or other sources of bugs."
+            },
         );
 
-        let mut diag = diag.note(
-            markup! {"Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs."},
-        );
-
-        // Check if this binding is part of an object pattern with a rest element
+        // Check if this binding is part of an object destructuring pattern with a rest property
         if let Some(decl) = binding.declaration()
             && is_rest_spread_sibling(&decl)
         {
             diag = diag.note(
-                    markup! {"You can use the "<Emphasis>"ignoreRestSiblings"</Emphasis>" option to ignore unused variables in an object destructuring with a spread."},
+                    markup! {
+                        "You can enable the "<Emphasis>"ignoreRestSiblings"</Emphasis>" option to ignore unused variables "
+                        "inside destructured objects with rest properties."
+                    },
                 );
         }
 

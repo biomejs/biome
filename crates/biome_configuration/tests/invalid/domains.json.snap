@@ -23,6 +23,9 @@ domains.json:4:7 deserialize ━━━━━━━━━━━━━━━━━
   - vue
   - project
   - tailwind
+  - turborepo
+  - playwright
+  - types
   
 
 

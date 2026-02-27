@@ -124,24 +124,46 @@ pub enum EmbeddingKind {
         /// Whether the script is inside Astro frontmatter
         frontmatter: bool,
     },
-    Vue,
-    Svelte,
+    Vue {
+        /// Whether the script is inside script tag with setup attribute
+        setup: bool,
+        /// Where the bindings are defined
+        is_source: bool,
+        /// Whether this is a v-on event handler (e.g., @click="handler")
+        event_handler: bool,
+    },
+    Svelte {
+        /// Where the bindings are defined
+        is_source: bool,
+    },
     #[default]
     None,
 }
 
 impl EmbeddingKind {
     pub const fn is_astro(&self) -> bool {
-        matches!(self, Self::Astro { frontmatter: false })
+        matches!(self, Self::Astro { .. })
     }
     pub const fn is_astro_frontmatter(&self) -> bool {
         matches!(self, Self::Astro { frontmatter: true })
     }
     pub const fn is_vue(&self) -> bool {
-        matches!(self, Self::Vue)
+        matches!(self, Self::Vue { .. })
+    }
+    pub const fn is_vue_setup(&self) -> bool {
+        matches!(self, Self::Vue { setup: true, .. })
+    }
+    pub const fn is_vue_event_handler(&self) -> bool {
+        matches!(
+            self,
+            Self::Vue {
+                event_handler: true,
+                ..
+            }
+        )
     }
     pub const fn is_svelte(&self) -> bool {
-        matches!(self, Self::Svelte)
+        matches!(self, Self::Svelte { .. })
     }
 }
 
@@ -207,20 +229,30 @@ impl JsFileSource {
     }
 
     pub fn astro() -> Self {
-        Self::ts().with_embedding_kind(EmbeddingKind::Astro { frontmatter: false })
-    }
-    pub fn astro_frontmatter() -> Self {
         Self::ts().with_embedding_kind(EmbeddingKind::Astro { frontmatter: true })
     }
 
     /// Vue file definition
     pub fn vue() -> Self {
-        Self::js_module().with_embedding_kind(EmbeddingKind::Vue)
+        Self::js_module().with_embedding_kind(EmbeddingKind::Vue {
+            setup: false,
+            is_source: true,
+            event_handler: false,
+        })
+    }
+
+    /// Vue file definition with setup attribute
+    pub fn vue_setup() -> Self {
+        Self::js_module().with_embedding_kind(EmbeddingKind::Vue {
+            setup: true,
+            is_source: true,
+            event_handler: false,
+        })
     }
 
     /// Svelte file definition
     pub fn svelte() -> Self {
-        Self::js_module().with_embedding_kind(EmbeddingKind::Svelte)
+        Self::js_module().with_embedding_kind(EmbeddingKind::Svelte { is_source: true })
     }
 
     pub const fn with_module_kind(mut self, kind: ModuleKind) -> Self {
@@ -281,6 +313,47 @@ impl JsFileSource {
 
     pub const fn is_jsx(&self) -> bool {
         self.variant.is_jsx()
+    }
+
+    pub const fn is_embedded(&self) -> bool {
+        matches!(
+            self.embedding_kind,
+            EmbeddingKind::Svelte { .. } | EmbeddingKind::Vue { .. } | EmbeddingKind::Astro { .. }
+        )
+    }
+
+    /// The code is embedded, and that's where bindings are defined.
+    pub const fn is_embedded_source(&self) -> bool {
+        matches!(
+            self.embedding_kind,
+            EmbeddingKind::Svelte { is_source: true }
+                | EmbeddingKind::Vue {
+                    is_source: true,
+                    ..
+                }
+                | EmbeddingKind::Astro { frontmatter: true }
+        )
+    }
+
+    /// Returns true if this is a template expression that should be parsed as an expression
+    /// rather than as a module/script. Template expressions in frameworks like Vue ({{ }}),
+    /// Svelte ({ }), and Astro ({ }) should parse `{ duration }` as an object literal,
+    /// not as a block statement.
+    pub const fn is_template_expression(&self) -> bool {
+        matches!(
+            self.embedding_kind,
+            EmbeddingKind::Svelte { is_source: false }
+                | EmbeddingKind::Vue {
+                    is_source: false,
+                    ..
+                }
+                | EmbeddingKind::Astro { frontmatter: false }
+        )
+    }
+
+    /// Returns true if this is a Vue event handler (v-on directive)
+    pub const fn is_vue_event_handler(&self) -> bool {
+        self.embedding_kind.is_vue_event_handler()
     }
 
     pub const fn as_embedding_kind(&self) -> &EmbeddingKind {

@@ -1,6 +1,7 @@
 use crate::CliDiagnostic;
 use biome_configuration::Configuration;
 use biome_fs::FileSystem;
+use camino::Utf8Path;
 use std::ffi::OsString;
 
 pub(crate) fn get_changed_files(
@@ -26,7 +27,12 @@ pub(crate) fn get_changed_files(
 
     let changed_files = fs.get_changed_files(base)?;
 
-    let filtered_changed_files = changed_files.iter().map(OsString::from).collect::<Vec<_>>();
+    // Filter out files that no longer exist (e.g., deleted or renamed in the working directory)
+    let filtered_changed_files = changed_files
+        .iter()
+        .filter(|file| fs.path_is_file(Utf8Path::new(file)))
+        .map(OsString::from)
+        .collect::<Vec<_>>();
 
     Ok(filtered_changed_files)
 }
@@ -34,7 +40,12 @@ pub(crate) fn get_changed_files(
 pub(crate) fn get_staged_files(fs: &dyn FileSystem) -> Result<Vec<OsString>, CliDiagnostic> {
     let staged_files = fs.get_staged_files()?;
 
-    let filtered_staged_files = staged_files.iter().map(OsString::from).collect::<Vec<_>>();
+    // Filter out files that no longer exist (e.g., deleted or renamed in the working directory)
+    let filtered_staged_files = staged_files
+        .iter()
+        .filter(|file| fs.path_is_file(Utf8Path::new(file)))
+        .map(OsString::from)
+        .collect::<Vec<_>>();
 
     Ok(filtered_staged_files)
 }

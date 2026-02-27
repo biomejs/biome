@@ -51,6 +51,8 @@ invalid.vue:5:14 lint/nursery/useVueValidVElse ━━━━━━━━━━━
   
   i Remove the argument; v-else is a stand-alone control directive.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -66,6 +68,8 @@ invalid.vue:8:14 lint/nursery/useVueValidVElse ━━━━━━━━━━━
     10 │   <!-- v-else with value -->
   
   i Remove the modifier; v-else is a stand-alone control directive.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -83,6 +87,8 @@ invalid.vue:11:14 lint/nursery/useVueValidVElse ━━━━━━━━━━�
   
   i Remove the value; v-else is a stand-alone control directive.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -98,6 +104,8 @@ invalid.vue:14:8 lint/nursery/useVueValidVElse ━━━━━━━━━━━
     16 │   <!-- v-else after element without v-if/v-else-if -->
   
   i Place v-else immediately after an element with v-if or v-else-if, within the same parent.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -116,6 +124,8 @@ invalid.vue:18:8 lint/nursery/useVueValidVElse ━━━━━━━━━━━
   
   i Place v-else immediately after an element with v-if or v-else-if, within the same parent.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -131,6 +141,8 @@ invalid.vue:21:25 lint/nursery/useVueValidVElse ━━━━━━━━━━�
     23 │   <!-- v-else on same element as v-else-if -->
   
   i Move v-else onto a separate element immediately following the v-if/v-else-if element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -148,6 +160,8 @@ invalid.vue:24:30 lint/nursery/useVueValidVElse ━━━━━━━━━━�
   
   i Move v-else onto a separate element immediately following the v-if/v-else-if element.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -163,6 +177,8 @@ invalid.vue:29:8 lint/nursery/useVueValidVElse ━━━━━━━━━━━
     30 │ </template>
   
   i Place v-else immediately after an element with v-if or v-else-if, within the same parent.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

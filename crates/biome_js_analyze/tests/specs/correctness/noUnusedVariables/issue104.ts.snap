@@ -12,5 +12,3 @@ export function f(X: X): X {
 }
 
 ```
-
-

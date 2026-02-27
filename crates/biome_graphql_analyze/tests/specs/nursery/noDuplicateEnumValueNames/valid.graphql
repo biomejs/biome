@@ -1,0 +1,6 @@
+# should not generate diagnostics
+enum A {
+	TEST
+	OTHER
+	ANOTHER
+}

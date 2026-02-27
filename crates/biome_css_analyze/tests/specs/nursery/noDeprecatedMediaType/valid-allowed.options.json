@@ -1,0 +1,15 @@
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noDeprecatedMediaType": {
+          "level": "error",
+          "options": {
+            "allow": ["speech"]
+          }
+        }
+      }
+    }
+  }
+}

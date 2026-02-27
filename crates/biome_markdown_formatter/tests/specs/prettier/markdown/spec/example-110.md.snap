@@ -1,0 +1,40 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/spec/example-110.md
+---
+# Input
+
+```md
+~~~~    ruby startline=3 $%@#$
+def foo(x)
+  return 3
+end
+~~~~~~~
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1,5 @@
+-```ruby startline=3 $%@#$
++~~~~    ruby startline=3 $%@#$
+ def foo(x)
+   return 3
+ end
+-```
++~~~~~~~
+```
+
+# Output
+
+```md
+~~~~    ruby startline=3 $%@#$
+def foo(x)
+  return 3
+end
+~~~~~~~
+```

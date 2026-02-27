@@ -1,0 +1,176 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<input type="checkbox" bind:checked={isChecked} />
+<input type="checkbox" bind:indeterminate={isIndeterminate} />
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@0..1 "<" [] [],
+            name: HtmlTagName {
+                value_token: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [
+                HtmlAttribute {
+                    name: HtmlAttributeName {
+                        value_token: HTML_LITERAL@7..11 "type" [] [],
+                    },
+                    initializer: HtmlAttributeInitializerClause {
+                        eq_token: EQ@11..12 "=" [] [],
+                        value: HtmlString {
+                            value_token: HTML_STRING_LITERAL@12..23 "\"checkbox\"" [] [Whitespace(" ")],
+                        },
+                    },
+                },
+                SvelteBindDirective {
+                    bind_token: BIND_KW@23..27 "bind" [] [],
+                    value: SvelteDirectiveValue {
+                        colon_token: COLON@27..28 ":" [] [],
+                        property: SvelteName {
+                            ident_token: IDENT@28..35 "checked" [] [],
+                        },
+                        modifiers: SvelteDirectiveModifierList [],
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@35..36 "=" [] [],
+                            value: HtmlAttributeSingleTextExpression {
+                                l_curly_token: L_CURLY@36..37 "{" [] [],
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@37..46 "isChecked" [] [],
+                                },
+                                r_curly_token: R_CURLY@46..48 "}" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                },
+            ],
+            slash_token: SLASH@48..49 "/" [] [],
+            r_angle_token: R_ANGLE@49..50 ">" [] [],
+        },
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@50..52 "<" [Newline("\n")] [],
+            name: HtmlTagName {
+                value_token: HTML_LITERAL@52..58 "input" [] [Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [
+                HtmlAttribute {
+                    name: HtmlAttributeName {
+                        value_token: HTML_LITERAL@58..62 "type" [] [],
+                    },
+                    initializer: HtmlAttributeInitializerClause {
+                        eq_token: EQ@62..63 "=" [] [],
+                        value: HtmlString {
+                            value_token: HTML_STRING_LITERAL@63..74 "\"checkbox\"" [] [Whitespace(" ")],
+                        },
+                    },
+                },
+                SvelteBindDirective {
+                    bind_token: BIND_KW@74..78 "bind" [] [],
+                    value: SvelteDirectiveValue {
+                        colon_token: COLON@78..79 ":" [] [],
+                        property: SvelteName {
+                            ident_token: IDENT@79..92 "indeterminate" [] [],
+                        },
+                        modifiers: SvelteDirectiveModifierList [],
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@92..93 "=" [] [],
+                            value: HtmlAttributeSingleTextExpression {
+                                l_curly_token: L_CURLY@93..94 "{" [] [],
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@94..109 "isIndeterminate" [] [],
+                                },
+                                r_curly_token: R_CURLY@109..111 "}" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                },
+            ],
+            slash_token: SLASH@111..112 "/" [] [],
+            r_angle_token: R_ANGLE@112..113 ">" [] [],
+        },
+    ],
+    eof_token: EOF@113..114 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..114
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..113
+    0: HTML_SELF_CLOSING_ELEMENT@0..50
+      0: L_ANGLE@0..1 "<" [] []
+      1: HTML_TAG_NAME@1..7
+        0: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@7..48
+        0: HTML_ATTRIBUTE@7..23
+          0: HTML_ATTRIBUTE_NAME@7..11
+            0: HTML_LITERAL@7..11 "type" [] []
+          1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@11..23
+            0: EQ@11..12 "=" [] []
+            1: HTML_STRING@12..23
+              0: HTML_STRING_LITERAL@12..23 "\"checkbox\"" [] [Whitespace(" ")]
+        1: SVELTE_BIND_DIRECTIVE@23..48
+          0: BIND_KW@23..27 "bind" [] []
+          1: SVELTE_DIRECTIVE_VALUE@27..48
+            0: COLON@27..28 ":" [] []
+            1: SVELTE_NAME@28..35
+              0: IDENT@28..35 "checked" [] []
+            2: SVELTE_DIRECTIVE_MODIFIER_LIST@35..35
+            3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@35..48
+              0: EQ@35..36 "=" [] []
+              1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@36..48
+                0: L_CURLY@36..37 "{" [] []
+                1: HTML_TEXT_EXPRESSION@37..46
+                  0: HTML_LITERAL@37..46 "isChecked" [] []
+                2: R_CURLY@46..48 "}" [] [Whitespace(" ")]
+      3: SLASH@48..49 "/" [] []
+      4: R_ANGLE@49..50 ">" [] []
+    1: HTML_SELF_CLOSING_ELEMENT@50..113
+      0: L_ANGLE@50..52 "<" [Newline("\n")] []
+      1: HTML_TAG_NAME@52..58
+        0: HTML_LITERAL@52..58 "input" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@58..111
+        0: HTML_ATTRIBUTE@58..74
+          0: HTML_ATTRIBUTE_NAME@58..62
+            0: HTML_LITERAL@58..62 "type" [] []
+          1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@62..74
+            0: EQ@62..63 "=" [] []
+            1: HTML_STRING@63..74
+              0: HTML_STRING_LITERAL@63..74 "\"checkbox\"" [] [Whitespace(" ")]
+        1: SVELTE_BIND_DIRECTIVE@74..111
+          0: BIND_KW@74..78 "bind" [] []
+          1: SVELTE_DIRECTIVE_VALUE@78..111
+            0: COLON@78..79 ":" [] []
+            1: SVELTE_NAME@79..92
+              0: IDENT@79..92 "indeterminate" [] []
+            2: SVELTE_DIRECTIVE_MODIFIER_LIST@92..92
+            3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@92..111
+              0: EQ@92..93 "=" [] []
+              1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@93..111
+                0: L_CURLY@93..94 "{" [] []
+                1: HTML_TEXT_EXPRESSION@94..109
+                  0: HTML_LITERAL@94..109 "isIndeterminate" [] []
+                2: R_CURLY@109..111 "}" [] [Whitespace(" ")]
+      3: SLASH@111..112 "/" [] []
+      4: R_ANGLE@112..113 ">" [] []
+  4: EOF@113..114 "" [Newline("\n")] []
+
+```

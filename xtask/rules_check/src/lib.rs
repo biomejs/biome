@@ -13,6 +13,7 @@ use biome_analyze::{
 };
 use biome_configuration::Configuration;
 use biome_console::{Console, markup};
+use biome_css_analyze::CssAnalyzerServices;
 use biome_css_parser::CssParserOptions;
 use biome_css_syntax::CssLanguage;
 use biome_deserialize::json::deserialize_from_json_ast;
@@ -22,6 +23,7 @@ use biome_html_parser::HtmlParseOptions;
 use biome_html_syntax::HtmlLanguage;
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, TextSize};
+use biome_json_analyze::JsonAnalyzeServices;
 use biome_json_factory::make;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonObjectValue};
@@ -67,6 +69,15 @@ pub fn check_rules() -> anyhow::Result<()> {
             let group = R::Group::NAME;
             let rule_name = R::METADATA.name;
             let rule_severity = R::METADATA.severity;
+
+            if let Some(issue_number) = R::METADATA.issue_number
+                && group != "nursery"
+            {
+                self.errors.push(Errors::new(format!(
+                    "The rule '{rule_name}' has an issue number set to '{issue_number}'. The presence of an issue number indicates that the rule is not yet completed. Rules that have an issue number must belong to the 'nursery' group. Change the group of the rule to 'nursery' or remove the issue number."
+                )));
+            }
+
             if matches!(group, "a11y" | "correctness" | "security")
                 && rule_severity != Severity::Error
                 && !matches!(
@@ -289,8 +300,9 @@ fn assert_lint(
                 .unwrap_or_else(|_| biome_html_syntax::HtmlFileSource::html()),
         )
     } else {
-        test.document_file_source()
+        test.document_file_source_from_path()
     };
+
     match document_file_source {
         DocumentFileSource::Js(file_source) => {
             // Temporary support for astro, svelte and vue code blocks
@@ -299,11 +311,11 @@ fn assert_lint(
                     biome_service::file_handlers::AstroFileHandler::input(code),
                     JsFileSource::ts(),
                 ),
-                EmbeddingKind::Svelte => (
+                EmbeddingKind::Svelte { .. } => (
                     biome_service::file_handlers::SvelteFileHandler::input(code),
                     biome_service::file_handlers::SvelteFileHandler::file_source(code),
                 ),
-                EmbeddingKind::Vue => (
+                EmbeddingKind::Vue { .. } => (
                     biome_service::file_handlers::VueFileHandler::input(code),
                     biome_service::file_handlers::VueFileHandler::file_source(code),
                 ),
@@ -370,30 +382,39 @@ fn assert_lint(
                 };
 
                 let options = test.create_analyzer_options::<JsonLanguage>(config)?;
-
-                biome_json_analyze::analyze(&root, filter, &options, file_source, |signal| {
-                    if let Some(mut diag) = signal.diagnostic() {
-                        for action in signal.actions() {
-                            if !action.is_suppression() {
-                                diag = diag.add_code_suggestion(action.into());
+                let json_services = JsonAnalyzeServices {
+                    file_source,
+                    configuration_provider: None,
+                };
+                biome_json_analyze::analyze(
+                    &root,
+                    filter,
+                    &options,
+                    json_services,
+                    &[],
+                    |signal| {
+                        if let Some(mut diag) = signal.diagnostic() {
+                            for action in signal.actions() {
+                                if !action.is_suppression() {
+                                    diag = diag.add_code_suggestion(action.into());
+                                }
                             }
+
+                            let error = diag
+                                .with_file_path(test.file_path())
+                                .with_file_source_code(code);
+                            diagnostics.write_diagnostic(error);
                         }
 
-                        let error = diag
-                            .with_file_path(test.file_path())
-                            .with_file_source_code(code);
-                        diagnostics.write_diagnostic(error);
-                    }
-
-                    ControlFlow::<()>::Continue(())
-                });
+                        ControlFlow::<()>::Continue(())
+                    },
+                );
             }
         }
-        DocumentFileSource::Css(..) => {
-            let parse_options = CssParserOptions::default()
-                .allow_css_modules()
-                .allow_tailwind_directives();
-            let parse = biome_css_parser::parse_css(code, parse_options);
+        DocumentFileSource::Css(file_source) => {
+            let parse_options = CssParserOptions::from(&file_source);
+
+            let parse = biome_css_parser::parse_css(code, file_source, parse_options);
 
             if parse.has_errors() {
                 for diag in parse.into_diagnostics() {
@@ -412,8 +433,11 @@ fn assert_lint(
                 };
 
                 let options = test.create_analyzer_options::<CssLanguage>(config)?;
-
-                biome_css_analyze::analyze(&root, filter, &options, &[], |signal| {
+                let semantic_model = biome_css_semantic::semantic_model(&parse.tree());
+                let services = CssAnalyzerServices::default()
+                    .with_file_source(file_source)
+                    .with_semantic_model(&semantic_model);
+                biome_css_analyze::analyze(&root, filter, &options, services, &[], |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
                         for action in signal.actions() {
                             if !action.is_suppression() {
@@ -491,7 +515,7 @@ fn assert_lint(
 
                 let options = test.create_analyzer_options::<HtmlLanguage>(config)?;
 
-                biome_html_analyze::analyze(&root, filter, &options, |signal| {
+                biome_html_analyze::analyze(&root, filter, &options, source, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
                         for action in signal.actions() {
                             if !action.is_suppression() {
@@ -510,6 +534,7 @@ fn assert_lint(
             }
         }
         DocumentFileSource::Grit(..) => todo!("Grit analysis is not yet supported"),
+        DocumentFileSource::Markdown(..) => todo!("Markdown analysis is not yet supported"),
 
         // Unknown code blocks should be ignored by tests
         DocumentFileSource::Unknown | DocumentFileSource::Ignore => {}
@@ -557,7 +582,9 @@ fn make_json_object_with_single_member<V: Into<AnyJsonValue>>(
         make::token(biome_json_syntax::JsonSyntaxKind::L_CURLY),
         make::json_member_list(
             [make::json_member(
-                make::json_member_name(make::json_string_literal(name)),
+                biome_json_syntax::AnyJsonMemberName::JsonMemberName(make::json_member_name(
+                    make::json_string_literal(name),
+                )),
                 make::token(biome_json_syntax::JsonSyntaxKind::COLON),
                 value.into(),
             )],
@@ -575,7 +602,7 @@ fn get_first_member<V: Into<AnyJsonValue>>(parent: V, expected_name: &str) -> Op
         .into_iter()
         .next()?
         .ok()?;
-    let member_name = member.name().ok()?.inner_string_text().ok()?.to_string();
+    let member_name = member.name().ok()?.inner_string_text()?.ok()?.to_string();
 
     if member_name.as_str() == expected_name {
         member.value().ok()

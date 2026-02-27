@@ -153,6 +153,7 @@ impl Rule for NoMissingVarFunction {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
+        let root = ctx.root();
         if is_wrapped_in_var(node) {
             return None;
         }
@@ -170,7 +171,7 @@ impl Rule for NoMissingVarFunction {
         if rule
             .declarations()
             .iter()
-            .flat_map(|decl| decl.property().value())
+            .flat_map(|decl| decl.property(&root).value())
             .any(|value| value.text() == custom_variable_name.text())
         {
             return Some(node.clone());
@@ -182,7 +183,7 @@ impl Rule for NoMissingVarFunction {
             if parent_rule
                 .declarations()
                 .iter()
-                .flat_map(|decl| decl.property().value())
+                .flat_map(|decl| decl.property(&root).value())
                 .any(|value| value.text() == custom_variable_name.text())
             {
                 return Some(node.clone());

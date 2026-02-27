@@ -20,6 +20,7 @@ use std::borrow::Cow;
 use std::collections::{BTreeMap, HashMap};
 
 #[derive(Clone, Debug, PartialEq)]
+#[expect(clippy::use_self)]
 pub enum GritResolvedPattern<'a> {
     Binding(Vec<GritBinding<'a>>),
     Snippets(Vec<ResolvedSnippet<'a, GritQueryContext>>),

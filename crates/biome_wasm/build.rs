@@ -7,7 +7,6 @@ use biome_js_formatter::{context::JsFormatOptions, format_node};
 use biome_rowan::AstNode;
 use biome_service::workspace_types::{ModuleQueue, generate_type, methods};
 use quote::{format_ident, quote};
-use schemars::generate::{SchemaGenerator, SchemaSettings};
 use std::{env, fs, io, path::PathBuf};
 
 fn main() -> io::Result<()> {
@@ -21,11 +20,6 @@ fn main() -> io::Result<()> {
         generate_type(&mut items, &mut queue, &method.params);
         generate_type(&mut items, &mut queue, &method.result);
     }
-    // HACK: SupportKind doesn't get picked up in the loop above, so we add it manually
-    let support_kind_schema = SchemaGenerator::from(SchemaSettings::openapi3())
-        .root_schema_for::<biome_service::workspace::SupportKind>();
-
-    generate_type(&mut items, &mut queue, &support_kind_schema);
 
     let module = make::js_module(
         make::js_directive_list(None),
@@ -72,7 +66,12 @@ fn main() -> io::Result<()> {
 
     // Wasm-bindgen will paste the generated TS code as-is into the final .d.ts file,
     // ensure it looks good by running it through the formatter
-    let formatted = format_node(JsFormatOptions::new(JsFileSource::ts()), module.syntax()).unwrap();
+    let formatted = format_node(
+        JsFormatOptions::new(JsFileSource::ts()),
+        module.syntax(),
+        false,
+    )
+    .unwrap();
     let printed = formatted.print().unwrap();
     let definitions = printed.into_code();
 

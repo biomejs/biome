@@ -56,6 +56,8 @@ invalid.vue:5:28 lint/nursery/useVueValidVElseIf ━━━━━━━━━━�
   
   i For example, use v-else-if="condition" instead of v-else-if:arg="condition".
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -73,6 +75,8 @@ invalid.vue:8:37 lint/nursery/useVueValidVElseIf ━━━━━━━━━━�
   i Remove the modifier from the v-else-if directive.
   
   i For example, use v-else-if="condition" instead of v-else-if.mod="condition".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -92,6 +96,8 @@ invalid.vue:11:28 lint/nursery/useVueValidVElseIf ━━━━━━━━━━
   
   i For example, use v-else-if="condition" instead of just v-else-if.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -109,6 +115,8 @@ invalid.vue:14:8 lint/nursery/useVueValidVElseIf ━━━━━━━━━━�
   i Add a preceding element with v-if or v-else-if, or remove this directive.
   
   i v-else-if directives are part of conditional chains and must follow another conditional directive.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -128,6 +136,8 @@ invalid.vue:17:8 lint/nursery/useVueValidVElseIf ━━━━━━━━━━�
   
   i Each element should only have one conditional directive from the v-if/v-else-if/v-else family.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -145,6 +155,8 @@ invalid.vue:23:21 lint/nursery/useVueValidVElseIf ━━━━━━━━━━
   i Add a preceding element with v-if or v-else-if, or remove this directive.
   
   i v-else-if directives are part of conditional chains and must follow another conditional directive.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -164,6 +176,8 @@ invalid.vue:29:37 lint/nursery/useVueValidVElseIf ━━━━━━━━━━
   
   i For example, use v-else-if="condition" instead of v-else-if.mod="condition".
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -180,6 +194,8 @@ invalid.vue:32:28 lint/nursery/useVueValidVElseIf ━━━━━━━━━━
   i Remove the argument from the v-else-if directive.
   
   i For example, use v-else-if="condition" instead of v-else-if:arg="condition".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

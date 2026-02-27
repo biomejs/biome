@@ -1,0 +1,67 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/list/combined-lists.md
+---
+# Input
+
+```md
+* hello1
+
+* hello2
+
+
+* hello3
+
+* hello4
+
+
+* hello5
+
+* hello6
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,11 +1,13 @@
+-- hello1
++* hello1
+ 
+-- hello2
++* hello2
++
++
++* hello3
+ 
+-- hello3
++* hello4
+ 
+-- hello4
+ 
+-- hello5
++* hello5
+ 
+-- hello6
++* hello6
+\ No newline at end of file
+```
+
+# Output
+
+```md
+* hello1
+
+* hello2
+
+
+* hello3
+
+* hello4
+
+
+* hello5
+
+* hello6```

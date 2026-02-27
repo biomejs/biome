@@ -1,0 +1,146 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+.red {
+  color: v-bind(color);
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..1 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@1..5 "red" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@5..6 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssBogusProperty {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@6..14 "color" [Newline("\n"), Whitespace("  ")] [],
+                                    },
+                                    COLON@14..16 ":" [] [Whitespace(" ")],
+                                    CssBogus {
+                                        items: [
+                                            CssBogusSupportsCondition {
+                                                items: [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@16..22 "v-bind" [] [],
+                                                    },
+                                                    L_PAREN@22..23 "(" [] [],
+                                                    CssParameterList [
+                                                        CssParameter {
+                                                            any_css_expression: CssListOfComponentValuesExpression {
+                                                                css_component_value_list: CssComponentValueList [
+                                                                    CssIdentifier {
+                                                                        value_token: IDENT@23..28 "color" [] [],
+                                                                    },
+                                                                ],
+                                                            },
+                                                        },
+                                                    ],
+                                                    R_PAREN@28..29 ")" [] [],
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@29..30 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@30..32 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@32..33 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..33
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..32
+    0: CSS_QUALIFIED_RULE@0..32
+      0: CSS_SELECTOR_LIST@0..5
+        0: CSS_COMPOUND_SELECTOR@0..5
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..5
+            0: CSS_CLASS_SELECTOR@0..5
+              0: DOT@0..1 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@1..5
+                0: IDENT@1..5 "red" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@5..32
+        0: L_CURLY@5..6 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@6..30
+          0: CSS_DECLARATION_WITH_SEMICOLON@6..30
+            0: CSS_DECLARATION@6..29
+              0: CSS_BOGUS_PROPERTY@6..29
+                0: CSS_IDENTIFIER@6..14
+                  0: IDENT@6..14 "color" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@14..16 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@16..29
+                  0: CSS_BOGUS_SUPPORTS_CONDITION@16..29
+                    0: CSS_IDENTIFIER@16..22
+                      0: IDENT@16..22 "v-bind" [] []
+                    1: L_PAREN@22..23 "(" [] []
+                    2: CSS_PARAMETER_LIST@23..28
+                      0: CSS_PARAMETER@23..28
+                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@23..28
+                          0: CSS_COMPONENT_VALUE_LIST@23..28
+                            0: CSS_IDENTIFIER@23..28
+                              0: IDENT@23..28 "color" [] []
+                    3: R_PAREN@28..29 ")" [] []
+              1: (empty)
+            1: SEMICOLON@29..30 ";" [] []
+        2: R_CURLY@30..32 "}" [Newline("\n")] []
+  2: EOF@32..33 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+v_bind_disabled.css:2:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × `v-bind()` is not a standard CSS function.
+  
+    1 │ .red {
+  > 2 │   color: v-bind(color);
+      │          ^^^^^^^^^^^^^
+    3 │ }
+    4 │ 
+  
+  i This is valid only when defined inside SFC vue files.
+  
+```

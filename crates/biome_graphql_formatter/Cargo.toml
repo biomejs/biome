@@ -1,17 +1,25 @@
 [package]
-authors.workspace    = true
-categories.workspace = true
-description          = "Biome's GraphQL formatter"
-edition.workspace    = true
-homepage.workspace   = true
-keywords.workspace   = true
-license.workspace    = true
 name                 = "biome_graphql_formatter"
-publish              = true
-repository.workspace = true
 version              = "0.1.0"
+authors.workspace    = true
+edition.workspace    = true
+description          = "Biome's GraphQL formatter"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+# cargo-workspaces metadata
+[package.metadata.workspaces]
+independent = true
+
+[[bench]]
+harness = false
+name    = "graphql_formatter"
 
 [dependencies]
 biome_diagnostics    = { workspace = true }
@@ -30,25 +38,16 @@ biome_service        = { path = "../biome_service" }
 biome_test_utils     = { path = "../biome_test_utils" }
 camino               = { workspace = true }
 countme              = { workspace = true, features = ["enable"] }
-criterion            = { package = "codspeed-criterion-compat", version = "=3.0.5" }
+criterion            = { package = "codspeed-criterion-compat", version = "*" }
 serde                = { workspace = true, features = ["derive"] }
 serde_json           = { workspace = true }
 tests_macros         = { path = "../tests_macros" }
 
-[target.'cfg(target_os = "windows")'.dev-dependencies]
-mimalloc = { workspace = true }
-
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
 tikv-jemallocator = { workspace = true }
 
-# cargo-workspaces metadata
-[package.metadata.workspaces]
-independent = true
+[target.'cfg(target_os = "windows")'.dev-dependencies]
+mimalloc = { workspace = true }
 
 [lints]
 workspace = true
-
-
-[[bench]]
-harness = false
-name    = "graphql_formatter"

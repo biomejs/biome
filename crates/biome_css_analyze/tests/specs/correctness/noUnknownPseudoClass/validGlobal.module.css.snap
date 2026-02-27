@@ -1,0 +1,24 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: validGlobal.module.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+.meow :global(.global) {
+	color: blue;
+}
+
+.foo :local(.bar) {
+	color: red;
+}
+
+:local(.component) {
+	margin: 0;
+}
+
+.parent :local(.child):hover {
+	background: blue;
+}
+
+```

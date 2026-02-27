@@ -15,13 +15,6 @@
 	"foo.reduce((acc, bar) => {return [...acc, ...bar];}, [])",
 	"foo.reduceRight((acc, bar) => {return [...acc, ...bar];}, [])",
 
-	// Array - Arrow return with assign
-	"foo.reduce((acc, bar) => Object.assign(acc, bar), [])",
-	"foo.reduceRight((acc, bar) => Object.assign(acc, bar), [])",
-
-	// Array - Body return with Assign
-	"foo.reduce((acc, bar) => { return Object.assign(acc, bar) }, [])",
-	"foo.reduceRight((acc, bar) => { return Object.assign(acc, bar) }, [])",
 
 	// Object - Arrow return
 	"foo.reduce((acc, bar) => ({...acc, [bar.key]: bar.value}), {})",
@@ -39,11 +32,27 @@
 	"foo.reduce((acc, bar) => {return {...acc, ...bar};}, {})",
 	"foo.reduceRight((acc, bar) => {return {...acc, ...bar};}, {})",
 
+	// Array - Arrow return with assign
+	"foo.reduce((acc, bar) => Object.assign({}, acc, bar), [])",
+	"foo.reduceRight((acc, bar) => Object.assign({}, acc, bar), [])",
+
+	// Array - Body return with Assign
+	"foo.reduce((acc, bar) => { return Object.assign([], acc, bar) }, [])",
+	"foo.reduceRight((acc, bar) => { return Object.assign([], acc, bar) }, [])",
+
 	// Object - Arrow return with assign
-	"foo.reduce((acc, bar) => Object.assign(acc, bar), {})",
-	"foo.reduceRight((acc, bar) => Object.assign(acc, bar), {})",
+	"foo.reduce((acc, bar) => Object.assign([], acc, bar), {})",
+	"foo.reduceRight((acc, bar) => Object.assign([], acc, bar), {})",
 
 	// Object - Body return with Assign
-	"foo.reduce((acc, bar) => { return Object.assign(acc, bar) }, {})",
-	"foo.reduceRight((acc, bar) => { return Object.assign(acc, bar) }, {})"
+	"foo.reduce((acc, bar) => { return Object.assign([], acc, bar) }, {})",
+	"foo.reduceRight((acc, bar) => { return Object.assign([], acc, bar) }, {})",
+
+	// Array - Body return with Assign new
+	"foo.reduce((acc, bar) => { return Object.assign(new Array(1), acc, bar) }, [])",
+	"foo.reduceRight((acc, bar) => { return Object.assign(new Array(1), acc, bar) }, [])",
+
+	// Object - Arrow return with assign new
+	"foo.reduce((acc, bar) => Object.assign(new Array(1), acc, bar), {})",
+	"foo.reduceRight((acc, bar) => Object.assign(new Array(1), acc, bar), {})"
 ]

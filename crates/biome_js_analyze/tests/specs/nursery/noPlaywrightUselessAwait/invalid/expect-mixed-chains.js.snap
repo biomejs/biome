@@ -1,0 +1,132 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: expect-mixed-chains.js
+---
+# Input
+```js
+/* should generate diagnostics */
+// Invalid: sync expect without async modifiers should trigger the rule
+await expect(1).toBe(1);
+await expect(value).toEqual(expectedValue);
+await expect(str).toMatch(/pattern/);
+await expect(arr).toHaveLength(3);
+
+// Invalid: expect.soft with sync matcher (soft doesn't make it async)
+await expect.soft(value).toBe(123);
+
+
+```
+
+# Diagnostics
+```
+expect-mixed-chains.js:3:1 lint/nursery/noPlaywrightUselessAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary await expression.
+  
+    1 │ /* should generate diagnostics */
+    2 │ // Invalid: sync expect without async modifiers should trigger the rule
+  > 3 │ await expect(1).toBe(1);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ await expect(value).toEqual(expectedValue);
+    5 │ await expect(str).toMatch(/pattern/);
+  
+  i This method does not return a Promise.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove unnecessary await
+  
+    3 │ await·expect(1).toBe(1);
+      │ ------                  
+
+```
+
+```
+expect-mixed-chains.js:4:1 lint/nursery/noPlaywrightUselessAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary await expression.
+  
+    2 │ // Invalid: sync expect without async modifiers should trigger the rule
+    3 │ await expect(1).toBe(1);
+  > 4 │ await expect(value).toEqual(expectedValue);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ await expect(str).toMatch(/pattern/);
+    6 │ await expect(arr).toHaveLength(3);
+  
+  i This method does not return a Promise.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove unnecessary await
+  
+    4 │ await·expect(value).toEqual(expectedValue);
+      │ ------                                     
+
+```
+
+```
+expect-mixed-chains.js:5:1 lint/nursery/noPlaywrightUselessAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary await expression.
+  
+    3 │ await expect(1).toBe(1);
+    4 │ await expect(value).toEqual(expectedValue);
+  > 5 │ await expect(str).toMatch(/pattern/);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ await expect(arr).toHaveLength(3);
+    7 │ 
+  
+  i This method does not return a Promise.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove unnecessary await
+  
+    5 │ await·expect(str).toMatch(/pattern/);
+      │ ------                               
+
+```
+
+```
+expect-mixed-chains.js:6:1 lint/nursery/noPlaywrightUselessAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary await expression.
+  
+    4 │ await expect(value).toEqual(expectedValue);
+    5 │ await expect(str).toMatch(/pattern/);
+  > 6 │ await expect(arr).toHaveLength(3);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ // Invalid: expect.soft with sync matcher (soft doesn't make it async)
+  
+  i This method does not return a Promise.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove unnecessary await
+  
+    6 │ await·expect(arr).toHaveLength(3);
+      │ ------                            
+
+```
+
+```
+expect-mixed-chains.js:9:1 lint/nursery/noPlaywrightUselessAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary await expression.
+  
+     8 │ // Invalid: expect.soft with sync matcher (soft doesn't make it async)
+   > 9 │ await expect.soft(value).toBe(123);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+  
+  i This method does not return a Promise.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove unnecessary await
+  
+    9 │ await·expect.soft(value).toBe(123);
+      │ ------                             
+
+```

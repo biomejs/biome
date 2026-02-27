@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-define-props.vue
+---
+# Input
+```ts
+// defineProps macro doesn't exist in non-setup scripts, so this is valid
+defineProps({
+    $el: String
+});
+
+```

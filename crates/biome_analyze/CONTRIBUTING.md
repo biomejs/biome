@@ -20,6 +20,7 @@ The analyzer allows implementors to create **three different** types of rules:
       - [Naming Conventions for Rules](#naming-conventions-for-rules)
       - [What a Rule should say to the User](#what-a-rule-should-say-to-the-user)
       - [Placement of New Rules](#placement-of-new-rules)
+    + [Mark a rule as a work in progress](#mark-a-rule-as-a-work-in-progress)
     + [Creating and Implementing the Rule](#creating-and-implementing-the-rule)
     + [Coding Tips for Rules](#coding-tips-for-rules)
       - [`declare_lint_rule!` macro](#declare_lint_rule-macro)
@@ -219,6 +220,26 @@ New rules **must** be placed inside the `nursery` group. This group is meant as 
 >
 > If you aren't familiar with Biome's APIs, this is an option that you have. If you decide to use this option, you should make sure to describe your plan in an issue.
 
+### Mark a rule as a work in progress
+
+Sometimes nursery rules aren't completed yet – missing use cases, code actions, etc. – and you might want to communicate that to your users.
+
+You can add `issue_number` to the rule macro, and Biome will:
+- Add a footnote to the diagnostic of the rule with a link to the issue, e.g. `https://github.com/biomejs/biome/issues/1111`
+- Add a note on the website, with a link to the issue.
+
+```rust
+declare_lint_rule! {
+    /// Docs
+    pub(crate) NoVar {
+        version: "next",
+        name: "noVar",
+        language: "js",
+        issue_number: Some("1111"),
+    }
+}
+```
+
 ### Creating and Implementing the Rule
 
 Let's say we want to create a new **lint** rule called `useMyRuleName`, follow these steps:
@@ -335,7 +356,7 @@ Let's say we want to create a new **lint** rule called `useMyRuleName`, follow t
 6. Implement the `diagnostic` function to define what the user will see.
 
    Follow the [guidelines & pillars](#what-a-rule-should-say-to-the-user) when writing the messages.
-   Please also keep [Biome's technical principals](https://biomejs.dev/internals/philosophy/#technical) in mind when writing those messages and implementing your diagnostic rule.
+   Please also keep [Biome's technical principles](https://biomejs.dev/internals/philosophy/#technical) in mind when writing those messages and implementing your diagnostic rule.
 
    ```rust
    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic>
@@ -893,7 +914,7 @@ impl Rule for ForLoopCountReferences {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        // The model holds all informations about the semantic, like scopes and declarations
+        // The model holds all information about the semantic, like scopes and declarations
         let model = ctx.model();
 
         // Here we are extracting the `let i = 0;` declaration in for loop
@@ -1352,6 +1373,20 @@ The documentation needs to adhere to the following rules:
   /// }
   /// ```
   ````
+
+- **Callout blocks (Asides)**
+
+  You can use [Starlight asides](https://starlight.astro.build/guides/authoring-content/#asides) (also known as "admonitions" or "callouts") to highlight important notes, warnings, or tips in your rule documentation.
+
+  Example usage:
+
+  ````rust
+  /// :::caution
+  /// The rule doesn't support dependencies installed inside a monorepo.
+  /// :::
+  ````
+
+  Supported types: `:::note`, `:::tip`, `:::caution`, `:::danger`.
 
 - **Ordering of code block properties**
 

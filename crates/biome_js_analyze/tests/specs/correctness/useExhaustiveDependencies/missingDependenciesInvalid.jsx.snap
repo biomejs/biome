@@ -221,6 +221,10 @@ missingDependenciesInvalid.jsx:19:5 lint/correctness/useExhaustiveDependencies  
     21 │     }, []);
     22 │ }
   
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
   i Either include it or remove the dependency array.
   
   i Unsafe fix: Add the missing dependency to the list.
@@ -250,6 +254,10 @@ missingDependenciesInvalid.jsx:19:5 lint/correctness/useExhaustiveDependencies  
        │                      ^
     21 │     }, []);
     22 │ }
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
   
   i Either include it or remove the dependency array.
   
@@ -281,6 +289,10 @@ missingDependenciesInvalid.jsx:34:3 lint/correctness/useExhaustiveDependencies  
     44 │ 
     45 │       console.log(isPending);
   
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
   i Either include it or remove the dependency array.
   
   i Unsafe fix: Add the missing dependency to the list.
@@ -310,6 +322,10 @@ missingDependenciesInvalid.jsx:34:3 lint/correctness/useExhaustiveDependencies  
        │                   ^^^^^^^^^^^^^^^^
     42 │       console.log(memoizedValue);
     43 │       console.log(deferredValue);
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
   
   i Either include it or remove the dependency array.
   
@@ -341,6 +357,10 @@ missingDependenciesInvalid.jsx:34:3 lint/correctness/useExhaustiveDependencies  
     39 │       dispatch(1);
     40 │ 
   
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
   i Either include it or remove the dependency array.
   
   i Unsafe fix: Add the missing dependency to the list.
@@ -370,6 +390,10 @@ missingDependenciesInvalid.jsx:34:3 lint/correctness/useExhaustiveDependencies  
        │                   ^^^^
     36 │       setName(1);
     37 │ 
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
   
   i Either include it or remove the dependency array.
   
@@ -401,6 +425,10 @@ missingDependenciesInvalid.jsx:34:3 lint/correctness/useExhaustiveDependencies  
     46 │       startTransition();
     47 │       event();
   
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
   i Either include it or remove the dependency array.
   
   i Unsafe fix: Add the missing dependency to the list.
@@ -429,6 +457,10 @@ missingDependenciesInvalid.jsx:34:3 lint/correctness/useExhaustiveDependencies  
        │                   ^^^^^^^^^^^^^
     43 │       console.log(deferredValue);
     44 │ 
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
   
   i Either include it or remove the dependency array.
   
@@ -460,6 +492,10 @@ missingDependenciesInvalid.jsx:55:3 lint/correctness/useExhaustiveDependencies  
     56 │   useCallback(() => console.log(a), []);
     57 │   useMemo(() => console.log(a), []);
   
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
   i Either include it or remove the dependency array.
   
   i Unsafe fix: Add the missing dependency to the list.
@@ -489,6 +525,10 @@ missingDependenciesInvalid.jsx:56:3 lint/correctness/useExhaustiveDependencies  
        │                                 ^
     57 │   useMemo(() => console.log(a), []);
     58 │   useImperativeHandle(ref, () => console.log(a), []);
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
   
   i Either include it or remove the dependency array.
   
@@ -520,6 +560,10 @@ missingDependenciesInvalid.jsx:57:3 lint/correctness/useExhaustiveDependencies  
     58 │   useImperativeHandle(ref, () => console.log(a), []);
     59 │   useLayoutEffect(() => console.log(a), []);
   
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
   i Either include it or remove the dependency array.
   
   i Unsafe fix: Add the missing dependency to the list.
@@ -549,6 +593,10 @@ missingDependenciesInvalid.jsx:58:3 lint/correctness/useExhaustiveDependencies  
        │                                              ^
     59 │   useLayoutEffect(() => console.log(a), []);
     60 │   useInsertionEffect(() => console.log(a), []);
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
   
   i Either include it or remove the dependency array.
   
@@ -580,6 +628,10 @@ missingDependenciesInvalid.jsx:59:3 lint/correctness/useExhaustiveDependencies  
     60 │   useInsertionEffect(() => console.log(a), []);
     61 │ }
   
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
   i Either include it or remove the dependency array.
   
   i Unsafe fix: Add the missing dependency to the list.
@@ -610,6 +662,10 @@ missingDependenciesInvalid.jsx:60:3 lint/correctness/useExhaustiveDependencies  
     61 │ }
     62 │ 
   
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
   i Either include it or remove the dependency array.
   
   i Unsafe fix: Add the missing dependency to the list.
@@ -639,6 +695,10 @@ missingDependenciesInvalid.jsx:67:3 lint/correctness/useExhaustiveDependencies  
        │                                ^
     69 │   }, []);
     70 │ }
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
   
   i Either include it or remove the dependency array.
   
@@ -679,6 +739,10 @@ missingDependenciesInvalid.jsx:76:3 lint/correctness/useExhaustiveDependencies  
     79 │   }, []);
     80 │ }
   
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
   i Either include it or remove the dependency array.
   
   i Unsafe fix: Add the missing dependency to the list.
@@ -709,6 +773,10 @@ missingDependenciesInvalid.jsx:86:3 lint/correctness/useExhaustiveDependencies  
     88 │   }, []);
     89 │ }
   
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
   i Either include it or remove the dependency array.
   
   i Unsafe fix: Add the missing dependency to the list.
@@ -738,6 +806,10 @@ missingDependenciesInvalid.jsx:92:3 lint/correctness/useExhaustiveDependencies  
     94 │   }, []);
     95 │ });
   
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
   i Either include it or remove the dependency array.
   
   i Unsafe fix: Add the missing dependency to the list.
@@ -766,6 +838,10 @@ missingDependenciesInvalid.jsx:98:3 lint/correctness/useExhaustiveDependencies  
         │                   ^
     100 │   }, []);
     101 │ });
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
   
   i Either include it or remove the dependency array.
   
@@ -797,6 +873,10 @@ missingDependenciesInvalid.jsx:106:3 lint/correctness/useExhaustiveDependencies 
     108 │   }, []);
     109 │ }
   
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
   i Either include it or remove the dependency array.
   
   i Unsafe fix: Add the missing dependency to the list.
@@ -826,6 +906,10 @@ missingDependenciesInvalid.jsx:113:3 lint/correctness/useExhaustiveDependencies 
         │                   ^
     115 │   }, []);
     116 │ }
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
   
   i Either include it or remove the dependency array.
   
@@ -857,6 +941,10 @@ missingDependenciesInvalid.jsx:121:3 lint/correctness/useExhaustiveDependencies 
     123 │   }, []);
     124 │ }
   
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
   i Either include it or remove the dependency array.
   
   i Unsafe fix: Add the missing dependency to the list.
@@ -886,6 +974,10 @@ missingDependenciesInvalid.jsx:128:3 lint/correctness/useExhaustiveDependencies 
         │                   ^
     130 │   }, []);
     131 │ }
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
   
   i Either include it or remove the dependency array.
   
@@ -917,6 +1009,10 @@ missingDependenciesInvalid.jsx:136:9 lint/correctness/useExhaustiveDependencies 
     138 │   }, []);
     139 │ }
   
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
   i Either include it or remove the dependency array.
   
   i Unsafe fix: Add the missing dependency to the list.
@@ -946,6 +1042,10 @@ missingDependenciesInvalid.jsx:144:2 lint/correctness/useExhaustiveDependencies 
         │ 			            ^^^^^^^^^^^
     146 │ 	}, []);
     147 │ }
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
   
   i Either include it or remove the dependency array.
   
@@ -977,6 +1077,10 @@ missingDependenciesInvalid.jsx:155:2 lint/correctness/useExhaustiveDependencies 
     157 │ 	}, []);
     158 │ }
   
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
   i Either include it or remove the dependency array.
   
   i Unsafe fix: Add the missing dependency to the list.
@@ -1005,6 +1109,10 @@ missingDependenciesInvalid.jsx:168:3 lint/correctness/useExhaustiveDependencies 
         │     ^^^^
     170 │   }, [])
     171 │ 
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
   
   i Either include it or remove the dependency array.
   
@@ -1035,6 +1143,10 @@ missingDependenciesInvalid.jsx:176:2 lint/correctness/useExhaustiveDependencies 
     178 │ 	}, []);
     179 │ 
   
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
   i Either include it or remove the dependency array.
   
   i Unsafe fix: Add the missing dependency to the list.
@@ -1064,6 +1176,10 @@ missingDependenciesInvalid.jsx:185:2 lint/correctness/useExhaustiveDependencies 
     187 │ 	}, []);
     188 │ 
   
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
   i Either include it or remove the dependency array.
   
   i Unsafe fix: Add the missing dependency to the list.
@@ -1092,6 +1208,10 @@ missingDependenciesInvalid.jsx:185:2 lint/correctness/useExhaustiveDependencies 
         │ 		               ^
     187 │ 	}, []);
     188 │ 
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
   
   i Either include it or remove the dependency array.
   

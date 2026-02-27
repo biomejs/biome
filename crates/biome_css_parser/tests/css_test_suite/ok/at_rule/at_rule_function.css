@@ -1,0 +1,104 @@
+@function --transparent(--color, --alpha) {
+  result: oklch(from var(--color) l c h / var(--alpha));
+}
+
+section {
+  --base-color: #faa6ff;
+  background-color: --transparent(var(--base-color), 0.8);
+}
+
+@function --transparent(--color <color>, --alpha type(<number> | <percentage>))
+  returns <color> {
+  result: oklch(from var(--color) l c h / var(--alpha));
+}
+
+section {
+  --base-color: #faa6ff;
+  background-color: --transparent(var(--base-color), 50%);
+}
+
+@function --transparent(--color <color>, --alpha <number>: 0.8) returns <color> {
+  result: oklch(from var(--color) l c h / var(--alpha));
+}
+
+section {
+  --base-color: #faa6ff;
+  background-color: --transparent(var(--base-color));
+}
+
+@function --max-plus-x(--list <length>#, --x <length>) {
+  result: calc(max(var(--list)) + var(--x));
+}
+
+.coma-separated-value {
+  width: --max-plus-x({1px, 7px, 2px}, 3px);
+}
+
+.single-coma-separated-value {
+  width: --max-plus-x({1px}, 3px);
+}
+
+@function --anim-1s(--animation, --count) {
+  --duration: 1s;
+  --easing: linear;
+  result: var(--animation) var(--duration) var(--count) var(--easing);
+}
+
+@function --outer(--outer-arg) {
+  --outer-local: 2;
+  result: --inner();
+}
+
+@function --inner() returns <number> {
+  result: calc(var(--outer-arg) + var(--outer-local));
+}
+
+div {
+  z-index: --outer(1);
+}
+
+@function --double-z() returns <number> {
+  result: calc(var(--z) * 2);
+}
+
+div {
+  --z: 3;
+  z-index: --double-z();
+}
+
+@function --add-a-b-c(--b, --c) {
+  --c: 300;
+  result: calc(var(--a) + var(--b) + var(--c));
+}
+
+div {
+  --a: 1;
+  --b: 2;
+  --c: 3;
+  z-index: --add-a-b-c(20, 30);
+}
+
+@function --narrow-wide(--narrow, --wide) {
+  result: var(--wide);
+  @media (width < 700px) {
+    result: var(--narrow);
+  }
+}
+
+@function --narrow-wide(--narrow, --wide) {
+  result: if(media(width < 700px): var(--narrow) ; else: var(--wide));
+}
+
+@function --double(--value) {
+  result: calc(var(--value) * 2);
+}
+
+p {
+  --base-spacing: 10px;
+  border-radius: var(--base-spacing);
+  padding: --double(var(--base-spacing));
+  width: 50%;
+  background-color: wheat;
+}
+
+@function --test(--param1   <string>   : rem , --param2) {}

@@ -1,13 +1,13 @@
-use super::{SearchCapabilities, parse_lang_from_script_opening_tag};
+use super::{ParsedLangAndSetup, SearchCapabilities, parse_lang_and_setup_from_script_opening_tag};
 use crate::WorkspaceError;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities, EnabledForPath,
     ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults, ParseResult,
     ParserCapabilities, javascript,
 };
-use crate::settings::Settings;
+use crate::settings::SettingsWithEditor;
 use crate::workspace::{DocumentFileSource, FixFileResult, PullActionsResult};
-use biome_formatter::Printed;
+use biome_formatter::{Printed, SourceMapGeneration};
 use biome_fs::BiomePath;
 use biome_html_syntax::HtmlLanguage;
 use biome_js_formatter::format_node;
@@ -68,12 +68,21 @@ impl VueFileHandler {
         VUE_FENCE
             .captures(text)
             .and_then(|captures| {
-                let (language, variant) =
-                    parse_lang_from_script_opening_tag(captures.name("opening")?.as_str());
+                let ParsedLangAndSetup {
+                    language,
+                    variant,
+                    setup,
+                } = parse_lang_and_setup_from_script_opening_tag(
+                    captures.name("opening")?.as_str(),
+                );
                 Some(
                     JsFileSource::from(language)
                         .with_variant(variant)
-                        .with_embedding_kind(EmbeddingKind::Vue),
+                        .with_embedding_kind(EmbeddingKind::Vue {
+                            setup,
+                            is_source: true,
+                            event_handler: false,
+                        }),
                 )
             })
             .map_or(JsFileSource::js_module(), |fs| fs)
@@ -125,7 +134,7 @@ fn parse(
     _rome_path: &BiomePath,
     _file_source: DocumentFileSource,
     text: &str,
-    _settings: &Settings,
+    _settings: &SettingsWithEditor,
     cache: &mut NodeCache,
 ) -> ParseResult {
     let script = VueFileHandler::input(text);
@@ -146,7 +155,7 @@ fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<JsLanguage>(biome_path, document_file_source);
     let html_options = settings.format_options::<HtmlLanguage>(biome_path, document_file_source);
@@ -156,8 +165,8 @@ fn format(
         0
     };
     let tree = parse.syntax();
-    let formatted = format_node(options, &tree)?;
-    match formatted.print_with_indent(indent_amount) {
+    let formatted = format_node(options, &tree, false)?;
+    match formatted.print_with_indent(indent_amount, SourceMapGeneration::Disabled) {
         Ok(printed) => Ok(printed),
         Err(error) => {
             error!("The file {} couldn't be formatted", biome_path.as_str());
@@ -170,7 +179,7 @@ pub(crate) fn format_range(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
     range: TextRange,
 ) -> Result<Printed, WorkspaceError> {
     javascript::format_range(biome_path, document_file_source, parse, settings, range)
@@ -180,7 +189,7 @@ pub(crate) fn format_on_type(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: &Settings,
+    settings: &SettingsWithEditor,
     offset: TextSize,
 ) -> Result<Printed, WorkspaceError> {
     javascript::format_on_type(biome_path, document_file_source, parse, settings, offset)

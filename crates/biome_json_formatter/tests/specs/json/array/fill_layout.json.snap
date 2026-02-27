@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: json/array/fill_layout.json
 ---
+
 # Input
 
 ```json
@@ -26,6 +27,7 @@ Line width: 80
 Trailing commas: None
 Expand: Auto
 Bracket spacing: true
+Trailing newline: true
 -----
 
 ```json
@@ -33,4 +35,5 @@ Bracket spacing: true
 	123231321, 123213213, 12312321, 12321123211232112321, 12321321,
 	1232132112321321123213211232132112321321
 ]
+
 ```

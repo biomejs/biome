@@ -12,6 +12,7 @@ impl FormatRule<AnyVueDirective> for FormatAnyVueDirective {
             AnyVueDirective::VueDirective(node) => node.format().fmt(f),
             AnyVueDirective::VueVBindShorthandDirective(node) => node.format().fmt(f),
             AnyVueDirective::VueVOnShorthandDirective(node) => node.format().fmt(f),
+            AnyVueDirective::VueVSlotShorthandDirective(node) => node.format().fmt(f),
         }
     }
 }

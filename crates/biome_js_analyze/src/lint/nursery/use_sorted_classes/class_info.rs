@@ -38,6 +38,11 @@ enum UtilityMatch {
 impl From<(&str, &str)> for UtilityMatch {
     /// Checks if a utility matches a target, and returns the result.
     fn from((target, utility_text): (&str, &str)) -> Self {
+        // Support negative value utilities (e.g., `-ml-2` should match `ml-` or `-ml-`).
+        // Strip the leading `-` from both target and utility for matching purposes.
+        let target = target.strip_prefix('-').unwrap_or(target);
+        let utility_text = utility_text.strip_prefix('-').unwrap_or(utility_text);
+
         // If the target ends with `$`, then it's an exact target.
         if target.ends_with('$') {
             // Check if the utility matches the target (without the final `$`) exactly.
@@ -62,8 +67,8 @@ mod utility_match_tests {
     #[test]
     fn test_exact_match() {
         assert_eq!(UtilityMatch::from(("px-2$", "px-2")), UtilityMatch::Exact);
-        // TODO: support negative values
-        // assert_eq!(UtilityMatch::from(("px-2$", "-px-2")), UtilityMatch::Exact);
+        // Negative values should also match
+        assert_eq!(UtilityMatch::from(("px-2$", "-px-2")), UtilityMatch::Exact);
         assert_eq!(
             UtilityMatch::from(("px-2$", "not-px-2")),
             UtilityMatch::None
@@ -80,8 +85,8 @@ mod utility_match_tests {
     #[test]
     fn test_partial_match() {
         assert_eq!(UtilityMatch::from(("px-", "px-2")), UtilityMatch::Partial);
-        // TODO: support negative values
-        // assert_eq!(UtilityMatch::from(("px-", "-px-2")), UtilityMatch::Partial);
+        // Negative values should also match
+        assert_eq!(UtilityMatch::from(("px-", "-px-2")), UtilityMatch::Partial);
         assert_eq!(UtilityMatch::from(("px-", "px-2.5")), UtilityMatch::Partial);
         assert_eq!(
             UtilityMatch::from(("px-", "px-anything")),
@@ -92,9 +97,67 @@ mod utility_match_tests {
             UtilityMatch::Partial
         );
         assert_eq!(UtilityMatch::from(("px-", "px-")), UtilityMatch::None);
-        // TODO: support negative values
-        // assert_eq!(UtilityMatch::from(("px-", "-px-")), UtilityMatch::None);
+        // Negative prefix without value should also not match
+        assert_eq!(UtilityMatch::from(("px-", "-px-")), UtilityMatch::None);
         assert_eq!(UtilityMatch::from(("px-", "not-px-2")), UtilityMatch::None);
+    }
+
+    #[test]
+    fn test_negative_margin_utilities() {
+        // Test negative margin utilities like -ml-2, -mr-4, etc.
+        assert_eq!(UtilityMatch::from(("ml-", "-ml-2")), UtilityMatch::Partial);
+        assert_eq!(UtilityMatch::from(("mr-", "-mr-4")), UtilityMatch::Partial);
+        assert_eq!(UtilityMatch::from(("mt-", "-mt-1")), UtilityMatch::Partial);
+        assert_eq!(UtilityMatch::from(("mb-", "-mb-3")), UtilityMatch::Partial);
+        assert_eq!(UtilityMatch::from(("m-", "-m-2")), UtilityMatch::Partial);
+        assert_eq!(UtilityMatch::from(("mx-", "-mx-4")), UtilityMatch::Partial);
+        assert_eq!(UtilityMatch::from(("my-", "-my-6")), UtilityMatch::Partial);
+        // Negative spacing utilities
+        assert_eq!(
+            UtilityMatch::from(("space-x-", "-space-x-2")),
+            UtilityMatch::Partial
+        );
+        assert_eq!(
+            UtilityMatch::from(("space-y-", "-space-y-4")),
+            UtilityMatch::Partial
+        );
+        // Negative positioning utilities
+        assert_eq!(
+            UtilityMatch::from(("top-", "-top-2")),
+            UtilityMatch::Partial
+        );
+        assert_eq!(
+            UtilityMatch::from(("right-", "-right-4")),
+            UtilityMatch::Partial
+        );
+        assert_eq!(
+            UtilityMatch::from(("bottom-", "-bottom-1")),
+            UtilityMatch::Partial
+        );
+        assert_eq!(
+            UtilityMatch::from(("left-", "-left-3")),
+            UtilityMatch::Partial
+        );
+        assert_eq!(
+            UtilityMatch::from(("inset-", "-inset-2")),
+            UtilityMatch::Partial
+        );
+    }
+
+    #[test]
+    fn test_negative_target_utilities() {
+        // Test that targets with leading `-` also work (for custom utilities defined with `-` prefix)
+        // Exact match with negative target
+        assert_eq!(UtilityMatch::from(("-test$", "-test")), UtilityMatch::Exact);
+        assert_eq!(UtilityMatch::from(("-test$", "test")), UtilityMatch::Exact);
+        // Partial match with negative target
+        assert_eq!(UtilityMatch::from(("-ml-", "-ml-2")), UtilityMatch::Partial);
+        assert_eq!(UtilityMatch::from(("-ml-", "ml-2")), UtilityMatch::Partial);
+        // Both negative target and utility
+        assert_eq!(
+            UtilityMatch::from(("-custom-", "-custom-value")),
+            UtilityMatch::Partial
+        );
     }
 }
 
@@ -668,5 +731,103 @@ mod get_class_info_tests {
             })
         );
         assert_eq!(get_class_info("unknown", &sort_config), None);
+    }
+
+    #[test]
+    fn test_get_class_info_negative_values() {
+        const UTILITIES_CONFIG: [UtilityLayer; 2] = [
+            UtilityLayer {
+                name: "layer0",
+                classes: &["m-", "mx-", "my-", "mt-", "mr-", "mb-", "ml-"],
+            },
+            UtilityLayer {
+                name: "layer1",
+                classes: &["top-", "right-", "bottom-", "left-", "inset-"],
+            },
+        ];
+        let variants: &'static [&'static str; 2] = &["hover", "focus"];
+
+        let sort_config = SortConfig::new(&ConfigPreset {
+            utilities: &UTILITIES_CONFIG,
+            variants,
+        });
+
+        // Test negative margin classes
+        assert_eq!(
+            get_class_info("-ml-2", &sort_config),
+            Some(ClassInfo {
+                text: "-ml-2".into(),
+                variant_weight: None,
+                layer_index: 0,
+                utility_index: 6, // ml- is at index 6
+                arbitrary_variants: None
+            })
+        );
+        assert_eq!(
+            get_class_info("-m-4", &sort_config),
+            Some(ClassInfo {
+                text: "-m-4".into(),
+                variant_weight: None,
+                layer_index: 0,
+                utility_index: 0, // m- is at index 0
+                arbitrary_variants: None
+            })
+        );
+        assert_eq!(
+            get_class_info("-mx-2", &sort_config),
+            Some(ClassInfo {
+                text: "-mx-2".into(),
+                variant_weight: None,
+                layer_index: 0,
+                utility_index: 1, // mx- is at index 1
+                arbitrary_variants: None
+            })
+        );
+
+        // Test negative positioning classes
+        assert_eq!(
+            get_class_info("-top-4", &sort_config),
+            Some(ClassInfo {
+                text: "-top-4".into(),
+                variant_weight: None,
+                layer_index: 1,
+                utility_index: 0, // top- is at index 0
+                arbitrary_variants: None
+            })
+        );
+        assert_eq!(
+            get_class_info("-left-2", &sort_config),
+            Some(ClassInfo {
+                text: "-left-2".into(),
+                variant_weight: None,
+                layer_index: 1,
+                utility_index: 3, // left- is at index 3
+                arbitrary_variants: None
+            })
+        );
+
+        // Test negative with variants
+        assert_eq!(
+            get_class_info("hover:-ml-2", &sort_config),
+            Some(ClassInfo {
+                text: "hover:-ml-2".into(),
+                variant_weight: Some(bitvec![u8, Lsb0; 1]),
+                layer_index: 0,
+                utility_index: 6, // ml- is at index 6
+                arbitrary_variants: None
+            })
+        );
+
+        // Positive values should still work
+        assert_eq!(
+            get_class_info("ml-2", &sort_config),
+            Some(ClassInfo {
+                text: "ml-2".into(),
+                variant_weight: None,
+                layer_index: 0,
+                utility_index: 6, // ml- is at index 6
+                arbitrary_variants: None
+            })
+        );
     }
 }

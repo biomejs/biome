@@ -7,3 +7,5 @@ expression: valid-malformed-ast.js
 /* should not generate diagnostics */
 /[\u0E0�]
 ```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._

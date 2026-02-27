@@ -856,6 +856,18 @@ impl SendNode {
         }
     }
 
+    /// Downcast this handle back into a [SyntaxNode]
+    ///
+    /// Returns `None` if the specified language `L` is not the one this node
+    /// was created with
+    pub fn into_language_root<N>(self) -> Option<N>
+    where
+        N: AstNode,
+        N::Language: 'static,
+    {
+        self.into_node().map(|node| N::unwrap_cast(node))
+    }
+
     /// Downcasts this node to a language-specific root node.
     ///
     /// ## Panics

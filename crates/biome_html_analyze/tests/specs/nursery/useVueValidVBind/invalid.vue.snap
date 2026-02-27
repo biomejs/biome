@@ -57,6 +57,8 @@ invalid.vue:5:8 lint/nursery/useVueValidVBind ━━━━━━━━━━━�
   
   i Add a value to the directive, e.g. v-bind:foo="bar".
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -75,6 +77,8 @@ invalid.vue:6:8 lint/nursery/useVueValidVBind ━━━━━━━━━━━�
   i v-bind directives require a value.
   
   i Add a value to the directive, e.g. v-bind:foo="bar".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -95,6 +99,8 @@ invalid.vue:7:8 lint/nursery/useVueValidVBind ━━━━━━━━━━━�
   
   i Add a value to the directive, e.g. v-bind:foo="bar".
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -112,6 +118,8 @@ invalid.vue:10:8 lint/nursery/useVueValidVBind ━━━━━━━━━━━
   i v-bind directives require a value.
   
   i Add a value to the directive, e.g. v-bind:foo="bar".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -132,6 +140,8 @@ invalid.vue:11:8 lint/nursery/useVueValidVBind ━━━━━━━━━━━
   
   i Add a value to the directive, e.g. v-bind:foo="bar".
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -149,6 +159,8 @@ invalid.vue:14:8 lint/nursery/useVueValidVBind ━━━━━━━━━━━
   i v-bind directives require a value.
   
   i Add a value to the directive, e.g. v-bind:foo="bar".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -168,6 +180,8 @@ invalid.vue:17:18 lint/nursery/useVueValidVBind ━━━━━━━━━━�
   
   i Remove or correct the invalid modifier.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -185,6 +199,8 @@ invalid.vue:20:13 lint/nursery/useVueValidVBind ━━━━━━━━━━�
   i Only the following modifiers are allowed on v-bind directives: prop, camel, sync, and attr.
   
   i Remove or correct the invalid modifier.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -204,6 +220,8 @@ invalid.vue:23:15 lint/nursery/useVueValidVBind ━━━━━━━━━━�
   
   i Remove or correct the invalid modifier.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -221,6 +239,8 @@ invalid.vue:26:22 lint/nursery/useVueValidVBind ━━━━━━━━━━�
   i Only the following modifiers are allowed on v-bind directives: prop, camel, sync, and attr.
   
   i Remove or correct the invalid modifier.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -240,6 +260,8 @@ invalid.vue:29:20 lint/nursery/useVueValidVBind ━━━━━━━━━━�
   
   i Remove or correct the invalid modifier.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -257,6 +279,8 @@ invalid.vue:32:31 lint/nursery/useVueValidVBind ━━━━━━━━━━�
   i Only the following modifiers are allowed on v-bind directives: prop, camel, sync, and attr.
   
   i Remove or correct the invalid modifier.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

@@ -1,0 +1,17 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validAssignment.ts
+---
+# Input
+```ts
+// should not generate diagnostics
+
+let hey = false;
+
+function test() {
+	hey = "string"
+}
+
+if (hey) {}
+
+```

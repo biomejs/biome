@@ -6,7 +6,7 @@ use std::env;
 
 mod language;
 
-tests_macros::gen_tests! {"tests/specs/prettier/{json}/**/*.{json}", crate::test_snapshot, ""}
+tests_macros::gen_tests! {"tests/specs/prettier/{json}/**/*.{json,jsonc}", crate::test_snapshot, ""}
 
 fn test_snapshot(input: &'static str, _: &str, _: &str, _: &str) {
     countme::enable(true);

@@ -280,6 +280,11 @@ impl Glob {
     fn is_raw_match_candidate(&self, path: &CandidatePath<'_>) -> bool {
         self.glob.is_match_candidate(&path.0)
     }
+
+    /// Returns the pattern as a string slice.
+    pub fn as_str(&self) -> &str {
+        self.glob.glob().glob()
+    }
 }
 impl AsRef<Self> for Glob {
     fn as_ref(&self) -> &Self {

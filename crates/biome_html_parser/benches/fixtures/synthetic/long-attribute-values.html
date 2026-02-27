@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Long Attribute Values Test</title>
+</head>
+<body>
+    <div class="container">
+        <div
+            class="lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum"
+        >
+            Element with very long class attribute
+        </div>
+        
+        <div
+            style="display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 20px; margin: 10px 5px 15px 20px; background-color: rgba(255, 255, 255, 0.9); border: 1px solid #e0e0e0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; font-size: 16px; line-height: 1.5; color: #333; text-align: left; text-decoration: none; text-transform: none; letter-spacing: normal; word-spacing: normal; white-space: normal; overflow-wrap: break-word; word-break: normal; hyphens: auto; cursor: pointer; user-select: none; pointer-events: auto; visibility: visible; opacity: 1; z-index: 1; position: relative; top: 0; left: 0; right: auto; bottom: auto; width: 100%; height: auto; min-width: 0; max-width: none; min-height: 0; max-height: none; overflow: visible; clip: auto; clip-path: none; transform: none; transform-origin: center; transition: all 0.3s ease; animation: none; filter: none; backdrop-filter: none; mix-blend-mode: normal; isolation: auto; will-change: auto; contain: none;"
+        >
+            Element with very long inline style
+        </div>
+        
+        <div
+            data-config='{"api":{"endpoint":"https://api.example.com/v1","timeout":30000,"retries":3,"retryDelay":1000,"headers":{"Content-Type":"application/json","Accept":"application/json","Authorization":"Bearer token123","X-API-Key":"secret-key-abc123","X-Request-ID":"uuid-v4-string"}},"ui":{"theme":"dark","language":"en","currency":"USD","dateFormat":"MM/DD/YYYY","timeFormat":"12h","timezone":"America/New_York","animations":true,"reducedMotion":false,"highContrast":false},"features":{"search":true,"filters":true,"sorting":true,"pagination":true,"export":true,"import":false,"sharing":true,"notifications":true,"offline":false},"performance":{"lazyLoad":true,"virtualScroll":true,"debounce":300,"throttle":100,"cache":true,"cacheTTL":3600},"analytics":{"enabled":true,"trackPageViews":true,"trackEvents":true,"trackErrors":true,"sampleRate":1.0,"anonymizeIP":true}}'
+        >
+            Element with long JSON data attribute
+        </div>
+        
+        <div
+            data-users='[{"id":1,"name":"John Doe","email":"john.doe@example.com","role":"admin","permissions":["read","write","delete","manage"],"department":"Engineering","location":"New York","phone":"+1-555-0101","status":"active","createdAt":"2023-01-15T10:30:00Z","lastLogin":"2024-01-20T14:22:00Z","avatar":"https://cdn.example.com/avatars/1.jpg","settings":{"notifications":true,"newsletter":false,"twoFactor":true,"theme":"dark"}},{"id":2,"name":"Jane Smith","email":"jane.smith@example.com","role":"editor","permissions":["read","write"],"department":"Marketing","location":"Los Angeles","phone":"+1-555-0102","status":"active","createdAt":"2023-02-20T09:15:00Z","lastLogin":"2024-01-19T16:45:00Z","avatar":"https://cdn.example.com/avatars/2.jpg","settings":{"notifications":true,"newsletter":true,"twoFactor":false,"theme":"light"}},{"id":3,"name":"Bob Johnson","email":"bob.johnson@example.com","role":"viewer","permissions":["read"],"department":"Sales","location":"Chicago","phone":"+1-555-0103","status":"inactive","createdAt":"2023-03-10T11:00:00Z","lastLogin":"2023-12-15T10:30:00Z","avatar":"https://cdn.example.com/avatars/3.jpg","settings":{"notifications":false,"newsletter":true,"twoFactor":false,"theme":"auto"}}]'
+        >
+            Element with long array data attribute
+        </div>
+        
+        <input
+            type="text"
+            value="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+        >
+        
+        <textarea
+            placeholder="Enter your message here. This is a very long placeholder text that demonstrates how the parser handles lengthy placeholder attributes in form elements. The text continues to provide meaningful content while testing the parser's ability to process long attribute values efficiently."
+            rows="5"
+            cols="50"
+        ></textarea>
+        
+        <a
+            href="https://example.com/path/to/resource?param1=value1&param2=value2&param3=value3&param4=value4&param5=value5&param6=value6&param7=value7&param8=value8&param9=value9&param10=value10&utm_source=newsletter&utm_medium=email&utm_campaign=summer_sale&utm_content=cta_button&utm_term=conversion&ref=homepage&session=abc123xyz789&token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+        >
+            Link with very long URL
+        </a>
+        
+        <img
+            src="https://images.example.com/photos/landscape/mountains/sunset-over-alpine-peaks-with-lake-reflection-high-resolution-4k-wallpaper-beautiful-scenic-nature-photography-professional-quality-dramatic-lighting-clouds-sky-colors-orange-pink-purple.jpg?width=3840&height=2160&fit=crop&crop=center&quality=90&format=webp&dpr=2&saturation=1.1&contrast=1.05&brightness=1.0&sharpness=1.2&watermark=false&signature=abc123def456ghi789"
+            alt="Beautiful sunset over alpine mountain peaks with crystal clear lake reflection, dramatic orange and pink clouds in the sky, professional high-resolution nature photography, 4K quality wallpaper, stunning scenic landscape with snow-capped summits and pristine wilderness"
+        >
+        
+        <div
+            aria-label="This is an extremely long accessibility label that describes the purpose and function of this element in great detail for screen reader users, ensuring that all users regardless of visual ability can understand the context and meaning of this interactive component"
+            aria-describedby="detailed-description"
+        >
+            Accessible element
+        </div>
+        
+        <p id="detailed-description">
+            This paragraph provides additional context and description for the element above.
+            It contains detailed information about functionality and usage.
+        </p>
+        
+        <div
+            data-tracking='{"page":{"url":"https://example.com/products/category/electronics/smartphones/apple/iphone-15-pro","title":"iPhone 15 Pro - Buy Now","referrer":"https://google.com/search?q=iphone+15+pro","path":"/products/category/electronics/smartphones/apple/iphone-15-pro"},"user":{"id":"user_12345","anonymous":false,"segment":"premium","lifetimeValue":5000.00,"firstVisit":"2023-01-01","visitCount":42,"lastPurchase":"2024-01-15"},"session":{"id":"sess_abc123","startTime":"2024-01-20T10:00:00Z","duration":1800,"pageViews":5,"events":15},"device":{"type":"desktop","os":"macOS","osVersion":"14.2","browser":"Chrome","browserVersion":"120.0","screenResolution":"2560x1440","viewport":"1920x1080","language":"en-US","timezone":"America/New_York"},"campaign":{"name":"winter_sale_2024","source":"email","medium":"newsletter","term":"discount","content":"hero_banner"}}'
+        >
+            Tracking data
+        </div>
+        
+        <meta
+            name="description"
+            content="This is a comprehensive meta description that provides detailed information about the page content for search engines and social media platforms. The description includes relevant keywords and compelling copy to encourage click-throughs from search results pages. It demonstrates how the parser handles lengthy content attributes in meta tags."
+        >
+        
+        <meta
+            property="og:description"
+            content="Open Graph description for social sharing that appears when this page is shared on Facebook, LinkedIn, and other platforms that support Open Graph protocol. This long description helps optimize social media presence and engagement."
+        >
+        
+        <link
+            rel="stylesheet"
+            href="https://cdn.example.com/styles/main.min.css?v=2.1.0&theme=dark&fonts=inter,roboto,open-sans&icons=fontawesome,heroicons&animations=enabled&responsive=true&print=optimized&critical=inline&async=non-critical&preload=fonts,hero"
+        >
+        
+        <script
+            src="https://cdn.example.com/scripts/app.bundle.js?v=3.0.1&modules=analytics,forms,navigation,search,notifications,modals,tooltips,lazyload,infinite-scroll&locale=en-US&currency=USD&features=new-dashboard,enhanced-search,beta-api&debug=false&sourcemap=hidden"
+            defer="true"
+            async="false"
+        ></script>
+        
+        <iframe
+            src="https://www.example.com/embed/video?autoplay=0&controls=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&origin=https://example.com&widgetid=1&forigin=https://example.com/page&aoriginsup=1&vf=1&pl=1&ar=1&hl=en&cc_load_policy=0&cc_lang_pref=en&iv_load_policy=1&fs=1&mute=0&loop=0&start=0&end=0&playlist=abc123&listType=playlist&list=PLabc123xyz"
+            title="Embedded video player with comprehensive configuration parameters"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        ></iframe>
+    </div>
+</body>
+</html>

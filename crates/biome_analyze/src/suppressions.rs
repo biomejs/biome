@@ -276,10 +276,12 @@ impl RangeSuppressions {
             }
 
             let range_suppression = match filter {
-                None => {
-                    self.suppressions.pop();
-                    return Ok(());
-                }
+                None => self
+                    .suppressions
+                    .iter_mut()
+                    .rev()
+                    .filter(|s| !s.is_ended)
+                    .find(|s| s.suppressed_categories.contains(suppression.category)),
                 Some(PLUGIN_LINT_RULE_FILTER) => self
                     .suppressions
                     .iter_mut()
@@ -334,10 +336,13 @@ impl RangeSuppressions {
             if range_suppression
                 .suppression_range
                 .contains_range(*position)
-                && range_suppression
-                    .filters_by_category
-                    .get(rule_category)
-                    .is_some_and(|filters| filters.iter().any(|f| f == filter))
+                && (range_suppression
+                    .suppressed_categories
+                    .contains(rule_category)
+                    || range_suppression
+                        .filters_by_category
+                        .get(rule_category)
+                        .is_some_and(|filters| filters.iter().any(|f| f == filter)))
             {
                 range_suppression.did_suppress_signal = true;
                 return true;

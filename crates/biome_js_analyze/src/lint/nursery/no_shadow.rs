@@ -2,6 +2,7 @@ use biome_analyze::{
     QueryMatch, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_semantic::{Binding, SemanticModel};
 use biome_js_syntax::{
     JsClassExpression, JsFunctionExpression, JsIdentifierBinding, JsParameterList,
@@ -63,6 +64,7 @@ declare_lint_rule! {
         name: "noShadow",
         language: "js",
         recommended: false,
+        severity: Severity::Warning,
         sources: &[
             RuleSource::Eslint("no-shadow").same(),
             // uncomment when we can handle the test cases from typescript-eslint
@@ -131,7 +133,7 @@ fn check_shadowing(model: &SemanticModel, binding: Binding) -> Option<ShadowedBi
 
     let name = get_binding_name(&binding)?;
     let binding_hoisted_scope = model
-        .scope_hoisted_to(binding.syntax())
+        .scope_hoisted_to(&binding.syntax())
         .unwrap_or(binding.scope());
 
     for upper in binding_hoisted_scope.ancestors().skip(1) {
@@ -158,10 +160,10 @@ fn evaluate_shadowing(model: &SemanticModel, binding: &Binding, upper_binding: &
     }
     if is_declaration(binding) && is_declaration(upper_binding) {
         let binding_hoisted_scope = model
-            .scope_hoisted_to(binding.syntax())
+            .scope_hoisted_to(&binding.syntax())
             .unwrap_or(binding.scope());
         let upper_binding_hoisted_scope = model
-            .scope_hoisted_to(upper_binding.syntax())
+            .scope_hoisted_to(&upper_binding.syntax())
             .unwrap_or(upper_binding.scope());
         if binding_hoisted_scope == upper_binding_hoisted_scope {
             // redeclarations are not shadowing, they get caught by `noRedeclare`

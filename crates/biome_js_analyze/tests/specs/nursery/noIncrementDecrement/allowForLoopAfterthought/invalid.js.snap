@@ -49,6 +49,8 @@ invalid.js:2:1 lint/nursery/noIncrementDecrement ━━━━━━━━━━�
   
   i The unary ++ and -- operators are subject to automatic semicolon insertion, differences in whitespace can change semantics of source code. Instead use += or -=.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -64,6 +66,8 @@ invalid.js:5:1 lint/nursery/noIncrementDecrement ━━━━━━━━━━�
     7 │ for (let i = 0; i < 10; j = i++) {
   
   i The unary ++ and -- operators are subject to automatic semicolon insertion, differences in whitespace can change semantics of source code. Instead use += or -=.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -82,6 +86,8 @@ invalid.js:7:29 lint/nursery/noIncrementDecrement ━━━━━━━━━━
   
   i The unary ++ and -- operators are subject to automatic semicolon insertion, differences in whitespace can change semantics of source code. Instead use += or -=.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -98,6 +104,8 @@ invalid.js:11:18 lint/nursery/noIncrementDecrement ━━━━━━━━━�
     13 │ }
   
   i The unary ++ and -- operators are subject to automatic semicolon insertion, differences in whitespace can change semantics of source code. Instead use += or -=.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -116,6 +124,8 @@ invalid.js:15:26 lint/nursery/noIncrementDecrement ━━━━━━━━━�
   
   i The unary ++ and -- operators are subject to automatic semicolon insertion, differences in whitespace can change semantics of source code. Instead use += or -=.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -132,6 +142,8 @@ invalid.js:17:27 lint/nursery/noIncrementDecrement ━━━━━━━━━�
     19 │ for (i++;;);
   
   i The unary ++ and -- operators are subject to automatic semicolon insertion, differences in whitespace can change semantics of source code. Instead use += or -=.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -150,6 +162,8 @@ invalid.js:19:6 lint/nursery/noIncrementDecrement ━━━━━━━━━━
   
   i The unary ++ and -- operators are subject to automatic semicolon insertion, differences in whitespace can change semantics of source code. Instead use += or -=.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -166,6 +180,8 @@ invalid.js:21:7 lint/nursery/noIncrementDecrement ━━━━━━━━━━
     23 │ for (;;) ++i;
   
   i The unary ++ and -- operators are subject to automatic semicolon insertion, differences in whitespace can change semantics of source code. Instead use += or -=.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -184,6 +200,8 @@ invalid.js:23:10 lint/nursery/noIncrementDecrement ━━━━━━━━━�
   
   i The unary ++ and -- operators are subject to automatic semicolon insertion, differences in whitespace can change semantics of source code. Instead use += or -=.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -200,6 +218,8 @@ invalid.js:25:13 lint/nursery/noIncrementDecrement ━━━━━━━━━�
     27 │ for (;; i++, f(--j));
   
   i The unary ++ and -- operators are subject to automatic semicolon insertion, differences in whitespace can change semantics of source code. Instead use += or -=.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
@@ -218,6 +238,8 @@ invalid.js:27:16 lint/nursery/noIncrementDecrement ━━━━━━━━━�
   
   i The unary ++ and -- operators are subject to automatic semicolon insertion, differences in whitespace can change semantics of source code. Instead use += or -=.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -232,6 +254,8 @@ invalid.js:29:16 lint/nursery/noIncrementDecrement ━━━━━━━━━�
        │                ^^^
   
   i The unary ++ and -- operators are subject to automatic semicolon insertion, differences in whitespace can change semantics of source code. Instead use += or -=.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

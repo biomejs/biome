@@ -17,3 +17,5 @@ globalThis.Math.min(0, Math.max(100, x));
 Math.min(0, globalThis.Math.max(100, x));
 
 foo(Math.min(0, Math.max(100, x)));
+
+Math.min(0x10000000000000000, Math.max(0x20000000000000000, x));

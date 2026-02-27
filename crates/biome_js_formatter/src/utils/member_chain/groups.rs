@@ -207,19 +207,6 @@ impl MemberChainGroup {
         Ok(result)
     }
 
-    pub(super) fn has_comments(&self, comments: &JsComments) -> bool {
-        self.members.iter().enumerate().any(|(index, member)| {
-            if index == 0 {
-                comments.has_trailing_comments(member.syntax())
-            } else if index < self.members.len() {
-                comments.has_leading_comments(member.syntax())
-                    || comments.has_trailing_comments(member.syntax())
-            } else {
-                false
-            }
-        })
-    }
-
     pub(super) fn needs_empty_line_before(&self) -> bool {
         let first = self.members.first();
         first.is_some_and(|first| match first {

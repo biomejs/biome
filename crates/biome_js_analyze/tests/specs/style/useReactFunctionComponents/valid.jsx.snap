@@ -30,4 +30,12 @@ export default class Bar extends React.Component {
   }
 }
 
+const ErrorBoundary = class extends React.Component {
+  componentDidCatch(error, errorInfo) {}
+
+  render() {
+    return this.props.children;
+  }
+}
+
 ```

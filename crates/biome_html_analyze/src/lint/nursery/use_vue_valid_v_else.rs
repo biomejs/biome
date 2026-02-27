@@ -54,7 +54,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueValidVElse {
-        version: "next",
+        version: "2.3.6",
         name: "useVueValidVElse",
         language: "html",
         recommended: true,
@@ -201,7 +201,7 @@ fn has_v_if_or_else_if_directives(element: &AnyHtmlElement) -> bool {
             AnyVueDirective::try_cast(attribute.syntax().clone())
             && let Ok(name_token) = vue_dir.name_token()
         {
-            let name = name_token.text();
+            let name = name_token.text_trimmed();
             if name == "v-if" || name == "v-else-if" {
                 return true;
             }

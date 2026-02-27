@@ -1,0 +1,186 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<div transition:fade={{ duration: 200 }}>Slow fade</div>
+<p transition:fly={{ y: 200, duration: 2000 }}>Flies in</p>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteTransitionDirective {
+                        transition_token: TRANSITION_KW@5..15 "transition" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@15..16 ":" [] [],
+                            property: SvelteName {
+                                ident_token: IDENT@16..20 "fade" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@20..21 "=" [] [],
+                                value: HtmlAttributeSingleTextExpression {
+                                    l_curly_token: L_CURLY@21..22 "{" [] [],
+                                    expression: HtmlTextExpression {
+                                        html_literal_token: HTML_LITERAL@22..39 "{ duration: 200 }" [] [],
+                                    },
+                                    r_curly_token: R_CURLY@39..40 "}" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@40..41 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@41..50 "Slow fade" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@50..51 "<" [] [],
+                slash_token: SLASH@51..52 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@52..55 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@55..56 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@56..58 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@58..60 "p" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteTransitionDirective {
+                        transition_token: TRANSITION_KW@60..70 "transition" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@70..71 ":" [] [],
+                            property: SvelteName {
+                                ident_token: IDENT@71..74 "fly" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@74..75 "=" [] [],
+                                value: HtmlAttributeSingleTextExpression {
+                                    l_curly_token: L_CURLY@75..76 "{" [] [],
+                                    expression: HtmlTextExpression {
+                                        html_literal_token: HTML_LITERAL@76..102 "{ y: 200, duration: 2000 }" [] [],
+                                    },
+                                    r_curly_token: R_CURLY@102..103 "}" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@103..104 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@104..112 "Flies in" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@112..113 "<" [] [],
+                slash_token: SLASH@113..114 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@114..115 "p" [] [],
+                },
+                r_angle_token: R_ANGLE@115..116 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@116..117 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..117
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..116
+    0: HTML_ELEMENT@0..56
+      0: HTML_OPENING_ELEMENT@0..41
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..40
+          0: SVELTE_TRANSITION_DIRECTIVE@5..40
+            0: TRANSITION_KW@5..15 "transition" [] []
+            1: SVELTE_DIRECTIVE_VALUE@15..40
+              0: COLON@15..16 ":" [] []
+              1: SVELTE_NAME@16..20
+                0: IDENT@16..20 "fade" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@20..20
+              3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@20..40
+                0: EQ@20..21 "=" [] []
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@21..40
+                  0: L_CURLY@21..22 "{" [] []
+                  1: HTML_TEXT_EXPRESSION@22..39
+                    0: HTML_LITERAL@22..39 "{ duration: 200 }" [] []
+                  2: R_CURLY@39..40 "}" [] []
+        3: R_ANGLE@40..41 ">" [] []
+      1: HTML_ELEMENT_LIST@41..50
+        0: HTML_CONTENT@41..50
+          0: HTML_LITERAL@41..50 "Slow fade" [] []
+      2: HTML_CLOSING_ELEMENT@50..56
+        0: L_ANGLE@50..51 "<" [] []
+        1: SLASH@51..52 "/" [] []
+        2: HTML_TAG_NAME@52..55
+          0: HTML_LITERAL@52..55 "div" [] []
+        3: R_ANGLE@55..56 ">" [] []
+    1: HTML_ELEMENT@56..116
+      0: HTML_OPENING_ELEMENT@56..104
+        0: L_ANGLE@56..58 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@58..60
+          0: HTML_LITERAL@58..60 "p" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@60..103
+          0: SVELTE_TRANSITION_DIRECTIVE@60..103
+            0: TRANSITION_KW@60..70 "transition" [] []
+            1: SVELTE_DIRECTIVE_VALUE@70..103
+              0: COLON@70..71 ":" [] []
+              1: SVELTE_NAME@71..74
+                0: IDENT@71..74 "fly" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@74..74
+              3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@74..103
+                0: EQ@74..75 "=" [] []
+                1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@75..103
+                  0: L_CURLY@75..76 "{" [] []
+                  1: HTML_TEXT_EXPRESSION@76..102
+                    0: HTML_LITERAL@76..102 "{ y: 200, duration: 2000 }" [] []
+                  2: R_CURLY@102..103 "}" [] []
+        3: R_ANGLE@103..104 ">" [] []
+      1: HTML_ELEMENT_LIST@104..112
+        0: HTML_CONTENT@104..112
+          0: HTML_LITERAL@104..112 "Flies in" [] []
+      2: HTML_CLOSING_ELEMENT@112..116
+        0: L_ANGLE@112..113 "<" [] []
+        1: SLASH@113..114 "/" [] []
+        2: HTML_TAG_NAME@114..115
+          0: HTML_LITERAL@114..115 "p" [] []
+        3: R_ANGLE@115..116 ">" [] []
+  4: EOF@116..117 "" [Newline("\n")] []
+
+```

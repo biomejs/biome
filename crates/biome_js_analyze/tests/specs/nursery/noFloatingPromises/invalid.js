@@ -3,3 +3,8 @@ async function returnsPromise() {
 }
 returnsPromise();
 returnsPromise().then(() => { }).finally(() => { });
+
+async function issue7999() {
+  // ✅
+  returnsPromise();
+}

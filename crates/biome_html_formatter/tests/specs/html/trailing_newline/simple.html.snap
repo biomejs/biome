@@ -1,0 +1,79 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: trailing_newline/simple.html
+---
+
+# Input
+
+```html
+<!doctype html>
+<html>
+<head>
+  <title>Test</title>
+</head>
+<body>
+  <h1>Hello</h1>
+</body>
+</html>
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+Bracket same line: false
+Whitespace sensitivity: css
+Indent script and style: false
+Self close void elements: never
+Trailing newline: true
+-----
+
+```html
+<!doctype html>
+<html>
+	<head>
+		<title>Test</title>
+	</head>
+	<body>
+		<h1>Hello</h1>
+	</body>
+</html>
+
+```
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+Bracket same line: false
+Whitespace sensitivity: css
+Indent script and style: false
+Self close void elements: never
+Trailing newline: false
+-----
+
+```html
+<!doctype html>
+<html>
+	<head>
+		<title>Test</title>
+	</head>
+	<body>
+		<h1>Hello</h1>
+	</body>
+</html>
+```

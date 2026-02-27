@@ -26,5 +26,3 @@ for (let x of xs) {}
 ```cjs
 for (const x of xs) {}
 ```
-
-

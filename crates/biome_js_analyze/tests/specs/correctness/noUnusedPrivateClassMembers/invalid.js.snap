@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 152
 expression: invalid.js
 ---
 # Input
@@ -42,6 +41,13 @@ class Foo {
 	#usedOnlyInWrite = 5;
 	method() {
 			this.#usedOnlyInWrite = 42;
+	}
+}
+
+class Foo {
+	#usedOnlyInWriteStatement = 5;
+	method() {
+			this.#usedOnlyInWriteStatement += 42;
 	}
 }
 
@@ -242,19 +248,41 @@ invalid.js:42:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
 
   ! This private class member is defined but never used.
   
-    41 │ class C {
-  > 42 │ 	#usedOnlyInIncrement;
-       │ 	^^^^^^^^^^^^^^^^^^^^
-    43 │ 
-    44 │ 	foo() {
+    41 │ class Foo {
+  > 42 │ 	#usedOnlyInWriteStatement = 5;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    43 │ 	method() {
+    44 │ 			this.#usedOnlyInWriteStatement += 42;
   
   i Unsafe fix: Remove unused declaration.
   
     40 40 │   
-    41 41 │   class C {
-    42    │ - → #usedOnlyInIncrement;
-    43 42 │   
-    44 43 │   	foo() {
+    41 41 │   class Foo {
+    42    │ - → #usedOnlyInWriteStatement·=·5;
+    43 42 │   	method() {
+    44 43 │   			this.#usedOnlyInWriteStatement += 42;
+  
+
+```
+
+```
+invalid.js:49:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    48 │ class C {
+  > 49 │ 	#usedOnlyInIncrement;
+       │ 	^^^^^^^^^^^^^^^^^^^^
+    50 │ 
+    51 │ 	foo() {
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    47 47 │   
+    48 48 │   class C {
+    49    │ - → #usedOnlyInIncrement;
+    50 49 │   
+    51 50 │   	foo() {
   
 
 ```

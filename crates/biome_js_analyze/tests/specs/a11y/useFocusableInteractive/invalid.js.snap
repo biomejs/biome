@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -11,3 +10,5 @@ snapshot_kind: text
 </div>;
 
 ```
+
+_Note: The parser emitted 7 diagnostics which are not shown here._

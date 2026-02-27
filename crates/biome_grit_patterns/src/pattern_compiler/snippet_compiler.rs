@@ -835,7 +835,7 @@ mod tests {
                                             Variable {
                                                 internal: Static(
                                                     VariableScope {
-                                                        scope: 0,
+                                                        scope: 1,
                                                         index: 0,
                                                     },
                                                 ),
@@ -868,7 +868,7 @@ mod tests {
                                                             Variable {
                                                                 internal: Static(
                                                                     VariableScope {
-                                                                        scope: 0,
+                                                                        scope: 1,
                                                                         index: 0,
                                                                     },
                                                                 ),

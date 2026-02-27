@@ -1,0 +1,12 @@
+<!-- should generate diagnostics -->
+
+<div foo="a" foo="b"></div>
+
+<div Foo Foo></div>
+
+<!-- case-sensitive: these should NOT be considered duplicates -->
+<div foo Foo></div>
+
+<div class class></div>
+<div style style></div>
+

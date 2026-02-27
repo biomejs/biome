@@ -1,6 +1,6 @@
 use crate::commands::MigrateSubCommand;
 use crate::diagnostics::MigrationDiagnostic;
-use crate::execute::diagnostics::{ContentDiffAdvice, MigrateDiffDiagnostic};
+use crate::runner::diagnostics::{ContentDiffAdvice, MigrateDiffDiagnostic};
 use crate::{CliDiagnostic, CliSession};
 use biome_analyze::AnalysisFilter;
 use biome_configuration::Configuration;
@@ -36,6 +36,7 @@ mod eslint_unicorn;
 mod ignorefile;
 mod node;
 mod prettier;
+mod unsupported_rules;
 
 pub(crate) struct MigratePayload<'a> {
     pub(crate) session: CliSession<'a>,
@@ -198,6 +199,7 @@ fn migrate_file(payload: MigrateFile) -> Result<MigrationFileResult, CliDiagnost
                 .into(),
         ),
         persist_node_cache: false,
+        inline_config: None,
     })?;
     let parsed = parse_json_with_cache(&biome_config_content, &mut cache, parse_options);
 
@@ -250,10 +252,12 @@ fn migrate_file(payload: MigrateFile) -> Result<MigrationFileResult, CliDiagnost
                     path: biome_path.clone(),
                     content: new_content,
                     version: 1,
+                    inline_config: None,
                 })?;
                 let printed = workspace.format_file(FormatFileParams {
                     project_key,
                     path: biome_path,
+                    inline_config: None,
                 })?;
                 if write {
                     biome_config_file.set_content(printed.as_code().as_bytes())?;
@@ -323,10 +327,12 @@ fn migrate_file(payload: MigrateFile) -> Result<MigrationFileResult, CliDiagnost
                     path: biome_path.clone(),
                     content: new_content,
                     version: 1,
+                    inline_config: None,
                 })?;
                 let printed = workspace.format_file(FormatFileParams {
                     project_key,
                     path: biome_path,
+                    inline_config: None,
                 })?;
                 if write {
                     biome_config_file.set_content(printed.as_code().as_bytes())?;
@@ -409,10 +415,12 @@ fn migrate_file(payload: MigrateFile) -> Result<MigrationFileResult, CliDiagnost
                         path: biome_path.clone(),
                         content: new_configuration_content,
                         version: 1,
+                        inline_config: None,
                     })?;
                     let printed = workspace.format_file(FormatFileParams {
                         project_key,
                         path: biome_path,
+                        inline_config: None,
                     })?;
                     configuration_file.set_content(printed.as_code().as_bytes())?;
                     Ok(MigrationFileResult::Migrated)

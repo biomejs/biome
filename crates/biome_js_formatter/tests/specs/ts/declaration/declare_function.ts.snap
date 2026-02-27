@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/declaration/declare_function.ts
 ---
+
 # Input
 
 ```ts
@@ -34,6 +35,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -44,4 +46,5 @@ declare function looooooooooooooooooooooooooooong_naaaaaame<
 	SecondType,
 	ThirdType,
 >(loreum: string, ipsum: number, chilly: symbol, powder: number): string;
+
 ```

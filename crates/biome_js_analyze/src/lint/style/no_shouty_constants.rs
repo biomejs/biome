@@ -173,7 +173,7 @@ impl Rule for NoShoutyConstants {
                 AnyJsObjectMemberName::JsLiteralMemberName(js_literal_member_name(
                     SyntaxToken::new_detached(
                         JsSyntaxKind::JS_LITERAL_MEMBER_NAME,
-                        JsReferenceIdentifier::cast_ref(state.reference.syntax())?
+                        JsReferenceIdentifier::cast_ref(&state.reference.syntax())?
                             .value_token()
                             .ok()?
                             .text_trimmed(),

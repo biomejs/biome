@@ -9,3 +9,5 @@ expression: issue_6508.jsx
 <React.Fragment>&#9650;</React.Fragment>
 
 ```
+
+_Note: The parser emitted 5 diagnostics which are not shown here._

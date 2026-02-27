@@ -9,9 +9,7 @@ use biome_configuration::diagnostics::{
     CantLoadExtendFile, CantResolve, EditorConfigDiagnostic, ParseFailedDiagnostic,
 };
 use biome_configuration::editorconfig::EditorConfig;
-use biome_configuration::{
-    BiomeDiagnostic, ConfigurationPathHint, ConfigurationPayload, push_to_analyzer_rules,
-};
+use biome_configuration::{BiomeDiagnostic, ConfigurationPathHint, push_to_analyzer_rules};
 use biome_configuration::{Configuration, VERSION, push_to_analyzer_assist};
 use biome_console::markup;
 use biome_css_analyze::METADATA as css_lint_metadata;
@@ -22,13 +20,15 @@ use biome_diagnostics::{DiagnosticExt, Error, Severity};
 use biome_fs::{AutoSearchResult, ConfigName, FileSystem, OpenOptions};
 use biome_graphql_analyze::METADATA as graphql_lint_metadata;
 use biome_graphql_syntax::GraphqlLanguage;
+use biome_html_analyze::METADATA as html_lint_metadata;
+use biome_html_syntax::HtmlLanguage;
 use biome_js_analyze::METADATA as js_lint_metadata;
 use biome_js_syntax::JsLanguage;
 use biome_json_analyze::METADATA as json_lint_metadata;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_syntax::JsonLanguage;
-use biome_resolver::{FsWithResolverProxy, ResolveOptions, resolve};
+use biome_resolver::{FsWithResolverProxy, ResolveOptions, is_relative_specifier, resolve};
 use biome_rowan::Language;
 use camino::{Utf8Path, Utf8PathBuf};
 use rustc_hash::FxHashSet;
@@ -36,7 +36,6 @@ use std::fmt::Debug;
 use std::io::ErrorKind;
 use std::iter::FusedIterator;
 use std::ops::Deref;
-use std::path::Path;
 use std::str::FromStr;
 use tracing::instrument;
 
@@ -54,6 +53,27 @@ pub struct LoadedConfiguration {
     pub configuration: Configuration,
     /// All diagnostics that were emitted during parsing and deserialization
     pub diagnostics: Vec<Error>,
+    /// The list of possible extended configuration files
+    pub extended_configurations: Vec<(Utf8PathBuf, Configuration)>,
+    /// Where the configuration was loaded from.
+    pub loaded_location: LoadedLocation,
+}
+
+#[derive(Default, Debug)]
+pub enum LoadedLocation {
+    /// Loaded from inside the project
+    #[default]
+    InProject,
+    /// Loaded from a parent folder
+    ParentFolder,
+    /// Loaded from the user configuration folder
+    UserConfigFolder,
+}
+
+impl LoadedLocation {
+    pub const fn is_in_project(&self) -> bool {
+        matches!(self, Self::InProject)
+    }
 }
 
 impl LoadedConfiguration {
@@ -70,29 +90,53 @@ impl LoadedConfiguration {
             external_resolution_base_path,
             configuration_file_path,
             deserialized,
+            loaded_location,
         } = value;
         let (partial_configuration, mut diagnostics) = deserialized.consume();
 
-        Ok(Self {
-            configuration: match partial_configuration {
-                Some(mut partial_configuration) => {
-                    partial_configuration.apply_extends(
-                        fs,
-                        &configuration_file_path,
-                        &external_resolution_base_path,
-                        &mut diagnostics,
-                    )?;
-                    partial_configuration.migrate_deprecated_fields();
-                    partial_configuration
+        let mut extended_configurations: Vec<(Utf8PathBuf, Configuration)> = vec![];
+
+        let configuration = match partial_configuration {
+            Some(mut partial_configuration) => {
+                extended_configurations.extend(partial_configuration.apply_extends(
+                    fs,
+                    &configuration_file_path,
+                    &external_resolution_base_path,
+                    &mut diagnostics,
+                )?);
+                partial_configuration.migrate_deprecated_fields();
+
+                // Normalize plugin paths relative to the configuration file directory so
+                // merged configurations (e.g. nested configs extending from root) can
+                // still load plugins defined in other configuration files.
+                let config_dir = configuration_file_path
+                    .parent()
+                    .unwrap_or(external_resolution_base_path.as_path());
+                if let Some(plugins) = partial_configuration.plugins.as_mut() {
+                    plugins.normalize_relative_paths(config_dir);
                 }
-                None => Configuration::default(),
-            },
+                if let Some(overrides) = partial_configuration.overrides.as_mut() {
+                    for pattern in overrides.0.iter_mut() {
+                        if let Some(plugins) = pattern.plugins.as_mut() {
+                            plugins.normalize_relative_paths(config_dir);
+                        }
+                    }
+                }
+                partial_configuration
+            }
+            None => Configuration::default(),
+        };
+
+        Ok(Self {
+            configuration,
             diagnostics: diagnostics
                 .into_iter()
                 .map(|diagnostic| diagnostic.with_file_path(configuration_file_path.to_string()))
                 .collect(),
             directory_path: configuration_file_path.parent().map(Utf8PathBuf::from),
             file_path: Some(configuration_file_path),
+            extended_configurations,
+            loaded_location,
         })
     }
 
@@ -159,6 +203,18 @@ pub fn load_configuration(
 ) -> Result<LoadedConfiguration, WorkspaceError> {
     let config = read_config(fs, config_path, true)?;
     LoadedConfiguration::try_from_payload(config, fs)
+}
+
+#[derive(Debug)]
+pub struct ConfigurationPayload {
+    /// The result of the deserialization
+    pub deserialized: Deserialized<Configuration>,
+    /// The path of where the `biome.json` or `biome.jsonc` file was found. This contains the file name.
+    pub configuration_file_path: Utf8PathBuf,
+    /// The base path where the external configuration in a package should be resolved from
+    pub external_resolution_base_path: Utf8PathBuf,
+
+    pub loaded_location: LoadedLocation,
 }
 
 /// - [Result]: if an error occurred while loading the configuration file.
@@ -241,20 +297,37 @@ pub fn read_config(
         is_found
     };
 
-    let Some(auto_search_result) = fs.auto_search_files_with_predicate(
-        &configuration_directory,
-        &[ConfigName::biome_json(), ConfigName::biome_jsonc()],
-        &mut predicate,
-    ) else {
+    let Some((auto_search_result, loaded_location)) = fs
+        .auto_search_files_with_predicate(
+            &configuration_directory,
+            &ConfigName::file_names(),
+            &mut predicate,
+        )
+        .map(|auto_search_result| {
+            if configuration_directory == auto_search_result.directory_path {
+                (auto_search_result, LoadedLocation::InProject)
+            } else {
+                (auto_search_result, LoadedLocation::ParentFolder)
+            }
+        })
+        .or_else(|| {
+            let user_config_dir = fs.user_config_dir()?;
+
+            let paths = ConfigName::file_names().map(|file_name| user_config_dir.join(file_name));
+            fs.read_file_from_paths_with_predicate(paths.as_slice(), &mut predicate)
+                .map(|auto_search_result| (auto_search_result, LoadedLocation::UserConfigFolder))
+        })
+    else {
         return Ok(None);
     };
 
     Ok(Some(ConfigurationPayload {
-        // Unwrapping is safe because the predicate in the search above would
+        // SAFETY: unwrapping is safe because the predicate in the search above would
         // only return `true` if it assigned `Some` value:
         deserialized: deserialized.unwrap(),
         configuration_file_path: auto_search_result.file_path,
         external_resolution_base_path,
+        loaded_location,
     }))
 }
 
@@ -264,6 +337,7 @@ fn load_user_config(
     external_resolution_base_path: Utf8PathBuf,
 ) -> LoadConfig {
     // If the configuration path hint is a file path, we'll load it directly.
+    let working_directory = fs.working_directory();
     if fs.path_is_file(config_file_path) {
         let content = fs.read_file_from_path(config_file_path)?;
         let parser_options = match config_file_path.extension() {
@@ -274,33 +348,36 @@ fn load_user_config(
             _ => return Err(BiomeDiagnostic::invalid_configuration_file(config_file_path).into()),
         };
         let deserialized = deserialize_from_json_str::<Configuration>(&content, parser_options, "");
+        let loaded_location = working_directory.map_or(LoadedLocation::InProject, |wd| {
+            if config_file_path.starts_with(wd) {
+                LoadedLocation::InProject
+            } else {
+                LoadedLocation::ParentFolder
+            }
+        });
         Ok(Some(ConfigurationPayload {
             deserialized,
             configuration_file_path: config_file_path.to_path_buf(),
             external_resolution_base_path,
+            loaded_location,
         }))
     } else {
-        let biome_json_path = config_file_path.join(ConfigName::biome_json());
-        let biome_jsonc_path = config_file_path.join(ConfigName::biome_jsonc());
-        let biome_json_exists = fs.path_exists(biome_json_path.as_path());
-        let biome_jsonc_exists = fs.path_exists(biome_jsonc_path.as_path());
-
-        if !biome_json_exists && !biome_jsonc_exists {
+        let config_paths =
+            ConfigName::file_names().map(|file_name| config_file_path.join(file_name));
+        let result = fs.read_files_from_paths(config_paths.as_slice());
+        let Some(result) = result else {
             return Err(BiomeDiagnostic::no_configuration_file_found(config_file_path).into());
-        }
-
-        let (config_path, parser_options) = if biome_json_exists {
-            (biome_json_path, JsonParserOptions::default())
-        } else {
-            (
-                biome_jsonc_path,
-                JsonParserOptions::default()
-                    .with_allow_comments()
-                    .with_allow_trailing_commas(),
-            )
         };
 
-        let content = fs.read_file_from_path(config_path.as_path())?;
+        let parser_options = if result.file_path.extension() == Some("json") {
+            JsonParserOptions::default()
+        } else {
+            JsonParserOptions::default()
+                .with_allow_comments()
+                .with_allow_trailing_commas()
+        };
+
+        let content = fs.read_file_from_path(result.file_path.as_path())?;
         let deserialized = deserialize_from_json_str::<Configuration>(&content, parser_options, "");
         if deserialized
             .deserialized
@@ -309,11 +386,18 @@ fn load_user_config(
         {
             return Err(BiomeDiagnostic::non_root_configuration(config_file_path).into());
         }
-
+        let loaded_location = working_directory.map_or(LoadedLocation::InProject, |wd| {
+            if config_file_path.starts_with(wd) {
+                LoadedLocation::InProject
+            } else {
+                LoadedLocation::ParentFolder
+            }
+        });
         Ok(Some(ConfigurationPayload {
             deserialized,
-            configuration_file_path: config_path.to_path_buf(),
+            configuration_file_path: result.file_path.to_path_buf(),
             external_resolution_base_path,
+            loaded_location,
         }))
     }
 }
@@ -437,12 +521,14 @@ pub fn to_analyzer_rules(settings: &Settings, path: &Utf8Path) -> AnalyzerRules 
         push_to_analyzer_rules(rules, css_lint_metadata.deref(), &mut analyzer_rules);
         push_to_analyzer_rules(rules, json_lint_metadata.deref(), &mut analyzer_rules);
         push_to_analyzer_rules(rules, graphql_lint_metadata.deref(), &mut analyzer_rules);
+        push_to_analyzer_rules(rules, html_lint_metadata.deref(), &mut analyzer_rules);
     }
     if let Some(rules) = settings.assist.actions.as_ref() {
         push_to_analyzer_assist(rules, js_lint_metadata.deref(), &mut analyzer_rules);
         push_to_analyzer_assist(rules, css_lint_metadata.deref(), &mut analyzer_rules);
         push_to_analyzer_assist(rules, json_lint_metadata.deref(), &mut analyzer_rules);
         push_to_analyzer_assist(rules, graphql_lint_metadata.deref(), &mut analyzer_rules);
+        push_to_analyzer_assist(rules, html_lint_metadata.deref(), &mut analyzer_rules);
     }
     let overrides = &settings.override_settings;
     overrides.override_analyzer_rules(path, analyzer_rules)
@@ -455,7 +541,7 @@ pub trait ConfigurationExt {
         file_path: &Utf8Path,
         external_resolution_base_path: &Utf8Path,
         diagnostics: &mut Vec<Error>,
-    ) -> Result<(), WorkspaceError>;
+    ) -> Result<Vec<(Utf8PathBuf, Configuration)>, WorkspaceError>;
 
     fn deserialize_extends(
         &mut self,
@@ -488,7 +574,7 @@ impl ConfigurationExt for Configuration {
         file_path: &Utf8Path,
         external_resolution_base_path: &Utf8Path,
         diagnostics: &mut Vec<Error>,
-    ) -> Result<(), WorkspaceError> {
+    ) -> Result<Vec<(Utf8PathBuf, Configuration)>, WorkspaceError> {
         let deserialized = self.deserialize_extends(
             fs,
             file_path.parent().expect("file path should have a parent"),
@@ -496,6 +582,13 @@ impl ConfigurationExt for Configuration {
         )?;
         let (configurations, errors): (Vec<_>, Vec<_>) =
             deserialized.into_iter().map(Deserialized::consume).unzip();
+
+        let configuration_list = configurations
+            .iter()
+            .flatten()
+            .cloned()
+            .map(|c| (file_path.to_path_buf(), c))
+            .collect::<Vec<_>>();
 
         let extended_configuration = configurations.into_iter().flatten().reduce(
             |mut previous_configuration, current_configuration| {
@@ -521,7 +614,7 @@ impl ConfigurationExt for Configuration {
                 .collect::<Vec<_>>(),
         );
 
-        Ok(())
+        Ok(configuration_list)
     }
 
     /// Deserializes all the configuration files that were specified in the
@@ -539,9 +632,8 @@ impl ConfigurationExt for Configuration {
         let mut deserialized_configurations = vec![];
         if let Some(extends) = extends.as_list() {
             for extend_entry in extends.iter() {
-                let extend_entry_as_path = Path::new(extend_entry.as_ref());
-
-                let extend_configuration_file_path = if extend_entry_as_path.starts_with(".") {
+                let extend_configuration_file_path = if is_relative_specifier(extend_entry.as_ref())
+                {
                     relative_resolution_base_path.join(extend_entry.as_ref())
                 } else {
                     const RESOLVE_OPTIONS: ResolveOptions = ResolveOptions::new()
@@ -697,6 +789,7 @@ mod test {
 /// on the current configuration
 pub struct ProjectScanComputer<'a> {
     requires_project_scan: bool,
+    requires_types: bool,
     enabled_rules: FxHashSet<RuleFilter<'a>>,
     configuration: &'a Configuration,
     skip: &'a [AnalyzerSelector],
@@ -709,6 +802,7 @@ impl<'a> ProjectScanComputer<'a> {
         Self {
             enabled_rules,
             requires_project_scan: false,
+            requires_types: false,
             configuration,
             skip: &[],
             only: &[],
@@ -733,6 +827,11 @@ impl<'a> ProjectScanComputer<'a> {
             for (domain, value) in domains.iter() {
                 if domain == &RuleDomain::Project && value != &RuleDomainValue::None {
                     self.requires_project_scan = true;
+                }
+                if domain == &RuleDomain::Types && value != &RuleDomainValue::None {
+                    self.requires_types = true;
+                    self.requires_project_scan = true;
+                    // requiring types is of higher order of project, so we can bail
                     break;
                 }
             }
@@ -742,8 +841,11 @@ impl<'a> ProjectScanComputer<'a> {
         biome_css_analyze::visit_registry(&mut self);
         biome_json_analyze::visit_registry(&mut self);
         biome_js_analyze::visit_registry(&mut self);
+        biome_html_analyze::visit_registry(&mut self);
 
-        if self.requires_project_scan {
+        if self.requires_types {
+            ScanKind::TypeAware
+        } else if self.requires_project_scan {
             ScanKind::Project
         } else {
             // There's no need to scan further known files if the VCS isn't enabled
@@ -767,6 +869,7 @@ impl<'a> ProjectScanComputer<'a> {
                 if selector.match_rule::<R>() {
                     let domains = R::METADATA.domains;
                     self.requires_project_scan |= domains.contains(&RuleDomain::Project);
+                    self.requires_types |= domains.contains(&RuleDomain::Types);
                     break;
                 }
             }
@@ -775,6 +878,7 @@ impl<'a> ProjectScanComputer<'a> {
         {
             let domains = R::METADATA.domains;
             self.requires_project_scan |= domains.contains(&RuleDomain::Project);
+            self.requires_types |= domains.contains(&RuleDomain::Types);
         }
     }
 }
@@ -818,6 +922,15 @@ impl RegistryVisitor<GraphqlLanguage> for ProjectScanComputer<'_> {
     }
 }
 
+impl RegistryVisitor<HtmlLanguage> for ProjectScanComputer<'_> {
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = HtmlLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.check_rule::<R, HtmlLanguage>();
+    }
+}
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -965,6 +1078,69 @@ mod tests {
         assert_eq!(
             ProjectScanComputer::new(&configuration)
                 .with_rule_selectors(&[], &[DomainSelector("test").into()])
+                .compute(),
+            ScanKind::NoScanner
+        );
+    }
+
+    #[test]
+    fn should_return_type_aware_if_type_aware_domain_is_enabled() {
+        let mut domains = FxHashMap::default();
+        domains.insert(RuleDomain::Types, RuleDomainValue::Recommended);
+
+        let configuration = Configuration {
+            linter: Some(LinterConfiguration {
+                domains: Some(RuleDomains(domains)),
+                ..Default::default()
+            }),
+            ..Default::default()
+        };
+
+        assert_eq!(
+            ProjectScanComputer::new(&configuration).compute(),
+            ScanKind::TypeAware
+        );
+    }
+
+    #[test]
+    fn should_return_type_aware_if_type_aware_domain_selector() {
+        let configuration = Configuration::default();
+
+        assert_eq!(
+            ProjectScanComputer::new(&configuration)
+                .with_rule_selectors(&[], &[DomainSelector("types").into()])
+                .compute(),
+            ScanKind::TypeAware
+        );
+    }
+
+    #[test]
+    fn should_return_type_aware_when_both_type_aware_and_project_enabled() {
+        let mut domains = FxHashMap::default();
+        domains.insert(RuleDomain::Project, RuleDomainValue::Recommended);
+        domains.insert(RuleDomain::Types, RuleDomainValue::Recommended);
+
+        let configuration = Configuration {
+            linter: Some(LinterConfiguration {
+                domains: Some(RuleDomains(domains)),
+                ..Default::default()
+            }),
+            ..Default::default()
+        };
+
+        assert_eq!(
+            ProjectScanComputer::new(&configuration).compute(),
+            ScanKind::TypeAware
+        );
+    }
+
+    #[test]
+    fn should_not_return_type_aware_if_non_type_aware_domain() {
+        let configuration = Configuration::default();
+
+        assert_eq!(
+            ProjectScanComputer::new(&configuration)
+                .with_rule_selectors(&[], &[DomainSelector("react").into()])
                 .compute(),
             ScanKind::NoScanner
         );

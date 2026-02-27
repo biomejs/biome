@@ -3,6 +3,11 @@
   render(<h1>Hello World!</h1>, document.body);
 </script>
 
+<script type="text/jsx" data-presets="react" data-type="module">
+  import { h, render } from "https://unpkg.com/preact?module";
+  render(<h1>Hello World!</h1>, document.body);
+</script>
+
 <script type="text/babel">
   <!--
   alert(1);

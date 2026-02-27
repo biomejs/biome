@@ -7,3 +7,5 @@ expression: "%validMatch.ts"
 /* should not generate diagnostics */
 export const C: number;
 ```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._

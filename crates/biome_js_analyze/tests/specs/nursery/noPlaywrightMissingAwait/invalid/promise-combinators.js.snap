@@ -1,0 +1,180 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: promise-combinators.js
+---
+# Input
+```js
+/* should generate diagnostics */
+test('Promise.allSettled', async ({ page }) => {
+    Promise.allSettled([
+        expect(page.locator('.foo')).toBeVisible(),
+        expect(page.locator('.bar')).toHaveText('foo')
+    ]);
+});
+
+test('Promise.race', async ({ page }) => {
+    Promise.race([
+        expect(page.locator('.foo')).toBeVisible(),
+        expect(page.locator('.bar')).toHaveText('foo')
+    ]);
+});
+
+test('Promise.any', async ({ page }) => {
+    Promise.any([
+        expect(page.locator('.foo')).toBeVisible(),
+        expect(page.locator('.bar')).toHaveText('foo')
+    ]);
+});
+
+```
+
+# Diagnostics
+```
+promise-combinators.js:4:9 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Async matcher toBeVisible must be awaited or returned.
+  
+    2 │ test('Promise.allSettled', async ({ page }) => {
+    3 │     Promise.allSettled([
+  > 4 │         expect(page.locator('.foo')).toBeVisible(),
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │         expect(page.locator('.bar')).toHaveText('foo')
+    6 │     ]);
+  
+  i Async matchers return a Promise that must be handled.
+  
+  i Add await before the expression or return it from the function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await before the Promise combinator.
+  
+    3 │ ····await·Promise.allSettled([
+      │     ++++++                    
+
+```
+
+```
+promise-combinators.js:5:9 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Async matcher toHaveText must be awaited or returned.
+  
+    3 │     Promise.allSettled([
+    4 │         expect(page.locator('.foo')).toBeVisible(),
+  > 5 │         expect(page.locator('.bar')).toHaveText('foo')
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │     ]);
+    7 │ });
+  
+  i Async matchers return a Promise that must be handled.
+  
+  i Add await before the expression or return it from the function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await before the Promise combinator.
+  
+    3 │ ····await·Promise.allSettled([
+      │     ++++++                    
+
+```
+
+```
+promise-combinators.js:11:9 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Async matcher toBeVisible must be awaited or returned.
+  
+     9 │ test('Promise.race', async ({ page }) => {
+    10 │     Promise.race([
+  > 11 │         expect(page.locator('.foo')).toBeVisible(),
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │         expect(page.locator('.bar')).toHaveText('foo')
+    13 │     ]);
+  
+  i Async matchers return a Promise that must be handled.
+  
+  i Add await before the expression or return it from the function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await before the Promise combinator.
+  
+    10 │ ····await·Promise.race([
+       │     ++++++              
+
+```
+
+```
+promise-combinators.js:12:9 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Async matcher toHaveText must be awaited or returned.
+  
+    10 │     Promise.race([
+    11 │         expect(page.locator('.foo')).toBeVisible(),
+  > 12 │         expect(page.locator('.bar')).toHaveText('foo')
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │     ]);
+    14 │ });
+  
+  i Async matchers return a Promise that must be handled.
+  
+  i Add await before the expression or return it from the function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await before the Promise combinator.
+  
+    10 │ ····await·Promise.race([
+       │     ++++++              
+
+```
+
+```
+promise-combinators.js:18:9 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Async matcher toBeVisible must be awaited or returned.
+  
+    16 │ test('Promise.any', async ({ page }) => {
+    17 │     Promise.any([
+  > 18 │         expect(page.locator('.foo')).toBeVisible(),
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │         expect(page.locator('.bar')).toHaveText('foo')
+    20 │     ]);
+  
+  i Async matchers return a Promise that must be handled.
+  
+  i Add await before the expression or return it from the function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await before the Promise combinator.
+  
+    17 │ ····await·Promise.any([
+       │     ++++++             
+
+```
+
+```
+promise-combinators.js:19:9 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Async matcher toHaveText must be awaited or returned.
+  
+    17 │     Promise.any([
+    18 │         expect(page.locator('.foo')).toBeVisible(),
+  > 19 │         expect(page.locator('.bar')).toHaveText('foo')
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │     ]);
+    21 │ });
+  
+  i Async matchers return a Promise that must be handled.
+  
+  i Add await before the expression or return it from the function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await before the Promise combinator.
+  
+    17 │ ····await·Promise.any([
+       │     ++++++             
+
+```

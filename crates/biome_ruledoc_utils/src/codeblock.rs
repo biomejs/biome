@@ -8,6 +8,7 @@ use biome_service::{
     settings::{ServiceLanguage, Settings},
     workspace::DocumentFileSource,
 };
+use camino::Utf8PathBuf;
 
 /// Represents a single code block used for evaluating doc tests.
 ///
@@ -76,7 +77,7 @@ impl CodeBlock {
                 );
             };
 
-            settings.merge_with_configuration(config, None)?;
+            settings.merge_with_configuration(config, None, vec![])?;
         }
 
         let language_settings = &L::lookup_settings(&settings.languages).linter;
@@ -96,6 +97,13 @@ impl CodeBlock {
     pub fn document_file_source(&self) -> DocumentFileSource {
         // Always use the JS-first resolution path (experimental full HTML support disabled)
         DocumentFileSource::from_extension(&self.tag, false)
+    }
+
+    pub fn document_file_source_from_path(&self) -> DocumentFileSource {
+        self.file_path.as_ref().map_or_else(
+            || DocumentFileSource::from_extension(&self.tag, false),
+            |file| DocumentFileSource::from_path(&Utf8PathBuf::from(file.as_str()), false),
+        )
     }
 
     /// Returns the block's file path, but only if one was set explicitly using
@@ -122,7 +130,6 @@ impl FromStr for CodeBlock {
             .filter(|token| !token.is_empty());
 
         let mut code_block = Self::default();
-
         for token in tokens {
             match token {
                 "expect_diagnostic" => code_block.expect_diagnostic = true,
@@ -136,7 +143,6 @@ impl FromStr for CodeBlock {
                         if path.is_empty() {
                             bail!("The 'file' attribute must be followed by a file path");
                         }
-
                         code_block.file_path = Some(normalize_file_path(path));
                     } else {
                         if DocumentFileSource::from_extension(token, false)

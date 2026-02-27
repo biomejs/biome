@@ -1,0 +1,66 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+
+<script setup>
+const a = 1;
+</script>
+
+<script setup lang="ts">
+const b: number = 1;
+</script>
+
+
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:1 lint/nursery/useVueVapor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This <script setup> is missing the vapor attribute.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ 
+  > 3 │ <script setup>
+      │ ^^^^^^^^^^^^^^
+    4 │ const a = 1;
+    5 │ </script>
+  
+  i Add vapor to opt in to Vue Vapor mode: <script setup vapor>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add the vapor attribute.
+  
+    3 │ <script·setup·vapor>
+      │              ++++++ 
+
+```
+
+```
+invalid.vue:7:1 lint/nursery/useVueVapor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This <script setup> is missing the vapor attribute.
+  
+    5 │ </script>
+    6 │ 
+  > 7 │ <script setup lang="ts">
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ const b: number = 1;
+    9 │ </script>
+  
+  i Add vapor to opt in to Vue Vapor mode: <script setup vapor>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add the vapor attribute.
+  
+    7 │ <script·setup·vapor·lang="ts">
+      │               ++++++          
+
+```

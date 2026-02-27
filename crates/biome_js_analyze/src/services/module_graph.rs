@@ -17,7 +17,7 @@ impl ModuleGraphService {
     }
 
     pub fn module_info_for_path(&self, path: &Utf8Path) -> Option<JsModuleInfo> {
-        self.0.module_info_for_path(path)
+        self.0.js_module_info_for_path(path)
     }
 
     pub fn project_layout(&self) -> &ProjectLayout {
@@ -38,7 +38,7 @@ impl FromServices for ModuleGraphService {
                 .any(|d| d == &RuleDomain::Project);
             if !has_project_domain {
                 panic!(
-                    "The rule {rule_key} uses ModuleGraphService, but it is not in the project domain."
+                    "The rule {rule_key} uses ModuleGraphService, but it is not in the Project domain."
                 );
             }
         }

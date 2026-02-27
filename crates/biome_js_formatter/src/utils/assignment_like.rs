@@ -16,9 +16,9 @@ use biome_js_syntax::{
     JsInitializerClause, JsLiteralMemberName, JsObjectAssignmentPattern,
     JsObjectAssignmentPatternProperty, JsObjectBindingPattern, JsPropertyClassMember,
     JsPropertyClassMemberFields, JsPropertyObjectMember, JsSyntaxKind, JsVariableDeclarator,
-    TsInitializedPropertySignatureClassMember, TsInitializedPropertySignatureClassMemberFields,
-    TsPropertySignatureClassMember, TsPropertySignatureClassMemberFields, TsTypeAliasDeclaration,
-    TsTypeArguments, TsUnionType,
+    TsConditionalType, TsInitializedPropertySignatureClassMember,
+    TsInitializedPropertySignatureClassMemberFields, TsPropertySignatureClassMember,
+    TsPropertySignatureClassMemberFields, TsTypeAliasDeclaration, TsTypeArguments, TsUnionType,
 };
 use biome_js_syntax::{AnyJsLiteralExpression, JsUnaryExpression};
 use biome_rowan::{AstNode, SyntaxNodeOptionExt, SyntaxResult, declare_node_union};
@@ -680,6 +680,14 @@ impl AnyJsAssignmentLike {
             return Ok(AssignmentLikeLayout::NeverBreakAfterOperator);
         }
 
+        // For type aliases, check for leading comments before checking if we should break the left-hand side.
+        // This ensures comments after the `=` sign are properly indented.
+        if let Self::TsTypeAliasDeclaration(_) = self
+            && self.should_break_after_operator(&right, f)?
+        {
+            return Ok(AssignmentLikeLayout::BreakAfterOperator);
+        }
+
         if self.should_break_left_hand_side()? {
             return Ok(AssignmentLikeLayout::BreakLeftHandSide);
         }
@@ -931,11 +939,32 @@ impl AnyJsAssignmentLike {
                 }
                 has_leading_comments
             }
+            RightAssignmentLike::AnyTsType(AnyTsType::TsConditionalType(conditional_type)) => {
+                comments.has_leading_own_line_comment(conditional_type.syntax())
+                    || should_break_before_conditional_type(conditional_type)?
+            }
             right => comments.has_leading_own_line_comment(right.syntax()),
         };
 
         Ok(result)
     }
+}
+
+fn is_generic(ty: &AnyTsType) -> bool {
+    match ty {
+        AnyTsType::TsReferenceType(reference) => reference.type_arguments().is_some(),
+        AnyTsType::TsFunctionType(function) => function.type_parameters().is_some(),
+        _ => false,
+    }
+}
+
+fn should_break_before_conditional_type(
+    conditional_type: &TsConditionalType,
+) -> SyntaxResult<bool> {
+    Ok(
+        is_generic(&conditional_type.check_type()?)
+            || is_generic(&conditional_type.extends_type()?),
+    )
 }
 
 /// Checks if the function is entitled to be printed with layout [AssignmentLikeLayout::BreakAfterOperator]

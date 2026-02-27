@@ -1,4 +1,6 @@
+use crate::logging::LogOptions;
 use biome_lsp::{ServerConnection, ServerFactory};
+use biome_service::WatcherOptions;
 use camino::Utf8PathBuf;
 use std::{
     convert::Infallible,
@@ -53,8 +55,8 @@ async fn try_connect() -> io::Result<UnixStream> {
 /// Spawn the daemon server process in the background
 fn spawn_daemon(
     stop_on_disconnect: bool,
-    log_path: Option<Utf8PathBuf>,
-    log_file_name_prefix: Option<String>,
+    watcher_configuration: WatcherOptions,
+    log_options: LogOptions,
 ) -> io::Result<Child> {
     let binary = env::current_exe()?;
 
@@ -62,16 +64,24 @@ fn spawn_daemon(
     debug!("command {:?}", &cmd);
     cmd.arg("__run_server");
 
+    cmd.arg(format!(
+        "--watcher-kind={}",
+        watcher_configuration.watcher_kind
+    ));
+    cmd.arg(format!(
+        "--watcher-polling-interval={}",
+        watcher_configuration.polling_interval
+    ));
+
     if stop_on_disconnect {
         cmd.arg("--stop-on-disconnect");
     }
-    if let Some(log_path) = log_path {
-        cmd.arg(format!("--log-path={log_path}",));
-    }
+    cmd.arg(format!("--log-path={}", log_options.log_path.as_str()));
 
-    if let Some(log_file_name_prefix) = log_file_name_prefix {
-        cmd.arg(format!("--log-prefix-name={log_file_name_prefix}"));
-    }
+    cmd.arg(format!(
+        "--log-prefix-name={}",
+        log_options.log_prefix_name.as_str()
+    ));
 
     // Create a new session for the process and make it the leader, this will
     // ensures that the child process is fully detached from its parent and will
@@ -120,8 +130,8 @@ pub(crate) async fn open_socket() -> io::Result<Option<(OwnedReadHalf, OwnedWrit
 /// to be started
 pub(crate) async fn ensure_daemon(
     stop_on_disconnect: bool,
-    log_path: Option<Utf8PathBuf>,
-    log_file_name_prefix: Option<String>,
+    watcher_configuration: WatcherOptions,
+    log_options: LogOptions,
 ) -> io::Result<bool> {
     let mut current_child: Option<Child> = None;
     let mut last_error = None;
@@ -162,8 +172,8 @@ pub(crate) async fn ensure_daemon(
                     // it to become ready then retry the connection
                     current_child = Some(spawn_daemon(
                         stop_on_disconnect,
-                        log_path.clone(),
-                        log_file_name_prefix.clone(),
+                        watcher_configuration.clone(),
+                        log_options.clone(),
                     )?);
                     time::sleep(Duration::from_millis(50)).await;
                 }
@@ -181,7 +191,7 @@ pub(crate) async fn ensure_daemon(
 /// Ensure the server daemon is running and ready to receive connections and
 /// print the global socket name in the standard output
 pub(crate) async fn print_socket() -> io::Result<()> {
-    ensure_daemon(true, None, None).await?;
+    ensure_daemon(true, WatcherOptions::default(), LogOptions::default()).await?;
     println!("{}", get_socket_name().as_str());
     Ok(())
 }

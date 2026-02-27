@@ -1,0 +1,81 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/code/indent.md
+---
+# Input
+
+```md
+    Indented Code Block
+    Indented Code Block
+    Indented Code Block
+    Indented Code Block
+    Indented Code Block
+
+- ```
+  Fenced Code Block
+  Fenced Code Block
+  Fenced Code Block
+  Fenced Code Block
+  Fenced Code Block
+  ```
+
+<!-- prettier/prettier#3459 -->
+
+1. Change to your home directory:
+
+        cd
+
+2. List the contents:
+
+        ls -l
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -14,10 +14,10 @@
+ 
+ <!-- prettier/prettier#3459 -->
+ 
+-1.  Change to your home directory:
++1. Change to your home directory:
+ 
+         cd
+ 
+-2.  List the contents:
++2. List the contents:
+ 
+         ls -l
+```
+
+# Output
+
+```md
+    Indented Code Block
+    Indented Code Block
+    Indented Code Block
+    Indented Code Block
+    Indented Code Block
+
+- ```
+  Fenced Code Block
+  Fenced Code Block
+  Fenced Code Block
+  Fenced Code Block
+  Fenced Code Block
+  ```
+
+<!-- prettier/prettier#3459 -->
+
+1. Change to your home directory:
+
+        cd
+
+2. List the contents:
+
+        ls -l
+```

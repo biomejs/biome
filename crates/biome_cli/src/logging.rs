@@ -1,8 +1,9 @@
+use crate::cli_options::ColorsArg;
+use bpaf::Bpaf;
+use camino::Utf8PathBuf;
 use std::fmt::{Display, Formatter};
 use std::fs::File;
 use std::str::FromStr;
-
-use crate::cli_options::ColorsArg;
 use tracing::Metadata;
 use tracing::subscriber::Interest;
 use tracing_subscriber::filter::LevelFilter;
@@ -11,6 +12,76 @@ use tracing_subscriber::fmt::writer::MakeWriterExt;
 use tracing_subscriber::layer::{Context, Filter, SubscriberExt};
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::{Layer as _, registry};
+
+/// Options to control logging (CLI and Daemon)
+#[derive(Debug, Clone, Bpaf)]
+pub struct LogOptions {
+    /// Optional path/file to redirect log messages to. This option is applicable only to the CLI.
+    ///
+    /// If omitted, logs are printed to stdout.
+    #[bpaf(
+        long("log-file"),
+        env("BIOME_LOG_FILE"),
+        argument("STRING"),
+        hide_usage
+    )]
+    pub log_file: Option<String>,
+
+    // Allows changing the prefix applied to the file name of the logs. This option is applicable only to the daemon.
+    #[bpaf(
+        env("BIOME_LOG_PREFIX_NAME"),
+        long("log-prefix-name"),
+        argument("STRING"),
+        fallback(String::from("server.log")),
+        display_fallback
+    )]
+    pub log_prefix_name: String,
+
+    /// Allows changing the folder where logs are stored. This option is applicable only to the daemon.
+    #[bpaf(
+        env("BIOME_LOG_PATH"),
+        long("log-path"),
+        argument("PATH"),
+        fallback(biome_fs::ensure_cache_dir().join("biome-logs")),
+        display_fallback
+    )]
+    pub log_path: Utf8PathBuf,
+
+    /// The level of logging. In order, from the most verbose to the least
+    /// verbose: debug, info, warn, error.
+    ///
+    /// The value `none` won't show any logging.
+    #[bpaf(
+        long("log-level"),
+        env("BIOME_LOG_LEVEL"),
+        argument("none|debug|info|warn|error"),
+        fallback(LoggingLevel::default()),
+        display_fallback
+    )]
+    pub log_level: LoggingLevel,
+
+    /// What the log should look like.
+    #[bpaf(
+        long("log-kind"),
+        env("BIOME_LOG_KIND"),
+        argument("pretty|compact|json"),
+        fallback(LoggingKind::default()),
+        display_fallback
+    )]
+    pub log_kind: LoggingKind,
+}
+
+impl Default for LogOptions {
+    fn default() -> Self {
+        Self {
+            log_file: None,
+            log_prefix_name: String::from("server.log"),
+            log_path: biome_fs::ensure_cache_dir().join("biome-logs"),
+            log_level: LoggingLevel::default(),
+            log_kind: LoggingKind::default(),
+        }
+    }
+}
 
 pub fn setup_cli_subscriber(
     file: Option<&str>,
@@ -44,14 +115,15 @@ pub fn setup_cli_subscriber(
         .with_span_events(fmt_span)
         .with_writer(make_writer);
 
-    let layer = match kind {
-        LoggingKind::Pretty => layer.pretty().first(),
-        LoggingKind::Compact => layer.compact().second(),
-        LoggingKind::Json => layer.json().flatten_event(true).third(),
-    }
-    .with_filter(LoggingFilter { level });
-
-    registry().with(layer).init();
+    let registry = registry();
+    let filter = LoggingFilter { level };
+    match kind {
+        LoggingKind::Pretty => registry.with(layer.pretty().with_filter(filter)).init(),
+        LoggingKind::Compact => registry.with(layer.compact().with_filter(filter)).init(),
+        LoggingKind::Json => registry
+            .with(layer.json().flatten_event(true).with_filter(filter))
+            .init(),
+    };
 }
 
 #[derive(Copy, Debug, Default, Clone, Ord, PartialOrd, Eq, PartialEq)]
@@ -195,11 +267,8 @@ mod tracing_subscriber_ext {
     //!
     //! This module is kept private to preserve API flexibility.
 
-    use tracing::{Metadata, Subscriber};
-    use tracing_subscriber::{
-        Layer,
-        fmt::{MakeWriter, writer::OptionalWriter},
-    };
+    use tracing::Metadata;
+    use tracing_subscriber::fmt::{MakeWriter, writer::OptionalWriter};
 
     /// A wrapper type for an optional [MakeWriter].
     ///
@@ -241,53 +310,6 @@ mod tracing_subscriber_ext {
             OptionMakeWriter(self)
         }
     }
-
-    /// A wrapper type for one of three possible values.
-    ///
-    /// Implements [Layer] if `First`, `Second`, and `Third` all implement [Layer].
-    pub(super) enum OrderedVariants<First, Second, Third> {
-        First(First),
-        Second(Second),
-        Third(Third),
-    }
-
-    impl<First, Second, Third, S> Layer<S> for OrderedVariants<First, Second, Third>
-    where
-        First: Layer<S>,
-        Second: Layer<S>,
-        Third: Layer<S>,
-        S: Subscriber,
-    {
-    }
-
-    /// Extension trait for creating [OrderedVariants].
-    pub(super) trait OrderedVariantsExt {
-        /// Wraps `self` in the [OrderedVariants::First] variant.
-        fn first<Second, Third>(self) -> OrderedVariants<Self, Second, Third>
-        where
-            Self: Sized,
-        {
-            OrderedVariants::First(self)
-        }
-
-        /// Wraps `self` in the [OrderedVariants::Second] variant.
-        fn second<First, Third>(self) -> OrderedVariants<First, Self, Third>
-        where
-            Self: Sized,
-        {
-            OrderedVariants::Second(self)
-        }
-
-        /// Wraps `self` in the [OrderedVariants::Third] variant.
-        fn third<First, Second>(self) -> OrderedVariants<First, Second, Self>
-        where
-            Self: Sized,
-        {
-            OrderedVariants::Third(self)
-        }
-    }
-
-    impl<T> OrderedVariantsExt for T {}
 }
 
 #[cfg(test)]

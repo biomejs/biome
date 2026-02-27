@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-passthrough-export.js
+---
+# Input
+```js
+// should not generate diagnostics
+import MyComponent from './MyComponent.vue'
+export default MyComponent
+
+
+```

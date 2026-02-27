@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsonc
-snapshot_kind: text
 ---
 # Input
 ```cjs
@@ -291,6 +290,8 @@ invalid.jsonc:1:12 lint/suspicious/noRedeclare ━━━━━━━━━━━
 export var a; var a;
 ```
 
+_Note: The parser emitted 1 diagnostics which are not shown here._
+
 # Diagnostics
 ```
 invalid.jsonc:1:19 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -510,6 +511,8 @@ invalid.jsonc:1:13 lint/suspicious/noRedeclare ━━━━━━━━━━━
 ```cjs
 for (;;){ var a, a,;}
 ```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._
 
 # Diagnostics
 ```

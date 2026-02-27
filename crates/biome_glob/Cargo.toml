@@ -1,18 +1,15 @@
 [package]
-authors.workspace    = true
-categories.workspace = true
-description          = "<DESCRIPTION>"
-edition.workspace    = true
-homepage.workspace   = true
-keywords.workspace   = true
-license.workspace    = true
 name                 = "biome_glob"
-publish              = true
-repository.workspace = true
 version              = "0.1.0"
-
-[lints]
-workspace = true
+authors.workspace    = true
+edition.workspace    = true
+description          = "<DESCRIPTION>"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = true
 
 [dependencies]
 biome_deserialize        = { workspace = true, optional = true }
@@ -26,3 +23,6 @@ serde                    = { workspace = true, optional = true }
 biome_deserialize = ["dep:biome_deserialize", "dep:biome_deserialize_macros", "dep:biome_text_size"]
 schema            = ["dep:schemars", "serde"]
 serde             = ["dep:serde"]
+
+[lints]
+workspace = true

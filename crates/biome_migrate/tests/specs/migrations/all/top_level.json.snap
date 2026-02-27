@@ -1,7 +1,6 @@
 ---
 source: crates/biome_migrate/tests/spec_tests.rs
 expression: top_level.json
-snapshot_kind: text
 ---
 # Input
 ```json

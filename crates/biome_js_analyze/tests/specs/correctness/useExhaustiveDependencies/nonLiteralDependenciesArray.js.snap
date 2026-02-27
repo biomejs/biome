@@ -31,8 +31,7 @@ nonLiteralDependenciesArray.js:9:5 lint/correctness/useExhaustiveDependencies â”
     11 â”‚ 
   
   i Biome can't statically verify whether you've passed the correct dependencies.
-  
-  i Replace with an array literal and list your dependencies within it.
+    Replace the argument with an array literal and list your dependencies within it.
   
 
 ```

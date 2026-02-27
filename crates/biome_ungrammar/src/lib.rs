@@ -102,26 +102,26 @@ pub enum Rule {
         /// The label.
         label: String,
         /// The rule.
-        rule: Box<Rule>,
+        rule: Box<Self>,
     },
     /// A node, like `A`.
     Node(Node),
     /// A token, like `'struct'`.
     Token(Token),
     /// A sequence of rules, like `'while' '(' Expr ')' Stmt`.
-    Seq(Vec<Rule>),
+    Seq(Vec<Self>),
     /// An alternative between many rules, like `'+' | '-' | '*' | '/'`.
-    Alt(Vec<Rule>),
+    Alt(Vec<Self>),
     /// An unordered, alternative rule, like `A || B || C`, meaning A, B, and C
     /// can all appear 0 or 1 times, in any order.
-    UnorderedSome(Vec<Rule>),
+    UnorderedSome(Vec<Self>),
     /// An unordered, required rule, like `A && B && C`, meaning A, B, and C
     /// _must_ all appear exactly 1 time, but can be in any order.
-    UnorderedAll(Vec<Rule>),
+    UnorderedAll(Vec<Self>),
     /// An optional rule, like `A?`.
-    Opt(Box<Rule>),
+    Opt(Box<Self>),
     /// A repeated rule, like `A*`.
-    Rep(Box<Rule>),
+    Rep(Box<Self>),
 }
 
 #[test]

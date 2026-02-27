@@ -2,7 +2,7 @@ use super::*;
 use biome_js_syntax::TextRange;
 use biome_rowan::TokenText;
 use rustc_hash::FxHashMap;
-use std::rc::Rc;
+use std::sync::Arc;
 
 #[derive(Debug)]
 pub(crate) struct SemanticModelScopeData {
@@ -28,7 +28,7 @@ pub(crate) struct SemanticModelScopeData {
 /// Allows navigation to parent and children scope and binding information.
 #[derive(Clone, Debug)]
 pub struct Scope {
-    pub(crate) data: Rc<SemanticModelData>,
+    pub(crate) data: Arc<SemanticModelData>,
     pub(crate) id: ScopeId,
 }
 
@@ -125,8 +125,8 @@ impl Scope {
         self.data.scopes[self.id.index()].range
     }
 
-    pub fn syntax(&self) -> &JsSyntaxNode {
-        &self.data.scope_node_by_range[&self.range()]
+    pub fn syntax(&self) -> JsSyntaxNode {
+        self.data.scope_node_by_range[&self.range()].to_node(self.data.to_root().syntax())
     }
 
     /// Return the [Closure] associated with this scope if
@@ -139,7 +139,7 @@ impl Scope {
 
 /// Iterate all descendents scopes of the specified scope in breadth-first order.
 pub struct ScopeDescendentsIter {
-    data: Rc<SemanticModelData>,
+    data: Arc<SemanticModelData>,
     q: VecDeque<ScopeId>,
 }
 
@@ -163,7 +163,7 @@ impl Iterator for ScopeDescendentsIter {
 impl FusedIterator for ScopeDescendentsIter {}
 
 pub struct ScopeChildrenIter {
-    data: Rc<SemanticModelData>,
+    data: Arc<SemanticModelData>,
     scope_id: ScopeId,
     child_index: u32,
 }
@@ -195,7 +195,7 @@ impl FusedIterator for ScopeChildrenIter {}
 /// not** Returns bindings of parent scopes.
 #[derive(Debug)]
 pub struct ScopeBindingsIter {
-    data: Rc<SemanticModelData>,
+    data: Arc<SemanticModelData>,
     scope_id: ScopeId,
     binding_index: u32,
 }

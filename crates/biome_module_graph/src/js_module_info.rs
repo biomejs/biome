@@ -57,7 +57,7 @@ impl JsModuleInfo {
     /// Finds an exported symbol by `name`, using the `module_graph` to
     /// lookup re-exports if necessary.
     #[inline]
-    pub fn find_exported_symbol(
+    pub fn find_js_exported_symbol(
         &self,
         module_graph: &ModuleGraph,
         name: &str,
@@ -207,6 +207,9 @@ pub struct JsModuleInfoInner {
 
     /// Diagnostics emitted during the resolution of the module
     pub(crate) diagnostics: Vec<ModuleDiagnostic>,
+
+    /// Whether type inference was enabled when this module info was created
+    pub(crate) infer_types: bool,
 }
 
 #[derive(Debug, Default)]

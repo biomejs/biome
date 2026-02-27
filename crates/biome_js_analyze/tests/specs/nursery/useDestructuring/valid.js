@@ -1,0 +1,114 @@
+/* should not generate diagnostics */
+{
+	var [foo] = array;
+}
+{
+	var { foo } = object;
+}
+{
+	var foo;
+}
+{
+	var foo = object.bar;
+}
+{
+	({ foo } = object);
+}
+{
+	[foo] = array;
+}
+{
+	foo += array[0];
+}
+{
+	foo += bar.foo;
+}
+{
+	foo &&= array[0];
+}
+{
+	foo ||= bar.foo;
+}
+{
+	foo ??= bar['foo'];
+}
+{
+	class Foo extends Bar {
+		static foo() {
+			var foo = super.foo;
+		}
+	}
+}
+{
+	foo = bar[foo];
+}
+{
+	var foo = bar[foo];
+}
+{
+	var {
+		foo: { bar }
+	} = object;
+}
+{
+	var { bar } = object.foo;
+}
+{
+	var foo = array?.[0];
+}
+{
+	var foo = object?.foo;
+}
+{
+	class C {
+		#x;
+		foo() {
+			const x = this.#x;
+		}
+	}
+}
+{
+	class C {
+		#x;
+		foo() {
+			x = this.#x;
+		}
+	}
+}
+{
+	class C {
+		#x;
+		foo(a) {
+			x = a.#x;
+		}
+	}
+}
+{
+	class C {
+		#x;
+		foo() {
+			const y = this.#x;
+		}
+	}
+}
+{
+	class C {
+		#x;
+		foo(a) {
+			y = a.#x;
+		}
+	}
+}
+
+{
+	using foo = array[0];
+}
+{
+	using foo = object.foo;
+}
+{
+	await using foo = array[0];
+}
+{
+	await using foo = object.foo;
+}

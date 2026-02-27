@@ -27,4 +27,8 @@ g {
 mfrac {
 }
 
+::view-transition-old(root),
+::view-transition-new(root) {
+	z-index: 1;
+}
 ```

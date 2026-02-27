@@ -21,9 +21,6 @@ declare_lint_rule! {
     /// as modifying parameters will also mutate the `arguments` object.
     /// It is often unintended and indicative of a programmer error.
     ///
-    /// In contrast to the _ESLint_ rule, this rule cannot be configured to report
-    /// assignments to a property of a parameter.
-    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -148,10 +145,30 @@ impl Rule for NoParameterAssign {
 
                         match left.as_any_js_assignment()? {
                             AnyJsAssignment::JsComputedMemberAssignment(assignment) => {
-                                assignment.object().ok()
+                                if assignment
+                                    .object()
+                                    .ok()?
+                                    .get_callee_object_name()?
+                                    .token_text_trimmed()
+                                    == binding.name_token().ok()?.token_text_trimmed()
+                                {
+                                    return assignment.object().ok();
+                                }
+
+                                None
                             }
                             AnyJsAssignment::JsStaticMemberAssignment(assignment) => {
-                                assignment.object().ok()
+                                if assignment
+                                    .object()
+                                    .ok()?
+                                    .get_callee_object_name()?
+                                    .token_text_trimmed()
+                                    == binding.name_token().ok()?.token_text_trimmed()
+                                {
+                                    return assignment.object().ok();
+                                }
+
+                                None
                             }
                             _ => None,
                         }

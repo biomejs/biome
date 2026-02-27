@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/tailwind/source-inline.css
 ---
+
 # Input
 
 ```css
@@ -23,11 +24,13 @@ Indent width: 2
 Line ending: LF
 Line width: 80
 Quote style: Double Quotes
+Trailing newline: true
 -----
 
 ```css
 @source inline("underline font-bold text-center");
 @source inline("underline font-bold text-center bg-blue-500 hover:bg-blue-700 text-white font-large py-2 px-4 rounded shadow-md hover:shadow-lg transition duration-300 ease-in-out");
+
 ```
 
 # Lines exceeding max width of 80 characters
@@ -43,11 +46,13 @@ Indent width: 2
 Line ending: LF
 Line width: 80
 Quote style: Double Quotes
+Trailing newline: true
 -----
 
 ```css
 @source inline("underline font-bold text-center");
 @source inline("underline font-bold text-center bg-blue-500 hover:bg-blue-700 text-white font-large py-2 px-4 rounded shadow-md hover:shadow-lg transition duration-300 ease-in-out");
+
 ```
 
 # Lines exceeding max width of 80 characters

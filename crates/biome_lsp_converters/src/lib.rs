@@ -3,7 +3,7 @@
 #![deny(clippy::use_self)]
 
 use biome_line_index::WideEncoding;
-use tower_lsp_server::lsp_types::{ClientCapabilities, PositionEncodingKind};
+use tower_lsp_server::ls_types::{ClientCapabilities, PositionEncodingKind};
 
 pub mod from_proto;
 pub mod to_proto;
@@ -39,7 +39,7 @@ mod tests {
     use crate::to_proto::position;
     use biome_line_index::{LineIndex, WideEncoding::Utf16};
     use biome_text_size::TextSize;
-    use tower_lsp_server::lsp_types::Position;
+    use tower_lsp_server::ls_types::Position;
 
     macro_rules! check_conversion {
         ($line_index:ident : $position:expr => $text_size:expr ) => {

@@ -27,6 +27,8 @@ invalid.jsonc:1:1 lint/suspicious/noConfusingLabels ━━━━━━━━━�
 A: const foo = 0;
 ```
 
+_Note: The parser emitted 1 diagnostics which are not shown here._
+
 # Diagnostics
 ```
 invalid.jsonc:1:1 lint/suspicious/noConfusingLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -47,6 +49,8 @@ invalid.jsonc:1:1 lint/suspicious/noConfusingLabels ━━━━━━━━━�
 A: break A = 0;
 ```
 
+_Note: The parser emitted 1 diagnostics which are not shown here._
+
 # Diagnostics
 ```
 invalid.jsonc:1:1 lint/suspicious/noConfusingLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -66,6 +70,8 @@ invalid.jsonc:1:1 lint/suspicious/noConfusingLabels ━━━━━━━━━�
 ```cjs
 A: let foo = 0;
 ```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._
 
 # Diagnostics
 ```

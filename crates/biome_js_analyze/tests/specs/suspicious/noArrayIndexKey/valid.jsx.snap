@@ -75,3 +75,5 @@ function Component15() {
 }
 
 ```
+
+_Note: The parser emitted 2 diagnostics which are not shown here._

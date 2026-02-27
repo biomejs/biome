@@ -20,6 +20,8 @@ new AggregateError();
 
 ```
 
+_Note: The parser emitted 2 diagnostics which are not shown here._
+
 # Diagnostics
 ```
 noUndeclaredVariables.js:2:1 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

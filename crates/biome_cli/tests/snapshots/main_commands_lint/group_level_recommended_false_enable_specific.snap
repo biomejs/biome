@@ -50,7 +50,7 @@ fix.jsx:2:14 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━�
     3 │         return <button>Submit</button>;
     4 │     }
   
-  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
   
   i Unsafe fix: If this is intentional, prepend SubmitButton with an underscore.
   

@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/atrule/debug.css
 ---
+
 # Input
 
 ```css
@@ -78,29 +79,6 @@ info: css/atrule/debug.css
 
 12em;
 @debug $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var + $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var;
-```
-
-# Errors
-```
-debug.css:22:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
-    21 │ ;
-  > 22 │ @debug $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var + $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var;
-       │        ^
-    23 │ 
-  
-debug.css:22:95 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × unexpected character `$`
-  
-    21 │ ;
-  > 22 │ @debug $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var + $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var;
-       │                                                                                               ^
-    23 │ 
-  
-
 ```
 
 # Lines exceeding max width of 80 characters

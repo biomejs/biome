@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 # Input messages
 
@@ -25,5 +25,3 @@ package-lock.json project  VERBOSE  ━━━━━━━━━━━━━━�
 ```block
 { "name": "test" }
 ```
-
-

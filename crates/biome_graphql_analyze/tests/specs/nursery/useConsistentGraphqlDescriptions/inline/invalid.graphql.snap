@@ -38,6 +38,8 @@ invalid.graphql:2:2 lint/nursery/useConsistentGraphqlDescriptions ━━━━�
   
   i To stay consistent within the project, write the description inline style.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -58,6 +60,8 @@ invalid.graphql:6:2 lint/nursery/useConsistentGraphqlDescriptions ━━━━�
   
   i To stay consistent within the project, write the description inline style.
   
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
 
 ```
 
@@ -77,6 +81,8 @@ invalid.graphql:10:2 lint/nursery/useConsistentGraphqlDescriptions ━━━━�
     14 │ }
   
   i To stay consistent within the project, write the description inline style.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```

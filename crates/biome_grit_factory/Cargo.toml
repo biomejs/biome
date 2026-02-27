@@ -1,13 +1,13 @@
 [package]
+name                 = "biome_grit_factory"
+version              = "0.5.7"
 authors.workspace    = true
+edition.workspace    = true
 description          = "Utilities to create GritQL AST for biome_grit_parser"
 documentation        = "https://docs.rs/biome_grit_factory"
-edition.workspace    = true
-license.workspace    = true
-name                 = "biome_grit_factory"
-publish              = true
 repository.workspace = true
-version              = "0.5.7"
+license.workspace    = true
+publish              = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

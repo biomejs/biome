@@ -1,0 +1,107 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<div in:fly|local>Local in transition</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteInDirective {
+                        in_token: IN_KW@5..7 "in" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@7..8 ":" [] [],
+                            property: SvelteName {
+                                ident_token: IDENT@8..11 "fly" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [
+                                SvelteDirectiveModifier {
+                                    bitwise_or_token: PIPE@11..12 "|" [] [],
+                                    name: SvelteName {
+                                        ident_token: IDENT@12..17 "local" [] [],
+                                    },
+                                },
+                            ],
+                            initializer: missing (optional),
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@17..18 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@18..37 "Local in transition" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@37..38 "<" [] [],
+                slash_token: SLASH@38..39 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@39..42 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@42..43 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@43..44 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..44
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..43
+    0: HTML_ELEMENT@0..43
+      0: HTML_OPENING_ELEMENT@0..18
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..17
+          0: SVELTE_IN_DIRECTIVE@5..17
+            0: IN_KW@5..7 "in" [] []
+            1: SVELTE_DIRECTIVE_VALUE@7..17
+              0: COLON@7..8 ":" [] []
+              1: SVELTE_NAME@8..11
+                0: IDENT@8..11 "fly" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@11..17
+                0: SVELTE_DIRECTIVE_MODIFIER@11..17
+                  0: PIPE@11..12 "|" [] []
+                  1: SVELTE_NAME@12..17
+                    0: IDENT@12..17 "local" [] []
+              3: (empty)
+        3: R_ANGLE@17..18 ">" [] []
+      1: HTML_ELEMENT_LIST@18..37
+        0: HTML_CONTENT@18..37
+          0: HTML_LITERAL@18..37 "Local in transition" [] []
+      2: HTML_CLOSING_ELEMENT@37..43
+        0: L_ANGLE@37..38 "<" [] []
+        1: SLASH@38..39 "/" [] []
+        2: HTML_TAG_NAME@39..42
+          0: HTML_LITERAL@39..42 "div" [] []
+        3: R_ANGLE@42..43 ">" [] []
+  4: EOF@43..44 "" [Newline("\n")] []
+
+```

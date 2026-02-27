@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
-snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -22,6 +21,8 @@ var a = <span aria-dropeffect="hey"></span>;
 var a = <span aria-orientation="hey"></span>;
 
 ```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._
 
 # Diagnostics
 ```

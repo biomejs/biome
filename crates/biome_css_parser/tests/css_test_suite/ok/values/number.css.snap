@@ -2,6 +2,7 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```css
@@ -82,7 +83,7 @@ a {
 ```
 CssRoot {
     bom_token: missing (optional),
-    rules: CssRuleList [
+    items: CssRootItemList [
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
@@ -1076,35 +1077,25 @@ CssRoot {
                                 },
                                 colon_token: COLON@684..686 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
-                                    CssFunction {
-                                        name: CssIdentifier {
-                                            value_token: IDENT@686..690 "attr" [] [],
-                                        },
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@686..690 "attr" [] [],
                                         l_paren_token: L_PAREN@690..691 "(" [] [],
-                                        items: CssParameterList [
-                                            CssParameter {
-                                                any_css_expression: CssListOfComponentValuesExpression {
-                                                    css_component_value_list: CssComponentValueList [
-                                                        CssIdentifier {
-                                                            value_token: IDENT@691..701 "data-size" [] [Whitespace(" ")],
-                                                        },
-                                                        CssIdentifier {
-                                                            value_token: IDENT@701..703 "em" [] [],
-                                                        },
-                                                    ],
-                                                },
-                                            },
-                                            COMMA@703..705 "," [] [Whitespace(" ")],
-                                            CssParameter {
-                                                any_css_expression: CssListOfComponentValuesExpression {
-                                                    css_component_value_list: CssComponentValueList [
-                                                        CssNumber {
-                                                            value_token: CSS_NUMBER_LITERAL@705..708 ".01" [] [],
-                                                        },
-                                                    ],
-                                                },
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@691..701 "data-size" [] [Whitespace(" ")],
                                             },
                                         ],
+                                        attr_type: CssRegularAttrUnit {
+                                            unit_token: IDENT@701..703 "em" [] [],
+                                        },
+                                        fallback_value: CssAttrFallbackValue {
+                                            comma_token: COMMA@703..705 "," [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssNumber {
+                                                    value_token: CSS_NUMBER_LITERAL@705..708 ".01" [] [],
+                                                },
+                                            ],
+                                        },
                                         r_paren_token: R_PAREN@708..709 ")" [] [],
                                     },
                                 ],
@@ -1127,7 +1118,7 @@ CssRoot {
 ```
 0: CSS_ROOT@0..713
   0: (empty)
-  1: CSS_RULE_LIST@0..712
+  1: CSS_ROOT_ITEM_LIST@0..712
     0: CSS_QUALIFIED_RULE@0..712
       0: CSS_SELECTOR_LIST@0..2
         0: CSS_COMPOUND_SELECTOR@0..2
@@ -1774,25 +1765,20 @@ CssRoot {
                   0: IDENT@676..684 "height" [Newline("\n"), Whitespace("\t")] []
                 1: COLON@684..686 ":" [] [Whitespace(" ")]
                 2: CSS_GENERIC_COMPONENT_VALUE_LIST@686..709
-                  0: CSS_FUNCTION@686..709
-                    0: CSS_IDENTIFIER@686..690
-                      0: IDENT@686..690 "attr" [] []
+                  0: CSS_ATTR_FUNCTION@686..709
+                    0: ATTR_KW@686..690 "attr" [] []
                     1: L_PAREN@690..691 "(" [] []
-                    2: CSS_PARAMETER_LIST@691..708
-                      0: CSS_PARAMETER@691..703
-                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@691..703
-                          0: CSS_COMPONENT_VALUE_LIST@691..703
-                            0: CSS_IDENTIFIER@691..701
-                              0: IDENT@691..701 "data-size" [] [Whitespace(" ")]
-                            1: CSS_IDENTIFIER@701..703
-                              0: IDENT@701..703 "em" [] []
-                      1: COMMA@703..705 "," [] [Whitespace(" ")]
-                      2: CSS_PARAMETER@705..708
-                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@705..708
-                          0: CSS_COMPONENT_VALUE_LIST@705..708
-                            0: CSS_NUMBER@705..708
-                              0: CSS_NUMBER_LITERAL@705..708 ".01" [] []
-                    3: R_PAREN@708..709 ")" [] []
+                    2: CSS_ATTR_NAME_LIST@691..701
+                      0: CSS_IDENTIFIER@691..701
+                        0: IDENT@691..701 "data-size" [] [Whitespace(" ")]
+                    3: CSS_REGULAR_ATTR_UNIT@701..703
+                      0: IDENT@701..703 "em" [] []
+                    4: CSS_ATTR_FALLBACK_VALUE@703..708
+                      0: COMMA@703..705 "," [] [Whitespace(" ")]
+                      1: CSS_GENERIC_COMPONENT_VALUE_LIST@705..708
+                        0: CSS_NUMBER@705..708
+                          0: CSS_NUMBER_LITERAL@705..708 ".01" [] []
+                    5: R_PAREN@708..709 ")" [] []
               1: (empty)
             1: SEMICOLON@709..710 ";" [] []
         2: R_CURLY@710..712 "}" [Newline("\n")] []

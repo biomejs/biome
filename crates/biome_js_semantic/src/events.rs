@@ -364,6 +364,17 @@ impl SemanticEventExtractor {
                 );
             }
 
+            JS_EXPRESSION_TEMPLATE_ROOT => {
+                self.push_scope(
+                    node.text_trimmed_range(),
+                    ScopeHoisting::DontHoistDeclarationsToParent,
+                    ScopeOptions {
+                        is_closure: false,
+                        implies_strict_mode: false,
+                    },
+                );
+            }
+
             JS_DIRECTIVE => {
                 if JsDirective::unwrap_cast(node.clone())
                     .inner_string_text()
@@ -461,6 +472,7 @@ impl SemanticEventExtractor {
             | TS_DECLARE_FUNCTION_DECLARATION
             | TS_DECLARE_FUNCTION_EXPORT_DEFAULT_DECLARATION
             | TS_CALL_SIGNATURE_TYPE_MEMBER
+            | TS_CONSTRUCT_SIGNATURE_TYPE_MEMBER
             | TS_METHOD_SIGNATURE_CLASS_MEMBER
             | TS_METHOD_SIGNATURE_TYPE_MEMBER
             | TS_INDEX_SIGNATURE_CLASS_MEMBER
@@ -840,6 +852,7 @@ impl SemanticEventExtractor {
             }
             JS_MODULE
             | JS_SCRIPT
+            | JS_EXPRESSION_TEMPLATE_ROOT
             | TS_DECLARATION_MODULE
             | JS_FUNCTION_DECLARATION
             | JS_FUNCTION_EXPORT_DEFAULT_DECLARATION
@@ -866,6 +879,7 @@ impl SemanticEventExtractor {
             | TS_DECLARE_FUNCTION_DECLARATION
             | TS_DECLARE_FUNCTION_EXPORT_DEFAULT_DECLARATION
             | TS_CALL_SIGNATURE_TYPE_MEMBER
+            | TS_CONSTRUCT_SIGNATURE_TYPE_MEMBER
             | TS_METHOD_SIGNATURE_CLASS_MEMBER
             | TS_METHOD_SIGNATURE_TYPE_MEMBER
             | TS_INDEX_SIGNATURE_CLASS_MEMBER

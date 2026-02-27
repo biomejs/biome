@@ -2,6 +2,7 @@
 source: crates/biome_module_graph/tests/snap/mod.rs
 expression: content
 ---
+
 # `/src/index.ts` (Not imported by resolver)
 
 ## Source
@@ -24,11 +25,11 @@ Imports {
 ## Registered types
 
 ```
-Module TypeId(0) => value: 1
+Module TypeId(0) => number: 1
 
-Module TypeId(1) => value: 2
+Module TypeId(1) => number: 2
 
-Module TypeId(2) => value: 3
+Module TypeId(2) => number: 3
 
 Module TypeId(3) => Tuple(
     [
@@ -85,11 +86,11 @@ Module TypeId(9) => instanceof Array<Module(0) TypeId(7)>
 ## Registered types
 
 ```
-Full TypeId(0) => value: 1
+Full TypeId(0) => number: 1
 
-Full TypeId(1) => value: 2
+Full TypeId(1) => number: 2
 
-Full TypeId(2) => value: 3
+Full TypeId(2) => number: 3
 
 Full TypeId(3) => Tuple(
     [

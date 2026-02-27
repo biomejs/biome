@@ -1,0 +1,207 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+interface Example {
+  methodFunc(arg: string): number;
+}
+
+type Generic<T, U> = {
+  methodFunc(arg: T): U;
+}
+
+type Union =
+  | {
+    foo(bar: number): number;
+  }
+  | 4;
+
+type Intersection =
+{
+  qux(quux: number): "quuux";
+} & { foo: string };
+
+interface Overloaded {
+  moo(): void;
+  moo(x: number): number;
+  moo(x: string): boolean;
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:4:3 lint/nursery/useConsistentMethodSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer using property-style over method-style method signatures.
+  
+    3 │ interface Example {
+  > 4 │   methodFunc(arg: string): number;
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ }
+    6 │ 
+  
+  i Consistently using a single style of method signatures helps improve readability and consistency.
+  
+  i Property-style function declarations also allow for stricter type checking when the strictFunctionTypes compiler option is enabled.
+  
+  i If this isn't what you want, consider changing the style option in the rule's settings.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8780 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:8:3 lint/nursery/useConsistentMethodSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer using property-style over method-style method signatures.
+  
+     7 │ type Generic<T, U> = {
+   > 8 │   methodFunc(arg: T): U;
+       │   ^^^^^^^^^^^^^^^^^^^^^^
+     9 │ }
+    10 │ 
+  
+  i Consistently using a single style of method signatures helps improve readability and consistency.
+  
+  i Property-style function declarations also allow for stricter type checking when the strictFunctionTypes compiler option is enabled.
+  
+  i If this isn't what you want, consider changing the style option in the rule's settings.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8780 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:13:5 lint/nursery/useConsistentMethodSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer using property-style over method-style method signatures.
+  
+    11 │ type Union =
+    12 │   | {
+  > 13 │     foo(bar: number): number;
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │   }
+    15 │   | 4;
+  
+  i Consistently using a single style of method signatures helps improve readability and consistency.
+  
+  i Property-style function declarations also allow for stricter type checking when the strictFunctionTypes compiler option is enabled.
+  
+  i If this isn't what you want, consider changing the style option in the rule's settings.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8780 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:19:3 lint/nursery/useConsistentMethodSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer using property-style over method-style method signatures.
+  
+    17 │ type Intersection =
+    18 │ {
+  > 19 │   qux(quux: number): "quuux";
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ } & { foo: string };
+    21 │ 
+  
+  i Consistently using a single style of method signatures helps improve readability and consistency.
+  
+  i Property-style function declarations also allow for stricter type checking when the strictFunctionTypes compiler option is enabled.
+  
+  i If this isn't what you want, consider changing the style option in the rule's settings.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8780 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:23:3 lint/nursery/useConsistentMethodSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer using property-style over method-style method signatures.
+  
+    22 │ interface Overloaded {
+  > 23 │   moo(): void;
+       │   ^^^^^^^^^^^^
+    24 │   moo(x: number): number;
+    25 │   moo(x: string): boolean;
+  
+  i Consistently using a single style of method signatures helps improve readability and consistency.
+  
+  i Property-style function declarations also allow for stricter type checking when the strictFunctionTypes compiler option is enabled.
+  
+  i If this isn't what you want, consider changing the style option in the rule's settings.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8780 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:24:3 lint/nursery/useConsistentMethodSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer using property-style over method-style method signatures.
+  
+    22 │ interface Overloaded {
+    23 │   moo(): void;
+  > 24 │   moo(x: number): number;
+       │   ^^^^^^^^^^^^^^^^^^^^^^^
+    25 │   moo(x: string): boolean;
+    26 │ }
+  
+  i Consistently using a single style of method signatures helps improve readability and consistency.
+  
+  i Property-style function declarations also allow for stricter type checking when the strictFunctionTypes compiler option is enabled.
+  
+  i If this isn't what you want, consider changing the style option in the rule's settings.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8780 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:25:3 lint/nursery/useConsistentMethodSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer using property-style over method-style method signatures.
+  
+    23 │   moo(): void;
+    24 │   moo(x: number): number;
+  > 25 │   moo(x: string): boolean;
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ }
+    27 │ 
+  
+  i Consistently using a single style of method signatures helps improve readability and consistency.
+  
+  i Property-style function declarations also allow for stricter type checking when the strictFunctionTypes compiler option is enabled.
+  
+  i If this isn't what you want, consider changing the style option in the rule's settings.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8780 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -16,7 +16,7 @@ invalidFixNone.js:1:7 lint/correctness/noUnusedVariables ━━━━━━━�
   > 1 │ const x = 0;
       │       ^
   
-  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
   
 
 ```

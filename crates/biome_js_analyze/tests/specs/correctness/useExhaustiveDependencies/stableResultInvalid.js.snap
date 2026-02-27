@@ -36,6 +36,10 @@ stableResultInvalid.js:6:22 lint/correctness/useExhaustiveDependencies  FIXABLE 
     7 │ }
     8 │ 
   
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
   i Either include it or remove the dependency array.
   
   i Unsafe fix: Add the missing dependency to the list.

@@ -1,0 +1,306 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+- First item
+  with continuation
+- Second item
+
+1. Ordered item
+   continues here
+2. Next ordered
+
+- Nested lists:
+  - Child item
+  - Another child
+- Back to parent
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    bullet: MINUS@0..1 "-" [] [],
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@1..12 " First item" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@12..13 "\n" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@13..32 "with continuation" [Skipped(" "), Skipped(" ")] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@32..33 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+                MdBullet {
+                    bullet: MINUS@33..34 "-" [] [],
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@34..46 " Second item" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@46..47 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                        MdNewline {
+                            value_token: NEWLINE@47..48 "\n" [] [],
+                        },
+                    ],
+                },
+            ],
+        },
+        MdOrderedListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    bullet: MD_ORDERED_LIST_MARKER@48..50 "1." [] [],
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@50..63 " Ordered item" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@63..64 "\n" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@64..81 "continues here" [Skipped(" "), Skipped(" "), Skipped(" ")] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@81..82 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+                MdBullet {
+                    bullet: MD_ORDERED_LIST_MARKER@82..84 "2." [] [],
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@84..97 " Next ordered" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@97..98 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                        MdNewline {
+                            value_token: NEWLINE@98..99 "\n" [] [],
+                        },
+                    ],
+                },
+            ],
+        },
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    bullet: MINUS@99..100 "-" [] [],
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@100..114 " Nested lists:" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@114..115 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                        MdBulletListItem {
+                            md_bullet_list: MdBulletList [
+                                MdBullet {
+                                    bullet: MINUS@115..118 "-" [Skipped(" "), Skipped(" ")] [],
+                                    content: MdBlockList [
+                                        MdParagraph {
+                                            list: MdInlineItemList [
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@118..129 " Child item" [] [],
+                                                },
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@129..130 "\n" [] [],
+                                                },
+                                            ],
+                                            hard_line: missing (optional),
+                                        },
+                                    ],
+                                },
+                                MdBullet {
+                                    bullet: MINUS@130..133 "-" [Skipped(" "), Skipped(" ")] [],
+                                    content: MdBlockList [
+                                        MdParagraph {
+                                            list: MdInlineItemList [
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@133..147 " Another child" [] [],
+                                                },
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@147..148 "\n" [] [],
+                                                },
+                                            ],
+                                            hard_line: missing (optional),
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                MdBullet {
+                    bullet: MINUS@148..149 "-" [] [],
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@149..164 " Back to parent" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@164..165 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@165..165 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..165
+  0: (empty)
+  1: MD_BLOCK_LIST@0..165
+    0: MD_BULLET_LIST_ITEM@0..48
+      0: MD_BULLET_LIST@0..48
+        0: MD_BULLET@0..33
+          0: MINUS@0..1 "-" [] []
+          1: MD_BLOCK_LIST@1..33
+            0: MD_PARAGRAPH@1..33
+              0: MD_INLINE_ITEM_LIST@1..33
+                0: MD_TEXTUAL@1..12
+                  0: MD_TEXTUAL_LITERAL@1..12 " First item" [] []
+                1: MD_TEXTUAL@12..13
+                  0: MD_TEXTUAL_LITERAL@12..13 "\n" [] []
+                2: MD_TEXTUAL@13..32
+                  0: MD_TEXTUAL_LITERAL@13..32 "with continuation" [Skipped(" "), Skipped(" ")] []
+                3: MD_TEXTUAL@32..33
+                  0: MD_TEXTUAL_LITERAL@32..33 "\n" [] []
+              1: (empty)
+        1: MD_BULLET@33..48
+          0: MINUS@33..34 "-" [] []
+          1: MD_BLOCK_LIST@34..48
+            0: MD_PARAGRAPH@34..47
+              0: MD_INLINE_ITEM_LIST@34..47
+                0: MD_TEXTUAL@34..46
+                  0: MD_TEXTUAL_LITERAL@34..46 " Second item" [] []
+                1: MD_TEXTUAL@46..47
+                  0: MD_TEXTUAL_LITERAL@46..47 "\n" [] []
+              1: (empty)
+            1: MD_NEWLINE@47..48
+              0: NEWLINE@47..48 "\n" [] []
+    1: MD_ORDERED_LIST_ITEM@48..99
+      0: MD_BULLET_LIST@48..99
+        0: MD_BULLET@48..82
+          0: MD_ORDERED_LIST_MARKER@48..50 "1." [] []
+          1: MD_BLOCK_LIST@50..82
+            0: MD_PARAGRAPH@50..82
+              0: MD_INLINE_ITEM_LIST@50..82
+                0: MD_TEXTUAL@50..63
+                  0: MD_TEXTUAL_LITERAL@50..63 " Ordered item" [] []
+                1: MD_TEXTUAL@63..64
+                  0: MD_TEXTUAL_LITERAL@63..64 "\n" [] []
+                2: MD_TEXTUAL@64..81
+                  0: MD_TEXTUAL_LITERAL@64..81 "continues here" [Skipped(" "), Skipped(" "), Skipped(" ")] []
+                3: MD_TEXTUAL@81..82
+                  0: MD_TEXTUAL_LITERAL@81..82 "\n" [] []
+              1: (empty)
+        1: MD_BULLET@82..99
+          0: MD_ORDERED_LIST_MARKER@82..84 "2." [] []
+          1: MD_BLOCK_LIST@84..99
+            0: MD_PARAGRAPH@84..98
+              0: MD_INLINE_ITEM_LIST@84..98
+                0: MD_TEXTUAL@84..97
+                  0: MD_TEXTUAL_LITERAL@84..97 " Next ordered" [] []
+                1: MD_TEXTUAL@97..98
+                  0: MD_TEXTUAL_LITERAL@97..98 "\n" [] []
+              1: (empty)
+            1: MD_NEWLINE@98..99
+              0: NEWLINE@98..99 "\n" [] []
+    2: MD_BULLET_LIST_ITEM@99..165
+      0: MD_BULLET_LIST@99..165
+        0: MD_BULLET@99..148
+          0: MINUS@99..100 "-" [] []
+          1: MD_BLOCK_LIST@100..148
+            0: MD_PARAGRAPH@100..115
+              0: MD_INLINE_ITEM_LIST@100..115
+                0: MD_TEXTUAL@100..114
+                  0: MD_TEXTUAL_LITERAL@100..114 " Nested lists:" [] []
+                1: MD_TEXTUAL@114..115
+                  0: MD_TEXTUAL_LITERAL@114..115 "\n" [] []
+              1: (empty)
+            1: MD_BULLET_LIST_ITEM@115..148
+              0: MD_BULLET_LIST@115..148
+                0: MD_BULLET@115..130
+                  0: MINUS@115..118 "-" [Skipped(" "), Skipped(" ")] []
+                  1: MD_BLOCK_LIST@118..130
+                    0: MD_PARAGRAPH@118..130
+                      0: MD_INLINE_ITEM_LIST@118..130
+                        0: MD_TEXTUAL@118..129
+                          0: MD_TEXTUAL_LITERAL@118..129 " Child item" [] []
+                        1: MD_TEXTUAL@129..130
+                          0: MD_TEXTUAL_LITERAL@129..130 "\n" [] []
+                      1: (empty)
+                1: MD_BULLET@130..148
+                  0: MINUS@130..133 "-" [Skipped(" "), Skipped(" ")] []
+                  1: MD_BLOCK_LIST@133..148
+                    0: MD_PARAGRAPH@133..148
+                      0: MD_INLINE_ITEM_LIST@133..148
+                        0: MD_TEXTUAL@133..147
+                          0: MD_TEXTUAL_LITERAL@133..147 " Another child" [] []
+                        1: MD_TEXTUAL@147..148
+                          0: MD_TEXTUAL_LITERAL@147..148 "\n" [] []
+                      1: (empty)
+        1: MD_BULLET@148..165
+          0: MINUS@148..149 "-" [] []
+          1: MD_BLOCK_LIST@149..165
+            0: MD_PARAGRAPH@149..165
+              0: MD_INLINE_ITEM_LIST@149..165
+                0: MD_TEXTUAL@149..164
+                  0: MD_TEXTUAL_LITERAL@149..164 " Back to parent" [] []
+                1: MD_TEXTUAL@164..165
+                  0: MD_TEXTUAL_LITERAL@164..165 "\n" [] []
+              1: (empty)
+  2: EOF@165..165 "" [] []
+
+```

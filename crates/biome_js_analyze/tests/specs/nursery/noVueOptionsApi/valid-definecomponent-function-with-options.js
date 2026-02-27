@@ -1,0 +1,19 @@
+// should not generate diagnostics
+// defineComponent with function signature and extra options (Vue 3.3+)
+import { defineComponent, ref, h } from "vue";
+
+const Comp = defineComponent(
+  (props) => {
+    const count = ref(0);
+    return () => h("div", count.value);
+  },
+  // extra options - this is still Composition API, not Options API
+  {
+    props: {
+      message: String,
+    },
+    emits: ["update"],
+  }
+);
+
+export default Comp;

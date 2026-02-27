@@ -73,6 +73,13 @@ impl<'source> HtmlParser<'source> {
     pub fn re_lex(&mut self, context: HtmlReLexContext) -> HtmlSyntaxKind {
         self.source_mut().re_lex(context)
     }
+
+    /// Signals to the lexer that the frontmatter decision has been made.
+    /// After this call, `---` in the `Regular` context is treated as plain
+    /// HTML text rather than a `FENCE` token.
+    pub(crate) fn set_after_frontmatter(&mut self, value: bool) {
+        self.source.set_after_frontmatter(value);
+    }
 }
 
 pub struct HtmlParserCheckpoint {
@@ -109,6 +116,7 @@ pub struct HtmlParseOptions {
     pub(crate) frontmatter: bool,
     pub(crate) text_expression: Option<TextExpressionKind>,
     pub(crate) vue: bool,
+    pub(crate) is_html: bool,
 }
 
 impl HtmlParseOptions {
@@ -143,6 +151,10 @@ impl HtmlParseOptions {
         self.vue = true;
         self
     }
+
+    pub fn is_html(&self) -> bool {
+        self.is_html
+    }
 }
 
 impl From<&HtmlFileSource> for HtmlParseOptions {
@@ -157,7 +169,7 @@ impl From<&HtmlFileSource> for HtmlParseOptions {
                 HtmlTextExpressions::Double => {
                     options = options.with_double_text_expression();
                 }
-                HtmlTextExpressions::None => {}
+                HtmlTextExpressions::None => options.is_html = true,
             },
             HtmlVariant::Astro => {
                 options = options.with_single_text_expression().with_frontmatter();

@@ -1,18 +1,19 @@
 [package]
-authors.workspace    = true
-categories.workspace = true
-description          = "Biome's GraphQL linter"
-edition.workspace    = true
-homepage.workspace   = true
-keywords.workspace   = true
-license.workspace    = true
 name                 = "biome_graphql_analyze"
-publish              = true
-repository.workspace = true
 version              = "0.0.1"
+authors.workspace    = true
+edition.workspace    = true
+description          = "Biome's GraphQL linter"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = true
 
 [dependencies]
 biome_analyze            = { workspace = true }
+biome_analyze_macros     = { workspace = true }
 biome_console            = { workspace = true }
 biome_deserialize        = { workspace = true }
 biome_deserialize_macros = { workspace = true }
@@ -34,6 +35,9 @@ biome_test_utils     = { path = "../biome_test_utils" }
 camino               = { workspace = true }
 insta                = { workspace = true, features = ["glob"] }
 tests_macros         = { path = "../tests_macros" }
+
+[build-dependencies]
+filetime = { workspace = true }
 
 [features]
 schema = ["schemars"]

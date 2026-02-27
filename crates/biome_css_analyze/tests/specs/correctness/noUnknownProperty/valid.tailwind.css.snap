@@ -1,0 +1,15 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.tailwind.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+
+@plugin "foo" {
+	we: should;
+	allow: "anything";
+	in: here;
+}
+
+```

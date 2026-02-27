@@ -8,12 +8,12 @@ pub enum ScriptType {
 
     /// `<script type="module">`
     ///
-    /// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules#applying_the_module_to_your_html
+    /// <https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules#applying_the_module_to_your_html>
     Module,
 
     /// `<script type="importmap">`
     ///
-    /// https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/script/type/importmap
+    /// <https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/script/type/importmap>
     ImportMap,
 
     /// `<script type="application/json">`

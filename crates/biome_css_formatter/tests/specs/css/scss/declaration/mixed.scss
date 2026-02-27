@@ -1,0 +1,10 @@
+.example {
+  $local-var:   10px;
+  ns.$namespaced-var:    20px;
+  $default-var:   red   !default;
+  $global-var:blue!global;
+  $combined:green!global!default!global;
+
+  padding:   $local-var;
+  margin:  ns.$namespaced-var;
+}

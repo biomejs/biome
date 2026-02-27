@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: recursiveComponents.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -40,3 +39,5 @@ const MyRecursiveComponent6 = function f() {
 }
 
 ```
+
+_Note: The parser emitted 30 diagnostics which are not shown here._

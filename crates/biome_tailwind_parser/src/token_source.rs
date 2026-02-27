@@ -14,6 +14,9 @@ pub(crate) struct TailwindTokenSource<'source> {
 
     /// List of the skipped trivia. Needed to construct the CST and compute the non-trivia token offsets.
     pub(super) trivia_list: Vec<Trivia>,
+
+    /// Whether the lexer encountered any trivia between the previous non-trivia token and the current non-trivia token.
+    had_trivia_before: bool,
 }
 pub(crate) type TailwindTokenSourceCheckpoint = TokenSourceCheckpoint<TailwindSyntaxKind>;
 
@@ -55,15 +58,14 @@ impl<'source> TailwindTokenSource<'source> {
         Self {
             lexer,
             trivia_list: vec![],
+            had_trivia_before: false,
         }
     }
 
     fn next_non_trivia_token(&mut self, context: TailwindLexContext, first_token: bool) {
         let mut trailing = !first_token;
+        self.had_trivia_before = false;
 
-        // Unlike most token sources, we can't skip over trivia tokens blindly.
-        // This is because whitespace is invalid inside Tailwind utility classes.
-        // Tailwind also has no comments, so we don't need to worry about them.
         loop {
             let kind = self.lexer.next_token(context);
 
@@ -75,15 +77,13 @@ impl<'source> TailwindTokenSource<'source> {
                     break;
                 }
                 Ok(trivia_kind) => {
-                    self.trivia_list
-                        .push(Trivia::new(trivia_kind, self.current_range(), trailing));
-
                     if trivia_kind.is_newline() {
                         trailing = false;
-                        // skipping over newlines is OK
-                        continue;
                     }
-                    break;
+
+                    self.had_trivia_before = true;
+                    self.trivia_list
+                        .push(Trivia::new(trivia_kind, self.current_range(), trailing));
                 }
             }
         }
@@ -102,6 +102,11 @@ impl<'source> TailwindTokenSource<'source> {
         assert!(self.trivia_list.len() >= checkpoint.trivia_len as usize);
         self.trivia_list.truncate(checkpoint.trivia_len as usize);
         self.lexer.rewind(checkpoint.lexer_checkpoint);
+    }
+
+    /// Whether the lexer encountered any trivia between the previous non-trivia token and the current non-trivia token.
+    pub fn had_trivia_before(&self) -> bool {
+        self.had_trivia_before
     }
 }
 

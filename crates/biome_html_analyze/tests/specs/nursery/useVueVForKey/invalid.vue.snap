@@ -1,0 +1,82 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<ul>
+  <li v-for="item in items">{{ item }}</li>
+</ul>
+
+<div class="wrapper" v-for="(item, i) in items" data-id="foo"></div>
+
+<template v-for="item in items">
+  <li>{{ item }}</li>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:7 lint/nursery/useVueVForKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This element is using v-for, but the key attribute is missing.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <ul>
+  > 3 │   <li v-for="item in items">{{ item }}</li>
+      │       ^^^^^^^^^^^^^^^^^^^^^
+    4 │ </ul>
+    5 │ 
+  
+  i Using a unique key with v-for helps Vue optimize rendering and track elements efficiently. Failing to provide a key can result in unexpected behavior during updates. See the Vue docs for more info.
+  
+  i Provide the key using :key="value", and have the value be a unique value from the items you are iterating over. For example: `<li v-for="item in items" :key="item.id">{{ item }}</li>`
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:6:22 lint/nursery/useVueVForKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This element is using v-for, but the key attribute is missing.
+  
+    4 │ </ul>
+    5 │ 
+  > 6 │ <div class="wrapper" v-for="(item, i) in items" data-id="foo"></div>
+      │                      ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ <template v-for="item in items">
+  
+  i Using a unique key with v-for helps Vue optimize rendering and track elements efficiently. Failing to provide a key can result in unexpected behavior during updates. See the Vue docs for more info.
+  
+  i Provide the key using :key="value", and have the value be a unique value from the items you are iterating over. For example: `<li v-for="item in items" :key="item.id">{{ item }}</li>`
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:11 lint/nursery/useVueVForKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This element is using v-for, but the key attribute is missing.
+  
+     6 │ <div class="wrapper" v-for="(item, i) in items" data-id="foo"></div>
+     7 │ 
+   > 8 │ <template v-for="item in items">
+       │           ^^^^^^^^^^^^^^^^^^^^^
+     9 │   <li>{{ item }}</li>
+    10 │ </template>
+  
+  i Using a unique key with v-for helps Vue optimize rendering and track elements efficiently. Failing to provide a key can result in unexpected behavior during updates. See the Vue docs for more info.
+  
+  i Provide the key using :key="value", and have the value be a unique value from the items you are iterating over. For example: `<li v-for="item in items" :key="item.id">{{ item }}</li>`
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1,0 +1,14 @@
+{
+	"linter": {
+		"rules": {
+			"nursery": {
+				"useRequiredScripts": {
+					"level": "error",
+					"options": {
+						"requiredScripts": ["test", "build", "lint"]
+					}
+				}
+			}
+		}
+	}
+}

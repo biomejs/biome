@@ -1,7 +1,9 @@
 use biome_analyze::{
     AnalysisFilter, AnalyzerAction, AnalyzerPluginSlice, ControlFlow, Never, RuleFilter,
 };
+use biome_css_analyze::CssAnalyzerServices;
 use biome_css_parser::{CssParserOptions, parse_css};
+use biome_css_semantic::semantic_model;
 use biome_css_syntax::{CssFileSource, CssLanguage};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_fs::OsFileSystem;
@@ -9,7 +11,7 @@ use biome_plugin_loader::AnalyzerGritPlugin;
 use biome_rowan::AstNode;
 use biome_test_utils::{
     CheckActionType, assert_diagnostics_expectation_comment, assert_errors_are_absent,
-    code_fix_to_string, create_analyzer_options, diagnostic_to_string,
+    code_fix_to_string, create_analyzer_options, create_parser_options, diagnostic_to_string,
     has_bogus_nodes_or_empty_slots, parse_test_path, register_leak_checker, scripts_from_json,
     write_analyzer_snapshot,
 };
@@ -51,16 +53,8 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
 
     let mut snapshot = String::new();
     let extension = input_file.extension().unwrap_or_default();
-
-    let parser_options = if file_name.ends_with(".module.css") {
-        CssParserOptions {
-            css_modules: true,
-            ..CssParserOptions::default()
-        }
-    } else {
-        CssParserOptions::default()
-    };
-
+    let mut diagnostics = vec![];
+    let parser_options = create_parser_options::<CssLanguage>(input_file, &mut diagnostics);
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
 
@@ -74,14 +68,20 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
                 file_name,
                 input_file,
                 CheckActionType::Lint,
-                parser_options,
+                parser_options.unwrap_or_default(),
                 &[],
             );
         }
     } else {
-        let Ok(source_type) = input_file.try_into() else {
+        let Ok(mut source_type): Result<CssFileSource, _> = input_file.try_into() else {
             return;
         };
+
+        let parser_options = parser_options.unwrap_or(CssParserOptions::from(&source_type));
+
+        if parser_options.tailwind_directives {
+            source_type = source_type.with_tailwind_directives()
+        }
         analyze_and_snap(
             &mut snapshot,
             &input_code,
@@ -118,22 +118,30 @@ pub(crate) fn analyze_and_snap(
     let mut diagnostics = Vec::new();
     let options = create_analyzer_options::<CssLanguage>(input_file, &mut diagnostics);
 
-    let parser_options = if options.css_modules() {
-        parser_options.allow_css_modules()
-    } else {
-        parser_options
-    };
-
-    let parsed = parse_css(input_code, parser_options);
+    let parsed = parse_css(input_code, source_type, parser_options);
     let root = parsed.tree();
 
     let mut code_fixes = Vec::new();
-
-    let (_, errors) = biome_css_analyze::analyze(&root, filter, &options, plugins, |event| {
-        if let Some(mut diag) = event.diagnostic() {
-            for action in event.actions() {
-                if check_action_type.is_suppression() {
-                    if action.is_suppression() {
+    let semantic_model = semantic_model(&root);
+    let services = CssAnalyzerServices::default()
+        .with_file_source(source_type)
+        .with_semantic_model(&semantic_model);
+    let (_, errors) =
+        biome_css_analyze::analyze(&root, filter, &options, services, plugins, |event| {
+            if let Some(mut diag) = event.diagnostic() {
+                for action in event.actions() {
+                    if check_action_type.is_suppression() {
+                        if action.is_suppression() {
+                            check_code_action(
+                                input_file,
+                                input_code,
+                                source_type,
+                                &action,
+                                parser_options,
+                            );
+                            diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
+                        }
+                    } else if !action.is_suppression() {
                         check_code_action(
                             input_file,
                             input_code,
@@ -143,30 +151,32 @@ pub(crate) fn analyze_and_snap(
                         );
                         diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
                     }
-                } else if !action.is_suppression() {
-                    check_code_action(input_file, input_code, source_type, &action, parser_options);
-                    diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
                 }
+
+                diagnostics.push(diagnostic_to_string(file_name, input_code, diag.into()));
+                return ControlFlow::Continue(());
             }
 
-            diagnostics.push(diagnostic_to_string(file_name, input_code, diag.into()));
-            return ControlFlow::Continue(());
-        }
-
-        for action in event.actions() {
-            if check_action_type.is_suppression() {
-                if action.category.matches("quickfix.suppressRule") {
+            for action in event.actions() {
+                if check_action_type.is_suppression() {
+                    if action.category.matches("quickfix.suppressRule") {
+                        check_code_action(
+                            input_file,
+                            input_code,
+                            source_type,
+                            &action,
+                            parser_options,
+                        );
+                        code_fixes.push(code_fix_to_string(input_code, action));
+                    }
+                } else if !action.category.matches("quickfix.suppressRule") {
                     check_code_action(input_file, input_code, source_type, &action, parser_options);
                     code_fixes.push(code_fix_to_string(input_code, action));
                 }
-            } else if !action.category.matches("quickfix.suppressRule") {
-                check_code_action(input_file, input_code, source_type, &action, parser_options);
-                code_fixes.push(code_fix_to_string(input_code, action));
             }
-        }
 
-        ControlFlow::<Never>::Continue(())
-    });
+            ControlFlow::<Never>::Continue(())
+        });
 
     for error in errors {
         diagnostics.push(diagnostic_to_string(file_name, input_code, error));
@@ -178,6 +188,7 @@ pub(crate) fn analyze_and_snap(
         diagnostics.as_slice(),
         code_fixes.as_slice(),
         "css",
+        parsed.diagnostics().len(),
     );
 
     assert_diagnostics_expectation_comment(input_file, root.syntax(), diagnostics);
@@ -186,7 +197,7 @@ pub(crate) fn analyze_and_snap(
 fn check_code_action(
     path: &Utf8Path,
     source: &str,
-    _source_type: CssFileSource,
+    source_type: CssFileSource,
     action: &AnalyzerAction<CssLanguage>,
     options: CssParserOptions,
 ) {
@@ -215,7 +226,7 @@ fn check_code_action(
     }
 
     // Re-parse the modified code and panic if the resulting tree has syntax errors
-    let re_parse = parse_css(&output, options);
+    let re_parse = parse_css(&output, source_type, options);
     assert_errors_are_absent(re_parse.tree().syntax(), re_parse.diagnostics(), path);
 }
 

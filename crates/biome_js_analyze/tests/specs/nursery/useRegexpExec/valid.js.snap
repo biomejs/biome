@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+/thing/.exec('something');
+
+'some things are just things'.match(/thing/g);
+
+const text = 'something';
+const search = /thing/;
+search.exec(text);
+
+const text1 = 'something';
+const search1 = /thing/g;
+text1.match(search1);
+
+const obj = {
+	match: () => { }
+}
+obj.match(/thing/)
+
+new RegExp(/thing/).exec('something');
+
+'some things are just things'.match(new RegExp(/thing/g));
+'some things are just things'.match(new RegExp(/thing/, "g"));
+
+```

@@ -4,6 +4,7 @@ use biome_analyze::{
     RuleCategoriesBuilder,
 };
 use biome_css_parser::CssParserOptions;
+use biome_css_syntax::CssFileSource;
 use biome_test_utils::BenchCase;
 use criterion::{BenchmarkId, Criterion, black_box, criterion_group, criterion_main};
 use std::collections::HashMap;
@@ -42,7 +43,11 @@ fn bench_analyzer(criterion: &mut Criterion) {
                     BenchmarkId::from_parameter(test_case.filename()),
                     code,
                     |b, _| {
-                        let parse = biome_css_parser::parse_css(code, CssParserOptions::default());
+                        let parse = biome_css_parser::parse_css(
+                            code,
+                            CssFileSource::css(),
+                            CssParserOptions::default(),
+                        );
 
                         let filter = AnalysisFilter {
                             categories: RuleCategoriesBuilder::default()
@@ -56,11 +61,16 @@ fn bench_analyzer(criterion: &mut Criterion) {
                             AnalyzerConfiguration::default()
                                 .with_jsx_runtime(JsxRuntime::default()),
                         );
+                        let semantic_model = biome_css_semantic::semantic_model(&parse.tree());
+                        let services = biome_css_analyze::CssAnalyzerServices::default()
+                            .with_file_source(CssFileSource::default())
+                            .with_semantic_model(&semantic_model);
                         b.iter(|| {
                             biome_css_analyze::analyze(
                                 &parse.tree(),
                                 filter,
                                 &options,
+                                services.clone(),
                                 &[],
                                 |event| {
                                     black_box(event.diagnostic());

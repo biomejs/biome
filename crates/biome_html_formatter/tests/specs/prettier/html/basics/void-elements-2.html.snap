@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: html/basics/void-elements-2.html
 ---
+
 # Input
 
 ```html
@@ -29,14 +30,13 @@ info: html/basics/void-elements-2.html
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,12 +1,16 @@
+@@ -1,12 +1,12 @@
  <video controls width="250">
    <source src="/media/examples/flower.webm" type="video/webm" />
 -  <source src="/media/examples/flower.mp4" type="video/mp4" /></video
 ->text after
 +  <source src="/media/examples/flower.mp4" type="video/mp4" />
-+</video>
-+text after
++</video>text after
  
  <!-- #8626 -->
  <object data="horse.wav">
@@ -46,11 +46,7 @@ info: html/basics/void-elements-2.html
 +  <param name="autoplay" value="true" />
 +</object>1
  
--<span><img src="1.png" /><img src="1.png" /></span>1
-+<span
-+  ><img src="1.png" />
-+  <img src="1.png" /></span
-+>1
+ <span><img src="1.png" /><img src="1.png" /></span>1
 ```
 
 # Output
@@ -59,8 +55,7 @@ info: html/basics/void-elements-2.html
 <video controls width="250">
   <source src="/media/examples/flower.webm" type="video/webm" />
   <source src="/media/examples/flower.mp4" type="video/mp4" />
-</video>
-text after
+</video>text after
 
 <!-- #8626 -->
 <object data="horse.wav">
@@ -68,8 +63,5 @@ text after
   <param name="autoplay" value="true" />
 </object>1
 
-<span
-  ><img src="1.png" />
-  <img src="1.png" /></span
->1
+<span><img src="1.png" /><img src="1.png" /></span>1
 ```

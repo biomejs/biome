@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: deprecated.jsx
-snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -17,3 +16,5 @@ snapshot_kind: text
 <area href="#" aria-invalid />
 <a href="#" aria-invalid />
 ```
+
+_Note: The parser emitted 15 diagnostics which are not shown here._

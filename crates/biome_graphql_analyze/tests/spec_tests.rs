@@ -93,10 +93,10 @@ pub(crate) fn analyze_and_snap(
     input_file: &Utf8Path,
     check_action_type: CheckActionType,
 ) {
+    let mut diagnostics = Vec::new();
     let parsed = parse_graphql(input_code);
     let root = parsed.tree();
 
-    let mut diagnostics = Vec::new();
     let mut code_fixes = Vec::new();
     let options = create_analyzer_options::<GraphqlLanguage>(input_file, &mut diagnostics);
 
@@ -143,6 +143,7 @@ pub(crate) fn analyze_and_snap(
         diagnostics.as_slice(),
         code_fixes.as_slice(),
         "graphql",
+        parsed.diagnostics().len(),
     );
 
     assert_diagnostics_expectation_comment(input_file, root.syntax(), diagnostics);

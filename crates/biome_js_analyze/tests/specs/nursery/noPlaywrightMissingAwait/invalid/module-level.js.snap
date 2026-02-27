@@ -1,0 +1,38 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: module-level.js
+---
+# Input
+```js
+/* should generate diagnostics */
+// Module-level code (top-level await is supported)
+expect(page.locator('body')).toBeVisible();
+
+
+
+```
+
+# Diagnostics
+```
+module-level.js:3:1 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Async matcher toBeVisible must be awaited or returned.
+  
+    1 │ /* should generate diagnostics */
+    2 │ // Module-level code (top-level await is supported)
+  > 3 │ expect(page.locator('body')).toBeVisible();
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i Async matchers return a Promise that must be handled.
+  
+  i Add await before the expression or return it from the function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await before the call.
+  
+    3 │ await·expect(page.locator('body')).toBeVisible();
+      │ ++++++                                           
+
+```

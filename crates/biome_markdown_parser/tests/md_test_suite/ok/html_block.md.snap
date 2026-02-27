@@ -1,0 +1,127 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+<div>
+This is an HTML block.
+It continues until blank line.
+</div>
+
+Next paragraph after blank line.
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdHtmlBlock {
+            content: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@0..1 "<" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@1..4 "div" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@4..5 ">" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@5..6 "\n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@6..28 "This is an HTML block." [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@28..29 "\n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@29..59 "It continues until blank line." [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@59..60 "\n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@60..61 "<" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@61..65 "/div" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@65..66 ">" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@66..67 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@67..68 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@68..100 "Next paragraph after blank line." [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@100..101 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+    ],
+    eof_token: EOF@101..101 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..101
+  0: (empty)
+  1: MD_BLOCK_LIST@0..101
+    0: MD_HTML_BLOCK@0..67
+      0: MD_INLINE_ITEM_LIST@0..67
+        0: MD_TEXTUAL@0..1
+          0: MD_TEXTUAL_LITERAL@0..1 "<" [] []
+        1: MD_TEXTUAL@1..4
+          0: MD_TEXTUAL_LITERAL@1..4 "div" [] []
+        2: MD_TEXTUAL@4..5
+          0: MD_TEXTUAL_LITERAL@4..5 ">" [] []
+        3: MD_TEXTUAL@5..6
+          0: MD_TEXTUAL_LITERAL@5..6 "\n" [] []
+        4: MD_TEXTUAL@6..28
+          0: MD_TEXTUAL_LITERAL@6..28 "This is an HTML block." [] []
+        5: MD_TEXTUAL@28..29
+          0: MD_TEXTUAL_LITERAL@28..29 "\n" [] []
+        6: MD_TEXTUAL@29..59
+          0: MD_TEXTUAL_LITERAL@29..59 "It continues until blank line." [] []
+        7: MD_TEXTUAL@59..60
+          0: MD_TEXTUAL_LITERAL@59..60 "\n" [] []
+        8: MD_TEXTUAL@60..61
+          0: MD_TEXTUAL_LITERAL@60..61 "<" [] []
+        9: MD_TEXTUAL@61..65
+          0: MD_TEXTUAL_LITERAL@61..65 "/div" [] []
+        10: MD_TEXTUAL@65..66
+          0: MD_TEXTUAL_LITERAL@65..66 ">" [] []
+        11: MD_TEXTUAL@66..67
+          0: MD_TEXTUAL_LITERAL@66..67 "\n" [] []
+    1: MD_NEWLINE@67..68
+      0: NEWLINE@67..68 "\n" [] []
+    2: MD_PARAGRAPH@68..101
+      0: MD_INLINE_ITEM_LIST@68..101
+        0: MD_TEXTUAL@68..100
+          0: MD_TEXTUAL_LITERAL@68..100 "Next paragraph after blank line." [] []
+        1: MD_TEXTUAL@100..101
+          0: MD_TEXTUAL_LITERAL@100..101 "\n" [] []
+      1: (empty)
+  2: EOF@101..101 "" [] []
+
+```

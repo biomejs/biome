@@ -17,6 +17,7 @@ impl FormatNodeRule<SvelteConstBlock> for FormatSvelteConstBlock {
             [
                 sv_curly_at_token.format(),
                 const_token.format(),
+                space(),
                 expression.format(),
                 r_curly_token.format()
             ]

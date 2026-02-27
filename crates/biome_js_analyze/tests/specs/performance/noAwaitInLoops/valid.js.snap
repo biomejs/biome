@@ -27,3 +27,5 @@ async function foo() { while (true) { class Foo { async foo() { await bar; } } }
 async function foo() { for await (var x of xs) { await f(x) } }
 
 ```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._

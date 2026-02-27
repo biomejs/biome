@@ -1,0 +1,63 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue8802.ts
+---
+# Input
+```ts
+import { useMemo } from "react";
+
+export interface Days {
+    mon: boolean;
+    tue: boolean;
+    wed: boolean;
+    thu: boolean;
+    fri: boolean;
+}
+
+const WeekdayValues: (keyof Days)[] = ["mon", "tue", "wed", "thu", "fri"];
+
+// "day" doesn't exist outside the memoized function.
+// Biome should report "props.value" as a missing dependency,
+// NOT "props.value[day]" since "day" is a callback-scoped variable.
+function Component(props: { value: Days }) {
+    useMemo(() => {
+        return WeekdayValues.filter((day) => props.value[day]);
+    }, []);
+}
+
+```
+
+# Diagnostics
+```
+issue8802.ts:17:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook does not specify its dependency on props.value.
+  
+    15 │ // NOT "props.value[day]" since "day" is a callback-scoped variable.
+    16 │ function Component(props: { value: Days }) {
+  > 17 │     useMemo(() => {
+       │     ^^^^^^^
+    18 │         return WeekdayValues.filter((day) => props.value[day]);
+    19 │     }, []);
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    16 │ function Component(props: { value: Days }) {
+    17 │     useMemo(() => {
+  > 18 │         return WeekdayValues.filter((day) => props.value[day]);
+       │                                              ^^^^^^^^^^^
+    19 │     }, []);
+    20 │ }
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
+  i Either include it or remove the dependency array.
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    19 │ ····},·[props.value]);
+       │         +++++++++++   
+
+```

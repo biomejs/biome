@@ -16,3 +16,9 @@ var f = f;
 function f(a = b, b = 0) {}
 
 function g(a = a) {}
+
+const instance = new Class1();
+class Class1 {}
+
+const instance2 = new Class2();
+export default class Class2 {}

@@ -1,15 +1,17 @@
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make::js_variable_declarator_list;
+use biome_js_semantic::CanBeImportedExported;
 use biome_js_syntax::{JsLanguage, JsSyntaxToken, JsVariableDeclarator, JsVariableStatement};
 use biome_rowan::{AstNode, BatchMutationExt, TextRange};
 use biome_rowan::{SyntaxTriviaPiece, chain_trivia_pieces};
 use biome_rule_options::no_useless_undefined_initialization::NoUselessUndefinedInitializationOptions;
 
 use crate::JsRuleAction;
+use crate::services::semantic::Semantic;
 
 declare_lint_rule! {
     /// Disallow initializing variables to `undefined`.
@@ -49,6 +51,17 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// Exported variables are not flagged because in some frameworks (e.g., Svelte 4),
+    /// initializing exported variables to `undefined` is used to declare optional props.
+    ///
+    /// ```js
+    /// export let x = undefined;
+    /// ```
+    /// ```js
+    /// let y = undefined;
+    /// export { y };
+    /// ```
+    ///
     pub NoUselessUndefinedInitialization {
         version: "1.7.2",
         name: "noUselessUndefinedInitialization",
@@ -61,13 +74,14 @@ declare_lint_rule! {
 }
 
 impl Rule for NoUselessUndefinedInitialization {
-    type Query = Ast<JsVariableStatement>;
+    type Query = Semantic<JsVariableStatement>;
     type State = (Box<str>, TextRange);
     type Signals = Box<[Self::State]>;
     type Options = NoUselessUndefinedInitializationOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let statement = ctx.query();
+        let model = ctx.model();
 
         let mut signals = vec![];
         let Ok(node) = statement.declaration() else {
@@ -96,6 +110,19 @@ impl Rule for NoUselessUndefinedInitialization {
             };
 
             if keyword.is_undefined() {
+                // Skip if the variable is exported.
+                // In frameworks like Svelte 4, exported variables with `undefined`
+                // initialization are used to declare optional props.
+                let is_exported = decl
+                    .id()
+                    .ok()
+                    .and_then(|id| id.as_any_js_binding()?.as_js_identifier_binding().cloned())
+                    .is_some_and(|binding| binding.is_exported(model));
+
+                if is_exported {
+                    continue;
+                }
+
                 let decl_range = initializer.range();
                 let Some(binding_name) = decl.id().ok().map(|id| id.to_trimmed_text()) else {
                     continue;

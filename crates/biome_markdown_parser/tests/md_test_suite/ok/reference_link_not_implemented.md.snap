@@ -1,0 +1,86 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+Reference links without definitions should be parsed as text: [text][label].
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@0..62 "Reference links without definitions should be parsed as text: " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@62..63 "[" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@63..67 "text" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@67..68 "]" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@68..69 "[" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@69..74 "label" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@74..75 "]" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@75..76 "." [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@76..77 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+    ],
+    eof_token: EOF@77..77 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..77
+  0: (empty)
+  1: MD_BLOCK_LIST@0..77
+    0: MD_PARAGRAPH@0..77
+      0: MD_INLINE_ITEM_LIST@0..77
+        0: MD_TEXTUAL@0..62
+          0: MD_TEXTUAL_LITERAL@0..62 "Reference links without definitions should be parsed as text: " [] []
+        1: MD_TEXTUAL@62..63
+          0: MD_TEXTUAL_LITERAL@62..63 "[" [] []
+        2: MD_TEXTUAL@63..67
+          0: MD_TEXTUAL_LITERAL@63..67 "text" [] []
+        3: MD_TEXTUAL@67..68
+          0: MD_TEXTUAL_LITERAL@67..68 "]" [] []
+        4: MD_TEXTUAL@68..69
+          0: MD_TEXTUAL_LITERAL@68..69 "[" [] []
+        5: MD_TEXTUAL@69..74
+          0: MD_TEXTUAL_LITERAL@69..74 "label" [] []
+        6: MD_TEXTUAL@74..75
+          0: MD_TEXTUAL_LITERAL@74..75 "]" [] []
+        7: MD_TEXTUAL@75..76
+          0: MD_TEXTUAL_LITERAL@75..76 "." [] []
+        8: MD_TEXTUAL@76..77
+          0: MD_TEXTUAL_LITERAL@76..77 "\n" [] []
+      1: (empty)
+  2: EOF@77..77 "" [] []
+
+```

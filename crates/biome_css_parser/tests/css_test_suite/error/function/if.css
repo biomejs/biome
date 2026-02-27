@@ -1,0 +1,137 @@
+.missing-colon {
+	color: if(style(--foo: bar) black);
+}
+
+.empty-condition {
+	color: if(: black);
+}
+
+.unclosed-style {
+	color: if(style(--foo: bar: black);
+}
+
+.invalid-style-query {
+	color: if(style(not a valid query): black);
+}
+
+.double-not {
+	color: if(not not(--style: black): black;);
+}
+
+.double-not-and {
+	color: if(not (style(--style: black) and not(--style: black)): black;);
+}
+
+.missing-open-paren {
+	color: if style(--foo: bar): black;);
+}
+
+.missing-supports-paren {
+	color: if(supports --foo: bar): black;);
+}
+
+.missing-media-close-paren {
+	color: if(media(print: black;);
+}
+
+.missing-and-operand {
+	color: if(style(--foo: bar) and: black;);
+}
+
+.missing-or-operand {
+	color: if(style(--foo: bar) or: black;);
+}
+
+.invalid-else {
+	color: if(style(--foo: bar): black; elsif: white;);
+}
+
+.multiple-semicolons {
+	color: if(style(--foo: bar): black;;);
+}
+
+.missing-test-name {
+	color: if((--foo: bar): black;);
+}
+
+.unknown-test {
+	color: if(custom(--foo: bar): black;);
+}
+
+.incomplete-parens-expr {
+	color: if((: black;);
+}
+
+.mixed-operators {
+	color: if(style(--a: 1) and style(--b: 2) or style(--c: 3): black;);
+}
+
+.empty-else {
+	color: if(style(--foo: bar): black; else);
+}
+
+.and-no-left {
+	color: if(and style(--foo: bar): black;);
+}
+
+.or-no-left {
+	color: if(or style(--foo: bar): black;);
+}
+
+.empty-if {
+	color: if();
+}
+
+.if-branch-list-recovery {
+	a: if(style(--foo: bar): black; !bogus; else: white);
+	a: if(style(--foo: bar): black; ???; else: white);
+}
+
+.todo {
+	background: if(style(--foo: bar) and (!bogus): red;);
+	background: if(not foo: red;);
+}
+
+.invalid-branch-content {
+	a: if(style(--foo: bar): black; !bogus; else: white);
+}
+
+.invalid-branch-content-no-trailing-semi {
+	a: if(style(--foo: bar): black; !bogus; else: white)
+}
+
+.multiple-invalid-branches {
+	a: if(style(--a: 1): red; !!!; style(--b: 2): blue; @@@; else: green);
+}
+
+.invalid-then-valid {
+	a: if(###: red; style(--foo: bar): blue; else: green);
+}
+
+.recovery-at-semicolon {
+	a: if(style(--foo: bar): black; bogus-no-colon; else: white);
+}
+
+.multiple-if-declarations {
+	a: if(style(--foo: bar): black; else: white);
+	b: if(style(--invalid): red; !!!; else: blue);
+	c: if(style(--baz: qux): green; else: yellow);
+}
+
+/* Test if() inside nested rules */
+.outer {
+	.inner {
+		color: if(style(--foo: bar): red; !bogus; else: blue);
+	}
+	a: if(style(--test: val): green; else: yellow);
+}
+
+/* Deeply nested with multiple if() declarations */
+.level1 {
+	.level2 {
+		.level3 {
+			a: if(style(--deep: true): red; !!!; else: blue);
+			b: if(style(--valid: false): green; else: yellow);
+		}
+	}
+}

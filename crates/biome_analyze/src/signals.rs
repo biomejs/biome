@@ -2,14 +2,14 @@ use crate::categories::{
     SUPPRESSION_INLINE_ACTION_CATEGORY, SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY,
 };
 use crate::{
-    AnalyzerDiagnostic, AnalyzerOptions, OtherActionCategory, Queryable, RuleGroup, ServiceBag,
-    SuppressionAction,
+    AnalyzerDiagnostic, AnalyzerOptions, OtherActionCategory, Queryable, RuleDiagnostic, RuleGroup,
+    ServiceBag, SuppressionAction,
     categories::ActionCategory,
     context::RuleContext,
     registry::{RuleLanguage, RuleRoot},
     rule::Rule,
 };
-use biome_console::MarkupBuf;
+use biome_console::{MarkupBuf, markup};
 use biome_diagnostics::{Applicability, CodeSuggestion, Error, advice::CodeSuggestionAdvice};
 use biome_rowan::{BatchMutation, Language};
 use std::iter::FusedIterator;
@@ -98,6 +98,42 @@ where
         } else {
             AnalyzerTransformationIter::new(vec![])
         }
+    }
+}
+
+/// Implementation of [AnalyzerSignal] for plugin diagnostics that preserves
+/// the [RuleDiagnostic] as [DiagnosticKind::Rule](crate::diagnostics::DiagnosticKind::Rule),
+/// ensuring diagnostic offset adjustments are correctly applied for embedded
+/// languages (Vue, Svelte, Astro).
+///
+/// Unlike [DiagnosticSignal] which converts through [Error] into
+/// [DiagnosticKind::Raw](crate::diagnostics::DiagnosticKind::Raw), this type
+/// directly converts via `AnalyzerDiagnostic::from(RuleDiagnostic)`.
+pub struct PluginSignal<L> {
+    diagnostic: RuleDiagnostic,
+    _phantom: PhantomData<L>,
+}
+
+impl<L: Language> PluginSignal<L> {
+    pub fn new(diagnostic: RuleDiagnostic) -> Self {
+        Self {
+            diagnostic,
+            _phantom: PhantomData,
+        }
+    }
+}
+
+impl<L: Language> AnalyzerSignal<L> for PluginSignal<L> {
+    fn diagnostic(&self) -> Option<AnalyzerDiagnostic> {
+        Some(AnalyzerDiagnostic::from(self.diagnostic.clone()))
+    }
+
+    fn actions(&self) -> AnalyzerActionIter<L> {
+        AnalyzerActionIter::new(vec![])
+    }
+
+    fn transformations(&self) -> AnalyzerTransformationIter<L> {
+        AnalyzerTransformationIter::new(vec![])
     }
 }
 
@@ -370,12 +406,25 @@ where
             preferred_jsx_quote,
             preferred_indentation,
             self.options.jsx_runtime(),
-            self.options.css_modules(),
+            self.options.jsx_factory(),
+            self.options.jsx_fragment_factory(),
         )
         .ok()?;
 
         R::diagnostic(&ctx, &self.state).map(|mut diagnostic| {
             diagnostic.severity = ctx.metadata().severity;
+
+            if let Some(issue_number) = ctx.metadata().issue_number {
+                let url = format!("https://github.com/biomejs/biome/issues/{}", issue_number);
+                diagnostic = diagnostic.note(markup! {
+                 "This rule is still being actively worked on, so it may be missing features or have rough edges. Visit "<Hyperlink href={url.as_str()}>{url.as_str()}</Hyperlink>" for more information or to report possible bugs."
+                });
+            }
+            if <R::Group as RuleGroup>::NAME == "nursery" {
+                diagnostic = diagnostic.note(markup! {
+                    "This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit "<Hyperlink href="https://biomejs.dev/linter/#nursery">"https://biomejs.dev/linter/#nursery"</Hyperlink>" for more information."
+                });
+            }
             AnalyzerDiagnostic::from(diagnostic)
         })
     }
@@ -407,7 +456,8 @@ where
             self.options.preferred_jsx_quote(),
             self.options.preferred_indentation(),
             self.options.jsx_runtime(),
-            self.options.css_modules(),
+            self.options.jsx_factory(),
+            self.options.jsx_fragment_factory(),
         )
         .ok();
         let mut actions = Vec::new();
@@ -472,7 +522,8 @@ where
             self.options.preferred_jsx_quote(),
             self.options.preferred_indentation(),
             self.options.jsx_runtime(),
-            self.options.css_modules(),
+            self.options.jsx_factory(),
+            self.options.jsx_fragment_factory(),
         )
         .ok();
         if let Some(ctx) = ctx {

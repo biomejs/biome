@@ -152,6 +152,8 @@ let a; function foo() { bar(++a); }
 { let id; function foo() { if (typeof id !== 'undefined') { return; } id = setInterval(() => {}, 250); } foo()
 ```
 
+_Note: The parser emitted 1 diagnostics which are not shown here._
+
 # Input
 ```cjs
 /*exported a*/ let a; function init() { a = foo(); }

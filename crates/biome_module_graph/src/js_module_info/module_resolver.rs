@@ -74,19 +74,26 @@ pub struct ModuleResolver {
 
 impl ModuleResolver {
     pub fn for_module(module_info: JsModuleInfo, module_graph: Arc<ModuleGraph>) -> Self {
-        let num_initial_types = module_info.types.len();
+        let infer_types = module_info.infer_types;
 
+        let types = if infer_types {
+            TypeStore::with_capacity(module_info.types.len())
+        } else {
+            TypeStore::default()
+        };
         let mut resolver = Self {
             module_graph,
             modules: vec![module_info],
             modules_by_path: Default::default(),
             expressions: Default::default(),
-            types: TypeStore::with_capacity(num_initial_types),
+            types,
             type_id_map: Default::default(),
             diagnostics: Default::default(),
         };
 
-        resolver.run_inference();
+        if infer_types {
+            resolver.run_inference();
+        }
         resolver
     }
 
@@ -169,7 +176,7 @@ impl ModuleResolver {
             Entry::Occupied(entry) => Some(*entry.get()),
             Entry::Vacant(entry) => {
                 let path = entry.key().as_path()?;
-                let module_info = self.module_graph.module_info_for_path(path)?;
+                let module_info = self.module_graph.js_module_info_for_path(path)?;
                 let module_id = ModuleId::new(self.modules.len());
                 self.modules.push(module_info);
                 self.types

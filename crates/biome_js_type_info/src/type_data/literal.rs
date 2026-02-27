@@ -82,6 +82,35 @@ impl NumberLiteral {
 }
 
 #[derive(Clone, Debug, Default, Eq, Hash, PartialEq, Resolvable)]
+pub struct RegexpLiteral {
+    /// The pattern to match against.
+    ///
+    /// Examples:
+    ///
+    /// ```js
+    /// const regex1 = /hello/;
+    /// //     Pattern: ^^^^^
+    ///
+    /// const regex2 = new RegExp("world", "i");
+    /// //                Pattern: ^^^^^
+    /// ```
+    pub pattern: Text,
+
+    /// The flags carried by the expression.
+    ///
+    /// Examples:
+    ///
+    /// ```js
+    /// const regex1 = /hello/i;
+    /// //              Flag: ^
+    ///
+    /// const regex2 = new RegExp("world", "g");
+    /// //                            Flag: ^
+    /// ```
+    pub flags: Text,
+}
+
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq, Resolvable)]
 pub struct StringLiteral(Text);
 
 impl StringLiteral {

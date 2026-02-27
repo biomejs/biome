@@ -1,0 +1,70 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<template>
+	<div v-bind:foo="bar" />
+  <div disabled v-bind:foo="bar" />
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:7 lint/nursery/useVueConsistentVBindStyle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use shorthand ':' syntax instead of v-bind.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │ 	<div v-bind:foo="bar" />
+      │ 	     ^^^^^^^^^^^^^^^^
+    4 │   <div disabled v-bind:foo="bar" />
+    5 │ </template>
+  
+  i This project prefers to use shorthand syntax for v-bind.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the shorthand ':' syntax instead.
+  
+    1 1 │   <!-- should generate diagnostics -->
+    2 2 │   <template>
+    3   │ - → <div·v-bind:foo="bar"·/>
+      3 │ + → <div·:foo="bar"·/>
+    4 4 │     <div disabled v-bind:foo="bar" />
+    5 5 │   </template>
+  
+
+```
+
+```
+invalid.vue:4:17 lint/nursery/useVueConsistentVBindStyle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use shorthand ':' syntax instead of v-bind.
+  
+    2 │ <template>
+    3 │ 	<div v-bind:foo="bar" />
+  > 4 │   <div disabled v-bind:foo="bar" />
+      │                 ^^^^^^^^^^^^^^^^
+    5 │ </template>
+    6 │ 
+  
+  i This project prefers to use shorthand syntax for v-bind.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the shorthand ':' syntax instead.
+  
+    2 2 │   <template>
+    3 3 │   	<div v-bind:foo="bar" />
+    4   │ - ··<div·disabled·v-bind:foo="bar"·/>
+      4 │ + ··<div·disabled·:foo="bar"·/>
+    5 5 │   </template>
+    6 6 │   
+  
+
+```

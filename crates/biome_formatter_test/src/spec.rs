@@ -70,6 +70,9 @@ impl<'a> SpecTestFile<'a> {
                 project_key,
                 path: input_file.clone(),
                 features: FeaturesBuilder::new().with_formatter().build(),
+                inline_config: None,
+                skip_ignore_check: false,
+                not_requested_features: FeaturesBuilder::new().build(),
             })
             .unwrap();
 
@@ -269,7 +272,11 @@ where
                 deserialize_from_str::<Configuration>(options_path.get_buffer_from_file().as_str())
                     .consume();
             settings
-                .merge_with_configuration(test_options.unwrap_or_default(), None)
+                .merge_with_configuration(
+                    test_options.unwrap_or_default(),
+                    None,
+                    Vec::<(Utf8PathBuf, Configuration)>::new(),
+                )
                 .unwrap();
 
             if !diagnostics.is_empty() {

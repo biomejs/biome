@@ -1,0 +1,104 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `index.ts`
+
+```ts
+import { z} from "z"
+import { z, b , a} from "lodash"
+
+a ==b
+
+debugger
+
+let f;
+		let f;
+```
+
+## `main.ts`
+
+```ts
+import { z} from "z"
+import { z, b , a} from "lodash"
+
+a ==b
+
+debugger
+
+let f;
+		let f;
+```
+
+# Termination Message
+
+```block
+format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Biome",
+          "informationUri": "https://biomejs.dev",
+          "rules": [
+            {
+              "id": "format",
+              "shortDescription": {
+                "text": "Follow a consistent style—handling things like spacing, indentation, line breaks, and punctuation to make code easier to read and maintain."
+              },
+              "helpUri": "https://biomejs.dev/formatter/"
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "format",
+          "level": "error",
+          "message": {
+            "text": "Formatter would have printed the following content:"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "index.ts"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "format",
+          "level": "error",
+          "message": {
+            "text": "Formatter would have printed the following content:"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "main.ts"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```

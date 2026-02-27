@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/tailwind/utility.css
 ---
+
 # Input
 
 ```css
@@ -23,6 +24,9 @@ info: css/tailwind/utility.css
 @utility tab-4{tab-size:4;}
 
 @utility tab-*{tab-size:--value(--tab-size-*);}
+
+@utility px-*{padding-inline:--value(--padding-inline-*);}
+
 ```
 
 
@@ -38,6 +42,7 @@ Indent width: 2
 Line ending: LF
 Line width: 80
 Quote style: Double Quotes
+Trailing newline: true
 -----
 
 ```css
@@ -66,6 +71,11 @@ Quote style: Double Quotes
 @utility tab-* {
 	tab-size: --value(--tab-size-*);
 }
+
+@utility px-* {
+	padding-inline: --value(--padding-inline-*);
+}
+
 ```
 
 ## Output 1
@@ -76,6 +86,7 @@ Indent width: 2
 Line ending: LF
 Line width: 80
 Quote style: Double Quotes
+Trailing newline: true
 -----
 
 ```css
@@ -104,4 +115,9 @@ Quote style: Double Quotes
 @utility tab-* {
 	tab-size: --value(--tab-size-*);
 }
+
+@utility px-* {
+	padding-inline: --value(--padding-inline-*);
+}
+
 ```

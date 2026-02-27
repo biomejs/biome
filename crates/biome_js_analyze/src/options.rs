@@ -1,7 +1,5 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-//! Generated file, do not edit by hand, see `xtask/codegen`
-
 use crate::assist;
 use crate::lint;
 pub type NoAccessKey = <lint::a11y::no_access_key::NoAccessKey as biome_analyze::Rule>::Options;
@@ -450,6 +448,8 @@ pub type UseSortedClasses =
     <lint::nursery::use_sorted_classes::UseSortedClasses as biome_analyze::Rule>::Options;
 pub type UseSortedKeys =
     <assist::source::use_sorted_keys::UseSortedKeys as biome_analyze::Rule>::Options;
+pub type UseSortedInterfaceMembers =
+    <assist::source::use_sorted_interface_members::UseSortedInterfaceMembers as biome_analyze::Rule>::Options;
 pub type UseStrictMode =
     <lint::suspicious::use_strict_mode::UseStrictMode as biome_analyze::Rule>::Options;
 pub type UseSymbolDescription =

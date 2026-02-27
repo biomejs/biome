@@ -1,9 +1,9 @@
 [package]
-description = "Internal script to make sure that the metadata or the rules are correct"
-edition     = "2024"
 name        = "rules_check"
-publish     = false
 version     = "0.0.0"
+edition     = "2024"
+description = "Internal script to make sure that the metadata or the rules are correct"
+publish     = false
 
 [dependencies]
 anyhow                = { workspace = true }
@@ -12,6 +12,7 @@ biome_configuration   = { workspace = true }
 biome_console         = { workspace = true }
 biome_css_analyze     = { workspace = true }
 biome_css_parser      = { workspace = true }
+biome_css_semantic    = { workspace = true }
 biome_css_syntax      = { workspace = true }
 biome_deserialize     = { workspace = true }
 biome_diagnostics     = { workspace = true }
@@ -36,7 +37,6 @@ biome_ruledoc_utils   = { workspace = true }
 biome_service         = { workspace = true }
 camino                = { workspace = true }
 pulldown-cmark        = "0.13.0"
-
 
 [lints]
 workspace = true

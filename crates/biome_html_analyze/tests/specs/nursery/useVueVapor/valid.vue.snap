@@ -1,0 +1,23 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.vue
+---
+# Input
+```html
+<!-- should not generate diagnostics -->
+
+<script setup vapor>
+const a = 1;
+</script>
+
+<script setup vapor lang="ts">
+const b: number = 1;
+</script>
+
+<script>
+export default {};
+</script>
+
+
+
+```

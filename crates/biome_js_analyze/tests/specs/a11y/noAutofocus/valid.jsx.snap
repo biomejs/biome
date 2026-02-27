@@ -16,3 +16,5 @@ expression: valid.jsx
     <dialog><input autoFocus />></dialog>
 </>
 ```
+
+_Note: The parser emitted 2 diagnostics which are not shown here._

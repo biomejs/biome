@@ -1,3 +1,5 @@
+use std::ops::Not;
+
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext,
     declare_lint_rule,
@@ -5,8 +7,8 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_factory::make::{self, js_module_item_list};
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsModuleItem, JsModuleItemList, JsSyntaxKind, JsVariableDeclarator,
-    JsVariableDeclaratorList, T,
+    AnyJsExpression, AnyJsModuleItem, JsFileSource, JsModuleItemList, JsSyntaxKind,
+    JsVariableDeclarator, JsVariableDeclaratorList, T,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TextRange, TokenText, TriviaPieceKind};
 use biome_rule_options::use_vue_define_macros_order::UseVueDefineMacrosOrderOptions;
@@ -113,9 +115,12 @@ impl Rule for UseVueDefineMacrosOrder {
     type Options = UseVueDefineMacrosOrderOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        // TODO: Need to run this only on <script setup> blocks.
-        let path = ctx.file_path();
-        if path.extension() != Some("vue") {
+        if ctx
+            .source_type::<JsFileSource>()
+            .as_embedding_kind()
+            .is_vue_setup()
+            .not()
+        {
             return None;
         }
 

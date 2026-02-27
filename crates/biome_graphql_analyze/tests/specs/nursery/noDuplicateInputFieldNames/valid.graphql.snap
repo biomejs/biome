@@ -1,0 +1,29 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: valid.graphql
+---
+# Input
+```graphql
+# should not generate diagnostics
+query A {
+	field(arg: { f: true })
+}
+query B {
+	field(arg1: { f: true }, arg2: { f: true })
+}
+query C {
+	field(arg: { f1: "value", f2: "value", f3: "value" })
+}
+query D {
+	field(arg: {
+		deep: {
+			deep: {
+				id: 1
+			}
+			id: 1
+		}
+		id: 1
+	})
+}
+
+```

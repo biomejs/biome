@@ -1,0 +1,49 @@
+// should not generate diagnostics
+
+try {
+  throw new Error("Original error");
+} catch (err) {
+  throw new Error("Wrapper error", { cause: err });
+}
+
+try {
+  throw new Error("Original error");
+} catch (err) {
+  console.error("Caught error:", err);
+}
+
+
+class CustomError extends Error {
+  constructor(message, options) {
+    super(message, options);
+    this.name = "CustomError";
+  }
+}
+try {
+  throw new Error("Original error");
+} catch (err) {
+  throw new CustomError("Custom failure", { cause: err });
+}
+
+
+try {
+  throw new Error("Original error");
+} catch (err) {
+  throw new Error(`Failed to process: ${err.message}`, { cause: err });
+}
+
+try {
+    doSomething();
+} catch (e) {
+    console.error(e);
+}
+
+try {
+} catch (error) {
+	foo = {
+		bar() {
+			// This throw is not directly related to the caught error.
+			throw new Error("Something went wrong");
+		}
+	};
+}

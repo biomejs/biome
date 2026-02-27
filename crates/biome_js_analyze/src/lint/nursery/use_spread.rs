@@ -48,10 +48,13 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseSpread {
-        version: "next",
+        version: "2.3.6",
         name: "useSpread",
         language: "js",
-        sources: &[RuleSource::Eslint("prefer-spread").same()],
+        sources: &[
+            RuleSource::Eslint("prefer-spread").same(),
+            RuleSource::EslintE18e("prefer-spread-syntax").inspired(),
+        ],
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

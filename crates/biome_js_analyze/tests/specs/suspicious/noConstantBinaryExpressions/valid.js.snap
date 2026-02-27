@@ -45,3 +45,5 @@ a ?? (doSomething(), undefined) ?? b;
 a ?? (something = null) ?? ;
 
 ```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._

@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-definecomponent-function-signature.js
+---
+# Input
+```js
+// should not generate diagnostics
+// defineComponent with function signature is Composition API (Vue 3.3+)
+import { defineComponent, ref, h } from "vue";
+
+export default defineComponent((props) => {
+  const count = ref(0);
+  return () => h("div", count.value);
+});
+
+```

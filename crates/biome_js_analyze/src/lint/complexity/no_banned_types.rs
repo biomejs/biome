@@ -36,29 +36,33 @@ declare_lint_rule! {
     /// ### Disallow the unsafe `Function` type
     ///
     /// TypeScript's built-in `Function` type is capable of accepting callbacks of any shape or form,
-    /// behaving equivalent to `(...rest: any[]) => any` (which uses the unsafe `any` type) when called directly.
+    /// behaving equivalent to `(...rest: any[]) => any` (which uses the unsafe `any` type) when called directly. \
     /// It also accepts classes or plain objects that happen to possess all properties of the `Function` class,
     /// which is likewise a potential source of confusion.
     ///
     /// As such, it is almost always preferable to explicitly specify function parameters and return types where possible. \
     /// When a generic "catch-all" callback type is required, one of the following can be used instead:
     /// - `() => void`: A function that accepts no parameters and whose return value is ignored
-    /// - `(...args: never) => unknown`: A "top type" for functions that can be assigned any function type,
+    /// - `(...args: never) => unknown`: A "top type" for functions that can be _assigned_ any function type,
     ///    but can't be called directly
     ///
     /// ### Disallow the misleading empty object type `{}`
-    /// In TypeScript, the type `{}` _doesn't_ represent an empty object (as many new to the language may assume).
-    /// It actually accepts any non-nullish value, _including non-object primitives_.
-    /// The following TypeScript example is thus perfectly valid:
+    /// `{}`, also known as the "empty object" type, _doesn't_ actually represent an empty object (despite what many new to TypeScript may assume). \
+    /// Due to TypeScript's type system being _structural_ instead of nominal, it actually accepts _any non-nullish value_,
+    // including non-object primitives like numbers and strings[^1]. \
+    /// The following example is thus perfectly valid TypeScript:
     ///
-    /// ```ts,expect_diagnostic
+    /// ```ts,ignore
     /// const n: {} = 0;
     /// ```
     ///
     /// Often, developers writing `{}` actually mean one of the following:
     /// - `object`: Represents any object value
     /// - `unknown`: Represents any value at all, including `null` and `undefined`
-    /// - `{ [k: string]: never }` or `Record<string, never>`: Represent object types that disallow property access
+    /// - `{ [k: keyof any]: never }` or `Record<keyof any, never>`: Represent object types whose properties are all of type `never` (and cannot be used)
+    /// - `{ [myUniqueInternalSymbol]?: never }`: Represents an object type whose only "property" is an unexported `unique symbol`, thereby forcing external consumers to omit it[^2]. \
+    ///   This can be used as a type guard for use in `extends` clauses or a type annotation for use in [excess property checks](https://www.typescriptlang.org/docs/handbook/2/objects.html#excess-property-checks),
+    ///   both with their own respective use cases and pitfalls.
     ///
     /// To avoid confusion, this rule forbids the use of the type `{}`, except in two situations:
     ///
@@ -79,7 +83,8 @@ declare_lint_rule! {
     /// In this last case, you can also use the `NonNullable` utility type to the same effect:
     ///
     /// ```ts
-    /// type NonNullableMyType = NonNullable<MyType>;
+    /// // equivalent to `{}`
+    /// type AnythingNotNullish = NonNullable<unknown>;
     /// ```
     ///
     /// ## Examples
@@ -149,11 +154,21 @@ declare_lint_rule! {
     /// type notNull<T> = T & {};
     /// ```
     ///
+    /// [^1]: This is the exact same mechanism that allows passing `{ foo: number, bar: string }`
+    /// to a function expecting `{ bar: string }`.
+    /// Specifying `{}` doesn't restrict compatible types to ones with _exactly_ 0 properties;
+    /// it simply requires they have _at least_ 0 properties.
+    /// [^2]: In this case, you'd write `declare const myUniqueInternalSymbol: unique symbol` somewhere in the same file.
     pub NoBannedTypes {
         version: "1.0.0",
         name: "noBannedTypes",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("ban-types").same()],
+        sources: &[
+            RuleSource::EslintTypeScript("ban-types").same(),
+            RuleSource::EslintTypeScript("no-empty-object-type").inspired(),
+            RuleSource::EslintTypeScript("no-wrapper-object-types").inspired(),
+            RuleSource::EslintTypeScript("no-unsafe-function-type").inspired(),
+        ],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Safe,
@@ -318,11 +333,14 @@ impl BannedType {
             }
             Self::Object | Self::EmptyObject => {
                 markup! {
-                    "'"<Emphasis>{ self.to_string() }</Emphasis>"' accepts "<Emphasis>"any"</Emphasis>" non-nullable value, including non-object primitives like '123' and 'true'."
+                    "'"<Emphasis>{ self.to_string() }</Emphasis>"' accepts "<Emphasis>"any"</Emphasis>" non-nullish value, including non-object primitives like "
+                    "'"<Emphasis>"123"</Emphasis>"' and '"<Emphasis>"true"</Emphasis>"'."
                     "\n- If you want a type meaning \"any arbitrary object\", use '"<Emphasis>"object"</Emphasis>"' instead."
                     "\n- If you want a type meaning \"any value\", use '"<Emphasis>"unknown"</Emphasis>"' instead."
-                    "\n- If you want a type meaning \"an object without any properties\", use "
-                    "'"<Emphasis>"{ [k: string]: never }"</Emphasis>"' or '"<Emphasis>"Record<string, never>"</Emphasis>"' instead."
+                    "\n- If you want a type meaning \"an object whose properties cannot be used\", use "
+                    "'"<Emphasis>"{ [k: keyof any]: never }"</Emphasis>"' or '"<Emphasis>"Record<keyof any, never>"</Emphasis>"' instead."
+                    "\n- If you want a type meaning \"an object that cannot contain any properties whatsoever\", use "
+                    "'"<Emphasis>"{ [uniqueSymbol]?: never }"</Emphasis>"' with an unexported "<Emphasis>"unique symbol"</Emphasis>" in the same file."
                 }.to_owned()
             }
         }

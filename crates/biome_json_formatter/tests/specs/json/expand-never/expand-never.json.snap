@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: json/expand-never/expand-never.json
 ---
+
 # Input
 
 ```json
@@ -32,6 +33,7 @@ Line width: 80
 Trailing commas: None
 Expand: Auto
 Bracket spacing: true
+Trailing newline: true
 -----
 
 ```json
@@ -44,6 +46,7 @@ Bracket spacing: true
 		}
 	}
 }
+
 ```
 
 ## Output 1
@@ -56,8 +59,10 @@ Line width: 80
 Trailing commas: None
 Expand: Never
 Bracket spacing: true
+Trailing newline: true
 -----
 
 ```json
 { "foo": { "bar": { "baz": { "qux": true } } } }
+
 ```

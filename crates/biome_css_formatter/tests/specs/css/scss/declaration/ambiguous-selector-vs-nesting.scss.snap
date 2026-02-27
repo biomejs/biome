@@ -1,0 +1,50 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/scss/declaration/ambiguous-selector-vs-nesting.scss
+---
+
+# Input
+
+```scss
+.test{
+  label:hover{color:red;}
+  font:bold{color:blue;}
+  font:12px{family:sans-serif;}
+  font: bold{family:serif;}
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+Trailing newline: true
+-----
+
+```scss
+.test {
+	label:hover {
+		color: red;
+	}
+	font:bold {
+		color: blue;
+	}
+	font: 12px {
+		family: sans-serif;
+	}
+	font: bold {
+		family: serif;
+	}
+}
+
+```

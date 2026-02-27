@@ -36,12 +36,12 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseFind {
-        version: "next",
+        version: "2.3.6",
         name: "useFind",
         language: "js",
         recommended: false,
         sources: &[RuleSource::EslintTypeScript("prefer-find").same()],
-        domains: &[RuleDomain::Project],
+        domains: &[RuleDomain::Types],
     }
 }
 

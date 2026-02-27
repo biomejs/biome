@@ -1,0 +1,33 @@
+[package]
+name                 = "biome_configuration_macros"
+version              = "0.0.1"
+authors.workspace    = true
+edition.workspace    = true
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+
+[lib]
+proc-macro = true
+
+[dependencies]
+biome_analyze         = { workspace = true }
+biome_css_analyze     = { workspace = true }
+biome_css_syntax      = { workspace = true }
+biome_graphql_analyze = { workspace = true }
+biome_graphql_syntax  = { workspace = true }
+biome_html_analyze    = { workspace = true }
+biome_html_syntax     = { workspace = true }
+biome_js_analyze      = { workspace = true }
+biome_js_syntax       = { workspace = true }
+biome_json_analyze    = { workspace = true }
+biome_json_syntax     = { workspace = true }
+biome_string_case     = { workspace = true }
+proc-macro2           = { workspace = true }
+pulldown-cmark        = { version = "0.13.0" }
+quote                 = { workspace = true }
+
+[lints]
+workspace = true

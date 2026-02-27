@@ -1,4 +1,3 @@
-#![expect(clippy::mutable_key_type)]
 use crate::diagnostics::LspError;
 use crate::session::Session;
 use crate::utils;
@@ -25,7 +24,7 @@ use biome_service::workspace::{
 use std::borrow::Cow;
 use std::collections::HashMap;
 use std::ops::Sub;
-use tower_lsp_server::lsp_types::{
+use tower_lsp_server::ls_types::{
     self as lsp, CodeActionKind, CodeActionOrCommand, CodeActionParams, CodeActionResponse, Uri,
 };
 use tracing::{debug, info};
@@ -79,6 +78,12 @@ pub(crate) fn code_actions(
         project_key: doc.project_key,
         path: path.clone(),
         features,
+        inline_config: session.inline_config(),
+        skip_ignore_check: false,
+        not_requested_features: FeaturesBuilder::new()
+            .with_search()
+            .with_formatter()
+            .build(),
     })?;
 
     if !file_features.supports_lint() && !file_features.supports_assist() {
@@ -163,6 +168,7 @@ pub(crate) fn code_actions(
             .map(AnalyzerSelector::from)
             .collect(),
         categories: categories.build(),
+        inline_config: session.inline_config(),
     }) {
         Ok(result) => result,
         Err(err) => {
@@ -316,6 +322,9 @@ fn fix_all(
             .with_linter()
             .with_assist()
             .build(),
+        inline_config: session.inline_config(),
+        skip_ignore_check: false,
+        not_requested_features: FeaturesBuilder::new().with_search().build(),
     })?;
     let should_format = file_features.supports_format();
 
@@ -354,6 +363,7 @@ fn fix_all(
         enabled_rules: vec![],
         suppression_reason: None,
         rule_categories: categories.build(),
+        inline_config: session.inline_config(),
     })?;
     let output = if file_features.supports_full_html_support() {
         fixed.code

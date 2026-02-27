@@ -88,3 +88,8 @@ class Sample {
 		return true;
 	}
 }
+
+async function* yieldWithoutStar() {
+	yield 1;
+	yield 2;
+}

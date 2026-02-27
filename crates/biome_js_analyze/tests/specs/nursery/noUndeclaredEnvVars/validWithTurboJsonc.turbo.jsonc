@@ -1,0 +1,10 @@
+{
+	// Global environment variables
+	"globalEnv": ["JSONC_ACME_TOKEN", "JSONC_ACME_APP_ID", "JSONC_FOO_*"],
+	"tasks": {
+		"build": {
+			// Task-specific environment variables
+			"env": ["JSONC_BUILD_VAR", "JSONC_BUILD_OUTPUT"]
+		}
+	}
+}

@@ -33,6 +33,19 @@ pub const CONFIG_DISABLED_FORMATTER_JSONC: &str = r#"{
 }
 "#;
 
+pub const CONFIG_FILES_INCLUDES_EXCLUDES_STDIN_PATH: &str = r#"{
+  "files": {
+    "includes": [
+      "apps/**/*.{ts,tsx}",
+      "packages/**/*.{ts,tsx}"
+    ]
+  },
+  "formatter": {
+    "enabled": true
+  }
+}
+"#;
+
 pub const CONFIG_ALL_FIELDS: &str = r#"{
   "formatter": {
     "enabled": true,

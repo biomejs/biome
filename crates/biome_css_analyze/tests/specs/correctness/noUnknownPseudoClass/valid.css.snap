@@ -45,5 +45,8 @@ a:defined { }
 ::-webkit-scrollbar-button:hover {}
 dialog:open {}
 custom-selector:state(checked) {}
+:active-view-transition * { transition-duration: 0s; }
 
 ```
+
+_Note: The parser emitted 2 diagnostics which are not shown here._

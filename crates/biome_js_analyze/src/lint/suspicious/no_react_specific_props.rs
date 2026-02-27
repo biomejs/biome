@@ -32,7 +32,7 @@ declare_lint_rule! {
         version: "1.7.2",
         name: "noReactSpecificProps",
         language: "js",
-        sources: &[RuleSource::EslintSolid("no-react-specific-props").same()],
+        sources: &[RuleSource::EslintSolid("no-react-specific-props").same(), RuleSource::EslintQwik("no-react-props").same()],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Safe,
