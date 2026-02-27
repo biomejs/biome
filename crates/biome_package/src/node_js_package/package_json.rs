@@ -312,9 +312,10 @@ impl DeserializationVisitor for PackageJsonVisitor {
                 // It only takes effect if "types" has not been seen yet.
                 "typings" => {
                     if result.types.is_none()
-                        && let Some(value) = Deserializable::deserialize(ctx, &value, &key_text) {
-                            result.types = Some(value);
-                        }
+                        && let Some(value) = Deserializable::deserialize(ctx, &value, &key_text)
+                    {
+                        result.types = Some(value);
+                    }
                 }
                 "main" => {
                     if let Some(value) = Deserializable::deserialize(ctx, &value, &key_text) {
