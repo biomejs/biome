@@ -6268,7 +6268,7 @@
 					]
 				},
 				"useNullishCoalescing": {
-					"description": "Enforce using nullish coalescing operator (??) instead of logical or (||).\nSee https://biomejs.dev/linter/rules/use-nullish-coalescing",
+					"description": "Enforce using the nullish coalescing operator (??) instead of logical or (||).\nSee https://biomejs.dev/linter/rules/use-nullish-coalescing",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseNullishCoalescingConfiguration" },
 						{ "type": "null" }
