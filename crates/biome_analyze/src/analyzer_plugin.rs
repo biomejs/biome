@@ -38,7 +38,7 @@ pub enum PluginTargetLanguage {
 }
 
 /// Cached result of checking whether a plugin applies to the current file.
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 enum FileApplicability {
     /// Not yet checked for this file.
     Unknown,
@@ -121,17 +121,16 @@ where
             return;
         }
 
-        match self.applies_to_file {
-            FileApplicability::NotApplicable => return,
-            FileApplicability::Unknown => {
-                if self.plugin.applies_to_file(&ctx.options.file_path) {
-                    self.applies_to_file = FileApplicability::Applicable;
-                } else {
-                    self.applies_to_file = FileApplicability::NotApplicable;
-                    return;
-                }
-            }
-            FileApplicability::Applicable => {}
+        if self.applies_to_file == FileApplicability::Unknown {
+            self.applies_to_file = if self.plugin.applies_to_file(&ctx.options.file_path) {
+                FileApplicability::Applicable
+            } else {
+                FileApplicability::NotApplicable
+            };
+        }
+
+        if self.applies_to_file == FileApplicability::NotApplicable {
+            return;
         }
 
         let rule_timer = profiling::start_plugin_rule("plugin");
