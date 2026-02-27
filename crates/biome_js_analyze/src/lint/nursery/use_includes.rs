@@ -457,8 +457,6 @@ fn collect_leading_trivia_for_indexof(
     if let Some(trivia) = binary_expression.syntax().first_leading_trivia() {
         leading_trivia.extend(trivia.pieces());
     }
-    println!("Leading trivia collected: {:?}", leading_trivia);
-
     leading_trivia
 }
 
@@ -486,8 +484,6 @@ fn collect_trailing_trivia_for_indexof(
     if let Some(trivia) = binary_expression.syntax().last_trailing_trivia() {
         trailing_trivia.extend(trivia.pieces());
     }
-    println!("Trailing trivia collected: {:?}", trailing_trivia);
-
     trailing_trivia
 }
 
@@ -502,7 +498,6 @@ fn collect_leading_trivia_for_regextest(
     if let Some(trivia) = first_arg.syntax().first_leading_trivia() {
         leading_trivia.extend(trivia.pieces());
     }
-    println!("Leading trivia collected: {:?}", leading_trivia);
     leading_trivia
 }
 
@@ -531,6 +526,5 @@ fn collect_trailing_trivia_for_regextest(
     {
         trailing_trivia.extend(trivia.pieces());
     }
-    println!("Trailing trivia collected: {:?}", trailing_trivia);
     trailing_trivia
 }
