@@ -978,7 +978,21 @@ match these patterns.
 	 */
 	plugins?: Plugins;
 }
-export type PluginConfiguration = string;
+/**
+	* Configuration for a single plugin entry.
+
+Can be either a plain path string or an object with path and options:
+
+```json
+{
+  "plugins": [
+    "simple-plugin.grit",
+    { "path": "scoped-plugin.grit", "includes": ["src/**/*.ts"] }
+  ]
+}
+``` 
+	 */
+export type PluginConfiguration = string | PluginWithOptions;
 export type VcsClientKind = "git";
 /**
  * A list of rules that belong to this group
@@ -1189,6 +1203,20 @@ export interface OverrideLinterConfiguration {
 	 * List of rules
 	 */
 	rules?: Rules;
+}
+/**
+ * Plugin path with additional options.
+ */
+export interface PluginWithOptions {
+	/**
+	* A list of glob patterns. The plugin will only run on files matching
+these patterns. Use negated globs (e.g., `!**/*.test.ts`) for exclusions. 
+	 */
+	includes?: NormalizedGlob[];
+	/**
+	 * The path to the plugin.
+	 */
+	path: string;
 }
 export type NoDuplicateClassesConfiguration =
 	| RuleAssistPlainConfiguration

@@ -209,7 +209,8 @@ mod tests {
         );
 
         let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;
-        let plugin = Arc::new(AnalyzerJsPlugin::load(fs.clone(), "/plugin.js".into(), None).unwrap());
+        let plugin =
+            Arc::new(AnalyzerJsPlugin::load(fs.clone(), "/plugin.js".into(), None).unwrap());
 
         let worker1 = {
             let plugin = plugin.clone();
