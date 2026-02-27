@@ -454,7 +454,9 @@ fn is_line_start_within_indent(p: &MarkdownParser, max_indent: usize) -> bool {
 
     let mut indent = source[virtual_start..start]
         .chars()
-        .fold(0usize, |count, c| count + if c == '\t' { TAB_STOP_SPACES } else { 1 });
+        .fold(0usize, |count, c| {
+            count + if c == '\t' { TAB_STOP_SPACES } else { 1 }
+        });
 
     if p.state().virtual_line_start.is_none() && p.state().list_item_required_indent > 0 {
         indent = indent.saturating_sub(p.state().list_item_required_indent);
