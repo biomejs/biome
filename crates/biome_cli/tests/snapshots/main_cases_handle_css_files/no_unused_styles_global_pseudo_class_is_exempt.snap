@@ -2,16 +2,19 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
-## `input.css`
+## `styles.css`
 
 ```css
-html {
+:global(.reset) {
+  margin: 0;
 }
-
+:global(.base) {
+  padding: 0;
+}
 ```
 
 # Emitted Messages
 
 ```block
-Formatted 1 file in <TIME>. Fixed 1 file.
+Checked 1 file in <TIME>. No fixes applied.
 ```

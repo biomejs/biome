@@ -1,0 +1,97 @@
+/* should not generate diagnostics */
+
+/* ── Basic: referenced via className ──────────────────────────────────────── */
+
+/* .button is referenced in valid.jsx via className="button" */
+.button {
+	color: blue;
+}
+
+/* .card is also referenced */
+.card {
+	padding: 1rem;
+}
+
+/* ── Descendant combinator: .parent .child — both classes referenced ──────── */
+
+.parent .child {
+	color: red;
+}
+
+/* ── Child combinator: .list > .item — both referenced ───────────────────── */
+
+.list > .item {
+	padding: 4px;
+}
+
+/* ── Adjacent sibling: .alpha + .beta — both referenced ──────────────────── */
+
+.alpha + .beta {
+	margin-top: 8px;
+}
+
+/* ── Compound selector: .btn.active — both referenced ────────────────────── */
+
+.btn.active {
+	background: blue;
+}
+
+/* ── Selector list: .foo, .bar — both referenced ─────────────────────────── */
+
+.foo,
+.bar {
+	margin: 0;
+}
+
+/* ── Element-qualified: div.container — .container referenced ─────────────── */
+
+div.container {
+	max-width: 1200px;
+}
+
+/* ── @media at-rule: .mobile inside media query — referenced ─────────────── */
+
+@media (max-width: 768px) {
+	.mobile {
+		display: block;
+	}
+}
+
+/* ── @layer at-rule: .layered inside @layer — referenced ─────────────────── */
+
+@layer utilities {
+	.layered {
+		display: flex;
+	}
+}
+
+/* ── :is() pseudo: .alert, .warning inside :is() — both referenced ───────── */
+
+:is(.alert, .warning) {
+	border: 1px solid;
+}
+
+/* ── :where() pseudo: .emphasis inside :where() — referenced ─────────────── */
+
+:where(.emphasis) {
+	font-style: italic;
+}
+
+/* ── :not() pseudo: .visible inside :not() — referenced ──────────────────── */
+
+:not(.visible) {
+	display: none;
+}
+
+/* ── Pseudo-element: .btn::before — .btn is referenced ───────────────────── */
+
+.btn::before {
+	content: "";
+}
+
+/* ── State pseudo-class: .link:hover — .link is referenced ───────────────── */
+
+.link:hover {
+	text-decoration: underline;
+}
+

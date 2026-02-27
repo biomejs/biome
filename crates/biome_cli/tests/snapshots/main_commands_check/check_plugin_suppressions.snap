@@ -30,14 +30,13 @@ language css
 
 ```css
 .report-this-error {
-    z-index: 1;
+  z-index: 1;
 }
 
 .dont-report-this-error-please {
-    /* biome-ignore lint/plugin/noManualZIndex: Should not report */
-    z-index: 2;
+  /* biome-ignore lint/plugin/noManualZIndex: Should not report */
+  z-index: 2;
 }
-
 ```
 
 # Termination Message

@@ -3,11 +3,13 @@ use crate::settings::ModuleGraphResolutionKind;
 use crate::test_utils::setup_workspace_and_open_project;
 use biome_configuration::{
     FormatterConfiguration, JsConfiguration,
+    analyzer::AnalyzerSelector,
     javascript::{JsFormatterConfiguration, JsParserConfiguration},
 };
 use biome_formatter::{IndentStyle, LineWidth};
 use biome_fs::MemoryFileSystem;
 use biome_rowan::TextSize;
+use std::str::FromStr;
 
 #[test]
 fn commonjs_file_rejects_import_statement() {
@@ -629,4 +631,475 @@ const Bar = graphql(`
     	}
     `);
     ");
+}
+
+// ── noUndeclaredStyles ────────────────────────────────────────────────────────
+
+/// A class used in `class="..."` that has no matching `.foo {}` in any `<style>`
+/// block should be flagged.
+#[test]
+fn no_undeclared_styles_reports_unknown_class() {
+    const FILE_CONTENT: &str = r#"<style>.card { border: 1px solid; }</style>
+<div class="header">Content</div>"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8PathBuf::from("/project/index.html"),
+        FILE_CONTENT.as_bytes(),
+    );
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/index.html"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            path: BiomePath::new("/project/index.html"),
+            only: vec![AnalyzerSelector::from_str("lint/nursery/noUndeclaredStyles").unwrap()],
+            skip: vec![],
+            enabled_rules: vec![],
+            project_key,
+            categories: Default::default(),
+            pull_code_actions: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    assert_eq!(
+        result.diagnostics.len(),
+        1,
+        "Expected one diagnostic for undeclared class 'header'"
+    );
+    assert!(
+        format!("{:?}", result.diagnostics[0]).contains("header"),
+        "Diagnostic should mention 'header'"
+    );
+}
+
+/// When every class used in `class="..."` is defined in a `<style>` block,
+/// no diagnostics should be emitted.
+#[test]
+fn no_undeclared_styles_passes_when_class_is_defined() {
+    const FILE_CONTENT: &str = r#"<style>.card { border: 1px solid; }</style>
+<div class="card">Content</div>"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8PathBuf::from("/project/index.html"),
+        FILE_CONTENT.as_bytes(),
+    );
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/index.html"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            path: BiomePath::new("/project/index.html"),
+            only: vec![AnalyzerSelector::from_str("lint/nursery/noUndeclaredStyles").unwrap()],
+            skip: vec![],
+            enabled_rules: vec![],
+            project_key,
+            categories: Default::default(),
+            pull_code_actions: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    assert!(
+        result.diagnostics.is_empty(),
+        "Expected no diagnostics when class is declared"
+    );
+}
+
+/// An HTML file with no `<style>` blocks and no linked stylesheets should
+/// never emit diagnostics, to avoid false positives on unstyled HTML.
+#[test]
+fn no_undeclared_styles_silent_without_style_info() {
+    const FILE_CONTENT: &str = r#"<div class="anything">Content</div>"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8PathBuf::from("/project/index.html"),
+        FILE_CONTENT.as_bytes(),
+    );
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/index.html"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            path: BiomePath::new("/project/index.html"),
+            only: vec![AnalyzerSelector::from_str("lint/nursery/noUndeclaredStyles").unwrap()],
+            skip: vec![],
+            enabled_rules: vec![],
+            project_key,
+            categories: Default::default(),
+            pull_code_actions: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    assert!(
+        result.diagnostics.is_empty(),
+        "Expected no diagnostics when the file has no style information"
+    );
+}
+
+/// Multiple classes in one `class` attribute: only undeclared ones flagged.
+#[test]
+fn no_undeclared_styles_reports_only_undeclared_in_multi_class() {
+    const FILE_CONTENT: &str = r#"<style>.card { border: 1px solid; } .title { font-weight: bold; }</style>
+<div class="card header title footer">Content</div>"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8PathBuf::from("/project/index.html"),
+        FILE_CONTENT.as_bytes(),
+    );
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/index.html"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            path: BiomePath::new("/project/index.html"),
+            only: vec![AnalyzerSelector::from_str("lint/nursery/noUndeclaredStyles").unwrap()],
+            skip: vec![],
+            enabled_rules: vec![],
+            project_key,
+            categories: Default::default(),
+            pull_code_actions: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    // "card" and "title" are declared; "header" and "footer" are not.
+    assert_eq!(
+        result.diagnostics.len(),
+        2,
+        "Expected diagnostics for 'header' and 'footer' only"
+    );
+}
+
+// ── noUnusedStyles ────────────────────────────────────────────────────────────
+
+/// A CSS class that no JS/HTML file imports or references should be flagged.
+#[test]
+fn no_unused_styles_reports_unreferenced_class() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8PathBuf::from("/project/styles.css"),
+        b".unused { color: red; }",
+    );
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/styles.css"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            path: BiomePath::new("/project/styles.css"),
+            only: vec![AnalyzerSelector::from_str("lint/nursery/noUnusedStyles").unwrap()],
+            skip: vec![],
+            enabled_rules: vec![],
+            project_key,
+            categories: Default::default(),
+            pull_code_actions: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    assert_eq!(
+        result.diagnostics.len(),
+        1,
+        "Expected one diagnostic for unreferenced class 'unused'"
+    );
+    assert!(
+        format!("{:?}", result.diagnostics[0]).contains("unused"),
+        "Diagnostic should mention 'unused'"
+    );
+}
+
+/// A CSS class that is referenced via `className` in a JSX file that imports
+/// the stylesheet should not be flagged.
+#[test]
+fn no_unused_styles_passes_when_class_is_referenced_in_jsx() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8PathBuf::from("/project/styles.css"),
+        b".button { color: blue; }",
+    );
+    fs.insert(
+        Utf8PathBuf::from("/project/App.jsx"),
+        b"import \"./styles.css\";\nexport default () => <div className=\"button\" />;",
+    );
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/styles.css"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            path: BiomePath::new("/project/styles.css"),
+            only: vec![AnalyzerSelector::from_str("lint/nursery/noUnusedStyles").unwrap()],
+            skip: vec![],
+            enabled_rules: vec![],
+            project_key,
+            categories: Default::default(),
+            pull_code_actions: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    assert!(
+        result.diagnostics.is_empty(),
+        "Expected no diagnostics when class is referenced in importing JSX"
+    );
+}
+
+/// Only unused classes should be flagged; referenced ones should pass.
+#[test]
+fn no_unused_styles_reports_only_unreferenced_classes() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8PathBuf::from("/project/styles.css"),
+        b".used { color: green; } .orphan { color: red; }",
+    );
+    fs.insert(
+        Utf8PathBuf::from("/project/App.jsx"),
+        b"import \"./styles.css\";\nexport default () => <div className=\"used\" />;",
+    );
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/styles.css"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            path: BiomePath::new("/project/styles.css"),
+            only: vec![AnalyzerSelector::from_str("lint/nursery/noUnusedStyles").unwrap()],
+            skip: vec![],
+            enabled_rules: vec![],
+            project_key,
+            categories: Default::default(),
+            pull_code_actions: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    assert_eq!(
+        result.diagnostics.len(),
+        1,
+        "Expected one diagnostic for unreferenced class 'orphan'"
+    );
+    assert!(
+        format!("{:?}", result.diagnostics[0]).contains("orphan"),
+        "Diagnostic should mention 'orphan'"
+    );
+}
+
+/// A CSS class referenced via a transitive CSS @import chain should not be
+/// flagged. If app.jsx imports theme.css which @imports base.css, classes in
+/// base.css that are used in app.jsx are considered referenced.
+#[test]
+fn no_unused_styles_passes_with_transitive_css_import() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8PathBuf::from("/project/base.css"),
+        b".base { box-sizing: border-box; }",
+    );
+    fs.insert(
+        Utf8PathBuf::from("/project/theme.css"),
+        b"@import \"./base.css\"; .theme { background: white; }",
+    );
+    fs.insert(
+        Utf8PathBuf::from("/project/App.jsx"),
+        b"import \"./theme.css\";\nexport default () => <div className=\"base theme\" />;",
+    );
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+
+    // Open all files so that the module graph is fully populated.
+    for path in [
+        "/project/App.jsx",
+        "/project/theme.css",
+        "/project/base.css",
+    ] {
+        workspace
+            .open_file(OpenFileParams {
+                project_key,
+                path: BiomePath::new(path),
+                content: FileContent::FromServer,
+                document_file_source: None,
+                persist_node_cache: false,
+                inline_config: None,
+            })
+            .unwrap();
+    }
+
+    for path in ["/project/base.css", "/project/theme.css"] {
+        let result = workspace
+            .pull_diagnostics(PullDiagnosticsParams {
+                path: BiomePath::new(path),
+                only: vec![AnalyzerSelector::from_str("lint/nursery/noUnusedStyles").unwrap()],
+                skip: vec![],
+                enabled_rules: vec![],
+                project_key,
+                categories: Default::default(),
+                pull_code_actions: false,
+                inline_config: None,
+            })
+            .unwrap();
+
+        assert!(
+            result.diagnostics.is_empty(),
+            "Expected no diagnostics for {path} — all classes are transitively referenced"
+        );
+    }
 }

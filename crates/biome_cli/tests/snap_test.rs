@@ -1,6 +1,10 @@
 use biome_cli::CliDiagnostic;
 use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::{BufferConsole, Markup, markup};
+use biome_css_formatter::context::CssFormatOptions;
+use biome_css_formatter::format_node as format_css_node;
+use biome_css_parser::{CssParserOptions, parse_css};
+use biome_css_syntax::CssFileSource;
 use biome_diagnostics::termcolor::NoColor;
 use biome_diagnostics::{Error, print_diagnostic_to_string};
 use biome_formatter::{IndentStyle, IndentWidth};
@@ -96,12 +100,37 @@ impl CliSnapshot {
                     redact_snapshot(file_content).unwrap_or(String::new().into());
 
                 let _ = write!(content, "## `{redacted_name}`\n\n");
-                let _ = write!(content, "```{extension}");
-                content.push('\n');
-                content.push_str(&redacted_content);
-                content.push('\n');
-                content.push_str("```");
-                content.push_str("\n\n")
+
+                if extension == "css" {
+                    // Format CSS with the same pipeline used for biome.json.
+                    let parsed = parse_css(
+                        &redacted_content,
+                        CssFileSource::css(),
+                        CssParserOptions::default(),
+                    );
+                    let formatted = format_css_node(
+                        CssFormatOptions::default()
+                            .with_indent_style(IndentStyle::Space)
+                            .with_indent_width(IndentWidth::default()),
+                        &parsed.syntax(),
+                    )
+                    .expect("formatted CSS")
+                    .print()
+                    .expect("printed CSS");
+
+                    content.push_str("```css");
+                    content.push('\n');
+                    content.push_str(formatted.as_code());
+                    content.push_str("```");
+                    content.push_str("\n\n");
+                } else {
+                    let _ = write!(content, "```{extension}");
+                    content.push('\n');
+                    content.push_str(&redacted_content);
+                    content.push('\n');
+                    content.push_str("```");
+                    content.push_str("\n\n");
+                }
             }
         }
 

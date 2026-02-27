@@ -17,7 +17,6 @@ expression: redactor(content)
 ```css
 html {
 }
-
 ```
 
 ## `input.js`

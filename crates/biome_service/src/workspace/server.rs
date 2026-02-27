@@ -1015,15 +1015,38 @@ impl WorkspaceServer {
                         &[(path, js_root)],
                         infer_types,
                     )
-                } else if let (Some(css_root), Some(services)) = (
-                    SendNode::into_language_root::<AnyCssRoot>(root.clone()),
-                    services.as_css_services(),
-                ) {
+                } else if let Some(css_root) =
+                    SendNode::into_language_root::<AnyCssRoot>(root.clone())
+                {
+                    let semantic_model = services
+                        .as_css_services()
+                        .and_then(|s| s.semantic_model.as_ref());
                     self.module_graph.update_graph_for_css_paths(
                         self.fs.as_ref(),
                         &self.project_layout,
                         &[(path, css_root)],
-                        services.semantic_model.as_ref(),
+                        semantic_model,
+                    )
+                } else if let Some(html_root) =
+                    SendNode::into_language_root::<HtmlRoot>(root.clone())
+                {
+                    // Collect embedded CSS roots from the stored document's snippets.
+                    let embedded_css_roots: Vec<AnyCssRoot> = self
+                        .documents
+                        .pin()
+                        .get(path.as_path())
+                        .map(|doc| {
+                            doc.embedded_snippets
+                                .iter()
+                                .filter_map(|s| s.as_css_embedded_snippet())
+                                .map(|s| s.parse.tree())
+                                .collect()
+                        })
+                        .unwrap_or_default();
+                    self.module_graph.update_graph_for_html_paths(
+                        self.fs.as_ref(),
+                        &self.project_layout,
+                        &[(path, html_root, embedded_css_roots)],
                     )
                 } else {
                     Default::default()
@@ -1704,9 +1727,9 @@ impl Workspace for WorkspaceServer {
             pull_code_actions,
             inline_config,
         } = params;
-        let settings = self
+        let (working_directory, settings) = self
             .projects
-            .get_settings_based_on_path(project_key, &path)
+            .get_settings_and_wd_based_on_path(project_key, &path)
             .ok_or_else(WorkspaceError::no_project)?;
         let (parse, embedded_snippets, services) =
             self.get_parse_with_snippets_and_services(&path)?;
@@ -1745,6 +1768,7 @@ impl Workspace for WorkspaceServer {
                 diagnostic_offset: None,
                 document_services: &services,
                 snippet_services: None,
+                working_directory: Some(working_directory.as_path()),
             });
 
             let LintResults {
@@ -1779,6 +1803,7 @@ impl Workspace for WorkspaceServer {
                     diagnostic_offset: Some(embedded_node.content_offset()),
                     document_services: &services,
                     snippet_services: Some(snippet_services),
+                    working_directory: Some(working_directory.as_path()),
                 });
 
                 diagnostics.extend(results.diagnostics);
@@ -1838,9 +1863,9 @@ impl Workspace for WorkspaceServer {
             enabled_rules,
             inline_config,
         } = params;
-        let settings = self
+        let (working_directory, settings) = self
             .projects
-            .get_settings_based_on_path(project_key, &path)
+            .get_settings_and_wd_based_on_path(project_key, &path)
             .ok_or_else(WorkspaceError::no_project)?;
         let (parse, embedded_snippets, services) =
             self.get_parse_with_snippets_and_services(&path)?;
@@ -1876,6 +1901,7 @@ impl Workspace for WorkspaceServer {
                 plugins: plugins.clone(),
                 diagnostic_offset: None,
                 document_services: &services,
+                working_directory: Some(working_directory.as_path()),
             });
 
             for embedded_node in embedded_snippets {
@@ -1904,6 +1930,7 @@ impl Workspace for WorkspaceServer {
                     plugins: plugins.clone(),
                     diagnostic_offset: Some(embedded_node.content_offset()),
                     document_services: &services,
+                    working_directory: Some(working_directory.as_path()),
                 });
 
                 final_result.diagnostics.extend(snippet_result.diagnostics);
@@ -1943,9 +1970,9 @@ impl Workspace for WorkspaceServer {
             categories,
             inline_config,
         } = params;
-        let settings = self
+        let (working_directory, settings) = self
             .projects
-            .get_settings_based_on_path(project_key, &path)
+            .get_settings_and_wd_based_on_path(project_key, &path)
             .ok_or_else(WorkspaceError::no_project)?;
         let capabilities =
             self.get_file_capabilities(&path, settings.experimental_full_html_support_enabled());
@@ -1976,6 +2003,7 @@ impl Workspace for WorkspaceServer {
             categories,
             action_offset: None,
             document_services: &services,
+            working_directory: Some(working_directory.as_path()),
         });
 
         for embedded_snippet in embedded_snippets {
@@ -2003,6 +2031,7 @@ impl Workspace for WorkspaceServer {
                 categories,
                 action_offset: Some(embedded_snippet.content_offset()),
                 document_services: &services,
+                working_directory: Some(working_directory.as_path()),
             });
 
             result.actions.extend(embedded_actions_result.actions);
@@ -2159,9 +2188,9 @@ impl Workspace for WorkspaceServer {
             inline_config,
         } = params;
 
-        let settings = self
+        let (working_directory, settings) = self
             .projects
-            .get_settings_based_on_path(project_key, &path)
+            .get_settings_and_wd_based_on_path(project_key, &path)
             .ok_or_else(WorkspaceError::no_project)?;
         let capabilities =
             self.get_file_capabilities(&path, settings.experimental_full_html_support_enabled());
@@ -2222,6 +2251,7 @@ impl Workspace for WorkspaceServer {
                     enabled_rules: &enabled_rules,
                     plugins: plugins.clone(),
                     document_services: &services,
+                    working_directory: Some(working_directory.as_path()),
                 })?;
 
                 actions.extend(results.actions);
@@ -2254,6 +2284,7 @@ impl Workspace for WorkspaceServer {
             enabled_rules: &enabled_rules,
             plugins: plugins.clone(),
             document_services: &services,
+            working_directory: Some(working_directory.as_path()),
         })?;
 
         actions.extend(fix_result.actions);

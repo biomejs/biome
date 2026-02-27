@@ -19,9 +19,11 @@ use biome_analyze::{
 };
 use biome_css_syntax::{CssFileSource, CssLanguage, TextRange};
 use biome_diagnostics::Error;
+use biome_module_graph::ModuleGraph;
+use biome_project_layout::ProjectLayout;
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
 use std::ops::Deref;
-use std::sync::LazyLock;
+use std::sync::{Arc, LazyLock};
 
 pub(crate) type CssRuleAction = RuleAction<CssLanguage>;
 
@@ -35,6 +37,8 @@ pub static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
 pub struct CssAnalyzerServices<'a> {
     pub semantic_model: Option<&'a biome_css_semantic::model::SemanticModel>,
     pub file_source: CssFileSource,
+    pub module_graph: Option<Arc<ModuleGraph>>,
+    pub project_layout: Option<Arc<ProjectLayout>>,
 }
 
 impl<'a> CssAnalyzerServices<'a> {
@@ -48,6 +52,16 @@ impl<'a> CssAnalyzerServices<'a> {
         semantic_model: &'a biome_css_semantic::model::SemanticModel,
     ) -> Self {
         self.semantic_model = Some(semantic_model);
+        self
+    }
+
+    pub fn with_module_graph(mut self, module_graph: Arc<ModuleGraph>) -> Self {
+        self.module_graph = Some(module_graph);
+        self
+    }
+
+    pub fn with_project_layout(mut self, project_layout: Arc<ProjectLayout>) -> Self {
+        self.project_layout = Some(project_layout);
         self
     }
 }
@@ -146,6 +160,12 @@ where
     if let Some(semantic_model) = css_services.semantic_model {
         services.insert_service(semantic_model.clone());
     }
+    if let Some(module_graph) = css_services.module_graph {
+        services.insert_service(module_graph);
+    }
+    if let Some(project_layout) = css_services.project_layout {
+        services.insert_service(project_layout);
+    }
 
     for ((phase, _), visitor) in visitors {
         analyzer.add_visitor(phase, visitor);
@@ -229,6 +249,7 @@ mod tests {
         let css_services = CssAnalyzerServices {
             semantic_model: Some(&semantic_model(&parsed.tree())),
             file_source: CssFileSource::css(),
+            ..CssAnalyzerServices::default()
         };
         analyze(
             &parsed.tree(),
@@ -286,6 +307,7 @@ mod tests {
         let css_services = CssAnalyzerServices {
             semantic_model: None,
             file_source: CssFileSource::css(),
+            ..CssAnalyzerServices::default()
         };
         analyze(
             &parsed.tree(),
@@ -337,6 +359,7 @@ a {
         let css_services = CssAnalyzerServices {
             semantic_model: Some(&semantic_model(&parsed.tree())),
             file_source: CssFileSource::css(),
+            ..CssAnalyzerServices::default()
         };
         analyze(
             &parsed.tree(),
@@ -384,6 +407,7 @@ a {
         let css_services = CssAnalyzerServices {
             semantic_model: Some(&semantic_model(&parsed.tree())),
             file_source: CssFileSource::css(),
+            ..CssAnalyzerServices::default()
         };
         analyze(
             &parsed.tree(),
@@ -428,6 +452,7 @@ a {
         let css_services = CssAnalyzerServices {
             semantic_model: Some(&semantic_model(&parsed.tree())),
             file_source: CssFileSource::css(),
+            ..CssAnalyzerServices::default()
         };
         analyze(
             &parsed.tree(),

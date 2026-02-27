@@ -1,0 +1,70 @@
+/* Classes defined here but never imported or referenced anywhere. */
+
+/* ── Basic unused ─────────────────────────────────────────────────────────── */
+
+.unused-class {
+	color: red;
+}
+
+.also-unused {
+	font-size: 2rem;
+}
+
+/* ── Descendant combinator: both .ghost-parent and .ghost-child are unused ── */
+
+.ghost-parent .ghost-child {
+	opacity: 0;
+}
+
+/* ── Child combinator: both .orphan-list and .orphan-item are unused ─────── */
+
+.orphan-list > .orphan-item {
+	display: none;
+}
+
+/* ── Adjacent sibling: both .sib-a and .sib-b are unused ─────────────────── */
+
+.sib-a + .sib-b {
+	visibility: hidden;
+}
+
+/* ── Compound selector: both .dead and .end are unused ───────────────────── */
+
+.dead.end {
+	pointer-events: none;
+}
+
+/* ── Selector list: both .foo-unused and .bar-unused are unused ───────────── */
+
+.foo-unused,
+.bar-unused {
+	border: none;
+}
+
+/* ── @media: .tablet is never referenced ─────────────────────────────────── */
+
+@media (min-width: 768px) {
+	.tablet {
+		font-size: 1.2rem;
+	}
+}
+
+/* ── @layer: .overlay is never referenced ────────────────────────────────── */
+
+@layer components {
+	.overlay {
+		position: fixed;
+	}
+}
+
+/* ── :is(): .danger is never referenced ──────────────────────────────────── */
+
+:is(.danger) {
+	color: red;
+}
+
+/* ── :where(): .subtle is never referenced ───────────────────────────────── */
+
+:where(.subtle) {
+	opacity: 0.5;
+}
