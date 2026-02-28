@@ -1,5 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 212
 info: css/atrule/container.css
 ---
 
@@ -159,15 +160,19 @@ Trailing newline: true
 @container (150px <= WIDTH) {
 }
 
-@container scroll-state(scrolled: bottom) {  }
+@container scroll-state(scrolled: bottom) {
+}
 
-@container scroll-state(stuck: top) {  }
+@container scroll-state(stuck: top) {
+}
 
 @container not scroll-state(stuck) {
 }
 
-@container card scroll-state(scrolled: bottom) {  }
+@container card scroll-state(scrolled: bottom) {
+}
 
-@container   scroll-state(  scrolled:   bottom  )   {  }
+@container scroll-state(scrolled: bottom) {
+}
 
 ```
