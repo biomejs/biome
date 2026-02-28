@@ -275,11 +275,10 @@ fn collect_reference_identifiers(expression: AnyJsExpression, references: &mut V
         }
         AnyJsExpression::JsTemplateExpression(template_expression) => {
             for element in template_expression.elements() {
-                if let AnyJsTemplateElement::JsTemplateElement(template_element) = element {
-                    if let Ok(expression) = template_element.expression() {
+                if let AnyJsTemplateElement::JsTemplateElement(template_element) = element
+                    && let Ok(expression) = template_element.expression() {
                         collect_reference_identifiers(expression, references);
                     }
-                }
             }
         }
         AnyJsExpression::JsBinaryExpression(binary_expression) => {
