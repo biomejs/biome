@@ -84,6 +84,9 @@ impl Rule for UseImportsFirst {
                 },
             )
             .note(markup! {
+                "Scattering imports makes it harder to see the module's dependencies at a glance."
+            })
+            .note(markup! {
                 "Move all import statements before any other statements."
             }),
         )

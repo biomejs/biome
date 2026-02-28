@@ -25,6 +25,8 @@ invalid.js:3:1 lint/nursery/useImportsFirst ━━━━━━━━━━━━
     4 │ 
     5 │ import { qux } from "qux";
   
+  i Scattering imports makes it harder to see the module's dependencies at a glance.
+  
   i Move all import statements before any other statements.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -42,6 +44,8 @@ invalid.js:5:1 lint/nursery/useImportsFirst ━━━━━━━━━━━━
   > 5 │ import { qux } from "qux";
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │ 
+  
+  i Scattering imports makes it harder to see the module's dependencies at a glance.
   
   i Move all import statements before any other statements.
   
