@@ -287,6 +287,11 @@ pub(crate) fn marker_followed_by_whitespace_or_eol(p: &mut MarkdownParser) -> bo
         return true;
     }
 
+    // MD_HARD_LINE_LITERAL is spaces+newline — counts as whitespace after marker.
+    if p.at(MD_HARD_LINE_LITERAL) {
+        return true;
+    }
+
     if p.at(MD_TEXTUAL_LITERAL) {
         let text = p.cur_text();
         return text.starts_with(' ') || text.starts_with('\t');
@@ -1005,7 +1010,10 @@ fn parse_ordered_bullet(p: &mut MarkdownParser) -> (ParsedSyntax, ListItemBlankI
         while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
             p.bump(MD_TEXTUAL_LITERAL);
         }
-        p.at(NEWLINE) || p.at(T![EOF])
+        // MD_HARD_LINE_LITERAL is spaces+newline produced by the lexer when
+        // 2+ trailing spaces precede a newline (hard line break in inline
+        // context). In list-marker context it means the first line is empty.
+        p.at(NEWLINE) || p.at(T![EOF]) || p.at(MD_HARD_LINE_LITERAL)
     });
 
     // Post-marker space
@@ -1413,9 +1421,12 @@ fn handle_blank_lines(p: &mut MarkdownParser, state: &mut ListItemLoopState) -> 
         at_blank_line_after_prefix(p)
     };
 
-    // On the first line, if at a blank line at NEWLINE, fall through to
-    // handle_first_line_marker_only below.
-    if state.first_line && blank_line_after_prefix && p.at(NEWLINE) {
+    // On the first line, if at a blank line at NEWLINE (or MD_HARD_LINE_LITERAL,
+    // which is spaces+newline), fall through to handle_first_line_marker_only.
+    if state.first_line
+        && blank_line_after_prefix
+        && (p.at(NEWLINE) || p.at(MD_HARD_LINE_LITERAL))
+    {
         return (LoopAction::FallThrough, line_has_quote_prefix);
     }
 
@@ -1529,7 +1540,12 @@ fn apply_blank_line_action_with_prefix(
     }
 }
 
-/// Handle the first line when at NEWLINE with no inline content (marker-only).
+/// Handle the first line when at NEWLINE (or MD_HARD_LINE_LITERAL) with no
+/// inline content (marker-only).
+///
+/// MD_HARD_LINE_LITERAL is a combined spaces+newline token that the lexer
+/// produces when 2+ trailing spaces precede a newline. In list-marker context
+/// it semantically represents an empty first line.
 ///
 /// Returns `Break` if the item is empty, `Continue` if the next line should be
 /// processed, or `FallThrough` if this phase doesn't apply.
@@ -1537,12 +1553,17 @@ fn handle_first_line_marker_only(
     p: &mut MarkdownParser,
     state: &mut ListItemLoopState,
 ) -> LoopAction {
-    if !state.first_line || !p.at(NEWLINE) {
+    let at_hard_line = p.at(MD_HARD_LINE_LITERAL);
+    if !state.first_line || (!p.at(NEWLINE) && !at_hard_line) {
         return LoopAction::FallThrough;
     }
 
     let next_is_sibling = p.lookahead(|p| {
-        p.bump(NEWLINE);
+        if at_hard_line {
+            p.bump(MD_HARD_LINE_LITERAL);
+        } else {
+            p.bump(NEWLINE);
+        }
         if p.at_line_start() {
             at_bullet_list_item_with_base_indent(p, state.marker_indent)
                 || at_order_list_item_with_base_indent(p, state.marker_indent)
@@ -1552,8 +1573,14 @@ fn handle_first_line_marker_only(
     });
 
     // Marker-only line: emit the newline as an explicit MdNewline node.
+    // For MD_HARD_LINE_LITERAL, remap to NEWLINE — the trailing spaces are
+    // insignificant whitespace on an otherwise empty line.
     let newline_m = p.start();
-    p.bump(NEWLINE);
+    if at_hard_line {
+        p.bump_remap(NEWLINE);
+    } else {
+        p.bump(NEWLINE);
+    }
     newline_m.complete(p, MD_NEWLINE);
     state.first_line = false;
     state.last_was_blank = false;
@@ -2323,6 +2350,11 @@ fn at_blank_line_after_prefix(p: &mut MarkdownParser) -> bool {
             return p.at_blank_line();
         }
         if p.at(T![EOF]) {
+            return true;
+        }
+        // MD_HARD_LINE_LITERAL (spaces+newline) counts as a blank line
+        // in list-marker context.
+        if p.at(MD_HARD_LINE_LITERAL) {
             return true;
         }
         while p.at(MD_TEXTUAL_LITERAL) {
