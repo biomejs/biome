@@ -2385,6 +2385,11 @@ See https://biomejs.dev/linter/rules/use-global-this
 	 */
 	useGlobalThis?: UseGlobalThisConfiguration;
 	/**
+	* Enforce that all imports appear at the top of the module.
+See https://biomejs.dev/linter/rules/use-imports-first 
+	 */
+	useImportsFirst?: UseImportsFirstConfiguration;
+	/**
 	* Enforce id attribute on next/script components with inline content or dangerouslySetInnerHTML.
 See https://biomejs.dev/linter/rules/use-inline-script-id 
 	 */
@@ -4254,6 +4259,9 @@ export type UseFindConfiguration =
 export type UseGlobalThisConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseGlobalThisOptions;
+export type UseImportsFirstConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseImportsFirstOptions;
 export type UseInlineScriptIdConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseInlineScriptIdOptions;
@@ -5955,6 +5963,10 @@ export interface RuleWithUseGlobalThisOptions {
 	level: RulePlainConfiguration;
 	options?: UseGlobalThisOptions;
 }
+export interface RuleWithUseImportsFirstOptions {
+	level: RulePlainConfiguration;
+	options?: UseImportsFirstOptions;
+}
 export interface RuleWithUseInlineScriptIdOptions {
 	level: RulePlainConfiguration;
 	options?: UseInlineScriptIdOptions;
@@ -7409,6 +7421,7 @@ export type UseExpectOptions = {};
 export type UseExplicitTypeOptions = {};
 export type UseFindOptions = {};
 export type UseGlobalThisOptions = {};
+export type UseImportsFirstOptions = {};
 export type UseInlineScriptIdOptions = {};
 export interface UseInputNameOptions {
 	/**
@@ -8319,10 +8332,10 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
-	| "lint/nursery/useExpect"
 	| "lint/nursery/noAmbiguousAnchorText"
 	| "lint/nursery/noBeforeInteractiveScriptOutsideDocument"
 	| "lint/nursery/noColorInvalidHex"
+	| "lint/nursery/noConditionalExpect"
 	| "lint/nursery/noContinue"
 	| "lint/nursery/noDeprecatedMediaType"
 	| "lint/nursery/noDivRegex"
@@ -8352,7 +8365,6 @@ export type Category =
 	| "lint/nursery/noMultiStr"
 	| "lint/nursery/noNestedPromises"
 	| "lint/nursery/noParametersOnlyUsedInRecursion"
-	| "lint/nursery/noConditionalExpect"
 	| "lint/nursery/noPlaywrightElementHandle"
 	| "lint/nursery/noPlaywrightEval"
 	| "lint/nursery/noPlaywrightForceOption"
@@ -8392,19 +8404,21 @@ export type Category =
 	| "lint/nursery/useDestructuring"
 	| "lint/nursery/useErrorCause"
 	| "lint/nursery/useExhaustiveSwitchCases"
+	| "lint/nursery/useExpect"
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useFind"
 	| "lint/nursery/useGlobalThis"
 	| "lint/nursery/useImportRestrictions"
+	| "lint/nursery/useImportsFirst"
 	| "lint/nursery/useInlineScriptId"
 	| "lint/nursery/useInputName"
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useLoneAnonymousOperation"
 	| "lint/nursery/useLoneExecutableDefinition"
-	| "lint/nursery/useNullishCoalescing"
 	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useNamedCaptureGroup"
+	| "lint/nursery/useNullishCoalescing"
 	| "lint/nursery/usePlaywrightValidDescribeCallback"
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"

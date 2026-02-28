@@ -6233,7 +6233,7 @@
 					]
 				},
 				"useImportsFirst": {
-					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/use-imports-first",
+					"description": "Enforce that all imports appear at the top of the module.\nSee https://biomejs.dev/linter/rules/use-imports-first",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseImportsFirstConfiguration" },
 						{ "type": "null" }
