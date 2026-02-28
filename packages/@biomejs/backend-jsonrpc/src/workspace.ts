@@ -2410,7 +2410,7 @@ See https://biomejs.dev/linter/rules/use-named-capture-group
 	 */
 	useNamedCaptureGroup?: UseNamedCaptureGroupConfiguration;
 	/**
-	* Enforce using nullish coalescing operator (??) instead of logical or (||).
+	* Enforce using the nullish coalescing operator (??) instead of logical or (||).
 See https://biomejs.dev/linter/rules/use-nullish-coalescing 
 	 */
 	useNullishCoalescing?: UseNullishCoalescingConfiguration;
