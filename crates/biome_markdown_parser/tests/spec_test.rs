@@ -195,11 +195,7 @@ pub fn quick_test() {
     );
 
     // Control: "-\n- x\n" (no extra spaces — known working)
-    test_example(
-        9994,
-        "-\n- x\n",
-        "<ul>\n<li></li>\n<li>x</li>\n</ul>\n",
-    );
+    test_example(9994, "-\n- x\n", "<ul>\n<li></li>\n<li>x</li>\n</ul>\n");
 }
 
 /// Regression: ordered marker + 2+ trailing spaces before newline.
@@ -284,8 +280,7 @@ pub fn marker_only_bullet_trailing_spaces() {
         root.quote_indents(),
     );
     assert_eq!(
-        "<ul>\n<li></li>\n<li>x</li>\n</ul>\n",
-        html,
+        "<ul>\n<li></li>\n<li>x</li>\n</ul>\n", html,
         "Bullet trailing spaces: HTML mismatch"
     );
 }

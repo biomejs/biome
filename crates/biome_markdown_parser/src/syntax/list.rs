@@ -1423,9 +1423,7 @@ fn handle_blank_lines(p: &mut MarkdownParser, state: &mut ListItemLoopState) -> 
 
     // On the first line, if at a blank line at NEWLINE (or MD_HARD_LINE_LITERAL,
     // which is spaces+newline), fall through to handle_first_line_marker_only.
-    if state.first_line
-        && blank_line_after_prefix
-        && (p.at(NEWLINE) || p.at(MD_HARD_LINE_LITERAL))
+    if state.first_line && blank_line_after_prefix && (p.at(NEWLINE) || p.at(MD_HARD_LINE_LITERAL))
     {
         return (LoopAction::FallThrough, line_has_quote_prefix);
     }
