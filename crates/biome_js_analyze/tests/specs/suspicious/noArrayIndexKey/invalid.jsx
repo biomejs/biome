@@ -132,3 +132,11 @@ function Component10() {
         </HoC>
     );
 }
+// Edge case: index comes first in template string (issue #8812)
+function Component11() {
+    return (
+        <HoC>
+            {({ things }) => things.map((item, index) => <Component key={`${index}-${item}`} />)}
+        </HoC>
+    );
+}

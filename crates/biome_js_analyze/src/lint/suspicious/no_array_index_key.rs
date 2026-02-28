@@ -124,6 +124,41 @@ pub struct NoArrayIndexKeyState {
     binding_origin: TextRange,
 }
 
+
+/// Collect all identifiers from an expression (template strings, binary expressions, etc.)
+fn collect_identifiers_from_expression(expression: &AnyJsExpression) -> Vec<JsReferenceIdentifier> {
+    let mut identifiers = Vec::new();
+    
+    match expression {
+        AnyJsExpression::JsIdentifierExpression(ident_expr) => {
+            if let Ok(name) = ident_expr.name() {
+                identifiers.push(name);
+            }
+        }
+        AnyJsExpression::JsTemplateExpression(template_expr) => {
+            for element in template_expr.elements() {
+                if let AnyJsTemplateElement::JsTemplateElement(template_element) = element {
+                    if let Some(expr) = template_element.expression().ok() {
+                        // Recursively collect from nested expressions
+                        identifiers.extend(collect_identifiers_from_expression(&expr));
+                    }
+                }
+            }
+        }
+        AnyJsExpression::JsBinaryExpression(binary_expr) => {
+            if let Ok(left) = binary_expr.left() {
+                identifiers.extend(collect_identifiers_from_expression(&left));
+            }
+            if let Ok(right) = binary_expr.right() {
+                identifiers.extend(collect_identifiers_from_expression(&right));
+            }
+        }
+        _ => {}
+    }
+    
+    identifiers
+}
+
 impl Rule for NoArrayIndexKey {
     type Query = Semantic<NoArrayIndexKeyQuery>;
     type State = NoArrayIndexKeyState;
@@ -142,35 +177,57 @@ impl Rule for NoArrayIndexKey {
 
         let mut capture_array_index = None;
 
-        match reference {
-            AnyJsExpression::JsIdentifierExpression(identifier_expression) => {
-                capture_array_index = Some(identifier_expression.name().ok()?);
-            }
-            AnyJsExpression::JsTemplateExpression(template_expression) => {
-                let template_elements = template_expression.elements();
-                for element in template_elements {
-                    if let AnyJsTemplateElement::JsTemplateElement(template_element) = element {
-                        let cap_index_value = template_element
-                            .expression()
-                            .ok()?
-                            .as_js_identifier_expression()?
-                            .name()
-                            .ok();
-                        capture_array_index = cap_index_value;
-                    }
-                }
-            }
-            AnyJsExpression::JsBinaryExpression(binary_expression) => {
-                let _ = cap_array_index_value(&binary_expression, &mut capture_array_index);
-            }
-            _ => {}
-        };
+        // Collect all identifiers from the expression (fixes #8812)
+        // We need to check ALL identifiers, not just the last one in templates/binary expressions
+        let identifiers = collect_identifiers_from_expression(&reference);
+        
+        // Check each identifier to see if any is an array index parameter
+        for identifier in identifiers {
+            let parameter = match model
+                .binding(&identifier)
+                .and_then(|declaration| declaration.syntax().parent())
+                .and_then(JsFormalParameter::cast)
+            {
+                Some(param) => param,
+                None => continue,
+            };
+            
+            let function = match parameter
+                .parent::<JsParameterList>()
+                .and_then(|list| list.parent::<JsParameters>())
+                .and_then(|parameters| parameters.parent::<AnyJsFunction>())
+            {
+                Some(func) => func,
+                None => continue,
+            };
+            
+            let call_expression = match function
+                .parent::<JsCallArgumentList>()
+                .and_then(|arguments| arguments.parent::<JsCallArguments>())
+                .and_then(|arguments| arguments.parent::<JsCallExpression>())
+            {
+                Some(call) => call,
+                None => continue,
+            };
 
+            // Check if the caller is an array method and the parameter is the array index of that method
+            let is_array_method_index = match is_array_method_index(&parameter, &call_expression) {
+                Some(true) => true,
+                _ => continue,
+            };
+
+            if !is_array_method_index {
+                continue;
+            }
+            
+            // Found an array index! Set it and break
+            capture_array_index = Some(identifier);
+            break;
+        }
+        
         let reference = capture_array_index?;
-
-        // Given the reference identifier retrieved from the key property,
-        // find the declaration and ensure it resolves to the parameter of a function,
-        // and navigate up to the closest call expression
+        
+        // Re-validate to get the parameter for the diagnostic
         let parameter = model
             .binding(&reference)
             .and_then(|declaration| declaration.syntax().parent())
@@ -183,10 +240,8 @@ impl Rule for NoArrayIndexKey {
             .parent::<JsCallArgumentList>()
             .and_then(|arguments| arguments.parent::<JsCallArguments>())
             .and_then(|arguments| arguments.parent::<JsCallExpression>())?;
-
-        // Check if the caller is an array method and the parameter is the array index of that method
+        
         let is_array_method_index = is_array_method_index(&parameter, &call_expression)?;
-
         if !is_array_method_index {
             return None;
         }
