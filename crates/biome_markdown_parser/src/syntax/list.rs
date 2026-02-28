@@ -155,6 +155,47 @@ fn skip_list_marker_indent(p: &mut MarkdownParser) {
     }
 }
 
+/// Emit an MdIndentTokenList containing 0-N MdIndentToken nodes.
+///
+/// Consumes whitespace-only MD_TEXTUAL_LITERAL tokens up to `max_columns`
+/// columns of indent. Pass 0 for max_columns to consume all remaining whitespace.
+/// Returns the number of columns consumed.
+fn emit_indent_char_list(p: &mut MarkdownParser, max_columns: usize) -> usize {
+    let list_m = p.start();
+    let mut consumed = 0usize;
+    while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
+        let text = p.cur_text();
+        let width: usize = text
+            .chars()
+            .map(|c| if c == '\t' { TAB_STOP_SPACES } else { 1 })
+            .sum();
+        if max_columns > 0 && consumed + width > max_columns {
+            break;
+        }
+        consumed += width;
+        let char_m = p.start();
+        p.bump_remap(MD_INDENT_CHAR);
+        char_m.complete(p, MD_INDENT_TOKEN);
+    }
+    list_m.complete(p, MD_INDENT_TOKEN_LIST);
+    consumed
+}
+
+/// Consume the first whitespace token after the list marker as MD_LIST_POST_MARKER_SPACE.
+/// Returns true if a space was consumed.
+fn emit_list_post_marker_space(p: &mut MarkdownParser) -> bool {
+    if !p.at(MD_TEXTUAL_LITERAL) {
+        return false;
+    }
+    let text = p.cur_text();
+    if text == " " || text == "\t" {
+        p.bump_remap(MD_LIST_POST_MARKER_SPACE);
+        true
+    } else {
+        false
+    }
+}
+
 fn is_whitespace_only(text: &str) -> bool {
     !text.is_empty() && text.chars().all(|c| c == ' ' || c == '\t')
 }
@@ -648,22 +689,26 @@ fn parse_bullet(p: &mut MarkdownParser) -> (ParsedSyntax, ListItemBlankInfo) {
     let m = p.start();
 
     // Compute the marker indent, handling both normal and virtual line start cases.
-    // For virtual line start (nested list detection), we compute the actual column
-    // to ensure correct indented code block detection.
     let marker_indent = compute_marker_indent(p);
-    skip_list_marker_indent(p);
+
+    // #region MdListMarkerPrefix
+    let prefix_m = p.start();
+
+    // Pre-marker indent: consume all whitespace before the marker.
+    // The 0-3 column rule is enforced by at_bullet_list_item(); no cap needed here.
+    // In nested contexts, skip_line_indent() may leave more than 3 columns.
+    emit_indent_char_list(p, 0);
 
     // Bullet marker is 1 character (-, *, or +)
     let marker_width = 1;
 
-    // Bump the bullet marker (-, *, or +)
-    let mut marker_token_text = None;
+    // Bump the bullet marker
+    let mut setext_marker = false;
     if p.at(MD_SETEXT_UNDERLINE_LITERAL) && is_single_dash_setext_marker(p.cur_text()) {
-        marker_token_text = Some(p.cur_text().to_string());
+        setext_marker = true;
         p.bump_remap(T![-]);
     } else if p.at(MD_TEXTUAL_LITERAL) && is_textual_bullet_marker(p.cur_text()) {
-        let text = p.cur_text().to_string();
-        marker_token_text = Some(text.clone());
+        let text = p.cur_text();
         if text == "-" {
             p.bump_remap(T![-]);
         } else if text == "*" {
@@ -679,50 +724,60 @@ fn parse_bullet(p: &mut MarkdownParser) -> (ParsedSyntax, ListItemBlankInfo) {
         p.bump(T![+]);
     }
 
-    // Count spaces after marker to determine required indentation.
-    // Per CommonMark §5.2, content aligns to first non-space after marker.
-    //
-    // For the setext-remapped case (marker_token_text is Some), the token includes
-    // trailing spaces before the newline. This means the first line is empty
-    // (marker + whitespace + newline), and the trailing spaces shouldn't count
-    // for indentation purposes. Per CommonMark, the required indent is marker_width + 1.
-    let (spaces_after_marker, first_line_empty) = if let Some(text) = marker_token_text.as_deref() {
-        // Setext token case: token is "- " or "-  " etc. followed by newline
-        // The first line is empty, so use minimum indent (marker_width + 1)
-        let spaces = count_spaces_after_dash_in_token(text, marker_indent + marker_width);
-        (spaces, true)
+    // Count spaces BEFORE consuming (peek from source text)
+    let spaces_after_marker = if setext_marker {
+        0
     } else {
-        let spaces =
-            count_spaces_after_marker(p.source_after_current(), marker_indent + marker_width);
-        // Check if first line is empty by looking at what follows
-        let first_empty = p.lookahead(|p| {
-            // Skip any whitespace
+        count_spaces_after_marker(p.source_after_current(), marker_indent + marker_width)
+    };
+
+    let first_line_empty = if setext_marker {
+        true
+    } else {
+        p.lookahead(|p| {
             while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
                 p.bump(MD_TEXTUAL_LITERAL);
             }
-            // If we hit newline or EOF, first line is empty
             p.at(NEWLINE) || p.at(T![EOF])
-        });
-        (spaces, first_empty)
+        })
     };
 
-    // Set required indent for continuation lines
-    // Required indent = marker width + spaces after marker (minimum 1)
-    // BUT: if first line is empty (marker + whitespace + newline), use minimum indent
+    // Post-marker space (first whitespace token after marker)
+    if !setext_marker {
+        emit_list_post_marker_space(p);
+    }
+
+    // Content indent (remaining whitespace tokens on first line)
+    if !setext_marker && !first_line_empty && spaces_after_marker > 1 {
+        emit_indent_char_list(p, 0);
+    } else {
+        // Empty first line or no content indent -- emit empty MdIndentTokenList
+        let empty_m = p.start();
+        empty_m.complete(p, MD_INDENT_TOKEN_LIST);
+    }
+
+    prefix_m.complete(p, MD_LIST_MARKER_PREFIX);
+    // #endregion
+
     let prev_required_indent = p.state().list_item_required_indent;
     let prev_marker_indent = p.state().list_item_marker_indent;
-    p.state_mut().list_item_required_indent = if spaces_after_marker > INDENT_CODE_BLOCK_SPACES {
-        marker_indent + marker_width + 1
-    } else if first_line_empty {
-        // Empty first line: use minimum indent (marker + 1 space)
-        marker_indent + marker_width + 1
+
+    let effective_spaces = if setext_marker {
+        0
     } else {
-        marker_indent + marker_width + spaces_after_marker.max(1)
+        spaces_after_marker
     };
+
+    p.state_mut().list_item_required_indent =
+        if effective_spaces > INDENT_CODE_BLOCK_SPACES || first_line_empty {
+            marker_indent + marker_width + 1
+        } else {
+            marker_indent + marker_width + effective_spaces.max(1)
+        };
     p.state_mut().list_item_marker_indent = marker_indent;
 
     // Parse block content (MD_BLOCK_LIST)
-    let blank_info = parse_list_item_block_content(p, spaces_after_marker);
+    let blank_info = parse_list_item_block_content(p, effective_spaces);
 
     // Restore previous required indent
     p.state_mut().list_item_required_indent = prev_required_indent;
@@ -730,14 +785,8 @@ fn parse_bullet(p: &mut MarkdownParser) -> (ParsedSyntax, ListItemBlankInfo) {
 
     let completed = m.complete(p, MD_BULLET);
     let range = completed.range(p);
-    let indent = marker_indent + marker_width + spaces_after_marker.max(1);
-    p.record_list_item_indent(
-        range,
-        indent,
-        marker_indent,
-        marker_width,
-        spaces_after_marker,
-    );
+    let indent = marker_indent + marker_width + effective_spaces.max(1);
+    p.record_list_item_indent(range, indent, marker_indent, marker_width, effective_spaces);
     (Present(completed), blank_info)
 }
 
@@ -934,25 +983,24 @@ fn parse_ordered_bullet(p: &mut MarkdownParser) -> (ParsedSyntax, ListItemBlankI
     }
 
     let m = p.start();
-
-    // Compute the marker indent, handling both normal and virtual line start cases.
-    // For virtual line start (nested list detection), we compute the actual column
-    // to ensure correct indented code block detection.
     let marker_indent = compute_marker_indent(p);
-    skip_list_marker_indent(p);
 
-    // Get marker width from actual token text (e.g., "1." = 2, "10." = 3)
+    // #region MdListMarkerPrefix
+    let prefix_m = p.start();
+
+    // Pre-marker indent: consume all whitespace before the marker.
+    // The 0-3 column rule is enforced by at_order_list_item(); no cap needed here.
+    // In nested contexts, skip_line_indent() may leave more than 3 columns.
+    emit_indent_char_list(p, 0);
+
+    // Ordered marker (variable width: "1." = 2, "10." = 3, etc.)
     let marker_width = p.cur_text().len();
-
-    // Bump the ordered list marker
     p.bump(MD_ORDERED_LIST_MARKER);
 
-    // Count spaces after marker to determine required indentation.
-    // Per CommonMark §5.2, content aligns to first non-space after marker.
+    // Count spaces (peek from source text BEFORE consuming)
     let spaces_after_marker =
         count_spaces_after_marker(p.source_after_current(), marker_indent + marker_width);
 
-    // Check if first line is empty (marker followed by only whitespace + newline)
     let first_line_empty = p.lookahead(|p| {
         while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
             p.bump(MD_TEXTUAL_LITERAL);
@@ -960,25 +1008,32 @@ fn parse_ordered_bullet(p: &mut MarkdownParser) -> (ParsedSyntax, ListItemBlankI
         p.at(NEWLINE) || p.at(T![EOF])
     });
 
-    // Set required indent for continuation lines
-    // Required indent = marker width + spaces after marker (minimum 1)
-    // BUT: if first line is empty (marker + whitespace + newline), use minimum indent
+    // Post-marker space
+    emit_list_post_marker_space(p);
+
+    // Content indent
+    if !first_line_empty && spaces_after_marker > 1 {
+        emit_indent_char_list(p, 0);
+    } else {
+        let empty_m = p.start();
+        empty_m.complete(p, MD_INDENT_TOKEN_LIST);
+    }
+
+    prefix_m.complete(p, MD_LIST_MARKER_PREFIX);
+    // #endregion
+
     let prev_required_indent = p.state().list_item_required_indent;
     let prev_marker_indent = p.state().list_item_marker_indent;
-    p.state_mut().list_item_required_indent = if spaces_after_marker > INDENT_CODE_BLOCK_SPACES {
-        marker_indent + marker_width + 1
-    } else if first_line_empty {
-        // Empty first line: use minimum indent (marker + 1 space)
-        marker_indent + marker_width + 1
-    } else {
-        marker_indent + marker_width + spaces_after_marker.max(1)
-    };
+    p.state_mut().list_item_required_indent =
+        if spaces_after_marker > INDENT_CODE_BLOCK_SPACES || first_line_empty {
+            marker_indent + marker_width + 1
+        } else {
+            marker_indent + marker_width + spaces_after_marker.max(1)
+        };
     p.state_mut().list_item_marker_indent = marker_indent;
 
-    // Parse block content
     let blank_info = parse_list_item_block_content(p, spaces_after_marker);
 
-    // Restore previous required indent
     p.state_mut().list_item_required_indent = prev_required_indent;
     p.state_mut().list_item_marker_indent = prev_marker_indent;
 
@@ -1047,28 +1102,6 @@ pub(crate) fn textual_starts_with_ordered_marker(text: &str) -> bool {
     }
 
     matches!(chars.peek(), None | Some(' ' | '\t' | '\n' | '\r'))
-}
-
-fn count_spaces_after_dash_in_token(text: &str, start_column: usize) -> usize {
-    let mut column = start_column;
-    let mut seen_dash = false;
-
-    for c in text.chars() {
-        if !seen_dash {
-            if c == '-' {
-                seen_dash = true;
-            }
-            continue;
-        }
-
-        match c {
-            ' ' => column += 1,
-            '\t' => column += TAB_STOP_SPACES - (column % TAB_STOP_SPACES),
-            _ => break,
-        }
-    }
-
-    column.saturating_sub(start_column)
 }
 
 fn line_indent_from_current(p: &MarkdownParser) -> usize {
@@ -1518,8 +1551,10 @@ fn handle_first_line_marker_only(
         }
     });
 
-    // Marker-only line: consume the newline as trivia and continue.
-    p.parse_as_skipped_trivia_tokens(|p| p.bump(NEWLINE));
+    // Marker-only line: emit the newline as an explicit MdNewline node.
+    let newline_m = p.start();
+    p.bump(NEWLINE);
+    newline_m.complete(p, MD_NEWLINE);
     state.first_line = false;
     state.last_was_blank = false;
 
@@ -1570,10 +1605,6 @@ fn parse_first_line_blocks(
     });
 
     if fenced_code_start {
-        while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
-            p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_TEXTUAL_LITERAL));
-        }
-
         let parsed = with_virtual_line_start(p, p.cur_range().start(), parse_fenced_code_block);
         if parsed.is_present() {
             state.record_first_line_block();
@@ -1656,10 +1687,6 @@ fn parse_first_line_blocks(
     });
 
     if let Some(nested_marker) = nested_marker {
-        while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
-            p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_TEXTUAL_LITERAL));
-        }
-
         let prev_virtual = p.state().virtual_line_start;
         let prev_required = p.state().list_item_required_indent;
         p.state_mut().virtual_line_start = Some(p.cur_range().start());
@@ -1736,11 +1763,6 @@ fn parse_first_line_atx_heading(p: &mut MarkdownParser, state: &mut ListItemLoop
         return false;
     }
 
-    // Skip leading whitespace as trivia
-    while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
-        p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_TEXTUAL_LITERAL));
-    }
-
     let header_m = p.start();
 
     // Can't reuse header::parse_hash_list(): in list context `#` may be lexed as
@@ -1776,11 +1798,6 @@ fn parse_first_line_blockquote(p: &mut MarkdownParser, state: &mut ListItemLoopS
 
     if !blockquote_start {
         return false;
-    }
-
-    // Skip leading whitespace as trivia
-    while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
-        p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_TEXTUAL_LITERAL));
     }
 
     let prev_virtual = p.state().virtual_line_start;

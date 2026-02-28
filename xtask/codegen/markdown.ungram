@@ -178,6 +178,11 @@ MdQuotePrefix =
 MdQuoteIndent = 'md_quote_pre_marker_indent'
 MdQuoteIndentList = MdQuoteIndent*
 
+// Generic indent character for list pre-marker and content indent.
+// Reusable across phases (lists, fenced code, thematic breaks).
+MdIndentToken = 'md_indent_char'
+MdIndentTokenList = MdIndentToken*
+
 MdBulletListItem = MdBulletList
 MdOrderedListItem = MdBulletList
 
@@ -188,8 +193,16 @@ MdBulletList = MdBullet*
 // 1. Hey!
 // ^^^^^^^
 MdBullet =
-	bullet: ('-' | '*' | '+' | 'md_ordered_list_marker')
+	prefix: MdListMarkerPrefix
 	content: MdBlockList
+
+// Structural tokens around a list marker: indent, marker, post-space, content indent.
+// Mirrors MdQuotePrefix pattern. Marker is required; all other fields optional/empty.
+MdListMarkerPrefix =
+	pre_marker_indent: MdIndentTokenList
+	marker: ('-' | '*' | '+' | 'md_ordered_list_marker')
+	post_marker_space: 'md_list_post_marker_space'?
+	content_indent: MdIndentTokenList
 
 // Any block paragraph
 //
