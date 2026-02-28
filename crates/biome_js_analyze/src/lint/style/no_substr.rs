@@ -158,13 +158,23 @@ impl AnyJsStatement {
                 let declarators = declaration.declarators();
                 declarators.into_iter().find_map(|declarator| {
                     let init = declarator.ok()?.initializer()?;
-                    init.expression()
-                        .ok()?
-                        .as_js_static_member_expression()?
-                        .member()
-                        .ok()?
-                        .value_token()
-                        .ok()
+                    let expr = init.expression().ok()?;
+                    // Handle direct member expression (e.g., `const f = foo.substr`)
+                    if let Some(member_expr) = expr.as_js_static_member_expression() {
+                        return member_expr.member().ok()?.value_token().ok();
+                    }
+                    // Handle call expression (e.g., `const y = foo.substring(0)`)
+                    if let Some(call_expr) = expr.as_js_call_expression() {
+                        return call_expr
+                            .callee()
+                            .ok()?
+                            .as_js_static_member_expression()?
+                            .member()
+                            .ok()?
+                            .value_token()
+                            .ok();
+                    }
+                    None
                 })
             }
         }
@@ -185,11 +195,21 @@ impl AnyJsStatement {
                 let declarators = declaration.declarators();
                 declarators.into_iter().find_map(|declarator| {
                     let init = declarator.ok()?.initializer()?;
-                    init.expression()
-                        .ok()?
-                        .as_js_static_member_expression()?
-                        .member()
-                        .ok()
+                    let expr = init.expression().ok()?;
+                    // Handle direct member expression (e.g., `const f = foo.substr`)
+                    if let Some(member_expr) = expr.as_js_static_member_expression() {
+                        return member_expr.member().ok();
+                    }
+                    // Handle call expression (e.g., `const y = foo.substring(0)`)
+                    if let Some(call_expr) = expr.as_js_call_expression() {
+                        return call_expr
+                            .callee()
+                            .ok()?
+                            .as_js_static_member_expression()?
+                            .member()
+                            .ok();
+                    }
+                    None
                 })
             }
         }
@@ -202,7 +222,18 @@ impl AnyJsStatement {
                 .as_js_call_expression()?
                 .arguments()
                 .ok(),
-            _ => None,
+            Self::JsVariableStatement(node) => {
+                let declaration = node.declaration().ok()?;
+                let declarators = declaration.declarators();
+                declarators.into_iter().find_map(|declarator| {
+                    let init = declarator.ok()?.initializer()?;
+                    init.expression()
+                        .ok()?
+                        .as_js_call_expression()?
+                        .arguments()
+                        .ok()
+                })
+            }
         }
     }
 }

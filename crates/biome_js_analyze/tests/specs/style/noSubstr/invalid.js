@@ -18,3 +18,7 @@ foo.substring(start, end)
 "foo".substring(1, 3)
 // Extra arguments
 foo.substring(1, 2, 3)
+// Variable declarations with call expressions
+const y = x.substring(0);
+const z = x.substr();
+let a = foo.bar.substring(1, 2);
