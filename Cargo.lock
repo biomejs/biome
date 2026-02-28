@@ -808,6 +808,7 @@ version = "0.5.7"
 dependencies = [
  "biome_analyze",
  "biome_analyze_macros",
+ "biome_aria",
  "biome_aria_metadata",
  "biome_console",
  "biome_deserialize",
@@ -901,6 +902,7 @@ dependencies = [
 name = "biome_html_syntax"
 version = "0.5.7"
 dependencies = [
+ "biome_aria",
  "biome_html_factory",
  "biome_html_parser",
  "biome_rowan",
