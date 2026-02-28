@@ -138,7 +138,7 @@ impl BiomePlugin {
                     } else if rule.as_os_str().as_encoded_bytes().ends_with(b".wasm") {
                         #[cfg(feature = "wasm_plugin")]
                         {
-                            let plugins = AnalyzerWasmPlugin::load(&plugin_path.join(rule), None)?;
+                            let plugins = AnalyzerWasmPlugin::load(&plugin_path.join(rule), options_json.clone())?;
                             Ok(plugins
                                 .into_iter()
                                 .map(|p| Arc::new(p) as Arc<dyn AnalyzerPlugin>)
