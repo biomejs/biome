@@ -40,6 +40,23 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssContainerNotQuery" => lang::CssContainerNotQuery::KIND_SET.iter().next(),
         "CssContainerOrQuery" => lang::CssContainerOrQuery::KIND_SET.iter().next(),
         "CssContainerQueryInParens" => lang::CssContainerQueryInParens::KIND_SET.iter().next(),
+        "CssContainerScrollStateAndQuery" => lang::CssContainerScrollStateAndQuery::KIND_SET
+            .iter()
+            .next(),
+        "CssContainerScrollStateInParens" => lang::CssContainerScrollStateInParens::KIND_SET
+            .iter()
+            .next(),
+        "CssContainerScrollStateNotQuery" => lang::CssContainerScrollStateNotQuery::KIND_SET
+            .iter()
+            .next(),
+        "CssContainerScrollStateOrQuery" => {
+            lang::CssContainerScrollStateOrQuery::KIND_SET.iter().next()
+        }
+        "CssContainerScrollStateQueryInParens" => {
+            lang::CssContainerScrollStateQueryInParens::KIND_SET
+                .iter()
+                .next()
+        }
         "CssContainerSizeFeatureInParens" => lang::CssContainerSizeFeatureInParens::KIND_SET
             .iter()
             .next(),

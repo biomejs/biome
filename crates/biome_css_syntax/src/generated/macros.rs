@@ -128,6 +128,32 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::CssContainerQueryInParens::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_CONTAINER_SCROLL_STATE_AND_QUERY => {
+                    let $pattern =
+                        unsafe { $crate::CssContainerScrollStateAndQuery::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_CONTAINER_SCROLL_STATE_IN_PARENS => {
+                    let $pattern =
+                        unsafe { $crate::CssContainerScrollStateInParens::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_CONTAINER_SCROLL_STATE_NOT_QUERY => {
+                    let $pattern =
+                        unsafe { $crate::CssContainerScrollStateNotQuery::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_CONTAINER_SCROLL_STATE_OR_QUERY => {
+                    let $pattern =
+                        unsafe { $crate::CssContainerScrollStateOrQuery::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_CONTAINER_SCROLL_STATE_QUERY_IN_PARENS => {
+                    let $pattern = unsafe {
+                        $crate::CssContainerScrollStateQueryInParens::new_unchecked(node)
+                    };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_CONTAINER_SIZE_FEATURE_IN_PARENS => {
                     let $pattern =
                         unsafe { $crate::CssContainerSizeFeatureInParens::new_unchecked(node) };

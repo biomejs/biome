@@ -1183,6 +1183,231 @@ pub struct CssContainerQueryInParensFields {
     pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssContainerScrollStateAndQuery {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssContainerScrollStateAndQuery {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssContainerScrollStateAndQueryFields {
+        CssContainerScrollStateAndQueryFields {
+            left: self.left(),
+            and_token: self.and_token(),
+            right: self.right(),
+        }
+    }
+    pub fn left(&self) -> SyntaxResult<CssContainerScrollStateInParens> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn and_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn right(&self) -> SyntaxResult<AnyCssContainerScrollStateAndCombinableQuery> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for CssContainerScrollStateAndQuery {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssContainerScrollStateAndQueryFields {
+    pub left: SyntaxResult<CssContainerScrollStateInParens>,
+    pub and_token: SyntaxResult<SyntaxToken>,
+    pub right: SyntaxResult<AnyCssContainerScrollStateAndCombinableQuery>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssContainerScrollStateInParens {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssContainerScrollStateInParens {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssContainerScrollStateInParensFields {
+        CssContainerScrollStateInParensFields {
+            l_paren_token: self.l_paren_token(),
+            query: self.query(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn query(&self) -> SyntaxResult<AnyCssContainerScrollStateInParens> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for CssContainerScrollStateInParens {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssContainerScrollStateInParensFields {
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub query: SyntaxResult<AnyCssContainerScrollStateInParens>,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssContainerScrollStateNotQuery {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssContainerScrollStateNotQuery {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssContainerScrollStateNotQueryFields {
+        CssContainerScrollStateNotQueryFields {
+            not_token: self.not_token(),
+            query: self.query(),
+        }
+    }
+    pub fn not_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn query(&self) -> SyntaxResult<CssContainerScrollStateInParens> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for CssContainerScrollStateNotQuery {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssContainerScrollStateNotQueryFields {
+    pub not_token: SyntaxResult<SyntaxToken>,
+    pub query: SyntaxResult<CssContainerScrollStateInParens>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssContainerScrollStateOrQuery {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssContainerScrollStateOrQuery {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssContainerScrollStateOrQueryFields {
+        CssContainerScrollStateOrQueryFields {
+            left: self.left(),
+            or_token: self.or_token(),
+            right: self.right(),
+        }
+    }
+    pub fn left(&self) -> SyntaxResult<CssContainerScrollStateInParens> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn or_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn right(&self) -> SyntaxResult<AnyCssContainerScrollStateOrCombinableQuery> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for CssContainerScrollStateOrQuery {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssContainerScrollStateOrQueryFields {
+    pub left: SyntaxResult<CssContainerScrollStateInParens>,
+    pub or_token: SyntaxResult<SyntaxToken>,
+    pub right: SyntaxResult<AnyCssContainerScrollStateOrCombinableQuery>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssContainerScrollStateQueryInParens {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssContainerScrollStateQueryInParens {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssContainerScrollStateQueryInParensFields {
+        CssContainerScrollStateQueryInParensFields {
+            name: self.name(),
+            l_paren_token: self.l_paren_token(),
+            query: self.query(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn query(&self) -> SyntaxResult<AnyCssContainerScrollStateQuery> {
+        support::required_node(&self.syntax, 2usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+impl Serialize for CssContainerScrollStateQueryInParens {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssContainerScrollStateQueryInParensFields {
+    pub name: SyntaxResult<CssIdentifier>,
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub query: SyntaxResult<AnyCssContainerScrollStateQuery>,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssContainerSizeFeatureInParens {
     pub(crate) syntax: SyntaxNode,
 }
@@ -10688,6 +10913,7 @@ impl AnyCssContainerQuery {
 pub enum AnyCssContainerQueryInParens {
     AnyCssValue(AnyCssValue),
     CssContainerQueryInParens(CssContainerQueryInParens),
+    CssContainerScrollStateQueryInParens(CssContainerScrollStateQueryInParens),
     CssContainerSizeFeatureInParens(CssContainerSizeFeatureInParens),
     CssContainerStyleQueryInParens(CssContainerStyleQueryInParens),
 }
@@ -10704,6 +10930,14 @@ impl AnyCssContainerQueryInParens {
             _ => None,
         }
     }
+    pub fn as_css_container_scroll_state_query_in_parens(
+        &self,
+    ) -> Option<&CssContainerScrollStateQueryInParens> {
+        match &self {
+            Self::CssContainerScrollStateQueryInParens(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_css_container_size_feature_in_parens(
         &self,
     ) -> Option<&CssContainerSizeFeatureInParens> {
@@ -10717,6 +10951,121 @@ impl AnyCssContainerQueryInParens {
     ) -> Option<&CssContainerStyleQueryInParens> {
         match &self {
             Self::CssContainerStyleQueryInParens(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssContainerScrollStateAndCombinableQuery {
+    CssContainerScrollStateAndQuery(CssContainerScrollStateAndQuery),
+    CssContainerScrollStateInParens(CssContainerScrollStateInParens),
+}
+impl AnyCssContainerScrollStateAndCombinableQuery {
+    pub fn as_css_container_scroll_state_and_query(
+        &self,
+    ) -> Option<&CssContainerScrollStateAndQuery> {
+        match &self {
+            Self::CssContainerScrollStateAndQuery(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_container_scroll_state_in_parens(
+        &self,
+    ) -> Option<&CssContainerScrollStateInParens> {
+        match &self {
+            Self::CssContainerScrollStateInParens(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssContainerScrollStateInParens {
+    AnyCssContainerScrollStateQuery(AnyCssContainerScrollStateQuery),
+    AnyCssValue(AnyCssValue),
+}
+impl AnyCssContainerScrollStateInParens {
+    pub fn as_any_css_container_scroll_state_query(
+        &self,
+    ) -> Option<&AnyCssContainerScrollStateQuery> {
+        match &self {
+            Self::AnyCssContainerScrollStateQuery(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_any_css_value(&self) -> Option<&AnyCssValue> {
+        match &self {
+            Self::AnyCssValue(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssContainerScrollStateOrCombinableQuery {
+    CssContainerScrollStateInParens(CssContainerScrollStateInParens),
+    CssContainerScrollStateOrQuery(CssContainerScrollStateOrQuery),
+}
+impl AnyCssContainerScrollStateOrCombinableQuery {
+    pub fn as_css_container_scroll_state_in_parens(
+        &self,
+    ) -> Option<&CssContainerScrollStateInParens> {
+        match &self {
+            Self::CssContainerScrollStateInParens(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_container_scroll_state_or_query(
+        &self,
+    ) -> Option<&CssContainerScrollStateOrQuery> {
+        match &self {
+            Self::CssContainerScrollStateOrQuery(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssContainerScrollStateQuery {
+    AnyCssQueryFeature(AnyCssQueryFeature),
+    CssContainerScrollStateAndQuery(CssContainerScrollStateAndQuery),
+    CssContainerScrollStateInParens(CssContainerScrollStateInParens),
+    CssContainerScrollStateNotQuery(CssContainerScrollStateNotQuery),
+    CssContainerScrollStateOrQuery(CssContainerScrollStateOrQuery),
+}
+impl AnyCssContainerScrollStateQuery {
+    pub fn as_any_css_query_feature(&self) -> Option<&AnyCssQueryFeature> {
+        match &self {
+            Self::AnyCssQueryFeature(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_container_scroll_state_and_query(
+        &self,
+    ) -> Option<&CssContainerScrollStateAndQuery> {
+        match &self {
+            Self::CssContainerScrollStateAndQuery(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_container_scroll_state_in_parens(
+        &self,
+    ) -> Option<&CssContainerScrollStateInParens> {
+        match &self {
+            Self::CssContainerScrollStateInParens(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_container_scroll_state_not_query(
+        &self,
+    ) -> Option<&CssContainerScrollStateNotQuery> {
+        match &self {
+            Self::CssContainerScrollStateNotQuery(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_container_scroll_state_or_query(
+        &self,
+    ) -> Option<&CssContainerScrollStateOrQuery> {
+        match &self {
+            Self::CssContainerScrollStateOrQuery(item) => Some(item),
             _ => None,
         }
     }
@@ -14747,6 +15096,265 @@ impl From<CssContainerQueryInParens> for SyntaxNode {
 }
 impl From<CssContainerQueryInParens> for SyntaxElement {
     fn from(n: CssContainerQueryInParens) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssContainerScrollStateAndQuery {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_CONTAINER_SCROLL_STATE_AND_QUERY as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_CONTAINER_SCROLL_STATE_AND_QUERY
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssContainerScrollStateAndQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssContainerScrollStateAndQuery")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field("and_token", &support::DebugSyntaxResult(self.and_token()))
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("CssContainerScrollStateAndQuery").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssContainerScrollStateAndQuery> for SyntaxNode {
+    fn from(n: CssContainerScrollStateAndQuery) -> Self {
+        n.syntax
+    }
+}
+impl From<CssContainerScrollStateAndQuery> for SyntaxElement {
+    fn from(n: CssContainerScrollStateAndQuery) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssContainerScrollStateInParens {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_CONTAINER_SCROLL_STATE_IN_PARENS as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_CONTAINER_SCROLL_STATE_IN_PARENS
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssContainerScrollStateInParens {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssContainerScrollStateInParens")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("query", &support::DebugSyntaxResult(self.query()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssContainerScrollStateInParens").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssContainerScrollStateInParens> for SyntaxNode {
+    fn from(n: CssContainerScrollStateInParens) -> Self {
+        n.syntax
+    }
+}
+impl From<CssContainerScrollStateInParens> for SyntaxElement {
+    fn from(n: CssContainerScrollStateInParens) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssContainerScrollStateNotQuery {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_CONTAINER_SCROLL_STATE_NOT_QUERY as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_CONTAINER_SCROLL_STATE_NOT_QUERY
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssContainerScrollStateNotQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssContainerScrollStateNotQuery")
+                .field("not_token", &support::DebugSyntaxResult(self.not_token()))
+                .field("query", &support::DebugSyntaxResult(self.query()))
+                .finish()
+        } else {
+            f.debug_struct("CssContainerScrollStateNotQuery").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssContainerScrollStateNotQuery> for SyntaxNode {
+    fn from(n: CssContainerScrollStateNotQuery) -> Self {
+        n.syntax
+    }
+}
+impl From<CssContainerScrollStateNotQuery> for SyntaxElement {
+    fn from(n: CssContainerScrollStateNotQuery) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssContainerScrollStateOrQuery {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_CONTAINER_SCROLL_STATE_OR_QUERY as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_CONTAINER_SCROLL_STATE_OR_QUERY
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssContainerScrollStateOrQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssContainerScrollStateOrQuery")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field("or_token", &support::DebugSyntaxResult(self.or_token()))
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("CssContainerScrollStateOrQuery").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssContainerScrollStateOrQuery> for SyntaxNode {
+    fn from(n: CssContainerScrollStateOrQuery) -> Self {
+        n.syntax
+    }
+}
+impl From<CssContainerScrollStateOrQuery> for SyntaxElement {
+    fn from(n: CssContainerScrollStateOrQuery) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssContainerScrollStateQueryInParens {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = SyntaxKindSet::from_raw(RawSyntaxKind(
+        CSS_CONTAINER_SCROLL_STATE_QUERY_IN_PARENS as u16,
+    ));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_CONTAINER_SCROLL_STATE_QUERY_IN_PARENS
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssContainerScrollStateQueryInParens {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssContainerScrollStateQueryInParens")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("query", &support::DebugSyntaxResult(self.query()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssContainerScrollStateQueryInParens")
+                .finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssContainerScrollStateQueryInParens> for SyntaxNode {
+    fn from(n: CssContainerScrollStateQueryInParens) -> Self {
+        n.syntax
+    }
+}
+impl From<CssContainerScrollStateQueryInParens> for SyntaxElement {
+    fn from(n: CssContainerScrollStateQueryInParens) -> Self {
         n.syntax.into()
     }
 }
@@ -27025,6 +27633,11 @@ impl From<CssContainerQueryInParens> for AnyCssContainerQueryInParens {
         Self::CssContainerQueryInParens(node)
     }
 }
+impl From<CssContainerScrollStateQueryInParens> for AnyCssContainerQueryInParens {
+    fn from(node: CssContainerScrollStateQueryInParens) -> Self {
+        Self::CssContainerScrollStateQueryInParens(node)
+    }
+}
 impl From<CssContainerSizeFeatureInParens> for AnyCssContainerQueryInParens {
     fn from(node: CssContainerSizeFeatureInParens) -> Self {
         Self::CssContainerSizeFeatureInParens(node)
@@ -27039,11 +27652,13 @@ impl AstNode for AnyCssContainerQueryInParens {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyCssValue::KIND_SET
         .union(CssContainerQueryInParens::KIND_SET)
+        .union(CssContainerScrollStateQueryInParens::KIND_SET)
         .union(CssContainerSizeFeatureInParens::KIND_SET)
         .union(CssContainerStyleQueryInParens::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
             CSS_CONTAINER_QUERY_IN_PARENS
+            | CSS_CONTAINER_SCROLL_STATE_QUERY_IN_PARENS
             | CSS_CONTAINER_SIZE_FEATURE_IN_PARENS
             | CSS_CONTAINER_STYLE_QUERY_IN_PARENS => true,
             k if AnyCssValue::can_cast(k) => true,
@@ -27054,6 +27669,11 @@ impl AstNode for AnyCssContainerQueryInParens {
         let res = match syntax.kind() {
             CSS_CONTAINER_QUERY_IN_PARENS => {
                 Self::CssContainerQueryInParens(CssContainerQueryInParens { syntax })
+            }
+            CSS_CONTAINER_SCROLL_STATE_QUERY_IN_PARENS => {
+                Self::CssContainerScrollStateQueryInParens(CssContainerScrollStateQueryInParens {
+                    syntax,
+                })
             }
             CSS_CONTAINER_SIZE_FEATURE_IN_PARENS => {
                 Self::CssContainerSizeFeatureInParens(CssContainerSizeFeatureInParens { syntax })
@@ -27073,6 +27693,7 @@ impl AstNode for AnyCssContainerQueryInParens {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             Self::CssContainerQueryInParens(it) => it.syntax(),
+            Self::CssContainerScrollStateQueryInParens(it) => it.syntax(),
             Self::CssContainerSizeFeatureInParens(it) => it.syntax(),
             Self::CssContainerStyleQueryInParens(it) => it.syntax(),
             Self::AnyCssValue(it) => it.syntax(),
@@ -27081,6 +27702,7 @@ impl AstNode for AnyCssContainerQueryInParens {
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssContainerQueryInParens(it) => it.into_syntax(),
+            Self::CssContainerScrollStateQueryInParens(it) => it.into_syntax(),
             Self::CssContainerSizeFeatureInParens(it) => it.into_syntax(),
             Self::CssContainerStyleQueryInParens(it) => it.into_syntax(),
             Self::AnyCssValue(it) => it.into_syntax(),
@@ -27092,6 +27714,7 @@ impl std::fmt::Debug for AnyCssContainerQueryInParens {
         match self {
             Self::AnyCssValue(it) => std::fmt::Debug::fmt(it, f),
             Self::CssContainerQueryInParens(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssContainerScrollStateQueryInParens(it) => std::fmt::Debug::fmt(it, f),
             Self::CssContainerSizeFeatureInParens(it) => std::fmt::Debug::fmt(it, f),
             Self::CssContainerStyleQueryInParens(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -27102,6 +27725,9 @@ impl From<AnyCssContainerQueryInParens> for SyntaxNode {
         match n {
             AnyCssContainerQueryInParens::AnyCssValue(it) => it.into_syntax(),
             AnyCssContainerQueryInParens::CssContainerQueryInParens(it) => it.into_syntax(),
+            AnyCssContainerQueryInParens::CssContainerScrollStateQueryInParens(it) => {
+                it.into_syntax()
+            }
             AnyCssContainerQueryInParens::CssContainerSizeFeatureInParens(it) => it.into_syntax(),
             AnyCssContainerQueryInParens::CssContainerStyleQueryInParens(it) => it.into_syntax(),
         }
@@ -27109,6 +27735,323 @@ impl From<AnyCssContainerQueryInParens> for SyntaxNode {
 }
 impl From<AnyCssContainerQueryInParens> for SyntaxElement {
     fn from(n: AnyCssContainerQueryInParens) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssContainerScrollStateAndQuery> for AnyCssContainerScrollStateAndCombinableQuery {
+    fn from(node: CssContainerScrollStateAndQuery) -> Self {
+        Self::CssContainerScrollStateAndQuery(node)
+    }
+}
+impl From<CssContainerScrollStateInParens> for AnyCssContainerScrollStateAndCombinableQuery {
+    fn from(node: CssContainerScrollStateInParens) -> Self {
+        Self::CssContainerScrollStateInParens(node)
+    }
+}
+impl AstNode for AnyCssContainerScrollStateAndCombinableQuery {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssContainerScrollStateAndQuery::KIND_SET.union(CssContainerScrollStateInParens::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            CSS_CONTAINER_SCROLL_STATE_AND_QUERY | CSS_CONTAINER_SCROLL_STATE_IN_PARENS
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_CONTAINER_SCROLL_STATE_AND_QUERY => {
+                Self::CssContainerScrollStateAndQuery(CssContainerScrollStateAndQuery { syntax })
+            }
+            CSS_CONTAINER_SCROLL_STATE_IN_PARENS => {
+                Self::CssContainerScrollStateInParens(CssContainerScrollStateInParens { syntax })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssContainerScrollStateAndQuery(it) => it.syntax(),
+            Self::CssContainerScrollStateInParens(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssContainerScrollStateAndQuery(it) => it.into_syntax(),
+            Self::CssContainerScrollStateInParens(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssContainerScrollStateAndCombinableQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::CssContainerScrollStateAndQuery(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssContainerScrollStateInParens(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssContainerScrollStateAndCombinableQuery> for SyntaxNode {
+    fn from(n: AnyCssContainerScrollStateAndCombinableQuery) -> Self {
+        match n {
+            AnyCssContainerScrollStateAndCombinableQuery::CssContainerScrollStateAndQuery(it) => {
+                it.into_syntax()
+            }
+            AnyCssContainerScrollStateAndCombinableQuery::CssContainerScrollStateInParens(it) => {
+                it.into_syntax()
+            }
+        }
+    }
+}
+impl From<AnyCssContainerScrollStateAndCombinableQuery> for SyntaxElement {
+    fn from(n: AnyCssContainerScrollStateAndCombinableQuery) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl AstNode for AnyCssContainerScrollStateInParens {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        AnyCssContainerScrollStateQuery::KIND_SET.union(AnyCssValue::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        match kind {
+            k if AnyCssContainerScrollStateQuery::can_cast(k) => true,
+            k if AnyCssValue::can_cast(k) => true,
+            _ => false,
+        }
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let syntax = match AnyCssContainerScrollStateQuery::try_cast(syntax) {
+            Ok(any_css_container_scroll_state_query) => {
+                return Some(Self::AnyCssContainerScrollStateQuery(
+                    any_css_container_scroll_state_query,
+                ));
+            }
+            Err(syntax) => syntax,
+        };
+        if let Some(any_css_value) = AnyCssValue::cast(syntax) {
+            return Some(Self::AnyCssValue(any_css_value));
+        }
+        None
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::AnyCssContainerScrollStateQuery(it) => it.syntax(),
+            Self::AnyCssValue(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::AnyCssContainerScrollStateQuery(it) => it.into_syntax(),
+            Self::AnyCssValue(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssContainerScrollStateInParens {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::AnyCssContainerScrollStateQuery(it) => std::fmt::Debug::fmt(it, f),
+            Self::AnyCssValue(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssContainerScrollStateInParens> for SyntaxNode {
+    fn from(n: AnyCssContainerScrollStateInParens) -> Self {
+        match n {
+            AnyCssContainerScrollStateInParens::AnyCssContainerScrollStateQuery(it) => {
+                it.into_syntax()
+            }
+            AnyCssContainerScrollStateInParens::AnyCssValue(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssContainerScrollStateInParens> for SyntaxElement {
+    fn from(n: AnyCssContainerScrollStateInParens) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssContainerScrollStateInParens> for AnyCssContainerScrollStateOrCombinableQuery {
+    fn from(node: CssContainerScrollStateInParens) -> Self {
+        Self::CssContainerScrollStateInParens(node)
+    }
+}
+impl From<CssContainerScrollStateOrQuery> for AnyCssContainerScrollStateOrCombinableQuery {
+    fn from(node: CssContainerScrollStateOrQuery) -> Self {
+        Self::CssContainerScrollStateOrQuery(node)
+    }
+}
+impl AstNode for AnyCssContainerScrollStateOrCombinableQuery {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssContainerScrollStateInParens::KIND_SET.union(CssContainerScrollStateOrQuery::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            CSS_CONTAINER_SCROLL_STATE_IN_PARENS | CSS_CONTAINER_SCROLL_STATE_OR_QUERY
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_CONTAINER_SCROLL_STATE_IN_PARENS => {
+                Self::CssContainerScrollStateInParens(CssContainerScrollStateInParens { syntax })
+            }
+            CSS_CONTAINER_SCROLL_STATE_OR_QUERY => {
+                Self::CssContainerScrollStateOrQuery(CssContainerScrollStateOrQuery { syntax })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssContainerScrollStateInParens(it) => it.syntax(),
+            Self::CssContainerScrollStateOrQuery(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssContainerScrollStateInParens(it) => it.into_syntax(),
+            Self::CssContainerScrollStateOrQuery(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssContainerScrollStateOrCombinableQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::CssContainerScrollStateInParens(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssContainerScrollStateOrQuery(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssContainerScrollStateOrCombinableQuery> for SyntaxNode {
+    fn from(n: AnyCssContainerScrollStateOrCombinableQuery) -> Self {
+        match n {
+            AnyCssContainerScrollStateOrCombinableQuery::CssContainerScrollStateInParens(it) => {
+                it.into_syntax()
+            }
+            AnyCssContainerScrollStateOrCombinableQuery::CssContainerScrollStateOrQuery(it) => {
+                it.into_syntax()
+            }
+        }
+    }
+}
+impl From<AnyCssContainerScrollStateOrCombinableQuery> for SyntaxElement {
+    fn from(n: AnyCssContainerScrollStateOrCombinableQuery) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssContainerScrollStateAndQuery> for AnyCssContainerScrollStateQuery {
+    fn from(node: CssContainerScrollStateAndQuery) -> Self {
+        Self::CssContainerScrollStateAndQuery(node)
+    }
+}
+impl From<CssContainerScrollStateInParens> for AnyCssContainerScrollStateQuery {
+    fn from(node: CssContainerScrollStateInParens) -> Self {
+        Self::CssContainerScrollStateInParens(node)
+    }
+}
+impl From<CssContainerScrollStateNotQuery> for AnyCssContainerScrollStateQuery {
+    fn from(node: CssContainerScrollStateNotQuery) -> Self {
+        Self::CssContainerScrollStateNotQuery(node)
+    }
+}
+impl From<CssContainerScrollStateOrQuery> for AnyCssContainerScrollStateQuery {
+    fn from(node: CssContainerScrollStateOrQuery) -> Self {
+        Self::CssContainerScrollStateOrQuery(node)
+    }
+}
+impl AstNode for AnyCssContainerScrollStateQuery {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = AnyCssQueryFeature::KIND_SET
+        .union(CssContainerScrollStateAndQuery::KIND_SET)
+        .union(CssContainerScrollStateInParens::KIND_SET)
+        .union(CssContainerScrollStateNotQuery::KIND_SET)
+        .union(CssContainerScrollStateOrQuery::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        match kind {
+            CSS_CONTAINER_SCROLL_STATE_AND_QUERY
+            | CSS_CONTAINER_SCROLL_STATE_IN_PARENS
+            | CSS_CONTAINER_SCROLL_STATE_NOT_QUERY
+            | CSS_CONTAINER_SCROLL_STATE_OR_QUERY => true,
+            k if AnyCssQueryFeature::can_cast(k) => true,
+            _ => false,
+        }
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_CONTAINER_SCROLL_STATE_AND_QUERY => {
+                Self::CssContainerScrollStateAndQuery(CssContainerScrollStateAndQuery { syntax })
+            }
+            CSS_CONTAINER_SCROLL_STATE_IN_PARENS => {
+                Self::CssContainerScrollStateInParens(CssContainerScrollStateInParens { syntax })
+            }
+            CSS_CONTAINER_SCROLL_STATE_NOT_QUERY => {
+                Self::CssContainerScrollStateNotQuery(CssContainerScrollStateNotQuery { syntax })
+            }
+            CSS_CONTAINER_SCROLL_STATE_OR_QUERY => {
+                Self::CssContainerScrollStateOrQuery(CssContainerScrollStateOrQuery { syntax })
+            }
+            _ => {
+                if let Some(any_css_query_feature) = AnyCssQueryFeature::cast(syntax) {
+                    return Some(Self::AnyCssQueryFeature(any_css_query_feature));
+                }
+                return None;
+            }
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssContainerScrollStateAndQuery(it) => it.syntax(),
+            Self::CssContainerScrollStateInParens(it) => it.syntax(),
+            Self::CssContainerScrollStateNotQuery(it) => it.syntax(),
+            Self::CssContainerScrollStateOrQuery(it) => it.syntax(),
+            Self::AnyCssQueryFeature(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssContainerScrollStateAndQuery(it) => it.into_syntax(),
+            Self::CssContainerScrollStateInParens(it) => it.into_syntax(),
+            Self::CssContainerScrollStateNotQuery(it) => it.into_syntax(),
+            Self::CssContainerScrollStateOrQuery(it) => it.into_syntax(),
+            Self::AnyCssQueryFeature(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssContainerScrollStateQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::AnyCssQueryFeature(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssContainerScrollStateAndQuery(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssContainerScrollStateInParens(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssContainerScrollStateNotQuery(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssContainerScrollStateOrQuery(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssContainerScrollStateQuery> for SyntaxNode {
+    fn from(n: AnyCssContainerScrollStateQuery) -> Self {
+        match n {
+            AnyCssContainerScrollStateQuery::AnyCssQueryFeature(it) => it.into_syntax(),
+            AnyCssContainerScrollStateQuery::CssContainerScrollStateAndQuery(it) => {
+                it.into_syntax()
+            }
+            AnyCssContainerScrollStateQuery::CssContainerScrollStateInParens(it) => {
+                it.into_syntax()
+            }
+            AnyCssContainerScrollStateQuery::CssContainerScrollStateNotQuery(it) => {
+                it.into_syntax()
+            }
+            AnyCssContainerScrollStateQuery::CssContainerScrollStateOrQuery(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssContainerScrollStateQuery> for SyntaxElement {
+    fn from(n: AnyCssContainerScrollStateQuery) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -34734,6 +35677,26 @@ impl std::fmt::Display for AnyCssContainerQueryInParens {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyCssContainerScrollStateAndCombinableQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssContainerScrollStateInParens {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssContainerScrollStateOrCombinableQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssContainerScrollStateQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyCssContainerStyleAndCombinableQuery {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -35345,6 +36308,31 @@ impl std::fmt::Display for CssContainerOrQuery {
     }
 }
 impl std::fmt::Display for CssContainerQueryInParens {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssContainerScrollStateAndQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssContainerScrollStateInParens {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssContainerScrollStateNotQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssContainerScrollStateOrQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssContainerScrollStateQueryInParens {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
