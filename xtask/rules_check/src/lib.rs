@@ -1,6 +1,7 @@
 //! This module is in charge of checking if the documentation and tests cases inside the Analyzer rules are correct.
 //!
 //!
+use std::any::TypeId;
 use std::collections::{BTreeMap, HashMap};
 use std::fmt::{Display, Formatter, Write};
 use std::str::FromStr;
@@ -69,6 +70,12 @@ pub fn check_rules() -> anyhow::Result<()> {
             let group = R::Group::NAME;
             let rule_name = R::METADATA.name;
             let rule_severity = R::METADATA.severity;
+
+            if TypeId::of::<R::Options>() == TypeId::of::<()>() {
+                self.errors.push(Errors::new(format!(
+                    "The rule '{rule_name}' uses `type Options = ()`. All lint rules must use a generated options struct (e.g., `RuleNameOptions`), even if empty. One should have been created for you if you ran the codegen when creating the rule. Create an empty options struct for this rule in biome_rule_options and update the rule to use it (e.g., `type Options = RuleNameOptions`)."
+                )));
+            }
 
             if let Some(issue_number) = R::METADATA.issue_number
                 && group != "nursery"
