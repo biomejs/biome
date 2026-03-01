@@ -4,6 +4,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_syntax::{AnyJsModuleItem, JsModuleItemList};
 use biome_rowan::{AstNode, AstNodeList, TextRange};
+use biome_rule_options::use_imports_first::UseImportsFirstOptions;
 
 declare_lint_rule! {
     /// Enforce that all imports appear at the top of the module.
@@ -51,7 +52,7 @@ impl Rule for UseImportsFirst {
     type Query = Ast<JsModuleItemList>;
     type State = TextRange;
     type Signals = Vec<Self::State>;
-    type Options = ();
+    type Options = UseImportsFirstOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let items = ctx.query();
