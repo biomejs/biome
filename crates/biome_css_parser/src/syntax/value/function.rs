@@ -312,6 +312,8 @@ fn parse_any_expression_with_context(
 pub(crate) const BINARY_OPERATION_TOKEN: TokenSet<CssSyntaxKind> =
     token_set![T![+], T![-], T![*], T![/]];
 const UNARY_OPERATION_TOKEN: TokenSet<CssSyntaxKind> = token_set![T![+], T![-], T![*]];
+const COMPONENT_VALUE_EXPRESSION_RECOVERY_SET: TokenSet<CssSyntaxKind> =
+    token_set!(T![')'], T![;], T![,]).union(BINARY_OPERATION_TOKEN);
 
 /// Checks if the current position in the CSS parser is at a binary operator.
 ///
@@ -431,7 +433,7 @@ impl ParseNodeList for ComponentValueExpressionList {
     ) -> RecoveryResult {
         parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecoveryTokenSet::new(CSS_BOGUS, token_set!(T![')'], T![;])),
+            &ParseRecoveryTokenSet::new(CSS_BOGUS, COMPONENT_VALUE_EXPRESSION_RECOVERY_SET),
             expected_component_value,
         )
     }
