@@ -6297,6 +6297,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useScopedStyles": {
+					"description": "Enforce that \\<style> blocks in Vue SFCs have the scoped attribute and that \\<style> blocks in Astro components do not have the is:global directive.\nSee https://biomejs.dev/linter/rules/use-scoped-styles",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseScopedStylesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useSortedClasses": {
 					"description": "Enforce the sorting of CSS utility classes.\nSee https://biomejs.dev/linter/rules/use-sorted-classes",
 					"anyOf": [
@@ -10791,6 +10798,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseScopedStylesOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseScopedStylesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseSelfClosingElementsOptions": {
 			"type": "object",
 			"properties": {
@@ -14074,6 +14091,16 @@
 					"items": { "type": "string" }
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseScopedStylesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseScopedStylesOptions" }
+			]
+		},
+		"UseScopedStylesOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseSelfClosingElementsConfiguration": {

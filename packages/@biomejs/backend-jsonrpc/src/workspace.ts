@@ -2430,6 +2430,11 @@ See https://biomejs.dev/linter/rules/use-required-scripts
 	 */
 	useRequiredScripts?: UseRequiredScriptsConfiguration;
 	/**
+	* Enforce that \<style> blocks in Vue SFCs have the scoped attribute and that \<style> blocks in Astro components do not have the is:global directive.
+See https://biomejs.dev/linter/rules/use-scoped-styles 
+	 */
+	useScopedStyles?: UseScopedStylesConfiguration;
+	/**
 	* Enforce the sorting of CSS utility classes.
 See https://biomejs.dev/linter/rules/use-sorted-classes 
 	 */
@@ -4281,6 +4286,9 @@ export type UseRegexpExecConfiguration =
 export type UseRequiredScriptsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseRequiredScriptsOptions;
+export type UseScopedStylesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseScopedStylesOptions;
 export type UseSortedClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSortedClassesOptions;
@@ -5992,6 +6000,11 @@ export interface RuleWithUseRequiredScriptsOptions {
 	level: RulePlainConfiguration;
 	options?: UseRequiredScriptsOptions;
 }
+export interface RuleWithUseScopedStylesOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseScopedStylesOptions;
+}
 export interface RuleWithUseSortedClassesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -7439,6 +7452,7 @@ export interface UseRequiredScriptsOptions {
 	 */
 	requiredScripts?: string[];
 }
+export type UseScopedStylesOptions = {};
 export interface UseSortedClassesOptions {
 	/**
 	 * Additional attributes that will be sorted.
@@ -8319,10 +8333,10 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
-	| "lint/nursery/useExpect"
 	| "lint/nursery/noAmbiguousAnchorText"
 	| "lint/nursery/noBeforeInteractiveScriptOutsideDocument"
 	| "lint/nursery/noColorInvalidHex"
+	| "lint/nursery/noConditionalExpect"
 	| "lint/nursery/noContinue"
 	| "lint/nursery/noDeprecatedMediaType"
 	| "lint/nursery/noDivRegex"
@@ -8352,7 +8366,6 @@ export type Category =
 	| "lint/nursery/noMultiStr"
 	| "lint/nursery/noNestedPromises"
 	| "lint/nursery/noParametersOnlyUsedInRecursion"
-	| "lint/nursery/noConditionalExpect"
 	| "lint/nursery/noPlaywrightElementHandle"
 	| "lint/nursery/noPlaywrightEval"
 	| "lint/nursery/noPlaywrightForceOption"
@@ -8392,6 +8405,7 @@ export type Category =
 	| "lint/nursery/useDestructuring"
 	| "lint/nursery/useErrorCause"
 	| "lint/nursery/useExhaustiveSwitchCases"
+	| "lint/nursery/useExpect"
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useFind"
@@ -8423,6 +8437,7 @@ export type Category =
 	| "lint/nursery/useVueDefineMacrosOrder"
 	| "lint/nursery/useVueHyphenatedAttributes"
 	| "lint/nursery/useVueMultiWordComponentNames"
+	| "lint/nursery/useScopedStyles"
 	| "lint/nursery/useVueVForKey"
 	| "lint/nursery/useVueValidTemplateRoot"
 	| "lint/nursery/useVueValidVBind"
