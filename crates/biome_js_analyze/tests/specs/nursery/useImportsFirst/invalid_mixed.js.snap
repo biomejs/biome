@@ -16,7 +16,7 @@ import baz from "baz";
 ```
 invalid_mixed.js:3:1 lint/nursery/useImportsFirst ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This import should appear at the top of the module.
+  i This import appears after a non-import statement.
   
     1 │ import foo from "foo";
     2 │ foo.init();
@@ -37,7 +37,7 @@ invalid_mixed.js:3:1 lint/nursery/useImportsFirst ━━━━━━━━━━
 ```
 invalid_mixed.js:5:1 lint/nursery/useImportsFirst ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This import should appear at the top of the module.
+  i This import appears after a non-import statement.
   
     3 │ import bar from "bar";
     4 │ export { bar };

@@ -81,7 +81,7 @@ impl Rule for UseImportsFirst {
                 rule_category!(),
                 range,
                 markup! {
-                    "This import should appear at the top of the module."
+                    "This import appears after a non-import statement."
                 },
             )
             .note(markup! {

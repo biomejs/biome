@@ -16,7 +16,7 @@ import { qux } from "qux";
 ```
 invalid.js:3:1 lint/nursery/useImportsFirst ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This import should appear at the top of the module.
+  i This import appears after a non-import statement.
   
     1 │ import { foo } from "foo";
     2 │ const bar = 1;
@@ -37,7 +37,7 @@ invalid.js:3:1 lint/nursery/useImportsFirst ━━━━━━━━━━━━
 ```
 invalid.js:5:1 lint/nursery/useImportsFirst ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This import should appear at the top of the module.
+  i This import appears after a non-import statement.
   
     3 │ import { baz } from "baz";
     4 │ 

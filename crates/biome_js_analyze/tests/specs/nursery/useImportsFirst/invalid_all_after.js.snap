@@ -16,7 +16,7 @@ import { quux } from "quux";
 ```
 invalid_all_after.js:4:1 lint/nursery/useImportsFirst ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This import should appear at the top of the module.
+  i This import appears after a non-import statement.
   
     2 │ let bar = 2;
     3 │ function baz() {}
@@ -37,7 +37,7 @@ invalid_all_after.js:4:1 lint/nursery/useImportsFirst ━━━━━━━━�
 ```
 invalid_all_after.js:5:1 lint/nursery/useImportsFirst ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This import should appear at the top of the module.
+  i This import appears after a non-import statement.
   
     3 │ function baz() {}
     4 │ import { qux } from "qux";
