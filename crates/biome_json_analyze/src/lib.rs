@@ -14,8 +14,6 @@ use crate::suppression_action::JsonSuppressionAction;
 pub use biome_analyze::ExtendedConfigurationProvider;
 use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, AnalyzerPluginSlice, AnalyzerSignal, AnalyzerSuppression,
-    BatchPluginVisitor, ControlFlow, LanguageRoot, MatchQueryParams, MetadataRegistry, Phases,
-    PluginTargetLanguage, PluginVisitor, RuleAction, RuleRegistry, to_analyzer_suppressions,
 };
 use biome_diagnostics::Error;
 use biome_json_syntax::{JsonFileSource, JsonLanguage, TextRange};
