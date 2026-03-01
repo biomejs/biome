@@ -1687,3 +1687,44 @@ let counter = 0;
         result,
     ));
 }
+
+#[test]
+fn no_undeclared_variables_not_triggered_for_script_setup_bindings() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.vue");
+    fs.insert(
+        file.into(),
+        r#"<script setup lang="ts">
+import { ALL_SKIP_CATEGORIES } from "ott-common";
+const model = defineModel<string[]>();
+</script>
+<template>
+  <div :data-categories="ALL_SKIP_CATEGORIES">{{ model }}</div>
+</template>"#
+            .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noUndeclaredVariables", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_undeclared_variables_not_triggered_for_script_setup_bindings",
+        fs,
+        console,
+        result,
+    ));
+}
