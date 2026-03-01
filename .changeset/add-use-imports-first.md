@@ -2,4 +2,4 @@
 "@biomejs/biome": patch
 ---
 
-Added the nursery rule [`useImportsFirst`](https://biomejs.dev/linter/rules/use-imports-first/) that enforces all import statements appear before any non-import statements in a module. Inspired by the ESLint [`import/first`](https://github.com/import-js/eslint-plugin-import/blob/HEAD/docs/rules/first.md) rule.
+Added the nursery rule [`useImportsFirst`](https://biomejs.dev/linter/rules/use-imports-first/) that enforces all import statements appear before any non-import statements in a module. Inspired by the eslint-plugin-import [`import/first`](https://github.com/import-js/eslint-plugin-import/blob/HEAD/docs/rules/first.md) rule.
