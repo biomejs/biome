@@ -2284,15 +2284,15 @@ See https://biomejs.dev/linter/rules/no-ternary
 	 */
 	noTernary?: NoTernaryConfiguration;
 	/**
+	* Reports CSS class names in HTML class attributes that are not defined in any \<style> block or linked stylesheet available to the file.
+See https://biomejs.dev/linter/rules/no-undeclared-classes 
+	 */
+	noUndeclaredClasses?: NoUndeclaredClassesConfiguration;
+	/**
 	* Disallow the use of undeclared environment variables.
 See https://biomejs.dev/linter/rules/no-undeclared-env-vars 
 	 */
 	noUndeclaredEnvVars?: NoUndeclaredEnvVarsConfiguration;
-	/**
-	* Reports CSS class names in HTML class attributes that are not defined in any \<style> block or linked stylesheet in the same file.
-See https://biomejs.dev/linter/rules/no-undeclared-styles 
-	 */
-	noUndeclaredStyles?: NoUndeclaredStylesConfiguration;
 	/**
 	* Disallow unknown DOM properties.
 See https://biomejs.dev/linter/rules/no-unknown-attribute 
@@ -2305,9 +2305,9 @@ See https://biomejs.dev/linter/rules/no-unnecessary-conditions
 	noUnnecessaryConditions?: NoUnnecessaryConditionsConfiguration;
 	/**
 	* Reports CSS class selectors that are never referenced in any JSX or HTML file.
-See https://biomejs.dev/linter/rules/no-unused-styles 
+See https://biomejs.dev/linter/rules/no-unused-classes 
 	 */
-	noUnusedStyles?: NoUnusedStylesConfiguration;
+	noUnusedClasses?: NoUnusedClassesConfiguration;
 	/**
 	* Disallow redundant return statements.
 See https://biomejs.dev/linter/rules/no-useless-return 
@@ -4193,21 +4193,21 @@ export type NoSyncScriptsConfiguration =
 export type NoTernaryConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTernaryOptions;
+export type NoUndeclaredClassesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUndeclaredClassesOptions;
 export type NoUndeclaredEnvVarsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUndeclaredEnvVarsOptions;
-export type NoUndeclaredStylesConfiguration =
-	| RulePlainConfiguration
-	| RuleWithNoUndeclaredStylesOptions;
 export type NoUnknownAttributeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnknownAttributeOptions;
 export type NoUnnecessaryConditionsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnnecessaryConditionsOptions;
-export type NoUnusedStylesConfiguration =
+export type NoUnusedClassesConfiguration =
 	| RulePlainConfiguration
-	| RuleWithNoUnusedStylesOptions;
+	| RuleWithNoUnusedClassesOptions;
 export type NoUselessReturnConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessReturnOptions;
@@ -5864,13 +5864,13 @@ export interface RuleWithNoTernaryOptions {
 	level: RulePlainConfiguration;
 	options?: NoTernaryOptions;
 }
+export interface RuleWithNoUndeclaredClassesOptions {
+	level: RulePlainConfiguration;
+	options?: NoUndeclaredClassesOptions;
+}
 export interface RuleWithNoUndeclaredEnvVarsOptions {
 	level: RulePlainConfiguration;
 	options?: NoUndeclaredEnvVarsOptions;
-}
-export interface RuleWithNoUndeclaredStylesOptions {
-	level: RulePlainConfiguration;
-	options?: NoUndeclaredStylesOptions;
 }
 export interface RuleWithNoUnknownAttributeOptions {
 	level: RulePlainConfiguration;
@@ -5880,9 +5880,9 @@ export interface RuleWithNoUnnecessaryConditionsOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnnecessaryConditionsOptions;
 }
-export interface RuleWithNoUnusedStylesOptions {
+export interface RuleWithNoUnusedClassesOptions {
 	level: RulePlainConfiguration;
-	options?: NoUnusedStylesOptions;
+	options?: NoUnusedClassesOptions;
 }
 export interface RuleWithNoUselessReturnOptions {
 	fix?: FixKind;
@@ -7342,6 +7342,7 @@ export type NoScriptUrlOptions = {};
 export type NoShadowOptions = {};
 export type NoSyncScriptsOptions = {};
 export type NoTernaryOptions = {};
+export type NoUndeclaredClassesOptions = {};
 export interface NoUndeclaredEnvVarsOptions {
 	/**
 	* Environment variables that should always be allowed.
@@ -7351,12 +7352,11 @@ Supports regular expressions, e.g. `["MY_ENV_.*"]`.
 	 */
 	allowedEnvVars?: Regex[];
 }
-export type NoUndeclaredStylesOptions = {};
 export interface NoUnknownAttributeOptions {
 	ignore?: string[];
 }
 export type NoUnnecessaryConditionsOptions = {};
-export type NoUnusedStylesOptions = {};
+export type NoUnusedClassesOptions = {};
 export type NoUselessReturnOptions = {};
 export type NoVueArrowFuncInWatchOptions = {};
 export type NoVueOptionsApiOptions = {};
@@ -8345,10 +8345,10 @@ export type Category =
 	| "lint/nursery/noSyncScripts"
 	| "lint/nursery/noTernary"
 	| "lint/nursery/noUndeclaredEnvVars"
-	| "lint/nursery/noUndeclaredStyles"
+	| "lint/nursery/noUndeclaredClasses"
 	| "lint/nursery/noUnknownAttribute"
 	| "lint/nursery/noUnnecessaryConditions"
-	| "lint/nursery/noUnusedStyles"
+	| "lint/nursery/noUnusedClasses"
 	| "lint/nursery/noUnwantedPolyfillio"
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessReturn"
@@ -8953,8 +8953,14 @@ export type HtmlVariant =
 	| "Vue"
 	| "Svelte";
 export type GritVariant = "Standard";
-export type EmbeddingHtmlKind = "None" | "Html" | "Vue" | "Astro" | "Svelte";
+export type EmbeddingHtmlKind =
+	| "None"
+	| "Html"
+	| { Vue: { applicability: EmbeddingApplicability } }
+	| { Astro: { applicability: EmbeddingApplicability } }
+	| { Svelte: { applicability: EmbeddingApplicability } };
 export type HtmlTextExpressions = "None" | "Single" | "Double";
+export type EmbeddingApplicability = "Local" | "Global" | "Unknown";
 export interface OpenFileResult {
 	diagnostics: Diagnostic[];
 }
