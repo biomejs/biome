@@ -135,6 +135,7 @@ impl<'src> HtmlLexer<'src> {
             EXL => self.consume_byte(T![!]),
             // Handle colons as separate tokens for Astro directives
             COL => self.consume_byte(T![:]),
+            PRD => self.consume_byte(T![.]),
             BEO if self.at_svelte_opening_block() => self.consume_svelte_opening_block(),
             BEO => {
                 if self.at_opening_double_text_expression() {
@@ -282,6 +283,9 @@ impl<'src> HtmlLexer<'src> {
                 Some(MUL) => return self.consume_js_block_comment(),
                 _ => {}
             }
+        }
+        if dispatched == PRD {
+            return self.consume_byte(T![.]);
         }
         self.consume_token_inside_tag(current)
     }
