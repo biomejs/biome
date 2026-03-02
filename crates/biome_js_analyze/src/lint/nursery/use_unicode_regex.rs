@@ -105,12 +105,16 @@ impl Rule for UseUnicodeRegex {
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "Use the "<Emphasis>"u"</Emphasis>" or "<Emphasis>"v"</Emphasis>" flag for this regular expression."
+                    "This regular expression is missing the "<Emphasis>"u"</Emphasis>" or "<Emphasis>"v"</Emphasis>" flag."
                 },
             )
             .note(markup! {
-                "The "<Emphasis>"u"</Emphasis>" flag enables Unicode mode which correctly handles Unicode characters. "
-                "The "<Emphasis>"v"</Emphasis>" flag (ES2024) enables Unicode Sets mode with additional features."
+                "Without the "<Emphasis>"u"</Emphasis>" or "<Emphasis>"v"</Emphasis>" flag, this regular expression may not correctly handle Unicode characters, "
+                "such as emoji or characters outside the Basic Multilingual Plane."
+            })
+            .note(markup! {
+                "The "<Emphasis>"u"</Emphasis>" flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. "
+                "The "<Emphasis>"v"</Emphasis>" flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes."
             }),
         )
     }
