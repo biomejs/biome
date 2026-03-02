@@ -249,6 +249,7 @@ impl DeserializationVisitor for PackageJsonVisitor {
         _name: &str,
     ) -> Option<Self::Output> {
         let mut result = Self::Output::default();
+        let mut seen_types_field = false;
         for (key, value) in members.flatten() {
             let Some(key_text) = Text::deserialize(ctx, &key, "") else {
                 continue;
@@ -306,12 +307,14 @@ impl DeserializationVisitor for PackageJsonVisitor {
                     }
                 }
                 "types" => {
+                    seen_types_field = true;
                     result.types = Deserializable::deserialize(ctx, &value, &key_text);
                 }
                 // "typings" is a legacy alias for "types" used by older packages.
-                // It only takes effect if "types" has not been seen yet.
+                // It only takes effect if "types" was not present at all (even
+                // if its value was invalid and failed to deserialize).
                 "typings" => {
-                    if result.types.is_none()
+                    if !seen_types_field
                         && let Some(value) = Deserializable::deserialize(ctx, &value, &key_text)
                     {
                         result.types = Some(value);
@@ -423,6 +426,25 @@ mod tests {
             pkg.types.as_deref(),
             Some("./dist/correct.d.ts"),
             "`types` must win over `typings` even when `typings` appears first in JSON"
+        );
+
+        // Even when `"types"` is invalid (fails to deserialize), `"typings"`
+        // must not override it — presence of the key is what matters.
+        let (pkg_invalid, _) = deserialize_from_json_str::<PackageJson>(
+            r#"{
+                "name": "my-pkg",
+                "version": "1.0.0",
+                "types":   123,
+                "typings": "./dist/wrong.d.ts"
+            }"#,
+            JsonParserOptions::default(),
+            "package.json",
+        )
+        .consume();
+        let pkg_invalid = pkg_invalid.expect("must parse");
+        assert_eq!(
+            pkg_invalid.types, None,
+            "`typings` must not override a malformed `types` field"
         );
 
         // Reverse order: `"types"` before `"typings"` must be unaffected.
