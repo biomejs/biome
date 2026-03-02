@@ -1159,14 +1159,8 @@ fn parse_matched_embed(
                 content.content_offset,
             );
 
-            // Source-level embeds get full services; expression-level don't
-            let js_services = if is_source_level
-                && (ctx.settings.as_ref().is_linter_enabled()
-                    || ctx.settings.as_ref().is_assist_enabled())
-            {
-                JsDocumentServices::default()
-                    .with_js_semantic_model(&snippet.tree())
-                    .into()
+            let js_services = if is_source_level {
+                js_document_services_for_snippet(ctx.settings, &js_source, &snippet)
             } else {
                 DocumentServices::none()
             };
@@ -1254,6 +1248,21 @@ fn parse_matched_embed(
             // GraphQL embeds are only used by the JS handler, not HTML
             None
         }
+    }
+}
+
+/// Builds JS document services for a source-level embedded snippet when lint/assist are enabled.
+fn js_document_services_for_snippet(
+    settings: &SettingsWithEditor,
+    file_source: &JsFileSource,
+    snippet: &EmbeddedSnippet<JsLanguage>,
+) -> DocumentServices {
+    if settings.as_ref().is_linter_enabled() || settings.as_ref().is_assist_enabled() {
+        JsDocumentServices::default()
+            .with_js_semantic_model(&snippet.tree(), file_source)
+            .into()
+    } else {
+        DocumentServices::none()
     }
 }
 
@@ -1435,6 +1444,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         categories,
         action_offset,
         document_services: _,
+        snippet_services: _,
     } = params;
     let _ = debug_span!("Code actions HTML", range =? range, path =? path).entered();
     let tree = parse.tree();

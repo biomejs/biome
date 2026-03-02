@@ -2,6 +2,7 @@ use super::{document::Document, *};
 use crate::Watcher;
 use crate::configuration::{LoadedConfiguration, ProjectScanComputer, read_config};
 use crate::diagnostics::{FileTooLarge, NoIgnoreFileFound, VcsDiagnostic};
+use crate::file_handlers::svelte::SvelteFileHandler;
 use crate::file_handlers::{
     Capabilities, CodeActionsParams, DiagnosticsAndActionsParams, DocumentFileSource, Features,
     FixAllParams, FormatEmbedNode, LintParams, LintResults, ParseResult, UpdateSnippetsNodes,
@@ -49,7 +50,7 @@ use biome_formatter::Printed;
 use biome_fs::{BiomePath, ConfigName, PathKind};
 use biome_grit_patterns::{CompilePatternOptions, GritQuery, compile_pattern_with_options};
 use biome_html_syntax::HtmlRoot;
-use biome_js_syntax::{AnyJsRoot, LanguageVariant, ModuleKind};
+use biome_js_syntax::{AnyJsRoot, JsFileSource, LanguageVariant, ModuleKind};
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonFileSource;
 use biome_module_graph::{ModuleDependencies, ModuleDiagnostic, ModuleGraph};
@@ -246,7 +247,7 @@ impl WorkspaceServer {
         experimental_full_html_support: bool,
     ) -> Capabilities {
         let language = self.get_file_source(path, experimental_full_html_support);
-        self.features.get_capabilities(language)
+        self.features.get_capabilities(path.as_path(), language)
     }
 
     /// Retrieves the supported language of a file.
@@ -301,6 +302,22 @@ impl WorkspaceServer {
             .iter()
             .position(|(_, file_source)| *file_source == document_file_source)
             .unwrap_or_else(|| self.file_sources.push(document_file_source))
+    }
+
+    fn semantic_js_source_type(
+        &self,
+        path: &Utf8Path,
+        document_source: DocumentFileSource,
+        content: &str,
+    ) -> Option<JsFileSource> {
+        let source_type = document_source.to_js_file_source()?;
+        if path.extension() == Some("svelte") {
+            // Component files infer JS/TS from `<script ...>` content.
+            // Source modules (`.svelte.ts` / `.svelte.js`) already carry source type.
+            Some(SvelteFileHandler::file_source(content))
+        } else {
+            Some(source_type)
+        }
     }
 
     #[instrument(
@@ -443,9 +460,12 @@ impl WorkspaceServer {
                         services = CssDocumentServices::default()
                             .with_css_semantic_model(&any_parse.tree())
                             .into();
-                    } else if language.is_javascript_like() {
+                    } else if language.is_javascript_like()
+                        && let Some(source_type) =
+                            self.semantic_js_source_type(&path, language, &content)
+                    {
                         services = JsDocumentServices::default()
-                            .with_js_semantic_model(&any_parse.tree())
+                            .with_js_semantic_model(&any_parse.tree(), &source_type)
                             .into();
                     }
                 }
@@ -738,7 +758,7 @@ impl WorkspaceServer {
         let file_source = self
             .get_source(file_source_index)
             .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
-        let capabilities = self.features.get_capabilities(file_source);
+        let capabilities = self.features.get_capabilities(path, file_source);
 
         let parse = capabilities
             .parser
@@ -1339,7 +1359,7 @@ impl Workspace for WorkspaceServer {
             &params.path,
             settings.experimental_full_html_support_enabled(),
         );
-        let capabilities = self.features.get_capabilities(language);
+        let capabilities = self.features.get_capabilities(&params.path, language);
 
         let settings = self.settings_handle(&settings, params.inline_config);
         self.projects.get_file_features(GetFileFeaturesParams {
@@ -1611,9 +1631,12 @@ impl Workspace for WorkspaceServer {
                 services = CssDocumentServices::default()
                     .with_css_semantic_model(&parsed.any_parse.tree())
                     .into();
-            } else if document_source.is_javascript_like() {
+            } else if document_source.is_javascript_like()
+                && let Some(source_type) =
+                    self.semantic_js_source_type(&path, document_source, &content)
+            {
                 services = JsDocumentServices::default()
-                    .with_js_semantic_model(&parsed.any_parse.tree())
+                    .with_js_semantic_model(&parsed.any_parse.tree(), &source_type)
                     .into();
             }
         }
@@ -1739,7 +1762,7 @@ impl Workspace for WorkspaceServer {
             self.get_parse_with_snippets_and_services(&path)?;
         let language =
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
-        let capabilities = self.features.get_capabilities(language);
+        let capabilities = self.features.get_capabilities(&path, language);
 
         let (diagnostics, errors, skipped_diagnostics) = if (categories.is_lint()
             || categories.is_assist())
@@ -1783,7 +1806,7 @@ impl Workspace for WorkspaceServer {
                 let Some(file_source) = self.get_source(embedded_node.file_source_index()) else {
                     continue;
                 };
-                let capabilities = self.features.get_capabilities(file_source);
+                let capabilities = self.features.get_capabilities(&path, file_source);
                 let Some(lint) = capabilities.analyzer.lint else {
                     continue;
                 };
@@ -1821,8 +1844,8 @@ impl Workspace for WorkspaceServer {
                 .filter(|diag| diag.severity() <= Severity::Error)
                 .count();
 
-            for embedded_node in embedded_snippets {
-                let diagnostics = embedded_node.into_serde_diagnostics();
+            for embedded_node in &embedded_snippets {
+                let diagnostics = embedded_node.clone().into_serde_diagnostics();
                 errors += diagnostics
                     .iter()
                     .filter(|diag| diag.severity() <= Severity::Error)
@@ -1873,7 +1896,7 @@ impl Workspace for WorkspaceServer {
             self.get_parse_with_snippets_and_services(&path)?;
         let language =
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
-        let capabilities = self.features.get_capabilities(language);
+        let capabilities = self.features.get_capabilities(&path, language);
         let result = if (categories.is_lint() || categories.is_assist())
             && let Some(pull_diagnostics_and_actions) =
                 capabilities.analyzer.pull_diagnostics_and_actions
@@ -1903,13 +1926,14 @@ impl Workspace for WorkspaceServer {
                 plugins: plugins.clone(),
                 diagnostic_offset: None,
                 document_services: &services,
+                snippet_services: None,
             });
 
-            for embedded_node in embedded_snippets {
+            for embedded_node in &embedded_snippets {
                 let Some(file_source) = self.get_source(embedded_node.file_source_index()) else {
                     continue;
                 };
-                let capabilities = self.features.get_capabilities(file_source);
+                let capabilities = self.features.get_capabilities(&path, file_source);
                 let Some(pull_diagnostics_and_actions) =
                     capabilities.analyzer.pull_diagnostics_and_actions
                 else {
@@ -1917,7 +1941,7 @@ impl Workspace for WorkspaceServer {
                 };
 
                 let snippet_result = pull_diagnostics_and_actions(DiagnosticsAndActionsParams {
-                    parse: embedded_node.parse().clone(),
+                    parse: embedded_node.parse(),
                     settings: &handle,
                     path: &path,
                     only: &only,
@@ -1931,6 +1955,7 @@ impl Workspace for WorkspaceServer {
                     plugins: plugins.clone(),
                     diagnostic_offset: Some(embedded_node.content_offset()),
                     document_services: &services,
+                    snippet_services: Some(embedded_node.as_snippet_services()),
                 });
 
                 final_result.diagnostics.extend(snippet_result.diagnostics);
@@ -2003,13 +2028,14 @@ impl Workspace for WorkspaceServer {
             categories,
             action_offset: None,
             document_services: &services,
+            snippet_services: None,
         });
 
-        for embedded_snippet in embedded_snippets {
+        for embedded_snippet in &embedded_snippets {
             let Some(file_source) = self.get_source(embedded_snippet.file_source_index()) else {
                 continue;
             };
-            let capabilities = self.features.get_capabilities(file_source);
+            let capabilities = self.features.get_capabilities(&path, file_source);
             let Some(code_actions) = capabilities.analyzer.code_actions else {
                 continue;
             };
@@ -2030,6 +2056,7 @@ impl Workspace for WorkspaceServer {
                 categories,
                 action_offset: Some(embedded_snippet.content_offset()),
                 document_services: &services,
+                snippet_services: Some(embedded_snippet.as_snippet_services()),
             });
 
             result.actions.extend(embedded_actions_result.actions);
@@ -2228,7 +2255,7 @@ impl Workspace for WorkspaceServer {
                 else {
                     continue;
                 };
-                let capabilities = self.features.get_capabilities(document_file_source);
+                let capabilities = self.features.get_capabilities(&path, document_file_source);
                 let Some(fix_all) = capabilities.analyzer.fix_all else {
                     continue;
                 };

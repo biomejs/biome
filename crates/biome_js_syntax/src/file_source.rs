@@ -387,6 +387,24 @@ impl JsFileSource {
         }
     }
 
+    /// Returns whether the path points to a Svelte source-module file.
+    ///
+    /// These files are JavaScript/TypeScript modules with Svelte semantics
+    /// (for example, `$store` auto-subscriptions), not `.svelte` component
+    /// documents with embedded `<script>` content.
+    pub fn is_svelte_source_module_path(path: &Utf8Path) -> bool {
+        let Some(file_name) = path.file_name() else {
+            return false;
+        };
+
+        file_name.ends_with(".svelte.ts")
+            || file_name.ends_with(".svelte.test.ts")
+            || file_name.ends_with(".svelte.spec.ts")
+            || file_name.ends_with(".svelte.js")
+            || file_name.ends_with(".svelte.test.js")
+            || file_name.ends_with(".svelte.spec.js")
+    }
+
     /// Try to return the JS file source corresponding to this file name from well-known files
     pub fn try_from_well_known(path: &Utf8Path) -> Result<Self, FileSourceError> {
         // Be careful with definition files, because `Path::extension()` only
@@ -398,6 +416,14 @@ impl JsFileSource {
             return Self::try_from_extension("d.mts");
         } else if file_name.ends_with(".d.cts") {
             return Self::try_from_extension("d.cts");
+        } else if Self::is_svelte_source_module_path(path) {
+            let source = if file_name.ends_with(".ts") {
+                Self::ts()
+            } else {
+                Self::js_module()
+            };
+
+            return Ok(source.with_embedding_kind(EmbeddingKind::Svelte { is_source: true }));
         }
 
         match path.extension() {

@@ -4,7 +4,7 @@ use biome_analyze::{
     VisitorFinishContext,
 };
 use biome_js_semantic::{SemanticEventExtractor, SemanticModel, SemanticModelBuilder};
-use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode, TextRange, WalkEvent};
+use biome_js_syntax::{AnyJsRoot, JsFileSource, JsLanguage, JsSyntaxNode, TextRange, WalkEvent};
 use biome_rowan::AstNode;
 
 pub struct SemanticServices {
@@ -91,6 +91,7 @@ where
 pub struct SemanticModelBuilderVisitor {
     extractor: SemanticEventExtractor,
     builder: SemanticModelBuilder,
+    flavor_configured: bool,
 }
 
 impl SemanticModelBuilderVisitor {
@@ -98,6 +99,7 @@ impl SemanticModelBuilderVisitor {
         Self {
             extractor: SemanticEventExtractor::default(),
             builder: SemanticModelBuilder::new(root.clone()),
+            flavor_configured: false,
         }
     }
 }
@@ -105,7 +107,19 @@ impl SemanticModelBuilderVisitor {
 impl Visitor for SemanticModelBuilderVisitor {
     type Language = JsLanguage;
 
-    fn visit(&mut self, event: &WalkEvent<JsSyntaxNode>, _ctx: VisitorContext<JsLanguage>) {
+    fn visit(&mut self, event: &WalkEvent<JsSyntaxNode>, ctx: VisitorContext<JsLanguage>) {
+        if !self.flavor_configured {
+            let source_type = ctx
+                .services
+                .get_service::<JsFileSource>()
+                .copied()
+                .unwrap_or_default();
+            let flavor = (&source_type).into();
+            self.extractor.set_flavor(flavor);
+            self.builder.set_flavor(flavor);
+            self.flavor_configured = true;
+        }
+
         match event {
             WalkEvent::Enter(node) => {
                 self.builder.push_node(node);
