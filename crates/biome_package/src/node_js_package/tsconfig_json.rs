@@ -64,7 +64,7 @@ impl Manifest for TsConfigJson {
 }
 
 impl TsConfigJson {
-    fn parse(path: &Utf8Path, json: &str) -> (Self, Vec<Error>) {
+    pub fn parse(path: &Utf8Path, json: &str) -> (Self, Vec<Error>) {
         let (tsconfig, diagnostics) = deserialize_from_json_str(
             json,
             JsonParserOptions::default()

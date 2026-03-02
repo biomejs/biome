@@ -276,6 +276,18 @@ debug     = false
 opt-level = "s"
 debug     = true
 
+[profile.dev.package.biome_resolver_wasm]
+opt-level = "s"
+debug     = true
+
+[profile.release.package.biome_resolver_wasm]
+opt-level = 3
+debug     = false
+
+[profile.test.package.biome_resolver_wasm]
+opt-level = "s"
+debug     = true
+
 [profile.debugging]
 inherits = "dev"
 debug    = true

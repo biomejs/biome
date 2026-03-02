@@ -137,6 +137,48 @@ build-wasm-web:
     -Os \
     -g
 
+# Build resolver WASM for Node.js target (development)
+build-wasm-resolver-node-dev:
+  cargo build --lib --target wasm32-unknown-unknown -p biome_resolver_wasm
+  wasm-bindgen target/wasm32-unknown-unknown/debug/biome_resolver_wasm.wasm \
+    --out-dir packages/@biomejs/wasm-resolver-nodejs \
+    --target nodejs \
+    --typescript
+
+# Build resolver WASM for Node.js target (release)
+build-wasm-resolver-node:
+  cargo build --lib --target wasm32-unknown-unknown --release -p biome_resolver_wasm
+  wasm-bindgen target/wasm32-unknown-unknown/release/biome_resolver_wasm.wasm \
+    --out-dir packages/@biomejs/wasm-resolver-nodejs \
+    --no-demangle \
+    --target nodejs \
+    --typescript
+  wasm-opt packages/@biomejs/wasm-resolver-nodejs/biome_resolver_wasm_bg.wasm \
+    -o packages/@biomejs/wasm-resolver-nodejs/biome_resolver_wasm_bg.wasm \
+    -Os \
+    -g
+
+# Build resolver WASM for web target (development)
+build-wasm-resolver-web-dev:
+  cargo build --lib --target wasm32-unknown-unknown -p biome_resolver_wasm
+  wasm-bindgen target/wasm32-unknown-unknown/debug/biome_resolver_wasm.wasm \
+    --out-dir packages/@biomejs/wasm-resolver-web \
+    --target web \
+    --typescript
+
+# Build resolver WASM for web target (release)
+build-wasm-resolver-web:
+  cargo build --lib --target wasm32-unknown-unknown --release -p biome_resolver_wasm
+  wasm-bindgen target/wasm32-unknown-unknown/release/biome_resolver_wasm.wasm \
+    --out-dir packages/@biomejs/wasm-resolver-web \
+    --no-demangle \
+    --target web \
+    --typescript
+  wasm-opt packages/@biomejs/wasm-resolver-web/biome_resolver_wasm_bg.wasm \
+    -o packages/@biomejs/wasm-resolver-web/biome_resolver_wasm_bg.wasm \
+    -Os \
+    -g
+
 # Generates the code of the grammars available in Biome
 gen-grammar *args='':
   cargo run -p xtask_codegen -- grammar {{args}}

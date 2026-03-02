@@ -1,0 +1,39 @@
+[package]
+name                 = "biome_resolver_wasm"
+version              = "0.1.0"
+authors.workspace    = true
+edition.workspace    = true
+description          = "WebAssembly bindings to the Biome resolver"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = false
+
+[package.metadata.wasm-pack.profile.profiling]
+wasm-opt = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+biome_deserialize    = { workspace = true }
+biome_fs             = { workspace = true }
+biome_json_parser    = { workspace = true }
+biome_package        = { workspace = true }
+biome_resolver       = { workspace = true }
+camino               = { workspace = true }
+serde                = { workspace = true }
+serde-wasm-bindgen   = "0.6.5"
+js-sys               = "0.3.83"
+# IMPORTANT: if you update this package, you must update justfile and workflows
+# so we install the same CLI version
+wasm-bindgen         = { version = "=0.2.106", features = ["serde-serialize"] }
+console_error_panic_hook = { version = "0.1.7", optional = true }
+
+[features]
+default = ["console_error_panic_hook"]
+
+[lints]
+workspace = true

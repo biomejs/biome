@@ -1,0 +1,76 @@
+{
+  "name": "@biomejs/resolver",
+  "version": "0.1.0",
+  "description": "JavaScript API for the Biome module resolver",
+  "scripts": {
+    "tsc": "tsc --noEmit",
+    "build:wasm-dev": "pnpm run \"/^build:wasm-.+-dev$/\"",
+    "build:wasm": "pnpm run \"/^build:wasm-.+(?<!dev)$/\"",
+    "build:wasm-node-dev": "just build-wasm-resolver-node-dev",
+    "build:wasm-node": "just build-wasm-resolver-node",
+    "build:wasm-web-dev": "just build-wasm-resolver-web-dev",
+    "build:wasm-web": "just build-wasm-resolver-web",
+    "test": "vitest",
+    "test:ci": "vitest run",
+    "build": "tsc"
+  },
+  "files": [
+    "README.md",
+    "LICENSE-APACHE",
+    "LICENSE-MIT",
+    "dist/"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./nodejs": {
+      "types": "./dist/nodejs.d.ts",
+      "default": "./dist/nodejs.js"
+    },
+    "./web": {
+      "types": "./dist/web.d.ts",
+      "default": "./dist/web.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "keywords": [
+    "resolver",
+    "module-resolution",
+    "biome"
+  ],
+  "license": "MIT OR Apache-2.0",
+  "homepage": "https://biomejs.dev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/biomejs/biome.git",
+    "directory": "packages/@biomejs/resolver"
+  },
+  "author": "Biome Developers and Contributors",
+  "bugs": "https://github.com/biomejs/biome/issues",
+  "devDependencies": {
+    "@biomejs/wasm-resolver-nodejs": "workspace:*",
+    "@biomejs/wasm-resolver-web": "workspace:*",
+    "typescript": "5.9.3",
+    "vite": "7.3.1",
+    "vitest": "4.0.18"
+  },
+  "peerDependencies": {
+    "@biomejs/wasm-resolver-nodejs": "^0.1.0",
+    "@biomejs/wasm-resolver-web": "^0.1.0"
+  },
+  "peerDependenciesMeta": {
+    "@biomejs/wasm-resolver-nodejs": {
+      "optional": true
+    },
+    "@biomejs/wasm-resolver-web": {
+      "optional": true
+    }
+  },
+  "publishConfig": {
+    "provenance": true
+  }
+}
