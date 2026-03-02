@@ -2445,6 +2445,11 @@ See https://biomejs.dev/linter/rules/use-spread
 	 */
 	useSpread?: UseSpreadConfiguration;
 	/**
+	* Enforce the use of the u or v flag for regular expressions.
+See https://biomejs.dev/linter/rules/use-unicode-regex 
+	 */
+	useUnicodeRegex?: UseUnicodeRegexConfiguration;
+	/**
 	* Enforce consistent defineProps declaration style.
 See https://biomejs.dev/linter/rules/use-vue-consistent-define-props-declaration 
 	 */
@@ -4295,6 +4300,9 @@ export type UseSortedClassesConfiguration =
 export type UseSpreadConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSpreadOptions;
+export type UseUnicodeRegexConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseUnicodeRegexOptions;
 export type UseVueConsistentDefinePropsDeclarationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueConsistentDefinePropsDeclarationOptions;
@@ -6015,6 +6023,11 @@ export interface RuleWithUseSpreadOptions {
 	level: RulePlainConfiguration;
 	options?: UseSpreadOptions;
 }
+export interface RuleWithUseUnicodeRegexOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseUnicodeRegexOptions;
+}
 export interface RuleWithUseVueConsistentDefinePropsDeclarationOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueConsistentDefinePropsDeclarationOptions;
@@ -7464,6 +7477,7 @@ export interface UseSortedClassesOptions {
 	functions?: string[];
 }
 export type UseSpreadOptions = {};
+export type UseUnicodeRegexOptions = {};
 export interface UseVueConsistentDefinePropsDeclarationOptions {
 	style?: DeclarationStyle;
 }
@@ -8426,6 +8440,7 @@ export type Category =
 	| "lint/nursery/useRequiredScripts"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSpread"
+	| "lint/nursery/useUnicodeRegex"
 	| "lint/nursery/useUniqueArgumentNames"
 	| "lint/nursery/useUniqueFieldDefinitionNames"
 	| "lint/nursery/useUniqueGraphqlOperationName"
