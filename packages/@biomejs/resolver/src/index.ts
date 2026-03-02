@@ -1,5 +1,5 @@
 export type * from "./common";
-export { MemoryFileSystem, Resolver, ResolveErrorKind } from "./common";
+export { MemoryFileSystem, ResolveErrorKind, Resolver } from "./common";
 
 /**
  * Which WASM distribution to load.

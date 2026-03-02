@@ -1,10 +1,10 @@
 import * as wasmModule from "@biomejs/wasm-resolver-nodejs";
 import {
-	MemoryFileSystem,
-	Resolver,
 	ensureInitialized,
+	MemoryFileSystem,
 	type ResolveOptions,
 	type ResolveResult,
+	Resolver,
 } from "./common";
 import { nodePathInfo, nodeReadFileUtf8 } from "./nodejsFileSystem";
 

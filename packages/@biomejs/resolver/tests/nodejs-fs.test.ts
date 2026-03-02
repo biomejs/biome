@@ -5,10 +5,10 @@
  * they require the Node.js WASM target to have been built beforehand.
  */
 
-import * as wasmModule from "@biomejs/wasm-resolver-nodejs";
 import * as path from "node:path";
+import * as wasmModule from "@biomejs/wasm-resolver-nodejs";
 import { beforeAll, describe, expect, it } from "vitest";
-import { Resolver, ResolveErrorKind, ensureInitialized } from "../src/common";
+import { ensureInitialized, ResolveErrorKind, Resolver } from "../src/common";
 import { nodePathInfo, nodeReadFileUtf8 } from "../src/nodejs-fs";
 
 beforeAll(() => {
@@ -55,10 +55,7 @@ describe("Node.js filesystem resolver", () => {
 			nodeReadFileUtf8,
 		);
 
-		const result = resolver.resolve(
-			"this-package-does-not-exist",
-			repoRoot,
-		);
+		const result = resolver.resolve("this-package-does-not-exist", repoRoot);
 		expect(result).toHaveProperty("error");
 		expect(result).toHaveProperty("errorKind", ResolveErrorKind.ModuleNotFound);
 

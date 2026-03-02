@@ -1,10 +1,10 @@
 import * as wasmModule from "@biomejs/wasm-resolver-web";
 import {
-	MemoryFileSystem,
-	Resolver,
 	ensureInitialized,
+	MemoryFileSystem,
 	type ResolveOptions,
 	type ResolveResult,
+	Resolver,
 } from "./common";
 
 export type * from "./common";
