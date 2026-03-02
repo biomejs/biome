@@ -208,7 +208,7 @@ fn parse_any_tag_name(p: &mut HtmlParser) -> ParsedSyntax {
         // Parse as regular HTML tag
         parse_literal(p, HTML_TAG_NAME)
     };
-    // Step 2: Extend with member access if present
+    // Step 2: Extend with member access if present (using .map() pattern from JSX parser)
     name.map(|mut name| {
         // Check kind BEFORE moving name with precede()
         let is_lowercase_tag = name.kind(p) == HTML_TAG_NAME;
