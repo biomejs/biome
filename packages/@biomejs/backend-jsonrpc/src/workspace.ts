@@ -8959,11 +8959,14 @@ export type GritVariant = "Standard";
 export type EmbeddingHtmlKind =
 	| "None"
 	| "Html"
-	| { Vue: { applicability: EmbeddingApplicability } }
-	| { Astro: { applicability: EmbeddingApplicability } }
-	| { Svelte: { applicability: EmbeddingApplicability } };
+	| { Vue: { applicability: EmbeddingStyleApplicability } }
+	| { Astro: { applicability: EmbeddingStyleApplicability } }
+	| { Svelte: { applicability: EmbeddingStyleApplicability } };
 export type HtmlTextExpressions = "None" | "Single" | "Double";
-export type EmbeddingApplicability = "Local" | "Global" | "Unknown";
+/**
+ * How the CSS is applied inside a snippet
+ */
+export type EmbeddingStyleApplicability = "Local" | "Global" | "Unknown";
 export interface OpenFileResult {
 	diagnostics: Diagnostic[];
 }
