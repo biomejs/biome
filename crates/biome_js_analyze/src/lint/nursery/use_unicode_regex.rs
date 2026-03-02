@@ -62,7 +62,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseUnicodeRegex {
-        version: "next",
+        version: "2.4.5",
         name: "useUnicodeRegex",
         language: "js",
         sources: &[RuleSource::Eslint("require-unicode-regexp").same()],

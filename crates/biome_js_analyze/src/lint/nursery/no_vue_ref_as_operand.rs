@@ -86,7 +86,7 @@ declare_lint_rule! {
     /// ```
     /// 
     pub NoVueRefAsOperand {
-        version: "next",
+        version: "2.4.5",
         name: "noVueRefAsOperand",
         language: "js",
         recommended: false,

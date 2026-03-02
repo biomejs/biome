@@ -56,7 +56,7 @@ declare_lint_rule! {
     /// - [Vue Documentation](https://vuejs.org/api/sfc-css-features.html#scoped-css)
     /// - [Astro Documentation](https://docs.astro.build/en/guides/styling/#global-styles)
     pub UseScopedStyles {
-        version: "next",
+        version: "2.4.5",
         name: "useScopedStyles",
         language: "html",
         recommended: true,
