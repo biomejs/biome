@@ -1,0 +1,26 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 155
+expression: invalidDoubleDollarStoreDereference.svelte.ts
+---
+# Input
+```ts
+$$state;
+
+```
+
+# Diagnostics
+```
+invalidDoubleDollarStoreDereference.svelte.ts:1:1 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━
+
+  × The $$state variable is undeclared.
+  
+  > 1 │ $$state;
+      │ ^^^^^^^
+    2 │ 
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```

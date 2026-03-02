@@ -1,0 +1,2 @@
+type store = number;
+$store;
