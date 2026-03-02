@@ -13,7 +13,9 @@ use crate::css_module_info::{
     CssClassStep, CssModuleInfo, CssModuleVisitor, CssTraversalStep, ImportTreeNode,
     SerializedCssModuleInfo,
 };
-use crate::html_module_info::{HtmlModuleInfo, HtmlModuleVisitor, SerializedHtmlModuleInfo};
+use crate::html_module_info::{
+    HtmlEmbeddedContent, HtmlModuleInfo, HtmlModuleVisitor, SerializedHtmlModuleInfo,
+};
 use crate::{
     JsExport, JsModuleInfo, JsOwnExport, ModuleDiagnostic, SerializedJsModuleInfo,
     js_module_info::JsModuleVisitor,
@@ -28,6 +30,7 @@ use biome_project_layout::ProjectLayout;
 use biome_resolver::{FsWithResolverProxy, PathInfo};
 use camino::{Utf8Path, Utf8PathBuf};
 pub(crate) use fs_proxy::ModuleGraphFsProxy;
+use indexmap::IndexSet;
 use papaya::{HashMap, HashMapRef, LocalGuard};
 use rustc_hash::{FxBuildHasher, FxHashSet};
 use std::collections::VecDeque;
@@ -101,7 +104,7 @@ impl ModuleGraph {
         let data = self.data.pin();
         let mut result = Vec::new();
         let mut visited: FxHashSet<Utf8PathBuf> = FxHashSet::default();
-        let mut queue = std::collections::VecDeque::new();
+        let mut queue = VecDeque::new();
         queue.push_back(path.to_path_buf());
 
         while let Some(current) = queue.pop_front() {
@@ -124,10 +127,16 @@ impl ModuleGraph {
                         .imports
                         .values()
                         .any(|p| p.resolved_path.as_path() == Some(current.as_path())),
-                    ModuleInfo::Html(html_info) => html_info
-                        .imported_stylesheets
-                        .iter()
-                        .any(|p| p.as_path() == Some(current.as_path())),
+                    ModuleInfo::Html(html_info) => {
+                        html_info
+                            .imported_stylesheets
+                            .iter()
+                            .any(|p| p.as_path() == Some(current.as_path()))
+                            || html_info
+                                .static_import_paths
+                                .values()
+                                .any(|p| p.as_path() == Some(current.as_path()))
+                    }
                 };
 
                 if imports_current && !visited.contains(file_path.as_path()) {
@@ -222,142 +231,6 @@ impl ModuleGraph {
         }
 
         false
-    }
-
-    /// Collects all CSS classes available through the import tree of the given HTML file.
-    ///
-    /// Traverses the import tree starting from `html_path`, collecting classes from:
-    /// 1. Inline `<style>` blocks in the HTML file itself
-    /// 2. CSS files directly linked via `<link rel="stylesheet">`
-    /// 3. CSS files imported by parent JS/HTML files that import this HTML file
-    ///
-    /// Returns a tuple of (available_classes, traversal_path) where:
-    /// - `available_classes` is a set of all CSS class names found
-    /// - `traversal_path` is a vector describing the files visited (for diagnostics)
-    pub fn collect_available_classes_from_import_tree(
-        &self,
-        html_path: &Utf8Path,
-    ) -> (FxHashSet<String>, Vec<CssTraversalStep>) {
-        let data = self.data.pin();
-        let mut available_classes = FxHashSet::default();
-        let mut traversal_path = Vec::new();
-        let mut visited = FxHashSet::default();
-
-        // Start with the HTML file itself
-        if let Some(html_info) = self.html_module_info_for_path(html_path) {
-            // Collect inline styles
-            for class in html_info.style_classes.iter() {
-                available_classes.insert(class.text().to_string());
-            }
-
-            // Collect linked stylesheets
-            for stylesheet_path in &html_info.imported_stylesheets {
-                if let Some(path) = stylesheet_path.as_path()
-                    && let Some(css_info) = self.css_module_info_for_path(path)
-                {
-                    for class in css_info.classes.iter() {
-                        let class_name = class.text().to_string();
-                        available_classes.insert(class_name.clone());
-                    }
-                    traversal_path.push(CssTraversalStep {
-                        css_path: path.to_path_buf(),
-                        importer_path: html_path.to_path_buf(),
-                        component_chain: vec![html_path.to_path_buf()],
-                        is_direct: true,
-                    });
-                }
-            }
-        }
-
-        // Now traverse upward: find files that import this HTML file
-        // and collect CSS they import
-        let mut queue: VecDeque<_> = VecDeque::new();
-        queue.push_back((html_path.to_path_buf(), vec![html_path.to_path_buf()]));
-        visited.insert(html_path.to_path_buf());
-
-        while let Some((current_path, current_chain)) = queue.pop_front() {
-            // Find all files that import current_path
-            for (file_path, module_info) in data.iter() {
-                if visited.contains(file_path.as_path()) {
-                    continue;
-                }
-
-                let imports_current = match module_info {
-                    ModuleInfo::Js(js_info) => js_info
-                        .static_import_paths
-                        .values()
-                        .chain(js_info.dynamic_import_paths.values())
-                        .any(|p| p.as_path() == Some(current_path.as_path())),
-                    ModuleInfo::Html(html_info) => html_info
-                        .imported_stylesheets
-                        .iter()
-                        .any(|p| p.as_path() == Some(current_path.as_path())),
-                    ModuleInfo::Css(_) => false,
-                };
-
-                if imports_current {
-                    visited.insert(file_path.clone());
-
-                    match module_info {
-                        ModuleInfo::Js(js_info) => {
-                            let mut new_chain = current_chain.clone();
-                            new_chain.push(file_path.clone());
-
-                            // Collect CSS files imported by this parent JS file
-                            for import_path in js_info
-                                .static_import_paths
-                                .values()
-                                .chain(js_info.dynamic_import_paths.values())
-                            {
-                                if let Some(path) = import_path.as_path()
-                                    && let Some(css_info) = self.css_module_info_for_path(path)
-                                {
-                                    for class in css_info.classes.iter() {
-                                        let class_name = class.text().to_string();
-                                        available_classes.insert(class_name.clone());
-                                    }
-                                    traversal_path.push(CssTraversalStep {
-                                        css_path: path.to_path_buf(),
-                                        importer_path: file_path.clone(),
-                                        component_chain: new_chain.clone(),
-                                        is_direct: false,
-                                    });
-                                }
-                            }
-                            // Continue traversing upward
-                            queue.push_back((file_path.clone(), new_chain));
-                        }
-                        ModuleInfo::Html(html_info) => {
-                            let mut new_chain = current_chain.clone();
-                            new_chain.push(file_path.clone());
-
-                            // Collect CSS files linked by this HTML file
-                            for stylesheet_path in &html_info.imported_stylesheets {
-                                if let Some(path) = stylesheet_path.as_path()
-                                    && let Some(css_info) = self.css_module_info_for_path(path)
-                                {
-                                    for class in css_info.classes.iter() {
-                                        let class_name = class.text().to_string();
-                                        available_classes.insert(class_name.clone());
-                                    }
-                                    traversal_path.push(CssTraversalStep {
-                                        css_path: path.to_path_buf(),
-                                        importer_path: file_path.clone(),
-                                        component_chain: new_chain.clone(),
-                                        is_direct: false,
-                                    });
-                                }
-                            }
-                            // Continue traversing upward
-                            queue.push_back((file_path.clone(), new_chain));
-                        }
-                        ModuleInfo::Css(_) => {}
-                    }
-                }
-            }
-        }
-
-        (available_classes, traversal_path)
     }
 
     /// Returns an iterator that lazily traverses the import tree for the given JS file.
@@ -479,22 +352,31 @@ impl ModuleGraph {
             }
 
             let imports_current = match module_info {
-                crate::ModuleInfo::Js(js_info) => js_info
+                ModuleInfo::Js(js_info) => js_info
                     .static_import_paths
                     .values()
                     .chain(js_info.dynamic_import_paths.values())
                     .any(|p| p.as_path() == Some(current_path)),
-                crate::ModuleInfo::Html(html_info) => html_info
-                    .imported_stylesheets
-                    .iter()
-                    .any(|p| p.as_path() == Some(current_path)),
-                crate::ModuleInfo::Css(_) => false,
+                ModuleInfo::Html(html_info) => {
+                    // An HTML-like file (Vue/Astro/Svelte) can import another
+                    // HTML-like file via its embedded <script> block imports, or
+                    // link a stylesheet via <link rel="stylesheet">.
+                    html_info
+                        .imported_stylesheets
+                        .iter()
+                        .any(|p| p.as_path() == Some(current_path))
+                        || html_info
+                            .static_import_paths
+                            .values()
+                            .any(|p| p.as_path() == Some(current_path))
+                }
+                ModuleInfo::Css(_) => false,
             };
 
             if imports_current {
                 // Collect CSS imports from this parent
                 let css_imports: Vec<Utf8PathBuf> = match module_info {
-                    crate::ModuleInfo::Js(js_info) => js_info
+                    ModuleInfo::Js(js_info) => js_info
                         .static_import_paths
                         .values()
                         .filter_map(|import_path| {
@@ -504,16 +386,17 @@ impl ModuleGraph {
                             Some(path.to_path_buf())
                         })
                         .collect(),
-                    crate::ModuleInfo::Html(html_info) => html_info
+                    ModuleInfo::Html(html_info) => html_info
                         .imported_stylesheets
                         .iter()
+                        .chain(html_info.static_import_paths.values())
                         .filter_map(|stylesheet_path| {
                             let path = stylesheet_path.as_path()?;
                             self.css_module_info_for_path(path)?;
                             Some(path.to_path_buf())
                         })
                         .collect(),
-                    crate::ModuleInfo::Css(_) => Vec::new(),
+                    ModuleInfo::Css(_) => Vec::new(),
                 };
 
                 // Clone visited set for this branch to allow the same node in different branches
@@ -533,6 +416,103 @@ impl ModuleGraph {
         }
 
         parents
+    }
+
+    /// Returns an iterator that lazily traverses the import tree for the given HTML file,
+    /// yielding CSS class steps from:
+    ///
+    /// 1. All inline `<style>` blocks in the HTML file itself — both globally and
+    ///    locally scoped, since scoped styles are valid for the component's own
+    ///    elements.
+    /// 2. CSS files directly linked via `<link rel="stylesheet">`.
+    /// 3. CSS files imported by parent JS/HTML files that transitively import
+    ///    this HTML file (upward traversal) — only globally scoped classes from
+    ///    parent files are included.
+    pub fn traverse_import_tree_for_html_classes(
+        &self,
+        html_path: &Utf8Path,
+    ) -> impl Iterator<Item = CssClassStep> + '_ {
+        let mut inline_steps = Vec::new();
+        let mut linked_steps = Vec::new();
+
+        if let Some(html_info) = self.html_module_info_for_path(html_path) {
+            // 1. All inline style classes (global and local).
+            // For same-file checks, scoped styles still apply to the component's own
+            // elements, so both Global and Local classes are valid. Only when classes
+            // are traversed from imported/parent files do we restrict to Global.
+            let all_inline_classes: IndexSet<_> = html_info
+                .style_classes
+                .iter()
+                .map(|c| c.name.clone())
+                .collect();
+            if !all_inline_classes.is_empty() {
+                inline_steps.push(CssClassStep {
+                    css_path: html_path.to_path_buf(),
+                    css_classes: all_inline_classes,
+                });
+            }
+
+            // 2. Directly linked external stylesheets.
+            for stylesheet_path in &html_info.imported_stylesheets {
+                if let Some(path) = stylesheet_path.as_path()
+                    && let Some(css_info) = self.css_module_info_for_path(path)
+                {
+                    linked_steps.push(CssClassStep {
+                        css_path: path.to_path_buf(),
+                        css_classes: css_info.classes.clone(),
+                    });
+                }
+            }
+        }
+
+        // 3. Upward traversal: CSS imported by parent files that import this HTML file.
+        let stack = vec![html_path.to_path_buf()];
+        let mut visited = FxHashSet::default();
+        visited.insert(html_path.to_path_buf());
+
+        inline_steps
+            .into_iter()
+            .chain(linked_steps)
+            .chain(ImportTreeTraversal {
+                module_graph: self,
+                stack,
+                visited,
+                current_css_iter: None,
+            })
+    }
+
+    /// Builds a tree structure representing the import relationships for an HTML file,
+    /// for use in diagnostic display.
+    ///
+    /// Mirrors [`Self::build_import_tree`] but for HTML files: it includes
+    /// directly linked CSS (`<link rel="stylesheet">`) and traverses upward
+    /// through parent importers.
+    ///
+    /// Returns `None` if the file is not found in the module graph.
+    pub fn build_import_tree_for_html(&self, html_path: &Utf8Path) -> Option<ImportTreeNode> {
+        let html_info = self.html_module_info_for_path(html_path)?;
+
+        let css_imports: Vec<_> = html_info
+            .imported_stylesheets
+            .iter()
+            .filter_map(|stylesheet_path| {
+                let path = stylesheet_path.as_path()?;
+                self.css_module_info_for_path(path)?;
+                Some(path.to_path_buf())
+            })
+            .collect();
+
+        let mut root = ImportTreeNode {
+            file_path: html_path.to_path_buf(),
+            css_imports,
+            parent_components: Vec::new(),
+        };
+
+        let mut visited = FxHashSet::default();
+        visited.insert(html_path.to_path_buf());
+        root.parent_components = self.build_parent_nodes(html_path, &mut visited);
+
+        Some(root)
     }
 
     /// Collects all CSS classes available through the import tree of the given JS file.
@@ -596,10 +576,16 @@ impl ModuleGraph {
                         .values()
                         .chain(js_info.dynamic_import_paths.values())
                         .any(|p| p.as_path() == Some(current_path.as_path())),
-                    ModuleInfo::Html(html_info) => html_info
-                        .imported_stylesheets
-                        .iter()
-                        .any(|p| p.as_path() == Some(current_path.as_path())),
+                    ModuleInfo::Html(html_info) => {
+                        html_info
+                            .imported_stylesheets
+                            .iter()
+                            .any(|p| p.as_path() == Some(current_path.as_path()))
+                            || html_info
+                                .static_import_paths
+                                .values()
+                                .any(|p| p.as_path() == Some(current_path.as_path()))
+                    }
                     ModuleInfo::Css(_) => false,
                 };
 
@@ -639,8 +625,12 @@ impl ModuleGraph {
                             let mut new_chain = current_chain.clone();
                             new_chain.push(file_path.clone());
 
-                            // Collect CSS files linked by this HTML file
-                            for stylesheet_path in &html_info.imported_stylesheets {
+                            // Collect CSS files linked by this parent HTML-like file.
+                            for stylesheet_path in html_info
+                                .imported_stylesheets
+                                .iter()
+                                .chain(html_info.static_import_paths.values())
+                            {
                                 if let Some(path) = stylesheet_path.as_path()
                                     && let Some(css_info) = self.css_module_info_for_path(path)
                                 {
@@ -791,14 +781,24 @@ impl ModuleGraph {
 
     /// Updates the module graph for a single HTML file.
     ///
-    /// Collects CSS class names defined in embedded `<style>` blocks (from
-    /// already-parsed CSS ASTs — no re-parsing), CSS class names referenced in
-    /// `class` attributes, and external stylesheets linked via `<link>`.
+    /// Accepts a slice of `(path, html_root, embedded_content)` triples where
+    /// `embedded_content` is a flat list of [`HtmlEmbeddedContent`] blocks —
+    /// one variant per `<style>` or `<script>` block found in the file. The
+    /// caller is responsible for parsing the blocks and resolving any metadata
+    /// (e.g. `CssFileSource` carrying [`EmbeddingApplicability`]); this method
+    /// handles all downstream logic.
+    ///
+    /// Collected data:
+    /// - CSS class names from `<style>` blocks (scoped per `EmbeddingApplicability`).
+    /// - CSS class references from `class="…"` HTML attributes.
+    /// - External stylesheet paths from `<link rel="stylesheet" href="…">`.
+    /// - Static JS import paths from `<script>` blocks (for upward traversal in
+    ///   Vue/Astro/Svelte component hierarchies).
     pub fn update_graph_for_html_paths(
         &self,
         fs: &dyn FsWithResolverProxy,
         project_layout: &ProjectLayout,
-        added_or_updated_paths: &[(&BiomePath, HtmlRoot, Vec<AnyCssRoot>)],
+        added_or_updated_paths: &[(&BiomePath, HtmlRoot, Vec<HtmlEmbeddedContent>)],
     ) -> (ModuleDependencies, Vec<ModuleDiagnostic>) {
         // Register directory path info (same pattern as CSS/JS).
         let path_info = self.path_info.pin();
@@ -824,11 +824,11 @@ impl ModuleGraph {
         // Traverse all the added and updated paths and insert their module info.
         let modules = self.data.pin();
 
-        for (path, html_root, embedded_css_roots) in added_or_updated_paths {
+        for (path, html_root, embedded_content) in added_or_updated_paths {
             let directory = path.parent().unwrap_or(path);
             let visitor = HtmlModuleVisitor::new(
                 html_root.clone(),
-                embedded_css_roots,
+                embedded_content,
                 path.to_path_buf(),
                 directory,
                 &fs_proxy,
@@ -837,6 +837,12 @@ impl ModuleGraph {
             let module = visitor.visit();
 
             for resolved_path in &module.imported_stylesheets {
+                if let Some(p) = resolved_path.as_path() {
+                    dependencies.insert(p.to_path_buf());
+                }
+            }
+
+            for resolved_path in module.static_import_paths.values() {
                 if let Some(p) = resolved_path.as_path() {
                     dependencies.insert(p.to_path_buf());
                 }

@@ -4999,6 +4999,17 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUndeclaredClassesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUndeclaredClassesOptions" }
+			]
+		},
+		"NoUndeclaredClassesOptions": {
+			"description": "Options for the `noUndeclaredClasses` rule.",
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUndeclaredDependenciesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5047,16 +5058,6 @@
 					"items": { "$ref": "#/$defs/Regex" }
 				}
 			},
-			"additionalProperties": false
-		},
-		"NoUndeclaredStylesConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithNoUndeclaredStylesOptions" }
-			]
-		},
-		"NoUndeclaredStylesOptions": {
-			"type": "object",
 			"additionalProperties": false
 		},
 		"NoUndeclaredVariablesConfiguration": {
@@ -5287,6 +5288,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUnusedClassesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUnusedClassesOptions" }
+			]
+		},
+		"NoUnusedClassesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUnusedExpressionsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5340,16 +5351,6 @@
 			]
 		},
 		"NoUnusedPrivateClassMembersOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
-		"NoUnusedStylesConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithNoUnusedStylesOptions" }
-			]
-		},
-		"NoUnusedStylesOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -6091,17 +6092,17 @@
 						{ "type": "null" }
 					]
 				},
+				"noUndeclaredClasses": {
+					"description": "Reports CSS class names in HTML class attributes that are not defined in any \\<style> block or linked stylesheet available to the file.\nSee https://biomejs.dev/linter/rules/no-undeclared-classes",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUndeclaredClassesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUndeclaredEnvVars": {
 					"description": "Disallow the use of undeclared environment variables.\nSee https://biomejs.dev/linter/rules/no-undeclared-env-vars",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUndeclaredEnvVarsConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUndeclaredStyles": {
-					"description": "Reports CSS class names in HTML class attributes that are not defined in any \\<style> block or linked stylesheet in the same file.\nSee https://biomejs.dev/linter/rules/no-undeclared-styles",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoUndeclaredStylesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6119,10 +6120,10 @@
 						{ "type": "null" }
 					]
 				},
-				"noUnusedStyles": {
-					"description": "Reports CSS class selectors that are never referenced in any JSX or HTML file.\nSee https://biomejs.dev/linter/rules/no-unused-styles",
+				"noUnusedClasses": {
+					"description": "Reports CSS class selectors that are never referenced in any JSX or HTML file.\nSee https://biomejs.dev/linter/rules/no-unused-classes",
 					"anyOf": [
-						{ "$ref": "#/$defs/NoUnusedStylesConfiguration" },
+						{ "$ref": "#/$defs/NoUnusedClassesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9122,6 +9123,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoUndeclaredClassesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUndeclaredClassesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoUndeclaredDependenciesOptions": {
 			"type": "object",
 			"properties": {
@@ -9136,15 +9146,6 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUndeclaredEnvVarsOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
-		"RuleWithNoUndeclaredStylesOptions": {
-			"type": "object",
-			"properties": {
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/NoUndeclaredStylesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -9321,6 +9322,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoUnusedClassesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUnusedClassesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoUnusedExpressionsOptions": {
 			"type": "object",
 			"properties": {
@@ -9366,15 +9376,6 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUnusedPrivateClassMembersOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
-		"RuleWithNoUnusedStylesOptions": {
-			"type": "object",
-			"properties": {
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/NoUnusedStylesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

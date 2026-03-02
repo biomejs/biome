@@ -332,7 +332,7 @@ fn should_apply_fixes_to_embedded_languages() {
     ));
 }
 
-// ── noUndeclaredStyles ────────────────────────────────────────────────────────
+// noUndeclaredClasses
 
 const BIOME_JSON_HTML_LINTER: &str = r#"{ "linter": { "enabled": true }, "html": { "linter": { "enabled": true }, "experimentalFullSupportEnabled": true } }"#;
 
@@ -341,9 +341,9 @@ const BIOME_JSON_HTML_LINTER: &str = r#"{ "linter": { "enabled": true }, "html":
 /// unknown classes across multiple `<style>` blocks, unknown classes on
 /// different element types, and a class absent from a linked stylesheet.
 #[test]
-fn no_undeclared_styles_reports_undeclared_classes() {
+fn no_undeclared_classes_reports_undeclared_classes() {
     let mut console = BufferConsole::default();
-    let mut fs = TemporaryFs::new("no_undeclared_styles_reports_undeclared_classes");
+    let mut fs = TemporaryFs::new("no_undeclared_classes_reports_undeclared_classes");
 
     fs.create_file("biome.json", BIOME_JSON_HTML_LINTER);
     // .card is declared; .header is not → flagged
@@ -378,12 +378,12 @@ fn no_undeclared_styles_reports_undeclared_classes() {
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["lint", "--only=nursery/noUndeclaredStyles", fs.cli_path()].as_slice()),
+        Args::from(["lint", "--only=nursery/noUndeclaredClasses", fs.cli_path()].as_slice()),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "no_undeclared_styles_reports_undeclared_classes",
+        "no_undeclared_classes_reports_undeclared_classes",
         fs.create_mem(),
         console,
         result,
@@ -394,9 +394,9 @@ fn no_undeclared_styles_reports_undeclared_classes() {
 /// sources: inline `<style>` block, pseudo-selector variants (`:hover`,
 /// `::before`), and a linked external stylesheet.
 #[test]
-fn no_undeclared_styles_passes_when_declared() {
+fn no_undeclared_classes_passes_when_declared() {
     let mut console = BufferConsole::default();
-    let mut fs = TemporaryFs::new("no_undeclared_styles_passes_when_declared");
+    let mut fs = TemporaryFs::new("no_undeclared_classes_passes_when_declared");
 
     fs.create_file("biome.json", BIOME_JSON_HTML_LINTER);
     fs.create_file("styles.css", ".hero { font-size: 2rem; }");
@@ -420,12 +420,12 @@ fn no_undeclared_styles_passes_when_declared() {
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["lint", "--only=nursery/noUndeclaredStyles", fs.cli_path()].as_slice()),
+        Args::from(["lint", "--only=nursery/noUndeclaredClasses", fs.cli_path()].as_slice()),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "no_undeclared_styles_passes_when_declared",
+        "no_undeclared_classes_passes_when_declared",
         fs.create_mem(),
         console,
         result,
@@ -435,9 +435,9 @@ fn no_undeclared_styles_passes_when_declared() {
 /// A file with no `<style>` blocks and no linked stylesheets must never emit
 /// diagnostics — the rule silently passes to avoid false positives.
 #[test]
-fn no_undeclared_styles_silent_without_style_info() {
+fn no_undeclared_classes_silent_without_style_info() {
     let mut console = BufferConsole::default();
-    let mut fs = TemporaryFs::new("no_undeclared_styles_silent_without_style_info");
+    let mut fs = TemporaryFs::new("no_undeclared_classes_silent_without_style_info");
 
     fs.create_file("biome.json", BIOME_JSON_HTML_LINTER);
     fs.create_file("file.html", r#"<div class="anything">Content</div>"#);
@@ -445,12 +445,12 @@ fn no_undeclared_styles_silent_without_style_info() {
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["lint", "--only=nursery/noUndeclaredStyles", fs.cli_path()].as_slice()),
+        Args::from(["lint", "--only=nursery/noUndeclaredClasses", fs.cli_path()].as_slice()),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "no_undeclared_styles_silent_without_style_info",
+        "no_undeclared_classes_silent_without_style_info",
         fs.create_mem(),
         console,
         result,

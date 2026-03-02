@@ -83,7 +83,7 @@ impl<'a> JsModuleVisitor<'a> {
     /// attributes.
     ///
     /// Only static string literals are collected; dynamic expressions are
-    /// skipped to avoid false positives in `noUnusedStyles`.
+    /// skipped to avoid false positives in `noUnusedClasses`.
     fn visit_jsx_attribute(&self, attr: JsxAttribute, collector: &mut JsModuleInfoCollector) {
         if let Some(inner) = self.extract_jsx_class_attribute_inner(&attr) {
             collector

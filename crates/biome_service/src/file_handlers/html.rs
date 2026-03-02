@@ -22,7 +22,10 @@ use biome_configuration::html::{
     HtmlLinterConfiguration, HtmlLinterEnabled, HtmlParseInterpolation, HtmlParserConfiguration,
 };
 use biome_css_parser::{CssModulesKind, parse_css_with_offset_and_cache};
-use biome_css_syntax::{CssFileSource, CssLanguage};
+use biome_css_syntax::{
+    CssFileSource, CssLanguage, EmbeddingHtmlKind, EmbeddingKind as CssEmbeddingKind,
+    EmbeddingStyleApplicability,
+};
 use biome_formatter::format_element::{Interned, LineMode};
 use biome_formatter::prelude::{Document, Tag};
 use biome_formatter::{
@@ -1010,10 +1013,43 @@ pub(crate) fn parse_embedded_style(
         }
 
         let file_source = if html_file_source.is_html() {
-            DocumentFileSource::Css(CssFileSource::css())
+            CssFileSource::css()
+                .with_embedding_kind(CssEmbeddingKind::Html(EmbeddingHtmlKind::Html))
+        } else if html_file_source.is_vue() {
+            // Vue `<style scoped>` and `<style module>` are both component-local.
+            // Plain `<style>` (no attribute) leaks into the global scope.
+            let applicability =
+                if element.is_style_scoped("scoped") || element.is_style_scoped("module") {
+                    EmbeddingStyleApplicability::Local
+                } else {
+                    EmbeddingStyleApplicability::Global
+                };
+            CssFileSource::new_css_modules().with_embedding_kind(CssEmbeddingKind::Html(
+                EmbeddingHtmlKind::Vue { applicability },
+            ))
+        } else if html_file_source.is_astro() {
+            // Astro: <style is:global> → Global; plain <style> → Local
+            let applicability = if element.is_style_scoped("is:global") {
+                EmbeddingStyleApplicability::Global
+            } else {
+                EmbeddingStyleApplicability::Local
+            };
+            CssFileSource::new_css_modules().with_embedding_kind(CssEmbeddingKind::Html(
+                EmbeddingHtmlKind::Astro { applicability },
+            ))
+        } else if html_file_source.is_svelte() {
+            // Svelte: plain <style> → Local (global classes via :global() are
+            // detected at the class-selector level by the CSS semantic model)
+            CssFileSource::new_css_modules().with_embedding_kind(CssEmbeddingKind::Html(
+                EmbeddingHtmlKind::Svelte {
+                    applicability: EmbeddingStyleApplicability::Local,
+                },
+            ))
         } else {
-            DocumentFileSource::Css(CssFileSource::new_css_modules())
+            CssFileSource::new_css_modules()
         };
+
+        let file_source = DocumentFileSource::Css(file_source);
         let (snippet, services) = element.children().iter().next().and_then(|child| {
             let child = child.as_any_html_content()?;
             let child = child.as_html_embedded_content()?;
