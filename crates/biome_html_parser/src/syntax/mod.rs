@@ -252,10 +252,15 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
 
     parse_any_tag_name(p).or_add_diagnostic(p, expected_element_name);
 
-    if Astro.is_supported(p) {
-        p.re_lex(HtmlReLexContext::InsideTagAstro);
-    } else if Svelte.is_supported(p) {
-        p.re_lex(HtmlReLexContext::InsideTagSvelte);
+    let context = inside_tag_context(p);
+    match context {
+        HtmlLexContext::InsideTagSvelte => {
+            p.re_lex(HtmlReLexContext::InsideTagSvelte);
+        }
+        HtmlLexContext::InsideTagAstro => {
+            p.re_lex(HtmlReLexContext::InsideTagAstro);
+        }
+        _ => {}
     }
 
     AttributeList.parse_list(p);
