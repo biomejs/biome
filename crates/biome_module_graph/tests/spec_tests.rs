@@ -2970,6 +2970,36 @@ fn test_html_inline_style_classes_are_global() {
     assert!(found, "Global class must appear in traversal");
 }
 
+/// `class="..."` on void/self-closing HTML elements must be collected as
+/// referenced classes, not silently dropped.
+///
+/// Before the fix, `visit_self_closing_element` returned early for non-`<link>`
+/// tags, so `<img class="hero" />` and `<input class="field" />` never reached
+/// `referenced_classes`, which produced false `noUndeclaredClasses` diagnostics.
+#[test]
+fn test_html_self_closing_element_class_references_are_collected() {
+    let src = r#"<img class="hero" /><input class="field" /><br class="spacer" />"#;
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.html".into(), src);
+
+    let html_path = BiomePath::new("/src/index.html");
+    let html_root = parse_html_src(src, HtmlFileSource::html());
+
+    let module_graph = ModuleGraph::default();
+    let layout = ProjectLayout::default();
+    module_graph.update_graph_for_html_paths(&fs, &layout, &[(&html_path, html_root, vec![])]);
+
+    let html_info = module_graph
+        .html_module_info_for_path(Utf8Path::new("/src/index.html"))
+        .expect("HTML module must exist");
+
+    let has = |name: &str| html_info.referenced_classes.iter().any(|r| r.matches(name));
+
+    assert!(has("hero"), "expected 'hero' in referenced_classes");
+    assert!(has("field"), "expected 'field' in referenced_classes");
+    assert!(has("spacer"), "expected 'spacer' in referenced_classes");
+}
+
 /// Vue `<style>` (unscoped) → classes are Global.
 #[test]
 fn test_vue_unscoped_style_classes_are_global() {

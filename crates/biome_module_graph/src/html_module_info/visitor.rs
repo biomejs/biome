@@ -76,7 +76,11 @@ impl<'a> HtmlModuleVisitor<'a> {
                     &mut imported_stylesheets,
                 );
             } else if let Some(element) = HtmlSelfClosingElement::cast(node) {
-                self.visit_self_closing_element(element, &mut imported_stylesheets);
+                self.visit_self_closing_element(
+                    element,
+                    &mut referenced_classes,
+                    &mut imported_stylesheets,
+                );
             }
         }
 
@@ -164,12 +168,39 @@ impl<'a> HtmlModuleVisitor<'a> {
         }
     }
 
-    /// Handles void/self-closing elements — specifically `<link rel="stylesheet" href="...">`.
+    /// Handles void/self-closing elements.
+    ///
+    /// Collects `class="..."` references from any self-closing element (e.g.
+    /// `<img class="hero" />`, `<input class="field" />`), and additionally
+    /// handles `<link rel="stylesheet" href="...">` for stylesheet imports.
     fn visit_self_closing_element(
         &self,
         element: HtmlSelfClosingElement,
+        referenced_classes: &mut Vec<CssClassReference>,
         imported_stylesheets: &mut Vec<ResolvedPath>,
     ) {
+        // Collect class= references from all self-closing elements.
+        for attr in element.attributes() {
+            let Some(attr) = attr.as_html_attribute() else {
+                continue;
+            };
+            let Some(name_token) = attr.name().ok().and_then(|n| n.value_token().ok()) else {
+                continue;
+            };
+            if name_token.text_trimmed().eq_ignore_ascii_case("class") {
+                if let Some(initializer) = attr.initializer()
+                    && let Ok(value_node) = initializer.value()
+                {
+                    collect_class_attribute_reference(
+                        &value_node,
+                        &self.file_path,
+                        referenced_classes,
+                    );
+                }
+            }
+        }
+
+        // Collect <link rel="stylesheet"> imports.
         let is_link_tag = element
             .tag_name()
             .is_some_and(|t| t.text().eq_ignore_ascii_case("link"));
