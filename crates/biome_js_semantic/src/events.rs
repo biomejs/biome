@@ -13,7 +13,7 @@ use rustc_hash::FxHashMap;
 use std::collections::VecDeque;
 use std::mem;
 
-use crate::ScopeId;
+use crate::{ScopeId, SemanticFlavor};
 
 /// Events emitted by the [SemanticEventExtractor].
 /// These events are later made into the Semantic Model.
@@ -158,6 +158,7 @@ pub struct SemanticEventExtractor {
     /// Type parameters bound in a `infer T` clause.
     infers: Vec<TsTypeParameterName>,
     is_ambient_context: bool,
+    flavor: SemanticFlavor,
 }
 
 /// A binding name is either a type or a value.
@@ -929,6 +930,28 @@ impl SemanticEventExtractor {
         self.stash.pop_front()
     }
 
+    pub fn set_flavor(&mut self, flavor: SemanticFlavor) {
+        self.flavor = flavor;
+    }
+
+    fn maybe_svelte_store_dereference_binding_name(
+        &self,
+        name: &BindingName,
+    ) -> Option<BindingName> {
+        let BindingName::Value(name) = name else {
+            return None;
+        };
+        if self.flavor != SemanticFlavor::Svelte {
+            return None;
+        }
+        let store_name = self.flavor.store_reference_name(name.text())?;
+        let store_name_start = name.len() - TextSize::from(u32::try_from(store_name.len()).ok()?);
+        Some(BindingName::Value(
+            name.clone()
+                .slice(TextRange::new(store_name_start, name.len())),
+        ))
+    }
+
     fn push_infers_in_scope(&mut self) {
         let infers = mem::take(&mut self.infers);
         for infer in infers {
@@ -983,143 +1006,50 @@ impl SemanticEventExtractor {
 
         // Bind references to declarations
         for (name, mut references) in scope.references {
-            if let Some(info) = self.bindings.get(&name) {
-                let declaration_at = info.range_start;
-                // We know the declaration of these reference.
-                for reference in references {
-                    let declaration_before_reference = declaration_at < reference.range().start();
-                    let event = match reference {
-                        Reference::Export(range) => {
-                            self.stash.push_back(SemanticEvent::Export {
-                                range,
-                                declaration_at,
-                            });
-                            if declaration_before_reference {
-                                SemanticEvent::Read {
-                                    range,
-                                    declaration_at,
-                                    scope_id,
-                                }
-                            } else {
-                                SemanticEvent::HoistedRead {
-                                    range,
-                                    declaration_at,
-                                    scope_id,
-                                }
-                            }
-                        }
-                        reference @ (Reference::Read(_) | Reference::AmbientRead(_)) => {
-                            if info.declaration_kind == JsSyntaxKind::JS_NAMESPACE_IMPORT_SPECIFIER
-                                && matches!(name, BindingName::Type(_))
-                            {
-                                // An import namespace imported as a type can only be
-                                // used in a qualified name, e.g `Namespace.Type`.
-                                // Thus, the reference is unresolved.
-                                // Note that we don't need to forward the reference in a parent scope,
-                                // because an import namespace is already in the root scope.
-                                self.stash.push_back(SemanticEvent::UnresolvedReference {
-                                    is_read: !reference.is_write(),
-                                    range: reference.range(),
-                                });
-                            }
-                            // Handle edge case where a non-import binding shadows a type import
-                            // and the reference appears in a type position (AmbientRead).
-                            // For example `(stream: stream.T) => {}` (parameter shadows import)
-                            // or `let hast: hast.Root` inside a block (variable shadows import)
-                            // In these cases, the reference should be promoted to the parent scope
-                            // so that the dual lookup can resolve it to the type-only import.
-                            if reference.is_ambient_read()
-                                && !info.is_imported()
-                                && let Some(parent) = self.scopes.last_mut()
-                            {
-                                // Promote this reference to the parent scope
-                                let parent_references =
-                                    parent.references.entry(name.clone()).or_default();
-                                parent_references.push(Reference::AmbientRead(reference.range()));
-                                continue;
-                            }
-                            if declaration_before_reference {
-                                SemanticEvent::Read {
-                                    range: reference.range(),
-                                    declaration_at,
-                                    scope_id,
-                                }
-                            } else {
-                                SemanticEvent::HoistedRead {
-                                    range: reference.range(),
-                                    declaration_at,
-                                    scope_id,
-                                }
-                            }
-                        }
-                        Reference::Write(range) => {
-                            if declaration_before_reference {
-                                SemanticEvent::Write {
-                                    range,
-                                    declaration_at,
-                                    scope_id,
-                                }
-                            } else {
-                                SemanticEvent::HoistedWrite {
-                                    range,
-                                    declaration_at,
-                                    scope_id,
-                                }
-                            }
-                        }
-                    };
-                    self.stash.push_back(event);
+            if let Some(info) = self.bindings.get(&name).cloned() {
+                self.resolve_references_in_scope(name, references, &info, scope_id);
+                continue;
+            }
+
+            if let Some(info) = self.bindings.get(&name.clone().dual()).cloned() {
+                self.resolve_references_in_dual_scope(name, references, &info);
+                continue;
+            }
+
+            let fallback_name = self.maybe_svelte_store_dereference_binding_name(&name);
+            if let Some(fallback_name) = fallback_name {
+                // `$store = ...` updates the store value in Svelte; it is not a write to the
+                // backing `store` binding, so treat fallback writes as reads.
+                normalize_svelte_store_write_references(&mut references);
+
+                if let Some(info) = self.bindings.get(&fallback_name).cloned() {
+                    self.resolve_references_in_scope(fallback_name, references, &info, scope_id);
+                    continue;
                 }
-            } else if let Some(info) = self.bindings.get(&name.clone().dual()) {
-                let mut parent_references = self
-                    .scopes
-                    .last_mut()
-                    .map(|parent| parent.references.entry(name.clone()).or_default());
-                let is_dual_imported = info.is_imported();
-                for reference in references {
-                    match reference {
-                        Reference::Export(_) => {
-                            // An export can export both a value and a type.
-                            // If a dual binding exists, then it exports the dual binding.
-                        }
-                        Reference::AmbientRead(range) if is_dual_imported => {
-                            // An ambient read can only read a value,
-                            // but also an imported value as a type (with the `type` modifier)
-                            let declaration_before_reference =
-                                info.range_start < reference.range().start();
-                            let event = if declaration_before_reference {
-                                SemanticEvent::Read {
-                                    range,
-                                    declaration_at: info.range_start,
-                                    scope_id: ScopeId::new(0),
-                                }
-                            } else {
-                                SemanticEvent::HoistedRead {
-                                    range,
-                                    declaration_at: info.range_start,
-                                    scope_id: ScopeId::new(0),
-                                }
-                            };
-                            self.stash.push_back(event);
-                        }
-                        reference => {
-                            if let Some(parent_references) = &mut parent_references {
-                                parent_references.push(reference);
-                            } else {
-                                self.stash.push_back(SemanticEvent::UnresolvedReference {
-                                    is_read: !reference.is_write(),
-                                    range: reference.range(),
-                                });
-                            }
-                        }
+
+                if let Some(info) = self.bindings.get(&fallback_name.clone().dual()).cloned() {
+                    self.resolve_references_in_dual_scope(fallback_name, references, &info);
+                    continue;
+                }
+
+                if let Some(parent) = self.scopes.last_mut() {
+                    let parent_references = parent.references.entry(fallback_name).or_default();
+                    parent_references.append(&mut references);
+                } else {
+                    for reference in references {
+                        self.stash.push_back(SemanticEvent::UnresolvedReference {
+                            is_read: !reference.is_write(),
+                            range: reference.range(),
+                        });
                     }
                 }
-            } else if let Some(parent) = self.scopes.last_mut() {
-                // Promote these references to the parent scope
+                continue;
+            }
+
+            if let Some(parent) = self.scopes.last_mut() {
                 let parent_references = parent.references.entry(name).or_default();
                 parent_references.append(&mut references);
             } else {
-                // We are in the global scope. Raise `UnresolvedReference`.
                 for reference in references {
                     self.stash.push_back(SemanticEvent::UnresolvedReference {
                         is_read: !reference.is_write(),
@@ -1145,6 +1075,148 @@ impl SemanticEventExtractor {
         // We should at least have the global scope
         debug_assert!(!self.scopes.is_empty());
         self.scopes.last_mut().unwrap()
+    }
+
+    fn resolve_references_in_scope(
+        &mut self,
+        name: BindingName,
+        references: Vec<Reference>,
+        info: &BindingInfo,
+        scope_id: ScopeId,
+    ) {
+        let declaration_at = info.range_start;
+        for reference in references {
+            let declaration_before_reference = declaration_at < reference.range().start();
+            let event = match reference {
+                Reference::Export(range) => {
+                    self.stash.push_back(SemanticEvent::Export {
+                        range,
+                        declaration_at,
+                    });
+                    if declaration_before_reference {
+                        SemanticEvent::Read {
+                            range,
+                            declaration_at,
+                            scope_id,
+                        }
+                    } else {
+                        SemanticEvent::HoistedRead {
+                            range,
+                            declaration_at,
+                            scope_id,
+                        }
+                    }
+                }
+                reference @ (Reference::Read(_) | Reference::AmbientRead(_)) => {
+                    if info.declaration_kind == JsSyntaxKind::JS_NAMESPACE_IMPORT_SPECIFIER
+                        && matches!(&name, BindingName::Type(_))
+                    {
+                        // An import namespace imported as a type can only be
+                        // used in a qualified name, e.g `Namespace.Type`.
+                        // Thus, the reference is unresolved.
+                        // Note that we don't need to forward the reference in a parent scope,
+                        // because an import namespace is already in the root scope.
+                        // TODO(semantic-invalid-namespace-type-ref): Split semantic events for
+                        // invalid namespace-type references from usage tracking. We currently
+                        // emit both unresolved and read events so `noUndeclaredVariables` and
+                        // `noUnusedImports` stay consistent.
+                        self.stash.push_back(SemanticEvent::UnresolvedReference {
+                            is_read: !reference.is_write(),
+                            range: reference.range(),
+                        });
+                    }
+                    // A value binding can shadow a type-only import with the same name.
+                    // Promote ambient reads so the parent scope can resolve the type binding.
+                    if reference.is_ambient_read()
+                        && !info.is_imported()
+                        && let Some(parent) = self.scopes.last_mut()
+                    {
+                        let parent_references = parent.references.entry(name.clone()).or_default();
+                        parent_references.push(Reference::AmbientRead(reference.range()));
+                        continue;
+                    }
+                    if declaration_before_reference {
+                        SemanticEvent::Read {
+                            range: reference.range(),
+                            declaration_at,
+                            scope_id,
+                        }
+                    } else {
+                        SemanticEvent::HoistedRead {
+                            range: reference.range(),
+                            declaration_at,
+                            scope_id,
+                        }
+                    }
+                }
+                Reference::Write(range) => {
+                    if declaration_before_reference {
+                        SemanticEvent::Write {
+                            range,
+                            declaration_at,
+                            scope_id,
+                        }
+                    } else {
+                        SemanticEvent::HoistedWrite {
+                            range,
+                            declaration_at,
+                            scope_id,
+                        }
+                    }
+                }
+            };
+            self.stash.push_back(event);
+        }
+    }
+
+    fn resolve_references_in_dual_scope(
+        &mut self,
+        name: BindingName,
+        references: Vec<Reference>,
+        info: &BindingInfo,
+    ) {
+        let mut parent_references = self
+            .scopes
+            .last_mut()
+            .map(|parent| parent.references.entry(name.clone()).or_default());
+        let is_dual_imported = info.is_imported();
+        for reference in references {
+            match reference {
+                Reference::Export(_) => {
+                    // An export can export both a value and a type.
+                    // If a dual binding exists, then it exports the dual binding.
+                }
+                Reference::AmbientRead(range) if is_dual_imported => {
+                    // An ambient read can only read a value,
+                    // but also an imported value as a type (with the `type` modifier)
+                    let declaration_before_reference = info.range_start < reference.range().start();
+                    let event = if declaration_before_reference {
+                        SemanticEvent::Read {
+                            range,
+                            declaration_at: info.range_start,
+                            scope_id: ScopeId::new(0),
+                        }
+                    } else {
+                        SemanticEvent::HoistedRead {
+                            range,
+                            declaration_at: info.range_start,
+                            scope_id: ScopeId::new(0),
+                        }
+                    };
+                    self.stash.push_back(event);
+                }
+                reference => {
+                    if let Some(parent_references) = &mut parent_references {
+                        parent_references.push(reference);
+                    } else {
+                        self.stash.push_back(SemanticEvent::UnresolvedReference {
+                            is_read: !reference.is_write(),
+                            range: reference.range(),
+                        });
+                    }
+                }
+            }
+        }
     }
 
     /// Finds the scope where declarations that are hoisted will be declared at.
@@ -1213,6 +1285,16 @@ impl SemanticEventExtractor {
             .entry(binding_name)
             .or_default()
             .push(reference);
+    }
+}
+
+/// In Svelte fallback resolution, convert `$store = ...` references into reads of `store`.
+/// This keeps write-sensitive rules from treating auto-subscription updates as binding writes.
+fn normalize_svelte_store_write_references(references: &mut [Reference]) {
+    for reference in references {
+        if let Reference::Write(range) = reference {
+            *reference = Reference::Read(*range);
+        }
     }
 }
 
