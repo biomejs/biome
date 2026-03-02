@@ -159,7 +159,7 @@ impl Rule for UseSortedAttributes {
         for (PropElement { prop }, PropElement { prop: sorted_prop }) in
             zip(state.props.iter(), state.get_sorted_props(comparator))
         {
-            mutation.replace_node(prop.clone(), sorted_prop);
+            mutation.replace_node_discard_trivia(prop.clone(), sorted_prop);
         }
 
         Some(RuleAction::new(
