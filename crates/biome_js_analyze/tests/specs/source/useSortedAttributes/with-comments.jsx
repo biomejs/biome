@@ -3,7 +3,7 @@
 	tel={5555555}
 	address="NY"
 	{...this.props}
-	// Simple comment
+	// Another simple comment
 	lastName="Smith"
 	firstName="John" // Inline comment
 />

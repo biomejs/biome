@@ -9,7 +9,7 @@ expression: with-comments.jsx
 	tel={5555555}
 	address="NY"
 	{...this.props}
-	// Simple comment
+	// Another simple comment
 	lastName="Smith"
 	firstName="John" // Inline comment
 />
@@ -28,7 +28,7 @@ with-comments.jsx:1:1 assist/source/useSortedAttributes  FIXABLE  ━━━━�
    > 3 │ 	tel={5555555}
    > 4 │ 	address="NY"
    > 5 │ 	{...this.props}
-   > 6 │ 	// Simple comment
+   > 6 │ 	// Another simple comment
    > 7 │ 	lastName="Smith"
    > 8 │ 	firstName="John" // Inline comment
    > 9 │ />
@@ -45,7 +45,7 @@ with-comments.jsx:1:1 assist/source/useSortedAttributes  FIXABLE  ━━━━�
         3 │ + → //·Simple·comment
         4 │ + → tel={5555555}
      5  5 │   	{...this.props}
-     6  6 │   	// Simple comment
+     6  6 │   	// Another simple comment
   
 
 ```
@@ -61,7 +61,7 @@ with-comments.jsx:1:1 assist/source/useSortedAttributes  FIXABLE  ━━━━�
    > 3 │ 	tel={5555555}
    > 4 │ 	address="NY"
    > 5 │ 	{...this.props}
-   > 6 │ 	// Simple comment
+   > 6 │ 	// Another simple comment
    > 7 │ 	lastName="Smith"
    > 8 │ 	firstName="John" // Inline comment
    > 9 │ />
@@ -72,11 +72,11 @@ with-comments.jsx:1:1 assist/source/useSortedAttributes  FIXABLE  ━━━━�
   
      4  4 │   	address="NY"
      5  5 │   	{...this.props}
-     6    │ - → //·Simple·comment
+     6    │ - → //·Another·simple·comment
      7    │ - → lastName="Smith"
      8    │ - → firstName="John"·//·Inline·comment
         6 │ + → firstName="John"·//·Inline·comment
-        7 │ + → //·Simple·comment
+        7 │ + → //·Another·simple·comment
         8 │ + → lastName="Smith"
      9  9 │   />
     10 10 │   
