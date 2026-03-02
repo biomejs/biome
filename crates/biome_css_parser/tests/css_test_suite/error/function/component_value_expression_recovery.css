@@ -1,0 +1,7 @@
+.comma-recovery {
+	color: fn(1px ? 2px, 3px);
+}
+
+.operator-recovery {
+	color: fn(1px ? 2px + 3px);
+}

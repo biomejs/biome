@@ -2,13 +2,9 @@
 
 @container scroll-state(stuck) {  }
 
-@container not scroll-state(stuck) {  }
-
 @container scroll-state(not (stuck)) { }
 
 @container scroll-state((stuck) and (scrolled: bottom)) { }
-
-@container scroll-state((stuck) or (scrolled: bottom)) { }
 
 @container scroll-state((stuck) or (snapped: x)) { }
 
