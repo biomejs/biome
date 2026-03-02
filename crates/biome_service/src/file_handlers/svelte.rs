@@ -125,22 +125,34 @@ impl ExtensionHandler for SvelteFileHandler {
 }
 
 fn parse(
-    _rome_path: &BiomePath,
-    _file_source: DocumentFileSource,
+    rome_path: &BiomePath,
+    file_source: DocumentFileSource,
     text: &str,
     _settings: &SettingsWithEditor,
     cache: &mut NodeCache,
 ) -> ParseResult {
-    let script = SvelteFileHandler::input(text);
-    let file_source = SvelteFileHandler::file_source(text);
+    let source_type = file_source.to_js_file_source().unwrap_or_default();
+    let (script, script_file_source) = if JsFileSource::is_svelte_source_module_path(rome_path) {
+        (text, source_type)
+    } else {
+        (
+            SvelteFileHandler::input(text),
+            SvelteFileHandler::file_source(text),
+        )
+    };
 
-    debug!("Parsing file with language {:?}", file_source);
+    debug!("Parsing file with language {:?}", script_file_source);
 
-    let parse = parse_js_with_cache(script, file_source, JsParserOptions::default(), cache);
+    let parse = parse_js_with_cache(
+        script,
+        script_file_source,
+        JsParserOptions::default(),
+        cache,
+    );
 
     ParseResult {
         any_parse: parse.into(),
-        language: Some(file_source.into()),
+        language: Some(file_source),
     }
 }
 
