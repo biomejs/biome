@@ -58,3 +58,36 @@ function JsTryFinallyStatement4() {
 
     afterTryStatement();
 }
+
+// https://github.com/biomejs/biome/issues/4946
+// finally block should be reachable when there is a jump (break/continue/return) before it
+function JsTryFinallyStatement5() {
+    while (true) {
+        try {
+            break;
+        } finally {
+            console.log("reachable");
+        }
+        console.log("unreachable");
+    }
+}
+
+function JsTryFinallyStatement6() {
+    while (true) {
+        try {
+            continue;
+        } finally {
+            console.log("reachable");
+        }
+        console.log("unreachable");
+    }
+}
+
+function JsTryFinallyStatement7() {
+    try {
+        return;
+    } finally {
+        console.log("reachable");
+    }
+    console.log("unreachable");
+}
