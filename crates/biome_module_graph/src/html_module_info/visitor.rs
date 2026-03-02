@@ -187,16 +187,11 @@ impl<'a> HtmlModuleVisitor<'a> {
             let Some(name_token) = attr.name().ok().and_then(|n| n.value_token().ok()) else {
                 continue;
             };
-            if name_token.text_trimmed().eq_ignore_ascii_case("class") {
-                if let Some(initializer) = attr.initializer()
-                    && let Ok(value_node) = initializer.value()
-                {
-                    collect_class_attribute_reference(
-                        &value_node,
-                        &self.file_path,
-                        referenced_classes,
-                    );
-                }
+            if name_token.text_trimmed().eq_ignore_ascii_case("class")
+                && let Some(initializer) = attr.initializer()
+                && let Ok(value_node) = initializer.value()
+            {
+                collect_class_attribute_reference(&value_node, &self.file_path, referenced_classes);
             }
         }
 
