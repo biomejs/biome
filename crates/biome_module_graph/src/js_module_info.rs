@@ -452,6 +452,17 @@ pub enum JsOwnExport {
     Binding(TextRange),
     /// An export that directly references a resolved type.
     Type(ResolvedTypeId),
+    /// A namespace export created by `export * as Name from "..."`.
+    ///
+    /// The entire module namespace of the target is re-exported under `Name`,
+    /// making `Name` an own export of this module (it is a namespace object
+    /// created here, not forwarded from the target).
+    ///
+    /// Stores the same [`JsReexport`] information as other reexport kinds so
+    /// that the JSDoc comment on the export statement and the resolved path to
+    /// the target module are both preserved for documentation and type
+    /// inference.
+    Namespace(JsReexport),
 }
 
 /// Information about an export statement that re-exports all symbols from

@@ -187,8 +187,18 @@ tests/specs/nursery/useMyRuleName/
 └── options.json        # Optional rule configuration
 ```
 
-Example `invalid.js`:
-```javascript
+**Every test file must start with a top-level comment** declaring whether it expects diagnostics. The test runner enforces this — see the `testing-codegen` skill for full rules. The short version:
+
+`valid.js` — comment is **mandatory** (test panics without it):
+```js
+/* should not generate diagnostics */
+const x = 1;
+const y = 2;
+```
+
+`invalid.js` — comment is strongly recommended (also enforced when present):
+```js
+/* should generate diagnostics */
 const prohibited_name = 1;
 const another_prohibited = 2;
 ```

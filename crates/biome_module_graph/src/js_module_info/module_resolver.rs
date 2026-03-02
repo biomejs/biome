@@ -157,6 +157,16 @@ impl ModuleResolver {
                         )
                 }
                 JsOwnExport::Type(resolved_id) => self.resolved_type_for_id(*resolved_id),
+                JsOwnExport::Namespace(reexport) => self
+                    .resolve_import(&TypeImportQualifier {
+                        resolved_path: reexport.import.resolved_path.clone(),
+                        symbol: reexport.import.symbol.clone(),
+                        type_only: false,
+                    })
+                    .map_or_else(
+                        || self.resolved_type_for_id(GLOBAL_UNKNOWN_ID),
+                        |resolved_id| self.resolved_type_for_id(resolved_id),
+                    ),
             })
     }
 
@@ -591,6 +601,18 @@ fn resolve_from_export(
             }
         }
         JsOwnExport::Type(resolved_id) => Some(resolved_id.with_module_id(module_id)),
+        JsOwnExport::Namespace(reexport) => {
+            // `export * as Ns from "./mod"` makes `Ns` a namespace object whose
+            // type is the full import namespace of the target module. We tell
+            // the caller to follow the import with `ImportSymbol::All`, which
+            // will produce a `TypeData::ImportNamespace` pointing at the right
+            // module.
+            return ResolveFromExportResult::FollowImport(TypeImportQualifier {
+                symbol: reexport.import.symbol.clone(),
+                resolved_path: reexport.import.resolved_path.clone(),
+                type_only: false,
+            });
+        }
     };
 
     ResolveFromExportResult::Resolved(resolved)

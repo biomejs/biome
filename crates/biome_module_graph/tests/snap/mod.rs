@@ -99,7 +99,7 @@ impl<'a> ModuleGraphSnapshot<'a> {
                             .filter_map(JsExport::as_own_export)
                             .filter_map(|export| match export {
                                 JsOwnExport::Binding(binding_range) => Some(*binding_range),
-                                JsOwnExport::Type(_) => None,
+                                JsOwnExport::Type(_) | JsOwnExport::Namespace(_) => None,
                             })
                             .collect();
                         if !exported_binding_ranges.is_empty() {

@@ -99,14 +99,14 @@ Exports {
     )
   }
   "renamed2" => {
-    ExportReexport => Reexport(
+    ExportOwnExport => JsOwnExport::Namespace(Reexport(
       Specifier: "./renamed-reexports"
       Resolved path: "/src/renamed-reexports.ts"
       Import Symbol: All
       JsDoc(
         Hello, namespace 2.
       )
-    )
+    ))
   }
 }
 Imports {
@@ -340,14 +340,14 @@ export * as renamed from "./renamed-reexports";
 ```
 Exports {
   "renamed" => {
-    ExportReexport => Reexport(
+    ExportOwnExport => JsOwnExport::Namespace(Reexport(
       Specifier: "./renamed-reexports"
       Resolved path: "/src/renamed-reexports.ts"
       Import Symbol: All
       JsDoc(
         Hello, namespace 1.
       )
-    )
+    ))
   }
 }
 Imports {
