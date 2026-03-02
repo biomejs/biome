@@ -1450,6 +1450,7 @@ impl<'src> ReLexer<'src> for HtmlLexer<'src> {
                 HtmlReLexContext::HtmlText => self.consume_html_text(current),
                 HtmlReLexContext::InsideTag => self.consume_token_inside_tag(current),
                 HtmlReLexContext::InsideTagAstro => self.consume_token_inside_tag_astro(current),
+                HtmlReLexContext::InsideTagSvelte => self.consume_token_inside_tag_svelte(current),
             },
             None => EOF,
         };

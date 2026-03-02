@@ -156,6 +156,8 @@ pub(crate) enum HtmlReLexContext {
     InsideTag,
     /// Relex tokens as if the parser was inside a tag in an Astro file.
     InsideTagAstro,
+    /// Relex tokens as if the parser was inside a tag in a Svelte file.
+    InsideTagSvelte,
 }
 
 pub(crate) type HtmlTokenSourceCheckpoint = TokenSourceCheckpoint<HtmlSyntaxKind>;

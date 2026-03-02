@@ -153,6 +153,8 @@ fn inside_tag_context(p: &HtmlParser) -> HtmlLexContext {
         HtmlLexContext::InsideTagWithDirectives { svelte: false }
     } else if Svelte.is_supported(p) {
         HtmlLexContext::InsideTagSvelte
+    } else if Astro.is_supported(p) {
+        HtmlLexContext::InsideTagAstro
     } else {
         HtmlLexContext::InsideTag
     }
@@ -252,6 +254,8 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
 
     if Astro.is_supported(p) {
         p.re_lex(HtmlReLexContext::InsideTagAstro);
+    } else if Svelte.is_supported(p) {
+        p.re_lex(HtmlReLexContext::InsideTagSvelte);
     }
 
     AttributeList.parse_list(p);
@@ -325,8 +329,8 @@ fn parse_closing_tag(p: &mut HtmlParser) -> ParsedSyntax {
         return Absent;
     }
     let m = p.start();
-    p.bump_with_context(T![<], HtmlLexContext::InsideTag);
-    p.bump_with_context(T![/], HtmlLexContext::InsideTag);
+    p.bump_with_context(T![<], inside_tag_context(p));
+    p.bump_with_context(T![/], inside_tag_context(p));
     let should_be_self_closing = VOID_ELEMENTS
         .iter()
         .any(|tag| tag.eq_ignore_ascii_case(p.cur_text()))
