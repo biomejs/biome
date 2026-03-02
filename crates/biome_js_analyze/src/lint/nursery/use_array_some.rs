@@ -49,7 +49,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseArraySome {
-        version: "next",
+        version: "2.4.5",
         name: "useArraySome",
         language: "js",
         recommended: false,

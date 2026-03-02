@@ -55,7 +55,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseNamedCaptureGroup {
-        version: "next",
+        version: "2.4.5",
         name: "useNamedCaptureGroup",
         language: "js",
         sources: &[RuleSource::Eslint("prefer-named-capture-group").same()],
