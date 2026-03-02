@@ -40,6 +40,53 @@ var foo: string = "";
 </script>
 <div></div>"#;
 
+const SVELTE_STORE_DEREFERENCE_FILE: &str = r#"<script>
+const store = 1;
+$store;
+$missing;
+</script>
+<div></div>"#;
+
+const SVELTE_MODULE_STORE_DEREFERENCE_FILE: &str = r#"const store = 1;
+$store;
+$missing;"#;
+
+const SVELTE_MODULE_TYPE_ONLY_STORE_DEREFERENCE_FILE: &str = r#"type store = number;
+$store;"#;
+
+const SVELTE_TS_SCRIPT_TYPE_GLOBAL_FILE: &str = r#"<script lang="ts">
+type B<T> = PromiseLike<T>;
+</script>
+<div></div>"#;
+
+fn assert_no_undeclared_variables_svelte_snapshot(
+    file_path: &str,
+    file_content: &str,
+    snapshot_name: &str,
+) {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file = Utf8Path::new(file_path);
+    fs.insert(file.into(), file_content.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noUndeclaredVariables", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        snapshot_name,
+        fs,
+        console,
+        result,
+    ));
+}
+
 #[test]
 fn sorts_imports_check() {
     let fs = MemoryFileSystem::default();
@@ -537,6 +584,85 @@ fn check_stdin_write_unsafe_successfully() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "check_stdin_write_unsafe_successfully",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn no_undeclared_variables_handles_svelte_store_dereference() {
+    assert_no_undeclared_variables_svelte_snapshot(
+        "file.svelte",
+        SVELTE_STORE_DEREFERENCE_FILE,
+        "no_undeclared_variables_handles_svelte_store_dereference",
+    );
+}
+
+#[test]
+fn no_undeclared_variables_handles_svelte_module_store_dereference() {
+    assert_no_undeclared_variables_svelte_snapshot(
+        "file.svelte.ts",
+        SVELTE_MODULE_STORE_DEREFERENCE_FILE,
+        "no_undeclared_variables_handles_svelte_module_store_dereference",
+    );
+}
+
+#[test]
+fn no_undeclared_variables_handles_svelte_module_type_only_store_dereference() {
+    assert_no_undeclared_variables_svelte_snapshot(
+        "file.svelte.ts",
+        SVELTE_MODULE_TYPE_ONLY_STORE_DEREFERENCE_FILE,
+        "no_undeclared_variables_handles_svelte_module_type_only_store_dereference",
+    );
+}
+
+#[test]
+fn no_undeclared_variables_handles_svelte_js_module_store_dereference() {
+    assert_no_undeclared_variables_svelte_snapshot(
+        "file.svelte.js",
+        SVELTE_MODULE_STORE_DEREFERENCE_FILE,
+        "no_undeclared_variables_handles_svelte_js_module_store_dereference",
+    );
+}
+
+#[test]
+fn no_undeclared_variables_check_types_handles_svelte_ts_script_globals() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+  "linter": {
+    "rules": {
+      "correctness": {
+        "noUndeclaredVariables": {
+          "level": "error",
+          "options": {
+            "checkTypes": true
+          }
+        }
+      }
+    }
+  }
+}"#
+        .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.svelte");
+    fs.insert(file.into(), SVELTE_TS_SCRIPT_TYPE_GLOBAL_FILE.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noUndeclaredVariables", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_undeclared_variables_check_types_handles_svelte_ts_script_globals",
         fs,
         console,
         result,
