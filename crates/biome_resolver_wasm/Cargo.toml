@@ -18,19 +18,19 @@ wasm-opt = false
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-biome_deserialize        = { workspace = true }
-biome_fs                 = { workspace = true }
-biome_json_parser        = { workspace = true }
-biome_package            = { workspace = true }
-biome_resolver           = { workspace = true }
-camino                   = { workspace = true }
-console_error_panic_hook = { version = "0.1.7", optional = true }
-js-sys                   = "0.3.83"
-serde                    = { workspace = true }
-serde-wasm-bindgen       = "0.6.5"
+biome_deserialize    = { workspace = true }
+biome_fs             = { workspace = true }
+biome_json_parser    = { workspace = true }
+biome_package        = { workspace = true }
+biome_resolver       = { workspace = true }
+camino               = { workspace = true }
+serde                = { workspace = true }
+serde-wasm-bindgen   = "0.6.5"
+js-sys               = "0.3.83"
 # IMPORTANT: if you update this package, you must update justfile and workflows
 # so we install the same CLI version
-wasm-bindgen             = { version = "=0.2.106", features = ["serde-serialize"] }
+wasm-bindgen         = { version = "=0.2.106", features = ["serde-serialize"] }
+console_error_panic_hook = { version = "0.1.7", optional = true }
 
 [features]
 default = ["console_error_panic_hook"]

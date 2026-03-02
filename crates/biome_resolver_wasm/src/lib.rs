@@ -229,10 +229,10 @@ impl ResolverFsProxy for JsFileSystem {
         let mut dir = search_dir.to_path_buf();
         loop {
             let candidate = dir.join("package.json");
-            if let Ok(content) = self.read_file_utf8(&candidate) {
-                if let Some(manifest) = parse_package_json(&content) {
-                    return Ok((dir, manifest));
-                }
+            if let Ok(content) = self.read_file_utf8(&candidate)
+                && let Some(manifest) = parse_package_json(&content)
+            {
+                return Ok((dir, manifest));
             }
             match dir.parent() {
                 Some(parent) => dir = parent.to_path_buf(),
@@ -421,7 +421,7 @@ impl Resolver {
     ///
     /// `options` is an optional plain JavaScript object with resolver options.
     #[wasm_bindgen(js_name = "withJsFileSystem")]
-    pub fn with_js_fs(fs: JsFileSystem, options: JsValue) -> Result<Resolver, js_sys::Error> {
+    pub fn with_js_fs(fs: JsFileSystem, options: JsValue) -> Result<Self, js_sys::Error> {
         let options: WasmResolveOptions = if options.is_null() || options.is_undefined() {
             WasmResolveOptions::default()
         } else {
@@ -441,10 +441,7 @@ impl Resolver {
     ///
     /// `options` is an optional plain JavaScript object with resolver options.
     #[wasm_bindgen(js_name = "withMemoryFileSystem")]
-    pub fn with_memory_fs(
-        fs: &MemoryFileSystem,
-        options: JsValue,
-    ) -> Result<Resolver, js_sys::Error> {
+    pub fn with_memory_fs(fs: &MemoryFileSystem, options: JsValue) -> Result<Self, js_sys::Error> {
         let options: WasmResolveOptions = if options.is_null() || options.is_undefined() {
             WasmResolveOptions::default()
         } else {

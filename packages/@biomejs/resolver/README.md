@@ -833,7 +833,7 @@ if (result.path) {
 The possible `errorKind` values are:
 
 | `ResolveErrorKind` | `error` string | Meaning |
-|---|---|---|
+| --- | --- | --- |
 | `ModuleNotFound` | `"module not found"` | The specifier could not be found anywhere |
 | `DirectoryWithoutIndex` | `"found directory without index"` | The specifier resolved to a directory but no index file was found; add `defaultFiles` and `extensions` |
 | `NodeBuiltIn` | `"resolved to a Node.js built-in"` | The specifier is a Node.js built-in (only returned when `resolveNodeBuiltins: true`) |
