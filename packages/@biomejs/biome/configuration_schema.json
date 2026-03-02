@@ -5006,6 +5006,7 @@
 			]
 		},
 		"NoUndeclaredClassesOptions": {
+			"description": "Options for the `noUndeclaredClasses` rule.",
 			"type": "object",
 			"additionalProperties": false
 		},

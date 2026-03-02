@@ -7342,6 +7342,9 @@ export type NoScriptUrlOptions = {};
 export type NoShadowOptions = {};
 export type NoSyncScriptsOptions = {};
 export type NoTernaryOptions = {};
+/**
+ * Options for the `noUndeclaredClasses` rule.
+ */
 export type NoUndeclaredClassesOptions = {};
 export interface NoUndeclaredEnvVarsOptions {
 	/**
