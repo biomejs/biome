@@ -2,6 +2,7 @@ use bpaf::Args;
 use camino::Utf8Path;
 
 use biome_console::BufferConsole;
+use biome_fs::FileSystemExt;
 use biome_fs::MemoryFileSystem;
 
 use crate::run_cli;
@@ -68,4 +69,56 @@ fn issue_9180_2() {
         console,
         result,
     ));
+}
+
+/// Regression test for https://github.com/biomejs/biome/issues/9300
+///
+/// This issue affects Tanstack Form users who use `<form.Field>` as their default API.
+/// In Biome 2.4.5, lowercase component member expressions like `<form.Field>` were
+/// incorrectly formatted as `<form .Field>` (with an extra space before the dot),
+/// which breaks the code.
+///
+/// This test ensures that lowercase component member expressions in Svelte and Astro
+/// files are formatted correctly without adding extra spaces.
+#[test]
+fn issue_9300() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let svelte_file = Utf8Path::new("form.svelte");
+    fs.insert(svelte_file.into(), "<form.Field></form.Field>".as_bytes());
+
+    let astro_file = Utf8Path::new("form.astro");
+    fs.insert(astro_file.into(), "<form.Field></form.Field>".as_bytes());
+
+    let (fs_after, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                svelte_file.as_str(),
+                astro_file.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let mut buffer = String::new();
+    fs_after
+        .open(Utf8Path::new("form.svelte"))
+        .unwrap()
+        .read_to_string(&mut buffer)
+        .unwrap();
+    assert_eq!(buffer, "<form.Field></form.Field>");
+
+    let mut buffer = String::new();
+    fs_after
+        .open(Utf8Path::new("form.astro"))
+        .unwrap()
+        .read_to_string(&mut buffer)
+        .unwrap();
+    assert_eq!(buffer, "<form.Field></form.Field>");
 }
