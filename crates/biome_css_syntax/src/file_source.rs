@@ -27,11 +27,31 @@ pub enum EmbeddingHtmlKind {
     /// `.html` files
     Html,
     /// `.vue` files
-    Vue,
+    Vue {
+        applicability: EmbeddingApplicability,
+    },
     /// `.astro` files
-    Astro,
+    Astro {
+        applicability: EmbeddingApplicability,
+    },
     /// `.svelte` files
-    Svelte,
+    Svelte {
+        applicability: EmbeddingApplicability,
+    },
+}
+
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[derive(
+    Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
+)]
+pub enum EmbeddingApplicability {
+    /// The styles will be applied to the current component
+    Local,
+    /// The styles will be applied to the global scope
+    Global,
+    /// Unknown applicability
+    #[default]
+    Unknown,
 }
 
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -157,8 +177,20 @@ impl CssFileSource {
     pub fn is_vue_embedded(&self) -> bool {
         matches!(
             self.embedding_kind,
-            EmbeddingKind::Html(EmbeddingHtmlKind::Vue)
+            EmbeddingKind::Html(EmbeddingHtmlKind::Vue { .. })
         )
+    }
+
+    /// Returns the applicability of this embedded CSS block.
+    pub fn embedding_applicability(&self) -> EmbeddingApplicability {
+        match &self.embedding_kind {
+            EmbeddingKind::Html(
+                EmbeddingHtmlKind::Vue { applicability }
+                | EmbeddingHtmlKind::Astro { applicability }
+                | EmbeddingHtmlKind::Svelte { applicability },
+            ) => *applicability,
+            _ => EmbeddingApplicability::Unknown,
+        }
     }
 
     pub fn is_tailwind_css(&self) -> bool {
@@ -167,6 +199,35 @@ impl CssFileSource {
 
     pub fn set_variant(&mut self, variant: CssVariant) {
         self.variant = variant;
+    }
+
+    /// If the CSS is embedded, it sets its applicability
+    pub fn set_applicability(&mut self, new_applicability: EmbeddingApplicability) {
+        if let EmbeddingKind::Html(embedded_kind) = &mut self.embedding_kind {
+            match embedded_kind {
+                EmbeddingHtmlKind::None => {}
+                EmbeddingHtmlKind::Html => {}
+                EmbeddingHtmlKind::Vue { applicability } => {
+                    *applicability = new_applicability;
+                }
+                EmbeddingHtmlKind::Astro { applicability } => {
+                    *applicability = new_applicability;
+                }
+                EmbeddingHtmlKind::Svelte { applicability } => {
+                    *applicability = new_applicability;
+                }
+            }
+        }
+    }
+
+    /// Whether this CSS is applied locally. This is only `true` if the CSS is embedded in HTML files.
+    pub fn is_applied_locally(&self) -> bool {
+        matches!(
+            self.embedding_kind,
+            EmbeddingKind::Html(EmbeddingHtmlKind::Vue {
+                applicability: EmbeddingApplicability::Local
+            })
+        )
     }
 
     /// Try to return the CSS file source corresponding to this file name from well-known files

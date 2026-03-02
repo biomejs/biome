@@ -19,11 +19,13 @@ expression: content
 ## Module Info
 
 ```
-classes: [
+Classes {
   button,
   header,
-]
-imports: []
+}
+Imports {
+  No imports
+}
 ```
 
 

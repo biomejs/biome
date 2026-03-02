@@ -51,7 +51,7 @@ use biome_html_syntax::HtmlRoot;
 use biome_js_syntax::{AnyJsRoot, LanguageVariant, ModuleKind};
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonFileSource;
-use biome_module_graph::{ModuleDependencies, ModuleDiagnostic, ModuleGraph};
+use biome_module_graph::{HtmlEmbeddedContent, ModuleDependencies, ModuleDiagnostic, ModuleGraph};
 use biome_package::PackageType;
 use biome_parser::AnyParse;
 use biome_plugin_loader::{BiomePlugin, PluginCache, PluginDiagnostic};
@@ -158,6 +158,40 @@ impl WorkspaceServer {
             scanner: Scanner::new(watcher_tx),
             fs,
             notification_tx,
+        }
+    }
+
+    /// Returns the module graph, for use in tests.
+    pub fn module_graph(&self) -> Arc<ModuleGraph> {
+        self.module_graph.clone()
+    }
+
+    /// Indexes a list of files into the module graph for test purposes.
+    ///
+    /// Unlike [`open_file`], this method uses the internal indexing path
+    /// (`OpenFileReason::Index`) so that `update_service_data` is triggered,
+    /// causing the module graph to be populated. It also accepts an explicit
+    /// `document_file_source` per file so that framework files (`.vue`, `.astro`,
+    /// `.svelte`) are correctly parsed as HTML-like regardless of the workspace
+    /// settings.
+    #[cfg(feature = "testing")]
+    pub fn index_files_for_test(
+        &self,
+        project_key: ProjectKey,
+        files: impl IntoIterator<Item = (BiomePath, DocumentFileSource)>,
+    ) {
+        for (path, document_file_source) in files {
+            let _ = self.open_file_internal(
+                OpenFileReason::Index(IndexTrigger::InitialScan),
+                OpenFileParams {
+                    project_key,
+                    path,
+                    content: FileContent::FromServer,
+                    document_file_source: Some(document_file_source),
+                    persist_node_cache: false,
+                    inline_config: None,
+                },
+            );
         }
     }
 
@@ -1030,23 +1064,34 @@ impl WorkspaceServer {
                 } else if let Some(html_root) =
                     SendNode::into_language_root::<HtmlRoot>(root.clone())
                 {
-                    // Collect embedded CSS roots from the stored document's snippets.
-                    let embedded_css_roots: Vec<AnyCssRoot> = self
+                    // Map embedded snippets to HtmlEmbeddedContent variants.
+                    // CSS blocks carry EmbeddingApplicability (resolved via file_source_index).
+                    // JS blocks carry static import specifiers for upward traversal.
+                    let embedded_content: Vec<HtmlEmbeddedContent> = self
                         .documents
                         .pin()
                         .get(path.as_path())
                         .map(|doc| {
                             doc.embedded_snippets
                                 .iter()
-                                .filter_map(|s| s.as_css_embedded_snippet())
-                                .map(|s| s.parse.tree())
+                                .filter_map(|s| {
+                                    if let Some(css) = s.as_css_embedded_snippet() {
+                                        let css_source = self
+                                            .get_source(css.file_source_index)
+                                            .and_then(|src| src.to_css_file_source())?;
+                                        Some(HtmlEmbeddedContent::Css(css.parse.tree(), css_source))
+                                    } else {
+                                        s.as_js_embedded_snippet()
+                                            .map(|js| HtmlEmbeddedContent::Js(js.parse.tree()))
+                                    }
+                                })
                                 .collect()
                         })
                         .unwrap_or_default();
                     self.module_graph.update_graph_for_html_paths(
                         self.fs.as_ref(),
                         &self.project_layout,
-                        &[(path, html_root, embedded_css_roots)],
+                        &[(path, html_root, embedded_content)],
                     )
                 } else {
                     Default::default()

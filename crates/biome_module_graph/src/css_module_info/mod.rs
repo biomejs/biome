@@ -1,7 +1,7 @@
 pub(crate) mod traverse;
 mod visitor;
 
-use biome_css_syntax::CssPseudoClassFunctionSelector;
+use biome_css_syntax::EmbeddingApplicability;
 use biome_resolver::ResolvedPath;
 use biome_rowan::{Text, TokenText};
 use camino::Utf8PathBuf;
@@ -10,9 +10,38 @@ use std::collections::BTreeSet;
 use std::hash::{Hash, Hasher};
 use std::ops::{Deref, DerefMut};
 use std::sync::Arc;
-
 pub use traverse::{CssClassStep, CssTraversalStep, ImportTreeDisplay, ImportTreeNode};
 pub(crate) use visitor::CssModuleVisitor;
+
+/// Represents a CSS class definition.
+///
+/// Two definitions are considered equal (and hash to the same value) when they
+/// share the same class name **and** the same applicability. This means `.foo`
+/// defined in a globally scoped `<style>` block and `.foo` defined in a locally
+/// scoped `<style scoped>` block are distinct entries in an [`IndexSet`].
+#[derive(Clone, Debug)]
+pub struct CssClassDefinition {
+    /// The name of the class.
+    pub name: TokenText,
+
+    /// How this CSS class should be applied.
+    pub applicability: EmbeddingApplicability,
+}
+
+impl PartialEq for CssClassDefinition {
+    fn eq(&self, other: &Self) -> bool {
+        self.name.text() == other.name.text() && self.applicability == other.applicability
+    }
+}
+
+impl Eq for CssClassDefinition {}
+
+impl Hash for CssClassDefinition {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.name.text().hash(state);
+        self.applicability.hash(state);
+    }
+}
 
 /// A CSS class reference from an HTML or JSX attribute.
 ///
@@ -167,16 +196,4 @@ pub struct SerializedCssModuleInfo {
 
     /// Set of all CSS class names defined in this file.
     pub classes: BTreeSet<String>,
-}
-
-/// Returns `true` if the given pseudo-class function selector is `:global(...)`.
-///
-/// This is used by CSS and HTML module visitors to skip class selectors that
-/// are globally scoped and cannot be traced to specific `class="..."` attribute
-/// references.
-pub(crate) fn is_global_pseudo(node: &CssPseudoClassFunctionSelector) -> bool {
-    node.name()
-        .ok()
-        .and_then(|name| name.value_token().ok())
-        .is_some_and(|token| token.text_trimmed() == "global")
 }

@@ -14,7 +14,10 @@ pub use self::generated::*;
 pub use biome_rowan::{
     SyntaxNodeText, TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent,
 };
-pub use file_source::{CssFileLanguage, CssFileSource, CssVariant, EmbeddingKind};
+pub use file_source::{
+    CssFileLanguage, CssFileSource, CssVariant, EmbeddingApplicability, EmbeddingHtmlKind,
+    EmbeddingKind,
+};
 pub use syntax_node::*;
 
 use crate::CssSyntaxKind::*;

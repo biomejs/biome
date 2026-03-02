@@ -633,12 +633,12 @@ const Bar = graphql(`
     ");
 }
 
-// ── noUndeclaredStyles ────────────────────────────────────────────────────────
+// noUndeclaredClasses
 
 /// A class used in `class="..."` that has no matching `.foo {}` in any `<style>`
 /// block should be flagged.
 #[test]
-fn no_undeclared_styles_reports_unknown_class() {
+fn no_undeclared_classes_reports_unknown_class() {
     const FILE_CONTENT: &str = r#"<style>.card { border: 1px solid; }</style>
 <div class="header">Content</div>"#;
 
@@ -674,7 +674,7 @@ fn no_undeclared_styles_reports_unknown_class() {
     let result = workspace
         .pull_diagnostics(PullDiagnosticsParams {
             path: BiomePath::new("/project/index.html"),
-            only: vec![AnalyzerSelector::from_str("lint/nursery/noUndeclaredStyles").unwrap()],
+            only: vec![AnalyzerSelector::from_str("lint/nursery/noUndeclaredClasses").unwrap()],
             skip: vec![],
             enabled_rules: vec![],
             project_key,
@@ -698,7 +698,7 @@ fn no_undeclared_styles_reports_unknown_class() {
 /// When every class used in `class="..."` is defined in a `<style>` block,
 /// no diagnostics should be emitted.
 #[test]
-fn no_undeclared_styles_passes_when_class_is_defined() {
+fn no_undeclared_classes_passes_when_class_is_defined() {
     const FILE_CONTENT: &str = r#"<style>.card { border: 1px solid; }</style>
 <div class="card">Content</div>"#;
 
@@ -734,7 +734,7 @@ fn no_undeclared_styles_passes_when_class_is_defined() {
     let result = workspace
         .pull_diagnostics(PullDiagnosticsParams {
             path: BiomePath::new("/project/index.html"),
-            only: vec![AnalyzerSelector::from_str("lint/nursery/noUndeclaredStyles").unwrap()],
+            only: vec![AnalyzerSelector::from_str("lint/nursery/noUndeclaredClasses").unwrap()],
             skip: vec![],
             enabled_rules: vec![],
             project_key,
@@ -753,7 +753,7 @@ fn no_undeclared_styles_passes_when_class_is_defined() {
 /// An HTML file with no `<style>` blocks and no linked stylesheets should
 /// never emit diagnostics, to avoid false positives on unstyled HTML.
 #[test]
-fn no_undeclared_styles_silent_without_style_info() {
+fn no_undeclared_classes_silent_without_style_info() {
     const FILE_CONTENT: &str = r#"<div class="anything">Content</div>"#;
 
     let fs = MemoryFileSystem::default();
@@ -788,7 +788,7 @@ fn no_undeclared_styles_silent_without_style_info() {
     let result = workspace
         .pull_diagnostics(PullDiagnosticsParams {
             path: BiomePath::new("/project/index.html"),
-            only: vec![AnalyzerSelector::from_str("lint/nursery/noUndeclaredStyles").unwrap()],
+            only: vec![AnalyzerSelector::from_str("lint/nursery/noUndeclaredClasses").unwrap()],
             skip: vec![],
             enabled_rules: vec![],
             project_key,
@@ -806,7 +806,7 @@ fn no_undeclared_styles_silent_without_style_info() {
 
 /// Multiple classes in one `class` attribute: only undeclared ones flagged.
 #[test]
-fn no_undeclared_styles_reports_only_undeclared_in_multi_class() {
+fn no_undeclared_classes_reports_only_undeclared_in_multi_class() {
     const FILE_CONTENT: &str = r#"<style>.card { border: 1px solid; } .title { font-weight: bold; }</style>
 <div class="card header title footer">Content</div>"#;
 
@@ -842,7 +842,7 @@ fn no_undeclared_styles_reports_only_undeclared_in_multi_class() {
     let result = workspace
         .pull_diagnostics(PullDiagnosticsParams {
             path: BiomePath::new("/project/index.html"),
-            only: vec![AnalyzerSelector::from_str("lint/nursery/noUndeclaredStyles").unwrap()],
+            only: vec![AnalyzerSelector::from_str("lint/nursery/noUndeclaredClasses").unwrap()],
             skip: vec![],
             enabled_rules: vec![],
             project_key,
@@ -860,11 +860,11 @@ fn no_undeclared_styles_reports_only_undeclared_in_multi_class() {
     );
 }
 
-// ── noUnusedStyles ────────────────────────────────────────────────────────────
+// noUnusedClasses
 
 /// A CSS class that no JS/HTML file imports or references should be flagged.
 #[test]
-fn no_unused_styles_reports_unreferenced_class() {
+fn no_unused_classes_reports_unreferenced_class() {
     let fs = MemoryFileSystem::default();
     fs.insert(
         Utf8PathBuf::from("/project/styles.css"),
@@ -897,7 +897,7 @@ fn no_unused_styles_reports_unreferenced_class() {
     let result = workspace
         .pull_diagnostics(PullDiagnosticsParams {
             path: BiomePath::new("/project/styles.css"),
-            only: vec![AnalyzerSelector::from_str("lint/nursery/noUnusedStyles").unwrap()],
+            only: vec![AnalyzerSelector::from_str("lint/nursery/noUnusedClasses").unwrap()],
             skip: vec![],
             enabled_rules: vec![],
             project_key,
@@ -921,7 +921,7 @@ fn no_unused_styles_reports_unreferenced_class() {
 /// A CSS class that is referenced via `className` in a JSX file that imports
 /// the stylesheet should not be flagged.
 #[test]
-fn no_unused_styles_passes_when_class_is_referenced_in_jsx() {
+fn no_unused_classes_passes_when_class_is_referenced_in_jsx() {
     let fs = MemoryFileSystem::default();
     fs.insert(
         Utf8PathBuf::from("/project/styles.css"),
@@ -958,7 +958,7 @@ fn no_unused_styles_passes_when_class_is_referenced_in_jsx() {
     let result = workspace
         .pull_diagnostics(PullDiagnosticsParams {
             path: BiomePath::new("/project/styles.css"),
-            only: vec![AnalyzerSelector::from_str("lint/nursery/noUnusedStyles").unwrap()],
+            only: vec![AnalyzerSelector::from_str("lint/nursery/noUnusedClasses").unwrap()],
             skip: vec![],
             enabled_rules: vec![],
             project_key,
@@ -976,7 +976,7 @@ fn no_unused_styles_passes_when_class_is_referenced_in_jsx() {
 
 /// Only unused classes should be flagged; referenced ones should pass.
 #[test]
-fn no_unused_styles_reports_only_unreferenced_classes() {
+fn no_unused_classes_reports_only_unreferenced_classes() {
     let fs = MemoryFileSystem::default();
     fs.insert(
         Utf8PathBuf::from("/project/styles.css"),
@@ -1013,7 +1013,7 @@ fn no_unused_styles_reports_only_unreferenced_classes() {
     let result = workspace
         .pull_diagnostics(PullDiagnosticsParams {
             path: BiomePath::new("/project/styles.css"),
-            only: vec![AnalyzerSelector::from_str("lint/nursery/noUnusedStyles").unwrap()],
+            only: vec![AnalyzerSelector::from_str("lint/nursery/noUnusedClasses").unwrap()],
             skip: vec![],
             enabled_rules: vec![],
             project_key,
@@ -1038,7 +1038,7 @@ fn no_unused_styles_reports_only_unreferenced_classes() {
 /// flagged. If app.jsx imports theme.css which @imports base.css, classes in
 /// base.css that are used in app.jsx are considered referenced.
 #[test]
-fn no_unused_styles_passes_with_transitive_css_import() {
+fn no_unused_classes_passes_with_transitive_css_import() {
     let fs = MemoryFileSystem::default();
     fs.insert(
         Utf8PathBuf::from("/project/base.css"),
@@ -1087,7 +1087,7 @@ fn no_unused_styles_passes_with_transitive_css_import() {
         let result = workspace
             .pull_diagnostics(PullDiagnosticsParams {
                 path: BiomePath::new(path),
-                only: vec![AnalyzerSelector::from_str("lint/nursery/noUnusedStyles").unwrap()],
+                only: vec![AnalyzerSelector::from_str("lint/nursery/noUnusedClasses").unwrap()],
                 skip: vec![],
                 enabled_rules: vec![],
                 project_key,

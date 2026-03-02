@@ -14,8 +14,7 @@ pub mod workspace_types;
 mod scanner;
 mod utils;
 
-#[cfg(test)]
-mod test_utils;
+pub mod test_utils;
 
 use camino::Utf8Path;
 use std::ops::Deref;

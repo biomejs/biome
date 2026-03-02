@@ -1,12 +1,17 @@
-use biome_analyze::{AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilter};
+use biome_analyze::{
+    AnalysisFilter, AnalyzerAction, ControlFlow, Never, Queryable, RegistryVisitor, Rule,
+    RuleDomain, RuleFilter, RuleGroup,
+};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
+use biome_html_analyze::HtmlAnalyzerServices;
 use biome_html_parser::parse_html;
 use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
 use biome_rowan::AstNode;
 use biome_test_utils::{
     CheckActionType, assert_diagnostics_expectation_comment, assert_errors_are_absent,
     code_fix_to_string, create_analyzer_options, diagnostic_to_string,
-    has_bogus_nodes_or_empty_slots, parse_test_path, register_leak_checker, scripts_from_json,
+    has_bogus_nodes_or_empty_slots, module_graph_for_html_test_file, parse_test_path,
+    project_layout_for_test_file, register_leak_checker, scripts_from_json,
     write_analyzer_snapshot,
 };
 use camino::Utf8Path;
@@ -15,6 +20,44 @@ use std::{fs::read_to_string, slice};
 
 tests_macros::gen_tests! {"tests/specs/**/*.{html,vue,svelte,astro,json,jsonc}", crate::run_test, "module"}
 tests_macros::gen_tests! {"tests/suppression/**/*.{html,vue,svelte,astro,json,jsonc}", crate::run_suppression_test, "module"}
+
+/// Checks if any of the enabled rules is in the project domain and requires the module graph.
+struct NeedsModuleGraph<'a> {
+    enabled_rules: Option<&'a [RuleFilter<'a>]>,
+    needs_module_graph: bool,
+}
+
+impl<'a> NeedsModuleGraph<'a> {
+    fn new(enabled_rules: Option<&'a [RuleFilter<'a>]>) -> Self {
+        Self {
+            enabled_rules,
+            needs_module_graph: false,
+        }
+    }
+
+    fn compute(mut self) -> bool {
+        biome_html_analyze::visit_registry(&mut self);
+        self.needs_module_graph
+    }
+}
+
+impl RegistryVisitor<HtmlLanguage> for NeedsModuleGraph<'_> {
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = HtmlLanguage, Output: Clone>>
+            + 'static,
+    {
+        let filter = RuleFilter::Rule(<R::Group as RuleGroup>::NAME, R::METADATA.name);
+
+        if self
+            .enabled_rules
+            .is_some_and(|enabled_rules| enabled_rules.contains(&filter))
+            && R::METADATA.domains.contains(&RuleDomain::Project)
+        {
+            self.needs_module_graph = true;
+        }
+    }
+}
 
 fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     register_leak_checker();
@@ -103,12 +146,26 @@ pub(crate) fn analyze_and_snap(
     let options =
         create_analyzer_options::<HtmlLanguage>(input_file, working_directory, &mut diagnostics);
 
+    let needs_module_graph = NeedsModuleGraph::new(filter.enabled_rules).compute();
+    let html_services = if needs_module_graph {
+        let mut project_diagnostics = Vec::new();
+        let project_layout = project_layout_for_test_file(input_file, &mut project_diagnostics);
+        diagnostics.extend(project_diagnostics);
+        let module_graph = module_graph_for_html_test_file(input_file, &project_layout);
+        HtmlAnalyzerServices {
+            module_graph: Some(module_graph),
+            project_layout: Some(project_layout),
+        }
+    } else {
+        HtmlAnalyzerServices::default()
+    };
+
     let (_, errors) = biome_html_analyze::analyze(
         &root,
         filter,
         &options,
         source_type,
-        biome_html_analyze::HtmlAnalyzerServices::default(),
+        html_services,
         |event| {
             if let Some(mut diag) = event.diagnostic() {
                 for action in event.actions() {
@@ -155,6 +212,11 @@ pub(crate) fn analyze_and_snap(
         "html",
         parsed.diagnostics().len(),
     );
+
+    if needs_module_graph {
+        // Normalize Windows paths in the snapshot output.
+        *snapshot = snapshot.replace('\\', "/");
+    }
 
     assert_diagnostics_expectation_comment(input_file, root.syntax(), diagnostics);
 }

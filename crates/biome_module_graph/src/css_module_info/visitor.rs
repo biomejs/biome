@@ -1,4 +1,4 @@
-use crate::css_module_info::{CssImport, CssImports, CssModuleInfo, is_global_pseudo};
+use crate::css_module_info::{CssImport, CssImports, CssModuleInfo};
 use crate::module_graph::ModuleGraphFsProxy;
 use biome_css_syntax::{
     AnyCssImportUrl, AnyCssRoot, CssClassSelector, CssPseudoClassFunctionSelector,
@@ -46,7 +46,7 @@ impl<'a> CssModuleVisitor<'a> {
                     } else if let Some(pseudo_fn) =
                         CssPseudoClassFunctionSelector::cast(node.clone())
                     {
-                        if is_global_pseudo(&pseudo_fn) {
+                        if pseudo_fn.is_global_pseudo() {
                             global_depth += 1;
                         }
                     } else if global_depth == 0
@@ -57,7 +57,7 @@ impl<'a> CssModuleVisitor<'a> {
                 }
                 WalkEvent::Leave(node) => {
                     if let Some(pseudo_fn) = CssPseudoClassFunctionSelector::cast(node)
-                        && is_global_pseudo(&pseudo_fn)
+                        && pseudo_fn.is_global_pseudo()
                     {
                         global_depth = global_depth.saturating_sub(1);
                     }
