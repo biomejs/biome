@@ -23,8 +23,8 @@ use biome_configuration::html::{
 };
 use biome_css_parser::{CssModulesKind, parse_css_with_offset_and_cache};
 use biome_css_syntax::{
-    CssFileSource, CssLanguage, EmbeddingApplicability, EmbeddingHtmlKind,
-    EmbeddingKind as CssEmbeddingKind,
+    CssFileSource, CssLanguage, EmbeddingHtmlKind, EmbeddingKind as CssEmbeddingKind,
+    EmbeddingStyleApplicability,
 };
 use biome_formatter::format_element::{Interned, LineMode};
 use biome_formatter::prelude::{Document, Tag};
@@ -1020,9 +1020,9 @@ pub(crate) fn parse_embedded_style(
             // Plain `<style>` (no attribute) leaks into the global scope.
             let applicability =
                 if element.is_style_scoped("scoped") || element.is_style_scoped("module") {
-                    EmbeddingApplicability::Local
+                    EmbeddingStyleApplicability::Local
                 } else {
-                    EmbeddingApplicability::Global
+                    EmbeddingStyleApplicability::Global
                 };
             CssFileSource::new_css_modules().with_embedding_kind(CssEmbeddingKind::Html(
                 EmbeddingHtmlKind::Vue { applicability },
@@ -1030,9 +1030,9 @@ pub(crate) fn parse_embedded_style(
         } else if html_file_source.is_astro() {
             // Astro: <style is:global> → Global; plain <style> → Local
             let applicability = if element.is_style_scoped("is:global") {
-                EmbeddingApplicability::Global
+                EmbeddingStyleApplicability::Global
             } else {
-                EmbeddingApplicability::Local
+                EmbeddingStyleApplicability::Local
             };
             CssFileSource::new_css_modules().with_embedding_kind(CssEmbeddingKind::Html(
                 EmbeddingHtmlKind::Astro { applicability },
@@ -1042,7 +1042,7 @@ pub(crate) fn parse_embedded_style(
             // detected at the class-selector level by the CSS semantic model)
             CssFileSource::new_css_modules().with_embedding_kind(CssEmbeddingKind::Html(
                 EmbeddingHtmlKind::Svelte {
-                    applicability: EmbeddingApplicability::Local,
+                    applicability: EmbeddingStyleApplicability::Local,
                 },
             ))
         } else {

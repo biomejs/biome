@@ -3,7 +3,7 @@ use crate::html_module_info::{HtmlEmbeddedContent, HtmlModuleInfo};
 use crate::module_graph::ModuleGraphFsProxy;
 use biome_css_syntax::{
     AnyCssRoot, CssClassSelector, CssFileSource, CssPseudoClassFunctionSelector,
-    EmbeddingApplicability,
+    EmbeddingStyleApplicability,
 };
 use biome_html_syntax::{
     AnyHtmlAttributeInitializer, HtmlElement, HtmlRoot, HtmlSelfClosingElement,
@@ -227,12 +227,12 @@ impl<'a> HtmlModuleVisitor<'a> {
 }
 
 /// Collects CSS class names from a CSS AST, annotating each with its
-/// [`EmbeddingApplicability`] based on the embedding context.
+/// [`EmbeddingStyleApplicability`] based on the embedding context.
 ///
 /// # Applicability rules
 ///
 /// - Selectors inside `:global(...)` pseudo-class blocks are always
-///   [`EmbeddingApplicability::Global`], regardless of the file source.
+///   [`EmbeddingStyleApplicability::Global`], regardless of the file source.
 /// - All other selectors take their applicability from
 ///   [`CssFileSource::embedding_applicability`]:
 ///   - Plain HTML `<style>` → `Global`
@@ -268,7 +268,7 @@ pub(crate) fn collect_css_classes(
                     // Selectors inside :global(...) are always globally scoped,
                     // even within a locally scoped <style> block.
                     let applicability = if global_depth > 0 {
-                        EmbeddingApplicability::Global
+                        EmbeddingStyleApplicability::Global
                     } else {
                         base_applicability
                     };

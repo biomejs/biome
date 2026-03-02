@@ -12,7 +12,7 @@ pub use crate::css_module_info::{
     ImportTreeDisplay, ImportTreeNode,
 };
 pub use crate::html_module_info::{HtmlEmbeddedContent, HtmlModuleInfo, SerializedHtmlModuleInfo};
-pub use biome_css_syntax::EmbeddingApplicability;
+pub use biome_css_syntax::EmbeddingStyleApplicability;
 pub use biome_js_type_info::ImportSymbol;
 pub use biome_resolver::ResolvedPath;
 pub use diagnostics::ModuleDiagnostic;

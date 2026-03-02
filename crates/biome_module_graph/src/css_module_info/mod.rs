@@ -1,7 +1,7 @@
 pub(crate) mod traverse;
 mod visitor;
 
-use biome_css_syntax::EmbeddingApplicability;
+use biome_css_syntax::EmbeddingStyleApplicability;
 use biome_resolver::ResolvedPath;
 use biome_rowan::{Text, TokenText};
 use camino::Utf8PathBuf;
@@ -25,7 +25,7 @@ pub struct CssClassDefinition {
     pub name: TokenText,
 
     /// How this CSS class should be applied.
-    pub applicability: EmbeddingApplicability,
+    pub applicability: EmbeddingStyleApplicability,
 }
 
 impl PartialEq for CssClassDefinition {

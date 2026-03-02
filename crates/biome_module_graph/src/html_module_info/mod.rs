@@ -29,7 +29,7 @@ pub(crate) use visitor::HtmlModuleVisitor;
 pub enum HtmlEmbeddedContent {
     /// A `<style>` block with its resolved CSS source (carries [`EmbeddingApplicability`]).
     ///
-    /// [`EmbeddingApplicability`]: biome_css_syntax::EmbeddingApplicability
+    /// [`EmbeddingApplicability`]: biome_css_syntax::EmbeddingStyleApplicability
     Css(AnyCssRoot, CssFileSource),
     /// A `<script>` block parsed as JS/TS.
     Js(AnyJsRoot),

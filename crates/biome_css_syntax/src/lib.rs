@@ -15,8 +15,8 @@ pub use biome_rowan::{
     SyntaxNodeText, TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent,
 };
 pub use file_source::{
-    CssFileLanguage, CssFileSource, CssVariant, EmbeddingApplicability, EmbeddingHtmlKind,
-    EmbeddingKind,
+    CssFileLanguage, CssFileSource, CssVariant, EmbeddingHtmlKind, EmbeddingKind,
+    EmbeddingStyleApplicability,
 };
 pub use syntax_node::*;
 

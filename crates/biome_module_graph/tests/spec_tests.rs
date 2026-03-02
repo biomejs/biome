@@ -9,7 +9,9 @@ use std::sync::Arc;
 use crate::snap::ModuleGraphSnapshot;
 use biome_configuration::{Configuration, HtmlConfiguration};
 use biome_css_parser::{CssModulesKind, CssParserOptions};
-use biome_css_syntax::{CssFileSource, EmbeddingApplicability, EmbeddingHtmlKind, EmbeddingKind};
+use biome_css_syntax::{
+    CssFileSource, EmbeddingHtmlKind, EmbeddingKind, EmbeddingStyleApplicability,
+};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_fs::{BiomePath, FileSystem, MemoryFileSystem, OsFileSystem, normalize_path};
 use biome_html_parser::HtmlParseOptions;
@@ -2902,35 +2904,35 @@ fn html_css_source() -> CssFileSource {
 /// Returns a `CssFileSource` for a Vue `<style>` (unscoped → Global).
 fn vue_global_css_source() -> CssFileSource {
     CssFileSource::css().with_embedding_kind(EmbeddingKind::Html(EmbeddingHtmlKind::Vue {
-        applicability: EmbeddingApplicability::Global,
+        applicability: EmbeddingStyleApplicability::Global,
     }))
 }
 
 /// Returns a `CssFileSource` for a Vue `<style scoped>` (Local).
 fn vue_scoped_css_source() -> CssFileSource {
     CssFileSource::css().with_embedding_kind(EmbeddingKind::Html(EmbeddingHtmlKind::Vue {
-        applicability: EmbeddingApplicability::Local,
+        applicability: EmbeddingStyleApplicability::Local,
     }))
 }
 
 /// Returns a `CssFileSource` for an Astro `<style>` (default → Local).
 fn astro_local_css_source() -> CssFileSource {
     CssFileSource::css().with_embedding_kind(EmbeddingKind::Html(EmbeddingHtmlKind::Astro {
-        applicability: EmbeddingApplicability::Local,
+        applicability: EmbeddingStyleApplicability::Local,
     }))
 }
 
 /// Returns a `CssFileSource` for an Astro `<style is:global>` (Global).
 fn astro_global_css_source() -> CssFileSource {
     CssFileSource::css().with_embedding_kind(EmbeddingKind::Html(EmbeddingHtmlKind::Astro {
-        applicability: EmbeddingApplicability::Global,
+        applicability: EmbeddingStyleApplicability::Global,
     }))
 }
 
 /// Returns a `CssFileSource` for a Svelte `<style>` (default → Local).
 fn svelte_local_css_source() -> CssFileSource {
     CssFileSource::css().with_embedding_kind(EmbeddingKind::Html(EmbeddingHtmlKind::Svelte {
-        applicability: EmbeddingApplicability::Local,
+        applicability: EmbeddingStyleApplicability::Local,
     }))
 }
 
@@ -2957,7 +2959,7 @@ fn test_html_inline_style_classes_are_global() {
     assert_eq!(def.name.text(), "card");
     assert_eq!(
         def.applicability,
-        EmbeddingApplicability::Unknown,
+        EmbeddingStyleApplicability::Unknown,
         "HTML inline styles are always Unknown"
     );
 
@@ -2996,7 +2998,7 @@ fn test_vue_unscoped_style_classes_are_global() {
     assert_eq!(def.name.text(), "card");
     assert_eq!(
         def.applicability,
-        EmbeddingApplicability::Global,
+        EmbeddingStyleApplicability::Global,
         "Vue unscoped <style> is Global"
     );
 
@@ -3035,7 +3037,7 @@ fn test_vue_scoped_style_classes_are_local_and_hidden() {
     assert_eq!(def.name.text(), "alpha");
     assert_eq!(
         def.applicability,
-        EmbeddingApplicability::Local,
+        EmbeddingStyleApplicability::Local,
         "Vue <style scoped> is Local"
     );
 
@@ -3120,7 +3122,7 @@ fn test_astro_local_style_classes_are_hidden() {
         .expect("Astro module must exist");
 
     let def = html_info.style_classes.iter().next().unwrap();
-    assert_eq!(def.applicability, EmbeddingApplicability::Local);
+    assert_eq!(def.applicability, EmbeddingStyleApplicability::Local);
 
     // Local inline classes appear in same-file traversal: scoped styles still
     // apply to the component's own elements. Scoping only restricts leaking to
@@ -3181,7 +3183,7 @@ fn test_svelte_local_style_classes_are_hidden() {
     let def = html_info.style_classes.iter().next().unwrap();
     assert_eq!(
         def.applicability,
-        EmbeddingApplicability::Local,
+        EmbeddingStyleApplicability::Local,
         "Svelte default <style> is Local"
     );
 
@@ -3228,7 +3230,7 @@ fn test_svelte_global_pseudo_class_is_visible() {
         .expect(".prose class must exist");
     assert_eq!(
         def.applicability,
-        EmbeddingApplicability::Global,
+        EmbeddingStyleApplicability::Global,
         ":global(.prose) must be stored as Global even in a Local Svelte block"
     );
 

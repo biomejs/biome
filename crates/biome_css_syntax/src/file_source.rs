@@ -28,23 +28,24 @@ pub enum EmbeddingHtmlKind {
     Html,
     /// `.vue` files
     Vue {
-        applicability: EmbeddingApplicability,
+        applicability: EmbeddingStyleApplicability,
     },
     /// `.astro` files
     Astro {
-        applicability: EmbeddingApplicability,
+        applicability: EmbeddingStyleApplicability,
     },
     /// `.svelte` files
     Svelte {
-        applicability: EmbeddingApplicability,
+        applicability: EmbeddingStyleApplicability,
     },
 }
 
+/// How the CSS is applied inside a snippet
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[derive(
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
 )]
-pub enum EmbeddingApplicability {
+pub enum EmbeddingStyleApplicability {
     /// The styles will be applied to the current component
     Local,
     /// The styles will be applied to the global scope
@@ -182,14 +183,14 @@ impl CssFileSource {
     }
 
     /// Returns the applicability of this embedded CSS block.
-    pub fn embedding_applicability(&self) -> EmbeddingApplicability {
+    pub fn embedding_applicability(&self) -> EmbeddingStyleApplicability {
         match &self.embedding_kind {
             EmbeddingKind::Html(
                 EmbeddingHtmlKind::Vue { applicability }
                 | EmbeddingHtmlKind::Astro { applicability }
                 | EmbeddingHtmlKind::Svelte { applicability },
             ) => *applicability,
-            _ => EmbeddingApplicability::Unknown,
+            _ => EmbeddingStyleApplicability::default(),
         }
     }
 
@@ -202,7 +203,7 @@ impl CssFileSource {
     }
 
     /// If the CSS is embedded, it sets its applicability
-    pub fn set_applicability(&mut self, new_applicability: EmbeddingApplicability) {
+    pub fn set_applicability(&mut self, new_applicability: EmbeddingStyleApplicability) {
         if let EmbeddingKind::Html(embedded_kind) = &mut self.embedding_kind {
             match embedded_kind {
                 EmbeddingHtmlKind::None => {}
@@ -223,7 +224,7 @@ impl CssFileSource {
     /// Whether this CSS is applied locally. This is only `true` if the CSS is embedded in HTML files
     /// with local (scoped) applicability, e.g. Vue `<style scoped>`, Astro or Svelte scoped blocks.
     pub fn is_applied_locally(&self) -> bool {
-        self.embedding_applicability() == EmbeddingApplicability::Local
+        self.embedding_applicability() == EmbeddingStyleApplicability::Local
     }
 
     /// Try to return the CSS file source corresponding to this file name from well-known files
