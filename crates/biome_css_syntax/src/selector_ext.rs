@@ -48,7 +48,7 @@ impl CssPseudoClassFunctionSelector {
         self.name()
             .ok()
             .and_then(|name| name.value_token().ok())
-            .is_some_and(|token| token.text_trimmed() == "global")
+            .is_some_and(|token| token.text_trimmed().eq_ignore_ascii_case("global"))
     }
 }
 

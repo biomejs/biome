@@ -30,8 +30,8 @@ impl<'a> ModuleGraphSnapshot<'a> {
             .iter()
             .map(|(file, entry)| {
                 let content = entry.lock();
-                let content = std::str::from_utf8(content.as_slice()).unwrap();
-                (file.as_str().to_string(), String::from(content))
+                let content = String::from_utf8_lossy(content.as_slice()).into_owned();
+                (file.as_str().to_string(), content)
             })
             .collect();
         Self {

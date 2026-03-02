@@ -289,7 +289,9 @@ impl HtmlElement {
 
     /// Returns `true` if the element is a `<style lang="sass">` or `<style lang="scss">`
     pub fn is_sass_lang(&self) -> bool {
-        self.is_style_tag() && self.has_attribute_with_value("lang", "scss")
+        self.is_style_tag()
+            && (self.has_attribute_with_value("lang", "scss")
+                || self.has_attribute_with_value("lang", "sass"))
     }
 
     pub fn is_style_scoped(&self, attribute_name: &str) -> bool {

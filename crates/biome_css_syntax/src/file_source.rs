@@ -220,14 +220,10 @@ impl CssFileSource {
         }
     }
 
-    /// Whether this CSS is applied locally. This is only `true` if the CSS is embedded in HTML files.
+    /// Whether this CSS is applied locally. This is only `true` if the CSS is embedded in HTML files
+    /// with local (scoped) applicability, e.g. Vue `<style scoped>`, Astro or Svelte scoped blocks.
     pub fn is_applied_locally(&self) -> bool {
-        matches!(
-            self.embedding_kind,
-            EmbeddingKind::Html(EmbeddingHtmlKind::Vue {
-                applicability: EmbeddingApplicability::Local
-            })
-        )
+        self.embedding_applicability() == EmbeddingApplicability::Local
     }
 
     /// Try to return the CSS file source corresponding to this file name from well-known files
