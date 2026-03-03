@@ -1,13 +1,12 @@
 # @biomejs/resolver
 
-> [!WARNING]
-> This package is currently shipped as alpha. Its APIs could change from one release to another.
+> **Warning:** This package is currently shipped as alpha. Its APIs could change from one release to another.
 
 <div align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-dark-transparent.svg">
     <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-light-transparent.svg">
-    <img alt="Shows the banner of Biome, with its logo and the phrase 'Biome - Toolchain of the web'." src="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-light-transparent.svg" width="700">
+    <img alt="Biome logo with tagline 'Toolchain of the web'" src="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-light-transparent.svg" width="700">
   </picture>
 
   <br>
@@ -26,21 +25,15 @@
 <br>
 
 
-A WebAssembly-based module resolver that implements the [Node.js module resolution
-algorithm](https://nodejs.org/api/esm.html#resolution-algorithm-specification), including support for `package.json` `exports`/`imports` maps,
-TypeScript path aliases, extension aliases, and more.
+This WebAssembly-based module resolver implements the [Node.js module resolution algorithm](https://nodejs.org/api/esm.html#resolution-algorithm-specification), including support for `package.json` `exports`/`imports` maps, TypeScript path aliases, extension aliases, and more.
 
-This package is part of the [Biome](https://biomejs.dev) project. It exposes the
-same resolver that Biome uses internally for its module graph, project lint rules, and type-aware lint rules.
+You can use this resolver to build tools that need to resolve JavaScript or TypeScript imports—such as bundlers, linters, type checkers, or language servers. Because it compiles to WebAssembly, it requires no native binaries, has no platform-specific dependencies, and runs synchronously.
 
-Because it is compiled to WebAssembly, it requires no native binaries, has no
-platform-specific dependencies, and is fully synchronous.
+This package is part of the [Biome](https://biomejs.dev) project. It exposes the same resolver that Biome uses internally for its module graph, project lint rules, and type-aware lint rules.
 
 ## Installation
 
-Install the main package together with the WASM peer dependency that matches
-your environment. There are two peer packages: one for Node.js and one for
-browser environments.
+To install the resolver, run one of the following commands depending on your target environment. There are two peer packages: one for Node.js and one for browser environments.
 
 ```sh
 # Install the Node.js distribution
@@ -51,10 +44,7 @@ npm install @biomejs/resolver @biomejs/wasm-resolver-web
 
 ```
 
-> [!NOTE]
-> All the examples from now on will target the Node.js distribution.
-> Head to the [relevant section](#using-the-web-distribution) if you wish to know how to use
-> the web distribution.
+> **Note:** All the examples from now on will target the Node.js distribution. Head to the [relevant section](#resolve-in-a-browser-playground-web-distribution) if you wish to know how to use the web distribution.
 
 ## Quick start
 
@@ -103,9 +93,7 @@ WASM synchronously from disk and therefore supports static imports.
 
 ## Important: how extensions work
 
-Extensions must be provided **without a leading dot**. The resolver adds the dot
-itself when it constructs candidate file paths. For example, passing `"js"`
-causes the resolver to look for files ending in `.js`.
+You must provide extensions **without a leading dot**. The resolver adds the dot itself when it constructs candidate file paths. For example, passing `"js"` causes the resolver to look for files ending in `.js`.
 
 The correct way to set extensions is:
 
@@ -143,10 +131,7 @@ expected, because the resolver will append the extension again, producing
 
 ## How `package.json` fields map to resolver options
 
-When the resolver encounters a bare package specifier such as `import "lodash"`,
-it walks up the directory tree from `baseDir` until it finds a `package.json`,
-then reads fields from it to determine where the package's entry point is. Which
-fields it reads and how it interprets them depend on the options you pass.
+When the resolver encounters a bare package specifier such as `import "lodash"`, it walks up the directory tree from `baseDir` until it finds a `package.json`, then reads fields from it to determine where the package's entry point is. Which fields it reads and how it interprets them depend on the options you pass. The following sections explain how each `package.json` field maps to resolver behavior.
 
 ### `exports`
 
@@ -279,10 +264,7 @@ resolver.free();
 
 ## How `tsconfig.json` fields map to resolver options
 
-The resolver automatically discovers `tsconfig.json` by walking up from the
-`baseDir` you pass to `resolve()`. When a `tsconfig.json` is found, the resolver
-reads certain fields from it automatically, without requiring any extra options
-on your part.
+The resolver automatically discovers `tsconfig.json` by walking up from the `baseDir` you pass to `resolve()`. When a `tsconfig.json` is found, the resolver reads certain fields from it automatically, without requiring any extra options on your part. The following sections explain how each `tsconfig.json` field affects resolution behavior.
 
 ### `paths`
 
@@ -667,19 +649,17 @@ resolver.free();
 
 ### Resolve in a browser playground (web distribution)
 
-The web distribution is designed for environments where the host filesystem is
-not accessible, such as browser-based code playgrounds or in-browser IDEs. It
-exposes an in-memory filesystem that you populate with `insertFile()` calls
-before creating a resolver.
+The web distribution is designed for environments where the host filesystem is not accessible, such as browser-based code playgrounds or in-browser IDEs. It exposes an in-memory filesystem that you populate with `insertFile()` calls before creating a resolver.
 
-Because the WASM binary must be fetched and compiled by the browser before it
-can be used, the web distribution must be loaded with a dynamic `import()`. The
-`await` ensures the WASM is ready before you call any resolver APIs.
+Because the WASM binary must be fetched and compiled by the browser before it can be used, the web distribution must be loaded with a dynamic `import()`. The `await` ensures the WASM is ready before you call any resolver APIs.
 
-To set up a virtual project, insert every file the resolver might need: your
-source files, any `package.json` manifests (both your project's and any packages
-in `node_modules`), and any other files that imports may reference. The resolver
-walks this virtual filesystem exactly as it would a real one.
+To set up a virtual project, insert every file the resolver might need:
+
+- Your source files
+- Every `package.json` along the resolution path — both your project root manifest and the manifests of any packages in `node_modules`. Without a `package.json`, the resolver cannot locate package entry points and will return `ManifestNotFound`.
+- Any `tsconfig.json` files whose `paths`, `baseUrl`, or `typeRoots` settings you want the resolver to apply. If a `tsconfig.json` is absent, the resolver resolves as if no TypeScript configuration exists.
+
+The paths you use must be absolute and consistent. The resolver treats the virtual filesystem exactly like a real one: it walks parent directories looking for manifests, so the directory structure implied by the paths you insert must match what you expect the resolver to traverse.
 
 ```ts
 // The web distribution must be loaded dynamically because browsers require
@@ -690,14 +670,29 @@ const { createMemoryFileSystem, createWebResolver } = await import(
 
 const fs = createMemoryFileSystem();
 
-// Populate the file system
+// Project manifest — required for bare package specifier resolution.
 fs.insertFile(
   "/project/package.json",
   JSON.stringify({ name: "my-app", version: "1.0.0" }),
 );
+
+// TypeScript configuration — required for path aliases and baseUrl.
+fs.insertFile(
+  "/project/tsconfig.json",
+  JSON.stringify({
+    compilerOptions: {
+      baseUrl: "./src",
+      paths: { "@utils/*": ["./src/utils/*"] },
+    },
+  }),
+);
+
+// Source files.
 fs.insertFile("/project/src/index.ts", "");
 fs.insertFile("/project/src/greet.ts", "");
 
+// A package in node_modules — both the manifest and the entry point
+// must be present for the resolver to return a path.
 fs.insertFile(
   "/project/node_modules/lodash/package.json",
   JSON.stringify({ name: "lodash", version: "4.17.21", main: "./lodash.js" }),
@@ -711,15 +706,23 @@ const resolver = createWebResolver(fs, {
   conditionNames: ["import", "default"],
 });
 
+// Resolves relative import
 const relativeResult = resolver.resolve("./greet.ts", "/project/src");
 // => { path: "/project/src/greet.ts" }
 
+// Resolves using the path alias from tsconfig.json
+const aliasResult = resolver.resolve("@utils/format", "/project/src");
+// => { path: "/project/src/utils/format.ts" }
+
+// Resolves the package entry point from the node_modules manifest
 const packageResult = resolver.resolve("lodash", "/project/src");
 // => { path: "/project/node_modules/lodash/lodash.js" }
 
 resolver.free();
 fs.free();
 ```
+
+If you are building a browser playground that lets users edit multiple files, keep a single `MemoryFileSystem` instance and call `insertFile()` or `remove()` as files change. You can reuse the same `Resolver` instance across edits because it reads from the filesystem on every `resolve()` call — there is no internal cache to invalidate.
 
 ## Error handling
 
@@ -875,90 +878,110 @@ If you create a single resolver at startup and reuse it for the lifetime of your
 process — a common pattern in long-running tools — there is no need to call
 `free()` at all.
 
-## Using the web distribution
+## API Reference
 
-The web distribution uses an in-memory filesystem that you populate before
-creating a resolver. Because it has no access to the host filesystem, every file
-the resolver might need must be explicitly inserted with `insertFile()`. This
-includes not just your source files, but also:
+### `createNodeResolver(options?: ResolverOptions): Resolver`
 
-- Every `package.json` along the resolution path — both your project root
-  manifest and the manifests of any packages in `node_modules`. Without a
-  `package.json`, the resolver cannot locate package entry points and will
-  return `ManifestNotFound`.
-- Any `tsconfig.json` files whose `paths`, `baseUrl`, or `typeRoots` settings
-  you want the resolver to apply. If a `tsconfig.json` is absent, the resolver
-  resolves as if no TypeScript configuration exists.
+Creates a resolver instance that uses the Node.js filesystem.
 
-The paths you use must be absolute and consistent. The resolver treats the
-virtual filesystem exactly like a real one: it walks parent directories looking
-for manifests, so the directory structure implied by the paths you insert must
-match what you expect the resolver to traverse.
+**Options:**
 
-Because the WASM binary must be fetched over the network and compiled by the
-browser before it can be used, the web distribution must be loaded with a
-dynamic `await import()`. The `await` ensures the WASM module is fully
-initialized before you call any resolver APIs. This is required in browser
-environments — synchronous WASM loading is not possible when the binary comes
-over HTTP. Node.js can load WASM synchronously from disk, which is why
-`@biomejs/resolver/nodejs` supports static imports.
+- `extensions?: string[]` — List of file extensions to try when resolving specifiers without explicit extensions (e.g., `["js", "ts"]`). Do not include the leading dot.
+- `defaultFiles?: string[]` — List of filename stems to try when resolving directory imports (e.g., `["index"]`). Do not include extensions.
+- `conditionNames?: string[]` — List of condition names for matching `exports` and `imports` fields in `package.json` (e.g., `["node", "import"]`).
+- `extensionAliases?: Array<{ extension: string; aliases: string[] }>` — Maps one extension to a list of alternatives (e.g., `[{ extension: "js", aliases: ["ts", "js"] }]`).
+- `resolveTypes?: boolean` — When `true`, resolves to TypeScript declaration files (`.d.ts`) instead of source files.
+- `resolveNodeBuiltins?: boolean` — When `true`, returns `ResolveErrorKind.NodeBuiltIn` for Node.js built-in modules instead of `ModuleNotFound`.
+
+**Returns:** A `Resolver` instance.
+
+### `createWebResolver(fs: MemoryFileSystem, options?: ResolverOptions): Resolver`
+
+Creates a resolver instance that uses an in-memory filesystem.
+
+**Parameters:**
+
+- `fs: MemoryFileSystem` — The memory filesystem instance created with `createMemoryFileSystem()`.
+- `options?: ResolverOptions` — Same options as `createNodeResolver()`.
+
+**Returns:** A `Resolver` instance.
+
+### `Resolver`
+
+#### `resolve(specifier: string, baseDir: string): ResolveResult`
+
+Resolves a module specifier to an absolute file path.
+
+**Parameters:**
+
+- `specifier: string` — The module specifier to resolve (e.g., `"./utils"`, `"lodash"`, `"@utils/format"`).
+- `baseDir: string` — The absolute path to the directory from which to resolve. Must be a directory, not a file path.
+
+**Returns:**
 
 ```ts
-const { createMemoryFileSystem, createWebResolver } = await import(
-  "@biomejs/resolver/web"
-);
-
-const fs = createMemoryFileSystem();
-
-// Project manifest — required for bare package specifier resolution.
-fs.insertFile(
-  "/project/package.json",
-  JSON.stringify({ name: "my-app", version: "1.0.0" }),
-);
-
-// TypeScript configuration — required for path aliases and baseUrl.
-fs.insertFile(
-  "/project/tsconfig.json",
-  JSON.stringify({
-    compilerOptions: {
-      baseUrl: "./src",
-      paths: { "@utils/*": ["./src/utils/*"] },
-    },
-  }),
-);
-
-// Source files.
-fs.insertFile("/project/src/index.ts", "");
-fs.insertFile("/project/src/utils/format.ts", "");
-
-// A package in node_modules — both the manifest and the entry point
-// must be present for the resolver to return a path.
-fs.insertFile(
-  "/project/node_modules/lodash/package.json",
-  JSON.stringify({ name: "lodash", version: "4.17.21", main: "./lodash.js" }),
-);
-fs.insertFile("/project/node_modules/lodash/lodash.js", "");
-
-const resolver = createWebResolver(fs, {
-  extensions: ["ts", "js"],
-  defaultFiles: ["index"],
-  conditionNames: ["import", "default"],
-});
-
-// Resolves using the path alias from tsconfig.json.
-const aliasResult = resolver.resolve("@utils/format", "/project/src");
-// => { path: "/project/src/utils/format.ts" }
-
-// Resolves the package entry point from the node_modules manifest.
-const pkgResult = resolver.resolve("lodash", "/project/src");
-// => { path: "/project/node_modules/lodash/lodash.js" }
-
-resolver.free();
-fs.free();
+type ResolveResult =
+  | { path: string; error?: never; errorKind?: never }
+  | { path?: never; error: string; errorKind: ResolveErrorKind };
 ```
 
-If you are building a browser playground that lets users edit multiple files,
-keep a single `MemoryFileSystem` instance and call `insertFile()` or `remove()`
-as files change. You can reuse the same `Resolver` instance across edits because
-it reads from the filesystem on every `resolve()` call — there is no internal
-cache to invalidate.
+#### `free(): void`
+
+Releases the memory held by the resolver. After calling `free()`, do not use the resolver instance.
+
+### `MemoryFileSystem`
+
+#### `insertFile(path: string, content: string): void`
+
+Inserts or updates a file in the memory filesystem.
+
+**Parameters:**
+
+- `path: string` — Absolute path to the file.
+- `content: string` — File contents.
+
+#### `remove(path: string): void`
+
+Removes a file from the memory filesystem.
+
+**Parameters:**
+
+- `path: string` — Absolute path to the file.
+
+#### `free(): void`
+
+Releases the memory held by the filesystem. After calling `free()`, do not use the filesystem instance.
+
+### `ResolveErrorKind`
+
+An enum representing different types of resolution errors:
+
+- `ModuleNotFound` — The specifier could not be found.
+- `DirectoryWithoutIndex` — The specifier resolves to a directory without an index file.
+- `NodeBuiltIn` — The specifier refers to a Node.js built-in module (only when `resolveNodeBuiltins: true`).
+- `ManifestNotFound` — No `package.json` was found.
+- `ErrorLoadingManifest` — A manifest file exists but could not be parsed.
+- `BrokenSymlink` — A symlink in the resolution chain is broken.
+- `InvalidExportsTarget` — The `exports` field contains an invalid target.
+- `InvalidPackageName` — The specifier contains invalid package name characters.
+
+### Standard Condition Names
+
+Common values for `conditionNames`:
+
+- `"node"` — Node.js environment
+- `"import"` — ESM import
+- `"require"` — CommonJS require
+- `"default"` — Default condition (fallback)
+- `"types"` — TypeScript type declarations
+- `"browser"` — Browser environment
+- `"development"` — Development mode
+- `"production"` — Production mode
+
+## Next steps
+
+- Browse the [Biome documentation](https://biomejs.dev) for more on how Biome uses this resolver
+- Join the [Biome Discord](https://biomejs.dev/chat) for help and discussion
+- Report issues or contribute on [GitHub](https://github.com/biomejs/biome)
+- Explore related packages in the [@biomejs npm organization](https://www.npmjs.com/org/biomejs)
+
