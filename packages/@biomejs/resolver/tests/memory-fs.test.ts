@@ -9,10 +9,10 @@
 import * as wasmModule from "@biomejs/wasm-resolver-nodejs";
 import { beforeAll, describe, expect, it } from "vitest";
 import {
+	ensureInitialized,
 	MemoryFileSystem,
 	ResolveErrorKind,
 	Resolver,
-	ensureInitialized,
 } from "../src/common";
 
 beforeAll(() => {

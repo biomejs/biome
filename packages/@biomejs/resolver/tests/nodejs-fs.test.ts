@@ -8,7 +8,7 @@
 import * as path from "node:path";
 import * as wasmModule from "@biomejs/wasm-resolver-nodejs";
 import { beforeAll, describe, expect, it } from "vitest";
-import { ResolveErrorKind, Resolver, ensureInitialized } from "../src/common";
+import { ensureInitialized, ResolveErrorKind, Resolver } from "../src/common";
 import { nodePathInfo, nodeReadFileUtf8 } from "../src/nodejsFileSystem";
 
 beforeAll(() => {
@@ -26,7 +26,9 @@ describe("Node.js filesystem resolver", () => {
 		);
 		try {
 			const result = resolver.resolve("./nodejs-fs.test.ts", __dirname);
-			expect(result).toEqual({ path: path.join(__dirname, "nodejs-fs.test.ts") });
+			expect(result).toEqual({
+				path: path.join(__dirname, "nodejs-fs.test.ts"),
+			});
 		} finally {
 			resolver.free();
 		}
