@@ -70,6 +70,9 @@
       "optional": true
     }
   },
+  "engines": {
+    "node": ">=14.21.3"
+  },
   "publishConfig": {
     "provenance": true
   }

@@ -5,9 +5,8 @@
  * This module must only be imported in Node.js environments.
  */
 
-import * as fs from "node:fs";
-
-export type PathInfo = "file" | "directory" | { symlink: string } | null;
+import { lstatSync, readFileSync, realpathSync } from "node:fs";
+import type { PathInfo } from "./common";
 
 /**
  * Returns `"file"`, `"directory"`, `{ symlink: <canonicalized> }`, or `null`
@@ -15,10 +14,10 @@ export type PathInfo = "file" | "directory" | { symlink: string } | null;
  */
 export function nodePathInfo(path: string): PathInfo {
 	try {
-		const stat = fs.lstatSync(path);
+		const stat = lstatSync(path);
 		if (stat.isSymbolicLink()) {
 			try {
-				const real = fs.realpathSync(path);
+				const real = realpathSync(path);
 				return { symlink: real };
 			} catch {
 				return null;
@@ -42,7 +41,7 @@ export function nodePathInfo(path: string): PathInfo {
  */
 export function nodeReadFileUtf8(path: string): string | null {
 	try {
-		return fs.readFileSync(path, "utf8");
+		return readFileSync(path, "utf8");
 	} catch {
 		return null;
 	}

@@ -26,13 +26,12 @@
 <br>
 
 
-A WebAssembly-based module resolver that implements the Node.js module resolution
-algorithm, including support for `package.json` `exports`/`imports` maps,
+A WebAssembly-based module resolver that implements the [Node.js module resolution
+algorithm](https://nodejs.org/api/esm.html#resolution-algorithm-specification), including support for `package.json` `exports`/`imports` maps,
 TypeScript path aliases, extension aliases, and more.
 
 This package is part of the [Biome](https://biomejs.dev) project. It exposes the
-same resolver that Biome uses internally for type-aware lint rules, making it
-available as a standalone library.
+same resolver that Biome uses internally for its module graph, project lint rules, and type-aware lint rules.
 
 Because it is compiled to WebAssembly, it requires no native binaries, has no
 platform-specific dependencies, and is fully synchronous.
@@ -44,11 +43,43 @@ your environment. There are two peer packages: one for Node.js and one for
 browser environments.
 
 ```sh
+# Install the Node.js distribution
 npm install @biomejs/resolver @biomejs/wasm-resolver-nodejs
+
+# Install the web distribution
+npm install @biomejs/resolver @biomejs/wasm-resolver-web
+
 ```
 
-For browser environments, replace `@biomejs/wasm-resolver-nodejs` with
-`@biomejs/wasm-resolver-web`.
+> [!NOTE]
+> All the examples from now on will target the Node.js distribution.
+> Head the [relative section](#using-the-web-distribution) if you wish to know how to use
+> the web distribution.
+
+## Quick start
+
+```ts
+import { createNodeResolver } from "@biomejs/resolver/nodejs";
+import { ResolveErrorKind } from "@biomejs/resolver";
+
+const resolver = createNodeResolver({
+  extensions: ["ts", "js"],
+  defaultFiles: ["index"],
+  conditionNames: ["node", "import"],
+});
+
+const result = resolver.resolve("./utils", "/project/src");
+
+if (result.path) {
+  console.log(result.path); // "/project/src/utils/index.ts"
+} else if (result.errorKind === ResolveErrorKind.ModuleNotFound) {
+  console.error("Not found:", result.error);
+} else {
+  console.error("Resolution failed:", result.error);
+}
+
+resolver.free();
+```
 
 ## Choosing a distribution
 
@@ -57,132 +88,13 @@ The package ships two entry points that differ in how they access the filesystem
 `@biomejs/resolver/nodejs` talks to the real filesystem using Node.js built-in
 `node:fs` APIs. Use this when writing CLI tools, build scripts, language server
 plugins, or any program that runs in Node.js, Bun, or Deno and needs to resolve
-modules from disk.
+modules from the disk.
 
 `@biomejs/resolver/web` uses an in-memory filesystem that you populate yourself.
 Use this when writing browser-based tools such as online code playgrounds or
 browser IDEs, where access to the host filesystem is not available. This entry
 point is also a good fit for unit tests because you control every file precisely
 without touching the disk.
-
-## Error handling
-
-`resolver.resolve()` never throws. All failures are returned as a value. A
-failed result carries two fields: `error`, a human-readable string suitable for
-logging, and `errorKind`, a `ResolveErrorKind` enum value for programmatic
-branching. A successful result carries only `path`. Exactly one of `path` or
-`error` is always present.
-
-```ts
-import { createNodeResolver } from "@biomejs/resolver/nodejs";
-import { ResolveErrorKind } from "@biomejs/resolver";
-
-const resolver = createNodeResolver();
-const result = resolver.resolve("./utils.js", "/project/src");
-
-if (result.path) {
-  processFile(result.path);
-} else {
-  // Use errorKind for branching, error for display.
-  if (result.errorKind === ResolveErrorKind.ModuleNotFound) {
-    console.error("File not found:", result.error);
-  } else {
-    console.error("Resolution failed:", result.error);
-  }
-}
-
-resolver.free();
-```
-
-This design means you never need a `try`/`catch` around `resolve()` calls. All
-exceptional conditions, including malformed manifests and broken symlinks, are
-surfaced as values rather than thrown exceptions.
-
-### `ResolveErrorKind.ModuleNotFound`
-
-The specifier could not be found anywhere the resolver looked. This is the most
-common error and almost always means one of the following:
-
-- The file does not exist at the path you specified. Check the path for typos.
-- The package is not installed. Run your package manager's install command.
-- The `extensions` option does not include the extension of the file you are
-  trying to resolve. Add the missing extension without a leading dot.
-- The `conditionNames` option does not match any condition in the package's
-  `exports` map. Check which conditions the package supports and include the
-  right ones.
-- The `baseDir` you passed is wrong. It must be an absolute path to a
-  **directory**, not a file path.
-
-### `ResolveErrorKind.DirectoryWithoutIndex`
-
-The specifier resolves to a directory, but the resolver does not know which file
-inside that directory to use. Fix this by providing both `defaultFiles` and
-`extensions`.
-
-```ts
-const resolver = createNodeResolver({
-  defaultFiles: ["index"],
-  extensions: ["ts", "js"],
-});
-```
-
-With this configuration, resolving `"./utils"` when `./utils/` is a directory
-will try `./utils/index.ts` and then `./utils/index.js`.
-
-### `ResolveErrorKind.NodeBuiltIn`
-
-This is only returned when `resolveNodeBuiltins: true` is set. It means the
-specifier names a built-in module such as `node:fs` or `node:path`. This is not
-a failure — it signals that the import refers to the runtime itself rather than a
-file on disk. Handle it by skipping the specifier, recording it as a built-in,
-or substituting a polyfill.
-
-```ts
-const result = resolver.resolve("node:fs", "/project/src");
-
-if (result.errorKind === ResolveErrorKind.NodeBuiltIn) {
-  // not an error — the import is intentional
-} else if (result.error) {
-  console.error("Resolution failed:", result.error);
-}
-```
-
-Without `resolveNodeBuiltins: true`, built-in specifiers produce
-`ModuleNotFound` instead, because the resolver treats them as ordinary package
-names and finds no matching directory in `node_modules`.
-
-### `ResolveErrorKind.ManifestNotFound`
-
-No `package.json` was found walking up from `baseDir`. This typically happens
-when `baseDir` is set to a path outside your project root or to a temporary
-directory that has no manifest. Confirm that `baseDir` is inside a directory
-tree that contains a `package.json`.
-
-### `ResolveErrorKind.ErrorLoadingManifest`
-
-A `package.json` or `tsconfig.json` was found on disk but could not be parsed.
-The file likely contains invalid JSON. Validate it with a JSON linter.
-
-### `ResolveErrorKind.BrokenSymlink`
-
-A symlink in the resolution chain points to a target that does not exist. This
-usually means a broken symlink in `node_modules` left behind by an interrupted
-package install. Re-running your package manager's install command normally
-fixes it.
-
-### `ResolveErrorKind.InvalidExportsTarget`
-
-The matched condition in a `package.json` `exports` or `imports` map points to
-an invalid target. A valid target must be a string starting with `./`, an array
-of fallbacks, a conditions object, or `null`. This is a bug in the package's
-`package.json`. If you control the package, fix the manifest; otherwise check
-for a newer version.
-
-### `ResolveErrorKind.InvalidPackageName`
-
-The specifier contains characters that are not valid in a package name, such as
-uppercase letters in a scoped package name or a path segment that begins with
-`.`. Check the specifier for typos.
 
 ## Important: how extensions work
 
@@ -765,12 +677,11 @@ in `node_modules`), and any other files that imports may reference. The resolver
 walks this virtual filesystem exactly as it would a real one.
 
 ```ts
-const { createMemoryFileSystem, createWebResolver } = await import(
-  "@biomejs/resolver/web"
-);
+import { createMemoryFileSystem, createWebResolver } from "@biomejs/resolver/web";
 
 const fs = createMemoryFileSystem();
 
+// Populate the file system
 fs.insertFile(
   "/project/package.json",
   JSON.stringify({ name: "my-app", version: "1.0.0" }),
@@ -784,6 +695,7 @@ fs.insertFile(
 );
 fs.insertFile("/project/node_modules/lodash/lodash.js", "");
 
+// Create resolver
 const resolver = createWebResolver(fs, {
   extensions: ["ts", "js"],
   defaultFiles: ["index"],
@@ -800,15 +712,13 @@ resolver.free();
 fs.free();
 ```
 
-`insertFile` accepts a UTF-8 string. If you have binary content, use `insertBytes`
-with a `Uint8Array` instead.
+## Error handling
 
-## Understanding the result
-
-`resolver.resolve()` always returns synchronously and never throws. The return
-value is a discriminated union with two shapes: a success object with a `path`
-property, and a failure object with an `error` string and an `errorKind` enum
-value. Exactly one of `path` or `error` is always present.
+`resolver.resolve()` never throws. All failures are returned as a value. A
+failed result carries two fields: `error`, a human-readable string suitable for
+logging, and `errorKind`, a `ResolveErrorKind` enum value for programmatic
+branching. A successful result carries only `path`. Exactly one of `path` or
+`error` is always present.
 
 ```ts
 type ResolveResult =
@@ -821,27 +731,115 @@ narrow the type correctly inside each branch. Use `error` for display and
 logging; use `errorKind` for programmatic branching.
 
 ```ts
+import { createNodeResolver } from "@biomejs/resolver/nodejs";
+import { ResolveErrorKind } from "@biomejs/resolver";
+
+const resolver = createNodeResolver();
 const result = resolver.resolve("./utils.js", "/project/src");
 
 if (result.path) {
   processFile(result.path);
 } else {
-  console.error(`Could not resolve: ${result.error}`);
+  // Use errorKind for branching, error for display.
+  if (result.errorKind === ResolveErrorKind.ModuleNotFound) {
+    console.error("File not found:", result.error);
+  } else {
+    console.error("Resolution failed:", result.error);
+  }
+}
+
+resolver.free();
+```
+
+This design means you never need a `try`/`catch` around `resolve()` calls. All
+exceptional conditions, including malformed manifests and broken symlinks, are
+surfaced as values rather than thrown exceptions.
+
+### `ResolveErrorKind.ModuleNotFound`
+
+The specifier could not be found anywhere the resolver looked. This is the most
+common error and almost always means one of the following:
+
+- The file does not exist at the path you specified. Check the path for typos.
+- The package is not installed. Run your package manager's install command.
+- The `extensions` option does not include the extension of the file you are
+  trying to resolve. Add the missing extension without a leading dot.
+- The `conditionNames` option does not match any condition in the package's
+  `exports` map. Check which conditions the package supports and include the
+  right ones.
+- The `baseDir` you passed is wrong. It must be an absolute path to a
+  **directory**, not a file path.
+
+### `ResolveErrorKind.DirectoryWithoutIndex`
+
+The specifier resolves to a directory, but the resolver does not know which file
+inside that directory to use. Fix this by providing both `defaultFiles` and
+`extensions`.
+
+```ts
+const resolver = createNodeResolver({
+  defaultFiles: ["index"],
+  extensions: ["ts", "js"],
+});
+```
+
+With this configuration, resolving `"./utils"` when `./utils/` is a directory
+will try `./utils/index.ts` and then `./utils/index.js`.
+
+### `ResolveErrorKind.NodeBuiltIn`
+
+This is only returned when `resolveNodeBuiltins: true` is set. It means the
+specifier names a built-in module such as `node:fs` or `node:path`. This is not
+a failure — it signals that the import refers to the runtime itself rather than a
+file on disk. Handle it by skipping the specifier, recording it as a built-in,
+or substituting a polyfill.
+
+```ts
+const result = resolver.resolve("node:fs", "/project/src");
+
+if (result.errorKind === ResolveErrorKind.NodeBuiltIn) {
+  // not an error — the import is intentional
+} else if (result.error) {
+  console.error("Resolution failed:", result.error);
 }
 ```
 
-The possible `errorKind` values are:
+Without `resolveNodeBuiltins: true`, built-in specifiers produce
+`ModuleNotFound` instead, because the resolver treats them as ordinary package
+names and finds no matching directory in `node_modules`.
 
-| `ResolveErrorKind` | `error` string | Meaning |
-| --- | --- | --- |
-| `ModuleNotFound` | `"module not found"` | The specifier could not be found anywhere |
-| `DirectoryWithoutIndex` | `"found directory without index"` | The specifier resolved to a directory but no index file was found; add `defaultFiles` and `extensions` |
-| `NodeBuiltIn` | `"resolved to a Node.js built-in"` | The specifier is a Node.js built-in (only returned when `resolveNodeBuiltins: true`) |
-| `ManifestNotFound` | `"no package.json manifest found"` | No `package.json` was found walking up from `baseDir` |
-| `ErrorLoadingManifest` | `"error loading manifest"` | A `package.json` or `tsconfig.json` was found but could not be parsed |
-| `BrokenSymlink` | `"broken symlink"` | A symlink in the resolution chain points to a non-existent target |
-| `InvalidExportsTarget` | `"unexpected target in \`imports\` or \`exports\`"` | The matched export or import condition maps to an invalid value |
-| `InvalidPackageName` | `"invalid package name"` | The specifier contains characters that are not valid in a package name |
+### `ResolveErrorKind.ManifestNotFound`
+
+No `package.json` was found walking up from `baseDir`. This typically happens
+when `baseDir` is set to a path outside your project root or to a temporary
+directory that has no manifest. Confirm that `baseDir` is inside a directory
+tree that contains a `package.json`.
+
+### `ResolveErrorKind.ErrorLoadingManifest`
+
+A `package.json` or `tsconfig.json` was found on disk but could not be parsed.
+The file likely contains invalid JSON. Validate it with a JSON linter.
+
+### `ResolveErrorKind.BrokenSymlink`
+
+A symlink in the resolution chain points to a target that does not exist. This
+usually means a broken symlink in `node_modules` left behind by an interrupted
+package install. Re-running your package manager's install command normally
+fixes it.
+
+### `ResolveErrorKind.InvalidExportsTarget`
+
+The matched condition in a `package.json` `exports` or `imports` map points to
+an invalid target. A valid target must be a string starting with `./`, an array
+of fallbacks, a conditions object, or `null`. This is a bug in the package's
+`package.json`. If you control the package, fix the manifest; otherwise check
+for a newer version.
+
+### `ResolveErrorKind.InvalidPackageName`
+
+The specifier contains characters that are not valid in a package name, such as
+uppercase letters in a scoped package name or a path segment that begins with
+`.`. Check the specifier for typos.
 
 ## Memory management
 
@@ -862,3 +860,83 @@ try {
 If you create a single resolver at startup and reuse it for the lifetime of your
 process — a common pattern in long-running tools — there is no need to call
 `free()`.
+
+## Using the web distribution
+
+The web distribution uses an in-memory filesystem that you populate before
+creating a resolver. Because it has no access to the host filesystem, every file
+the resolver might need must be explicitly inserted with `insertFile()`. This
+includes not just your source files, but also:
+
+- Every `package.json` along the resolution path — both your project root
+  manifest and the manifests of any packages in `node_modules`. Without a
+  `package.json`, the resolver cannot locate package entry points and will
+  return `ManifestNotFound`.
+- Any `tsconfig.json` files whose `paths`, `baseUrl`, or `typeRoots` settings
+  you want the resolver to apply. If a `tsconfig.json` is absent, the resolver
+  resolves as if no TypeScript configuration exists.
+
+The paths you use must be absolute and consistent. The resolver treats the
+virtual filesystem exactly like a real one: it walks parent directories looking
+for manifests, so the directory structure implied by the paths you insert must
+match what you expect the resolver to traverse.
+
+```ts
+const { createMemoryFileSystem, createWebResolver } = await import(
+  "@biomejs/resolver/web"
+);
+
+const fs = createMemoryFileSystem();
+
+// Project manifest — required for bare package specifier resolution.
+fs.insertFile(
+  "/project/package.json",
+  JSON.stringify({ name: "my-app", version: "1.0.0" }),
+);
+
+// TypeScript configuration — required for path aliases and baseUrl.
+fs.insertFile(
+  "/project/tsconfig.json",
+  JSON.stringify({
+    compilerOptions: {
+      baseUrl: "./src",
+      paths: { "@utils/*": ["./src/utils/*"] },
+    },
+  }),
+);
+
+// Source files.
+fs.insertFile("/project/src/index.ts", "");
+fs.insertFile("/project/src/utils/format.ts", "");
+
+// A package in node_modules — both the manifest and the entry point
+// must be present for the resolver to return a path.
+fs.insertFile(
+  "/project/node_modules/lodash/package.json",
+  JSON.stringify({ name: "lodash", version: "4.17.21", main: "./lodash.js" }),
+);
+fs.insertFile("/project/node_modules/lodash/lodash.js", "");
+
+const resolver = createWebResolver(fs, {
+  extensions: ["ts", "js"],
+  defaultFiles: ["index"],
+  conditionNames: ["import", "default"],
+});
+
+// Resolves using the path alias from tsconfig.json.
+const aliasResult = resolver.resolve("@utils/format", "/project/src");
+// => { path: "/project/src/utils/format.ts" }
+
+// Resolves the package entry point from the node_modules manifest.
+const pkgResult = resolver.resolve("lodash", "/project/src");
+// => { path: "/project/node_modules/lodash/lodash.js" }
+
+resolver.free();
+fs.free();
+```
+
+If you are building a browser playground that lets users edit multiple files,
+keep a single `MemoryFileSystem` instance and call `insertFile()` or `remove()`
+as files change. You can reuse the same `Resolver` instance across edits because
+it reads from the filesystem on every `resolve()` call — there is no internal
+cache to invalidate.

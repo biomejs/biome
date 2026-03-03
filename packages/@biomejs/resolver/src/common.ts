@@ -1,4 +1,17 @@
 /**
+ * The value returned by the `pathInfo` callback passed to
+ * `Resolver.fromJsFileSystem()`.
+ *
+ * - `"file"` — the path exists and is a regular file.
+ * - `"directory"` — the path exists and is a directory.
+ * - `{ symlink: string }` — the path is a symlink; `symlink` must be the
+ *   fully canonicalized real path (i.e. the result of `realpathSync` or
+ *   equivalent). The resolver uses this to detect and break symlink cycles.
+ * - `null` — the path does not exist or is not accessible.
+ */
+export type PathInfo = "file" | "directory" | { symlink: string } | null;
+
+/**
  * Options for the module resolver.
  */
 export interface ResolveOptions {
@@ -209,9 +222,7 @@ export interface ResolverModule {
 	main(): void;
 	MemoryFileSystem: new () => WasmMemoryFileSystem;
 	JsFileSystem: new (
-		pathInfoFn: (
-			path: string,
-		) => "file" | "directory" | { symlink: string } | null,
+		pathInfoFn: (path: string) => PathInfo,
 		readFileUtf8Fn: (path: string) => string | null,
 	) => WasmJsFileSystem;
 	Resolver: {
@@ -284,17 +295,27 @@ export class Resolver {
 	private constructor(private readonly inner: WasmResolver) {}
 
 	/**
-	 * Creates a resolver backed by the provided JavaScript filesystem bridge.
+	 * Creates a resolver backed by two JavaScript filesystem callbacks.
 	 *
-	 * Use this in Node.js environments — pass a `JsFileSystem` constructed
-	 * with callbacks that delegate to `lstatSync`, `realpathSync`, and
-	 * `readFileSync` from `node:fs`.
+	 * This is the low-level constructor for environments that have synchronous
+	 * filesystem access but are not Node.js — for example Bun, Deno, or any
+	 * runtime that exposes its own `fs`-like APIs. Pass callbacks that
+	 * implement `pathInfo` and `readFileUtf8` for your target runtime.
+	 *
+	 * For Node.js specifically, prefer `createNodeResolver()` from
+	 * `@biomejs/resolver/nodejs`, which wires these callbacks automatically.
+	 *
+	 * @param module - The loaded WASM module.
+	 * @param pathInfoFn - Returns the kind of the filesystem entry at `path`
+	 *   without following symlinks. See {@link PathInfo} for the expected return
+	 *   values. Must be synchronous.
+	 * @param readFileUtf8Fn - Returns the UTF-8 content of the file at `path`,
+	 *   or `null` if it does not exist or is not readable. Must be synchronous.
+	 * @param options - Optional resolver options.
 	 */
 	static fromJsFileSystem(
 		module: ResolverModule,
-		pathInfoFn: (
-			path: string,
-		) => "file" | "directory" | { symlink: string } | null,
+		pathInfoFn: (path: string) => PathInfo,
 		readFileUtf8Fn: (path: string) => string | null,
 		options?: ResolveOptions | null,
 	): Resolver {
