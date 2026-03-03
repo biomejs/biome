@@ -78,6 +78,8 @@ fn issue_9180_2() {
 /// incorrectly formatted as `<form .Field>` (with an extra space before the dot),
 /// which breaks the code.
 ///
+/// The official Tanstack Form docs https://tanstack.com/form/latest/docs/framework/svelte/quick-start
+///
 /// This test ensures that lowercase component member expressions in Svelte and Astro
 /// files are formatted correctly without adding extra spaces.
 #[test]
