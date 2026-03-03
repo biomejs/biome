@@ -187,7 +187,8 @@ MdBulletListItem = MdBulletList
 MdOrderedListItem = MdBulletList
 
 
-MdBulletList = MdBullet*
+AnyMdBulletListMember = MdBullet | MdNewline
+MdBulletList = AnyMdBulletListMember*
 // - Hey!
 // ^^^^^^
 // 1. Hey!

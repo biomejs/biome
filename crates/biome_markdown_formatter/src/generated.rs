@@ -1679,6 +1679,31 @@ impl IntoFormat<MarkdownFormatContext> for biome_markdown_syntax::AnyMdBlock {
         )
     }
 }
+impl AsFormat<MarkdownFormatContext> for biome_markdown_syntax::AnyMdBulletListMember {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_markdown_syntax::AnyMdBulletListMember,
+        crate::markdown::any::bullet_list_member::FormatAnyMdBulletListMember,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::markdown::any::bullet_list_member::FormatAnyMdBulletListMember::default(),
+        )
+    }
+}
+impl IntoFormat<MarkdownFormatContext> for biome_markdown_syntax::AnyMdBulletListMember {
+    type Format = FormatOwnedWithRule<
+        biome_markdown_syntax::AnyMdBulletListMember,
+        crate::markdown::any::bullet_list_member::FormatAnyMdBulletListMember,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::markdown::any::bullet_list_member::FormatAnyMdBulletListMember::default(),
+        )
+    }
+}
 impl AsFormat<MarkdownFormatContext> for biome_markdown_syntax::AnyMdCodeBlock {
     type Format<'a> = FormatRefWithRule<
         'a,

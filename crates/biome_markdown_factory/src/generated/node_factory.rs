@@ -641,7 +641,7 @@ where
 }
 pub fn md_bullet_list<I>(items: I) -> MdBulletList
 where
-    I: IntoIterator<Item = MdBullet>,
+    I: IntoIterator<Item = AnyMdBulletListMember>,
     I::IntoIter: ExactSizeIterator,
 {
     MdBulletList::unwrap_cast(SyntaxNode::new_detached(

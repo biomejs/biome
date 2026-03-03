@@ -43,7 +43,8 @@
 //! be decided with full context.
 
 use biome_markdown_syntax::{
-    AnyMdBlock, AnyMdCodeBlock, AnyMdInline, AnyMdLeafBlock, MarkdownLanguage, MdAutolink,
+    AnyMdBlock, AnyMdBulletListMember, AnyMdCodeBlock, AnyMdInline, AnyMdLeafBlock,
+    MarkdownLanguage, MdAutolink,
     MdBlockList, MdBullet, MdBulletListItem, MdDocument, MdEntityReference, MdFencedCodeBlock,
     MdHardLine, MdHeader, MdHtmlBlock, MdIndentCodeBlock, MdInlineCode, MdInlineEmphasis,
     MdInlineHtml, MdInlineImage, MdInlineItalic, MdInlineItemList, MdInlineLink, MdLinkBlock,
@@ -565,7 +566,11 @@ impl<'a> HtmlRenderer<'a> {
 
             let start = list
                 .md_bullet_list()
-                .first()
+                .iter()
+                .find_map(|member| match member {
+                    AnyMdBulletListMember::MdBullet(bullet) => Some(bullet),
+                    _ => None,
+                })
                 .and_then(|bullet| bullet.prefix().ok())
                 .and_then(|prefix| prefix.marker().ok())
                 .map_or(1, |marker| {

@@ -331,8 +331,10 @@ fn skip_blank_lines_between_items(
         // Blank lines between items make the list loose
         *is_tight = false;
         *last_item_ends_with_blank = true;
-        // Skip the blank line as trivia (no tree node created)
-        p.parse_as_skipped_trivia_tokens(|p| p.bump(NEWLINE));
+        // Emit blank line as an explicit MdNewline CST node
+        let newline_m = p.start();
+        p.bump(NEWLINE);
+        newline_m.complete(p, MD_NEWLINE);
     }
 }
 
