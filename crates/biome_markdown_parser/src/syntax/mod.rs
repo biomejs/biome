@@ -1161,6 +1161,7 @@ fn set_inline_emphasis_context(p: &mut MarkdownParser) -> Option<EmphasisContext
 fn inline_list_source_len(p: &mut MarkdownParser) -> usize {
     p.lookahead(|p| {
         let mut len = 0usize;
+        let mut has_content = false;
 
         loop {
             if p.at(T![EOF]) {
@@ -1186,11 +1187,19 @@ fn inline_list_source_len(p: &mut MarkdownParser) -> usize {
                     consume_quote_prefix_without_virtual(p, quote_depth);
                 }
 
+                if has_content && p.at(MD_SETEXT_UNDERLINE_LITERAL) && allow_setext_heading(p) {
+                    break;
+                }
+
+                if has_content && p.at(MD_THEMATIC_BREAK_LITERAL) && is_dash_only_thematic_break(p)
+                {
+                    break;
+                }
                 if quote_depth > 0 && p.at(R_ANGLE) && !has_quote_prefix(p, quote_depth) {
                     consume_partial_quote_prefix_lookahead(p, quote_depth, &mut len);
                 }
 
-                if at_paragraph_break(p, true) {
+                if at_paragraph_break(p, has_content) {
                     break;
                 }
 
@@ -1228,9 +1237,10 @@ fn inline_list_source_len(p: &mut MarkdownParser) -> usize {
                     // We intentionally skip the heavier post-indent block-interrupt
                     // check here; the following non-NEWLINE pass still catches
                     // interrupts for emphasis-context length calculation.
-                    if p.at(MD_SETEXT_UNDERLINE_LITERAL)
-                        || (p.at(MD_THEMATIC_BREAK_LITERAL)
-                            && is_dash_only_thematic_break_text(p.cur_text()))
+                    if has_content
+                        && (p.at(MD_SETEXT_UNDERLINE_LITERAL)
+                            || (p.at(MD_THEMATIC_BREAK_LITERAL)
+                                && is_dash_only_thematic_break_text(p.cur_text())))
                     {
                         break;
                     }
@@ -1239,16 +1249,20 @@ fn inline_list_source_len(p: &mut MarkdownParser) -> usize {
                 continue;
             }
 
-            if p.at(MD_SETEXT_UNDERLINE_LITERAL) && allow_setext_heading(p) {
+            if has_content && p.at(MD_SETEXT_UNDERLINE_LITERAL) && allow_setext_heading(p) {
                 break;
             }
 
-            if p.at(MD_THEMATIC_BREAK_LITERAL) && is_dash_only_thematic_break(p) {
+            if has_content && p.at(MD_THEMATIC_BREAK_LITERAL) && is_dash_only_thematic_break(p) {
                 break;
             }
 
             if p.has_preceding_line_break() && at_block_interrupt(p) {
                 break;
+            }
+
+            if !p.cur_text().chars().all(|c| c == ' ' || c == '\t') {
+                has_content = true;
             }
 
             len += p.cur_text().len();
