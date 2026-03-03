@@ -193,7 +193,7 @@ export type ResolveResult = ResolveSuccess | ResolveFailure;
  * WASM package.
  */
 export interface WasmMemoryFileSystem {
-	insert(path: string, data: Uint8Array): void;
+	insertFile(path: string, content: string): void;
 	remove(path: string): void;
 	free(): void;
 }
@@ -245,7 +245,7 @@ const initialized = new WeakSet<object>();
 /**
  * An in-memory filesystem suitable for use in browser environments and tests.
  *
- * Populate with `insert()` before constructing a `Resolver`.
+ * Populate with `insertFile()` before constructing a `Resolver`.
  */
 export class MemoryFileSystem {
 	constructor(private readonly inner: WasmMemoryFileSystem) {}
@@ -254,14 +254,7 @@ export class MemoryFileSystem {
 	 * Inserts a file at `path` with the given UTF-8 string content.
 	 */
 	insertFile(path: string, content: string): void {
-		this.inner.insert(path, new TextEncoder().encode(content));
-	}
-
-	/**
-	 * Inserts a file at `path` with the given raw byte content.
-	 */
-	insertBytes(path: string, data: Uint8Array): void {
-		this.inner.insert(path, data);
+		this.inner.insertFile(path, content);
 	}
 
 	/**
@@ -272,8 +265,10 @@ export class MemoryFileSystem {
 	}
 
 	/**
-	 * Frees the underlying WASM memory. After calling this, the object must not
-	 * be used.
+	 * Frees the underlying WASM memory.
+	 *
+	 * After calling this, the object must not be used. Calling `free()` more
+	 * than once on the same instance throws an error.
 	 */
 	free(): void {
 		this.inner.free();
@@ -288,8 +283,8 @@ export class MemoryFileSystem {
 /**
  * A module resolver.
  *
- * Create with the static factory methods `Resolver.withJsFileSystem()` or
- * `Resolver.withMemoryFileSystem()`.
+ * Create with the static factory methods `Resolver.fromJsFileSystem()` or
+ * `Resolver.fromMemoryFileSystem()`.
  */
 export class Resolver {
 	private constructor(private readonly inner: WasmResolver) {}
@@ -342,19 +337,24 @@ export class Resolver {
 	}
 
 	/**
-	 * Resolves `specifier` starting from `baseDir`.
+	 * Resolves `specifier` starting from `baseDir`. Never throws.
 	 *
 	 * `baseDir` must be an absolute path to a **directory** (not a file).
 	 *
-	 * Returns `{ path: string }` on success or `{ error: string }` on failure.
+	 * Returns `{ path: string }` on success, or
+	 * `{ error: string; errorKind: ResolveErrorKind }` on failure.
+	 * Use `error` for display and logging; use `errorKind` for programmatic
+	 * branching.
 	 */
 	resolve(specifier: string, baseDir: string): ResolveResult {
 		return this.inner.resolve(specifier, baseDir);
 	}
 
 	/**
-	 * Frees the underlying WASM memory. After calling this, the object must not
-	 * be used.
+	 * Frees the underlying WASM memory.
+	 *
+	 * After calling this, the object must not be used. Calling `free()` more
+	 * than once on the same instance throws an error.
 	 */
 	free(): void {
 		this.inner.free();

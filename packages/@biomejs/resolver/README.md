@@ -850,16 +850,21 @@ do not, the memory will not be reclaimed for the lifetime of the process or page
 ```ts
 const resolver = createNodeResolver();
 
-try {
-  const result = resolver.resolve("./utils.js", "/project/src");
-} finally {
-  resolver.free();
+for (const specifier of specifiers) {
+  const result = resolver.resolve(specifier, baseDir);
+    // handle result...
 }
+
+resolver.free();
+
 ```
+
+Calling `free()` more than once on the same object throws an error. Do not
+retain a reference to a resolver after calling `free()`.
 
 If you create a single resolver at startup and reuse it for the lifetime of your
 process — a common pattern in long-running tools — there is no need to call
-`free()`.
+`free()` at all.
 
 ## Using the web distribution
 

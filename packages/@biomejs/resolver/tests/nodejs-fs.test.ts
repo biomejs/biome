@@ -8,8 +8,8 @@
 import * as path from "node:path";
 import * as wasmModule from "@biomejs/wasm-resolver-nodejs";
 import { beforeAll, describe, expect, it } from "vitest";
-import { ensureInitialized, ResolveErrorKind, Resolver } from "../src/common";
-import { nodePathInfo, nodeReadFileUtf8 } from "../src/nodejs-fs";
+import { ResolveErrorKind, Resolver, ensureInitialized } from "../src/common";
+import { nodePathInfo, nodeReadFileUtf8 } from "../src/nodejsFileSystem";
 
 beforeAll(() => {
 	ensureInitialized(wasmModule);
@@ -24,12 +24,12 @@ describe("Node.js filesystem resolver", () => {
 			nodePathInfo,
 			nodeReadFileUtf8,
 		);
-
-		// Resolve this test file itself relative to its own directory.
-		const result = resolver.resolve("./nodejs-fs.test.ts", __dirname);
-		expect(result).toEqual({ path: path.join(__dirname, "nodejs-fs.test.ts") });
-
-		resolver.free();
+		try {
+			const result = resolver.resolve("./nodejs-fs.test.ts", __dirname);
+			expect(result).toEqual({ path: path.join(__dirname, "nodejs-fs.test.ts") });
+		} finally {
+			resolver.free();
+		}
 	});
 
 	it("resolves a relative sibling file on disk", () => {
@@ -38,14 +38,14 @@ describe("Node.js filesystem resolver", () => {
 			nodePathInfo,
 			nodeReadFileUtf8,
 		);
-
-		// Resolve the memory-fs test file from the same directory.
-		const result = resolver.resolve("./memory-fs.test.ts", __dirname);
-		expect(result).toEqual({
-			path: path.join(__dirname, "memory-fs.test.ts"),
-		});
-
-		resolver.free();
+		try {
+			const result = resolver.resolve("./memory-fs.test.ts", __dirname);
+			expect(result).toEqual({
+				path: path.join(__dirname, "memory-fs.test.ts"),
+			});
+		} finally {
+			resolver.free();
+		}
 	});
 
 	it("returns an error for a module that does not exist", () => {
@@ -54,11 +54,15 @@ describe("Node.js filesystem resolver", () => {
 			nodePathInfo,
 			nodeReadFileUtf8,
 		);
-
-		const result = resolver.resolve("this-package-does-not-exist", repoRoot);
-		expect(result).toHaveProperty("error");
-		expect(result).toHaveProperty("errorKind", ResolveErrorKind.ModuleNotFound);
-
-		resolver.free();
+		try {
+			const result = resolver.resolve("this-package-does-not-exist", repoRoot);
+			expect(result).toHaveProperty("error");
+			expect(result).toHaveProperty(
+				"errorKind",
+				ResolveErrorKind.ModuleNotFound,
+			);
+		} finally {
+			resolver.free();
+		}
 	});
 });

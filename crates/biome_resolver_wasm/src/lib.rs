@@ -229,9 +229,11 @@ impl ResolverFsProxy for JsFileSystem {
         let mut dir = search_dir.to_path_buf();
         loop {
             let candidate = dir.join("package.json");
-            if let Ok(content) = self.read_file_utf8(&candidate)
-                && let Some(manifest) = parse_package_json(&content)
-            {
+            if let Ok(content) = self.read_file_utf8(&candidate) {
+                // File exists but is unparseable — surface the error immediately
+                // rather than silently continuing upward to a parent manifest.
+                let manifest =
+                    parse_package_json(&content).ok_or(ResolveError::ErrorLoadingManifest)?;
                 return Ok((dir, manifest));
             }
             match dir.parent() {
@@ -266,7 +268,7 @@ impl ResolverFsProxy for JsFileSystem {
 
 /// An in-memory filesystem for use in browser environments and tests.
 ///
-/// Populate it with `insert()` before calling `Resolver.withMemoryFileSystem()`.
+/// Populate it with `insert_file()` before calling `Resolver.withMemoryFileSystem()`.
 #[wasm_bindgen]
 pub struct MemoryFileSystem {
     inner: Arc<biome_fs::MemoryFileSystem>,
@@ -288,9 +290,11 @@ impl MemoryFileSystem {
         Self::default()
     }
 
-    /// Inserts a file at `path` with the given byte content.
-    pub fn insert(&self, path: &str, data: &[u8]) {
-        self.inner.insert(Utf8PathBuf::from(path), data);
+    /// Inserts a UTF-8 file at `path` with the given string content.
+    #[wasm_bindgen(js_name = insertFile)]
+    pub fn insert_file(&self, path: &str, content: &str) {
+        self.inner
+            .insert(Utf8PathBuf::from(path), content.as_bytes());
     }
 
     /// Removes the file at `path`.
@@ -516,8 +520,12 @@ fn parse_package_json(content: &str) -> Option<PackageJson> {
 }
 
 fn parse_tsconfig_json(path: &Utf8Path, content: &str) -> Option<TsConfigJson> {
-    let (tsconfig, _errors) = TsConfigJson::parse(path, content);
-    Some(tsconfig)
+    let (tsconfig, errors) = TsConfigJson::parse(path, content);
+    if errors.is_empty() {
+        Some(tsconfig)
+    } else {
+        None
+    }
 }
 
 // #endregion

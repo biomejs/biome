@@ -13,14 +13,14 @@ set windows-powershell := true
 install-tools:
 	cargo install cargo-binstall
 	cargo binstall cargo-insta wasm-opt
-	cargo binstall wasm-bindgen-cli --version 0.2.105
+	cargo binstall wasm-bindgen-cli --version 0.2.106
 	pnpm install
 
 # Upgrades the tools needed to develop
 upgrade-tools:
 	cargo install cargo-binstall --force
 	cargo binstall cargo-insta wasm-opt --force
-	cargo binstall wasm-bindgen-cli --version 0.2.105 --force
+	cargo binstall wasm-bindgen-cli --version 0.2.106 --force
 
 # Generate all files across crates and tools. You rarely want to use it locally.
 gen-all:
