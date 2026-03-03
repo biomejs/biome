@@ -1,0 +1,9 @@
+$base: 10;
+
+@import "theme.css" supports(width: $base + 1);
+
+.box {
+  @supports (width: $base + 1) {
+    width: $base + 1;
+  }
+}

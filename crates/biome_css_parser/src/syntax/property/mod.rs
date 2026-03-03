@@ -9,6 +9,7 @@ use crate::syntax::css_modules::{
 use crate::syntax::parse_error::{
     expected_component_value, expected_identifier, tailwind_disabled,
 };
+use crate::syntax::scss::parse_scss_expression_allow_empty_value_until;
 use crate::syntax::{
     CssSyntaxFeatures, is_at_any_value, is_at_dashed_identifier, is_at_identifier, is_at_string,
     parse_any_value, parse_custom_identifier_with_keywords, parse_dashed_identifier,
@@ -17,7 +18,9 @@ use crate::syntax::{
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseNodeList;
-use biome_parser::parse_recovery::{ParseRecovery, ParseRecoveryTokenSet, RecoveryResult};
+use biome_parser::parse_recovery::{
+    ParseRecovery, ParseRecoveryTokenSet, RecoveryError, RecoveryResult,
+};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{Parser, SyntaxFeature, TokenSet, token_set};
@@ -29,13 +32,28 @@ pub(crate) fn is_at_any_property(p: &mut CssParser) -> bool {
 
 #[inline]
 pub(crate) fn parse_any_property(p: &mut CssParser) -> ParsedSyntax {
+    parse_any_property_with_value_end_set(
+        p,
+        END_OF_PROPERTY_VALUE_COMPONENT_LIST_TOKEN_SET,
+        END_OF_PROPERTY_VALUE_TOKEN_SET,
+    )
+}
+
+#[inline]
+pub(crate) fn parse_any_property_with_value_end_set(
+    p: &mut CssParser,
+    value_end_set: TokenSet<CssSyntaxKind>,
+    recovery_end_set: TokenSet<CssSyntaxKind>,
+) -> ParsedSyntax {
     if !is_at_any_property(p) {
         return Absent;
     }
 
     match p.cur() {
-        T![composes] => parse_composes_property(p),
-        _ => parse_generic_property(p),
+        T![composes] => {
+            parse_composes_property_with_value_end_set(p, value_end_set, recovery_end_set)
+        }
+        _ => parse_generic_property_with_value_end_set(p, value_end_set, recovery_end_set),
     }
 }
 
@@ -64,7 +82,11 @@ fn is_at_composes_property(p: &mut CssParser) -> bool {
 ///     composes: alertText;
 /// }
 /// ```
-fn parse_composes_property(p: &mut CssParser) -> ParsedSyntax {
+fn parse_composes_property_with_value_end_set(
+    p: &mut CssParser,
+    value_end_set: TokenSet<CssSyntaxKind>,
+    recovery_end_set: TokenSet<CssSyntaxKind>,
+) -> ParsedSyntax {
     if !is_at_composes_property(p) {
         return Absent;
     }
@@ -75,7 +97,7 @@ fn parse_composes_property(p: &mut CssParser) -> ParsedSyntax {
         p.error(composes_not_allowed(p, p.cur_range()));
 
         // Fallback to a generic property
-        return parse_generic_property(p);
+        return parse_generic_property_with_value_end_set(p, value_end_set, recovery_end_set);
     }
 
     let m = p.start();
@@ -160,7 +182,7 @@ const END_OF_COMPOSES_CLASS_TOKEN_SET: TokenSet<CssSyntaxKind> =
     END_OF_PROPERTY_VALUE_TOKEN_SET.union(token_set!(T![from]));
 
 #[inline]
-fn is_at_generic_property(p: &mut CssParser) -> bool {
+pub(crate) fn is_at_generic_property(p: &mut CssParser) -> bool {
     is_at_identifier(p)
         && (p.nth_at(1, T![:])
         // handle --*:
@@ -170,13 +192,7 @@ fn is_at_generic_property(p: &mut CssParser) -> bool {
 }
 
 #[inline]
-fn parse_generic_property(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_generic_property(p) {
-        return Absent;
-    }
-
-    let m = p.start();
-
+pub(crate) fn parse_generic_property_name(p: &mut CssParser) {
     if is_at_dashed_identifier(p) {
         let ident = parse_dashed_identifier(p).ok();
         if let Some(ident) = ident
@@ -200,16 +216,95 @@ fn parse_generic_property(p: &mut CssParser) -> ParsedSyntax {
     } else {
         parse_regular_identifier(p).ok();
     }
+}
+
+/// Parses a generic property/value pair, using SCSS expression parsing when enabled
+/// so lists, maps, and `!important` terminate correctly.
+///
+/// Example:
+/// ```scss
+/// margin: 1px 2px, 3px 4px !important;
+/// ```
+///
+/// Docs: https://sass-lang.com/documentation/style-rules/declarations
+#[inline]
+fn parse_generic_property_with_value_end_set(
+    p: &mut CssParser,
+    value_end_set: TokenSet<CssSyntaxKind>,
+    recovery_end_set: TokenSet<CssSyntaxKind>,
+) -> ParsedSyntax {
+    if !is_at_generic_property(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    parse_generic_property_name(p);
 
     p.expect(T![:]);
 
-    GenericComponentValueList.parse_list(p);
+    if CssSyntaxFeatures::Scss.is_supported(p) {
+        let value = parse_scss_expression_allow_empty_value_until(p, value_end_set);
+        let missing_value = match &value {
+            Present(m) => m.range(p).is_empty(),
+            Absent => true,
+        };
+
+        if missing_value {
+            p.error(expected_component_value(p, p.cur_range()));
+        }
+        value.ok();
+    } else {
+        GenericComponentValueList::new(value_end_set, recovery_end_set).parse_list(p);
+    }
 
     Present(m.complete(p, CSS_GENERIC_PROPERTY))
 }
-const END_OF_PROPERTY_VALUE_TOKEN_SET: TokenSet<CssSyntaxKind> = token_set!(T!['}'], T![;]);
 
-pub(crate) struct GenericComponentValueList;
+pub(crate) const END_OF_PROPERTY_VALUE_TOKEN_SET: TokenSet<CssSyntaxKind> =
+    token_set!(T!['}'], T![;]);
+// Include `)` to recover malformed values without turning the whole declaration
+// into a bogus property, and `!` so `!important` isn't parsed as a value token.
+pub(crate) const END_OF_PROPERTY_VALUE_COMPONENT_LIST_TOKEN_SET: TokenSet<CssSyntaxKind> =
+    END_OF_PROPERTY_VALUE_TOKEN_SET.union(token_set!(T![')'], T![!]));
+
+pub(crate) struct GenericComponentValueList {
+    end_set: TokenSet<CssSyntaxKind>,
+    recovery_set: TokenSet<CssSyntaxKind>,
+    boundary: Option<fn(&mut CssParser) -> bool>,
+}
+
+impl GenericComponentValueList {
+    pub(crate) fn new(
+        end_set: TokenSet<CssSyntaxKind>,
+        recovery_set: TokenSet<CssSyntaxKind>,
+    ) -> Self {
+        Self {
+            end_set,
+            recovery_set,
+            boundary: None,
+        }
+    }
+
+    pub(crate) fn with_boundary(mut self, boundary: fn(&mut CssParser) -> bool) -> Self {
+        self.boundary = Some(boundary);
+        self
+    }
+
+    #[inline]
+    fn at_boundary(&self, p: &mut CssParser) -> bool {
+        self.boundary.map_or(false, |boundary| boundary(p))
+    }
+}
+
+impl Default for GenericComponentValueList {
+    fn default() -> Self {
+        Self::new(
+            END_OF_PROPERTY_VALUE_COMPONENT_LIST_TOKEN_SET,
+            END_OF_PROPERTY_VALUE_TOKEN_SET,
+        )
+    }
+}
 
 impl ParseNodeList for GenericComponentValueList {
     type Kind = CssSyntaxKind;
@@ -221,7 +316,7 @@ impl ParseNodeList for GenericComponentValueList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at_ts(END_OF_PROPERTY_VALUE_TOKEN_SET) || p.at(T![')']) || /* !token is !important */ p.at(T![!])
+        p.at_ts(self.end_set) || self.at_boundary(p)
     }
 
     fn recover(
@@ -229,9 +324,13 @@ impl ParseNodeList for GenericComponentValueList {
         p: &mut Self::Parser<'_>,
         parsed_element: ParsedSyntax,
     ) -> RecoveryResult {
+        if self.at_boundary(p) {
+            return Err(RecoveryError::AlreadyRecovered);
+        }
+
         parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecoveryTokenSet::new(CSS_BOGUS_PROPERTY_VALUE, END_OF_PROPERTY_VALUE_TOKEN_SET)
+            &ParseRecoveryTokenSet::new(CSS_BOGUS_PROPERTY_VALUE, self.recovery_set)
                 .enable_recovery_on_line_break(),
             expected_component_value,
         )

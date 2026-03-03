@@ -2869,8 +2869,8 @@ impl CssGenericProperty {
     pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
-    pub fn value(&self) -> CssGenericComponentValueList {
-        support::list(&self.syntax, 2usize)
+    pub fn value(&self) -> SyntaxResult<AnyCssGenericPropertyValueOrExpression> {
+        support::required_node(&self.syntax, 2usize)
     }
 }
 impl Serialize for CssGenericProperty {
@@ -2885,7 +2885,7 @@ impl Serialize for CssGenericProperty {
 pub struct CssGenericPropertyFields {
     pub name: SyntaxResult<AnyCssDeclarationName>,
     pub colon_token: SyntaxResult<SyntaxToken>,
-    pub value: CssGenericComponentValueList,
+    pub value: SyntaxResult<AnyCssGenericPropertyValueOrExpression>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssIdSelector {
@@ -11652,6 +11652,25 @@ impl AnyCssGenericComponentValue {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssGenericPropertyValueOrExpression {
+    CssGenericComponentValueList(CssGenericComponentValueList),
+    ScssExpression(ScssExpression),
+}
+impl AnyCssGenericPropertyValueOrExpression {
+    pub fn as_css_generic_component_value_list(&self) -> Option<&CssGenericComponentValueList> {
+        match &self {
+            Self::CssGenericComponentValueList(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_expression(&self) -> Option<&ScssExpression> {
+        match &self {
+            Self::ScssExpression(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssIfBranch {
     CssBogusIfBranch(CssBogusIfBranch),
     CssIfBranch(CssIfBranch),
@@ -17145,7 +17164,7 @@ impl std::fmt::Debug for CssGenericProperty {
                     "colon_token",
                     &support::DebugSyntaxResult(self.colon_token()),
                 )
-                .field("value", &self.value())
+                .field("value", &support::DebugSyntaxResult(self.value()))
                 .finish()
         } else {
             f.debug_struct("CssGenericProperty").finish()
@@ -29759,6 +29778,70 @@ impl From<AnyCssGenericComponentValue> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssGenericComponentValueList> for AnyCssGenericPropertyValueOrExpression {
+    fn from(node: CssGenericComponentValueList) -> Self {
+        Self::CssGenericComponentValueList(node)
+    }
+}
+impl From<ScssExpression> for AnyCssGenericPropertyValueOrExpression {
+    fn from(node: ScssExpression) -> Self {
+        Self::ScssExpression(node)
+    }
+}
+impl AstNode for AnyCssGenericPropertyValueOrExpression {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssGenericComponentValueList::KIND_SET.union(ScssExpression::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, CSS_GENERIC_COMPONENT_VALUE_LIST | SCSS_EXPRESSION)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_GENERIC_COMPONENT_VALUE_LIST => {
+                Self::CssGenericComponentValueList(CssGenericComponentValueList::cast(syntax)?)
+            }
+            SCSS_EXPRESSION => Self::ScssExpression(ScssExpression { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssGenericComponentValueList(it) => it.syntax(),
+            Self::ScssExpression(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssGenericComponentValueList(it) => it.into_syntax(),
+            Self::ScssExpression(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssGenericPropertyValueOrExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::CssGenericComponentValueList(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssExpression(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssGenericPropertyValueOrExpression> for SyntaxNode {
+    fn from(n: AnyCssGenericPropertyValueOrExpression) -> Self {
+        match n {
+            AnyCssGenericPropertyValueOrExpression::CssGenericComponentValueList(it) => {
+                it.into_syntax()
+            }
+            AnyCssGenericPropertyValueOrExpression::ScssExpression(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssGenericPropertyValueOrExpression> for SyntaxElement {
+    fn from(n: AnyCssGenericPropertyValueOrExpression) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssBogusIfBranch> for AnyCssIfBranch {
     fn from(node: CssBogusIfBranch) -> Self {
         Self::CssBogusIfBranch(node)
@@ -35800,6 +35883,11 @@ impl std::fmt::Display for AnyCssFunctionParameter {
     }
 }
 impl std::fmt::Display for AnyCssGenericComponentValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssGenericPropertyValueOrExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

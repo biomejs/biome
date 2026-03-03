@@ -11366,6 +11366,18 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssGenericComponentVa
         )
     }
 }
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssGenericPropertyValueOrExpression {
+    type Format < 'a > = FormatRefWithRule < 'a , biome_css_syntax :: AnyCssGenericPropertyValueOrExpression , crate :: css :: any :: generic_property_value_or_expression :: FormatAnyCssGenericPropertyValueOrExpression > ;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: any :: generic_property_value_or_expression :: FormatAnyCssGenericPropertyValueOrExpression :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssGenericPropertyValueOrExpression {
+    type Format = FormatOwnedWithRule < biome_css_syntax :: AnyCssGenericPropertyValueOrExpression , crate :: css :: any :: generic_property_value_or_expression :: FormatAnyCssGenericPropertyValueOrExpression > ;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: any :: generic_property_value_or_expression :: FormatAnyCssGenericPropertyValueOrExpression :: default ())
+    }
+}
 impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssIfBranch {
     type Format<'a> = FormatRefWithRule<
         'a,

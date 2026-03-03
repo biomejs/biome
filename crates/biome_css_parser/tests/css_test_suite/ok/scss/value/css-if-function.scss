@@ -1,0 +1,4 @@
+.test {
+  color: if(style(--scheme: dark): #eeeeee;);
+  background: if(media(print): white; else: black;);
+}

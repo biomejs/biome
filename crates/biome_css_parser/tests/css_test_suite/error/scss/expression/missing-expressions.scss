@@ -1,0 +1,14 @@
+// Missing RHS in binary expression should recover
+$missing-rhs: 1 + ;
+
+// Dangling unary chain should recover
+$dangling-unary: not - ;
+
+// Missing keyword argument value should recover
+$kw-args: foo($x: , $y: 1);
+
+// Map pair missing value in parens should recover
+$map-missing: (b: , c: 1);
+
+// Map pair trailing colon should recover
+$map-trailing: (b: 1, c:);

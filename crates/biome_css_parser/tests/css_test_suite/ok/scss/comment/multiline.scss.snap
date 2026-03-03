@@ -97,11 +97,13 @@ CssRoot {
                                     value_token: IDENT@106..114 "color" [Newline("\n"), Whitespace("  ")] [],
                                 },
                                 colon_token: COLON@114..116 ":" [] [Whitespace(" ")],
-                                value: CssGenericComponentValueList [
-                                    CssIdentifier {
-                                        value_token: IDENT@116..119 "red" [] [],
-                                    },
-                                ],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssIdentifier {
+                                            value_token: IDENT@116..119 "red" [] [],
+                                        },
+                                    ],
+                                },
                             },
                             important: missing (optional),
                         },
@@ -172,11 +174,13 @@ CssRoot {
                                     value_token: IDENT@300..341 "background" [Newline("\n"), Whitespace("  "), Comments("/* Comment inside rul ..."), Newline("\n"), Whitespace("  ")] [],
                                 },
                                 colon_token: COLON@341..343 ":" [] [Whitespace(" ")],
-                                value: CssGenericComponentValueList [
-                                    CssIdentifier {
-                                        value_token: IDENT@343..348 "white" [] [],
-                                    },
-                                ],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssIdentifier {
+                                            value_token: IDENT@343..348 "white" [] [],
+                                        },
+                                    ],
+                                },
                             },
                             important: missing (optional),
                         },
@@ -226,11 +230,13 @@ CssRoot {
                                         value_token: IDENT@464..502 "margin" [Newline("\n"), Whitespace("  "), Comments("/* Comment inside mix ..."), Newline("\n"), Whitespace("  ")] [],
                                     },
                                     colon_token: COLON@502..504 ":" [] [Whitespace(" ")],
-                                    value: CssGenericComponentValueList [
-                                        CssNumber {
-                                            value_token: CSS_NUMBER_LITERAL@504..505 "0" [] [],
-                                        },
-                                    ],
+                                    value: ScssExpression {
+                                        items: ScssExpressionItemList [
+                                            CssNumber {
+                                                value_token: CSS_NUMBER_LITERAL@504..505 "0" [] [],
+                                            },
+                                        ],
+                                    },
                                 },
                                 important: missing (optional),
                             },
@@ -283,9 +289,10 @@ CssRoot {
                 0: CSS_IDENTIFIER@106..114
                   0: IDENT@106..114 "color" [Newline("\n"), Whitespace("  ")] []
                 1: COLON@114..116 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@116..119
-                  0: CSS_IDENTIFIER@116..119
-                    0: IDENT@116..119 "red" [] []
+                2: SCSS_EXPRESSION@116..119
+                  0: SCSS_EXPRESSION_ITEM_LIST@116..119
+                    0: CSS_IDENTIFIER@116..119
+                      0: IDENT@116..119 "red" [] []
               1: (empty)
             1: SEMICOLON@119..120 ";" [] []
         2: R_CURLY@120..122 "}" [Newline("\n")] []
@@ -332,9 +339,10 @@ CssRoot {
                 0: CSS_IDENTIFIER@300..341
                   0: IDENT@300..341 "background" [Newline("\n"), Whitespace("  "), Comments("/* Comment inside rul ..."), Newline("\n"), Whitespace("  ")] []
                 1: COLON@341..343 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@343..348
-                  0: CSS_IDENTIFIER@343..348
-                    0: IDENT@343..348 "white" [] []
+                2: SCSS_EXPRESSION@343..348
+                  0: SCSS_EXPRESSION_ITEM_LIST@343..348
+                    0: CSS_IDENTIFIER@343..348
+                      0: IDENT@343..348 "white" [] []
               1: (empty)
             1: SEMICOLON@348..349 ";" [] []
         2: R_CURLY@349..351 "}" [Newline("\n")] []
@@ -367,9 +375,10 @@ CssRoot {
                   0: CSS_IDENTIFIER@464..502
                     0: IDENT@464..502 "margin" [Newline("\n"), Whitespace("  "), Comments("/* Comment inside mix ..."), Newline("\n"), Whitespace("  ")] []
                   1: COLON@502..504 ":" [] [Whitespace(" ")]
-                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@504..505
-                    0: CSS_NUMBER@504..505
-                      0: CSS_NUMBER_LITERAL@504..505 "0" [] []
+                  2: SCSS_EXPRESSION@504..505
+                    0: SCSS_EXPRESSION_ITEM_LIST@504..505
+                      0: CSS_NUMBER@504..505
+                        0: CSS_NUMBER_LITERAL@504..505 "0" [] []
                 1: (empty)
               1: SEMICOLON@505..506 ";" [] []
           2: R_CURLY@506..508 "}" [Newline("\n")] []
