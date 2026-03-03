@@ -34,7 +34,7 @@ declare_lint_rule! {
     ///   Writing `Boolean(value)` or `String(myNum)` makes the type of the resulting value clear and explicit, as opposed to `!!value` or `foo + ""` (which may appaer confusing at first glance).
     /// - TypeScript does not allow declaration merging for the built-in type coercion operators, unlike their more explicit function counterparts.
     ///   For instance, `+value` cannot be overridden to return a more specific type under certain conditions (as opposed to `Number()`,
-    ///   whose method signature can be customized to do exactly that).
+    ///   whose method signatures can be customized to do exactly that).
     ///
     /// This rule encourages the use of explicit type conversion functions like `Boolean()`, `Number()`, and `String()`
     /// in favor of implicit operator conversions.
