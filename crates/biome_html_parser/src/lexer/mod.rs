@@ -277,15 +277,14 @@ impl<'src> HtmlLexer<'src> {
     fn consume_token_inside_tag_svelte(&mut self, current: u8) -> HtmlSyntaxKind {
         let dispatched = lookup_byte(current);
 
-        if dispatched == SLH {
-            match self.byte_at(1).map(lookup_byte) {
+        match dispatched {
+            SLH => match self.byte_at(1).map(lookup_byte) {
                 Some(SLH) => return self.consume_js_line_comment(),
                 Some(MUL) => return self.consume_js_block_comment(),
                 _ => {}
-            }
-        }
-        if dispatched == PRD {
-            return self.consume_byte(T![.]);
+            },
+            PRD => return self.consume_byte(T![.]),
+            _ => {}
         }
         self.consume_token_inside_tag(current)
     }
