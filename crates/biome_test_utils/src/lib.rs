@@ -260,7 +260,11 @@ pub fn module_graph_for_test_file(
 pub fn get_added_js_paths<'a>(
     fs: &dyn FileSystem,
     paths: &'a [BiomePath],
-) -> Vec<(&'a BiomePath, AnyJsRoot)> {
+) -> Vec<(
+    &'a BiomePath,
+    AnyJsRoot,
+    std::sync::Arc<biome_js_semantic::SemanticModel>,
+)> {
     paths
         .iter()
         .filter_map(|path| {
@@ -280,7 +284,14 @@ pub fn get_added_js_paths<'a>(
                 );
                 parsed.try_tree()
             })?;
-            Some((path, root))
+
+            // Build semantic model for the parsed root
+            let semantic_model = biome_js_semantic::semantic_model(
+                &root,
+                biome_js_semantic::SemanticModelOptions::default(),
+            );
+
+            Some((path, root, std::sync::Arc::new(semantic_model)))
         })
         .collect()
 }

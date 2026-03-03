@@ -112,7 +112,7 @@ MdDocument {
         },
         MdQuote {
             prefix: MdQuotePrefix {
-                pre_marker_indent_token: missing (optional),
+                pre_marker_indent: MdQuoteIndentList [],
                 marker_token: R_ANGLE@84..85 ">" [] [],
                 post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@85..86 " " [] [],
             },
@@ -245,7 +245,7 @@ MdDocument {
       1: (empty)
     8: MD_QUOTE@84..103
       0: MD_QUOTE_PREFIX@84..86
-        0: (empty)
+        0: MD_QUOTE_INDENT_LIST@84..84
         1: R_ANGLE@84..85 ">" [] []
         2: MD_QUOTE_POST_MARKER_SPACE@85..86 " " [] []
       1: MD_BLOCK_LIST@86..103

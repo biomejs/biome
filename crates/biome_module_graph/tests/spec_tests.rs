@@ -6,16 +6,19 @@ use std::fs::read_link;
 use std::ops::Deref;
 use std::sync::Arc;
 
+use biome_resolver::ResolveError;
+
 use crate::snap::ModuleGraphSnapshot;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_fs::{BiomePath, FileSystem, MemoryFileSystem, OsFileSystem, normalize_path};
-use biome_js_type_info::{ScopeId, TypeData, TypeResolver};
+use biome_js_semantic::ScopeId;
+use biome_js_type_info::{TypeData, TypeResolver};
 use biome_jsdoc_comment::JsdocComment;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_value::{JsonObject, JsonString};
 use biome_module_graph::{
     ImportSymbol, JsExport, JsImport, JsImportPath, JsImportPhase, JsModuleInfoDiagnostic,
-    JsReexport, ModuleDiagnostic, ModuleGraph, ModuleResolver, ResolvedPath,
+    JsOwnExport, JsReexport, ModuleDiagnostic, ModuleGraph, ModuleResolver, ResolvedPath,
 };
 use biome_package::{Dependencies, PackageJson};
 use biome_project_layout::ProjectLayout;
@@ -374,6 +377,59 @@ fn test_export_default_function_declaration() {
 }
 
 #[test]
+fn test_export_default_imported_binding() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/foo.ts".into(),
+        r#"
+            /**
+             * @returns {number}
+             */
+            export function foo(): number {
+                return 42;
+            }
+        "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            import { foo } from "./foo.ts";
+
+            export default foo;
+        "#,
+    );
+
+    let added_paths = [
+        BiomePath::new("/src/foo.ts"),
+        BiomePath::new("/src/index.ts"),
+    ];
+    let added_paths = get_added_js_paths(&fs, &added_paths);
+
+    let module_graph = Arc::new(ModuleGraph::default());
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, true);
+
+    let index_module = module_graph
+        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let resolver = Arc::new(ModuleResolver::for_module(
+        index_module,
+        module_graph.clone(),
+    ));
+
+    // Test that the default export's type is correctly resolved as a function returning number
+    let default_export_ty = resolver
+        .resolved_type_of_default_export()
+        .expect("default export must exist");
+    assert!(
+        default_export_ty.is_function(),
+        "Default export should be a function, got: {default_export_ty:?}"
+    );
+
+    let snapshot = ModuleGraphSnapshot::new(module_graph.as_ref(), &fs).with_resolver(&resolver);
+    snapshot.assert_snapshot("test_export_default_imported_binding");
+}
+
+#[test]
 fn test_export_const_type_declaration_with_namespace() {
     let fs = MemoryFileSystem::default();
     fs.insert(
@@ -503,7 +559,7 @@ fn test_resolve_exports() {
     );
     assert_eq!(
         exports.swap_remove(&Text::new_static("renamed2")),
-        Some(JsExport::Reexport(JsReexport {
+        Some(JsExport::Own(JsOwnExport::Namespace(JsReexport {
             import: JsImport {
                 specifier: "./renamed-reexports".into(),
                 resolved_path: ResolvedPath::from_path("/src/renamed-reexports.ts"),
@@ -512,7 +568,7 @@ fn test_resolve_exports() {
             jsdoc_comment: Some(JsdocComment::from_comment_text(
                 "/**\n* Hello, namespace 2.\n*/"
             )),
-        }))
+        })))
     );
 
     assert_eq!(
@@ -534,7 +590,7 @@ fn test_resolve_exports() {
     assert_eq!(data.exports.len(), 1);
     assert_eq!(
         data.exports.get(&Text::new_static("renamed")),
-        Some(&JsExport::Reexport(JsReexport {
+        Some(&JsExport::Own(JsOwnExport::Namespace(JsReexport {
             import: JsImport {
                 specifier: "./renamed-reexports".into(),
                 resolved_path: ResolvedPath::from_path("/src/renamed-reexports.ts"),
@@ -542,8 +598,8 @@ fn test_resolve_exports() {
             },
             jsdoc_comment: Some(JsdocComment::from_comment_text(
                 "/**\n* Hello, namespace 1.\n*/"
-            ))
-        }))
+            )),
+        })))
     );
 
     let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
@@ -2234,6 +2290,334 @@ function g() {
     let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs).with_resolver(resolver.as_ref());
 
     snapshot.assert_snapshot("test_widening_via_assignment_multiple_values");
+}
+
+// ============================================================================
+// Regression tests for false positives fixed in biome#9143
+// ============================================================================
+
+/// `node:fs`, `node:path`, etc. must resolve to `ResolveError::NodeBuiltIn`,
+/// not to any file path error. The lint rule silently accepts this error kind.
+#[test]
+fn test_node_builtin_imports_resolve_to_builtin_error() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            import fs from "node:fs";
+            import path from "node:path";
+            import { fileURLToPath } from "node:url";
+        "#,
+    );
+
+    let project_layout = ProjectLayout::default();
+    project_layout.insert_node_manifest(
+        "/".into(),
+        PackageJson::new("test-pkg").with_version("0.0.0"),
+    );
+
+    let added_paths = [BiomePath::new("/src/index.ts")];
+    let added_paths = get_added_js_paths(&fs, &added_paths);
+
+    let module_graph = ModuleGraph::default();
+    module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, true);
+
+    let data = module_graph.data();
+    let module = data
+        .get(Utf8Path::new("/src/index.ts"))
+        .unwrap()
+        .as_js_module_info()
+        .unwrap();
+
+    // All three `node:*` specifiers must be present in static_import_paths.
+    for specifier in ["node:fs", "node:path", "node:url"] {
+        let import_path = module
+            .static_import_paths
+            .get(specifier)
+            .unwrap_or_else(|| panic!("specifier `{specifier}` not found in static_import_paths"));
+
+        assert_eq!(
+            import_path.resolved_path.error(),
+            Some(&ResolveError::NodeBuiltIn),
+            "`{specifier}` should resolve to ResolveError::NodeBuiltIn, got: {:?}",
+            import_path.resolved_path.as_deref()
+        );
+    }
+}
+
+/// A package that uses `"typings"` (instead of `"types"`) to declare its type
+/// entry point must still be resolved correctly. This regression covers the
+/// `lucide-react` false-positive reported in biome#9143.
+#[test]
+fn test_package_typings_field_resolution() {
+    let fs = MemoryFileSystem::default();
+
+    // Package entry point — a .d.ts reached via "typings".
+    fs.insert(
+        "/node_modules/my-icons/dist/index.d.ts".into(),
+        r#"export declare function Icon(): void;"#,
+    );
+
+    // The package's package.json uses "typings", not "types".
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"import { Icon } from "my-icons";"#,
+    );
+
+    let project_layout = ProjectLayout::default();
+    project_layout.insert_node_manifest(
+        "/".into(),
+        PackageJson::new("test-pkg")
+            .with_version("0.0.0")
+            .with_dependencies(Dependencies(Box::new([(
+                "my-icons".into(),
+                "1.0.0".into(),
+            )]))),
+    );
+
+    // Insert the package manifest using `with_typings` once that API exists,
+    // or manually build a PackageJson that has `typings` set.
+    // For now we build it from raw JSON — this also exercises the
+    // `"typings"` → `"types"` alias in PackageJson deserialization.
+    let pkg_json_str = r#"{"name":"my-icons","version":"1.0.0","typings":"./dist/index.d.ts"}"#;
+    let pkg_json = biome_deserialize::json::deserialize_from_json_str::<PackageJson>(
+        pkg_json_str,
+        biome_json_parser::JsonParserOptions::default(),
+        "package.json",
+    )
+    .into_deserialized()
+    .expect("package.json must parse");
+
+    project_layout.insert_node_manifest("/node_modules/my-icons".into(), pkg_json);
+
+    let added_paths = [
+        BiomePath::new("/src/index.ts"),
+        BiomePath::new("/node_modules/my-icons/dist/index.d.ts"),
+    ];
+    let added_paths = get_added_js_paths(&fs, &added_paths);
+
+    let module_graph = ModuleGraph::default();
+    module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, true);
+
+    let data = module_graph.data();
+    let module = data
+        .get(Utf8Path::new("/src/index.ts"))
+        .unwrap()
+        .as_js_module_info()
+        .unwrap();
+
+    // The import must resolve to the .d.ts file, not an error.
+    let import_path = module
+        .static_imports
+        .get("Icon")
+        .expect("`Icon` must be in static_imports");
+    assert_eq!(
+        import_path.resolved_path.as_path(),
+        Some(Utf8Path::new("/node_modules/my-icons/dist/index.d.ts")),
+        "Package with `typings` field must resolve to its declared entry point"
+    );
+}
+
+/// `export {{ x as y }} from "./mod"` re-exports `x` under the name `y`.
+/// When a consumer imports `y`, the resolver must look up `x` (the source-side
+/// name) in the target module — not `y` (the alias). This regression covers
+/// the `vitest` / `@tanstack/react-query` false-positives in biome#9143.
+#[test]
+fn test_aliased_named_reexport_is_found_by_alias() {
+    let fs = MemoryFileSystem::default();
+
+    // Source module: exports the function under its original name.
+    fs.insert(
+        "/src/source.ts".into(),
+        r#"export function originalName() {}"#,
+    );
+
+    // Barrel: re-exports `originalName` under a different name `renamedSymbol`.
+    fs.insert(
+        "/src/barrel.ts".into(),
+        r#"export { originalName as renamedSymbol } from "./source.ts";"#,
+    );
+
+    // Consumer: imports using the public alias name.
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"import { renamedSymbol } from "./barrel.ts";"#,
+    );
+
+    let project_layout = ProjectLayout::default();
+    project_layout.insert_node_manifest(
+        "/".into(),
+        PackageJson::new("test-pkg").with_version("0.0.0"),
+    );
+
+    let added_paths = [
+        BiomePath::new("/src/source.ts"),
+        BiomePath::new("/src/barrel.ts"),
+        BiomePath::new("/src/index.ts"),
+    ];
+    let added_paths = get_added_js_paths(&fs, &added_paths);
+
+    let module_graph = Arc::new(ModuleGraph::default());
+    module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, true);
+
+    // `barrel.ts` must expose `renamedSymbol` as an own export (resolved from
+    // the re-export chain to a binding in `source.ts`).
+    let data = module_graph.data();
+    let barrel = data
+        .get(Utf8Path::new("/src/barrel.ts"))
+        .unwrap()
+        .as_js_module_info()
+        .unwrap();
+
+    let found = barrel.find_js_exported_symbol(module_graph.as_ref(), "renamedSymbol");
+    assert!(
+        found.is_some(),
+        "`renamedSymbol` must be found via the aliased re-export chain; got None"
+    );
+
+    // `originalName` must NOT be visible under the barrel's public API.
+    let not_found = barrel.find_js_exported_symbol(module_graph.as_ref(), "originalName");
+    assert!(
+        not_found.is_none(),
+        "`originalName` must not be directly exported from the barrel"
+    );
+}
+
+/// `export * as Ns from "./mod"` creates a namespace object and exports it
+/// under the name `Ns`. `Ns` must be resolved as `JsOwnExport::Namespace`
+/// (an own export of the barrel module, not a forwarding re-export).
+/// This regression covers the `@base-ui/react` false-positive in biome#9143.
+#[test]
+fn test_namespace_reexport_is_own_export() {
+    let fs = MemoryFileSystem::default();
+
+    // Source module with some exports.
+    fs.insert(
+        "/src/source.ts".into(),
+        r#"
+            export function alpha() {}
+            export function beta() {}
+        "#,
+    );
+
+    // Barrel: re-exports entire namespace of `source.ts` under `MyNs`.
+    fs.insert(
+        "/src/barrel.ts".into(),
+        r#"export * as MyNs from "./source.ts";"#,
+    );
+
+    let project_layout = ProjectLayout::default();
+    project_layout.insert_node_manifest(
+        "/".into(),
+        PackageJson::new("test-pkg").with_version("0.0.0"),
+    );
+
+    let added_paths = [
+        BiomePath::new("/src/source.ts"),
+        BiomePath::new("/src/barrel.ts"),
+    ];
+    let added_paths = get_added_js_paths(&fs, &added_paths);
+
+    let module_graph = Arc::new(ModuleGraph::default());
+    module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, true);
+
+    let data = module_graph.data();
+    let barrel = data
+        .get(Utf8Path::new("/src/barrel.ts"))
+        .unwrap()
+        .as_js_module_info()
+        .unwrap();
+
+    // `MyNs` must be stored as an own export (namespace), not as a forwarding
+    // re-export. Only then will `find_js_exported_symbol` return `Some`.
+    assert_eq!(
+        barrel.exports.get(&Text::new_static("MyNs")),
+        Some(&JsExport::Own(JsOwnExport::Namespace(JsReexport {
+            import: JsImport {
+                specifier: "./source.ts".into(),
+                resolved_path: ResolvedPath::from_path("/src/source.ts"),
+                symbol: ImportSymbol::All,
+            },
+            jsdoc_comment: None,
+        }))),
+        "`export * as MyNs` must produce JsExport::Own(JsOwnExport::Namespace(JsReexport {{ .. }}))"
+    );
+
+    // Confirm `find_js_exported_symbol` returns `Some` as the lint rule sees it.
+    let found = barrel.find_js_exported_symbol(module_graph.as_ref(), "MyNs");
+    assert!(
+        found.is_some(),
+        "`MyNs` must be found by find_js_exported_symbol"
+    );
+}
+
+/// `export * as Ns from "./mod"` should also support type inference: when
+/// `index.ts` imports `{ MyNs }` from a barrel that uses `export * as MyNs`,
+/// calling `MyNs.alpha()` must resolve to the return type of `alpha` in
+/// the source module. This verifies the `JsOwnExport::Namespace(JsReexport)`
+/// variant drives the correct `TypeData::ImportNamespace` path.
+#[test]
+fn test_namespace_reexport_type_inference() {
+    let fs = MemoryFileSystem::default();
+
+    // Source module with a typed export.
+    fs.insert(
+        "/src/source.ts".into(),
+        r#"
+            /**
+            * @description
+            * I am a jsdoc
+            */
+            export function alpha(): number {
+                return 1;
+            }
+        "#,
+    );
+
+    // Barrel: re-exports entire source namespace under `MyNs`.
+    fs.insert(
+        "/src/barrel.ts".into(),
+        r#"export * as MyNs from "./source.ts";"#,
+    );
+
+    // Consumer: imports the namespace and calls a member.
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"import { MyNs } from "./barrel.ts";
+
+        const result = MyNs.alpha();
+        "#,
+    );
+
+    let added_paths = [
+        BiomePath::new("/src/source.ts"),
+        BiomePath::new("/src/barrel.ts"),
+        BiomePath::new("/src/index.ts"),
+    ];
+    let added_paths = get_added_js_paths(&fs, &added_paths);
+
+    let module_graph = Arc::new(ModuleGraph::default());
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, true);
+
+    let index_module = module_graph
+        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let resolver = Arc::new(ModuleResolver::for_module(
+        index_module,
+        module_graph.clone(),
+    ));
+
+    let result_id = resolver
+        .resolve_type_of(&Text::new_static("result"), ScopeId::GLOBAL)
+        .expect("result variable not found");
+    let result_ty = resolver.resolved_type_for_id(result_id);
+    assert!(
+        result_ty.is_number_or_number_literal(),
+        "expected `MyNs.alpha()` to resolve to number, got: {result_ty:?}"
+    );
+
+    let snapshot = ModuleGraphSnapshot::new(module_graph.as_ref(), &fs).with_resolver(&resolver);
+    snapshot.assert_snapshot("test_namespace_reexport_type_inference");
 }
 
 fn find_files_recursively_in_directory(

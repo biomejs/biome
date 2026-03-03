@@ -55,45 +55,41 @@ CssRoot {
                                         },
                                         l_paren_token: L_PAREN@35..36 "(" [] [],
                                         items: CssParameterList [
-                                            CssParameter {
-                                                any_css_expression: CssBinaryExpression {
-                                                    left: CssListOfComponentValuesExpression {
-                                                        css_component_value_list: CssComponentValueList [
-                                                            CssFunction {
-                                                                name: CssIdentifier {
-                                                                    value_token: IDENT@36..39 "rgb" [] [],
-                                                                },
-                                                                l_paren_token: L_PAREN@39..40 "(" [] [],
-                                                                items: CssParameterList [
-                                                                    CssParameter {
-                                                                        any_css_expression: CssListOfComponentValuesExpression {
-                                                                            css_component_value_list: CssComponentValueList [
-                                                                                CssNumber {
-                                                                                    value_token: CSS_NUMBER_LITERAL@40..44 "255" [] [Whitespace(" ")],
-                                                                                },
-                                                                                CssNumber {
-                                                                                    value_token: CSS_NUMBER_LITERAL@44..46 "0" [] [Whitespace(" ")],
-                                                                                },
-                                                                                CssNumber {
-                                                                                    value_token: CSS_NUMBER_LITERAL@46..47 "0" [] [],
-                                                                                },
-                                                                            ],
+                                            CssBinaryExpression {
+                                                left: CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssFunction {
+                                                            name: CssIdentifier {
+                                                                value_token: IDENT@36..39 "rgb" [] [],
+                                                            },
+                                                            l_paren_token: L_PAREN@39..40 "(" [] [],
+                                                            items: CssParameterList [
+                                                                CssListOfComponentValuesExpression {
+                                                                    css_component_value_list: CssComponentValueList [
+                                                                        CssNumber {
+                                                                            value_token: CSS_NUMBER_LITERAL@40..44 "255" [] [Whitespace(" ")],
                                                                         },
-                                                                    },
-                                                                ],
-                                                                r_paren_token: R_PAREN@47..49 ")" [] [Whitespace(" ")],
-                                                            },
-                                                        ],
-                                                    },
-                                                    operator_token: SLASH@49..51 "/" [] [Whitespace(" ")],
-                                                    right: CssListOfComponentValuesExpression {
-                                                        css_component_value_list: CssComponentValueList [
-                                                            CssPercentage {
-                                                                value_token: CSS_NUMBER_LITERAL@51..53 "50" [] [],
-                                                                percent_token: PERCENT@53..54 "%" [] [],
-                                                            },
-                                                        ],
-                                                    },
+                                                                        CssNumber {
+                                                                            value_token: CSS_NUMBER_LITERAL@44..46 "0" [] [Whitespace(" ")],
+                                                                        },
+                                                                        CssNumber {
+                                                                            value_token: CSS_NUMBER_LITERAL@46..47 "0" [] [],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                            ],
+                                                            r_paren_token: R_PAREN@47..49 ")" [] [Whitespace(" ")],
+                                                        },
+                                                    ],
+                                                },
+                                                operator_token: SLASH@49..51 "/" [] [Whitespace(" ")],
+                                                right: CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssPercentage {
+                                                            value_token: CSS_NUMBER_LITERAL@51..53 "50" [] [],
+                                                            percent_token: PERCENT@53..54 "%" [] [],
+                                                        },
+                                                    ],
                                                 },
                                             },
                                         ],
@@ -141,39 +137,35 @@ CssRoot {
                                         },
                                         l_paren_token: L_PAREN@89..90 "(" [] [],
                                         items: CssParameterList [
-                                            CssParameter {
-                                                any_css_expression: CssBinaryExpression {
-                                                    left: CssListOfComponentValuesExpression {
-                                                        css_component_value_list: CssComponentValueList [
-                                                            CssFunction {
-                                                                name: CssIdentifier {
-                                                                    value_token: IDENT@90..93 "var" [] [],
-                                                                },
-                                                                l_paren_token: L_PAREN@93..94 "(" [] [],
-                                                                items: CssParameterList [
-                                                                    CssParameter {
-                                                                        any_css_expression: CssListOfComponentValuesExpression {
-                                                                            css_component_value_list: CssComponentValueList [
-                                                                                CssDashedIdentifier {
-                                                                                    value_token: IDENT@94..110 "--color-lime-300" [] [],
-                                                                                },
-                                                                            ],
+                                            CssBinaryExpression {
+                                                left: CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssFunction {
+                                                            name: CssIdentifier {
+                                                                value_token: IDENT@90..93 "var" [] [],
+                                                            },
+                                                            l_paren_token: L_PAREN@93..94 "(" [] [],
+                                                            items: CssParameterList [
+                                                                CssListOfComponentValuesExpression {
+                                                                    css_component_value_list: CssComponentValueList [
+                                                                        CssDashedIdentifier {
+                                                                            value_token: IDENT@94..110 "--color-lime-300" [] [],
                                                                         },
-                                                                    },
-                                                                ],
-                                                                r_paren_token: R_PAREN@110..112 ")" [] [Whitespace(" ")],
-                                                            },
-                                                        ],
-                                                    },
-                                                    operator_token: SLASH@112..114 "/" [] [Whitespace(" ")],
-                                                    right: CssListOfComponentValuesExpression {
-                                                        css_component_value_list: CssComponentValueList [
-                                                            CssPercentage {
-                                                                value_token: CSS_NUMBER_LITERAL@114..116 "50" [] [],
-                                                                percent_token: PERCENT@116..117 "%" [] [],
-                                                            },
-                                                        ],
-                                                    },
+                                                                    ],
+                                                                },
+                                                            ],
+                                                            r_paren_token: R_PAREN@110..112 ")" [] [Whitespace(" ")],
+                                                        },
+                                                    ],
+                                                },
+                                                operator_token: SLASH@112..114 "/" [] [Whitespace(" ")],
+                                                right: CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssPercentage {
+                                                            value_token: CSS_NUMBER_LITERAL@114..116 "50" [] [],
+                                                            percent_token: PERCENT@116..117 "%" [] [],
+                                                        },
+                                                    ],
                                                 },
                                             },
                                         ],
@@ -225,31 +217,29 @@ CssRoot {
                       0: IDENT@28..35 "--alpha" [] []
                     1: L_PAREN@35..36 "(" [] []
                     2: CSS_PARAMETER_LIST@36..54
-                      0: CSS_PARAMETER@36..54
-                        0: CSS_BINARY_EXPRESSION@36..54
-                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@36..49
-                            0: CSS_COMPONENT_VALUE_LIST@36..49
-                              0: CSS_FUNCTION@36..49
-                                0: CSS_IDENTIFIER@36..39
-                                  0: IDENT@36..39 "rgb" [] []
-                                1: L_PAREN@39..40 "(" [] []
-                                2: CSS_PARAMETER_LIST@40..47
-                                  0: CSS_PARAMETER@40..47
-                                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@40..47
-                                      0: CSS_COMPONENT_VALUE_LIST@40..47
-                                        0: CSS_NUMBER@40..44
-                                          0: CSS_NUMBER_LITERAL@40..44 "255" [] [Whitespace(" ")]
-                                        1: CSS_NUMBER@44..46
-                                          0: CSS_NUMBER_LITERAL@44..46 "0" [] [Whitespace(" ")]
-                                        2: CSS_NUMBER@46..47
-                                          0: CSS_NUMBER_LITERAL@46..47 "0" [] []
-                                3: R_PAREN@47..49 ")" [] [Whitespace(" ")]
-                          1: SLASH@49..51 "/" [] [Whitespace(" ")]
-                          2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@51..54
-                            0: CSS_COMPONENT_VALUE_LIST@51..54
-                              0: CSS_PERCENTAGE@51..54
-                                0: CSS_NUMBER_LITERAL@51..53 "50" [] []
-                                1: PERCENT@53..54 "%" [] []
+                      0: CSS_BINARY_EXPRESSION@36..54
+                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@36..49
+                          0: CSS_COMPONENT_VALUE_LIST@36..49
+                            0: CSS_FUNCTION@36..49
+                              0: CSS_IDENTIFIER@36..39
+                                0: IDENT@36..39 "rgb" [] []
+                              1: L_PAREN@39..40 "(" [] []
+                              2: CSS_PARAMETER_LIST@40..47
+                                0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@40..47
+                                  0: CSS_COMPONENT_VALUE_LIST@40..47
+                                    0: CSS_NUMBER@40..44
+                                      0: CSS_NUMBER_LITERAL@40..44 "255" [] [Whitespace(" ")]
+                                    1: CSS_NUMBER@44..46
+                                      0: CSS_NUMBER_LITERAL@44..46 "0" [] [Whitespace(" ")]
+                                    2: CSS_NUMBER@46..47
+                                      0: CSS_NUMBER_LITERAL@46..47 "0" [] []
+                              3: R_PAREN@47..49 ")" [] [Whitespace(" ")]
+                        1: SLASH@49..51 "/" [] [Whitespace(" ")]
+                        2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@51..54
+                          0: CSS_COMPONENT_VALUE_LIST@51..54
+                            0: CSS_PERCENTAGE@51..54
+                              0: CSS_NUMBER_LITERAL@51..53 "50" [] []
+                              1: PERCENT@53..54 "%" [] []
                     3: R_PAREN@54..55 ")" [] []
               1: (empty)
             1: SEMICOLON@55..56 ";" [] []
@@ -279,27 +269,25 @@ CssRoot {
                       0: IDENT@82..89 "--alpha" [] []
                     1: L_PAREN@89..90 "(" [] []
                     2: CSS_PARAMETER_LIST@90..117
-                      0: CSS_PARAMETER@90..117
-                        0: CSS_BINARY_EXPRESSION@90..117
-                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@90..112
-                            0: CSS_COMPONENT_VALUE_LIST@90..112
-                              0: CSS_FUNCTION@90..112
-                                0: CSS_IDENTIFIER@90..93
-                                  0: IDENT@90..93 "var" [] []
-                                1: L_PAREN@93..94 "(" [] []
-                                2: CSS_PARAMETER_LIST@94..110
-                                  0: CSS_PARAMETER@94..110
-                                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@94..110
-                                      0: CSS_COMPONENT_VALUE_LIST@94..110
-                                        0: CSS_DASHED_IDENTIFIER@94..110
-                                          0: IDENT@94..110 "--color-lime-300" [] []
-                                3: R_PAREN@110..112 ")" [] [Whitespace(" ")]
-                          1: SLASH@112..114 "/" [] [Whitespace(" ")]
-                          2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@114..117
-                            0: CSS_COMPONENT_VALUE_LIST@114..117
-                              0: CSS_PERCENTAGE@114..117
-                                0: CSS_NUMBER_LITERAL@114..116 "50" [] []
-                                1: PERCENT@116..117 "%" [] []
+                      0: CSS_BINARY_EXPRESSION@90..117
+                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@90..112
+                          0: CSS_COMPONENT_VALUE_LIST@90..112
+                            0: CSS_FUNCTION@90..112
+                              0: CSS_IDENTIFIER@90..93
+                                0: IDENT@90..93 "var" [] []
+                              1: L_PAREN@93..94 "(" [] []
+                              2: CSS_PARAMETER_LIST@94..110
+                                0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@94..110
+                                  0: CSS_COMPONENT_VALUE_LIST@94..110
+                                    0: CSS_DASHED_IDENTIFIER@94..110
+                                      0: IDENT@94..110 "--color-lime-300" [] []
+                              3: R_PAREN@110..112 ")" [] [Whitespace(" ")]
+                        1: SLASH@112..114 "/" [] [Whitespace(" ")]
+                        2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@114..117
+                          0: CSS_COMPONENT_VALUE_LIST@114..117
+                            0: CSS_PERCENTAGE@114..117
+                              0: CSS_NUMBER_LITERAL@114..116 "50" [] []
+                              1: PERCENT@116..117 "%" [] []
                     3: R_PAREN@117..118 ")" [] []
               1: (empty)
             1: SEMICOLON@118..119 ";" [] []

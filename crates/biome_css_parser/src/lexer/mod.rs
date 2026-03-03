@@ -365,6 +365,24 @@ impl<'src> CssLexer<'src> {
             LSS => self.consume_lss(),
 
             DOL => self.consume_dol(),
+
+            // Check for BOM first at position 0, before checking if UNI is an identifier start.
+            // The BOM character (U+FEFF) is in the valid CSS non-ASCII identifier range,
+            // so without this check it would be incorrectly consumed as part of an identifier.
+            UNI if self.position == 0 => {
+                if let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM) {
+                    self.unicode_bom_length = bom_size;
+                    return bom;
+                }
+                // Not a BOM, check other UNI cases below
+                if self.options.is_metavariable_enabled() && self.is_metavariable_start() {
+                    self.consume_metavariable(GRIT_METAVARIABLE)
+                } else if self.is_ident_start() {
+                    self.consume_identifier()
+                } else {
+                    self.consume_unexpected_character()
+                }
+            }
             UNI if self.options.is_metavariable_enabled() && self.is_metavariable_start() => {
                 self.consume_metavariable(GRIT_METAVARIABLE)
             }
@@ -380,7 +398,7 @@ impl<'src> CssLexer<'src> {
             PNC => self.consume_byte(T![')']),
             BEO => self.consume_byte(T!['{']),
             BEC => self.consume_byte(T!['}']),
-            BTO => self.consume_byte(T!('[')),
+            BTO => self.consume_byte(T!['[']),
             BTC => self.consume_byte(T![']']),
             COM => self.consume_byte(T![,]),
             MOR => self.consume_mor(),
@@ -391,17 +409,7 @@ impl<'src> CssLexer<'src> {
             PRC => self.consume_byte(T![%]),
             Dispatch::AMP => self.consume_byte(T![&]),
 
-            UNI => {
-                // A BOM can only appear at the start of a file, so if we haven't advanced at all yet,
-                // perform the check. At any other position, the BOM is just considered plain whitespace.
-                if self.position == 0
-                    && let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM)
-                {
-                    self.unicode_bom_length = bom_size;
-                    return bom;
-                }
-                self.consume_unexpected_character()
-            }
+            UNI => self.consume_unexpected_character(),
 
             _ => self.consume_unexpected_character(),
         }

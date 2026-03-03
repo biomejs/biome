@@ -435,17 +435,13 @@ CssRoot {
                                                                                                                                 items: [
                                                                                                                                     CssBogus {
                                                                                                                                         items: [
+                                                                                                                                            CssIdentifier {
+                                                                                                                                                value_token: IDENT@777..784 "display" [] [],
+                                                                                                                                            },
                                                                                                                                             CssBogus {
                                                                                                                                                 items: [
-                                                                                                                                                    CssIdentifier {
-                                                                                                                                                        value_token: IDENT@777..784 "display" [] [],
-                                                                                                                                                    },
-                                                                                                                                                    CssBogus {
-                                                                                                                                                        items: [
-                                                                                                                                                            COLON@784..786 ":" [] [Whitespace(" ")],
-                                                                                                                                                            IDENT@786..790 "flex" [] [],
-                                                                                                                                                        ],
-                                                                                                                                                    },
+                                                                                                                                                    COLON@784..786 ":" [] [Whitespace(" ")],
+                                                                                                                                                    IDENT@786..790 "flex" [] [],
                                                                                                                                                 ],
                                                                                                                                             },
                                                                                                                                         ],
@@ -1327,12 +1323,11 @@ CssRoot {
                                               2: CSS_BOGUS@777..790
                                                 0: CSS_BOGUS@777..790
                                                   0: CSS_BOGUS@777..790
-                                                    0: CSS_BOGUS@777..790
-                                                      0: CSS_IDENTIFIER@777..784
-                                                        0: IDENT@777..784 "display" [] []
-                                                      1: CSS_BOGUS@784..790
-                                                        0: COLON@784..786 ":" [] [Whitespace(" ")]
-                                                        1: IDENT@786..790 "flex" [] []
+                                                    0: CSS_IDENTIFIER@777..784
+                                                      0: IDENT@777..784 "display" [] []
+                                                    1: CSS_BOGUS@784..790
+                                                      0: COLON@784..786 ":" [] [Whitespace(" ")]
+                                                      1: IDENT@786..790 "flex" [] []
                                               3: R_PAREN@790..792 ")" [] [Whitespace(" ")]
                                         1: CSS_DECLARATION_OR_RULE_BLOCK@792..794
                                           0: L_CURLY@792..793 "{" [] []

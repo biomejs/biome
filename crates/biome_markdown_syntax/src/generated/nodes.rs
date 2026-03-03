@@ -1156,6 +1156,41 @@ pub struct MdQuoteFields {
     pub content: MdBlockList,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct MdQuoteIndent {
+    pub(crate) syntax: SyntaxNode,
+}
+impl MdQuoteIndent {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> MdQuoteIndentFields {
+        MdQuoteIndentFields {
+            md_quote_pre_marker_indent_token: self.md_quote_pre_marker_indent_token(),
+        }
+    }
+    pub fn md_quote_pre_marker_indent_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for MdQuoteIndent {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct MdQuoteIndentFields {
+    pub md_quote_pre_marker_indent_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct MdQuotePrefix {
     pub(crate) syntax: SyntaxNode,
 }
@@ -1171,13 +1206,13 @@ impl MdQuotePrefix {
     }
     pub fn as_fields(&self) -> MdQuotePrefixFields {
         MdQuotePrefixFields {
-            pre_marker_indent_token: self.pre_marker_indent_token(),
+            pre_marker_indent: self.pre_marker_indent(),
             marker_token: self.marker_token(),
             post_marker_space_token: self.post_marker_space_token(),
         }
     }
-    pub fn pre_marker_indent_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, 0usize)
+    pub fn pre_marker_indent(&self) -> MdQuoteIndentList {
+        support::list(&self.syntax, 0usize)
     }
     pub fn marker_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
@@ -1196,7 +1231,7 @@ impl Serialize for MdQuotePrefix {
 }
 #[derive(Serialize)]
 pub struct MdQuotePrefixFields {
-    pub pre_marker_indent_token: Option<SyntaxToken>,
+    pub pre_marker_indent: MdQuoteIndentList,
     pub marker_token: SyntaxResult<SyntaxToken>,
     pub post_marker_space_token: Option<SyntaxToken>,
 }
@@ -3117,6 +3152,56 @@ impl From<MdQuote> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for MdQuoteIndent {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MD_QUOTE_INDENT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MD_QUOTE_INDENT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for MdQuoteIndent {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdQuoteIndent")
+                .field(
+                    "md_quote_pre_marker_indent_token",
+                    &support::DebugSyntaxResult(self.md_quote_pre_marker_indent_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("MdQuoteIndent").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<MdQuoteIndent> for SyntaxNode {
+    fn from(n: MdQuoteIndent) -> Self {
+        n.syntax
+    }
+}
+impl From<MdQuoteIndent> for SyntaxElement {
+    fn from(n: MdQuoteIndent) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for MdQuotePrefix {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -3145,10 +3230,7 @@ impl std::fmt::Debug for MdQuotePrefix {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("MdQuotePrefix")
-                .field(
-                    "pre_marker_indent_token",
-                    &support::DebugOptionalElement(self.pre_marker_indent_token()),
-                )
+                .field("pre_marker_indent", &self.pre_marker_indent())
                 .field(
                     "marker_token",
                     &support::DebugSyntaxResult(self.marker_token()),
@@ -4279,6 +4361,11 @@ impl std::fmt::Display for MdQuote {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for MdQuoteIndent {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for MdQuotePrefix {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -4782,6 +4869,88 @@ impl IntoIterator for &MdInlineItemList {
 impl IntoIterator for MdInlineItemList {
     type Item = AnyMdInline;
     type IntoIter = AstNodeListIterator<Language, AnyMdInline>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct MdQuoteIndentList {
+    syntax_list: SyntaxList,
+}
+impl MdQuoteIndentList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for MdQuoteIndentList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MD_QUOTE_INDENT_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MD_QUOTE_INDENT_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for MdQuoteIndentList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstNodeList for MdQuoteIndentList {
+    type Language = Language;
+    type Node = MdQuoteIndent;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for MdQuoteIndentList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("MdQuoteIndentList ")?;
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+impl IntoIterator for &MdQuoteIndentList {
+    type Item = MdQuoteIndent;
+    type IntoIter = AstNodeListIterator<Language, MdQuoteIndent>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for MdQuoteIndentList {
+    type Item = MdQuoteIndent;
+    type IntoIter = AstNodeListIterator<Language, MdQuoteIndent>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

@@ -7,6 +7,7 @@ use biome_html_syntax::{
     AnyHtmlContent, AnyHtmlElement, HtmlAttribute, HtmlElementList, HtmlFileSource,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::use_anchor_content::UseAnchorContentOptions;
 
 use crate::HtmlRuleAction;
 use crate::a11y::{
@@ -97,7 +98,7 @@ impl Rule for UseAnchorContent {
     type Query = Ast<AnyHtmlElement>;
     type State = UseAnchorContentState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseAnchorContentOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

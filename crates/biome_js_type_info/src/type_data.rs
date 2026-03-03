@@ -1454,61 +1454,22 @@ impl TypeReferenceQualifier {
     }
 }
 
-#[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct BindingId(u32);
-
-impl BindingId {
-    pub const fn new(index: usize) -> Self {
-        // SAFETY: We don't handle files exceeding `u32::MAX` bytes.
-        // Thus, it isn't possible to exceed `u32::MAX` bindings.
-        Self(index as u32)
-    }
-
-    pub const fn index(self) -> usize {
-        self.0 as usize
-    }
-}
+// Re-export BindingId and ScopeId from biome_js_semantic to avoid duplication.
+// These types represent the same semantic concepts and should have a single source of truth.
+pub use biome_js_semantic::{BindingId, ScopeId};
 
 // We allow conversion from `BindingId` into `TypeId`, and vice versa, because
 // for project-level `ResolvedTypeId` instances, the `TypeId` is an indirection
 // that is resolved through a binding.
 impl From<BindingId> for TypeId {
     fn from(id: BindingId) -> Self {
-        Self::new(id.0 as usize)
+        Self::new(id.index())
     }
 }
 
 impl From<TypeId> for BindingId {
     fn from(id: TypeId) -> Self {
         Self::new(id.index())
-    }
-}
-
-// We use `NonZeroU32` to allow niche optimizations.
-#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct ScopeId(pub(crate) std::num::NonZeroU32);
-
-// We don't implement `From<usize> for ScopeId` and `From<ScopeId> for usize`
-// to ensure that the API consumers don't create `ScopeId`.
-impl ScopeId {
-    pub const GLOBAL: Self = Self::new(0);
-
-    pub const fn new(index: usize) -> Self {
-        // SAFETY: We don't handle files exceeding `u32::MAX` bytes.
-        // Thus, it isn't possible to exceed `u32::MAX` scopes.
-        //
-        // Adding 1 ensures that the value is never equal to 0.
-        // Instead of adding 1, we could XOR the value with `u32::MAX`.
-        // This is what the [nonmax](https://docs.rs/nonmax/latest/nonmax/) crate does.
-        // However, this doesn't preserve the order.
-        // It is why we opted for adding 1.
-        Self(unsafe { std::num::NonZeroU32::new_unchecked(index.unchecked_add(1) as u32) })
-    }
-
-    pub const fn index(self) -> usize {
-        // SAFETY: The internal representation ensures that the value is never equal to 0.
-        // Thus, it is safe to subtract 1.
-        (unsafe { self.0.get().unchecked_sub(1) }) as usize
     }
 }
 

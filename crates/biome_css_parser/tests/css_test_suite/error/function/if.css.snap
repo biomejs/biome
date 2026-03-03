@@ -579,17 +579,13 @@ CssRoot {
                                                                                         items: [
                                                                                             CssBogus {
                                                                                                 items: [
+                                                                                                    CssDashedIdentifier {
+                                                                                                        value_token: IDENT@355..362 "--style" [] [],
+                                                                                                    },
                                                                                                     CssBogus {
                                                                                                         items: [
-                                                                                                            CssDashedIdentifier {
-                                                                                                                value_token: IDENT@355..362 "--style" [] [],
-                                                                                                            },
-                                                                                                            CssBogus {
-                                                                                                                items: [
-                                                                                                                    COLON@362..364 ":" [] [Whitespace(" ")],
-                                                                                                                    IDENT@364..369 "black" [] [],
-                                                                                                                ],
-                                                                                                            },
+                                                                                                            COLON@362..364 ":" [] [Whitespace(" ")],
+                                                                                                            IDENT@364..369 "black" [] [],
                                                                                                         ],
                                                                                                     },
                                                                                                 ],
@@ -1426,17 +1422,13 @@ CssRoot {
                                                                                 items: [
                                                                                     CssBogus {
                                                                                         items: [
+                                                                                            CssDashedIdentifier {
+                                                                                                value_token: IDENT@1099..1102 "--c" [] [],
+                                                                                            },
                                                                                             CssBogus {
                                                                                                 items: [
-                                                                                                    CssDashedIdentifier {
-                                                                                                        value_token: IDENT@1099..1102 "--c" [] [],
-                                                                                                    },
-                                                                                                    CssBogus {
-                                                                                                        items: [
-                                                                                                            COLON@1102..1104 ":" [] [Whitespace(" ")],
-                                                                                                            CSS_NUMBER_LITERAL@1104..1105 "3" [] [],
-                                                                                                        ],
-                                                                                                    },
+                                                                                                    COLON@1102..1104 ":" [] [Whitespace(" ")],
+                                                                                                    CSS_NUMBER_LITERAL@1104..1105 "3" [] [],
                                                                                                 ],
                                                                                             },
                                                                                         ],
@@ -3356,12 +3348,11 @@ CssRoot {
                             2: CSS_BOGUS@355..369
                               0: CSS_BOGUS@355..369
                                 0: CSS_BOGUS@355..369
-                                  0: CSS_BOGUS@355..369
-                                    0: CSS_DASHED_IDENTIFIER@355..362
-                                      0: IDENT@355..362 "--style" [] []
-                                    1: CSS_BOGUS@362..369
-                                      0: COLON@362..364 ":" [] [Whitespace(" ")]
-                                      1: IDENT@364..369 "black" [] []
+                                  0: CSS_DASHED_IDENTIFIER@355..362
+                                    0: IDENT@355..362 "--style" [] []
+                                  1: CSS_BOGUS@362..369
+                                    0: COLON@362..364 ":" [] [Whitespace(" ")]
+                                    1: IDENT@364..369 "black" [] []
                             3: R_PAREN@369..370 ")" [] []
                     3: R_PAREN@370..371 ")" [] []
                   1: CSS_BOGUS_PROPERTY_VALUE@371..378
@@ -3888,12 +3879,11 @@ CssRoot {
                             2: CSS_BOGUS@1099..1105
                               0: CSS_BOGUS@1099..1105
                                 0: CSS_BOGUS@1099..1105
-                                  0: CSS_BOGUS@1099..1105
-                                    0: CSS_DASHED_IDENTIFIER@1099..1102
-                                      0: IDENT@1099..1102 "--c" [] []
-                                    1: CSS_BOGUS@1102..1105
-                                      0: COLON@1102..1104 ":" [] [Whitespace(" ")]
-                                      1: CSS_NUMBER_LITERAL@1104..1105 "3" [] []
+                                  0: CSS_DASHED_IDENTIFIER@1099..1102
+                                    0: IDENT@1099..1102 "--c" [] []
+                                  1: CSS_BOGUS@1102..1105
+                                    0: COLON@1102..1104 ":" [] [Whitespace(" ")]
+                                    1: CSS_NUMBER_LITERAL@1104..1105 "3" [] []
                             3: R_PAREN@1105..1106 ")" [] []
                           2: CSS_BOGUS_PROPERTY_VALUE@1106..1113
                             0: COLON@1106..1108 ":" [] [Whitespace(" ")]

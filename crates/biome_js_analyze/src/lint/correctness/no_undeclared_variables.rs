@@ -1,4 +1,5 @@
 use crate::globals::{is_js_global, is_ts_global};
+use crate::services::embedded_bindings::EmbeddedBindings;
 use crate::services::semantic::SemanticServices;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
@@ -83,6 +84,13 @@ impl Rule for NoUndeclaredVariables {
                 let source_type = ctx.source_type::<JsFileSource>();
 
                 if ctx.is_global(text) {
+                    return None;
+                }
+
+                let embedded_bindings = ctx
+                    .get_service::<EmbeddedBindings>()
+                    .expect("embedded bindings service");
+                if embedded_bindings.contains_binding(text) {
                     return None;
                 }
 

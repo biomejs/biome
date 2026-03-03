@@ -6,25 +6,31 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsExpression, JsConditionalExpression, JsDoWhileStatement, JsForStatement, JsIfStatement,
+    AnyJsAssignmentPattern, AnyJsExpression, JsAssignmentExpression, JsAssignmentOperator,
+    JsConditionalExpression, JsDoWhileStatement, JsForStatement, JsIfStatement,
     JsLogicalExpression, JsLogicalOperator, JsParenthesizedExpression, JsSyntaxKind,
     JsWhileStatement, T,
 };
 use biome_js_type_info::ConditionalType;
-use biome_rowan::{AstNode, BatchMutationExt, TextRange};
+use biome_rowan::{
+    AstNode, BatchMutationExt, TextRange, declare_node_union,
+};
 use biome_rule_options::use_nullish_coalescing::UseNullishCoalescingOptions;
 
 declare_lint_rule! {
-    /// Enforce using nullish coalescing operator (`??`) instead of logical or (`||`).
+    /// Enforce using the nullish coalescing operator (`??`) instead of logical or (`||`).
     ///
     /// The `??` operator only checks for `null` and `undefined`, while `||` checks
     /// for any falsy value including `0`, `''`, and `false`. This can prevent bugs
     /// where legitimate falsy values are incorrectly treated as missing.
     ///
-    /// This rule triggers when the left operand of `||` is possibly nullish (contains
-    /// `null` or `undefined` in its type). A safe fix is only offered when the type
-    /// analysis confirms the left operand can only be truthy or nullish (not other
-    /// falsy values like `0` or `''`).
+    /// For `||` expressions, this rule triggers when the left operand is possibly
+    /// nullish (contains `null` or `undefined` in its type). A safe fix is only
+    /// offered when type analysis confirms the left operand can only be truthy or
+    /// nullish (not other falsy values like `0` or `''`).
+    ///
+    /// For `||=` assignment expressions, the same logic applies: `a ||= b` is
+    /// flagged when `a` is possibly nullish and can be rewritten as `a ??= b`.
     ///
     /// By default, `||` expressions in conditional test positions (if/while/for/ternary)
     /// are ignored, as the falsy-checking behavior is often intentional there. This can
@@ -42,6 +48,11 @@ declare_lint_rule! {
     /// ```ts
     /// declare const maybeNumber: number | undefined;
     /// const value = maybeNumber || 0; // should use ??
+    /// ```
+    ///
+    /// ```ts
+    /// declare let x: string | null;
+    /// x ||= 'default'; // should use ??=
     /// ```
     ///
     /// ### Valid
@@ -66,8 +77,14 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// ```ts
+    /// // Already using ??=
+    /// declare let y: string | null;
+    /// y ??= 'default';
+    /// ```
+    ///
     pub UseNullishCoalescing {
-        version: "next",
+        version: "2.4.5",
         name: "useNullishCoalescing",
         language: "js",
         sources: &[RuleSource::EslintTypeScript("prefer-nullish-coalescing").inspired()],
@@ -79,69 +96,93 @@ declare_lint_rule! {
     }
 }
 
-pub struct UseNullishCoalescingState {
-    operator_range: TextRange,
-    can_fix: bool,
+declare_node_union! {
+    pub UseNullishCoalescingQuery = JsLogicalExpression | JsAssignmentExpression
+}
+
+pub enum UseNullishCoalescingState {
+    LogicalOr {
+        operator_range: TextRange,
+        can_fix: bool,
+    },
+    LogicalOrAssignment {
+        operator_range: TextRange,
+        can_fix: bool,
+    },
 }
 
 impl Rule for UseNullishCoalescing {
-    type Query = Typed<JsLogicalExpression>;
+    type Query = Typed<UseNullishCoalescingQuery>;
     type State = UseNullishCoalescingState;
     type Signals = Option<Self::State>;
     type Options = UseNullishCoalescingOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let logical = ctx.query();
-        let operator = logical.operator().ok()?;
-        if operator != JsLogicalOperator::LogicalOr {
-            return None;
+        match ctx.query() {
+            UseNullishCoalescingQuery::JsLogicalExpression(logical) => {
+                run_logical_or(ctx, logical)
+            }
+            UseNullishCoalescingQuery::JsAssignmentExpression(assignment) => {
+                run_logical_or_assignment(ctx, assignment)
+            }
         }
-
-        let options = ctx.options();
-        if options.ignore_conditional_tests() && is_in_test_position(logical) {
-            return None;
-        }
-
-        let left = logical.left().ok()?;
-        let left_ty = ctx.type_of_expression(&left);
-
-        if !is_possibly_nullish(&left_ty) {
-            return None;
-        }
-
-        let can_fix = is_safe_type_for_replacement(&left_ty)
-            && is_safe_syntax_context_for_replacement(logical);
-
-        Some(UseNullishCoalescingState {
-            operator_range: logical.operator_token().ok()?.text_trimmed_range(),
-            can_fix,
-        })
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                state.operator_range,
-                markup! {
-                    "Use "<Emphasis>"??"</Emphasis>" instead of "<Emphasis>"||"</Emphasis>"."
-                },
-            )
-            .note(markup! {
-                "The "<Emphasis>"||"</Emphasis>" operator checks for all falsy values (including 0, '', and false), while "<Emphasis>"??"</Emphasis>" only checks for null and undefined."
-            }),
-        )
+        match state {
+            UseNullishCoalescingState::LogicalOr { operator_range, .. } => Some(
+                RuleDiagnostic::new(
+                    rule_category!(),
+                    *operator_range,
+                    markup! {
+                        "Use "<Emphasis>"??"</Emphasis>" instead of "<Emphasis>"||"</Emphasis>"."
+                    },
+                )
+                .note(markup! {
+                    "The "<Emphasis>"||"</Emphasis>" operator checks for all falsy values (including 0, '', and false), while "<Emphasis>"??"</Emphasis>" only checks for null and undefined."
+                }),
+            ),
+            UseNullishCoalescingState::LogicalOrAssignment { operator_range, .. } => Some(
+                RuleDiagnostic::new(
+                    rule_category!(),
+                    *operator_range,
+                    markup! {
+                        "Use "<Emphasis>"??="</Emphasis>" instead of "<Emphasis>"||="</Emphasis>"."
+                    },
+                )
+                .note(markup! {
+                    "The "<Emphasis>"||="</Emphasis>" operator assigns when the left side is falsy, while "<Emphasis>"??="</Emphasis>" only assigns when it is null or undefined."
+                }),
+            ),
+        }
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
-        if !state.can_fix {
+        let (can_fix, replacement_token, message) = match state {
+            UseNullishCoalescingState::LogicalOr { can_fix, .. } => (
+                *can_fix,
+                T![??],
+                markup! { "Use "<Emphasis>"??"</Emphasis>" instead." }.to_owned(),
+            ),
+            UseNullishCoalescingState::LogicalOrAssignment { can_fix, .. } => (
+                *can_fix,
+                T![??=],
+                markup! { "Use "<Emphasis>"??="</Emphasis>" instead." }.to_owned(),
+            ),
+        };
+
+        if !can_fix {
             return None;
         }
 
-        let node = ctx.query();
-        let old_token = node.operator_token().ok()?;
+        let old_token = match ctx.query() {
+            UseNullishCoalescingQuery::JsLogicalExpression(node) => node.operator_token().ok()?,
+            UseNullishCoalescingQuery::JsAssignmentExpression(node) => {
+                node.operator_token().ok()?
+            }
+        };
 
-        let new_token = make::token(T![??])
+        let new_token = make::token(replacement_token)
             .with_leading_trivia_pieces(old_token.leading_trivia().pieces())
             .with_trailing_trivia_pieces(old_token.trailing_trivia().pieces());
 
@@ -151,10 +192,71 @@ impl Rule for UseNullishCoalescing {
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
-            markup! { "Use "<Emphasis>"??"</Emphasis>" instead." }.to_owned(),
+            message,
             mutation,
         ))
     }
+}
+
+fn run_logical_or(
+    ctx: &RuleContext<UseNullishCoalescing>,
+    logical: &JsLogicalExpression,
+) -> Option<UseNullishCoalescingState> {
+    let operator = logical.operator().ok()?;
+    if operator != JsLogicalOperator::LogicalOr {
+        return None;
+    }
+
+    let options = ctx.options();
+    if options.ignore_conditional_tests() && is_in_test_position(logical) {
+        return None;
+    }
+
+    let left = logical.left().ok()?;
+    let left_ty = ctx.type_of_expression(&left);
+
+    if !is_possibly_nullish(&left_ty) {
+        return None;
+    }
+
+    let can_fix =
+        is_safe_type_for_replacement(&left_ty) && is_safe_syntax_context_for_replacement(logical);
+
+    Some(UseNullishCoalescingState::LogicalOr {
+        operator_range: logical.operator_token().ok()?.text_trimmed_range(),
+        can_fix,
+    })
+}
+
+fn run_logical_or_assignment(
+    ctx: &RuleContext<UseNullishCoalescing>,
+    assignment: &JsAssignmentExpression,
+) -> Option<UseNullishCoalescingState> {
+    let operator = assignment.operator().ok()?;
+    if operator != JsAssignmentOperator::LogicalOrAssign {
+        return None;
+    }
+
+    let left = assignment.left().ok()?;
+    let left_ty = match &left {
+        AnyJsAssignmentPattern::AnyJsAssignment(assign) => {
+            let id = assign.as_js_identifier_assignment()?;
+            let name = id.name_token().ok()?;
+            ctx.type_of_named_value(assignment.range(), name.text_trimmed())
+        }
+        _ => return None,
+    };
+
+    if !is_possibly_nullish(&left_ty) {
+        return None;
+    }
+
+    let can_fix = is_safe_type_for_replacement(&left_ty);
+
+    Some(UseNullishCoalescingState::LogicalOrAssignment {
+        operator_range: assignment.operator_token().ok()?.text_trimmed_range(),
+        can_fix,
+    })
 }
 
 fn is_safe_type_for_replacement(ty: &biome_js_type_info::Type) -> bool {

@@ -482,6 +482,76 @@ pub fn css_container_query_in_parens(
         ],
     ))
 }
+pub fn css_container_scroll_state_and_query(
+    left: CssContainerScrollStateInParens,
+    and_token: SyntaxToken,
+    right: AnyCssContainerScrollStateAndCombinableQuery,
+) -> CssContainerScrollStateAndQuery {
+    CssContainerScrollStateAndQuery::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CONTAINER_SCROLL_STATE_AND_QUERY,
+        [
+            Some(SyntaxElement::Node(left.into_syntax())),
+            Some(SyntaxElement::Token(and_token)),
+            Some(SyntaxElement::Node(right.into_syntax())),
+        ],
+    ))
+}
+pub fn css_container_scroll_state_in_parens(
+    l_paren_token: SyntaxToken,
+    query: AnyCssContainerScrollStateInParens,
+    r_paren_token: SyntaxToken,
+) -> CssContainerScrollStateInParens {
+    CssContainerScrollStateInParens::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CONTAINER_SCROLL_STATE_IN_PARENS,
+        [
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(query.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_container_scroll_state_not_query(
+    not_token: SyntaxToken,
+    query: CssContainerScrollStateInParens,
+) -> CssContainerScrollStateNotQuery {
+    CssContainerScrollStateNotQuery::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CONTAINER_SCROLL_STATE_NOT_QUERY,
+        [
+            Some(SyntaxElement::Token(not_token)),
+            Some(SyntaxElement::Node(query.into_syntax())),
+        ],
+    ))
+}
+pub fn css_container_scroll_state_or_query(
+    left: CssContainerScrollStateInParens,
+    or_token: SyntaxToken,
+    right: AnyCssContainerScrollStateOrCombinableQuery,
+) -> CssContainerScrollStateOrQuery {
+    CssContainerScrollStateOrQuery::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CONTAINER_SCROLL_STATE_OR_QUERY,
+        [
+            Some(SyntaxElement::Node(left.into_syntax())),
+            Some(SyntaxElement::Token(or_token)),
+            Some(SyntaxElement::Node(right.into_syntax())),
+        ],
+    ))
+}
+pub fn css_container_scroll_state_query_in_parens(
+    name: CssIdentifier,
+    l_paren_token: SyntaxToken,
+    query: AnyCssContainerScrollStateQuery,
+    r_paren_token: SyntaxToken,
+) -> CssContainerScrollStateQueryInParens {
+    CssContainerScrollStateQueryInParens::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CONTAINER_SCROLL_STATE_QUERY_IN_PARENS,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(query.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
 pub fn css_container_size_feature_in_parens(
     l_paren_token: SyntaxToken,
     feature: AnyCssQueryFeature,
@@ -1717,12 +1787,6 @@ pub fn css_page_selector_pseudo(
             Some(SyntaxElement::Token(colon_token)),
             Some(SyntaxElement::Node(selector.into_syntax())),
         ],
-    ))
-}
-pub fn css_parameter(any_css_expression: AnyCssExpression) -> CssParameter {
-    CssParameter::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_PARAMETER,
-        [Some(SyntaxElement::Node(any_css_expression.into_syntax()))],
     ))
 }
 pub fn css_parenthesized_expression(
@@ -3888,7 +3952,7 @@ where
 }
 pub fn css_parameter_list<I, S>(items: I, separators: S) -> CssParameterList
 where
-    I: IntoIterator<Item = CssParameter>,
+    I: IntoIterator<Item = AnyCssExpression>,
     I::IntoIter: ExactSizeIterator,
     S: IntoIterator<Item = CssSyntaxToken>,
     S::IntoIter: ExactSizeIterator,

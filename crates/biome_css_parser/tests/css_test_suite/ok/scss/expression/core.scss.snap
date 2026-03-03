@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
 
@@ -53,23 +52,21 @@ CssRoot {
                                         },
                                         l_paren_token: L_PAREN@19..20 "(" [] [],
                                         items: CssParameterList [
-                                            CssParameter {
-                                                any_css_expression: ScssExpression {
-                                                    items: ScssExpressionItemList [
-                                                        ScssIdentifier {
-                                                            dollar_token: DOLLAR@20..21 "$" [] [],
-                                                            name: CssIdentifier {
-                                                                value_token: IDENT@21..27 "alpha" [] [Whitespace(" ")],
-                                                            },
+                                            ScssExpression {
+                                                items: ScssExpressionItemList [
+                                                    ScssIdentifier {
+                                                        dollar_token: DOLLAR@20..21 "$" [] [],
+                                                        name: CssIdentifier {
+                                                            value_token: IDENT@21..27 "alpha" [] [Whitespace(" ")],
                                                         },
-                                                        ScssIdentifier {
-                                                            dollar_token: DOLLAR@27..28 "$" [] [],
-                                                            name: CssIdentifier {
-                                                                value_token: IDENT@28..32 "beta" [] [],
-                                                            },
+                                                    },
+                                                    ScssIdentifier {
+                                                        dollar_token: DOLLAR@27..28 "$" [] [],
+                                                        name: CssIdentifier {
+                                                            value_token: IDENT@28..32 "beta" [] [],
                                                         },
-                                                    ],
-                                                },
+                                                    },
+                                                ],
                                             },
                                         ],
                                         r_paren_token: R_PAREN@32..33 ")" [] [],
@@ -94,20 +91,18 @@ CssRoot {
                                         },
                                         l_paren_token: L_PAREN@47..48 "(" [] [],
                                         items: CssParameterList [
-                                            CssParameter {
-                                                any_css_expression: ScssExpression {
-                                                    items: ScssExpressionItemList [
-                                                        CssNumber {
-                                                            value_token: CSS_NUMBER_LITERAL@48..50 "1" [] [Whitespace(" ")],
-                                                        },
-                                                        CssNumber {
-                                                            value_token: CSS_NUMBER_LITERAL@50..52 "2" [] [Whitespace(" ")],
-                                                        },
-                                                        CssNumber {
-                                                            value_token: CSS_NUMBER_LITERAL@52..53 "3" [] [],
-                                                        },
-                                                    ],
-                                                },
+                                            ScssExpression {
+                                                items: ScssExpressionItemList [
+                                                    CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@48..50 "1" [] [Whitespace(" ")],
+                                                    },
+                                                    CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@50..52 "2" [] [Whitespace(" ")],
+                                                    },
+                                                    CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@52..53 "3" [] [],
+                                                    },
+                                                ],
                                             },
                                         ],
                                         r_paren_token: R_PAREN@53..54 ")" [] [],
@@ -158,17 +153,16 @@ CssRoot {
                       0: IDENT@17..19 "fn" [] []
                     1: L_PAREN@19..20 "(" [] []
                     2: CSS_PARAMETER_LIST@20..32
-                      0: CSS_PARAMETER@20..32
-                        0: SCSS_EXPRESSION@20..32
-                          0: SCSS_EXPRESSION_ITEM_LIST@20..32
-                            0: SCSS_IDENTIFIER@20..27
-                              0: DOLLAR@20..21 "$" [] []
-                              1: CSS_IDENTIFIER@21..27
-                                0: IDENT@21..27 "alpha" [] [Whitespace(" ")]
-                            1: SCSS_IDENTIFIER@27..32
-                              0: DOLLAR@27..28 "$" [] []
-                              1: CSS_IDENTIFIER@28..32
-                                0: IDENT@28..32 "beta" [] []
+                      0: SCSS_EXPRESSION@20..32
+                        0: SCSS_EXPRESSION_ITEM_LIST@20..32
+                          0: SCSS_IDENTIFIER@20..27
+                            0: DOLLAR@20..21 "$" [] []
+                            1: CSS_IDENTIFIER@21..27
+                              0: IDENT@21..27 "alpha" [] [Whitespace(" ")]
+                          1: SCSS_IDENTIFIER@27..32
+                            0: DOLLAR@27..28 "$" [] []
+                            1: CSS_IDENTIFIER@28..32
+                              0: IDENT@28..32 "beta" [] []
                     3: R_PAREN@32..33 ")" [] []
               1: (empty)
             1: SEMICOLON@33..34 ";" [] []
@@ -184,15 +178,14 @@ CssRoot {
                       0: IDENT@45..47 "fn" [] []
                     1: L_PAREN@47..48 "(" [] []
                     2: CSS_PARAMETER_LIST@48..53
-                      0: CSS_PARAMETER@48..53
-                        0: SCSS_EXPRESSION@48..53
-                          0: SCSS_EXPRESSION_ITEM_LIST@48..53
-                            0: CSS_NUMBER@48..50
-                              0: CSS_NUMBER_LITERAL@48..50 "1" [] [Whitespace(" ")]
-                            1: CSS_NUMBER@50..52
-                              0: CSS_NUMBER_LITERAL@50..52 "2" [] [Whitespace(" ")]
-                            2: CSS_NUMBER@52..53
-                              0: CSS_NUMBER_LITERAL@52..53 "3" [] []
+                      0: SCSS_EXPRESSION@48..53
+                        0: SCSS_EXPRESSION_ITEM_LIST@48..53
+                          0: CSS_NUMBER@48..50
+                            0: CSS_NUMBER_LITERAL@48..50 "1" [] [Whitespace(" ")]
+                          1: CSS_NUMBER@50..52
+                            0: CSS_NUMBER_LITERAL@50..52 "2" [] [Whitespace(" ")]
+                          2: CSS_NUMBER@52..53
+                            0: CSS_NUMBER_LITERAL@52..53 "3" [] []
                     3: R_PAREN@53..54 ")" [] []
               1: (empty)
             1: SEMICOLON@54..55 ";" [] []

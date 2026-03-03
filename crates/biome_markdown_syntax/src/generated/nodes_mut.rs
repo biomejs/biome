@@ -447,11 +447,19 @@ impl MdQuote {
         )
     }
 }
-impl MdQuotePrefix {
-    pub fn with_pre_marker_indent_token(self, element: Option<SyntaxToken>) -> Self {
+impl MdQuoteIndent {
+    pub fn with_md_quote_pre_marker_indent_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(0usize..=0usize, once(element.map(|element| element.into()))),
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
+impl MdQuotePrefix {
+    pub fn with_pre_marker_indent(self, element: MdQuoteIndentList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
     pub fn with_marker_token(self, element: SyntaxToken) -> Self {

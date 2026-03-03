@@ -16,7 +16,7 @@ export type Bar = { bar: "bar" };
 ```
 Exports {
   "Bar" => {
-    ExportOwnExport => JsOwnExport::Binding(0)
+    ExportOwnExport => JsOwnExport::Binding(21..24)
   }
 }
 Imports {
@@ -27,10 +27,9 @@ Imports {
 ## Exported Bindings
 
 ```
-BindingId(0) => JsBindingData {
-  Name: Bar,
-  Type: Module(0) TypeId(1),
-  Declaration kind: Type
+Bar  => BindingTypeData {
+  Types Module(0) TypeId(1),
+  Exported Ranges: (21..24)
 }
 ```
 
@@ -116,7 +115,7 @@ export function foo<T>(foo: T, bar: Bar): T;
 ```
 Exports {
   "foo" => {
-    ExportOwnExport => JsOwnExport::Binding(1)
+    ExportOwnExport => JsOwnExport::Binding(71..74)
   }
 }
 Imports {
@@ -131,10 +130,9 @@ Imports {
 ## Exported Bindings
 
 ```
-BindingId(1) => JsBindingData {
-  Name: foo,
-  Type: Module(0) TypeId(3),
-  Declaration kind: HoistedValue
+foo => BindingTypeData {
+  Types Module(0) TypeId(3),
+  Exported Ranges: 
 }
 ```
 

@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
 
@@ -627,14 +626,12 @@ CssRoot {
                                                                             },
                                                                             l_paren_token: L_PAREN@581..582 "(" [] [],
                                                                             items: CssParameterList [
-                                                                                CssParameter {
-                                                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                                                        css_component_value_list: CssComponentValueList [
-                                                                                            CssIdentifier {
-                                                                                                value_token: IDENT@582..586 "page" [] [],
-                                                                                            },
-                                                                                        ],
-                                                                                    },
+                                                                                CssListOfComponentValuesExpression {
+                                                                                    css_component_value_list: CssComponentValueList [
+                                                                                        CssIdentifier {
+                                                                                            value_token: IDENT@582..586 "page" [] [],
+                                                                                        },
+                                                                                    ],
                                                                                 },
                                                                             ],
                                                                             r_paren_token: R_PAREN@586..588 ")" [] [Whitespace(" ")],
@@ -648,14 +645,12 @@ CssRoot {
                                                                             },
                                                                             l_paren_token: L_PAREN@602..603 "(" [] [],
                                                                             items: CssParameterList [
-                                                                                CssParameter {
-                                                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                                                        css_component_value_list: CssComponentValueList [
-                                                                                            CssIdentifier {
-                                                                                                value_token: IDENT@603..608 "pages" [] [],
-                                                                                            },
-                                                                                        ],
-                                                                                    },
+                                                                                CssListOfComponentValuesExpression {
+                                                                                    css_component_value_list: CssComponentValueList [
+                                                                                        CssIdentifier {
+                                                                                            value_token: IDENT@603..608 "pages" [] [],
+                                                                                        },
+                                                                                    ],
                                                                                 },
                                                                             ],
                                                                             r_paren_token: R_PAREN@608..609 ")" [] [],
@@ -1047,11 +1042,10 @@ CssRoot {
                                       0: IDENT@574..581 "counter" [] []
                                     1: L_PAREN@581..582 "(" [] []
                                     2: CSS_PARAMETER_LIST@582..586
-                                      0: CSS_PARAMETER@582..586
-                                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@582..586
-                                          0: CSS_COMPONENT_VALUE_LIST@582..586
-                                            0: CSS_IDENTIFIER@582..586
-                                              0: IDENT@582..586 "page" [] []
+                                      0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@582..586
+                                        0: CSS_COMPONENT_VALUE_LIST@582..586
+                                          0: CSS_IDENTIFIER@582..586
+                                            0: IDENT@582..586 "page" [] []
                                     3: R_PAREN@586..588 ")" [] [Whitespace(" ")]
                                   2: CSS_STRING@588..595
                                     0: CSS_STRING_LITERAL@588..595 "' of '" [] [Whitespace(" ")]
@@ -1060,11 +1054,10 @@ CssRoot {
                                       0: IDENT@595..602 "counter" [] []
                                     1: L_PAREN@602..603 "(" [] []
                                     2: CSS_PARAMETER_LIST@603..608
-                                      0: CSS_PARAMETER@603..608
-                                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@603..608
-                                          0: CSS_COMPONENT_VALUE_LIST@603..608
-                                            0: CSS_IDENTIFIER@603..608
-                                              0: IDENT@603..608 "pages" [] []
+                                      0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@603..608
+                                        0: CSS_COMPONENT_VALUE_LIST@603..608
+                                          0: CSS_IDENTIFIER@603..608
+                                            0: IDENT@603..608 "pages" [] []
                                     3: R_PAREN@608..609 ")" [] []
                               1: (empty)
                             1: SEMICOLON@609..610 ";" [] []

@@ -41,7 +41,9 @@ use biome_parser::prelude::ParsedSyntax::{self, *};
 use crate::MarkdownParser;
 use crate::syntax::parse_any_block_with_indent_code_policy;
 use crate::syntax::parse_error::quote_nesting_too_deep;
-use crate::syntax::{INDENT_CODE_BLOCK_SPACES, TAB_STOP_SPACES, is_paragraph_like};
+use crate::syntax::{
+    INDENT_CODE_BLOCK_SPACES, MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES, is_paragraph_like,
+};
 
 /// Check if we're at the start of a block quote (`>`).
 pub(crate) fn at_quote(p: &mut MarkdownParser) -> bool {
@@ -55,10 +57,10 @@ pub(crate) fn at_quote(p: &mut MarkdownParser) -> bool {
             // Treat virtual line start as column 0.
             indent = 0;
         }
-        if indent > 3 {
+        if indent > MAX_BLOCK_PREFIX_INDENT {
             return false;
         }
-        p.skip_line_indent(3);
+        p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
         p.at(T![>])
     })
 }
@@ -80,7 +82,7 @@ pub(crate) fn parse_quote(p: &mut MarkdownParser) -> ParsedSyntax {
         let range = p.cur_range();
         p.error(quote_nesting_too_deep(p, range, max_nesting_depth));
         p.state_mut().quote_depth_exceeded = true;
-        p.skip_line_indent(3);
+        p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
         if p.at(T![>]) {
             p.parse_as_skipped_trivia_tokens(|p| p.bump(T![>]));
         } else if p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == ">" {
@@ -127,8 +129,6 @@ fn emit_quote_prefix_node(p: &mut MarkdownParser) -> bool {
 ///
 /// Returns whether a post-marker separator was consumed.
 fn emit_quote_prefix_tokens(p: &mut MarkdownParser, use_virtual_line_start: bool) -> Option<bool> {
-    // TODO: Emit MD_QUOTE_PRE_MARKER_INDENT directly instead of skipping indent trivia.
-    // This is intentionally deferred from Step 1b to keep parser migration scope narrow.
     let saved_virtual = if use_virtual_line_start {
         let prev = p.state().virtual_line_start;
         p.state_mut().virtual_line_start = Some(p.cur_range().start());
@@ -136,7 +136,31 @@ fn emit_quote_prefix_tokens(p: &mut MarkdownParser, use_virtual_line_start: bool
     } else {
         None
     };
-    p.skip_line_indent(3);
+
+    // Direct bounded scan (0-3 cols per CommonMark §5.1): simpler than ParseNodeList
+    // here because we immediately validate `>` and keep this path no-recovery.
+    let indent_list_m = p.start();
+    let mut consumed = 0usize;
+    while p.at(MD_TEXTUAL_LITERAL) {
+        let text = p.cur_text();
+        if text.is_empty() || !text.chars().all(|c| c == ' ' || c == '\t') {
+            break;
+        }
+        // Tabs expand to tab-stop width (CommonMark §2.2).
+        let indent: usize = text
+            .chars()
+            .map(|c| if c == '\t' { TAB_STOP_SPACES } else { 1 })
+            .sum();
+        if consumed + indent > MAX_BLOCK_PREFIX_INDENT {
+            break;
+        }
+        consumed += indent;
+        let indent_m = p.start();
+        p.bump_remap(MD_QUOTE_PRE_MARKER_INDENT);
+        indent_m.complete(p, MD_QUOTE_INDENT);
+    }
+    indent_list_m.complete(p, MD_QUOTE_INDENT_LIST);
+
     if let Some(prev) = saved_virtual {
         p.state_mut().virtual_line_start = prev;
     }
@@ -311,7 +335,7 @@ pub(crate) fn line_has_quote_prefix_at_current(p: &MarkdownParser, depth: usize)
             }
             _ => break,
         }
-        if indent > 3 {
+        if indent > MAX_BLOCK_PREFIX_INDENT {
             return false;
         }
     }

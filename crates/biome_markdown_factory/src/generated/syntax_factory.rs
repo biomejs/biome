@@ -791,12 +791,31 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                 }
                 slots.into_node(MD_QUOTE, children)
             }
+            MD_QUOTE_INDENT => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == MD_QUOTE_PRE_MARKER_INDENT
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        MD_QUOTE_INDENT.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(MD_QUOTE_INDENT, children)
+            }
             MD_QUOTE_PREFIX => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
-                    && element.kind() == MD_QUOTE_PRE_MARKER_INDENT
+                    && MdQuoteIndentList::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -1033,6 +1052,9 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
             MD_HASH_LIST => Self::make_node_list_syntax(kind, children, MdHash::can_cast),
             MD_INLINE_ITEM_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyMdInline::can_cast)
+            }
+            MD_QUOTE_INDENT_LIST => {
+                Self::make_node_list_syntax(kind, children, MdQuoteIndent::can_cast)
             }
             _ => unreachable!("Is {:?} a token?", kind),
         }
