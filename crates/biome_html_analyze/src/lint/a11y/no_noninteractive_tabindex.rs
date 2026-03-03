@@ -91,10 +91,10 @@ impl Rule for NoNoninteractiveTabindex {
             let role_value = role_attr.initializer()?.value().ok()?.string_value()?;
             let role = AriaRole::from_roles(role_value.trim());
 
-            if let Some(aria_role) = role {
-                if aria_role.is_interactive() {
-                    return None;
-                }
+            if let Some(aria_role) = role
+                && aria_role.is_interactive()
+            {
+                return None;
             }
         }
 
