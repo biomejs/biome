@@ -5,7 +5,7 @@ use biome_aria::AriaRoles;
 use biome_aria_metadata::AriaRole;
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlElement, HtmlAttribute};
+use biome_html_syntax::{AnyHtmlElement, HtmlAttribute, HtmlFileSource};
 use biome_rowan::{AstNode, BatchMutationExt, Text};
 use biome_rule_options::no_redundant_roles::NoRedundantRolesOptions;
 
@@ -13,6 +13,13 @@ use crate::HtmlRuleAction;
 
 declare_lint_rule! {
     /// Enforce explicit `role` property is not the same as implicit/default role property on an element.
+    ///
+    /// :::note
+    /// In `.html` files, all elements are treated as native HTML elements.
+    ///
+    /// In component-based frameworks (Vue, Svelte, Astro), only lowercase element names are checked.
+    /// PascalCase names like `<Button>` are assumed to be custom components and are ignored.
+    /// :::
     ///
     /// ## Examples
     ///
@@ -44,7 +51,7 @@ declare_lint_rule! {
         version: "next",
         name: "noRedundantRoles",
         language: "html",
-        sources: &[RuleSource::EslintJsxA11y("no-redundant-roles").same()],
+        sources: &[RuleSource::EslintJsxA11y("no-redundant-roles").same(), RuleSource::HtmlEslint("no-redundant-role").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
@@ -64,6 +71,19 @@ impl Rule for NoRedundantRoles {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
+
+        // Skip custom components in framework files.
+        // In HTML files, all elements are native HTML.
+        // In Vue/Svelte/Astro, only lowercase names are native HTML elements;
+        // PascalCase names are custom components and should be ignored.
+        let source_type = ctx.source_type::<HtmlFileSource>();
+        if !source_type.is_html() {
+            let element_name = node.name()?;
+            let name_text = element_name.text();
+            if name_text.chars().next().is_some_and(|c| c.is_uppercase()) {
+                return None;
+            }
+        }
 
         let role_attribute = node.find_attribute_by_name("role")?;
         let role_attribute_value = role_attribute.initializer()?.value().ok()?.string_value()?;
