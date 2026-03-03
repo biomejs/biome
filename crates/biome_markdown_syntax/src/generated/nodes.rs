@@ -1642,6 +1642,25 @@ impl AnyMdBlock {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyMdBulletListMember {
+    MdBullet(MdBullet),
+    MdNewline(MdNewline),
+}
+impl AnyMdBulletListMember {
+    pub fn as_md_bullet(&self) -> Option<&MdBullet> {
+        match &self {
+            Self::MdBullet(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_md_newline(&self) -> Option<&MdNewline> {
+        match &self {
+            Self::MdNewline(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyMdCodeBlock {
     MdFencedCodeBlock(MdFencedCodeBlock),
     MdIndentCodeBlock(MdIndentCodeBlock),
@@ -3889,6 +3908,65 @@ impl From<AnyMdBlock> for SyntaxElement {
         node.into()
     }
 }
+impl From<MdBullet> for AnyMdBulletListMember {
+    fn from(node: MdBullet) -> Self {
+        Self::MdBullet(node)
+    }
+}
+impl From<MdNewline> for AnyMdBulletListMember {
+    fn from(node: MdNewline) -> Self {
+        Self::MdNewline(node)
+    }
+}
+impl AstNode for AnyMdBulletListMember {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = MdBullet::KIND_SET.union(MdNewline::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, MD_BULLET | MD_NEWLINE)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            MD_BULLET => Self::MdBullet(MdBullet { syntax }),
+            MD_NEWLINE => Self::MdNewline(MdNewline { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::MdBullet(it) => it.syntax(),
+            Self::MdNewline(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::MdBullet(it) => it.into_syntax(),
+            Self::MdNewline(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyMdBulletListMember {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::MdBullet(it) => std::fmt::Debug::fmt(it, f),
+            Self::MdNewline(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyMdBulletListMember> for SyntaxNode {
+    fn from(n: AnyMdBulletListMember) -> Self {
+        match n {
+            AnyMdBulletListMember::MdBullet(it) => it.into_syntax(),
+            AnyMdBulletListMember::MdNewline(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyMdBulletListMember> for SyntaxElement {
+    fn from(n: AnyMdBulletListMember) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<MdFencedCodeBlock> for AnyMdCodeBlock {
     fn from(node: MdFencedCodeBlock) -> Self {
         Self::MdFencedCodeBlock(node)
@@ -4394,6 +4472,11 @@ impl std::fmt::Display for AnyMdBlock {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyMdBulletListMember {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyMdCodeBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -4797,7 +4880,7 @@ impl Serialize for MdBulletList {
 }
 impl AstNodeList for MdBulletList {
     type Language = Language;
-    type Node = MdBullet;
+    type Node = AnyMdBulletListMember;
     fn syntax_list(&self) -> &SyntaxList {
         &self.syntax_list
     }
@@ -4812,15 +4895,15 @@ impl Debug for MdBulletList {
     }
 }
 impl IntoIterator for &MdBulletList {
-    type Item = MdBullet;
-    type IntoIter = AstNodeListIterator<Language, MdBullet>;
+    type Item = AnyMdBulletListMember;
+    type IntoIter = AstNodeListIterator<Language, AnyMdBulletListMember>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
 }
 impl IntoIterator for MdBulletList {
-    type Item = MdBullet;
-    type IntoIter = AstNodeListIterator<Language, MdBullet>;
+    type Item = AnyMdBulletListMember;
+    type IntoIter = AstNodeListIterator<Language, AnyMdBulletListMember>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
