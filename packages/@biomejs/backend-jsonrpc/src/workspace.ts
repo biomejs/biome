@@ -1458,7 +1458,7 @@ See https://biomejs.dev/linter/rules/no-for-each
 	 */
 	noForEach?: NoForEachConfiguration;
 	/**
-	* Disallow shorthand type conversions.
+	* Encourage use of explicit type conversion functions over their shorthand counterparts.
 See https://biomejs.dev/linter/rules/no-implicit-coercions 
 	 */
 	noImplicitCoercions?: NoImplicitCoercionsConfiguration;
@@ -6999,7 +6999,12 @@ export interface NoForEachOptions {
 	 */
 	allowedIdentifiers?: string[];
 }
-export type NoImplicitCoercionsOptions = {};
+export interface NoImplicitCoercionsOptions {
+	/**
+	 * Whether to allow implicitly coercing values to booleans via `!!value`.
+	 */
+	doubleNegation?: boolean;
+}
 export type NoImportantStylesOptions = {};
 export type NoStaticOnlyClassOptions = {};
 export type NoThisInStaticOptions = {};
