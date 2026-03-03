@@ -26,7 +26,7 @@ declare_lint_rule! {
     /// const answer = +"42"; // 42 (coerced to number)
     ///
     /// const myStr = "" + answer; // "42" (coerced to string)
-    /// console.log(!!answer); // "false" (coerced to boolean)
+    /// console.log(!!answer); // "true" (coerced to boolean)
     /// ```
     ///
     /// While these "implicit coercions" can save space, there are several reasons one may prefer to avoid them:
