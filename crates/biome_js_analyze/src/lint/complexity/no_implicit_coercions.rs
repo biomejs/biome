@@ -24,7 +24,7 @@ declare_lint_rule! {
     /// ```js,ignore
     /// const answer = +"42"; // 42 (coerced to number)
     ///
-    /// const myStr = "" + answer; // "123" (coerced to string)
+    /// const myStr = "" + answer; // "42" (coerced to string)
     /// console.log(!!answer); // "false" (coerced to boolean)
     /// ```
     ///
@@ -155,7 +155,15 @@ declare_lint_rule! {
     /// Default: `false` (disallow)
     ///
     /// Examples of correct code with `doubleNegation` set to `true`:
-    /// ```js
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///      "doubleNegation": true
+    ///   }
+    /// }
+    /// ```
+    /// 
+    /// ```js,use_options
     /// !!foo;
     /// ```
     ///
