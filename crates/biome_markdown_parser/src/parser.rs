@@ -166,7 +166,6 @@ impl<'source> MarkdownParser<'source> {
 
     /// Record tight/loose information for a parsed list node.
     pub(crate) fn record_list_tightness(&mut self, range: TextRange, is_tight: bool) {
-        let range = self.trim_range(range);
         self.state
             .list_tightness
             .push(ListTightness { range, is_tight });
@@ -180,7 +179,6 @@ impl<'source> MarkdownParser<'source> {
         marker_width: usize,
         spaces_after_marker: usize,
     ) {
-        let range = self.trim_range(range);
         self.state.list_item_indents.push(ListItemIndent {
             range,
             indent,
@@ -191,7 +189,6 @@ impl<'source> MarkdownParser<'source> {
     }
 
     pub(crate) fn record_quote_indent(&mut self, range: TextRange, indent: usize) {
-        let range = self.trim_range(range);
         self.state.quote_indents.push(QuoteIndent { range, indent });
     }
 
@@ -292,33 +289,6 @@ impl<'source> MarkdownParser<'source> {
 
     pub(crate) fn set_virtual_line_start(&mut self) {
         self.state.virtual_line_start = Some(self.cur_range().start());
-    }
-
-    pub(crate) fn trim_range(&self, range: TextRange) -> TextRange {
-        let start: usize = range.start().into();
-        let end: usize = range.end().into();
-        if start >= end {
-            return range;
-        }
-
-        let source = self.source.source_text();
-        let slice = &source[start..end];
-        if slice
-            .trim_matches(|c: char| matches!(c, ' ' | '\t' | '\r'))
-            .is_empty()
-        {
-            return TextRange::new(range.start(), range.start());
-        }
-        let leading = slice
-            .len()
-            .saturating_sub(slice.trim_start_matches([' ', '\t', '\r']).len());
-        let trailing = slice
-            .len()
-            .saturating_sub(slice.trim_end_matches([' ', '\t', '\r']).len());
-        let new_start = start + leading;
-        let new_end = end.saturating_sub(trailing);
-
-        TextRange::new((new_start as u32).into(), (new_end as u32).into())
     }
 
     /// Skip an optional indentation token at line start if it is whitespace-only

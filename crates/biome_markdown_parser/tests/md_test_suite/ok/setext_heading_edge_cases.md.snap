@@ -125,7 +125,12 @@ MdDocument {
         MdBulletListItem {
             md_bullet_list: MdBulletList [
                 MdBullet {
-                    bullet: MINUS@48..49 "-" [] [],
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@48..49 "-" [] [],
+                        post_marker_space_token: missing (optional),
+                        content_indent: MdIndentTokenList [],
+                    },
                     content: MdBlockList [
                         MdSetextHeader {
                             content: MdInlineItemList [
@@ -230,7 +235,11 @@ MdDocument {
     11: MD_BULLET_LIST_ITEM@48..66
       0: MD_BULLET_LIST@48..66
         0: MD_BULLET@48..66
-          0: MINUS@48..49 "-" [] []
+          0: MD_LIST_MARKER_PREFIX@48..49
+            0: MD_INDENT_TOKEN_LIST@48..48
+            1: MINUS@48..49 "-" [] []
+            2: (empty)
+            3: MD_INDENT_TOKEN_LIST@49..49
           1: MD_BLOCK_LIST@49..66
             0: MD_SETEXT_HEADER@49..59
               0: MD_INLINE_ITEM_LIST@49..54

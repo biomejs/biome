@@ -566,7 +566,8 @@ impl<'a> HtmlRenderer<'a> {
             let start = list
                 .md_bullet_list()
                 .first()
-                .and_then(|bullet| bullet.bullet().ok())
+                .and_then(|bullet| bullet.prefix().ok())
+                .and_then(|prefix| prefix.marker().ok())
                 .map_or(1, |marker| {
                     let text = marker.text();
                     text.trim_start()
@@ -596,7 +597,10 @@ impl<'a> HtmlRenderer<'a> {
             let is_tight = list_is_tight && !item_has_blank_line;
             let is_empty = is_empty_content(&blocks);
 
-            let first_is_paragraph = blocks.first().is_some_and(is_paragraph_block);
+            let first_is_paragraph = blocks
+                .iter()
+                .find(|b| !is_newline_block(b))
+                .is_some_and(is_paragraph_block);
             let last_is_paragraph = blocks
                 .iter()
                 .rev()
@@ -969,8 +973,18 @@ impl<'a> HtmlRenderer<'a> {
                 }
 
                 let mut content = buffer.content;
+                if state.leading_newline && content.starts_with('\n') {
+                    content.remove(0);
+                }
                 if state.trim_trailing_newline && content.ends_with('\n') {
                     content.pop();
+                }
+                if state.leading_newline
+                    && content.starts_with('<')
+                    && !content.contains('\n')
+                    && !content.ends_with('\n')
+                {
+                    content.push('\n');
                 }
                 self.push_str(&content);
                 self.push_str("</li>\n");

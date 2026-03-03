@@ -48,6 +48,8 @@ pub enum MarkdownSyntaxKind {
     MD_ENTITY_LITERAL,
     MD_QUOTE_PRE_MARKER_INDENT,
     MD_QUOTE_POST_MARKER_SPACE,
+    MD_INDENT_CHAR,
+    MD_LIST_POST_MARKER_SPACE,
     ERROR_TOKEN,
     NEWLINE,
     WHITESPACE,
@@ -103,6 +105,9 @@ pub enum MarkdownSyntaxKind {
     MD_INDENT,
     MD_THEMATIC_BREAK_BLOCK,
     MD_NEWLINE,
+    MD_INDENT_TOKEN,
+    MD_INDENT_TOKEN_LIST,
+    MD_LIST_MARKER_PREFIX,
     #[doc(hidden)]
     __LAST,
 }
@@ -151,6 +156,8 @@ impl MarkdownSyntaxKind {
                 | MD_ENTITY_LITERAL
                 | MD_QUOTE_PRE_MARKER_INDENT
                 | MD_QUOTE_POST_MARKER_SPACE
+                | MD_INDENT_CHAR
+                | MD_LIST_POST_MARKER_SPACE
         )
     }
     pub const fn is_list(self) -> bool {
@@ -163,6 +170,7 @@ impl MarkdownSyntaxKind {
                 | MD_BULLET_LIST
                 | MD_INLINE_ITEM_LIST
                 | MD_INDENTED_CODE_LINE_LIST
+                | MD_INDENT_TOKEN_LIST
         )
     }
     pub fn from_keyword(ident: &str) -> Option<Self> {
