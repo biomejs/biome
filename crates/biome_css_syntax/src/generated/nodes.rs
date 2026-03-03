@@ -384,14 +384,14 @@ impl CssBinaryExpression {
     pub fn as_fields(&self) -> CssBinaryExpressionFields {
         CssBinaryExpressionFields {
             left: self.left(),
-            operator_token: self.operator_token(),
+            operator: self.operator(),
             right: self.right(),
         }
     }
     pub fn left(&self) -> SyntaxResult<AnyCssExpression> {
         support::required_node(&self.syntax, 0usize)
     }
-    pub fn operator_token(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn operator(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
     pub fn right(&self) -> SyntaxResult<AnyCssExpression> {
@@ -409,7 +409,7 @@ impl Serialize for CssBinaryExpression {
 #[derive(Serialize)]
 pub struct CssBinaryExpressionFields {
     pub left: SyntaxResult<AnyCssExpression>,
-    pub operator_token: SyntaxResult<SyntaxToken>,
+    pub operator: SyntaxResult<SyntaxToken>,
     pub right: SyntaxResult<AnyCssExpression>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -14161,8 +14161,8 @@ impl std::fmt::Debug for CssBinaryExpression {
             f.debug_struct("CssBinaryExpression")
                 .field("left", &support::DebugSyntaxResult(self.left()))
                 .field(
-                    "operator_token",
-                    &support::DebugSyntaxResult(self.operator_token()),
+                    "operator",
+                    &support::DebugSyntaxResult(self.operator()),
                 )
                 .field("right", &support::DebugSyntaxResult(self.right()))
                 .finish()

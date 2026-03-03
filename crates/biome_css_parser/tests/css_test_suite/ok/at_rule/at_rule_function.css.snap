@@ -199,7 +199,7 @@ CssRoot {
                                                             },
                                                         ],
                                                     },
-                                                    operator_token: SLASH@84..86 "/" [] [Whitespace(" ")],
+                                                    operator: SLASH@84..86 "/" [] [Whitespace(" ")],
                                                     right: CssListOfComponentValuesExpression {
                                                         css_component_value_list: CssComponentValueList [
                                                             CssFunction {
@@ -451,7 +451,7 @@ CssRoot {
                                                             },
                                                         ],
                                                     },
-                                                    operator_token: SLASH@341..343 "/" [] [Whitespace(" ")],
+                                                    operator: SLASH@341..343 "/" [] [Whitespace(" ")],
                                                     right: CssListOfComponentValuesExpression {
                                                         css_component_value_list: CssComponentValueList [
                                                             CssFunction {
@@ -691,7 +691,7 @@ CssRoot {
                                                             },
                                                         ],
                                                     },
-                                                    operator_token: SLASH@580..582 "/" [] [Whitespace(" ")],
+                                                    operator: SLASH@580..582 "/" [] [Whitespace(" ")],
                                                     right: CssListOfComponentValuesExpression {
                                                         css_component_value_list: CssComponentValueList [
                                                             CssFunction {
@@ -908,7 +908,7 @@ CssRoot {
                                                             },
                                                         ],
                                                     },
-                                                    operator_token: PLUS@781..783 "+" [] [Whitespace(" ")],
+                                                    operator: PLUS@781..783 "+" [] [Whitespace(" ")],
                                                     right: CssListOfComponentValuesExpression {
                                                         css_component_value_list: CssComponentValueList [
                                                             CssFunction {
@@ -1367,7 +1367,7 @@ CssRoot {
                                                             },
                                                         ],
                                                     },
-                                                    operator_token: PLUS@1242..1244 "+" [] [Whitespace(" ")],
+                                                    operator: PLUS@1242..1244 "+" [] [Whitespace(" ")],
                                                     right: CssListOfComponentValuesExpression {
                                                         css_component_value_list: CssComponentValueList [
                                                             CssFunction {
@@ -1516,7 +1516,7 @@ CssRoot {
                                                             },
                                                         ],
                                                     },
-                                                    operator_token: STAR@1366..1368 "*" [] [Whitespace(" ")],
+                                                    operator: STAR@1366..1368 "*" [] [Whitespace(" ")],
                                                     right: CssListOfComponentValuesExpression {
                                                         css_component_value_list: CssComponentValueList [
                                                             CssNumber {
@@ -1682,7 +1682,7 @@ CssRoot {
                                                             },
                                                         ],
                                                     },
-                                                    operator_token: PLUS@1489..1491 "+" [] [Whitespace(" ")],
+                                                    operator: PLUS@1489..1491 "+" [] [Whitespace(" ")],
                                                     right: CssBinaryExpression {
                                                         left: CssListOfComponentValuesExpression {
                                                             css_component_value_list: CssComponentValueList [
@@ -1704,7 +1704,7 @@ CssRoot {
                                                                 },
                                                             ],
                                                         },
-                                                        operator_token: PLUS@1500..1502 "+" [] [Whitespace(" ")],
+                                                        operator: PLUS@1500..1502 "+" [] [Whitespace(" ")],
                                                         right: CssListOfComponentValuesExpression {
                                                             css_component_value_list: CssComponentValueList [
                                                                 CssFunction {
@@ -2161,7 +2161,7 @@ CssRoot {
                                                             },
                                                         ],
                                                     },
-                                                    operator_token: STAR@1891..1893 "*" [] [Whitespace(" ")],
+                                                    operator: STAR@1891..1893 "*" [] [Whitespace(" ")],
                                                     right: CssListOfComponentValuesExpression {
                                                         css_component_value_list: CssComponentValueList [
                                                             CssNumber {

@@ -88,17 +88,17 @@ impl CssAttrFunctionBuilder {
     }
 }
 pub fn css_attribute_matcher(
-    operator_token: SyntaxToken,
+    operator: SyntaxToken,
     value: CssAttributeMatcherValue,
 ) -> CssAttributeMatcherBuilder {
     CssAttributeMatcherBuilder {
-        operator_token,
+        operator,
         value,
         modifier_token: None,
     }
 }
 pub struct CssAttributeMatcherBuilder {
-    operator_token: SyntaxToken,
+    operator: SyntaxToken,
     value: CssAttributeMatcherValue,
     modifier_token: Option<SyntaxToken>,
 }
@@ -111,7 +111,7 @@ impl CssAttributeMatcherBuilder {
         CssAttributeMatcher::unwrap_cast(SyntaxNode::new_detached(
             CssSyntaxKind::CSS_ATTRIBUTE_MATCHER,
             [
-                Some(SyntaxElement::Token(self.operator_token)),
+                Some(SyntaxElement::Token(self.operator)),
                 Some(SyntaxElement::Node(self.value.into_syntax())),
                 self.modifier_token.map(|token| SyntaxElement::Token(token)),
             ],
@@ -188,14 +188,14 @@ impl CssAttributeSelectorBuilder {
 }
 pub fn css_binary_expression(
     left: AnyCssExpression,
-    operator_token_token: SyntaxToken,
+    operator_token: SyntaxToken,
     right: AnyCssExpression,
 ) -> CssBinaryExpression {
     CssBinaryExpression::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BINARY_EXPRESSION,
         [
             Some(SyntaxElement::Node(left.into_syntax())),
-            Some(SyntaxElement::Token(operator_token_token)),
+            Some(SyntaxElement::Token(operator_token)),
             Some(SyntaxElement::Node(right.into_syntax())),
         ],
     ))
@@ -2281,11 +2281,11 @@ pub fn css_query_feature_range(
     ))
 }
 pub fn css_query_feature_range_comparison(
-    operator_token: SyntaxToken,
+    operator: SyntaxToken,
 ) -> CssQueryFeatureRangeComparison {
     CssQueryFeatureRangeComparison::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_QUERY_FEATURE_RANGE_COMPARISON,
-        [Some(SyntaxElement::Token(operator_token))],
+        [Some(SyntaxElement::Token(operator))],
     ))
 }
 pub fn css_query_feature_range_interval(
@@ -2768,13 +2768,13 @@ impl CssTypeSelectorBuilder {
     }
 }
 pub fn css_unary_expression(
-    operator_token: SyntaxToken,
+    operator: SyntaxToken,
     expression: AnyCssExpression,
 ) -> CssUnaryExpression {
     CssUnaryExpression::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_UNARY_EXPRESSION,
         [
-            Some(SyntaxElement::Token(operator_token)),
+            Some(SyntaxElement::Token(operator)),
             Some(SyntaxElement::Node(expression.into_syntax())),
         ],
     ))
@@ -3054,14 +3054,14 @@ pub fn scss_arbitrary_argument(
 }
 pub fn scss_binary_expression(
     left: AnyScssExpression,
-    operator_token: SyntaxToken,
+    operator: SyntaxToken,
     right: AnyScssExpression,
 ) -> ScssBinaryExpression {
     ScssBinaryExpression::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_BINARY_EXPRESSION,
         [
             Some(SyntaxElement::Node(left.into_syntax())),
-            Some(SyntaxElement::Token(operator_token)),
+            Some(SyntaxElement::Token(operator)),
             Some(SyntaxElement::Node(right.into_syntax())),
         ],
     ))
@@ -3240,13 +3240,13 @@ pub fn scss_qualified_name(
     ))
 }
 pub fn scss_unary_expression(
-    operator_token: SyntaxToken,
+    operator: SyntaxToken,
     expression: AnyScssExpression,
 ) -> ScssUnaryExpression {
     ScssUnaryExpression::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_UNARY_EXPRESSION,
         [
-            Some(SyntaxElement::Token(operator_token)),
+            Some(SyntaxElement::Token(operator)),
             Some(SyntaxElement::Node(expression.into_syntax())),
         ],
     ))

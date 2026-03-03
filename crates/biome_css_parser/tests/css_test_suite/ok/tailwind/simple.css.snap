@@ -278,7 +278,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: SLASH@338..340 "/" [] [Whitespace(" ")],
+                                                operator: SLASH@338..340 "/" [] [Whitespace(" ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssFunction {
