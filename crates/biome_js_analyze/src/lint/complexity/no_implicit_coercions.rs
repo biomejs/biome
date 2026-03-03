@@ -13,7 +13,8 @@ use biome_js_syntax::{
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPieceKind, declare_node_union};
 use biome_rule_options::no_implicit_coercions::NoImplicitCoercionsOptions;
 
-// NB: The ZWBS in the markdown table are required to keep the backticks inside the codeblock.
+// NB: The zero width breaking spaces in the markdown table are ACTIVELY REQUIRED to keep the backticks inside the codeblock from merging with those to delimit the code section.
+// Do not remove them without actively testing the website content.
 
 declare_lint_rule! {
     /// Encourage use of explicit type conversion functions over their shorthand counterparts.
@@ -42,7 +43,7 @@ declare_lint_rule! {
     ///
     /// | Pattern                                        | Target              | Example                |
     /// | ---------------------------------------------- | ------------------- | ---------------------- |
-    /// | Double negation                                | `Boolean`           | `!!value`              |
+    /// | Double negation[^1]                            | `Boolean`           | `!!value`              |
     /// | Unary plus                                     | `Number`            | `+value`               |
     /// | Double unary negation                          | `Number`            | `-(-value)`            |
     /// | Subtraction with zero                          | `Number`            | `value - 0`            |
@@ -50,10 +51,12 @@ declare_lint_rule! {
     /// | Division with one                              | `Number`            | `value / 1`            |
     /// | Concatenation with an empty string             | `String`            | `value + ""`           |
     /// | Empty template literal                         | `String`            | ``​`${value}`​``       |
-    /// | Bitwise NOT with `indexOf` [^1]                | Check against `-1`  | `~arr.indexOf(value)`  |
+    /// | Bitwise NOT with `indexOf`[^2]                 | Check against `-1`  | `~arr.indexOf(value)`  |
     ///
-    /// [^1]: Bitwise NOT produces the 2's complement negation of a number, which is `0` for `-1`.
-    ///
+    /// [^1]: Unless the `doubleNegation` option is set to `true`, in which case it is ignored.
+    /// 
+    /// [^2]: Bitwise NOT produces the 2's complement negation of a number, which is `0` for `-1`.
+    /// 
     /// ## Examples
     ///
     /// ### Invalid
@@ -161,6 +164,14 @@ declare_lint_rule! {
     /// ```js,use_options
     /// !!foo;
     /// ```
+    /// 
+    /// :::info
+    /// While one could make an argument to add options for each individual disallowed pattern, the other variants are significantly less common
+    /// and tend to suffer even more from readability issues.
+    /// As such, the choice was made (for the time being) to only allow toggling double negation given its relatively high frequency.
+    /// 
+    /// Ff you have a strong case to selectively allow one of the other patterns, open a feature request on [GitHub](https://github.com/biomejs/biome/discussions) and we can discuss it there!
+    /// :::
     ///
     pub NoImplicitCoercions {
         version: "2.1.0",
