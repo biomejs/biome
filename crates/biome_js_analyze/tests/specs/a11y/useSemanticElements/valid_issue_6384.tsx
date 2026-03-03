@@ -4,7 +4,6 @@ import type { FC } from 'react';
 export const Test: FC = () => {
 	return (
 		<li>
-			{/** biome-ignore lint/a11y/useSemanticElements: - */}
 			<div
 				role="checkbox"
 				onClick={() => onSelect(id)}

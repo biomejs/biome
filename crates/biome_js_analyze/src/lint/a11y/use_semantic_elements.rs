@@ -21,27 +21,28 @@ declare_lint_rule! {
     /// ### Invalid
     ///
     /// ```jsx,expect_diagnostic
-    /// <div role="checkbox"></div>
+    /// <div role="button"></div>
     /// ```
     ///
     /// ```jsx,expect_diagnostic
-    /// <div role="separator"></div>
+    /// <div role="form"></div>
     /// ```
     ///
     /// ```jsx,expect_diagnostic
-    /// <div role="checkbox" />
+    /// <div role="button" />
     /// ```
     ///
     /// ```jsx,expect_diagnostic
-    /// <div role="separator" />
+    /// <div role="form" />
     /// ```
     ///
     /// ### Valid
     ///
     /// ```jsx
     /// <>
-    ///   <input type="checkbox">label</input>
-    ///   <hr/>
+    ///   <button>label</button>
+    ///   <form></form>
+    ///   <div role="status"></div>
     /// </>;
     /// ```
     ///
@@ -95,7 +96,7 @@ impl Rule for UseSemanticElements {
         }
 
         let role = AriaRole::from_roles(role_value)?;
-        if role.base_html_elements().is_empty() && role.related_html_elements().is_empty() {
+        if role.base_html_elements().is_empty() {
             None
         } else {
             Some(role_attribute)
@@ -111,7 +112,6 @@ impl Rule for UseSemanticElements {
         let candidates = role
             .base_html_elements()
             .iter()
-            .chain(role.related_html_elements())
             .map(|element| element.to_string())
             .collect::<Vec<_>>();
         let candidate_list = candidates.join("\n");
