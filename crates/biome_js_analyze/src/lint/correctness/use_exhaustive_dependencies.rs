@@ -1664,6 +1664,7 @@ impl Rule for UseExhaustiveDependencies {
                 );
 
                 markup! { "Add the missing dependency "<Emphasis>{capture_text.as_ref()}</Emphasis>" to the list." }
+                    .to_owned()
             }
             Fix::RemoveDependency {
                 dependencies,
@@ -1683,7 +1684,7 @@ impl Rule for UseExhaustiveDependencies {
                     recreate_array(dependencies_array, elements),
                 );
 
-                markup! { "Remove the extra dependencies from the list." }
+                markup! { "Remove the extra dependencies from the list." }.to_owned()
             }
             _ => return None,
         };

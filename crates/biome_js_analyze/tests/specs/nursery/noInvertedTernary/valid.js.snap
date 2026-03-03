@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+const a = i === data.depth - 1 ? 0 : 18;
+const b = foo == bar ? second : first;
+const c = foo === bar ? first : second;
+const d = condition ? first : second;
+```

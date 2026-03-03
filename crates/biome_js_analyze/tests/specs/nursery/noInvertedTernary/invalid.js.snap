@@ -1,0 +1,59 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+const a = i !== data.depth - 1 ? 18 : 0;
+const b = foo != bar ? first : second;
+```
+
+# Diagnostics
+```
+invalid.js:2:11 lint/nursery/noInvertedTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid inverted ternary conditions.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const a = i !== data.depth - 1 ? 18 : 0;
+      │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ const b = foo != bar ? first : second;
+  
+  i Use an equality check in the test and swap the two branches for better readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use a direct ternary condition.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·a·=·i·!==·data.depth·-·1·?·18·:·0;
+      2 │ + const·a·=·i·===·data.depth·-·1·?·0:·18;
+    3 3 │   const b = foo != bar ? first : second;
+  
+
+```
+
+```
+invalid.js:3:11 lint/nursery/noInvertedTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid inverted ternary conditions.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const a = i !== data.depth - 1 ? 18 : 0;
+  > 3 │ const b = foo != bar ? first : second;
+      │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Use an equality check in the test and swap the two branches for better readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use a direct ternary condition.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   const a = i !== data.depth - 1 ? 18 : 0;
+    3   │ - const·b·=·foo·!=·bar·?·first·:·second;
+      3 │ + const·b·=·foo·==·bar·?·second:·first;
+  
+
+```

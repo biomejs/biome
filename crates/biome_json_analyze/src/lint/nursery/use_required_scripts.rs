@@ -140,10 +140,12 @@ impl Rule for UseRequiredScripts {
             markup! {
                 "The required script "<Emphasis>{missing_list}</Emphasis>" is missing from package.json."
             }
+            .to_owned()
         } else {
             markup! {
                 "The required scripts "<Emphasis>{missing_list}</Emphasis>" are missing from package.json."
             }
+            .to_owned()
         };
 
         Some(
