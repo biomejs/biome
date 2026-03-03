@@ -422,16 +422,20 @@ struct PathState<'cfg> {
     next_block: BlockId,
     /// Set of all blocks already visited on this path
     visited: RoaringBitmap,
-    /// Current terminating instruction for the path, if one was
-    /// encountered
-    terminator: Option<Option<PathTerminator>>,
+    /// Current terminating instruction for the path, if one was encountered.
+    /// See [`Terminator`] for the semantics of each `Option` level.
+    terminator: Option<Terminator>,
     exception_handlers: Option<&'cfg [ExceptionHandler]>,
-    /// The terminator that was active before entering a `finally` block
-    /// via a dead implicit jump (i.e. when `break`/`continue`/`return`/`throw`
-    /// precedes the implicit try-body-to-finally fall-through). This is
-    /// restored by `finally_fallthrough` so that code *after* the
-    /// `try/finally` construct is still correctly seen as unreachable.
-    pre_finally_terminator: Option<Option<Option<PathTerminator>>>,
+    /// The terminator that was active before entering a `finally` block via a
+    /// dead implicit jump (i.e. when `break`/`continue`/`return`/`throw`
+    /// precedes the implicit try-body-to-finally fall-through).
+    ///
+    /// `None` means we are not currently inside such a finally block.
+    /// `Some(t)` stores the `Option<Terminator>` that was in `self.terminator`
+    /// when the finally block was entered; it is restored by `finally_fallthrough`
+    /// so that code *after* the `try/finally` construct is still correctly seen
+    /// as unreachable.
+    pre_finally_terminator: Option<Option<Terminator>>,
 }
 
 /// Perform a simple reachability analysis on the control flow graph by
@@ -439,7 +443,7 @@ struct PathState<'cfg> {
 fn traverse_cfg(
     cfg: &JsControlFlowGraph,
     signals: &mut UnreachableRanges,
-) -> FxHashMap<BlockId, Vec<Option<Option<PathTerminator>>>> {
+) -> FxHashMap<BlockId, Vec<Option<Terminator>>> {
     let mut queue = VecDeque::new();
 
     queue.push_back(PathState {
@@ -609,8 +613,8 @@ fn handle_jump<'cfg>(
     path: &PathState<'cfg>,
     block: BlockId,
     finally_fallthrough: bool,
-    effective_terminator: Option<Option<PathTerminator>>,
-    pre_finally_terminator: Option<Option<Option<PathTerminator>>>,
+    effective_terminator: Option<Terminator>,
+    pre_finally_terminator: Option<Option<Terminator>>,
 ) {
     // If this jump is exiting a finally clause and this path is visiting
     // an exception handlers chain
@@ -1030,6 +1034,16 @@ pub struct UnreachableRange {
     text_trimmed_range: TextRange,
     terminators: Vec<PathTerminator>,
 }
+
+/// The terminator state of a path through the control flow graph.
+///
+/// Each level of `Option` carries distinct semantics:
+/// - Outer `Option`: `None` = the path has no terminator yet (code is still live);
+///   `Some(_)` = a terminating instruction has been encountered on this path.
+/// - Inner `Option<PathTerminator>`: `None` = the terminator has no associated
+///   syntax node (e.g. an implicit jump); `Some(pt)` = the terminator corresponds
+///   to a concrete syntax node that can be pointed to in a diagnostic.
+type Terminator = Option<PathTerminator>;
 
 #[derive(Debug, Clone, Copy)]
 struct PathTerminator {
