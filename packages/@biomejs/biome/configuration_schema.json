@@ -3354,6 +3354,12 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoDuplicateSelectorsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoDuplicateSelectorsOptions" }
+			]
+		},
 		"NoDuplicateSelectorsKeyframeBlockConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -3361,6 +3367,10 @@
 			]
 		},
 		"NoDuplicateSelectorsKeyframeBlockOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoDuplicateSelectorsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -5856,6 +5866,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDuplicateSelectors": {
+					"description": "Disallow duplicate selectors.\nSee https://biomejs.dev/linter/rules/no-duplicate-selectors",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoDuplicateSelectorsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateVariableNames": {
 					"description": "Require all variable definitions to be unique.\nSee https://biomejs.dev/linter/rules/no-duplicate-variable-names",
 					"anyOf": [
@@ -7720,6 +7737,15 @@
 				"options": {
 					"$ref": "#/$defs/NoDuplicateSelectorsKeyframeBlockOptions"
 				}
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoDuplicateSelectorsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoDuplicateSelectorsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
