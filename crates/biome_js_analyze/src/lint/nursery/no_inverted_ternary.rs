@@ -53,7 +53,7 @@ impl Rule for NoInvertedTernary {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let test_expression = node.test().ok()?;
+        let test_expression = node.test().ok()?.inner_expression()?;
         let test = test_expression.as_js_binary_expression()?;
         matches!(
             test.operator().ok()?,
@@ -80,7 +80,7 @@ impl Rule for NoInvertedTernary {
 
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
-        let test_expression = node.test().ok()?;
+        let test_expression = node.test().ok()?.inner_expression()?;
         let test = test_expression.as_js_binary_expression()?;
         let flipped_operator = match test.operator().ok()? {
             JsBinaryOperator::StrictInequality => T![===],
