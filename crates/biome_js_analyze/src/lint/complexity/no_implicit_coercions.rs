@@ -13,9 +13,6 @@ use biome_js_syntax::{
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPieceKind, declare_node_union};
 use biome_rule_options::no_implicit_coercions::NoImplicitCoercionsOptions;
 
-// NB: The zero width breaking spaces in the markdown table are ACTIVELY REQUIRED to keep the backticks inside the codeblock from merging with those to delimit the code section.
-// Do not remove them without actively testing the website content.
-
 declare_lint_rule! {
     /// Encourage use of explicit type conversion functions over their shorthand counterparts.
     ///
@@ -26,7 +23,7 @@ declare_lint_rule! {
     /// const answer = +"42"; // 42 (coerced to number)
     ///
     /// const myStr = "" + answer; // "42" (coerced to string)
-    /// console.log(!!answer); // "true" (coerced to boolean)
+    /// console.log(!!answer); // true (coerced to boolean)
     /// ```
     ///
     /// While these "implicit coercions" can save space, there are several reasons one may prefer to avoid them:
@@ -51,7 +48,6 @@ declare_lint_rule! {
     /// | Multiplication with one                        | `Number`            | `value * 1`            |
     /// | Division with one                              | `Number`            | `value / 1`            |
     /// | Concatenation with an empty string             | `String`            | `value + ""`           |
-    /// | Empty template literal                         | `String`            | ``​`${value}`​``       |
     /// | Bitwise NOT with `indexOf`[^2]                 | Check against `-1`  | `~arr.indexOf(value)`  |
     ///
     /// [^1]: Unless the `doubleNegation` option is set to `true`, in which case it is ignored.
@@ -95,14 +91,7 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// +foo;
-    /// ```
-    /// ```js,expect_diagnostic
-    /// `${foo}`;
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
-    /// foo += "";
+    /// foo += ``;
     /// ```
     ///
     /// ```js,expect_diagnostic
@@ -171,7 +160,7 @@ declare_lint_rule! {
     /// and tend to suffer even more from readability issues.
     /// As such, the choice was made (for the time being) to only allow toggling double negation given its relatively high frequency.
     ///
-    /// Ff you have a strong case to selectively allow one of the other patterns, open a feature request on [GitHub](https://github.com/biomejs/biome/discussions) and we can discuss it there!
+    /// If you have a strong case to selectively allow one of the other patterns, open a feature request on [GitHub](https://github.com/biomejs/biome/discussions) and we can discuss it there!
     /// :::
     ///
     pub NoImplicitCoercions {
@@ -194,6 +183,8 @@ impl Rule for NoImplicitCoercions {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
+        // TODO: Lint empty template expressions like `${value}`; ESLint does this by default and we should too
+        // (this will need to actively ignore anything with extra content, custom tagging functions, etc.)
         match node {
             PotentialImplicitCoercion::JsUnaryExpression(unary_expression) => {
                 match unary_expression.operator().ok()? {
