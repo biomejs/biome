@@ -21,7 +21,7 @@ declare_lint_rule! {
     ///
     /// JavaScript (due to its dynamic typing) [automatically coerces](https://developer.mozilla.org/en-US/docs/Glossary/Type_coercion)
     /// values to and from different types when applying certain operators.
-    /// As such, one can use these operators as a "shorthand" for coercing values between types:
+    /// As such, one can use these operators as a "shorthand" for coercing values between different types:
     /// ```js,ignore
     /// const answer = +"42"; // 42 (coerced to number)
     ///
@@ -31,6 +31,7 @@ declare_lint_rule! {
     ///
     /// While these "implicit coercions" can save space, there are several reasons one may prefer to avoid them:
     /// - Relying on these shortcuts can hurt readability, especially for newer developers less familiar with these patterns.
+    ///   Writing `Boolean(value)` or `String(myNum)` makes the type of the resulting value clear and explicit, as opposed to `!!value` or `foo + ""` (which may appaer confusing at first glance).
     /// - TypeScript does not allow declaration merging for the built-in type coercion operators, unlike their more explicit function counterparts.
     ///   For instance, `+value` cannot be overridden to return a more specific type under certain conditions (as opposed to `Number()`,
     ///   whose method signature can be customized to do exactly that).
@@ -54,9 +55,9 @@ declare_lint_rule! {
     /// | Bitwise NOT with `indexOf`[^2]                 | Check against `-1`  | `~arr.indexOf(value)`  |
     ///
     /// [^1]: Unless the `doubleNegation` option is set to `true`, in which case it is ignored.
-    /// 
+    ///
     /// [^2]: Bitwise NOT produces the 2's complement negation of a number, which is `0` for `-1`.
-    /// 
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -164,12 +165,12 @@ declare_lint_rule! {
     /// ```js,use_options
     /// !!foo;
     /// ```
-    /// 
+    ///
     /// :::info
     /// While one could make an argument to add options for each individual disallowed pattern, the other variants are significantly less common
     /// and tend to suffer even more from readability issues.
     /// As such, the choice was made (for the time being) to only allow toggling double negation given its relatively high frequency.
-    /// 
+    ///
     /// Ff you have a strong case to selectively allow one of the other patterns, open a feature request on [GitHub](https://github.com/biomejs/biome/discussions) and we can discuss it there!
     /// :::
     ///
