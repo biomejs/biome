@@ -1,0 +1,21 @@
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "rules": {
+      "nursery": {
+        "useBaseline": {
+          "level": "error",
+          "options": {
+            "allowProperties": ["accent-color"],
+            "allowSelectors": ["has"],
+            "allowFunctions": ["color-mix"],
+            "allowMediaConditions": ["scripting"],
+            "allowPropertyValues":  {
+              "clip-path":"fill-box"
+            }
+          }
+        }
+      }
+    }
+  }
+}

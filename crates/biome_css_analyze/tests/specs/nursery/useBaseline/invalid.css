@@ -1,0 +1,48 @@
+/* should generate diagnostics */
+
+/* Limited/newly available properties - flagged with default "widely" */
+a { accent-color: bar; backdrop-filter: auto }
+
+/* @supports not (negated) - NOT suppressed */
+@supports not (accent-color: auto) { a { accent-color: auto } }
+
+/* Outer @supports does not protect inner non-matching rule */
+@supports (accent-color: auto) {
+    @supports (backdrop-filter: auto) {
+        a { accent-color: red; }
+    }
+    a { backdrop-filter: auto; }
+}
+
+/* Property value not yet widely available */
+@supports (clip-path: fill-box) { a { clip-path: stroke-box; } }
+
+/* Function not yet widely available */
+a { width: abs(20% - 100px); }
+a { color: light-dark(black, white); }
+
+/* Function inside @supports, but @supports condition uses different feature */
+@supports (accent-color: auto) { a { accent-color: abs(20% - 10px); } }
+
+/* Media conditions not widely available */
+@media (inverted-colors: inverted) { a { color: red; } }
+
+/* Multiple non-baseline media conditions in one rule */
+@media (height: 600px) and (inverted-colors: inverted) and (device-posture: folded) { a { color: red; } }
+
+/* Unknown condition mixed with non-baseline */
+@media (foo) and (inverted-colors: inverted) { a { color: red; } }
+
+/* Pseudo-class not yet widely available */
+h1:has(+ h2) { margin: 0 0 0.25rem 0; }
+
+/* @supports selector() guards only its own block, not a separate rule */
+@supports selector(:has()) {}
+@supports (color: red) {
+    h1:has(+ h2) {
+        color: red;
+    }
+}
+
+/* Pseudo-element not yet widely available */
+details::details-content { background-color: #a29bfe; }

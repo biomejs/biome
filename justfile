@@ -56,6 +56,9 @@ gen-analyzer:
 gen-rules:
   cargo run -p xtask_codegen -- analyzer
 
+# Generates Baseline data for CSS features from web-features
+gen-css-baseline:
+  cargo run -p xtask_codegen -- css-baseline
 
 gen-configuration:
   cargo run -p xtask_codegen --features configuration -- configuration
