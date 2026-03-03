@@ -45,7 +45,6 @@ declare_lint_rule! {
     /// | Double negation                                | `Boolean`           | `!!value`              |
     /// | Unary plus                                     | `Number`            | `+value`               |
     /// | Double unary negation                          | `Number`            | `-(-value)`            |
-    /// | Adding with zero                               | `Number`            | `value + 0`            |
     /// | Subtraction with zero                          | `Number`            | `value - 0`            |
     /// | Multiplication with one                        | `Number`            | `value * 1`            |
     /// | Division with one                              | `Number`            | `value / 1`            |
@@ -65,10 +64,6 @@ declare_lint_rule! {
     ///
     /// ```js,expect_diagnostic
     /// +foo;
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
-    /// foo + 0;
     /// ```
     ///
     /// ```js,expect_diagnostic
@@ -143,14 +138,14 @@ declare_lint_rule! {
     /// -foo;
     /// +1234;
     /// 2 * foo;
-    /// foo + 1;
     /// foo + 'bar';
+    /// foo + 0; // has the potential to concatenate strings, unlike `foo - 0`
     /// ```
     ///
     /// ## Options
     ///
     /// ### `doubleNegation`
-    /// Whether to allow or disallow the use of double negation (`!!value`) for Boolean coercions.
+    /// Whether to allow or disallow the use of double negation (`!!value`) for `Boolean` coercions.
     ///
     /// Default: `false` (disallow)
     ///
@@ -162,7 +157,7 @@ declare_lint_rule! {
     ///   }
     /// }
     /// ```
-    /// 
+    ///
     /// ```js,use_options
     /// !!foo;
     /// ```
