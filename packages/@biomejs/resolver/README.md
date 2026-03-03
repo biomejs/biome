@@ -53,7 +53,7 @@ npm install @biomejs/resolver @biomejs/wasm-resolver-web
 
 > [!NOTE]
 > All the examples from now on will target the Node.js distribution.
-> Head the [relative section](#using-the-web-distribution) if you wish to know how to use
+> Head to the [relevant section](#using-the-web-distribution) if you wish to know how to use
 > the web distribution.
 
 ## Quick start
@@ -95,6 +95,11 @@ Use this when writing browser-based tools such as online code playgrounds or
 browser IDEs, where access to the host filesystem is not available. This entry
 point is also a good fit for unit tests because you control every file precisely
 without touching the disk.
+
+**The web distribution must be loaded asynchronously** using `await import()`
+because the WASM binary needs to be fetched and compiled by the browser before
+it can be used. This is different from the Node.js distribution, which can load
+WASM synchronously from disk and therefore supports static imports.
 
 ## Important: how extensions work
 
@@ -677,7 +682,11 @@ in `node_modules`), and any other files that imports may reference. The resolver
 walks this virtual filesystem exactly as it would a real one.
 
 ```ts
-import { createMemoryFileSystem, createWebResolver } from "@biomejs/resolver/web";
+// The web distribution must be loaded dynamically because browsers require
+// asynchronous fetching and compilation of the WASM binary.
+const { createMemoryFileSystem, createWebResolver } = await import(
+  "@biomejs/resolver/web"
+);
 
 const fs = createMemoryFileSystem();
 
@@ -885,6 +894,14 @@ The paths you use must be absolute and consistent. The resolver treats the
 virtual filesystem exactly like a real one: it walks parent directories looking
 for manifests, so the directory structure implied by the paths you insert must
 match what you expect the resolver to traverse.
+
+Because the WASM binary must be fetched over the network and compiled by the
+browser before it can be used, the web distribution must be loaded with a
+dynamic `await import()`. The `await` ensures the WASM module is fully
+initialized before you call any resolver APIs. This is required in browser
+environments — synchronous WASM loading is not possible when the binary comes
+over HTTP. Node.js can load WASM synchronously from disk, which is why
+`@biomejs/resolver/nodejs` supports static imports.
 
 ```ts
 const { createMemoryFileSystem, createWebResolver } = await import(

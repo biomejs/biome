@@ -321,12 +321,12 @@ struct WasmResolveOptions {
 
     /// File extensions to try when resolving bare paths without an extension.
     ///
-    /// Example: `[".js", ".ts", ".json"]`
+    /// Example: `["js", "ts", "json"]`
     extensions: Vec<String>,
 
     /// Extension aliases: map an extension to one or more fallback extensions.
     ///
-    /// Example: `[{ extension: ".js", aliases: [".ts", ".js"] }]`
+    /// Example: `[{ extension: "js", aliases: ["ts", "js"] }]`
     extension_aliases: Vec<WasmExtensionAlias>,
 
     /// Index file names to look for when resolving a directory.
