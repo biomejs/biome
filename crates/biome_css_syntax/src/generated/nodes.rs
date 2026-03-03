@@ -9435,8 +9435,8 @@ impl ScssNestingDeclaration {
     pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
-    pub fn value(&self) -> CssGenericComponentValueList {
-        support::list(&self.syntax, 2usize)
+    pub fn value(&self) -> SyntaxResult<ScssExpression> {
+        support::required_node(&self.syntax, 2usize)
     }
     pub fn block(&self) -> SyntaxResult<AnyCssDeclarationOrRuleBlock> {
         support::required_node(&self.syntax, 3usize)
@@ -9454,7 +9454,7 @@ impl Serialize for ScssNestingDeclaration {
 pub struct ScssNestingDeclarationFields {
     pub name: SyntaxResult<CssIdentifier>,
     pub colon_token: SyntaxResult<SyntaxToken>,
-    pub value: CssGenericComponentValueList,
+    pub value: SyntaxResult<ScssExpression>,
     pub block: SyntaxResult<AnyCssDeclarationOrRuleBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -25146,7 +25146,7 @@ impl std::fmt::Debug for ScssNestingDeclaration {
                     "colon_token",
                     &support::DebugSyntaxResult(self.colon_token()),
                 )
-                .field("value", &self.value())
+                .field("value", &support::DebugSyntaxResult(self.value()))
                 .field("block", &support::DebugSyntaxResult(self.block()))
                 .finish()
         } else {

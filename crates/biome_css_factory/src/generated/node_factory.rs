@@ -188,14 +188,14 @@ impl CssAttributeSelectorBuilder {
 }
 pub fn css_binary_expression(
     left: AnyCssExpression,
-    operator_token: SyntaxToken,
+    operator: SyntaxToken,
     right: AnyCssExpression,
 ) -> CssBinaryExpression {
     CssBinaryExpression::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BINARY_EXPRESSION,
         [
             Some(SyntaxElement::Node(left.into_syntax())),
-            Some(SyntaxElement::Token(operator_token)),
+            Some(SyntaxElement::Token(operator)),
             Some(SyntaxElement::Node(right.into_syntax())),
         ],
     ))
@@ -3192,7 +3192,7 @@ pub fn scss_namespaced_identifier(
 pub fn scss_nesting_declaration(
     name: CssIdentifier,
     colon_token: SyntaxToken,
-    value: CssGenericComponentValueList,
+    value: ScssExpression,
     block: AnyCssDeclarationOrRuleBlock,
 ) -> ScssNestingDeclaration {
     ScssNestingDeclaration::unwrap_cast(SyntaxNode::new_detached(

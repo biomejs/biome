@@ -2564,7 +2564,7 @@ ScssNamespacedIdentifier =
 ScssNestingDeclaration =
 	name: CssIdentifier
 	':'
-	value: CssGenericComponentValueList
+	value: ScssExpression
 	block: AnyCssDeclarationOrRuleBlock
 
 // border: 1px solid $color;

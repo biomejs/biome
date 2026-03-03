@@ -158,7 +158,7 @@ impl CssBinaryExpression {
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_operator_token(self, element: SyntaxToken) -> Self {
+    pub fn with_operator(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into()))),
@@ -3748,7 +3748,7 @@ impl ScssNestingDeclaration {
                 .splice_slots(1usize..=1usize, once(Some(element.into()))),
         )
     }
-    pub fn with_value(self, element: CssGenericComponentValueList) -> Self {
+    pub fn with_value(self, element: ScssExpression) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),

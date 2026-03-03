@@ -75,6 +75,26 @@ pub(crate) fn parse_scss_expression(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
+pub(crate) fn parse_scss_expression_allow_empty_value_until(
+    p: &mut CssParser,
+    end_ts: TokenSet<CssSyntaxKind>,
+) -> ParsedSyntax {
+    if p.at_ts(end_ts) || p.at(EOF) {
+        return parse_empty_scss_expression(p);
+    }
+
+    parse_scss_expression_until(p, end_ts)
+}
+
+#[inline]
+fn parse_empty_scss_expression(p: &mut CssParser) -> ParsedSyntax {
+    let expression = p.start();
+    let expression_items = p.start();
+    expression_items.complete(p, SCSS_EXPRESSION_ITEM_LIST);
+    Present(expression.complete(p, SCSS_EXPRESSION))
+}
+
+#[inline]
 pub(crate) fn parse_scss_expression_until(
     p: &mut CssParser,
     end_ts: TokenSet<CssSyntaxKind>,
