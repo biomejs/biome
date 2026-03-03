@@ -56,7 +56,7 @@ use biome_js_formatter::context::{
 };
 use biome_js_formatter::format_node;
 use biome_js_parser::JsParserOptions;
-use biome_js_semantic::{SemanticModelOptions, semantic_model, svelte_runes};
+use biome_js_semantic::{SVELTE_RUNES, SemanticModelOptions, semantic_model};
 use biome_js_syntax::{
     AnyJsExpression, AnyJsRoot, AnyJsTemplateElement, JsCallArgumentList, JsCallArguments,
     JsCallExpression, JsClassDeclaration, JsClassExpression, JsFileSource, JsFunctionDeclaration,
@@ -383,7 +383,7 @@ impl ServiceLanguage for JsLanguage {
                 globals.extend(["Astro"].map(Into::into));
             } else if source_type.as_embedding_kind().is_svelte() {
                 // Svelte 5 runes
-                globals.extend(svelte_runes().iter().copied().map(Into::into));
+                globals.extend(SVELTE_RUNES.iter().copied().map(Into::into));
             }
         }
 
@@ -915,7 +915,7 @@ fn debug_registered_types(_path: &BiomePath, parse: AnyParse) -> Result<String, 
 
 fn debug_semantic_model(path: &BiomePath, parse: AnyParse) -> Result<String, WorkspaceError> {
     let tree: AnyJsRoot = parse.tree();
-    let source_type = js_file_source_for_path(path);
+    let source_type = JsFileSource::try_from(path.as_path()).unwrap_or_default();
     let model = semantic_model(&tree, SemanticModelOptions::from(&source_type));
     Ok(model.to_string())
 }
@@ -1367,7 +1367,7 @@ fn rename(
     new_name: String,
 ) -> Result<RenameResult, WorkspaceError> {
     let root = parse.tree();
-    let source_type = js_file_source_for_path(path);
+    let source_type = JsFileSource::try_from(path.as_path()).unwrap_or_default();
     let model = semantic_model(&root, SemanticModelOptions::from(&source_type));
 
     if let Some(node) = parse
@@ -1400,10 +1400,6 @@ fn rename(
             RenameError::CannotFindDeclaration(new_name),
         ))
     }
-}
-
-fn js_file_source_for_path(path: &BiomePath) -> JsFileSource {
-    JsFileSource::try_from(path.as_path()).unwrap_or_default()
 }
 
 fn js_source_type_for_analysis(

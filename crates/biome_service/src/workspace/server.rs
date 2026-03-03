@@ -50,7 +50,7 @@ use biome_formatter::Printed;
 use biome_fs::{BiomePath, ConfigName, PathKind};
 use biome_grit_patterns::{CompilePatternOptions, GritQuery, compile_pattern_with_options};
 use biome_html_syntax::HtmlRoot;
-use biome_js_syntax::{AnyJsRoot, JsFileSource, LanguageVariant, ModuleKind};
+use biome_js_syntax::{AnyJsRoot, LanguageVariant, ModuleKind};
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonFileSource;
 use biome_module_graph::{ModuleDependencies, ModuleDiagnostic, ModuleGraph};
@@ -247,7 +247,7 @@ impl WorkspaceServer {
         experimental_full_html_support: bool,
     ) -> Capabilities {
         let language = self.get_file_source(path, experimental_full_html_support);
-        self.features.get_capabilities(path.as_path(), language)
+        self.features.get_capabilities(language)
     }
 
     /// Retrieves the supported language of a file.
@@ -304,22 +304,6 @@ impl WorkspaceServer {
             .unwrap_or_else(|| self.file_sources.push(document_file_source))
     }
 
-    fn semantic_js_source_type(
-        &self,
-        path: &Utf8Path,
-        document_source: DocumentFileSource,
-        content: &str,
-    ) -> Option<JsFileSource> {
-        let source_type = document_source.to_js_file_source()?;
-        if path.extension() == Some("svelte") {
-            // Component files infer JS/TS from `<script ...>` content.
-            // Source modules (`.svelte.ts` / `.svelte.js`) already carry source type.
-            Some(SvelteFileHandler::file_source(content))
-        } else {
-            Some(source_type)
-        }
-    }
-
     #[instrument(
         level = "debug",
         skip(self, params),
@@ -353,7 +337,7 @@ impl WorkspaceServer {
             // TODO: remove once HTML full support is stable
             // document_file_source is given by the LSP, and we have to change it if full support is enabled.
             // The workspace knows that, but the LSP doesn't, so we have to do the modification here
-            if document_file_source.is_javascript_like()
+            if let DocumentFileSource::Js(_) = document_file_source
                 && matches!(path.extension(), Some("astro" | "vue" | "svelte" | "html"))
             {
                 DocumentFileSource::from_path(
@@ -460,10 +444,14 @@ impl WorkspaceServer {
                         services = CssDocumentServices::default()
                             .with_css_semantic_model(&any_parse.tree())
                             .into();
-                    } else if language.is_javascript_like()
-                        && let Some(source_type) =
-                            self.semantic_js_source_type(&path, language, &content)
-                    {
+                    } else if let DocumentFileSource::Js(source_type) = language {
+                        let source_type = if source_type.is_svelte_component() {
+                            // Component files infer JS/TS from `<script ...>` content.
+                            // Source modules (`.svelte.ts` / `.svelte.js`) already carry source type.
+                            SvelteFileHandler::file_source(&content)
+                        } else {
+                            source_type
+                        };
                         services = JsDocumentServices::default()
                             .with_js_semantic_model(&any_parse.tree(), &source_type)
                             .into();
@@ -758,7 +746,7 @@ impl WorkspaceServer {
         let file_source = self
             .get_source(file_source_index)
             .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
-        let capabilities = self.features.get_capabilities(path, file_source);
+        let capabilities = self.features.get_capabilities(file_source);
 
         let parse = capabilities
             .parser
@@ -1359,7 +1347,7 @@ impl Workspace for WorkspaceServer {
             &params.path,
             settings.experimental_full_html_support_enabled(),
         );
-        let capabilities = self.features.get_capabilities(&params.path, language);
+        let capabilities = self.features.get_capabilities(language);
 
         let settings = self.settings_handle(&settings, params.inline_config);
         self.projects.get_file_features(GetFileFeaturesParams {
@@ -1631,10 +1619,14 @@ impl Workspace for WorkspaceServer {
                 services = CssDocumentServices::default()
                     .with_css_semantic_model(&parsed.any_parse.tree())
                     .into();
-            } else if document_source.is_javascript_like()
-                && let Some(source_type) =
-                    self.semantic_js_source_type(&path, document_source, &content)
-            {
+            } else if let DocumentFileSource::Js(source_type) = document_source {
+                let source_type = if source_type.is_svelte_component() {
+                    // Component files infer JS/TS from `<script ...>` content.
+                    // Source modules (`.svelte.ts` / `.svelte.js`) already carry source type.
+                    SvelteFileHandler::file_source(&content)
+                } else {
+                    source_type
+                };
                 services = JsDocumentServices::default()
                     .with_js_semantic_model(&parsed.any_parse.tree(), &source_type)
                     .into();
@@ -1762,7 +1754,7 @@ impl Workspace for WorkspaceServer {
             self.get_parse_with_snippets_and_services(&path)?;
         let language =
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
-        let capabilities = self.features.get_capabilities(&path, language);
+        let capabilities = self.features.get_capabilities(language);
 
         let (diagnostics, errors, skipped_diagnostics) = if (categories.is_lint()
             || categories.is_assist())
@@ -1806,7 +1798,7 @@ impl Workspace for WorkspaceServer {
                 let Some(file_source) = self.get_source(embedded_node.file_source_index()) else {
                     continue;
                 };
-                let capabilities = self.features.get_capabilities(&path, file_source);
+                let capabilities = self.features.get_capabilities(file_source);
                 let Some(lint) = capabilities.analyzer.lint else {
                     continue;
                 };
@@ -1896,7 +1888,7 @@ impl Workspace for WorkspaceServer {
             self.get_parse_with_snippets_and_services(&path)?;
         let language =
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
-        let capabilities = self.features.get_capabilities(&path, language);
+        let capabilities = self.features.get_capabilities(language);
         let result = if (categories.is_lint() || categories.is_assist())
             && let Some(pull_diagnostics_and_actions) =
                 capabilities.analyzer.pull_diagnostics_and_actions
@@ -1933,7 +1925,7 @@ impl Workspace for WorkspaceServer {
                 let Some(file_source) = self.get_source(embedded_node.file_source_index()) else {
                     continue;
                 };
-                let capabilities = self.features.get_capabilities(&path, file_source);
+                let capabilities = self.features.get_capabilities(file_source);
                 let Some(pull_diagnostics_and_actions) =
                     capabilities.analyzer.pull_diagnostics_and_actions
                 else {
@@ -2035,7 +2027,7 @@ impl Workspace for WorkspaceServer {
             let Some(file_source) = self.get_source(embedded_snippet.file_source_index()) else {
                 continue;
             };
-            let capabilities = self.features.get_capabilities(&path, file_source);
+            let capabilities = self.features.get_capabilities(file_source);
             let Some(code_actions) = capabilities.analyzer.code_actions else {
                 continue;
             };
@@ -2255,7 +2247,7 @@ impl Workspace for WorkspaceServer {
                 else {
                     continue;
                 };
-                let capabilities = self.features.get_capabilities(&path, document_file_source);
+                let capabilities = self.features.get_capabilities(document_file_source);
                 let Some(fix_all) = capabilities.analyzer.fix_all else {
                     continue;
                 };
