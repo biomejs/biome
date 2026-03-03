@@ -183,7 +183,8 @@ impl Rule for NoImplicitCoercions {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        // TODO: Lint empty template expressions like `${value}`; ESLint does this by default and we should too
+        // TODO: Lint empty template expressions like `${value}`; while ESLint doesn't do this by default, it still falls under the bucket of "useless string coercion"
+        // (and is a configurable option in the latter)
         // (this will need to actively ignore anything with extra content, custom tagging functions, etc.)
         match node {
             PotentialImplicitCoercion::JsUnaryExpression(unary_expression) => {
