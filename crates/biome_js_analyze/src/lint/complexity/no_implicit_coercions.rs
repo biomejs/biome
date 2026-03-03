@@ -13,19 +13,47 @@ use biome_js_syntax::{
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPieceKind, declare_node_union};
 use biome_rule_options::no_implicit_coercions::NoImplicitCoercionsOptions;
 
+// NB: The ZWBS in the markdown table are required to keep the backticks inside the codeblock.
+
 declare_lint_rule! {
-    /// Disallow shorthand type conversions.
+    /// Encourage use of explicit type conversion functions over their shorthand counterparts.
     ///
-    /// JavaScript allows shorthand type conversions by using operators like `!!`, `+`, `~`, etc.
-    /// These shortcuts can make the code harder to read and understand, especially for developers
-    /// who are not familiar with these patterns. Using explicit type conversion functions like
-    /// `Boolean()`, `Number()`, and `String()` makes the intent clearer and more readable.
+    /// JavaScript (due to its dynamic typing) [automatically coerces](https://developer.mozilla.org/en-US/docs/Glossary/Type_coercion)
+    /// values to and from different types when applying certain operators.
+    /// As such, one can use these operators as a "shorthand" for coercing values between types:
+    /// ```js,ignore
+    /// const answer = +"42"; // 42 (coerced to number)
     ///
-    /// This rule reports when values are converted to:
-    /// - Boolean using double negation `!!value`
-    /// - Number using unary plus `+value`, subtraction from zero `value - 0`, multiplication by one `value * 1`, division by one `value / 1`, or double negation with minus `-(-value)`
-    /// - String using concatenation with empty string `value + ""` or empty template literal `` value + `` ``
-    /// - Check index using bitwise NOT with indexOf `~value.indexOf(item)` instead of comparing with -1
+    /// const myStr = "" + answer; // "123" (coerced to string)
+    /// console.log(!!answer); // "false" (coerced to boolean)
+    /// ```
+    ///
+    /// While these "implicit coercions" can save space, there are several reasons one may prefer to avoid them:
+    /// - Relying on these shortcuts can hurt readability, especially for newer developers less familiar with these patterns.
+    /// - TypeScript does not allow declaration merging for the built-in type coercion operators, unlike their more explicit function counterparts.
+    ///   For instance, `+value` cannot be overridden to return a more specific type under certain conditions (as opposed to `Number()`,
+    ///   whose method signature can be customized to do exactly that).
+    ///
+    /// This rule encourages the use of explicit type conversion functions like `Boolean()`, `Number()`, and `String()`
+    /// in favor of implicit operator conversions.
+    ///
+    /// ### Disallowed patterns
+    /// A full list of constructs linted by this rule are as follows:
+    ///
+    /// | Pattern                                        | Target              | Example                |
+    /// | ---------------------------------------------- | ------------------- | ---------------------- |
+    /// | Double negation                                | `Boolean`           | `!!value`              |
+    /// | Unary plus                                     | `Number`            | `+value`               |
+    /// | Double unary negation                          | `Number`            | `-(-value)`            |
+    /// | Adding with zero                               | `Number`            | `value + 0`            |
+    /// | Subtraction with zero                          | `Number`            | `value - 0`            |
+    /// | Multiplication with one                        | `Number`            | `value * 1`            |
+    /// | Division with one                              | `Number`            | `value / 1`            |
+    /// | Concatenation with an empty string             | `String`            | `value + ""`           |
+    /// | Empty template literal                         | `String`            | ``​`${value}`​``       |
+    /// | Bitwise NOT with `indexOf` [^1]                | Check against `-1`  | `~arr.indexOf(value)`  |
+    ///
+    /// [^1]: Bitwise NOT produces the 2's complement negation of a number, which is `0` for `-1`.
     ///
     /// ## Examples
     ///
@@ -37,6 +65,10 @@ declare_lint_rule! {
     ///
     /// ```js,expect_diagnostic
     /// +foo;
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// foo + 0;
     /// ```
     ///
     /// ```js,expect_diagnostic
@@ -64,7 +96,10 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// `` + foo;
+    /// +foo;
+    /// ```
+    /// ```js,expect_diagnostic
+    /// `${foo}`;
     /// ```
     ///
     /// ```js,expect_diagnostic
@@ -93,14 +128,35 @@ declare_lint_rule! {
     /// foo.indexOf(1) !== -1;
     /// ```
     ///
-    /// These are not flagged because they don't perform type coercion:
+    /// ```js
+    /// `a${foo}`;
+    /// ```
+    ///
+    /// ```js
+    /// tag`${foo}`;
+    /// ```
+    ///
+    /// These are not flagged because they have other effects on the produced value other than type coercion:
     /// ```js
     /// !foo;
     /// ~foo;
     /// -foo;
     /// +1234;
     /// 2 * foo;
+    /// foo + 1;
     /// foo + 'bar';
+    /// ```
+    ///
+    /// ## Options
+    ///
+    /// ### `doubleNegation`
+    /// Whether to allow or disallow the use of double negation (`!!value`) for Boolean coercions.
+    ///
+    /// Default: `false` (disallow)
+    ///
+    /// Examples of correct code with `doubleNegation` set to `true`:
+    /// ```js
+    /// !!foo;
     /// ```
     ///
     pub NoImplicitCoercions {
@@ -168,6 +224,9 @@ impl Rule for NoImplicitCoercions {
                     }
                     // !!arg
                     JsUnaryOperator::LogicalNot => {
+                        if ctx.options().double_negation() {
+                            return None;
+                        }
                         let argument = unary_expression.get_arg_for_double_operation()?;
                         Some(RuleState::ExpressionToTypeCall(ExpressionToTypeCall {
                             expression: unary_expression.clone().into(),
@@ -298,10 +357,11 @@ impl Rule for NoImplicitCoercions {
             node.range(),
             markup! {
                 {
+                    // TODO: probably should update this eventually to be more illustrative/precise
                     if matches!(state, RuleState::ExpressionToMinusOneComparison(_)) {
                         "Using binary operations instead of comparisons is harder to read and understand."
                     } else {
-                        "Implicit type conversion is hard to read and understand."
+                        "Implicit type conversions are hard to read and understand."
                     }
                 }
             },
@@ -333,7 +393,7 @@ impl Rule for NoImplicitCoercions {
                     ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),
                     markup! {
-                        "Use "<Emphasis>{expression_info.type_name}"()"</Emphasis>" call instead."
+                        "Use "<Emphasis>{expression_info.type_name}"()"</Emphasis>" instead."
                     }
                     .to_owned(),
                     mutation,
