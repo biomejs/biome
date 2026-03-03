@@ -2151,6 +2151,11 @@ See https://biomejs.dev/linter/rules/no-increment-decrement
 	 */
 	noIncrementDecrement?: NoIncrementDecrementConfiguration;
 	/**
+	* Disallow the use of inline styles on HTML elements.
+See https://biomejs.dev/linter/rules/no-inline-styles 
+	 */
+	noInlineStyles?: NoInlineStylesConfiguration;
+	/**
 	* Disallow .bind(), arrow functions, or function expressions in JSX props.
 See https://biomejs.dev/linter/rules/no-jsx-props-bind 
 	 */
@@ -4126,6 +4131,9 @@ export type NoHexColorsConfiguration =
 export type NoIncrementDecrementConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoIncrementDecrementOptions;
+export type NoInlineStylesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoInlineStylesOptions;
 export type NoJsxPropsBindConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoJsxPropsBindOptions;
@@ -5777,6 +5785,11 @@ export interface RuleWithNoIncrementDecrementOptions {
 	level: RulePlainConfiguration;
 	options?: NoIncrementDecrementOptions;
 }
+export interface RuleWithNoInlineStylesOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoInlineStylesOptions;
+}
 export interface RuleWithNoJsxPropsBindOptions {
 	level: RulePlainConfiguration;
 	options?: NoJsxPropsBindOptions;
@@ -7350,6 +7363,7 @@ export interface NoIncrementDecrementOptions {
 	 */
 	allowForLoopAfterthoughts?: boolean;
 }
+export type NoInlineStylesOptions = {};
 export type NoJsxPropsBindOptions = {};
 export type NoLeakedRenderOptions = {};
 export type NoMisusedPromisesOptions = {};
@@ -8372,6 +8386,7 @@ export type Category =
 	| "lint/nursery/noHexColors"
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noIncrementDecrement"
+	| "lint/nursery/noInlineStyles"
 	| "lint/nursery/noJsxPropsBind"
 	| "lint/nursery/noLeakedRender"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
@@ -8430,14 +8445,15 @@ export type Category =
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useLoneAnonymousOperation"
 	| "lint/nursery/useLoneExecutableDefinition"
-	| "lint/nursery/useNullishCoalescing"
 	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useNamedCaptureGroup"
+	| "lint/nursery/useNullishCoalescing"
 	| "lint/nursery/usePlaywrightValidDescribeCallback"
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
 	| "lint/nursery/useRegexpExec"
 	| "lint/nursery/useRequiredScripts"
+	| "lint/nursery/useScopedStyles"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSpread"
 	| "lint/nursery/useUnicodeRegex"
@@ -8452,7 +8468,6 @@ export type Category =
 	| "lint/nursery/useVueDefineMacrosOrder"
 	| "lint/nursery/useVueHyphenatedAttributes"
 	| "lint/nursery/useVueMultiWordComponentNames"
-	| "lint/nursery/useScopedStyles"
 	| "lint/nursery/useVueVForKey"
 	| "lint/nursery/useVueValidTemplateRoot"
 	| "lint/nursery/useVueValidVBind"

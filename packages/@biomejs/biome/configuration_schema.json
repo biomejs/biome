@@ -3927,6 +3927,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoInlineStylesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoInlineStylesOptions" }
+			]
+		},
+		"NoInlineStylesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoInnerDeclarationsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5903,6 +5913,13 @@
 					"description": "Disallows the usage of the unary operators ++ and --.\nSee https://biomejs.dev/linter/rules/no-increment-decrement",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoIncrementDecrementConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noInlineStyles": {
+					"description": "Disallow the use of inline styles on HTML elements.\nSee https://biomejs.dev/linter/rules/no-inline-styles",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoInlineStylesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -8169,6 +8186,16 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoInferrableTypesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoInlineStylesOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoInlineStylesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

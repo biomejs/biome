@@ -128,6 +128,7 @@ pub mod no_important_in_keyframe;
 pub mod no_important_styles;
 pub mod no_increment_decrement;
 pub mod no_inferrable_types;
+pub mod no_inline_styles;
 pub mod no_inner_declarations;
 pub mod no_interactive_element_to_noninteractive_role;
 pub mod no_invalid_builtin_instantiation;
