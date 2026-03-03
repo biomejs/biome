@@ -9,7 +9,7 @@ pub enum SemanticFlavor {
     Svelte,
 }
 
-const SVELTE_RUNES: [&str; 7] = [
+pub const SVELTE_RUNES: [&str; 7] = [
     "$bindable",
     "$derived",
     "$effect",
@@ -49,8 +49,4 @@ impl From<&JsFileSource> for SemanticFlavor {
             Self::Vanilla
         }
     }
-}
-
-pub fn svelte_runes() -> &'static [&'static str; 7] {
-    &SVELTE_RUNES
 }

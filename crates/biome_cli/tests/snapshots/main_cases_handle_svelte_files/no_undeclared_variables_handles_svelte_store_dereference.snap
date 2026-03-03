@@ -1,13 +1,15 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 520
 expression: redactor(content)
 ---
 ## `file.svelte`
 
 ```svelte
 <script>
-const store = 1;
-$store;
+import { writable } from "svelte/store";
+const count = writable(1);
+$count;
 $missing;
 </script>
 <div></div>
@@ -27,16 +29,16 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-file.svelte:4:1 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.svelte:5:1 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The $missing variable is undeclared.
   
-    2 │ const store = 1;
-    3 │ $store;
-  > 4 │ $missing;
+    3 │ const count = writable(1);
+    4 │ $count;
+  > 5 │ $missing;
       │ ^^^^^^^^
-    5 │ </script>
-    6 │ <div></div>
+    6 │ </script>
+    7 │ <div></div>
   
   i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.

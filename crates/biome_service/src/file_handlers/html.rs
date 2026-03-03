@@ -54,7 +54,7 @@ use biome_html_syntax::{
     VueVSlotShorthandDirective,
 };
 use biome_js_parser::parse_js_with_offset_and_cache;
-use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage};
+use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, SvelteFileKind};
 use biome_json_parser::parse_json_with_offset_and_cache;
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_parser::AnyParse;
@@ -1141,8 +1141,10 @@ fn parse_matched_embed(
                 }
                 EmbedCandidate::Element { .. } => {
                     if ctx.host_file_source.is_svelte() {
-                        js_source = js_source
-                            .with_embedding_kind(EmbeddingKind::Svelte { is_source: true });
+                        js_source = js_source.with_embedding_kind(EmbeddingKind::Svelte {
+                            is_source: true,
+                            kind: SvelteFileKind::Component,
+                        });
                     } else if ctx.host_file_source.is_vue() {
                         js_source = js_source.with_embedding_kind(EmbeddingKind::Vue {
                             setup: candidate.has_attribute("setup"),
@@ -1163,8 +1165,10 @@ fn parse_matched_embed(
                         js_source = js_source
                             .with_embedding_kind(EmbeddingKind::Astro { frontmatter: false });
                     } else if ctx.host_file_source.is_svelte() {
-                        js_source = js_source
-                            .with_embedding_kind(EmbeddingKind::Svelte { is_source: false });
+                        js_source = js_source.with_embedding_kind(EmbeddingKind::Svelte {
+                            is_source: false,
+                            kind: SvelteFileKind::Component,
+                        });
                     } else if ctx.host_file_source.is_vue() {
                         js_source = js_source.with_embedding_kind(EmbeddingKind::Vue {
                             setup: false,
@@ -1182,24 +1186,21 @@ fn parse_matched_embed(
                     if let Some(efs) = embedded_file_source {
                         js_source = efs;
                     }
-                    match ctx.host_file_source.variant() {
-                        HtmlVariant::Standard(_) => {}
-                        HtmlVariant::Astro => {
-                            js_source = js_source
-                                .with_embedding_kind(EmbeddingKind::Astro { frontmatter: false });
-                        }
-                        HtmlVariant::Vue => {
-                            js_source = js_source.with_embedding_kind(EmbeddingKind::Vue {
-                                setup: false,
-                                is_source: false,
-                                event_handler: *is_event_handler,
-                                allow_statements: false,
-                            });
-                        }
-                        HtmlVariant::Svelte => {
-                            js_source = js_source
-                                .with_embedding_kind(EmbeddingKind::Svelte { is_source: false });
-                        }
+                    if ctx.host_file_source.is_svelte() {
+                        js_source = js_source.with_embedding_kind(EmbeddingKind::Svelte {
+                            is_source: false,
+                            kind: SvelteFileKind::Component,
+                        });
+                    } else if ctx.host_file_source.is_vue() {
+                        js_source = js_source.with_embedding_kind(EmbeddingKind::Vue {
+                            setup: false,
+                            is_source: false,
+                            event_handler: *is_event_handler,
+                            allow_statements: false,
+                        });
+                    } else if ctx.host_file_source.is_astro() {
+                        js_source = js_source
+                            .with_embedding_kind(EmbeddingKind::Astro { frontmatter: false });
                     }
 
                     false
@@ -1232,7 +1233,12 @@ fn parse_matched_embed(
             );
 
             let js_services = if is_source_level {
-                js_document_services_for_snippet(ctx.settings, &js_source, &snippet)
+                JsDocumentServices::for_js_snippet(
+                    &snippet.tree(),
+                    &js_source,
+                    ctx.settings.as_ref().is_linter_enabled()
+                        || ctx.settings.as_ref().is_assist_enabled(),
+                )
             } else {
                 DocumentServices::none()
             };
@@ -1320,21 +1326,6 @@ fn parse_matched_embed(
             // GraphQL embeds are only used by the JS handler, not HTML
             None
         }
-    }
-}
-
-/// Builds JS document services for a source-level embedded snippet when lint/assist are enabled.
-fn js_document_services_for_snippet(
-    settings: &SettingsWithEditor,
-    file_source: &JsFileSource,
-    snippet: &EmbeddedSnippet<JsLanguage>,
-) -> DocumentServices {
-    if settings.as_ref().is_linter_enabled() || settings.as_ref().is_assist_enabled() {
-        JsDocumentServices::default()
-            .with_js_semantic_model(&snippet.tree(), file_source)
-            .into()
-    } else {
-        DocumentServices::none()
     }
 }
 

@@ -1,12 +1,14 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 520
 expression: redactor(content)
 ---
 ## `file.svelte.ts`
 
 ```ts
-const store = 1;
-$store;
+import { writable } from "svelte/store";
+const count = writable(1);
+$count;
 $missing;
 ```
 
@@ -24,13 +26,13 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-file.svelte.ts:3:1 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.svelte.ts:4:1 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The $missing variable is undeclared.
   
-    1 │ const store = 1;
-    2 │ $store;
-  > 3 │ $missing;
+    2 │ const count = writable(1);
+    3 │ $count;
+  > 4 │ $missing;
       │ ^^^^^^^^
   
   i By default, Biome recognizes browser and Node.js globals.

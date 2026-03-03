@@ -12,7 +12,9 @@ use biome_fs::BiomePath;
 use biome_html_syntax::HtmlLanguage;
 use biome_js_formatter::format_node;
 use biome_js_parser::{JsParserOptions, parse_js_with_cache};
-use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, TextRange, TextSize};
+use biome_js_syntax::{
+    EmbeddingKind, JsFileSource, JsLanguage, SvelteFileKind, TextRange, TextSize,
+};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
 use regex::{Match, Regex};
@@ -76,7 +78,10 @@ impl SvelteFileHandler {
                 Some(
                     JsFileSource::from(language)
                         .with_variant(variant)
-                        .with_embedding_kind(EmbeddingKind::Svelte { is_source: true }),
+                        .with_embedding_kind(EmbeddingKind::Svelte {
+                            is_source: true,
+                            kind: SvelteFileKind::Component,
+                        }),
                 )
             })
             .map_or(JsFileSource::js_module(), |fs| fs)
@@ -125,14 +130,14 @@ impl ExtensionHandler for SvelteFileHandler {
 }
 
 fn parse(
-    rome_path: &BiomePath,
+    _rome_path: &BiomePath,
     file_source: DocumentFileSource,
     text: &str,
     _settings: &SettingsWithEditor,
     cache: &mut NodeCache,
 ) -> ParseResult {
     let source_type = file_source.to_js_file_source().unwrap_or_default();
-    let (script, script_file_source) = if JsFileSource::is_svelte_source_module_path(rome_path) {
+    let (script, script_file_source) = if source_type.is_svelte_source_module() {
         (text, source_type)
     } else {
         (

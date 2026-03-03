@@ -40,52 +40,37 @@ var foo: string = "";
 </script>
 <div></div>"#;
 
+// In Svelte, `writable(...)` creates a store binding (`count`), and `$count` is the
+// auto-subscription syntax that reads the store value.
+// This test verifies `$count` resolves through `count`, while `$missing` stays undeclared.
 const SVELTE_STORE_DEREFERENCE_FILE: &str = r#"<script>
-const store = 1;
-$store;
+import { writable } from "svelte/store";
+const count = writable(1);
+$count;
 $missing;
 </script>
 <div></div>"#;
 
-const SVELTE_MODULE_STORE_DEREFERENCE_FILE: &str = r#"const store = 1;
-$store;
+const SVELTE_MODULE_STORE_DEREFERENCE_FILE: &str = r#"import { writable } from "svelte/store";
+const count = writable(1);
+$count;
 $missing;"#;
 
-const SVELTE_MODULE_TYPE_ONLY_STORE_DEREFERENCE_FILE: &str = r#"type store = number;
-$store;"#;
+const SVELTE_JS_MODULE_STORE_DEREFERENCE_FILE: &str = r#"import { writable } from "svelte/store";
+const count = writable(1);
+$count;
+$missing;"#;
 
+const SVELTE_MODULE_TYPE_ONLY_BINDING_DEREFERENCE_FILE: &str = r#"type count = number;
+$count;"#;
+
+// Regression guard for `.svelte` + `<script lang="ts">` + `checkTypes: true`.
+// `PromiseLike` comes from TypeScript lib globals and must not be reported as undeclared.
+// If source-type inference regresses to JavaScript, this test starts failing.
 const SVELTE_TS_SCRIPT_TYPE_GLOBAL_FILE: &str = r#"<script lang="ts">
 type B<T> = PromiseLike<T>;
 </script>
 <div></div>"#;
-
-fn assert_no_undeclared_variables_svelte_snapshot(
-    file_path: &str,
-    file_content: &str,
-    snapshot_name: &str,
-) {
-    let fs = MemoryFileSystem::default();
-    let mut console = BufferConsole::default();
-
-    let file = Utf8Path::new(file_path);
-    fs.insert(file.into(), file_content.as_bytes());
-
-    let (fs, result) = run_cli(
-        fs,
-        &mut console,
-        Args::from(["lint", "--only=noUndeclaredVariables", file.as_str()].as_slice()),
-    );
-
-    assert!(result.is_err(), "run_cli returned {result:?}");
-
-    assert_cli_snapshot(SnapshotPayload::new(
-        module_path!(),
-        snapshot_name,
-        fs,
-        console,
-        result,
-    ));
-}
 
 #[test]
 fn sorts_imports_check() {
@@ -590,42 +575,119 @@ fn check_stdin_write_unsafe_successfully() {
     ));
 }
 
+// `.svelte` component path: `$count` should resolve via extracted `<script>` bindings.
 #[test]
 fn no_undeclared_variables_handles_svelte_store_dereference() {
-    assert_no_undeclared_variables_svelte_snapshot(
-        "file.svelte",
-        SVELTE_STORE_DEREFERENCE_FILE,
-        "no_undeclared_variables_handles_svelte_store_dereference",
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file = Utf8Path::new("file.svelte");
+    fs.insert(file.into(), SVELTE_STORE_DEREFERENCE_FILE.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noUndeclaredVariables", file.as_str()].as_slice()),
     );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_undeclared_variables_handles_svelte_store_dereference",
+        fs,
+        console,
+        result,
+    ));
 }
 
+// `.svelte.ts` source-module path: `$count` should resolve through the `count` store binding,
+// and `$missing` should stay undeclared.
 #[test]
 fn no_undeclared_variables_handles_svelte_module_store_dereference() {
-    assert_no_undeclared_variables_svelte_snapshot(
-        "file.svelte.ts",
-        SVELTE_MODULE_STORE_DEREFERENCE_FILE,
-        "no_undeclared_variables_handles_svelte_module_store_dereference",
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file = Utf8Path::new("file.svelte.ts");
+    fs.insert(file.into(), SVELTE_MODULE_STORE_DEREFERENCE_FILE.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noUndeclaredVariables", file.as_str()].as_slice()),
     );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_undeclared_variables_handles_svelte_module_store_dereference",
+        fs,
+        console,
+        result,
+    ));
 }
 
+// Type-only bindings must not satisfy `$count` store dereference resolution.
 #[test]
 fn no_undeclared_variables_handles_svelte_module_type_only_store_dereference() {
-    assert_no_undeclared_variables_svelte_snapshot(
-        "file.svelte.ts",
-        SVELTE_MODULE_TYPE_ONLY_STORE_DEREFERENCE_FILE,
-        "no_undeclared_variables_handles_svelte_module_type_only_store_dereference",
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file = Utf8Path::new("file.svelte.ts");
+    fs.insert(
+        file.into(),
+        SVELTE_MODULE_TYPE_ONLY_BINDING_DEREFERENCE_FILE.as_bytes(),
     );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noUndeclaredVariables", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_undeclared_variables_handles_svelte_module_type_only_store_dereference",
+        fs,
+        console,
+        result,
+    ));
 }
 
+// `.svelte.js` source-module path: `$count` should resolve through the `count` store binding,
+// and `$missing` should stay undeclared.
 #[test]
 fn no_undeclared_variables_handles_svelte_js_module_store_dereference() {
-    assert_no_undeclared_variables_svelte_snapshot(
-        "file.svelte.js",
-        SVELTE_MODULE_STORE_DEREFERENCE_FILE,
-        "no_undeclared_variables_handles_svelte_js_module_store_dereference",
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file = Utf8Path::new("file.svelte.js");
+    fs.insert(
+        file.into(),
+        SVELTE_JS_MODULE_STORE_DEREFERENCE_FILE.as_bytes(),
     );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noUndeclaredVariables", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_undeclared_variables_handles_svelte_js_module_store_dereference",
+        fs,
+        console,
+        result,
+    ));
 }
 
+// `.svelte` + `<script lang="ts">` + `checkTypes`: TS globals (e.g. `PromiseLike`) must stay recognized.
 #[test]
 fn no_undeclared_variables_check_types_handles_svelte_ts_script_globals() {
     let fs = MemoryFileSystem::default();

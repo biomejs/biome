@@ -88,10 +88,13 @@ where
         N::unwrap_cast(node.clone())
     }
 }
+/// Syntax-phase visitor that extracts semantic events and builds semantic data.
+///
+/// Flavor-specific behavior (for example Svelte semantics) is configured from
+/// the file source service when entering the root node.
 pub struct SemanticModelBuilderVisitor {
     extractor: SemanticEventExtractor,
     builder: SemanticModelBuilder,
-    flavor_configured: bool,
 }
 
 impl SemanticModelBuilderVisitor {
@@ -99,7 +102,6 @@ impl SemanticModelBuilderVisitor {
         Self {
             extractor: SemanticEventExtractor::default(),
             builder: SemanticModelBuilder::new(root.clone()),
-            flavor_configured: false,
         }
     }
 }
@@ -108,7 +110,11 @@ impl Visitor for SemanticModelBuilderVisitor {
     type Language = JsLanguage;
 
     fn visit(&mut self, event: &WalkEvent<JsSyntaxNode>, ctx: VisitorContext<JsLanguage>) {
-        if !self.flavor_configured {
+        // Visitor construction has no access to the service bag, so configure
+        // semantic flavor when we enter the root node.
+        if let WalkEvent::Enter(node) = event
+            && node.parent().is_none()
+        {
             let source_type = ctx
                 .services
                 .get_service::<JsFileSource>()
@@ -117,7 +123,6 @@ impl Visitor for SemanticModelBuilderVisitor {
             let flavor = (&source_type).into();
             self.extractor.set_flavor(flavor);
             self.builder.set_flavor(flavor);
-            self.flavor_configured = true;
         }
 
         match event {

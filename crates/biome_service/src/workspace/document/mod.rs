@@ -386,4 +386,20 @@ impl JsDocumentServices {
         self.source_type = Some(*source_type);
         self
     }
+
+    /// Builds document services for a JS snippet and includes semantic data only
+    /// when analyzer-backed features are enabled.
+    pub fn for_js_snippet(
+        root: &AnyJsRoot,
+        source_type: &JsFileSource,
+        is_analyzer_enabled: bool,
+    ) -> DocumentServices {
+        if is_analyzer_enabled {
+            Self::default()
+                .with_js_semantic_model(root, source_type)
+                .into()
+        } else {
+            DocumentServices::none()
+        }
+    }
 }

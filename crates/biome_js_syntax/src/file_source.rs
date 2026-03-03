@@ -119,6 +119,18 @@ impl Language {
 #[derive(
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
 )]
+pub enum SvelteFileKind {
+    /// A `.svelte` component document where JavaScript is extracted from `<script>` blocks.
+    #[default]
+    Component,
+    /// A `.svelte.js` / `.svelte.ts` source module parsed as a regular JS/TS module.
+    SourceModule,
+}
+
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[derive(
+    Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
+)]
 pub enum EmbeddingKind {
     Astro {
         /// Whether the script is inside Astro frontmatter
@@ -139,6 +151,10 @@ pub enum EmbeddingKind {
     Svelte {
         /// Where the bindings are defined
         is_source: bool,
+        /// `kind` models the document shape (`.svelte` component vs
+        /// `.svelte.ts` / `.svelte.js` source module), while `is_source`
+        /// tracks whether bindings come from source code or template expressions.
+        kind: SvelteFileKind,
     },
     #[default]
     None,
@@ -168,6 +184,24 @@ impl EmbeddingKind {
     }
     pub const fn is_svelte(&self) -> bool {
         matches!(self, Self::Svelte { .. })
+    }
+    pub const fn is_svelte_component(&self) -> bool {
+        matches!(
+            self,
+            Self::Svelte {
+                kind: SvelteFileKind::Component,
+                ..
+            }
+        )
+    }
+    pub const fn is_svelte_source_module(&self) -> bool {
+        matches!(
+            self,
+            Self::Svelte {
+                kind: SvelteFileKind::SourceModule,
+                ..
+            }
+        )
     }
 }
 
@@ -258,7 +292,10 @@ impl JsFileSource {
 
     /// Svelte file definition
     pub fn svelte() -> Self {
-        Self::js_module().with_embedding_kind(EmbeddingKind::Svelte { is_source: true })
+        Self::js_module().with_embedding_kind(EmbeddingKind::Svelte {
+            is_source: true,
+            kind: SvelteFileKind::Component,
+        })
     }
 
     pub const fn with_module_kind(mut self, kind: ModuleKind) -> Self {
@@ -332,12 +369,13 @@ impl JsFileSource {
     pub const fn is_embedded_source(&self) -> bool {
         matches!(
             self.embedding_kind,
-            EmbeddingKind::Svelte { is_source: true }
-                | EmbeddingKind::Vue {
-                    is_source: true,
-                    ..
-                }
-                | EmbeddingKind::Astro { frontmatter: true }
+            EmbeddingKind::Svelte {
+                is_source: true,
+                ..
+            } | EmbeddingKind::Vue {
+                is_source: true,
+                ..
+            } | EmbeddingKind::Astro { frontmatter: true }
         )
     }
 
@@ -348,12 +386,13 @@ impl JsFileSource {
     pub const fn is_template_expression(&self) -> bool {
         matches!(
             self.embedding_kind,
-            EmbeddingKind::Svelte { is_source: false }
-                | EmbeddingKind::Vue {
-                    allow_statements: false,
-                    ..
-                }
-                | EmbeddingKind::Astro { frontmatter: false }
+            EmbeddingKind::Svelte {
+                is_source: false,
+                ..
+            } | EmbeddingKind::Vue {
+                allow_statements: false,
+                ..
+            } | EmbeddingKind::Astro { frontmatter: false }
         )
     }
 
@@ -364,6 +403,14 @@ impl JsFileSource {
 
     pub const fn as_embedding_kind(&self) -> &EmbeddingKind {
         &self.embedding_kind
+    }
+
+    pub const fn is_svelte_component(&self) -> bool {
+        self.embedding_kind.is_svelte_component()
+    }
+
+    pub const fn is_svelte_source_module(&self) -> bool {
+        self.embedding_kind.is_svelte_source_module()
     }
 
     pub fn file_extension(&self) -> &str {
@@ -429,7 +476,10 @@ impl JsFileSource {
                 Self::js_module()
             };
 
-            return Ok(source.with_embedding_kind(EmbeddingKind::Svelte { is_source: true }));
+            return Ok(source.with_embedding_kind(EmbeddingKind::Svelte {
+                is_source: true,
+                kind: SvelteFileKind::SourceModule,
+            }));
         }
 
         match path.extension() {
