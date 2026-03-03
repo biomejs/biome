@@ -636,10 +636,16 @@ fn handle_jump<'cfg>(
         }
     } else if finally_fallthrough {
         // Exiting a finally block in the normal (non-exception) context.
-        // If there was a `pre_finally_terminator` stored when we entered the
-        // finally block via a dead implicit jump, restore it so that code after
-        // the try/finally is correctly seen as unreachable.
-        let continuation_terminator = path.pre_finally_terminator.unwrap_or(path.terminator);
+        // Determine the terminator to propagate past the try/finally:
+        // - If the finally block itself terminates (e.g. contains a `return`
+        //   or `throw`), prefer that as the most proximate cause.
+        // - Otherwise, if we entered finally via a dead implicit jump (the
+        //   try body had `break`/`continue`/`return`), restore the saved
+        //   pre-finally terminator so code after the try/finally is still
+        //   correctly seen as unreachable.
+        let continuation_terminator = path
+            .terminator
+            .or(path.pre_finally_terminator.unwrap_or(None));
 
         if !path.visited.contains(block.index()) {
             queue.push_back(PathState {
