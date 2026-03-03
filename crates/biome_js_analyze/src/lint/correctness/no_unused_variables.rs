@@ -95,6 +95,16 @@ declare_lint_rule! {
     /// console.log(rest);
     /// ```
     ///
+    /// TypeScript namespaces that participate in declaration merging with an exported
+    /// or used value of the same name are not flagged, and vice versa.
+    /// ```ts
+    /// const MyComponent = () => {};
+    /// namespace MyComponent {
+    ///     export type Props = { id: string };
+    /// }
+    /// export default MyComponent;
+    /// ```
+    ///
     /// In Astro files, a top-level interface or a type alias named `Props` is always ignored
     /// as it's implicitly read by the framework.
     /// ```astro,ignore
@@ -471,6 +481,77 @@ impl Rule for NoUnusedVariables {
     }
 }
 
+fn containing_statement_list(decl: &AnyJsBindingDeclaration) -> Option<JsSyntaxNode> {
+    decl.syntax().ancestors().find(|a| {
+        matches!(
+            a.kind(),
+            JsSyntaxKind::JS_MODULE_ITEM_LIST | JsSyntaxKind::JS_STATEMENT_LIST
+        )
+    })
+}
+
+fn is_declaration_merged_with_used(
+    model: &SemanticModel,
+    binding: &AnyJsIdentifierBinding,
+) -> bool {
+    let decl = binding.declaration();
+    let is_namespace = matches!(
+        decl.as_ref(),
+        Some(AnyJsBindingDeclaration::TsModuleDeclaration(_))
+    );
+    let is_value = !is_namespace
+        && matches!(
+            decl.as_ref(),
+            Some(
+                AnyJsBindingDeclaration::JsVariableDeclarator(_)
+                    | AnyJsBindingDeclaration::JsFunctionDeclaration(_)
+                    | AnyJsBindingDeclaration::JsClassDeclaration(_)
+            )
+        );
+    if !is_namespace && !is_value {
+        return false;
+    }
+    let Ok(name_token) = binding.name_token() else {
+        return false;
+    };
+    let name = name_token.text_trimmed();
+    let binding_range = binding.syntax().text_trimmed_range();
+    let binding_list_range = decl
+        .as_ref()
+        .and_then(containing_statement_list)
+        .map(|n| n.text_trimmed_range());
+    model.all_bindings().any(|scope_binding| {
+        let other = scope_binding.tree();
+        if other.syntax().text_trimmed_range() == binding_range {
+            return false;
+        }
+        let other_decl = other.declaration();
+        let other_is_namespace = other_decl
+            .as_ref()
+            .is_some_and(|d| matches!(d, AnyJsBindingDeclaration::TsModuleDeclaration(_)));
+        let is_merge_pair =
+            (is_namespace && !other_is_namespace) || (is_value && other_is_namespace);
+        if !is_merge_pair {
+            return false;
+        }
+        let other_list_range = other_decl.as_ref().and_then(containing_statement_list);
+        if other_list_range.map(|n| n.text_trimmed_range()) != binding_list_range {
+            return false;
+        }
+        let Ok(other_name) = other.name_token() else {
+            return false;
+        };
+        if other_name.text_trimmed() != name {
+            return false;
+        }
+        if is_namespace {
+            model.is_exported(&other) || !is_unused(model, &other)
+        } else {
+            model.is_exported(&other)
+        }
+    })
+}
+
 /// Returns `true` if `binding` is considered as unused.
 pub fn is_unused(model: &SemanticModel, binding: &AnyJsIdentifierBinding) -> bool {
     if matches!(binding, AnyJsIdentifierBinding::TsLiteralEnumMemberName(_)) {
@@ -486,6 +567,10 @@ pub fn is_unused(model: &SemanticModel, binding: &AnyJsIdentifierBinding) -> boo
     }
 
     if model.is_exported(binding) {
+        return false;
+    }
+
+    if is_declaration_merged_with_used(model, binding) {
         return false;
     }
 
