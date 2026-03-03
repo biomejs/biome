@@ -1,4 +1,5 @@
-use biome_css_parser::{parse_css, CssParserOptions};
+use biome_css_parser::{CssParserOptions, parse_css};
+use biome_css_syntax::CssFileSource;
 
 use crate::model::Specificity;
 use crate::semantic_model;
@@ -6,7 +7,7 @@ use crate::semantic_model;
 #[test]
 fn test_specificity_type_selector() {
     let css_code = "div {}";
-    let parse = parse_css(css_code, CssParserOptions::default());
+    let parse = parse_css(css_code, CssFileSource::css(), CssParserOptions::default());
     let root = parse.tree();
 
     let model = semantic_model(&root);
@@ -20,7 +21,7 @@ fn test_specificity_type_selector() {
 #[test]
 fn test_specificity_class_selector() {
     let css_code = ".class {}";
-    let parse = parse_css(css_code, CssParserOptions::default());
+    let parse = parse_css(css_code, CssFileSource::css(), CssParserOptions::default());
     let root = parse.tree();
 
     let model = semantic_model(&root);
@@ -34,7 +35,7 @@ fn test_specificity_class_selector() {
 #[test]
 fn test_specificity_id_selector() {
     let css_code = "#id {}";
-    let parse = parse_css(css_code, CssParserOptions::default());
+    let parse = parse_css(css_code, CssFileSource::css(), CssParserOptions::default());
     let root = parse.tree();
 
     let model = semantic_model(&root);
@@ -48,7 +49,7 @@ fn test_specificity_id_selector() {
 #[test]
 fn test_specificity_type_and_class_selector() {
     let css_code = "div.class {}";
-    let parse = parse_css(css_code, CssParserOptions::default());
+    let parse = parse_css(css_code, CssFileSource::css(), CssParserOptions::default());
     let root = parse.tree();
 
     let model = semantic_model(&root);
@@ -62,7 +63,7 @@ fn test_specificity_type_and_class_selector() {
 #[test]
 fn test_specificity_attribute_selector() {
     let css_code = "[type=\"text\"] {}";
-    let parse = parse_css(css_code, CssParserOptions::default());
+    let parse = parse_css(css_code, CssFileSource::css(), CssParserOptions::default());
     let root = parse.tree();
 
     let model = semantic_model(&root);
@@ -76,7 +77,7 @@ fn test_specificity_attribute_selector() {
 #[test]
 fn test_specificity_pseudo_class_selector() {
     let css_code = ":hover {}";
-    let parse = parse_css(css_code, CssParserOptions::default());
+    let parse = parse_css(css_code, CssFileSource::css(), CssParserOptions::default());
     let root = parse.tree();
 
     let model = semantic_model(&root);
@@ -90,7 +91,7 @@ fn test_specificity_pseudo_class_selector() {
 #[test]
 fn test_specificity_pseudo_element_selector() {
     let css_code = "::before {}";
-    let parse = parse_css(css_code, CssParserOptions::default());
+    let parse = parse_css(css_code, CssFileSource::css(), CssParserOptions::default());
     let root = parse.tree();
 
     let model = semantic_model(&root);
@@ -104,7 +105,7 @@ fn test_specificity_pseudo_element_selector() {
 #[test]
 fn test_specificity_complex_selector() {
     let css_code = "ul li.active a#link:hover {}";
-    let parse = parse_css(css_code, CssParserOptions::default());
+    let parse = parse_css(css_code, CssFileSource::css(), CssParserOptions::default());
     let root = parse.tree();
 
     let model = semantic_model(&root);
@@ -118,7 +119,7 @@ fn test_specificity_complex_selector() {
 #[test]
 fn test_specificity_pseudo_class_functions() {
     let css_code = ":not(#id) {}";
-    let parse = parse_css(css_code, CssParserOptions::default());
+    let parse = parse_css(css_code, CssFileSource::css(), CssParserOptions::default());
     let root = parse.tree();
 
     let model = semantic_model(&root);
@@ -132,7 +133,7 @@ fn test_specificity_pseudo_class_functions() {
 #[test]
 fn test_specificity_with_pseudo_function_where() {
     let css_code = ":where(.class) {}";
-    let parse = parse_css(css_code, CssParserOptions::default());
+    let parse = parse_css(css_code, CssFileSource::css(), CssParserOptions::default());
     let root = parse.tree();
 
     let model = semantic_model(&root);
@@ -147,7 +148,7 @@ fn test_specificity_with_pseudo_function_where() {
 #[test]
 fn test_specificity_with_pseudo_function_is() {
     let css_code = ":is(div, .class) {}";
-    let parse = parse_css(css_code, CssParserOptions::default());
+    let parse = parse_css(css_code, CssFileSource::css(), CssParserOptions::default());
     let root = parse.tree();
 
     let model = semantic_model(&root);
@@ -162,7 +163,7 @@ fn test_specificity_with_pseudo_function_is() {
 #[test]
 fn test_specificity_nested_selector() {
     let css_code = ".parent .child {}";
-    let parse = parse_css(css_code, CssParserOptions::default());
+    let parse = parse_css(css_code, CssFileSource::css(), CssParserOptions::default());
     let root = parse.tree();
 
     let model = semantic_model(&root);
@@ -177,7 +178,7 @@ fn test_specificity_nested_selector() {
 #[test]
 fn test_specificity_nested_pseudo_class() {
     let css_code = "a:not(.active) {}";
-    let parse = parse_css(css_code, CssParserOptions::default());
+    let parse = parse_css(css_code, CssFileSource::css(), CssParserOptions::default());
     let root = parse.tree();
 
     let model = semantic_model(&root);
@@ -195,7 +196,7 @@ fn test_specificity_nested_pseudo_class() {
 #[test]
 fn test_specificity_nested_pseudo_class_functions() {
     let css_code = ":not(:nth-child(2n+1)) {}";
-    let parse = parse_css(css_code, CssParserOptions::default());
+    let parse = parse_css(css_code, CssFileSource::css(), CssParserOptions::default());
     let root = parse.tree();
 
     let model = semantic_model(&root);
@@ -213,7 +214,7 @@ fn test_specificity_nested_pseudo_class_functions() {
 #[test]
 fn test_specificity_multiple_nesting() {
     let css_code = "body div#main .content ul li.active a:hover {}";
-    let parse = parse_css(css_code, CssParserOptions::default());
+    let parse = parse_css(css_code, CssFileSource::css(), CssParserOptions::default());
     let root = parse.tree();
 
     let model = semantic_model(&root);
@@ -239,7 +240,7 @@ fn test_specificity_multiple_nesting() {
 #[test]
 fn test_specificity_nested_pseudo_elements_and_classes() {
     let css_code = "div::before:hover {}";
-    let parse = parse_css(css_code, CssParserOptions::default());
+    let parse = parse_css(css_code, CssFileSource::css(), CssParserOptions::default());
     let root = parse.tree();
 
     let model = semantic_model(&root);
@@ -257,7 +258,7 @@ fn test_specificity_nested_pseudo_elements_and_classes() {
 #[test]
 fn test_specificity_nested_combinators() {
     let css_code = "ul > li + li.active ~ a#link:hover {}";
-    let parse = parse_css(css_code, CssParserOptions::default());
+    let parse = parse_css(css_code, CssFileSource::css(), CssParserOptions::default());
     let root = parse.tree();
 
     let model = semantic_model(&root);
@@ -276,7 +277,7 @@ fn test_specificity_nested_combinators() {
 #[test]
 fn test_specificity_with_nested_pseudo_functions() {
     let css_code = ":is(div, :not(.class)) {}";
-    let parse = parse_css(css_code, CssParserOptions::default());
+    let parse = parse_css(css_code, CssFileSource::css(), CssParserOptions::default());
     let root = parse.tree();
 
     let model = semantic_model(&root);
@@ -295,7 +296,7 @@ fn test_specificity_with_nested_pseudo_functions() {
 #[test]
 fn test_specificity_nested_selector_lists() {
     let css_code = "div, .class, #id, a:hover, ul li a#link {}";
-    let parse = parse_css(css_code, CssParserOptions::default());
+    let parse = parse_css(css_code, CssFileSource::css(), CssParserOptions::default());
     let root = parse.tree();
 
     let model = semantic_model(&root);
@@ -318,7 +319,7 @@ fn test_specificity_nested_selector_lists() {
 #[test]
 fn test_specificity_deeply_nested_rules() {
     let css_code = "a { div { .class { #id { } } } }";
-    let parse = parse_css(css_code, CssParserOptions::default());
+    let parse = parse_css(css_code, CssFileSource::css(), CssParserOptions::default());
     let root = parse.tree();
 
     let model = semantic_model(&root);
@@ -334,7 +335,7 @@ fn test_specificity_deeply_nested_rules() {
         .first()
         .expect("Expected 'div' child rule");
     let div_rule = model
-        .get_rule_by_id(*div_rule_id)
+        .get_rule_by_id(div_rule_id)
         .expect("Expected to retrieve 'div' rule");
 
     let class_rule_id = div_rule
@@ -342,7 +343,7 @@ fn test_specificity_deeply_nested_rules() {
         .first()
         .expect("Expected '.class' child rule");
     let class_rule = model
-        .get_rule_by_id(*class_rule_id)
+        .get_rule_by_id(class_rule_id)
         .expect("Expected to retrieve 'span.class' rule");
 
     let id_rule_id = class_rule
@@ -350,29 +351,31 @@ fn test_specificity_deeply_nested_rules() {
         .first()
         .expect("Expected '#id' child rule");
     let _id_rule = model
-        .get_rule_by_id(*id_rule_id)
+        .get_rule_by_id(id_rule_id)
         .expect("Expected to retrieve '#id' rule");
+
+    let root = model.root();
 
     // Check selectors and specificities at each level
     // 'a'
     let a_selector = &parent_rule.selectors[0];
-    assert_eq!(&a_selector.name, "a");
+    assert_eq!(a_selector.text(&root).to_string(), "a");
     assert_eq!(&a_selector.specificity, &Specificity(0, 0, 1));
 
-    // 'a div'
+    // 'a div' - TODO: Should resolve to "a div" once nested selector resolution is implemented
     let div_selector = &div_rule.selectors[0];
-    assert_eq!(&div_selector.name, "a div");
+    assert_eq!(div_selector.text(&root).to_string(), "div");
     assert_eq!(&div_selector.specificity, &Specificity(0, 0, 2));
 
     // TODO: Bug. It should be (0, 1, 2) instead of (0, 1, 1)
     // 'a div .class'
     // let class_selector = &class_rule.selectors[0];
-    // assert_eq!(&class_selector.name, ".class");
+    // assert_eq!(class_selector.text(&root).to_string(), ".class");
     // assert_eq!(&class_selector.specificity, &Specificity(0, 1, 2));
 
     // TODO: Bug. It should be (1, 1, 2) instead of (1, 1, 0)
     // 'a div .class #id'
     // let id_selector = &id_rule.selectors[0];
-    // assert_eq!(&id_selector.name, "#id");
+    // assert_eq!(id_selector.text(&root).to_string(), "#id");
     // assert_eq!(&id_selector.specificity, &Specificity(1, 1, 2));
 }

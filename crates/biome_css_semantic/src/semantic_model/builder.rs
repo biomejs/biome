@@ -260,23 +260,3 @@ impl SemanticModelBuilder {
         }
     }
 }
-
-fn resolve_selector(current: &str, parent: &[Selector]) -> Vec<String> {
-    let mut resolved = Vec::new();
-
-    if parent.is_empty() {
-        return vec![current.to_string()];
-    }
-
-    for parent in parent {
-        let parent = parent.name.to_string();
-        if current.contains('&') {
-            let current = current.replace('&', &parent);
-            resolved.push(current);
-        } else {
-            resolved.push(format!("{} {}", parent, current));
-        }
-    }
-
-    resolved
-}
