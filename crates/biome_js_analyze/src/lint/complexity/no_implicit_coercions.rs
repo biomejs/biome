@@ -28,7 +28,7 @@ declare_lint_rule! {
     ///
     /// While these "implicit coercions" can save space, there are several reasons one may prefer to avoid them:
     /// - Relying on these shortcuts can hurt readability, especially for newer developers less familiar with these patterns.
-    ///   Writing `Boolean(value)` or `String(myNum)` makes the type of the resulting value clear and explicit, as opposed to `!!value` or `foo + ""` (which may appaer confusing at first glance).
+    ///   Writing `Boolean(value)` or `String(myNum)` makes the type of the resulting value clear and explicit, as opposed to `!!value` or `foo + ""` (which may appear confusing at first glance).
     /// - TypeScript does not allow declaration merging for the built-in type coercion operators, unlike their more explicit function counterparts.
     ///   For instance, `+value` cannot be overridden to return a more specific type under certain conditions (as opposed to `Number()`,
     ///   whose method signatures can be customized to do exactly that).
