@@ -210,14 +210,14 @@ mod tests {
 
         assert_eq!(rule.selectors.len(), 1);
         assert_eq!(rule.declarations.len(), 2);
-        assert_eq!(rule.selectors[0].text(&root).to_string(), "p");
+        assert_eq!(rule.selectors[0].resolved().to_string(), "p");
 
         let range = TextRange::new(0.into(), 1.into());
         let rule = model.get_rule_by_range(range).unwrap();
 
         assert_eq!(rule.selectors.len(), 1);
         assert_eq!(rule.declarations.len(), 2);
-        assert_eq!(rule.selectors[0].text(&root).to_string(), "p");
+        assert_eq!(rule.selectors[0].resolved().to_string(), "p");
     }
 
     #[test]
@@ -238,13 +238,12 @@ mod tests {
 
         assert_eq!(rule.selectors.len(), 1);
         assert_eq!(rule.declarations.len(), 1);
-        // TODO: Should resolve to "p .child" once nested selector resolution is implemented
-        assert_eq!(rule.selectors[0].text(&root).to_string(), ".child");
+        assert_eq!(rule.selectors[0].resolved().to_string(), "p .child");
 
         let parent = model.get_rule_by_id(&rule.parent_id.unwrap()).unwrap();
         assert_eq!(parent.selectors.len(), 1);
         assert_eq!(parent.declarations.len(), 2);
-        assert_eq!(parent.selectors[0].text(&root).to_string(), "p");
+        assert_eq!(parent.selectors[0].resolved().to_string(), "p");
     }
 
     #[ignore]
@@ -438,13 +437,19 @@ mod specificity_tests {
 
         let specificity = model.specificity_of_rules().collect::<Vec<_>>();
 
-        assert_eq!(specificity.len(), 3);
+        // The child selector `& > p` is expanded to 2 selectors (one for each parent)
+        assert_eq!(specificity.len(), 4);
 
         let mut specificity = specificity.into_iter();
 
         assert_eq!(specificity.next().unwrap(), Specificity(0, 0, 1), "div");
         assert_eq!(specificity.next().unwrap(), Specificity(0, 0, 1), "span");
-        assert_eq!(specificity.next().unwrap(), Specificity(0, 0, 2), "& > p");
+        assert_eq!(specificity.next().unwrap(), Specificity(0, 0, 2), "div > p");
+        assert_eq!(
+            specificity.next().unwrap(),
+            Specificity(0, 0, 2),
+            "span > p"
+        );
     }
 
     #[test]

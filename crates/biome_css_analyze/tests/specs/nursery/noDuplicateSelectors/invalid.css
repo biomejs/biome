@@ -1,0 +1,84 @@
+/* should generate diagnostics */
+
+/* 1. Basic duplicate: same selector twice in the same file */
+.foo {}
+.foo {}
+
+/* 2. Duplicate type selector */
+div { color: red; }
+div { color: blue; }
+
+/* 3. Duplicate inside same @media block */
+@media (min-width: 600px) {
+  .bar {}
+  .bar {}
+}
+
+/* 4. Selector list: same list in different order counts as duplicate */
+.a, .b {}
+.b, .a {}
+
+/* 5. Nesting resolved: `a { & b {} }` produces `a b`, same as explicit `a b {}` */
+a b {}
+a {
+  & b {}
+}
+
+/* 6. Compound selector ordering: .a.b == .b.a */
+.a.b {}
+.b.a {}
+
+/* 7. Type selector case-insensitivity: DIV == div */
+DIV { color: red; }
+div { color: blue; }
+
+/* 8. Descendant via nesting: `.nav .link {}` == `.nav { .link {} }` */
+.nav .link {}
+.nav {
+  .link {}
+}
+
+/* 9. Multi-level nesting: `.x .y .z {}` == `.x { .y { .z {} } }` */
+.x .y .z {}
+.x {
+  .y {
+    .z {}
+  }
+}
+
+/* 10. Nesting with ampersand and pseudo-class:
+   `button:hover {}` == `button { &:hover {} }` */
+button:hover {}
+button {
+  &:hover {}
+}
+
+/* 11. Nesting with ampersand and pseudo-element:
+   `span::before {}` == `span { &::before {} }` */
+span::before {}
+span {
+  &::before {}
+}
+
+/* 12. Selector list duplicate via nesting: `.p .r, .q .r` == `.p, .q { .r {} }` */
+.p .r {}
+.q .r {}
+.p, .q {
+  .r {}
+}
+
+/* 13. Sibling combinator via nesting: `h3 ~ p {}` == `h3 { & ~ p {} }` */
+h3 ~ p {}
+h3 {
+  & ~ p {}
+}
+
+/* 14. Duplicate with attribute selector */
+[type="text"] {}
+[type="text"] {}
+
+/* 15. Duplicate with ID and class compound selector */
+#main .content {}
+#main {
+  .content {}
+}

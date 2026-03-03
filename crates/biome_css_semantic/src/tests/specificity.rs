@@ -359,23 +359,23 @@ fn test_specificity_deeply_nested_rules() {
     // Check selectors and specificities at each level
     // 'a'
     let a_selector = &parent_rule.selectors[0];
-    assert_eq!(a_selector.text(&root).to_string(), "a");
+    assert_eq!(a_selector.resolved().to_string(), "a");
     assert_eq!(&a_selector.specificity, &Specificity(0, 0, 1));
 
-    // 'a div' - TODO: Should resolve to "a div" once nested selector resolution is implemented
+    // 'a div'
     let div_selector = &div_rule.selectors[0];
-    assert_eq!(div_selector.text(&root).to_string(), "div");
+    assert_eq!(div_selector.resolved().to_string(), "a div");
     assert_eq!(&div_selector.specificity, &Specificity(0, 0, 2));
 
     // TODO: Bug. It should be (0, 1, 2) instead of (0, 1, 1)
     // 'a div .class'
     // let class_selector = &class_rule.selectors[0];
-    // assert_eq!(class_selector.text(&root).to_string(), ".class");
+    // assert_eq!(class_selector.resolved().to_string(), ".class");
     // assert_eq!(&class_selector.specificity, &Specificity(0, 1, 2));
 
     // TODO: Bug. It should be (1, 1, 2) instead of (1, 1, 0)
     // 'a div .class #id'
     // let id_selector = &id_rule.selectors[0];
-    // assert_eq!(id_selector.text(&root).to_string(), "#id");
+    // assert_eq!(id_selector.resolved().to_string(), "#id");
     // assert_eq!(&id_selector.specificity, &Specificity(1, 1, 2));
 }

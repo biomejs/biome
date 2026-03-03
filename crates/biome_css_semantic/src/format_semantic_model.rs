@@ -101,13 +101,11 @@ impl<'a> Format<FormatSemanticModelContext> for SelectorWithRoot<'a> {
         let selector = self.0;
         let root = self.1;
         let range = std::format!("{:?}", selector.range(root));
+        let resolved = selector.resolved().to_string();
         write!(
             f,
             [
-                text(
-                    selector.text(root).into_text().text(),
-                    selector.range(root).start()
-                ),
+                text(resolved.as_str(), selector.range(root).start()),
                 token(":"),
                 space(),
                 &selector.specificity(),
