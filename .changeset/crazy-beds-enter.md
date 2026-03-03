@@ -1,5 +1,5 @@
 ---
-"@biomejs/biome": patch
+"@biomejs/biome": minor
 ---
 
 The `doubleNegation` option has been added to [`noImplicitCoercions`](https://biomejs.dev/linter/rules/no-implicit-coercions) to allow ignoring double negations inside code.
