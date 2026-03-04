@@ -73,10 +73,6 @@ impl Rule for NoRedundantRoles {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        // Skip custom components in framework files.
-        // In HTML files, all elements are native HTML.
-        // In Vue/Svelte/Astro, only lowercase names are native HTML elements;
-        // PascalCase names are custom components and should be ignored.
         let source_type = ctx.source_type::<HtmlFileSource>();
         if !source_type.is_html() {
             let element_name = node.name()?;
