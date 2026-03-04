@@ -12,7 +12,8 @@ use biome_parser::{Parser, TokenSet, token_set};
 
 use super::expression::{is_at_any_expression_with_context, parse_any_expression_with_context};
 
-const PARAMETER_RECOVERY_TOKEN_SET: TokenSet<CssSyntaxKind> = token_set!(T![,], T![')'], T![;]);
+const PARAMETER_RECOVERY_TOKEN_SET: TokenSet<CssSyntaxKind> =
+    token_set!(T![,], T![')'], T![;], T!['}']);
 
 #[derive(Debug, Copy, Clone)]
 struct ParameterListParseRecovery {
@@ -88,7 +89,7 @@ fn parse_parameter_with_context(p: &mut CssParser, context: ValueParsingContext)
     }
 
     if context.is_scss_parsing_allowed() {
-        parse_scss_expression_in_args_until(p, token_set![T![,], T![')'], T![;], T!['}']])
+        parse_scss_expression_in_args_until(p, PARAMETER_RECOVERY_TOKEN_SET)
     } else {
         parse_any_expression_with_context(p, context)
     }
