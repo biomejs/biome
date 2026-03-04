@@ -14,7 +14,7 @@ use biome_configuration::formatter::FormatterEnabled;
 use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, TrailingNewline};
 use biome_fs::BiomePath;
 use biome_markdown_formatter::context::MarkdownFormatOptions;
-use biome_markdown_parser::{MarkdownParseOptions, parse_markdown_with_cache};
+use biome_markdown_parser::{MarkdownParserOptions, parse_markdown_with_cache};
 use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode, MdDocument};
 use biome_parser::{AnyParse, NodeParse};
 use biome_rowan::NodeCache;
@@ -49,7 +49,7 @@ impl ServiceLanguage for MarkdownLanguage {
     type AssistSettings = MarkdownAssistSettings;
     type FormatOptions = MarkdownFormatOptions;
     type ParserSettings = ();
-    type ParserOptions = MarkdownParseOptions;
+    type ParserOptions = MarkdownParserOptions;
     type EnvironmentSettings = ();
 
     fn lookup_settings(language: &LanguageListSettings) -> &LanguageSettings<Self> {
@@ -66,7 +66,7 @@ impl ServiceLanguage for MarkdownLanguage {
         _path: &BiomePath,
         _file_source: &DocumentFileSource,
     ) -> Self::ParserOptions {
-        MarkdownParseOptions::default()
+        MarkdownParserOptions::default()
     }
 
     fn resolve_format_options(

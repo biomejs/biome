@@ -22,7 +22,7 @@
 //! ## Depth Limits
 //!
 //! To prevent stack overflow from pathological input (deeply nested lists),
-//! nesting depth is limited by `MarkdownParseOptions::max_nesting_depth`
+//! nesting depth is limited by `MarkdownParserOptions::max_nesting_depth`
 //! (default: 100). Deeper nesting emits a diagnostic and treats additional
 //! list markers as content.
 //!
@@ -629,7 +629,7 @@ fn expected_bullet(p: &MarkdownParser, range: TextRange) -> ParseDiagnostic {
 ///
 /// Parses consecutive bullet items into a single list.
 ///
-/// Nesting is limited to `MarkdownParseOptions::max_nesting_depth` to prevent stack overflow.
+/// Nesting is limited to `MarkdownParserOptions::max_nesting_depth` to prevent stack overflow.
 pub(crate) fn parse_bullet_list_item(p: &mut MarkdownParser) -> ParsedSyntax {
     if !at_bullet_list_item(p) {
         return Absent;
@@ -943,7 +943,7 @@ fn expected_ordered_item(p: &MarkdownParser, range: TextRange) -> ParseDiagnosti
 ///
 /// Parses consecutive ordered items into a single list.
 ///
-/// Nesting is limited to `MarkdownParseOptions::max_nesting_depth` to prevent stack overflow.
+/// Nesting is limited to `MarkdownParserOptions::max_nesting_depth` to prevent stack overflow.
 pub(crate) fn parse_order_list_item(p: &mut MarkdownParser) -> ParsedSyntax {
     if !at_order_list_item(p) {
         return Absent;

@@ -32,7 +32,7 @@ use biome_graphql_syntax::GraphqlLanguage;
 use biome_grit_formatter::context::GritFormatOptions;
 use biome_grit_syntax::GritLanguage;
 use biome_html_formatter::HtmlFormatOptions;
-use biome_html_parser::HtmlParseOptions;
+use biome_html_parser::HtmlParserOptions;
 use biome_html_syntax::HtmlLanguage;
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_parser::JsParserOptions;
@@ -1426,7 +1426,7 @@ impl OverrideSettings {
     pub(crate) fn apply_override_html_parser_options(
         &self,
         path: &Utf8Path,
-        options: &mut HtmlParseOptions,
+        options: &mut HtmlParserOptions,
     ) {
         for pattern in self.patterns.iter() {
             if pattern.is_file_included(path) {
@@ -1849,7 +1849,7 @@ impl OverrideSettingPattern {
         }
     }
 
-    fn apply_overrides_to_html_parser_options(&self, options: &mut HtmlParseOptions) {
+    fn apply_overrides_to_html_parser_options(&self, options: &mut HtmlParserOptions) {
         let html_parser = &self.languages.html.parser;
 
         if let Some(interpolation) = html_parser.interpolation {
