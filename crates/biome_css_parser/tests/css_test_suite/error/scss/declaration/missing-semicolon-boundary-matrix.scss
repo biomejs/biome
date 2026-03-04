@@ -1,0 +1,66 @@
+a {
+  $v0: 1 !default
+  .class { color: red; }
+
+  $v1: 1 !default
+  #id { color: red; }
+
+  $v2: 1 !default
+  :hover { color: red; }
+
+  $v3: 1 !default
+  [data-x] { color: red; }
+
+  $v4: 1 !default
+  &.nested { color: red; }
+
+  $v5: 1 !default
+  > .child { color: red; }
+
+  $v6: 1 !default
+  + .sibling { color: red; }
+
+  $v7: 1 !default
+  ~ .later { color: red; }
+
+  $v8: 1 !default
+  || .column { color: red; }
+
+  $v9: 1 !default
+  * { color: red; }
+
+  $v10: 1 !default
+  svg|a { color: red; }
+
+  $v11: 1 !default
+  a.b { color: red; }
+
+  $v12: 1 !default
+  a#id { color: red; }
+
+  $v13: 1 !default
+  a[attr] { color: red; }
+
+  $v14: 1 !default
+  a::before { color: red; }
+
+  $v15: 1 !default
+  a > .desc { color: red; }
+
+  $v16: 1 !default
+  a + .adj { color: red; }
+
+  $v17: 1 !default
+  a ~ .sib { color: red; }
+
+  $v18: 1 !default
+  a || .col { color: red; }
+
+  $v19: 1 !default
+  @media screen {
+    .m { color: red; }
+  }
+
+  $v20: 1 !default
+  color: red;
+}

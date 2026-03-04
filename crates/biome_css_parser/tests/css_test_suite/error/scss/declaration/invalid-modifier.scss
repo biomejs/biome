@@ -1,4 +1,4 @@
-// Invalid modifier - using unknown identifier instead of !default or !global
+// !important is accepted in parser recovery (lint can report it if needed)
 $color: red !important;
 
 // Invalid modifier - just a random word
