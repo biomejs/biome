@@ -390,6 +390,37 @@
 			"additionalProperties": false
 		},
 		"AttributePosition": { "type": "string", "enum": ["auto", "multiline"] },
+		"AvailabilityNamed": {
+			"description": "Named Baseline availability tiers.",
+			"oneOf": [
+				{
+					"description": "Warn on anything not Baseline widely available (default).",
+					"type": "string",
+					"const": "widely"
+				},
+				{
+					"description": "Warn on anything not at least Baseline newly available.",
+					"type": "string",
+					"const": "newly"
+				}
+			]
+		},
+		"AvailabilityTarget": {
+			"description": "The Baseline availability level to target.\n\n- `\"widely\"` – warn on anything not Baseline widely available.\n- `\"newly\"` – warn on anything not at least Baseline newly available.\n- A year (e.g. `2023`) – warn on anything whose `baseline_low_date` is after\n  that year (i.e. became newly available after that year).",
+			"anyOf": [
+				{
+					"description": "A named tier: `\"widely\"` or `\"newly\"`.",
+					"$ref": "#/$defs/AvailabilityNamed"
+				},
+				{
+					"description": "A year cutoff (e.g. `2023`).",
+					"type": "integer",
+					"format": "uint16",
+					"maximum": 65535,
+					"minimum": 0
+				}
+			]
+		},
 		"Bool": { "type": "boolean" },
 		"BracketSameLine": {
 			"description": "Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).",
@@ -6162,6 +6193,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useBaseline": {
+					"description": "Disallow CSS properties, values, at-rules, functions, and selectors that are not part of the configured Baseline.\nSee https://biomejs.dev/linter/rules/use-baseline",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseBaselineConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useConsistentEnumValueType": {
 					"description": "Disallow enums from having both number and string members.\nSee https://biomejs.dev/linter/rules/use-consistent-enum-value-type",
 					"anyOf": [
@@ -9902,6 +9940,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseBaselineOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseBaselineOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseBiomeIgnoreFolderOptions": {
 			"type": "object",
 			"properties": {
@@ -12966,6 +13013,53 @@
 		},
 		"UseAwaitThenableOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseBaselineConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseBaselineOptions" }
+			]
+		},
+		"UseBaselineOptions": {
+			"description": "Options for the `useBaseline` rule.",
+			"type": "object",
+			"properties": {
+				"allowAtRules": {
+					"description": "CSS at-rules to exclude from checking (without `@`, case-insensitive).",
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"allowFunctions": {
+					"description": "CSS value functions to exclude from checking (case-insensitive).",
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"allowMediaConditions": {
+					"description": "CSS media conditions to exclude from checking (case-insensitive).",
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"allowProperties": {
+					"description": "CSS properties to exclude from checking (case-insensitive).",
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"allowPropertyValues": {
+					"description": "CSS property values to exclude from checking (format: `\"property:value\"`, case-insensitive).",
+					"type": "object",
+					"additionalProperties": { "type": "string" }
+				},
+				"allowSelectors": {
+					"description": "CSS pseudo-selectors to exclude from checking (without `:` or `::`, case-insensitive).",
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"available": {
+					"description": "The availability level to target. Defaults to `\"widely\"`.",
+					"$ref": "#/$defs/AvailabilityTarget"
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseBiomeIgnoreFolderConfiguration": {

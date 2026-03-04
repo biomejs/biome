@@ -22,7 +22,7 @@ pub enum BaselineYear {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct BaselineStatus {
     pub tier: BaselineTier,
-    
+
     pub year: BaselineYear,
 }
 #[doc = r" Look up the Baseline status of a feature by name."]

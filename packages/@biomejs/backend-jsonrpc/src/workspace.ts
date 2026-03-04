@@ -2335,6 +2335,11 @@ See https://biomejs.dev/linter/rules/use-await-thenable
 	 */
 	useAwaitThenable?: UseAwaitThenableConfiguration;
 	/**
+	* Disallow CSS properties, values, at-rules, functions, and selectors that are not part of the configured Baseline.
+See https://biomejs.dev/linter/rules/use-baseline 
+	 */
+	useBaseline?: UseBaselineConfiguration;
+	/**
 	* Disallow enums from having both number and string members.
 See https://biomejs.dev/linter/rules/use-consistent-enum-value-type 
 	 */
@@ -4234,6 +4239,9 @@ export type UseArraySortCompareConfiguration =
 export type UseAwaitThenableConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseAwaitThenableOptions;
+export type UseBaselineConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseBaselineOptions;
 export type UseConsistentEnumValueTypeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentEnumValueTypeOptions;
@@ -5930,6 +5938,10 @@ export interface RuleWithUseAwaitThenableOptions {
 	level: RulePlainConfiguration;
 	options?: UseAwaitThenableOptions;
 }
+export interface RuleWithUseBaselineOptions {
+	level: RulePlainConfiguration;
+	options?: UseBaselineOptions;
+}
 export interface RuleWithUseConsistentEnumValueTypeOptions {
 	level: RulePlainConfiguration;
 	options?: UseConsistentEnumValueTypeOptions;
@@ -7402,6 +7414,39 @@ export type NoVueVIfWithVForOptions = {};
 export type UseArraySomeOptions = {};
 export type UseArraySortCompareOptions = {};
 export type UseAwaitThenableOptions = {};
+/**
+ * Options for the `useBaseline` rule.
+ */
+export interface UseBaselineOptions {
+	/**
+	 * CSS at-rules to exclude from checking (without `@`, case-insensitive).
+	 */
+	allowAtRules?: string[];
+	/**
+	 * CSS value functions to exclude from checking (case-insensitive).
+	 */
+	allowFunctions?: string[];
+	/**
+	 * CSS media conditions to exclude from checking (case-insensitive).
+	 */
+	allowMediaConditions?: string[];
+	/**
+	 * CSS properties to exclude from checking (case-insensitive).
+	 */
+	allowProperties?: string[];
+	/**
+	 * CSS property values to exclude from checking (format: `"property:value"`, case-insensitive).
+	 */
+	allowPropertyValues?: Record<string, string>;
+	/**
+	 * CSS pseudo-selectors to exclude from checking (without `:` or `::`, case-insensitive).
+	 */
+	allowSelectors?: string[];
+	/**
+	 * The availability level to target. Defaults to `"widely"`.
+	 */
+	available?: AvailabilityTarget;
+}
 export type UseConsistentEnumValueTypeOptions = {};
 export interface UseConsistentGraphqlDescriptionsOptions {
 	/**
@@ -7963,6 +8008,15 @@ while for `useState()` it would be `[1]`.
 }
 export type Regex = string;
 /**
+	* The Baseline availability level to target.
+
+- `"widely"` – warn on anything not Baseline widely available.
+- `"newly"` – warn on anything not at least Baseline newly available.
+- A year (e.g. `2023`) – warn on anything whose `baseline_low_date` is after
+  that year (i.e. became newly available after that year). 
+	 */
+export type AvailabilityTarget = AvailabilityNamed | number;
+/**
  * The GraphQL description style to enforce.
  */
 export type UseConsistentGraphqlDescriptionsStyle = "block" | "inline";
@@ -8004,6 +8058,10 @@ export interface Convention {
 }
 export type GroupMatcher = ImportMatcher | SourceMatcher;
 export type StableHookResult = boolean | number[] | string[];
+/**
+ * Named Baseline availability tiers.
+ */
+export type AvailabilityNamed = "widely" | "newly";
 export interface PathOptions {
 	/**
 	 * Names of the exported members that allowed to be not be used.
@@ -8411,6 +8469,7 @@ export type Category =
 	| "lint/nursery/useArraySome"
 	| "lint/nursery/useArraySortCompare"
 	| "lint/nursery/useAwaitThenable"
+	| "lint/nursery/useBaseline"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentEnumValueType"
 	| "lint/nursery/useConsistentGraphqlDescriptions"
@@ -8430,14 +8489,15 @@ export type Category =
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useLoneAnonymousOperation"
 	| "lint/nursery/useLoneExecutableDefinition"
-	| "lint/nursery/useNullishCoalescing"
 	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useNamedCaptureGroup"
+	| "lint/nursery/useNullishCoalescing"
 	| "lint/nursery/usePlaywrightValidDescribeCallback"
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
 	| "lint/nursery/useRegexpExec"
 	| "lint/nursery/useRequiredScripts"
+	| "lint/nursery/useScopedStyles"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSpread"
 	| "lint/nursery/useUnicodeRegex"
@@ -8452,7 +8512,6 @@ export type Category =
 	| "lint/nursery/useVueDefineMacrosOrder"
 	| "lint/nursery/useVueHyphenatedAttributes"
 	| "lint/nursery/useVueMultiWordComponentNames"
-	| "lint/nursery/useScopedStyles"
 	| "lint/nursery/useVueVForKey"
 	| "lint/nursery/useVueValidTemplateRoot"
 	| "lint/nursery/useVueValidVBind"
