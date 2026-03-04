@@ -727,7 +727,8 @@ impl Session {
             // the relative config path against that folder.
             if let Some(root) = workspace_roots
                 .iter()
-                .find(|root| file_path.starts_with(*root))
+                .filter(|root| file_path.starts_with(*root))
+                .max_by_key(|root| root.as_str().len())
             {
                 return Some(root.join(&config_path));
             }
