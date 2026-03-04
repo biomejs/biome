@@ -285,22 +285,22 @@ fn parse_code_content(
             quote_depth,
             &mut at_line_start,
         ) {
-            CodeContentLoopAction::Break => break,
-            CodeContentLoopAction::Continue => continue,
-            CodeContentLoopAction::ConsumeText => {}
+            CodeContentTokenAction::Break => break,
+            CodeContentTokenAction::Skip => continue,
+            CodeContentTokenAction::Consume => {
+                bump_code_textual(p);
+                at_line_start = false;
+            }
         }
-
-        bump_code_textual(p);
-        at_line_start = false;
     }
 
     m.complete(p, MD_INLINE_ITEM_LIST);
 }
 
-enum CodeContentLoopAction {
+enum CodeContentTokenAction {
     Break,
-    Continue,
-    ConsumeText,
+    Skip,
+    Consume,
 }
 
 /// Prepare the next token inside fenced code block content.
@@ -315,34 +315,34 @@ fn prepare_next_code_content_token(
     fence_indent: usize,
     quote_depth: usize,
     at_line_start: &mut bool,
-) -> CodeContentLoopAction {
+) -> CodeContentTokenAction {
     if *at_line_start && quote_depth > 0 && !consume_quote_prefixes_in_code_content(p, quote_depth)
     {
-        return CodeContentLoopAction::Break;
+        return CodeContentTokenAction::Break;
     }
 
     if consume_code_newline(p) {
         *at_line_start = true;
-        return CodeContentLoopAction::Continue;
+        return CodeContentTokenAction::Skip;
     }
 
     if at_closing_fence(p, is_tilde_fence, fence_len) {
-        return CodeContentLoopAction::Break;
+        return CodeContentTokenAction::Break;
     }
 
     if *at_line_start && fence_indent > 0 {
         skip_fenced_content_indent(p, fence_indent);
         if at_closing_fence(p, is_tilde_fence, fence_len) {
-            return CodeContentLoopAction::Break;
+            return CodeContentTokenAction::Break;
         }
     }
 
     // Prefix/indent consumption above can advance directly to EOF.
     if p.at(T![EOF]) {
-        return CodeContentLoopAction::Break;
+        return CodeContentTokenAction::Break;
     }
 
-    CodeContentLoopAction::ConsumeText
+    CodeContentTokenAction::Consume
 }
 
 /// Consume all expected `>` quote prefixes for the current line inside a
