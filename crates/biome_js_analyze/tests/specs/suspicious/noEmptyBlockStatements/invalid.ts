@@ -1,11 +1,11 @@
-function fooEmptyTs() {}
+function fooEmptyTs() { }
 
-const barEmptyTs = () => {};
+const barEmptyTs = () => { };
 
 function fooWithNestedEmptyFnBlockTs() {
   let a = 1;
 
-  function shouldFail(){}
+  function shouldFail() { }
 
   return a
 }
@@ -14,7 +14,7 @@ function fooWithNestedEmptyFnBlockTs() {
 const barWithNestedEmptyFnBlockTs = () => {
   let a = 1;
 
-  const shouldFail = () => {}
+  const shouldFail = () => { }
 
   return a
 }
@@ -26,43 +26,43 @@ if (someVarTs) {
 while (someVarTs) {
 }
 
-switch(someVarTs) {
+switch (someVarTs) {
 }
 
 const doSomething = () => null;
 try {
-    doSomething();
-} catch(ex) {
+  doSomething();
+} catch (ex) {
 
 } finally {
 
 }
 
 class FooEmptyStaticTs {
-  static {}
+  static { }
 }
 
-for(let i; i>0; i++){}
+for (let i; i > 0; i++) { }
 
 const obTs = {}
-for (const key in obTs) {}
+for (const key in obTs) { }
 
 const arTs = []
-for (const val of arTs) {}
+for (const val of arTs) { }
 
-function fooWithInternalEmptyBlocksTs(){
+function fooWithInternalEmptyBlocksTs() {
   let someOtherVar: string = '';
-  if (someOtherVar) {}
+  if (someOtherVar) { }
 
   while (someOtherVar) {
   }
 
-  switch(someOtherVar) {
+  switch (someOtherVar) {
   }
 
   try {
-      doSomething();
-  } catch(ex) {
+    doSomething();
+  } catch (ex) {
 
   } finally {
 
@@ -75,5 +75,21 @@ export class FooBar {
   ) {
     function bar() { }
     bar();
+  }
+}
+
+// Class without implements should still flag empty methods
+class NoImplements {
+  doSomething() { }
+}
+
+// Nested function inside a method of a class with implements should still flag
+interface SomeInterface {
+  run(): void;
+}
+class ImplWithNested implements SomeInterface {
+  run() {
+    function inner() { }
+    inner();
   }
 }

@@ -4,8 +4,8 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsConstructorParameter, JsBlockStatement, JsConstructorClassMember, JsFunctionBody,
-    JsStaticInitializationBlockClassMember, JsSwitchStatement,
+    AnyJsClass, AnyJsConstructorParameter, JsBlockStatement, JsConstructorClassMember,
+    JsFunctionBody, JsMethodClassMember, JsStaticInitializationBlockClassMember, JsSwitchStatement,
 };
 use biome_rowan::{AstNode, AstNodeList, SyntaxNodeCast, declare_node_union};
 use biome_rule_options::no_empty_block_statements::NoEmptyBlockStatementsOptions;
@@ -87,8 +87,13 @@ impl Rule for NoEmptyBlockStatements {
         let has_comments = query.syntax().has_comments_descendants();
         let is_constructor_with_ts_param_props_or_private =
             is_constructor_with_ts_param_props_or_private(query);
+        let is_method_in_class_with_implements = is_method_in_class_with_implements(query);
 
-        (is_empty && !has_comments && !is_constructor_with_ts_param_props_or_private).then_some(())
+        (is_empty
+            && !has_comments
+            && !is_constructor_with_ts_param_props_or_private
+            && !is_method_in_class_with_implements)
+        .then_some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
@@ -146,4 +151,29 @@ fn is_constructor_with_ts_param_props_or_private(query: &Query) -> bool {
         .into_iter()
         .any(|modifier| modifier.is_private() || modifier.is_protected());
     is_param_props || is_private
+}
+
+/// Check if the function body belongs to a method in a class that implements an interface.
+///
+/// When a class implements an interface, it is common for methods to have empty bodies,
+/// especially in mock implementations used for testing.
+fn is_method_in_class_with_implements(query: &Query) -> bool {
+    let Query::JsFunctionBody(body) = query else {
+        return false;
+    };
+
+    // Check if the parent is a method class member
+    let Some(parent) = body.syntax().parent() else {
+        return false;
+    };
+    if JsMethodClassMember::cast(parent).is_none() {
+        return false;
+    }
+
+    // Walk up to find the enclosing class: method -> member list -> class
+    body.syntax()
+        .ancestors()
+        .find_map(AnyJsClass::cast)
+        .and_then(|class| class.implements_clause())
+        .is_some()
 }
