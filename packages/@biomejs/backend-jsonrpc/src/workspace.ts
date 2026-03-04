@@ -2312,6 +2312,11 @@ See https://biomejs.dev/linter/rules/no-ternary
 	 */
 	noTernary?: NoTernaryConfiguration;
 	/**
+	* Reports CSS class names in HTML class attributes that are not defined in any \<style> block or linked stylesheet available to the file.
+See https://biomejs.dev/linter/rules/no-undeclared-classes 
+	 */
+	noUndeclaredClasses?: NoUndeclaredClassesConfiguration;
+	/**
 	* Disallow the use of undeclared environment variables.
 See https://biomejs.dev/linter/rules/no-undeclared-env-vars 
 	 */
@@ -2326,6 +2331,11 @@ See https://biomejs.dev/linter/rules/no-unknown-attribute
 See https://biomejs.dev/linter/rules/no-unnecessary-conditions 
 	 */
 	noUnnecessaryConditions?: NoUnnecessaryConditionsConfiguration;
+	/**
+	* Reports CSS class selectors that are never referenced in any JSX or HTML file.
+See https://biomejs.dev/linter/rules/no-unused-classes 
+	 */
+	noUnusedClasses?: NoUnusedClassesConfiguration;
 	/**
 	* Disallow redundant return statements.
 See https://biomejs.dev/linter/rules/no-useless-return 
@@ -4211,6 +4221,9 @@ export type NoSyncScriptsConfiguration =
 export type NoTernaryConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTernaryOptions;
+export type NoUndeclaredClassesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUndeclaredClassesOptions;
 export type NoUndeclaredEnvVarsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUndeclaredEnvVarsOptions;
@@ -4220,6 +4233,9 @@ export type NoUnknownAttributeConfiguration =
 export type NoUnnecessaryConditionsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnnecessaryConditionsOptions;
+export type NoUnusedClassesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUnusedClassesOptions;
 export type NoUselessReturnConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessReturnOptions;
@@ -5876,6 +5892,10 @@ export interface RuleWithNoTernaryOptions {
 	level: RulePlainConfiguration;
 	options?: NoTernaryOptions;
 }
+export interface RuleWithNoUndeclaredClassesOptions {
+	level: RulePlainConfiguration;
+	options?: NoUndeclaredClassesOptions;
+}
 export interface RuleWithNoUndeclaredEnvVarsOptions {
 	level: RulePlainConfiguration;
 	options?: NoUndeclaredEnvVarsOptions;
@@ -5887,6 +5907,10 @@ export interface RuleWithNoUnknownAttributeOptions {
 export interface RuleWithNoUnnecessaryConditionsOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnnecessaryConditionsOptions;
+}
+export interface RuleWithNoUnusedClassesOptions {
+	level: RulePlainConfiguration;
+	options?: NoUnusedClassesOptions;
 }
 export interface RuleWithNoUselessReturnOptions {
 	fix?: FixKind;
@@ -7346,6 +7370,10 @@ export type NoScriptUrlOptions = {};
 export type NoShadowOptions = {};
 export type NoSyncScriptsOptions = {};
 export type NoTernaryOptions = {};
+/**
+ * Options for the `noUndeclaredClasses` rule.
+ */
+export type NoUndeclaredClassesOptions = {};
 export interface NoUndeclaredEnvVarsOptions {
 	/**
 	* Environment variables that should always be allowed.
@@ -7359,6 +7387,7 @@ export interface NoUnknownAttributeOptions {
 	ignore?: string[];
 }
 export type NoUnnecessaryConditionsOptions = {};
+export type NoUnusedClassesOptions = {};
 export type NoUselessReturnOptions = {};
 export type NoVueArrowFuncInWatchOptions = {};
 export type NoVueOptionsApiOptions = {};
@@ -8295,10 +8324,10 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
-	| "lint/nursery/useExpect"
 	| "lint/nursery/noAmbiguousAnchorText"
 	| "lint/nursery/noBeforeInteractiveScriptOutsideDocument"
 	| "lint/nursery/noColorInvalidHex"
+	| "lint/nursery/noConditionalExpect"
 	| "lint/nursery/noContinue"
 	| "lint/nursery/noDeprecatedMediaType"
 	| "lint/nursery/noDivRegex"
@@ -8328,7 +8357,6 @@ export type Category =
 	| "lint/nursery/noMultiStr"
 	| "lint/nursery/noNestedPromises"
 	| "lint/nursery/noParametersOnlyUsedInRecursion"
-	| "lint/nursery/noConditionalExpect"
 	| "lint/nursery/noPlaywrightElementHandle"
 	| "lint/nursery/noPlaywrightEval"
 	| "lint/nursery/noPlaywrightForceOption"
@@ -8348,8 +8376,10 @@ export type Category =
 	| "lint/nursery/noSyncScripts"
 	| "lint/nursery/noTernary"
 	| "lint/nursery/noUndeclaredEnvVars"
+	| "lint/nursery/noUndeclaredClasses"
 	| "lint/nursery/noUnknownAttribute"
 	| "lint/nursery/noUnnecessaryConditions"
+	| "lint/nursery/noUnusedClasses"
 	| "lint/nursery/noUnwantedPolyfillio"
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessReturn"
@@ -8366,6 +8396,7 @@ export type Category =
 	| "lint/nursery/useDestructuring"
 	| "lint/nursery/useErrorCause"
 	| "lint/nursery/useExhaustiveSwitchCases"
+	| "lint/nursery/useExpect"
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useFind"
@@ -8953,8 +8984,17 @@ export type HtmlVariant =
 	| "Vue"
 	| "Svelte";
 export type GritVariant = "Standard";
-export type EmbeddingHtmlKind = "None" | "Html" | "Vue" | "Astro" | "Svelte";
+export type EmbeddingHtmlKind =
+	| "None"
+	| "Html"
+	| { Vue: { applicability: EmbeddingStyleApplicability } }
+	| { Astro: { applicability: EmbeddingStyleApplicability } }
+	| { Svelte: { applicability: EmbeddingStyleApplicability } };
 export type HtmlTextExpressions = "None" | "Single" | "Double";
+/**
+ * How the CSS is applied inside a snippet
+ */
+export type EmbeddingStyleApplicability = "Local" | "Global" | "Unknown";
 export interface OpenFileResult {
 	diagnostics: Diagnostic[];
 }
@@ -9048,7 +9088,8 @@ export interface GetModuleGraphResult {
 }
 export type SerializedModuleInfo =
 	| { js: SerializedJsModuleInfo }
-	| { css: SerializedCssModuleInfo };
+	| { css: SerializedCssModuleInfo }
+	| { html: SerializedHtmlModuleInfo };
 export interface SerializedJsModuleInfo {
 	/**
 	 * Dynamic imports.
@@ -9058,6 +9099,10 @@ export interface SerializedJsModuleInfo {
 	 * Exported symbols.
 	 */
 	exports: string[];
+	/**
+	 * CSS class names referenced in JSX `className` or `class` attributes.
+	 */
+	referencedClasses: string[];
 	/**
 	* Map of all the paths from static imports in the module.
 
@@ -9084,11 +9129,25 @@ Maps from the local imported name to the absolute path it resolves to.
 }
 export interface SerializedCssModuleInfo {
 	/**
+	 * Set of all CSS class names defined in this file.
+	 */
+	classes: string[];
+	/**
 	* Map of all static imports found in the module.
 
 Maps from the local imported name to the absolute path it resolves to. 
 	 */
 	imports: string[];
+}
+export interface SerializedHtmlModuleInfo {
+	/**
+	 * CSS class names referenced in `class` attributes.
+	 */
+	referencedClasses: string[];
+	/**
+	 * CSS class names defined in `<style>` blocks.
+	 */
+	styleClasses: string[];
 }
 export interface PullDiagnosticsParams {
 	categories: RuleCategories;

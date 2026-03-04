@@ -13,6 +13,7 @@ import type {
 import { BiomeCommon } from "./common";
 
 export type * from "./common";
+export { spanInBytesToSpanInCodeUnits } from "./common";
 export type Configuration =
 	| ConfigurationBundler
 	| ConfigurationNodejs

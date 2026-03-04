@@ -6,13 +6,12 @@ expression: redactor(content)
 
 ```css
 .brokenStyle {
-	color: f(
+  color: f(
 }
 
 .style {
-	color: fakeFunction();
+  color: fakeFunction();
 }
-
 ```
 
 ## `index.ts`

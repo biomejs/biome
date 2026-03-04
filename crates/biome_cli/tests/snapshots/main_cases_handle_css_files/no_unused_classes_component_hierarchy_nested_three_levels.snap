@@ -1,0 +1,43 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `App.jsx`
+
+```jsx
+import "./styles.css";
+import Page from "./Page.jsx";
+export default () => <Page />;
+
+```
+
+## `Button.jsx`
+
+```jsx
+export default () => <button className="btn">Click</button>;
+```
+
+## `Page.jsx`
+
+```jsx
+import Button from "./Button.jsx";
+export default () => <div className="container"><Button /></div>;
+
+```
+
+## `styles.css`
+
+```css
+.container {
+  width: 100%;
+}
+.btn {
+  padding: 8px;
+}
+```
+
+# Emitted Messages
+
+```block
+Checked 4 files in <TIME>. No fixes applied.
+```

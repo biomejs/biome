@@ -6,6 +6,7 @@ mod scope;
 mod utils;
 mod visitor;
 
+use crate::css_module_info::CssClassReference;
 use biome_js_syntax::AnyJsImportLike;
 use biome_js_type_info::{BindingId, ImportSymbol, ResolvedTypeId, ScopeId, TypeData};
 use biome_jsdoc_comment::JsdocComment;
@@ -109,9 +110,7 @@ impl JsModuleInfo {
                 .map(|(specifier, JsImportPath { resolved_path, .. })| {
                     (
                         specifier.to_string(),
-                        resolved_path
-                            .as_ref()
-                            .map_or_else(|_| specifier.to_string(), ToString::to_string),
+                        resolved_path.dump().unwrap_or(specifier.to_string()),
                     )
                 })
                 .collect(),
@@ -126,6 +125,17 @@ impl JsModuleInfo {
                 .dynamic_import_paths
                 .iter()
                 .map(|(text, _)| text.to_string())
+                .collect::<BTreeSet<_>>(),
+
+            referenced_classes: self
+                .referenced_classes
+                .iter()
+                .flat_map(|r| {
+                    r.token
+                        .text()
+                        .split_ascii_whitespace()
+                        .map(|s| s.to_string())
+                })
                 .collect::<BTreeSet<_>>(),
         }
     }
@@ -210,6 +220,13 @@ pub struct JsModuleInfoInner {
 
     /// Whether type inference was enabled when this module info was created
     pub(crate) infer_types: bool,
+
+    /// CSS class references from JSX `className` or `class` attributes.
+    ///
+    /// Each entry represents one attribute occurrence (e.g., `className="foo bar"`),
+    /// which may contain multiple space-separated class names.
+    /// Only static string literals are collected; dynamic values are excluded.
+    pub referenced_classes: Vec<CssClassReference>,
 }
 
 #[derive(Debug, Default)]
@@ -459,4 +476,7 @@ pub struct SerializedJsModuleInfo {
 
     /// Exported symbols.
     pub exports: BTreeSet<String>,
+
+    /// CSS class names referenced in JSX `className` or `class` attributes.
+    pub referenced_classes: BTreeSet<String>,
 }

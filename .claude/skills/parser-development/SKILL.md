@@ -13,6 +13,19 @@ Use this skill when creating or modifying Biome's parsers. Covers grammar author
 2. Understand the language syntax you're implementing
 3. Read `crates/biome_parser/CONTRIBUTING.md` for detailed concepts
 
+## Code Standards
+
+**CRITICAL: No Emojis**
+
+Emojis are BANNED in all parser code:
+- NO emojis in code comments
+- NO emojis in rustdoc documentation
+- NO emojis in grammar files (.ungram)
+- NO emojis in test files
+- NO emojis in error messages or diagnostics
+
+Keep all code professional and emoji-free.
+
 ## Common Workflows
 
 ### Create Grammar for New Language

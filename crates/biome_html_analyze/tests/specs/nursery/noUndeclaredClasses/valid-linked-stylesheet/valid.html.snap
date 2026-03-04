@@ -1,0 +1,19 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.html
+---
+# Input
+```html
+<!-- should not generate diagnostics -->
+<!doctype html>
+<html>
+<head>
+	<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+	<div class="card">Defined in linked stylesheet</div>
+	<div class="header btn">Multiple classes from linked stylesheet</div>
+</body>
+</html>
+
+```

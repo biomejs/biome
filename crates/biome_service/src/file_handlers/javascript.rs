@@ -901,6 +901,7 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
     let tree = params.parse.tree();
     let analyzer_options = params.settings.analyzer_options::<JsLanguage>(
         params.path,
+        params.working_directory,
         &params.language,
         params.suppression_reason.as_deref(),
     );
@@ -968,12 +969,17 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         categories,
         action_offset,
         document_services: _,
+        working_directory,
     } = params;
     let _ = debug_span!("Code actions JavaScript", range =? range, path =? path).entered();
     let tree = parse.tree();
     let _ = trace_span!("Parsed file").entered();
-    let analyzer_options =
-        settings.analyzer_options::<JsLanguage>(path, &language, suppression_reason.as_deref());
+    let analyzer_options = settings.analyzer_options::<JsLanguage>(
+        path,
+        working_directory,
+        &language,
+        suppression_reason.as_deref(),
+    );
     let mut actions = Vec::new();
     let (enabled_rules, disabled_rules, analyzer_options) =
         AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
@@ -1037,6 +1043,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         .as_linter_rules(params.biome_path.as_path());
     let analyzer_options = params.settings.analyzer_options::<JsLanguage>(
         params.biome_path,
+        params.working_directory,
         &params.document_file_source,
         params.suppression_reason.as_deref(),
     );
@@ -1265,10 +1272,15 @@ pub(crate) fn pull_diagnostics_and_actions(
         plugins,
         diagnostic_offset,
         document_services: _,
+        working_directory,
     } = params;
     let tree = parse.tree();
-    let analyzer_options =
-        settings.analyzer_options::<JsLanguage>(path, &language, suppression_reason.as_deref());
+    let analyzer_options = settings.analyzer_options::<JsLanguage>(
+        path,
+        working_directory,
+        &language,
+        suppression_reason.as_deref(),
+    );
     let (enabled_rules, disabled_rules, analyzer_options) =
         AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
             .with_only(only)

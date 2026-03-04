@@ -4999,6 +4999,17 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUndeclaredClassesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUndeclaredClassesOptions" }
+			]
+		},
+		"NoUndeclaredClassesOptions": {
+			"description": "Options for the `noUndeclaredClasses` rule.",
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUndeclaredDependenciesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5274,6 +5285,16 @@
 			]
 		},
 		"NoUnsafeOptionalChainingOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoUnusedClassesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUnusedClassesOptions" }
+			]
+		},
+		"NoUnusedClassesOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -6071,6 +6092,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUndeclaredClasses": {
+					"description": "Reports CSS class names in HTML class attributes that are not defined in any \\<style> block or linked stylesheet available to the file.\nSee https://biomejs.dev/linter/rules/no-undeclared-classes",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUndeclaredClassesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUndeclaredEnvVars": {
 					"description": "Disallow the use of undeclared environment variables.\nSee https://biomejs.dev/linter/rules/no-undeclared-env-vars",
 					"anyOf": [
@@ -6089,6 +6117,13 @@
 					"description": "Disallow unnecessary type-based conditions that can be statically determined as redundant.\nSee https://biomejs.dev/linter/rules/no-unnecessary-conditions",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnnecessaryConditionsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnusedClasses": {
+					"description": "Reports CSS class selectors that are never referenced in any JSX or HTML file.\nSee https://biomejs.dev/linter/rules/no-unused-classes",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUnusedClassesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9111,6 +9146,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoUndeclaredClassesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUndeclaredClassesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoUndeclaredDependenciesOptions": {
 			"type": "object",
 			"properties": {
@@ -9297,6 +9341,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUnsafeOptionalChainingOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUnusedClassesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUnusedClassesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

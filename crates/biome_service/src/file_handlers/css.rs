@@ -543,6 +543,7 @@ fn lint(params: LintParams) -> LintResults {
     let settings = &params.settings;
     let analyzer_options = settings.analyzer_options::<CssLanguage>(
         params.path,
+        params.working_directory,
         &params.language,
         params.suppression_reason.as_deref(),
     );
@@ -571,6 +572,8 @@ fn lint(params: LintParams) -> LintResults {
                 .and_then(|services| services.semantic_model.as_ref())
         }),
         file_source,
+        module_graph: Some(params.module_graph.clone()),
+        project_layout: Some(params.project_layout.clone()),
     };
     let (_, analyze_diagnostics) = analyze(
         &tree,
@@ -596,7 +599,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         range,
         settings,
         path,
-        module_graph: _,
+        module_graph,
         project_layout,
         language,
         only,
@@ -607,6 +610,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         categories,
         action_offset,
         document_services,
+        working_directory,
     } = params;
     let tree = parse.tree();
     let Some(file_source) = language.to_css_file_source() else {
@@ -616,8 +620,12 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         };
     };
 
-    let analyzer_options =
-        settings.analyzer_options::<CssLanguage>(path, &language, suppression_reason.as_deref());
+    let analyzer_options = settings.analyzer_options::<CssLanguage>(
+        path,
+        working_directory,
+        &language,
+        suppression_reason.as_deref(),
+    );
     let mut actions = Vec::new();
     let (enabled_rules, disabled_rules, analyzer_options) =
         AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
@@ -625,7 +633,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             .with_skip(skip)
             .with_path(path.as_path())
             .with_enabled_selectors(rules)
-            .with_project_layout(project_layout)
+            .with_project_layout(project_layout.clone())
             .finish();
 
     let filter = AnalysisFilter {
@@ -641,6 +649,8 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             .as_css_services()
             .and_then(|services| services.semantic_model.as_ref()),
         file_source,
+        module_graph: Some(module_graph),
+        project_layout: Some(project_layout),
     };
 
     analyze(
@@ -682,6 +692,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         .as_linter_rules(params.biome_path.as_path());
     let analyzer_options = params.settings.analyzer_options::<CssLanguage>(
         params.biome_path,
+        params.working_directory,
         &params.document_file_source,
         params.suppression_reason.as_deref(),
     );
@@ -714,6 +725,8 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                 .as_css_services()
                 .and_then(|services| services.semantic_model.as_ref()),
             file_source,
+            module_graph: Some(params.module_graph.clone()),
+            project_layout: Some(params.project_layout.clone()),
         };
 
         let (action, _) = analyze(

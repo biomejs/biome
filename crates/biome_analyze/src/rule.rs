@@ -1419,12 +1419,6 @@ pub struct RuleDiagnostic {
     advice_offset: Option<TextSize>,
 }
 
-impl RuleDiagnostic {
-    pub(crate) fn set_advice_offset(&mut self, offset: TextSize) {
-        self.advice_offset = Some(offset);
-    }
-}
-
 impl Diagnostic for RuleDiagnostic {
     fn severity(&self) -> Severity {
         self.severity
@@ -1529,6 +1523,10 @@ impl RuleDiagnostic {
             severity: Severity::default(),
             advice_offset: None,
         }
+    }
+
+    pub(crate) fn set_advice_offset(&mut self, offset: TextSize) {
+        self.advice_offset = Some(offset);
     }
 
     /// Marks this diagnostic as deprecated code, which will
