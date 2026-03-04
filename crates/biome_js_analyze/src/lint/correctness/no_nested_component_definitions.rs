@@ -112,6 +112,7 @@ impl Rule for NoNestedComponentDefinitions {
             && let Some(parent_component) = node
                 .syntax()
                 .ancestors()
+                .skip(1)
                 .skip_while(|ancestor| ancestor.eq(node.syntax()))
                 .find_map(|syntax| ReactComponentInfo::from_declaration(&syntax))
         {
