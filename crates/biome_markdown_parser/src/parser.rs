@@ -15,7 +15,7 @@ use crate::token_source::{MarkdownTokenSource, MarkdownTokenSourceCheckpoint};
 
 /// Options for configuring the markdown parser.
 #[derive(Debug, Clone)]
-pub struct MarkdownParseOptions {
+pub struct MarkdownParserOptions {
     /// Maximum nesting depth for block quotes and lists.
     ///
     /// This limits recursion on pathological input to avoid stack overflow.
@@ -23,7 +23,7 @@ pub struct MarkdownParseOptions {
     // Reserved for future GFM options
 }
 
-impl Default for MarkdownParseOptions {
+impl Default for MarkdownParserOptions {
     fn default() -> Self {
         Self {
             max_nesting_depth: DEFAULT_MAX_NESTING_DEPTH,
@@ -112,12 +112,12 @@ pub struct QuoteIndent {
 pub(crate) struct MarkdownParser<'source> {
     context: ParserContext<MarkdownSyntaxKind>,
     source: MarkdownTokenSource<'source>,
-    options: MarkdownParseOptions,
+    options: MarkdownParserOptions,
     state: MarkdownParserState,
 }
 
 impl<'source> MarkdownParser<'source> {
-    pub fn new(source: &'source str, options: MarkdownParseOptions) -> Self {
+    pub fn new(source: &'source str, options: MarkdownParserOptions) -> Self {
         Self {
             context: ParserContext::default(),
             source: MarkdownTokenSource::from_str(source),
@@ -127,7 +127,7 @@ impl<'source> MarkdownParser<'source> {
     }
 
     /// Returns parser options. Reserved for GFM extensions.
-    pub(crate) fn options(&self) -> &MarkdownParseOptions {
+    pub(crate) fn options(&self) -> &MarkdownParserOptions {
         &self.options
     }
 
