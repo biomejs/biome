@@ -7,7 +7,9 @@ use crate::syntax::at_rule::supports::error::{
 };
 use crate::syntax::block::parse_conditional_block;
 use crate::syntax::declaration::parse_declaration_important;
-use crate::syntax::parse_error::{expected_component_value, expected_declaration, expected_selector};
+use crate::syntax::parse_error::{
+    expected_component_value, expected_declaration, expected_selector,
+};
 use crate::syntax::property::{
     GenericComponentValueList, is_at_generic_property, parse_generic_property_name,
 };
