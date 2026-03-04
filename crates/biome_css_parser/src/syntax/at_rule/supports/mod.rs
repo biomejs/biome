@@ -7,7 +7,7 @@ use crate::syntax::at_rule::supports::error::{
 };
 use crate::syntax::block::parse_conditional_block;
 use crate::syntax::declaration::parse_declaration_important;
-use crate::syntax::parse_error::{expected_declaration, expected_selector};
+use crate::syntax::parse_error::{expected_component_value, expected_declaration, expected_selector};
 use crate::syntax::property::{
     GenericComponentValueList, is_at_generic_property, parse_generic_property_name,
 };
@@ -347,8 +347,15 @@ const END_OF_SUPPORTS_PROPERTY_VALUE_TOKEN_SET: TokenSet<CssSyntaxKind> =
 #[inline]
 fn parse_supports_property_value(p: &mut CssParser) {
     if CssSyntaxFeatures::Scss.is_supported(p) {
-        parse_scss_expression_allow_empty_value_until(p, END_OF_SUPPORTS_PROPERTY_VALUE_TOKEN_SET)
-            .ok();
+        let missing_value = parse_scss_expression_allow_empty_value_until(
+            p,
+            END_OF_SUPPORTS_PROPERTY_VALUE_TOKEN_SET,
+        )
+        .ok()
+        .is_none_or(|value| value.range(p).is_empty());
+        if missing_value {
+            p.error(expected_component_value(p, p.cur_range()));
+        }
     } else {
         GenericComponentValueList::new(
             END_OF_SUPPORTS_PROPERTY_VALUE_TOKEN_SET,

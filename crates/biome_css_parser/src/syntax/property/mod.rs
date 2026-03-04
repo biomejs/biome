@@ -108,7 +108,8 @@ fn parse_composes_property_with_value_end_set(
     {
         let m = p.start();
 
-        let classes = ComposesClassList.parse_list(p);
+        let class_list_end_set = value_end_set.union(token_set!(T![from]));
+        let classes = ComposesClassList::new(class_list_end_set, recovery_end_set).parse_list(p);
 
         // If the list of classes is empty, generate a diagnostic error.
         if classes.range(p).is_empty() {
@@ -136,7 +137,19 @@ fn parse_composes_property_with_value_end_set(
 }
 
 /// A struct representing a list of classes in a `composes` property.
-struct ComposesClassList;
+struct ComposesClassList {
+    end_set: TokenSet<CssSyntaxKind>,
+    recovery_end_set: TokenSet<CssSyntaxKind>,
+}
+
+impl ComposesClassList {
+    fn new(end_set: TokenSet<CssSyntaxKind>, recovery_end_set: TokenSet<CssSyntaxKind>) -> Self {
+        Self {
+            end_set,
+            recovery_end_set,
+        }
+    }
+}
 
 impl ParseNodeList for ComposesClassList {
     type Kind = CssSyntaxKind;
@@ -153,7 +166,7 @@ impl ParseNodeList for ComposesClassList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at_ts(END_OF_COMPOSES_CLASS_TOKEN_SET)
+        p.at_ts(self.end_set)
     }
 
     fn recover(
@@ -161,11 +174,27 @@ impl ParseNodeList for ComposesClassList {
         p: &mut Self::Parser<'_>,
         parsed_element: ParsedSyntax,
     ) -> RecoveryResult {
-        parsed_element.or_recover(p, &ComposesClassListParseRecovery, expected_identifier)
+        parsed_element.or_recover(
+            p,
+            &ComposesClassListParseRecovery::new(self.end_set, self.recovery_end_set),
+            expected_identifier,
+        )
     }
 }
 
-struct ComposesClassListParseRecovery;
+struct ComposesClassListParseRecovery {
+    end_set: TokenSet<CssSyntaxKind>,
+    recovery_end_set: TokenSet<CssSyntaxKind>,
+}
+
+impl ComposesClassListParseRecovery {
+    fn new(end_set: TokenSet<CssSyntaxKind>, recovery_end_set: TokenSet<CssSyntaxKind>) -> Self {
+        Self {
+            end_set,
+            recovery_end_set,
+        }
+    }
+}
 
 impl ParseRecovery for ComposesClassListParseRecovery {
     type Kind = CssSyntaxKind;
@@ -174,12 +203,9 @@ impl ParseRecovery for ComposesClassListParseRecovery {
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
         // If the next token is the end of the list or the next element, we're at a recovery point.
-        p.at_ts(END_OF_COMPOSES_CLASS_TOKEN_SET) || is_at_identifier(p)
+        p.at_ts(self.end_set) || p.at_ts(self.recovery_end_set) || is_at_identifier(p)
     }
 }
-
-const END_OF_COMPOSES_CLASS_TOKEN_SET: TokenSet<CssSyntaxKind> =
-    END_OF_PROPERTY_VALUE_TOKEN_SET.union(token_set!(T![from]));
 
 #[inline]
 pub(crate) fn is_at_generic_property(p: &mut CssParser) -> bool {
@@ -244,16 +270,13 @@ fn parse_generic_property_with_value_end_set(
     p.expect(T![:]);
 
     if CssSyntaxFeatures::Scss.is_supported(p) {
-        let value = parse_scss_expression_allow_empty_value_until(p, value_end_set);
-        let missing_value = match &value {
-            Present(m) => m.range(p).is_empty(),
-            Absent => true,
-        };
+        let missing_value = parse_scss_expression_allow_empty_value_until(p, value_end_set)
+            .ok()
+            .is_none_or(|value| value.range(p).is_empty());
 
         if missing_value {
             p.error(expected_component_value(p, p.cur_range()));
         }
-        value.ok();
     } else {
         GenericComponentValueList::new(value_end_set, recovery_end_set).parse_list(p);
     }
