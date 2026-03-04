@@ -12,6 +12,7 @@ impl FormatRule<AnyMdInline> for FormatAnyMdInline {
             AnyMdInline::MdEntityReference(node) => node.format().fmt(f),
             AnyMdInline::MdHardLine(node) => node.format().fmt(f),
             AnyMdInline::MdHtmlBlock(node) => node.format().fmt(f),
+            AnyMdInline::MdIndentToken(node) => node.format().fmt(f),
             AnyMdInline::MdInlineCode(node) => node.format().fmt(f),
             AnyMdInline::MdInlineEmphasis(node) => node.format().fmt(f),
             AnyMdInline::MdInlineHtml(node) => node.format().fmt(f),

@@ -1711,6 +1711,7 @@ pub enum AnyMdInline {
     MdEntityReference(MdEntityReference),
     MdHardLine(MdHardLine),
     MdHtmlBlock(MdHtmlBlock),
+    MdIndentToken(MdIndentToken),
     MdInlineCode(MdInlineCode),
     MdInlineEmphasis(MdInlineEmphasis),
     MdInlineHtml(MdInlineHtml),
@@ -1745,6 +1746,12 @@ impl AnyMdInline {
     pub fn as_md_html_block(&self) -> Option<&MdHtmlBlock> {
         match &self {
             Self::MdHtmlBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_md_indent_token(&self) -> Option<&MdIndentToken> {
+        match &self {
+            Self::MdIndentToken(item) => Some(item),
             _ => None,
         }
     }
@@ -4118,6 +4125,11 @@ impl From<MdHtmlBlock> for AnyMdInline {
         Self::MdHtmlBlock(node)
     }
 }
+impl From<MdIndentToken> for AnyMdInline {
+    fn from(node: MdIndentToken) -> Self {
+        Self::MdIndentToken(node)
+    }
+}
 impl From<MdInlineCode> for AnyMdInline {
     fn from(node: MdInlineCode) -> Self {
         Self::MdInlineCode(node)
@@ -4179,6 +4191,7 @@ impl AstNode for AnyMdInline {
         .union(MdEntityReference::KIND_SET)
         .union(MdHardLine::KIND_SET)
         .union(MdHtmlBlock::KIND_SET)
+        .union(MdIndentToken::KIND_SET)
         .union(MdInlineCode::KIND_SET)
         .union(MdInlineEmphasis::KIND_SET)
         .union(MdInlineHtml::KIND_SET)
@@ -4197,6 +4210,7 @@ impl AstNode for AnyMdInline {
                 | MD_ENTITY_REFERENCE
                 | MD_HARD_LINE
                 | MD_HTML_BLOCK
+                | MD_INDENT_TOKEN
                 | MD_INLINE_CODE
                 | MD_INLINE_EMPHASIS
                 | MD_INLINE_HTML
@@ -4216,6 +4230,7 @@ impl AstNode for AnyMdInline {
             MD_ENTITY_REFERENCE => Self::MdEntityReference(MdEntityReference { syntax }),
             MD_HARD_LINE => Self::MdHardLine(MdHardLine { syntax }),
             MD_HTML_BLOCK => Self::MdHtmlBlock(MdHtmlBlock { syntax }),
+            MD_INDENT_TOKEN => Self::MdIndentToken(MdIndentToken { syntax }),
             MD_INLINE_CODE => Self::MdInlineCode(MdInlineCode { syntax }),
             MD_INLINE_EMPHASIS => Self::MdInlineEmphasis(MdInlineEmphasis { syntax }),
             MD_INLINE_HTML => Self::MdInlineHtml(MdInlineHtml { syntax }),
@@ -4237,6 +4252,7 @@ impl AstNode for AnyMdInline {
             Self::MdEntityReference(it) => it.syntax(),
             Self::MdHardLine(it) => it.syntax(),
             Self::MdHtmlBlock(it) => it.syntax(),
+            Self::MdIndentToken(it) => it.syntax(),
             Self::MdInlineCode(it) => it.syntax(),
             Self::MdInlineEmphasis(it) => it.syntax(),
             Self::MdInlineHtml(it) => it.syntax(),
@@ -4256,6 +4272,7 @@ impl AstNode for AnyMdInline {
             Self::MdEntityReference(it) => it.into_syntax(),
             Self::MdHardLine(it) => it.into_syntax(),
             Self::MdHtmlBlock(it) => it.into_syntax(),
+            Self::MdIndentToken(it) => it.into_syntax(),
             Self::MdInlineCode(it) => it.into_syntax(),
             Self::MdInlineEmphasis(it) => it.into_syntax(),
             Self::MdInlineHtml(it) => it.into_syntax(),
@@ -4277,6 +4294,7 @@ impl std::fmt::Debug for AnyMdInline {
             Self::MdEntityReference(it) => std::fmt::Debug::fmt(it, f),
             Self::MdHardLine(it) => std::fmt::Debug::fmt(it, f),
             Self::MdHtmlBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::MdIndentToken(it) => std::fmt::Debug::fmt(it, f),
             Self::MdInlineCode(it) => std::fmt::Debug::fmt(it, f),
             Self::MdInlineEmphasis(it) => std::fmt::Debug::fmt(it, f),
             Self::MdInlineHtml(it) => std::fmt::Debug::fmt(it, f),
@@ -4298,6 +4316,7 @@ impl From<AnyMdInline> for SyntaxNode {
             AnyMdInline::MdEntityReference(it) => it.into_syntax(),
             AnyMdInline::MdHardLine(it) => it.into_syntax(),
             AnyMdInline::MdHtmlBlock(it) => it.into_syntax(),
+            AnyMdInline::MdIndentToken(it) => it.into_syntax(),
             AnyMdInline::MdInlineCode(it) => it.into_syntax(),
             AnyMdInline::MdInlineEmphasis(it) => it.into_syntax(),
             AnyMdInline::MdInlineHtml(it) => it.into_syntax(),

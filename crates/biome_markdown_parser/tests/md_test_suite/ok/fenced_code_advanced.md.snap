@@ -378,8 +378,14 @@ MdDocument {
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@341..342 "\n" [] [],
                 },
+                MdIndentToken {
+                    md_indent_char_token: MD_INDENT_CHAR@342..343 " " [] [],
+                },
+                MdIndentToken {
+                    md_indent_char_token: MD_INDENT_CHAR@343..344 " " [] [],
+                },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@342..353 "code line" [Skipped(" "), Skipped(" ")] [],
+                    value_token: MD_TEXTUAL_LITERAL@344..353 "code line" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@353..354 "\n" [] [],
@@ -618,9 +624,13 @@ MdDocument {
       2: MD_INLINE_ITEM_LIST@341..354
         0: MD_TEXTUAL@341..342
           0: MD_TEXTUAL_LITERAL@341..342 "\n" [] []
-        1: MD_TEXTUAL@342..353
-          0: MD_TEXTUAL_LITERAL@342..353 "code line" [Skipped(" "), Skipped(" ")] []
-        2: MD_TEXTUAL@353..354
+        1: MD_INDENT_TOKEN@342..343
+          0: MD_INDENT_CHAR@342..343 " " [] []
+        2: MD_INDENT_TOKEN@343..344
+          0: MD_INDENT_CHAR@343..344 " " [] []
+        3: MD_TEXTUAL@344..353
+          0: MD_TEXTUAL_LITERAL@344..353 "code line" [] []
+        4: MD_TEXTUAL@353..354
           0: MD_TEXTUAL_LITERAL@353..354 "\n" [] []
       3: TRIPLE_BACKTICK@354..359 "```" [Skipped(" "), Skipped(" ")] []
     26: MD_NEWLINE@359..360

@@ -33,6 +33,7 @@ use biome_parser::{
 };
 
 use crate::syntax::parse_error::unterminated_fenced_code;
+use crate::syntax::quote::try_bump_quote_marker;
 use crate::syntax::{MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES};
 
 /// Minimum number of fence characters required per CommonMark §4.5.
@@ -276,70 +277,128 @@ fn parse_code_content(
 
     // Consume all tokens until we see the matching closing fence or EOF
     while !p.at(T![EOF]) {
-        if at_line_start && quote_depth > 0 {
-            let prev_virtual = p.state().virtual_line_start;
-            p.state_mut().virtual_line_start = Some(p.cur_range().start());
-            p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
-            p.state_mut().virtual_line_start = prev_virtual;
-
-            let mut ok = true;
-            for _ in 0..quote_depth {
-                if p.at(MD_TEXTUAL_LITERAL) && p.cur_text().starts_with('>') {
-                    p.force_relex_regular();
-                }
-
-                if p.at(T![>]) {
-                    p.parse_as_skipped_trivia_tokens(|p| p.bump(T![>]));
-                } else if p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == ">" {
-                    p.parse_as_skipped_trivia_tokens(|p| p.bump_remap(T![>]));
-                } else {
-                    ok = false;
-                    break;
-                }
-
-                if p.at(MD_TEXTUAL_LITERAL) {
-                    let text = p.cur_text();
-                    if text == " " || text == "\t" {
-                        p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_TEXTUAL_LITERAL));
-                    }
-                }
-            }
-
-            if !ok {
-                break;
-            }
-            at_line_start = false;
+        match prepare_next_code_content_token(
+            p,
+            is_tilde_fence,
+            fence_len,
+            fence_indent,
+            quote_depth,
+            &mut at_line_start,
+        ) {
+            CodeContentLoopAction::Break => break,
+            CodeContentLoopAction::Continue => continue,
+            CodeContentLoopAction::ConsumeText => {}
         }
 
-        if p.at(NEWLINE) {
-            // Preserve newlines as code content and reset virtual line start.
-            let text_m = p.start();
-            p.bump_remap(MD_TEXTUAL_LITERAL);
-            text_m.complete(p, MD_TEXTUAL);
-            p.set_virtual_line_start();
-            at_line_start = true;
-            continue;
-        }
-
-        if at_closing_fence(p, is_tilde_fence, fence_len) {
-            break;
-        }
-
-        if at_line_start && fence_indent > 0 {
-            skip_fenced_content_indent(p, fence_indent);
-            if at_closing_fence(p, is_tilde_fence, fence_len) {
-                break;
-            }
-        }
-
-        // Consume the token as code content (including NEWLINE tokens)
-        let text_m = p.start();
-        p.bump_remap(MD_TEXTUAL_LITERAL);
-        text_m.complete(p, MD_TEXTUAL);
+        consume_code_textual(p);
         at_line_start = false;
     }
 
     m.complete(p, MD_INLINE_ITEM_LIST);
+}
+
+enum CodeContentLoopAction {
+    Break,
+    Continue,
+    ConsumeText,
+}
+
+fn prepare_next_code_content_token(
+    p: &mut MarkdownParser,
+    is_tilde_fence: bool,
+    fence_len: usize,
+    fence_indent: usize,
+    quote_depth: usize,
+    at_line_start: &mut bool,
+) -> CodeContentLoopAction {
+    if *at_line_start && quote_depth > 0 {
+        if !consume_quote_prefixes_in_code_content(p, quote_depth) {
+            return CodeContentLoopAction::Break;
+        }
+        *at_line_start = false;
+    }
+
+    if consume_code_newline(p) {
+        *at_line_start = true;
+        return CodeContentLoopAction::Continue;
+    }
+
+    if at_closing_fence(p, is_tilde_fence, fence_len) {
+        return CodeContentLoopAction::Break;
+    }
+
+    if *at_line_start && fence_indent > 0 {
+        skip_fenced_content_indent(p, fence_indent);
+        if at_closing_fence(p, is_tilde_fence, fence_len) {
+            return CodeContentLoopAction::Break;
+        }
+    }
+
+    CodeContentLoopAction::ConsumeText
+}
+
+fn consume_quote_prefixes_in_code_content(p: &mut MarkdownParser, quote_depth: usize) -> bool {
+    let prev_virtual = p.state().virtual_line_start;
+    p.state_mut().virtual_line_start = Some(p.cur_range().start());
+    p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
+    p.state_mut().virtual_line_start = prev_virtual;
+
+    for _ in 0..quote_depth {
+        if !consume_quote_prefix_in_code_content(p) {
+            return false;
+        }
+    }
+
+    true
+}
+
+fn consume_quote_prefix_in_code_content(p: &mut MarkdownParser) -> bool {
+    if p.at(MD_TEXTUAL_LITERAL) && p.cur_text().starts_with('>') {
+        p.force_relex_regular();
+    }
+
+    if !(p.at(T![>]) || (p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == ">")) {
+        return false;
+    }
+
+    let prefix_m = p.start();
+
+    // Empty pre-marker indent list (initial indent handled by skip_line_indent).
+    let indent_list_m = p.start();
+    indent_list_m.complete(p, MD_QUOTE_INDENT_LIST);
+
+    debug_assert!(try_bump_quote_marker(p), "guard above guarantees marker present");
+
+    // Optional post-marker space
+    if p.at(MD_TEXTUAL_LITERAL) {
+        let text = p.cur_text();
+        if text == " " || text == "\t" {
+            p.bump_remap(MD_QUOTE_POST_MARKER_SPACE);
+        }
+    }
+
+    prefix_m.complete(p, MD_QUOTE_PREFIX);
+    true
+}
+
+fn consume_code_newline(p: &mut MarkdownParser) -> bool {
+    if !p.at(NEWLINE) {
+        return false;
+    }
+
+    // Preserve newlines as code content and reset virtual line start.
+    let text_m = p.start();
+    p.bump_remap(MD_TEXTUAL_LITERAL);
+    text_m.complete(p, MD_TEXTUAL);
+    p.set_virtual_line_start();
+    true
+}
+
+fn consume_code_textual(p: &mut MarkdownParser) {
+    // Consume the token as code content (including NEWLINE tokens).
+    let text_m = p.start();
+    p.bump_remap(MD_TEXTUAL_LITERAL);
+    text_m.complete(p, MD_TEXTUAL);
 }
 
 pub(crate) fn info_string_has_backtick(p: &mut MarkdownParser) -> bool {
@@ -390,7 +449,9 @@ fn skip_fenced_content_indent(p: &mut MarkdownParser, indent: usize) {
         }
 
         consumed += width;
-        p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_TEXTUAL_LITERAL));
+        let char_m = p.start();
+        p.bump_remap(MD_INDENT_CHAR);
+        char_m.complete(p, MD_INDENT_TOKEN);
     }
 }
 
