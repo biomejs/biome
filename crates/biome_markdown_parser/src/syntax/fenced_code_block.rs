@@ -286,7 +286,7 @@ fn parse_code_content(
             &mut at_line_start,
         ) {
             CodeContentTokenAction::Break => break,
-            CodeContentTokenAction::Skip => continue,
+            CodeContentTokenAction::Skip => {}
             CodeContentTokenAction::Consume => {
                 bump_code_textual(p);
                 at_line_start = false;
