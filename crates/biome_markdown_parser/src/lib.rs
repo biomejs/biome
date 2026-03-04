@@ -1,7 +1,7 @@
 #![deny(clippy::use_self)]
 
 use biome_markdown_factory::MarkdownSyntaxFactory;
-use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode, MdDocument};
+use biome_markdown_syntax::{MdDocument, MdLanguage, MdSyntaxNode};
 use biome_parser::{AnyParse, NodeParse, prelude::ParseDiagnostic, tree_sink::LosslessTreeSink};
 use biome_rowan::{AstNode, NodeCache};
 use parser::MarkdownParser;
@@ -24,7 +24,7 @@ pub use parser::MarkdownParserOptions;
 pub use to_html::document_to_html;
 
 pub(crate) type MarkdownLosslessTreeSink<'source> =
-    LosslessTreeSink<'source, MarkdownLanguage, MarkdownSyntaxFactory>;
+    LosslessTreeSink<'source, MdLanguage, MarkdownSyntaxFactory>;
 
 /// Parse markdown source code with default options.
 pub fn parse_markdown(source: &str) -> MarkdownParse {
@@ -64,7 +64,7 @@ pub fn parse_markdown_with_cache(
 /// A utility struct for managing the result of a parser job
 #[derive(Debug)]
 pub struct MarkdownParse {
-    root: MarkdownSyntaxNode,
+    root: MdSyntaxNode,
     diagnostics: Vec<ParseDiagnostic>,
     list_tightness: Vec<parser::ListTightness>,
     list_item_indents: Vec<parser::ListItemIndent>,
@@ -73,7 +73,7 @@ pub struct MarkdownParse {
 
 impl MarkdownParse {
     pub fn new(
-        root: MarkdownSyntaxNode,
+        root: MdSyntaxNode,
         diagnostics: Vec<ParseDiagnostic>,
         list_tightness: Vec<parser::ListTightness>,
         list_item_indents: Vec<parser::ListItemIndent>,
@@ -88,7 +88,7 @@ impl MarkdownParse {
         }
     }
 
-    pub fn syntax(&self) -> MarkdownSyntaxNode {
+    pub fn syntax(&self) -> MdSyntaxNode {
         self.root.clone()
     }
 

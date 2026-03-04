@@ -1,49 +1,52 @@
-use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode};
-
-mod prelude;
+use biome_markdown_syntax::{MdLanguage, MdSyntaxNode, MdSyntaxToken};
 
 mod comments;
 pub mod context;
 mod cst;
-pub mod generated;
-pub mod markdown;
-pub mod verbatim;
+mod generated;
+mod markdown;
+mod prelude;
+mod trivia;
+mod verbatim;
 
+pub(crate) use crate::context::MdFormatContext;
+use crate::prelude::{format_bogus_node, format_suppressed_node};
+pub(crate) use crate::trivia::*;
+use crate::{context::MdFormatOptions, cst::FormatMarkdownSyntaxNode};
 use biome_formatter::{
-    FormatContext, FormatLanguage, FormatResult, Formatted, TransformSourceMap, prelude::*,
+    FormatContext, FormatLanguage, FormatOwnedWithRule, FormatRefWithRule, FormatResult,
+    FormatRule, Formatted, TransformSourceMap,
+    prelude::*,
+    trivia::{FormatToken, format_skipped_token_trivia},
+    write,
 };
 use biome_rowan::AstNode;
 
-pub(crate) use crate::context::MarkdownFormatContext;
-use crate::{
-    context::MarkdownFormatOptions, cst::FormatMarkdownSyntaxNode, verbatim::format_bogus_node,
-};
-
-pub(crate) type MarkdownFormatter<'buf> = Formatter<'buf, MarkdownFormatContext>;
+pub(crate) type MarkdownFormatter<'buf> = Formatter<'buf, MdFormatContext>;
 
 #[derive(Debug, Clone, Default)]
-pub struct MarkdownFormatLanguage {
-    options: MarkdownFormatOptions,
+pub struct MdFormatLanguage {
+    options: MdFormatOptions,
 }
 
-impl MarkdownFormatLanguage {
-    pub fn new(options: MarkdownFormatOptions) -> Self {
+impl MdFormatLanguage {
+    pub fn new(options: MdFormatOptions) -> Self {
         Self { options }
     }
 }
 
-impl FormatLanguage for MarkdownFormatLanguage {
-    type SyntaxLanguage = MarkdownLanguage;
-    type Context = MarkdownFormatContext;
+impl FormatLanguage for MdFormatLanguage {
+    type SyntaxLanguage = MdLanguage;
+    type Context = MdFormatContext;
     type FormatRule = FormatMarkdownSyntaxNode;
 
     fn create_context(
         self,
-        _root: &MarkdownSyntaxNode,
+        _root: &MdSyntaxNode,
         source_map: Option<TransformSourceMap>,
         _delegate_fmt_embedded_nodes: bool,
-    ) -> MarkdownFormatContext {
-        MarkdownFormatContext::new(self.options.clone()).with_source_map(source_map)
+    ) -> MdFormatContext {
+        MdFormatContext::new(self.options.clone()).with_source_map(source_map)
     }
 
     fn options(&self) -> &<Self::Context as FormatContext>::Options {
@@ -198,33 +201,106 @@ pub(crate) trait AsFormat<Context> {
     fn format(&self) -> Self::Format<'_>;
 }
 
-/// Rule for formatting an bogus nodes.
+/// Rule for formatting bogus nodes.
 pub(crate) trait FormatBogusNodeRule<N>
 where
-    N: AstNode<Language = MarkdownLanguage>,
+    N: AstNode<Language = MdLanguage>,
 {
     fn fmt(&self, node: &N, f: &mut MarkdownFormatter) -> FormatResult<()> {
         format_bogus_node(node.syntax()).fmt(f)
     }
 }
 
-/// Format a [MarkdownSyntaxNode]
+/// Format a [MdSyntaxNode]
 pub(crate) trait FormatNodeRule<N>
 where
-    N: AstNode<Language = MarkdownLanguage>,
+    N: AstNode<Language = MdLanguage>,
 {
-    // this is the method that actually start the formatting
     fn fmt(&self, node: &N, f: &mut MarkdownFormatter) -> FormatResult<()> {
-        self.fmt_fields(node, f)
+        if self.is_suppressed(node, f) || self.is_global_suppressed(node, f) {
+            return write!(f, [format_suppressed_node(node.syntax())]);
+        }
+
+        self.fmt_leading_comments(node, f)?;
+        self.fmt_fields(node, f)?;
+        self.fmt_dangling_comments(node, f)?;
+        self.fmt_trailing_comments(node, f)
+    }
+
+    /// Returns `true` if the node has a suppression comment and should use the same formatting as in the source document.
+    fn is_suppressed(&self, node: &N, f: &MarkdownFormatter) -> bool {
+        f.context().comments().is_suppressed(node.syntax())
+    }
+
+    /// Returns `true` if the node has a global suppression comment and should use the same formatting as in the source document.
+    fn is_global_suppressed(&self, node: &N, f: &MarkdownFormatter) -> bool {
+        f.context().comments().is_global_suppressed(node.syntax())
     }
 
     fn fmt_fields(&self, node: &N, f: &mut MarkdownFormatter) -> FormatResult<()>;
+
+    fn fmt_leading_comments(&self, node: &N, f: &mut MarkdownFormatter) -> FormatResult<()> {
+        format_leading_comments(node.syntax()).fmt(f)
+    }
+
+    fn fmt_dangling_comments(&self, node: &N, f: &mut MarkdownFormatter) -> FormatResult<()> {
+        format_dangling_comments(node.syntax())
+            .with_soft_block_indent()
+            .fmt(f)
+    }
+
+    fn fmt_trailing_comments(&self, node: &N, f: &mut MarkdownFormatter) -> FormatResult<()> {
+        format_trailing_comments(node.syntax()).fmt(f)
+    }
+}
+
+/// Format implementation specific to Markdown tokens.
+#[derive(Debug, Default)]
+pub(crate) struct FormatMdSyntaxToken;
+
+impl FormatRule<MdSyntaxToken> for FormatMdSyntaxToken {
+    type Context = MdFormatContext;
+
+    fn fmt(&self, token: &MdSyntaxToken, f: &mut Formatter<Self::Context>) -> FormatResult<()> {
+        f.state_mut().track_token(token);
+
+        self.format_skipped_token_trivia(token, f)?;
+        self.format_trimmed_token_trivia(token, f)?;
+
+        Ok(())
+    }
+}
+
+impl FormatToken<MdLanguage, MdFormatContext> for FormatMdSyntaxToken {
+    fn format_skipped_token_trivia(
+        &self,
+        token: &MdSyntaxToken,
+        f: &mut Formatter<MdFormatContext>,
+    ) -> FormatResult<()> {
+        format_skipped_token_trivia(token).fmt(f)
+    }
+}
+
+impl AsFormat<MdFormatContext> for MdSyntaxToken {
+    type Format<'a> = FormatRefWithRule<'a, Self, FormatMdSyntaxToken>;
+
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(self, FormatMdSyntaxToken)
+    }
+}
+
+impl IntoFormat<MdFormatContext> for MdSyntaxToken {
+    type Format = FormatOwnedWithRule<Self, FormatMdSyntaxToken>;
+
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(self, FormatMdSyntaxToken)
+    }
 }
 
 /// Main entry point for formatting a Markdown file
 pub fn format_node(
-    options: MarkdownFormatOptions,
-    root: &MarkdownSyntaxNode,
-) -> FormatResult<Formatted<MarkdownFormatContext>> {
-    biome_formatter::format_node(root, MarkdownFormatLanguage::new(options), false)
+    options: MdFormatOptions,
+    root: &MdSyntaxNode,
+) -> FormatResult<Formatted<MdFormatContext>> {
+    biome_formatter::format_node(root, MdFormatLanguage::new(options), false)
 }

@@ -2,23 +2,26 @@ use super::{
     Capabilities, DebugCapabilities, DocumentFileSource, EnabledForPath, ExtensionHandler,
     FormatterCapabilities, ParseResult, ParserCapabilities, SearchCapabilities,
 };
+use crate::WorkspaceError;
 use crate::settings::{
     FormatSettings, LanguageListSettings, LanguageSettings, OverrideSettings, ServiceLanguage,
-    Settings, SettingsWithEditor, check_feature_activity,
+    Settings, SettingsWithEditor, check_feature_activity, check_override_feature_activity,
 };
 use crate::workspace::GetSyntaxTreeResult;
 use biome_analyze::AnalyzerOptions;
 use biome_configuration::analyzer::assist::AssistEnabled;
 use biome_configuration::analyzer::linter::LinterEnabled;
-use biome_configuration::formatter::FormatterEnabled;
-use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, TrailingNewline};
+use biome_configuration::markdown::{MarkdownFormatterConfiguration, MarkdownFormatterEnabled};
+use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, TrailingNewline};
 use biome_fs::BiomePath;
-use biome_markdown_formatter::context::MarkdownFormatOptions;
+use biome_markdown_formatter::context::MdFormatOptions;
+use biome_markdown_formatter::format_node;
 use biome_markdown_parser::{MarkdownParserOptions, parse_markdown_with_cache};
-use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode, MdDocument};
+use biome_markdown_syntax::{MdDocument, MdLanguage, MdSyntaxNode};
 use biome_parser::{AnyParse, NodeParse};
 use biome_rowan::NodeCache;
 use camino::Utf8Path;
+use tracing::{debug, error};
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -28,7 +31,20 @@ pub struct MarkdownFormatterSettings {
     pub indent_width: Option<IndentWidth>,
     pub indent_style: Option<IndentStyle>,
     pub trailing_newline: Option<TrailingNewline>,
-    pub enabled: Option<FormatterEnabled>,
+    pub enabled: Option<MarkdownFormatterEnabled>,
+}
+
+impl From<MarkdownFormatterConfiguration> for MarkdownFormatterSettings {
+    fn from(configuration: MarkdownFormatterConfiguration) -> Self {
+        Self {
+            line_ending: configuration.line_ending,
+            line_width: configuration.line_width,
+            indent_width: configuration.indent_width,
+            indent_style: configuration.indent_style,
+            enabled: configuration.enabled,
+            trailing_newline: configuration.trailing_newline,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
@@ -43,11 +59,11 @@ pub struct MarkdownAssistSettings {
     pub enabled: Option<AssistEnabled>,
 }
 
-impl ServiceLanguage for MarkdownLanguage {
+impl ServiceLanguage for MdLanguage {
     type FormatterSettings = MarkdownFormatterSettings;
     type LinterSettings = MarkdownLinterSettings;
     type AssistSettings = MarkdownAssistSettings;
-    type FormatOptions = MarkdownFormatOptions;
+    type FormatOptions = MdFormatOptions;
     type ParserSettings = ();
     type ParserOptions = MarkdownParserOptions;
     type EnvironmentSettings = ();
@@ -99,7 +115,7 @@ impl ServiceLanguage for MarkdownLanguage {
             .trailing_newline
             .or(global.trailing_newline)
             .unwrap_or_default();
-        MarkdownFormatOptions::new()
+        MdFormatOptions::new()
             .with_indent_style(indent_style)
             .with_indent_width(indent_width)
             .with_line_width(line_width)
@@ -121,39 +137,84 @@ impl ServiceLanguage for MarkdownLanguage {
     }
 
     fn linter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
-        // TODO: evaluate markdown override patterns once markdown override settings are introduced.
-        let _ = path;
+        let overrides_activity =
+            settings
+                .override_settings
+                .patterns
+                .iter()
+                .rev()
+                .find_map(|pattern| {
+                    check_override_feature_activity(
+                        pattern.languages.markdown.linter.enabled,
+                        pattern.linter.enabled,
+                    )
+                    .filter(|_| {
+                        // Then check whether the path satisfies
+                        pattern.is_file_included(path)
+                    })
+                });
 
-        check_feature_activity(
-            settings.languages.markdown.linter.enabled,
-            settings.linter.enabled,
-        )
-        .unwrap_or_default()
-        .into()
+        overrides_activity
+            .or(check_feature_activity(
+                settings.languages.markdown.linter.enabled,
+                settings.linter.enabled,
+            ))
+            .unwrap_or_default()
+            .into()
     }
 
     fn formatter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
-        // TODO: evaluate markdown override patterns once markdown override settings are introduced.
-        let _ = path;
+        let overrides_activity =
+            settings
+                .override_settings
+                .patterns
+                .iter()
+                .rev()
+                .find_map(|pattern| {
+                    check_override_feature_activity(
+                        pattern.languages.markdown.formatter.enabled,
+                        pattern.formatter.enabled,
+                    )
+                    .filter(|_| {
+                        // Then check whether the path satisfies
+                        pattern.is_file_included(path)
+                    })
+                });
 
-        check_feature_activity(
-            settings.languages.markdown.formatter.enabled,
-            settings.formatter.enabled,
-        )
-        .unwrap_or_default()
-        .into()
+        overrides_activity
+            .or(check_feature_activity(
+                settings.languages.markdown.formatter.enabled,
+                settings.formatter.enabled,
+            ))
+            .unwrap_or_default()
+            .into()
     }
 
     fn assist_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
-        // TODO: evaluate markdown override patterns once markdown override settings are introduced.
-        let _ = path;
+        let overrides_activity =
+            settings
+                .override_settings
+                .patterns
+                .iter()
+                .rev()
+                .find_map(|pattern| {
+                    check_override_feature_activity(
+                        pattern.languages.markdown.assist.enabled,
+                        pattern.assist.enabled,
+                    )
+                    .filter(|_| {
+                        // Then check whether the path satisfies
+                        pattern.is_file_included(path)
+                    })
+                });
 
-        check_feature_activity(
-            settings.languages.markdown.assist.enabled,
-            settings.assist.enabled,
-        )
-        .unwrap_or_default()
-        .into()
+        overrides_activity
+            .or(check_feature_activity(
+                settings.languages.markdown.assist.enabled,
+                settings.assist.enabled,
+            ))
+            .unwrap_or_default()
+            .into()
     }
 }
 
@@ -183,7 +244,7 @@ impl ExtensionHandler for MarkdownFileHandler {
             },
             analyzer: Default::default(),
             formatter: FormatterCapabilities {
-                format: None,
+                format: Some(format),
                 format_range: None,
                 format_on_type: None,
                 format_embedded: None,
@@ -194,15 +255,15 @@ impl ExtensionHandler for MarkdownFileHandler {
 }
 
 fn formatter_enabled(path: &Utf8Path, settings: &SettingsWithEditor) -> bool {
-    settings.formatter_enabled_for_file_path::<MarkdownLanguage>(path)
+    settings.formatter_enabled_for_file_path::<MdLanguage>(path)
 }
 
 fn linter_enabled(path: &Utf8Path, settings: &SettingsWithEditor) -> bool {
-    settings.linter_enabled_for_file_path::<MarkdownLanguage>(path)
+    settings.linter_enabled_for_file_path::<MdLanguage>(path)
 }
 
 fn assist_enabled(path: &Utf8Path, settings: &SettingsWithEditor) -> bool {
-    settings.assist_enabled_for_file_path::<MarkdownLanguage>(path)
+    settings.assist_enabled_for_file_path::<MdLanguage>(path)
 }
 
 fn parse(
@@ -212,7 +273,7 @@ fn parse(
     settings: &SettingsWithEditor,
     cache: &mut NodeCache,
 ) -> ParseResult {
-    let options = settings.parse_options::<MarkdownLanguage>(_biome_path, &file_source);
+    let options = settings.parse_options::<MdLanguage>(_biome_path, &file_source);
     let parse = parse_markdown_with_cache(text, cache, options);
     let any_parse =
         NodeParse::new(parse.syntax().as_send().unwrap(), parse.into_diagnostics()).into();
@@ -224,10 +285,29 @@ fn parse(
 }
 
 fn debug_syntax_tree(_biome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeResult {
-    let syntax: MarkdownSyntaxNode = parse.syntax();
+    let syntax: MdSyntaxNode = parse.syntax();
     let tree: MdDocument = parse.tree();
     GetSyntaxTreeResult {
         cst: format!("{syntax:#?}"),
         ast: format!("{tree:#?}"),
+    }
+}
+
+pub(crate) fn format(
+    biome_path: &BiomePath,
+    document_file_source: &DocumentFileSource,
+    parse: AnyParse,
+    settings: &SettingsWithEditor,
+) -> Result<Printed, WorkspaceError> {
+    let options = settings.format_options::<MdLanguage>(biome_path, document_file_source);
+    debug!("{:?}", &options);
+    let tree = parse.syntax();
+    let formatted = format_node(options, &tree)?;
+    match formatted.print() {
+        Ok(printed) => Ok(printed),
+        Err(error) => {
+            error!("The file {} couldn't be formatted", biome_path.as_str());
+            Err(WorkspaceError::FormatError(error.into()))
+        }
     }
 }

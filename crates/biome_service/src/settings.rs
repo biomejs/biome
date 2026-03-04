@@ -14,9 +14,9 @@ use biome_configuration::{
     BiomeDiagnostic, Configuration, ConfigurationSource, CssConfiguration,
     DEFAULT_SCANNER_IGNORE_ENTRIES, ExtendedConfigurations, FilesConfiguration,
     FilesIgnoreUnknownEnabled, FormatterConfiguration, GraphqlConfiguration, GritConfiguration,
-    JsConfiguration, JsonConfiguration, LinterConfiguration, OverrideAssistConfiguration,
-    OverrideFormatterConfiguration, OverrideGlobs, OverrideLinterConfiguration, Overrides, Rules,
-    push_to_analyzer_assist, push_to_analyzer_rules,
+    JsConfiguration, JsonConfiguration, LinterConfiguration, MarkdownConfiguration,
+    OverrideAssistConfiguration, OverrideFormatterConfiguration, OverrideGlobs,
+    OverrideLinterConfiguration, Overrides, Rules, push_to_analyzer_assist, push_to_analyzer_rules,
 };
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::{CssModulesKind, CssParserOptions};
@@ -40,7 +40,7 @@ use biome_js_syntax::JsLanguage;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
-use biome_markdown_syntax::MarkdownLanguage;
+use biome_markdown_syntax::MdLanguage;
 use biome_plugin_loader::Plugins;
 use camino::{Utf8Path, Utf8PathBuf};
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
@@ -187,6 +187,13 @@ impl Settings {
         if let Some(html) = configuration.html {
             self.experimental_full_html_support = html.experimental_full_support_enabled;
             self.languages.html = html.into();
+        }
+
+        #[cfg(feature = "markdown")]
+        {
+            if let Some(markdown) = configuration.markdown {
+                self.languages.markdown = markdown.into();
+            }
         }
 
         // plugin settings
@@ -678,7 +685,7 @@ pub struct LanguageListSettings {
     pub graphql: LanguageSettings<GraphqlLanguage>,
     pub html: LanguageSettings<HtmlLanguage>,
     pub grit: LanguageSettings<GritLanguage>,
-    pub markdown: LanguageSettings<MarkdownLanguage>,
+    pub markdown: LanguageSettings<MdLanguage>,
 }
 
 impl From<JsConfiguration> for LanguageSettings<JsLanguage> {
@@ -816,6 +823,17 @@ impl From<HtmlConfiguration> for LanguageSettings<HtmlLanguage> {
 
         if let Some(assist) = html.assist {
             language_setting.assist = assist.into();
+        }
+
+        language_setting
+    }
+}
+
+impl From<MarkdownConfiguration> for LanguageSettings<MdLanguage> {
+    fn from(markdown: MarkdownConfiguration) -> Self {
+        let mut language_setting: Self = Self::default();
+        if let Some(formatter) = markdown.formatter {
+            language_setting.formatter = formatter.into();
         }
 
         language_setting

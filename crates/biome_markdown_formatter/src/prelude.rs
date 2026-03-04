@@ -4,9 +4,9 @@
 
 pub(crate) use crate::{
     AsFormat, FormatNodeRule, FormattedIterExt as _, FormattedIterExt, IntoFormat,
-    MarkdownFormatContext, MarkdownFormatter,
+    MarkdownFormatter, MdFormatContext, format_removed, verbatim::*,
 };
 pub(crate) use biome_formatter::prelude::*;
-pub(crate) use biome_rowan::{AstNode, AstNodeList, AstSeparatedList};
-
-pub(crate) use crate::verbatim::format_verbatim_node;
+pub(crate) use biome_rowan::{
+    AstNode as _, AstNodeList as _, AstNodeSlotMap as _, AstSeparatedList as _,
+};

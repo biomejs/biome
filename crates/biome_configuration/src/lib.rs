@@ -155,6 +155,12 @@ pub struct Configuration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub css: Option<CssConfiguration>,
 
+    /// Specific configuration for the Markdown language
+    #[bpaf(external(markdown_configuration), optional)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "markdown")]
+    pub markdown: Option<MarkdownConfiguration>,
+
     /// Specific configuration for the GraphQL language
     #[bpaf(external(graphql_configuration), optional)]
     #[serde(skip_serializing_if = "Option::is_none")]

@@ -55,7 +55,7 @@ use either::Either;
 use grit::GritFileHandler;
 use html::HtmlFileHandler;
 pub use javascript::JsFormatterSettings;
-use markdown::MarkdownFileHandler;
+use md::MarkdownFileHandler;
 use rustc_hash::FxHashSet;
 use std::borrow::Cow;
 use std::collections::HashSet;
@@ -70,7 +70,7 @@ pub(crate) mod html;
 mod ignore;
 pub(crate) mod javascript;
 pub(crate) mod json;
-pub(crate) mod markdown;
+pub(crate) mod md;
 pub mod svelte;
 mod unknown;
 pub mod vue;
@@ -169,6 +169,11 @@ impl DocumentFileSource {
             return Ok(file_source.into());
         }
         if let Ok(file_source) = GraphqlFileSource::try_from_well_known(path) {
+            return Ok(file_source.into());
+        }
+
+        #[cfg(feature = "markdown")]
+        if let Ok(file_source) = MdFileSource::try_from_well_known(path) {
             return Ok(file_source.into());
         }
 

@@ -43,12 +43,12 @@
 //! be decided with full context.
 
 use biome_markdown_syntax::{
-    AnyMdBlock, AnyMdBulletListMember, AnyMdCodeBlock, AnyMdInline, AnyMdLeafBlock,
-    MarkdownLanguage, MdAutolink, MdBlockList, MdBullet, MdBulletListItem, MdDocument,
-    MdEntityReference, MdFencedCodeBlock, MdHardLine, MdHeader, MdHtmlBlock, MdIndentCodeBlock,
-    MdInlineCode, MdInlineEmphasis, MdInlineHtml, MdInlineImage, MdInlineItalic, MdInlineItemList,
-    MdInlineLink, MdLinkBlock, MdLinkDestination, MdLinkLabel, MdLinkReferenceDefinition,
-    MdLinkTitle, MdOrderedListItem, MdParagraph, MdQuote, MdReferenceImage, MdReferenceLink,
+    AnyMdBlock, AnyMdBulletListMember, AnyMdCodeBlock, AnyMdInline, AnyMdLeafBlock, MdAutolink,
+    MdBlockList, MdBullet, MdBulletListItem, MdDocument, MdEntityReference, MdFencedCodeBlock,
+    MdHardLine, MdHeader, MdHtmlBlock, MdIndentCodeBlock, MdInlineCode, MdInlineEmphasis,
+    MdInlineHtml, MdInlineImage, MdInlineItalic, MdInlineItemList, MdInlineLink, MdLanguage,
+    MdLinkBlock, MdLinkDestination, MdLinkLabel, MdLinkReferenceDefinition, MdLinkTitle,
+    MdOrderedListItem, MdParagraph, MdQuote, MdReferenceImage, MdReferenceLink,
     MdReferenceLinkLabel, MdSetextHeader, MdSoftBreak, MdTextual, MdThematicBreakBlock,
 };
 use biome_rowan::{AstNode, AstNodeList, Direction, SyntaxNode, TextRange, WalkEvent};
@@ -378,7 +378,7 @@ struct HtmlRenderer<'a> {
     depth: usize,
     opaque_depth: Option<usize>,
     skip_children_depth: Option<usize>,
-    suppressed_inline_nodes: Vec<Vec<SyntaxNode<MarkdownLanguage>>>,
+    suppressed_inline_nodes: Vec<Vec<SyntaxNode<MdLanguage>>>,
 }
 
 struct Buffer {
@@ -448,7 +448,7 @@ impl<'a> HtmlRenderer<'a> {
         }
     }
 
-    fn render(mut self, root: &SyntaxNode<MarkdownLanguage>) -> String {
+    fn render(mut self, root: &SyntaxNode<MdLanguage>) -> String {
         for event in root.preorder() {
             match event {
                 WalkEvent::Enter(node) => {
@@ -497,7 +497,7 @@ impl<'a> HtmlRenderer<'a> {
             .unwrap_or_default()
     }
 
-    fn enter(&mut self, node: SyntaxNode<MarkdownLanguage>) {
+    fn enter(&mut self, node: SyntaxNode<MdLanguage>) {
         if MdInlineItemList::cast(node.clone()).is_some()
             && self
                 .suppressed_inline_nodes
@@ -900,7 +900,7 @@ impl<'a> HtmlRenderer<'a> {
         }
     }
 
-    fn leave(&mut self, node: SyntaxNode<MarkdownLanguage>) {
+    fn leave(&mut self, node: SyntaxNode<MdLanguage>) {
         if MdParagraph::cast(node.clone()).is_some() {
             let buffer = self.pop_buffer();
             if let BufferKind::Paragraph(state) = buffer.kind {
@@ -1071,7 +1071,7 @@ impl<'a> HtmlRenderer<'a> {
     }
 }
 
-fn is_last_inline_item(node: &SyntaxNode<MarkdownLanguage>) -> bool {
+fn is_last_inline_item(node: &SyntaxNode<MdLanguage>) -> bool {
     let Some(parent) = node.parent() else {
         return false;
     };

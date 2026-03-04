@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: markdown/linkReference/case-and-space/case-and-space.md
 ---
+
 # Input
 
 ```md

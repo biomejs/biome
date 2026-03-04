@@ -9,16 +9,16 @@ use crate::{MarkdownSyntaxKind, MdDocument};
 use biome_rowan::Language;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct MarkdownLanguage;
+pub struct MdLanguage;
 
-impl Language for MarkdownLanguage {
+impl Language for MdLanguage {
     type Kind = MarkdownSyntaxKind;
     type Root = MdDocument;
 }
 
-pub type MarkdownSyntaxNode = biome_rowan::SyntaxNode<MarkdownLanguage>;
-pub type MarkdownSyntaxToken = biome_rowan::SyntaxToken<MarkdownLanguage>;
-pub type MarkdownSyntaxElement = biome_rowan::SyntaxElement<MarkdownLanguage>;
-pub type MarkdownSyntaxNodeChildren = biome_rowan::SyntaxNodeChildren<MarkdownLanguage>;
-pub type MarkdownSyntaxElementChildren = biome_rowan::SyntaxElementChildren<MarkdownLanguage>;
-pub type MarkdownSyntaxList = biome_rowan::SyntaxList<MarkdownLanguage>;
+pub type MdSyntaxNode = biome_rowan::SyntaxNode<MdLanguage>;
+pub type MdSyntaxToken = biome_rowan::SyntaxToken<MdLanguage>;
+pub type MdSyntaxElement = biome_rowan::SyntaxElement<MdLanguage>;
+pub type MdSyntaxNodeChildren = biome_rowan::SyntaxNodeChildren<MdLanguage>;
+pub type MdSyntaxElementChildren = biome_rowan::SyntaxElementChildren<MdLanguage>;
+pub type MdSyntaxList = biome_rowan::SyntaxList<MdLanguage>;

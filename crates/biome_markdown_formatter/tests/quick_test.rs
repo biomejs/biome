@@ -1,26 +1,27 @@
-use biome_formatter::FormatElement;
-use biome_markdown_formatter::{MarkdownFormatLanguage, context::MarkdownFormatOptions};
+use biome_markdown_formatter::{MdFormatLanguage, context::MdFormatOptions};
 use biome_markdown_parser::parse_markdown;
-use biome_rowan::TextSize;
 
-// This test only verifies the formatter infrastructure works end-to-end
-// without actually formatting the input.
 #[ignore]
 #[test]
 fn quick_test() {
-    let source = "A simple paragraph";
+    let source = r#"# Hello World
+
+## Heading Level 2
+
+### Heading with trailing hashes ###
+
+# Simple
+"#;
     let parse = parse_markdown(source);
-    let options = MarkdownFormatOptions::default();
 
+    // Print CST
+    eprintln!("{:#?}", parse.syntax());
+
+    let options = MdFormatOptions::default();
     let result =
-        biome_formatter::format_node(&parse.syntax(), MarkdownFormatLanguage::new(options), false);
+        biome_formatter::format_node(&parse.syntax(), MdFormatLanguage::new(options), false);
 
-    let boxed_text: Box<str> = source.into();
-    assert_eq!(
-        result.unwrap().document().as_elements().first().unwrap(),
-        &FormatElement::Text {
-            text: boxed_text,
-            source_position: TextSize::default(),
-        }
-    );
+    // Print formatted output
+    let formatted = result.unwrap();
+    eprintln!("Formatted:\n{}", formatted.print().unwrap().as_code());
 }

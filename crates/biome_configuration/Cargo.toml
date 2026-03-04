@@ -60,7 +60,8 @@ tikv-jemallocator = { workspace = true }
 mimalloc = { workspace = true }
 
 [features]
-schema = [
+markdown = []
+schema   = [
   "biome_analyze/schema",
   "biome_formatter/schema",
   "biome_html_formatter/schema",

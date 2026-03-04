@@ -1,19 +1,19 @@
-use crate::{MarkdownFormatContext, prelude::*};
+use crate::{MdFormatContext, prelude::*};
 use biome_formatter::{FormatOwnedWithRule, FormatRefWithRule, FormatResult};
-use biome_markdown_syntax::{MarkdownSyntaxNode, map_syntax_node};
+use biome_markdown_syntax::{MdSyntaxNode, map_syntax_node};
 
 #[derive(Debug, Copy, Clone, Default)]
 pub struct FormatMarkdownSyntaxNode;
 
-impl FormatRule<MarkdownSyntaxNode> for FormatMarkdownSyntaxNode {
-    type Context = MarkdownFormatContext;
+impl FormatRule<MdSyntaxNode> for FormatMarkdownSyntaxNode {
+    type Context = MdFormatContext;
 
-    fn fmt(&self, node: &MarkdownSyntaxNode, f: &mut MarkdownFormatter) -> FormatResult<()> {
+    fn fmt(&self, node: &MdSyntaxNode, f: &mut MarkdownFormatter) -> FormatResult<()> {
         map_syntax_node!(node.clone(), node => node.format().fmt(f))
     }
 }
 
-impl AsFormat<MarkdownFormatContext> for MarkdownSyntaxNode {
+impl AsFormat<MdFormatContext> for MdSyntaxNode {
     type Format<'a> = FormatRefWithRule<'a, Self, FormatMarkdownSyntaxNode>;
 
     fn format(&self) -> Self::Format<'_> {
@@ -21,7 +21,7 @@ impl AsFormat<MarkdownFormatContext> for MarkdownSyntaxNode {
     }
 }
 
-impl IntoFormat<MarkdownFormatContext> for MarkdownSyntaxNode {
+impl IntoFormat<MdFormatContext> for MdSyntaxNode {
     type Format = FormatOwnedWithRule<Self, FormatMarkdownSyntaxNode>;
 
     fn into_format(self) -> Self::Format {

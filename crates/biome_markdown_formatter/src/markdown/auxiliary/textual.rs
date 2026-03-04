@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use biome_markdown_syntax::MdTextual;
 use biome_rowan::AstNode;
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdTextual;
 impl FormatNodeRule<MdTextual> for FormatMdTextual {

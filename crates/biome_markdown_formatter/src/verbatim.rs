@@ -1,26 +1,26 @@
-use crate::MarkdownFormatContext;
+use crate::MdFormatContext;
 use biome_formatter::{
     Buffer, Format, FormatResult,
     prelude::{Formatter, text},
 };
-use biome_markdown_syntax::MarkdownSyntaxNode;
+use biome_markdown_syntax::MdSyntaxNode;
 use biome_rowan::{Direction, SyntaxElement};
 
-pub fn format_verbatim_node(node: &MarkdownSyntaxNode) -> FormatMarkdownVerbatimNode<'_> {
+pub fn format_verbatim_node(node: &MdSyntaxNode) -> FormatMarkdownVerbatimNode<'_> {
     FormatMarkdownVerbatimNode { node }
 }
 
-pub fn format_suppressed_node(node: &MarkdownSyntaxNode) -> FormatMarkdownVerbatimNode<'_> {
+pub fn format_suppressed_node(node: &MdSyntaxNode) -> FormatMarkdownVerbatimNode<'_> {
     FormatMarkdownVerbatimNode { node }
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub struct FormatMarkdownVerbatimNode<'node> {
-    node: &'node MarkdownSyntaxNode,
+    node: &'node MdSyntaxNode,
 }
 
-impl Format<MarkdownFormatContext> for FormatMarkdownVerbatimNode<'_> {
-    fn fmt(&self, f: &mut Formatter<MarkdownFormatContext>) -> FormatResult<()> {
+impl Format<MdFormatContext> for FormatMarkdownVerbatimNode<'_> {
+    fn fmt(&self, f: &mut Formatter<MdFormatContext>) -> FormatResult<()> {
         // Track all tokens in the node so the formatter knows they've been seen
         for element in self.node.descendants_with_tokens(Direction::Next) {
             match element {
@@ -49,7 +49,7 @@ impl Format<MarkdownFormatContext> for FormatMarkdownVerbatimNode<'_> {
 }
 
 pub fn format_bogus_node(
-    node: &biome_rowan::SyntaxNode<biome_markdown_syntax::MarkdownLanguage>,
+    node: &biome_rowan::SyntaxNode<biome_markdown_syntax::MdLanguage>,
 ) -> FormatMarkdownVerbatimNode<'_> {
     FormatMarkdownVerbatimNode { node }
 }
