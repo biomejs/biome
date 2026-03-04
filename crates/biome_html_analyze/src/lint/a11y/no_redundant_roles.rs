@@ -17,8 +17,9 @@ declare_lint_rule! {
     /// :::note
     /// In `.html` files, all elements are treated as native HTML elements.
     ///
-    /// In component-based frameworks (Vue, Svelte, Astro), only lowercase element names are checked.
-    /// PascalCase names like `<Button>` are assumed to be custom components and are ignored.
+    /// In component-based frameworks (Vue, Svelte, Astro), only native HTML element names are checked.
+    /// PascalCase names like `<Button>` and kebab-case names like `<my-button>` are assumed to be
+    /// custom components and are ignored.
     /// :::
     ///
     /// ## Examples
@@ -80,7 +81,9 @@ impl Rule for NoRedundantRoles {
         if !source_type.is_html() {
             let element_name = node.name()?;
             let name_text = element_name.text();
-            if name_text.chars().next().is_some_and(|c| c.is_uppercase()) {
+            if name_text.chars().next().is_some_and(|c| c.is_uppercase())
+                || name_text.contains('-')
+            {
                 return None;
             }
         }
@@ -106,7 +109,7 @@ impl Rule for NoRedundantRoles {
             rule_category!(),
             state.redundant_attribute.range(),
             markup! {
-                "Using the role attribute '"{role_attribute}"' on the '"{element_name}"' element is redundant, because it is implied by its semantic."
+                "Using the role attribute '"{role_attribute}"' on the '"{element_name}"' element is redundant, because it is implied by its semantics."
             },
         ))
     }
