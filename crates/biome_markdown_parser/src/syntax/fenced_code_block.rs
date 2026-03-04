@@ -343,20 +343,52 @@ fn prepare_next_code_content_token(
 /// Consume all expected `>` quote prefixes for the current line inside a
 /// fenced code block.
 ///
-/// Returns `true` if all `quote_depth` prefixes were consumed successfully,
-/// meaning the line continues inside the blockquote. Returns `false` if a
-/// prefix is missing, indicating the blockquote (and thus the code block)
-/// has ended — the caller should break out of the content loop.
+/// Uses a lookahead preflight to verify all `quote_depth` prefixes are
+/// present before consuming any. This prevents partial consumption from
+/// stealing outer blockquote markers when an inner prefix is missing
+/// (e.g., `> hello` inside a depth-2 blockquote would consume the outer
+/// `>` but fail on the missing inner `>`, corrupting outer parsing).
+///
+/// Returns `true` if all prefixes were consumed successfully, `false` if
+/// any prefix is missing — the caller should break out of the content loop.
 fn consume_quote_prefixes_in_code_content(p: &mut MarkdownParser, quote_depth: usize) -> bool {
+    // Preflight: verify all prefixes exist before consuming any.
+    let all_present = p.lookahead(|p| {
+        p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
+        for _ in 0..quote_depth {
+            if p.at(MD_TEXTUAL_LITERAL) && p.cur_text().starts_with('>') {
+                p.force_relex_regular();
+            }
+            if p.at(T![>]) {
+                p.bump(T![>]);
+            } else if p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == ">" {
+                p.bump(MD_TEXTUAL_LITERAL);
+            } else {
+                return false;
+            }
+            // Skip optional post-marker space
+            if p.at(MD_TEXTUAL_LITERAL) {
+                let text = p.cur_text();
+                if text == " " || text == "\t" {
+                    p.bump(MD_TEXTUAL_LITERAL);
+                }
+            }
+        }
+        true
+    });
+
+    if !all_present {
+        return false;
+    }
+
     let prev_virtual = p.state().virtual_line_start;
     p.state_mut().virtual_line_start = Some(p.cur_range().start());
     p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
     p.state_mut().virtual_line_start = prev_virtual;
 
     for _ in 0..quote_depth {
-        if !consume_quote_prefix_in_code_content(p) {
-            return false;
-        }
+        let consumed = consume_quote_prefix_in_code_content(p);
+        debug_assert!(consumed, "preflight verified all prefixes present");
     }
 
     p.set_virtual_line_start();
