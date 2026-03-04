@@ -691,9 +691,7 @@ impl Session {
     ///   that in a multi-root workspace, the relative path is resolved against the
     ///   correct root rather than an arbitrary one.
     /// - When `file_path` is `None` (e.g. from `load_workspace_settings`), each
-    ///   workspace folder is tried in order and the first one that produces an
-    ///   existing path is used. This handles the case where the configuration is
-    ///   loaded before any file is opened.
+    ///   workspace folder is tried in order. The closest path to the `file_path` is used.
     /// - If no workspace folders are registered, the session's `base_path()`
     ///   (derived from the deprecated `root_uri` initialization parameter) is used
     ///   as a fallback to keep backwards compatibility.
