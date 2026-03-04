@@ -35,7 +35,7 @@ This skill provides general development best practices, common gotchas, and Biom
 pub fn quick_test() {
     let code = r#"<button on:click={handleClick}>Click</button>"#;
     let source_type = HtmlFileSource::svelte();
-    let options = HtmlParseOptions::from(&source_type);
+    let options = HtmlParserOptions::from(&source_type);
     let root = parse_html(code, options);
     dbg!(&root.syntax());  // Shows full AST structure
 }

@@ -40,7 +40,7 @@ use biome_html_formatter::{
     context::{IndentScriptAndStyle, WhitespaceSensitivity},
     format_node,
 };
-use biome_html_parser::{HtmlParseOptions, parse_html_with_cache};
+use biome_html_parser::{HtmlParserOptions, parse_html_with_cache};
 use biome_html_syntax::element_ext::AnyEmbeddedContent;
 use biome_html_syntax::{
     AnySvelteDirective, AstroEmbeddedContent, HtmlAttributeInitializerClause,
@@ -306,7 +306,7 @@ impl ServiceLanguage for HtmlLanguage {
         None
     }
 
-    type ParserOptions = HtmlParseOptions;
+    type ParserOptions = HtmlParserOptions;
 
     fn resolve_parse_options(
         overrides: &OverrideSettings,
@@ -315,7 +315,7 @@ impl ServiceLanguage for HtmlLanguage {
         file_source: &DocumentFileSource,
     ) -> Self::ParserOptions {
         let html_file_source = file_source.to_html_file_source().unwrap_or_default();
-        let mut options = HtmlParseOptions::from(&html_file_source);
+        let mut options = HtmlParserOptions::from(&html_file_source);
         if language.interpolation.unwrap_or_default().into() && html_file_source.is_html() {
             options = options.with_double_text_expression();
         }

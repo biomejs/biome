@@ -76,7 +76,7 @@ pub fn quick_test() {
   let code = r#"<button on:click={handleClick}>Click</button>"#;
 
   let source_type = HtmlFileSource::svelte();
-  let options = HtmlParseOptions::from(&source_type);
+  let options = HtmlParserOptions::from(&source_type);
   let root = parse_html(code, options);
   let syntax = root.syntax();
 

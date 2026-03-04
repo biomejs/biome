@@ -2,7 +2,7 @@ use biome_formatter::{AttributePosition, IndentStyle, LineWidth};
 use biome_formatter_test::check_reformat::CheckReformat;
 use biome_html_formatter::context::HtmlFormatOptions;
 use biome_html_formatter::{HtmlFormatLanguage, format_node};
-use biome_html_parser::{HtmlParseOptions, parse_html};
+use biome_html_parser::{HtmlParserOptions, parse_html};
 use biome_html_syntax::HtmlFileSource;
 
 mod language {
@@ -29,7 +29,7 @@ fn quick_test() {
 {/snippet}
 "#;
     let source_type = HtmlFileSource::html();
-    let tree = parse_html(src, HtmlParseOptions::from(&source_type));
+    let tree = parse_html(src, HtmlParserOptions::from(&source_type));
     let options = HtmlFormatOptions::new(source_type)
         .with_indent_style(IndentStyle::Space)
         .with_line_width(LineWidth::try_from(80).unwrap())
