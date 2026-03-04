@@ -231,6 +231,7 @@ AnyMdInline =
 	| MdSoftBreak
 	| MdTextual
 	| MdQuotePrefix
+	| MdIndentToken
 
 
 // *italic*

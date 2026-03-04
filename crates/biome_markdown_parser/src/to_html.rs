@@ -1699,6 +1699,9 @@ fn extract_alt_text_inline(inline: &AnyMdInline, ctx: &HtmlRenderContext, out: &
         AnyMdInline::MdQuotePrefix(_) => {
             // Quote prefixes don't contribute text to alt attributes
         }
+        AnyMdInline::MdIndentToken(_) => {
+            // Indent tokens don't contribute text to alt attributes
+        }
     }
 }
 
