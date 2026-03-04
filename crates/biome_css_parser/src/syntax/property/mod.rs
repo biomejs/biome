@@ -293,7 +293,7 @@ impl GenericComponentValueList {
 
     #[inline]
     fn at_boundary(&self, p: &mut CssParser) -> bool {
-        self.boundary.map_or(false, |boundary| boundary(p))
+        self.boundary.is_some_and(|boundary| boundary(p))
     }
 }
 

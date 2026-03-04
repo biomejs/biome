@@ -55,8 +55,7 @@ pub(crate) enum CssSyntaxFeatures {
 
 pub(crate) use declaration::{
     DeclarationList, is_at_any_declaration, is_at_any_declaration_with_semicolon,
-    is_at_declaration, parse_any_declaration_with_semicolon, parse_declaration,
-    parse_declaration_with_value_end_set,
+    is_at_declaration, parse_any_declaration_with_semicolon, parse_declaration_with_value_end_set,
 };
 
 impl SyntaxFeature for CssSyntaxFeatures {
