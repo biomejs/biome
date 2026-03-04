@@ -358,6 +358,10 @@ impl LanguageServer for LSPServer {
     async fn did_change_configuration(&self, params: DidChangeConfigurationParams) {
         let settings = params.settings;
         self.session.load_extension_settings(Some(settings)).await;
+        // Reload the workspace configuration so that settings such as
+        // `configurationPath` take effect immediately without requiring the
+        // user to restart the server or open a new file.
+        self.session.load_workspace_settings(true).await;
         self.setup_capabilities().await;
         self.session.update_all_diagnostics().await;
     }
