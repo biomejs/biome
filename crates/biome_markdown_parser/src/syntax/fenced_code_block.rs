@@ -290,7 +290,7 @@ fn parse_code_content(
             CodeContentLoopAction::ConsumeText => {}
         }
 
-        consume_code_textual(p);
+        bump_code_textual(p);
         at_line_start = false;
     }
 
@@ -303,6 +303,11 @@ enum CodeContentLoopAction {
     ConsumeText,
 }
 
+/// Prepare the next token inside fenced code block content.
+///
+/// Handles quote prefix consumption, newlines, closing fence detection,
+/// and indent stripping. Returns an action telling the caller how to
+/// proceed in the content loop.
 fn prepare_next_code_content_token(
     p: &mut MarkdownParser,
     is_tilde_fence: bool,
@@ -335,6 +340,13 @@ fn prepare_next_code_content_token(
     CodeContentLoopAction::ConsumeText
 }
 
+/// Consume all expected `>` quote prefixes for the current line inside a
+/// fenced code block.
+///
+/// Returns `true` if all `quote_depth` prefixes were consumed successfully,
+/// meaning the line continues inside the blockquote. Returns `false` if a
+/// prefix is missing, indicating the blockquote (and thus the code block)
+/// has ended — the caller should break out of the content loop.
 fn consume_quote_prefixes_in_code_content(p: &mut MarkdownParser, quote_depth: usize) -> bool {
     let prev_virtual = p.state().virtual_line_start;
     p.state_mut().virtual_line_start = Some(p.cur_range().start());
@@ -351,6 +363,11 @@ fn consume_quote_prefixes_in_code_content(p: &mut MarkdownParser, quote_depth: u
     true
 }
 
+/// Consume a single `> ` quote prefix (marker + optional trailing space)
+/// inside fenced code block content, emitting it as an `MdQuotePrefix` CST node.
+///
+/// Returns `true` if the prefix was consumed, `false` if the current token
+/// is not a quote marker.
 fn consume_quote_prefix_in_code_content(p: &mut MarkdownParser) -> bool {
     if p.at(MD_TEXTUAL_LITERAL) && p.cur_text().starts_with('>') {
         p.force_relex_regular();
@@ -367,9 +384,14 @@ fn consume_quote_prefix_in_code_content(p: &mut MarkdownParser) -> bool {
     indent_list_m.complete(p, MD_QUOTE_INDENT_LIST);
 
     let marker_bumped = try_bump_quote_marker(p);
-    debug_assert!(marker_bumped, "guard above guarantees marker present");
+    debug_assert!(
+        marker_bumped,
+        "consume_quote_prefix_in_code_content: quote marker not found after guard confirmed `>` \
+         token — check that force_relex_regular and the guard condition are in sync"
+    );
     if !marker_bumped {
-        unreachable!("guard above guarantees marker present");
+        prefix_m.abandon(p);
+        return false;
     }
 
     // Optional post-marker space
@@ -397,8 +419,8 @@ fn consume_code_newline(p: &mut MarkdownParser) -> bool {
     true
 }
 
-fn consume_code_textual(p: &mut MarkdownParser) {
-    // Consume the token as code content (including NEWLINE tokens).
+/// Bump the current token as code textual content (`MdTextual` node).
+fn bump_code_textual(p: &mut MarkdownParser) {
     let text_m = p.start();
     p.bump_remap(MD_TEXTUAL_LITERAL);
     text_m.complete(p, MD_TEXTUAL);
