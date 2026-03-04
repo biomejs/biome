@@ -2,7 +2,6 @@ use bpaf::Args;
 use camino::Utf8Path;
 
 use biome_console::BufferConsole;
-use biome_fs::FileSystemExt;
 use biome_fs::MemoryFileSystem;
 
 use crate::run_cli;
@@ -93,26 +92,26 @@ fn issue_9300() {
     let astro_file = Utf8Path::new("form.astro");
     fs.insert(astro_file.into(), "<form.Field></form.Field>".as_bytes());
 
-    let (fs_after, result) = run_cli(
+    let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", svelte_file.as_str(), astro_file.as_str()].as_slice()),
+        Args::from(
+            [
+                "check",
+                "--write",
+                svelte_file.as_str(),
+                astro_file.as_str(),
+            ]
+            .as_slice(),
+        ),
     );
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    let mut buffer = String::new();
-    fs_after
-        .open(Utf8Path::new("form.svelte"))
-        .unwrap()
-        .read_to_string(&mut buffer)
-        .unwrap();
-    assert_eq!(buffer, "<form.Field></form.Field>");
-
-    let mut buffer = String::new();
-    fs_after
-        .open(Utf8Path::new("form.astro"))
-        .unwrap()
-        .read_to_string(&mut buffer)
-        .unwrap();
-    assert_eq!(buffer, "<form.Field></form.Field>");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "issue_9300",
+        fs,
+        console,
+        result,
+    ));
 }
