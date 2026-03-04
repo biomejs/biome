@@ -96,15 +96,7 @@ fn issue_9300() {
     let (fs_after, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                "--write",
-                svelte_file.as_str(),
-                astro_file.as_str(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["check", svelte_file.as_str(), astro_file.as_str()].as_slice()),
     );
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
