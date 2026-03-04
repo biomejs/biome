@@ -311,11 +311,9 @@ fn prepare_next_code_content_token(
     quote_depth: usize,
     at_line_start: &mut bool,
 ) -> CodeContentLoopAction {
-    if *at_line_start && quote_depth > 0 {
-        if !consume_quote_prefixes_in_code_content(p, quote_depth) {
-            return CodeContentLoopAction::Break;
-        }
-        *at_line_start = false;
+    if *at_line_start && quote_depth > 0 && !consume_quote_prefixes_in_code_content(p, quote_depth)
+    {
+        return CodeContentLoopAction::Break;
     }
 
     if consume_code_newline(p) {
@@ -349,6 +347,7 @@ fn consume_quote_prefixes_in_code_content(p: &mut MarkdownParser, quote_depth: u
         }
     }
 
+    p.set_virtual_line_start();
     true
 }
 
@@ -464,9 +463,12 @@ fn line_has_closing_fence(p: &MarkdownParser, is_tilde_fence: bool, fence_len: u
         return false;
     };
 
-    let line_start = find_line_start(&source[..start]);
+    let line_start: usize = match p.state().virtual_line_start {
+        Some(virtual_start) => virtual_start.into(),
+        None => find_line_start(&source[..start]),
+    };
 
-    if !is_whitespace_prefix(source, start, line_start) {
+    if line_start != start && !is_whitespace_prefix(source, start, line_start) {
         return false;
     }
 
