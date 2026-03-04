@@ -337,6 +337,11 @@ fn prepare_next_code_content_token(
         }
     }
 
+    // Prefix/indent consumption above can advance directly to EOF.
+    if p.at(T![EOF]) {
+        return CodeContentLoopAction::Break;
+    }
+
     CodeContentLoopAction::ConsumeText
 }
 
