@@ -164,7 +164,11 @@ impl Rule for NoUselessConstructor {
                 return None;
             }
         }
-        let class = constructor.syntax().ancestors().find_map(AnyJsClass::cast);
+        let class = constructor
+            .syntax()
+            .ancestors()
+            .skip(1)
+            .find_map(AnyJsClass::cast);
         if let Some(class) = &class
             && !class.decorators().is_empty()
         {

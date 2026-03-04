@@ -158,6 +158,7 @@ impl Rule for UseGenericFontNames {
 fn is_in_font_face_at_rule(node: &CssGenericProperty) -> bool {
     node.syntax()
         .ancestors()
+        .skip(1)
         .find(|n| n.kind() == CssSyntaxKind::CSS_AT_RULE)
         .and_then(|n| n.cast::<CssAtRule>())
         .and_then(|n| n.rule().ok())

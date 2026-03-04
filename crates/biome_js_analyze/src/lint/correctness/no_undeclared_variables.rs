@@ -102,7 +102,7 @@ impl Rule for NoUndeclaredVariables {
                 // arguments object within non-arrow functions
                 if text == "arguments" {
                     let is_in_non_arrow_function =
-                        identifier.syntax().ancestors().any(|ancestor| {
+                        identifier.syntax().ancestors().skip(1).any(|ancestor| {
                             !matches!(
                                 AnyJsFunction::cast(ancestor),
                                 None | Some(AnyJsFunction::JsArrowFunctionExpression(_))
