@@ -61,7 +61,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: PLUS@37..39 "+" [] [Whitespace(" ")],
+                                                operator: PLUS@37..39 "+" [] [Whitespace(" ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssNumber {
@@ -117,7 +117,7 @@ CssRoot {
                                                         ],
                                                     },
                                                 },
-                                                operator_token: PLUS@67..69 "+" [] [Whitespace(" ")],
+                                                operator: PLUS@67..69 "+" [] [Whitespace(" ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssRegularDimension {
@@ -174,7 +174,7 @@ CssRoot {
                                                         ],
                                                     },
                                                 },
-                                                operator_token: STAR@100..102 "*" [] [Whitespace(" ")],
+                                                operator: STAR@100..102 "*" [] [Whitespace(" ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssNumber {

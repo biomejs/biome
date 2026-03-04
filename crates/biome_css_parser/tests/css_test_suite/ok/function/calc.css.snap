@@ -207,7 +207,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: SLASH@34..36 "/" [] [Whitespace(" ")],
+                                                operator: SLASH@34..36 "/" [] [Whitespace(" ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssNumber {
@@ -268,7 +268,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: PLUS@72..74 "+" [] [Whitespace(" ")],
+                                                operator: PLUS@72..74 "+" [] [Whitespace(" ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssRegularDimension {
@@ -370,7 +370,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: PLUS@154..156 "+" [] [Whitespace(" ")],
+                                                operator: PLUS@154..156 "+" [] [Whitespace(" ")],
                                                 right: CssBinaryExpression {
                                                     left: CssListOfComponentValuesExpression {
                                                         css_component_value_list: CssComponentValueList [
@@ -379,7 +379,7 @@ CssRoot {
                                                             },
                                                         ],
                                                     },
-                                                    operator_token: STAR@158..160 "*" [] [Whitespace(" ")],
+                                                    operator: STAR@158..160 "*" [] [Whitespace(" ")],
                                                     right: CssListOfComponentValuesExpression {
                                                         css_component_value_list: CssComponentValueList [
                                                             CssNumber {
@@ -423,7 +423,7 @@ CssRoot {
                                                                 },
                                                             ],
                                                         },
-                                                        operator_token: PLUS@189..191 "+" [] [Whitespace(" ")],
+                                                        operator: PLUS@189..191 "+" [] [Whitespace(" ")],
                                                         right: CssListOfComponentValuesExpression {
                                                             css_component_value_list: CssComponentValueList [
                                                                 CssNumber {
@@ -434,7 +434,7 @@ CssRoot {
                                                     },
                                                     r_paren_token: R_PAREN@192..194 ")" [] [Whitespace(" ")],
                                                 },
-                                                operator_token: STAR@194..196 "*" [] [Whitespace(" ")],
+                                                operator: STAR@194..196 "*" [] [Whitespace(" ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssNumber {
@@ -474,7 +474,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: STAR@225..227 "*" [] [Whitespace(" ")],
+                                                operator: STAR@225..227 "*" [] [Whitespace(" ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssNumber {
@@ -517,7 +517,7 @@ CssRoot {
                                                             },
                                                         ],
                                                     },
-                                                    operator_token: PLUS@254..256 "+" [] [Whitespace(" ")],
+                                                    operator: PLUS@254..256 "+" [] [Whitespace(" ")],
                                                     right: CssListOfComponentValuesExpression {
                                                         css_component_value_list: CssComponentValueList [
                                                             CssRegularDimension {
@@ -563,7 +563,7 @@ CssRoot {
                                                             },
                                                         ],
                                                     },
-                                                    operator_token: PLUS@296..300 "+" [] [Whitespace("   ")],
+                                                    operator: PLUS@296..300 "+" [] [Whitespace("   ")],
                                                     right: CssListOfComponentValuesExpression {
                                                         css_component_value_list: CssComponentValueList [
                                                             CssRegularDimension {
@@ -607,7 +607,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: PLUS@342..347 "+" [] [Whitespace("    ")],
+                                                operator: PLUS@342..347 "+" [] [Whitespace("    ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssRegularDimension {
@@ -649,7 +649,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: PLUS@380..382 "+" [] [Whitespace(" ")],
+                                                operator: PLUS@380..382 "+" [] [Whitespace(" ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssPercentage {
@@ -691,7 +691,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: PLUS@408..410 "+" [] [Whitespace(" ")],
+                                                operator: PLUS@408..410 "+" [] [Whitespace(" ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssPercentage {
@@ -733,7 +733,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: PLUS@436..438 "+" [] [Whitespace(" ")],
+                                                operator: PLUS@436..438 "+" [] [Whitespace(" ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssRegularDimension {
@@ -775,7 +775,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: SLASH@465..467 "/" [] [Whitespace(" ")],
+                                                operator: SLASH@465..467 "/" [] [Whitespace(" ")],
                                                 right: CssBinaryExpression {
                                                     left: CssListOfComponentValuesExpression {
                                                         css_component_value_list: CssComponentValueList [
@@ -784,7 +784,7 @@ CssRoot {
                                                             },
                                                         ],
                                                     },
-                                                    operator_token: MINUS@469..471 "-" [] [Whitespace(" ")],
+                                                    operator: MINUS@469..471 "-" [] [Whitespace(" ")],
                                                     right: CssBinaryExpression {
                                                         left: CssListOfComponentValuesExpression {
                                                             css_component_value_list: CssComponentValueList [
@@ -793,7 +793,7 @@ CssRoot {
                                                                 },
                                                             ],
                                                         },
-                                                        operator_token: STAR@473..475 "*" [] [Whitespace(" ")],
+                                                        operator: STAR@473..475 "*" [] [Whitespace(" ")],
                                                         right: CssBinaryExpression {
                                                             left: CssListOfComponentValuesExpression {
                                                                 css_component_value_list: CssComponentValueList [
@@ -803,7 +803,7 @@ CssRoot {
                                                                     },
                                                                 ],
                                                             },
-                                                            operator_token: MINUS@479..481 "-" [] [Whitespace(" ")],
+                                                            operator: MINUS@479..481 "-" [] [Whitespace(" ")],
                                                             right: CssBinaryExpression {
                                                                 left: CssListOfComponentValuesExpression {
                                                                     css_component_value_list: CssComponentValueList [
@@ -812,7 +812,7 @@ CssRoot {
                                                                         },
                                                                     ],
                                                                 },
-                                                                operator_token: STAR@483..485 "*" [] [Whitespace(" ")],
+                                                                operator: STAR@483..485 "*" [] [Whitespace(" ")],
                                                                 right: CssListOfComponentValuesExpression {
                                                                     css_component_value_list: CssComponentValueList [
                                                                         CssRegularDimension {
@@ -915,7 +915,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: MINUS@547..549 "-" [] [Whitespace(" ")],
+                                                operator: MINUS@547..549 "-" [] [Whitespace(" ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssRegularDimension {
@@ -964,7 +964,7 @@ CssRoot {
                                                                         },
                                                                     ],
                                                                 },
-                                                                operator_token: STAR@579..581 "*" [] [Whitespace(" ")],
+                                                                operator: STAR@579..581 "*" [] [Whitespace(" ")],
                                                                 right: CssListOfComponentValuesExpression {
                                                                     css_component_value_list: CssComponentValueList [
                                                                         CssPercentage {
@@ -1010,7 +1010,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: STAR@606..608 "*" [] [Whitespace(" ")],
+                                                operator: STAR@606..608 "*" [] [Whitespace(" ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssFunction {
@@ -1081,7 +1081,7 @@ CssRoot {
                                                                                             },
                                                                                         ],
                                                                                     },
-                                                                                    operator_token: SLASH@652..654 "/" [] [Whitespace(" ")],
+                                                                                    operator: SLASH@652..654 "/" [] [Whitespace(" ")],
                                                                                     right: CssListOfComponentValuesExpression {
                                                                                         css_component_value_list: CssComponentValueList [
                                                                                             CssRegularDimension {
@@ -1123,7 +1123,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: STAR@668..670 "*" [] [Whitespace(" ")],
+                                                operator: STAR@668..670 "*" [] [Whitespace(" ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssRegularDimension {
@@ -1287,7 +1287,7 @@ CssRoot {
                                                                 },
                                                             ],
                                                         },
-                                                        operator_token: STAR@799..801 "*" [] [Whitespace(" ")],
+                                                        operator: STAR@799..801 "*" [] [Whitespace(" ")],
                                                         right: CssListOfComponentValuesExpression {
                                                             css_component_value_list: CssComponentValueList [
                                                                 CssNumber {
@@ -1298,7 +1298,7 @@ CssRoot {
                                                     },
                                                     r_paren_token: R_PAREN@802..804 ")" [] [Whitespace(" ")],
                                                 },
-                                                operator_token: STAR@804..806 "*" [] [Whitespace(" ")],
+                                                operator: STAR@804..806 "*" [] [Whitespace(" ")],
                                                 right: CssBinaryExpression {
                                                     left: CssParenthesizedExpression {
                                                         l_paren_token: L_PAREN@806..807 "(" [] [],
@@ -1311,7 +1311,7 @@ CssRoot {
                                                                     },
                                                                 ],
                                                             },
-                                                            operator_token: PLUS@811..813 "+" [] [Whitespace(" ")],
+                                                            operator: PLUS@811..813 "+" [] [Whitespace(" ")],
                                                             right: CssBinaryExpression {
                                                                 left: CssListOfComponentValuesExpression {
                                                                     css_component_value_list: CssComponentValueList [
@@ -1321,7 +1321,7 @@ CssRoot {
                                                                         },
                                                                     ],
                                                                 },
-                                                                operator_token: SLASH@818..820 "/" [] [Whitespace(" ")],
+                                                                operator: SLASH@818..820 "/" [] [Whitespace(" ")],
                                                                 right: CssListOfComponentValuesExpression {
                                                                     css_component_value_list: CssComponentValueList [
                                                                         CssNumber {
@@ -1333,7 +1333,7 @@ CssRoot {
                                                         },
                                                         r_paren_token: R_PAREN@821..823 ")" [] [Whitespace(" ")],
                                                     },
-                                                    operator_token: MINUS@823..825 "-" [] [Whitespace(" ")],
+                                                    operator: MINUS@823..825 "-" [] [Whitespace(" ")],
                                                     right: CssBinaryExpression {
                                                         left: CssListOfComponentValuesExpression {
                                                             css_component_value_list: CssComponentValueList [
@@ -1343,7 +1343,7 @@ CssRoot {
                                                                 },
                                                             ],
                                                         },
-                                                        operator_token: SLASH@829..831 "/" [] [Whitespace(" ")],
+                                                        operator: SLASH@829..831 "/" [] [Whitespace(" ")],
                                                         right: CssBinaryExpression {
                                                             left: CssParenthesizedExpression {
                                                                 l_paren_token: L_PAREN@831..832 "(" [] [],
@@ -1355,7 +1355,7 @@ CssRoot {
                                                                             },
                                                                         ],
                                                                     },
-                                                                    operator_token: MINUS@834..836 "-" [] [Whitespace(" ")],
+                                                                    operator: MINUS@834..836 "-" [] [Whitespace(" ")],
                                                                     right: CssListOfComponentValuesExpression {
                                                                         css_component_value_list: CssComponentValueList [
                                                                             CssNumber {
@@ -1366,7 +1366,7 @@ CssRoot {
                                                                 },
                                                                 r_paren_token: R_PAREN@837..839 ")" [] [Whitespace(" ")],
                                                             },
-                                                            operator_token: PLUS@839..841 "+" [] [Whitespace(" ")],
+                                                            operator: PLUS@839..841 "+" [] [Whitespace(" ")],
                                                             right: CssListOfComponentValuesExpression {
                                                                 css_component_value_list: CssComponentValueList [
                                                                     CssRegularDimension {
@@ -1433,7 +1433,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: STAR@882..884 "*" [] [Whitespace(" ")],
+                                                operator: STAR@882..884 "*" [] [Whitespace(" ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssFunction {
@@ -1495,7 +1495,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: STAR@924..926 "*" [] [Whitespace(" ")],
+                                                operator: STAR@924..926 "*" [] [Whitespace(" ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssFunction {
@@ -1557,7 +1557,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: STAR@965..967 "*" [] [Whitespace(" ")],
+                                                operator: STAR@965..967 "*" [] [Whitespace(" ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssFunction {
@@ -1619,7 +1619,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: STAR@1006..1008 "*" [] [Whitespace(" ")],
+                                                operator: STAR@1006..1008 "*" [] [Whitespace(" ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssFunction {
@@ -1681,7 +1681,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: STAR@1047..1049 "*" [] [Whitespace(" ")],
+                                                operator: STAR@1047..1049 "*" [] [Whitespace(" ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssFunction {
@@ -1743,7 +1743,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: STAR@1088..1090 "*" [] [Whitespace(" ")],
+                                                operator: STAR@1088..1090 "*" [] [Whitespace(" ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssFunction {
@@ -1862,7 +1862,7 @@ CssRoot {
                                                                         },
                                                                     ],
                                                                 },
-                                                                operator_token: MINUS@1192..1194 "-" [] [Whitespace(" ")],
+                                                                operator: MINUS@1192..1194 "-" [] [Whitespace(" ")],
                                                                 right: CssListOfComponentValuesExpression {
                                                                     css_component_value_list: CssComponentValueList [
                                                                         CssRegularDimension {
@@ -1960,7 +1960,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: SLASH@1344..1346 "/" [] [Whitespace(" ")],
+                                                operator: SLASH@1344..1346 "/" [] [Whitespace(" ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssNumber {
@@ -2021,7 +2021,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: MINUS@1381..1383 "-" [] [Whitespace(" ")],
+                                                operator: MINUS@1381..1383 "-" [] [Whitespace(" ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssRegularDimension {
@@ -2083,7 +2083,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: MINUS@1413..1415 "-" [] [Whitespace(" ")],
+                                                operator: MINUS@1413..1415 "-" [] [Whitespace(" ")],
                                                 right: CssParenthesizedExpression {
                                                     l_paren_token: L_PAREN@1415..1417 "(" [] [Whitespace(" ")],
                                                     expression: CssBinaryExpression {
@@ -2099,7 +2099,7 @@ CssRoot {
                                                             },
                                                             r_paren_token: R_PAREN@1422..1424 ")" [] [Whitespace(" ")],
                                                         },
-                                                        operator_token: STAR@1424..1426 "*" [] [Whitespace(" ")],
+                                                        operator: STAR@1424..1426 "*" [] [Whitespace(" ")],
                                                         right: CssListOfComponentValuesExpression {
                                                             css_component_value_list: CssComponentValueList [
                                                                 CssNumber {
@@ -2200,7 +2200,7 @@ CssRoot {
                                                                         },
                                                                     ],
                                                                 },
-                                                                operator_token: MINUS@1527..1529 "-" [] [Whitespace(" ")],
+                                                                operator: MINUS@1527..1529 "-" [] [Whitespace(" ")],
                                                                 right: CssListOfComponentValuesExpression {
                                                                     css_component_value_list: CssComponentValueList [
                                                                         CssRegularDimension {
@@ -2280,7 +2280,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: STAR@1681..1683 "*" [] [Whitespace(" ")],
+                                                operator: STAR@1681..1683 "*" [] [Whitespace(" ")],
                                                 right: CssBinaryExpression {
                                                     left: CssParenthesizedExpression {
                                                         l_paren_token: L_PAREN@1683..1684 "(" [] [],
@@ -2293,7 +2293,7 @@ CssRoot {
                                                                     },
                                                                 ],
                                                             },
-                                                            operator_token: PLUS@1688..1690 "+" [] [Whitespace(" ")],
+                                                            operator: PLUS@1688..1690 "+" [] [Whitespace(" ")],
                                                             right: CssListOfComponentValuesExpression {
                                                                 css_component_value_list: CssComponentValueList [
                                                                     CssRegularDimension {
@@ -2305,7 +2305,7 @@ CssRoot {
                                                         },
                                                         r_paren_token: R_PAREN@1693..1695 ")" [] [Whitespace(" ")],
                                                     },
-                                                    operator_token: SLASH@1695..1697 "/" [] [Whitespace(" ")],
+                                                    operator: SLASH@1695..1697 "/" [] [Whitespace(" ")],
                                                     right: CssListOfComponentValuesExpression {
                                                         css_component_value_list: CssComponentValueList [
                                                             CssNumber {
@@ -2386,7 +2386,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: STAR@1809..1811 "*" [] [Whitespace(" ")],
+                                                operator: STAR@1809..1811 "*" [] [Whitespace(" ")],
                                                 right: CssBinaryExpression {
                                                     left: CssParenthesizedExpression {
                                                         l_paren_token: L_PAREN@1811..1812 "(" [] [],
@@ -2399,7 +2399,7 @@ CssRoot {
                                                                     },
                                                                 ],
                                                             },
-                                                            operator_token: PLUS@1816..1818 "+" [] [Whitespace(" ")],
+                                                            operator: PLUS@1816..1818 "+" [] [Whitespace(" ")],
                                                             right: CssListOfComponentValuesExpression {
                                                                 css_component_value_list: CssComponentValueList [
                                                                     CssRegularDimension {
@@ -2411,7 +2411,7 @@ CssRoot {
                                                         },
                                                         r_paren_token: R_PAREN@1821..1823 ")" [] [Whitespace(" ")],
                                                     },
-                                                    operator_token: SLASH@1823..1825 "/" [] [Whitespace(" ")],
+                                                    operator: SLASH@1823..1825 "/" [] [Whitespace(" ")],
                                                     right: CssListOfComponentValuesExpression {
                                                         css_component_value_list: CssComponentValueList [
                                                             CssNumber {
@@ -2882,7 +2882,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: MINUS@2184..2186 "-" [] [Whitespace(" ")],
+                                                operator: MINUS@2184..2186 "-" [] [Whitespace(" ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssIdentifier {
@@ -3890,7 +3890,7 @@ CssRoot {
                                                                         },
                                                                     ],
                                                                 },
-                                                                operator_token: SLASH@2921..2923 "/" [] [Whitespace(" ")],
+                                                                operator: SLASH@2921..2923 "/" [] [Whitespace(" ")],
                                                                 right: CssListOfComponentValuesExpression {
                                                                     css_component_value_list: CssComponentValueList [
                                                                         CssNumber {
@@ -4009,7 +4009,7 @@ CssRoot {
                                                                         },
                                                                     ],
                                                                 },
-                                                                operator_token: SLASH@3005..3007 "/" [] [Whitespace(" ")],
+                                                                operator: SLASH@3005..3007 "/" [] [Whitespace(" ")],
                                                                 right: CssListOfComponentValuesExpression {
                                                                     css_component_value_list: CssComponentValueList [
                                                                         CssNumber {
@@ -4272,7 +4272,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: STAR@3169..3171 "*" [] [Whitespace(" ")],
+                                                operator: STAR@3169..3171 "*" [] [Whitespace(" ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssNumber {
@@ -4335,7 +4335,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: STAR@3219..3221 "*" [] [Whitespace(" ")],
+                                                operator: STAR@3219..3221 "*" [] [Whitespace(" ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssFunction {
@@ -4443,7 +4443,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: STAR@3314..3316 "*" [] [Whitespace(" ")],
+                                                operator: STAR@3314..3316 "*" [] [Whitespace(" ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssNumber {
@@ -4484,7 +4484,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: STAR@3359..3363 "*" [] [Whitespace("   ")],
+                                                operator: STAR@3359..3363 "*" [] [Whitespace("   ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssNumber {
@@ -4525,7 +4525,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: STAR@3403..3404 "*" [] [],
+                                                operator: STAR@3403..3404 "*" [] [],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssNumber {
@@ -4565,7 +4565,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: PLUS@3446..3450 "+" [] [Whitespace("   ")],
+                                                operator: PLUS@3446..3450 "+" [] [Whitespace("   ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssNumber {
@@ -4640,7 +4640,7 @@ CssRoot {
                                                                 },
                                                             ],
                                                         },
-                                                        operator_token: PLUS@3531..3535 "+" [] [Whitespace("   ")],
+                                                        operator: PLUS@3531..3535 "+" [] [Whitespace("   ")],
                                                         right: CssListOfComponentValuesExpression {
                                                             css_component_value_list: CssComponentValueList [
                                                                 CssRegularDimension {
@@ -4652,7 +4652,7 @@ CssRoot {
                                                     },
                                                     r_paren_token: R_PAREN@3543..3547 ")" [] [Whitespace("   ")],
                                                 },
-                                                operator_token: STAR@3547..3551 "*" [] [Whitespace("   ")],
+                                                operator: STAR@3547..3551 "*" [] [Whitespace("   ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssNumber {

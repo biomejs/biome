@@ -77,7 +77,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: SLASH@39..41 "/" [] [Whitespace(" ")],
+                                                operator: SLASH@39..41 "/" [] [Whitespace(" ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssFunction {
@@ -180,7 +180,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: SLASH@130..132 "/" [] [Whitespace(" ")],
+                                                operator: SLASH@130..132 "/" [] [Whitespace(" ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssFunction {
@@ -253,7 +253,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: SLASH@194..196 "/" [] [Whitespace(" ")],
+                                                operator: SLASH@194..196 "/" [] [Whitespace(" ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssPercentage {

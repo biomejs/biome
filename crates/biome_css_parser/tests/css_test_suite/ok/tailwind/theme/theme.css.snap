@@ -282,7 +282,7 @@ CssRoot {
                                                             },
                                                         ],
                                                     },
-                                                    operator_token: PLUS@365..367 "+" [] [Whitespace(" ")],
+                                                    operator: PLUS@365..367 "+" [] [Whitespace(" ")],
                                                     right: CssListOfComponentValuesExpression {
                                                         css_component_value_list: CssComponentValueList [
                                                             CssRegularDimension {
