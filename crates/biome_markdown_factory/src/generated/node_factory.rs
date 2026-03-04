@@ -20,11 +20,11 @@ pub fn md_autolink(
         ],
     ))
 }
-pub fn md_bullet(bullet_token: SyntaxToken, content: MdBlockList) -> MdBullet {
+pub fn md_bullet(prefix: MdListMarkerPrefix, content: MdBlockList) -> MdBullet {
     MdBullet::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_BULLET,
         [
-            Some(SyntaxElement::Token(bullet_token)),
+            Some(SyntaxElement::Node(prefix.into_syntax())),
             Some(SyntaxElement::Node(content.into_syntax())),
         ],
     ))
@@ -142,6 +142,12 @@ pub fn md_indent_code_block(content: MdInlineItemList) -> MdIndentCodeBlock {
     MdIndentCodeBlock::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_INDENT_CODE_BLOCK,
         [Some(SyntaxElement::Node(content.into_syntax()))],
+    ))
+}
+pub fn md_indent_token(md_indent_char_token: SyntaxToken) -> MdIndentToken {
+    MdIndentToken::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_INDENT_TOKEN,
+        [Some(SyntaxElement::Token(md_indent_char_token))],
     ))
 }
 pub fn md_inline_code(
@@ -383,6 +389,42 @@ pub fn md_link_title(content: MdInlineItemList) -> MdLinkTitle {
         [Some(SyntaxElement::Node(content.into_syntax()))],
     ))
 }
+pub fn md_list_marker_prefix(
+    pre_marker_indent: MdIndentTokenList,
+    marker_token: SyntaxToken,
+    content_indent: MdIndentTokenList,
+) -> MdListMarkerPrefixBuilder {
+    MdListMarkerPrefixBuilder {
+        pre_marker_indent,
+        marker_token,
+        content_indent,
+        post_marker_space_token: None,
+    }
+}
+pub struct MdListMarkerPrefixBuilder {
+    pre_marker_indent: MdIndentTokenList,
+    marker_token: SyntaxToken,
+    content_indent: MdIndentTokenList,
+    post_marker_space_token: Option<SyntaxToken>,
+}
+impl MdListMarkerPrefixBuilder {
+    pub fn with_post_marker_space_token(mut self, post_marker_space_token: SyntaxToken) -> Self {
+        self.post_marker_space_token = Some(post_marker_space_token);
+        self
+    }
+    pub fn build(self) -> MdListMarkerPrefix {
+        MdListMarkerPrefix::unwrap_cast(SyntaxNode::new_detached(
+            MarkdownSyntaxKind::MD_LIST_MARKER_PREFIX,
+            [
+                Some(SyntaxElement::Node(self.pre_marker_indent.into_syntax())),
+                Some(SyntaxElement::Token(self.marker_token)),
+                self.post_marker_space_token
+                    .map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Node(self.content_indent.into_syntax())),
+            ],
+        ))
+    }
+}
 pub fn md_newline(value_token: SyntaxToken) -> MdNewline {
     MdNewline::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_NEWLINE,
@@ -599,7 +641,7 @@ where
 }
 pub fn md_bullet_list<I>(items: I) -> MdBulletList
 where
-    I: IntoIterator<Item = MdBullet>,
+    I: IntoIterator<Item = AnyMdBulletListMember>,
     I::IntoIter: ExactSizeIterator,
 {
     MdBulletList::unwrap_cast(SyntaxNode::new_detached(
@@ -628,6 +670,18 @@ where
 {
     MdHashList::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_HASH_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn md_indent_token_list<I>(items: I) -> MdIndentTokenList
+where
+    I: IntoIterator<Item = MdIndentToken>,
+    I::IntoIter: ExactSizeIterator,
+{
+    MdIndentTokenList::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_INDENT_TOKEN_LIST,
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),

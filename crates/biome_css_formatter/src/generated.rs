@@ -970,6 +970,83 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssContainerQueryInParen
         FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: container_query_in_parens :: FormatCssContainerQueryInParens :: default ())
     }
 }
+impl FormatRule < biome_css_syntax :: CssContainerScrollStateAndQuery > for crate :: css :: auxiliary :: container_scroll_state_and_query :: FormatCssContainerScrollStateAndQuery { type Context = CssFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_css_syntax :: CssContainerScrollStateAndQuery , f : & mut CssFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_css_syntax :: CssContainerScrollStateAndQuery > :: fmt (self , node , f) } }
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssContainerScrollStateAndQuery {
+    type Format < 'a > = FormatRefWithRule < 'a , biome_css_syntax :: CssContainerScrollStateAndQuery , crate :: css :: auxiliary :: container_scroll_state_and_query :: FormatCssContainerScrollStateAndQuery > ;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: auxiliary :: container_scroll_state_and_query :: FormatCssContainerScrollStateAndQuery :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssContainerScrollStateAndQuery {
+    type Format = FormatOwnedWithRule < biome_css_syntax :: CssContainerScrollStateAndQuery , crate :: css :: auxiliary :: container_scroll_state_and_query :: FormatCssContainerScrollStateAndQuery > ;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: container_scroll_state_and_query :: FormatCssContainerScrollStateAndQuery :: default ())
+    }
+}
+impl FormatRule < biome_css_syntax :: CssContainerScrollStateInParens > for crate :: css :: auxiliary :: container_scroll_state_in_parens :: FormatCssContainerScrollStateInParens { type Context = CssFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_css_syntax :: CssContainerScrollStateInParens , f : & mut CssFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_css_syntax :: CssContainerScrollStateInParens > :: fmt (self , node , f) } }
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssContainerScrollStateInParens {
+    type Format < 'a > = FormatRefWithRule < 'a , biome_css_syntax :: CssContainerScrollStateInParens , crate :: css :: auxiliary :: container_scroll_state_in_parens :: FormatCssContainerScrollStateInParens > ;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: auxiliary :: container_scroll_state_in_parens :: FormatCssContainerScrollStateInParens :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssContainerScrollStateInParens {
+    type Format = FormatOwnedWithRule < biome_css_syntax :: CssContainerScrollStateInParens , crate :: css :: auxiliary :: container_scroll_state_in_parens :: FormatCssContainerScrollStateInParens > ;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: container_scroll_state_in_parens :: FormatCssContainerScrollStateInParens :: default ())
+    }
+}
+impl FormatRule < biome_css_syntax :: CssContainerScrollStateNotQuery > for crate :: css :: auxiliary :: container_scroll_state_not_query :: FormatCssContainerScrollStateNotQuery { type Context = CssFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_css_syntax :: CssContainerScrollStateNotQuery , f : & mut CssFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_css_syntax :: CssContainerScrollStateNotQuery > :: fmt (self , node , f) } }
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssContainerScrollStateNotQuery {
+    type Format < 'a > = FormatRefWithRule < 'a , biome_css_syntax :: CssContainerScrollStateNotQuery , crate :: css :: auxiliary :: container_scroll_state_not_query :: FormatCssContainerScrollStateNotQuery > ;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: auxiliary :: container_scroll_state_not_query :: FormatCssContainerScrollStateNotQuery :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssContainerScrollStateNotQuery {
+    type Format = FormatOwnedWithRule < biome_css_syntax :: CssContainerScrollStateNotQuery , crate :: css :: auxiliary :: container_scroll_state_not_query :: FormatCssContainerScrollStateNotQuery > ;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: container_scroll_state_not_query :: FormatCssContainerScrollStateNotQuery :: default ())
+    }
+}
+impl FormatRule<biome_css_syntax::CssContainerScrollStateOrQuery>
+    for crate::css::auxiliary::container_scroll_state_or_query::FormatCssContainerScrollStateOrQuery
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssContainerScrollStateOrQuery,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssContainerScrollStateOrQuery>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssContainerScrollStateOrQuery {
+    type Format < 'a > = FormatRefWithRule < 'a , biome_css_syntax :: CssContainerScrollStateOrQuery , crate :: css :: auxiliary :: container_scroll_state_or_query :: FormatCssContainerScrollStateOrQuery > ;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: auxiliary :: container_scroll_state_or_query :: FormatCssContainerScrollStateOrQuery :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssContainerScrollStateOrQuery {
+    type Format = FormatOwnedWithRule < biome_css_syntax :: CssContainerScrollStateOrQuery , crate :: css :: auxiliary :: container_scroll_state_or_query :: FormatCssContainerScrollStateOrQuery > ;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: container_scroll_state_or_query :: FormatCssContainerScrollStateOrQuery :: default ())
+    }
+}
+impl FormatRule < biome_css_syntax :: CssContainerScrollStateQueryInParens > for crate :: css :: auxiliary :: container_scroll_state_query_in_parens :: FormatCssContainerScrollStateQueryInParens { type Context = CssFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_css_syntax :: CssContainerScrollStateQueryInParens , f : & mut CssFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_css_syntax :: CssContainerScrollStateQueryInParens > :: fmt (self , node , f) } }
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssContainerScrollStateQueryInParens {
+    type Format < 'a > = FormatRefWithRule < 'a , biome_css_syntax :: CssContainerScrollStateQueryInParens , crate :: css :: auxiliary :: container_scroll_state_query_in_parens :: FormatCssContainerScrollStateQueryInParens > ;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: auxiliary :: container_scroll_state_query_in_parens :: FormatCssContainerScrollStateQueryInParens :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssContainerScrollStateQueryInParens {
+    type Format = FormatOwnedWithRule < biome_css_syntax :: CssContainerScrollStateQueryInParens , crate :: css :: auxiliary :: container_scroll_state_query_in_parens :: FormatCssContainerScrollStateQueryInParens > ;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: container_scroll_state_query_in_parens :: FormatCssContainerScrollStateQueryInParens :: default ())
+    }
+}
 impl FormatRule < biome_css_syntax :: CssContainerSizeFeatureInParens > for crate :: css :: auxiliary :: container_size_feature_in_parens :: FormatCssContainerSizeFeatureInParens { type Context = CssFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_css_syntax :: CssContainerSizeFeatureInParens , f : & mut CssFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_css_syntax :: CssContainerSizeFeatureInParens > :: fmt (self , node , f) } }
 impl AsFormat<CssFormatContext> for biome_css_syntax::CssContainerSizeFeatureInParens {
     type Format < 'a > = FormatRefWithRule < 'a , biome_css_syntax :: CssContainerSizeFeatureInParens , crate :: css :: auxiliary :: container_size_feature_in_parens :: FormatCssContainerSizeFeatureInParens > ;
@@ -10697,6 +10774,72 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssContainerQueryInPa
             crate::css::any::container_query_in_parens::FormatAnyCssContainerQueryInParens::default(
             ),
         )
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssContainerScrollStateAndCombinableQuery {
+    type Format < 'a > = FormatRefWithRule < 'a , biome_css_syntax :: AnyCssContainerScrollStateAndCombinableQuery , crate :: css :: any :: container_scroll_state_and_combinable_query :: FormatAnyCssContainerScrollStateAndCombinableQuery > ;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: any :: container_scroll_state_and_combinable_query :: FormatAnyCssContainerScrollStateAndCombinableQuery :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext>
+    for biome_css_syntax::AnyCssContainerScrollStateAndCombinableQuery
+{
+    type Format = FormatOwnedWithRule < biome_css_syntax :: AnyCssContainerScrollStateAndCombinableQuery , crate :: css :: any :: container_scroll_state_and_combinable_query :: FormatAnyCssContainerScrollStateAndCombinableQuery > ;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: any :: container_scroll_state_and_combinable_query :: FormatAnyCssContainerScrollStateAndCombinableQuery :: default ())
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssContainerScrollStateInParens {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyCssContainerScrollStateInParens,
+        crate::css::any::container_scroll_state_in_parens::FormatAnyCssContainerScrollStateInParens,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: any :: container_scroll_state_in_parens :: FormatAnyCssContainerScrollStateInParens :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssContainerScrollStateInParens {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyCssContainerScrollStateInParens,
+        crate::css::any::container_scroll_state_in_parens::FormatAnyCssContainerScrollStateInParens,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: any :: container_scroll_state_in_parens :: FormatAnyCssContainerScrollStateInParens :: default ())
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssContainerScrollStateOrCombinableQuery {
+    type Format < 'a > = FormatRefWithRule < 'a , biome_css_syntax :: AnyCssContainerScrollStateOrCombinableQuery , crate :: css :: any :: container_scroll_state_or_combinable_query :: FormatAnyCssContainerScrollStateOrCombinableQuery > ;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: any :: container_scroll_state_or_combinable_query :: FormatAnyCssContainerScrollStateOrCombinableQuery :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext>
+    for biome_css_syntax::AnyCssContainerScrollStateOrCombinableQuery
+{
+    type Format = FormatOwnedWithRule < biome_css_syntax :: AnyCssContainerScrollStateOrCombinableQuery , crate :: css :: any :: container_scroll_state_or_combinable_query :: FormatAnyCssContainerScrollStateOrCombinableQuery > ;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: any :: container_scroll_state_or_combinable_query :: FormatAnyCssContainerScrollStateOrCombinableQuery :: default ())
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssContainerScrollStateQuery {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyCssContainerScrollStateQuery,
+        crate::css::any::container_scroll_state_query::FormatAnyCssContainerScrollStateQuery,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: any :: container_scroll_state_query :: FormatAnyCssContainerScrollStateQuery :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssContainerScrollStateQuery {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyCssContainerScrollStateQuery,
+        crate::css::any::container_scroll_state_query::FormatAnyCssContainerScrollStateQuery,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: any :: container_scroll_state_query :: FormatAnyCssContainerScrollStateQuery :: default ())
     }
 }
 impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssContainerStyleAndCombinableQuery {

@@ -349,7 +349,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: PLUS@276..278 "+" [] [Whitespace(" ")],
+                                                operator: PLUS@276..278 "+" [] [Whitespace(" ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssRegularDimension {
@@ -403,7 +403,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: STAR@311..313 "*" [] [Whitespace(" ")],
+                                                operator: STAR@311..313 "*" [] [Whitespace(" ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssNumber {
@@ -444,7 +444,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: MINUS@338..340 "-" [] [Whitespace(" ")],
+                                                operator: MINUS@338..340 "-" [] [Whitespace(" ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssFunction {

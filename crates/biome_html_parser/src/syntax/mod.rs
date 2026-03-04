@@ -153,6 +153,8 @@ fn inside_tag_context(p: &HtmlParser) -> HtmlLexContext {
         HtmlLexContext::InsideTagWithDirectives { svelte: false }
     } else if Svelte.is_supported(p) {
         HtmlLexContext::InsideTagSvelte
+    } else if Astro.is_supported(p) {
+        HtmlLexContext::InsideTagAstro
     } else {
         HtmlLexContext::InsideTag
     }
@@ -190,11 +192,14 @@ fn parse_any_tag_name(p: &mut HtmlParser) -> ParsedSyntax {
     if !is_at_start_literal(p) {
         return Absent;
     }
-
     let tag_text = p.cur_text();
 
-    // Step 1: Parse base name (either component or regular tag)
-    let name = if is_possible_component(p, tag_text) {
+    // Check if this could be a component or has member expression
+    let is_component = is_possible_component(p, tag_text);
+    let has_member_expression = !p.options().is_html() && p.nth_at(1, T![.]);
+
+    // Step 1: Parse base name
+    let name = if is_component || has_member_expression {
         // Parse as component name - use component_name_context to allow `.` for member expressions
         let m = p.start();
         p.bump_with_context(HTML_LITERAL, component_name_context(p));
@@ -203,14 +208,18 @@ fn parse_any_tag_name(p: &mut HtmlParser) -> ParsedSyntax {
         // Parse as regular HTML tag
         parse_literal(p, HTML_TAG_NAME)
     };
-
     // Step 2: Extend with member access if present (using .map() pattern from JSX parser)
     name.map(|mut name| {
-        while p.at(T![.]) {
-            let m = name.precede(p); // Create marker BEFORE already-parsed name
-            p.bump_with_context(T![.], component_name_context(p)); // Use component context for `.`
+        // Check kind BEFORE moving name with precede()
+        let is_lowercase_tag = name.kind(p) == HTML_TAG_NAME;
 
-            // Parse member name - must use component_name_context to maintain `.` lexing
+        while p.at(T![.]) {
+            // Convert BEFORE precede takes ownership of name
+            if is_lowercase_tag {
+                name.change_kind(p, HTML_COMPONENT_NAME);
+            }
+            let m = name.precede(p);
+            p.bump_with_context(T![.], component_name_context(p));
             if is_at_start_literal(p) {
                 let member_m = p.start();
                 p.bump_with_context(HTML_LITERAL, component_name_context(p));
@@ -219,7 +228,7 @@ fn parse_any_tag_name(p: &mut HtmlParser) -> ParsedSyntax {
                 p.error(expected_element_name(p, p.cur_range()));
             }
 
-            name = m.complete(p, HTML_MEMBER_NAME); // Wrap previous name
+            name = m.complete(p, HTML_MEMBER_NAME);
         }
         name
     })
@@ -243,8 +252,15 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
 
     parse_any_tag_name(p).or_add_diagnostic(p, expected_element_name);
 
-    if Astro.is_supported(p) {
-        p.re_lex(HtmlReLexContext::InsideTagAstro);
+    let context = inside_tag_context(p);
+    match context {
+        HtmlLexContext::InsideTagSvelte => {
+            p.re_lex(HtmlReLexContext::InsideTagSvelte);
+        }
+        HtmlLexContext::InsideTagAstro => {
+            p.re_lex(HtmlReLexContext::InsideTagAstro);
+        }
+        _ => {}
     }
 
     AttributeList.parse_list(p);
@@ -318,8 +334,8 @@ fn parse_closing_tag(p: &mut HtmlParser) -> ParsedSyntax {
         return Absent;
     }
     let m = p.start();
-    p.bump_with_context(T![<], HtmlLexContext::InsideTag);
-    p.bump_with_context(T![/], HtmlLexContext::InsideTag);
+    p.bump_with_context(T![<], inside_tag_context(p));
+    p.bump_with_context(T![/], inside_tag_context(p));
     let should_be_self_closing = VOID_ELEMENTS
         .iter()
         .any(|tag| tag.eq_ignore_ascii_case(p.cur_text()))

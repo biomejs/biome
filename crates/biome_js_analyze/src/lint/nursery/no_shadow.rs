@@ -249,6 +249,7 @@ fn is_inside_type_parameter(binding: &Binding) -> bool {
     binding
         .syntax()
         .ancestors()
+        .skip(1)
         .any(|ancestor| ancestor.cast::<TsTypeParameter>().is_some())
 }
 
@@ -256,6 +257,7 @@ fn is_inside_type_member(binding: &Binding) -> bool {
     binding
         .syntax()
         .ancestors()
+        .skip(1)
         .any(|ancestor| ancestor.cast::<TsPropertySignatureTypeMember>().is_some())
 }
 
@@ -263,5 +265,6 @@ fn is_inside_function_parameters(binding: &Binding) -> bool {
     binding
         .syntax()
         .ancestors()
+        .skip(1)
         .any(|ancestor| ancestor.cast::<JsParameterList>().is_some())
 }

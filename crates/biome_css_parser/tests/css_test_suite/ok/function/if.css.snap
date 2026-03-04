@@ -2920,7 +2920,7 @@ CssRoot {
                                                                         },
                                                                     ],
                                                                 },
-                                                                operator_token: PLUS@2588..2590 "+" [] [Whitespace(" ")],
+                                                                operator: PLUS@2588..2590 "+" [] [Whitespace(" ")],
                                                                 right: CssListOfComponentValuesExpression {
                                                                     css_component_value_list: CssComponentValueList [
                                                                         CssRegularDimension {
@@ -3003,7 +3003,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: MINUS@2655..2657 "-" [] [Whitespace(" ")],
+                                                operator: MINUS@2655..2657 "-" [] [Whitespace(" ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssIfFunction {
@@ -4491,7 +4491,7 @@ CssRoot {
                                                                         },
                                                                     ],
                                                                 },
-                                                                operator_token: PLUS@4063..4065 "+" [] [Whitespace(" ")],
+                                                                operator: PLUS@4063..4065 "+" [] [Whitespace(" ")],
                                                                 right: CssListOfComponentValuesExpression {
                                                                     css_component_value_list: CssComponentValueList [
                                                                         CssRegularDimension {
@@ -5196,7 +5196,7 @@ CssRoot {
                                                                         },
                                                                     ],
                                                                 },
-                                                                operator_token: STAR@4828..4830 "*" [] [Whitespace(" ")],
+                                                                operator: STAR@4828..4830 "*" [] [Whitespace(" ")],
                                                                 right: CssListOfComponentValuesExpression {
                                                                     css_component_value_list: CssComponentValueList [
                                                                         CssNumber {
@@ -5260,7 +5260,7 @@ CssRoot {
                                                                         },
                                                                     ],
                                                                 },
-                                                                operator_token: STAR@4896..4898 "*" [] [Whitespace(" ")],
+                                                                operator: STAR@4896..4898 "*" [] [Whitespace(" ")],
                                                                 right: CssListOfComponentValuesExpression {
                                                                     css_component_value_list: CssComponentValueList [
                                                                         CssNumber {
@@ -5308,7 +5308,7 @@ CssRoot {
                                                                         },
                                                                     ],
                                                                 },
-                                                                operator_token: STAR@4937..4939 "*" [] [Whitespace(" ")],
+                                                                operator: STAR@4937..4939 "*" [] [Whitespace(" ")],
                                                                 right: CssListOfComponentValuesExpression {
                                                                     css_component_value_list: CssComponentValueList [
                                                                         CssNumber {
@@ -6803,7 +6803,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: MINUS@6539..6541 "-" [] [Whitespace(" ")],
+                                                operator: MINUS@6539..6541 "-" [] [Whitespace(" ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssIfFunction {

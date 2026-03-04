@@ -43,13 +43,13 @@
 //! be decided with full context.
 
 use biome_markdown_syntax::{
-    AnyMdBlock, AnyMdCodeBlock, AnyMdInline, AnyMdLeafBlock, MarkdownLanguage, MdAutolink,
-    MdBlockList, MdBullet, MdBulletListItem, MdDocument, MdEntityReference, MdFencedCodeBlock,
-    MdHardLine, MdHeader, MdHtmlBlock, MdIndentCodeBlock, MdInlineCode, MdInlineEmphasis,
-    MdInlineHtml, MdInlineImage, MdInlineItalic, MdInlineItemList, MdInlineLink, MdLinkBlock,
-    MdLinkDestination, MdLinkLabel, MdLinkReferenceDefinition, MdLinkTitle, MdOrderedListItem,
-    MdParagraph, MdQuote, MdReferenceImage, MdReferenceLink, MdReferenceLinkLabel, MdSetextHeader,
-    MdSoftBreak, MdTextual, MdThematicBreakBlock,
+    AnyMdBlock, AnyMdBulletListMember, AnyMdCodeBlock, AnyMdInline, AnyMdLeafBlock,
+    MarkdownLanguage, MdAutolink, MdBlockList, MdBullet, MdBulletListItem, MdDocument,
+    MdEntityReference, MdFencedCodeBlock, MdHardLine, MdHeader, MdHtmlBlock, MdIndentCodeBlock,
+    MdInlineCode, MdInlineEmphasis, MdInlineHtml, MdInlineImage, MdInlineItalic, MdInlineItemList,
+    MdInlineLink, MdLinkBlock, MdLinkDestination, MdLinkLabel, MdLinkReferenceDefinition,
+    MdLinkTitle, MdOrderedListItem, MdParagraph, MdQuote, MdReferenceImage, MdReferenceLink,
+    MdReferenceLinkLabel, MdSetextHeader, MdSoftBreak, MdTextual, MdThematicBreakBlock,
 };
 use biome_rowan::{AstNode, AstNodeList, Direction, SyntaxNode, TextRange, WalkEvent};
 use percent_encoding::{AsciiSet, CONTROLS, utf8_percent_encode};
@@ -565,8 +565,13 @@ impl<'a> HtmlRenderer<'a> {
 
             let start = list
                 .md_bullet_list()
-                .first()
-                .and_then(|bullet| bullet.bullet().ok())
+                .iter()
+                .find_map(|member| match member {
+                    AnyMdBulletListMember::MdBullet(bullet) => Some(bullet),
+                    _ => None,
+                })
+                .and_then(|bullet| bullet.prefix().ok())
+                .and_then(|prefix| prefix.marker().ok())
                 .map_or(1, |marker| {
                     let text = marker.text();
                     text.trim_start()
@@ -596,7 +601,10 @@ impl<'a> HtmlRenderer<'a> {
             let is_tight = list_is_tight && !item_has_blank_line;
             let is_empty = is_empty_content(&blocks);
 
-            let first_is_paragraph = blocks.first().is_some_and(is_paragraph_block);
+            let first_is_paragraph = blocks
+                .iter()
+                .find(|b| !is_newline_block(b))
+                .is_some_and(is_paragraph_block);
             let last_is_paragraph = blocks
                 .iter()
                 .rev()
@@ -969,8 +977,18 @@ impl<'a> HtmlRenderer<'a> {
                 }
 
                 let mut content = buffer.content;
+                if state.leading_newline && content.starts_with('\n') {
+                    content.remove(0);
+                }
                 if state.trim_trailing_newline && content.ends_with('\n') {
                     content.pop();
+                }
+                if state.leading_newline
+                    && content.starts_with('<')
+                    && !content.contains('\n')
+                    && !content.ends_with('\n')
+                {
+                    content.push('\n');
                 }
                 self.push_str(&content);
                 self.push_str("</li>\n");
@@ -1680,6 +1698,9 @@ fn extract_alt_text_inline(inline: &AnyMdInline, ctx: &HtmlRenderContext, out: &
         }
         AnyMdInline::MdQuotePrefix(_) => {
             // Quote prefixes don't contribute text to alt attributes
+        }
+        AnyMdInline::MdIndentToken(_) => {
+            // Indent tokens don't contribute text to alt attributes
         }
     }
 }

@@ -76,6 +76,7 @@ impl Rule for NoConstructorReturn {
         let _arg = ret.argument()?;
         ret.syntax()
             .ancestors()
+            .skip(1)
             .find(|x| AnyJsControlFlowRoot::can_cast(x.kind()))
             .and_then(JsConstructorClassMember::cast)
     }

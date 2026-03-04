@@ -82,7 +82,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: SLASH@49..51 "/" [] [Whitespace(" ")],
+                                                operator: SLASH@49..51 "/" [] [Whitespace(" ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssPercentage {
@@ -158,7 +158,7 @@ CssRoot {
                                                         },
                                                     ],
                                                 },
-                                                operator_token: SLASH@112..114 "/" [] [Whitespace(" ")],
+                                                operator: SLASH@112..114 "/" [] [Whitespace(" ")],
                                                 right: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssPercentage {

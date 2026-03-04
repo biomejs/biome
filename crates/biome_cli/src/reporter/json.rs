@@ -11,6 +11,18 @@ use biome_json_factory::make::*;
 use biome_json_syntax::{AnyJsonMemberName, AnyJsonValue, JsonRoot, JsonSyntaxKind, T};
 use camino::{Utf8Path, Utf8PathBuf};
 
+/// Escapes special characters in a string for safe JSON output
+fn json_escape(input: &str) -> String {
+    input
+        .replace('\\', "\\\\")
+        .replace('"', "\\\"")
+        .replace('\n', "\\n")
+        .replace('\r', "\\r")
+        .replace('\t', "\\t")
+        .replace('\x08', "\\b")
+        .replace('\x0C', "\\f")
+}
+
 #[derive(Debug, Default)]
 pub(crate) struct JsonReporterVisitor {
     summary: TraversalSummary,
@@ -134,7 +146,9 @@ fn suggestion_to_json(suggestion: &JsonSuggestion) -> AnyJsonValue {
         json_member(
             AnyJsonMemberName::JsonMemberName(json_member_name(json_string_literal("text"))),
             token(T![:]),
-            AnyJsonValue::JsonStringValue(json_string_value(json_string_literal(&suggestion.text))),
+            AnyJsonValue::JsonStringValue(json_string_value(json_string_literal(&json_escape(
+                &suggestion.text,
+            )))),
         ),
     ];
     let separators = vec![token(T![,]); members.len() - 1];
@@ -164,7 +178,9 @@ fn report_to_json(report: &JsonReport) -> AnyJsonValue {
         json_member(
             AnyJsonMemberName::JsonMemberName(json_member_name(json_string_literal("message"))),
             token(T![:]),
-            AnyJsonValue::JsonStringValue(json_string_value(json_string_literal(&report.message))),
+            AnyJsonValue::JsonStringValue(json_string_value(json_string_literal(&json_escape(
+                &report.message,
+            )))),
         ),
     ];
 

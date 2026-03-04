@@ -8,7 +8,7 @@ use crate::syntax::at_rule::supports::error::{
 use crate::syntax::block::parse_conditional_block;
 use crate::syntax::parse_error::{expected_declaration, expected_selector};
 use crate::syntax::selector::parse_selector;
-use crate::syntax::{is_nth_at_identifier, parse_any_value, parse_declaration};
+use crate::syntax::{is_nth_at_identifier, parse_any_css_value, parse_declaration};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_recovery::ParseRecovery;
@@ -230,7 +230,7 @@ fn parse_any_supports_condition_in_parens(
         {
             return Absent;
         }
-        parse_any_value(p)
+        parse_any_css_value(p)
     }
 }
 

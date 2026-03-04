@@ -1318,7 +1318,7 @@ CssRoot {
                                                                     },
                                                                 ],
                                                             },
-                                                            operator_token: SLASH@736..738 "/" [] [Whitespace(" ")],
+                                                            operator: SLASH@736..738 "/" [] [Whitespace(" ")],
                                                             right: CssListOfComponentValuesExpression {
                                                                 css_component_value_list: CssComponentValueList [
                                                                     CssPercentage {

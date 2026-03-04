@@ -375,6 +375,14 @@ impl Format<FormatTypeContext> for JsOwnExport {
                     token(")")
                 ]]
             ),
+            Self::Namespace(reexport) => write!(
+                f,
+                [&format_args![
+                    token("JsOwnExport::Namespace("),
+                    reexport,
+                    token(")")
+                ]]
+            ),
         }
     }
 }

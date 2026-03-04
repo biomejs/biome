@@ -2435,6 +2435,11 @@ See https://biomejs.dev/linter/rules/use-required-scripts
 	 */
 	useRequiredScripts?: UseRequiredScriptsConfiguration;
 	/**
+	* Enforce that \<style> blocks in Vue SFCs have the scoped attribute and that \<style> blocks in Astro components do not have the is:global directive.
+See https://biomejs.dev/linter/rules/use-scoped-styles 
+	 */
+	useScopedStyles?: UseScopedStylesConfiguration;
+	/**
 	* Enforce the sorting of CSS utility classes.
 See https://biomejs.dev/linter/rules/use-sorted-classes 
 	 */
@@ -2444,6 +2449,11 @@ See https://biomejs.dev/linter/rules/use-sorted-classes
 See https://biomejs.dev/linter/rules/use-spread 
 	 */
 	useSpread?: UseSpreadConfiguration;
+	/**
+	* Enforce the use of the u or v flag for regular expressions.
+See https://biomejs.dev/linter/rules/use-unicode-regex 
+	 */
+	useUnicodeRegex?: UseUnicodeRegexConfiguration;
 	/**
 	* Enforce consistent defineProps declaration style.
 See https://biomejs.dev/linter/rules/use-vue-consistent-define-props-declaration 
@@ -4289,12 +4299,18 @@ export type UseRegexpExecConfiguration =
 export type UseRequiredScriptsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseRequiredScriptsOptions;
+export type UseScopedStylesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseScopedStylesOptions;
 export type UseSortedClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSortedClassesOptions;
 export type UseSpreadConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSpreadOptions;
+export type UseUnicodeRegexConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseUnicodeRegexOptions;
 export type UseVueConsistentDefinePropsDeclarationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueConsistentDefinePropsDeclarationOptions;
@@ -6004,6 +6020,11 @@ export interface RuleWithUseRequiredScriptsOptions {
 	level: RulePlainConfiguration;
 	options?: UseRequiredScriptsOptions;
 }
+export interface RuleWithUseScopedStylesOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseScopedStylesOptions;
+}
 export interface RuleWithUseSortedClassesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -6013,6 +6034,11 @@ export interface RuleWithUseSpreadOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseSpreadOptions;
+}
+export interface RuleWithUseUnicodeRegexOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseUnicodeRegexOptions;
 }
 export interface RuleWithUseVueConsistentDefinePropsDeclarationOptions {
 	level: RulePlainConfiguration;
@@ -7452,6 +7478,7 @@ export interface UseRequiredScriptsOptions {
 	 */
 	requiredScripts?: string[];
 }
+export type UseScopedStylesOptions = {};
 export interface UseSortedClassesOptions {
 	/**
 	 * Additional attributes that will be sorted.
@@ -7463,6 +7490,7 @@ export interface UseSortedClassesOptions {
 	functions?: string[];
 }
 export type UseSpreadOptions = {};
+export type UseUnicodeRegexOptions = {};
 export interface UseVueConsistentDefinePropsDeclarationOptions {
 	style?: DeclarationStyle;
 }
@@ -8426,6 +8454,7 @@ export type Category =
 	| "lint/nursery/useRequiredScripts"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSpread"
+	| "lint/nursery/useUnicodeRegex"
 	| "lint/nursery/useUniqueArgumentNames"
 	| "lint/nursery/useUniqueFieldDefinitionNames"
 	| "lint/nursery/useUniqueGraphqlOperationName"
@@ -8437,6 +8466,7 @@ export type Category =
 	| "lint/nursery/useVueDefineMacrosOrder"
 	| "lint/nursery/useVueHyphenatedAttributes"
 	| "lint/nursery/useVueMultiWordComponentNames"
+	| "lint/nursery/useScopedStyles"
 	| "lint/nursery/useVueVForKey"
 	| "lint/nursery/useVueValidTemplateRoot"
 	| "lint/nursery/useVueValidVBind"

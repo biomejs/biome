@@ -461,6 +461,44 @@ impl IntoFormat<MarkdownFormatContext> for biome_markdown_syntax::MdIndentCodeBl
         )
     }
 }
+impl FormatRule<biome_markdown_syntax::MdIndentToken>
+    for crate::markdown::auxiliary::indent_token::FormatMdIndentToken
+{
+    type Context = MarkdownFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_markdown_syntax::MdIndentToken,
+        f: &mut MarkdownFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_markdown_syntax::MdIndentToken>::fmt(self, node, f)
+    }
+}
+impl AsFormat<MarkdownFormatContext> for biome_markdown_syntax::MdIndentToken {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_markdown_syntax::MdIndentToken,
+        crate::markdown::auxiliary::indent_token::FormatMdIndentToken,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::markdown::auxiliary::indent_token::FormatMdIndentToken::default(),
+        )
+    }
+}
+impl IntoFormat<MarkdownFormatContext> for biome_markdown_syntax::MdIndentToken {
+    type Format = FormatOwnedWithRule<
+        biome_markdown_syntax::MdIndentToken,
+        crate::markdown::auxiliary::indent_token::FormatMdIndentToken,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::markdown::auxiliary::indent_token::FormatMdIndentToken::default(),
+        )
+    }
+}
 impl FormatRule<biome_markdown_syntax::MdInlineCode>
     for crate::markdown::auxiliary::inline_code::FormatMdInlineCode
 {
@@ -870,6 +908,44 @@ impl IntoFormat<MarkdownFormatContext> for biome_markdown_syntax::MdLinkTitle {
         FormatOwnedWithRule::new(
             self,
             crate::markdown::auxiliary::link_title::FormatMdLinkTitle::default(),
+        )
+    }
+}
+impl FormatRule<biome_markdown_syntax::MdListMarkerPrefix>
+    for crate::markdown::auxiliary::list_marker_prefix::FormatMdListMarkerPrefix
+{
+    type Context = MarkdownFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_markdown_syntax::MdListMarkerPrefix,
+        f: &mut MarkdownFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_markdown_syntax::MdListMarkerPrefix>::fmt(self, node, f)
+    }
+}
+impl AsFormat<MarkdownFormatContext> for biome_markdown_syntax::MdListMarkerPrefix {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_markdown_syntax::MdListMarkerPrefix,
+        crate::markdown::auxiliary::list_marker_prefix::FormatMdListMarkerPrefix,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::markdown::auxiliary::list_marker_prefix::FormatMdListMarkerPrefix::default(),
+        )
+    }
+}
+impl IntoFormat<MarkdownFormatContext> for biome_markdown_syntax::MdListMarkerPrefix {
+    type Format = FormatOwnedWithRule<
+        biome_markdown_syntax::MdListMarkerPrefix,
+        crate::markdown::auxiliary::list_marker_prefix::FormatMdListMarkerPrefix,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::markdown::auxiliary::list_marker_prefix::FormatMdListMarkerPrefix::default(),
         )
     }
 }
@@ -1467,6 +1543,31 @@ impl IntoFormat<MarkdownFormatContext> for biome_markdown_syntax::MdHashList {
         )
     }
 }
+impl AsFormat<MarkdownFormatContext> for biome_markdown_syntax::MdIndentTokenList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_markdown_syntax::MdIndentTokenList,
+        crate::markdown::lists::indent_token_list::FormatMdIndentTokenList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::markdown::lists::indent_token_list::FormatMdIndentTokenList::default(),
+        )
+    }
+}
+impl IntoFormat<MarkdownFormatContext> for biome_markdown_syntax::MdIndentTokenList {
+    type Format = FormatOwnedWithRule<
+        biome_markdown_syntax::MdIndentTokenList,
+        crate::markdown::lists::indent_token_list::FormatMdIndentTokenList,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::markdown::lists::indent_token_list::FormatMdIndentTokenList::default(),
+        )
+    }
+}
 impl AsFormat<MarkdownFormatContext> for biome_markdown_syntax::MdInlineItemList {
     type Format<'a> = FormatRefWithRule<
         'a,
@@ -1575,6 +1676,31 @@ impl IntoFormat<MarkdownFormatContext> for biome_markdown_syntax::AnyMdBlock {
         FormatOwnedWithRule::new(
             self,
             crate::markdown::any::block::FormatAnyMdBlock::default(),
+        )
+    }
+}
+impl AsFormat<MarkdownFormatContext> for biome_markdown_syntax::AnyMdBulletListMember {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_markdown_syntax::AnyMdBulletListMember,
+        crate::markdown::any::bullet_list_member::FormatAnyMdBulletListMember,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::markdown::any::bullet_list_member::FormatAnyMdBulletListMember::default(),
+        )
+    }
+}
+impl IntoFormat<MarkdownFormatContext> for biome_markdown_syntax::AnyMdBulletListMember {
+    type Format = FormatOwnedWithRule<
+        biome_markdown_syntax::AnyMdBulletListMember,
+        crate::markdown::any::bullet_list_member::FormatAnyMdBulletListMember,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::markdown::any::bullet_list_member::FormatAnyMdBulletListMember::default(),
         )
     }
 }

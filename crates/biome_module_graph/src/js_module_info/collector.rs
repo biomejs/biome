@@ -949,7 +949,18 @@ impl JsModuleInfoCollector {
                     export_name,
                     reexport,
                 } => {
-                    finalised_exports.insert(export_name, JsExport::Reexport(reexport));
+                    // `export * as Foo from "..."` creates a namespace export:
+                    // `Foo` is an own symbol of this module (a namespace object),
+                    // not a forwarded individual symbol from the target.
+                    // We store the full `JsReexport` so that the JSDoc comment
+                    // and resolved target path are preserved for documentation
+                    // tooling and type inference.
+                    if reexport.import.symbol == ImportSymbol::All {
+                        finalised_exports
+                            .insert(export_name, JsExport::Own(JsOwnExport::Namespace(reexport)));
+                    } else {
+                        finalised_exports.insert(export_name, JsExport::Reexport(reexport));
+                    }
                 }
             }
         }

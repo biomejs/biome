@@ -135,6 +135,7 @@ impl<'src> HtmlLexer<'src> {
             EXL => self.consume_byte(T![!]),
             // Handle colons as separate tokens for Astro directives
             COL => self.consume_byte(T![:]),
+            PRD => self.consume_byte(T![.]),
             BEO if self.at_svelte_opening_block() => self.consume_svelte_opening_block(),
             BEO => {
                 if self.at_opening_double_text_expression() {
@@ -276,12 +277,14 @@ impl<'src> HtmlLexer<'src> {
     fn consume_token_inside_tag_svelte(&mut self, current: u8) -> HtmlSyntaxKind {
         let dispatched = lookup_byte(current);
 
-        if dispatched == SLH {
-            match self.byte_at(1).map(lookup_byte) {
+        match dispatched {
+            SLH => match self.byte_at(1).map(lookup_byte) {
                 Some(SLH) => return self.consume_js_line_comment(),
                 Some(MUL) => return self.consume_js_block_comment(),
                 _ => {}
-            }
+            },
+            PRD => return self.consume_byte(T![.]),
+            _ => {}
         }
         self.consume_token_inside_tag(current)
     }
@@ -1446,6 +1449,7 @@ impl<'src> ReLexer<'src> for HtmlLexer<'src> {
                 HtmlReLexContext::HtmlText => self.consume_html_text(current),
                 HtmlReLexContext::InsideTag => self.consume_token_inside_tag(current),
                 HtmlReLexContext::InsideTagAstro => self.consume_token_inside_tag_astro(current),
+                HtmlReLexContext::InsideTagSvelte => self.consume_token_inside_tag_svelte(current),
             },
             None => EOF,
         };

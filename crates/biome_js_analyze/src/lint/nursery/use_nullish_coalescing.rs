@@ -84,7 +84,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseNullishCoalescing {
-        version: "next",
+        version: "2.4.5",
         name: "useNullishCoalescing",
         language: "js",
         sources: &[RuleSource::EslintTypeScript("prefer-nullish-coalescing").inspired()],

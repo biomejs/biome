@@ -1,0 +1,17 @@
+@container   scroll-state(  scrolled:   bottom  )   {  }
+
+@container scroll-state( not  ( stuck ) ) { }
+
+@container scroll-state( ( stuck ) and  ( scrolled:   bottom ) ) { }
+
+@container scroll-state( ( stuck ) or  ( scrolled:   bottom ) ) { }
+
+@container  main-layout   scroll-state( not  (( stuck ) and ( scrolled:  bottom )) )  {  }
+
+@container scroll-state( ( stuck ) and ( scrolled: bottom ) and ( snapped: y ) ) { }
+
+@container scroll-state(
+  ( stuck )
+  or
+  ( snapped:   x )
+) { }

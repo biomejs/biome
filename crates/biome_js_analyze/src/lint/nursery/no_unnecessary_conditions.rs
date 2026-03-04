@@ -313,6 +313,7 @@ fn check_condition_necessity(
     let inside_catch = expr
         .syntax()
         .ancestors()
+        .skip(1)
         .any(|ancestor| JsCatchClause::can_cast(ancestor.kind()));
 
     if inside_catch {
