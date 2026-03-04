@@ -1,7 +1,7 @@
 use crate::parser::CssParser;
+use crate::syntax::ValueParsingContext;
 use crate::syntax::parse_error::expected_declaration_item;
 use crate::syntax::scss::parse_scss_expression_in_args_until;
-use crate::syntax::ValueParsingContext;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseSeparatedList;
