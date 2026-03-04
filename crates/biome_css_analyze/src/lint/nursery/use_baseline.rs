@@ -175,15 +175,16 @@ declare_lint_rule! {
     ///
     /// ### `allowPropertyValues`
     ///
-    /// A list of CSS property value pairs to exclude from checking, in `"property:value"` format
-    /// (case-insensitive).
+    /// An object to map properties with its values (case-insensitive).
     ///
-    /// Default: `[]`
+    /// Default: `{}`
     ///
     /// ```json,options
     /// {
     ///   "options": {
-    ///     "allowPropertyValues": ["clip-path:fill-box"]
+    ///     "allowPropertyValues": {
+    ///       "clip-path": "fill-box"
+    ///     }
     ///   }
     /// }
     /// ```
@@ -302,41 +303,41 @@ pub enum FeatureName {
 
 impl From<TokenText> for FeatureName {
     fn from(name: TokenText) -> Self {
-        FeatureName::Token(name)
+        Self::Token(name)
     }
 }
 
 impl From<&'static str> for FeatureName {
     fn from(name: &'static str) -> Self {
-        FeatureName::String(name)
+        Self::String(name)
     }
 }
 
 impl From<(TokenText, TokenText)> for FeatureName {
     fn from(pair: (TokenText, TokenText)) -> Self {
-        FeatureName::PropertyValue(pair.0, pair.1)
+        Self::PropertyValue(pair.0, pair.1)
     }
 }
 
 impl FeatureName {
     fn message(&self) -> String {
         match self {
-            FeatureName::Token(name) => name.text().to_string(),
-            FeatureName::PropertyValue(key, value) => format!("{}: {}", key.text(), value.text()),
-            FeatureName::String(name) => name.to_string(),
+            Self::Token(name) => name.text().to_string(),
+            Self::PropertyValue(key, value) => format!("{}: {}", key.text(), value.text()),
+            Self::String(name) => name.to_string(),
         }
     }
 
     fn can_i_use(&self) -> MarkupBuf {
         match self {
-            FeatureName::Token(name) => {
+            Self::Token(name) => {
                 let href = format!("https://caniuse.com/?search={}", name.text());
                 markup! {
                     "Check "<Hyperlink href={href}>"caniuse.com"</Hyperlink>" for more information about the feature "{name.text()}"."
                 }
                 .to_owned()
             }
-            FeatureName::PropertyValue(key, value) => {
+            Self::PropertyValue(key, value) => {
                 let value_href = format!("https://caniuse.com/?search={}", value.text());
                 let key_href = format!("https://caniuse.com/?search={}", key.text());
 
@@ -345,7 +346,7 @@ impl FeatureName {
                     "Check "<Hyperlink href={key_href}>"caniuse.com"</Hyperlink>" for more information about the property "{key.text()}"."
                 }.to_owned()
             }
-            FeatureName::String(name) => {
+            Self::String(name) => {
                 let href = format!("https://caniuse.com/?search={}", name);
 
                 markup! {

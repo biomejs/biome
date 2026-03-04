@@ -4,7 +4,7 @@ use quote::quote;
 use serde::Deserialize;
 use std::collections::BTreeMap;
 use ureq::get;
-use xtask_glue::*;
+use xtask_codegen::update;
 use xtask_glue::{Mode, Result, project_root};
 
 const WEB_FEATURES_DATA_URL: &str = "https://unpkg.com/web-features/data.json";
@@ -87,7 +87,6 @@ fn map_status(baseline: BaselineValue, low_date: Option<&str>) -> Status {
 
 /// Regex-free pattern matching for CSS compat keys.
 /// Returns `None` if the key doesn't match the given category.
-
 fn match_css_property(key: &str) -> Option<&str> {
     // css.properties.<property>  (no further dots — excludes value sub-keys)
     let rest = key.strip_prefix("css.properties.")?;
@@ -148,7 +147,7 @@ fn match_css_function(key: &str) -> Option<&str> {
     // The key format is css.types.<something>  or css.types.<parent>.<something>
     let rest = key.strip_prefix("css.types.")?;
     // Take the last segment
-    let name = rest.split('.').last()?;
+    let name = rest.split('.').next_back()?;
     // Heuristic: if it ends with no underscore and is a single segment,
     // it's a candidate. We'll validate against known function names below.
     Some(name)
@@ -203,7 +202,7 @@ fn extract_css_features(data: &WebFeaturesData) -> CssFeatures {
     let mut functions_map: BTreeMap<String, Status> = BTreeMap::new();
     let mut selectors: BTreeMap<String, Status> = BTreeMap::new();
 
-    for (_feature_id, entry) in &data.features {
+    for entry in data.features.values() {
         let feature = match entry {
             FeatureEntry::Feature(f) => f,
             FeatureEntry::Other => continue,
@@ -596,7 +595,9 @@ pub fn generate_css_baseline(mode: Mode) -> Result<()> {
     let tokens = generate_code(features);
     let output_path = project_root().join("crates/biome_css_analyze/src/baseline_data.rs");
 
-    &xtask_glue::reformat_with_command(tokens.to_string(), "baseline")?;
+    let content = &xtask_glue::reformat_with_command(tokens.to_string(), "baseline")?;
+
+    update(output_path.as_path(), content, &mode)?;
 
     Ok(())
 }
