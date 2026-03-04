@@ -14160,10 +14160,7 @@ impl std::fmt::Debug for CssBinaryExpression {
             DEPTH.set(current_depth + 1);
             f.debug_struct("CssBinaryExpression")
                 .field("left", &support::DebugSyntaxResult(self.left()))
-                .field(
-                    "operator",
-                    &support::DebugSyntaxResult(self.operator()),
-                )
+                .field("operator", &support::DebugSyntaxResult(self.operator()))
                 .field("right", &support::DebugSyntaxResult(self.right()))
                 .finish()
         } else {
