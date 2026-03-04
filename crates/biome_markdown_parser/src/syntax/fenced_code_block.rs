@@ -367,10 +367,11 @@ fn consume_quote_prefix_in_code_content(p: &mut MarkdownParser) -> bool {
     let indent_list_m = p.start();
     indent_list_m.complete(p, MD_QUOTE_INDENT_LIST);
 
-    debug_assert!(
-        try_bump_quote_marker(p),
-        "guard above guarantees marker present"
-    );
+    let marker_bumped = try_bump_quote_marker(p);
+    debug_assert!(marker_bumped, "guard above guarantees marker present");
+    if !marker_bumped {
+        unreachable!("guard above guarantees marker present");
+    }
 
     // Optional post-marker space
     if p.at(MD_TEXTUAL_LITERAL) {
