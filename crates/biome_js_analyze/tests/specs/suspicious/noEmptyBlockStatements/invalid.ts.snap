@@ -4,14 +4,14 @@ expression: invalid.ts
 ---
 # Input
 ```ts
-function fooEmptyTs() {}
+function fooEmptyTs() { }
 
-const barEmptyTs = () => {};
+const barEmptyTs = () => { };
 
 function fooWithNestedEmptyFnBlockTs() {
   let a = 1;
 
-  function shouldFail(){}
+  function shouldFail() { }
 
   return a
 }
@@ -20,7 +20,7 @@ function fooWithNestedEmptyFnBlockTs() {
 const barWithNestedEmptyFnBlockTs = () => {
   let a = 1;
 
-  const shouldFail = () => {}
+  const shouldFail = () => { }
 
   return a
 }
@@ -32,43 +32,43 @@ if (someVarTs) {
 while (someVarTs) {
 }
 
-switch(someVarTs) {
+switch (someVarTs) {
 }
 
 const doSomething = () => null;
 try {
-    doSomething();
-} catch(ex) {
+  doSomething();
+} catch (ex) {
 
 } finally {
 
 }
 
 class FooEmptyStaticTs {
-  static {}
+  static { }
 }
 
-for(let i; i>0; i++){}
+for (let i; i > 0; i++) { }
 
 const obTs = {}
-for (const key in obTs) {}
+for (const key in obTs) { }
 
 const arTs = []
-for (const val of arTs) {}
+for (const val of arTs) { }
 
-function fooWithInternalEmptyBlocksTs(){
+function fooWithInternalEmptyBlocksTs() {
   let someOtherVar: string = '';
-  if (someOtherVar) {}
+  if (someOtherVar) { }
 
   while (someOtherVar) {
   }
 
-  switch(someOtherVar) {
+  switch (someOtherVar) {
   }
 
   try {
-      doSomething();
-  } catch(ex) {
+    doSomething();
+  } catch (ex) {
 
   } finally {
 
@@ -84,6 +84,22 @@ export class FooBar {
   }
 }
 
+// Class without implements should still flag empty methods
+class NoImplements {
+  doSomething() { }
+}
+
+// Nested function inside a method of a class with implements should still flag
+interface SomeInterface {
+  run(): void;
+}
+class ImplWithNested implements SomeInterface {
+  run() {
+    function inner() { }
+    inner();
+  }
+}
+
 ```
 
 # Diagnostics
@@ -92,10 +108,10 @@ invalid.ts:1:23 lint/suspicious/noEmptyBlockStatements ━━━━━━━━�
 
   ! Unexpected empty block.
   
-  > 1 │ function fooEmptyTs() {}
-      │                       ^^
+  > 1 │ function fooEmptyTs() { }
+      │                       ^^^
     2 │ 
-    3 │ const barEmptyTs = () => {};
+    3 │ const barEmptyTs = () => { };
   
   i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
   
@@ -107,10 +123,10 @@ invalid.ts:3:26 lint/suspicious/noEmptyBlockStatements ━━━━━━━━�
 
   ! Unexpected empty block.
   
-    1 │ function fooEmptyTs() {}
+    1 │ function fooEmptyTs() { }
     2 │ 
-  > 3 │ const barEmptyTs = () => {};
-      │                          ^^
+  > 3 │ const barEmptyTs = () => { };
+      │                          ^^^
     4 │ 
     5 │ function fooWithNestedEmptyFnBlockTs() {
   
@@ -120,14 +136,14 @@ invalid.ts:3:26 lint/suspicious/noEmptyBlockStatements ━━━━━━━━�
 ```
 
 ```
-invalid.ts:8:24 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:8:25 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected empty block.
   
      6 │   let a = 1;
      7 │ 
-   > 8 │   function shouldFail(){}
-       │                        ^^
+   > 8 │   function shouldFail() { }
+       │                         ^^^
      9 │ 
     10 │   return a
   
@@ -143,8 +159,8 @@ invalid.ts:17:28 lint/suspicious/noEmptyBlockStatements ━━━━━━━━
   
     15 │   let a = 1;
     16 │ 
-  > 17 │   const shouldFail = () => {}
-       │                            ^^
+  > 17 │   const shouldFail = () => { }
+       │                            ^^^
     18 │ 
     19 │   return a
   
@@ -183,7 +199,7 @@ invalid.ts:26:19 lint/suspicious/noEmptyBlockStatements ━━━━━━━━
   > 27 │ }
        │ ^
     28 │ 
-    29 │ switch(someVarTs) {
+    29 │ switch (someVarTs) {
   
   i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
   
@@ -197,8 +213,8 @@ invalid.ts:29:1 lint/suspicious/noEmptyBlockStatements ━━━━━━━━�
   
     27 │ }
     28 │ 
-  > 29 │ switch(someVarTs) {
-       │ ^^^^^^^^^^^^^^^^^^^
+  > 29 │ switch (someVarTs) {
+       │ ^^^^^^^^^^^^^^^^^^^^
   > 30 │ }
        │ ^
     31 │ 
@@ -210,14 +226,14 @@ invalid.ts:29:1 lint/suspicious/noEmptyBlockStatements ━━━━━━━━�
 ```
 
 ```
-invalid.ts:35:13 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:35:14 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected empty block.
   
     33 │ try {
-    34 │     doSomething();
-  > 35 │ } catch(ex) {
-       │             ^
+    34 │   doSomething();
+  > 35 │ } catch (ex) {
+       │              ^
   > 36 │ 
   > 37 │ } finally {
        │ ^
@@ -234,7 +250,7 @@ invalid.ts:37:11 lint/suspicious/noEmptyBlockStatements ━━━━━━━━
 
   ! Unexpected empty block.
   
-    35 │ } catch(ex) {
+    35 │ } catch (ex) {
     36 │ 
   > 37 │ } finally {
        │           ^
@@ -255,8 +271,8 @@ invalid.ts:42:3 lint/suspicious/noEmptyBlockStatements ━━━━━━━━�
   ! Unexpected empty block.
   
     41 │ class FooEmptyStaticTs {
-  > 42 │   static {}
-       │   ^^^^^^^^^
+  > 42 │   static { }
+       │   ^^^^^^^^^^
     43 │ }
     44 │ 
   
@@ -266,14 +282,14 @@ invalid.ts:42:3 lint/suspicious/noEmptyBlockStatements ━━━━━━━━�
 ```
 
 ```
-invalid.ts:45:21 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:45:25 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected empty block.
   
     43 │ }
     44 │ 
-  > 45 │ for(let i; i>0; i++){}
-       │                     ^^
+  > 45 │ for (let i; i > 0; i++) { }
+       │                         ^^^
     46 │ 
     47 │ const obTs = {}
   
@@ -288,8 +304,8 @@ invalid.ts:48:25 lint/suspicious/noEmptyBlockStatements ━━━━━━━━
   ! Unexpected empty block.
   
     47 │ const obTs = {}
-  > 48 │ for (const key in obTs) {}
-       │                         ^^
+  > 48 │ for (const key in obTs) { }
+       │                         ^^^
     49 │ 
     50 │ const arTs = []
   
@@ -304,10 +320,10 @@ invalid.ts:51:25 lint/suspicious/noEmptyBlockStatements ━━━━━━━━
   ! Unexpected empty block.
   
     50 │ const arTs = []
-  > 51 │ for (const val of arTs) {}
-       │                         ^^
+  > 51 │ for (const val of arTs) { }
+       │                         ^^^
     52 │ 
-    53 │ function fooWithInternalEmptyBlocksTs(){
+    53 │ function fooWithInternalEmptyBlocksTs() {
   
   i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
   
@@ -319,10 +335,10 @@ invalid.ts:55:21 lint/suspicious/noEmptyBlockStatements ━━━━━━━━
 
   ! Unexpected empty block.
   
-    53 │ function fooWithInternalEmptyBlocksTs(){
+    53 │ function fooWithInternalEmptyBlocksTs() {
     54 │   let someOtherVar: string = '';
-  > 55 │   if (someOtherVar) {}
-       │                     ^^
+  > 55 │   if (someOtherVar) { }
+       │                     ^^^
     56 │ 
     57 │   while (someOtherVar) {
   
@@ -336,14 +352,14 @@ invalid.ts:57:24 lint/suspicious/noEmptyBlockStatements ━━━━━━━━
 
   ! Unexpected empty block.
   
-    55 │   if (someOtherVar) {}
+    55 │   if (someOtherVar) { }
     56 │ 
   > 57 │   while (someOtherVar) {
        │                        ^
   > 58 │   }
        │   ^
     59 │ 
-    60 │   switch(someOtherVar) {
+    60 │   switch (someOtherVar) {
   
   i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
   
@@ -357,8 +373,8 @@ invalid.ts:60:3 lint/suspicious/noEmptyBlockStatements ━━━━━━━━�
   
     58 │   }
     59 │ 
-  > 60 │   switch(someOtherVar) {
-       │   ^^^^^^^^^^^^^^^^^^^^^^
+  > 60 │   switch (someOtherVar) {
+       │   ^^^^^^^^^^^^^^^^^^^^^^^
   > 61 │   }
        │   ^
     62 │ 
@@ -370,14 +386,14 @@ invalid.ts:60:3 lint/suspicious/noEmptyBlockStatements ━━━━━━━━�
 ```
 
 ```
-invalid.ts:65:15 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:65:16 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected empty block.
   
     63 │   try {
-    64 │       doSomething();
-  > 65 │   } catch(ex) {
-       │               ^
+    64 │     doSomething();
+  > 65 │   } catch (ex) {
+       │                ^
   > 66 │ 
   > 67 │   } finally {
        │   ^
@@ -394,7 +410,7 @@ invalid.ts:67:13 lint/suspicious/noEmptyBlockStatements ━━━━━━━━
 
   ! Unexpected empty block.
   
-    65 │   } catch(ex) {
+    65 │   } catch (ex) {
     66 │ 
   > 67 │   } finally {
        │             ^
@@ -420,6 +436,40 @@ invalid.ts:76:20 lint/suspicious/noEmptyBlockStatements ━━━━━━━━
        │                    ^^^
     77 │     bar();
     78 │   }
+  
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
+  
+
+```
+
+```
+invalid.ts:83:17 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block.
+  
+    81 │ // Class without implements should still flag empty methods
+    82 │ class NoImplements {
+  > 83 │   doSomething() { }
+       │                 ^^^
+    84 │ }
+    85 │ 
+  
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
+  
+
+```
+
+```
+invalid.ts:92:22 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block.
+  
+    90 │ class ImplWithNested implements SomeInterface {
+    91 │   run() {
+  > 92 │     function inner() { }
+       │                      ^^^
+    93 │     inner();
+    94 │   }
   
   i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
   

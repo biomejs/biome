@@ -77,3 +77,25 @@ export class FooBar {
 class FooBarPrivate {
   private constructor() { }
 }
+
+// Classes implementing interfaces may have empty method bodies (e.g. mock implementations)
+interface MyInterface {
+  connect(): void;
+  disconnect(): void;
+}
+
+class MyMock implements MyInterface {
+  connect() {}
+  disconnect() {}
+}
+
+// Class implementing multiple interfaces
+interface AnotherInterface {
+  start(): void;
+}
+
+class MultiMock implements MyInterface, AnotherInterface {
+  connect() {}
+  disconnect() {}
+  start() {}
+}
