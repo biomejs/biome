@@ -743,3 +743,132 @@ fn migrate_rules_covered_by_formatter() {
         result,
     ));
 }
+
+#[test]
+fn migrate_jest_consistent_test_it_no_options() {
+    // With both flags and --write, biome.json should get the rule at its default options.
+    let biomejson = r#"{}"#;
+    let eslintrc = r#"{ "rules": { "jest/consistent-test-it": "error" } }"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8Path::new("biome.json").into(), biomejson.as_bytes());
+    fs.insert(Utf8Path::new(".eslintrc.json").into(), eslintrc.as_bytes());
+
+    let mut console = BufferConsole::default();
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "migrate",
+                "eslint",
+                "--include-inspired",
+                "--include-nursery",
+                "--write",
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    // rerun with linting to verify the configuration is valid
+
+    let (fs, result) = run_cli(fs, &mut console, Args::from(["lint"].as_slice()));
+
+    assert!(result.is_ok(), "run_cli rerun returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "migrate_jest_consistent_test_it_no_options",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn migrate_jest_consistent_test_it_with_options() {
+    // Options from ESLint (fn + withinDescribe) must be preserved in biome.json.
+    let biomejson = r#"{}"#;
+    let eslintrc = r#"{
+        "rules": {
+            "jest/consistent-test-it": ["error", {
+                "fn": "it",
+                "withinDescribe": "test"
+            }]
+        }
+    }"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8Path::new("biome.json").into(), biomejson.as_bytes());
+    fs.insert(Utf8Path::new(".eslintrc.json").into(), eslintrc.as_bytes());
+
+    let mut console = BufferConsole::default();
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "migrate",
+                "eslint",
+                "--include-inspired",
+                "--include-nursery",
+                "--write",
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "migrate_jest_consistent_test_it_with_options",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn migrate_vitest_consistent_test_it_with_options() {
+    // vitest/consistent-test-it maps to the same Biome rule; options must be preserved.
+    let biomejson = r#"{}"#;
+    let eslintrc = r#"{
+        "rules": {
+            "vitest/consistent-test-it": ["error", {
+                "fn": "it",
+                "withinDescribe": "test"
+            }]
+        }
+    }"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8Path::new("biome.json").into(), biomejson.as_bytes());
+    fs.insert(Utf8Path::new(".eslintrc.json").into(), eslintrc.as_bytes());
+
+    let mut console = BufferConsole::default();
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "migrate",
+                "eslint",
+                "--include-inspired",
+                "--include-nursery",
+                "--write",
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "migrate_vitest_consistent_test_it_with_options",
+        fs,
+        console,
+        result,
+    ));
+}

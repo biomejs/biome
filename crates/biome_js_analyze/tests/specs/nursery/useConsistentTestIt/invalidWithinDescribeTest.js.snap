@@ -1,0 +1,129 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidWithinDescribeTest.js
+---
+# Input
+```js
+/* should generate diagnostics */
+// withinDescribe="test": inside describe blocks must use test()
+
+describe("suite", () => {
+  it("foo", () => {});
+  it.skip("foo", () => {});
+  it.only("foo", () => {});
+  xit("foo", () => {});
+});
+
+```
+
+# Diagnostics
+```
+invalidWithinDescribeTest.js:5:3 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer using test over it for test functions.
+  
+    4 │ describe("suite", () => {
+  > 5 │   it("foo", () => {});
+      │   ^^
+    6 │   it.skip("foo", () => {});
+    7 │   it.only("foo", () => {});
+  
+  i Use test consistently for all test function calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use test instead.
+  
+     3  3 │   
+     4  4 │   describe("suite", () => {
+     5    │ - ··it("foo",·()·=>·{});
+        5 │ + ··test("foo",·()·=>·{});
+     6  6 │     it.skip("foo", () => {});
+     7  7 │     it.only("foo", () => {});
+  
+
+```
+
+```
+invalidWithinDescribeTest.js:6:3 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer using test over it for test functions.
+  
+    4 │ describe("suite", () => {
+    5 │   it("foo", () => {});
+  > 6 │   it.skip("foo", () => {});
+      │   ^^
+    7 │   it.only("foo", () => {});
+    8 │   xit("foo", () => {});
+  
+  i Use test consistently for all test function calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use test instead.
+  
+     4  4 │   describe("suite", () => {
+     5  5 │     it("foo", () => {});
+     6    │ - ··it.skip("foo",·()·=>·{});
+        6 │ + ··test.skip("foo",·()·=>·{});
+     7  7 │     it.only("foo", () => {});
+     8  8 │     xit("foo", () => {});
+  
+
+```
+
+```
+invalidWithinDescribeTest.js:7:3 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer using test over it for test functions.
+  
+    5 │   it("foo", () => {});
+    6 │   it.skip("foo", () => {});
+  > 7 │   it.only("foo", () => {});
+      │   ^^
+    8 │   xit("foo", () => {});
+    9 │ });
+  
+  i Use test consistently for all test function calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use test instead.
+  
+     5  5 │     it("foo", () => {});
+     6  6 │     it.skip("foo", () => {});
+     7    │ - ··it.only("foo",·()·=>·{});
+        7 │ + ··test.only("foo",·()·=>·{});
+     8  8 │     xit("foo", () => {});
+     9  9 │   });
+  
+
+```
+
+```
+invalidWithinDescribeTest.js:8:3 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer using xtest over xit for test functions.
+  
+     6 │   it.skip("foo", () => {});
+     7 │   it.only("foo", () => {});
+   > 8 │   xit("foo", () => {});
+       │   ^^^
+     9 │ });
+    10 │ 
+  
+  i Use xtest consistently for all test function calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use xtest instead.
+  
+     6  6 │     it.skip("foo", () => {});
+     7  7 │     it.only("foo", () => {});
+     8    │ - ··xit("foo",·()·=>·{});
+        8 │ + ··xtest("foo",·()·=>·{});
+     9  9 │   });
+    10 10 │   
+  
+
+```

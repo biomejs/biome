@@ -327,6 +327,7 @@ pub mod use_consistent_graphql_descriptions;
 pub mod use_consistent_member_accessibility;
 pub mod use_consistent_method_signatures;
 pub mod use_consistent_object_definitions;
+pub mod use_consistent_test_it;
 pub mod use_consistent_type_definitions;
 pub mod use_const;
 pub mod use_date_now;

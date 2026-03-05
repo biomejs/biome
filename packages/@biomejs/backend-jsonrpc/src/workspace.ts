@@ -2350,6 +2350,11 @@ See https://biomejs.dev/linter/rules/use-consistent-method-signatures
 	 */
 	useConsistentMethodSignatures?: UseConsistentMethodSignaturesConfiguration;
 	/**
+	* Enforce consistent use of it or test for test functions.
+See https://biomejs.dev/linter/rules/use-consistent-test-it 
+	 */
+	useConsistentTestIt?: UseConsistentTestItConfiguration;
+	/**
 	* Require destructuring from arrays and/or objects.
 See https://biomejs.dev/linter/rules/use-destructuring 
 	 */
@@ -4243,6 +4248,9 @@ export type UseConsistentGraphqlDescriptionsConfiguration =
 export type UseConsistentMethodSignaturesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentMethodSignaturesOptions;
+export type UseConsistentTestItConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseConsistentTestItOptions;
 export type UseDestructuringConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseDestructuringOptions;
@@ -5942,6 +5950,11 @@ export interface RuleWithUseConsistentMethodSignaturesOptions {
 	level: RulePlainConfiguration;
 	options?: UseConsistentMethodSignaturesOptions;
 }
+export interface RuleWithUseConsistentTestItOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseConsistentTestItOptions;
+}
 export interface RuleWithUseDestructuringOptions {
 	level: RulePlainConfiguration;
 	options?: UseDestructuringOptions;
@@ -7420,6 +7433,21 @@ Default: "property"
 	 */
 	style?: MethodSignatureStyle;
 }
+/**
+ * Options for the `useConsistentTestIt` rule
+ */
+export interface UseConsistentTestItOptions {
+	/**
+	* The function to use for top-level tests (outside describe blocks).
+Default: `"it"` 
+	 */
+	function?: TestFunctionKind;
+	/**
+	* The function to use for tests inside describe blocks.
+Default: `"it"` 
+	 */
+	withinDescribe?: TestFunctionKind;
+}
 export type UseDestructuringOptions = {};
 /**
  * Options for the `useErrorCause` rule.
@@ -7967,6 +7995,10 @@ export type Regex = string;
  */
 export type UseConsistentGraphqlDescriptionsStyle = "block" | "inline";
 export type MethodSignatureStyle = "property" | "method";
+/**
+ * The function to use for tests
+ */
+export type TestFunctionKind = "it" | "test";
 export type CheckInputType = "off" | "loose" | "strict";
 export type DeclarationStyle = "type" | "runtime";
 export type VueDirectiveStyle = "shorthand" | "longhand";
@@ -8416,6 +8448,7 @@ export type Category =
 	| "lint/nursery/useConsistentGraphqlDescriptions"
 	| "lint/nursery/useConsistentMethodSignatures"
 	| "lint/nursery/useConsistentObjectDefinition"
+	| "lint/nursery/useConsistentTestIt"
 	| "lint/nursery/useDestructuring"
 	| "lint/nursery/useErrorCause"
 	| "lint/nursery/useExhaustiveSwitchCases"
@@ -8430,14 +8463,15 @@ export type Category =
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useLoneAnonymousOperation"
 	| "lint/nursery/useLoneExecutableDefinition"
-	| "lint/nursery/useNullishCoalescing"
 	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useNamedCaptureGroup"
+	| "lint/nursery/useNullishCoalescing"
 	| "lint/nursery/usePlaywrightValidDescribeCallback"
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
 	| "lint/nursery/useRegexpExec"
 	| "lint/nursery/useRequiredScripts"
+	| "lint/nursery/useScopedStyles"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSpread"
 	| "lint/nursery/useUnicodeRegex"
@@ -8452,7 +8486,6 @@ export type Category =
 	| "lint/nursery/useVueDefineMacrosOrder"
 	| "lint/nursery/useVueHyphenatedAttributes"
 	| "lint/nursery/useVueMultiWordComponentNames"
-	| "lint/nursery/useScopedStyles"
 	| "lint/nursery/useVueVForKey"
 	| "lint/nursery/useVueValidTemplateRoot"
 	| "lint/nursery/useVueValidVBind"

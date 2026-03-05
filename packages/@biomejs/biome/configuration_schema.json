@@ -6183,6 +6183,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useConsistentTestIt": {
+					"description": "Enforce consistent use of it or test for test functions.\nSee https://biomejs.dev/linter/rules/use-consistent-test-it",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseConsistentTestItConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useDestructuring": {
 					"description": "Require destructuring from arrays and/or objects.\nSee https://biomejs.dev/linter/rules/use-destructuring",
 					"anyOf": [
@@ -10048,6 +10055,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseConsistentTestItOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseConsistentTestItOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseConsistentTypeDefinitionsOptions": {
 			"type": "object",
 			"properties": {
@@ -12839,6 +12856,21 @@
 			},
 			"additionalProperties": false
 		},
+		"TestFunctionKind": {
+			"description": "The function to use for tests",
+			"oneOf": [
+				{
+					"description": "Use `it()` for tests",
+					"type": "string",
+					"const": "it"
+				},
+				{
+					"description": "Use `test()` for tests",
+					"type": "string",
+					"const": "test"
+				}
+			]
+		},
 		"TrailingNewline": { "type": "boolean" },
 		"UseAdjacentOverloadSignaturesConfiguration": {
 			"oneOf": [
@@ -13204,6 +13236,27 @@
 						{ "$ref": "#/$defs/ObjectPropertySyntax" },
 						{ "type": "null" }
 					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"UseConsistentTestItConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseConsistentTestItOptions" }
+			]
+		},
+		"UseConsistentTestItOptions": {
+			"description": "Options for the `useConsistentTestIt` rule",
+			"type": "object",
+			"properties": {
+				"function": {
+					"description": "The function to use for top-level tests (outside describe blocks).\nDefault: `\"it\"`",
+					"anyOf": [{ "$ref": "#/$defs/TestFunctionKind" }, { "type": "null" }]
+				},
+				"withinDescribe": {
+					"description": "The function to use for tests inside describe blocks.\nDefault: `\"it\"`",
+					"anyOf": [{ "$ref": "#/$defs/TestFunctionKind" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false

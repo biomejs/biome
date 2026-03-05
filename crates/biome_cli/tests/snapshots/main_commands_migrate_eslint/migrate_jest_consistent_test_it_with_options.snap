@@ -1,0 +1,58 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "recommended": false,
+      "nursery": {
+        "useConsistentTestIt": {
+          "level": "error",
+          "options": { "function": "it", "withinDescribe": "test" }
+        }
+      }
+    }
+  }
+}
+```
+
+## `.eslintrc.json`
+
+```json
+{
+        "rules": {
+            "jest/consistent-test-it": ["error", {
+                "fn": "it",
+                "withinDescribe": "test"
+            }]
+        }
+    }
+```
+
+# Emitted Messages
+
+```block
+migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i 1 ESLint rules found
+    - 1 have been migrated to Biome's rules
+    - 100% (1) of your ESLint rules are fully covered by Biome
+      - 100% (1) via direct migration to Biome rules
+  
+  
+
+```
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Migration results:
+  
+  - biome.json: configuration successfully migrated.
+  
+
+```

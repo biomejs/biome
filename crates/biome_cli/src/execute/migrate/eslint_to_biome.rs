@@ -2,7 +2,10 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use crate::execute::migrate::unsupported_rules::UNSUPPORTED_RULES;
 
-use super::{eslint_any_rule_to_biome::migrate_eslint_any_rule, eslint_eslint, eslint_typescript};
+use super::{
+    eslint_any_rule_to_biome::migrate_eslint_any_rule, eslint_eslint, eslint_jest,
+    eslint_typescript,
+};
 use biome_analyze::RuleSource;
 use biome_configuration::analyzer::SeverityOrGroup;
 use biome_configuration::{self as biome_config};
@@ -650,6 +653,29 @@ fn migrate_eslint_rule(
                             },
                         ));
                 }
+            }
+        }
+        eslint_eslint::Rule::JestConsistentTestIt(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
+                let severity = conf.severity();
+                let group = rules.nursery.get_or_insert_with(Default::default);
+                if let SeverityOrGroup::Group(group) = group {
+                    let rule_options =
+                        if let eslint_eslint::RuleConf::Option(_, rule_options) = conf {
+                            rule_options.into()
+                        } else {
+                            eslint_jest::ConsistentTestItOptions::default().into()
+                        };
+                    group.use_consistent_test_it =
+                        Some(biome_config::RuleFixConfiguration::WithOptions(
+                            biome_config::RuleWithFixOptions {
+                                level: severity.into(),
+                                fix: None,
+                                options: rule_options,
+                            },
+                        ));
+                }
+                results.add(&name, RuleMigrationResult::Migrated);
             }
         }
         eslint_eslint::Rule::Jsxa11yArioaRoles(conf) => {
