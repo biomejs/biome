@@ -33,21 +33,14 @@ use std::ffi::c_int;
 use std::fmt::Write;
 use std::sync::{Arc, Once};
 
-pub fn scripts_from_json(extension: &str, input_code: &str) -> Option<Vec<JsonCase>> {
+pub fn scripts_from_json(extension: &str, input_code: &str) -> Option<Vec<String>> {
     if extension == "json" || extension == "jsonc" {
         let input_code = StripComments::new(input_code.as_bytes());
-        let scripts: Vec<JsonCase> = serde_json::from_reader(input_code).ok()?;
+        let scripts: Vec<String> = serde_json::from_reader(input_code).ok()?;
         Some(scripts)
     } else {
         None
     }
-}
-
-#[derive(serde::Deserialize)]
-#[serde(untagged)]
-pub enum JsonCase {
-    String(String),
-    CaseWithLanguage { code: String, lang: String },
 }
 
 pub fn create_analyzer_options<L: ServiceLanguage>(

@@ -1800,7 +1800,6 @@ dependencies = [
  "countme",
  "json_comments",
  "owo-colors",
- "serde",
  "serde_json",
  "similar",
  "ureq",
