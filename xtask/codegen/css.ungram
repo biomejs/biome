@@ -2670,8 +2670,6 @@ ScssMapExpressionPair =
 //        ^^
 AnyScssExpression =
 	ScssExpression
-	| ScssKeywordArgument
-	| ScssArbitraryArgument
 	| ScssBinaryExpression
 	| ScssUnaryExpression
 	| ScssParenthesizedExpression
