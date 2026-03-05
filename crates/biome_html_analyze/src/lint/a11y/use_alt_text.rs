@@ -3,8 +3,8 @@ use biome_analyze::{
 };
 use biome_console::{fmt::Display, fmt::Formatter, markup};
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlAttribute, AnyHtmlElement, HtmlFileSource, AnyVueDirective};
-use biome_rowan::{AstNode, TextRange, AstNodeList};
+use biome_html_syntax::{AnyHtmlElement, HtmlFileSource};
+use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::use_alt_text::UseAltTextOptions;
 
 use crate::a11y::{
@@ -199,60 +199,6 @@ fn has_type_image_attribute(element: &AnyHtmlElement) -> bool {
 }
 
 /// Check if the element has a valid alt attribute
-///
-/// Handles three cases:
-/// - `alt="..."` — standard HTML attribute (empty `alt=""` is valid for decorative images)
-/// - `:alt="..."` — Vue v-bind shorthand (`VueVBindShorthandDirective`)
-/// - `v-bind:alt="..."` — explicit Vue v-bind (`VueDirective`)
 fn has_valid_alt_text(element: &AnyHtmlElement) -> bool {
-    /// Returns the bare argument name from a Vue directive arg node,
-    /// stripping the leading colon (e.g. `":alt"` → `"alt"`).
-    fn vue_arg_name(arg: &biome_html_syntax::VueDirectiveArgument) -> String {
-        arg.syntax()
-            .text_trimmed()
-            .to_string()
-            .trim_start_matches(':')
-            .to_string()
-    }
-
-    let is_alt = |attrs: &biome_html_syntax::HtmlAttributeList| {
-        attrs.iter().any(|attr| match attr {
-            // Standard HTML: alt="..." or bare alt
-            AnyHtmlAttribute::HtmlAttribute(a) => a
-                .name()
-                .ok()
-                .and_then(|n| n.value_token().ok())
-                .is_some_and(|t| t.text_trimmed().eq_ignore_ascii_case("alt")),
-
-            AnyHtmlAttribute::AnyVueDirective(vue) => match vue {
-                // :alt="..."
-                AnyVueDirective::VueVBindShorthandDirective(d) => d
-                    .arg()
-                    .is_ok_and(|arg| vue_arg_name(&arg).eq_ignore_ascii_case("alt")),
-
-                // v-bind:alt="..."
-                AnyVueDirective::VueDirective(d) => {
-                    let is_bind = d
-                        .name_token()
-                        .is_ok_and(|t| t.text_trimmed() == "v-bind");
-                    is_bind
-                        && d.arg()
-                            .is_some_and(|arg| vue_arg_name(&arg).eq_ignore_ascii_case("alt"))
-                }
-
-                _ => false,
-            },
-
-            _ => false,
-        })
-    };
-
-    match element {
-        AnyHtmlElement::HtmlElement(el) => {
-            let Ok(opening) = el.opening_element() else { return false };
-            is_alt(&opening.attributes())
-        }
-        AnyHtmlElement::HtmlSelfClosingElement(el) => is_alt(&el.attributes()),
-        _ => false,
-    }
+    element.find_attribute_or_vue_binding("alt").is_some()
 }

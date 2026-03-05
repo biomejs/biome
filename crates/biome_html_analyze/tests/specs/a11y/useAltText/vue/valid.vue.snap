@@ -14,4 +14,5 @@ expression: valid.vue
 
 <!-- img with dynamic :alt and :src -->
 <img :src="image.src" :alt="image.description" />
+
 ```
