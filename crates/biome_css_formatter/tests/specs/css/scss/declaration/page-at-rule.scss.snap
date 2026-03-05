@@ -1,5 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 212
 info: css/scss/declaration/page-at-rule.scss
 ---
 
@@ -57,7 +58,7 @@ Trailing newline: true
 ```scss
 @page :left {
 	$padding: 12px !default;
-	$scale: 1 +2 * 3;
+	$scale: 1 + 2 * 3;
 	padding: $padding * $scale;
 
 	font: {
@@ -66,13 +67,13 @@ Trailing newline: true
 	}
 
 	$map: (
-		($padding +1): foo,
-		(1 +2): bar,
+		($padding + 1): foo,
+		(1 + 2): bar,
 	);
 
 	@top-left {
 		$margin: 4px !global;
-		margin: ($margin +2) / 2;
+		margin: ($margin + 2) / 2;
 		border: 1px solid $color {
 			width: 1px;
 			color: $color;

@@ -1,15 +1,17 @@
 use crate::parser::CssParser;
+use crate::lexer::CssReLexContext;
 use crate::syntax::parse_error::{
     expected_component_value, expected_scss_expression, scss_ellipsis_not_allowed,
 };
 use crate::syntax::property::parse_generic_component_value;
 use crate::syntax::scss::{is_at_scss_identifier, parse_scss_identifier};
+use crate::syntax::value::dimension::is_at_any_dimension;
 use biome_css_syntax::CssSyntaxKind::{
-    CSS_BOGUS_PROPERTY_VALUE, EOF, SCSS_ARBITRARY_ARGUMENT, SCSS_BINARY_EXPRESSION,
-    SCSS_EXPRESSION, SCSS_EXPRESSION_ITEM_LIST, SCSS_KEYWORD_ARGUMENT, SCSS_LIST_EXPRESSION,
-    SCSS_LIST_EXPRESSION_ELEMENT, SCSS_LIST_EXPRESSION_ELEMENT_LIST, SCSS_MAP_EXPRESSION,
-    SCSS_MAP_EXPRESSION_PAIR, SCSS_MAP_EXPRESSION_PAIR_LIST, SCSS_PARENTHESIZED_EXPRESSION,
-    SCSS_UNARY_EXPRESSION,
+    CSS_BOGUS_PROPERTY_VALUE, CSS_NUMBER_LITERAL, EOF, SCSS_ARBITRARY_ARGUMENT,
+    SCSS_BINARY_EXPRESSION, SCSS_EXPRESSION, SCSS_EXPRESSION_ITEM_LIST, SCSS_KEYWORD_ARGUMENT,
+    SCSS_LIST_EXPRESSION, SCSS_LIST_EXPRESSION_ELEMENT, SCSS_LIST_EXPRESSION_ELEMENT_LIST,
+    SCSS_MAP_EXPRESSION, SCSS_MAP_EXPRESSION_PAIR, SCSS_MAP_EXPRESSION_PAIR_LIST,
+    SCSS_PARENTHESIZED_EXPRESSION, SCSS_UNARY_EXPRESSION,
 };
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_recovery::ParseRecoveryTokenSet;
@@ -266,11 +268,25 @@ fn parse_scss_primary_expression(p: &mut CssParser) -> ParsedSyntax {
     }
 }
 
+#[inline]
+fn re_lex_signed_numeric_as_scss_operator(p: &mut CssParser) {
+    if !(p.at(CSS_NUMBER_LITERAL) || is_at_any_dimension(p)) {
+        return;
+    }
+
+    let text = p.cur_text();
+    if matches!(text.as_bytes().first(), Some(b'+' | b'-')) {
+        p.re_lex(CssReLexContext::ScssExpression);
+    }
+}
+
 /// Returns the precedence level for the current SCSS binary operator token.
 ///
 /// Docs: https://sass-lang.com/documentation/operators/#order-of-operations
 #[inline]
 fn scss_binary_precedence(p: &mut CssParser) -> Option<u8> {
+    re_lex_signed_numeric_as_scss_operator(p);
+
     if !p.at_ts(SCSS_BINARY_OPERATOR_TOKEN_SET) {
         return None;
     }
