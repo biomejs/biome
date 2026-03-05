@@ -95,11 +95,17 @@ impl CodeBlock {
     }
 
     pub fn document_file_source(&self) -> DocumentFileSource {
+        if self.tag == "tailwind" {
+            return DocumentFileSource::Tailwind;
+        }
         // Always use the JS-first resolution path (experimental full HTML support disabled)
         DocumentFileSource::from_extension(&self.tag, false)
     }
 
     pub fn document_file_source_from_path(&self) -> DocumentFileSource {
+        if self.tag == "tailwind" {
+            return DocumentFileSource::Tailwind;
+        }
         self.file_path.as_ref().map_or_else(
             || DocumentFileSource::from_extension(&self.tag, false),
             |file| DocumentFileSource::from_path(&Utf8PathBuf::from(file.as_str()), false),
@@ -145,9 +151,11 @@ impl FromStr for CodeBlock {
                         }
                         code_block.file_path = Some(normalize_file_path(path));
                     } else {
-                        if DocumentFileSource::from_extension(token, false)
-                            == DocumentFileSource::Unknown
-                        {
+                        let is_known = token == "tailwind"
+                            || DocumentFileSource::from_extension(token, false)
+                                != DocumentFileSource::Unknown;
+
+                        if !is_known {
                             bail!("Unrecognised attribute in code block: {token}");
                         }
 
