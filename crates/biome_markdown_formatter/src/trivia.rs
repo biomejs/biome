@@ -1,5 +1,5 @@
-use crate::cst::FormatMarkdownSyntaxNode;
-use crate::{FormatMdSyntaxToken, MdFormatContext};
+use crate::MdFormatContext;
+use crate::cst::FormatMdSyntaxToken;
 use biome_formatter::formatter::Formatter;
 use biome_formatter::trivia::FormatToken;
 use biome_formatter::{Argument, Format, FormatResult};
@@ -36,6 +36,6 @@ pub(crate) fn format_replaced<'a>(
 
 impl<'a> Format<MdFormatContext> for FormatReplaced<'a> {
     fn fmt(&self, f: &mut Formatter<MdFormatContext>) -> FormatResult<()> {
-        FormatMarkdownSyntaxNode.format_replaced(self.token, &self.content, f)
+        FormatMdSyntaxToken.format_replaced(self.token, &self.content, f)
     }
 }

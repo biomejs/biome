@@ -6,9 +6,9 @@ use biome_markdown_syntax::{
 };
 
 #[derive(Debug, Copy, Clone, Default)]
-pub struct FormatMarkdownSyntaxNode;
+pub struct FormatMdSyntaxToken;
 
-impl FormatRule<MarkdownSyntaxToken> for FormatMarkdownSyntaxNode {
+impl FormatRule<MarkdownSyntaxToken> for FormatMdSyntaxToken {
     type Context = MdFormatContext;
 
     fn fmt(
@@ -23,7 +23,7 @@ impl FormatRule<MarkdownSyntaxToken> for FormatMarkdownSyntaxNode {
     }
 }
 
-impl FormatToken<MarkdownLanguage, MdFormatContext> for FormatMarkdownSyntaxNode {
+impl FormatToken<MarkdownLanguage, MdFormatContext> for FormatMdSyntaxToken {
     fn format_skipped_token_trivia(
         &self,
         token: &MarkdownSyntaxToken,
@@ -33,7 +33,7 @@ impl FormatToken<MarkdownLanguage, MdFormatContext> for FormatMarkdownSyntaxNode
     }
 }
 
-impl FormatRule<MarkdownSyntaxNode> for FormatMarkdownSyntaxNode {
+impl FormatRule<MarkdownSyntaxNode> for FormatMdSyntaxToken {
     type Context = MdFormatContext;
 
     fn fmt(&self, node: &MarkdownSyntaxNode, f: &mut MarkdownFormatter) -> FormatResult<()> {
@@ -42,17 +42,33 @@ impl FormatRule<MarkdownSyntaxNode> for FormatMarkdownSyntaxNode {
 }
 
 impl AsFormat<MdFormatContext> for MarkdownSyntaxNode {
-    type Format<'a> = FormatRefWithRule<'a, Self, FormatMarkdownSyntaxNode>;
+    type Format<'a> = FormatRefWithRule<'a, Self, FormatMdSyntaxToken>;
 
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(self, FormatMarkdownSyntaxNode)
+        FormatRefWithRule::new(self, FormatMdSyntaxToken)
     }
 }
 
 impl IntoFormat<MdFormatContext> for MarkdownSyntaxNode {
-    type Format = FormatOwnedWithRule<Self, FormatMarkdownSyntaxNode>;
+    type Format = FormatOwnedWithRule<Self, FormatMdSyntaxToken>;
 
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(self, FormatMarkdownSyntaxNode)
+        FormatOwnedWithRule::new(self, FormatMdSyntaxToken)
+    }
+}
+
+impl AsFormat<MdFormatContext> for MarkdownSyntaxToken {
+    type Format<'a> = FormatRefWithRule<'a, Self, FormatMdSyntaxToken>;
+
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(self, FormatMdSyntaxToken)
+    }
+}
+
+impl IntoFormat<MdFormatContext> for MarkdownSyntaxToken {
+    type Format = FormatOwnedWithRule<Self, FormatMdSyntaxToken>;
+
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(self, FormatMdSyntaxToken)
     }
 }

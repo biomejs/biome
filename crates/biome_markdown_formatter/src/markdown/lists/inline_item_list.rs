@@ -49,6 +49,11 @@ impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
                         }));
                     }
                 }
+
+                AnyMdInline::MdHardLine(hard_line) => {
+                    seen_new_line = true;
+                    joiner.entry(&format_with(|f| write!(f, [hard_line.format()])));
+                }
                 _ => {
                     joiner.entry(&item.format());
                     seen_new_line = false;

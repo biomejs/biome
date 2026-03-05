@@ -1,5 +1,3 @@
-use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode, MarkdownSyntaxToken};
-
 mod comments;
 pub mod context;
 mod cst;
@@ -12,14 +10,11 @@ mod verbatim;
 pub(crate) use crate::context::MdFormatContext;
 use crate::prelude::{format_bogus_node, format_suppressed_node};
 pub(crate) use crate::trivia::*;
-use crate::{context::MdFormatOptions, cst::FormatMarkdownSyntaxNode};
+use crate::{context::MdFormatOptions, cst::FormatMdSyntaxToken};
 use biome_formatter::{
-    FormatContext, FormatLanguage, FormatOwnedWithRule, FormatRefWithRule, FormatResult,
-    FormatRule, Formatted, TransformSourceMap,
-    prelude::*,
-    trivia::{FormatToken, format_skipped_token_trivia},
-    write,
+    FormatContext, FormatLanguage, FormatResult, Formatted, TransformSourceMap, prelude::*, write,
 };
+use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode};
 use biome_rowan::AstNode;
 
 pub(crate) type MarkdownFormatter<'buf> = Formatter<'buf, MdFormatContext>;
@@ -38,7 +33,7 @@ impl MdFormatLanguage {
 impl FormatLanguage for MdFormatLanguage {
     type SyntaxLanguage = MarkdownLanguage;
     type Context = MdFormatContext;
-    type FormatRule = FormatMarkdownSyntaxNode;
+    type FormatRule = FormatMdSyntaxToken;
 
     fn create_context(
         self,
@@ -251,53 +246,6 @@ where
 
     fn fmt_trailing_comments(&self, node: &N, f: &mut MarkdownFormatter) -> FormatResult<()> {
         format_trailing_comments(node.syntax()).fmt(f)
-    }
-}
-
-/// Format implementation specific to Markdown tokens.
-#[derive(Debug, Default)]
-pub(crate) struct FormatMdSyntaxToken;
-
-impl FormatRule<MarkdownSyntaxToken> for FormatMdSyntaxToken {
-    type Context = MdFormatContext;
-
-    fn fmt(
-        &self,
-        token: &MarkdownSyntaxToken,
-        f: &mut Formatter<Self::Context>,
-    ) -> FormatResult<()> {
-        f.state_mut().track_token(token);
-
-        self.format_skipped_token_trivia(token, f)?;
-        self.format_trimmed_token_trivia(token, f)?;
-
-        Ok(())
-    }
-}
-
-impl FormatToken<MarkdownLanguage, MdFormatContext> for FormatMdSyntaxToken {
-    fn format_skipped_token_trivia(
-        &self,
-        token: &MarkdownSyntaxToken,
-        f: &mut Formatter<MdFormatContext>,
-    ) -> FormatResult<()> {
-        format_skipped_token_trivia(token).fmt(f)
-    }
-}
-
-impl AsFormat<MdFormatContext> for MarkdownSyntaxToken {
-    type Format<'a> = FormatRefWithRule<'a, Self, FormatMdSyntaxToken>;
-
-    fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(self, FormatMdSyntaxToken)
-    }
-}
-
-impl IntoFormat<MdFormatContext> for MarkdownSyntaxToken {
-    type Format = FormatOwnedWithRule<Self, FormatMdSyntaxToken>;
-
-    fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(self, FormatMdSyntaxToken)
     }
 }
 
