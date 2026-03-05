@@ -171,7 +171,9 @@ fn parse_scss_variable_modifier(p: &mut CssParser) -> ParsedSyntax {
 
 fn important_modifier_not_allowed(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     p.err_builder("`!important` is not valid here.", range)
-        .with_hint("SCSS variable declarations only support the `!default` and `!global` modifiers.")
+        .with_hint(
+            "SCSS variable declarations only support the `!default` and `!global` modifiers.",
+        )
 }
 
 struct ScssVariableModifierList;
