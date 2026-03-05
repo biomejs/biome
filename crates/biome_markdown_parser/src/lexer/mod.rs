@@ -232,12 +232,13 @@ impl<'src> MarkdownLexer<'src> {
         match dispatched {
             // Whitespace handling is context-sensitive and order-dependent:
             // 1. Check newline first (highest priority - block separator)
-            // 2. CodeSpan: no special handling (backslash escapes disabled)
-            // 3. LinkDefinition: whitespace separates destination from title
-            // 4. Line start: single whitespace tokens for indentation detection
-            // 5. After block quote marker: optional space handling
-            // 6. Hard line break: 2+ spaces before newline
-            // 7. Default: whitespace is part of text content
+            // 2. ThematicBreakParts: emit single MD_INDENT_CHAR tokens
+            // 3. CodeSpan: no special handling (backslash escapes disabled)
+            // 4. LinkDefinition: whitespace separates destination from title
+            // 5. Line start: single whitespace tokens for indentation detection
+            // 6. After block quote marker: optional space handling
+            // 7. Hard line break: 2+ spaces before newline
+            // 8. Default: whitespace is part of text content
             WHS => {
                 if current == b'\n' || current == b'\r' {
                     self.consume_newline()
