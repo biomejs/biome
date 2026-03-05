@@ -1,7 +1,7 @@
 use std::hash::Hash;
 
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext,
+    Ast, FixKind, QueryMatch, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext,
     declare_lint_rule,
 };
 use biome_console::markup;
@@ -460,6 +460,11 @@ fn analyze_tailwind_shorthand(candidates: TwCandidateList) -> Vec<TailwindShorth
 /// Verifies that both nodes are equal by checking their descendants (nodes included) kinds
 /// and tokens (same kind and inner token text).
 pub(crate) fn is_node_equal(a_node: &TailwindSyntaxNode, b_node: &TailwindSyntaxNode) -> bool {
+    // fast path: check the length of the text first without allocating strings
+    if a_node.text_range().len() != b_node.text_range().len() {
+        return false;
+    }
+
     let a_tree = a_node.preorder_with_tokens(Direction::Next);
     let b_tree = b_node.preorder_with_tokens(Direction::Next);
     for (a_event, b_event) in std::iter::zip(a_tree, b_tree) {
