@@ -516,32 +516,35 @@ fn is_declaration_merged_with_used(
     };
     let name = name_token.text_trimmed();
     let binding_range = binding.syntax().text_trimmed_range();
-    let binding_list_range = decl
-        .as_ref()
-        .and_then(containing_statement_list)
-        .map(|n| n.text_trimmed_range());
-    model.all_bindings().any(|scope_binding| {
+    let Some(statement_list) = decl.as_ref().and_then(containing_statement_list) else {
+        return false;
+    };
+    let scope = model.scope(&statement_list);
+    scope.bindings().any(|scope_binding| {
         let other = scope_binding.tree();
         if other.syntax().text_trimmed_range() == binding_range {
-            return false;
-        }
-        let other_decl = other.declaration();
-        let other_is_namespace = other_decl
-            .as_ref()
-            .is_some_and(|d| matches!(d, AnyJsBindingDeclaration::TsModuleDeclaration(_)));
-        let is_merge_pair =
-            (is_namespace && !other_is_namespace) || (is_value && other_is_namespace);
-        if !is_merge_pair {
-            return false;
-        }
-        let other_list_range = other_decl.as_ref().and_then(containing_statement_list);
-        if other_list_range.map(|n| n.text_trimmed_range()) != binding_list_range {
             return false;
         }
         let Ok(other_name) = other.name_token() else {
             return false;
         };
         if other_name.text_trimmed() != name {
+            return false;
+        }
+        let other_decl = other.declaration();
+        let other_is_namespace = other_decl
+            .as_ref()
+            .is_some_and(|d| matches!(d, AnyJsBindingDeclaration::TsModuleDeclaration(_)));
+        let other_is_value = other_decl.as_ref().is_some_and(|d| {
+            matches!(
+                d,
+                AnyJsBindingDeclaration::JsVariableDeclarator(_)
+                    | AnyJsBindingDeclaration::JsFunctionDeclaration(_)
+                    | AnyJsBindingDeclaration::JsClassDeclaration(_)
+            )
+        });
+        let is_merge_pair = (is_namespace && other_is_value) || (is_value && other_is_namespace);
+        if !is_merge_pair {
             return false;
         }
         if is_namespace {
