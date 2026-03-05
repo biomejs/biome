@@ -38,7 +38,7 @@ info: markdown/footnoteDefinition/sibling.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,41 +1,21 @@
+@@ -1,41 +1,23 @@
  [^a]: a
 -
  [^a]: a
@@ -69,14 +69,16 @@ info: markdown/footnoteDefinition/sibling.md
 -    > 123\
 -    > 456
 -
-+[^a]: > 123      > 456
++[^a]: > 123
++> 456
  [^a]: a
 -
 -[^a]:
 -    > 123\
 -    > 456
 -
-+[^a]: > 123      > 456
++[^a]: > 123
++> 456
  [^a]: a
 -
  [^a]: a
@@ -102,9 +104,11 @@ info: markdown/footnoteDefinition/sibling.md
 [^a]: a
 [^a]: a
 [^a]: a
-[^a]: > 123      > 456
+[^a]: > 123
+> 456
 [^a]: a
-[^a]: > 123      > 456
+[^a]: > 123
+> 456
 [^a]: a
 [^a]: a
 [^a]: a

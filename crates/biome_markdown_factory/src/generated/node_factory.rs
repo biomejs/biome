@@ -2,7 +2,8 @@
 
 #![allow(clippy::redundant_closure)]
 use biome_markdown_syntax::{
-    MdSyntaxElement as SyntaxElement, MdSyntaxNode as SyntaxNode, MdSyntaxToken as SyntaxToken, *,
+    MarkdownSyntaxElement as SyntaxElement, MarkdownSyntaxNode as SyntaxNode,
+    MarkdownSyntaxToken as SyntaxToken, *,
 };
 use biome_rowan::AstNode;
 pub fn md_autolink(

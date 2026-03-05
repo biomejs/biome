@@ -2,13 +2,13 @@ use crate::{FormatMdSyntaxToken, MdFormatContext};
 use biome_formatter::formatter::Formatter;
 use biome_formatter::trivia::FormatToken;
 use biome_formatter::{Format, FormatResult};
-use biome_markdown_syntax::MdSyntaxToken;
+use biome_markdown_syntax::MarkdownSyntaxToken;
 
 pub(crate) struct FormatRemoved<'a> {
-    token: &'a MdSyntaxToken,
+    token: &'a MarkdownSyntaxToken,
 }
 
-pub(crate) fn format_removed(token: &MdSyntaxToken) -> FormatRemoved<'_> {
+pub(crate) fn format_removed(token: &MarkdownSyntaxToken) -> FormatRemoved<'_> {
     FormatRemoved { token }
 }
 

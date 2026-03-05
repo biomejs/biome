@@ -4,11 +4,11 @@ use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding,
     LineWidth, TrailingNewline, TransformSourceMap, comments::Comments, printer::PrinterOptions,
 };
-use biome_markdown_syntax::MdLanguage;
+use biome_markdown_syntax::MarkdownLanguage;
 
 use crate::comments::{FormatMarkdownLeadingComment, MarkdownCommentStyle};
 
-pub type MarkdownComments = Comments<MdLanguage>;
+pub type MarkdownComments = Comments<MarkdownLanguage>;
 
 pub struct MdFormatContext {
     source_map: Option<TransformSourceMap>,
@@ -26,7 +26,7 @@ pub struct MdFormatOptions {
 }
 
 impl CstFormatContext for MdFormatContext {
-    type Language = MdLanguage;
+    type Language = MarkdownLanguage;
     type Style = MarkdownCommentStyle;
     type CommentRule = FormatMarkdownLeadingComment;
 

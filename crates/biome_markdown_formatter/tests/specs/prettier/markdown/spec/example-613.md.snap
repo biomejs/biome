@@ -19,14 +19,13 @@ foo
 +++ Biome
 @@ -1,2 +1,2 @@
 -foo
--baz
 +foo 
-+ baz
+ baz
 ```
 
 # Output
 
 ```md
 foo 
- baz
+baz
 ```

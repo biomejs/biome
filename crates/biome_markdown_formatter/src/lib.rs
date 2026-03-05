@@ -1,4 +1,4 @@
-use biome_markdown_syntax::{MdLanguage, MdSyntaxNode, MdSyntaxToken};
+use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode, MarkdownSyntaxToken};
 
 mod comments;
 pub mod context;
@@ -36,13 +36,13 @@ impl MdFormatLanguage {
 }
 
 impl FormatLanguage for MdFormatLanguage {
-    type SyntaxLanguage = MdLanguage;
+    type SyntaxLanguage = MarkdownLanguage;
     type Context = MdFormatContext;
     type FormatRule = FormatMarkdownSyntaxNode;
 
     fn create_context(
         self,
-        _root: &MdSyntaxNode,
+        _root: &MarkdownSyntaxNode,
         source_map: Option<TransformSourceMap>,
         _delegate_fmt_embedded_nodes: bool,
     ) -> MdFormatContext {
@@ -204,17 +204,17 @@ pub(crate) trait AsFormat<Context> {
 /// Rule for formatting bogus nodes.
 pub(crate) trait FormatBogusNodeRule<N>
 where
-    N: AstNode<Language = MdLanguage>,
+    N: AstNode<Language = MarkdownLanguage>,
 {
     fn fmt(&self, node: &N, f: &mut MarkdownFormatter) -> FormatResult<()> {
         format_bogus_node(node.syntax()).fmt(f)
     }
 }
 
-/// Format a [MdSyntaxNode]
+/// Format a [MarkdownSyntaxNode]
 pub(crate) trait FormatNodeRule<N>
 where
-    N: AstNode<Language = MdLanguage>,
+    N: AstNode<Language = MarkdownLanguage>,
 {
     fn fmt(&self, node: &N, f: &mut MarkdownFormatter) -> FormatResult<()> {
         if self.is_suppressed(node, f) || self.is_global_suppressed(node, f) {
@@ -258,10 +258,14 @@ where
 #[derive(Debug, Default)]
 pub(crate) struct FormatMdSyntaxToken;
 
-impl FormatRule<MdSyntaxToken> for FormatMdSyntaxToken {
+impl FormatRule<MarkdownSyntaxToken> for FormatMdSyntaxToken {
     type Context = MdFormatContext;
 
-    fn fmt(&self, token: &MdSyntaxToken, f: &mut Formatter<Self::Context>) -> FormatResult<()> {
+    fn fmt(
+        &self,
+        token: &MarkdownSyntaxToken,
+        f: &mut Formatter<Self::Context>,
+    ) -> FormatResult<()> {
         f.state_mut().track_token(token);
 
         self.format_skipped_token_trivia(token, f)?;
@@ -271,17 +275,17 @@ impl FormatRule<MdSyntaxToken> for FormatMdSyntaxToken {
     }
 }
 
-impl FormatToken<MdLanguage, MdFormatContext> for FormatMdSyntaxToken {
+impl FormatToken<MarkdownLanguage, MdFormatContext> for FormatMdSyntaxToken {
     fn format_skipped_token_trivia(
         &self,
-        token: &MdSyntaxToken,
+        token: &MarkdownSyntaxToken,
         f: &mut Formatter<MdFormatContext>,
     ) -> FormatResult<()> {
         format_skipped_token_trivia(token).fmt(f)
     }
 }
 
-impl AsFormat<MdFormatContext> for MdSyntaxToken {
+impl AsFormat<MdFormatContext> for MarkdownSyntaxToken {
     type Format<'a> = FormatRefWithRule<'a, Self, FormatMdSyntaxToken>;
 
     fn format(&self) -> Self::Format<'_> {
@@ -289,7 +293,7 @@ impl AsFormat<MdFormatContext> for MdSyntaxToken {
     }
 }
 
-impl IntoFormat<MdFormatContext> for MdSyntaxToken {
+impl IntoFormat<MdFormatContext> for MarkdownSyntaxToken {
     type Format = FormatOwnedWithRule<Self, FormatMdSyntaxToken>;
 
     fn into_format(self) -> Self::Format {
@@ -300,7 +304,7 @@ impl IntoFormat<MdFormatContext> for MdSyntaxToken {
 /// Main entry point for formatting a Markdown file
 pub fn format_node(
     options: MdFormatOptions,
-    root: &MdSyntaxNode,
+    root: &MarkdownSyntaxNode,
 ) -> FormatResult<Formatted<MdFormatContext>> {
     biome_formatter::format_node(root, MdFormatLanguage::new(options), false)
 }

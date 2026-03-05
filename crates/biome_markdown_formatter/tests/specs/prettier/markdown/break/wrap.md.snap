@@ -20,10 +20,11 @@ word very-very-very-very-very-very-very-very-very-very-long-word very-very-very-
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,5 +1,3 @@
+@@ -1,5 +1,4 @@
 -a  
 - very-very-very-very-very-very-very-very-very-very-long-word very-very-very-very-very-very-very-very-very-very-long-word very-very-very-very-very-very-very-very-very-very-long-word
-+a very-very-very-very-very-very-very-very-very-very-long-word very-very-very-very-very-very-very-very-very-very-long-word very-very-very-very-very-very-very-very-very-very-long-word
++a
++very-very-very-very-very-very-very-very-very-very-long-word very-very-very-very-very-very-very-very-very-very-long-word very-very-very-very-very-very-very-very-very-very-long-word
  
 -\
  word very-very-very-very-very-very-very-very-very-very-long-word very-very-very-very-very-very-very-very-very-very-long-word
@@ -32,13 +33,14 @@ word very-very-very-very-very-very-very-very-very-very-long-word very-very-very-
 # Output
 
 ```md
-a very-very-very-very-very-very-very-very-very-very-long-word very-very-very-very-very-very-very-very-very-very-long-word very-very-very-very-very-very-very-very-very-very-long-word
+a
+very-very-very-very-very-very-very-very-very-very-long-word very-very-very-very-very-very-very-very-very-very-long-word very-very-very-very-very-very-very-very-very-very-long-word
 
 word very-very-very-very-very-very-very-very-very-very-long-word very-very-very-very-very-very-very-very-very-very-long-word
 ```
 
 # Lines exceeding max width of 80 characters
 ```
-    1: a very-very-very-very-very-very-very-very-very-very-long-word very-very-very-very-very-very-very-very-very-very-long-word very-very-very-very-very-very-very-very-very-very-long-word
-    3: word very-very-very-very-very-very-very-very-very-very-long-word very-very-very-very-very-very-very-very-very-very-long-word
+    2: very-very-very-very-very-very-very-very-very-very-long-word very-very-very-very-very-very-very-very-very-very-long-word very-very-very-very-very-very-very-very-very-very-long-word
+    4: word very-very-very-very-very-very-very-very-very-very-long-word very-very-very-very-very-very-very-very-very-very-long-word
 ```

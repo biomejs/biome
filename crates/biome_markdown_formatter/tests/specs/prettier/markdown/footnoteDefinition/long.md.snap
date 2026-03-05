@@ -25,7 +25,7 @@ info: markdown/footnoteDefinition/long.md
 -    this is a long long long long long long long long long long long long long paragraph.
 -    this is a long long long long long long long long long long long long long paragraph.
 +[^world]: this is a long long long long long long long long long long long long long paragraph.
-+          this is a long long long long long long long long long long long long long paragraph.
++this is a long long long long long long long long long long long long long paragraph.
 ```
 
 # Output
@@ -33,12 +33,12 @@ info: markdown/footnoteDefinition/long.md
 ```md
 [^hello]: this is a long long long long long long long long long long long long long paragraph.
 [^world]: this is a long long long long long long long long long long long long long paragraph.
-          this is a long long long long long long long long long long long long long paragraph.
+this is a long long long long long long long long long long long long long paragraph.
 ```
 
 # Lines exceeding max width of 80 characters
 ```
     1: [^hello]: this is a long long long long long long long long long long long long long paragraph.
     2: [^world]: this is a long long long long long long long long long long long long long paragraph.
-    3:           this is a long long long long long long long long long long long long long paragraph.
+    3: this is a long long long long long long long long long long long long long paragraph.
 ```

@@ -3,10 +3,11 @@
 #![allow(dead_code)]
 #![allow(unused)]
 use crate::{
+    MarkdownLanguage as Language, MarkdownSyntaxElement as SyntaxElement,
+    MarkdownSyntaxElementChildren as SyntaxElementChildren,
     MarkdownSyntaxKind::{self as SyntaxKind, *},
-    MdLanguage as Language, MdSyntaxElement as SyntaxElement,
-    MdSyntaxElementChildren as SyntaxElementChildren, MdSyntaxList as SyntaxList,
-    MdSyntaxNode as SyntaxNode, MdSyntaxToken as SyntaxToken,
+    MarkdownSyntaxList as SyntaxList, MarkdownSyntaxNode as SyntaxNode,
+    MarkdownSyntaxToken as SyntaxToken,
     macros::map_syntax_node,
 };
 use biome_rowan::{

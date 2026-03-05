@@ -17,14 +17,15 @@ bar
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,2 +1 @@
+@@ -1,2 +1,2 @@
 -foo\
--bar
-+foobar
++foo
+ bar
 ```
 
 # Output
 
 ```md
-foobar
+foo
+bar
 ```

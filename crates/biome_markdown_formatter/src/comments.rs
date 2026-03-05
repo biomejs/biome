@@ -3,7 +3,7 @@ use biome_formatter::{
     comments::{CommentKind, CommentPlacement, CommentStyle, DecoratedComment, SourceComment},
     prelude::Formatter,
 };
-use biome_markdown_syntax::MdLanguage;
+use biome_markdown_syntax::MarkdownLanguage;
 use biome_rowan::SyntaxTriviaPieceComments;
 
 use crate::MdFormatContext;
@@ -12,7 +12,7 @@ use crate::MdFormatContext;
 pub struct MarkdownCommentStyle;
 
 impl CommentStyle for MarkdownCommentStyle {
-    type Language = MdLanguage;
+    type Language = MarkdownLanguage;
 
     fn is_suppression(_: &str) -> bool {
         true
@@ -33,12 +33,12 @@ impl CommentStyle for MarkdownCommentStyle {
 #[derive(Default)]
 pub struct FormatMarkdownLeadingComment;
 
-impl FormatRule<SourceComment<MdLanguage>> for FormatMarkdownLeadingComment {
+impl FormatRule<SourceComment<MarkdownLanguage>> for FormatMarkdownLeadingComment {
     type Context = MdFormatContext;
 
     fn fmt(
         &self,
-        _: &SourceComment<MdLanguage>,
+        _: &SourceComment<MarkdownLanguage>,
         _: &mut Formatter<Self::Context>,
     ) -> FormatResult<()> {
         Ok(())

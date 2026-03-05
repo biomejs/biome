@@ -17,14 +17,15 @@ bbb
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,2 +1 @@
+@@ -1,2 +1,2 @@
 -aaa  
--bbb
-+aaabbb
-\ No newline at end of file
++aaa
+ bbb
 ```
 
 # Output
 
 ```md
-aaabbb```
+aaa
+bbb
+```

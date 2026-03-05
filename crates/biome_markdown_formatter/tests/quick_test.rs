@@ -4,13 +4,9 @@ use biome_markdown_parser::parse_markdown;
 #[ignore]
 #[test]
 fn quick_test() {
-    let source = r#"# Hello World
-
-## Heading Level 2
-
-### Heading with trailing hashes ###
-
-# Simple
+    let source = r#"aaa
+             bbb
+                                       ccc
 "#;
     let parse = parse_markdown(source);
 

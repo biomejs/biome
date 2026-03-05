@@ -17,7 +17,7 @@ use biome_fs::BiomePath;
 use biome_markdown_formatter::context::MdFormatOptions;
 use biome_markdown_formatter::format_node;
 use biome_markdown_parser::{MarkdownParserOptions, parse_markdown_with_cache};
-use biome_markdown_syntax::{MdDocument, MdLanguage, MdSyntaxNode};
+use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode, MdDocument};
 use biome_parser::{AnyParse, NodeParse};
 use biome_rowan::NodeCache;
 use camino::Utf8Path;
@@ -59,7 +59,7 @@ pub struct MarkdownAssistSettings {
     pub enabled: Option<AssistEnabled>,
 }
 
-impl ServiceLanguage for MdLanguage {
+impl ServiceLanguage for MarkdownLanguage {
     type FormatterSettings = MarkdownFormatterSettings;
     type LinterSettings = MarkdownLinterSettings;
     type AssistSettings = MarkdownAssistSettings;
@@ -255,15 +255,15 @@ impl ExtensionHandler for MarkdownFileHandler {
 }
 
 fn formatter_enabled(path: &Utf8Path, settings: &SettingsWithEditor) -> bool {
-    settings.formatter_enabled_for_file_path::<MdLanguage>(path)
+    settings.formatter_enabled_for_file_path::<MarkdownLanguage>(path)
 }
 
 fn linter_enabled(path: &Utf8Path, settings: &SettingsWithEditor) -> bool {
-    settings.linter_enabled_for_file_path::<MdLanguage>(path)
+    settings.linter_enabled_for_file_path::<MarkdownLanguage>(path)
 }
 
 fn assist_enabled(path: &Utf8Path, settings: &SettingsWithEditor) -> bool {
-    settings.assist_enabled_for_file_path::<MdLanguage>(path)
+    settings.assist_enabled_for_file_path::<MarkdownLanguage>(path)
 }
 
 fn parse(
@@ -273,7 +273,7 @@ fn parse(
     settings: &SettingsWithEditor,
     cache: &mut NodeCache,
 ) -> ParseResult {
-    let options = settings.parse_options::<MdLanguage>(_biome_path, &file_source);
+    let options = settings.parse_options::<MarkdownLanguage>(_biome_path, &file_source);
     let parse = parse_markdown_with_cache(text, cache, options);
     let any_parse =
         NodeParse::new(parse.syntax().as_send().unwrap(), parse.into_diagnostics()).into();
@@ -285,7 +285,7 @@ fn parse(
 }
 
 fn debug_syntax_tree(_biome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeResult {
-    let syntax: MdSyntaxNode = parse.syntax();
+    let syntax: MarkdownSyntaxNode = parse.syntax();
     let tree: MdDocument = parse.tree();
     GetSyntaxTreeResult {
         cst: format!("{syntax:#?}"),
@@ -299,7 +299,7 @@ pub(crate) fn format(
     parse: AnyParse,
     settings: &SettingsWithEditor,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<MdLanguage>(biome_path, document_file_source);
+    let options = settings.format_options::<MarkdownLanguage>(biome_path, document_file_source);
     debug!("{:?}", &options);
     let tree = parse.syntax();
     let formatted = format_node(options, &tree)?;

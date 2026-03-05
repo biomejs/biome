@@ -19,10 +19,10 @@ foo\
 @@ -1 +1 @@
 -foo\
 +foo
-\ No newline at end of file
 ```
 
 # Output
 
 ```md
-foo```
+foo
+```

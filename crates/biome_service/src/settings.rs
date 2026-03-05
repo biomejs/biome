@@ -40,7 +40,7 @@ use biome_js_syntax::JsLanguage;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
-use biome_markdown_syntax::MdLanguage;
+use biome_markdown_syntax::MarkdownLanguage;
 use biome_plugin_loader::Plugins;
 use camino::{Utf8Path, Utf8PathBuf};
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
@@ -685,7 +685,7 @@ pub struct LanguageListSettings {
     pub graphql: LanguageSettings<GraphqlLanguage>,
     pub html: LanguageSettings<HtmlLanguage>,
     pub grit: LanguageSettings<GritLanguage>,
-    pub markdown: LanguageSettings<MdLanguage>,
+    pub markdown: LanguageSettings<MarkdownLanguage>,
 }
 
 impl From<JsConfiguration> for LanguageSettings<JsLanguage> {
@@ -829,7 +829,7 @@ impl From<HtmlConfiguration> for LanguageSettings<HtmlLanguage> {
     }
 }
 
-impl From<MarkdownConfiguration> for LanguageSettings<MdLanguage> {
+impl From<MarkdownConfiguration> for LanguageSettings<MarkdownLanguage> {
     fn from(markdown: MarkdownConfiguration) -> Self {
         let mut language_setting: Self = Self::default();
         if let Some(formatter) = markdown.formatter {

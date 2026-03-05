@@ -19,14 +19,13 @@ info: markdown/spec/example-182.md
 +++ Biome
 @@ -1,2 +1,2 @@
 -aaa
--bbb
 +  aaa
-+ bbb
+ bbb
 ```
 
 # Output
 
 ```md
   aaa
- bbb
+bbb
 ```

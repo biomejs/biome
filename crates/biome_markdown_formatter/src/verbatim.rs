@@ -3,20 +3,20 @@ use biome_formatter::{
     Buffer, Format, FormatResult,
     prelude::{Formatter, text},
 };
-use biome_markdown_syntax::MdSyntaxNode;
+use biome_markdown_syntax::MarkdownSyntaxNode;
 use biome_rowan::{Direction, SyntaxElement};
 
-pub fn format_verbatim_node(node: &MdSyntaxNode) -> FormatMarkdownVerbatimNode<'_> {
+pub fn format_verbatim_node(node: &MarkdownSyntaxNode) -> FormatMarkdownVerbatimNode<'_> {
     FormatMarkdownVerbatimNode { node }
 }
 
-pub fn format_suppressed_node(node: &MdSyntaxNode) -> FormatMarkdownVerbatimNode<'_> {
+pub fn format_suppressed_node(node: &MarkdownSyntaxNode) -> FormatMarkdownVerbatimNode<'_> {
     FormatMarkdownVerbatimNode { node }
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub struct FormatMarkdownVerbatimNode<'node> {
-    node: &'node MdSyntaxNode,
+    node: &'node MarkdownSyntaxNode,
 }
 
 impl Format<MdFormatContext> for FormatMarkdownVerbatimNode<'_> {
@@ -49,7 +49,7 @@ impl Format<MdFormatContext> for FormatMarkdownVerbatimNode<'_> {
 }
 
 pub fn format_bogus_node(
-    node: &biome_rowan::SyntaxNode<biome_markdown_syntax::MdLanguage>,
+    node: &biome_rowan::SyntaxNode<biome_markdown_syntax::MarkdownLanguage>,
 ) -> FormatMarkdownVerbatimNode<'_> {
     FormatMarkdownVerbatimNode { node }
 }
