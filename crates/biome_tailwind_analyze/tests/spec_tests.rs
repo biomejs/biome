@@ -4,9 +4,10 @@ use biome_rowan::AstNode;
 use biome_tailwind_parser::parse_tailwind;
 use biome_tailwind_syntax::TailwindLanguage;
 use biome_test_utils::{
-    CheckActionType, assert_errors_are_absent, code_fix_to_string, create_analyzer_options,
-    diagnostic_to_string, has_bogus_nodes_or_empty_slots, parse_test_path, register_leak_checker,
-    scripts_from_json, write_analyzer_snapshot,
+    CheckActionType, assert_diagnostics_expectation_comment, assert_errors_are_absent,
+    code_fix_to_string, create_analyzer_options, diagnostic_to_string,
+    has_bogus_nodes_or_empty_slots, parse_test_path, register_leak_checker, scripts_from_json,
+    write_analyzer_snapshot,
 };
 use camino::Utf8Path;
 use std::ops::Deref;
@@ -49,13 +50,9 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
 
     if let Some(scripts) = scripts_from_json(extension, &input_code) {
         for script in scripts {
-            let code = match script {
-                biome_test_utils::JsonCase::String(code) => code,
-                biome_test_utils::JsonCase::CaseWithLanguage { code, .. } => code,
-            };
             analyze_and_snap(
                 &mut snapshot,
-                &code,
+                &script,
                 filter,
                 file_name,
                 input_file,
@@ -142,21 +139,7 @@ pub(crate) fn analyze_and_snap(
         parsed.diagnostics().len(),
     );
 
-    let expect_diagnostics = input_file
-        .file_name()
-        .is_some_and(|f| f.contains("invalid"));
-    if expect_diagnostics {
-        assert!(
-            !diagnostics.is_empty(),
-            "Expected diagnostics, but none were found. Input code: {input_code}"
-        );
-    } else {
-        assert!(
-            diagnostics.is_empty(),
-            "Expected no diagnostics, but some were found:\n{}\nInput code: {input_code}",
-            diagnostics.join("\n")
-        );
-    }
+    assert_diagnostics_expectation_comment(input_file, root.syntax(), diagnostics);
 }
 
 fn check_code_action(path: &Utf8Path, source: &str, action: &AnalyzerAction<TailwindLanguage>) {
