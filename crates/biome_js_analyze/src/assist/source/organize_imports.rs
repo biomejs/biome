@@ -1174,11 +1174,11 @@ fn merge(
             let clause2 = clause2.as_js_export_named_from_clause()?;
             let specifiers1 = clause1.specifiers();
             let specifiers2 = clause2.specifiers();
-            if let Some(meregd_specifiers) =
+            if let Some(merged_specifiers) =
                 merge_export_from_specifiers(&specifiers1, &specifiers2, sort_order)
             {
-                let meregd_clause = clause1.with_specifiers(meregd_specifiers);
-                let merged_item = item2.clone().with_export_clause(meregd_clause.into());
+                let merged_specifiers = clause1.with_specifiers(merged_specifiers);
+                let merged_item = item2.clone().with_export_clause(merged_specifiers.into());
 
                 let item1_leading_trivia = item1.syntax().first_leading_trivia()?;
                 let merged_item = if item1_leading_trivia.is_empty() {
@@ -1241,10 +1241,10 @@ fn merge(
                         return None;
                     };
                     let specifiers2 = clause2.named_specifiers().ok()?;
-                    if let Some(meregd_specifiers) =
+                    if let Some(merged_specifiers) =
                         merge_import_specifiers(specifiers1, &specifiers2, sort_order)
                     {
-                        let merged_clause = clause1.with_specifier(meregd_specifiers.into());
+                        let merged_clause = clause1.with_specifier(merged_specifiers.into());
                         let merged_item = item2.clone().with_import_clause(merged_clause.into());
 
                         let item1_leading_trivia = item1.syntax().first_leading_trivia()?;
@@ -1264,10 +1264,10 @@ fn merge(
                 ) => {
                     let specifiers1 = clause1.named_specifiers().ok()?;
                     let specifiers2 = clause2.named_specifiers().ok()?;
-                    if let Some(meregd_specifiers) =
+                    if let Some(merged_specifiers) =
                         merge_import_specifiers(specifiers1, &specifiers2, sort_order)
                     {
-                        let merged_clause = clause1.with_named_specifiers(meregd_specifiers);
+                        let merged_clause = clause1.with_named_specifiers(merged_specifiers);
                         let merged_item = item2.clone().with_import_clause(merged_clause.into());
                         let item1_leading_trivia = item1.syntax().first_leading_trivia()?;
                         let merged_item = if item1_leading_trivia.is_empty() {
