@@ -15,11 +15,10 @@ use std::{cmp::Ordering, collections::HashMap};
 
 use bitvec::{order::Lsb0, vec::BitVec};
 
-use super::{
+use crate::{
     class_lexer::{ClassSegmentStructure, tokenize_class},
-    sort_config::{SortConfig, VariantsConfig, build_variant_weight},
+    sort_config::{SortConfig, UtilityLayer, VariantsConfig, build_variant_weight},
 };
-use crate::lint::nursery::use_sorted_classes::sort_config::UtilityLayer;
 
 // utilities
 // ---------
@@ -232,7 +231,7 @@ fn get_utility_info(
 #[cfg(test)]
 mod get_utility_info_tests {
     use super::*;
-    use crate::lint::nursery::use_sorted_classes::sort_config::UtilityLayer;
+    use crate::sort_config::UtilityLayer;
 
     #[test]
     fn test_exact_match() {
@@ -412,7 +411,7 @@ impl From<(&str, &str)> for VariantMatch {
 
 #[cfg(test)]
 mod variant_match_tests {
-    use crate::lint::nursery::use_sorted_classes::class_info::VariantMatch;
+    use crate::class_info::VariantMatch;
 
     #[test]
     fn test_exact_match() {
@@ -597,9 +596,7 @@ mod get_class_info_tests {
     use bitvec::bitvec;
 
     use super::*;
-    use crate::lint::nursery::use_sorted_classes::{
-        presets::ConfigPreset, sort_config::UtilityLayer,
-    };
+    use crate::{presets::ConfigPreset, sort_config::UtilityLayer};
 
     #[test]
     fn test_get_class_info() {

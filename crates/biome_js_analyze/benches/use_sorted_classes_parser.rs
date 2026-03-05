@@ -1,4 +1,4 @@
-use biome_js_analyze::lint::nursery::use_sorted_classes::class_lexer::tokenize_class;
+use biome_tailwind_sort::class_lexer::tokenize_class;
 use criterion::{BenchmarkId, Criterion, Throughput, black_box, criterion_group, criterion_main};
 
 #[cfg(target_os = "windows")]

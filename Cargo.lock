@@ -936,9 +936,9 @@ dependencies = [
  "biome_service",
  "biome_string_case",
  "biome_suppression",
+ "biome_tailwind_sort",
  "biome_test_utils",
  "biome_unicode_table",
- "bitvec",
  "camino",
  "codspeed-criterion-compat",
  "enumflags2",
@@ -1730,6 +1730,13 @@ dependencies = [
  "tests_macros",
  "tikv-jemallocator",
  "tracing",
+]
+
+[[package]]
+name = "biome_tailwind_sort"
+version = "0.0.1"
+dependencies = [
+ "bitvec",
 ]
 
 [[package]]

@@ -9,7 +9,7 @@ use std::collections::HashMap;
 
 use bitvec::{order::Lsb0, vec::BitVec};
 
-use super::presets::ConfigPreset;
+use crate::presets::ConfigPreset;
 
 /// A utility layer, containing its name and an ordered list of classes.
 pub struct UtilityLayer {

@@ -1,0 +1,20 @@
+[package]
+name                 = "biome_tailwind_sort"
+version              = "0.0.1"
+authors.workspace    = true
+edition.workspace    = true
+description          = "Language-agnostic Tailwind CSS utility class sorting"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = true
+
+[dependencies]
+bitvec = "1.0.1"
+
+[dev-dependencies]
+
+[lints]
+workspace = true

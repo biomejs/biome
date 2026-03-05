@@ -1,14 +1,6 @@
-mod class_info;
-pub mod class_lexer;
-mod presets;
 mod sort;
-mod sort_config;
-mod tailwind_preset;
 
-use self::{
-    presets::UseSortedClassesPreset, sort::get_sort_class_name_range, sort::sort_class_name,
-    sort_config::SortConfig,
-};
+use self::sort::{get_sort_class_name_range, get_template_literal_space_context, sort_class_name};
 use crate::JsRuleAction;
 use crate::shared::any_class_string_like::AnyClassStringLike;
 use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
@@ -19,7 +11,8 @@ use biome_js_factory::make::{
 };
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::use_sorted_classes::UseSortedClassesOptions;
-use presets::get_config_preset;
+use biome_tailwind_sort::presets::{UseSortedClassesPreset, get_config_preset};
+use biome_tailwind_sort::sort_config::SortConfig;
 use std::sync::LazyLock;
 
 declare_lint_rule! {
@@ -176,7 +169,7 @@ impl Rule for UseSortedClasses {
         if node.should_visit(options)?
             && let Some(value) = node.value()
         {
-            let template_ctx = sort::get_template_literal_space_context(node);
+            let template_ctx = get_template_literal_space_context(node);
             let sorted_value: String = sort_class_name(&value, &SORT_CONFIG, &template_ctx);
             if sorted_value.is_empty() {
                 return None;
@@ -194,7 +187,7 @@ impl Rule for UseSortedClasses {
         // Calculate the range offset to account for the ignored prefix and postfix.
         let sort_range = if let Some(value) = node.value() {
             let range = node.range();
-            let template_ctx = sort::get_template_literal_space_context(node);
+            let template_ctx = get_template_literal_space_context(node);
             let real_sort_range = get_sort_class_name_range(&value, &range, &template_ctx);
             real_sort_range.unwrap_or(range)
         } else {

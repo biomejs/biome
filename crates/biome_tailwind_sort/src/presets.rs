@@ -1,14 +1,13 @@
 //! Presets contain pre-defined sort configurations, notably from Tailwind CSS. They are a
 //! starting point that can be extended (e.g. by adding custom utilities or variants).
 
-use super::{
+use crate::{
     sort_config::{UtilitiesConfig, VariantsConfig},
     tailwind_preset::{TAILWIND_LAYERS, VARIANT_CLASSES},
 };
 
 #[derive(Default)]
 pub enum UseSortedClassesPreset {
-    #[expect(unused)]
     None,
     #[default]
     TailwindCSS,
