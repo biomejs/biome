@@ -1,0 +1,32 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-shallowref-property.vue
+---
+# Input
+```ts
+import { shallowRef } from 'vue'
+const foo = shallowRef({})
+foo.bar = 123
+
+```
+
+# Diagnostics
+```
+invalid-shallowref-property.vue:3:1 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Ref value is accessed without `.value`.
+  
+    1 │ import { shallowRef } from 'vue'
+    2 │ const foo = shallowRef({})
+  > 3 │ foo.bar = 123
+      │ ^^^
+    4 │ 
+  
+  i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
+  
+  i Use `.value` to access ref value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

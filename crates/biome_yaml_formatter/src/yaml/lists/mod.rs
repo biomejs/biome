@@ -7,3 +7,4 @@ pub(crate) mod directive_list;
 pub(crate) mod document_list;
 pub(crate) mod flow_map_entry_list;
 pub(crate) mod flow_sequence_entry_list;
+pub(crate) mod property_list;

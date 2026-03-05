@@ -1,0 +1,49 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+
+// Named capture groups
+/(?<id>ba[rz])/;
+/(?<year>[0-9]{4})-(?<month>[0-9]{2})/;
+
+// Non-capturing groups
+/(?:ba[rz])/;
+
+// No groups at all
+/ba[rz]/;
+
+// Lookahead / lookbehind
+/(?=foo)/;
+/(?!foo)/;
+/(?<=foo)/;
+/(?<!foo)/;
+
+// Escaped parenthesis
+/\(foo\)/;
+
+// Parenthesis inside character class
+/[(]/;
+
+// RegExp constructor — named capture groups
+new RegExp("(?<id>foo)");
+RegExp("(?:foo)");
+
+// RegExp constructor — dynamic pattern (skip)
+new RegExp(pattern);
+
+// RegExp constructor — no groups at all
+RegExp("foo");
+
+// RegExp constructor — escaped parenthesis (not a capture group)
+new RegExp("\\(foo)");
+
+// Shadowed RegExp — should not trigger
+const RegExp = () => {};
+new RegExp("(foo)");
+RegExp("(foo)");
+
+```

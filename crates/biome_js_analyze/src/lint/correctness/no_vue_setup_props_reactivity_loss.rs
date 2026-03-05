@@ -10,6 +10,7 @@ use biome_js_syntax::{
     JsObjectMemberList, JsParameters,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange};
+use biome_rule_options::no_vue_setup_props_reactivity_loss::NoVueSetupPropsReactivityLossOptions;
 
 declare_lint_rule! {
     /// Disallow destructuring of `props` passed to `setup` in Vue projects.
@@ -68,7 +69,7 @@ impl Rule for NoVueSetupPropsReactivityLoss {
     type Query = VueComponentQuery;
     type State = Violation;
     type Signals = Vec<Self::State>;
-    type Options = ();
+    type Options = NoVueSetupPropsReactivityLossOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         match ctx.query() {

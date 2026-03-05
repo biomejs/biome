@@ -3,7 +3,7 @@ use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
     RuleCategoriesBuilder,
 };
-use biome_html_parser::{HtmlParseOptions, parse_html};
+use biome_html_parser::{HtmlParserOptions, parse_html};
 use biome_html_syntax::HtmlFileSource;
 use biome_test_utils::BenchCase;
 use criterion::{BenchmarkId, Criterion, black_box, criterion_group, criterion_main};
@@ -44,7 +44,7 @@ fn bench_analyzer(criterion: &mut Criterion) {
                     BenchmarkId::from_parameter(test_case.filename()),
                     code,
                     |b, _| {
-                        let parse = parse_html(code, HtmlParseOptions::from(&file_source));
+                        let parse = parse_html(code, HtmlParserOptions::from(&file_source));
 
                         let filter = AnalysisFilter {
                             categories: RuleCategoriesBuilder::default()

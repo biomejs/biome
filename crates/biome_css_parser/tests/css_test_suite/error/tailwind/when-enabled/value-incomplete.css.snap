@@ -47,14 +47,12 @@ CssRoot {
                                             },
                                             l_paren_token: L_PAREN@32..33 "(" [] [],
                                             items: CssParameterList [
-                                                CssParameter {
-                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                        css_component_value_list: CssComponentValueList [
-                                                            CssIdentifier {
-                                                                value_token: IDENT@33..39 "length" [] [],
-                                                            },
-                                                        ],
-                                                    },
+                                                CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssIdentifier {
+                                                            value_token: IDENT@33..39 "length" [] [],
+                                                        },
+                                                    ],
                                                 },
                                             ],
                                             r_paren_token: missing (required),
@@ -105,11 +103,10 @@ CssRoot {
                         0: IDENT@25..32 "--value" [] []
                       1: L_PAREN@32..33 "(" [] []
                       2: CSS_PARAMETER_LIST@33..39
-                        0: CSS_PARAMETER@33..39
-                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@33..39
-                            0: CSS_COMPONENT_VALUE_LIST@33..39
-                              0: CSS_IDENTIFIER@33..39
-                                0: IDENT@33..39 "length" [] []
+                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@33..39
+                          0: CSS_COMPONENT_VALUE_LIST@33..39
+                            0: CSS_IDENTIFIER@33..39
+                              0: IDENT@33..39 "length" [] []
                       3: (empty)
                 1: (empty)
               1: (empty)

@@ -86,7 +86,7 @@ impl AnalyzerPlugin for AnalyzerGritPlugin {
         let parse = AnyParse::Node(NodeParse::new(root.unwrap(), vec![]));
         let file = GritTargetFile { parse, path };
 
-        match self.grit_query.execute(file) {
+        match self.grit_query.execute_optimized(file) {
             Ok(result) => {
                 let mut diagnostics: Vec<_> = result
                     .logs

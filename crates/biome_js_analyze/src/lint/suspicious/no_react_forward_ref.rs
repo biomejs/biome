@@ -151,7 +151,7 @@ impl Rule for NoReactForwardRef {
 
         let global_react_import = model
             .all_bindings()
-            .filter_map(|binding| JsIdentifierBinding::cast_ref(binding.syntax()))
+            .filter_map(|binding| JsIdentifierBinding::cast_ref(&binding.syntax()))
             .find(|binding| is_global_react_import(binding, ReactLibrary::React));
 
         let new_function: AnyJsExpression = match function.clone() {

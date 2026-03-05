@@ -1,0 +1,36 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/multiparser-json/invalid-json.md
+---
+# Input
+
+```md
+<!-- #10333 -->
+```json
+packages\the-hub\cypress\fixtures\gridConfiguration.json
+```
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1,4 @@
+ <!-- #10333 -->
+-
+ ```json
+ packages\the-hub\cypress\fixtures\gridConfiguration.json
+-```
++```
+\ No newline at end of file
+```
+
+# Output
+
+```md
+<!-- #10333 -->
+```json
+packages\the-hub\cypress\fixtures\gridConfiguration.json
+``````

@@ -129,6 +129,7 @@ fn is_within_not_pseudo_class(node: &AnyCssPseudoClassNth) -> bool {
     let number_of_not = node
         .syntax()
         .ancestors()
+        .skip(1)
         .filter_map(|n| n.cast::<CssPseudoClassFunctionSelectorList>())
         .filter_map(|n| n.name().ok())
         .filter_map(|n| n.value_token().ok())

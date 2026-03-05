@@ -232,11 +232,11 @@ mod tests {
 
     #[test]
     fn tracks_html_element_names() {
-        use biome_html_parser::{HtmlParseOptions, parse_html};
+        use biome_html_parser::{HtmlParserOptions, parse_html};
 
         let source = r#"<Component /><AvatarPrimitive.Fallback />"#;
         // Enable Vue parsing so component names are parsed correctly
-        let parsed = parse_html(source, HtmlParseOptions::default().with_vue());
+        let parsed = parse_html(source, HtmlParserOptions::default().with_vue());
 
         println!("Diagnostics: {:?}", parsed.diagnostics());
         println!("Has errors: {}", !parsed.diagnostics().is_empty());

@@ -572,7 +572,15 @@ const Bar = graphql(`
        id: $peopleId){
        totalCount
        }}
-`);"#;
+`);
+
+const Baz = graphql`
+  query PeopleCount {
+  people(
+       id: $peopleId){
+       totalCount
+       }}
+`;"#;
 
     let fs = MemoryFileSystem::default();
     fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
@@ -630,6 +638,14 @@ const Bar = graphql(`
     		}
     	}
     `);
+
+    const Baz = graphql`
+    	query PeopleCount {
+    		people(id: $peopleId) {
+    			totalCount
+    		}
+    	}
+    `;
     ");
 }
 

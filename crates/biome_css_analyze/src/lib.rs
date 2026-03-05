@@ -14,8 +14,8 @@ pub use crate::registry::visit_registry;
 use crate::suppression_action::CssSuppressionAction;
 use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, AnalyzerPluginSlice, AnalyzerSignal, AnalyzerSuppression,
-    ControlFlow, LanguageRoot, MatchQueryParams, MetadataRegistry, Phases, PluginTargetLanguage,
-    PluginVisitor, RuleAction, RuleRegistry, to_analyzer_suppressions,
+    BatchPluginVisitor, ControlFlow, LanguageRoot, MatchQueryParams, MetadataRegistry, Phases,
+    PluginTargetLanguage, RuleAction, RuleRegistry, to_analyzer_suppressions,
 };
 use biome_css_syntax::{CssFileSource, CssLanguage, TextRange};
 use biome_diagnostics::Error;
@@ -158,7 +158,10 @@ where
 
     services.insert_service(css_services.file_source);
     if let Some(semantic_model) = css_services.semantic_model {
-        services.insert_service(semantic_model.clone());
+        services.insert_service(Arc::new(semantic_model.clone()));
+    } else {
+        let semantic_model = biome_css_semantic::semantic_model(root);
+        services.insert_service(Arc::new(semantic_model));
     }
     if let Some(module_graph) = css_services.module_graph {
         services.insert_service(module_graph);
@@ -171,15 +174,19 @@ where
         analyzer.add_visitor(phase, visitor);
     }
 
-    for plugin in plugins {
-        // SAFETY: The plugin target language is correctly checked here.
+    let css_plugins: Vec<_> = plugins
+        .iter()
+        .filter(|p| p.language() == PluginTargetLanguage::Css)
+        .cloned()
+        .collect();
+
+    if !css_plugins.is_empty() {
+        // SAFETY: All plugins have been verified to target CSS above.
         unsafe {
-            if plugin.language() == PluginTargetLanguage::Css {
-                analyzer.add_visitor(
-                    Phases::Syntax,
-                    Box::new(PluginVisitor::new_unchecked(plugin.clone())),
-                )
-            }
+            analyzer.add_visitor(
+                Phases::Syntax,
+                Box::new(BatchPluginVisitor::new_unchecked(&css_plugins)),
+            );
         }
     }
 

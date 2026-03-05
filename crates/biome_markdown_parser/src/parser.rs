@@ -8,13 +8,14 @@ use biome_rowan::{TextRange, TextSize};
 use std::collections::HashSet;
 
 use crate::lexer::{MarkdownLexContext, MarkdownReLexContext};
+use crate::syntax::TAB_STOP_SPACES;
 use crate::syntax::inline::EmphasisContext;
 use crate::syntax::parse_error::DEFAULT_MAX_NESTING_DEPTH;
 use crate::token_source::{MarkdownTokenSource, MarkdownTokenSourceCheckpoint};
 
 /// Options for configuring the markdown parser.
 #[derive(Debug, Clone)]
-pub struct MarkdownParseOptions {
+pub struct MarkdownParserOptions {
     /// Maximum nesting depth for block quotes and lists.
     ///
     /// This limits recursion on pathological input to avoid stack overflow.
@@ -22,7 +23,7 @@ pub struct MarkdownParseOptions {
     // Reserved for future GFM options
 }
 
-impl Default for MarkdownParseOptions {
+impl Default for MarkdownParserOptions {
     fn default() -> Self {
         Self {
             max_nesting_depth: DEFAULT_MAX_NESTING_DEPTH,
@@ -111,12 +112,12 @@ pub struct QuoteIndent {
 pub(crate) struct MarkdownParser<'source> {
     context: ParserContext<MarkdownSyntaxKind>,
     source: MarkdownTokenSource<'source>,
-    options: MarkdownParseOptions,
+    options: MarkdownParserOptions,
     state: MarkdownParserState,
 }
 
 impl<'source> MarkdownParser<'source> {
-    pub fn new(source: &'source str, options: MarkdownParseOptions) -> Self {
+    pub fn new(source: &'source str, options: MarkdownParserOptions) -> Self {
         Self {
             context: ParserContext::default(),
             source: MarkdownTokenSource::from_str(source),
@@ -126,7 +127,7 @@ impl<'source> MarkdownParser<'source> {
     }
 
     /// Returns parser options. Reserved for GFM extensions.
-    pub(crate) fn options(&self) -> &MarkdownParseOptions {
+    pub(crate) fn options(&self) -> &MarkdownParserOptions {
         &self.options
     }
 
@@ -165,7 +166,6 @@ impl<'source> MarkdownParser<'source> {
 
     /// Record tight/loose information for a parsed list node.
     pub(crate) fn record_list_tightness(&mut self, range: TextRange, is_tight: bool) {
-        let range = self.trim_range(range);
         self.state
             .list_tightness
             .push(ListTightness { range, is_tight });
@@ -179,7 +179,6 @@ impl<'source> MarkdownParser<'source> {
         marker_width: usize,
         spaces_after_marker: usize,
     ) {
-        let range = self.trim_range(range);
         self.state.list_item_indents.push(ListItemIndent {
             range,
             indent,
@@ -190,7 +189,6 @@ impl<'source> MarkdownParser<'source> {
     }
 
     pub(crate) fn record_quote_indent(&mut self, range: TextRange, indent: usize) {
-        let range = self.trim_range(range);
         self.state.quote_indents.push(QuoteIndent { range, indent });
     }
 
@@ -293,33 +291,6 @@ impl<'source> MarkdownParser<'source> {
         self.state.virtual_line_start = Some(self.cur_range().start());
     }
 
-    pub(crate) fn trim_range(&self, range: TextRange) -> TextRange {
-        let start: usize = range.start().into();
-        let end: usize = range.end().into();
-        if start >= end {
-            return range;
-        }
-
-        let source = self.source.source_text();
-        let slice = &source[start..end];
-        if slice
-            .trim_matches(|c: char| matches!(c, ' ' | '\t' | '\r'))
-            .is_empty()
-        {
-            return TextRange::new(range.start(), range.start());
-        }
-        let leading = slice
-            .len()
-            .saturating_sub(slice.trim_start_matches([' ', '\t', '\r']).len());
-        let trailing = slice
-            .len()
-            .saturating_sub(slice.trim_end_matches([' ', '\t', '\r']).len());
-        let new_start = start + leading;
-        let new_end = end.saturating_sub(trailing);
-
-        TextRange::new((new_start as u32).into(), (new_end as u32).into())
-    }
-
     /// Skip an optional indentation token at line start if it is whitespace-only
     /// and does not exceed `max_indent` columns.
     pub fn skip_line_indent(&mut self, max_indent: usize) -> bool {
@@ -338,7 +309,7 @@ impl<'source> MarkdownParser<'source> {
 
             let indent = text
                 .chars()
-                .map(|c| if c == '\t' { 4 } else { 1 })
+                .map(|c| if c == '\t' { TAB_STOP_SPACES } else { 1 })
                 .sum::<usize>();
 
             if consumed + indent > max_indent {
@@ -469,7 +440,7 @@ fn count_leading_indent(text: &str) -> usize {
     for c in text.chars() {
         match c {
             ' ' => count += 1,
-            '\t' => count += 4,
+            '\t' => count += TAB_STOP_SPACES,
             _ => break,
         }
     }

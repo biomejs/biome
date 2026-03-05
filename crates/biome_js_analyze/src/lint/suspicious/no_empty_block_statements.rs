@@ -83,12 +83,17 @@ impl Rule for NoEmptyBlockStatements {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let query = ctx.query();
-        let is_empty = is_empty(query);
-        let has_comments = query.syntax().has_comments_descendants();
-        let is_constructor_with_ts_param_props_or_private =
-            is_constructor_with_ts_param_props_or_private(query);
+        if !is_empty(query) {
+            return None;
+        }
+        if is_constructor_with_ts_param_props_or_private(query) {
+            return None;
+        }
+        if query.syntax().has_comments_descendants() {
+            return None;
+        }
 
-        (is_empty && !has_comments && !is_constructor_with_ts_param_props_or_private).then_some(())
+        Some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
@@ -111,10 +116,10 @@ impl Rule for NoEmptyBlockStatements {
 fn is_empty(query: &Query) -> bool {
     use Query::*;
     match query {
-        JsFunctionBody(body) => body.directives().len() == 0 && body.statements().len() == 0,
-        JsBlockStatement(block) => block.statements().len() == 0,
-        JsStaticInitializationBlockClassMember(block) => block.statements().len() == 0,
-        JsSwitchStatement(statement) => statement.cases().len() == 0,
+        JsFunctionBody(body) => body.directives().is_empty() && body.statements().is_empty(),
+        JsBlockStatement(block) => block.statements().is_empty(),
+        JsStaticInitializationBlockClassMember(block) => block.statements().is_empty(),
+        JsSwitchStatement(statement) => statement.cases().is_empty(),
     }
 }
 
@@ -141,9 +146,11 @@ fn is_constructor_with_ts_param_props_or_private(query: &Query) -> bool {
         .parameters()
         .into_iter()
         .any(|param| matches!(param, Ok(AnyJsConstructorParameter::TsPropertyParameter(_))));
-    let is_private = constructor
+    if is_param_props {
+        return true;
+    }
+    constructor
         .modifiers()
         .into_iter()
-        .any(|modifier| modifier.is_private() || modifier.is_protected());
-    is_param_props || is_private
+        .any(|modifier| modifier.is_private() || modifier.is_protected())
 }

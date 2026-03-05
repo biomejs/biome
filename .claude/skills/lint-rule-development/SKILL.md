@@ -72,12 +72,12 @@ impl Rule for UseMyRuleName {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let binding = ctx.query();
-        
+
         // Check if identifier matches your rule logic
         if binding.name_token().ok()?.text() == "prohibited_name" {
             return Some(());
         }
-        
+
         None
     }
 
@@ -148,23 +148,23 @@ use biome_analyze::Semantic;
 
 impl Rule for MySemanticRule {
     type Query = Semantic<JsReferenceIdentifier>;
-    
+
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let model = ctx.model();
-        
+
         // Check if binding is declared
         let binding = node.binding(model)?;
-        
+
         // Get all references to this binding
         let all_refs = binding.all_references(model);
-        
+
         // Get only read references
         let read_refs = binding.all_reads(model);
-        
+
         // Get only write references
         let write_refs = binding.all_writes(model);
-        
+
         Some(())
     }
 }
@@ -191,13 +191,13 @@ impl Rule for UseMyRuleName {
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
-        
+
         // Example: Replace the node
         mutation.replace_node(
             node.clone(),
             make::js_identifier_binding(make::ident("replacement"))
         );
-        
+
         Some(JsRuleAction::new(
             ctx.action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
@@ -274,6 +274,18 @@ These magic comments:
 Example `invalid.js`:
 ```javascript
 // should generate diagnostics
+**Every test file must start with a top-level comment** declaring whether it expects diagnostics. The test runner enforces this — see the `testing-codegen` skill for full rules. The short version:
+
+`valid.js` — comment is **mandatory** (test panics without it):
+```js
+/* should not generate diagnostics */
+const x = 1;
+const y = 2;
+```
+
+`invalid.js` — comment is strongly recommended (also enforced when present):
+```js
+/* should generate diagnostics */
 const prohibited_name = 1;
 const another_prohibited = 2;
 ```

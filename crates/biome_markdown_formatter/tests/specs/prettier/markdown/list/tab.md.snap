@@ -1,0 +1,106 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/list/tab.md
+---
+# Input
+
+```md
+* Text
+
+ 	[title](link)
+
+* Text
+
+ 	- foo
+ 	- foo
+ 	- bar
+
+* Text
+
+ 	# foo
+
+* Text
+
+ 	```
+ 	foo
+ 	```
+
+* Text
+
+ 	`foo`
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,22 +1,23 @@
+-- Text
++* Text
+ 
+-  [title](link)
++ 	[title](link)
+ 
+-- Text
+-  - foo
+-  - foo
+-  - bar
++* Text
+ 
+-- Text
++ 	- foo
++ 	- foo
++ 	- bar
+ 
+-  # foo
++* Text
++
++ 	# foo
+ 
+-- Text
++* Text
+ 
+-  ```
+-  foo
+-  ```
++ 	```
++ 	foo
++ 	```
+ 
+-- Text
++* Text
+ 
+-  `foo`
++ 	`foo`
+```
+
+# Output
+
+```md
+* Text
+
+ 	[title](link)
+
+* Text
+
+ 	- foo
+ 	- foo
+ 	- bar
+
+* Text
+
+ 	# foo
+
+* Text
+
+ 	```
+ 	foo
+ 	```
+
+* Text
+
+ 	`foo`
+```

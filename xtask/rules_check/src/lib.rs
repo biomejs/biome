@@ -1,6 +1,7 @@
 //! This module is in charge of checking if the documentation and tests cases inside the Analyzer rules are correct.
 //!
 //!
+use std::any::TypeId;
 use std::collections::{BTreeMap, HashMap};
 use std::fmt::{Display, Formatter, Write};
 use std::str::FromStr;
@@ -19,7 +20,7 @@ use biome_css_syntax::CssLanguage;
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::{DiagnosticExt, PrintDiagnostic, Severity};
 use biome_graphql_syntax::GraphqlLanguage;
-use biome_html_parser::HtmlParseOptions;
+use biome_html_parser::HtmlParserOptions;
 use biome_html_syntax::HtmlLanguage;
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, TextSize};
@@ -69,6 +70,12 @@ pub fn check_rules() -> anyhow::Result<()> {
             let group = R::Group::NAME;
             let rule_name = R::METADATA.name;
             let rule_severity = R::METADATA.severity;
+
+            if TypeId::of::<R::Options>() == TypeId::of::<()>() {
+                self.errors.push(Errors::new(format!(
+                    "The rule '{rule_name}' uses `type Options = ()`. All lint rules must use a generated options struct (e.g., `RuleNameOptions`), even if empty. One should have been created for you if you ran the codegen when creating the rule. Create an empty options struct for this rule in biome_rule_options and update the rule to use it (e.g., `type Options = RuleNameOptions`)."
+                )));
+            }
 
             if let Some(issue_number) = R::METADATA.issue_number
                 && group != "nursery"
@@ -495,7 +502,7 @@ fn assert_lint(
             }
         }
         DocumentFileSource::Html(source) => {
-            let parse = biome_html_parser::parse_html(code, HtmlParseOptions::from(&source));
+            let parse = biome_html_parser::parse_html(code, HtmlParserOptions::from(&source));
 
             if parse.has_errors() {
                 for diag in parse.into_diagnostics() {
@@ -541,6 +548,7 @@ fn assert_lint(
             }
         }
         DocumentFileSource::Grit(..) => todo!("Grit analysis is not yet supported"),
+        DocumentFileSource::Markdown(..) => todo!("Markdown analysis is not yet supported"),
 
         // Unknown code blocks should be ignored by tests
         DocumentFileSource::Unknown | DocumentFileSource::Ignore => {}

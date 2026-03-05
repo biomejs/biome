@@ -375,7 +375,7 @@ impl AnyHtmlTagElement {
 #[cfg(test)]
 mod tests {
     use biome_html_factory::syntax::HtmlElement;
-    use biome_html_parser::{HtmlParseOptions, parse_html};
+    use biome_html_parser::{HtmlParserOptions, parse_html};
     use biome_rowan::AstNode;
 
     #[test]
@@ -384,7 +384,7 @@ mod tests {
         <script type="text/javascript">
         </script>
         "#;
-        let syntax = parse_html(html, HtmlParseOptions::default());
+        let syntax = parse_html(html, HtmlParserOptions::default());
         let element = syntax
             .tree()
             .syntax()
@@ -398,7 +398,7 @@ mod tests {
         <script type="application/javascript">
         </script>
         "#;
-        let syntax = parse_html(html, HtmlParseOptions::default());
+        let syntax = parse_html(html, HtmlParserOptions::default());
         let element = syntax
             .tree()
             .syntax()
@@ -412,7 +412,7 @@ mod tests {
         <script type="application/ecmascript">
         </script>
         "#;
-        let syntax = parse_html(html, HtmlParseOptions::default());
+        let syntax = parse_html(html, HtmlParserOptions::default());
         let element = syntax
             .tree()
             .syntax()
@@ -426,7 +426,7 @@ mod tests {
         <script type="module">
         </script>
         "#;
-        let syntax = parse_html(html, HtmlParseOptions::default());
+        let syntax = parse_html(html, HtmlParserOptions::default());
         let element = syntax
             .tree()
             .syntax()

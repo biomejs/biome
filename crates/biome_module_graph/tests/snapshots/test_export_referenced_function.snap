@@ -21,7 +21,7 @@ export { foo };
 ```
 Exports {
   "foo" => {
-    ExportOwnExport => JsOwnExport::Binding(0)
+    ExportOwnExport => JsOwnExport::Binding(87..90)
   }
 }
 Imports {
@@ -32,13 +32,12 @@ Imports {
 ## Exported Bindings
 
 ```
-BindingId(0) => JsBindingData {
-  Name: foo,
-  Type: Module(0) TypeId(1),
-  JSDoc comment: JsDoc(
+foo => BindingTypeData {
+  Types Module(0) TypeId(1),
+  JsDoc(
     @returns {string}
   ),
-  Declaration kind: HoistedValue
+  Exported Ranges: (118..121)
 }
 ```
 

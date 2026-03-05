@@ -27,9 +27,16 @@ pub(crate) enum HtmlLexContext {
     Regular,
     /// When the lexer is inside a tag, special characters are lexed as tag tokens.
     InsideTag,
-    /// Like [InsideTag], but with Vue-specific tokens enabled.
-    /// This enables parsing of Component directives (v-bind, :, @, #, etc.)
-    InsideTagWithDirectives,
+    /// Like [InsideTag], but with Vue-style directive tokens enabled (`.`, `:`, `@`, `#`, etc.).
+    /// When `svelte` is `true`, also recognizes `//` and `/* */` as JS-style comments (for Svelte
+    /// component names which need both member-expression `.` support and comment support).
+    InsideTagWithDirectives { svelte: bool },
+    /// Like [InsideTag], but with Svelte-specific tokens enabled.
+    /// This enables parsing of JS-style `//` and `/* */` comments as trivia.
+    InsideTagSvelte,
+    /// Like [InsideTag], but with Astro-specific tokens enabled.
+    /// This enables parsing of Astro directives (client:, set:, class:, is:, server:)
+    InsideTagAstro,
     /// Lexes Vue directive arguments inside `[]`.
     VueDirectiveArgument,
     /// When the parser encounters a `=` token (the beginning of the attribute initializer clause), it switches to this context.
@@ -147,6 +154,10 @@ pub(crate) enum HtmlReLexContext {
     HtmlText,
     /// Relex tokens as if the parser was inside a tag.
     InsideTag,
+    /// Relex tokens as if the parser was inside a tag in an Astro file.
+    InsideTagAstro,
+    /// Relex tokens as if the parser was inside a tag in a Svelte file.
+    InsideTagSvelte,
 }
 
 pub(crate) type HtmlTokenSourceCheckpoint = TokenSourceCheckpoint<HtmlSyntaxKind>;
@@ -213,6 +224,13 @@ impl<'source> HtmlTokenSource<'source> {
 
     pub fn re_lex(&mut self, mode: HtmlReLexContext) -> HtmlSyntaxKind {
         self.lexer.re_lex(mode)
+    }
+
+    /// Signals to the lexer that the frontmatter decision has been made.
+    /// After this call, `---` in the `Regular` context is treated as plain
+    /// HTML text rather than a `FENCE` token.
+    pub fn set_after_frontmatter(&mut self, value: bool) {
+        self.lexer.lexer_mut().set_after_frontmatter(value);
     }
 }
 

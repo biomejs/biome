@@ -1,0 +1,75 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/code/mdn-transform.md
+---
+# Input
+
+```md
+
+```css
+
+#example-element:focus {
+  transform: rotate3d(1, 1, 1,      30deg) matrix3d(
+      1,
+      0,
+      0,
+                      0,
+      0,
+    1,
+      6,
+      0,
+      0,
+      0,
+      1,
+      0,
+      50,
+      100,
+      0,
+      1.1
+    );
+}
+```
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,3 +1,4 @@
++
+ ```css
+ 
+ #example-element:focus {
+```
+
+# Output
+
+```md
+
+```css
+
+#example-element:focus {
+  transform: rotate3d(1, 1, 1,      30deg) matrix3d(
+      1,
+      0,
+      0,
+                      0,
+      0,
+    1,
+      6,
+      0,
+      0,
+      0,
+      1,
+      0,
+      50,
+      100,
+      0,
+      1.1
+    );
+}
+```
+```

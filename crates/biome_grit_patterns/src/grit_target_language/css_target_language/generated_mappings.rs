@@ -40,6 +40,23 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssContainerNotQuery" => lang::CssContainerNotQuery::KIND_SET.iter().next(),
         "CssContainerOrQuery" => lang::CssContainerOrQuery::KIND_SET.iter().next(),
         "CssContainerQueryInParens" => lang::CssContainerQueryInParens::KIND_SET.iter().next(),
+        "CssContainerScrollStateAndQuery" => lang::CssContainerScrollStateAndQuery::KIND_SET
+            .iter()
+            .next(),
+        "CssContainerScrollStateInParens" => lang::CssContainerScrollStateInParens::KIND_SET
+            .iter()
+            .next(),
+        "CssContainerScrollStateNotQuery" => lang::CssContainerScrollStateNotQuery::KIND_SET
+            .iter()
+            .next(),
+        "CssContainerScrollStateOrQuery" => {
+            lang::CssContainerScrollStateOrQuery::KIND_SET.iter().next()
+        }
+        "CssContainerScrollStateQueryInParens" => {
+            lang::CssContainerScrollStateQueryInParens::KIND_SET
+                .iter()
+                .next()
+        }
         "CssContainerSizeFeatureInParens" => lang::CssContainerSizeFeatureInParens::KIND_SET
             .iter()
             .next(),
@@ -143,7 +160,6 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssPageAtRuleBlock" => lang::CssPageAtRuleBlock::KIND_SET.iter().next(),
         "CssPageSelector" => lang::CssPageSelector::KIND_SET.iter().next(),
         "CssPageSelectorPseudo" => lang::CssPageSelectorPseudo::KIND_SET.iter().next(),
-        "CssParameter" => lang::CssParameter::KIND_SET.iter().next(),
         "CssParenthesizedExpression" => lang::CssParenthesizedExpression::KIND_SET.iter().next(),
         "CssPercentage" => lang::CssPercentage::KIND_SET.iter().next(),
         "CssPositionTryAtRule" => lang::CssPositionTryAtRule::KIND_SET.iter().next(),
@@ -274,11 +290,20 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssViewTransitionAtRuleDeclarator" => lang::CssViewTransitionAtRuleDeclarator::KIND_SET
             .iter()
             .next(),
+        "ScssArbitraryArgument" => lang::ScssArbitraryArgument::KIND_SET.iter().next(),
+        "ScssBinaryExpression" => lang::ScssBinaryExpression::KIND_SET.iter().next(),
         "ScssDeclaration" => lang::ScssDeclaration::KIND_SET.iter().next(),
+        "ScssExpression" => lang::ScssExpression::KIND_SET.iter().next(),
         "ScssIdentifier" => lang::ScssIdentifier::KIND_SET.iter().next(),
+        "ScssKeywordArgument" => lang::ScssKeywordArgument::KIND_SET.iter().next(),
+        "ScssMapExpression" => lang::ScssMapExpression::KIND_SET.iter().next(),
+        "ScssMapExpressionPair" => lang::ScssMapExpressionPair::KIND_SET.iter().next(),
         "ScssNamespacedIdentifier" => lang::ScssNamespacedIdentifier::KIND_SET.iter().next(),
         "ScssNestingDeclaration" => lang::ScssNestingDeclaration::KIND_SET.iter().next(),
+        "ScssParentSelectorValue" => lang::ScssParentSelectorValue::KIND_SET.iter().next(),
+        "ScssParenthesizedExpression" => lang::ScssParenthesizedExpression::KIND_SET.iter().next(),
         "ScssQualifiedName" => lang::ScssQualifiedName::KIND_SET.iter().next(),
+        "ScssUnaryExpression" => lang::ScssUnaryExpression::KIND_SET.iter().next(),
         "ScssVariableModifier" => lang::ScssVariableModifier::KIND_SET.iter().next(),
         "TwApplyAtRule" => lang::TwApplyAtRule::KIND_SET.iter().next(),
         "TwConfigAtRule" => lang::TwConfigAtRule::KIND_SET.iter().next(),

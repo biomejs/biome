@@ -81,6 +81,7 @@ impl VueFileHandler {
                         .with_embedding_kind(EmbeddingKind::Vue {
                             setup,
                             is_source: true,
+                            event_handler: false,
                         }),
                 )
             })

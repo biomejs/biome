@@ -9,7 +9,9 @@ use crate::settings::{
     OverrideSettings, SettingsWithEditor, check_feature_activity, check_override_feature_activity,
 };
 use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
-use crate::workspace::{CodeAction, CssDocumentServices, DocumentServices, EmbeddedSnippet};
+use crate::workspace::{
+    CodeAction, CssDocumentServices, DocumentServices, EmbeddedSnippet, JsDocumentServices,
+};
 use crate::workspace::{FixFileResult, PullActionsResult};
 use crate::{
     WorkspaceError,
@@ -41,7 +43,7 @@ use biome_html_formatter::{
     context::{IndentScriptAndStyle, WhitespaceSensitivity},
     format_node,
 };
-use biome_html_parser::{HtmlParseOptions, parse_html_with_cache};
+use biome_html_parser::{HtmlParserOptions, parse_html_with_cache};
 use biome_html_syntax::element_ext::AnyEmbeddedContent;
 use biome_html_syntax::{
     AnySvelteDirective, AstroEmbeddedContent, HtmlAttributeInitializerClause,
@@ -307,7 +309,7 @@ impl ServiceLanguage for HtmlLanguage {
         None
     }
 
-    type ParserOptions = HtmlParseOptions;
+    type ParserOptions = HtmlParserOptions;
 
     fn resolve_parse_options(
         overrides: &OverrideSettings,
@@ -316,7 +318,7 @@ impl ServiceLanguage for HtmlLanguage {
         file_source: &DocumentFileSource,
     ) -> Self::ParserOptions {
         let html_file_source = file_source.to_html_file_source().unwrap_or_default();
-        let mut options = HtmlParseOptions::from(&html_file_source);
+        let mut options = HtmlParserOptions::from(&html_file_source);
         if language.interpolation.unwrap_or_default().into() && html_file_source.is_html() {
             options = options.with_double_text_expression();
         }
@@ -430,8 +432,8 @@ fn parse_embedded_nodes(
                                 settings,
                                 builder,
                             );
-                            if let Some((content, file_source)) = result {
-                                nodes.push((content.into(), file_source.into()));
+                            if let Some((content, js_services, file_source)) = result {
+                                nodes.push(((content, js_services).into(), file_source.into()));
                             }
                         } else if script_type.is_json() {
                             let result = parse_embedded_json(
@@ -503,8 +505,8 @@ fn parse_embedded_nodes(
                         settings,
                         builder,
                     );
-                    if let Some((content, file_source)) = result {
-                        nodes.push((content.into(), file_source));
+                    if let Some((content, js_services, file_source)) = result {
+                        nodes.push(((content, js_services).into(), file_source));
                     }
                 }
 
@@ -527,8 +529,8 @@ fn parse_embedded_nodes(
                                 settings,
                                 builder,
                             );
-                            if let Some((content, file_source)) = result {
-                                nodes.push((content.into(), file_source.into()));
+                            if let Some((content, js_services, file_source)) = result {
+                                nodes.push(((content, js_services).into(), file_source.into()));
                             }
                         } else if script_type.is_json() {
                             let result = parse_embedded_json(
@@ -581,9 +583,9 @@ fn parse_embedded_nodes(
                             settings,
                             builder,
                         );
-                        if let Some((content, file_source)) = result {
+                        if let Some((content, js_services, file_source)) = result {
                             embedded_file_source = file_source;
-                            nodes.push((content.into(), file_source.into()));
+                            nodes.push(((content, js_services).into(), file_source.into()));
                         }
                     } else if script_type.is_json() {
                         let result =
@@ -630,6 +632,7 @@ fn parse_embedded_nodes(
                         embedded_file_source.with_embedding_kind(EmbeddingKind::Vue {
                             setup: false,
                             is_source: false,
+                            event_handler: true,
                         });
                     if let Some((content, doc_source)) = parse_directive_string_value(
                         &initializer,
@@ -650,6 +653,7 @@ fn parse_embedded_nodes(
                         embedded_file_source.with_embedding_kind(EmbeddingKind::Vue {
                             setup: false,
                             is_source: false,
+                            event_handler: false,
                         });
                     if let Some((content, doc_source)) = parse_directive_string_value(
                         &initializer,
@@ -670,6 +674,7 @@ fn parse_embedded_nodes(
                         embedded_file_source.with_embedding_kind(EmbeddingKind::Vue {
                             setup: false,
                             is_source: false,
+                            event_handler: false,
                         });
                     if let Some((content, doc_source)) = parse_directive_string_value(
                         &initializer,
@@ -686,10 +691,15 @@ fn parse_embedded_nodes(
                 if let Some(directive) = VueDirective::cast_ref(&element)
                     && let Some(initializer) = directive.initializer()
                 {
+                    let is_v_on = directive
+                        .name_token()
+                        .map(|t| t.text_trimmed() == "v-on")
+                        .unwrap_or(false);
                     let file_source =
                         embedded_file_source.with_embedding_kind(EmbeddingKind::Vue {
                             setup: false,
                             is_source: false,
+                            event_handler: is_v_on,
                         });
                     if let Some((content, doc_source)) = parse_directive_string_value(
                         &initializer,
@@ -728,9 +738,9 @@ fn parse_embedded_nodes(
                             settings,
                             builder,
                         );
-                        if let Some((content, file_source)) = result {
+                        if let Some((content, js_services, file_source)) = result {
                             embedded_file_source = file_source;
-                            nodes.push((content.into(), file_source.into()));
+                            nodes.push(((content, js_services).into(), file_source.into()));
                         }
                     } else if script_type.is_json() {
                         let result =
@@ -885,7 +895,11 @@ pub(crate) fn parse_astro_embedded_script(
     path: &BiomePath,
     settings: &SettingsWithEditor,
     builder: &mut EmbeddedBuilder,
-) -> Option<(EmbeddedSnippet<JsLanguage>, DocumentFileSource)> {
+) -> Option<(
+    EmbeddedSnippet<JsLanguage>,
+    DocumentServices,
+    DocumentFileSource,
+)> {
     let content = element.content_token()?;
     let file_source =
         JsFileSource::ts().with_embedding_kind(EmbeddingKind::Astro { frontmatter: true });
@@ -900,15 +914,23 @@ pub(crate) fn parse_astro_embedded_script(
     );
     builder.visit_js_source_snippet(&parse.tree());
 
-    Some((
-        EmbeddedSnippet::new(
-            parse.into(),
-            element.range(),
-            content.text_trimmed_range(),
-            content.text_range().start(),
-        ),
-        document_file_source,
-    ))
+    let snippet = EmbeddedSnippet::new(
+        parse.into(),
+        element.range(),
+        content.text_trimmed_range(),
+        content.text_range().start(),
+    );
+
+    let js_services =
+        if settings.as_ref().is_linter_enabled() || settings.as_ref().is_assist_enabled() {
+            JsDocumentServices::default()
+                .with_js_semantic_model(&snippet.tree())
+                .into()
+        } else {
+            DocumentServices::none()
+        };
+
+    Some((snippet, js_services, document_file_source))
 }
 
 pub(crate) fn parse_embedded_script(
@@ -918,7 +940,7 @@ pub(crate) fn parse_embedded_script(
     html_file_source: &HtmlFileSource,
     settings: &SettingsWithEditor,
     builder: &mut EmbeddedBuilder,
-) -> Option<(EmbeddedSnippet<JsLanguage>, JsFileSource)> {
+) -> Option<(EmbeddedSnippet<JsLanguage>, DocumentServices, JsFileSource)> {
     if element.is_javascript_tag() {
         let file_source = if html_file_source.is_svelte() || html_file_source.is_vue() {
             let mut file_source = if element.is_typescript_lang() {
@@ -937,6 +959,7 @@ pub(crate) fn parse_embedded_script(
                 file_source = file_source.with_embedding_kind(EmbeddingKind::Vue {
                     setup: element.is_script_with_setup_attribute(),
                     is_source: true,
+                    event_handler: false,
                 });
             }
             file_source
@@ -983,7 +1006,17 @@ pub(crate) fn parse_embedded_script(
                 content.text_range().start(),
             ))
         })?;
-        Some((embedded_content, file_source))
+
+        let js_services =
+            if settings.as_ref().is_linter_enabled() || settings.as_ref().is_assist_enabled() {
+                JsDocumentServices::default()
+                    .with_js_semantic_model(&embedded_content.tree())
+                    .into()
+            } else {
+                DocumentServices::none()
+            };
+
+        Some((embedded_content, js_services, file_source))
     } else {
         None
     }
@@ -1231,6 +1264,7 @@ pub(crate) fn parse_vue_text_expression(
     let file_source = js_file_source.with_embedding_kind(EmbeddingKind::Vue {
         setup: false,
         is_source: false,
+        event_handler: false,
     });
     parse_text_expression(expression, cache, biome_path, settings, file_source)
 }

@@ -132,3 +132,27 @@ function Component10() {
         </HoC>
     );
 }
+
+function Component11() {
+    return (
+        <HoC>
+            {({ things }) => things.map((item, index) => <Component key={`${index}-${item}`} />)}
+        </HoC>
+    );
+}
+
+function Component12() {
+    return (
+        <HoC>
+            {({ things }) => things.map((item, index) => <Component key={`${item.title}-${index}`} />)}
+        </HoC>
+    );
+}
+
+function Component13() {
+    return (
+        <HoC>
+            {({ things }) => things.map((item, index) => <Component key={index + item} />)}
+        </HoC>
+    );
+}

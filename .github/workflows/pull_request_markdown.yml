@@ -13,7 +13,7 @@ jobs:
     runs-on: depot-ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
-      - uses: DavidAnson/markdownlint-cli2-action@36bf2f53fe58e6d4c086a1b420ee3f704d00cedc
+      - uses: DavidAnson/markdownlint-cli2-action@07a94fa9f512f1307d8aaabe3d3bec4ac93c5e99
         with:
           globs: |
             **/*.md

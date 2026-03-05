@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attribute Heavy Test</title>
+</head>
+<body>
+    <div
+        id="main-container"
+        class="container wrapper outer-wrapper"
+        data-id="12345"
+        data-section="hero"
+        data-component="hero-banner"
+        data-variant="primary"
+        data-analytics="true"
+        data-tracking="enabled"
+        data-category="landing"
+        data-priority="high"
+        data-loaded="false"
+        data-initialized="true"
+        data-responsive="mobile-first"
+        data-breakpoint="lg"
+        data-theme="dark"
+        data-locale="en-US"
+        data-currency="USD"
+        data-user="anonymous"
+        data-session="active"
+        data-cache="no-cache"
+        data-version="2.1.0"
+        data-build="production"
+        data-env="prod"
+        data-debug="false"
+        role="main"
+        aria-label="Main content"
+        aria-labelledby="main-heading"
+        tabindex="0"
+        hidden="false"
+        inert="false"
+        itemscope=""
+        itemtype="https://schema.org/WebPage"
+        itemprop="mainContentOfPage"
+        lang="en"
+        dir="ltr"
+        translate="yes"
+        contenteditable="false"
+        draggable="false"
+        dropzone="copy"
+        spellcheck="false"
+    >
+        <h1 id="main-heading">Attribute Heavy Elements</h1>
+        
+        <input
+            type="text"
+            name="username"
+            id="username-input"
+            class="form-control input-field"
+            placeholder="Enter your username"
+            value=""
+            required="true"
+            minlength="3"
+            maxlength="50"
+            pattern="[a-zA-Z0-9_]+"
+            autocomplete="username"
+            autofocus="false"
+            disabled="false"
+            readonly="false"
+            size="30"
+            tabindex="1"
+            title="Username must be 3-50 characters"
+            aria-label="Username"
+            aria-required="true"
+            aria-describedby="username-help"
+            aria-invalid="false"
+            data-validate="true"
+            data-validation="username"
+            data-error-message="Invalid username"
+            data-success-message="Username available"
+            data-async="true"
+            data-debounce="300"
+        >
+        
+        <button
+            type="submit"
+            id="submit-btn"
+            class="btn btn-primary btn-large"
+            name="submit"
+            value="submit"
+            disabled="false"
+            form="main-form"
+            formaction="/submit"
+            formmethod="POST"
+            formenctype="multipart/form-data"
+            formnovalidate="false"
+            formtarget="_self"
+            popovertarget="confirmation"
+            popovertargetaction="show"
+            aria-label="Submit form"
+            aria-pressed="false"
+            aria-expanded="false"
+            aria-controls="result-panel"
+            tabindex="2"
+            accesskey="s"
+            draggable="false"
+            hidden="false"
+            inert="false"
+            itemscope=""
+            itemtype="https://schema.org/SubmitAction"
+            itemprop="potentialAction"
+            data-action="submit"
+            data-loading="false"
+            data-analytics="click"
+            data-category="form"
+            data-label="submit-button"
+            data-value="1"
+        >
+            Submit
+        </button>
+        
+        <img
+            src="/images/photo.jpg"
+            alt="Sample photo"
+            width="800"
+            height="600"
+            loading="lazy"
+            decoding="async"
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+            sizes="(max-width: 600px) 100vw, 50vw"
+            srcset="/images/photo-400.jpg 400w, /images/photo-800.jpg 800w, /images/photo-1200.jpg 1200w"
+            usemap="#imagemap"
+            ismap="false"
+            longdesc="/images/photo-desc.html"
+            id="hero-image"
+            class="responsive-image lazyload"
+            title="Hero Image"
+            data-src="/images/photo.jpg"
+            data-srcset="/images/photo-400.jpg 400w"
+            data-sizes="auto"
+            data-lazy="true"
+            data-loaded="false"
+            data-error="false"
+            data-retina="true"
+            data-ratio="4:3"
+            data-orientation="landscape"
+            data-focal-point="center"
+            data-crop="cover"
+            data-quality="85"
+            data-format="jpg"
+            data-alt-fallback="Image"
+        >
+        
+        <a
+            href="https://example.com/page"
+            target="_blank"
+            rel="noopener noreferrer nofollow"
+            download="file.pdf"
+            hreflang="en"
+            type="text/html"
+            referrerpolicy="no-referrer"
+            ping="https://analytics.example.com/track"
+            id="external-link"
+            class="link external-link"
+            title="Visit external site"
+            aria-label="External link to example.com"
+            aria-describedby="link-desc"
+            tabindex="3"
+            accesskey="e"
+            draggable="true"
+            hidden="false"
+            itemscope=""
+            itemtype="https://schema.org/WebPage"
+            itemprop="url"
+            data-track="true"
+            data-analytics="outbound"
+            data-category="navigation"
+            data-action="click"
+            data-label="external-link"
+            data-value="example.com"
+            data-open-in="new-tab"
+            data-prefetch="false"
+            data-preload="false"
+            data-visited="false"
+            data-secure="true"
+            data-protocol="https"
+        >
+            External Link
+        </a>
+        
+        <form
+            action="/api/submit"
+            method="POST"
+            enctype="multipart/form-data"
+            name="main-form"
+            id="main-form"
+            class="form contact-form"
+            accept-charset="UTF-8"
+            autocomplete="on"
+            novalidate="false"
+            target="_self"
+            rel="noopener"
+            aria-label="Contact form"
+            aria-describedby="form-instructions"
+            data-validate="true"
+            data-ajax="true"
+            data-endpoint="/api/submit"
+            data-method="POST"
+            data-success="/thank-you"
+            data-error="/error"
+            data-csrf="true"
+            data-recaptcha="enabled"
+            data-honeypot="true"
+            data-tracking="form-submit"
+            data-category="lead-generation"
+            data-conversion="true"
+        >
+            <fieldset
+                disabled="false"
+                form="main-form"
+                name="personal-info"
+                id="personal-fieldset"
+                class="fieldset"
+                aria-label="Personal Information"
+                aria-describedby="fieldset-desc"
+                data-section="personal"
+                data-required="true"
+                data-collapsed="false"
+                data-order="1"
+            >
+                <legend>Personal Information</legend>
+                <label
+                    for="email"
+                    id="email-label"
+                    class="label required"
+                    form="main-form"
+                    aria-label="Email address"
+                    data-required="true"
+                    data-field="email"
+                    data-validation="email"
+                >Email:</label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    class="input email-input"
+                    placeholder="your@email.com"
+                    required="true"
+                    autocomplete="email"
+                    pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+                    maxlength="254"
+                    minlength="5"
+                    size="40"
+                    tabindex="4"
+                    aria-required="true"
+                    aria-describedby="email-error"
+                    aria-invalid="false"
+                    data-validate="true"
+                    data-type="email"
+                    data-domain-check="true"
+                    data-disposable-check="true"
+                >
+            </fieldset>
+        </form>
+        
+        <table
+            id="data-table"
+            class="table data-table striped"
+            border="0"
+            cellpadding="5"
+            cellspacing="0"
+            summary="Data summary"
+            aria-label="Data table"
+            aria-describedby="table-desc"
+            data-sortable="true"
+            data-filterable="true"
+            data-paginated="true"
+            data-page-size="25"
+            data-current-page="1"
+            data-total-rows="1000"
+            data-exportable="true"
+            data-responsive="true"
+            data-sticky-header="true"
+            data-selectable="true"
+            data-editable="false"
+        >
+            <caption>Sample Data Table</caption>
+            <thead>
+                <tr>
+                    <th scope="col" data-sort="string" data-filter="text">Name</th>
+                    <th scope="col" data-sort="number" data-filter="range">Age</th>
+                    <th scope="col" data-sort="string" data-filter="select">City</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr data-id="1" data-selected="false">
+                    <td data-value="John">John</td>
+                    <td data-value="30">30</td>
+                    <td data-value="NYC">New York</td>
+                </tr>
+                <tr data-id="2" data-selected="false">
+                    <td data-value="Jane">Jane</td>
+                    <td data-value="25">25</td>
+                    <td data-value="LA">Los Angeles</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

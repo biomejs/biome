@@ -4,14 +4,14 @@ use biome_markdown_syntax::MdLinkReferenceDefinition;
 use biome_rowan::AstNode;
 
 use crate::MarkdownLosslessTreeSink;
-use crate::MarkdownParseOptions;
+use crate::MarkdownParserOptions;
 use crate::parser::MarkdownParser;
 use crate::syntax::parse_document;
 use crate::syntax::reference::normalize_reference_label;
 
 pub(crate) fn collect_link_reference_definitions(
     source: &str,
-    options: MarkdownParseOptions,
+    options: MarkdownParserOptions,
 ) -> HashSet<String> {
     let mut parser = MarkdownParser::new(source, options);
     parse_document(&mut parser);

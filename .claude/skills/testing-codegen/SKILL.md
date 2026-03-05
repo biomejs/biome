@@ -5,7 +5,8 @@ description: Guide for testing workflows and code generation commands in Biome. 
 
 ## Purpose
 
-Use this skill for testing, code generation, and preparing contributions. Covers snapshot testing with `insta`, code generation commands, and changeset creation.
+Use this skill for testing, code generation, and preparing contributions. Covers snapshot testing with
+`insta`, code generation commands, and changeset creation.
 
 ## Prerequisites
 
@@ -67,6 +68,7 @@ let rule_filter = RuleFilter::Rule("nursery", "noVar");
 ```
 
 Run:
+
 ```shell
 just qt biome_js_analyze
 ```
@@ -83,23 +85,25 @@ For inspecting AST structure when implementing parsers or working with embedded 
 
 #[test]
 pub fn quick_test() {
-    let code = r#"<button on:click={handleClick}>Click</button>"#;
-    
-    let source_type = HtmlFileSource::svelte();
-    let options = HtmlParseOptions::from(&source_type);
-    let root = parse_html(code, options);
-    let syntax = root.syntax();
-    
-    dbg!(&syntax, root.diagnostics(), root.has_errors());
+  let code = r#"<button on:click={handleClick}>Click</button>"#;
+
+  let source_type = HtmlFileSource::svelte();
+  let options = HtmlParserOptions::from(&source_type);
+  let root = parse_html(code, options);
+  let syntax = root.syntax();
+
+  dbg!(&syntax, root.diagnostics(), root.has_errors());
 }
 ```
 
 Run:
+
 ```shell
 just qt biome_html_parser
 ```
 
 The `dbg!` output shows the full AST tree structure, helping you understand:
+
 - How directives/attributes are parsed (e.g., `HtmlAttribute` vs `SvelteBindDirective`)
 - Whether values use `HtmlString` (quotes) or `HtmlTextExpression` (curly braces)
 - Token ranges and offsets needed for proper snippet creation
@@ -108,11 +112,13 @@ The `dbg!` output shows the full AST tree structure, helping you understand:
 ### Snapshot Testing with Insta
 
 Run tests and generate snapshots:
+
 ```shell
 cargo test
 ```
 
 Review generated/changed snapshots:
+
 ```shell
 # Interactive review (recommended)
 cargo insta review
@@ -128,6 +134,7 @@ cargo insta review --test-runner nextest
 ```
 
 Snapshot commands:
+
 - `a` - accept snapshot
 - `r` - reject snapshot
 - `s` - skip snapshot
@@ -147,6 +154,7 @@ cargo test
 ### Create Test Files
 
 **Single file tests** - Place in `tests/specs/{group}/{rule}/`:
+
 ```
 tests/specs/nursery/noVar/
 ├── invalid.js           # Code that triggers the rule
@@ -155,6 +163,7 @@ tests/specs/nursery/noVar/
 ```
 
 **Multiple test cases** - Use `.jsonc` files with arrays:
+
 ```jsonc
 // tests/specs/nursery/noVar/invalid.jsonc
 [
@@ -165,6 +174,7 @@ tests/specs/nursery/noVar/
 ```
 
 **Test-specific options** - Create `options.json`:
+
 ```json
 {
   "linter": {
@@ -182,19 +192,66 @@ tests/specs/nursery/noVar/
 }
 ```
 
+### Top-Level Comment Convention (REQUIRED)
+
+Every JS/TS test spec file **must** begin with a top-level comment declaring whether it expects diagnostics. The test runner (
+`assert_diagnostics_expectation_comment` in `biome_test_utils`) enforces this and panics if the rules are violated.
+
+**For files whose name contains "valid" (but not "invalid"):**
+
+```js
+/* should not generate diagnostics */
+import {foo} from "./foo.js";
+```
+
+This is **enforced** — the test panics if the comment is absent.
+
+**For files whose name contains "invalid" (or other names):**
+
+```js
+/* should generate diagnostics */
+var x = 1;
+var y = 2;
+```
+
+This is strongly recommended convention and is also enforced when present: if the comment says
+`should generate diagnostics` but no diagnostics appear, the test panics.
+
+**Rules enforced by the test runner:**
+
+| File name contains        | Comment present?                  | Behaviour                          |
+|---------------------------|-----------------------------------|------------------------------------|
+| "valid" (not "invalid")   | `should not generate diagnostics` | Passes if no diagnostics           |
+| "valid" (not "invalid")   | `should generate diagnostics`     | Passes if diagnostics present      |
+| "valid" (not "invalid")   | absent                            | **PANIC** — comment is mandatory   |
+| "invalid" or neutral name | `should not generate diagnostics` | Passes if no diagnostics           |
+| "invalid" or neutral name | `should generate diagnostics`     | Passes if diagnostics present      |
+| "invalid" or neutral name | absent                            | No enforcement (but add it anyway) |
+
+**Important details:**
+
+- The comment is found by scanning the entire file's leading trivia — it does not have to be literally the first token, but putting it at the very top (line 1) is the established convention.
+- Fixture/support files (e.g. `foo.js`, `bar.ts`) that don't contain "valid" or "invalid" in their name do **not** require a comment, since they are not considered "valid test files" by the runner.
+- Files excluded from comment enforcement regardless of name: `.snap`, `.json`, `.jsonc`, `.svelte`, `.vue`, `.astro`,
+  `.html`.
+
 ### Code Generation Commands
 
 **After modifying analyzers/lint rules:**
+
 ```shell
 just gen-analyzer
 ```
+
 This updates:
+
 - Rule registrations
-- Configuration schemas  
+- Configuration schemas
 - Documentation exports
 - TypeScript bindings
 
 **After modifying grammar (.ungram files):**
+
 ```shell
 # Specific language
 just gen-grammar html
@@ -207,28 +264,35 @@ just gen-grammar
 ```
 
 **After modifying formatters:**
+
 ```shell
 just gen-formatter html
 ```
 
 **After modifying configuration:**
+
 ```shell
 just gen-bindings
 ```
+
 Generates TypeScript types and JSON schema.
 
 **Full codegen (rarely needed):**
+
 ```shell
 just gen-all
 ```
 
 **Before committing:**
+
 ```shell
 just ready
 ```
+
 Runs full codegen + format + lint (takes time).
 
 Or run individually:
+
 ```shell
 just f  # Format Rust and TOML
 just l  # Lint code
@@ -243,6 +307,7 @@ just new-changeset
 ```
 
 This prompts for:
+
 1. **Package selection**: Usually `@biomejs/biome`
 2. **Change type**:
    - `patch` - Bug fixes
@@ -251,6 +316,7 @@ This prompts for:
 3. **Description**: What changed (used in CHANGELOG)
 
 **Changeset writing guidelines:**
+
 - Be concise and clear (1-3 sentences)
 - Start bug fixes with: `Fixed [#issue](link): ...`
 - Use past tense for your actions: "Added", "Fixed", "Changed"
@@ -260,12 +326,14 @@ This prompts for:
 - End sentences with periods
 
 Example changeset:
+
 ```markdown
 ---
 "@biomejs/biome": patch
 ---
 
-Fixed [#1234](https://github.com/biomejs/biome/issues/1234): The rule [`noVar`](https://biomejs.dev/linter/rules/no-var/) now correctly handles variables in for loops.
+Fixed [#1234](https://github.com/biomejs/biome/issues/1234): The rule [
+`noVar`](https://biomejs.dev/linter/rules/no-var/) now correctly handles variables in for loops.
 
 Biome now analyzes the scope of loop variables properly.
 ```
@@ -286,13 +354,14 @@ Use `dbg!()` macro in Rust code:
 
 ```rust
 fn some_function() -> &'static str {
-    let some_variable = "debug_value";
-    dbg!(&some_variable);  // Prints during test
-    some_variable
+  let some_variable = "debug_value";
+  dbg!(&some_variable);  // Prints during test
+  some_variable
 }
 ```
 
 Run with output:
+
 ```shell
 cargo test test_name -- --show-output
 ```
@@ -319,7 +388,7 @@ cargo test test_name -- --show-output
 // Snapshot test in rule file
 #[test]
 fn test_rule() {
-    assert_lint_rule! {
+  assert_lint_rule! {
         noVar,
         invalid => [
             "var x = 1;",
@@ -336,25 +405,25 @@ fn test_rule() {
 #[test]
 #[ignore]  // Uncomment when using
 fn quick_test() {
-    const SOURCE: &str = r#"
+  const SOURCE: &str = r#"
         var x = 1;
     "#;
-    
-    let rule_filter = RuleFilter::Rule("nursery", "noVar");
-    // Test runs with this configuration
+
+  let rule_filter = RuleFilter::Rule("nursery", "noVar");
+  // Test runs with this configuration
 }
 ```
 
 ## Code Generation Dependencies
 
-| When you modify... | Run... |
-| ------------------- | -------- |
-| `.ungram` grammar files | `just gen-grammar <lang>` |
-| Lint rules in `*_analyze` | `just gen-analyzer` |
+| When you modify...         | Run...                      |
+|----------------------------|-----------------------------|
+| `.ungram` grammar files    | `just gen-grammar <lang>`   |
+| Lint rules in `*_analyze`  | `just gen-analyzer`         |
 | Formatter in `*_formatter` | `just gen-formatter <lang>` |
-| Configuration types | `just gen-bindings` |
-| Before committing | `just f && just l` |
-| Full rebuild | `just gen-all` (slow) |
+| Configuration types        | `just gen-bindings`         |
+| Before committing          | `just f && just l`          |
+| Full rebuild               | `just gen-all` (slow)       |
 
 ## References
 
