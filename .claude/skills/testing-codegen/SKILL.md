@@ -141,13 +141,29 @@ cargo test
 
 ### Create Test Files
 
-**Single file tests** - Place in `tests/specs/{group}/{rule}/`:
+**Single file tests** - Place in `tests/specs/{group}/{rule}/` under the appropriate `*_analyze` crate for the language:
 
 ```
 tests/specs/nursery/noVar/
-├── invalid.js           # Code that triggers the rule
-├── valid.js             # Code that doesn't trigger
+├── invalid.js           # Code that should generate diagnostics
+├── valid.js             # Code that should not generate diagnostics
 └── options.json         # Optional: rule configuration
+```
+
+**File and folder naming conventions (IMPORTANT):**
+
+- Use `valid` or `invalid` in file names or parent folder names to indicate expected behaviour.
+- Files/folders with `valid` in the name (but not `invalid`) are expected to produce **no diagnostics**.
+- Files/folders with `invalid` in the name are expected to produce **diagnostics**.
+- When testing cases inside a folder, prefix the name of folder using `valid`/`invalid` e.g. `validResolutionReact`/`invalidResolutionReact`
+
+```
+tests/specs/nursery/noShadow/
+├── invalid.js                     # should generate diagnostics
+├── valid.js                       # should not generate diagnostics
+├── validResolutionReact/
+└───── file.js              # should generate diagnostics
+   └── file2.js             # should not generate diagnostics
 ```
 
 **Multiple test cases** - Use `.jsonc` files with arrays:
@@ -182,27 +198,19 @@ tests/specs/nursery/noVar/
 
 ### Top-Level Comment Convention (REQUIRED)
 
-Every JS/TS test spec file **must** begin with a top-level comment declaring whether it expects diagnostics. The test runner (
-`assert_diagnostics_expectation_comment` in `biome_test_utils`) enforces this and panics if the rules are violated.
+Every test spec file **must** begin with a top-level comment declaring whether it expects diagnostics. The test runner
+(`assert_diagnostics_expectation_comment` in `biome_test_utils`) enforces this and panics if the rules are violated.
+
+Write the marker text using whatever comment syntax the language under test supports.
+For languages that do not support comments at all, rely on the file/folder naming convention (`valid`/`invalid`) instead.
 
 **For files whose name contains "valid" (but not "invalid"):**
 
-```js
-/* should not generate diagnostics */
-import {foo} from "./foo.js";
-```
-
-This is **enforced** — the test panics if the comment is absent.
+The comment is **mandatory** — the test panics if it is absent.
 
 **For files whose name contains "invalid" (or other names):**
 
-```js
-/* should generate diagnostics */
-var x = 1;
-var y = 2;
-```
-
-This is strongly recommended convention and is also enforced when present: if the comment says
+The comment is strongly recommended and is also enforced when present: if the comment says
 `should generate diagnostics` but no diagnostics appear, the test panics.
 
 **Rules enforced by the test runner:**

@@ -1,0 +1,241 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidDestructuring.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+// Object destructuring shadowing outer variable
+const x = 1;
+function shadowObj() {
+    const { a: x } = { a: 2 };
+}
+
+// Array destructuring shadowing outer variable
+const y = 1;
+function shadowArr() {
+    const [y] = [2];
+}
+
+// Nested destructuring shadowing outer variable
+const z = 1;
+function shadowNested() {
+    const { a: { b: z } } = { a: { b: 2 } };
+}
+
+// Shorthand object destructuring shadowing outer variable
+const w = 1;
+function shadowShorthand() {
+    const { w } = { w: 2 };
+}
+
+// Mixed nested destructuring shadowing outer variable
+const m = 1;
+function shadowMixed() {
+    const [{ m }] = [{ m: 2 }];
+}
+
+// Rest in array destructuring shadowing outer variable
+const rest = 1;
+function shadowRestArr() {
+    const [, ...rest] = [1, 2, 3];
+}
+
+// Rest in object destructuring shadowing outer variable
+const other = 1;
+function shadowRestObj() {
+    const { a, ...other } = { a: 1, b: 2 };
+}
+
+```
+
+# Diagnostics
+```
+invalidDestructuring.js:6:16 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable shadows another variable with the same name in the outer scope.
+  
+    4 │ const x = 1;
+    5 │ function shadowObj() {
+  > 6 │     const { a: x } = { a: 2 };
+      │                ^
+    7 │ }
+    8 │ 
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    3 │ // Object destructuring shadowing outer variable
+  > 4 │ const x = 1;
+      │       ^
+    5 │ function shadowObj() {
+    6 │     const { a: x } = { a: 2 };
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidDestructuring.js:12:12 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable shadows another variable with the same name in the outer scope.
+  
+    10 │ const y = 1;
+    11 │ function shadowArr() {
+  > 12 │     const [y] = [2];
+       │            ^
+    13 │ }
+    14 │ 
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+     9 │ // Array destructuring shadowing outer variable
+  > 10 │ const y = 1;
+       │       ^
+    11 │ function shadowArr() {
+    12 │     const [y] = [2];
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidDestructuring.js:18:21 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable shadows another variable with the same name in the outer scope.
+  
+    16 │ const z = 1;
+    17 │ function shadowNested() {
+  > 18 │     const { a: { b: z } } = { a: { b: 2 } };
+       │                     ^
+    19 │ }
+    20 │ 
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    15 │ // Nested destructuring shadowing outer variable
+  > 16 │ const z = 1;
+       │       ^
+    17 │ function shadowNested() {
+    18 │     const { a: { b: z } } = { a: { b: 2 } };
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidDestructuring.js:24:13 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable shadows another variable with the same name in the outer scope.
+  
+    22 │ const w = 1;
+    23 │ function shadowShorthand() {
+  > 24 │     const { w } = { w: 2 };
+       │             ^
+    25 │ }
+    26 │ 
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    21 │ // Shorthand object destructuring shadowing outer variable
+  > 22 │ const w = 1;
+       │       ^
+    23 │ function shadowShorthand() {
+    24 │     const { w } = { w: 2 };
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidDestructuring.js:30:14 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable shadows another variable with the same name in the outer scope.
+  
+    28 │ const m = 1;
+    29 │ function shadowMixed() {
+  > 30 │     const [{ m }] = [{ m: 2 }];
+       │              ^
+    31 │ }
+    32 │ 
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    27 │ // Mixed nested destructuring shadowing outer variable
+  > 28 │ const m = 1;
+       │       ^
+    29 │ function shadowMixed() {
+    30 │     const [{ m }] = [{ m: 2 }];
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidDestructuring.js:36:17 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable shadows another variable with the same name in the outer scope.
+  
+    34 │ const rest = 1;
+    35 │ function shadowRestArr() {
+  > 36 │     const [, ...rest] = [1, 2, 3];
+       │                 ^^^^
+    37 │ }
+    38 │ 
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    33 │ // Rest in array destructuring shadowing outer variable
+  > 34 │ const rest = 1;
+       │       ^^^^
+    35 │ function shadowRestArr() {
+    36 │     const [, ...rest] = [1, 2, 3];
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidDestructuring.js:42:19 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable shadows another variable with the same name in the outer scope.
+  
+    40 │ const other = 1;
+    41 │ function shadowRestObj() {
+  > 42 │     const { a, ...other } = { a: 1, b: 2 };
+       │                   ^^^^^
+    43 │ }
+    44 │ 
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    39 │ // Rest in object destructuring shadowing outer variable
+  > 40 │ const other = 1;
+       │       ^^^^^
+    41 │ function shadowRestObj() {
+    42 │     const { a, ...other } = { a: 1, b: 2 };
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
