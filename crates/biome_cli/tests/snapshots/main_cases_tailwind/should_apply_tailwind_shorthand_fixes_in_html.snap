@@ -1,0 +1,37 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 520
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "html": {
+    "experimentalFullSupportEnabled": true,
+    "linter": {
+      "enabled": true
+    }
+  },
+  "linter": {
+    "rules": {
+      "recommended": false,
+      "nursery": {
+        "useTailwindShorthandClasses": "error"
+      }
+    }
+  }
+}
+```
+
+## `file.html`
+
+```html
+<div class="mx-2"></div>\n
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. Fixed 1 file.
+```

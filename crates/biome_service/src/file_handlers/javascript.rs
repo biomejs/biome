@@ -45,7 +45,10 @@ use biome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
 use biome_js_analyze::{
     ControlFlowGraph, JsAnalyzerServices, analyze, analyze_with_inspect_matcher,
 };
-use biome_js_factory::make::ident;
+use biome_js_factory::make::{
+    ident, js_string_literal, js_string_literal_single_quotes, jsx_string_literal,
+    jsx_string_literal_single_quotes,
+};
 use biome_js_formatter::context::trailing_commas::TrailingCommas;
 use biome_js_formatter::context::{
     ArrowParentheses, JsFormatOptions, OperatorLinebreak, QuoteProperties, Semicolons,
@@ -58,7 +61,7 @@ use biome_js_syntax::{
     JsCallArguments, JsCallExpression, JsClassDeclaration, JsClassExpression, JsFileSource,
     JsFunctionDeclaration, JsLanguage, JsStringLiteralExpression, JsSyntaxNode,
     JsTemplateChunkElement, JsTemplateExpression, JsVariableDeclarator, JsxAttribute,
-    JsxOpeningElement, JsxSelfClosingElement, TextRange, TextSize, TokenAtOffset,
+    JsxOpeningElement, JsxSelfClosingElement, JsxString, TextRange, TextSize, TokenAtOffset,
 };
 use biome_js_type_info::{GlobalsResolver, ScopeId, TypeData, TypeResolver};
 use biome_module_graph::ModuleGraph;
@@ -1489,12 +1492,46 @@ fn update_snippets(
 ) -> Result<SendNode, WorkspaceError> {
     let tree: AnyJsRoot = root.tree();
     let mut mutation = BatchMutation::new(tree.syntax().clone());
-    let iterator = tree
-        .syntax()
-        .descendants()
-        .filter_map(JsTemplateChunkElement::cast);
+    for node in tree.syntax().descendants() {
+        if let Some(element) = JsTemplateChunkElement::cast(node.clone()) {
+            let Some(snippet) = new_snippets
+                .iter()
+                .find(|snippet| snippet.range == element.range())
+            else {
+                continue;
+            };
 
-    for element in iterator {
+            if let Ok(value_token) = element.template_chunk_token() {
+                let new_token = ident(snippet.new_code.as_str());
+                mutation.replace_token(value_token, new_token);
+            }
+
+            continue;
+        }
+
+        if let Some(element) = JsStringLiteralExpression::cast(node.clone()) {
+            let Some(snippet) = new_snippets
+                .iter()
+                .find(|snippet| snippet.range == element.range())
+            else {
+                continue;
+            };
+
+            if let Ok(value_token) = element.value_token() {
+                let new_token = if value_token.text_trimmed().starts_with('"') {
+                    js_string_literal(snippet.new_code.as_str())
+                } else {
+                    js_string_literal_single_quotes(snippet.new_code.as_str())
+                };
+                mutation.replace_token(value_token, new_token);
+            }
+
+            continue;
+        }
+
+        let Some(element) = JsxString::cast(node) else {
+            continue;
+        };
         let Some(snippet) = new_snippets
             .iter()
             .find(|snippet| snippet.range == element.range())
@@ -1502,8 +1539,12 @@ fn update_snippets(
             continue;
         };
 
-        if let Ok(value_token) = element.template_chunk_token() {
-            let new_token = ident(snippet.new_code.as_str());
+        if let Ok(value_token) = element.value_token() {
+            let new_token = if value_token.text_trimmed().starts_with('"') {
+                jsx_string_literal(snippet.new_code.as_str())
+            } else {
+                jsx_string_literal_single_quotes(snippet.new_code.as_str())
+            };
             mutation.replace_token(value_token, new_token);
         }
     }

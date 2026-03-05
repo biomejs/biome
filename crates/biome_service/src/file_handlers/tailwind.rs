@@ -289,7 +289,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> crate::workspace::PullA
 pub(crate) fn fix_all(
     params: FixAllParams,
 ) -> Result<crate::workspace::FixFileResult, WorkspaceError> {
-    let tree: TwRoot = params.parse.tree();
+    let mut tree: TwRoot = params.parse.tree();
 
     let rules = params
         .settings
@@ -324,10 +324,13 @@ pub(crate) fn fix_all(
         });
 
         // Tailwind has no formatter; fix_all just rewrites the text.
-        let result = process_fix_all.process_action(action, |_root| {
-            // Tailwind CST mutations aren't supported (no fix actions defined).
-            // Return None to stop the loop.
-            None
+        let result = process_fix_all.process_action(action, |root| {
+            tree = match TwRoot::cast(root) {
+                Some(tree) => tree,
+                None => return None,
+            };
+
+            Some(tree.syntax().text_range_with_trivia().len().into())
         })?;
 
         if result.is_none() {

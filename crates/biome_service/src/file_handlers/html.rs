@@ -33,7 +33,7 @@ use biome_formatter::{
 };
 use biome_fs::BiomePath;
 use biome_html_analyze::analyze;
-use biome_html_factory::make::ident;
+use biome_html_factory::make::{html_string_literal, ident};
 use biome_html_formatter::context::SelfCloseVoidElements;
 use biome_html_formatter::{
     HtmlFormatOptions,
@@ -43,7 +43,7 @@ use biome_html_formatter::{
 use biome_html_parser::{HtmlParserOptions, parse_html_with_cache};
 use biome_html_syntax::element_ext::AnyEmbeddedContent;
 use biome_html_syntax::{
-    AnySvelteDirective, AstroEmbeddedContent, HtmlAttributeInitializerClause,
+    AnySvelteDirective, AstroEmbeddedContent, HtmlAttribute, HtmlAttributeInitializerClause,
     HtmlDoubleTextExpression, HtmlElement, HtmlFileSource, HtmlLanguage, HtmlRoot,
     HtmlSelfClosingElement, HtmlSingleTextExpression, HtmlSyntaxNode, HtmlTextExpression,
     HtmlTextExpressions, HtmlVariant, SvelteAwaitBlock, SvelteEachBlock, SvelteIfBlock,
@@ -1348,7 +1348,7 @@ pub(crate) fn parse_vue_text_expression(
 /// If a matching attribute with a string value is found, the value is parsed as Tailwind.
 pub(crate) fn parse_tailwind_class_attributes(
     element_attributes: &biome_html_syntax::HtmlAttributeList,
-    element_range: biome_rowan::TextRange,
+    _element_range: biome_rowan::TextRange,
     cache: &mut NodeCache,
     attribute_names: &[String],
 ) -> Vec<(EmbeddedSnippet<TailwindLanguage>, DocumentFileSource)> {
@@ -1384,7 +1384,8 @@ pub(crate) fn parse_tailwind_class_attributes(
         let inner_offset = token_range.start() + TextSize::from(1);
 
         let parse = parse_tailwind_with_offset_and_cache(text, inner_offset, cache);
-        let snippet = EmbeddedSnippet::new(parse.into(), element_range, token_range, inner_offset);
+        let snippet =
+            EmbeddedSnippet::new(parse.into(), attribute.range(), token_range, inner_offset);
         results.push((snippet, DocumentFileSource::Tailwind));
     }
     results
@@ -1770,30 +1771,55 @@ pub(crate) fn update_snippets(
 ) -> Result<SendNode, WorkspaceError> {
     let tree: HtmlRoot = root.tree();
     let mut mutation = BatchMutation::new(tree.syntax().clone());
-    let iterator = tree
-        .syntax()
-        .descendants()
-        .filter_map(AnyEmbeddedContent::cast);
+    for node in tree.syntax().descendants() {
+        if let Some(element) = AnyEmbeddedContent::cast(node.clone()) {
+            let Some(snippet) = new_snippets
+                .iter()
+                .find(|snippet| snippet.range == element.range())
+            else {
+                continue;
+            };
 
-    for element in iterator {
+            if let Some(value_token) = element.value_token() {
+                let leading_trivia = read_leading_trivia(value_token.text_trimmed());
+                let trailing_trivia = read_trailing_trivia(value_token.text_trimmed());
+                let new_token = ident(&format!(
+                    "{}{}{}",
+                    leading_trivia,
+                    snippet.new_code.trim(),
+                    trailing_trivia
+                ));
+                mutation.replace_token(value_token, new_token);
+            }
+
+            continue;
+        }
+
+        let Some(attribute) = HtmlAttribute::cast(node) else {
+            continue;
+        };
         let Some(snippet) = new_snippets
             .iter()
-            .find(|snippet| snippet.range == element.range())
+            .find(|snippet| snippet.range == attribute.range())
         else {
             continue;
         };
 
-        if let Some(value_token) = element.value_token() {
-            let leading_trivia = read_leading_trivia(value_token.text_trimmed());
-            let trailing_trivia = read_trailing_trivia(value_token.text_trimmed());
-            let new_token = ident(&format!(
-                "{}{}{}",
-                leading_trivia,
-                snippet.new_code.trim(), // trim to avoid duplicating trivia
-                trailing_trivia
-            ));
-            mutation.replace_token(value_token, new_token);
-        }
+        let Some(initializer) = attribute.initializer() else {
+            continue;
+        };
+        let Ok(value) = initializer.value() else {
+            continue;
+        };
+        let Some(html_string) = value.as_html_string() else {
+            continue;
+        };
+        let Ok(value_token) = html_string.value_token() else {
+            continue;
+        };
+
+        let new_token = html_string_literal(snippet.new_code.as_str());
+        mutation.replace_token(value_token, new_token);
     }
 
     let root = mutation.commit();

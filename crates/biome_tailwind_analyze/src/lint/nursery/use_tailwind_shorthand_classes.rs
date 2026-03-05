@@ -10,7 +10,7 @@ use biome_rule_options::use_tailwind_shorthand_classes::UseTailwindShorthandClas
 use biome_tailwind_factory::make;
 use biome_tailwind_syntax::{
     AnyTwCandidate, AnyTwModifier, AnyTwValue, TailwindSyntaxKind, TailwindSyntaxNode,
-    TailwindSyntaxToken, TwCandidateList, TwFullCandidate, TwRoot, TwVariantList,
+    TailwindSyntaxToken, TwCandidateList, TwFullCandidate, TwVariantList,
 };
 use rustc_hash::{FxHashMap, FxHashSet};
 
@@ -63,14 +63,13 @@ declare_lint_rule! {
 }
 
 impl Rule for UseTailwindShorthandClasses {
-    type Query = Ast<TwRoot>;
+    type Query = Ast<TwCandidateList>;
     type State = TailwindShorthandViolation;
     type Signals = Box<[Self::State]>;
     type Options = UseTailwindShorthandClassesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let root = ctx.query();
-        let violations = analyze_tailwind_shorthand(root.candidates());
+        let violations = analyze_tailwind_shorthand(ctx.query());
         violations.into_boxed_slice()
     }
 
@@ -301,7 +300,7 @@ fn check_truncate_shorthand(
     })
 }
 
-fn analyze_tailwind_shorthand(candidates: TwCandidateList) -> Vec<TailwindShorthandViolation> {
+fn analyze_tailwind_shorthand(candidates: &TwCandidateList) -> Vec<TailwindShorthandViolation> {
     fn extract_key(full: &TwFullCandidate) -> Option<GroupKey> {
         let variants = full.variants();
         let negative = full.negative_token().is_some();
