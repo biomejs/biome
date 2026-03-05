@@ -42,6 +42,7 @@ const SCSS_MAP_EXPRESSION_KEY_END_TOKEN_SET: TokenSet<CssSyntaxKind> =
 const SCSS_MAP_EXPRESSION_VALUE_END_TOKEN_SET: TokenSet<CssSyntaxKind> = token_set![T![,], T![')']];
 const SCSS_LIST_EXPRESSION_ELEMENT_END_TOKEN_SET: TokenSet<CssSyntaxKind> =
     token_set![T![,], T![')']];
+const SCSS_GENERIC_DELIMITER_SET: TokenSet<CssSyntaxKind> = token_set![T![,], T![/]];
 
 pub(crate) const END_OF_SCSS_EXPRESSION_TOKEN_SET: TokenSet<CssSyntaxKind> =
     token_set![T![,], T![')'], T![;], T!['}']];
@@ -160,17 +161,20 @@ fn parse_scss_expression_item(p: &mut CssParser, options: ScssExpressionOptions)
         return parse_scss_keyword_argument(p, options);
     }
 
-    let expression = parse_scss_binary_expression(p, 0);
+    if p.at_ts(SCSS_GENERIC_DELIMITER_SET) {
+        return parse_generic_component_value(p);
+    }
+
+    let expression = parse_scss_binary_expression(p, 0).or_else(|| {
+        if p.at(T![...]) {
+            report_and_bump_scss_ellipsis(p);
+        }
+
+        Absent
+    });
     let expression = match expression {
         Present(expression) => expression,
-        Absent => {
-            if p.at(T![...]) {
-                let range = p.cur_range();
-                p.error(scss_ellipsis_not_allowed(p, range));
-                p.bump(T![...]);
-            }
-            return Absent;
-        }
+        Absent => return Absent,
     };
 
     if !p.at(T![...]) {
@@ -178,15 +182,20 @@ fn parse_scss_expression_item(p: &mut CssParser, options: ScssExpressionOptions)
     }
 
     if !options.allows_ellipsis {
-        let range = p.cur_range();
-        p.error(scss_ellipsis_not_allowed(p, range));
-        p.bump(T![...]);
+        report_and_bump_scss_ellipsis(p);
         return Present(expression);
     }
 
     let m = expression.precede(p);
     p.bump(T![...]);
     Present(m.complete(p, SCSS_ARBITRARY_ARGUMENT))
+}
+
+#[inline]
+fn report_and_bump_scss_ellipsis(p: &mut CssParser) {
+    let range = p.cur_range();
+    p.error(scss_ellipsis_not_allowed(p, range));
+    p.bump(T![...]);
 }
 
 #[inline]
