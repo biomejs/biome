@@ -7,8 +7,8 @@ use biome_css_syntax::CssSyntaxKind::{
     EOF, ERROR_TOKEN, SCSS_DECLARATION, SCSS_NAMESPACED_IDENTIFIER, SCSS_VARIABLE_MODIFIER,
     SCSS_VARIABLE_MODIFIER_LIST,
 };
-use biome_css_syntax::{CssSyntaxKind, T};
-use biome_parser::diagnostic::expected_token_any;
+use biome_css_syntax::{CssSyntaxKind, T, TextRange};
+use biome_parser::diagnostic::{ParseDiagnostic, expected_token_any};
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{RecoveryError, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
@@ -103,11 +103,11 @@ fn parse_scss_declaration_name(p: &mut CssParser) -> ParsedSyntax {
 const SCSS_VARIABLE_MODIFIER_LIST_END_SET: TokenSet<CssSyntaxKind> =
     token_set![T![;], T!['}'], EOF];
 const SCSS_VARIABLE_MODIFIER_TOKEN_SET: TokenSet<CssSyntaxKind> =
-    token_set![T![default], T![global], T![important]];
+    token_set![T![default], T![global]];
 
 #[inline]
 fn parse_scss_variable_modifiers(p: &mut CssParser) {
-    ScssVariableModifierList::default().parse_list(p);
+    ScssVariableModifierList.parse_list(p);
     recover_scss_variable_modifier_tail(p);
 }
 
@@ -156,12 +156,11 @@ fn parse_scss_variable_modifier(p: &mut CssParser) -> ParsedSyntax {
 
     if p.at_ts(SCSS_VARIABLE_MODIFIER_TOKEN_SET) {
         p.bump_ts(SCSS_VARIABLE_MODIFIER_TOKEN_SET);
+    } else if p.at(T![important]) {
+        p.error(important_modifier_not_allowed(p, p.cur_range()));
+        p.bump(T![important]);
     } else {
-        p.error(expected_token_any(&[
-            T![default],
-            T![global],
-            T![important],
-        ]));
+        p.error(expected_token_any(&[T![default], T![global]]));
         if !p.at_ts(SCSS_VARIABLE_MODIFIER_LIST_END_SET) {
             p.bump_any();
         }
@@ -170,7 +169,11 @@ fn parse_scss_variable_modifier(p: &mut CssParser) -> ParsedSyntax {
     Present(m.complete(p, SCSS_VARIABLE_MODIFIER))
 }
 
-#[derive(Default)]
+fn important_modifier_not_allowed(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder("`!important` is not valid here.", range)
+        .with_hint("SCSS variable declarations only support the `!default` and `!global` modifiers.")
+}
+
 struct ScssVariableModifierList;
 
 impl ParseNodeList for ScssVariableModifierList {

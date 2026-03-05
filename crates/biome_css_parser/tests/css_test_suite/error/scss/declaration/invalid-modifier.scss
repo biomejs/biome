@@ -1,4 +1,4 @@
-// !important is accepted in parser recovery (lint can report it if needed)
+// Invalid modifier - `!important` is not allowed on SCSS variable declarations
 $color: red !important;
 
 // Invalid modifier - just a random word

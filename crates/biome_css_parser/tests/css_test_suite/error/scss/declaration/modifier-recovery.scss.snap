@@ -12,7 +12,7 @@ $color: red foo !global;
 // Unexpected token between modifiers should not stop parsing later modifiers
 $gap: 1 !default bar !global;
 
-// !important should recover as generic invalid syntax and allow later modifiers
+// !important should report an invalid modifier diagnostic and allow later modifiers
 $size: 2 !important !global;
 
 ```
@@ -83,16 +83,16 @@ CssRoot {
         CssBogus {
             items: [
                 ScssIdentifier {
-                    dollar_token: DOLLAR@210..294 "$" [Newline("\n"), Newline("\n"), Comments("// !important should  ..."), Newline("\n")] [],
+                    dollar_token: DOLLAR@210..298 "$" [Newline("\n"), Newline("\n"), Comments("// !important should  ..."), Newline("\n")] [],
                     name: CssIdentifier {
-                        value_token: IDENT@294..298 "size" [] [],
+                        value_token: IDENT@298..302 "size" [] [],
                     },
                 },
-                COLON@298..300 ":" [] [Whitespace(" ")],
+                COLON@302..304 ":" [] [Whitespace(" ")],
                 ScssExpression {
                     items: ScssExpressionItemList [
                         CssNumber {
-                            value_token: CSS_NUMBER_LITERAL@300..302 "2" [] [Whitespace(" ")],
+                            value_token: CSS_NUMBER_LITERAL@304..306 "2" [] [Whitespace(" ")],
                         },
                     ],
                 },
@@ -100,30 +100,30 @@ CssRoot {
                     items: [
                         CssBogus {
                             items: [
-                                BANG@302..303 "!" [] [],
-                                IMPORTANT_KW@303..313 "important" [] [Whitespace(" ")],
+                                BANG@306..307 "!" [] [],
+                                IMPORTANT_KW@307..317 "important" [] [Whitespace(" ")],
                             ],
                         },
                         ScssVariableModifier {
-                            excl_token: BANG@313..314 "!" [] [],
-                            value: GLOBAL_KW@314..320 "global" [] [],
+                            excl_token: BANG@317..318 "!" [] [],
+                            value: GLOBAL_KW@318..324 "global" [] [],
                         },
                     ],
                 },
-                SEMICOLON@320..321 ";" [] [],
+                SEMICOLON@324..325 ";" [] [],
             ],
         },
     ],
-    eof_token: EOF@321..322 "" [Newline("\n")] [],
+    eof_token: EOF@325..326 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..322
+0: CSS_ROOT@0..326
   0: (empty)
-  1: CSS_ROOT_ITEM_LIST@0..321
+  1: CSS_ROOT_ITEM_LIST@0..325
     0: SCSS_DECLARATION@0..101
       0: SCSS_IDENTIFIER@0..83
         0: DOLLAR@0..78 "$" [Comments("// Unexpected token b ..."), Newline("\n")] []
@@ -160,25 +160,25 @@ CssRoot {
         0: BANG@202..203 "!" [] []
         1: GLOBAL_KW@203..209 "global" [] []
       6: SEMICOLON@209..210 ";" [] []
-    2: CSS_BOGUS@210..321
-      0: SCSS_IDENTIFIER@210..298
-        0: DOLLAR@210..294 "$" [Newline("\n"), Newline("\n"), Comments("// !important should  ..."), Newline("\n")] []
-        1: CSS_IDENTIFIER@294..298
-          0: IDENT@294..298 "size" [] []
-      1: COLON@298..300 ":" [] [Whitespace(" ")]
-      2: SCSS_EXPRESSION@300..302
-        0: SCSS_EXPRESSION_ITEM_LIST@300..302
-          0: CSS_NUMBER@300..302
-            0: CSS_NUMBER_LITERAL@300..302 "2" [] [Whitespace(" ")]
-      3: CSS_BOGUS@302..320
-        0: CSS_BOGUS@302..313
-          0: BANG@302..303 "!" [] []
-          1: IMPORTANT_KW@303..313 "important" [] [Whitespace(" ")]
-        1: SCSS_VARIABLE_MODIFIER@313..320
-          0: BANG@313..314 "!" [] []
-          1: GLOBAL_KW@314..320 "global" [] []
-      4: SEMICOLON@320..321 ";" [] []
-  2: EOF@321..322 "" [Newline("\n")] []
+    2: CSS_BOGUS@210..325
+      0: SCSS_IDENTIFIER@210..302
+        0: DOLLAR@210..298 "$" [Newline("\n"), Newline("\n"), Comments("// !important should  ..."), Newline("\n")] []
+        1: CSS_IDENTIFIER@298..302
+          0: IDENT@298..302 "size" [] []
+      1: COLON@302..304 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@304..306
+        0: SCSS_EXPRESSION_ITEM_LIST@304..306
+          0: CSS_NUMBER@304..306
+            0: CSS_NUMBER_LITERAL@304..306 "2" [] [Whitespace(" ")]
+      3: CSS_BOGUS@306..324
+        0: CSS_BOGUS@306..317
+          0: BANG@306..307 "!" [] []
+          1: IMPORTANT_KW@307..317 "important" [] [Whitespace(" ")]
+        1: SCSS_VARIABLE_MODIFIER@317..324
+          0: BANG@317..318 "!" [] []
+          1: GLOBAL_KW@318..324 "global" [] []
+      4: SEMICOLON@324..325 ";" [] []
+  2: EOF@325..326 "" [Newline("\n")] []
 
 ```
 
@@ -193,8 +193,19 @@ modifier-recovery.scss:5:18 parse ━━━━━━━━━━━━━━━�
   > 5 │ $gap: 1 !default bar !global;
       │                  ^^^
     6 │ 
-    7 │ // !important should recover as generic invalid syntax and allow later modifiers
+    7 │ // !important should report an invalid modifier diagnostic and allow later modifiers
   
   i Expected a variable modifier or the end of the declaration.
+  
+modifier-recovery.scss:8:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × `!important` is not valid here.
+  
+    7 │ // !important should report an invalid modifier diagnostic and allow later modifiers
+  > 8 │ $size: 2 !important !global;
+      │           ^^^^^^^^^
+    9 │ 
+  
+  i SCSS variable declarations only support the `!default` and `!global` modifiers.
   
 ```

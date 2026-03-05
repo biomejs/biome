@@ -4,5 +4,5 @@ $color: red foo !global;
 // Unexpected token between modifiers should not stop parsing later modifiers
 $gap: 1 !default bar !global;
 
-// !important should recover as generic invalid syntax and allow later modifiers
+// !important should report an invalid modifier diagnostic and allow later modifiers
 $size: 2 !important !global;

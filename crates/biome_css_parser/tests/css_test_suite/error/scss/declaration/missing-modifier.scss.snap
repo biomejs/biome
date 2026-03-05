@@ -162,7 +162,7 @@ CssRoot {
 ```
 missing-modifier.scss:2:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected 'default', 'global', or 'important' but instead found `;`
+  × expected 'default', or 'global' but instead found `;`
   
     1 │ // Exclamation mark but no modifier
   > 2 │ $color: red !;
@@ -174,7 +174,7 @@ missing-modifier.scss:2:14 parse ━━━━━━━━━━━━━━━�
   
 missing-modifier.scss:5:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected 'default', 'global', or 'important' but instead found `;`
+  × expected 'default', or 'global' but instead found `;`
   
     4 │ // Exclamation mark with space but no modifier
   > 5 │ $width: 100px ! ;
@@ -186,7 +186,7 @@ missing-modifier.scss:5:17 parse ━━━━━━━━━━━━━━━�
   
 missing-modifier.scss:9:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected 'default', 'global', or 'important' but instead the file ends
+  × expected 'default', or 'global' but instead the file ends
   
     7 │ // Exclamation mark at the end
     8 │ $height: 50vh !
