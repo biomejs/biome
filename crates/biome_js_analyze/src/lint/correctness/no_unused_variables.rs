@@ -573,16 +573,11 @@ pub fn is_unused(model: &SemanticModel, binding: &AnyJsIdentifierBinding) -> boo
         return false;
     }
 
-    if is_declaration_merged_with_used(model, binding) {
-        return false;
-    }
-
-    // We need to check if all uses of this binding are somehow recursive or unused
     let Some(declaration) = binding.declaration() else {
         return false;
     };
     let declaration = declaration.syntax();
-    binding
+    let unused_by_refs = binding
         .all_references(model)
         .filter_map(|reference| {
             let ref_parent = reference.syntax().parent()?;
@@ -646,7 +641,11 @@ pub fn is_unused(model: &SemanticModel, binding: &AnyJsIdentifierBinding) -> boo
             }
             // Always false when the ref is outside the declaration
             false
-        })
+        });
+    if !unused_by_refs {
+        return false;
+    }
+    !is_declaration_merged_with_used(model, binding)
 }
 
 /// Returns `true` if `expr` is unused.
