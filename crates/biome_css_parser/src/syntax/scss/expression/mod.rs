@@ -1,5 +1,5 @@
-use crate::parser::CssParser;
 use crate::lexer::CssReLexContext;
+use crate::parser::CssParser;
 use crate::syntax::parse_error::{
     expected_component_value, expected_scss_expression, scss_ellipsis_not_allowed,
 };
