@@ -1,5 +1,30 @@
 # @biomejs/biome
 
+## 2.4.6
+
+### Patch Changes
+
+- [#9305](https://github.com/biomejs/biome/pull/9305) [`40869b5`](https://github.com/biomejs/biome/commit/40869b5a698de5e0d2c06bc7587a9cad8c0389c5) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#4946](https://github.com/biomejs/biome/issues/4946): `noUnreachable` no longer reports code inside `finally` blocks as unreachable when there is a `break`, `continue`, or `return` in the corresponding `try` body.
+
+- [#9303](https://github.com/biomejs/biome/pull/9303) [`464910c`](https://github.com/biomejs/biome/commit/464910c06058454a0a0ed08998e1b32cb4a6ca67) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#2786](https://github.com/biomejs/biome/issues/2786): The formatter no longer produces different output on subsequent runs when a `case` clause has a trailing line comment followed by a single block statement.
+
+- [#9324](https://github.com/biomejs/biome/pull/9324) [`6294aa2`](https://github.com/biomejs/biome/commit/6294aa2e2710e90a05ed53edfc4dd80e3c4cbd9a) Thanks [@arendjr](https://github.com/arendjr)! - Fixed [`#7730`](https://github.com/biomejs/biome/issues/7730): [`useAnchorContent`](https://biomejs.dev/linter/rules/use-anchor-content/) now recognises SolidJS's `innerHTML` the same way as React's `dangerouslySetInnerHTML`.
+
+- [#9298](https://github.com/biomejs/biome/pull/9298) [`1003229`](https://github.com/biomejs/biome/commit/1003229853c80569751137b6f52dcc1b08aed659) Thanks [@Netail](https://github.com/Netail)! - Fixed [`#9296`](https://github.com/biomejs/biome/issues/9296), so comments are moved along with the attributes in the useSortedAttributes assist rule code fix.
+
+- [#9329](https://github.com/biomejs/biome/pull/9329) [`855b451`](https://github.com/biomejs/biome/commit/855b45125ad33933066eb363f706e1f00dc149d2) Thanks [@dyc3](https://github.com/dyc3)! - Improved performance of [`noEmptyBlockStatements`](https://biomejs.dev/linter/rules/no-empty-block-statements/). The rule is now smarter about short-circuiting its logic.
+
+- [#9326](https://github.com/biomejs/biome/pull/9326) [`85dfe9b`](https://github.com/biomejs/biome/commit/85dfe9b00b820fee0ad936a54328491446e085f5) Thanks [@dyc3](https://github.com/dyc3)! - Improved performance for [`noImportCycles`](https://biomejs.dev/linter/rules/no-import-cycles/) by explicitly excluding node_modules from the cycle detection. The performance improvement is directly proportional to how big your dependency tree is.
+
+- [#9323](https://github.com/biomejs/biome/pull/9323) [`d5ee469`](https://github.com/biomejs/biome/commit/d5ee4690bba0a3bb8a97da029732afde56cd4cd7) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#9217](https://github.com/biomejs/biome/issues/9217) and [biomejs/biome-vscode#959](https://github.com/biomejs/biome-vscode/issues/959), where the Biome language server didn't correctly resolve the editor setting `configurationPath` when the provided value is a relative path.
+
+- [#9302](https://github.com/biomejs/biome/pull/9302) [`86fbc70`](https://github.com/biomejs/biome/commit/86fbc70e8f5a63fd9ece11a99b2684c25c301dba) Thanks [@sepagian](https://github.com/sepagian)! - Fixed [#9300](https://github.com/biomejs/biome/issues/9300): Lowercase component member expressions like `<form.Field>` in Svelte and Astro files are now correctly formatted.
+
+  ```diff
+  -<form .Field></form.Field>
+  +<form.Field></form.Field>
+  ```
+
 ## 2.4.5
 
 ### Patch Changes
