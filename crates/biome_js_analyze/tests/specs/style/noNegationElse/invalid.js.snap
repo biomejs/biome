@@ -100,7 +100,7 @@ invalid.js:8:1 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━�
      7  7 │   
      8    │ - if·(a·!=·b)·{
      9    │ - → consequent;
-        8 │ + if·(a·==b)·{
+        8 │ + if·(a·==·b)·{
         9 │ + → alternate;
     10 10 │   } else {
     11    │ - → alternate;
@@ -134,7 +134,7 @@ invalid.js:14:1 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━�
     13 13 │   
     14    │ - if·(a·!==·b)·{
     15    │ - → consequent;
-       14 │ + if·(a·===b)·{
+       14 │ + if·(a·===·b)·{
        15 │ + → alternate;
     16 16 │   } else {
     17    │ - → alternate;
@@ -185,7 +185,7 @@ invalid.js:21:1 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━�
     19 19 │   
     20 20 │   !condition ? consequent : alternate;
     21    │ - a·!=·b·?·consequent·:·alternate;
-       21 │ + a·==b·?·alternate·:·consequent;
+       21 │ + a·==·b·?·alternate·:·consequent;
     22 22 │   a !== b ? consequent : alternate;
     23 23 │   
   
@@ -209,7 +209,7 @@ invalid.js:22:1 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━�
     20 20 │   !condition ? consequent : alternate;
     21 21 │   a != b ? consequent : alternate;
     22    │ - a·!==·b·?·consequent·:·alternate;
-       22 │ + a·===b·?·alternate·:·consequent;
+       22 │ + a·===·b·?·alternate·:·consequent;
     23 23 │   
     24 24 │   let a = !test ? c : d;
   

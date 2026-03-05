@@ -165,16 +165,28 @@ fn replace_negation(node: &AnyJsExpression) -> Option<AnyJsExpression> {
         AnyJsExpression::JsUnaryExpression(unary_expr) => unary_expr.argument().ok(),
         AnyJsExpression::JsBinaryExpression(binary_expr) => {
             let operator = binary_expr.operator().ok()?;
+
+            let token_leading_trivia = binary_expr.operator_token().ok()?.leading_trivia().pieces();
+            let token_trailing_trivia = binary_expr
+                .operator_token()
+                .ok()?
+                .trailing_trivia()
+                .pieces();
+
             match operator {
                 JsBinaryOperator::Inequality => Some(AnyJsExpression::JsBinaryExpression(
-                    binary_expr
-                        .clone()
-                        .with_operator_token_token(make::token(T![==])),
+                    binary_expr.clone().with_operator_token_token(
+                        make::token(T![==])
+                            .with_leading_trivia_pieces(token_leading_trivia)
+                            .with_trailing_trivia_pieces(token_trailing_trivia),
+                    ),
                 )),
                 JsBinaryOperator::StrictInequality => Some(AnyJsExpression::JsBinaryExpression(
-                    binary_expr
-                        .clone()
-                        .with_operator_token_token(make::token(T![===])),
+                    binary_expr.clone().with_operator_token_token(
+                        make::token(T![===])
+                            .with_leading_trivia_pieces(token_leading_trivia)
+                            .with_trailing_trivia_pieces(token_trailing_trivia),
+                    ),
                 )),
                 _ => None,
             }
