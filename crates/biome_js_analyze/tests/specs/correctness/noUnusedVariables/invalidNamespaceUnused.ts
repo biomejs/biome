@@ -1,3 +1,5 @@
+/* should generate diagnostics */
+
 // Standalone unused namespace (no merged value declaration)
 namespace Standalone {
     export type X = string;
