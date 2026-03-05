@@ -12,10 +12,13 @@ use crate::syntax::at_rule::error::{
 use crate::syntax::at_rule::feature::{expected_any_query_feature, parse_any_query_feature};
 use crate::syntax::block::parse_conditional_block;
 use crate::syntax::parse_error::expected_non_css_wide_keyword_identifier;
+use crate::syntax::property::{
+    END_OF_PROPERTY_VALUE_COMPONENT_LIST_TOKEN_SET, END_OF_PROPERTY_VALUE_TOKEN_SET,
+};
 use crate::syntax::value::function::{is_at_any_css_function, is_nth_at_css_function};
 use crate::syntax::{
-    is_at_declaration, parse_any_css_value, parse_custom_identifier, parse_declaration,
-    parse_regular_identifier,
+    is_at_declaration, parse_any_css_value, parse_custom_identifier,
+    parse_declaration_with_value_end_set, parse_regular_identifier,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -23,7 +26,13 @@ use biome_parser::parse_recovery::ParseRecovery;
 use biome_parser::parsed_syntax::ParsedSyntax::Present;
 use biome_parser::prelude::ParsedSyntax::Absent;
 use biome_parser::prelude::*;
+use biome_parser::{TokenSet, token_set};
 use error::{expected_any_container_query, expected_any_container_query_in_parens};
+
+const END_OF_CONTAINER_STYLE_QUERY_VALUE_TOKEN_SET: TokenSet<CssSyntaxKind> =
+    END_OF_PROPERTY_VALUE_COMPONENT_LIST_TOKEN_SET.union(token_set!(T![')'], T!['{']));
+const END_OF_CONTAINER_STYLE_QUERY_RECOVERY_TOKEN_SET: TokenSet<CssSyntaxKind> =
+    END_OF_PROPERTY_VALUE_TOKEN_SET.union(token_set!(T![')'], T!['{']));
 
 /// Checks if the current token in the parser is an `@container` at-rule.
 #[inline]
@@ -542,7 +551,11 @@ pub(crate) fn parse_container_style_query_in_parens(p: &mut CssParser) -> Parsed
 #[inline]
 pub(crate) fn parse_any_container_style_query(p: &mut CssParser) -> ParsedSyntax {
     if is_at_declaration(p) {
-        parse_declaration(p)
+        parse_declaration_with_value_end_set(
+            p,
+            END_OF_CONTAINER_STYLE_QUERY_VALUE_TOKEN_SET,
+            END_OF_CONTAINER_STYLE_QUERY_RECOVERY_TOKEN_SET,
+        )
     } else if is_at_container_style_not_query(p) {
         parse_container_style_not_query(p)
     } else {

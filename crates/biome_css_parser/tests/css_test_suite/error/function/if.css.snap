@@ -322,7 +322,6 @@ CssRoot {
                                                                             items: [
                                                                                 COLON@145..147 ":" [] [Whitespace(" ")],
                                                                                 IDENT@147..152 "black" [] [],
-                                                                                R_PAREN@152..153 ")" [] [],
                                                                             ],
                                                                         },
                                                                     ],
@@ -331,7 +330,7 @@ CssRoot {
                                                         },
                                                         important: missing (optional),
                                                     },
-                                                    r_paren_token: missing (required),
+                                                    r_paren_token: R_PAREN@152..153 ")" [] [],
                                                 },
                                                 colon_token: missing (required),
                                                 value: CssGenericComponentValueList [],
@@ -3184,20 +3183,19 @@ CssRoot {
                         0: CSS_IF_STYLE_TEST@129..153
                           0: STYLE_KW@129..134 "style" [] []
                           1: L_PAREN@134..135 "(" [] []
-                          2: CSS_DECLARATION@135..153
-                            0: CSS_BOGUS_PROPERTY@135..153
+                          2: CSS_DECLARATION@135..152
+                            0: CSS_BOGUS_PROPERTY@135..152
                               0: CSS_DASHED_IDENTIFIER@135..140
                                 0: IDENT@135..140 "--foo" [] []
                               1: COLON@140..142 ":" [] [Whitespace(" ")]
-                              2: CSS_BOGUS@142..153
+                              2: CSS_BOGUS@142..152
                                 0: CSS_IDENTIFIER@142..145
                                   0: IDENT@142..145 "bar" [] []
-                                1: CSS_BOGUS_PROPERTY_VALUE@145..153
+                                1: CSS_BOGUS_PROPERTY_VALUE@145..152
                                   0: COLON@145..147 ":" [] [Whitespace(" ")]
                                   1: IDENT@147..152 "black" [] []
-                                  2: R_PAREN@152..153 ")" [] []
                             1: (empty)
-                          3: (empty)
+                          3: R_PAREN@152..153 ")" [] []
                         1: (empty)
                         2: CSS_GENERIC_COMPONENT_VALUE_LIST@153..153
                       1: SEMICOLON@153..154 ";" [] []
@@ -4976,7 +4974,7 @@ if.css:10:28 parse ━━━━━━━━━━━━━━━━━━━━�
   
      9 │ .unclosed-style {
   > 10 │ 	color: if(style(--foo: bar: black);
-       │ 	                          ^^^^^^^^
+       │ 	                          ^^^^^^^
     11 │ }
     12 │ 
   
@@ -4992,7 +4990,7 @@ if.css:10:28 parse ━━━━━━━━━━━━━━━━━━━━�
   
 if.css:10:36 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `)` but instead found `;`
+  × expected `:` but instead found `;`
   
      9 │ .unclosed-style {
   > 10 │ 	color: if(style(--foo: bar: black);
@@ -5004,7 +5002,7 @@ if.css:10:36 parse ━━━━━━━━━━━━━━━━━━━━�
   
 if.css:11:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected an if branch, or an if test boolean expression but instead found '}'.
+  × expected `)` but instead found `}`
   
      9 │ .unclosed-style {
     10 │ 	color: if(style(--foo: bar: black);
@@ -5013,14 +5011,7 @@ if.css:11:1 parse ━━━━━━━━━━━━━━━━━━━━�
     12 │ 
     13 │ .invalid-style-query {
   
-  i Expected an if branch, or an if test boolean expression here.
-  
-     9 │ .unclosed-style {
-    10 │ 	color: if(style(--foo: bar: black);
-  > 11 │ }
-       │ ^
-    12 │ 
-    13 │ .invalid-style-query {
+  i Remove }
   
 if.css:14:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -5433,7 +5424,7 @@ if.css:62:22 parse ━━━━━━━━━━━━━━━━━━━━�
   
 if.css:63:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected an if branch, or an if test boolean expression but instead found '}'.
+  × expected `)` but instead found `}`
   
     61 │ .incomplete-parens-expr {
     62 │ 	color: if((: black;);
@@ -5442,14 +5433,7 @@ if.css:63:1 parse ━━━━━━━━━━━━━━━━━━━━�
     64 │ 
     65 │ .mixed-operators {
   
-  i Expected an if branch, or an if test boolean expression here.
-  
-    61 │ .incomplete-parens-expr {
-    62 │ 	color: if((: black;);
-  > 63 │ }
-       │ ^
-    64 │ 
-    65 │ .mixed-operators {
+  i Remove }
   
 if.css:66:44 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

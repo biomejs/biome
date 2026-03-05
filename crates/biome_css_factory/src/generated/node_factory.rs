@@ -1061,7 +1061,7 @@ pub fn css_generic_delimiter(value_token: SyntaxToken) -> CssGenericDelimiter {
 pub fn css_generic_property(
     name: AnyCssDeclarationName,
     colon_token: SyntaxToken,
-    value: CssGenericComponentValueList,
+    value: AnyCssGenericPropertyValueOrExpression,
 ) -> CssGenericProperty {
     CssGenericProperty::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_GENERIC_PROPERTY,
@@ -3192,7 +3192,7 @@ pub fn scss_namespaced_identifier(
 pub fn scss_nesting_declaration(
     name: CssIdentifier,
     colon_token: SyntaxToken,
-    value: CssGenericComponentValueList,
+    value: ScssExpression,
     block: AnyCssDeclarationOrRuleBlock,
 ) -> ScssNestingDeclaration {
     ScssNestingDeclaration::unwrap_cast(SyntaxNode::new_detached(

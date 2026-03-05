@@ -1,0 +1,480 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+// Missing RHS in binary expression should recover
+$missing-rhs: 1 + ;
+
+// Dangling unary chain should recover
+$dangling-unary: not - ;
+
+// Missing keyword argument value should recover
+$kw-args: foo($x: , $y: 1);
+
+// Map pair missing value in parens should recover
+$map-missing: (b: , c: 1);
+
+// Map pair trailing colon should recover
+$map-trailing: (b: 1, c:);
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        ScssDeclaration {
+            name: ScssIdentifier {
+                dollar_token: DOLLAR@0..52 "$" [Comments("// Missing RHS in bin ..."), Newline("\n")] [],
+                name: CssIdentifier {
+                    value_token: IDENT@52..63 "missing-rhs" [] [],
+                },
+            },
+            colon_token: COLON@63..65 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    ScssBinaryExpression {
+                        left: CssNumber {
+                            value_token: CSS_NUMBER_LITERAL@65..67 "1" [] [Whitespace(" ")],
+                        },
+                        operator: PLUS@67..69 "+" [] [Whitespace(" ")],
+                        right: missing (required),
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@69..70 ";" [] [],
+        },
+        ScssDeclaration {
+            name: ScssIdentifier {
+                dollar_token: DOLLAR@70..112 "$" [Newline("\n"), Newline("\n"), Comments("// Dangling unary cha ..."), Newline("\n")] [],
+                name: CssIdentifier {
+                    value_token: IDENT@112..126 "dangling-unary" [] [],
+                },
+            },
+            colon_token: COLON@126..128 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    ScssUnaryExpression {
+                        operator: NOT_KW@128..132 "not" [] [Whitespace(" ")],
+                        expression: ScssUnaryExpression {
+                            operator: MINUS@132..134 "-" [] [Whitespace(" ")],
+                            expression: missing (required),
+                        },
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@134..135 ";" [] [],
+        },
+        ScssDeclaration {
+            name: ScssIdentifier {
+                dollar_token: DOLLAR@135..187 "$" [Newline("\n"), Newline("\n"), Comments("// Missing keyword ar ..."), Newline("\n")] [],
+                name: CssIdentifier {
+                    value_token: IDENT@187..194 "kw-args" [] [],
+                },
+            },
+            colon_token: COLON@194..196 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    CssFunction {
+                        name: CssIdentifier {
+                            value_token: IDENT@196..199 "foo" [] [],
+                        },
+                        l_paren_token: L_PAREN@199..200 "(" [] [],
+                        items: CssParameterList [
+                            ScssExpression {
+                                items: ScssExpressionItemList [
+                                    ScssKeywordArgument {
+                                        name: ScssIdentifier {
+                                            dollar_token: DOLLAR@200..201 "$" [] [],
+                                            name: CssIdentifier {
+                                                value_token: IDENT@201..202 "x" [] [],
+                                            },
+                                        },
+                                        colon_token: COLON@202..204 ":" [] [Whitespace(" ")],
+                                        value: missing (required),
+                                    },
+                                ],
+                            },
+                            COMMA@204..206 "," [] [Whitespace(" ")],
+                            ScssExpression {
+                                items: ScssExpressionItemList [
+                                    ScssKeywordArgument {
+                                        name: ScssIdentifier {
+                                            dollar_token: DOLLAR@206..207 "$" [] [],
+                                            name: CssIdentifier {
+                                                value_token: IDENT@207..208 "y" [] [],
+                                            },
+                                        },
+                                        colon_token: COLON@208..210 ":" [] [Whitespace(" ")],
+                                        value: ScssExpression {
+                                            items: ScssExpressionItemList [
+                                                CssNumber {
+                                                    value_token: CSS_NUMBER_LITERAL@210..211 "1" [] [],
+                                                },
+                                            ],
+                                        },
+                                    },
+                                ],
+                            },
+                        ],
+                        r_paren_token: R_PAREN@211..212 ")" [] [],
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@212..213 ";" [] [],
+        },
+        ScssDeclaration {
+            name: ScssIdentifier {
+                dollar_token: DOLLAR@213..267 "$" [Newline("\n"), Newline("\n"), Comments("// Map pair missing v ..."), Newline("\n")] [],
+                name: CssIdentifier {
+                    value_token: IDENT@267..278 "map-missing" [] [],
+                },
+            },
+            colon_token: COLON@278..280 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    ScssMapExpression {
+                        l_paren_token: L_PAREN@280..281 "(" [] [],
+                        pairs: ScssMapExpressionPairList [
+                            ScssMapExpressionPair {
+                                key: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssIdentifier {
+                                            value_token: IDENT@281..282 "b" [] [],
+                                        },
+                                    ],
+                                },
+                                colon_token: COLON@282..284 ":" [] [Whitespace(" ")],
+                                value: missing (required),
+                            },
+                            COMMA@284..286 "," [] [Whitespace(" ")],
+                            ScssMapExpressionPair {
+                                key: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssIdentifier {
+                                            value_token: IDENT@286..287 "c" [] [],
+                                        },
+                                    ],
+                                },
+                                colon_token: COLON@287..289 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssNumber {
+                                            value_token: CSS_NUMBER_LITERAL@289..290 "1" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                        ],
+                        r_paren_token: R_PAREN@290..291 ")" [] [],
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@291..292 ";" [] [],
+        },
+        ScssDeclaration {
+            name: ScssIdentifier {
+                dollar_token: DOLLAR@292..337 "$" [Newline("\n"), Newline("\n"), Comments("// Map pair trailing  ..."), Newline("\n")] [],
+                name: CssIdentifier {
+                    value_token: IDENT@337..349 "map-trailing" [] [],
+                },
+            },
+            colon_token: COLON@349..351 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    ScssMapExpression {
+                        l_paren_token: L_PAREN@351..352 "(" [] [],
+                        pairs: ScssMapExpressionPairList [
+                            ScssMapExpressionPair {
+                                key: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssIdentifier {
+                                            value_token: IDENT@352..353 "b" [] [],
+                                        },
+                                    ],
+                                },
+                                colon_token: COLON@353..355 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssNumber {
+                                            value_token: CSS_NUMBER_LITERAL@355..356 "1" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            COMMA@356..358 "," [] [Whitespace(" ")],
+                            ScssMapExpressionPair {
+                                key: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssIdentifier {
+                                            value_token: IDENT@358..359 "c" [] [],
+                                        },
+                                    ],
+                                },
+                                colon_token: COLON@359..360 ":" [] [],
+                                value: missing (required),
+                            },
+                        ],
+                        r_paren_token: R_PAREN@360..361 ")" [] [],
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@361..362 ";" [] [],
+        },
+    ],
+    eof_token: EOF@362..363 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..363
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..362
+    0: SCSS_DECLARATION@0..70
+      0: SCSS_IDENTIFIER@0..63
+        0: DOLLAR@0..52 "$" [Comments("// Missing RHS in bin ..."), Newline("\n")] []
+        1: CSS_IDENTIFIER@52..63
+          0: IDENT@52..63 "missing-rhs" [] []
+      1: COLON@63..65 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@65..69
+        0: SCSS_EXPRESSION_ITEM_LIST@65..69
+          0: SCSS_BINARY_EXPRESSION@65..69
+            0: CSS_NUMBER@65..67
+              0: CSS_NUMBER_LITERAL@65..67 "1" [] [Whitespace(" ")]
+            1: PLUS@67..69 "+" [] [Whitespace(" ")]
+            2: (empty)
+      3: SCSS_VARIABLE_MODIFIER_LIST@69..69
+      4: SEMICOLON@69..70 ";" [] []
+    1: SCSS_DECLARATION@70..135
+      0: SCSS_IDENTIFIER@70..126
+        0: DOLLAR@70..112 "$" [Newline("\n"), Newline("\n"), Comments("// Dangling unary cha ..."), Newline("\n")] []
+        1: CSS_IDENTIFIER@112..126
+          0: IDENT@112..126 "dangling-unary" [] []
+      1: COLON@126..128 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@128..134
+        0: SCSS_EXPRESSION_ITEM_LIST@128..134
+          0: SCSS_UNARY_EXPRESSION@128..134
+            0: NOT_KW@128..132 "not" [] [Whitespace(" ")]
+            1: SCSS_UNARY_EXPRESSION@132..134
+              0: MINUS@132..134 "-" [] [Whitespace(" ")]
+              1: (empty)
+      3: SCSS_VARIABLE_MODIFIER_LIST@134..134
+      4: SEMICOLON@134..135 ";" [] []
+    2: SCSS_DECLARATION@135..213
+      0: SCSS_IDENTIFIER@135..194
+        0: DOLLAR@135..187 "$" [Newline("\n"), Newline("\n"), Comments("// Missing keyword ar ..."), Newline("\n")] []
+        1: CSS_IDENTIFIER@187..194
+          0: IDENT@187..194 "kw-args" [] []
+      1: COLON@194..196 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@196..212
+        0: SCSS_EXPRESSION_ITEM_LIST@196..212
+          0: CSS_FUNCTION@196..212
+            0: CSS_IDENTIFIER@196..199
+              0: IDENT@196..199 "foo" [] []
+            1: L_PAREN@199..200 "(" [] []
+            2: CSS_PARAMETER_LIST@200..211
+              0: SCSS_EXPRESSION@200..204
+                0: SCSS_EXPRESSION_ITEM_LIST@200..204
+                  0: SCSS_KEYWORD_ARGUMENT@200..204
+                    0: SCSS_IDENTIFIER@200..202
+                      0: DOLLAR@200..201 "$" [] []
+                      1: CSS_IDENTIFIER@201..202
+                        0: IDENT@201..202 "x" [] []
+                    1: COLON@202..204 ":" [] [Whitespace(" ")]
+                    2: (empty)
+              1: COMMA@204..206 "," [] [Whitespace(" ")]
+              2: SCSS_EXPRESSION@206..211
+                0: SCSS_EXPRESSION_ITEM_LIST@206..211
+                  0: SCSS_KEYWORD_ARGUMENT@206..211
+                    0: SCSS_IDENTIFIER@206..208
+                      0: DOLLAR@206..207 "$" [] []
+                      1: CSS_IDENTIFIER@207..208
+                        0: IDENT@207..208 "y" [] []
+                    1: COLON@208..210 ":" [] [Whitespace(" ")]
+                    2: SCSS_EXPRESSION@210..211
+                      0: SCSS_EXPRESSION_ITEM_LIST@210..211
+                        0: CSS_NUMBER@210..211
+                          0: CSS_NUMBER_LITERAL@210..211 "1" [] []
+            3: R_PAREN@211..212 ")" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@212..212
+      4: SEMICOLON@212..213 ";" [] []
+    3: SCSS_DECLARATION@213..292
+      0: SCSS_IDENTIFIER@213..278
+        0: DOLLAR@213..267 "$" [Newline("\n"), Newline("\n"), Comments("// Map pair missing v ..."), Newline("\n")] []
+        1: CSS_IDENTIFIER@267..278
+          0: IDENT@267..278 "map-missing" [] []
+      1: COLON@278..280 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@280..291
+        0: SCSS_EXPRESSION_ITEM_LIST@280..291
+          0: SCSS_MAP_EXPRESSION@280..291
+            0: L_PAREN@280..281 "(" [] []
+            1: SCSS_MAP_EXPRESSION_PAIR_LIST@281..290
+              0: SCSS_MAP_EXPRESSION_PAIR@281..284
+                0: SCSS_EXPRESSION@281..282
+                  0: SCSS_EXPRESSION_ITEM_LIST@281..282
+                    0: CSS_IDENTIFIER@281..282
+                      0: IDENT@281..282 "b" [] []
+                1: COLON@282..284 ":" [] [Whitespace(" ")]
+                2: (empty)
+              1: COMMA@284..286 "," [] [Whitespace(" ")]
+              2: SCSS_MAP_EXPRESSION_PAIR@286..290
+                0: SCSS_EXPRESSION@286..287
+                  0: SCSS_EXPRESSION_ITEM_LIST@286..287
+                    0: CSS_IDENTIFIER@286..287
+                      0: IDENT@286..287 "c" [] []
+                1: COLON@287..289 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@289..290
+                  0: SCSS_EXPRESSION_ITEM_LIST@289..290
+                    0: CSS_NUMBER@289..290
+                      0: CSS_NUMBER_LITERAL@289..290 "1" [] []
+            2: R_PAREN@290..291 ")" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@291..291
+      4: SEMICOLON@291..292 ";" [] []
+    4: SCSS_DECLARATION@292..362
+      0: SCSS_IDENTIFIER@292..349
+        0: DOLLAR@292..337 "$" [Newline("\n"), Newline("\n"), Comments("// Map pair trailing  ..."), Newline("\n")] []
+        1: CSS_IDENTIFIER@337..349
+          0: IDENT@337..349 "map-trailing" [] []
+      1: COLON@349..351 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@351..361
+        0: SCSS_EXPRESSION_ITEM_LIST@351..361
+          0: SCSS_MAP_EXPRESSION@351..361
+            0: L_PAREN@351..352 "(" [] []
+            1: SCSS_MAP_EXPRESSION_PAIR_LIST@352..360
+              0: SCSS_MAP_EXPRESSION_PAIR@352..356
+                0: SCSS_EXPRESSION@352..353
+                  0: SCSS_EXPRESSION_ITEM_LIST@352..353
+                    0: CSS_IDENTIFIER@352..353
+                      0: IDENT@352..353 "b" [] []
+                1: COLON@353..355 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@355..356
+                  0: SCSS_EXPRESSION_ITEM_LIST@355..356
+                    0: CSS_NUMBER@355..356
+                      0: CSS_NUMBER_LITERAL@355..356 "1" [] []
+              1: COMMA@356..358 "," [] [Whitespace(" ")]
+              2: SCSS_MAP_EXPRESSION_PAIR@358..360
+                0: SCSS_EXPRESSION@358..359
+                  0: SCSS_EXPRESSION_ITEM_LIST@358..359
+                    0: CSS_IDENTIFIER@358..359
+                      0: IDENT@358..359 "c" [] []
+                1: COLON@359..360 ":" [] []
+                2: (empty)
+            2: R_PAREN@360..361 ")" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@361..361
+      4: SEMICOLON@361..362 ";" [] []
+  2: EOF@362..363 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+missing-expressions.scss:2:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    1 │ // Missing RHS in binary expression should recover
+  > 2 │ $missing-rhs: 1 + ;
+      │                   ^
+    3 │ 
+    4 │ // Dangling unary chain should recover
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+missing-expressions.scss:5:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    4 │ // Dangling unary chain should recover
+  > 5 │ $dangling-unary: not - ;
+      │                        ^
+    6 │ 
+    7 │ // Missing keyword argument value should recover
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+missing-expressions.scss:8:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+     7 │ // Missing keyword argument value should recover
+   > 8 │ $kw-args: foo($x: , $y: 1);
+       │                   ^
+     9 │ 
+    10 │ // Map pair missing value in parens should recover
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+missing-expressions.scss:11:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found ','.
+  
+    10 │ // Map pair missing value in parens should recover
+  > 11 │ $map-missing: (b: , c: 1);
+       │                   ^
+    12 │ 
+    13 │ // Map pair trailing colon should recover
+  
+  i Expected a SCSS expression here.
+  
+    10 │ // Map pair missing value in parens should recover
+  > 11 │ $map-missing: (b: , c: 1);
+       │                   ^
+    12 │ 
+    13 │ // Map pair trailing colon should recover
+  
+missing-expressions.scss:14:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found ')'.
+  
+    13 │ // Map pair trailing colon should recover
+  > 14 │ $map-trailing: (b: 1, c:);
+       │                         ^
+    15 │ 
+  
+  i Expected a SCSS expression here.
+  
+    13 │ // Map pair trailing colon should recover
+  > 14 │ $map-trailing: (b: 1, c:);
+       │                         ^
+    15 │ 
+  
+```

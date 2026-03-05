@@ -7,8 +7,8 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_css_syntax::{
-    AnyCssAtRule, AnyCssGenericComponentValue, AnyCssValue, CssAtRule,
-    CssGenericComponentValueList, CssGenericProperty, CssSyntaxKind,
+    AnyCssAtRule, AnyCssGenericComponentValue, AnyCssGenericPropertyValueOrExpression, AnyCssValue,
+    CssAtRule, CssGenericComponentValueList, CssGenericProperty, CssSyntaxKind,
 };
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, SyntaxNodeCast, TextRange};
@@ -103,7 +103,13 @@ impl Rule for UseGenericFontNames {
 
         // handle shorthand font property with special value
         // e.g: { font: caption }, { font: inherit }
-        let properties = node.value();
+        let properties = match node.value() {
+            Ok(value) => match value {
+                AnyCssGenericPropertyValueOrExpression::CssGenericComponentValueList(list) => list,
+                AnyCssGenericPropertyValueOrExpression::ScssExpression(_) => return None,
+            },
+            Err(_) => return None,
+        };
         if is_font && is_shorthand_font_property_with_keyword(&properties) {
             return None;
         }

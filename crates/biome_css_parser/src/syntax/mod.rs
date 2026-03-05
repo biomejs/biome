@@ -55,7 +55,7 @@ pub(crate) enum CssSyntaxFeatures {
 
 pub(crate) use declaration::{
     DeclarationList, is_at_any_declaration, is_at_any_declaration_with_semicolon,
-    is_at_declaration, parse_any_declaration_with_semicolon, parse_declaration,
+    is_at_declaration, parse_any_declaration_with_semicolon, parse_declaration_with_value_end_set,
 };
 
 impl SyntaxFeature for CssSyntaxFeatures {
@@ -446,9 +446,23 @@ pub(crate) fn parse_any_value_with_context(
             scss_only_syntax_error(p, "SCSS variables", m.range(p))
         })
     } else if context.is_scss_syntax_allowed() && is_at_scss_qualified_name(p) {
-        CssSyntaxFeatures::Scss.parse_exclusive_syntax(p, parse_scss_qualified_name, |p, m| {
-            scss_only_syntax_error(p, "SCSS qualified names", m.range(p))
-        })
+        let has_dollar_member = p.nth_at(2, T![$]);
+        CssSyntaxFeatures::Scss
+            .parse_exclusive_syntax(p, parse_scss_qualified_name, |p, m| {
+                scss_only_syntax_error(p, "SCSS qualified names", m.range(p))
+            })
+            .map(|marker| {
+                if has_dollar_member && p.at(T!['(']) {
+                    p.error(
+                        p.err_builder(
+                            "Expected an identifier but instead found a variable member.",
+                            p.cur_range(),
+                        )
+                        .with_hint("Function names after `module.` cannot start with `$`."),
+                    );
+                }
+                marker
+            })
     } else if context.is_scss_syntax_allowed() && is_at_scss_parent_selector_value(p) {
         parse_scss_parent_selector_value(p)
     } else {

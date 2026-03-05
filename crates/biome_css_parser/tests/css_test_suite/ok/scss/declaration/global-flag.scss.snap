@@ -155,14 +155,16 @@ CssRoot {
                                     value_token: IDENT@218..227 "color" [Newline("\n"), Newline("\n"), Whitespace("  ")] [],
                                 },
                                 colon_token: COLON@227..229 ":" [] [Whitespace(" ")],
-                                value: CssGenericComponentValueList [
-                                    ScssIdentifier {
-                                        dollar_token: DOLLAR@229..230 "$" [] [],
-                                        name: CssIdentifier {
-                                            value_token: IDENT@230..240 "global-var" [] [],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        ScssIdentifier {
+                                            dollar_token: DOLLAR@229..230 "$" [] [],
+                                            name: CssIdentifier {
+                                                value_token: IDENT@230..240 "global-var" [] [],
+                                            },
                                         },
-                                    },
-                                ],
+                                    ],
+                                },
                             },
                             important: missing (optional),
                         },
@@ -220,14 +222,16 @@ CssRoot {
                                     value_token: IDENT@342..350 "color" [Newline("\n"), Whitespace("  ")] [],
                                 },
                                 colon_token: COLON@350..352 ":" [] [Whitespace(" ")],
-                                value: CssGenericComponentValueList [
-                                    ScssIdentifier {
-                                        dollar_token: DOLLAR@352..353 "$" [] [],
-                                        name: CssIdentifier {
-                                            value_token: IDENT@353..367 "important-var" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        ScssIdentifier {
+                                            dollar_token: DOLLAR@352..353 "$" [] [],
+                                            name: CssIdentifier {
+                                                value_token: IDENT@353..367 "important-var" [] [Whitespace(" ")],
+                                            },
                                         },
-                                    },
-                                ],
+                                    ],
+                                },
                             },
                             important: CssDeclarationImportant {
                                 excl_token: BANG@367..368 "!" [] [],
@@ -333,11 +337,12 @@ CssRoot {
                 0: CSS_IDENTIFIER@218..227
                   0: IDENT@218..227 "color" [Newline("\n"), Newline("\n"), Whitespace("  ")] []
                 1: COLON@227..229 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@229..240
-                  0: SCSS_IDENTIFIER@229..240
-                    0: DOLLAR@229..230 "$" [] []
-                    1: CSS_IDENTIFIER@230..240
-                      0: IDENT@230..240 "global-var" [] []
+                2: SCSS_EXPRESSION@229..240
+                  0: SCSS_EXPRESSION_ITEM_LIST@229..240
+                    0: SCSS_IDENTIFIER@229..240
+                      0: DOLLAR@229..230 "$" [] []
+                      1: CSS_IDENTIFIER@230..240
+                        0: IDENT@230..240 "global-var" [] []
               1: (empty)
             1: SEMICOLON@240..241 ";" [] []
         2: R_CURLY@241..243 "}" [Newline("\n")] []
@@ -375,11 +380,12 @@ CssRoot {
                 0: CSS_IDENTIFIER@342..350
                   0: IDENT@342..350 "color" [Newline("\n"), Whitespace("  ")] []
                 1: COLON@350..352 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@352..367
-                  0: SCSS_IDENTIFIER@352..367
-                    0: DOLLAR@352..353 "$" [] []
-                    1: CSS_IDENTIFIER@353..367
-                      0: IDENT@353..367 "important-var" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@352..367
+                  0: SCSS_EXPRESSION_ITEM_LIST@352..367
+                    0: SCSS_IDENTIFIER@352..367
+                      0: DOLLAR@352..353 "$" [] []
+                      1: CSS_IDENTIFIER@353..367
+                        0: IDENT@353..367 "important-var" [] [Whitespace(" ")]
               1: CSS_DECLARATION_IMPORTANT@367..377
                 0: BANG@367..368 "!" [] []
                 1: IMPORTANT_KW@368..377 "important" [] []

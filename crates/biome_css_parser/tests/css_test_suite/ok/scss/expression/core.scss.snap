@@ -45,33 +45,35 @@ CssRoot {
                                     value_token: IDENT@7..15 "width" [Newline("\n"), Whitespace("  ")] [],
                                 },
                                 colon_token: COLON@15..17 ":" [] [Whitespace(" ")],
-                                value: CssGenericComponentValueList [
-                                    CssFunction {
-                                        name: CssIdentifier {
-                                            value_token: IDENT@17..19 "fn" [] [],
-                                        },
-                                        l_paren_token: L_PAREN@19..20 "(" [] [],
-                                        items: CssParameterList [
-                                            ScssExpression {
-                                                items: ScssExpressionItemList [
-                                                    ScssIdentifier {
-                                                        dollar_token: DOLLAR@20..21 "$" [] [],
-                                                        name: CssIdentifier {
-                                                            value_token: IDENT@21..27 "alpha" [] [Whitespace(" ")],
-                                                        },
-                                                    },
-                                                    ScssIdentifier {
-                                                        dollar_token: DOLLAR@27..28 "$" [] [],
-                                                        name: CssIdentifier {
-                                                            value_token: IDENT@28..32 "beta" [] [],
-                                                        },
-                                                    },
-                                                ],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssFunction {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@17..19 "fn" [] [],
                                             },
-                                        ],
-                                        r_paren_token: R_PAREN@32..33 ")" [] [],
-                                    },
-                                ],
+                                            l_paren_token: L_PAREN@19..20 "(" [] [],
+                                            items: CssParameterList [
+                                                ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        ScssIdentifier {
+                                                            dollar_token: DOLLAR@20..21 "$" [] [],
+                                                            name: CssIdentifier {
+                                                                value_token: IDENT@21..27 "alpha" [] [Whitespace(" ")],
+                                                            },
+                                                        },
+                                                        ScssIdentifier {
+                                                            dollar_token: DOLLAR@27..28 "$" [] [],
+                                                            name: CssIdentifier {
+                                                                value_token: IDENT@28..32 "beta" [] [],
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@32..33 ")" [] [],
+                                        },
+                                    ],
+                                },
                             },
                             important: missing (optional),
                         },
@@ -84,30 +86,32 @@ CssRoot {
                                     value_token: IDENT@34..43 "height" [Newline("\n"), Whitespace("  ")] [],
                                 },
                                 colon_token: COLON@43..45 ":" [] [Whitespace(" ")],
-                                value: CssGenericComponentValueList [
-                                    CssFunction {
-                                        name: CssIdentifier {
-                                            value_token: IDENT@45..47 "fn" [] [],
-                                        },
-                                        l_paren_token: L_PAREN@47..48 "(" [] [],
-                                        items: CssParameterList [
-                                            ScssExpression {
-                                                items: ScssExpressionItemList [
-                                                    CssNumber {
-                                                        value_token: CSS_NUMBER_LITERAL@48..50 "1" [] [Whitespace(" ")],
-                                                    },
-                                                    CssNumber {
-                                                        value_token: CSS_NUMBER_LITERAL@50..52 "2" [] [Whitespace(" ")],
-                                                    },
-                                                    CssNumber {
-                                                        value_token: CSS_NUMBER_LITERAL@52..53 "3" [] [],
-                                                    },
-                                                ],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssFunction {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@45..47 "fn" [] [],
                                             },
-                                        ],
-                                        r_paren_token: R_PAREN@53..54 ")" [] [],
-                                    },
-                                ],
+                                            l_paren_token: L_PAREN@47..48 "(" [] [],
+                                            items: CssParameterList [
+                                                ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        CssNumber {
+                                                            value_token: CSS_NUMBER_LITERAL@48..50 "1" [] [Whitespace(" ")],
+                                                        },
+                                                        CssNumber {
+                                                            value_token: CSS_NUMBER_LITERAL@50..52 "2" [] [Whitespace(" ")],
+                                                        },
+                                                        CssNumber {
+                                                            value_token: CSS_NUMBER_LITERAL@52..53 "3" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@53..54 ")" [] [],
+                                        },
+                                    ],
+                                },
                             },
                             important: missing (optional),
                         },
@@ -147,23 +151,24 @@ CssRoot {
                 0: CSS_IDENTIFIER@7..15
                   0: IDENT@7..15 "width" [Newline("\n"), Whitespace("  ")] []
                 1: COLON@15..17 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@17..33
-                  0: CSS_FUNCTION@17..33
-                    0: CSS_IDENTIFIER@17..19
-                      0: IDENT@17..19 "fn" [] []
-                    1: L_PAREN@19..20 "(" [] []
-                    2: CSS_PARAMETER_LIST@20..32
-                      0: SCSS_EXPRESSION@20..32
-                        0: SCSS_EXPRESSION_ITEM_LIST@20..32
-                          0: SCSS_IDENTIFIER@20..27
-                            0: DOLLAR@20..21 "$" [] []
-                            1: CSS_IDENTIFIER@21..27
-                              0: IDENT@21..27 "alpha" [] [Whitespace(" ")]
-                          1: SCSS_IDENTIFIER@27..32
-                            0: DOLLAR@27..28 "$" [] []
-                            1: CSS_IDENTIFIER@28..32
-                              0: IDENT@28..32 "beta" [] []
-                    3: R_PAREN@32..33 ")" [] []
+                2: SCSS_EXPRESSION@17..33
+                  0: SCSS_EXPRESSION_ITEM_LIST@17..33
+                    0: CSS_FUNCTION@17..33
+                      0: CSS_IDENTIFIER@17..19
+                        0: IDENT@17..19 "fn" [] []
+                      1: L_PAREN@19..20 "(" [] []
+                      2: CSS_PARAMETER_LIST@20..32
+                        0: SCSS_EXPRESSION@20..32
+                          0: SCSS_EXPRESSION_ITEM_LIST@20..32
+                            0: SCSS_IDENTIFIER@20..27
+                              0: DOLLAR@20..21 "$" [] []
+                              1: CSS_IDENTIFIER@21..27
+                                0: IDENT@21..27 "alpha" [] [Whitespace(" ")]
+                            1: SCSS_IDENTIFIER@27..32
+                              0: DOLLAR@27..28 "$" [] []
+                              1: CSS_IDENTIFIER@28..32
+                                0: IDENT@28..32 "beta" [] []
+                      3: R_PAREN@32..33 ")" [] []
               1: (empty)
             1: SEMICOLON@33..34 ";" [] []
           1: CSS_DECLARATION_WITH_SEMICOLON@34..55
@@ -172,21 +177,22 @@ CssRoot {
                 0: CSS_IDENTIFIER@34..43
                   0: IDENT@34..43 "height" [Newline("\n"), Whitespace("  ")] []
                 1: COLON@43..45 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@45..54
-                  0: CSS_FUNCTION@45..54
-                    0: CSS_IDENTIFIER@45..47
-                      0: IDENT@45..47 "fn" [] []
-                    1: L_PAREN@47..48 "(" [] []
-                    2: CSS_PARAMETER_LIST@48..53
-                      0: SCSS_EXPRESSION@48..53
-                        0: SCSS_EXPRESSION_ITEM_LIST@48..53
-                          0: CSS_NUMBER@48..50
-                            0: CSS_NUMBER_LITERAL@48..50 "1" [] [Whitespace(" ")]
-                          1: CSS_NUMBER@50..52
-                            0: CSS_NUMBER_LITERAL@50..52 "2" [] [Whitespace(" ")]
-                          2: CSS_NUMBER@52..53
-                            0: CSS_NUMBER_LITERAL@52..53 "3" [] []
-                    3: R_PAREN@53..54 ")" [] []
+                2: SCSS_EXPRESSION@45..54
+                  0: SCSS_EXPRESSION_ITEM_LIST@45..54
+                    0: CSS_FUNCTION@45..54
+                      0: CSS_IDENTIFIER@45..47
+                        0: IDENT@45..47 "fn" [] []
+                      1: L_PAREN@47..48 "(" [] []
+                      2: CSS_PARAMETER_LIST@48..53
+                        0: SCSS_EXPRESSION@48..53
+                          0: SCSS_EXPRESSION_ITEM_LIST@48..53
+                            0: CSS_NUMBER@48..50
+                              0: CSS_NUMBER_LITERAL@48..50 "1" [] [Whitespace(" ")]
+                            1: CSS_NUMBER@50..52
+                              0: CSS_NUMBER_LITERAL@50..52 "2" [] [Whitespace(" ")]
+                            2: CSS_NUMBER@52..53
+                              0: CSS_NUMBER_LITERAL@52..53 "3" [] []
+                      3: R_PAREN@53..54 ")" [] []
               1: (empty)
             1: SEMICOLON@54..55 ";" [] []
         2: R_CURLY@55..57 "}" [Newline("\n")] []
