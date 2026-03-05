@@ -74,8 +74,7 @@ pub(crate) fn parse_unicode_range(p: &mut CssParser) -> ParsedSyntax {
             p.error(wildcard_range_interval_not_allowed(p, range));
             p.bump_with_context(T![-], CssLexContext::UnicodeRange);
 
-            if parse_unicode_codepoint(p).is_absent()
-                && parse_unicode_range_wildcard(p).is_absent()
+            if parse_unicode_codepoint(p).is_absent() && parse_unicode_range_wildcard(p).is_absent()
             {
                 p.error(expected_codepoint(p, p.cur_range()));
             }
