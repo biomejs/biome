@@ -62,7 +62,7 @@ pub struct MarkdownFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub trailing_newline: Option<TrailingNewline>,
 
-    /// The type of line ending applied to JSON (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
+    /// The type of line ending applied to Markdown (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
     #[bpaf(long("md-formatter-line-ending"), argument("lf|crlf|cr|auto"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_ending: Option<LineEnding>,
