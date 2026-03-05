@@ -2584,7 +2584,6 @@ ScssExpressionItemList = AnyScssExpressionItem*
 //         ^^^^^^^^^^^^^^^^
 AnyScssExpressionItem =
 	AnyCssValue
-	| CssDeclarationImportant
 	| CssGenericDelimiter
 	| ScssKeywordArgument
 	| ScssArbitraryArgument
