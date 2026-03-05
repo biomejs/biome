@@ -63,6 +63,8 @@ pub enum CssReLexContext {
     Regular,
     /// See [CssLexContext::UnicodeRange]
     UnicodeRange,
+    /// Re-lexes `+` and `-` as standalone tokens for SCSS expression parsing.
+    ScssExpression,
 }
 
 /// An extremely fast, lookup table based, lossless CSS lexer
@@ -1502,6 +1504,7 @@ impl<'src> ReLexer<'src> for CssLexer<'src> {
             Some(current) => match context {
                 CssReLexContext::Regular => self.consume_token(current),
                 CssReLexContext::UnicodeRange => self.consume_unicode_range_token(current),
+                CssReLexContext::ScssExpression => self.consume_scss_expression_token(current),
             },
             None => EOF,
         };
@@ -1514,6 +1517,16 @@ impl<'src> ReLexer<'src> for CssLexer<'src> {
         }
 
         re_lexed_kind
+    }
+}
+
+impl CssLexer<'_> {
+    fn consume_scss_expression_token(&mut self, current: u8) -> CssSyntaxKind {
+        match current {
+            b'+' => self.consume_byte(T![+]),
+            b'-' => self.consume_byte(T![-]),
+            _ => self.consume_token(current),
+        }
     }
 }
 

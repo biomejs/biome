@@ -3,6 +3,7 @@ source: crates/biome_formatter_test/src/snapshot_builder.rs
 assertion_line: 212
 info: css/scss/expression/precedence.scss
 ---
+
 # Input
 
 ```scss
@@ -156,8 +157,8 @@ $expr15: $a != ($b + $c * $d);
 
 $expr16: $a + $b / $c - $d * $e + $f;
 
-$expr17: 1 +2 * 3 -4 / 5;
-$expr18: -1 +2;
+$expr17: 1 + 2 * 3 - 4 / 5;
+$expr18: -1 + 2;
 $expr19: ($a + $b) * ($c + $d) / ($e - $f);
 
 $expr20: $a == $b and $c == $d or $e;

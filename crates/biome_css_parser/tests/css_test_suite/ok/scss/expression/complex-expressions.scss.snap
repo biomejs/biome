@@ -1,5 +1,6 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
 expression: snapshot
 ---
 
@@ -3129,11 +3130,14 @@ CssRoot {
             colon_token: COLON@3339..3341 ":" [] [Whitespace(" ")],
             value: ScssExpression {
                 items: ScssExpressionItemList [
-                    CssNumber {
-                        value_token: CSS_NUMBER_LITERAL@3341..3342 "1" [] [],
-                    },
-                    CssNumber {
-                        value_token: CSS_NUMBER_LITERAL@3342..3344 "+2" [] [],
+                    ScssBinaryExpression {
+                        left: CssNumber {
+                            value_token: CSS_NUMBER_LITERAL@3341..3342 "1" [] [],
+                        },
+                        operator: PLUS@3342..3343 "+" [] [],
+                        right: CssNumber {
+                            value_token: CSS_NUMBER_LITERAL@3343..3344 "2" [] [],
+                        },
                     },
                 ],
             },
@@ -5132,10 +5136,12 @@ CssRoot {
       1: COLON@3339..3341 ":" [] [Whitespace(" ")]
       2: SCSS_EXPRESSION@3341..3344
         0: SCSS_EXPRESSION_ITEM_LIST@3341..3344
-          0: CSS_NUMBER@3341..3342
-            0: CSS_NUMBER_LITERAL@3341..3342 "1" [] []
-          1: CSS_NUMBER@3342..3344
-            0: CSS_NUMBER_LITERAL@3342..3344 "+2" [] []
+          0: SCSS_BINARY_EXPRESSION@3341..3344
+            0: CSS_NUMBER@3341..3342
+              0: CSS_NUMBER_LITERAL@3341..3342 "1" [] []
+            1: PLUS@3342..3343 "+" [] []
+            2: CSS_NUMBER@3343..3344
+              0: CSS_NUMBER_LITERAL@3343..3344 "2" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@3344..3344
       4: SEMICOLON@3344..3345 ";" [] []
     80: SCSS_DECLARATION@3345..3365
