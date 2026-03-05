@@ -45,10 +45,10 @@ use biome_html_syntax::element_ext::AnyEmbeddedContent;
 use biome_html_syntax::{
     AnySvelteDirective, AstroEmbeddedContent, HtmlAttribute, HtmlAttributeInitializerClause,
     HtmlDoubleTextExpression, HtmlElement, HtmlFileSource, HtmlLanguage, HtmlRoot,
-    HtmlSelfClosingElement, HtmlSingleTextExpression, HtmlSyntaxNode, HtmlTextExpression,
-    HtmlTextExpressions, HtmlVariant, SvelteAwaitBlock, SvelteEachBlock, SvelteIfBlock,
-    SvelteKeyBlock, VueDirective, VueVBindShorthandDirective, VueVOnShorthandDirective,
-    VueVSlotShorthandDirective,
+    HtmlSelfClosingElement, HtmlSingleTextExpression, HtmlSyntaxKind, HtmlSyntaxNode,
+    HtmlSyntaxToken, HtmlTextExpression, HtmlTextExpressions, HtmlVariant, SvelteAwaitBlock,
+    SvelteEachBlock, SvelteIfBlock, SvelteKeyBlock, VueDirective, VueVBindShorthandDirective,
+    VueVOnShorthandDirective, VueVSlotShorthandDirective,
 };
 use biome_js_parser::parse_js_with_offset_and_cache;
 use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage};
@@ -963,6 +963,21 @@ fn parse_embedded_nodes(
                         nodes.push((content.into(), doc_source));
                     }
                 }
+
+                if let Some(attribute) = HtmlAttribute::cast_ref(&element)
+                    && let Some(initializer) = attribute.initializer()
+                    && let Ok(value) = initializer.value()
+                    && let Some(text_expression) = value.as_html_attribute_single_text_expression()
+                    && let Ok(expression) = text_expression.expression()
+                {
+                    let file_source = embedded_file_source
+                        .with_embedding_kind(EmbeddingKind::Svelte { is_source: false });
+                    if let Some((content, doc_source)) =
+                        parse_text_expression(expression, cache, biome_path, settings, file_source)
+                    {
+                        nodes.push((content.into(), doc_source));
+                    }
+                }
             }
 
             // Extract Tailwind class attributes from all elements
@@ -1795,7 +1810,28 @@ pub(crate) fn update_snippets(
             continue;
         }
 
-        let Some(attribute) = HtmlAttribute::cast(node) else {
+        let Some(attribute) = HtmlAttribute::cast(node.clone()) else {
+            let Some(text_expression) = HtmlTextExpression::cast(node) else {
+                continue;
+            };
+            let Some(snippet) = new_snippets
+                .iter()
+                .find(|snippet| snippet.range == text_expression.range())
+            else {
+                continue;
+            };
+
+            let Ok(value_token) = text_expression.html_literal_token() else {
+                continue;
+            };
+
+            let new_token = HtmlSyntaxToken::new_detached(
+                HtmlSyntaxKind::HTML_LITERAL,
+                snippet.new_code.as_str(),
+                [],
+                [],
+            );
+            mutation.replace_token(value_token, new_token);
             continue;
         };
         let Some(snippet) = new_snippets

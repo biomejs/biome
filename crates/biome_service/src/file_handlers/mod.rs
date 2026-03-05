@@ -1112,9 +1112,16 @@ impl Features {
         match language_hint {
             // TODO: remove match once we remove vue/astro/svelte handlers
             DocumentFileSource::Js(source) => match source.as_embedding_kind() {
-                EmbeddingKind::Astro { .. } => self.astro.capabilities(),
-                EmbeddingKind::Vue { .. } => self.vue.capabilities(),
-                EmbeddingKind::Svelte { .. } => self.svelte.capabilities(),
+                EmbeddingKind::Astro { .. } if source.is_embedded_source() => {
+                    self.astro.capabilities()
+                }
+                EmbeddingKind::Vue { .. } if source.is_embedded_source() => self.vue.capabilities(),
+                EmbeddingKind::Svelte { .. } if source.is_embedded_source() => {
+                    self.svelte.capabilities()
+                }
+                EmbeddingKind::Astro { .. }
+                | EmbeddingKind::Vue { .. }
+                | EmbeddingKind::Svelte { .. } => self.js.capabilities(),
                 EmbeddingKind::None => self.js.capabilities(),
             },
             DocumentFileSource::Json(_) => self.json.capabilities(),

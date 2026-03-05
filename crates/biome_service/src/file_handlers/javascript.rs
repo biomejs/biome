@@ -583,14 +583,16 @@ fn parse(
 fn parse_embedded_nodes(
     root: &AnyParse,
     biome_path: &BiomePath,
-    _file_source: &DocumentFileSource,
+    file_source: &DocumentFileSource,
     settings: &SettingsWithEditor,
     cache: &mut NodeCache,
     _builder: &mut EmbeddedBuilder,
 ) -> ParseEmbedResult {
+    let file_source = file_source.to_js_file_source().unwrap_or_default();
     if !settings
         .as_ref()
         .experimental_js_embedded_snippets_enabled()
+        && !file_source.is_embedded()
     {
         return ParseEmbedResult { nodes: vec![] };
     }

@@ -135,6 +135,7 @@ fn should_apply_tailwind_shorthand_fixes_in_svelte() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_file_contents(&fs, svelte_file, r#"<div class={clsx("mx-2")}></div>\n"#);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
