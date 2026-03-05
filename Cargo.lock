@@ -1727,6 +1727,7 @@ dependencies = [
  "filetime",
  "insta",
  "phf 0.13.1",
+ "rustc-hash 2.1.1",
  "schemars",
  "serde",
  "tests_macros",

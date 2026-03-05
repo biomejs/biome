@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::hash::Hash;
 
 use biome_analyze::{
@@ -13,6 +12,7 @@ use biome_tailwind_syntax::{
     AnyTwCandidate, AnyTwModifier, AnyTwValue, TailwindSyntaxKind, TailwindSyntaxNode,
     TailwindSyntaxToken, TwCandidateList, TwFullCandidate, TwRoot, TwVariantList,
 };
+use rustc_hash::{FxHashMap, FxHashSet};
 
 use crate::TailwindRuleAction;
 
@@ -335,7 +335,7 @@ fn analyze_tailwind_shorthand(candidates: TwCandidateList) -> Vec<TailwindShorth
         .filter_map(|c| c.as_tw_full_candidate().cloned())
         .collect();
 
-    let mut groups: HashMap<GroupKey, Vec<TwFullCandidate>> = HashMap::new();
+    let mut groups: FxHashMap<GroupKey, Vec<TwFullCandidate>> = FxHashMap::default();
     for candidate in &all_full_candidates {
         let Some(key) = extract_key(candidate) else {
             continue;
@@ -346,12 +346,14 @@ fn analyze_tailwind_shorthand(candidates: TwCandidateList) -> Vec<TailwindShorth
     let mut violations: Vec<TailwindShorthandViolation> = Vec::new();
 
     for pattern_group in TW_COMPRESSABLES {
-        for (required_bases, replacement_bases) in *pattern_group {
-            // Special case: `w`/`h` → `size` must skip values that `size` doesn't support
-            // (e.g. `screen`, container sizes like `xs`/`sm`/`md`/...).
-            let is_size_pattern = *required_bases == ["w", "h"];
+        for (key, candidates) in &groups {
+            let mut used_candidates = FxHashSet::default();
 
-            for (key, candidates) in &groups {
+            for (required_bases, replacement_bases) in *pattern_group {
+                // Special case: `w`/`h` → `size` must skip values that `size` doesn't support
+                // (e.g. `screen`, container sizes like `xs`/`sm`/`md`/...).
+                let is_size_pattern = *required_bases == ["w", "h"];
+
                 if candidates.len() < required_bases.len() {
                     // Not enough candidates to match the required bases
                     continue;
@@ -371,10 +373,9 @@ fn analyze_tailwind_shorthand(candidates: TwCandidateList) -> Vec<TailwindShorth
                 let mut found_all = true;
                 let mut flagged_candidates = Vec::with_capacity(replacement_bases.len());
                 for &rb in *required_bases {
-                    let Some(candidate) =
-                        candidates
-                            .iter()
-                            .find(|candidate| match candidate.candidate().ok() {
+                    let Some(candidate) = candidates.iter().find(|candidate| {
+                        !used_candidates.contains(&candidate.range())
+                            && match candidate.candidate().ok() {
                                 Some(AnyTwCandidate::TwFunctionalCandidate(func)) => func
                                     .base_token()
                                     .ok()
@@ -383,8 +384,8 @@ fn analyze_tailwind_shorthand(candidates: TwCandidateList) -> Vec<TailwindShorth
                                     st.base_token().ok().is_some_and(|t| t.text_trimmed() == rb)
                                 }
                                 _ => false,
-                            })
-                    else {
+                            }
+                    }) else {
                         found_all = false;
                         break;
                     };
@@ -435,6 +436,8 @@ fn analyze_tailwind_shorthand(candidates: TwCandidateList) -> Vec<TailwindShorth
                 } else {
                     replacement_bases
                 };
+
+                used_candidates.extend(flagged_candidates.iter().map(AstNode::range));
                 violations.push(TailwindShorthandViolation {
                     uncompressed_nodes: flagged_candidates,
                     replacement_bases: effective_replacement_bases,
