@@ -3,7 +3,7 @@ use crate::parser::CssParser;
 use crate::syntax::parse_error::{
     expected_component_value, expected_scss_expression, scss_ellipsis_not_allowed,
 };
-use crate::syntax::property::parse_generic_component_value;
+use crate::syntax::property::{is_at_generic_delimiter, parse_generic_component_value};
 use crate::syntax::scss::{is_at_scss_identifier, parse_scss_identifier};
 use crate::syntax::value::dimension::is_at_any_dimension;
 use biome_css_syntax::CssSyntaxKind::{
@@ -42,8 +42,6 @@ const SCSS_MAP_EXPRESSION_KEY_END_TOKEN_SET: TokenSet<CssSyntaxKind> =
 const SCSS_MAP_EXPRESSION_VALUE_END_TOKEN_SET: TokenSet<CssSyntaxKind> = token_set![T![,], T![')']];
 const SCSS_LIST_EXPRESSION_ELEMENT_END_TOKEN_SET: TokenSet<CssSyntaxKind> =
     token_set![T![,], T![')']];
-const SCSS_GENERIC_DELIMITER_SET: TokenSet<CssSyntaxKind> = token_set![T![,], T![/]];
-
 pub(crate) const END_OF_SCSS_EXPRESSION_TOKEN_SET: TokenSet<CssSyntaxKind> =
     token_set![T![,], T![')'], T![;], T!['}']];
 
@@ -161,7 +159,7 @@ fn parse_scss_expression_item(p: &mut CssParser, options: ScssExpressionOptions)
         return parse_scss_keyword_argument(p, options);
     }
 
-    if p.at_ts(SCSS_GENERIC_DELIMITER_SET) {
+    if is_at_generic_delimiter(p) {
         return parse_generic_component_value(p);
     }
 
@@ -277,6 +275,10 @@ fn parse_scss_primary_expression(p: &mut CssParser) -> ParsedSyntax {
     }
 }
 
+/// Re-lexes signed numeric tokens in SCSS expression context.
+///
+/// If the current token is `CSS_NUMBER_LITERAL` or any dimension starting with `+` or `-`,
+/// this mutates parser state via `CssParser::re_lex(CssReLexContext::ScssExpression)`.
 #[inline]
 fn re_lex_signed_numeric_as_scss_operator(p: &mut CssParser) {
     if !(p.at(CSS_NUMBER_LITERAL) || is_at_any_dimension(p)) {
