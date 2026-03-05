@@ -6,8 +6,8 @@ mod scope;
 mod utils;
 mod visitor;
 
-use crate::css_module_info::CssClassReference;
 use crate::ModuleGraph;
+use crate::css_module_info::CssClassReference;
 use biome_js_semantic::ScopeId;
 use biome_js_syntax::AnyJsImportLike;
 use biome_js_type_info::{

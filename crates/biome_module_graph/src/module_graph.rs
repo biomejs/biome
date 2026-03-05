@@ -713,7 +713,7 @@ impl ModuleGraph {
                 path.to_path_buf(),
                 directory,
                 &fs_proxy,
-               semantic_model.clone(),
+                semantic_model.clone(),
                 enable_type_inference,
             );
 
