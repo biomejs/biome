@@ -20,13 +20,12 @@ info: markdown/spec/example-40.md
 @@ -1,3 +1,2 @@
  ## foo
 -
--### bar
-+###   bar
+ ### bar
 ```
 
 # Output
 
 ```md
 ## foo
-###   bar
+### bar
 ```

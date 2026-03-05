@@ -24,7 +24,8 @@ info: markdown/spec/example-48.md
 +## 
  #
 -
- ###
+-###
++### 
 ```
 
 # Output
@@ -32,5 +33,5 @@ info: markdown/spec/example-48.md
 ```md
 ## 
 #
-###
+### 
 ```

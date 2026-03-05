@@ -18,11 +18,11 @@ info: markdown/spec/example-36.md
 +++ Biome
 @@ -1 +1 @@
 -# foo
-+#                  foo
++# foo
 \ No newline at end of file
 ```
 
 # Output
 
 ```md
-#                  foo```
+# foo```

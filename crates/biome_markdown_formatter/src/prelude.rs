@@ -4,7 +4,7 @@
 
 pub(crate) use crate::{
     AsFormat, FormatNodeRule, FormattedIterExt as _, FormattedIterExt, IntoFormat,
-    MarkdownFormatter, MdFormatContext, format_removed, verbatim::*,
+    MarkdownFormatter, MdFormatContext, format_removed, format_replaced, verbatim::*,
 };
 pub(crate) use biome_formatter::prelude::*;
 pub(crate) use biome_rowan::{

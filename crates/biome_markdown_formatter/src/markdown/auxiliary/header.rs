@@ -1,3 +1,4 @@
+use crate::markdown::auxiliary::paragraph::FormatMdParagraphOptions;
 use crate::prelude::*;
 use biome_formatter::write;
 use biome_markdown_syntax::{MdHeader, MdHeaderFields};
@@ -15,10 +16,19 @@ impl FormatNodeRule<MdHeader> for FormatMdHeader {
         write!(f, [before.format()])?;
 
         if let Some(content) = content {
-            write!(f, [content.format()])?;
+            write!(
+                f,
+                [
+                    space(),
+                    content
+                        .format()
+                        .with_options(FormatMdParagraphOptions { trim_start: true })
+                ]
+            )?;
         }
 
         for hash in after.iter() {
+            // TODO: remove this once we remove the skipped trivia from the hash
             f.context()
                 .comments()
                 .mark_suppression_checked(hash.syntax());

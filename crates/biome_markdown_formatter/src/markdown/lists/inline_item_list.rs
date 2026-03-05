@@ -1,17 +1,19 @@
 use crate::markdown::auxiliary::textual::FormatMdTextualOptions;
 use crate::prelude::*;
-use biome_formatter::write;
+use biome_formatter::{FormatRuleWithOptions, write};
 use biome_markdown_syntax::{AnyMdInline, MdInlineItemList};
 
 #[derive(Debug, Clone, Default)]
-pub(crate) struct FormatMdInlineItemList;
+pub(crate) struct FormatMdInlineItemList {
+    trime_start: bool,
+}
 impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
     type Context = MdFormatContext;
     fn fmt(&self, node: &MdInlineItemList, f: &mut MarkdownFormatter) -> FormatResult<()> {
         let mut joiner = f.join();
 
         let mut seen_new_line = false;
-        for item in node.iter() {
+        for (index, item) in node.iter().enumerate() {
             match item {
                 AnyMdInline::MdTextual(text) => {
                     if text.is_empty()? && seen_new_line {
@@ -19,7 +21,8 @@ impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
                             write!(
                                 f,
                                 [text.format().with_options(FormatMdTextualOptions {
-                                    should_remove: true
+                                    should_remove: true,
+                                    trime_start: false
                                 })]
                             )
                         });
@@ -30,7 +33,8 @@ impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
                                 f,
                                 [
                                     text.format().with_options(FormatMdTextualOptions {
-                                        should_remove: true
+                                        should_remove: true,
+                                        trime_start: false
                                     }),
                                     hard_line_break()
                                 ]
@@ -39,7 +43,10 @@ impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
                         seen_new_line = true;
                         joiner.entry(&entry);
                     } else {
-                        joiner.entry(&text.format());
+                        joiner.entry(&text.format().with_options(FormatMdTextualOptions {
+                            should_remove: false,
+                            trime_start: self.trime_start && index == 0,
+                        }));
                     }
                 }
                 _ => {
@@ -50,5 +57,18 @@ impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
         }
 
         joiner.finish()
+    }
+}
+
+pub(crate) struct FormatMdFormatInlineItemListOptions {
+    pub(crate) trime_start: bool,
+}
+
+impl FormatRuleWithOptions<MdInlineItemList> for FormatMdInlineItemList {
+    type Options = FormatMdFormatInlineItemListOptions;
+
+    fn with_options(mut self, options: Self::Options) -> Self {
+        self.trime_start = options.trime_start;
+        self
     }
 }

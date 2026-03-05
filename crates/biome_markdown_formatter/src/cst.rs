@@ -1,9 +1,37 @@
 use crate::{MdFormatContext, prelude::*};
+use biome_formatter::trivia::{FormatToken, format_skipped_token_trivia};
 use biome_formatter::{FormatOwnedWithRule, FormatRefWithRule, FormatResult};
-use biome_markdown_syntax::{MarkdownSyntaxNode, map_syntax_node};
+use biome_markdown_syntax::{
+    MarkdownLanguage, MarkdownSyntaxNode, MarkdownSyntaxToken, map_syntax_node,
+};
 
 #[derive(Debug, Copy, Clone, Default)]
 pub struct FormatMarkdownSyntaxNode;
+
+impl FormatRule<MarkdownSyntaxToken> for FormatMarkdownSyntaxNode {
+    type Context = MdFormatContext;
+
+    fn fmt(
+        &self,
+        token: &MarkdownSyntaxToken,
+        f: &mut Formatter<Self::Context>,
+    ) -> FormatResult<()> {
+        f.state_mut().track_token(token);
+
+        self.format_skipped_token_trivia(token, f)?;
+        self.format_trimmed_token_trivia(token, f)
+    }
+}
+
+impl FormatToken<MarkdownLanguage, MdFormatContext> for FormatMarkdownSyntaxNode {
+    fn format_skipped_token_trivia(
+        &self,
+        token: &MarkdownSyntaxToken,
+        f: &mut Formatter<MdFormatContext>,
+    ) -> FormatResult<()> {
+        format_skipped_token_trivia(token).fmt(f)
+    }
+}
 
 impl FormatRule<MarkdownSyntaxNode> for FormatMarkdownSyntaxNode {
     type Context = MdFormatContext;
