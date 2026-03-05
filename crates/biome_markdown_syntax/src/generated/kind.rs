@@ -108,6 +108,8 @@ pub enum MarkdownSyntaxKind {
     MD_INDENT_TOKEN,
     MD_INDENT_TOKEN_LIST,
     MD_LIST_MARKER_PREFIX,
+    MD_THEMATIC_BREAK_CHAR,
+    MD_THEMATIC_BREAK_PART_LIST,
     #[doc(hidden)]
     __LAST,
 }
@@ -171,6 +173,7 @@ impl MarkdownSyntaxKind {
                 | MD_INLINE_ITEM_LIST
                 | MD_INDENTED_CODE_LINE_LIST
                 | MD_INDENT_TOKEN_LIST
+                | MD_THEMATIC_BREAK_PART_LIST
         )
     }
     pub fn from_keyword(ident: &str) -> Option<Self> {

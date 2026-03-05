@@ -1672,10 +1672,8 @@ fn parse_first_line_blocks(
         is_thematic_break_pattern(p)
     });
 
-    if is_thematic_break {
-        if parse_thematic_break_block(p).is_present() {
-            state.record_first_line_block();
-        }
+    if is_thematic_break && parse_thematic_break_block(p).is_present() {
+        state.record_first_line_block();
         return LoopAction::Continue;
     }
 

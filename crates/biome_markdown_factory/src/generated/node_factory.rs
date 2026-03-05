@@ -621,9 +621,15 @@ pub fn md_textual(value_token: SyntaxToken) -> MdTextual {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
-pub fn md_thematic_break_block(value_token: SyntaxToken) -> MdThematicBreakBlock {
+pub fn md_thematic_break_block(parts: MdThematicBreakPartList) -> MdThematicBreakBlock {
     MdThematicBreakBlock::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_THEMATIC_BREAK_BLOCK,
+        [Some(SyntaxElement::Node(parts.into_syntax()))],
+    ))
+}
+pub fn md_thematic_break_char(value_token: SyntaxToken) -> MdThematicBreakChar {
+    MdThematicBreakChar::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_THEMATIC_BREAK_CHAR,
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
@@ -706,6 +712,18 @@ where
 {
     MdQuoteIndentList::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_QUOTE_INDENT_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn md_thematic_break_part_list<I>(items: I) -> MdThematicBreakPartList
+where
+    I: IntoIterator<Item = AnyMdThematicBreakPart>,
+    I::IntoIter: ExactSizeIterator,
+{
+    MdThematicBreakPartList::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_THEMATIC_BREAK_PART_LIST,
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),
