@@ -236,6 +236,45 @@ pub fn sort_export_specifiers(
     Some(new_list)
 }
 
+pub fn merge_export_specifiers(
+    specifiers1: &JsExportNamedSpecifierList,
+    specifiers2: &JsExportNamedSpecifierList,
+    sort_order: SortOrder,
+) -> Option<JsExportNamedSpecifierList> {
+    let mut nodes = Vec::with_capacity(specifiers1.len() + specifiers2.len());
+    let mut separators = Vec::with_capacity(specifiers1.len() + specifiers2.len());
+    for AstSeparatedElement {
+        node,
+        trailing_separator,
+    } in specifiers1.elements()
+    {
+        let separator = trailing_separator.ok()?;
+        let mut node = node.ok()?;
+        if separator.is_none() {
+            node = node.trim_trailing_trivia()?;
+        }
+        let separator = separator.unwrap_or_else(|| {
+            make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")])
+        });
+        nodes.push(node);
+        separators.push(separator);
+    }
+    for AstSeparatedElement {
+        node,
+        trailing_separator,
+    } in specifiers2.elements()
+    {
+        nodes.push(node.ok()?);
+        if let Some(separator) = trailing_separator.ok()? {
+            separators.push(separator);
+        }
+    }
+    sort_export_specifiers(
+        &make::js_export_named_specifier_list(nodes, separators),
+        sort_order,
+    )
+}
+
 pub fn are_import_attributes_sorted(
     attributes: &JsImportAssertion,
     sort_order: SortOrder,
