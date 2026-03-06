@@ -61,12 +61,12 @@ a { color: red; -moz-transition: bar }
 @SUPPORTS (clip-path: fill-box) { a { clip-path: fill-box; } }
 
 @Supports (accent-color: auto) and (backdrop-filter: auto) {
-    a { accent-color: auto; background-filter: auto }
+    a { accent-color: auto; backdrop-filter: auto }
 }
 
 @SUPPORTS (accent-color: auto) {
     @SuPpOrTs (backdrop-filter: auto) {
-        a { accent-color: auto; background-filter: auto }
+        a { accent-color: auto; backdrop-filter: auto }
     }
 }
 

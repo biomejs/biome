@@ -175,7 +175,7 @@ declare_lint_rule! {
     ///
     /// ### `allowPropertyValues`
     ///
-    /// An object to map properties with its values (case-insensitive).
+    /// An object mapping property names to arrays of allowed values (case-insensitive).
     ///
     /// Default: `{}`
     ///
@@ -183,7 +183,7 @@ declare_lint_rule! {
     /// {
     ///   "options": {
     ///     "allowPropertyValues": {
-    ///       "clip-path": "fill-box"
+    ///       "clip-path": ["fill-box"]
     ///     }
     ///   }
     /// }
@@ -405,13 +405,16 @@ fn in_allow_list(name: &TokenText, list: &[String]) -> bool {
 fn is_allowed_property_value(
     key: &TokenText,
     value: &TokenText,
-    list: &HashMap<String, String>,
+    list: &HashMap<String, Vec<String>>,
 ) -> bool {
-    let this_value = list.get(key.to_ascii_lowercase_cow().as_ref());
-    this_value.is_some_and(|this_value| {
-        value
-            .to_ascii_lowercase_cow()
-            .eq_ignore_ascii_case(this_value)
+    let key_lower = key.to_ascii_lowercase_cow();
+    let val_lower = value.to_ascii_lowercase_cow();
+    // Case-insensitive key lookup, then check if the value is in the allowed list.
+    list.iter().any(|(prop, allowed_values)| {
+        prop.eq_ignore_ascii_case(&key_lower)
+            && allowed_values
+                .iter()
+                .any(|v| v.eq_ignore_ascii_case(&val_lower))
     })
 }
 

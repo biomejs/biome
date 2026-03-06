@@ -37,7 +37,7 @@ a { color: light-dark(black, white); }
 h1:has(+ h2) { margin: 0 0 0.25rem 0; }
 
 /* @supports selector() guards only its own block, not a separate rule */
-@supports selector(:has()) {}
+@supports selector(:has()) { a { color: red; } }
 @supports (color: red) {
     h1:has(+ h2) {
         color: red;

@@ -10,8 +10,8 @@
             "allowSelectors": ["has"],
             "allowFunctions": ["color-mix"],
             "allowMediaConditions": ["scripting"],
-            "allowPropertyValues":  {
-              "clip-path":"fill-box"
+            "allowPropertyValues": {
+              "clip-path": ["fill-box"]
             }
           }
         }

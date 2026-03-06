@@ -241,7 +241,7 @@ impl<'a> std::fmt::Display for RuleSource<'a> {
             Self::EslintJson(_) => write!(f, "@eslint/json"),
             Self::EslintMarkdown(_) => write!(f, "@eslint/markdown"),
             Self::EslintYml(_) => write!(f, "eslint-plugin-yml"),
-            Self::EslintCss(_) => write!(f, "eslint/css"),
+            Self::EslintCss(_) => write!(f, "@eslint/css"),
         }
     }
 }
@@ -420,7 +420,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintJson(_) => "json",
             Self::EslintMarkdown(_) => "markdown",
             Self::EslintYml(_) => "yml",
-            Self::EslintCss(_) => "eslint/css",
+            Self::EslintCss(_) => "css",
         }
     }
 
@@ -478,7 +478,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintJson(rule_name) => format!("https://github.com/eslint/json/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintMarkdown(rule_name) => format!("https://github.com/eslint/markdown/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintYml(rule_name) => format!("https://ota-meshi.github.io/eslint-plugin-yml/rules/{rule_name}.html"),
-            Self::EslintCss(rule_name) => format!("https://github.com/eslint/css/tree/main/docs/rules/{rule_name}"),
+            Self::EslintCss(rule_name) => format!("https://github.com/eslint/css/blob/main/docs/rules/{rule_name}.md"),
         }
     }
 

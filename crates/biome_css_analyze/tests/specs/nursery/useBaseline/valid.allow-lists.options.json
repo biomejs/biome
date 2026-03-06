@@ -11,7 +11,7 @@
             "allowMediaConditions": ["scripting"],
             "allowSelectors": ["has"],
             "allowPropertyValues": {
-              "clip-path": "fill-box"
+              "clip-path": ["fill-box"]
             },
             "allowAtRules": ["container"]
           }

@@ -86,9 +86,9 @@ pub struct UseBaselineOptions {
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub allow_media_conditions: Vec<String>,
 
-    /// CSS property values to exclude from checking (format: `"property:value"`, case-insensitive).
+    /// CSS property values to exclude from checking (maps property name to allowed values, case-insensitive).
     #[serde(skip_serializing_if = "HashMap::is_empty")]
-    pub allow_property_values: HashMap<String, String>,
+    pub allow_property_values: HashMap<String, Vec<String>>,
 
     /// CSS pseudo-selectors to exclude from checking (without `:` or `::`, case-insensitive).
     #[serde(skip_serializing_if = "Vec::is_empty")]
