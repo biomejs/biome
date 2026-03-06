@@ -25,6 +25,9 @@ expression: invalid.svelte
 <!-- Hidden input is not accessible -->
 <a><input type="hidden" /></a>
 
+<!-- Image component is not recognized outside Astro -->
+<a><Image alt="description" /></a>
+
 ```
 
 # Diagnostics
@@ -244,6 +247,28 @@ invalid.svelte:20:1 lint/a11y/useAnchorContent ━━━━━━━━━━━
   > 20 │ <a><input type="hidden" /></a>
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     21 │ 
+    22 │ <!-- Image component is not recognized outside Astro -->
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.svelte:23:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    22 │ <!-- Image component is not recognized outside Astro -->
+  > 23 │ <a><Image alt="description" /></a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ 
   
   i All links on a page should have content that is accessible to screen readers.
   
