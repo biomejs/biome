@@ -243,23 +243,28 @@ fn hash_node<H: std::hash::Hasher>(node: &TailwindSyntaxNode, state: &mut H) {
     }
 }
 
-/// Returns the full class text of a candidate (e.g. `"overflow-hidden"` for a
-/// functional candidate with base `"overflow"` and value `"hidden"`).
-fn candidate_text(full: &TwFullCandidate) -> Option<String> {
-    match full.candidate().ok()? {
-        AnyTwCandidate::TwFunctionalCandidate(func) => {
-            let base = func.base_token().ok()?;
-            let value = func.value().ok()?;
-            Some(format!(
-                "{}-{}",
-                base.text_trimmed(),
-                value.syntax().text_trimmed()
-            ))
+/// Returns `true` if `full` is a functional candidate whose base token matches
+/// `base` and whose value text matches `value`, without allocating any strings.
+fn candidate_matches(full: &TwFullCandidate, base: &str, value: &str) -> bool {
+    match full.candidate().ok() {
+        Some(AnyTwCandidate::TwFunctionalCandidate(func)) => {
+            func.base_token()
+                .ok()
+                .is_some_and(|t| t.text_trimmed() == base)
+                && func
+                    .value()
+                    .ok()
+                    .is_some_and(|v| v.syntax().text_trimmed() == value)
         }
-        AnyTwCandidate::TwStaticCandidate(st) => {
-            Some(st.base_token().ok()?.text_trimmed().to_string())
+        Some(AnyTwCandidate::TwStaticCandidate(st)) => {
+            // Static candidates have no value part; match when `value` is empty.
+            value.is_empty()
+                && st
+                    .base_token()
+                    .ok()
+                    .is_some_and(|t| t.text_trimmed() == base)
         }
-        _ => None,
+        _ => false,
     }
 }
 
@@ -271,24 +276,32 @@ fn candidate_text(full: &TwFullCandidate) -> Option<String> {
 fn check_truncate_shorthand(
     all_candidates: &[TwFullCandidate],
 ) -> Option<TailwindShorthandViolation> {
-    const TRUNCATE_PARTS: &[&str] = &["overflow-hidden", "text-ellipsis", "whitespace-nowrap"];
+    /// Each tuple is `(base, value)` for a functional candidate that forms part
+    /// of the `truncate` shorthand.  Using `(base, value)` pairs avoids any
+    /// string allocation during matching.
+    const TRUNCATE_PARTS: &[(&str, &str)] = &[
+        ("overflow", "hidden"),
+        ("text", "ellipsis"),
+        ("whitespace", "nowrap"),
+    ];
 
     // Find the first part to establish the variants/negative/important context.
+    let (first_base, first_value) = TRUNCATE_PARTS[0];
     let first = all_candidates.iter().find(|c| {
-        candidate_text(c).as_deref() == Some("overflow-hidden")
+        candidate_matches(c, first_base, first_value)
             && c.negative_token().is_none()
             && c.excl_token().is_none()
     })?;
 
-    let first_variants_text = first.variants().syntax().text_trimmed().to_string();
+    let first_variants = first.variants();
 
     let mut matched: Vec<TwFullCandidate> = Vec::with_capacity(TRUNCATE_PARTS.len());
-    for &part in TRUNCATE_PARTS {
+    for &(base, value) in TRUNCATE_PARTS {
         let candidate = all_candidates.iter().find(|c| {
-            candidate_text(c).as_deref() == Some(part)
+            candidate_matches(c, base, value)
                 && c.negative_token().is_none()
                 && c.excl_token().is_none()
-                && c.variants().syntax().text_trimmed() == first_variants_text.as_str()
+                && is_node_equal(c.variants().syntax(), first_variants.syntax())
         })?;
         matched.push(candidate.clone());
     }
