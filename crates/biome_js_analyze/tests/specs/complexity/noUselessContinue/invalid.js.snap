@@ -118,11 +118,11 @@ invalid.js:16:3 lint/complexity/noUselessContinue  FIXABLE  ━━━━━━�
   
   i Safe fix: Delete the unnecessary continue statement
   
-    14 14 │   	if (i > 5) {
-    15 15 │   		console.log("foo");
+    14 14 │     if (i > 5) {
+    15 15 │       console.log("foo");
     16    │ - → → continue;
-    17 16 │   	} else if (i >= 5 && i < 8) {
-    18 17 │   		console.log("test");
+    17 16 │     } else if (i >= 5 && i < 8) {
+    18 17 │       console.log("test");
   
 
 ```

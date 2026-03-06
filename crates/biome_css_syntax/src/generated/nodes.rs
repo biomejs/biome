@@ -384,14 +384,14 @@ impl CssBinaryExpression {
     pub fn as_fields(&self) -> CssBinaryExpressionFields {
         CssBinaryExpressionFields {
             left: self.left(),
-            operator_token: self.operator_token(),
+            operator: self.operator(),
             right: self.right(),
         }
     }
     pub fn left(&self) -> SyntaxResult<AnyCssExpression> {
         support::required_node(&self.syntax, 0usize)
     }
-    pub fn operator_token(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn operator(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
     pub fn right(&self) -> SyntaxResult<AnyCssExpression> {
@@ -409,7 +409,7 @@ impl Serialize for CssBinaryExpression {
 #[derive(Serialize)]
 pub struct CssBinaryExpressionFields {
     pub left: SyntaxResult<AnyCssExpression>,
-    pub operator_token: SyntaxResult<SyntaxToken>,
+    pub operator: SyntaxResult<SyntaxToken>,
     pub right: SyntaxResult<AnyCssExpression>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -2869,8 +2869,8 @@ impl CssGenericProperty {
     pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
-    pub fn value(&self) -> CssGenericComponentValueList {
-        support::list(&self.syntax, 2usize)
+    pub fn value(&self) -> SyntaxResult<AnyCssGenericPropertyValueOrExpression> {
+        support::required_node(&self.syntax, 2usize)
     }
 }
 impl Serialize for CssGenericProperty {
@@ -2885,7 +2885,7 @@ impl Serialize for CssGenericProperty {
 pub struct CssGenericPropertyFields {
     pub name: SyntaxResult<AnyCssDeclarationName>,
     pub colon_token: SyntaxResult<SyntaxToken>,
-    pub value: CssGenericComponentValueList,
+    pub value: SyntaxResult<AnyCssGenericPropertyValueOrExpression>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssIdSelector {
@@ -9435,8 +9435,8 @@ impl ScssNestingDeclaration {
     pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
-    pub fn value(&self) -> CssGenericComponentValueList {
-        support::list(&self.syntax, 2usize)
+    pub fn value(&self) -> SyntaxResult<ScssExpression> {
+        support::required_node(&self.syntax, 2usize)
     }
     pub fn block(&self) -> SyntaxResult<AnyCssDeclarationOrRuleBlock> {
         support::required_node(&self.syntax, 3usize)
@@ -9454,7 +9454,7 @@ impl Serialize for ScssNestingDeclaration {
 pub struct ScssNestingDeclarationFields {
     pub name: SyntaxResult<CssIdentifier>,
     pub colon_token: SyntaxResult<SyntaxToken>,
-    pub value: CssGenericComponentValueList,
+    pub value: SyntaxResult<ScssExpression>,
     pub block: SyntaxResult<AnyCssDeclarationOrRuleBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -11652,6 +11652,25 @@ impl AnyCssGenericComponentValue {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssGenericPropertyValueOrExpression {
+    CssGenericComponentValueList(CssGenericComponentValueList),
+    ScssExpression(ScssExpression),
+}
+impl AnyCssGenericPropertyValueOrExpression {
+    pub fn as_css_generic_component_value_list(&self) -> Option<&CssGenericComponentValueList> {
+        match &self {
+            Self::CssGenericComponentValueList(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_expression(&self) -> Option<&ScssExpression> {
+        match &self {
+            Self::ScssExpression(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssIfBranch {
     CssBogusIfBranch(CssBogusIfBranch),
     CssIfBranch(CssIfBranch),
@@ -13489,10 +13508,8 @@ impl AnyScssDeclarationName {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyScssExpression {
     AnyCssValue(AnyCssValue),
-    ScssArbitraryArgument(ScssArbitraryArgument),
     ScssBinaryExpression(ScssBinaryExpression),
     ScssExpression(ScssExpression),
-    ScssKeywordArgument(ScssKeywordArgument),
     ScssListExpression(ScssListExpression),
     ScssMapExpression(ScssMapExpression),
     ScssParenthesizedExpression(ScssParenthesizedExpression),
@@ -13505,12 +13522,6 @@ impl AnyScssExpression {
             _ => None,
         }
     }
-    pub fn as_scss_arbitrary_argument(&self) -> Option<&ScssArbitraryArgument> {
-        match &self {
-            Self::ScssArbitraryArgument(item) => Some(item),
-            _ => None,
-        }
-    }
     pub fn as_scss_binary_expression(&self) -> Option<&ScssBinaryExpression> {
         match &self {
             Self::ScssBinaryExpression(item) => Some(item),
@@ -13520,12 +13531,6 @@ impl AnyScssExpression {
     pub fn as_scss_expression(&self) -> Option<&ScssExpression> {
         match &self {
             Self::ScssExpression(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_scss_keyword_argument(&self) -> Option<&ScssKeywordArgument> {
-        match &self {
-            Self::ScssKeywordArgument(item) => Some(item),
             _ => None,
         }
     }
@@ -14160,10 +14165,7 @@ impl std::fmt::Debug for CssBinaryExpression {
             DEPTH.set(current_depth + 1);
             f.debug_struct("CssBinaryExpression")
                 .field("left", &support::DebugSyntaxResult(self.left()))
-                .field(
-                    "operator_token",
-                    &support::DebugSyntaxResult(self.operator_token()),
-                )
+                .field("operator", &support::DebugSyntaxResult(self.operator()))
                 .field("right", &support::DebugSyntaxResult(self.right()))
                 .finish()
         } else {
@@ -17148,7 +17150,7 @@ impl std::fmt::Debug for CssGenericProperty {
                     "colon_token",
                     &support::DebugSyntaxResult(self.colon_token()),
                 )
-                .field("value", &self.value())
+                .field("value", &support::DebugSyntaxResult(self.value()))
                 .finish()
         } else {
             f.debug_struct("CssGenericProperty").finish()
@@ -25149,7 +25151,7 @@ impl std::fmt::Debug for ScssNestingDeclaration {
                     "colon_token",
                     &support::DebugSyntaxResult(self.colon_token()),
                 )
-                .field("value", &self.value())
+                .field("value", &support::DebugSyntaxResult(self.value()))
                 .field("block", &support::DebugSyntaxResult(self.block()))
                 .finish()
         } else {
@@ -29758,6 +29760,70 @@ impl From<AnyCssGenericComponentValue> for SyntaxNode {
 }
 impl From<AnyCssGenericComponentValue> for SyntaxElement {
     fn from(n: AnyCssGenericComponentValue) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssGenericComponentValueList> for AnyCssGenericPropertyValueOrExpression {
+    fn from(node: CssGenericComponentValueList) -> Self {
+        Self::CssGenericComponentValueList(node)
+    }
+}
+impl From<ScssExpression> for AnyCssGenericPropertyValueOrExpression {
+    fn from(node: ScssExpression) -> Self {
+        Self::ScssExpression(node)
+    }
+}
+impl AstNode for AnyCssGenericPropertyValueOrExpression {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssGenericComponentValueList::KIND_SET.union(ScssExpression::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, CSS_GENERIC_COMPONENT_VALUE_LIST | SCSS_EXPRESSION)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_GENERIC_COMPONENT_VALUE_LIST => {
+                Self::CssGenericComponentValueList(CssGenericComponentValueList::cast(syntax)?)
+            }
+            SCSS_EXPRESSION => Self::ScssExpression(ScssExpression { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssGenericComponentValueList(it) => it.syntax(),
+            Self::ScssExpression(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssGenericComponentValueList(it) => it.into_syntax(),
+            Self::ScssExpression(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssGenericPropertyValueOrExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::CssGenericComponentValueList(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssExpression(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssGenericPropertyValueOrExpression> for SyntaxNode {
+    fn from(n: AnyCssGenericPropertyValueOrExpression) -> Self {
+        match n {
+            AnyCssGenericPropertyValueOrExpression::CssGenericComponentValueList(it) => {
+                it.into_syntax()
+            }
+            AnyCssGenericPropertyValueOrExpression::ScssExpression(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssGenericPropertyValueOrExpression> for SyntaxElement {
+    fn from(n: AnyCssGenericPropertyValueOrExpression) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -34999,11 +35065,6 @@ impl From<AnyScssDeclarationName> for SyntaxElement {
         node.into()
     }
 }
-impl From<ScssArbitraryArgument> for AnyScssExpression {
-    fn from(node: ScssArbitraryArgument) -> Self {
-        Self::ScssArbitraryArgument(node)
-    }
-}
 impl From<ScssBinaryExpression> for AnyScssExpression {
     fn from(node: ScssBinaryExpression) -> Self {
         Self::ScssBinaryExpression(node)
@@ -35012,11 +35073,6 @@ impl From<ScssBinaryExpression> for AnyScssExpression {
 impl From<ScssExpression> for AnyScssExpression {
     fn from(node: ScssExpression) -> Self {
         Self::ScssExpression(node)
-    }
-}
-impl From<ScssKeywordArgument> for AnyScssExpression {
-    fn from(node: ScssKeywordArgument) -> Self {
-        Self::ScssKeywordArgument(node)
     }
 }
 impl From<ScssListExpression> for AnyScssExpression {
@@ -35042,20 +35098,16 @@ impl From<ScssUnaryExpression> for AnyScssExpression {
 impl AstNode for AnyScssExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyCssValue::KIND_SET
-        .union(ScssArbitraryArgument::KIND_SET)
         .union(ScssBinaryExpression::KIND_SET)
         .union(ScssExpression::KIND_SET)
-        .union(ScssKeywordArgument::KIND_SET)
         .union(ScssListExpression::KIND_SET)
         .union(ScssMapExpression::KIND_SET)
         .union(ScssParenthesizedExpression::KIND_SET)
         .union(ScssUnaryExpression::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            SCSS_ARBITRARY_ARGUMENT
-            | SCSS_BINARY_EXPRESSION
+            SCSS_BINARY_EXPRESSION
             | SCSS_EXPRESSION
-            | SCSS_KEYWORD_ARGUMENT
             | SCSS_LIST_EXPRESSION
             | SCSS_MAP_EXPRESSION
             | SCSS_PARENTHESIZED_EXPRESSION
@@ -35066,12 +35118,8 @@ impl AstNode for AnyScssExpression {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            SCSS_ARBITRARY_ARGUMENT => {
-                Self::ScssArbitraryArgument(ScssArbitraryArgument { syntax })
-            }
             SCSS_BINARY_EXPRESSION => Self::ScssBinaryExpression(ScssBinaryExpression { syntax }),
             SCSS_EXPRESSION => Self::ScssExpression(ScssExpression { syntax }),
-            SCSS_KEYWORD_ARGUMENT => Self::ScssKeywordArgument(ScssKeywordArgument { syntax }),
             SCSS_LIST_EXPRESSION => Self::ScssListExpression(ScssListExpression { syntax }),
             SCSS_MAP_EXPRESSION => Self::ScssMapExpression(ScssMapExpression { syntax }),
             SCSS_PARENTHESIZED_EXPRESSION => {
@@ -35089,10 +35137,8 @@ impl AstNode for AnyScssExpression {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::ScssArbitraryArgument(it) => it.syntax(),
             Self::ScssBinaryExpression(it) => it.syntax(),
             Self::ScssExpression(it) => it.syntax(),
-            Self::ScssKeywordArgument(it) => it.syntax(),
             Self::ScssListExpression(it) => it.syntax(),
             Self::ScssMapExpression(it) => it.syntax(),
             Self::ScssParenthesizedExpression(it) => it.syntax(),
@@ -35102,10 +35148,8 @@ impl AstNode for AnyScssExpression {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::ScssArbitraryArgument(it) => it.into_syntax(),
             Self::ScssBinaryExpression(it) => it.into_syntax(),
             Self::ScssExpression(it) => it.into_syntax(),
-            Self::ScssKeywordArgument(it) => it.into_syntax(),
             Self::ScssListExpression(it) => it.into_syntax(),
             Self::ScssMapExpression(it) => it.into_syntax(),
             Self::ScssParenthesizedExpression(it) => it.into_syntax(),
@@ -35118,10 +35162,8 @@ impl std::fmt::Debug for AnyScssExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::AnyCssValue(it) => std::fmt::Debug::fmt(it, f),
-            Self::ScssArbitraryArgument(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssBinaryExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssExpression(it) => std::fmt::Debug::fmt(it, f),
-            Self::ScssKeywordArgument(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssListExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssMapExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssParenthesizedExpression(it) => std::fmt::Debug::fmt(it, f),
@@ -35133,10 +35175,8 @@ impl From<AnyScssExpression> for SyntaxNode {
     fn from(n: AnyScssExpression) -> Self {
         match n {
             AnyScssExpression::AnyCssValue(it) => it.into_syntax(),
-            AnyScssExpression::ScssArbitraryArgument(it) => it.into_syntax(),
             AnyScssExpression::ScssBinaryExpression(it) => it.into_syntax(),
             AnyScssExpression::ScssExpression(it) => it.into_syntax(),
-            AnyScssExpression::ScssKeywordArgument(it) => it.into_syntax(),
             AnyScssExpression::ScssListExpression(it) => it.into_syntax(),
             AnyScssExpression::ScssMapExpression(it) => it.into_syntax(),
             AnyScssExpression::ScssParenthesizedExpression(it) => it.into_syntax(),
@@ -35803,6 +35843,11 @@ impl std::fmt::Display for AnyCssFunctionParameter {
     }
 }
 impl std::fmt::Display for AnyCssGenericComponentValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssGenericPropertyValueOrExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

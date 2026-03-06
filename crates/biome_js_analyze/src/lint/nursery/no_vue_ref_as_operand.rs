@@ -1,12 +1,17 @@
 use biome_analyze::{
-    Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule
+    Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_semantic::SemanticModel;
-use biome_js_syntax::{AnyJsExpression, AnyJsName, JsCallArgumentList, JsCallExpression, JsConditionalExpression, JsIdentifierAssignment, JsIdentifierBinding, JsIdentifierExpression, JsLogicalExpression, JsMethodObjectMember, JsStaticMemberAssignment, JsStaticMemberExpression, JsSyntaxKind, JsTemplateElement, JsTemplateExpression, JsVariableDeclaration, JsVariableDeclarator};
 use biome_js_syntax::binding_ext::AnyJsIdentifierBinding;
-use biome_rowan::{AstNode,  SyntaxNodeCast, TextRange, declare_node_union};
+use biome_js_syntax::{
+    AnyJsExpression, AnyJsName, JsCallArgumentList, JsCallExpression, JsConditionalExpression,
+    JsIdentifierAssignment, JsIdentifierBinding, JsIdentifierExpression, JsLogicalExpression,
+    JsMethodObjectMember, JsStaticMemberAssignment, JsStaticMemberExpression, JsSyntaxKind,
+    JsTemplateElement, JsTemplateExpression, JsVariableDeclaration, JsVariableDeclarator,
+};
+use biome_rowan::{AstNode, SyntaxNodeCast, TextRange, declare_node_union};
 use biome_rule_options::no_vue_ref_as_operand::NoVueRefAsOperandOptions;
 
 use crate::frameworks::vue::vue_call::is_vue_compiler_macro_call;
@@ -14,39 +19,39 @@ use crate::{frameworks::vue::vue_call::is_vue_api_reference, services::semantic:
 
 declare_lint_rule! {
     /// Disallow the use of value wrapped by `ref()`(Composition API) as operand
-    /// 
+    ///
     /// To access value wrapped by `ref()`, you must use `.value`.
     ///
     /// ## Examples
     ///
     /// ### Invalid
-    /// 
+    ///
     /// ```js,expect_diagnostic
     /// import { ref } from "vue"
-    /// 
+    ///
     /// const count = ref(0)
     /// count++
     /// ```
-    /// 
+    ///
     /// ```js,expect_diagnostic
     /// import { ref } from "vue"
-    /// 
+    ///
     /// const ok = ref(false)
     /// const msg = ok ? "yes" : "no"
     /// ```
-    /// 
+    ///
     /// ```js,expect_diagnostic
     /// import { ref } from "vue"
-    /// 
+    ///
     /// const ok = ref(false)
     /// if (ok) {
     ///   //
     /// }
     /// ```
-    /// 
+    ///
     /// ```js,expect_diagnostic
     /// import { ref } from "vue"
-    /// 
+    ///
     /// export default {
     ///   setup(_props, { emit }) {
     ///     const count = ref(0)
@@ -56,27 +61,27 @@ declare_lint_rule! {
     /// ```
     ///
     /// ### Valid
-    /// 
+    ///
     /// ```js
     /// import { ref } from "vue"
-    /// 
+    ///
     /// const count = ref(0)
     /// count.value++
     /// ```
-    /// 
+    ///
     /// ```js
     /// import { ref } from "vue"
-    /// 
+    ///
     /// const ok = ref(true)
     /// const msg = ok.value ? "yes" : "no"
     /// if (ok.value) {
     ///   //
     /// }
     /// ```
-    /// 
+    ///
     /// ```js
     /// import { ref } from "vue"
-    /// 
+    ///
     /// export default {
     ///   setup(_props, { emit }) {
     ///     const count = ref(0)
@@ -84,7 +89,7 @@ declare_lint_rule! {
     ///   }
     /// }
     /// ```
-    /// 
+    ///
     pub NoVueRefAsOperand {
         version: "2.4.5",
         name: "noVueRefAsOperand",
@@ -136,16 +141,21 @@ fn check_expression(expr: &NoVueRefAsOperandQuery, model: &SemanticModel) -> Opt
         NoVueRefAsOperandQuery::JsIdentifierExpression(ident_expr) => {
             let reference = ident_expr.name().ok()?;
             let binding = model.binding(&reference)?.tree();
-            let declarator = binding.syntax().ancestors().find_map(JsVariableDeclarator::cast)?;
+            let declarator = binding
+                .syntax()
+                .ancestors()
+                .skip(1)
+                .find_map(JsVariableDeclarator::cast)?;
             let init_clause = declarator.initializer()?;
             let init_expr = init_clause.expression().ok()?;
             let call_expr = init_expr.as_js_call_expression()?;
 
-            let ident_binding = if let AnyJsIdentifierBinding::JsIdentifierBinding(binding) = &binding {
-                binding
-            } else {
-                return None
-            };
+            let ident_binding =
+                if let AnyJsIdentifierBinding::JsIdentifierBinding(binding) = &binding {
+                    binding
+                } else {
+                    return None;
+                };
 
             if !is_calling_a_ref(call_expr, ident_binding, model) {
                 return None;
@@ -176,7 +186,7 @@ fn check_expression(expr: &NoVueRefAsOperandQuery, model: &SemanticModel) -> Opt
                         }
 
                         // Report only refs which are constants
-                        if let Some(declaration) = declarator.syntax().ancestors().find_map(JsVariableDeclaration::cast)
+                        if let Some(declaration) = declarator.syntax().ancestors().skip(1).find_map(JsVariableDeclaration::cast)
                         && (declaration.is_const()) {
                             return Some(ident_expr.range())
                         }
@@ -231,15 +241,20 @@ fn check_expression(expr: &NoVueRefAsOperandQuery, model: &SemanticModel) -> Opt
         }
         NoVueRefAsOperandQuery::JsIdentifierAssignment(ident_assignment) => {
             let binding = model.binding(ident_assignment)?.tree();
-            let declarator = binding.syntax().ancestors().find_map(JsVariableDeclarator::cast)?;
+            let declarator = binding
+                .syntax()
+                .ancestors()
+                .skip(1)
+                .find_map(JsVariableDeclarator::cast)?;
             let init_clause = declarator.initializer()?;
             let init_expr = init_clause.expression().ok()?;
             let call_expr = init_expr.as_js_call_expression()?;
-            let ident_binding = if let AnyJsIdentifierBinding::JsIdentifierBinding(binding) = &binding {
-                binding
-            } else {
-                return None
-            };
+            let ident_binding =
+                if let AnyJsIdentifierBinding::JsIdentifierBinding(binding) = &binding {
+                    binding
+                } else {
+                    return None;
+                };
 
             if !is_calling_a_ref(call_expr, ident_binding, model) {
                 return None;
@@ -260,22 +275,26 @@ const REF_VALUE_APIS: &[&str] = &[
     "toRef",
     "customRef",
     "shallowRef",
-    "toRefs"
+    "toRefs",
 ];
 
 fn is_calling_a_ref(
     call_expr: &JsCallExpression,
-    ident_binding: &JsIdentifierBinding, 
-    model: &SemanticModel) -> bool {
+    ident_binding: &JsIdentifierBinding,
+    model: &SemanticModel,
+) -> bool {
     if let Ok(callee) = call_expr.callee() {
-        if ident_binding.is_under_object_pattern_binding().is_some_and(|v|v) {
+        if ident_binding
+            .is_under_object_pattern_binding()
+            .is_some_and(|v| v)
+        {
             return is_valid_destructured_ref(&callee, call_expr, model);
         }
-    
+
         REF_VALUE_APIS
             .iter()
             .any(|ref_name| is_vue_api_reference(&callee, model, ref_name))
-        || is_vue_compiler_macro_call(call_expr, model, "defineModel")
+            || is_vue_compiler_macro_call(call_expr, model, "defineModel")
     } else {
         false
     }
@@ -310,19 +329,19 @@ fn check_static_member_access(
     let ref_callee_name = ref_callee_expr.get_callee_member_name()?;
     if ref_callee_name.text() == "toRefs" {
         if is_valid_static_member_wrapped_in_to_refs(ident_binding, &member) {
-            return None
+            return None;
         }
-        return Some(static_member_expr.range())
+        return Some(static_member_expr.range());
     }
 
     if !is_value_static_member(&member) {
-        return Some(ident_expr.range())
+        return Some(ident_expr.range());
     }
 
     None
 }
 
-/// Check if a static member is `.value` 
+/// Check if a static member is `.value`
 fn is_value_static_member(member: &AnyJsName) -> bool {
     member
         .as_js_name()
@@ -337,7 +356,7 @@ fn is_valid_static_member_wrapped_in_to_refs(
 ) -> bool {
     // Destructured refs: `const { foo } = toRefs(obj); foo.value`
     if ident_binding.is_under_pattern_binding().is_some_and(|v| v) {
-        return is_value_static_member(member)
+        return is_value_static_member(member);
     }
 
     // Direct refs: `const refs = toRefs(obj); refs.foo.value`
@@ -380,7 +399,7 @@ fn is_emit_call_in_setup(callee_expr: &AnyJsExpression, model: &SemanticModel) -
                 false
             }
         }
-        _ => false
+        _ => false,
     }
 }
 
@@ -389,28 +408,23 @@ fn is_emit_in_setup_method(binding: &AnyJsIdentifierBinding) -> bool {
     binding
         .syntax()
         .ancestors()
+        .skip(1)
         .find_map(JsMethodObjectMember::cast)
-        .and_then(|method| {
-            method
-                .name()
-                .ok()?
-                .as_js_literal_member_name()?
-                .name()
-                .ok()
-        })
+        .and_then(|method| method.name().ok()?.as_js_literal_member_name()?.name().ok())
         .is_some_and(|name| name == "setup")
 }
 
 /// Check if emit is defined by a macro (defineEmits)
 fn is_emit_call_by_macro(callee: &AnyJsExpression, model: &SemanticModel) -> bool {
     if let Some(ident_expr) = callee.as_js_identifier_expression()
-    && let Ok(reference) = ident_expr.name()
-    && let Some(binding) = model.binding(&reference)
-    && let Some(parent) = binding.syntax().parent()
-    && let Some(decl) = parent.cast::<JsVariableDeclarator>()
-    && let Some(init) = decl.initializer()
-    && let Some(expr) = init.expression().ok()
-    && let Some(call_expr) = expr.as_js_call_expression() {
+        && let Ok(reference) = ident_expr.name()
+        && let Some(binding) = model.binding(&reference)
+        && let Some(parent) = binding.syntax().parent()
+        && let Some(decl) = parent.cast::<JsVariableDeclarator>()
+        && let Some(init) = decl.initializer()
+        && let Some(expr) = init.expression().ok()
+        && let Some(call_expr) = expr.as_js_call_expression()
+    {
         is_vue_compiler_macro_call(call_expr, model, "defineEmits")
     } else {
         false

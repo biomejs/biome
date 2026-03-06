@@ -55,7 +55,7 @@ use either::Either;
 use grit::GritFileHandler;
 use html::HtmlFileHandler;
 pub use javascript::JsFormatterSettings;
-use markdown::MarkdownFileHandler;
+use md::MarkdownFileHandler;
 use rustc_hash::FxHashSet;
 use std::borrow::Cow;
 use std::collections::HashSet;
@@ -70,7 +70,7 @@ pub(crate) mod html;
 mod ignore;
 pub(crate) mod javascript;
 pub(crate) mod json;
-pub(crate) mod markdown;
+pub(crate) mod md;
 pub mod svelte;
 mod unknown;
 pub mod vue;
@@ -169,6 +169,11 @@ impl DocumentFileSource {
             return Ok(file_source.into());
         }
         if let Ok(file_source) = GraphqlFileSource::try_from_well_known(path) {
+            return Ok(file_source.into());
+        }
+
+        #[cfg(feature = "markdown")]
+        if let Ok(file_source) = MdFileSource::try_from_well_known(path) {
             return Ok(file_source.into());
         }
 
@@ -2008,43 +2013,5 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
         disabled_rules.extend(assists_disabled_rules);
 
         (enabled_rules, disabled_rules, analyzer_options)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::{DocumentFileSource, Features};
-    use camino::Utf8Path;
-
-    #[test]
-    fn markdown_file_source_detection_and_capabilities() {
-        let source = DocumentFileSource::from_path(Utf8Path::new("docs/readme.md"), false);
-        assert!(matches!(source, DocumentFileSource::Unknown));
-
-        let language_source = DocumentFileSource::from_language_id("markdown");
-        assert!(matches!(language_source, DocumentFileSource::Unknown));
-
-        assert!(!DocumentFileSource::can_parse(Utf8Path::new(
-            "docs/readme.md"
-        )));
-        assert!(!DocumentFileSource::can_read(Utf8Path::new(
-            "docs/readme.md"
-        )));
-        assert!(!DocumentFileSource::can_contain_embeds(
-            Utf8Path::new("docs/readme.md"),
-            false
-        ));
-    }
-
-    #[test]
-    fn markdown_features_provide_formatter_capabilities() {
-        let features = Features::new();
-        let capabilities = features.get_capabilities(DocumentFileSource::from_path(
-            Utf8Path::new("doc.md"),
-            false,
-        ));
-
-        assert!(capabilities.formatter.format.is_none());
-        assert!(capabilities.parser.parse.is_none());
     }
 }

@@ -15,10 +15,11 @@ impl FormatNodeRule<ScssNestingDeclaration> for FormatScssNestingDeclaration {
 
         write!(f, [name.format(), colon_token.format()])?;
 
-        if !value.is_empty() {
-            write!(f, [space(), value.format()])?;
+        let value = value?;
+        if !value.items().is_empty() {
+            write!(f, [space()])?;
         }
 
-        write!(f, [space(), block.format()])
+        write!(f, [value.format(), space(), block.format()])
     }
 }

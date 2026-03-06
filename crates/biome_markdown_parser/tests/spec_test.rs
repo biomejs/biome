@@ -193,4 +193,9 @@ pub fn quick_test() {
         "![a & b < c](url)\n",
         "<p><img src=\"url\" alt=\"a &amp; b &lt; c\" /></p>\n",
     );
+    test_example(
+        9992,
+        "> ```\n> hello\n> ```\n",
+        "<blockquote>\n<pre><code>hello\n</code></pre>\n</blockquote>\n",
+    );
 }

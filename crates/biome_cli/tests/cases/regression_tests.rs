@@ -69,3 +69,49 @@ fn issue_9180_2() {
         result,
     ));
 }
+
+/// Regression test for https://github.com/biomejs/biome/issues/9300
+///
+/// This issue affects Tanstack Form users who use `<form.Field>` as their default API.
+/// In Biome 2.4.5, lowercase component member expressions like `<form.Field>` were
+/// incorrectly formatted as `<form .Field>` (with an extra space before the dot),
+/// which breaks the code.
+///
+/// The official Tanstack Form docs https://tanstack.com/form/latest/docs/framework/svelte/quick-start
+///
+/// This test ensures that lowercase component member expressions in Svelte and Astro
+/// files are formatted correctly without adding extra spaces.
+#[test]
+fn issue_9300() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let svelte_file = Utf8Path::new("form.svelte");
+    fs.insert(svelte_file.into(), "<form.Field></form.Field>".as_bytes());
+
+    let astro_file = Utf8Path::new("form.astro");
+    fs.insert(astro_file.into(), "<form.Field></form.Field>".as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "check",
+                "--write",
+                svelte_file.as_str(),
+                astro_file.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "issue_9300",
+        fs,
+        console,
+        result,
+    ));
+}

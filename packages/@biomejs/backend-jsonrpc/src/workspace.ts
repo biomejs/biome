@@ -2281,6 +2281,11 @@ See https://biomejs.dev/linter/rules/no-ternary
 	 */
 	noTernary?: NoTernaryConfiguration;
 	/**
+	* Require the JSON top-level value to be an array or object.
+See https://biomejs.dev/linter/rules/no-top-level-literals 
+	 */
+	noTopLevelLiterals?: NoTopLevelLiteralsConfiguration;
+	/**
 	* Disallow the use of undeclared environment variables.
 See https://biomejs.dev/linter/rules/no-undeclared-env-vars 
 	 */
@@ -4209,6 +4214,9 @@ export type NoSyncScriptsConfiguration =
 export type NoTernaryConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTernaryOptions;
+export type NoTopLevelLiteralsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoTopLevelLiteralsOptions;
 export type NoUndeclaredEnvVarsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUndeclaredEnvVarsOptions;
@@ -5895,6 +5903,10 @@ export interface RuleWithNoTernaryOptions {
 	level: RulePlainConfiguration;
 	options?: NoTernaryOptions;
 }
+export interface RuleWithNoTopLevelLiteralsOptions {
+	level: RulePlainConfiguration;
+	options?: NoTopLevelLiteralsOptions;
+}
 export interface RuleWithNoUndeclaredEnvVarsOptions {
 	level: RulePlainConfiguration;
 	options?: NoUndeclaredEnvVarsOptions;
@@ -7394,6 +7406,7 @@ export type NoScriptUrlOptions = {};
 export type NoShadowOptions = {};
 export type NoSyncScriptsOptions = {};
 export type NoTernaryOptions = {};
+export type NoTopLevelLiteralsOptions = {};
 export interface NoUndeclaredEnvVarsOptions {
 	/**
 	* Environment variables that should always be allowed.
@@ -8444,16 +8457,18 @@ export type Category =
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useLoneAnonymousOperation"
 	| "lint/nursery/useLoneExecutableDefinition"
-	| "lint/nursery/useNullishCoalescing"
 	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useNamedCaptureGroup"
+	| "lint/nursery/useNullishCoalescing"
 	| "lint/nursery/usePlaywrightValidDescribeCallback"
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
 	| "lint/nursery/useRegexpExec"
 	| "lint/nursery/useRequiredScripts"
+	| "lint/nursery/useScopedStyles"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSpread"
+	| "lint/nursery/noTopLevelLiterals"
 	| "lint/nursery/useUnicodeRegex"
 	| "lint/nursery/useUniqueArgumentNames"
 	| "lint/nursery/useUniqueFieldDefinitionNames"
@@ -8466,7 +8481,6 @@ export type Category =
 	| "lint/nursery/useVueDefineMacrosOrder"
 	| "lint/nursery/useVueHyphenatedAttributes"
 	| "lint/nursery/useVueMultiWordComponentNames"
-	| "lint/nursery/useScopedStyles"
 	| "lint/nursery/useVueVForKey"
 	| "lint/nursery/useVueValidTemplateRoot"
 	| "lint/nursery/useVueValidVBind"

@@ -81,12 +81,12 @@ impl MdBullet {
     }
     pub fn as_fields(&self) -> MdBulletFields {
         MdBulletFields {
-            bullet: self.bullet(),
+            prefix: self.prefix(),
             content: self.content(),
         }
     }
-    pub fn bullet(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
+    pub fn prefix(&self) -> SyntaxResult<MdListMarkerPrefix> {
+        support::required_node(&self.syntax, 0usize)
     }
     pub fn content(&self) -> MdBlockList {
         support::list(&self.syntax, 1usize)
@@ -102,7 +102,7 @@ impl Serialize for MdBullet {
 }
 #[derive(Serialize)]
 pub struct MdBulletFields {
-    pub bullet: SyntaxResult<SyntaxToken>,
+    pub prefix: SyntaxResult<MdListMarkerPrefix>,
     pub content: MdBlockList,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -489,6 +489,41 @@ impl Serialize for MdIndentCodeBlock {
 #[derive(Serialize)]
 pub struct MdIndentCodeBlockFields {
     pub content: MdInlineItemList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct MdIndentToken {
+    pub(crate) syntax: SyntaxNode,
+}
+impl MdIndentToken {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> MdIndentTokenFields {
+        MdIndentTokenFields {
+            md_indent_char_token: self.md_indent_char_token(),
+        }
+    }
+    pub fn md_indent_char_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for MdIndentToken {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct MdIndentTokenFields {
+    pub md_indent_char_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct MdInlineCode {
@@ -1004,6 +1039,56 @@ impl Serialize for MdLinkTitle {
 #[derive(Serialize)]
 pub struct MdLinkTitleFields {
     pub content: MdInlineItemList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct MdListMarkerPrefix {
+    pub(crate) syntax: SyntaxNode,
+}
+impl MdListMarkerPrefix {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> MdListMarkerPrefixFields {
+        MdListMarkerPrefixFields {
+            pre_marker_indent: self.pre_marker_indent(),
+            marker: self.marker(),
+            post_marker_space_token: self.post_marker_space_token(),
+            content_indent: self.content_indent(),
+        }
+    }
+    pub fn pre_marker_indent(&self) -> MdIndentTokenList {
+        support::list(&self.syntax, 0usize)
+    }
+    pub fn marker(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn post_marker_space_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 2usize)
+    }
+    pub fn content_indent(&self) -> MdIndentTokenList {
+        support::list(&self.syntax, 3usize)
+    }
+}
+impl Serialize for MdListMarkerPrefix {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct MdListMarkerPrefixFields {
+    pub pre_marker_indent: MdIndentTokenList,
+    pub marker: SyntaxResult<SyntaxToken>,
+    pub post_marker_space_token: Option<SyntaxToken>,
+    pub content_indent: MdIndentTokenList,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct MdNewline {
@@ -1557,6 +1642,25 @@ impl AnyMdBlock {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyMdBulletListMember {
+    MdBullet(MdBullet),
+    MdNewline(MdNewline),
+}
+impl AnyMdBulletListMember {
+    pub fn as_md_bullet(&self) -> Option<&MdBullet> {
+        match &self {
+            Self::MdBullet(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_md_newline(&self) -> Option<&MdNewline> {
+        match &self {
+            Self::MdNewline(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyMdCodeBlock {
     MdFencedCodeBlock(MdFencedCodeBlock),
     MdIndentCodeBlock(MdIndentCodeBlock),
@@ -1607,6 +1711,7 @@ pub enum AnyMdInline {
     MdEntityReference(MdEntityReference),
     MdHardLine(MdHardLine),
     MdHtmlBlock(MdHtmlBlock),
+    MdIndentToken(MdIndentToken),
     MdInlineCode(MdInlineCode),
     MdInlineEmphasis(MdInlineEmphasis),
     MdInlineHtml(MdInlineHtml),
@@ -1641,6 +1746,12 @@ impl AnyMdInline {
     pub fn as_md_html_block(&self) -> Option<&MdHtmlBlock> {
         match &self {
             Self::MdHtmlBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_md_indent_token(&self) -> Option<&MdIndentToken> {
+        match &self {
+            Self::MdIndentToken(item) => Some(item),
             _ => None,
         }
     }
@@ -1862,7 +1973,7 @@ impl std::fmt::Debug for MdBullet {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("MdBullet")
-                .field("bullet", &support::DebugSyntaxResult(self.bullet()))
+                .field("prefix", &support::DebugSyntaxResult(self.prefix()))
                 .field("content", &self.content())
                 .finish()
         } else {
@@ -2368,6 +2479,56 @@ impl From<MdIndentCodeBlock> for SyntaxNode {
 }
 impl From<MdIndentCodeBlock> for SyntaxElement {
     fn from(n: MdIndentCodeBlock) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for MdIndentToken {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MD_INDENT_TOKEN as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MD_INDENT_TOKEN
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for MdIndentToken {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdIndentToken")
+                .field(
+                    "md_indent_char_token",
+                    &support::DebugSyntaxResult(self.md_indent_char_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("MdIndentToken").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<MdIndentToken> for SyntaxNode {
+    fn from(n: MdIndentToken) -> Self {
+        n.syntax
+    }
+}
+impl From<MdIndentToken> for SyntaxElement {
+    fn from(n: MdIndentToken) -> Self {
         n.syntax.into()
     }
 }
@@ -2953,6 +3114,59 @@ impl From<MdLinkTitle> for SyntaxNode {
 }
 impl From<MdLinkTitle> for SyntaxElement {
     fn from(n: MdLinkTitle) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for MdListMarkerPrefix {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MD_LIST_MARKER_PREFIX as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MD_LIST_MARKER_PREFIX
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for MdListMarkerPrefix {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdListMarkerPrefix")
+                .field("pre_marker_indent", &self.pre_marker_indent())
+                .field("marker", &support::DebugSyntaxResult(self.marker()))
+                .field(
+                    "post_marker_space_token",
+                    &support::DebugOptionalElement(self.post_marker_space_token()),
+                )
+                .field("content_indent", &self.content_indent())
+                .finish()
+        } else {
+            f.debug_struct("MdListMarkerPrefix").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<MdListMarkerPrefix> for SyntaxNode {
+    fn from(n: MdListMarkerPrefix) -> Self {
+        n.syntax
+    }
+}
+impl From<MdListMarkerPrefix> for SyntaxElement {
+    fn from(n: MdListMarkerPrefix) -> Self {
         n.syntax.into()
     }
 }
@@ -3701,6 +3915,65 @@ impl From<AnyMdBlock> for SyntaxElement {
         node.into()
     }
 }
+impl From<MdBullet> for AnyMdBulletListMember {
+    fn from(node: MdBullet) -> Self {
+        Self::MdBullet(node)
+    }
+}
+impl From<MdNewline> for AnyMdBulletListMember {
+    fn from(node: MdNewline) -> Self {
+        Self::MdNewline(node)
+    }
+}
+impl AstNode for AnyMdBulletListMember {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = MdBullet::KIND_SET.union(MdNewline::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, MD_BULLET | MD_NEWLINE)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            MD_BULLET => Self::MdBullet(MdBullet { syntax }),
+            MD_NEWLINE => Self::MdNewline(MdNewline { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::MdBullet(it) => it.syntax(),
+            Self::MdNewline(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::MdBullet(it) => it.into_syntax(),
+            Self::MdNewline(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyMdBulletListMember {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::MdBullet(it) => std::fmt::Debug::fmt(it, f),
+            Self::MdNewline(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyMdBulletListMember> for SyntaxNode {
+    fn from(n: AnyMdBulletListMember) -> Self {
+        match n {
+            AnyMdBulletListMember::MdBullet(it) => it.into_syntax(),
+            AnyMdBulletListMember::MdNewline(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyMdBulletListMember> for SyntaxElement {
+    fn from(n: AnyMdBulletListMember) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<MdFencedCodeBlock> for AnyMdCodeBlock {
     fn from(node: MdFencedCodeBlock) -> Self {
         Self::MdFencedCodeBlock(node)
@@ -3852,6 +4125,11 @@ impl From<MdHtmlBlock> for AnyMdInline {
         Self::MdHtmlBlock(node)
     }
 }
+impl From<MdIndentToken> for AnyMdInline {
+    fn from(node: MdIndentToken) -> Self {
+        Self::MdIndentToken(node)
+    }
+}
 impl From<MdInlineCode> for AnyMdInline {
     fn from(node: MdInlineCode) -> Self {
         Self::MdInlineCode(node)
@@ -3913,6 +4191,7 @@ impl AstNode for AnyMdInline {
         .union(MdEntityReference::KIND_SET)
         .union(MdHardLine::KIND_SET)
         .union(MdHtmlBlock::KIND_SET)
+        .union(MdIndentToken::KIND_SET)
         .union(MdInlineCode::KIND_SET)
         .union(MdInlineEmphasis::KIND_SET)
         .union(MdInlineHtml::KIND_SET)
@@ -3931,6 +4210,7 @@ impl AstNode for AnyMdInline {
                 | MD_ENTITY_REFERENCE
                 | MD_HARD_LINE
                 | MD_HTML_BLOCK
+                | MD_INDENT_TOKEN
                 | MD_INLINE_CODE
                 | MD_INLINE_EMPHASIS
                 | MD_INLINE_HTML
@@ -3950,6 +4230,7 @@ impl AstNode for AnyMdInline {
             MD_ENTITY_REFERENCE => Self::MdEntityReference(MdEntityReference { syntax }),
             MD_HARD_LINE => Self::MdHardLine(MdHardLine { syntax }),
             MD_HTML_BLOCK => Self::MdHtmlBlock(MdHtmlBlock { syntax }),
+            MD_INDENT_TOKEN => Self::MdIndentToken(MdIndentToken { syntax }),
             MD_INLINE_CODE => Self::MdInlineCode(MdInlineCode { syntax }),
             MD_INLINE_EMPHASIS => Self::MdInlineEmphasis(MdInlineEmphasis { syntax }),
             MD_INLINE_HTML => Self::MdInlineHtml(MdInlineHtml { syntax }),
@@ -3971,6 +4252,7 @@ impl AstNode for AnyMdInline {
             Self::MdEntityReference(it) => it.syntax(),
             Self::MdHardLine(it) => it.syntax(),
             Self::MdHtmlBlock(it) => it.syntax(),
+            Self::MdIndentToken(it) => it.syntax(),
             Self::MdInlineCode(it) => it.syntax(),
             Self::MdInlineEmphasis(it) => it.syntax(),
             Self::MdInlineHtml(it) => it.syntax(),
@@ -3990,6 +4272,7 @@ impl AstNode for AnyMdInline {
             Self::MdEntityReference(it) => it.into_syntax(),
             Self::MdHardLine(it) => it.into_syntax(),
             Self::MdHtmlBlock(it) => it.into_syntax(),
+            Self::MdIndentToken(it) => it.into_syntax(),
             Self::MdInlineCode(it) => it.into_syntax(),
             Self::MdInlineEmphasis(it) => it.into_syntax(),
             Self::MdInlineHtml(it) => it.into_syntax(),
@@ -4011,6 +4294,7 @@ impl std::fmt::Debug for AnyMdInline {
             Self::MdEntityReference(it) => std::fmt::Debug::fmt(it, f),
             Self::MdHardLine(it) => std::fmt::Debug::fmt(it, f),
             Self::MdHtmlBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::MdIndentToken(it) => std::fmt::Debug::fmt(it, f),
             Self::MdInlineCode(it) => std::fmt::Debug::fmt(it, f),
             Self::MdInlineEmphasis(it) => std::fmt::Debug::fmt(it, f),
             Self::MdInlineHtml(it) => std::fmt::Debug::fmt(it, f),
@@ -4032,6 +4316,7 @@ impl From<AnyMdInline> for SyntaxNode {
             AnyMdInline::MdEntityReference(it) => it.into_syntax(),
             AnyMdInline::MdHardLine(it) => it.into_syntax(),
             AnyMdInline::MdHtmlBlock(it) => it.into_syntax(),
+            AnyMdInline::MdIndentToken(it) => it.into_syntax(),
             AnyMdInline::MdInlineCode(it) => it.into_syntax(),
             AnyMdInline::MdInlineEmphasis(it) => it.into_syntax(),
             AnyMdInline::MdInlineHtml(it) => it.into_syntax(),
@@ -4206,6 +4491,11 @@ impl std::fmt::Display for AnyMdBlock {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyMdBulletListMember {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyMdCodeBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -4286,6 +4576,11 @@ impl std::fmt::Display for MdIndentCodeBlock {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for MdIndentToken {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for MdInlineCode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -4337,6 +4632,11 @@ impl std::fmt::Display for MdLinkReferenceDefinition {
     }
 }
 impl std::fmt::Display for MdLinkTitle {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for MdListMarkerPrefix {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -4599,7 +4899,7 @@ impl Serialize for MdBulletList {
 }
 impl AstNodeList for MdBulletList {
     type Language = Language;
-    type Node = MdBullet;
+    type Node = AnyMdBulletListMember;
     fn syntax_list(&self) -> &SyntaxList {
         &self.syntax_list
     }
@@ -4614,15 +4914,15 @@ impl Debug for MdBulletList {
     }
 }
 impl IntoIterator for &MdBulletList {
-    type Item = MdBullet;
-    type IntoIter = AstNodeListIterator<Language, MdBullet>;
+    type Item = AnyMdBulletListMember;
+    type IntoIter = AstNodeListIterator<Language, AnyMdBulletListMember>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
 }
 impl IntoIterator for MdBulletList {
-    type Item = MdBullet;
-    type IntoIter = AstNodeListIterator<Language, MdBullet>;
+    type Item = AnyMdBulletListMember;
+    type IntoIter = AstNodeListIterator<Language, AnyMdBulletListMember>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
@@ -4787,6 +5087,88 @@ impl IntoIterator for &MdHashList {
 impl IntoIterator for MdHashList {
     type Item = MdHash;
     type IntoIter = AstNodeListIterator<Language, MdHash>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct MdIndentTokenList {
+    syntax_list: SyntaxList,
+}
+impl MdIndentTokenList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for MdIndentTokenList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MD_INDENT_TOKEN_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MD_INDENT_TOKEN_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for MdIndentTokenList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstNodeList for MdIndentTokenList {
+    type Language = Language;
+    type Node = MdIndentToken;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for MdIndentTokenList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("MdIndentTokenList ")?;
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+impl IntoIterator for &MdIndentTokenList {
+    type Item = MdIndentToken;
+    type IntoIter = AstNodeListIterator<Language, MdIndentToken>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for MdIndentTokenList {
+    type Item = MdIndentToken;
+    type IntoIter = AstNodeListIterator<Language, MdIndentToken>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

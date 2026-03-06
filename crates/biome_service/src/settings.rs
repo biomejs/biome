@@ -14,9 +14,9 @@ use biome_configuration::{
     BiomeDiagnostic, Configuration, ConfigurationSource, CssConfiguration,
     DEFAULT_SCANNER_IGNORE_ENTRIES, ExtendedConfigurations, FilesConfiguration,
     FilesIgnoreUnknownEnabled, FormatterConfiguration, GraphqlConfiguration, GritConfiguration,
-    JsConfiguration, JsonConfiguration, LinterConfiguration, OverrideAssistConfiguration,
-    OverrideFormatterConfiguration, OverrideGlobs, OverrideLinterConfiguration, Overrides, Rules,
-    push_to_analyzer_assist, push_to_analyzer_rules,
+    JsConfiguration, JsonConfiguration, LinterConfiguration, MarkdownConfiguration,
+    OverrideAssistConfiguration, OverrideFormatterConfiguration, OverrideGlobs,
+    OverrideLinterConfiguration, Overrides, Rules, push_to_analyzer_assist, push_to_analyzer_rules,
 };
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::{CssModulesKind, CssParserOptions};
@@ -32,7 +32,7 @@ use biome_graphql_syntax::GraphqlLanguage;
 use biome_grit_formatter::context::GritFormatOptions;
 use biome_grit_syntax::GritLanguage;
 use biome_html_formatter::HtmlFormatOptions;
-use biome_html_parser::HtmlParseOptions;
+use biome_html_parser::HtmlParserOptions;
 use biome_html_syntax::HtmlLanguage;
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_parser::JsParserOptions;
@@ -187,6 +187,13 @@ impl Settings {
         if let Some(html) = configuration.html {
             self.experimental_full_html_support = html.experimental_full_support_enabled;
             self.languages.html = html.into();
+        }
+
+        #[cfg(feature = "markdown")]
+        {
+            if let Some(markdown) = configuration.markdown {
+                self.languages.markdown = markdown.into();
+            }
         }
 
         // plugin settings
@@ -822,6 +829,17 @@ impl From<HtmlConfiguration> for LanguageSettings<HtmlLanguage> {
     }
 }
 
+impl From<MarkdownConfiguration> for LanguageSettings<MarkdownLanguage> {
+    fn from(markdown: MarkdownConfiguration) -> Self {
+        let mut language_setting: Self = Self::default();
+        if let Some(formatter) = markdown.formatter {
+            language_setting.formatter = formatter.into();
+        }
+
+        language_setting
+    }
+}
+
 pub trait ServiceLanguage: biome_rowan::Language {
     /// Formatter settings type for this language
     type FormatterSettings: Default;
@@ -1426,7 +1444,7 @@ impl OverrideSettings {
     pub(crate) fn apply_override_html_parser_options(
         &self,
         path: &Utf8Path,
-        options: &mut HtmlParseOptions,
+        options: &mut HtmlParserOptions,
     ) {
         for pattern in self.patterns.iter() {
             if pattern.is_file_included(path) {
@@ -1849,7 +1867,7 @@ impl OverrideSettingPattern {
         }
     }
 
-    fn apply_overrides_to_html_parser_options(&self, options: &mut HtmlParseOptions) {
+    fn apply_overrides_to_html_parser_options(&self, options: &mut HtmlParserOptions) {
         let html_parser = &self.languages.html.parser;
 
         if let Some(interpolation) = html_parser.interpolation {

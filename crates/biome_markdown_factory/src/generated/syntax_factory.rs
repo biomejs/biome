@@ -53,10 +53,7 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
-                    && matches!(
-                        element.kind(),
-                        T ! [-] | T ! [*] | T ! [+] | MD_ORDERED_LIST_MARKER
-                    )
+                    && MdListMarkerPrefix::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -312,6 +309,25 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                     );
                 }
                 slots.into_node(MD_INDENT_CODE_BLOCK, children)
+            }
+            MD_INDENT_TOKEN => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == MD_INDENT_CHAR
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        MD_INDENT_TOKEN.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(MD_INDENT_TOKEN, children)
             }
             MD_INLINE_CODE => {
                 let mut elements = (&children).into_iter();
@@ -704,6 +720,49 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                 }
                 slots.into_node(MD_LINK_TITLE, children)
             }
+            MD_LIST_MARKER_PREFIX => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && MdIndentTokenList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && matches!(
+                        element.kind(),
+                        T ! [-] | T ! [*] | T ! [+] | MD_ORDERED_LIST_MARKER
+                    )
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == MD_LIST_POST_MARKER_SPACE
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && MdIndentTokenList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        MD_LIST_MARKER_PREFIX.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(MD_LIST_MARKER_PREFIX, children)
+            }
             MD_NEWLINE => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
@@ -1047,9 +1106,14 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                 slots.into_node(MD_THEMATIC_BREAK_BLOCK, children)
             }
             MD_BLOCK_LIST => Self::make_node_list_syntax(kind, children, AnyMdBlock::can_cast),
-            MD_BULLET_LIST => Self::make_node_list_syntax(kind, children, MdBullet::can_cast),
+            MD_BULLET_LIST => {
+                Self::make_node_list_syntax(kind, children, AnyMdBulletListMember::can_cast)
+            }
             MD_CODE_NAME_LIST => Self::make_node_list_syntax(kind, children, MdTextual::can_cast),
             MD_HASH_LIST => Self::make_node_list_syntax(kind, children, MdHash::can_cast),
+            MD_INDENT_TOKEN_LIST => {
+                Self::make_node_list_syntax(kind, children, MdIndentToken::can_cast)
+            }
             MD_INLINE_ITEM_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyMdInline::can_cast)
             }

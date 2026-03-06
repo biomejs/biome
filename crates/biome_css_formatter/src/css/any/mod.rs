@@ -40,6 +40,7 @@ pub(crate) mod function;
 pub(crate) mod function_name;
 pub(crate) mod function_parameter;
 pub(crate) mod generic_component_value;
+pub(crate) mod generic_property_value_or_expression;
 pub(crate) mod if_branch;
 pub(crate) mod if_condition;
 pub(crate) mod if_media_test_query;

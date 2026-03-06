@@ -64,14 +64,16 @@ CssRoot {
                                     value_token: IDENT@27..37 "padding" [Newline("\n"), Whitespace("  ")] [],
                                 },
                                 colon_token: COLON@37..39 ":" [] [Whitespace(" ")],
-                                value: CssGenericComponentValueList [
-                                    ScssIdentifier {
-                                        dollar_token: DOLLAR@39..40 "$" [] [],
-                                        name: CssIdentifier {
-                                            value_token: IDENT@40..47 "padding" [] [],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        ScssIdentifier {
+                                            dollar_token: DOLLAR@39..40 "$" [] [],
+                                            name: CssIdentifier {
+                                                value_token: IDENT@40..47 "padding" [] [],
+                                            },
                                         },
-                                    },
-                                ],
+                                    ],
+                                },
                             },
                             important: missing (optional),
                         },
@@ -124,11 +126,12 @@ CssRoot {
                 0: CSS_IDENTIFIER@27..37
                   0: IDENT@27..37 "padding" [Newline("\n"), Whitespace("  ")] []
                 1: COLON@37..39 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@39..47
-                  0: SCSS_IDENTIFIER@39..47
-                    0: DOLLAR@39..40 "$" [] []
-                    1: CSS_IDENTIFIER@40..47
-                      0: IDENT@40..47 "padding" [] []
+                2: SCSS_EXPRESSION@39..47
+                  0: SCSS_EXPRESSION_ITEM_LIST@39..47
+                    0: SCSS_IDENTIFIER@39..47
+                      0: DOLLAR@39..40 "$" [] []
+                      1: CSS_IDENTIFIER@40..47
+                        0: IDENT@40..47 "padding" [] []
               1: (empty)
             1: SEMICOLON@47..48 ";" [] []
         2: R_CURLY@48..50 "}" [Newline("\n")] []

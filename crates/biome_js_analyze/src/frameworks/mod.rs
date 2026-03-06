@@ -55,6 +55,7 @@ pub(crate) fn is_framework_lib_export(binding: &Binding, package_names: &[&str])
     binding
         .syntax()
         .ancestors()
+        .skip(1)
         .find_map(|ancestor| JsImport::cast(ancestor)?.source_text().ok())
         .is_some_and(|source| package_names.contains(&source.text()))
 }

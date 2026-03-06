@@ -229,6 +229,7 @@ pub mod no_template_curly_in_string;
 pub mod no_ternary;
 pub mod no_then_property;
 pub mod no_this_in_static;
+pub mod no_top_level_literals;
 pub mod no_ts_ignore;
 pub mod no_unassigned_variables;
 pub mod no_undeclared_dependencies;

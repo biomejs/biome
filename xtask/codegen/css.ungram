@@ -577,7 +577,11 @@ AnyCssProperty =
 CssGenericProperty =
 	name: AnyCssDeclarationName
 	':'
-	value: CssGenericComponentValueList
+	value: AnyCssGenericPropertyValueOrExpression
+
+AnyCssGenericPropertyValueOrExpression =
+	CssGenericComponentValueList
+	| ScssExpression
 
 // This grammar is specific to CSS Modules and defines how composes classes.
 // https://github.com/css-modules/css-modules/blob/master/docs/composition.md
@@ -2158,7 +2162,7 @@ CssCommaSeparatedValue =
 
 CssBinaryExpression =
 	left: AnyCssExpression
-	operator_token: (
+	operator: (
 		'+' | '-' | '*' | '/'
 	)
 	right: AnyCssExpression
@@ -2564,7 +2568,7 @@ ScssNamespacedIdentifier =
 ScssNestingDeclaration =
 	name: CssIdentifier
 	':'
-	value: CssGenericComponentValueList
+	value: ScssExpression
 	block: AnyCssDeclarationOrRuleBlock
 
 // border: 1px solid $color;
@@ -2666,8 +2670,6 @@ ScssMapExpressionPair =
 //        ^^
 AnyScssExpression =
 	ScssExpression
-	| ScssKeywordArgument
-	| ScssArbitraryArgument
 	| ScssBinaryExpression
 	| ScssUnaryExpression
 	| ScssParenthesizedExpression

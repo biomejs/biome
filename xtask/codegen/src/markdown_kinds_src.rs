@@ -40,6 +40,8 @@ pub const MARKDOWN_KINDS_SRC: KindsSrc = KindsSrc {
         "MD_ENTITY_LITERAL",
         "MD_QUOTE_PRE_MARKER_INDENT",
         "MD_QUOTE_POST_MARKER_SPACE",
+        "MD_INDENT_CHAR",
+        "MD_LIST_POST_MARKER_SPACE",
     ],
     tokens: &["ERROR_TOKEN", "NEWLINE", "WHITESPACE", "TAB"],
     nodes: &[
@@ -96,5 +98,8 @@ pub const MARKDOWN_KINDS_SRC: KindsSrc = KindsSrc {
         "MD_INDENT",
         "MD_THEMATIC_BREAK_BLOCK",
         "MD_NEWLINE",
+        "MD_INDENT_TOKEN",
+        "MD_INDENT_TOKEN_LIST",
+        "MD_LIST_MARKER_PREFIX",
     ],
 };
