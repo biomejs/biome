@@ -26,16749 +26,8781 @@ pub struct BaselineStatus {
     pub year: BaselineYear,
 }
 #[doc = r" Look up the Baseline status of a feature by name."]
-#[doc = r" The table must be sorted by name for binary search."]
-pub fn find_baseline(table: &[(&str, BaselineStatus)], name: &str) -> Option<BaselineStatus> {
-    table
-        .binary_search_by_key(&name, |&(n, _)| n)
-        .ok()
-        .map(|i| table[i].1)
+pub fn find_baseline(
+    table: &phf::Map<&'static str, BaselineStatus>,
+    name: &str,
+) -> Option<BaselineStatus> {
+    table.get(name).copied()
 }
 #[doc = r" Look up the Baseline status of a specific CSS property value."]
+#[doc = " The key format is `\"property:value\"` (lowercase)."]
 pub fn find_property_value_baseline(property: &str, value: &str) -> Option<BaselineStatus> {
-    BASELINE_PROPERTY_VALUES
-        .binary_search_by_key(&(property, value), |&(p, v, _)| (p, v))
-        .ok()
-        .map(|i| BASELINE_PROPERTY_VALUES[i].2)
+    let key = format!("{property}:{value}");
+    BASELINE_PROPERTY_VALUES.get(key.as_str()).copied()
 }
-#[doc = r" Baseline status for CSS properties. Sorted by name."]
-pub static BASELINE_PROPERTIES: &[(&str, BaselineStatus)] = &[
-    (
-        "-webkit-text-fill-color",
-        BaselineStatus {
+#[doc = r" Baseline status for CSS properties."]
+pub static BASELINE_PROPERTIES: phf::Map<&'static str, BaselineStatus> = phf::phf_map! {
+    "-webkit-text-fill-color" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "-webkit-text-stroke",
-        BaselineStatus {
+    "-webkit-text-stroke" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "-webkit-text-stroke-color",
-        BaselineStatus {
+    "-webkit-text-stroke-color" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "-webkit-text-stroke-width",
-        BaselineStatus {
+    "-webkit-text-stroke-width" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "accent-color",
-        BaselineStatus {
+    "accent-color" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "align-content",
-        BaselineStatus {
+    "align-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "align-items",
-        BaselineStatus {
+    "align-items" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "align-self",
-        BaselineStatus {
+    "align-self" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "alignment-baseline",
-        BaselineStatus {
+    "alignment-baseline" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "all",
-        BaselineStatus {
+    "all" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "anchor-name",
-        BaselineStatus {
+    "anchor-name" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "anchor-scope",
-        BaselineStatus {
+    "anchor-scope" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "animation",
-        BaselineStatus {
+    "animation" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation-composition",
-        BaselineStatus {
+    "animation-composition" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "animation-delay",
-        BaselineStatus {
+    "animation-delay" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation-direction",
-        BaselineStatus {
+    "animation-direction" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation-duration",
-        BaselineStatus {
+    "animation-duration" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation-fill-mode",
-        BaselineStatus {
+    "animation-fill-mode" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation-iteration-count",
-        BaselineStatus {
+    "animation-iteration-count" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation-name",
-        BaselineStatus {
+    "animation-name" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation-play-state",
-        BaselineStatus {
+    "animation-play-state" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation-range",
-        BaselineStatus {
+    "animation-range" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "animation-range-end",
-        BaselineStatus {
+    "animation-range-end" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "animation-range-start",
-        BaselineStatus {
+    "animation-range-start" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "animation-timeline",
-        BaselineStatus {
+    "animation-timeline" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "animation-timing-function",
-        BaselineStatus {
+    "animation-timing-function" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "appearance",
-        BaselineStatus {
+    "appearance" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "aspect-ratio",
-        BaselineStatus {
+    "aspect-ratio" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "backdrop-filter",
-        BaselineStatus {
+    "backdrop-filter" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "backface-visibility",
-        BaselineStatus {
+    "backface-visibility" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "background",
-        BaselineStatus {
+    "background" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "background-attachment",
-        BaselineStatus {
+    "background-attachment" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "background-blend-mode",
-        BaselineStatus {
+    "background-blend-mode" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "background-clip",
-        BaselineStatus {
+    "background-clip" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "background-color",
-        BaselineStatus {
+    "background-color" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "background-image",
-        BaselineStatus {
+    "background-image" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "background-origin",
-        BaselineStatus {
+    "background-origin" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "background-position",
-        BaselineStatus {
+    "background-position" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "background-position-x",
-        BaselineStatus {
+    "background-position-x" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "background-position-y",
-        BaselineStatus {
+    "background-position-y" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "background-repeat",
-        BaselineStatus {
+    "background-repeat" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2016),
         },
-    ),
-    (
-        "background-size",
-        BaselineStatus {
+    "background-size" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "baseline-shift",
-        BaselineStatus {
+    "baseline-shift" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "baseline-source",
-        BaselineStatus {
+    "baseline-source" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "block-size",
-        BaselineStatus {
+    "block-size" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "border",
-        BaselineStatus {
+    "border" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-block",
-        BaselineStatus {
+    "border-block" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "border-block-color",
-        BaselineStatus {
+    "border-block-color" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "border-block-end",
-        BaselineStatus {
+    "border-block-end" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "border-block-end-color",
-        BaselineStatus {
+    "border-block-end-color" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "border-block-end-style",
-        BaselineStatus {
+    "border-block-end-style" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "border-block-end-width",
-        BaselineStatus {
+    "border-block-end-width" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "border-block-start",
-        BaselineStatus {
+    "border-block-start" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "border-block-start-color",
-        BaselineStatus {
+    "border-block-start-color" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "border-block-start-style",
-        BaselineStatus {
+    "border-block-start-style" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "border-block-start-width",
-        BaselineStatus {
+    "border-block-start-width" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "border-block-style",
-        BaselineStatus {
+    "border-block-style" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "border-block-width",
-        BaselineStatus {
+    "border-block-width" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "border-bottom",
-        BaselineStatus {
+    "border-bottom" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-bottom-color",
-        BaselineStatus {
+    "border-bottom-color" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-bottom-left-radius",
-        BaselineStatus {
+    "border-bottom-left-radius" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-bottom-right-radius",
-        BaselineStatus {
+    "border-bottom-right-radius" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-bottom-style",
-        BaselineStatus {
+    "border-bottom-style" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-bottom-width",
-        BaselineStatus {
+    "border-bottom-width" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-collapse",
-        BaselineStatus {
+    "border-collapse" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-color",
-        BaselineStatus {
+    "border-color" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-end-end-radius",
-        BaselineStatus {
+    "border-end-end-radius" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "border-end-start-radius",
-        BaselineStatus {
+    "border-end-start-radius" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "border-image",
-        BaselineStatus {
+    "border-image" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "border-image-outset",
-        BaselineStatus {
+    "border-image-outset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "border-image-repeat",
-        BaselineStatus {
+    "border-image-repeat" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "border-image-slice",
-        BaselineStatus {
+    "border-image-slice" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "border-image-source",
-        BaselineStatus {
+    "border-image-source" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "border-image-width",
-        BaselineStatus {
+    "border-image-width" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "border-inline",
-        BaselineStatus {
+    "border-inline" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "border-inline-color",
-        BaselineStatus {
+    "border-inline-color" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "border-inline-end",
-        BaselineStatus {
+    "border-inline-end" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "border-inline-end-color",
-        BaselineStatus {
+    "border-inline-end-color" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "border-inline-end-style",
-        BaselineStatus {
+    "border-inline-end-style" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "border-inline-end-width",
-        BaselineStatus {
+    "border-inline-end-width" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "border-inline-start",
-        BaselineStatus {
+    "border-inline-start" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "border-inline-start-color",
-        BaselineStatus {
+    "border-inline-start-color" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "border-inline-start-style",
-        BaselineStatus {
+    "border-inline-start-style" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "border-inline-start-width",
-        BaselineStatus {
+    "border-inline-start-width" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "border-inline-style",
-        BaselineStatus {
+    "border-inline-style" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "border-inline-width",
-        BaselineStatus {
+    "border-inline-width" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "border-left",
-        BaselineStatus {
+    "border-left" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-left-color",
-        BaselineStatus {
+    "border-left-color" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-left-style",
-        BaselineStatus {
+    "border-left-style" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-left-width",
-        BaselineStatus {
+    "border-left-width" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-radius",
-        BaselineStatus {
+    "border-radius" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-right",
-        BaselineStatus {
+    "border-right" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-right-color",
-        BaselineStatus {
+    "border-right-color" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-right-style",
-        BaselineStatus {
+    "border-right-style" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-right-width",
-        BaselineStatus {
+    "border-right-width" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-spacing",
-        BaselineStatus {
+    "border-spacing" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-start-end-radius",
-        BaselineStatus {
+    "border-start-end-radius" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "border-start-start-radius",
-        BaselineStatus {
+    "border-start-start-radius" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "border-style",
-        BaselineStatus {
+    "border-style" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-top",
-        BaselineStatus {
+    "border-top" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-top-color",
-        BaselineStatus {
+    "border-top-color" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-top-left-radius",
-        BaselineStatus {
+    "border-top-left-radius" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-top-right-radius",
-        BaselineStatus {
+    "border-top-right-radius" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-top-style",
-        BaselineStatus {
+    "border-top-style" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-top-width",
-        BaselineStatus {
+    "border-top-width" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-width",
-        BaselineStatus {
+    "border-width" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "bottom",
-        BaselineStatus {
+    "bottom" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "box-decoration-break",
-        BaselineStatus {
+    "box-decoration-break" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "box-shadow",
-        BaselineStatus {
+    "box-shadow" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "box-sizing",
-        BaselineStatus {
+    "box-sizing" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "break-after",
-        BaselineStatus {
+    "break-after" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2019),
         },
-    ),
-    (
-        "break-before",
-        BaselineStatus {
+    "break-before" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2019),
         },
-    ),
-    (
-        "break-inside",
-        BaselineStatus {
+    "break-inside" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2019),
         },
-    ),
-    (
-        "caption-side",
-        BaselineStatus {
+    "caption-side" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "caret-color",
-        BaselineStatus {
+    "caret-color" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "caret-shape",
-        BaselineStatus {
+    "caret-shape" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "clear",
-        BaselineStatus {
+    "clear" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "clip",
-        BaselineStatus {
+    "clip" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "clip-path",
-        BaselineStatus {
+    "clip-path" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "clip-rule",
-        BaselineStatus {
+    "clip-rule" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "color",
-        BaselineStatus {
+    "color" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "color-adjust",
-        BaselineStatus {
+    "color-adjust" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "color-interpolation",
-        BaselineStatus {
+    "color-interpolation" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "color-interpolation-filters",
-        BaselineStatus {
+    "color-interpolation-filters" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "color-scheme",
-        BaselineStatus {
+    "color-scheme" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "column-count",
-        BaselineStatus {
+    "column-count" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "column-fill",
-        BaselineStatus {
+    "column-fill" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "column-gap",
-        BaselineStatus {
+    "column-gap" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "column-rule",
-        BaselineStatus {
+    "column-rule" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "column-rule-color",
-        BaselineStatus {
+    "column-rule-color" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "column-rule-style",
-        BaselineStatus {
+    "column-rule-style" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "column-rule-width",
-        BaselineStatus {
+    "column-rule-width" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "column-span",
-        BaselineStatus {
+    "column-span" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "column-width",
-        BaselineStatus {
+    "column-width" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "columns",
-        BaselineStatus {
+    "columns" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "contain",
-        BaselineStatus {
+    "contain" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "contain-intrinsic-block-size",
-        BaselineStatus {
+    "contain-intrinsic-block-size" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "contain-intrinsic-height",
-        BaselineStatus {
+    "contain-intrinsic-height" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "contain-intrinsic-inline-size",
-        BaselineStatus {
+    "contain-intrinsic-inline-size" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "contain-intrinsic-size",
-        BaselineStatus {
+    "contain-intrinsic-size" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "contain-intrinsic-width",
-        BaselineStatus {
+    "contain-intrinsic-width" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "container",
-        BaselineStatus {
+    "container" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "container-name",
-        BaselineStatus {
+    "container-name" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "container-type",
-        BaselineStatus {
+    "container-type" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "content",
-        BaselineStatus {
+    "content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "content-visibility",
-        BaselineStatus {
+    "content-visibility" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2025),
         },
-    ),
-    (
-        "corner-block-end-shape",
-        BaselineStatus {
+    "corner-block-end-shape" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "corner-block-start-shape",
-        BaselineStatus {
+    "corner-block-start-shape" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "corner-bottom-left-shape",
-        BaselineStatus {
+    "corner-bottom-left-shape" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "corner-bottom-right-shape",
-        BaselineStatus {
+    "corner-bottom-right-shape" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "corner-bottom-shape",
-        BaselineStatus {
+    "corner-bottom-shape" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "corner-end-end-shape",
-        BaselineStatus {
+    "corner-end-end-shape" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "corner-end-start-shape",
-        BaselineStatus {
+    "corner-end-start-shape" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "corner-inline-end-shape",
-        BaselineStatus {
+    "corner-inline-end-shape" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "corner-inline-start-shape",
-        BaselineStatus {
+    "corner-inline-start-shape" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "corner-left-shape",
-        BaselineStatus {
+    "corner-left-shape" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "corner-right-shape",
-        BaselineStatus {
+    "corner-right-shape" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "corner-shape",
-        BaselineStatus {
+    "corner-shape" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "corner-start-end-shape",
-        BaselineStatus {
+    "corner-start-end-shape" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "corner-start-start-shape",
-        BaselineStatus {
+    "corner-start-start-shape" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "corner-top-left-shape",
-        BaselineStatus {
+    "corner-top-left-shape" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "corner-top-right-shape",
-        BaselineStatus {
+    "corner-top-right-shape" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "corner-top-shape",
-        BaselineStatus {
+    "corner-top-shape" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "counter-increment",
-        BaselineStatus {
+    "counter-increment" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "counter-reset",
-        BaselineStatus {
+    "counter-reset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "counter-set",
-        BaselineStatus {
+    "counter-set" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "custom-property",
-        BaselineStatus {
+    "custom-property" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "cx",
-        BaselineStatus {
+    "cx" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "cy",
-        BaselineStatus {
+    "cy" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "d",
-        BaselineStatus {
+    "d" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "direction",
-        BaselineStatus {
+    "direction" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "display",
-        BaselineStatus {
+    "display" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "dominant-baseline",
-        BaselineStatus {
+    "dominant-baseline" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "empty-cells",
-        BaselineStatus {
+    "empty-cells" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "field-sizing",
-        BaselineStatus {
+    "field-sizing" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "fill",
-        BaselineStatus {
+    "fill" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "fill-opacity",
-        BaselineStatus {
+    "fill-opacity" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "fill-rule",
-        BaselineStatus {
+    "fill-rule" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "filter",
-        BaselineStatus {
+    "filter" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2016),
         },
-    ),
-    (
-        "flex",
-        BaselineStatus {
+    "flex" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "flex-basis",
-        BaselineStatus {
+    "flex-basis" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "flex-direction",
-        BaselineStatus {
+    "flex-direction" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "flex-flow",
-        BaselineStatus {
+    "flex-flow" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "flex-grow",
-        BaselineStatus {
+    "flex-grow" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "flex-shrink",
-        BaselineStatus {
+    "flex-shrink" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "flex-wrap",
-        BaselineStatus {
+    "flex-wrap" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "float",
-        BaselineStatus {
+    "float" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "flood-color",
-        BaselineStatus {
+    "flood-color" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "flood-opacity",
-        BaselineStatus {
+    "flood-opacity" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "font",
-        BaselineStatus {
+    "font" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "font-family",
-        BaselineStatus {
+    "font-family" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "font-feature-settings",
-        BaselineStatus {
+    "font-feature-settings" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "font-kerning",
-        BaselineStatus {
+    "font-kerning" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-language-override",
-        BaselineStatus {
+    "font-language-override" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "font-optical-sizing",
-        BaselineStatus {
+    "font-optical-sizing" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-palette",
-        BaselineStatus {
+    "font-palette" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "font-size",
-        BaselineStatus {
+    "font-size" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "font-size-adjust",
-        BaselineStatus {
+    "font-size-adjust" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "font-stretch",
-        BaselineStatus {
+    "font-stretch" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-style",
-        BaselineStatus {
+    "font-style" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "font-synthesis",
-        BaselineStatus {
+    "font-synthesis" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "font-synthesis-position",
-        BaselineStatus {
+    "font-synthesis-position" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "font-synthesis-small-caps",
-        BaselineStatus {
+    "font-synthesis-small-caps" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "font-synthesis-style",
-        BaselineStatus {
+    "font-synthesis-style" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "font-synthesis-weight",
-        BaselineStatus {
+    "font-synthesis-weight" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "font-variant",
-        BaselineStatus {
+    "font-variant" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "font-variant-alternates",
-        BaselineStatus {
+    "font-variant-alternates" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "font-variant-caps",
-        BaselineStatus {
+    "font-variant-caps" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-east-asian",
-        BaselineStatus {
+    "font-variant-east-asian" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-emoji",
-        BaselineStatus {
+    "font-variant-emoji" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "font-variant-ligatures",
-        BaselineStatus {
+    "font-variant-ligatures" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-numeric",
-        BaselineStatus {
+    "font-variant-numeric" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-position",
-        BaselineStatus {
+    "font-variant-position" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "font-variation-settings",
-        BaselineStatus {
+    "font-variation-settings" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2018),
         },
-    ),
-    (
-        "font-weight",
-        BaselineStatus {
+    "font-weight" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "font-width",
-        BaselineStatus {
+    "font-width" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "forced-color-adjust",
-        BaselineStatus {
+    "forced-color-adjust" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "gap",
-        BaselineStatus {
+    "gap" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "glyph-orientation-vertical",
-        BaselineStatus {
+    "glyph-orientation-vertical" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "grid",
-        BaselineStatus {
+    "grid" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "grid-area",
-        BaselineStatus {
+    "grid-area" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "grid-auto-columns",
-        BaselineStatus {
+    "grid-auto-columns" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "grid-auto-flow",
-        BaselineStatus {
+    "grid-auto-flow" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "grid-auto-rows",
-        BaselineStatus {
+    "grid-auto-rows" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "grid-column",
-        BaselineStatus {
+    "grid-column" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "grid-column-end",
-        BaselineStatus {
+    "grid-column-end" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "grid-column-start",
-        BaselineStatus {
+    "grid-column-start" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "grid-row",
-        BaselineStatus {
+    "grid-row" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "grid-row-end",
-        BaselineStatus {
+    "grid-row-end" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "grid-row-start",
-        BaselineStatus {
+    "grid-row-start" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "grid-template",
-        BaselineStatus {
+    "grid-template" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "grid-template-areas",
-        BaselineStatus {
+    "grid-template-areas" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "grid-template-columns",
-        BaselineStatus {
+    "grid-template-columns" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "grid-template-rows",
-        BaselineStatus {
+    "grid-template-rows" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "hanging-punctuation",
-        BaselineStatus {
+    "hanging-punctuation" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "height",
-        BaselineStatus {
+    "height" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "hyphenate-character",
-        BaselineStatus {
+    "hyphenate-character" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "hyphenate-limit-chars",
-        BaselineStatus {
+    "hyphenate-limit-chars" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "hyphens",
-        BaselineStatus {
+    "hyphens" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "image-orientation",
-        BaselineStatus {
+    "image-orientation" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "image-rendering",
-        BaselineStatus {
+    "image-rendering" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "ime-mode",
-        BaselineStatus {
+    "ime-mode" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "initial-letter",
-        BaselineStatus {
+    "initial-letter" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "inline-size",
-        BaselineStatus {
+    "inline-size" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "inset",
-        BaselineStatus {
+    "inset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "inset-block",
-        BaselineStatus {
+    "inset-block" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "inset-block-end",
-        BaselineStatus {
+    "inset-block-end" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "inset-block-start",
-        BaselineStatus {
+    "inset-block-start" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "inset-inline",
-        BaselineStatus {
+    "inset-inline" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "inset-inline-end",
-        BaselineStatus {
+    "inset-inline-end" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "inset-inline-start",
-        BaselineStatus {
+    "inset-inline-start" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "interactivity",
-        BaselineStatus {
+    "interactivity" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "interpolate-size",
-        BaselineStatus {
+    "interpolate-size" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "isolation",
-        BaselineStatus {
+    "isolation" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "justify-content",
-        BaselineStatus {
+    "justify-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "justify-items",
-        BaselineStatus {
+    "justify-items" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "justify-self",
-        BaselineStatus {
+    "justify-self" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "left",
-        BaselineStatus {
+    "left" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "letter-spacing",
-        BaselineStatus {
+    "letter-spacing" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "lighting-color",
-        BaselineStatus {
+    "lighting-color" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "line-break",
-        BaselineStatus {
+    "line-break" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "line-clamp",
-        BaselineStatus {
+    "line-clamp" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "line-height",
-        BaselineStatus {
+    "line-height" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style",
-        BaselineStatus {
+    "list-style" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-image",
-        BaselineStatus {
+    "list-style-image" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-position",
-        BaselineStatus {
+    "list-style-position" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        BaselineStatus {
+    "list-style-type" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "margin",
-        BaselineStatus {
+    "margin" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "margin-block",
-        BaselineStatus {
+    "margin-block" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "margin-block-end",
-        BaselineStatus {
+    "margin-block-end" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "margin-block-start",
-        BaselineStatus {
+    "margin-block-start" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "margin-bottom",
-        BaselineStatus {
+    "margin-bottom" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "margin-inline",
-        BaselineStatus {
+    "margin-inline" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "margin-inline-end",
-        BaselineStatus {
+    "margin-inline-end" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "margin-inline-start",
-        BaselineStatus {
+    "margin-inline-start" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "margin-left",
-        BaselineStatus {
+    "margin-left" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "margin-right",
-        BaselineStatus {
+    "margin-right" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "margin-top",
-        BaselineStatus {
+    "margin-top" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "margin-trim",
-        BaselineStatus {
+    "margin-trim" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "marker",
-        BaselineStatus {
+    "marker" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "marker-end",
-        BaselineStatus {
+    "marker-end" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "marker-mid",
-        BaselineStatus {
+    "marker-mid" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "marker-start",
-        BaselineStatus {
+    "marker-start" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "mask",
-        BaselineStatus {
+    "mask" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "mask-border",
-        BaselineStatus {
+    "mask-border" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "mask-border-outset",
-        BaselineStatus {
+    "mask-border-outset" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "mask-border-repeat",
-        BaselineStatus {
+    "mask-border-repeat" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "mask-border-slice",
-        BaselineStatus {
+    "mask-border-slice" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "mask-border-source",
-        BaselineStatus {
+    "mask-border-source" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "mask-border-width",
-        BaselineStatus {
+    "mask-border-width" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "mask-clip",
-        BaselineStatus {
+    "mask-clip" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "mask-composite",
-        BaselineStatus {
+    "mask-composite" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "mask-image",
-        BaselineStatus {
+    "mask-image" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "mask-mode",
-        BaselineStatus {
+    "mask-mode" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "mask-origin",
-        BaselineStatus {
+    "mask-origin" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "mask-position",
-        BaselineStatus {
+    "mask-position" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "mask-repeat",
-        BaselineStatus {
+    "mask-repeat" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "mask-size",
-        BaselineStatus {
+    "mask-size" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "mask-type",
-        BaselineStatus {
+    "mask-type" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "math-depth",
-        BaselineStatus {
+    "math-depth" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "math-shift",
-        BaselineStatus {
+    "math-shift" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "math-style",
-        BaselineStatus {
+    "math-style" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "max-block-size",
-        BaselineStatus {
+    "max-block-size" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "max-height",
-        BaselineStatus {
+    "max-height" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "max-inline-size",
-        BaselineStatus {
+    "max-inline-size" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "max-width",
-        BaselineStatus {
+    "max-width" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "min-block-size",
-        BaselineStatus {
+    "min-block-size" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "min-height",
-        BaselineStatus {
+    "min-height" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "min-inline-size",
-        BaselineStatus {
+    "min-inline-size" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "min-width",
-        BaselineStatus {
+    "min-width" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "mix-blend-mode",
-        BaselineStatus {
+    "mix-blend-mode" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "object-fit",
-        BaselineStatus {
+    "object-fit" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "object-position",
-        BaselineStatus {
+    "object-position" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "object-view-box",
-        BaselineStatus {
+    "object-view-box" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "offset",
-        BaselineStatus {
+    "offset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "offset-anchor",
-        BaselineStatus {
+    "offset-anchor" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "offset-distance",
-        BaselineStatus {
+    "offset-distance" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "offset-path",
-        BaselineStatus {
+    "offset-path" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "offset-position",
-        BaselineStatus {
+    "offset-position" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "offset-rotate",
-        BaselineStatus {
+    "offset-rotate" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "opacity",
-        BaselineStatus {
+    "opacity" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "order",
-        BaselineStatus {
+    "order" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "orphans",
-        BaselineStatus {
+    "orphans" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "outline",
-        BaselineStatus {
+    "outline" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "outline-color",
-        BaselineStatus {
+    "outline-color" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "outline-offset",
-        BaselineStatus {
+    "outline-offset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "outline-style",
-        BaselineStatus {
+    "outline-style" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "outline-width",
-        BaselineStatus {
+    "outline-width" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "overflow",
-        BaselineStatus {
+    "overflow" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "overflow-anchor",
-        BaselineStatus {
+    "overflow-anchor" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "overflow-block",
-        BaselineStatus {
+    "overflow-block" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "overflow-clip-margin",
-        BaselineStatus {
+    "overflow-clip-margin" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "overflow-inline",
-        BaselineStatus {
+    "overflow-inline" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "overflow-wrap",
-        BaselineStatus {
+    "overflow-wrap" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2018),
         },
-    ),
-    (
-        "overflow-x",
-        BaselineStatus {
+    "overflow-x" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "overflow-y",
-        BaselineStatus {
+    "overflow-y" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "overlay",
-        BaselineStatus {
+    "overlay" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "overscroll-behavior",
-        BaselineStatus {
+    "overscroll-behavior" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "overscroll-behavior-block",
-        BaselineStatus {
+    "overscroll-behavior-block" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "overscroll-behavior-inline",
-        BaselineStatus {
+    "overscroll-behavior-inline" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "overscroll-behavior-x",
-        BaselineStatus {
+    "overscroll-behavior-x" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "overscroll-behavior-y",
-        BaselineStatus {
+    "overscroll-behavior-y" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "padding",
-        BaselineStatus {
+    "padding" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "padding-block",
-        BaselineStatus {
+    "padding-block" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "padding-block-end",
-        BaselineStatus {
+    "padding-block-end" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "padding-block-start",
-        BaselineStatus {
+    "padding-block-start" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "padding-bottom",
-        BaselineStatus {
+    "padding-bottom" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "padding-inline",
-        BaselineStatus {
+    "padding-inline" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "padding-inline-end",
-        BaselineStatus {
+    "padding-inline-end" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "padding-inline-start",
-        BaselineStatus {
+    "padding-inline-start" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "padding-left",
-        BaselineStatus {
+    "padding-left" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "padding-right",
-        BaselineStatus {
+    "padding-right" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "padding-top",
-        BaselineStatus {
+    "padding-top" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "page",
-        BaselineStatus {
+    "page" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "page-break-after",
-        BaselineStatus {
+    "page-break-after" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "page-break-before",
-        BaselineStatus {
+    "page-break-before" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "page-break-inside",
-        BaselineStatus {
+    "page-break-inside" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "paint-order",
-        BaselineStatus {
+    "paint-order" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "perspective",
-        BaselineStatus {
+    "perspective" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "perspective-origin",
-        BaselineStatus {
+    "perspective-origin" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "place-content",
-        BaselineStatus {
+    "place-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "place-items",
-        BaselineStatus {
+    "place-items" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "place-self",
-        BaselineStatus {
+    "place-self" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "pointer-events",
-        BaselineStatus {
+    "pointer-events" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "position",
-        BaselineStatus {
+    "position" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "position-anchor",
-        BaselineStatus {
+    "position-anchor" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        BaselineStatus {
+    "position-area" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-try",
-        BaselineStatus {
+    "position-try" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-try-fallbacks",
-        BaselineStatus {
+    "position-try-fallbacks" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-try-order",
-        BaselineStatus {
+    "position-try-order" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-visibility",
-        BaselineStatus {
+    "position-visibility" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "print-color-adjust",
-        BaselineStatus {
+    "print-color-adjust" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2025),
         },
-    ),
-    (
-        "quotes",
-        BaselineStatus {
+    "quotes" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "r",
-        BaselineStatus {
+    "r" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "reading-flow",
-        BaselineStatus {
+    "reading-flow" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "reading-order",
-        BaselineStatus {
+    "reading-order" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "resize",
-        BaselineStatus {
+    "resize" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "right",
-        BaselineStatus {
+    "right" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "rotate",
-        BaselineStatus {
+    "rotate" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "row-gap",
-        BaselineStatus {
+    "row-gap" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "ruby-align",
-        BaselineStatus {
+    "ruby-align" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "ruby-overhang",
-        BaselineStatus {
+    "ruby-overhang" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "ruby-position",
-        BaselineStatus {
+    "ruby-position" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "rx",
-        BaselineStatus {
+    "rx" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "ry",
-        BaselineStatus {
+    "ry" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scale",
-        BaselineStatus {
+    "scale" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "scroll-behavior",
-        BaselineStatus {
+    "scroll-behavior" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "scroll-initial-target",
-        BaselineStatus {
+    "scroll-initial-target" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "scroll-margin",
-        BaselineStatus {
+    "scroll-margin" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-margin-block",
-        BaselineStatus {
+    "scroll-margin-block" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-margin-block-end",
-        BaselineStatus {
+    "scroll-margin-block-end" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-margin-block-start",
-        BaselineStatus {
+    "scroll-margin-block-start" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-margin-bottom",
-        BaselineStatus {
+    "scroll-margin-bottom" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-margin-inline",
-        BaselineStatus {
+    "scroll-margin-inline" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-margin-inline-end",
-        BaselineStatus {
+    "scroll-margin-inline-end" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-margin-inline-start",
-        BaselineStatus {
+    "scroll-margin-inline-start" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-margin-left",
-        BaselineStatus {
+    "scroll-margin-left" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-margin-right",
-        BaselineStatus {
+    "scroll-margin-right" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-margin-top",
-        BaselineStatus {
+    "scroll-margin-top" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-marker-group",
-        BaselineStatus {
+    "scroll-marker-group" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "scroll-padding",
-        BaselineStatus {
+    "scroll-padding" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-padding-block",
-        BaselineStatus {
+    "scroll-padding-block" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-padding-block-end",
-        BaselineStatus {
+    "scroll-padding-block-end" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-padding-block-start",
-        BaselineStatus {
+    "scroll-padding-block-start" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-padding-bottom",
-        BaselineStatus {
+    "scroll-padding-bottom" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-padding-inline",
-        BaselineStatus {
+    "scroll-padding-inline" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-padding-inline-end",
-        BaselineStatus {
+    "scroll-padding-inline-end" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-padding-inline-start",
-        BaselineStatus {
+    "scroll-padding-inline-start" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-padding-left",
-        BaselineStatus {
+    "scroll-padding-left" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-padding-right",
-        BaselineStatus {
+    "scroll-padding-right" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-padding-top",
-        BaselineStatus {
+    "scroll-padding-top" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-snap-align",
-        BaselineStatus {
+    "scroll-snap-align" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-snap-stop",
-        BaselineStatus {
+    "scroll-snap-stop" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-snap-type",
-        BaselineStatus {
+    "scroll-snap-type" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-target-group",
-        BaselineStatus {
+    "scroll-target-group" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "scroll-timeline",
-        BaselineStatus {
+    "scroll-timeline" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "scroll-timeline-axis",
-        BaselineStatus {
+    "scroll-timeline-axis" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "scroll-timeline-name",
-        BaselineStatus {
+    "scroll-timeline-name" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "scrollbar-color",
-        BaselineStatus {
+    "scrollbar-color" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2025),
         },
-    ),
-    (
-        "scrollbar-gutter",
-        BaselineStatus {
+    "scrollbar-gutter" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "scrollbar-width",
-        BaselineStatus {
+    "scrollbar-width" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "shape-image-threshold",
-        BaselineStatus {
+    "shape-image-threshold" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "shape-margin",
-        BaselineStatus {
+    "shape-margin" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "shape-outside",
-        BaselineStatus {
+    "shape-outside" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "shape-rendering",
-        BaselineStatus {
+    "shape-rendering" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "speak",
-        BaselineStatus {
+    "speak" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "speak-as",
-        BaselineStatus {
+    "speak-as" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "stop-color",
-        BaselineStatus {
+    "stop-color" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "stop-opacity",
-        BaselineStatus {
+    "stop-opacity" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "stroke",
-        BaselineStatus {
+    "stroke" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "stroke-color",
-        BaselineStatus {
+    "stroke-color" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "stroke-dasharray",
-        BaselineStatus {
+    "stroke-dasharray" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "stroke-dashoffset",
-        BaselineStatus {
+    "stroke-dashoffset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "stroke-linecap",
-        BaselineStatus {
+    "stroke-linecap" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "stroke-linejoin",
-        BaselineStatus {
+    "stroke-linejoin" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "stroke-miterlimit",
-        BaselineStatus {
+    "stroke-miterlimit" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "stroke-opacity",
-        BaselineStatus {
+    "stroke-opacity" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "stroke-width",
-        BaselineStatus {
+    "stroke-width" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "tab-size",
-        BaselineStatus {
+    "tab-size" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "table-layout",
-        BaselineStatus {
+    "table-layout" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-align",
-        BaselineStatus {
+    "text-align" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-align-last",
-        BaselineStatus {
+    "text-align-last" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "text-anchor",
-        BaselineStatus {
+    "text-anchor" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "text-autospace",
-        BaselineStatus {
+    "text-autospace" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "text-box",
-        BaselineStatus {
+    "text-box" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "text-box-edge",
-        BaselineStatus {
+    "text-box-edge" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "text-box-trim",
-        BaselineStatus {
+    "text-box-trim" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "text-combine-upright",
-        BaselineStatus {
+    "text-combine-upright" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "text-decoration",
-        BaselineStatus {
+    "text-decoration" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-decoration-color",
-        BaselineStatus {
+    "text-decoration-color" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-decoration-line",
-        BaselineStatus {
+    "text-decoration-line" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-decoration-skip",
-        BaselineStatus {
+    "text-decoration-skip" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-decoration-skip-ink",
-        BaselineStatus {
+    "text-decoration-skip-ink" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-decoration-style",
-        BaselineStatus {
+    "text-decoration-style" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-decoration-thickness",
-        BaselineStatus {
+    "text-decoration-thickness" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-emphasis",
-        BaselineStatus {
+    "text-emphasis" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "text-emphasis-color",
-        BaselineStatus {
+    "text-emphasis-color" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "text-emphasis-position",
-        BaselineStatus {
+    "text-emphasis-position" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "text-emphasis-style",
-        BaselineStatus {
+    "text-emphasis-style" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "text-indent",
-        BaselineStatus {
+    "text-indent" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-justify",
-        BaselineStatus {
+    "text-justify" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "text-orientation",
-        BaselineStatus {
+    "text-orientation" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "text-overflow",
-        BaselineStatus {
+    "text-overflow" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-rendering",
-        BaselineStatus {
+    "text-rendering" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "text-shadow",
-        BaselineStatus {
+    "text-shadow" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-size-adjust",
-        BaselineStatus {
+    "text-size-adjust" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "text-spacing-trim",
-        BaselineStatus {
+    "text-spacing-trim" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "text-transform",
-        BaselineStatus {
+    "text-transform" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-underline-offset",
-        BaselineStatus {
+    "text-underline-offset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "text-underline-position",
-        BaselineStatus {
+    "text-underline-position" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "text-wrap",
-        BaselineStatus {
+    "text-wrap" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "text-wrap-mode",
-        BaselineStatus {
+    "text-wrap-mode" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "text-wrap-style",
-        BaselineStatus {
+    "text-wrap-style" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "timeline-scope",
-        BaselineStatus {
+    "timeline-scope" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "top",
-        BaselineStatus {
+    "top" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "touch-action",
-        BaselineStatus {
+    "touch-action" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2019),
         },
-    ),
-    (
-        "transform",
-        BaselineStatus {
+    "transform" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "transform-box",
-        BaselineStatus {
+    "transform-box" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "transform-origin",
-        BaselineStatus {
+    "transform-origin" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "transform-style",
-        BaselineStatus {
+    "transform-style" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "transition",
-        BaselineStatus {
+    "transition" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "transition-behavior",
-        BaselineStatus {
+    "transition-behavior" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "transition-delay",
-        BaselineStatus {
+    "transition-delay" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "transition-duration",
-        BaselineStatus {
+    "transition-duration" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "transition-property",
-        BaselineStatus {
+    "transition-property" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "transition-timing-function",
-        BaselineStatus {
+    "transition-timing-function" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "translate",
-        BaselineStatus {
+    "translate" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "unicode-bidi",
-        BaselineStatus {
+    "unicode-bidi" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "user-select",
-        BaselineStatus {
+    "user-select" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "vector-effect",
-        BaselineStatus {
+    "vector-effect" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "vertical-align",
-        BaselineStatus {
+    "vertical-align" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "view-timeline",
-        BaselineStatus {
+    "view-timeline" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "view-timeline-axis",
-        BaselineStatus {
+    "view-timeline-axis" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "view-timeline-inset",
-        BaselineStatus {
+    "view-timeline-inset" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "view-timeline-name",
-        BaselineStatus {
+    "view-timeline-name" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "view-transition-class",
-        BaselineStatus {
+    "view-transition-class" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2025),
         },
-    ),
-    (
-        "view-transition-name",
-        BaselineStatus {
+    "view-transition-name" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2025),
         },
-    ),
-    (
-        "visibility",
-        BaselineStatus {
+    "visibility" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "white-space",
-        BaselineStatus {
+    "white-space" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "white-space-collapse",
-        BaselineStatus {
+    "white-space-collapse" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "widows",
-        BaselineStatus {
+    "widows" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "width",
-        BaselineStatus {
+    "width" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "will-change",
-        BaselineStatus {
+    "will-change" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "word-break",
-        BaselineStatus {
+    "word-break" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "word-spacing",
-        BaselineStatus {
+    "word-spacing" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "writing-mode",
-        BaselineStatus {
+    "writing-mode" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "x",
-        BaselineStatus {
+    "x" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "y",
-        BaselineStatus {
+    "y" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "z-index",
-        BaselineStatus {
+    "z-index" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "zoom",
-        BaselineStatus {
+    "zoom" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-];
-#[doc = r" Baseline status for CSS property values (identifier keywords only). Sorted by (property, value)."]
-pub static BASELINE_PROPERTY_VALUES: &[(&str, &str, BaselineStatus)] = &[
-    (
-        "accent-color",
-        "auto",
-        BaselineStatus {
+};
+#[doc = r" Baseline status for CSS property values (identifier keywords only). Key format: property:value."]
+pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = phf::phf_map! {
+    "accent-color:auto" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "align-content",
-        "normal",
-        BaselineStatus {
+    "align-content:normal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "align-items",
-        "anchor-center",
-        BaselineStatus {
+    "align-items:anchor-center" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "align-self",
-        "anchor-center",
-        BaselineStatus {
+    "align-self:anchor-center" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "align-self",
-        "auto",
-        BaselineStatus {
+    "align-self:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "align-self",
-        "normal",
-        BaselineStatus {
+    "align-self:normal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "align-self",
-        "stretch",
-        BaselineStatus {
+    "align-self:stretch" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "alignment-baseline",
-        "alphabetic",
-        BaselineStatus {
+    "alignment-baseline:alphabetic" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "alignment-baseline",
-        "baseline",
-        BaselineStatus {
+    "alignment-baseline:baseline" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "alignment-baseline",
-        "central",
-        BaselineStatus {
+    "alignment-baseline:central" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "alignment-baseline",
-        "ideographic",
-        BaselineStatus {
+    "alignment-baseline:ideographic" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "alignment-baseline",
-        "mathematical",
-        BaselineStatus {
+    "alignment-baseline:mathematical" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "alignment-baseline",
-        "middle",
-        BaselineStatus {
+    "alignment-baseline:middle" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "alignment-baseline",
-        "text-after-edge",
-        BaselineStatus {
+    "alignment-baseline:text-after-edge" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "alignment-baseline",
-        "text-before-edge",
-        BaselineStatus {
+    "alignment-baseline:text-before-edge" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "anchor-name",
-        "none",
-        BaselineStatus {
+    "anchor-name:none" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "anchor-scope",
-        "all",
-        BaselineStatus {
+    "anchor-scope:all" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "anchor-scope",
-        "none",
-        BaselineStatus {
+    "anchor-scope:none" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "animation",
-        "alternate",
-        BaselineStatus {
+    "animation:alternate" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation",
-        "alternate-reverse",
-        BaselineStatus {
+    "animation:alternate-reverse" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation",
-        "auto",
-        BaselineStatus {
+    "animation:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation",
-        "backwards",
-        BaselineStatus {
+    "animation:backwards" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation",
-        "both",
-        BaselineStatus {
+    "animation:both" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation",
-        "ease",
-        BaselineStatus {
+    "animation:ease" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation",
-        "ease-in",
-        BaselineStatus {
+    "animation:ease-in" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation",
-        "ease-in-out",
-        BaselineStatus {
+    "animation:ease-in-out" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation",
-        "ease-out",
-        BaselineStatus {
+    "animation:ease-out" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation",
-        "forwards",
-        BaselineStatus {
+    "animation:forwards" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation",
-        "infinite",
-        BaselineStatus {
+    "animation:infinite" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation",
-        "linear",
-        BaselineStatus {
+    "animation:linear" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation",
-        "none",
-        BaselineStatus {
+    "animation:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation",
-        "normal",
-        BaselineStatus {
+    "animation:normal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation",
-        "reverse",
-        BaselineStatus {
+    "animation:reverse" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation",
-        "step-end",
-        BaselineStatus {
+    "animation:step-end" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation",
-        "step-start",
-        BaselineStatus {
+    "animation:step-start" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation-direction",
-        "alternate",
-        BaselineStatus {
+    "animation-direction:alternate" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation-direction",
-        "alternate-reverse",
-        BaselineStatus {
+    "animation-direction:alternate-reverse" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation-direction",
-        "normal",
-        BaselineStatus {
+    "animation-direction:normal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation-direction",
-        "reverse",
-        BaselineStatus {
+    "animation-direction:reverse" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation-duration",
-        "auto",
-        BaselineStatus {
+    "animation-duration:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation-fill-mode",
-        "backwards",
-        BaselineStatus {
+    "animation-fill-mode:backwards" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation-fill-mode",
-        "both",
-        BaselineStatus {
+    "animation-fill-mode:both" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation-fill-mode",
-        "forwards",
-        BaselineStatus {
+    "animation-fill-mode:forwards" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation-fill-mode",
-        "none",
-        BaselineStatus {
+    "animation-fill-mode:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation-iteration-count",
-        "infinite",
-        BaselineStatus {
+    "animation-iteration-count:infinite" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation-name",
-        "none",
-        BaselineStatus {
+    "animation-name:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation-play-state",
-        "paused",
-        BaselineStatus {
+    "animation-play-state:paused" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation-play-state",
-        "running",
-        BaselineStatus {
+    "animation-play-state:running" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation-range-end",
-        "normal",
-        BaselineStatus {
+    "animation-range-end:normal" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "animation-range-start",
-        "normal",
-        BaselineStatus {
+    "animation-range-start:normal" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "animation-timeline",
-        "scroll",
-        BaselineStatus {
+    "animation-timeline:scroll" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "animation-timeline",
-        "view",
-        BaselineStatus {
+    "animation-timeline:view" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "animation-timing-function",
-        "ease",
-        BaselineStatus {
+    "animation-timing-function:ease" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation-timing-function",
-        "ease-in",
-        BaselineStatus {
+    "animation-timing-function:ease-in" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation-timing-function",
-        "ease-in-out",
-        BaselineStatus {
+    "animation-timing-function:ease-in-out" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation-timing-function",
-        "ease-out",
-        BaselineStatus {
+    "animation-timing-function:ease-out" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation-timing-function",
-        "jump",
-        BaselineStatus {
+    "animation-timing-function:jump" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation-timing-function",
-        "linear",
-        BaselineStatus {
+    "animation-timing-function:linear" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation-timing-function",
-        "step-end",
-        BaselineStatus {
+    "animation-timing-function:step-end" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "animation-timing-function",
-        "step-start",
-        BaselineStatus {
+    "animation-timing-function:step-start" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "appearance",
-        "auto",
-        BaselineStatus {
+    "appearance:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "appearance",
-        "base-select",
-        BaselineStatus {
+    "appearance:base-select" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "appearance",
-        "button",
-        BaselineStatus {
+    "appearance:button" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "appearance",
-        "checkbox",
-        BaselineStatus {
+    "appearance:checkbox" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "appearance",
-        "listbox",
-        BaselineStatus {
+    "appearance:listbox" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "appearance",
-        "menulist",
-        BaselineStatus {
+    "appearance:menulist" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "appearance",
-        "menulist-button",
-        BaselineStatus {
+    "appearance:menulist-button" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "appearance",
-        "meter",
-        BaselineStatus {
+    "appearance:meter" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "appearance",
-        "none",
-        BaselineStatus {
+    "appearance:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "appearance",
-        "progress-bar",
-        BaselineStatus {
+    "appearance:progress-bar" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "appearance",
-        "radio",
-        BaselineStatus {
+    "appearance:radio" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "appearance",
-        "searchfield",
-        BaselineStatus {
+    "appearance:searchfield" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "appearance",
-        "textarea",
-        BaselineStatus {
+    "appearance:textarea" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "appearance",
-        "textfield",
-        BaselineStatus {
+    "appearance:textfield" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "aspect-ratio",
-        "auto",
-        BaselineStatus {
+    "aspect-ratio:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "background",
-        "background-clip",
-        BaselineStatus {
+    "background:background-clip" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "background",
-        "background-origin",
-        BaselineStatus {
+    "background:background-origin" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "background",
-        "background-size",
-        BaselineStatus {
+    "background:background-size" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "background",
-        "local",
-        BaselineStatus {
+    "background:local" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "background",
-        "no-repeat",
-        BaselineStatus {
+    "background:no-repeat" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "background",
-        "none",
-        BaselineStatus {
+    "background:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "background",
-        "repeat",
-        BaselineStatus {
+    "background:repeat" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "background",
-        "repeat-x",
-        BaselineStatus {
+    "background:repeat-x" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "background",
-        "repeat-y",
-        BaselineStatus {
+    "background:repeat-y" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "background",
-        "round",
-        BaselineStatus {
+    "background:round" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "background",
-        "scroll",
-        BaselineStatus {
+    "background:scroll" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "background",
-        "space",
-        BaselineStatus {
+    "background:space" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "background",
-        "transparent",
-        BaselineStatus {
+    "background:transparent" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "background-attachment",
-        "fixed",
-        BaselineStatus {
+    "background-attachment:fixed" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "background-attachment",
-        "local",
-        BaselineStatus {
+    "background-attachment:local" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "background-attachment",
-        "scroll",
-        BaselineStatus {
+    "background-attachment:scroll" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "background-clip",
-        "border-area",
-        BaselineStatus {
+    "background-clip:border-area" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "background-clip",
-        "border-box",
-        BaselineStatus {
+    "background-clip:border-box" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "background-clip",
-        "content-box",
-        BaselineStatus {
+    "background-clip:content-box" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "background-clip",
-        "padding-box",
-        BaselineStatus {
+    "background-clip:padding-box" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "background-clip",
-        "text",
-        BaselineStatus {
+    "background-clip:text" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "background-color",
-        "transparent",
-        BaselineStatus {
+    "background-color:transparent" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "background-image",
-        "element",
-        BaselineStatus {
+    "background-image:element" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "background-image",
-        "gradients",
-        BaselineStatus {
+    "background-image:gradients" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "background-image",
-        "image-set",
-        BaselineStatus {
+    "background-image:image-set" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "background-image",
-        "none",
-        BaselineStatus {
+    "background-image:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "background-origin",
-        "border-box",
-        BaselineStatus {
+    "background-origin:border-box" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "background-origin",
-        "content-box",
-        BaselineStatus {
+    "background-origin:content-box" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "background-origin",
-        "padding-box",
-        BaselineStatus {
+    "background-origin:padding-box" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "background-position",
-        "bottom",
-        BaselineStatus {
+    "background-position:bottom" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "background-position",
-        "center",
-        BaselineStatus {
+    "background-position:center" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "background-position",
-        "left",
-        BaselineStatus {
+    "background-position:left" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "background-position",
-        "right",
-        BaselineStatus {
+    "background-position:right" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "background-position",
-        "top",
-        BaselineStatus {
+    "background-position:top" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "background-repeat",
-        "2-value",
-        BaselineStatus {
+    "background-repeat:2-value" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2016),
         },
-    ),
-    (
-        "background-repeat",
-        "no-repeat",
-        BaselineStatus {
+    "background-repeat:no-repeat" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2016),
         },
-    ),
-    (
-        "background-repeat",
-        "repeat",
-        BaselineStatus {
+    "background-repeat:repeat" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2016),
         },
-    ),
-    (
-        "background-repeat",
-        "repeat-x",
-        BaselineStatus {
+    "background-repeat:repeat-x" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2016),
         },
-    ),
-    (
-        "background-repeat",
-        "repeat-y",
-        BaselineStatus {
+    "background-repeat:repeat-y" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2016),
         },
-    ),
-    (
-        "background-repeat",
-        "round",
-        BaselineStatus {
+    "background-repeat:round" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2016),
         },
-    ),
-    (
-        "background-repeat",
-        "space",
-        BaselineStatus {
+    "background-repeat:space" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2016),
         },
-    ),
-    (
-        "background-size",
-        "auto",
-        BaselineStatus {
+    "background-size:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "background-size",
-        "contain",
-        BaselineStatus {
+    "background-size:contain" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "background-size",
-        "cover",
-        BaselineStatus {
+    "background-size:cover" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "baseline-shift",
-        "baseline",
-        BaselineStatus {
+    "baseline-shift:baseline" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "baseline-shift",
-        "sub",
-        BaselineStatus {
+    "baseline-shift:sub" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "baseline-shift",
-        "super",
-        BaselineStatus {
+    "baseline-shift:super" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "baseline-source",
-        "auto",
-        BaselineStatus {
+    "baseline-source:auto" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "baseline-source",
-        "first",
-        BaselineStatus {
+    "baseline-source:first" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "baseline-source",
-        "last",
-        BaselineStatus {
+    "baseline-source:last" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "block-size",
-        "anchor-size",
-        BaselineStatus {
+    "block-size:anchor-size" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "block-size",
-        "fit-content",
-        BaselineStatus {
+    "block-size:fit-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "block-size",
-        "max-content",
-        BaselineStatus {
+    "block-size:max-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "block-size",
-        "min-content",
-        BaselineStatus {
+    "block-size:min-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "border",
-        "dashed",
-        BaselineStatus {
+    "border:dashed" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border",
-        "dotted",
-        BaselineStatus {
+    "border:dotted" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border",
-        "double",
-        BaselineStatus {
+    "border:double" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border",
-        "groove",
-        BaselineStatus {
+    "border:groove" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border",
-        "hidden",
-        BaselineStatus {
+    "border:hidden" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border",
-        "inset",
-        BaselineStatus {
+    "border:inset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border",
-        "medium",
-        BaselineStatus {
+    "border:medium" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border",
-        "none",
-        BaselineStatus {
+    "border:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border",
-        "outset",
-        BaselineStatus {
+    "border:outset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border",
-        "ridge",
-        BaselineStatus {
+    "border:ridge" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border",
-        "solid",
-        BaselineStatus {
+    "border:solid" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border",
-        "thick",
-        BaselineStatus {
+    "border:thick" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border",
-        "thin",
-        BaselineStatus {
+    "border:thin" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border",
-        "transparent",
-        BaselineStatus {
+    "border:transparent" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-bottom",
-        "dashed",
-        BaselineStatus {
+    "border-bottom:dashed" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-bottom",
-        "dotted",
-        BaselineStatus {
+    "border-bottom:dotted" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-bottom",
-        "double",
-        BaselineStatus {
+    "border-bottom:double" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-bottom",
-        "groove",
-        BaselineStatus {
+    "border-bottom:groove" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-bottom",
-        "hidden",
-        BaselineStatus {
+    "border-bottom:hidden" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-bottom",
-        "inset",
-        BaselineStatus {
+    "border-bottom:inset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-bottom",
-        "medium",
-        BaselineStatus {
+    "border-bottom:medium" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-bottom",
-        "none",
-        BaselineStatus {
+    "border-bottom:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-bottom",
-        "outset",
-        BaselineStatus {
+    "border-bottom:outset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-bottom",
-        "ridge",
-        BaselineStatus {
+    "border-bottom:ridge" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-bottom",
-        "solid",
-        BaselineStatus {
+    "border-bottom:solid" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-bottom",
-        "thick",
-        BaselineStatus {
+    "border-bottom:thick" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-bottom",
-        "thin",
-        BaselineStatus {
+    "border-bottom:thin" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-bottom",
-        "transparent",
-        BaselineStatus {
+    "border-bottom:transparent" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-bottom-color",
-        "transparent",
-        BaselineStatus {
+    "border-bottom-color:transparent" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-bottom-left-radius",
-        "percentages",
-        BaselineStatus {
+    "border-bottom-left-radius:percentages" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-bottom-right-radius",
-        "percentages",
-        BaselineStatus {
+    "border-bottom-right-radius:percentages" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-bottom-style",
-        "dashed",
-        BaselineStatus {
+    "border-bottom-style:dashed" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-bottom-style",
-        "dotted",
-        BaselineStatus {
+    "border-bottom-style:dotted" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-bottom-style",
-        "double",
-        BaselineStatus {
+    "border-bottom-style:double" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-bottom-style",
-        "groove",
-        BaselineStatus {
+    "border-bottom-style:groove" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-bottom-style",
-        "hidden",
-        BaselineStatus {
+    "border-bottom-style:hidden" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-bottom-style",
-        "inset",
-        BaselineStatus {
+    "border-bottom-style:inset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-bottom-style",
-        "none",
-        BaselineStatus {
+    "border-bottom-style:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-bottom-style",
-        "outset",
-        BaselineStatus {
+    "border-bottom-style:outset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-bottom-style",
-        "ridge",
-        BaselineStatus {
+    "border-bottom-style:ridge" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-bottom-style",
-        "solid",
-        BaselineStatus {
+    "border-bottom-style:solid" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-bottom-width",
-        "medium",
-        BaselineStatus {
+    "border-bottom-width:medium" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-bottom-width",
-        "thick",
-        BaselineStatus {
+    "border-bottom-width:thick" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-bottom-width",
-        "thin",
-        BaselineStatus {
+    "border-bottom-width:thin" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-collapse",
-        "collapse",
-        BaselineStatus {
+    "border-collapse:collapse" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-collapse",
-        "separate",
-        BaselineStatus {
+    "border-collapse:separate" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-color",
-        "transparent",
-        BaselineStatus {
+    "border-color:transparent" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-image",
-        "fill",
-        BaselineStatus {
+    "border-image:fill" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "border-image",
-        "gradient",
-        BaselineStatus {
+    "border-image:gradient" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "border-image",
-        "none",
-        BaselineStatus {
+    "border-image:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "border-image",
-        "repeat",
-        BaselineStatus {
+    "border-image:repeat" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "border-image",
-        "round",
-        BaselineStatus {
+    "border-image:round" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "border-image",
-        "space",
-        BaselineStatus {
+    "border-image:space" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "border-image",
-        "stretch",
-        BaselineStatus {
+    "border-image:stretch" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "border-image-repeat",
-        "repeat",
-        BaselineStatus {
+    "border-image-repeat:repeat" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "border-image-repeat",
-        "round",
-        BaselineStatus {
+    "border-image-repeat:round" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "border-image-repeat",
-        "space",
-        BaselineStatus {
+    "border-image-repeat:space" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "border-image-repeat",
-        "stretch",
-        BaselineStatus {
+    "border-image-repeat:stretch" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "border-image-width",
-        "auto",
-        BaselineStatus {
+    "border-image-width:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "border-left",
-        "dashed",
-        BaselineStatus {
+    "border-left:dashed" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-left",
-        "dotted",
-        BaselineStatus {
+    "border-left:dotted" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-left",
-        "double",
-        BaselineStatus {
+    "border-left:double" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-left",
-        "groove",
-        BaselineStatus {
+    "border-left:groove" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-left",
-        "hidden",
-        BaselineStatus {
+    "border-left:hidden" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-left",
-        "inset",
-        BaselineStatus {
+    "border-left:inset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-left",
-        "medium",
-        BaselineStatus {
+    "border-left:medium" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-left",
-        "none",
-        BaselineStatus {
+    "border-left:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-left",
-        "outset",
-        BaselineStatus {
+    "border-left:outset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-left",
-        "ridge",
-        BaselineStatus {
+    "border-left:ridge" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-left",
-        "solid",
-        BaselineStatus {
+    "border-left:solid" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-left",
-        "thick",
-        BaselineStatus {
+    "border-left:thick" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-left",
-        "thin",
-        BaselineStatus {
+    "border-left:thin" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-left",
-        "transparent",
-        BaselineStatus {
+    "border-left:transparent" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-left-color",
-        "transparent",
-        BaselineStatus {
+    "border-left-color:transparent" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-left-style",
-        "dashed",
-        BaselineStatus {
+    "border-left-style:dashed" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-left-style",
-        "dotted",
-        BaselineStatus {
+    "border-left-style:dotted" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-left-style",
-        "double",
-        BaselineStatus {
+    "border-left-style:double" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-left-style",
-        "groove",
-        BaselineStatus {
+    "border-left-style:groove" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-left-style",
-        "hidden",
-        BaselineStatus {
+    "border-left-style:hidden" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-left-style",
-        "inset",
-        BaselineStatus {
+    "border-left-style:inset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-left-style",
-        "none",
-        BaselineStatus {
+    "border-left-style:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-left-style",
-        "outset",
-        BaselineStatus {
+    "border-left-style:outset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-left-style",
-        "ridge",
-        BaselineStatus {
+    "border-left-style:ridge" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-left-style",
-        "solid",
-        BaselineStatus {
+    "border-left-style:solid" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-left-width",
-        "medium",
-        BaselineStatus {
+    "border-left-width:medium" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-left-width",
-        "thick",
-        BaselineStatus {
+    "border-left-width:thick" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-left-width",
-        "thin",
-        BaselineStatus {
+    "border-left-width:thin" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-radius",
-        "percentages",
-        BaselineStatus {
+    "border-radius:percentages" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-right",
-        "dashed",
-        BaselineStatus {
+    "border-right:dashed" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-right",
-        "dotted",
-        BaselineStatus {
+    "border-right:dotted" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-right",
-        "double",
-        BaselineStatus {
+    "border-right:double" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-right",
-        "groove",
-        BaselineStatus {
+    "border-right:groove" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-right",
-        "hidden",
-        BaselineStatus {
+    "border-right:hidden" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-right",
-        "inset",
-        BaselineStatus {
+    "border-right:inset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-right",
-        "medium",
-        BaselineStatus {
+    "border-right:medium" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-right",
-        "none",
-        BaselineStatus {
+    "border-right:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-right",
-        "outset",
-        BaselineStatus {
+    "border-right:outset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-right",
-        "ridge",
-        BaselineStatus {
+    "border-right:ridge" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-right",
-        "solid",
-        BaselineStatus {
+    "border-right:solid" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-right",
-        "thick",
-        BaselineStatus {
+    "border-right:thick" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-right",
-        "thin",
-        BaselineStatus {
+    "border-right:thin" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-right",
-        "transparent",
-        BaselineStatus {
+    "border-right:transparent" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-right-color",
-        "transparent",
-        BaselineStatus {
+    "border-right-color:transparent" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-right-style",
-        "dashed",
-        BaselineStatus {
+    "border-right-style:dashed" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-right-style",
-        "dotted",
-        BaselineStatus {
+    "border-right-style:dotted" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-right-style",
-        "double",
-        BaselineStatus {
+    "border-right-style:double" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-right-style",
-        "groove",
-        BaselineStatus {
+    "border-right-style:groove" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-right-style",
-        "hidden",
-        BaselineStatus {
+    "border-right-style:hidden" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-right-style",
-        "inset",
-        BaselineStatus {
+    "border-right-style:inset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-right-style",
-        "none",
-        BaselineStatus {
+    "border-right-style:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-right-style",
-        "outset",
-        BaselineStatus {
+    "border-right-style:outset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-right-style",
-        "ridge",
-        BaselineStatus {
+    "border-right-style:ridge" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-right-style",
-        "solid",
-        BaselineStatus {
+    "border-right-style:solid" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-right-width",
-        "medium",
-        BaselineStatus {
+    "border-right-width:medium" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-right-width",
-        "thick",
-        BaselineStatus {
+    "border-right-width:thick" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-right-width",
-        "thin",
-        BaselineStatus {
+    "border-right-width:thin" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-style",
-        "dashed",
-        BaselineStatus {
+    "border-style:dashed" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-style",
-        "dotted",
-        BaselineStatus {
+    "border-style:dotted" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-style",
-        "double",
-        BaselineStatus {
+    "border-style:double" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-style",
-        "groove",
-        BaselineStatus {
+    "border-style:groove" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-style",
-        "hidden",
-        BaselineStatus {
+    "border-style:hidden" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-style",
-        "inset",
-        BaselineStatus {
+    "border-style:inset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-style",
-        "none",
-        BaselineStatus {
+    "border-style:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-style",
-        "outset",
-        BaselineStatus {
+    "border-style:outset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-style",
-        "ridge",
-        BaselineStatus {
+    "border-style:ridge" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-style",
-        "solid",
-        BaselineStatus {
+    "border-style:solid" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-top",
-        "dashed",
-        BaselineStatus {
+    "border-top:dashed" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-top",
-        "dotted",
-        BaselineStatus {
+    "border-top:dotted" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-top",
-        "double",
-        BaselineStatus {
+    "border-top:double" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-top",
-        "groove",
-        BaselineStatus {
+    "border-top:groove" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-top",
-        "hidden",
-        BaselineStatus {
+    "border-top:hidden" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-top",
-        "inset",
-        BaselineStatus {
+    "border-top:inset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-top",
-        "medium",
-        BaselineStatus {
+    "border-top:medium" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-top",
-        "none",
-        BaselineStatus {
+    "border-top:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-top",
-        "outset",
-        BaselineStatus {
+    "border-top:outset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-top",
-        "ridge",
-        BaselineStatus {
+    "border-top:ridge" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-top",
-        "solid",
-        BaselineStatus {
+    "border-top:solid" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-top",
-        "thick",
-        BaselineStatus {
+    "border-top:thick" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-top",
-        "thin",
-        BaselineStatus {
+    "border-top:thin" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-top",
-        "transparent",
-        BaselineStatus {
+    "border-top:transparent" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-top-color",
-        "transparent",
-        BaselineStatus {
+    "border-top-color:transparent" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-top-left-radius",
-        "percentages",
-        BaselineStatus {
+    "border-top-left-radius:percentages" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-top-right-radius",
-        "percentages",
-        BaselineStatus {
+    "border-top-right-radius:percentages" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-top-style",
-        "dashed",
-        BaselineStatus {
+    "border-top-style:dashed" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-top-style",
-        "dotted",
-        BaselineStatus {
+    "border-top-style:dotted" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-top-style",
-        "double",
-        BaselineStatus {
+    "border-top-style:double" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-top-style",
-        "groove",
-        BaselineStatus {
+    "border-top-style:groove" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-top-style",
-        "hidden",
-        BaselineStatus {
+    "border-top-style:hidden" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-top-style",
-        "inset",
-        BaselineStatus {
+    "border-top-style:inset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-top-style",
-        "none",
-        BaselineStatus {
+    "border-top-style:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-top-style",
-        "outset",
-        BaselineStatus {
+    "border-top-style:outset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-top-style",
-        "ridge",
-        BaselineStatus {
+    "border-top-style:ridge" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-top-style",
-        "solid",
-        BaselineStatus {
+    "border-top-style:solid" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-top-width",
-        "medium",
-        BaselineStatus {
+    "border-top-width:medium" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-top-width",
-        "thick",
-        BaselineStatus {
+    "border-top-width:thick" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-top-width",
-        "thin",
-        BaselineStatus {
+    "border-top-width:thin" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-width",
-        "medium",
-        BaselineStatus {
+    "border-width:medium" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-width",
-        "thick",
-        BaselineStatus {
+    "border-width:thick" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "border-width",
-        "thin",
-        BaselineStatus {
+    "border-width:thin" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "bottom",
-        "anchor",
-        BaselineStatus {
+    "bottom:anchor" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "bottom",
-        "anchor-size",
-        BaselineStatus {
+    "bottom:anchor-size" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "bottom",
-        "auto",
-        BaselineStatus {
+    "bottom:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "box-decoration-break",
-        "clone",
-        BaselineStatus {
+    "box-decoration-break:clone" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "box-decoration-break",
-        "slice",
-        BaselineStatus {
+    "box-decoration-break:slice" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "box-shadow",
-        "inset",
-        BaselineStatus {
+    "box-shadow:inset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "box-shadow",
-        "none",
-        BaselineStatus {
+    "box-shadow:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "box-sizing",
-        "border-box",
-        BaselineStatus {
+    "box-sizing:border-box" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "box-sizing",
-        "content-box",
-        BaselineStatus {
+    "box-sizing:content-box" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "break-after",
-        "always",
-        BaselineStatus {
+    "break-after:always" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2019),
         },
-    ),
-    (
-        "break-after",
-        "auto",
-        BaselineStatus {
+    "break-after:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2019),
         },
-    ),
-    (
-        "break-after",
-        "avoid",
-        BaselineStatus {
+    "break-after:avoid" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2019),
         },
-    ),
-    (
-        "break-after",
-        "avoid-column",
-        BaselineStatus {
+    "break-after:avoid-column" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "break-after",
-        "avoid-page",
-        BaselineStatus {
+    "break-after:avoid-page" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2019),
         },
-    ),
-    (
-        "break-after",
-        "column",
-        BaselineStatus {
+    "break-after:column" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "break-after",
-        "left",
-        BaselineStatus {
+    "break-after:left" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2019),
         },
-    ),
-    (
-        "break-after",
-        "page",
-        BaselineStatus {
+    "break-after:page" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2019),
         },
-    ),
-    (
-        "break-after",
-        "recto",
-        BaselineStatus {
+    "break-after:recto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2019),
         },
-    ),
-    (
-        "break-after",
-        "right",
-        BaselineStatus {
+    "break-after:right" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2019),
         },
-    ),
-    (
-        "break-after",
-        "verso",
-        BaselineStatus {
+    "break-after:verso" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2019),
         },
-    ),
-    (
-        "break-before",
-        "always",
-        BaselineStatus {
+    "break-before:always" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2019),
         },
-    ),
-    (
-        "break-before",
-        "auto",
-        BaselineStatus {
+    "break-before:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2019),
         },
-    ),
-    (
-        "break-before",
-        "avoid",
-        BaselineStatus {
+    "break-before:avoid" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2019),
         },
-    ),
-    (
-        "break-before",
-        "avoid-column",
-        BaselineStatus {
+    "break-before:avoid-column" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "break-before",
-        "avoid-page",
-        BaselineStatus {
+    "break-before:avoid-page" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2019),
         },
-    ),
-    (
-        "break-before",
-        "column",
-        BaselineStatus {
+    "break-before:column" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "break-before",
-        "left",
-        BaselineStatus {
+    "break-before:left" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2019),
         },
-    ),
-    (
-        "break-before",
-        "page",
-        BaselineStatus {
+    "break-before:page" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2019),
         },
-    ),
-    (
-        "break-before",
-        "recto",
-        BaselineStatus {
+    "break-before:recto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2019),
         },
-    ),
-    (
-        "break-before",
-        "right",
-        BaselineStatus {
+    "break-before:right" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2019),
         },
-    ),
-    (
-        "break-before",
-        "verso",
-        BaselineStatus {
+    "break-before:verso" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2019),
         },
-    ),
-    (
-        "break-inside",
-        "auto",
-        BaselineStatus {
+    "break-inside:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2019),
         },
-    ),
-    (
-        "break-inside",
-        "avoid",
-        BaselineStatus {
+    "break-inside:avoid" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2019),
         },
-    ),
-    (
-        "break-inside",
-        "avoid-column",
-        BaselineStatus {
+    "break-inside:avoid-column" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "break-inside",
-        "avoid-page",
-        BaselineStatus {
+    "break-inside:avoid-page" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2019),
         },
-    ),
-    (
-        "caption-side",
-        "bottom",
-        BaselineStatus {
+    "caption-side:bottom" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "caption-side",
-        "bottom-outside",
-        BaselineStatus {
+    "caption-side:bottom-outside" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "caption-side",
-        "top",
-        BaselineStatus {
+    "caption-side:top" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "caption-side",
-        "top-outside",
-        BaselineStatus {
+    "caption-side:top-outside" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "caret-shape",
-        "auto",
-        BaselineStatus {
+    "caret-shape:auto" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "caret-shape",
-        "bar",
-        BaselineStatus {
+    "caret-shape:bar" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "caret-shape",
-        "block",
-        BaselineStatus {
+    "caret-shape:block" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "caret-shape",
-        "underscore",
-        BaselineStatus {
+    "caret-shape:underscore" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "clear",
-        "both",
-        BaselineStatus {
+    "clear:both" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "clear",
-        "inline-end",
-        BaselineStatus {
+    "clear:inline-end" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "clear",
-        "inline-start",
-        BaselineStatus {
+    "clear:inline-start" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "clear",
-        "left",
-        BaselineStatus {
+    "clear:left" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "clear",
-        "none",
-        BaselineStatus {
+    "clear:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "clear",
-        "right",
-        BaselineStatus {
+    "clear:right" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "clip",
-        "auto",
-        BaselineStatus {
+    "clip:auto" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "clip-path",
-        "fill-box",
-        BaselineStatus {
+    "clip-path:fill-box" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "clip-path",
-        "path",
-        BaselineStatus {
+    "clip-path:path" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "clip-path",
-        "stroke-box",
-        BaselineStatus {
+    "clip-path:stroke-box" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "clip-path",
-        "view-box",
-        BaselineStatus {
+    "clip-path:view-box" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "clip-rule",
-        "evenodd",
-        BaselineStatus {
+    "clip-rule:evenodd" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "clip-rule",
-        "nonzero",
-        BaselineStatus {
+    "clip-rule:nonzero" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "color",
-        "transparent",
-        BaselineStatus {
+    "color:transparent" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "color-interpolation",
-        "auto",
-        BaselineStatus {
+    "color-interpolation:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "color-interpolation",
-        "linearGradient",
-        BaselineStatus {
+    "color-interpolation:linearGradient" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "color-interpolation",
-        "sRGB",
-        BaselineStatus {
+    "color-interpolation:sRGB" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "color-interpolation-filters",
-        "auto",
-        BaselineStatus {
+    "color-interpolation-filters:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "color-interpolation-filters",
-        "linearRGB",
-        BaselineStatus {
+    "color-interpolation-filters:linearRGB" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "color-interpolation-filters",
-        "sRGB",
-        BaselineStatus {
+    "color-interpolation-filters:sRGB" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "color-scheme",
-        "dark",
-        BaselineStatus {
+    "color-scheme:dark" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "color-scheme",
-        "light",
-        BaselineStatus {
+    "color-scheme:light" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "color-scheme",
-        "normal",
-        BaselineStatus {
+    "color-scheme:normal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "color-scheme",
-        "only",
-        BaselineStatus {
+    "color-scheme:only" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "column-count",
-        "auto",
-        BaselineStatus {
+    "column-count:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "column-fill",
-        "auto",
-        BaselineStatus {
+    "column-fill:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "column-fill",
-        "balance",
-        BaselineStatus {
+    "column-fill:balance" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "column-gap",
-        "normal",
-        BaselineStatus {
+    "column-gap:normal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "column-rule",
-        "dashed",
-        BaselineStatus {
+    "column-rule:dashed" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "column-rule",
-        "dotted",
-        BaselineStatus {
+    "column-rule:dotted" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "column-rule",
-        "double",
-        BaselineStatus {
+    "column-rule:double" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "column-rule",
-        "groove",
-        BaselineStatus {
+    "column-rule:groove" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "column-rule",
-        "hidden",
-        BaselineStatus {
+    "column-rule:hidden" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "column-rule",
-        "inset",
-        BaselineStatus {
+    "column-rule:inset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "column-rule",
-        "medium",
-        BaselineStatus {
+    "column-rule:medium" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "column-rule",
-        "none",
-        BaselineStatus {
+    "column-rule:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "column-rule",
-        "outset",
-        BaselineStatus {
+    "column-rule:outset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "column-rule",
-        "ridge",
-        BaselineStatus {
+    "column-rule:ridge" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "column-rule",
-        "solid",
-        BaselineStatus {
+    "column-rule:solid" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "column-rule",
-        "thick",
-        BaselineStatus {
+    "column-rule:thick" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "column-rule",
-        "thin",
-        BaselineStatus {
+    "column-rule:thin" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "column-rule",
-        "transparent",
-        BaselineStatus {
+    "column-rule:transparent" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "column-rule-color",
-        "transparent",
-        BaselineStatus {
+    "column-rule-color:transparent" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "column-rule-style",
-        "dashed",
-        BaselineStatus {
+    "column-rule-style:dashed" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "column-rule-style",
-        "dotted",
-        BaselineStatus {
+    "column-rule-style:dotted" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "column-rule-style",
-        "double",
-        BaselineStatus {
+    "column-rule-style:double" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "column-rule-style",
-        "groove",
-        BaselineStatus {
+    "column-rule-style:groove" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "column-rule-style",
-        "hidden",
-        BaselineStatus {
+    "column-rule-style:hidden" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "column-rule-style",
-        "inset",
-        BaselineStatus {
+    "column-rule-style:inset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "column-rule-style",
-        "none",
-        BaselineStatus {
+    "column-rule-style:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "column-rule-style",
-        "outset",
-        BaselineStatus {
+    "column-rule-style:outset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "column-rule-style",
-        "ridge",
-        BaselineStatus {
+    "column-rule-style:ridge" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "column-rule-style",
-        "solid",
-        BaselineStatus {
+    "column-rule-style:solid" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "column-rule-width",
-        "medium",
-        BaselineStatus {
+    "column-rule-width:medium" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "column-rule-width",
-        "thick",
-        BaselineStatus {
+    "column-rule-width:thick" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "column-rule-width",
-        "thin",
-        BaselineStatus {
+    "column-rule-width:thin" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "column-span",
-        "all",
-        BaselineStatus {
+    "column-span:all" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "column-span",
-        "none",
-        BaselineStatus {
+    "column-span:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "column-width",
-        "auto",
-        BaselineStatus {
+    "column-width:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "contain",
-        "content",
-        BaselineStatus {
+    "contain:content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "contain",
-        "inline-size",
-        BaselineStatus {
+    "contain:inline-size" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "contain",
-        "layout",
-        BaselineStatus {
+    "contain:layout" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "contain",
-        "none",
-        BaselineStatus {
+    "contain:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "contain",
-        "paint",
-        BaselineStatus {
+    "contain:paint" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "contain",
-        "size",
-        BaselineStatus {
+    "contain:size" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "contain",
-        "strict",
-        BaselineStatus {
+    "contain:strict" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "contain",
-        "style",
-        BaselineStatus {
+    "contain:style" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "contain-intrinsic-block-size",
-        "none",
-        BaselineStatus {
+    "contain-intrinsic-block-size:none" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "contain-intrinsic-height",
-        "none",
-        BaselineStatus {
+    "contain-intrinsic-height:none" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "contain-intrinsic-inline-size",
-        "none",
-        BaselineStatus {
+    "contain-intrinsic-inline-size:none" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "contain-intrinsic-size",
-        "none",
-        BaselineStatus {
+    "contain-intrinsic-size:none" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "contain-intrinsic-width",
-        "none",
-        BaselineStatus {
+    "contain-intrinsic-width:none" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "container-name",
-        "none",
-        BaselineStatus {
+    "container-name:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "container-type",
-        "anchored",
-        BaselineStatus {
+    "container-type:anchored" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "container-type",
-        "inline-size",
-        BaselineStatus {
+    "container-type:inline-size" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "container-type",
-        "normal",
-        BaselineStatus {
+    "container-type:normal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "container-type",
-        "scroll-state",
-        BaselineStatus {
+    "container-type:scroll-state" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "container-type",
-        "size",
-        BaselineStatus {
+    "container-type:size" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "content",
-        "close-quote",
-        BaselineStatus {
+    "content:close-quote" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "content",
-        "gradient",
-        BaselineStatus {
+    "content:gradient" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "content",
-        "image-set",
-        BaselineStatus {
+    "content:image-set" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "content",
-        "no-close-quote",
-        BaselineStatus {
+    "content:no-close-quote" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "content",
-        "no-open-quote",
-        BaselineStatus {
+    "content:no-open-quote" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "content",
-        "none",
-        BaselineStatus {
+    "content:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "content",
-        "normal",
-        BaselineStatus {
+    "content:normal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "content",
-        "open-quote",
-        BaselineStatus {
+    "content:open-quote" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "content",
-        "url",
-        BaselineStatus {
+    "content:url" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "content-visibility",
-        "auto",
-        BaselineStatus {
+    "content-visibility:auto" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2025),
         },
-    ),
-    (
-        "content-visibility",
-        "hidden",
-        BaselineStatus {
+    "content-visibility:hidden" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2025),
         },
-    ),
-    (
-        "content-visibility",
-        "visible",
-        BaselineStatus {
+    "content-visibility:visible" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2025),
         },
-    ),
-    (
-        "counter-increment",
-        "list-item",
-        BaselineStatus {
+    "counter-increment:list-item" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "counter-increment",
-        "none",
-        BaselineStatus {
+    "counter-increment:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "counter-reset",
-        "list-item",
-        BaselineStatus {
+    "counter-reset:list-item" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "counter-reset",
-        "none",
-        BaselineStatus {
+    "counter-reset:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "counter-reset",
-        "reversed",
-        BaselineStatus {
+    "counter-reset:reversed" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "counter-set",
-        "list-item",
-        BaselineStatus {
+    "counter-set:list-item" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "counter-set",
-        "none",
-        BaselineStatus {
+    "counter-set:none" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "direction",
-        "ltr",
-        BaselineStatus {
+    "direction:ltr" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "direction",
-        "rtl",
-        BaselineStatus {
+    "direction:rtl" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "display",
-        "block",
-        BaselineStatus {
+    "display:block" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "display",
-        "contents",
-        BaselineStatus {
+    "display:contents" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "display",
-        "flex",
-        BaselineStatus {
+    "display:flex" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "display",
-        "flow-root",
-        BaselineStatus {
+    "display:flow-root" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "display",
-        "grid",
-        BaselineStatus {
+    "display:grid" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "display",
-        "inline",
-        BaselineStatus {
+    "display:inline" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "display",
-        "inline-block",
-        BaselineStatus {
+    "display:inline-block" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "display",
-        "inline-flex",
-        BaselineStatus {
+    "display:inline-flex" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "display",
-        "inline-grid",
-        BaselineStatus {
+    "display:inline-grid" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "display",
-        "inline-table",
-        BaselineStatus {
+    "display:inline-table" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "display",
-        "list-item",
-        BaselineStatus {
+    "display:list-item" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "display",
-        "math",
-        BaselineStatus {
+    "display:math" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "display",
-        "none",
-        BaselineStatus {
+    "display:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "display",
-        "ruby",
-        BaselineStatus {
+    "display:ruby" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "display",
-        "ruby-base",
-        BaselineStatus {
+    "display:ruby-base" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "display",
-        "ruby-base-container",
-        BaselineStatus {
+    "display:ruby-base-container" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "display",
-        "ruby-text",
-        BaselineStatus {
+    "display:ruby-text" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "display",
-        "ruby-text-container",
-        BaselineStatus {
+    "display:ruby-text-container" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "display",
-        "table",
-        BaselineStatus {
+    "display:table" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "display",
-        "table-caption",
-        BaselineStatus {
+    "display:table-caption" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "display",
-        "table-cell",
-        BaselineStatus {
+    "display:table-cell" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "display",
-        "table-column",
-        BaselineStatus {
+    "display:table-column" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "display",
-        "table-column-group",
-        BaselineStatus {
+    "display:table-column-group" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "display",
-        "table-footer-group",
-        BaselineStatus {
+    "display:table-footer-group" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "display",
-        "table-header-group",
-        BaselineStatus {
+    "display:table-header-group" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "display",
-        "table-row",
-        BaselineStatus {
+    "display:table-row" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "display",
-        "table-row-group",
-        BaselineStatus {
+    "display:table-row-group" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "dominant-baseline",
-        "alphabetic",
-        BaselineStatus {
+    "dominant-baseline:alphabetic" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "dominant-baseline",
-        "auto",
-        BaselineStatus {
+    "dominant-baseline:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "dominant-baseline",
-        "central",
-        BaselineStatus {
+    "dominant-baseline:central" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "dominant-baseline",
-        "hanging",
-        BaselineStatus {
+    "dominant-baseline:hanging" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "dominant-baseline",
-        "ideographic",
-        BaselineStatus {
+    "dominant-baseline:ideographic" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "dominant-baseline",
-        "mathematical",
-        BaselineStatus {
+    "dominant-baseline:mathematical" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "dominant-baseline",
-        "middle",
-        BaselineStatus {
+    "dominant-baseline:middle" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "empty-cells",
-        "hide",
-        BaselineStatus {
+    "empty-cells:hide" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "empty-cells",
-        "show",
-        BaselineStatus {
+    "empty-cells:show" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "field-sizing",
-        "content",
-        BaselineStatus {
+    "field-sizing:content" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "field-sizing",
-        "fixed",
-        BaselineStatus {
+    "field-sizing:fixed" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "fill",
-        "none",
-        BaselineStatus {
+    "fill:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "fill-rule",
-        "evenodd",
-        BaselineStatus {
+    "fill-rule:evenodd" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "fill-rule",
-        "nonzero",
-        BaselineStatus {
+    "fill-rule:nonzero" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "filter",
-        "blur",
-        BaselineStatus {
+    "filter:blur" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2016),
         },
-    ),
-    (
-        "filter",
-        "brightness",
-        BaselineStatus {
+    "filter:brightness" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2016),
         },
-    ),
-    (
-        "filter",
-        "contrast",
-        BaselineStatus {
+    "filter:contrast" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2016),
         },
-    ),
-    (
-        "filter",
-        "drop-shadow",
-        BaselineStatus {
+    "filter:drop-shadow" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2016),
         },
-    ),
-    (
-        "filter",
-        "grayscale",
-        BaselineStatus {
+    "filter:grayscale" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2016),
         },
-    ),
-    (
-        "filter",
-        "hue-rotate",
-        BaselineStatus {
+    "filter:hue-rotate" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2016),
         },
-    ),
-    (
-        "filter",
-        "invert",
-        BaselineStatus {
+    "filter:invert" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2016),
         },
-    ),
-    (
-        "filter",
-        "opacity",
-        BaselineStatus {
+    "filter:opacity" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2016),
         },
-    ),
-    (
-        "filter",
-        "saturate",
-        BaselineStatus {
+    "filter:saturate" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2016),
         },
-    ),
-    (
-        "filter",
-        "sepia",
-        BaselineStatus {
+    "filter:sepia" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2016),
         },
-    ),
-    (
-        "flex",
-        "none",
-        BaselineStatus {
+    "flex:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "flex-basis",
-        "auto",
-        BaselineStatus {
+    "flex-basis:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "flex-basis",
-        "content",
-        BaselineStatus {
+    "flex-basis:content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "flex-basis",
-        "fit-content",
-        BaselineStatus {
+    "flex-basis:fit-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "flex-basis",
-        "max-content",
-        BaselineStatus {
+    "flex-basis:max-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "flex-basis",
-        "min-content",
-        BaselineStatus {
+    "flex-basis:min-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "flex-direction",
-        "column",
-        BaselineStatus {
+    "flex-direction:column" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "flex-direction",
-        "column-reverse",
-        BaselineStatus {
+    "flex-direction:column-reverse" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "flex-direction",
-        "row",
-        BaselineStatus {
+    "flex-direction:row" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "flex-direction",
-        "row-reverse",
-        BaselineStatus {
+    "flex-direction:row-reverse" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "flex-wrap",
-        "nowrap",
-        BaselineStatus {
+    "flex-wrap:nowrap" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "flex-wrap",
-        "wrap",
-        BaselineStatus {
+    "flex-wrap:wrap" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "flex-wrap",
-        "wrap-reverse",
-        BaselineStatus {
+    "flex-wrap:wrap-reverse" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "float",
-        "inline-end",
-        BaselineStatus {
+    "float:inline-end" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "float",
-        "inline-start",
-        BaselineStatus {
+    "float:inline-start" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "float",
-        "left",
-        BaselineStatus {
+    "float:left" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "float",
-        "none",
-        BaselineStatus {
+    "float:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "float",
-        "right",
-        BaselineStatus {
+    "float:right" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "flood-color",
-        "currentColor",
-        BaselineStatus {
+    "flood-color:currentColor" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "flood-color",
-        "transparent",
-        BaselineStatus {
+    "flood-color:transparent" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "font",
-        "caption",
-        BaselineStatus {
+    "font:caption" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "font",
-        "icon",
-        BaselineStatus {
+    "font:icon" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "font",
-        "menu",
-        BaselineStatus {
+    "font:menu" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "font",
-        "message-box",
-        BaselineStatus {
+    "font:message-box" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "font",
-        "small-caption",
-        BaselineStatus {
+    "font:small-caption" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "font",
-        "status-bar",
-        BaselineStatus {
+    "font:status-bar" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "font-family",
-        "cursive",
-        BaselineStatus {
+    "font-family:cursive" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "font-family",
-        "fangsong",
-        BaselineStatus {
+    "font-family:fangsong" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "font-family",
-        "fantasy",
-        BaselineStatus {
+    "font-family:fantasy" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "font-family",
-        "kai",
-        BaselineStatus {
+    "font-family:kai" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "font-family",
-        "khmer-mul",
-        BaselineStatus {
+    "font-family:khmer-mul" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "font-family",
-        "math",
-        BaselineStatus {
+    "font-family:math" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2025),
         },
-    ),
-    (
-        "font-family",
-        "monospace",
-        BaselineStatus {
+    "font-family:monospace" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "font-family",
-        "nastaliq",
-        BaselineStatus {
+    "font-family:nastaliq" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "font-family",
-        "sans-serif",
-        BaselineStatus {
+    "font-family:sans-serif" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "font-family",
-        "serif",
-        BaselineStatus {
+    "font-family:serif" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "font-family",
-        "system-ui",
-        BaselineStatus {
+    "font-family:system-ui" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "font-family",
-        "ui-monospace",
-        BaselineStatus {
+    "font-family:ui-monospace" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "font-family",
-        "ui-rounded",
-        BaselineStatus {
+    "font-family:ui-rounded" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "font-family",
-        "ui-sans-serif",
-        BaselineStatus {
+    "font-family:ui-sans-serif" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "font-family",
-        "ui-serif",
-        BaselineStatus {
+    "font-family:ui-serif" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "font-feature-settings",
-        "normal",
-        BaselineStatus {
+    "font-feature-settings:normal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "font-kerning",
-        "auto",
-        BaselineStatus {
+    "font-kerning:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-kerning",
-        "none",
-        BaselineStatus {
+    "font-kerning:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-kerning",
-        "normal",
-        BaselineStatus {
+    "font-kerning:normal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-optical-sizing",
-        "auto",
-        BaselineStatus {
+    "font-optical-sizing:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-optical-sizing",
-        "none",
-        BaselineStatus {
+    "font-optical-sizing:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-palette",
-        "dark",
-        BaselineStatus {
+    "font-palette:dark" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "font-palette",
-        "light",
-        BaselineStatus {
+    "font-palette:light" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "font-palette",
-        "normal",
-        BaselineStatus {
+    "font-palette:normal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "font-size",
-        "math",
-        BaselineStatus {
+    "font-size:math" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "font-size",
-        "xxx-large",
-        BaselineStatus {
+    "font-size:xxx-large" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "font-size-adjust",
-        "from-font",
-        BaselineStatus {
+    "font-size-adjust:from-font" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "font-size-adjust",
-        "none",
-        BaselineStatus {
+    "font-size-adjust:none" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "font-size-adjust",
-        "two-values",
-        BaselineStatus {
+    "font-size-adjust:two-values" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "font-stretch",
-        "condensed",
-        BaselineStatus {
+    "font-stretch:condensed" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-stretch",
-        "expanded",
-        BaselineStatus {
+    "font-stretch:expanded" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-stretch",
-        "extra-condensed",
-        BaselineStatus {
+    "font-stretch:extra-condensed" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-stretch",
-        "extra-expanded",
-        BaselineStatus {
+    "font-stretch:extra-expanded" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-stretch",
-        "normal",
-        BaselineStatus {
+    "font-stretch:normal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-stretch",
-        "percentage",
-        BaselineStatus {
+    "font-stretch:percentage" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-stretch",
-        "semi-condensed",
-        BaselineStatus {
+    "font-stretch:semi-condensed" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-stretch",
-        "semi-expanded",
-        BaselineStatus {
+    "font-stretch:semi-expanded" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-stretch",
-        "ultra-condensed",
-        BaselineStatus {
+    "font-stretch:ultra-condensed" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-stretch",
-        "ultra-expanded",
-        BaselineStatus {
+    "font-stretch:ultra-expanded" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-style",
-        "italic",
-        BaselineStatus {
+    "font-style:italic" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "font-style",
-        "normal",
-        BaselineStatus {
+    "font-style:normal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "font-style",
-        "oblique",
-        BaselineStatus {
+    "font-style:oblique" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "font-style",
-        "oblique-angle",
-        BaselineStatus {
+    "font-style:oblique-angle" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "font-synthesis",
-        "position",
-        BaselineStatus {
+    "font-synthesis:position" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "font-synthesis",
-        "small-caps",
-        BaselineStatus {
+    "font-synthesis:small-caps" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "font-synthesis",
-        "style",
-        BaselineStatus {
+    "font-synthesis:style" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "font-synthesis",
-        "weight",
-        BaselineStatus {
+    "font-synthesis:weight" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "font-synthesis-position",
-        "auto",
-        BaselineStatus {
+    "font-synthesis-position:auto" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "font-synthesis-position",
-        "none",
-        BaselineStatus {
+    "font-synthesis-position:none" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "font-synthesis-small-caps",
-        "auto",
-        BaselineStatus {
+    "font-synthesis-small-caps:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "font-synthesis-small-caps",
-        "none",
-        BaselineStatus {
+    "font-synthesis-small-caps:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "font-synthesis-style",
-        "auto",
-        BaselineStatus {
+    "font-synthesis-style:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "font-synthesis-style",
-        "none",
-        BaselineStatus {
+    "font-synthesis-style:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "font-synthesis-weight",
-        "auto",
-        BaselineStatus {
+    "font-synthesis-weight:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "font-synthesis-weight",
-        "none",
-        BaselineStatus {
+    "font-synthesis-weight:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "font-variant",
-        "historical-forms",
-        BaselineStatus {
+    "font-variant:historical-forms" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "font-variant",
-        "none",
-        BaselineStatus {
+    "font-variant:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "font-variant",
-        "normal",
-        BaselineStatus {
+    "font-variant:normal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "font-variant",
-        "sub",
-        BaselineStatus {
+    "font-variant:sub" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "font-variant",
-        "super",
-        BaselineStatus {
+    "font-variant:super" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "font-variant-alternates",
-        "annotation",
-        BaselineStatus {
+    "font-variant-alternates:annotation" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "font-variant-alternates",
-        "historical-forms",
-        BaselineStatus {
+    "font-variant-alternates:historical-forms" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "font-variant-alternates",
-        "normal",
-        BaselineStatus {
+    "font-variant-alternates:normal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "font-variant-alternates",
-        "ornaments",
-        BaselineStatus {
+    "font-variant-alternates:ornaments" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "font-variant-alternates",
-        "styleset",
-        BaselineStatus {
+    "font-variant-alternates:styleset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "font-variant-alternates",
-        "stylistic",
-        BaselineStatus {
+    "font-variant-alternates:stylistic" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "font-variant-alternates",
-        "swash",
-        BaselineStatus {
+    "font-variant-alternates:swash" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "font-variant-caps",
-        "all-petite-caps",
-        BaselineStatus {
+    "font-variant-caps:all-petite-caps" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-caps",
-        "all-small-caps",
-        BaselineStatus {
+    "font-variant-caps:all-small-caps" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-caps",
-        "normal",
-        BaselineStatus {
+    "font-variant-caps:normal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-caps",
-        "petite-caps",
-        BaselineStatus {
+    "font-variant-caps:petite-caps" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-caps",
-        "small-caps",
-        BaselineStatus {
+    "font-variant-caps:small-caps" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-caps",
-        "titling-caps",
-        BaselineStatus {
+    "font-variant-caps:titling-caps" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-caps",
-        "unicase",
-        BaselineStatus {
+    "font-variant-caps:unicase" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-east-asian",
-        "full-width",
-        BaselineStatus {
+    "font-variant-east-asian:full-width" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-east-asian",
-        "jis04",
-        BaselineStatus {
+    "font-variant-east-asian:jis04" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-east-asian",
-        "jis78",
-        BaselineStatus {
+    "font-variant-east-asian:jis78" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-east-asian",
-        "jis83",
-        BaselineStatus {
+    "font-variant-east-asian:jis83" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-east-asian",
-        "jis90",
-        BaselineStatus {
+    "font-variant-east-asian:jis90" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-east-asian",
-        "normal",
-        BaselineStatus {
+    "font-variant-east-asian:normal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-east-asian",
-        "proportional-width",
-        BaselineStatus {
+    "font-variant-east-asian:proportional-width" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-east-asian",
-        "ruby",
-        BaselineStatus {
+    "font-variant-east-asian:ruby" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-east-asian",
-        "simplified",
-        BaselineStatus {
+    "font-variant-east-asian:simplified" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-east-asian",
-        "traditional",
-        BaselineStatus {
+    "font-variant-east-asian:traditional" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-emoji",
-        "emoji",
-        BaselineStatus {
+    "font-variant-emoji:emoji" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "font-variant-emoji",
-        "normal",
-        BaselineStatus {
+    "font-variant-emoji:normal" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "font-variant-emoji",
-        "text",
-        BaselineStatus {
+    "font-variant-emoji:text" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "font-variant-emoji",
-        "unicode",
-        BaselineStatus {
+    "font-variant-emoji:unicode" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "font-variant-ligatures",
-        "common-ligatures",
-        BaselineStatus {
+    "font-variant-ligatures:common-ligatures" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-ligatures",
-        "contextual",
-        BaselineStatus {
+    "font-variant-ligatures:contextual" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-ligatures",
-        "discretionary-ligatures",
-        BaselineStatus {
+    "font-variant-ligatures:discretionary-ligatures" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-ligatures",
-        "historical-ligatures",
-        BaselineStatus {
+    "font-variant-ligatures:historical-ligatures" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-ligatures",
-        "no-common-ligatures",
-        BaselineStatus {
+    "font-variant-ligatures:no-common-ligatures" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-ligatures",
-        "no-contextual",
-        BaselineStatus {
+    "font-variant-ligatures:no-contextual" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-ligatures",
-        "no-discretionary-ligatures",
-        BaselineStatus {
+    "font-variant-ligatures:no-discretionary-ligatures" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-ligatures",
-        "no-historical-ligatures",
-        BaselineStatus {
+    "font-variant-ligatures:no-historical-ligatures" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-ligatures",
-        "none",
-        BaselineStatus {
+    "font-variant-ligatures:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-ligatures",
-        "normal",
-        BaselineStatus {
+    "font-variant-ligatures:normal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-numeric",
-        "diagonal-fractions",
-        BaselineStatus {
+    "font-variant-numeric:diagonal-fractions" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-numeric",
-        "lining-nums",
-        BaselineStatus {
+    "font-variant-numeric:lining-nums" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-numeric",
-        "normal",
-        BaselineStatus {
+    "font-variant-numeric:normal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-numeric",
-        "oldstyle-nums",
-        BaselineStatus {
+    "font-variant-numeric:oldstyle-nums" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-numeric",
-        "ordinal",
-        BaselineStatus {
+    "font-variant-numeric:ordinal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-numeric",
-        "proportional-nums",
-        BaselineStatus {
+    "font-variant-numeric:proportional-nums" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-numeric",
-        "slashed-zero",
-        BaselineStatus {
+    "font-variant-numeric:slashed-zero" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-numeric",
-        "stacked-fractions",
-        BaselineStatus {
+    "font-variant-numeric:stacked-fractions" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-numeric",
-        "tabular-nums",
-        BaselineStatus {
+    "font-variant-numeric:tabular-nums" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "font-variant-position",
-        "normal",
-        BaselineStatus {
+    "font-variant-position:normal" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "font-variant-position",
-        "sub",
-        BaselineStatus {
+    "font-variant-position:sub" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "font-variant-position",
-        "super",
-        BaselineStatus {
+    "font-variant-position:super" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "font-weight",
-        "bold",
-        BaselineStatus {
+    "font-weight:bold" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "font-weight",
-        "bolder",
-        BaselineStatus {
+    "font-weight:bolder" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "font-weight",
-        "lighter",
-        BaselineStatus {
+    "font-weight:lighter" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "font-weight",
-        "normal",
-        BaselineStatus {
+    "font-weight:normal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "font-weight",
-        "number",
-        BaselineStatus {
+    "font-weight:number" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "font-width",
-        "condensed",
-        BaselineStatus {
+    "font-width:condensed" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "font-width",
-        "expanded",
-        BaselineStatus {
+    "font-width:expanded" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "font-width",
-        "extra-condensed",
-        BaselineStatus {
+    "font-width:extra-condensed" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "font-width",
-        "extra-expanded",
-        BaselineStatus {
+    "font-width:extra-expanded" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "font-width",
-        "normal",
-        BaselineStatus {
+    "font-width:normal" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "font-width",
-        "semi-condensed",
-        BaselineStatus {
+    "font-width:semi-condensed" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "font-width",
-        "semi-expanded",
-        BaselineStatus {
+    "font-width:semi-expanded" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "font-width",
-        "ultra-condensed",
-        BaselineStatus {
+    "font-width:ultra-condensed" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "font-width",
-        "ultra-expanded",
-        BaselineStatus {
+    "font-width:ultra-expanded" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "forced-color-adjust",
-        "auto",
-        BaselineStatus {
+    "forced-color-adjust:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "forced-color-adjust",
-        "none",
-        BaselineStatus {
+    "forced-color-adjust:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "forced-color-adjust",
-        "preserve-parent-color",
-        BaselineStatus {
+    "forced-color-adjust:preserve-parent-color" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "gap",
-        "normal",
-        BaselineStatus {
+    "gap:normal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "grid-auto-flow",
-        "column",
-        BaselineStatus {
+    "grid-auto-flow:column" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "grid-auto-flow",
-        "dense",
-        BaselineStatus {
+    "grid-auto-flow:dense" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "grid-auto-flow",
-        "row",
-        BaselineStatus {
+    "grid-auto-flow:row" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "grid-template",
-        "none",
-        BaselineStatus {
+    "grid-template:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "grid-template-areas",
-        "none",
-        BaselineStatus {
+    "grid-template-areas:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "grid-template-columns",
-        "animation",
-        BaselineStatus {
+    "grid-template-columns:animation" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "grid-template-columns",
-        "auto",
-        BaselineStatus {
+    "grid-template-columns:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "grid-template-columns",
-        "fit-content",
-        BaselineStatus {
+    "grid-template-columns:fit-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "grid-template-columns",
-        "masonry",
-        BaselineStatus {
+    "grid-template-columns:masonry" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "grid-template-columns",
-        "max-content",
-        BaselineStatus {
+    "grid-template-columns:max-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "grid-template-columns",
-        "min-content",
-        BaselineStatus {
+    "grid-template-columns:min-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "grid-template-columns",
-        "minmax",
-        BaselineStatus {
+    "grid-template-columns:minmax" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "grid-template-columns",
-        "none",
-        BaselineStatus {
+    "grid-template-columns:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "grid-template-columns",
-        "repeat",
-        BaselineStatus {
+    "grid-template-columns:repeat" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "grid-template-columns",
-        "subgrid",
-        BaselineStatus {
+    "grid-template-columns:subgrid" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "grid-template-rows",
-        "animation",
-        BaselineStatus {
+    "grid-template-rows:animation" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "grid-template-rows",
-        "auto",
-        BaselineStatus {
+    "grid-template-rows:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "grid-template-rows",
-        "fit-content",
-        BaselineStatus {
+    "grid-template-rows:fit-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "grid-template-rows",
-        "masonry",
-        BaselineStatus {
+    "grid-template-rows:masonry" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "grid-template-rows",
-        "max-content",
-        BaselineStatus {
+    "grid-template-rows:max-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "grid-template-rows",
-        "min-content",
-        BaselineStatus {
+    "grid-template-rows:min-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "grid-template-rows",
-        "minmax",
-        BaselineStatus {
+    "grid-template-rows:minmax" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "grid-template-rows",
-        "none",
-        BaselineStatus {
+    "grid-template-rows:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "grid-template-rows",
-        "repeat",
-        BaselineStatus {
+    "grid-template-rows:repeat" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "grid-template-rows",
-        "subgrid",
-        BaselineStatus {
+    "grid-template-rows:subgrid" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "hanging-punctuation",
-        "allow-end",
-        BaselineStatus {
+    "hanging-punctuation:allow-end" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "hanging-punctuation",
-        "first",
-        BaselineStatus {
+    "hanging-punctuation:first" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "hanging-punctuation",
-        "last",
-        BaselineStatus {
+    "hanging-punctuation:last" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "hanging-punctuation",
-        "none",
-        BaselineStatus {
+    "hanging-punctuation:none" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "height",
-        "anchor-size",
-        BaselineStatus {
+    "height:anchor-size" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "height",
-        "auto",
-        BaselineStatus {
+    "height:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "height",
-        "fit-content",
-        BaselineStatus {
+    "height:fit-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "height",
-        "max-content",
-        BaselineStatus {
+    "height:max-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "height",
-        "min-content",
-        BaselineStatus {
+    "height:min-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "height",
-        "stretch",
-        BaselineStatus {
+    "height:stretch" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "hyphenate-character",
-        "auto",
-        BaselineStatus {
+    "hyphenate-character:auto" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "hyphenate-limit-chars",
-        "auto",
-        BaselineStatus {
+    "hyphenate-limit-chars:auto" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "hyphens",
-        "auto",
-        BaselineStatus {
+    "hyphens:auto" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "image-orientation",
-        "from-image",
-        BaselineStatus {
+    "image-orientation:from-image" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "image-orientation",
-        "none",
-        BaselineStatus {
+    "image-orientation:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "image-rendering",
-        "auto",
-        BaselineStatus {
+    "image-rendering:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "image-rendering",
-        "crisp-edges",
-        BaselineStatus {
+    "image-rendering:crisp-edges" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "image-rendering",
-        "pixelated",
-        BaselineStatus {
+    "image-rendering:pixelated" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "image-rendering",
-        "smooth",
-        BaselineStatus {
+    "image-rendering:smooth" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "initial-letter",
-        "normal",
-        BaselineStatus {
+    "initial-letter:normal" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "inline-size",
-        "anchor-size",
-        BaselineStatus {
+    "inline-size:anchor-size" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "inline-size",
-        "fit-content",
-        BaselineStatus {
+    "inline-size:fit-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "inline-size",
-        "max-content",
-        BaselineStatus {
+    "inline-size:max-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "inline-size",
-        "min-content",
-        BaselineStatus {
+    "inline-size:min-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "inset",
-        "anchor",
-        BaselineStatus {
+    "inset:anchor" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "inset",
-        "anchor-size",
-        BaselineStatus {
+    "inset:anchor-size" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "inset",
-        "auto",
-        BaselineStatus {
+    "inset:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "inset-block",
-        "anchor",
-        BaselineStatus {
+    "inset-block:anchor" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "inset-block",
-        "anchor-size",
-        BaselineStatus {
+    "inset-block:anchor-size" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "inset-block",
-        "auto",
-        BaselineStatus {
+    "inset-block:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "inset-block-end",
-        "anchor",
-        BaselineStatus {
+    "inset-block-end:anchor" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "inset-block-end",
-        "anchor-size",
-        BaselineStatus {
+    "inset-block-end:anchor-size" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "inset-block-end",
-        "auto",
-        BaselineStatus {
+    "inset-block-end:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "inset-block-start",
-        "anchor",
-        BaselineStatus {
+    "inset-block-start:anchor" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "inset-block-start",
-        "anchor-size",
-        BaselineStatus {
+    "inset-block-start:anchor-size" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "inset-block-start",
-        "auto",
-        BaselineStatus {
+    "inset-block-start:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "inset-inline",
-        "anchor",
-        BaselineStatus {
+    "inset-inline:anchor" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "inset-inline",
-        "anchor-size",
-        BaselineStatus {
+    "inset-inline:anchor-size" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "inset-inline",
-        "auto",
-        BaselineStatus {
+    "inset-inline:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "inset-inline-end",
-        "anchor",
-        BaselineStatus {
+    "inset-inline-end:anchor" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "inset-inline-end",
-        "anchor-size",
-        BaselineStatus {
+    "inset-inline-end:anchor-size" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "inset-inline-end",
-        "auto",
-        BaselineStatus {
+    "inset-inline-end:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "inset-inline-start",
-        "anchor",
-        BaselineStatus {
+    "inset-inline-start:anchor" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "inset-inline-start",
-        "anchor-size",
-        BaselineStatus {
+    "inset-inline-start:anchor-size" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "inset-inline-start",
-        "auto",
-        BaselineStatus {
+    "inset-inline-start:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "interactivity",
-        "auto",
-        BaselineStatus {
+    "interactivity:auto" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "interactivity",
-        "inert",
-        BaselineStatus {
+    "interactivity:inert" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "interpolate-size",
-        "allow-keywords",
-        BaselineStatus {
+    "interpolate-size:allow-keywords" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "interpolate-size",
-        "numeric-only",
-        BaselineStatus {
+    "interpolate-size:numeric-only" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "justify-content",
-        "left",
-        BaselineStatus {
+    "justify-content:left" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "justify-content",
-        "normal",
-        BaselineStatus {
+    "justify-content:normal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "justify-content",
-        "right",
-        BaselineStatus {
+    "justify-content:right" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "justify-items",
-        "anchor-center",
-        BaselineStatus {
+    "justify-items:anchor-center" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "justify-items",
-        "center",
-        BaselineStatus {
+    "justify-items:center" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "justify-items",
-        "left",
-        BaselineStatus {
+    "justify-items:left" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "justify-items",
-        "legacy",
-        BaselineStatus {
+    "justify-items:legacy" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "justify-items",
-        "right",
-        BaselineStatus {
+    "justify-items:right" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "justify-self",
-        "anchor-center",
-        BaselineStatus {
+    "justify-self:anchor-center" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "justify-self",
-        "auto",
-        BaselineStatus {
+    "justify-self:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "justify-self",
-        "left",
-        BaselineStatus {
+    "justify-self:left" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "justify-self",
-        "normal",
-        BaselineStatus {
+    "justify-self:normal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "justify-self",
-        "right",
-        BaselineStatus {
+    "justify-self:right" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "justify-self",
-        "stretch",
-        BaselineStatus {
+    "justify-self:stretch" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "left",
-        "anchor",
-        BaselineStatus {
+    "left:anchor" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "left",
-        "anchor-size",
-        BaselineStatus {
+    "left:anchor-size" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "left",
-        "auto",
-        BaselineStatus {
+    "left:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "letter-spacing",
-        "normal",
-        BaselineStatus {
+    "letter-spacing:normal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "lighting-color",
-        "currentColor",
-        BaselineStatus {
+    "lighting-color:currentColor" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "lighting-color",
-        "transparent",
-        BaselineStatus {
+    "lighting-color:transparent" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "line-break",
-        "anywhere",
-        BaselineStatus {
+    "line-break:anywhere" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "line-break",
-        "auto",
-        BaselineStatus {
+    "line-break:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "line-break",
-        "loose",
-        BaselineStatus {
+    "line-break:loose" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "line-break",
-        "normal",
-        BaselineStatus {
+    "line-break:normal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "line-break",
-        "strict",
-        BaselineStatus {
+    "line-break:strict" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "line-clamp",
-        "none",
-        BaselineStatus {
+    "line-clamp:none" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "line-height",
-        "normal",
-        BaselineStatus {
+    "line-height:normal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style",
-        "inside",
-        BaselineStatus {
+    "list-style:inside" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style",
-        "none",
-        BaselineStatus {
+    "list-style:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style",
-        "outside",
-        BaselineStatus {
+    "list-style:outside" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style",
-        "symbols",
-        BaselineStatus {
+    "list-style:symbols" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-image",
-        "none",
-        BaselineStatus {
+    "list-style-image:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-position",
-        "inside",
-        BaselineStatus {
+    "list-style-position:inside" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-position",
-        "outside",
-        BaselineStatus {
+    "list-style-position:outside" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "arabic-indic",
-        BaselineStatus {
+    "list-style-type:arabic-indic" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "armenian",
-        BaselineStatus {
+    "list-style-type:armenian" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "bengali",
-        BaselineStatus {
+    "list-style-type:bengali" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "cambodian",
-        BaselineStatus {
+    "list-style-type:cambodian" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "circle",
-        BaselineStatus {
+    "list-style-type:circle" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "cjk-decimal",
-        BaselineStatus {
+    "list-style-type:cjk-decimal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "cjk-earthly-branch",
-        BaselineStatus {
+    "list-style-type:cjk-earthly-branch" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "cjk-heavenly-stem",
-        BaselineStatus {
+    "list-style-type:cjk-heavenly-stem" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "cjk-ideographic",
-        BaselineStatus {
+    "list-style-type:cjk-ideographic" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "decimal",
-        BaselineStatus {
+    "list-style-type:decimal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "decimal-leading-zero",
-        BaselineStatus {
+    "list-style-type:decimal-leading-zero" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "devanagari",
-        BaselineStatus {
+    "list-style-type:devanagari" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "disc",
-        BaselineStatus {
+    "list-style-type:disc" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "disclosure-closed",
-        BaselineStatus {
+    "list-style-type:disclosure-closed" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "disclosure-open",
-        BaselineStatus {
+    "list-style-type:disclosure-open" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "ethiopic-numeric",
-        BaselineStatus {
+    "list-style-type:ethiopic-numeric" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "georgian",
-        BaselineStatus {
+    "list-style-type:georgian" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "gujarati",
-        BaselineStatus {
+    "list-style-type:gujarati" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "gurmukhi",
-        BaselineStatus {
+    "list-style-type:gurmukhi" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "hebrew",
-        BaselineStatus {
+    "list-style-type:hebrew" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "hiragana",
-        BaselineStatus {
+    "list-style-type:hiragana" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "hiragana-iroha",
-        BaselineStatus {
+    "list-style-type:hiragana-iroha" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "japanese-formal",
-        BaselineStatus {
+    "list-style-type:japanese-formal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "japanese-informal",
-        BaselineStatus {
+    "list-style-type:japanese-informal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "kannada",
-        BaselineStatus {
+    "list-style-type:kannada" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "katakana",
-        BaselineStatus {
+    "list-style-type:katakana" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "katakana-iroha",
-        BaselineStatus {
+    "list-style-type:katakana-iroha" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "khmer",
-        BaselineStatus {
+    "list-style-type:khmer" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "korean-hangul-formal",
-        BaselineStatus {
+    "list-style-type:korean-hangul-formal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "korean-hanja-formal",
-        BaselineStatus {
+    "list-style-type:korean-hanja-formal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "korean-hanja-informal",
-        BaselineStatus {
+    "list-style-type:korean-hanja-informal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "lao",
-        BaselineStatus {
+    "list-style-type:lao" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "lower-alpha",
-        BaselineStatus {
+    "list-style-type:lower-alpha" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "lower-armenian",
-        BaselineStatus {
+    "list-style-type:lower-armenian" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "lower-greek",
-        BaselineStatus {
+    "list-style-type:lower-greek" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "lower-latin",
-        BaselineStatus {
+    "list-style-type:lower-latin" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "lower-roman",
-        BaselineStatus {
+    "list-style-type:lower-roman" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "malayalam",
-        BaselineStatus {
+    "list-style-type:malayalam" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "mongolian",
-        BaselineStatus {
+    "list-style-type:mongolian" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "myanmar",
-        BaselineStatus {
+    "list-style-type:myanmar" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "none",
-        BaselineStatus {
+    "list-style-type:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "oriya",
-        BaselineStatus {
+    "list-style-type:oriya" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "persian",
-        BaselineStatus {
+    "list-style-type:persian" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "simp-chinese-formal",
-        BaselineStatus {
+    "list-style-type:simp-chinese-formal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "simp-chinese-informal",
-        BaselineStatus {
+    "list-style-type:simp-chinese-informal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "square",
-        BaselineStatus {
+    "list-style-type:square" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "string",
-        BaselineStatus {
+    "list-style-type:string" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "symbols",
-        BaselineStatus {
+    "list-style-type:symbols" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "tamil",
-        BaselineStatus {
+    "list-style-type:tamil" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "telugu",
-        BaselineStatus {
+    "list-style-type:telugu" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "thai",
-        BaselineStatus {
+    "list-style-type:thai" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "tibetan",
-        BaselineStatus {
+    "list-style-type:tibetan" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "trad-chinese-formal",
-        BaselineStatus {
+    "list-style-type:trad-chinese-formal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "trad-chinese-informal",
-        BaselineStatus {
+    "list-style-type:trad-chinese-informal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "upper-alpha",
-        BaselineStatus {
+    "list-style-type:upper-alpha" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "upper-armenian",
-        BaselineStatus {
+    "list-style-type:upper-armenian" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "upper-latin",
-        BaselineStatus {
+    "list-style-type:upper-latin" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "list-style-type",
-        "upper-roman",
-        BaselineStatus {
+    "list-style-type:upper-roman" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "margin",
-        "anchor-size",
-        BaselineStatus {
+    "margin:anchor-size" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "margin",
-        "auto",
-        BaselineStatus {
+    "margin:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "margin-block",
-        "anchor-size",
-        BaselineStatus {
+    "margin-block:anchor-size" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "margin-block-end",
-        "anchor-size",
-        BaselineStatus {
+    "margin-block-end:anchor-size" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "margin-block-start",
-        "anchor-size",
-        BaselineStatus {
+    "margin-block-start:anchor-size" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "margin-bottom",
-        "anchor-size",
-        BaselineStatus {
+    "margin-bottom:anchor-size" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "margin-bottom",
-        "auto",
-        BaselineStatus {
+    "margin-bottom:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "margin-inline",
-        "anchor-size",
-        BaselineStatus {
+    "margin-inline:anchor-size" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "margin-inline-end",
-        "anchor-size",
-        BaselineStatus {
+    "margin-inline-end:anchor-size" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "margin-inline-start",
-        "anchor-size",
-        BaselineStatus {
+    "margin-inline-start:anchor-size" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "margin-left",
-        "anchor-size",
-        BaselineStatus {
+    "margin-left:anchor-size" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "margin-left",
-        "auto",
-        BaselineStatus {
+    "margin-left:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "margin-right",
-        "anchor-size",
-        BaselineStatus {
+    "margin-right:anchor-size" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "margin-right",
-        "auto",
-        BaselineStatus {
+    "margin-right:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "margin-top",
-        "anchor-size",
-        BaselineStatus {
+    "margin-top:anchor-size" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "margin-top",
-        "auto",
-        BaselineStatus {
+    "margin-top:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "margin-trim",
-        "block",
-        BaselineStatus {
+    "margin-trim:block" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "margin-trim",
-        "block-end",
-        BaselineStatus {
+    "margin-trim:block-end" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "margin-trim",
-        "block-start",
-        BaselineStatus {
+    "margin-trim:block-start" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "margin-trim",
-        "inline",
-        BaselineStatus {
+    "margin-trim:inline" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "margin-trim",
-        "inline-end",
-        BaselineStatus {
+    "margin-trim:inline-end" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "margin-trim",
-        "inline-start",
-        BaselineStatus {
+    "margin-trim:inline-start" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "margin-trim",
-        "none",
-        BaselineStatus {
+    "margin-trim:none" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "marker",
-        "none",
-        BaselineStatus {
+    "marker:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "marker-end",
-        "none",
-        BaselineStatus {
+    "marker-end:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "marker-mid",
-        "none",
-        BaselineStatus {
+    "marker-mid:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "marker-start",
-        "none",
-        BaselineStatus {
+    "marker-start:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "mask-clip",
-        "border",
-        BaselineStatus {
+    "mask-clip:border" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "mask-clip",
-        "content",
-        BaselineStatus {
+    "mask-clip:content" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "mask-clip",
-        "padding",
-        BaselineStatus {
+    "mask-clip:padding" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "mask-clip",
-        "text",
-        BaselineStatus {
+    "mask-clip:text" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "mask-composite",
-        "add",
-        BaselineStatus {
+    "mask-composite:add" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "mask-composite",
-        "exclude",
-        BaselineStatus {
+    "mask-composite:exclude" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "mask-composite",
-        "intersect",
-        BaselineStatus {
+    "mask-composite:intersect" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "mask-composite",
-        "subtract",
-        BaselineStatus {
+    "mask-composite:subtract" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "mask-mode",
-        "alpha",
-        BaselineStatus {
+    "mask-mode:alpha" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "mask-mode",
-        "luminance",
-        BaselineStatus {
+    "mask-mode:luminance" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "mask-mode",
-        "match-source",
-        BaselineStatus {
+    "mask-mode:match-source" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "mask-origin",
-        "border",
-        BaselineStatus {
+    "mask-origin:border" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "mask-origin",
-        "content",
-        BaselineStatus {
+    "mask-origin:content" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "mask-origin",
-        "fill-box",
-        BaselineStatus {
+    "mask-origin:fill-box" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "mask-origin",
-        "padding",
-        BaselineStatus {
+    "mask-origin:padding" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "mask-origin",
-        "stroke-box",
-        BaselineStatus {
+    "mask-origin:stroke-box" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "mask-origin",
-        "view-box",
-        BaselineStatus {
+    "mask-origin:view-box" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "mask-type",
-        "alpha",
-        BaselineStatus {
+    "mask-type:alpha" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "mask-type",
-        "luminance",
-        BaselineStatus {
+    "mask-type:luminance" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "max-block-size",
-        "anchor-size",
-        BaselineStatus {
+    "max-block-size:anchor-size" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "max-block-size",
-        "fit-content",
-        BaselineStatus {
+    "max-block-size:fit-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "max-block-size",
-        "max-content",
-        BaselineStatus {
+    "max-block-size:max-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "max-block-size",
-        "min-content",
-        BaselineStatus {
+    "max-block-size:min-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "max-height",
-        "anchor-size",
-        BaselineStatus {
+    "max-height:anchor-size" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "max-height",
-        "fit-content",
-        BaselineStatus {
+    "max-height:fit-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "max-height",
-        "max-content",
-        BaselineStatus {
+    "max-height:max-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "max-height",
-        "min-content",
-        BaselineStatus {
+    "max-height:min-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "max-height",
-        "none",
-        BaselineStatus {
+    "max-height:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "max-height",
-        "stretch",
-        BaselineStatus {
+    "max-height:stretch" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "max-inline-size",
-        "anchor-size",
-        BaselineStatus {
+    "max-inline-size:anchor-size" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "max-inline-size",
-        "fit-content",
-        BaselineStatus {
+    "max-inline-size:fit-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "max-inline-size",
-        "max-content",
-        BaselineStatus {
+    "max-inline-size:max-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "max-inline-size",
-        "min-content",
-        BaselineStatus {
+    "max-inline-size:min-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "max-width",
-        "anchor-size",
-        BaselineStatus {
+    "max-width:anchor-size" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "max-width",
-        "fit-content",
-        BaselineStatus {
+    "max-width:fit-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "max-width",
-        "max-content",
-        BaselineStatus {
+    "max-width:max-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "max-width",
-        "min-content",
-        BaselineStatus {
+    "max-width:min-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "max-width",
-        "none",
-        BaselineStatus {
+    "max-width:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "max-width",
-        "stretch",
-        BaselineStatus {
+    "max-width:stretch" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "min-block-size",
-        "anchor-size",
-        BaselineStatus {
+    "min-block-size:anchor-size" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "min-block-size",
-        "fit-content",
-        BaselineStatus {
+    "min-block-size:fit-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "min-block-size",
-        "max-content",
-        BaselineStatus {
+    "min-block-size:max-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "min-block-size",
-        "min-content",
-        BaselineStatus {
+    "min-block-size:min-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "min-height",
-        "anchor-size",
-        BaselineStatus {
+    "min-height:anchor-size" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "min-height",
-        "auto",
-        BaselineStatus {
+    "min-height:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "min-height",
-        "fit-content",
-        BaselineStatus {
+    "min-height:fit-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "min-height",
-        "max-content",
-        BaselineStatus {
+    "min-height:max-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "min-height",
-        "min-content",
-        BaselineStatus {
+    "min-height:min-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "min-height",
-        "stretch",
-        BaselineStatus {
+    "min-height:stretch" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "min-inline-size",
-        "anchor-size",
-        BaselineStatus {
+    "min-inline-size:anchor-size" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "min-inline-size",
-        "fit-content",
-        BaselineStatus {
+    "min-inline-size:fit-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "min-inline-size",
-        "max-content",
-        BaselineStatus {
+    "min-inline-size:max-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "min-inline-size",
-        "min-content",
-        BaselineStatus {
+    "min-inline-size:min-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "min-width",
-        "anchor-size",
-        BaselineStatus {
+    "min-width:anchor-size" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "min-width",
-        "auto",
-        BaselineStatus {
+    "min-width:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "min-width",
-        "fit-content",
-        BaselineStatus {
+    "min-width:fit-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "min-width",
-        "max-content",
-        BaselineStatus {
+    "min-width:max-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "min-width",
-        "min-content",
-        BaselineStatus {
+    "min-width:min-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "min-width",
-        "stretch",
-        BaselineStatus {
+    "min-width:stretch" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "mix-blend-mode",
-        "plus-darker",
-        BaselineStatus {
+    "mix-blend-mode:plus-darker" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "mix-blend-mode",
-        "plus-lighter",
-        BaselineStatus {
+    "mix-blend-mode:plus-lighter" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "object-fit",
-        "contain",
-        BaselineStatus {
+    "object-fit:contain" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "object-fit",
-        "cover",
-        BaselineStatus {
+    "object-fit:cover" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "object-fit",
-        "fill",
-        BaselineStatus {
+    "object-fit:fill" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "object-fit",
-        "none",
-        BaselineStatus {
+    "object-fit:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "object-fit",
-        "scale-down",
-        BaselineStatus {
+    "object-fit:scale-down" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "object-view-box",
-        "none",
-        BaselineStatus {
+    "object-view-box:none" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "offset-anchor",
-        "auto",
-        BaselineStatus {
+    "offset-anchor:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "offset-anchor",
-        "bottom",
-        BaselineStatus {
+    "offset-anchor:bottom" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "offset-anchor",
-        "center",
-        BaselineStatus {
+    "offset-anchor:center" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "offset-anchor",
-        "left",
-        BaselineStatus {
+    "offset-anchor:left" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "offset-anchor",
-        "right",
-        BaselineStatus {
+    "offset-anchor:right" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "offset-anchor",
-        "top",
-        BaselineStatus {
+    "offset-anchor:top" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "offset-path",
-        "border-box",
-        BaselineStatus {
+    "offset-path:border-box" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "offset-path",
-        "content-box",
-        BaselineStatus {
+    "offset-path:content-box" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "offset-path",
-        "fill-box",
-        BaselineStatus {
+    "offset-path:fill-box" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "offset-path",
-        "margin-box",
-        BaselineStatus {
+    "offset-path:margin-box" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "offset-path",
-        "none",
-        BaselineStatus {
+    "offset-path:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "offset-path",
-        "padding-box",
-        BaselineStatus {
+    "offset-path:padding-box" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "offset-path",
-        "path",
-        BaselineStatus {
+    "offset-path:path" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "offset-path",
-        "ray",
-        BaselineStatus {
+    "offset-path:ray" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "offset-path",
-        "stroke-box",
-        BaselineStatus {
+    "offset-path:stroke-box" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "offset-path",
-        "url",
-        BaselineStatus {
+    "offset-path:url" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "offset-path",
-        "view-box",
-        BaselineStatus {
+    "offset-path:view-box" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "offset-position",
-        "auto",
-        BaselineStatus {
+    "offset-position:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "offset-position",
-        "bottom",
-        BaselineStatus {
+    "offset-position:bottom" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "offset-position",
-        "center",
-        BaselineStatus {
+    "offset-position:center" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "offset-position",
-        "left",
-        BaselineStatus {
+    "offset-position:left" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "offset-position",
-        "normal",
-        BaselineStatus {
+    "offset-position:normal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "offset-position",
-        "right",
-        BaselineStatus {
+    "offset-position:right" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "offset-position",
-        "top",
-        BaselineStatus {
+    "offset-position:top" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "offset-rotate",
-        "auto",
-        BaselineStatus {
+    "offset-rotate:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "offset-rotate",
-        "reverse",
-        BaselineStatus {
+    "offset-rotate:reverse" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "opacity",
-        "percentages",
-        BaselineStatus {
+    "opacity:percentages" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "outline",
-        "dashed",
-        BaselineStatus {
+    "outline:dashed" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "outline",
-        "dotted",
-        BaselineStatus {
+    "outline:dotted" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "outline",
-        "double",
-        BaselineStatus {
+    "outline:double" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "outline",
-        "groove",
-        BaselineStatus {
+    "outline:groove" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "outline",
-        "inset",
-        BaselineStatus {
+    "outline:inset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "outline",
-        "medium",
-        BaselineStatus {
+    "outline:medium" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "outline",
-        "none",
-        BaselineStatus {
+    "outline:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "outline",
-        "outset",
-        BaselineStatus {
+    "outline:outset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "outline",
-        "ridge",
-        BaselineStatus {
+    "outline:ridge" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "outline",
-        "solid",
-        BaselineStatus {
+    "outline:solid" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "outline",
-        "thick",
-        BaselineStatus {
+    "outline:thick" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "outline",
-        "thin",
-        BaselineStatus {
+    "outline:thin" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "outline",
-        "transparent",
-        BaselineStatus {
+    "outline:transparent" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "outline-color",
-        "transparent",
-        BaselineStatus {
+    "outline-color:transparent" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "outline-style",
-        "auto",
-        BaselineStatus {
+    "outline-style:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "outline-style",
-        "dashed",
-        BaselineStatus {
+    "outline-style:dashed" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "outline-style",
-        "dotted",
-        BaselineStatus {
+    "outline-style:dotted" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "outline-style",
-        "double",
-        BaselineStatus {
+    "outline-style:double" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "outline-style",
-        "groove",
-        BaselineStatus {
+    "outline-style:groove" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "outline-style",
-        "inset",
-        BaselineStatus {
+    "outline-style:inset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "outline-style",
-        "none",
-        BaselineStatus {
+    "outline-style:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "outline-style",
-        "outset",
-        BaselineStatus {
+    "outline-style:outset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "outline-style",
-        "ridge",
-        BaselineStatus {
+    "outline-style:ridge" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "outline-style",
-        "solid",
-        BaselineStatus {
+    "outline-style:solid" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "outline-width",
-        "medium",
-        BaselineStatus {
+    "outline-width:medium" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "outline-width",
-        "thick",
-        BaselineStatus {
+    "outline-width:thick" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "outline-width",
-        "thin",
-        BaselineStatus {
+    "outline-width:thin" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "overflow",
-        "auto",
-        BaselineStatus {
+    "overflow:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "overflow",
-        "clip",
-        BaselineStatus {
+    "overflow:clip" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "overflow",
-        "hidden",
-        BaselineStatus {
+    "overflow:hidden" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "overflow",
-        "scroll",
-        BaselineStatus {
+    "overflow:scroll" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "overflow",
-        "visible",
-        BaselineStatus {
+    "overflow:visible" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "overflow-anchor",
-        "auto",
-        BaselineStatus {
+    "overflow-anchor:auto" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "overflow-anchor",
-        "none",
-        BaselineStatus {
+    "overflow-anchor:none" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "overflow-block",
-        "overlay",
-        BaselineStatus {
+    "overflow-block:overlay" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "overflow-clip-margin",
-        "border-box",
-        BaselineStatus {
+    "overflow-clip-margin:border-box" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "overflow-clip-margin",
-        "content-box",
-        BaselineStatus {
+    "overflow-clip-margin:content-box" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "overflow-clip-margin",
-        "padding-box",
-        BaselineStatus {
+    "overflow-clip-margin:padding-box" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "overflow-inline",
-        "overlay",
-        BaselineStatus {
+    "overflow-inline:overlay" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "overflow-wrap",
-        "anywhere",
-        BaselineStatus {
+    "overflow-wrap:anywhere" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2018),
         },
-    ),
-    (
-        "overflow-wrap",
-        "break-word",
-        BaselineStatus {
+    "overflow-wrap:break-word" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2018),
         },
-    ),
-    (
-        "overflow-wrap",
-        "normal",
-        BaselineStatus {
+    "overflow-wrap:normal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2018),
         },
-    ),
-    (
-        "overflow-x",
-        "auto",
-        BaselineStatus {
+    "overflow-x:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "overflow-x",
-        "clip",
-        BaselineStatus {
+    "overflow-x:clip" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "overflow-x",
-        "hidden",
-        BaselineStatus {
+    "overflow-x:hidden" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "overflow-x",
-        "scroll",
-        BaselineStatus {
+    "overflow-x:scroll" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "overflow-x",
-        "visible",
-        BaselineStatus {
+    "overflow-x:visible" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "overflow-y",
-        "auto",
-        BaselineStatus {
+    "overflow-y:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "overflow-y",
-        "clip",
-        BaselineStatus {
+    "overflow-y:clip" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "overflow-y",
-        "hidden",
-        BaselineStatus {
+    "overflow-y:hidden" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "overflow-y",
-        "scroll",
-        BaselineStatus {
+    "overflow-y:scroll" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "overflow-y",
-        "visible",
-        BaselineStatus {
+    "overflow-y:visible" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "overlay",
-        "auto",
-        BaselineStatus {
+    "overlay:auto" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "overlay",
-        "none",
-        BaselineStatus {
+    "overlay:none" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "overscroll-behavior",
-        "auto",
-        BaselineStatus {
+    "overscroll-behavior:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "overscroll-behavior",
-        "contain",
-        BaselineStatus {
+    "overscroll-behavior:contain" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "overscroll-behavior",
-        "none",
-        BaselineStatus {
+    "overscroll-behavior:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "overscroll-behavior-block",
-        "auto",
-        BaselineStatus {
+    "overscroll-behavior-block:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "overscroll-behavior-block",
-        "contain",
-        BaselineStatus {
+    "overscroll-behavior-block:contain" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "overscroll-behavior-block",
-        "none",
-        BaselineStatus {
+    "overscroll-behavior-block:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "overscroll-behavior-inline",
-        "auto",
-        BaselineStatus {
+    "overscroll-behavior-inline:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "overscroll-behavior-inline",
-        "contain",
-        BaselineStatus {
+    "overscroll-behavior-inline:contain" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "overscroll-behavior-inline",
-        "none",
-        BaselineStatus {
+    "overscroll-behavior-inline:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "overscroll-behavior-x",
-        "auto",
-        BaselineStatus {
+    "overscroll-behavior-x:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "overscroll-behavior-x",
-        "contain",
-        BaselineStatus {
+    "overscroll-behavior-x:contain" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "overscroll-behavior-x",
-        "none",
-        BaselineStatus {
+    "overscroll-behavior-x:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "overscroll-behavior-y",
-        "auto",
-        BaselineStatus {
+    "overscroll-behavior-y:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "overscroll-behavior-y",
-        "contain",
-        BaselineStatus {
+    "overscroll-behavior-y:contain" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "overscroll-behavior-y",
-        "none",
-        BaselineStatus {
+    "overscroll-behavior-y:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "page-break-after",
-        "always",
-        BaselineStatus {
+    "page-break-after:always" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "page-break-after",
-        "auto",
-        BaselineStatus {
+    "page-break-after:auto" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "page-break-after",
-        "avoid",
-        BaselineStatus {
+    "page-break-after:avoid" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "page-break-after",
-        "left",
-        BaselineStatus {
+    "page-break-after:left" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "page-break-after",
-        "right",
-        BaselineStatus {
+    "page-break-after:right" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "page-break-before",
-        "always",
-        BaselineStatus {
+    "page-break-before:always" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "page-break-before",
-        "auto",
-        BaselineStatus {
+    "page-break-before:auto" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "page-break-before",
-        "avoid",
-        BaselineStatus {
+    "page-break-before:avoid" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "page-break-before",
-        "left",
-        BaselineStatus {
+    "page-break-before:left" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "page-break-before",
-        "right",
-        BaselineStatus {
+    "page-break-before:right" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "page-break-inside",
-        "auto",
-        BaselineStatus {
+    "page-break-inside:auto" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "page-break-inside",
-        "avoid",
-        BaselineStatus {
+    "page-break-inside:avoid" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "perspective",
-        "none",
-        BaselineStatus {
+    "perspective:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "perspective-origin",
-        "bottom",
-        BaselineStatus {
+    "perspective-origin:bottom" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "perspective-origin",
-        "center",
-        BaselineStatus {
+    "perspective-origin:center" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "perspective-origin",
-        "left",
-        BaselineStatus {
+    "perspective-origin:left" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "perspective-origin",
-        "right",
-        BaselineStatus {
+    "perspective-origin:right" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "perspective-origin",
-        "top",
-        BaselineStatus {
+    "perspective-origin:top" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "place-items",
-        "anchor-center",
-        BaselineStatus {
+    "place-items:anchor-center" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "place-self",
-        "anchor-center",
-        BaselineStatus {
+    "place-self:anchor-center" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position",
-        "absolute",
-        BaselineStatus {
+    "position:absolute" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "position",
-        "fixed",
-        BaselineStatus {
+    "position:fixed" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "position",
-        "relative",
-        BaselineStatus {
+    "position:relative" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "position",
-        "static",
-        BaselineStatus {
+    "position:static" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "position",
-        "sticky",
-        BaselineStatus {
+    "position:sticky" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2019),
         },
-    ),
-    (
-        "position-anchor",
-        "auto",
-        BaselineStatus {
+    "position-anchor:auto" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-anchor",
-        "none",
-        BaselineStatus {
+    "position-anchor:none" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "block-end",
-        BaselineStatus {
+    "position-area:block-end" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "block-start",
-        BaselineStatus {
+    "position-area:block-start" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "bottom",
-        BaselineStatus {
+    "position-area:bottom" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "center",
-        BaselineStatus {
+    "position-area:center" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "end",
-        BaselineStatus {
+    "position-area:end" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "inline-end",
-        BaselineStatus {
+    "position-area:inline-end" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "inline-start",
-        BaselineStatus {
+    "position-area:inline-start" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "left",
-        BaselineStatus {
+    "position-area:left" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "none",
-        BaselineStatus {
+    "position-area:none" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "right",
-        BaselineStatus {
+    "position-area:right" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "self-block-end",
-        BaselineStatus {
+    "position-area:self-block-end" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "self-block-start",
-        BaselineStatus {
+    "position-area:self-block-start" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "self-end",
-        BaselineStatus {
+    "position-area:self-end" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "self-inline-end",
-        BaselineStatus {
+    "position-area:self-inline-end" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "self-inline-start",
-        BaselineStatus {
+    "position-area:self-inline-start" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "self-start",
-        BaselineStatus {
+    "position-area:self-start" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "self-x-end",
-        BaselineStatus {
+    "position-area:self-x-end" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "self-x-start",
-        BaselineStatus {
+    "position-area:self-x-start" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "self-y-end",
-        BaselineStatus {
+    "position-area:self-y-end" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "self-y-start",
-        BaselineStatus {
+    "position-area:self-y-start" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "span-all",
-        BaselineStatus {
+    "position-area:span-all" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "span-block-end",
-        BaselineStatus {
+    "position-area:span-block-end" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "span-block-start",
-        BaselineStatus {
+    "position-area:span-block-start" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "span-bottom",
-        BaselineStatus {
+    "position-area:span-bottom" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "span-end",
-        BaselineStatus {
+    "position-area:span-end" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "span-inline-end",
-        BaselineStatus {
+    "position-area:span-inline-end" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "span-inline-start",
-        BaselineStatus {
+    "position-area:span-inline-start" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "span-left",
-        BaselineStatus {
+    "position-area:span-left" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "span-right",
-        BaselineStatus {
+    "position-area:span-right" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "span-self-block-end",
-        BaselineStatus {
+    "position-area:span-self-block-end" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "span-self-block-start",
-        BaselineStatus {
+    "position-area:span-self-block-start" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "span-self-end",
-        BaselineStatus {
+    "position-area:span-self-end" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "span-self-inline-end",
-        BaselineStatus {
+    "position-area:span-self-inline-end" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "span-self-inline-start",
-        BaselineStatus {
+    "position-area:span-self-inline-start" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "span-self-start",
-        BaselineStatus {
+    "position-area:span-self-start" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "span-self-x-end",
-        BaselineStatus {
+    "position-area:span-self-x-end" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "span-self-x-start",
-        BaselineStatus {
+    "position-area:span-self-x-start" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "span-self-y-end",
-        BaselineStatus {
+    "position-area:span-self-y-end" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "span-self-y-start",
-        BaselineStatus {
+    "position-area:span-self-y-start" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "span-start",
-        BaselineStatus {
+    "position-area:span-start" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "span-top",
-        BaselineStatus {
+    "position-area:span-top" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "span-x-end",
-        BaselineStatus {
+    "position-area:span-x-end" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "span-x-start",
-        BaselineStatus {
+    "position-area:span-x-start" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "span-y-end",
-        BaselineStatus {
+    "position-area:span-y-end" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "span-y-start",
-        BaselineStatus {
+    "position-area:span-y-start" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "start",
-        BaselineStatus {
+    "position-area:start" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "top",
-        BaselineStatus {
+    "position-area:top" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "x-end",
-        BaselineStatus {
+    "position-area:x-end" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "x-start",
-        BaselineStatus {
+    "position-area:x-start" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "y-end",
-        BaselineStatus {
+    "position-area:y-end" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-area",
-        "y-start",
-        BaselineStatus {
+    "position-area:y-start" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-try",
-        "self-x-end",
-        BaselineStatus {
+    "position-try:self-x-end" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-try",
-        "self-x-start",
-        BaselineStatus {
+    "position-try:self-x-start" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-try",
-        "self-y-end",
-        BaselineStatus {
+    "position-try:self-y-end" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-try",
-        "self-y-start",
-        BaselineStatus {
+    "position-try:self-y-start" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-try",
-        "span-self-x-end",
-        BaselineStatus {
+    "position-try:span-self-x-end" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-try",
-        "span-self-x-start",
-        BaselineStatus {
+    "position-try:span-self-x-start" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-try",
-        "span-self-y-end",
-        BaselineStatus {
+    "position-try:span-self-y-end" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-try",
-        "span-self-y-start",
-        BaselineStatus {
+    "position-try:span-self-y-start" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-try-fallbacks",
-        "flip-block",
-        BaselineStatus {
+    "position-try-fallbacks:flip-block" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-try-fallbacks",
-        "flip-inline",
-        BaselineStatus {
+    "position-try-fallbacks:flip-inline" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-try-fallbacks",
-        "flip-start",
-        BaselineStatus {
+    "position-try-fallbacks:flip-start" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-try-fallbacks",
-        "none",
-        BaselineStatus {
+    "position-try-fallbacks:none" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-try-fallbacks",
-        "position-area",
-        BaselineStatus {
+    "position-try-fallbacks:position-area" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-try-fallbacks",
-        "self-x-end",
-        BaselineStatus {
+    "position-try-fallbacks:self-x-end" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-try-fallbacks",
-        "self-x-start",
-        BaselineStatus {
+    "position-try-fallbacks:self-x-start" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-try-fallbacks",
-        "self-y-end",
-        BaselineStatus {
+    "position-try-fallbacks:self-y-end" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-try-fallbacks",
-        "self-y-start",
-        BaselineStatus {
+    "position-try-fallbacks:self-y-start" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-try-fallbacks",
-        "span-self-x-end",
-        BaselineStatus {
+    "position-try-fallbacks:span-self-x-end" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-try-fallbacks",
-        "span-self-x-start",
-        BaselineStatus {
+    "position-try-fallbacks:span-self-x-start" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-try-fallbacks",
-        "span-self-y-end",
-        BaselineStatus {
+    "position-try-fallbacks:span-self-y-end" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-try-fallbacks",
-        "span-self-y-start",
-        BaselineStatus {
+    "position-try-fallbacks:span-self-y-start" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-try-order",
-        "most-block-size",
-        BaselineStatus {
+    "position-try-order:most-block-size" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-try-order",
-        "most-height",
-        BaselineStatus {
+    "position-try-order:most-height" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-try-order",
-        "most-inline-size",
-        BaselineStatus {
+    "position-try-order:most-inline-size" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-try-order",
-        "most-width",
-        BaselineStatus {
+    "position-try-order:most-width" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-try-order",
-        "normal",
-        BaselineStatus {
+    "position-try-order:normal" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-visibility",
-        "always",
-        BaselineStatus {
+    "position-visibility:always" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-visibility",
-        "anchors-visible",
-        BaselineStatus {
+    "position-visibility:anchors-visible" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "position-visibility",
-        "no-overflow",
-        BaselineStatus {
+    "position-visibility:no-overflow" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "print-color-adjust",
-        "economy",
-        BaselineStatus {
+    "print-color-adjust:economy" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2025),
         },
-    ),
-    (
-        "print-color-adjust",
-        "exact",
-        BaselineStatus {
+    "print-color-adjust:exact" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2025),
         },
-    ),
-    (
-        "quotes",
-        "auto",
-        BaselineStatus {
+    "quotes:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "quotes",
-        "none",
-        BaselineStatus {
+    "quotes:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "reading-flow",
-        "flex-flow",
-        BaselineStatus {
+    "reading-flow:flex-flow" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "reading-flow",
-        "flex-visual",
-        BaselineStatus {
+    "reading-flow:flex-visual" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "reading-flow",
-        "grid-columns",
-        BaselineStatus {
+    "reading-flow:grid-columns" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "reading-flow",
-        "grid-order",
-        BaselineStatus {
+    "reading-flow:grid-order" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "reading-flow",
-        "grid-rows",
-        BaselineStatus {
+    "reading-flow:grid-rows" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "reading-flow",
-        "normal",
-        BaselineStatus {
+    "reading-flow:normal" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "reading-flow",
-        "source-order",
-        BaselineStatus {
+    "reading-flow:source-order" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "resize",
-        "block",
-        BaselineStatus {
+    "resize:block" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "resize",
-        "inline",
-        BaselineStatus {
+    "resize:inline" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "right",
-        "anchor",
-        BaselineStatus {
+    "right:anchor" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "right",
-        "anchor-size",
-        BaselineStatus {
+    "right:anchor-size" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "right",
-        "auto",
-        BaselineStatus {
+    "right:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "rotate",
-        "none",
-        BaselineStatus {
+    "rotate:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "row-gap",
-        "normal",
-        BaselineStatus {
+    "row-gap:normal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "ruby-align",
-        "center",
-        BaselineStatus {
+    "ruby-align:center" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "ruby-align",
-        "space-around",
-        BaselineStatus {
+    "ruby-align:space-around" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "ruby-align",
-        "space-between",
-        BaselineStatus {
+    "ruby-align:space-between" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "ruby-align",
-        "start",
-        BaselineStatus {
+    "ruby-align:start" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "ruby-overhang",
-        "auto",
-        BaselineStatus {
+    "ruby-overhang:auto" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "ruby-overhang",
-        "none",
-        BaselineStatus {
+    "ruby-overhang:none" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "ruby-position",
-        "alternate",
-        BaselineStatus {
+    "ruby-position:alternate" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "ruby-position",
-        "inter-character",
-        BaselineStatus {
+    "ruby-position:inter-character" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "ruby-position",
-        "over",
-        BaselineStatus {
+    "ruby-position:over" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "ruby-position",
-        "under",
-        BaselineStatus {
+    "ruby-position:under" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "scale",
-        "none",
-        BaselineStatus {
+    "scale:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "scroll-behavior",
-        "auto",
-        BaselineStatus {
+    "scroll-behavior:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "scroll-behavior",
-        "smooth",
-        BaselineStatus {
+    "scroll-behavior:smooth" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "scroll-initial-target",
-        "nearest",
-        BaselineStatus {
+    "scroll-initial-target:nearest" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "scroll-initial-target",
-        "none",
-        BaselineStatus {
+    "scroll-initial-target:none" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "scroll-marker-group",
-        "after",
-        BaselineStatus {
+    "scroll-marker-group:after" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "scroll-marker-group",
-        "before",
-        BaselineStatus {
+    "scroll-marker-group:before" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "scroll-marker-group",
-        "none",
-        BaselineStatus {
+    "scroll-marker-group:none" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "scroll-padding",
-        "auto",
-        BaselineStatus {
+    "scroll-padding:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-padding-block",
-        "auto",
-        BaselineStatus {
+    "scroll-padding-block:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-padding-block-end",
-        "auto",
-        BaselineStatus {
+    "scroll-padding-block-end:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-padding-block-start",
-        "auto",
-        BaselineStatus {
+    "scroll-padding-block-start:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-padding-inline",
-        "auto",
-        BaselineStatus {
+    "scroll-padding-inline:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-padding-inline-end",
-        "auto",
-        BaselineStatus {
+    "scroll-padding-inline-end:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-padding-inline-start",
-        "auto",
-        BaselineStatus {
+    "scroll-padding-inline-start:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-snap-align",
-        "center",
-        BaselineStatus {
+    "scroll-snap-align:center" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-snap-align",
-        "end",
-        BaselineStatus {
+    "scroll-snap-align:end" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-snap-align",
-        "none",
-        BaselineStatus {
+    "scroll-snap-align:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-snap-align",
-        "start",
-        BaselineStatus {
+    "scroll-snap-align:start" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-snap-stop",
-        "always",
-        BaselineStatus {
+    "scroll-snap-stop:always" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-snap-stop",
-        "normal",
-        BaselineStatus {
+    "scroll-snap-stop:normal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-snap-type",
-        "block",
-        BaselineStatus {
+    "scroll-snap-type:block" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-snap-type",
-        "both",
-        BaselineStatus {
+    "scroll-snap-type:both" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-snap-type",
-        "inline",
-        BaselineStatus {
+    "scroll-snap-type:inline" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-snap-type",
-        "none",
-        BaselineStatus {
+    "scroll-snap-type:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-snap-type",
-        "x",
-        BaselineStatus {
+    "scroll-snap-type:x" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-snap-type",
-        "y",
-        BaselineStatus {
+    "scroll-snap-type:y" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-target-group",
-        "auto",
-        BaselineStatus {
+    "scroll-target-group:auto" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "scroll-target-group",
-        "none",
-        BaselineStatus {
+    "scroll-target-group:none" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "scroll-timeline-axis",
-        "block",
-        BaselineStatus {
+    "scroll-timeline-axis:block" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "scroll-timeline-axis",
-        "inline",
-        BaselineStatus {
+    "scroll-timeline-axis:inline" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "scroll-timeline-axis",
-        "x",
-        BaselineStatus {
+    "scroll-timeline-axis:x" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "scroll-timeline-axis",
-        "y",
-        BaselineStatus {
+    "scroll-timeline-axis:y" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "scrollbar-color",
-        "auto",
-        BaselineStatus {
+    "scrollbar-color:auto" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2025),
         },
-    ),
-    (
-        "scrollbar-gutter",
-        "auto",
-        BaselineStatus {
+    "scrollbar-gutter:auto" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "scrollbar-gutter",
-        "stable",
-        BaselineStatus {
+    "scrollbar-gutter:stable" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "scrollbar-width",
-        "auto",
-        BaselineStatus {
+    "scrollbar-width:auto" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "scrollbar-width",
-        "none",
-        BaselineStatus {
+    "scrollbar-width:none" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "scrollbar-width",
-        "thin",
-        BaselineStatus {
+    "scrollbar-width:thin" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "shape-image-threshold",
-        "percentages",
-        BaselineStatus {
+    "shape-image-threshold:percentages" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "shape-outside",
-        "circle",
-        BaselineStatus {
+    "shape-outside:circle" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "shape-outside",
-        "gradient",
-        BaselineStatus {
+    "shape-outside:gradient" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "shape-outside",
-        "image",
-        BaselineStatus {
+    "shape-outside:image" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "shape-outside",
-        "inset",
-        BaselineStatus {
+    "shape-outside:inset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "shape-outside",
-        "none",
-        BaselineStatus {
+    "shape-outside:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "shape-outside",
-        "path",
-        BaselineStatus {
+    "shape-outside:path" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "shape-outside",
-        "polygon",
-        BaselineStatus {
+    "shape-outside:polygon" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "shape-rendering",
-        "auto",
-        BaselineStatus {
+    "shape-rendering:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "speak-as",
-        "digits",
-        BaselineStatus {
+    "speak-as:digits" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "speak-as",
-        "literal-punctuation",
-        BaselineStatus {
+    "speak-as:literal-punctuation" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "speak-as",
-        "no-punctuation",
-        BaselineStatus {
+    "speak-as:no-punctuation" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "speak-as",
-        "normal",
-        BaselineStatus {
+    "speak-as:normal" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "speak-as",
-        "spell-out",
-        BaselineStatus {
+    "speak-as:spell-out" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "stroke",
-        "none",
-        BaselineStatus {
+    "stroke:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "stroke-dasharray",
-        "none",
-        BaselineStatus {
+    "stroke-dasharray:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "stroke-linecap",
-        "butt",
-        BaselineStatus {
+    "stroke-linecap:butt" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "stroke-linecap",
-        "round",
-        BaselineStatus {
+    "stroke-linecap:round" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "stroke-linecap",
-        "square",
-        BaselineStatus {
+    "stroke-linecap:square" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "stroke-linejoin",
-        "bevel",
-        BaselineStatus {
+    "stroke-linejoin:bevel" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "stroke-linejoin",
-        "miter",
-        BaselineStatus {
+    "stroke-linejoin:miter" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "stroke-linejoin",
-        "round",
-        BaselineStatus {
+    "stroke-linejoin:round" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "tab-size",
-        "length",
-        BaselineStatus {
+    "tab-size:length" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "table-layout",
-        "auto",
-        BaselineStatus {
+    "table-layout:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "table-layout",
-        "fixed",
-        BaselineStatus {
+    "table-layout:fixed" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-align",
-        "center",
-        BaselineStatus {
+    "text-align:center" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-align",
-        "end",
-        BaselineStatus {
+    "text-align:end" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-align",
-        "justify",
-        BaselineStatus {
+    "text-align:justify" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-align",
-        "left",
-        BaselineStatus {
+    "text-align:left" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-align",
-        "match-parent",
-        BaselineStatus {
+    "text-align:match-parent" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-align",
-        "right",
-        BaselineStatus {
+    "text-align:right" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-align",
-        "start",
-        BaselineStatus {
+    "text-align:start" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-align-last",
-        "auto",
-        BaselineStatus {
+    "text-align-last:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "text-anchor",
-        "end",
-        BaselineStatus {
+    "text-anchor:end" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "text-anchor",
-        "middle",
-        BaselineStatus {
+    "text-anchor:middle" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "text-anchor",
-        "start",
-        BaselineStatus {
+    "text-anchor:start" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "text-autospace",
-        "auto",
-        BaselineStatus {
+    "text-autospace:auto" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "text-autospace",
-        "ideograph-alpha",
-        BaselineStatus {
+    "text-autospace:ideograph-alpha" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "text-autospace",
-        "ideograph-numeric",
-        BaselineStatus {
+    "text-autospace:ideograph-numeric" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "text-autospace",
-        "insert",
-        BaselineStatus {
+    "text-autospace:insert" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "text-autospace",
-        "no-autospace",
-        BaselineStatus {
+    "text-autospace:no-autospace" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "text-autospace",
-        "normal",
-        BaselineStatus {
+    "text-autospace:normal" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "text-autospace",
-        "punctuation",
-        BaselineStatus {
+    "text-autospace:punctuation" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "text-autospace",
-        "replace",
-        BaselineStatus {
+    "text-autospace:replace" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "text-box",
-        "normal",
-        BaselineStatus {
+    "text-box:normal" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "text-box-edge",
-        "auto",
-        BaselineStatus {
+    "text-box-edge:auto" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "text-box-trim",
-        "none",
-        BaselineStatus {
+    "text-box-trim:none" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "text-box-trim",
-        "trim-both",
-        BaselineStatus {
+    "text-box-trim:trim-both" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "text-box-trim",
-        "trim-end",
-        BaselineStatus {
+    "text-box-trim:trim-end" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "text-box-trim",
-        "trim-start",
-        BaselineStatus {
+    "text-box-trim:trim-start" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "text-combine-upright",
-        "all",
-        BaselineStatus {
+    "text-combine-upright:all" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "text-combine-upright",
-        "none",
-        BaselineStatus {
+    "text-combine-upright:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "text-decoration-line",
-        "blink",
-        BaselineStatus {
+    "text-decoration-line:blink" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "text-decoration-line",
-        "grammar-error",
-        BaselineStatus {
+    "text-decoration-line:grammar-error" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-decoration-line",
-        "line-through",
-        BaselineStatus {
+    "text-decoration-line:line-through" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-decoration-line",
-        "none",
-        BaselineStatus {
+    "text-decoration-line:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-decoration-line",
-        "overline",
-        BaselineStatus {
+    "text-decoration-line:overline" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-decoration-line",
-        "spelling-error",
-        BaselineStatus {
+    "text-decoration-line:spelling-error" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-decoration-line",
-        "underline",
-        BaselineStatus {
+    "text-decoration-line:underline" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-decoration-skip",
-        "auto",
-        BaselineStatus {
+    "text-decoration-skip:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-decoration-skip",
-        "none",
-        BaselineStatus {
+    "text-decoration-skip:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-decoration-skip-ink",
-        "all",
-        BaselineStatus {
+    "text-decoration-skip-ink:all" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-decoration-skip-ink",
-        "auto",
-        BaselineStatus {
+    "text-decoration-skip-ink:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-decoration-skip-ink",
-        "none",
-        BaselineStatus {
+    "text-decoration-skip-ink:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-decoration-style",
-        "wavy",
-        BaselineStatus {
+    "text-decoration-style:wavy" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-decoration-thickness",
-        "auto",
-        BaselineStatus {
+    "text-decoration-thickness:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-decoration-thickness",
-        "from-font",
-        BaselineStatus {
+    "text-decoration-thickness:from-font" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-decoration-thickness",
-        "percentage",
-        BaselineStatus {
+    "text-decoration-thickness:percentage" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-emphasis-position",
-        "auto",
-        BaselineStatus {
+    "text-emphasis-position:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "text-emphasis-position",
-        "left",
-        BaselineStatus {
+    "text-emphasis-position:left" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "text-emphasis-position",
-        "over",
-        BaselineStatus {
+    "text-emphasis-position:over" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "text-emphasis-position",
-        "right",
-        BaselineStatus {
+    "text-emphasis-position:right" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "text-emphasis-position",
-        "under",
-        BaselineStatus {
+    "text-emphasis-position:under" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "text-emphasis-style",
-        "circle",
-        BaselineStatus {
+    "text-emphasis-style:circle" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "text-emphasis-style",
-        "dot",
-        BaselineStatus {
+    "text-emphasis-style:dot" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "text-emphasis-style",
-        "double-circle",
-        BaselineStatus {
+    "text-emphasis-style:double-circle" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "text-emphasis-style",
-        "filled",
-        BaselineStatus {
+    "text-emphasis-style:filled" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "text-emphasis-style",
-        "none",
-        BaselineStatus {
+    "text-emphasis-style:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "text-emphasis-style",
-        "sesame",
-        BaselineStatus {
+    "text-emphasis-style:sesame" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "text-emphasis-style",
-        "triangle",
-        BaselineStatus {
+    "text-emphasis-style:triangle" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "text-indent",
-        "each-line",
-        BaselineStatus {
+    "text-indent:each-line" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "text-indent",
-        "hanging",
-        BaselineStatus {
+    "text-indent:hanging" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "text-justify",
-        "auto",
-        BaselineStatus {
+    "text-justify:auto" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "text-justify",
-        "inter-character",
-        BaselineStatus {
+    "text-justify:inter-character" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "text-justify",
-        "inter-word",
-        BaselineStatus {
+    "text-justify:inter-word" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "text-justify",
-        "none",
-        BaselineStatus {
+    "text-justify:none" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "text-orientation",
-        "mixed",
-        BaselineStatus {
+    "text-orientation:mixed" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "text-orientation",
-        "sideways",
-        BaselineStatus {
+    "text-orientation:sideways" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "text-orientation",
-        "upright",
-        BaselineStatus {
+    "text-orientation:upright" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "text-overflow",
-        "clip",
-        BaselineStatus {
+    "text-overflow:clip" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-overflow",
-        "ellipsis",
-        BaselineStatus {
+    "text-overflow:ellipsis" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-overflow",
-        "string",
-        BaselineStatus {
+    "text-overflow:string" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "text-rendering",
-        "auto",
-        BaselineStatus {
+    "text-rendering:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "text-rendering",
-        "geometricPrecision",
-        BaselineStatus {
+    "text-rendering:geometricPrecision" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "text-size-adjust",
-        "auto",
-        BaselineStatus {
+    "text-size-adjust:auto" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "text-size-adjust",
-        "none",
-        BaselineStatus {
+    "text-size-adjust:none" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "text-size-adjust",
-        "percentages",
-        BaselineStatus {
+    "text-size-adjust:percentages" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "text-spacing-trim",
-        "normal",
-        BaselineStatus {
+    "text-spacing-trim:normal" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "text-spacing-trim",
-        "space-all",
-        BaselineStatus {
+    "text-spacing-trim:space-all" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "text-spacing-trim",
-        "space-first",
-        BaselineStatus {
+    "text-spacing-trim:space-first" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "text-spacing-trim",
-        "trim-start",
-        BaselineStatus {
+    "text-spacing-trim:trim-start" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "text-transform",
-        "capitalize",
-        BaselineStatus {
+    "text-transform:capitalize" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-transform",
-        "full-size-kana",
-        BaselineStatus {
+    "text-transform:full-size-kana" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-transform",
-        "full-width",
-        BaselineStatus {
+    "text-transform:full-width" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-transform",
-        "lowercase",
-        BaselineStatus {
+    "text-transform:lowercase" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-transform",
-        "math-auto",
-        BaselineStatus {
+    "text-transform:math-auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "text-transform",
-        "none",
-        BaselineStatus {
+    "text-transform:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-transform",
-        "uppercase",
-        BaselineStatus {
+    "text-transform:uppercase" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "text-underline-offset",
-        "auto",
-        BaselineStatus {
+    "text-underline-offset:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "text-underline-offset",
-        "percentage",
-        BaselineStatus {
+    "text-underline-offset:percentage" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "text-underline-position",
-        "auto",
-        BaselineStatus {
+    "text-underline-position:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "text-underline-position",
-        "from-font",
-        BaselineStatus {
+    "text-underline-position:from-font" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "text-underline-position",
-        "left",
-        BaselineStatus {
+    "text-underline-position:left" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "text-underline-position",
-        "right",
-        BaselineStatus {
+    "text-underline-position:right" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "text-underline-position",
-        "under",
-        BaselineStatus {
+    "text-underline-position:under" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "text-wrap",
-        "balance",
-        BaselineStatus {
+    "text-wrap:balance" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "text-wrap",
-        "nowrap",
-        BaselineStatus {
+    "text-wrap:nowrap" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "text-wrap",
-        "pretty",
-        BaselineStatus {
+    "text-wrap:pretty" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "text-wrap",
-        "stable",
-        BaselineStatus {
+    "text-wrap:stable" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "text-wrap",
-        "wrap",
-        BaselineStatus {
+    "text-wrap:wrap" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "text-wrap-mode",
-        "nowrap",
-        BaselineStatus {
+    "text-wrap-mode:nowrap" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "text-wrap-mode",
-        "wrap",
-        BaselineStatus {
+    "text-wrap-mode:wrap" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "text-wrap-style",
-        "auto",
-        BaselineStatus {
+    "text-wrap-style:auto" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "text-wrap-style",
-        "balance",
-        BaselineStatus {
+    "text-wrap-style:balance" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "text-wrap-style",
-        "pretty",
-        BaselineStatus {
+    "text-wrap-style:pretty" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "text-wrap-style",
-        "stable",
-        BaselineStatus {
+    "text-wrap-style:stable" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "timeline-scope",
-        "all",
-        BaselineStatus {
+    "timeline-scope:all" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "timeline-scope",
-        "none",
-        BaselineStatus {
+    "timeline-scope:none" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "top",
-        "anchor",
-        BaselineStatus {
+    "top:anchor" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "top",
-        "anchor-size",
-        BaselineStatus {
+    "top:anchor-size" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "top",
-        "auto",
-        BaselineStatus {
+    "top:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "touch-action",
-        "manipulation",
-        BaselineStatus {
+    "touch-action:manipulation" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2019),
         },
-    ),
-    (
-        "touch-action",
-        "none",
-        BaselineStatus {
+    "touch-action:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2019),
         },
-    ),
-    (
-        "touch-action",
-        "pan-down",
-        BaselineStatus {
+    "touch-action:pan-down" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2019),
         },
-    ),
-    (
-        "touch-action",
-        "pan-left",
-        BaselineStatus {
+    "touch-action:pan-left" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2019),
         },
-    ),
-    (
-        "touch-action",
-        "pan-right",
-        BaselineStatus {
+    "touch-action:pan-right" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2019),
         },
-    ),
-    (
-        "touch-action",
-        "pan-up",
-        BaselineStatus {
+    "touch-action:pan-up" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2019),
         },
-    ),
-    (
-        "touch-action",
-        "pan-x",
-        BaselineStatus {
+    "touch-action:pan-x" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2019),
         },
-    ),
-    (
-        "touch-action",
-        "pan-y",
-        BaselineStatus {
+    "touch-action:pan-y" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2019),
         },
-    ),
-    (
-        "touch-action",
-        "pinch-zoom",
-        BaselineStatus {
+    "touch-action:pinch-zoom" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2019),
         },
-    ),
-    (
-        "transform",
-        "3d",
-        BaselineStatus {
+    "transform:3d" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "transform",
-        "none",
-        BaselineStatus {
+    "transform:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "transform-box",
-        "border-box",
-        BaselineStatus {
+    "transform-box:border-box" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "transform-box",
-        "content-box",
-        BaselineStatus {
+    "transform-box:content-box" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "transform-box",
-        "fill-box",
-        BaselineStatus {
+    "transform-box:fill-box" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "transform-box",
-        "stroke-box",
-        BaselineStatus {
+    "transform-box:stroke-box" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "transform-box",
-        "view-box",
-        BaselineStatus {
+    "transform-box:view-box" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "transform-origin",
-        "bottom",
-        BaselineStatus {
+    "transform-origin:bottom" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "transform-origin",
-        "center",
-        BaselineStatus {
+    "transform-origin:center" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "transform-origin",
-        "left",
-        BaselineStatus {
+    "transform-origin:left" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "transform-origin",
-        "right",
-        BaselineStatus {
+    "transform-origin:right" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "transform-origin",
-        "top",
-        BaselineStatus {
+    "transform-origin:top" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "transition",
-        "all",
-        BaselineStatus {
+    "transition:all" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "transition",
-        "ease",
-        BaselineStatus {
+    "transition:ease" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "transition",
-        "ease-in",
-        BaselineStatus {
+    "transition:ease-in" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "transition",
-        "ease-in-out",
-        BaselineStatus {
+    "transition:ease-in-out" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "transition",
-        "ease-out",
-        BaselineStatus {
+    "transition:ease-out" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "transition",
-        "linear",
-        BaselineStatus {
+    "transition:linear" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "transition",
-        "none",
-        BaselineStatus {
+    "transition:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "transition",
-        "step-end",
-        BaselineStatus {
+    "transition:step-end" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "transition",
-        "step-start",
-        BaselineStatus {
+    "transition:step-start" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "transition",
-        "transition-behavior",
-        BaselineStatus {
+    "transition:transition-behavior" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "transition-property",
-        "all",
-        BaselineStatus {
+    "transition-property:all" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "transition-property",
-        "none",
-        BaselineStatus {
+    "transition-property:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "transition-timing-function",
-        "ease",
-        BaselineStatus {
+    "transition-timing-function:ease" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "transition-timing-function",
-        "ease-in",
-        BaselineStatus {
+    "transition-timing-function:ease-in" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "transition-timing-function",
-        "ease-in-out",
-        BaselineStatus {
+    "transition-timing-function:ease-in-out" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "transition-timing-function",
-        "ease-out",
-        BaselineStatus {
+    "transition-timing-function:ease-out" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "transition-timing-function",
-        "jump",
-        BaselineStatus {
+    "transition-timing-function:jump" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "transition-timing-function",
-        "linear",
-        BaselineStatus {
+    "transition-timing-function:linear" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "transition-timing-function",
-        "step-end",
-        BaselineStatus {
+    "transition-timing-function:step-end" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "transition-timing-function",
-        "step-start",
-        BaselineStatus {
+    "transition-timing-function:step-start" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "translate",
-        "none",
-        BaselineStatus {
+    "translate:none" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "unicode-bidi",
-        "bidi-override",
-        BaselineStatus {
+    "unicode-bidi:bidi-override" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "unicode-bidi",
-        "embed",
-        BaselineStatus {
+    "unicode-bidi:embed" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "unicode-bidi",
-        "isolate",
-        BaselineStatus {
+    "unicode-bidi:isolate" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "unicode-bidi",
-        "isolate-override",
-        BaselineStatus {
+    "unicode-bidi:isolate-override" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "unicode-bidi",
-        "normal",
-        BaselineStatus {
+    "unicode-bidi:normal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "unicode-bidi",
-        "plaintext",
-        BaselineStatus {
+    "unicode-bidi:plaintext" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "user-select",
-        "all",
-        BaselineStatus {
+    "user-select:all" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "user-select",
-        "auto",
-        BaselineStatus {
+    "user-select:auto" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "user-select",
-        "none",
-        BaselineStatus {
+    "user-select:none" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "user-select",
-        "text",
-        BaselineStatus {
+    "user-select:text" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "vertical-align",
-        "baseline",
-        BaselineStatus {
+    "vertical-align:baseline" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "vertical-align",
-        "bottom",
-        BaselineStatus {
+    "vertical-align:bottom" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "vertical-align",
-        "middle",
-        BaselineStatus {
+    "vertical-align:middle" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "vertical-align",
-        "sub",
-        BaselineStatus {
+    "vertical-align:sub" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "vertical-align",
-        "super",
-        BaselineStatus {
+    "vertical-align:super" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "vertical-align",
-        "text-bottom",
-        BaselineStatus {
+    "vertical-align:text-bottom" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "vertical-align",
-        "text-top",
-        BaselineStatus {
+    "vertical-align:text-top" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "vertical-align",
-        "top",
-        BaselineStatus {
+    "vertical-align:top" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "view-timeline-axis",
-        "block",
-        BaselineStatus {
+    "view-timeline-axis:block" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "view-timeline-axis",
-        "inline",
-        BaselineStatus {
+    "view-timeline-axis:inline" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "view-timeline-axis",
-        "x",
-        BaselineStatus {
+    "view-timeline-axis:x" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "view-timeline-axis",
-        "y",
-        BaselineStatus {
+    "view-timeline-axis:y" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "view-timeline-inset",
-        "auto",
-        BaselineStatus {
+    "view-timeline-inset:auto" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "view-transition-class",
-        "none",
-        BaselineStatus {
+    "view-transition-class:none" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2025),
         },
-    ),
-    (
-        "view-transition-name",
-        "match-element",
-        BaselineStatus {
+    "view-transition-name:match-element" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2025),
         },
-    ),
-    (
-        "view-transition-name",
-        "none",
-        BaselineStatus {
+    "view-transition-name:none" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2025),
         },
-    ),
-    (
-        "visibility",
-        "collapse",
-        BaselineStatus {
+    "visibility:collapse" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "visibility",
-        "hidden",
-        BaselineStatus {
+    "visibility:hidden" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "visibility",
-        "visible",
-        BaselineStatus {
+    "visibility:visible" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "white-space",
-        "break-spaces",
-        BaselineStatus {
+    "white-space:break-spaces" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "white-space",
-        "normal",
-        BaselineStatus {
+    "white-space:normal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "white-space",
-        "nowrap",
-        BaselineStatus {
+    "white-space:nowrap" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "white-space",
-        "pre",
-        BaselineStatus {
+    "white-space:pre" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "white-space",
-        "pre-line",
-        BaselineStatus {
+    "white-space:pre-line" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "white-space",
-        "pre-wrap",
-        BaselineStatus {
+    "white-space:pre-wrap" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "white-space-collapse",
-        "break-spaces",
-        BaselineStatus {
+    "white-space-collapse:break-spaces" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "white-space-collapse",
-        "collapse",
-        BaselineStatus {
+    "white-space-collapse:collapse" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "white-space-collapse",
-        "preserve",
-        BaselineStatus {
+    "white-space-collapse:preserve" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "white-space-collapse",
-        "preserve-breaks",
-        BaselineStatus {
+    "white-space-collapse:preserve-breaks" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "white-space-collapse",
-        "preserve-spaces",
-        BaselineStatus {
+    "white-space-collapse:preserve-spaces" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "width",
-        "anchor-size",
-        BaselineStatus {
+    "width:anchor-size" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "width",
-        "auto",
-        BaselineStatus {
+    "width:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "width",
-        "fit-content",
-        BaselineStatus {
+    "width:fit-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "width",
-        "max-content",
-        BaselineStatus {
+    "width:max-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "width",
-        "min-content",
-        BaselineStatus {
+    "width:min-content" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "width",
-        "stretch",
-        BaselineStatus {
+    "width:stretch" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "will-change",
-        "auto",
-        BaselineStatus {
+    "will-change:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "will-change",
-        "contents",
-        BaselineStatus {
+    "will-change:contents" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "will-change",
-        "scroll-position",
-        BaselineStatus {
+    "will-change:scroll-position" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "word-break",
-        "auto-phrase",
-        BaselineStatus {
+    "word-break:auto-phrase" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "word-break",
-        "break-all",
-        BaselineStatus {
+    "word-break:break-all" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "word-break",
-        "break-word",
-        BaselineStatus {
+    "word-break:break-word" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "word-break",
-        "keep-all",
-        BaselineStatus {
+    "word-break:keep-all" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "word-break",
-        "normal",
-        BaselineStatus {
+    "word-break:normal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "word-spacing",
-        "normal",
-        BaselineStatus {
+    "word-spacing:normal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "writing-mode",
-        "horizontal-tb",
-        BaselineStatus {
+    "writing-mode:horizontal-tb" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "writing-mode",
-        "lr",
-        BaselineStatus {
+    "writing-mode:lr" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "writing-mode",
-        "lr-tb",
-        BaselineStatus {
+    "writing-mode:lr-tb" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "writing-mode",
-        "rl",
-        BaselineStatus {
+    "writing-mode:rl" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "writing-mode",
-        "rl-tb",
-        BaselineStatus {
+    "writing-mode:rl-tb" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "writing-mode",
-        "sideways-lr",
-        BaselineStatus {
+    "writing-mode:sideways-lr" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "writing-mode",
-        "sideways-rl",
-        BaselineStatus {
+    "writing-mode:sideways-rl" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "writing-mode",
-        "tb",
-        BaselineStatus {
+    "writing-mode:tb" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "writing-mode",
-        "tb-rl",
-        BaselineStatus {
+    "writing-mode:tb-rl" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "writing-mode",
-        "vertical-lr",
-        BaselineStatus {
+    "writing-mode:vertical-lr" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "writing-mode",
-        "vertical-rl",
-        BaselineStatus {
+    "writing-mode:vertical-rl" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2017),
         },
-    ),
-    (
-        "z-index",
-        "auto",
-        BaselineStatus {
+    "z-index:auto" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-];
-#[doc = r" Baseline status for CSS at-rules. Sorted by name."]
-pub static BASELINE_AT_RULES: &[(&str, BaselineStatus)] = &[
-    (
-        "charset",
-        BaselineStatus {
+};
+#[doc = r" Baseline status for CSS at-rules."]
+pub static BASELINE_AT_RULES: phf::Map<&'static str, BaselineStatus> = phf::phf_map! {
+    "charset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "container",
-        BaselineStatus {
+    "container" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "counter-style",
-        BaselineStatus {
+    "counter-style" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "custom-media",
-        BaselineStatus {
+    "custom-media" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "font-face",
-        BaselineStatus {
+    "font-face" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2016),
         },
-    ),
-    (
-        "font-feature-values",
-        BaselineStatus {
+    "font-feature-values" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "font-palette-values",
-        BaselineStatus {
+    "font-palette-values" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "function",
-        BaselineStatus {
+    "function" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "import",
-        BaselineStatus {
+    "import" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "keyframes",
-        BaselineStatus {
+    "keyframes" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "layer",
-        BaselineStatus {
+    "layer" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "media",
-        BaselineStatus {
+    "media" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "namespace",
-        BaselineStatus {
+    "namespace" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "page",
-        BaselineStatus {
+    "page" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "position-try",
-        BaselineStatus {
+    "position-try" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "property",
-        BaselineStatus {
+    "property" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "scope",
-        BaselineStatus {
+    "scope" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2025),
         },
-    ),
-    (
-        "starting-style",
-        BaselineStatus {
+    "starting-style" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "supports",
-        BaselineStatus {
+    "supports" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "view-transition",
-        BaselineStatus {
+    "view-transition" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-];
-#[doc = r" Baseline status for CSS media query conditions. Sorted by name."]
-pub static BASELINE_MEDIA_CONDITIONS: &[(&str, BaselineStatus)] = &[
-    (
-        "-webkit-device-pixel-ratio",
-        BaselineStatus {
+};
+#[doc = r" Baseline status for CSS media query conditions."]
+pub static BASELINE_MEDIA_CONDITIONS: phf::Map<&'static str, BaselineStatus> = phf::phf_map! {
+    "-webkit-device-pixel-ratio" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2018),
         },
-    ),
-    (
-        "-webkit-max-device-pixel-ratio",
-        BaselineStatus {
+    "-webkit-max-device-pixel-ratio" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2018),
         },
-    ),
-    (
-        "-webkit-min-device-pixel-ratio",
-        BaselineStatus {
+    "-webkit-min-device-pixel-ratio" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2018),
         },
-    ),
-    (
-        "-webkit-transform-3d",
-        BaselineStatus {
+    "-webkit-transform-3d" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2016),
         },
-    ),
-    (
-        "any-hover",
-        BaselineStatus {
+    "any-hover" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2018),
         },
-    ),
-    (
-        "any-pointer",
-        BaselineStatus {
+    "any-pointer" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2018),
         },
-    ),
-    (
-        "aspect-ratio",
-        BaselineStatus {
+    "aspect-ratio" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "calc",
-        BaselineStatus {
+    "calc" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "color",
-        BaselineStatus {
+    "color" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "color-gamut",
-        BaselineStatus {
+    "color-gamut" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "color-index",
-        BaselineStatus {
+    "color-index" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "device-aspect-ratio",
-        BaselineStatus {
+    "device-aspect-ratio" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "device-height",
-        BaselineStatus {
+    "device-height" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "device-posture",
-        BaselineStatus {
+    "device-posture" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "device-width",
-        BaselineStatus {
+    "device-width" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "display-mode",
-        BaselineStatus {
+    "display-mode" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "dynamic-range",
-        BaselineStatus {
+    "dynamic-range" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "forced-colors",
-        BaselineStatus {
+    "forced-colors" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "grid",
-        BaselineStatus {
+    "grid" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "height",
-        BaselineStatus {
+    "height" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "horizontal-viewport-segments",
-        BaselineStatus {
+    "horizontal-viewport-segments" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "hover",
-        BaselineStatus {
+    "hover" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2018),
         },
-    ),
-    (
-        "inverted-colors",
-        BaselineStatus {
+    "inverted-colors" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "media_features",
-        BaselineStatus {
+    "media_features" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "media_query_values",
-        BaselineStatus {
+    "media_query_values" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "monochrome",
-        BaselineStatus {
+    "monochrome" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "nested-queries",
-        BaselineStatus {
+    "nested-queries" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "or_syntax",
-        BaselineStatus {
+    "or_syntax" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "orientation",
-        BaselineStatus {
+    "orientation" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "overflow-block",
-        BaselineStatus {
+    "overflow-block" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "overflow-inline",
-        BaselineStatus {
+    "overflow-inline" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "pointer",
-        BaselineStatus {
+    "pointer" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2018),
         },
-    ),
-    (
-        "prefers-color-scheme",
-        BaselineStatus {
+    "prefers-color-scheme" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "prefers-contrast",
-        BaselineStatus {
+    "prefers-contrast" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "prefers-reduced-data",
-        BaselineStatus {
+    "prefers-reduced-data" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "prefers-reduced-motion",
-        BaselineStatus {
+    "prefers-reduced-motion" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "prefers-reduced-transparency",
-        BaselineStatus {
+    "prefers-reduced-transparency" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "range_syntax",
-        BaselineStatus {
+    "range_syntax" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "resolution",
-        BaselineStatus {
+    "resolution" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "scripting",
-        BaselineStatus {
+    "scripting" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "update",
-        BaselineStatus {
+    "update" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "vertical-viewport-segments",
-        BaselineStatus {
+    "vertical-viewport-segments" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "video-dynamic-range",
-        BaselineStatus {
+    "video-dynamic-range" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "width",
-        BaselineStatus {
+    "width" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-];
-#[doc = r" Baseline status for CSS value functions. Sorted by name."]
-pub static BASELINE_FUNCTIONS: &[(&str, BaselineStatus)] = &[
-    (
-        "abs",
-        BaselineStatus {
+};
+#[doc = r" Baseline status for CSS value functions."]
+pub static BASELINE_FUNCTIONS: phf::Map<&'static str, BaselineStatus> = phf::phf_map! {
+    "abs" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2025),
         },
-    ),
-    (
-        "acos",
-        BaselineStatus {
+    "acos" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "asin",
-        BaselineStatus {
+    "asin" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "atan",
-        BaselineStatus {
+    "atan" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "atan2",
-        BaselineStatus {
+    "atan2" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "attr",
-        BaselineStatus {
+    "attr" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "blur",
-        BaselineStatus {
+    "blur" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2016),
         },
-    ),
-    (
-        "brightness",
-        BaselineStatus {
+    "brightness" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2016),
         },
-    ),
-    (
-        "calc",
-        BaselineStatus {
+    "calc" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "calc-size",
-        BaselineStatus {
+    "calc-size" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "circle",
-        BaselineStatus {
+    "circle" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "clamp",
-        BaselineStatus {
+    "clamp" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "color",
-        BaselineStatus {
+    "color" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "color-mix",
-        BaselineStatus {
+    "color-mix" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "conic-gradient",
-        BaselineStatus {
+    "conic-gradient" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "contrast",
-        BaselineStatus {
+    "contrast" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2016),
         },
-    ),
-    (
-        "cos",
-        BaselineStatus {
+    "cos" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "counter",
-        BaselineStatus {
+    "counter" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "counters",
-        BaselineStatus {
+    "counters" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "cross-fade",
-        BaselineStatus {
+    "cross-fade" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "cubic-bezier",
-        BaselineStatus {
+    "cubic-bezier" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "drop-shadow",
-        BaselineStatus {
+    "drop-shadow" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2016),
         },
-    ),
-    (
-        "element",
-        BaselineStatus {
+    "element" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "ellipse",
-        BaselineStatus {
+    "ellipse" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "env",
-        BaselineStatus {
+    "env" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "exp",
-        BaselineStatus {
+    "exp" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "grayscale",
-        BaselineStatus {
+    "grayscale" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2016),
         },
-    ),
-    (
-        "hsl",
-        BaselineStatus {
+    "hsl" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "hue-rotate",
-        BaselineStatus {
+    "hue-rotate" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2016),
         },
-    ),
-    (
-        "hwb",
-        BaselineStatus {
+    "hwb" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "hypot",
-        BaselineStatus {
+    "hypot" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "image",
-        BaselineStatus {
+    "image" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "image-set",
-        BaselineStatus {
+    "image-set" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "inset",
-        BaselineStatus {
+    "inset" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "invert",
-        BaselineStatus {
+    "invert" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2016),
         },
-    ),
-    (
-        "lab",
-        BaselineStatus {
+    "lab" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "lch",
-        BaselineStatus {
+    "lch" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "light-dark",
-        BaselineStatus {
+    "light-dark" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "linear-gradient",
-        BaselineStatus {
+    "linear-gradient" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "log",
-        BaselineStatus {
+    "log" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "matrix",
-        BaselineStatus {
+    "matrix" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "matrix3d",
-        BaselineStatus {
+    "matrix3d" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "max",
-        BaselineStatus {
+    "max" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "min",
-        BaselineStatus {
+    "min" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "mod",
-        BaselineStatus {
+    "mod" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "oklab",
-        BaselineStatus {
+    "oklab" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "oklch",
-        BaselineStatus {
+    "oklch" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "opacity",
-        BaselineStatus {
+    "opacity" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2016),
         },
-    ),
-    (
-        "paint",
-        BaselineStatus {
+    "paint" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "path",
-        BaselineStatus {
+    "path" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "perspective",
-        BaselineStatus {
+    "perspective" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "polygon",
-        BaselineStatus {
+    "polygon" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "pow",
-        BaselineStatus {
+    "pow" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "radial-gradient",
-        BaselineStatus {
+    "radial-gradient" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "ray",
-        BaselineStatus {
+    "ray" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "rect",
-        BaselineStatus {
+    "rect" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "rem",
-        BaselineStatus {
+    "rem" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "repeating-conic-gradient",
-        BaselineStatus {
+    "repeating-conic-gradient" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "repeating-linear-gradient",
-        BaselineStatus {
+    "repeating-linear-gradient" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "repeating-radial-gradient",
-        BaselineStatus {
+    "repeating-radial-gradient" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "rgb",
-        BaselineStatus {
+    "rgb" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "rotate",
-        BaselineStatus {
+    "rotate" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "rotate3d",
-        BaselineStatus {
+    "rotate3d" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "rotateX",
-        BaselineStatus {
+    "rotateX" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "rotateY",
-        BaselineStatus {
+    "rotateY" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "rotateZ",
-        BaselineStatus {
+    "rotateZ" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "round",
-        BaselineStatus {
+    "round" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "saturate",
-        BaselineStatus {
+    "saturate" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2016),
         },
-    ),
-    (
-        "scale",
-        BaselineStatus {
+    "scale" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "scale3d",
-        BaselineStatus {
+    "scale3d" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "scaleX",
-        BaselineStatus {
+    "scaleX" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "scaleY",
-        BaselineStatus {
+    "scaleY" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "scaleZ",
-        BaselineStatus {
+    "scaleZ" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "sepia",
-        BaselineStatus {
+    "sepia" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2016),
         },
-    ),
-    (
-        "sign",
-        BaselineStatus {
+    "sign" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2025),
         },
-    ),
-    (
-        "sin",
-        BaselineStatus {
+    "sin" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "skew",
-        BaselineStatus {
+    "skew" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "skewX",
-        BaselineStatus {
+    "skewX" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "skewY",
-        BaselineStatus {
+    "skewY" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "sqrt",
-        BaselineStatus {
+    "sqrt" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "steps",
-        BaselineStatus {
+    "steps" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "string",
-        BaselineStatus {
+    "string" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "tan",
-        BaselineStatus {
+    "tan" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "translate",
-        BaselineStatus {
+    "translate" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "translate3d",
-        BaselineStatus {
+    "translate3d" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "translateX",
-        BaselineStatus {
+    "translateX" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "translateY",
-        BaselineStatus {
+    "translateY" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "translateZ",
-        BaselineStatus {
+    "translateZ" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "url",
-        BaselineStatus {
+    "url" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2016),
         },
-    ),
-];
-#[doc = r" Baseline status for CSS pseudo-class and pseudo-element selectors. Sorted by name."]
-pub static BASELINE_SELECTORS: &[(&str, BaselineStatus)] = &[
-    (
-        "active",
-        BaselineStatus {
+};
+#[doc = r" Baseline status for CSS pseudo-class and pseudo-element selectors."]
+pub static BASELINE_SELECTORS: phf::Map<&'static str, BaselineStatus> = phf::phf_map! {
+    "active" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "active-view-transition",
-        BaselineStatus {
+    "active-view-transition" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2026),
         },
-    ),
-    (
-        "active-view-transition-type",
-        BaselineStatus {
+    "active-view-transition-type" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2026),
         },
-    ),
-    (
-        "after",
-        BaselineStatus {
+    "after" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "any-link",
-        BaselineStatus {
+    "any-link" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "attribute",
-        BaselineStatus {
+    "attribute" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "autofill",
-        BaselineStatus {
+    "autofill" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "backdrop",
-        BaselineStatus {
+    "backdrop" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "before",
-        BaselineStatus {
+    "before" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "buffering",
-        BaselineStatus {
+    "buffering" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "checked",
-        BaselineStatus {
+    "checked" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "checkmark",
-        BaselineStatus {
+    "checkmark" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "child",
-        BaselineStatus {
+    "child" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "class",
-        BaselineStatus {
+    "class" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "column",
-        BaselineStatus {
+    "column" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "cue",
-        BaselineStatus {
+    "cue" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "default",
-        BaselineStatus {
+    "default" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "defined",
-        BaselineStatus {
+    "defined" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "descendant",
-        BaselineStatus {
+    "descendant" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "details-content",
-        BaselineStatus {
+    "details-content" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2025),
         },
-    ),
-    (
-        "dir",
-        BaselineStatus {
+    "dir" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "disabled",
-        BaselineStatus {
+    "disabled" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "empty",
-        BaselineStatus {
+    "empty" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "enabled",
-        BaselineStatus {
+    "enabled" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "file-selector-button",
-        BaselineStatus {
+    "file-selector-button" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "first",
-        BaselineStatus {
+    "first" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "first-child",
-        BaselineStatus {
+    "first-child" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "first-letter",
-        BaselineStatus {
+    "first-letter" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "first-line",
-        BaselineStatus {
+    "first-line" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "first-of-type",
-        BaselineStatus {
+    "first-of-type" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "focus",
-        BaselineStatus {
+    "focus" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "focus-visible",
-        BaselineStatus {
+    "focus-visible" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "focus-within",
-        BaselineStatus {
+    "focus-within" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "fullscreen",
-        BaselineStatus {
+    "fullscreen" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "future",
-        BaselineStatus {
+    "future" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "grammar-error",
-        BaselineStatus {
+    "grammar-error" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "has",
-        BaselineStatus {
+    "has" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "has-slotted",
-        BaselineStatus {
+    "has-slotted" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "heading",
-        BaselineStatus {
+    "heading" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "headingfunction",
-        BaselineStatus {
+    "headingfunction" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "highlight",
-        BaselineStatus {
+    "highlight" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "host",
-        BaselineStatus {
+    "host" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "host-context",
-        BaselineStatus {
+    "host-context" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "hostfunction",
-        BaselineStatus {
+    "hostfunction" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "hover",
-        BaselineStatus {
+    "hover" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "id",
-        BaselineStatus {
+    "id" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "in-range",
-        BaselineStatus {
+    "in-range" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "indeterminate",
-        BaselineStatus {
+    "indeterminate" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "interest-source",
-        BaselineStatus {
+    "interest-source" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "interest-target",
-        BaselineStatus {
+    "interest-target" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "invalid",
-        BaselineStatus {
+    "invalid" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "is",
-        BaselineStatus {
+    "is" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "lang",
-        BaselineStatus {
+    "lang" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "last-child",
-        BaselineStatus {
+    "last-child" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "last-of-type",
-        BaselineStatus {
+    "last-of-type" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "left",
-        BaselineStatus {
+    "left" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "link",
-        BaselineStatus {
+    "link" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "list",
-        BaselineStatus {
+    "list" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "marker",
-        BaselineStatus {
+    "marker" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "modal",
-        BaselineStatus {
+    "modal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2022),
         },
-    ),
-    (
-        "muted",
-        BaselineStatus {
+    "muted" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "namespace",
-        BaselineStatus {
+    "namespace" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "nesting",
-        BaselineStatus {
+    "nesting" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "next-sibling",
-        BaselineStatus {
+    "next-sibling" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "not",
-        BaselineStatus {
+    "not" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "nth-child",
-        BaselineStatus {
+    "nth-child" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "nth-last-child",
-        BaselineStatus {
+    "nth-last-child" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "nth-last-of-type",
-        BaselineStatus {
+    "nth-last-of-type" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "nth-of-type",
-        BaselineStatus {
+    "nth-of-type" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "only-child",
-        BaselineStatus {
+    "only-child" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "only-of-type",
-        BaselineStatus {
+    "only-of-type" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "open",
-        BaselineStatus {
+    "open" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "optional",
-        BaselineStatus {
+    "optional" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "out-of-range",
-        BaselineStatus {
+    "out-of-range" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "part",
-        BaselineStatus {
+    "part" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "past",
-        BaselineStatus {
+    "past" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "paused",
-        BaselineStatus {
+    "paused" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "picker",
-        BaselineStatus {
+    "picker" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "picker-icon",
-        BaselineStatus {
+    "picker-icon" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "picture-in-picture",
-        BaselineStatus {
+    "picture-in-picture" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "placeholder",
-        BaselineStatus {
+    "placeholder" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "placeholder-shown",
-        BaselineStatus {
+    "placeholder-shown" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "playing",
-        BaselineStatus {
+    "playing" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "popover-open",
-        BaselineStatus {
+    "popover-open" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2025),
         },
-    ),
-    (
-        "read-only",
-        BaselineStatus {
+    "read-only" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "read-write",
-        BaselineStatus {
+    "read-write" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "required",
-        BaselineStatus {
+    "required" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "right",
-        BaselineStatus {
+    "right" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "root",
-        BaselineStatus {
+    "root" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "scope",
-        BaselineStatus {
+    "scope" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "scroll-button",
-        BaselineStatus {
+    "scroll-button" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "scroll-marker",
-        BaselineStatus {
+    "scroll-marker" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "scroll-marker-group",
-        BaselineStatus {
+    "scroll-marker-group" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "seeking",
-        BaselineStatus {
+    "seeking" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "selection",
-        BaselineStatus {
+    "selection" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "slotted",
-        BaselineStatus {
+    "slotted" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "spelling-error",
-        BaselineStatus {
+    "spelling-error" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "stalled",
-        BaselineStatus {
+    "stalled" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "state",
-        BaselineStatus {
+    "state" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "subsequent-sibling",
-        BaselineStatus {
+    "subsequent-sibling" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "target",
-        BaselineStatus {
+    "target" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "target-after",
-        BaselineStatus {
+    "target-after" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "target-before",
-        BaselineStatus {
+    "target-before" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "target-current",
-        BaselineStatus {
+    "target-current" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "target-text",
-        BaselineStatus {
+    "target-text" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2024),
         },
-    ),
-    (
-        "type",
-        BaselineStatus {
+    "type" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "universal",
-        BaselineStatus {
+    "universal" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "user-invalid",
-        BaselineStatus {
+    "user-invalid" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "user-valid",
-        BaselineStatus {
+    "user-valid" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2023),
         },
-    ),
-    (
-        "valid",
-        BaselineStatus {
+    "valid" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2015),
         },
-    ),
-    (
-        "view-transition",
-        BaselineStatus {
+    "view-transition" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2025),
         },
-    ),
-    (
-        "view-transition-group",
-        BaselineStatus {
+    "view-transition-group" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2025),
         },
-    ),
-    (
-        "view-transition-image-pair",
-        BaselineStatus {
+    "view-transition-image-pair" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2025),
         },
-    ),
-    (
-        "view-transition-new",
-        BaselineStatus {
+    "view-transition-new" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2025),
         },
-    ),
-    (
-        "view-transition-old",
-        BaselineStatus {
+    "view-transition-old" => BaselineStatus {
             tier: BaselineTier::Newly,
             year: BaselineYear::Known(2025),
         },
-    ),
-    (
-        "visited",
-        BaselineStatus {
+    "visited" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2020),
         },
-    ),
-    (
-        "volume-locked",
-        BaselineStatus {
+    "volume-locked" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-    (
-        "where",
-        BaselineStatus {
+    "where" => BaselineStatus {
             tier: BaselineTier::Widely,
             year: BaselineYear::Known(2021),
         },
-    ),
-    (
-        "xr-overlay",
-        BaselineStatus {
+    "xr-overlay" => BaselineStatus {
             tier: BaselineTier::Limited,
             year: BaselineYear::Unknown,
         },
-    ),
-];
+};

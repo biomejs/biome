@@ -217,7 +217,7 @@ declare_lint_rule! {
         name: "useBaseline",
         language: "css",
         recommended: false,
-        sources: &[RuleSource::Eslint("css/use-baseline").inspired()],
+        sources: &[RuleSource::EslintCss("use-baseline").inspired()],
     }
 }
 
@@ -447,7 +447,7 @@ fn check_property(
 
     // Check property name baseline
     if let Some(status) = find_baseline(
-        BASELINE_PROPERTIES,
+        &BASELINE_PROPERTIES,
         &prop_text.text().to_ascii_lowercase_cow(),
     ) && !is_acceptable(options, status.tier, status.year)
     {
@@ -509,7 +509,7 @@ fn check_function(func: &CssFunction, options: &UseBaselineOptions) -> Option<Us
         return None;
     }
 
-    if let Some(status) = find_baseline(BASELINE_FUNCTIONS, &name.to_ascii_lowercase_cow())
+    if let Some(status) = find_baseline(&BASELINE_FUNCTIONS, &name.to_ascii_lowercase_cow())
         && !is_acceptable(options, status.tier, status.year)
     {
         return Some(UseBaselineState {
@@ -531,7 +531,7 @@ fn check_pseudo(
         return None;
     }
 
-    if let Some(status) = find_baseline(BASELINE_SELECTORS, &name.to_ascii_lowercase_cow())
+    if let Some(status) = find_baseline(&BASELINE_SELECTORS, &name.to_ascii_lowercase_cow())
         && !is_acceptable(options, status.tier, status.year)
     {
         return Some(UseBaselineState {
@@ -555,7 +555,7 @@ fn check_media_condition(
         return None;
     }
 
-    if let Some(status) = find_baseline(BASELINE_MEDIA_CONDITIONS, &name.to_ascii_lowercase_cow())
+    if let Some(status) = find_baseline(&BASELINE_MEDIA_CONDITIONS, &name.to_ascii_lowercase_cow())
         && !is_acceptable(options, status.tier, status.year)
     {
         return Some(UseBaselineState {
@@ -620,7 +620,7 @@ fn check_at_rule(at_rule: &CssAtRule, options: &UseBaselineOptions) -> Option<Us
         return None;
     }
 
-    if let Some(status) = find_baseline(BASELINE_AT_RULES, name)
+    if let Some(status) = find_baseline(&BASELINE_AT_RULES, name)
         && !is_acceptable(options, status.tier, status.year)
     {
         // Report the at-rule's first token range (the @keyword)

@@ -424,65 +424,32 @@ fn status_entry(status: &Status) -> proc_macro2::TokenStream {
     quote! { BaselineStatus { tier: #tier, year: #year } }
 }
 
-fn generate_code(features: CssFeatures) -> proc_macro2::TokenStream {
-    let properties: Vec<_> = features
-        .properties
+fn phf_map_entries(items: &[(String, Status)]) -> Vec<proc_macro2::TokenStream> {
+    items
         .iter()
         .map(|(name, status)| {
             let name_lit = Literal::string(name);
             let entry = status_entry(status);
-            quote! { (#name_lit, #entry) }
+            quote! { #name_lit => #entry }
         })
-        .collect();
+        .collect()
+}
 
+fn generate_code(features: CssFeatures) -> proc_macro2::TokenStream {
+    let properties = phf_map_entries(&features.properties);
+    let at_rules = phf_map_entries(&features.at_rules);
+    let media_conditions = phf_map_entries(&features.media_conditions);
+    let functions = phf_map_entries(&features.functions);
+    let selectors = phf_map_entries(&features.selectors);
+
+    // Property values: flat map keyed by "property:value".
     let property_values: Vec<_> = features
         .property_values
         .iter()
         .map(|(prop, val, status)| {
-            let prop_lit = Literal::string(prop);
-            let val_lit = Literal::string(val);
+            let key_lit = Literal::string(&format!("{prop}:{val}"));
             let entry = status_entry(status);
-            quote! { (#prop_lit, #val_lit, #entry) }
-        })
-        .collect();
-
-    let at_rules: Vec<_> = features
-        .at_rules
-        .iter()
-        .map(|(name, status)| {
-            let name_lit = Literal::string(name);
-            let entry = status_entry(status);
-            quote! { (#name_lit, #entry) }
-        })
-        .collect();
-
-    let media_conditions: Vec<_> = features
-        .media_conditions
-        .iter()
-        .map(|(name, status)| {
-            let name_lit = Literal::string(name);
-            let entry = status_entry(status);
-            quote! { (#name_lit, #entry) }
-        })
-        .collect();
-
-    let functions: Vec<_> = features
-        .functions
-        .iter()
-        .map(|(name, status)| {
-            let name_lit = Literal::string(name);
-            let entry = status_entry(status);
-            quote! { (#name_lit, #entry) }
-        })
-        .collect();
-
-    let selectors: Vec<_> = features
-        .selectors
-        .iter()
-        .map(|(name, status)| {
-            let name_lit = Literal::string(name);
-            let entry = status_entry(status);
-            quote! { (#name_lit, #entry) }
+            quote! { #key_lit => #entry }
         })
         .collect();
 
@@ -515,54 +482,50 @@ fn generate_code(features: CssFeatures) -> proc_macro2::TokenStream {
         }
 
         /// Look up the Baseline status of a feature by name.
-        /// The table must be sorted by name for binary search.
         pub fn find_baseline(
-            table: &[(&str, BaselineStatus)],
+            table: &phf::Map<&'static str, BaselineStatus>,
             name: &str,
         ) -> Option<BaselineStatus> {
-            table
-                .binary_search_by_key(&name, |&(n, _)| n)
-                .ok()
-                .map(|i| table[i].1)
+            table.get(name).copied()
         }
 
         /// Look up the Baseline status of a specific CSS property value.
+        /// The key format is `"property:value"` (lowercase).
         pub fn find_property_value_baseline(property: &str, value: &str) -> Option<BaselineStatus> {
-            BASELINE_PROPERTY_VALUES
-                .binary_search_by_key(&(property, value), |&(p, v, _)| (p, v))
-                .ok()
-                .map(|i| BASELINE_PROPERTY_VALUES[i].2)
+            let key = format!("{property}:{value}");
+            BASELINE_PROPERTY_VALUES.get(key.as_str()).copied()
         }
 
-        /// Baseline status for CSS properties. Sorted by name.
-        pub static BASELINE_PROPERTIES: &[(&str, BaselineStatus)] = &[
+        /// Baseline status for CSS properties.
+        pub static BASELINE_PROPERTIES: phf::Map<&'static str, BaselineStatus> = phf::phf_map! {
             #( #properties ),*
-        ];
+        };
 
-        /// Baseline status for CSS property values (identifier keywords only). Sorted by (property, value).
-        pub static BASELINE_PROPERTY_VALUES: &[(&str, &str, BaselineStatus)] = &[
+        /// Baseline status for CSS property values (identifier keywords only).
+        /// Keys are in `"property:value"` format (lowercase).
+        pub static BASELINE_PROPERTY_VALUES: phf::Map<&'static str, BaselineStatus> = phf::phf_map! {
             #( #property_values ),*
-        ];
+        };
 
-        /// Baseline status for CSS at-rules. Sorted by name.
-        pub static BASELINE_AT_RULES: &[(&str, BaselineStatus)] = &[
+        /// Baseline status for CSS at-rules.
+        pub static BASELINE_AT_RULES: phf::Map<&'static str, BaselineStatus> = phf::phf_map! {
             #( #at_rules ),*
-        ];
+        };
 
-        /// Baseline status for CSS media query conditions. Sorted by name.
-        pub static BASELINE_MEDIA_CONDITIONS: &[(&str, BaselineStatus)] = &[
+        /// Baseline status for CSS media query conditions.
+        pub static BASELINE_MEDIA_CONDITIONS: phf::Map<&'static str, BaselineStatus> = phf::phf_map! {
             #( #media_conditions ),*
-        ];
+        };
 
-        /// Baseline status for CSS value functions. Sorted by name.
-        pub static BASELINE_FUNCTIONS: &[(&str, BaselineStatus)] = &[
+        /// Baseline status for CSS value functions.
+        pub static BASELINE_FUNCTIONS: phf::Map<&'static str, BaselineStatus> = phf::phf_map! {
             #( #functions ),*
-        ];
+        };
 
-        /// Baseline status for CSS pseudo-class and pseudo-element selectors. Sorted by name.
-        pub static BASELINE_SELECTORS: &[(&str, BaselineStatus)] = &[
+        /// Baseline status for CSS pseudo-class and pseudo-element selectors.
+        pub static BASELINE_SELECTORS: phf::Map<&'static str, BaselineStatus> = phf::phf_map! {
             #( #selectors ),*
-        ];
+        };
     }
 }
 
