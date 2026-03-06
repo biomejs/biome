@@ -6,6 +6,7 @@ use biome_diagnostics::Severity;
 use biome_html_syntax::{HtmlFileSource, element_ext::AnyHtmlTagElement};
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::use_valid_anchor::UseValidAnchorOptions;
+use biome_string_case::StrLikeExtension;
 
 declare_lint_rule! {
     /// Enforce that all anchors are valid, and they are navigable elements.
@@ -99,7 +100,7 @@ impl Rule for UseValidAnchor {
                         .value()
                         .ok()?
                         .string_value()?;
-                    let static_value = attribute_value.trim();
+                    let static_value = attribute_value.trim().to_ascii_lowercase_cow();
 
                     if static_value.is_empty()
                         || static_value == "#"
