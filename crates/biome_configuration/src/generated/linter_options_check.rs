@@ -593,6 +593,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_hex_colors::NoHexColorsOptions>(),
     ));
     result.push((
+        "nursery",
+        "noIdenticalTestTitle",
+        TypeId::of::<biome_rule_options::no_identical_test_title::NoIdenticalTestTitleOptions>(),
+    ));
+    result.push((
         "performance",
         "noImgElement",
         TypeId::of::<biome_rule_options::no_img_element::NoImgElementOptions>(),

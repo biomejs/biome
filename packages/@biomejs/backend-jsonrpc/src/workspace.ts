@@ -2172,6 +2172,11 @@ See https://biomejs.dev/linter/rules/no-hex-colors
 	 */
 	noHexColors?: NoHexColorsConfiguration;
 	/**
+	* Disallow identical titles in test suites and test cases.
+See https://biomejs.dev/linter/rules/no-identical-test-title 
+	 */
+	noIdenticalTestTitle?: NoIdenticalTestTitleConfiguration;
+	/**
 	* Disallow the use of eval()-like methods.
 See https://biomejs.dev/linter/rules/no-implied-eval 
 	 */
@@ -4234,6 +4239,9 @@ export type NoForInConfiguration =
 export type NoHexColorsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoHexColorsOptions;
+export type NoIdenticalTestTitleConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoIdenticalTestTitleOptions;
 export type NoImpliedEvalConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoImpliedEvalOptions;
@@ -5946,6 +5954,10 @@ export interface RuleWithNoHexColorsOptions {
 	level: RulePlainConfiguration;
 	options?: NoHexColorsOptions;
 }
+export interface RuleWithNoIdenticalTestTitleOptions {
+	level: RulePlainConfiguration;
+	options?: NoIdenticalTestTitleOptions;
+}
 export interface RuleWithNoImpliedEvalOptions {
 	level: RulePlainConfiguration;
 	options?: NoImpliedEvalOptions;
@@ -7601,6 +7613,7 @@ export type NoFloatingClassesOptions = {};
 export type NoFloatingPromisesOptions = {};
 export type NoForInOptions = {};
 export type NoHexColorsOptions = {};
+export type NoIdenticalTestTitleOptions = {};
 export type NoImpliedEvalOptions = {};
 export interface NoIncrementDecrementOptions {
 	/**
@@ -8766,6 +8779,7 @@ export type Category =
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noForIn"
 	| "lint/nursery/noHexColors"
+	| "lint/nursery/noIdenticalTestTitle"
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noImpliedEval"
 	| "lint/nursery/noIncrementDecrement"
