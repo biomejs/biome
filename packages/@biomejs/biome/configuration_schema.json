@@ -13046,9 +13046,12 @@
 					"items": { "type": "string" }
 				},
 				"allowPropertyValues": {
-					"description": "CSS property values to exclude from checking (format: `\"property:value\"`, case-insensitive).",
+					"description": "CSS property values to exclude from checking (maps property name to allowed values, case-insensitive).",
 					"type": "object",
-					"additionalProperties": { "type": "string" }
+					"additionalProperties": {
+						"type": "array",
+						"items": { "type": "string" }
+					}
 				},
 				"allowSelectors": {
 					"description": "CSS pseudo-selectors to exclude from checking (without `:` or `::`, case-insensitive).",

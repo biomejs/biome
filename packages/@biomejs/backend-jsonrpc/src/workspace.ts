@@ -7435,9 +7435,9 @@ export interface UseBaselineOptions {
 	 */
 	allowProperties?: string[];
 	/**
-	 * CSS property values to exclude from checking (format: `"property:value"`, case-insensitive).
+	 * CSS property values to exclude from checking (maps property name to allowed values, case-insensitive).
 	 */
-	allowPropertyValues?: Record<string, string>;
+	allowPropertyValues?: Record<string, string[]>;
 	/**
 	 * CSS pseudo-selectors to exclude from checking (without `:` or `::`, case-insensitive).
 	 */

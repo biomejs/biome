@@ -20,7 +20,6 @@ name    = "css_analyzer"
 [dependencies]
 biome_analyze            = { workspace = true }
 biome_analyze_macros     = { workspace = true }
-phf                      = { workspace = true }
 biome_console            = { workspace = true }
 biome_css_factory        = { workspace = true }
 biome_css_semantic       = { workspace = true }
@@ -33,6 +32,7 @@ biome_rule_options       = { workspace = true }
 biome_string_case        = { workspace = true }
 biome_suppression        = { workspace = true }
 camino                   = { workspace = true }
+phf                      = { workspace = true }
 regex                    = { workspace = true }
 rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, optional = true }
