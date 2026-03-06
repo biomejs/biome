@@ -1,4 +1,4 @@
-// Invalid modifier - using unknown identifier instead of !default or !global
+// Invalid modifier - `!important` is not allowed on SCSS variable declarations
 $color: red !important;
 
 // Invalid modifier - just a random word

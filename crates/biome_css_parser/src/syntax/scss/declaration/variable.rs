@@ -2,13 +2,13 @@ use super::super::{is_at_scss_identifier, parse_scss_identifier};
 use crate::parser::CssParser;
 use crate::syntax::parse_error::expected_scss_expression;
 use crate::syntax::scss::parse_scss_expression_until;
-use crate::syntax::{is_at_identifier, is_nth_at_identifier, parse_regular_identifier};
+use crate::syntax::{is_nth_at_identifier, parse_regular_identifier};
 use biome_css_syntax::CssSyntaxKind::{
-    EOF, SCSS_DECLARATION, SCSS_NAMESPACED_IDENTIFIER, SCSS_VARIABLE_MODIFIER,
+    EOF, ERROR_TOKEN, SCSS_DECLARATION, SCSS_NAMESPACED_IDENTIFIER, SCSS_VARIABLE_MODIFIER,
     SCSS_VARIABLE_MODIFIER_LIST,
 };
-use biome_css_syntax::{CssSyntaxKind, T};
-use biome_parser::diagnostic::expected_token_any;
+use biome_css_syntax::{CssSyntaxKind, T, TextRange};
+use biome_parser::diagnostic::{ParseDiagnostic, expected_token_any};
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{RecoveryError, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
@@ -34,7 +34,7 @@ pub(crate) fn is_at_scss_declaration(p: &mut CssParser) -> bool {
     }
 }
 
-/// Parses a SCSS variable declaration, including trailing `!default`/`!global`.
+/// Parses a SCSS variable declaration, including trailing variable modifiers.
 ///
 /// Examples:
 /// ```scss
@@ -56,7 +56,7 @@ pub(crate) fn parse_scss_declaration(p: &mut CssParser) -> ParsedSyntax {
 
     parse_scss_expression_until(p, token_set![T![!], T![;], T!['}']])
         .or_add_diagnostic(p, expected_scss_expression);
-    ScssVariableModifierList.parse_list(p);
+    parse_scss_variable_modifiers(p);
 
     if !p.at(T!['}']) && !p.at(EOF) {
         if p.nth_at(1, T!['}']) {
@@ -100,32 +100,80 @@ fn parse_scss_declaration_name(p: &mut CssParser) -> ParsedSyntax {
     }
 }
 
+const SCSS_VARIABLE_MODIFIER_LIST_END_SET: TokenSet<CssSyntaxKind> =
+    token_set![T![;], T!['}'], EOF];
+const SCSS_VARIABLE_MODIFIER_TOKEN_SET: TokenSet<CssSyntaxKind> =
+    token_set![T![default], T![global]];
+
 #[inline]
-fn is_at_scss_variable_modifier(p: &mut CssParser) -> bool {
-    p.at(T![!])
+fn parse_scss_variable_modifiers(p: &mut CssParser) {
+    ScssVariableModifierList.parse_list(p);
+    recover_scss_variable_modifier_tail(p);
 }
 
-const SCSS_VARIABLE_MODIFIER_SET: TokenSet<CssSyntaxKind> = token_set!(T![default], T![global]);
+#[inline]
+fn recover_scss_variable_modifier_tail(p: &mut CssParser) {
+    loop {
+        if p.at_ts(SCSS_VARIABLE_MODIFIER_LIST_END_SET) {
+            return;
+        }
+
+        if p.at(T![!]) {
+            parse_scss_variable_modifier(p).ok();
+            continue;
+        }
+
+        if p.at(ERROR_TOKEN) {
+            p.bump_any();
+            continue;
+        }
+
+        // Recover malformed modifier separators only when they directly precede
+        // another modifier (`bar !global`). Otherwise leave the token for
+        // missing-semicolon recovery at declaration level.
+        if p.nth_at(1, T![!]) {
+            let range = p.cur_range();
+            p.error(
+                p.err_builder("Unexpected value or character.", range)
+                    .with_hint("Expected a variable modifier or the end of the declaration."),
+            );
+            p.bump_any();
+            continue;
+        }
+
+        return;
+    }
+}
 
 #[inline]
 fn parse_scss_variable_modifier(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_scss_variable_modifier(p) {
+    if !p.at(T![!]) {
         return Absent;
     }
 
     let m = p.start();
     p.bump(T![!]);
 
-    if p.at_ts(SCSS_VARIABLE_MODIFIER_SET) {
-        p.bump_ts(SCSS_VARIABLE_MODIFIER_SET);
+    if p.at_ts(SCSS_VARIABLE_MODIFIER_TOKEN_SET) {
+        p.bump_ts(SCSS_VARIABLE_MODIFIER_TOKEN_SET);
+    } else if p.at(T![important]) {
+        p.error(important_modifier_not_allowed(p, p.cur_range()));
+        p.bump(T![important]);
     } else {
         p.error(expected_token_any(&[T![default], T![global]]));
-        if is_at_identifier(p) {
+        if !p.at_ts(SCSS_VARIABLE_MODIFIER_LIST_END_SET) {
             p.bump_any();
         }
     }
 
     Present(m.complete(p, SCSS_VARIABLE_MODIFIER))
+}
+
+fn important_modifier_not_allowed(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder("`!important` is not valid here.", range)
+        .with_hint(
+            "SCSS variable declarations only support the `!default` and `!global` modifiers.",
+        )
 }
 
 struct ScssVariableModifierList;
@@ -140,7 +188,7 @@ impl ParseNodeList for ScssVariableModifierList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        !is_at_scss_variable_modifier(p)
+        p.at_ts(SCSS_VARIABLE_MODIFIER_LIST_END_SET) || !p.at(T![!])
     }
 
     fn recover(

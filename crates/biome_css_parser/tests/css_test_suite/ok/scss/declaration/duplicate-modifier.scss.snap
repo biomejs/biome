@@ -1,0 +1,178 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+$dup-default: 1 !default !default;
+$dup-global: 1 !global !global;
+$dup-mixed: 1 !default !global !default;
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        ScssDeclaration {
+            name: ScssIdentifier {
+                dollar_token: DOLLAR@0..1 "$" [] [],
+                name: CssIdentifier {
+                    value_token: IDENT@1..12 "dup-default" [] [],
+                },
+            },
+            colon_token: COLON@12..14 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    CssNumber {
+                        value_token: CSS_NUMBER_LITERAL@14..16 "1" [] [Whitespace(" ")],
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [
+                ScssVariableModifier {
+                    excl_token: BANG@16..17 "!" [] [],
+                    value: DEFAULT_KW@17..25 "default" [] [Whitespace(" ")],
+                },
+                ScssVariableModifier {
+                    excl_token: BANG@25..26 "!" [] [],
+                    value: DEFAULT_KW@26..33 "default" [] [],
+                },
+            ],
+            semicolon_token: SEMICOLON@33..34 ";" [] [],
+        },
+        ScssDeclaration {
+            name: ScssIdentifier {
+                dollar_token: DOLLAR@34..36 "$" [Newline("\n")] [],
+                name: CssIdentifier {
+                    value_token: IDENT@36..46 "dup-global" [] [],
+                },
+            },
+            colon_token: COLON@46..48 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    CssNumber {
+                        value_token: CSS_NUMBER_LITERAL@48..50 "1" [] [Whitespace(" ")],
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [
+                ScssVariableModifier {
+                    excl_token: BANG@50..51 "!" [] [],
+                    value: GLOBAL_KW@51..58 "global" [] [Whitespace(" ")],
+                },
+                ScssVariableModifier {
+                    excl_token: BANG@58..59 "!" [] [],
+                    value: GLOBAL_KW@59..65 "global" [] [],
+                },
+            ],
+            semicolon_token: SEMICOLON@65..66 ";" [] [],
+        },
+        ScssDeclaration {
+            name: ScssIdentifier {
+                dollar_token: DOLLAR@66..68 "$" [Newline("\n")] [],
+                name: CssIdentifier {
+                    value_token: IDENT@68..77 "dup-mixed" [] [],
+                },
+            },
+            colon_token: COLON@77..79 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    CssNumber {
+                        value_token: CSS_NUMBER_LITERAL@79..81 "1" [] [Whitespace(" ")],
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [
+                ScssVariableModifier {
+                    excl_token: BANG@81..82 "!" [] [],
+                    value: DEFAULT_KW@82..90 "default" [] [Whitespace(" ")],
+                },
+                ScssVariableModifier {
+                    excl_token: BANG@90..91 "!" [] [],
+                    value: GLOBAL_KW@91..98 "global" [] [Whitespace(" ")],
+                },
+                ScssVariableModifier {
+                    excl_token: BANG@98..99 "!" [] [],
+                    value: DEFAULT_KW@99..106 "default" [] [],
+                },
+            ],
+            semicolon_token: SEMICOLON@106..107 ";" [] [],
+        },
+    ],
+    eof_token: EOF@107..108 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..108
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..107
+    0: SCSS_DECLARATION@0..34
+      0: SCSS_IDENTIFIER@0..12
+        0: DOLLAR@0..1 "$" [] []
+        1: CSS_IDENTIFIER@1..12
+          0: IDENT@1..12 "dup-default" [] []
+      1: COLON@12..14 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@14..16
+        0: SCSS_EXPRESSION_ITEM_LIST@14..16
+          0: CSS_NUMBER@14..16
+            0: CSS_NUMBER_LITERAL@14..16 "1" [] [Whitespace(" ")]
+      3: SCSS_VARIABLE_MODIFIER_LIST@16..33
+        0: SCSS_VARIABLE_MODIFIER@16..25
+          0: BANG@16..17 "!" [] []
+          1: DEFAULT_KW@17..25 "default" [] [Whitespace(" ")]
+        1: SCSS_VARIABLE_MODIFIER@25..33
+          0: BANG@25..26 "!" [] []
+          1: DEFAULT_KW@26..33 "default" [] []
+      4: SEMICOLON@33..34 ";" [] []
+    1: SCSS_DECLARATION@34..66
+      0: SCSS_IDENTIFIER@34..46
+        0: DOLLAR@34..36 "$" [Newline("\n")] []
+        1: CSS_IDENTIFIER@36..46
+          0: IDENT@36..46 "dup-global" [] []
+      1: COLON@46..48 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@48..50
+        0: SCSS_EXPRESSION_ITEM_LIST@48..50
+          0: CSS_NUMBER@48..50
+            0: CSS_NUMBER_LITERAL@48..50 "1" [] [Whitespace(" ")]
+      3: SCSS_VARIABLE_MODIFIER_LIST@50..65
+        0: SCSS_VARIABLE_MODIFIER@50..58
+          0: BANG@50..51 "!" [] []
+          1: GLOBAL_KW@51..58 "global" [] [Whitespace(" ")]
+        1: SCSS_VARIABLE_MODIFIER@58..65
+          0: BANG@58..59 "!" [] []
+          1: GLOBAL_KW@59..65 "global" [] []
+      4: SEMICOLON@65..66 ";" [] []
+    2: SCSS_DECLARATION@66..107
+      0: SCSS_IDENTIFIER@66..77
+        0: DOLLAR@66..68 "$" [Newline("\n")] []
+        1: CSS_IDENTIFIER@68..77
+          0: IDENT@68..77 "dup-mixed" [] []
+      1: COLON@77..79 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@79..81
+        0: SCSS_EXPRESSION_ITEM_LIST@79..81
+          0: CSS_NUMBER@79..81
+            0: CSS_NUMBER_LITERAL@79..81 "1" [] [Whitespace(" ")]
+      3: SCSS_VARIABLE_MODIFIER_LIST@81..106
+        0: SCSS_VARIABLE_MODIFIER@81..90
+          0: BANG@81..82 "!" [] []
+          1: DEFAULT_KW@82..90 "default" [] [Whitespace(" ")]
+        1: SCSS_VARIABLE_MODIFIER@90..98
+          0: BANG@90..91 "!" [] []
+          1: GLOBAL_KW@91..98 "global" [] [Whitespace(" ")]
+        2: SCSS_VARIABLE_MODIFIER@98..106
+          0: BANG@98..99 "!" [] []
+          1: DEFAULT_KW@99..106 "default" [] []
+      4: SEMICOLON@106..107 ";" [] []
+  2: EOF@107..108 "" [Newline("\n")] []
+
+```
+

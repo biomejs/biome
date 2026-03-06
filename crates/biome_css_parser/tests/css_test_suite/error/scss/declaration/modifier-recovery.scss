@@ -1,0 +1,8 @@
+// Unexpected token between modifiers should still allow following modifiers
+$color: red foo !global;
+
+// Unexpected token between modifiers should not stop parsing later modifiers
+$gap: 1 !default bar !global;
+
+// !important should report an invalid modifier diagnostic and allow later modifiers
+$size: 2 !important !global;
