@@ -5,9 +5,11 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_semantic::{Binding, SemanticModel};
 use biome_js_syntax::{
-    JsClassExpression, JsFunctionExpression, JsIdentifierBinding, JsParameterList,
-    TsIdentifierBinding, TsPropertySignatureTypeMember, TsTypeParameter, TsTypeParameterName,
     binding_ext::AnyJsBindingDeclaration,
+    JsClassExpression, JsFormalParameter, JsFunctionExpression, JsIdentifierBinding,
+    JsParameterList, JsRestParameter, JsVariableDeclarator, TsIdentifierBinding,
+    TsPropertySignatureTypeMember, TsTypeAliasDeclaration, TsTypeParameter, TsTypeParameterName,
+    binding_ext::AnyJsParameterParentFunction,
 };
 use biome_rowan::{AstNode, SyntaxNodeCast, TokenText, declare_node_union};
 use biome_rule_options::no_shadow::NoShadowOptions;
@@ -128,6 +130,13 @@ impl Rule for NoShadow {
 fn check_shadowing(model: &SemanticModel, binding: Binding) -> Option<ShadowedBinding> {
     if binding.scope().is_global_scope() {
         // global scope bindings can't shadow anything
+        return None;
+    }
+
+    if is_in_overload_signature(&binding) {
+        // Parameters in TypeScript overload signatures (constructor, method,
+        // and function overloads without a body) are type-only and don't exist
+        // at runtime. They should not be treated as shadowing outer variables.
         return None;
     }
 
@@ -281,4 +290,29 @@ fn is_inside_function_parameters(binding: &Binding) -> bool {
         .ancestors()
         .skip(1)
         .any(|ancestor| ancestor.cast::<JsParameterList>().is_some())
+}
+
+/// Returns true if the binding is a parameter inside a TypeScript overload
+/// signature (constructor, method, or function overload declaration without a
+/// body). These parameters are type-only and should not be considered as
+/// shadowing outer variables.
+fn is_in_overload_signature(binding: &Binding) -> bool {
+    let node = binding.syntax();
+    let parent_function = node.clone().cast::<JsIdentifierBinding>().and_then(|id| {
+        id.parent::<JsFormalParameter>()
+            .and_then(|p| p.parent_function())
+            .or_else(|| {
+                id.parent::<JsRestParameter>()
+                    .and_then(|p| p.parent_function())
+            })
+    });
+    matches!(
+        parent_function,
+        Some(
+            AnyJsParameterParentFunction::TsConstructorSignatureClassMember(_)
+                | AnyJsParameterParentFunction::TsMethodSignatureClassMember(_)
+                | AnyJsParameterParentFunction::TsDeclareFunctionDeclaration(_)
+                | AnyJsParameterParentFunction::TsDeclareFunctionExportDefaultDeclaration(_)
+        )
+    )
 }
