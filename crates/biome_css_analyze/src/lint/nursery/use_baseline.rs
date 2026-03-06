@@ -589,9 +589,9 @@ fn at_rule_name(rule: &AnyCssAtRule) -> Option<&'static str> {
         AnyCssAtRule::CssStartingStyleAtRule(_) => Some("starting-style"),
         AnyCssAtRule::CssSupportsAtRule(_) => Some("supports"),
         AnyCssAtRule::CssViewTransitionAtRule(_) => Some("view-transition"),
+        AnyCssAtRule::CssFunctionAtRule(_) => Some("function"),
         // Internal/framework at-rules, not CSS spec
-        AnyCssAtRule::CssFunctionAtRule(_)
-        | AnyCssAtRule::CssBogusAtRule(_)
+        AnyCssAtRule::CssBogusAtRule(_)
         | AnyCssAtRule::CssUnknownBlockAtRule(_)
         | AnyCssAtRule::CssUnknownValueAtRule(_)
         | AnyCssAtRule::CssValueAtRule(_)

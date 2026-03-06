@@ -400,7 +400,7 @@ fn is_known_css_function(name: &str) -> bool {
         "anchor",
         "anchor-size",
     ];
-    KNOWN.binary_search(&name).is_ok()
+    KNOWN.contains(&name)
 }
 
 fn tier_tokens(tier: Tier) -> proc_macro2::TokenStream {
