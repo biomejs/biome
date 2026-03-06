@@ -757,7 +757,7 @@ mod test {
     fn not_found() {
         snap_diagnostic(
             "not_found",
-            WorkspaceError::not_found("not_found.js").with_file_path("not_found.js"),
+            WorkspaceError::not_found("not_found.js").into(),
         )
     }
 
