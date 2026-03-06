@@ -2052,6 +2052,10 @@
 				"interpolation": {
 					"description": "Enables the parsing of double text expressions such as `{{ expression }}` inside `.html` files",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
+				},
+				"vue": {
+					"description": "Enables parsing of Vue syntax (v-if, v-bind, etc.) in `.html` files.\n\nBiome will already automatically enable Vue parsing in `.vue` files, so you probably don't want\nto enable this option. This will cause the parser to treat **all** HTML files (including `.svelte`\nand `.astro` files) as if they were Vue files.",
+					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
