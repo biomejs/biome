@@ -156,7 +156,7 @@ pub struct Configuration {
     pub css: Option<CssConfiguration>,
 
     /// Specific configuration for the Markdown language
-    #[bpaf(external(markdown_configuration), optional)]
+    #[bpaf(external(markdown_configuration), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg(feature = "markdown")]
     pub markdown: Option<MarkdownConfiguration>,
