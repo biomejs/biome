@@ -1,6 +1,7 @@
 ---
 name: testing-codegen
-description: Guide for testing workflows and code generation commands in Biome. Use when running tests, managing snapshots, creating changesets, or generating code. Examples:<example>User needs to run snapshot tests for a lint rule</example><example>User wants to create a changeset for a PR</example><example>User needs to regenerate analyzer code after changes</example>
+description: Guide for testing workflows and code generation commands in Biome. Use when running snapshot tests for lint rules, creating changesets for PRs, managing insta snapshots, or regenerating analyzer/parser/formatter code after changes.
+compatibility: Designed for coding agents working on the Biome codebase (github.com/biomejs/biome).
 ---
 
 ## Purpose
@@ -233,18 +234,22 @@ The comment is strongly recommended and is also enforced when present: if the co
 
 ### Code Generation Commands
 
-**After modifying analyzers/lint rules:**
+**After modifying analyzers/lint rules (during development):**
+
+```shell
+just gen-rules          # Updates rule registrations in *_analyze crates
+just gen-configuration  # Updates configuration schemas
+```
+
+These lightweight commands generate enough code to compile and test without errors.
+
+**Full analyzer codegen (optional — CI autofix handles this):**
 
 ```shell
 just gen-analyzer
 ```
 
-This updates:
-
-- Rule registrations
-- Configuration schemas
-- Documentation exports
-- TypeScript bindings
+This is a composite command that runs `gen-rules`, `gen-configuration`, `gen-migrate`, `gen-bindings`, `lint-rules`, and `format`. You typically don't need to run this locally — the CI autofix job does it automatically when you open a PR.
 
 **After modifying grammar (.ungram files):**
 
@@ -374,9 +379,9 @@ cargo test test_name -- --show-output
 - **Snapshot review**: Always review snapshots carefully - don't blindly accept
 - **Test performance**: Use `#[ignore]` for slow tests, run with `cargo test -- --ignored`
 - **Parser inspection**: Use `just qt <package>` to run quick_test and inspect AST, NOT full Biome builds (much faster)
-- **String extraction**: Use `inner_string_text()` for quoted strings, not `text_trimmed()` (which includes quotes)
-- **Legacy syntax**: Ask users before implementing deprecated/legacy syntax - wait for user demand
-- **Borrow checker**: Avoid temporary borrows that get dropped - use `let binding = value; binding.method()` pattern
+
+For general Biome development tips (string extraction, borrow checker patterns, legacy syntax),
+see the [biome-developer](../biome-developer/SKILL.md) skill.
 
 ## Common Test Patterns
 
@@ -412,14 +417,14 @@ fn quick_test() {
 
 ## Code Generation Dependencies
 
-| When you modify...         | Run...                      |
-|----------------------------|-----------------------------|
-| `.ungram` grammar files    | `just gen-grammar <lang>`   |
-| Lint rules in `*_analyze`  | `just gen-analyzer`         |
-| Formatter in `*_formatter` | `just gen-formatter <lang>` |
-| Configuration types        | `just gen-bindings`         |
-| Before committing          | `just f && just l`          |
-| Full rebuild               | `just gen-all` (slow)       |
+| When you modify...         | Run during dev...                         | Full (optional, CI does this) |
+|----------------------------|-------------------------------------------|-------------------------------|
+| `.ungram` grammar files    | `just gen-grammar <lang>`                 | —                             |
+| Lint rules in `*_analyze`  | `just gen-rules && just gen-configuration`| `just gen-analyzer`           |
+| Formatter in `*_formatter` | `just gen-formatter <lang>`               | —                             |
+| Configuration types        | `just gen-bindings`                       | —                             |
+| Before committing          | `just f && just l`                        | —                             |
+| Full rebuild               | —                                         | `just gen-all` (slow)         |
 
 ## References
 

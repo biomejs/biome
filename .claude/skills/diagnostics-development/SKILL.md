@@ -1,6 +1,7 @@
 ---
 name: diagnostics-development
-description: Guide for creating high-quality, user-friendly diagnostics in Biome. Use when implementing error messages, warnings, and code frame displays. Examples:<example>User needs to create a diagnostic for a lint rule</example><example>User wants to add helpful advice to error messages</example><example>User is improving diagnostic quality</example>
+description: Guide for creating high-quality, user-friendly diagnostics in Biome. Use when creating diagnostics for lint rules, adding helpful advice to error messages, implementing code frame displays, or improving diagnostic quality.
+compatibility: Designed for coding agents working on the Biome codebase (github.com/biomejs/biome).
 ---
 
 ## Purpose
@@ -42,11 +43,11 @@ use biome_diagnostics::{Diagnostic, category};
 struct NoVarDiagnostic {
     #[location(span)]
     span: TextRange,
-    
+
     #[message]
     #[description]
     message: MessageAndDescription,
-    
+
     #[advice]
     advice: NoVarAdvice,
 }
@@ -98,35 +99,34 @@ impl Advices for NoVarAdvice {
 ### Use Built-in Advice Types
 
 ```rust
-use biome_diagnostics::v2::{
-    LogAdvice, CodeFrameAdvice, DiffAdvice, CommandAdvice
-};
+use biome_diagnostics::{LogAdvice, CodeFrameAdvice, DiffAdvice, CommandAdvice, LogCategory};
 
-// Log advice - simple text
+// Log advice - simple text message
 LogAdvice {
     category: LogCategory::Info,
-    message: markup! { "Consider using arrow functions." }
+    text: markup! { "Consider using arrow functions." },
 }
 
 // Code frame advice - highlight code location
+// Fields: path (AsResource), span (AsSpan), source_code (AsSourceCode)
 CodeFrameAdvice {
-    location: node.text_range(),
+    path: "file.js",
+    span: node.text_range(),
     source_code: ctx.source_code(),
-    annotation: markup! { "This code is problematic" },
 }
 
-// Diff advice - show before/after
+// Diff advice - show a TextEdit diff
 DiffAdvice {
-    old: "var x = 1;",
-    new: "const x = 1;",
+    diff: text_edit,  // must implement AsRef<TextEdit>
 }
 
 // Command advice - suggest CLI command
 CommandAdvice {
-    command: "biome check --apply",
-    message: markup! { "Run this command to fix automatically" },
+    command: "biome check --write",
 }
 ```
+
+In practice, most lint rules use the `RuleDiagnostic` builder pattern instead of constructing advice types directly. See the [Add Diagnostic to Rule](#add-diagnostic-to-rule) section below.
 
 ### Add Diagnostic to Rule
 
@@ -136,7 +136,7 @@ use biome_analyze::{Rule, RuleDiagnostic};
 impl Rule for NoVar {
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
-        
+
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
@@ -166,13 +166,13 @@ use biome_console::markup;
 markup! {
     // Emphasis (bold/colored)
     "Use "<Emphasis>"const"</Emphasis>" instead."
-    
+
     // Code/identifiers
     "The variable "<Emphasis>{variable_name}</Emphasis>" is never used."
-    
+
     // Hyperlinks
     "See the "<Hyperlink href="https://example.com">"documentation"</Hyperlink>"."
-    
+
     // Interpolation
     "Found "{count}" issues."
 }
@@ -185,7 +185,7 @@ Add new categories to `crates/biome_diagnostics_categories/src/categories.rs`:
 ```rust
 define_categories! {
     // Existing categories...
-    
+
     "lint/correctness/noVar": "https://biomejs.dev/linter/rules/no-var",
     "lint/style/useConst": "https://biomejs.dev/linter/rules/use-const",
 }
@@ -199,19 +199,19 @@ define_categories! {
 struct ComplexDiagnostic {
     #[location(span)]
     span: TextRange,
-    
+
     #[message]
     message: &'static str,
-    
+
     // Multiple advices
     #[advice]
-    first_advice: LogAdvice,
-    
+    first_advice: LogAdvice<MarkupBuf>,
+
     #[advice]
-    code_frame: CodeFrameAdvice,
-    
+    code_frame: CodeFrameAdvice<String, TextRange, String>,
+
     #[verbose_advice]
-    verbose_help: LogAdvice,
+    verbose_help: LogAdvice<MarkupBuf>,
 }
 ```
 
@@ -240,25 +240,25 @@ Available tags:
 
 **Good messages:**
 ```rust
-// ✅ Specific and actionable
+// Good - specific and actionable
 "Use 'let' or 'const' instead of 'var'"
 
-// ✅ Explains why
+// Good - explains why
 "This variable is never reassigned, consider using 'const'"
 
-// ✅ Shows what to do
+// Good - shows what to do
 "Remove the unused import statement"
 ```
 
 **Bad messages:**
 ```rust
-// ❌ Too vague
+// Bad - too vague
 "Invalid syntax"
 
-// ❌ Just states the obvious
+// Bad - just states the obvious
 "Variable declared with 'var'"
 
-// ❌ No guidance
+// Bad - no guidance
 "This code has a problem"
 ```
 
@@ -266,30 +266,31 @@ Available tags:
 
 **Show, don't tell:**
 ```rust
-// ✅ Good - shows code frame
+// Good - shows code frame
 CodeFrameAdvice {
-    location: node.range(),
+    path: "file.js",
+    span: node.text_range(),
     source_code: source,
-    annotation: markup! { "This expression is always truthy" }
 }
 
-// ❌ Less helpful - just text
+// Less helpful - just text
 LogAdvice {
-    message: markup! { "The expression at line 5 is always truthy" }
+    category: LogCategory::Info,
+    text: markup! { "The expression at line 5 is always truthy" },
 }
 ```
 
 **Provide actionable fixes:**
 ```rust
-// ✅ Good - shows exact change
+// Good - shows exact change
 DiffAdvice {
-    old: "var x = 1;",
-    new: "const x = 1;",
+    diff: text_edit,  // AsRef<TextEdit>
 }
 
-// ❌ Less helpful - describes change
+// Less helpful - describes change
 LogAdvice {
-    message: markup! { "Change 'var' to 'const'" }
+    category: LogCategory::Info,
+    text: markup! { "Change 'var' to 'const'" },
 }
 ```
 
@@ -376,5 +377,5 @@ impl Advices for MyAdvice {
 - Full guide: `crates/biome_diagnostics/CONTRIBUTING.md`
 - Technical principles: https://biomejs.dev/internals/philosophy/#technical
 - Diagnostic trait: `crates/biome_diagnostics/src/diagnostic.rs`
-- Advice types: `crates/biome_diagnostics/src/v2/`
+- Advice types: `crates/biome_diagnostics/src/advice.rs`
 - Examples: Search for `#[derive(Diagnostic)]` in codebase
