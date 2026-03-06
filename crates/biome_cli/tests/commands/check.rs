@@ -3579,3 +3579,39 @@ fn check_format_with_syntax_errors_when_flag_enabled() {
         result,
     ));
 }
+
+/// Regression test for https://github.com/biomejs/biome/issues/5279
+/// Tab alignment between context and changed lines in diff output should be consistent.
+#[test]
+fn check_tab_alignment_in_diff_output() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let config = Utf8Path::new("biome.json");
+    fs.insert(
+        config.into(),
+        r#"{ "json": { "formatter": { "trailingCommas": "all" } } }"#.as_bytes(),
+    );
+
+    let file_path = Utf8Path::new("file.jsonc");
+    fs.insert(
+        file_path.into(),
+        "{\n\t\"$schema\": \"https://biomejs.dev/schemas/1.9.4/schema.json\",\n\t\"json\": {\n\t\t\"formatter\": { \"trailingCommas\": \"all\" }\n\t}\n}\n".as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_tab_alignment_in_diff_output",
+        fs,
+        console,
+        result,
+    ));
+}
