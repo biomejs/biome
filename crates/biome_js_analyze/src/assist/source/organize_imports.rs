@@ -1178,7 +1178,7 @@ fn merge(
             } else {
                 merged_item
                     .trim_leading_trivia()?
-                    .prepend_trivia_pieces(item1.syntax().first_leading_trivia()?.pieces())?
+                    .prepend_trivia_pieces(item1_leading_trivia.pieces())?
             };
             Some(merged_item.into())
         }
@@ -1268,7 +1268,7 @@ fn merge(
             } else {
                 merged_item
                     .trim_leading_trivia()?
-                    .prepend_trivia_pieces(item1.syntax().first_leading_trivia()?.pieces())?
+                    .prepend_trivia_pieces(item1_leading_trivia.pieces())?
             };
             Some(merged_item.into())
         }
