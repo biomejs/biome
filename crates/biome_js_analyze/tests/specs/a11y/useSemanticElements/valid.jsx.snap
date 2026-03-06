@@ -60,6 +60,13 @@ export const Component2 = () => (
 	<main role="main"></main>
 	<table role="table"></table>
 	<hr role="separator" />
+	{/* Constrained elements: tag + matching attributes should not be flagged */}
+	<input role="checkbox" type="checkbox" />
+	<input role="radio" type="radio" />
+	<input role="searchbox" type="search" />
+	<input role="textbox" type="text" />
+	<th role="columnheader" scope="col"></th>
+	<th role="rowheader" scope="row"></th>
 </>
 
 

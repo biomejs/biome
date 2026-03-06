@@ -110,14 +110,23 @@ impl Rule for UseSemanticElements {
             return None;
         }
 
-        // If the current element is already a semantic element for this role,
+        // If the current element is already a semantic element for this role
+        // (matching both the tag name and any required attributes),
         // don't flag it. That case is handled by `noRedundantRoles`.
         let element_name = node.name_value_token().ok()?;
         let element_name = element_name.text_trimmed();
-        let is_already_semantic = semantic_elements
-            .iter()
-            .chain(related_elements.iter())
-            .any(|instance| instance.element.as_str() == element_name);
+        let is_already_semantic =
+            semantic_elements
+                .iter()
+                .chain(related_elements.iter())
+                .any(|instance| {
+                    instance.element.as_str() == element_name
+                        && instance.attributes.iter().all(|required_attr| {
+                            node.find_attribute_by_name(required_attr.attribute.as_str())
+                                .and_then(|attr| attr.as_static_value())
+                                .is_some_and(|value| value.text() == required_attr.value)
+                        })
+                });
         if is_already_semantic {
             return None;
         }
