@@ -104,6 +104,12 @@ pub enum TypeData {
     /// Type derived from another through a built-in operator.
     TypeOperator(Box<TypeOperatorType>),
 
+    /// Mapped type: `{ [K in Keys]: ValueType }`.
+    MappedType(Box<MappedType>),
+
+    /// Indexed access type: `T[K]`.
+    IndexedAccessType(Box<IndexedAccessType>),
+
     /// Literal value used as a type.
     Literal(Box<Literal>),
 
@@ -398,6 +404,8 @@ impl TypeData {
             | Self::Union(_) => instance.type_parameters.is_empty(),
             Self::Class(_)
             | Self::Generic(_)
+            | Self::IndexedAccessType(_)
+            | Self::MappedType(_)
             | Self::MergedReference(_)
             // For references, we don't know. If a reference was pointing to a
             // class, stripping the instance would change its meaning.
@@ -1233,6 +1241,38 @@ impl FromStr for TypeOperator {
             _ => Err(()),
         }
     }
+}
+
+/// A mapped type: `{ [K in KeysType]: ValueType }`.
+///
+/// Mapped types iterate over a set of keys and produce an object type.
+/// They may include an `as` clause for key remapping, and modifiers for
+/// `readonly` and optional (`?`).
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
+pub struct MappedType {
+    /// Name of the iteration variable (e.g. `K`).
+    pub property_name: Text,
+
+    /// The type being iterated over (e.g. `keyof T`).
+    pub keys_type: TypeReference,
+
+    /// Optional `as` clause for key remapping (e.g. `as \`get_${K}\``).
+    pub name_type: Option<TypeReference>,
+
+    /// The value type for each key.
+    pub value_type: TypeReference,
+}
+
+/// An indexed access type: `T[K]`.
+///
+/// Used to look up a property type from an object or interface type.
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
+pub struct IndexedAccessType {
+    /// The object type being accessed.
+    pub object_type: TypeReference,
+
+    /// The index/key type.
+    pub index_type: TypeReference,
 }
 
 /// Reference to another type definition.

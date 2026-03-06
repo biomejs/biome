@@ -285,6 +285,22 @@ pub fn get_variable_declaration(root: &AnyJsRoot) -> JsVariableDeclaration {
         .expect("cannot find variable declaration")
 }
 
+pub fn get_type_alias_declaration(root: &AnyJsRoot) -> TsTypeAliasDeclaration {
+    let module = root.as_js_module().unwrap();
+    module
+        .items()
+        .into_iter()
+        .filter_map(|item| match item {
+            AnyJsModuleItem::AnyJsStatement(statement) => Some(statement),
+            _ => None,
+        })
+        .find_map(|statement| match statement {
+            AnyJsStatement::TsTypeAliasDeclaration(decl) => Some(decl),
+            _ => None,
+        })
+        .expect("cannot find type alias declaration")
+}
+
 pub fn parse_ts(code: &str) -> AnyJsRoot {
     let parsed = parse(code, JsFileSource::ts(), JsParserOptions::default());
     let diagnostics = parsed.diagnostics();

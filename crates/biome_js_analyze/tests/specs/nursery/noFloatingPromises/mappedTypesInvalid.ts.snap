@@ -1,0 +1,120 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: mappedTypesInvalid.ts
+---
+# Input
+```ts
+// should generate diagnostics
+
+// Direct interface member access returning Promise
+interface SimpleApi {
+    getThing: () => Promise<string>;
+}
+declare const api: SimpleApi;
+api.getThing();
+
+// Concrete mapped type (no generics)
+type ConcreteMapping = {
+    [K in "foo" | "bar"]: () => Promise<string>;
+};
+declare const concrete: ConcreteMapping;
+concrete.foo();
+
+// Generic mapped type (simple, no key remapping)
+type AsyncActions<T> = {
+    [K in keyof T]: () => Promise<T[K]>;
+};
+interface Config {
+    name: string;
+    count: number;
+}
+declare const actions: AsyncActions<Config>;
+actions.name();
+
+// Key remapping with template literals (issue #6603 scenario)
+interface Things {
+    thing: string;
+}
+type CalculateGetter<T> = {
+    [K in keyof T as K extends string ? `get_${K}` : never]: () => Promise<T[K]>;
+};
+declare const lazyThings: CalculateGetter<Things>;
+lazyThings.get_thing();
+
+```
+
+# Diagnostics
+```
+mappedTypesInvalid.ts:8:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+     6 │ }
+     7 │ declare const api: SimpleApi;
+   > 8 │ api.getThing();
+       │ ^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ // Concrete mapped type (no generics)
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+mappedTypesInvalid.ts:15:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    13 │ };
+    14 │ declare const concrete: ConcreteMapping;
+  > 15 │ concrete.foo();
+       │ ^^^^^^^^^^^^^^^
+    16 │ 
+    17 │ // Generic mapped type (simple, no key remapping)
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+mappedTypesInvalid.ts:26:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    24 │ }
+    25 │ declare const actions: AsyncActions<Config>;
+  > 26 │ actions.name();
+       │ ^^^^^^^^^^^^^^^
+    27 │ 
+    28 │ // Key remapping with template literals (issue #6603 scenario)
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+mappedTypesInvalid.ts:36:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    34 │ };
+    35 │ declare const lazyThings: CalculateGetter<Things>;
+  > 36 │ lazyThings.get_thing();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    37 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

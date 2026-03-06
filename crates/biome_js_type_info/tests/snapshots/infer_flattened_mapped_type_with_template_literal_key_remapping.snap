@@ -1,0 +1,77 @@
+---
+source: crates/biome_js_type_info/tests/utils.rs
+expression: content
+---
+## Input
+
+```ts
+interface Things {
+	thing: string;
+}
+
+type CalculateGetter<T> = {
+	[K in keyof T as K extends string ? `get_${K}` : never]: () => Promise<T[K]>;
+};
+
+```
+
+## Result
+
+```
+instanceof Global TypeId(8)<T>
+```
+
+## Registered types
+
+```
+Global TypeId(0) => string: `get_${K}`
+
+Global TypeId(1) => never
+
+Global TypeId(2) => instanceof unresolved reference "T" (scope ID: 0)
+
+Global TypeId(3) => instanceof unresolved reference "K" (scope ID: 0)
+
+Global TypeId(4) => IndexedAccessType {
+    object_type: Resolved(
+        Global TypeId(2),
+    ),
+    index_type: Resolved(
+        Global TypeId(3),
+    ),
+}
+
+Global TypeId(5) => instanceof Promise<Global TypeId(4)>
+
+Global TypeId(6) => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Global TypeId(5)
+}
+
+Global TypeId(7) => TypeOperatorType {
+    operator: Keyof,
+    ty: Resolved(
+        Global TypeId(2),
+    ),
+}
+
+Global TypeId(8) => MappedType {
+    property_name: "K",
+    keys_type: Resolved(
+        Global TypeId(7),
+    ),
+    name_type: Some(
+        Resolved(
+            Global TypeId(0),
+        ),
+    ),
+    value_type: Resolved(
+        Global TypeId(6),
+    ),
+}
+
+Global TypeId(9) => instanceof Promise<Global TypeId(4)>
+```

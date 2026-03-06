@@ -1,0 +1,46 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: mappedTypesConditionalsInvalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+// Mapped type producing Promise members used in conditional
+type Promisified<T> = {
+    [K in keyof T]: Promise<T[K]>;
+};
+
+interface Data {
+    value: string;
+}
+
+declare const promisified: Promisified<Data>;
+
+if (promisified.value) {
+    // Do something
+}
+
+```
+
+# Diagnostics
+```
+mappedTypesConditionalsInvalid.ts:14:5 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A Promise was found where a conditional was expected.
+  
+    12 │ declare const promisified: Promisified<Data>;
+    13 │ 
+  > 14 │ if (promisified.value) {
+       │     ^^^^^^^^^^^^^^^^^
+    15 │     // Do something
+    16 │ }
+  
+  i A Promise is always truthy, so this is most likely a mistake.
+  
+  i You may have intended to `await` the Promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

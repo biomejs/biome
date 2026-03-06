@@ -8,8 +8,8 @@ use biome_js_type_info::{
 use biome_rowan::Text;
 use utils::{
     HardcodedSymbolResolver, assert_type_data_snapshot, assert_typed_bindings_snapshot,
-    get_expression, get_function_declaration, get_interface_declaration, get_variable_declaration,
-    parse_ts,
+    get_expression, get_function_declaration, get_interface_declaration,
+    get_type_alias_declaration, get_variable_declaration, parse_ts,
 };
 
 #[test]
@@ -371,5 +371,143 @@ function bar({ foo }: Foo) {
         &expr_ty,
         &resolver,
         "infer_flattened_type_of_destructured_interface_field",
+    )
+}
+
+#[test]
+fn infer_flattened_mapped_type_with_template_literal_key_remapping() {
+    // This is the exact scenario from issue #6603:
+    // type CalculateGetter<T> = {
+    //     [K in keyof T as K extends string ? `get_${K}` : never]: () => Promise<T[K]>;
+    // };
+    // We test the mapped type itself being correctly parsed.
+    const CODE: &str = r#"interface Things {
+    thing: string;
+}
+
+type CalculateGetter<T> = {
+    [K in keyof T as K extends string ? `get_${K}` : never]: () => Promise<T[K]>;
+};"#;
+
+    let root = parse_ts(CODE);
+
+    // Parse the interface
+    let interface_decl = get_interface_declaration(&root);
+    let mut resolver = GlobalsResolver::default();
+    let _interface_ty =
+        TypeData::from_ts_interface_declaration(&mut resolver, ScopeId::GLOBAL, &interface_decl)
+            .expect("interface must be inferred");
+    resolver.run_inference();
+
+    // Parse the type alias
+    let type_alias_decl = get_type_alias_declaration(&root);
+    let alias_ty =
+        TypeData::from_ts_type_alias_declaration(&mut resolver, ScopeId::GLOBAL, &type_alias_decl)
+            .expect("type alias must be inferred");
+    resolver.run_inference();
+
+    // Verify that the alias parsed to a mapped type structure
+    // The alias_ty should be InstanceOf(MappedType(...), [T_generic_param])
+    assert!(
+        matches!(&alias_ty, TypeData::InstanceOf(_)),
+        "Expected InstanceOf for generic type alias, got: {alias_ty}"
+    );
+
+    assert_type_data_snapshot(
+        CODE,
+        &alias_ty,
+        &resolver,
+        "infer_flattened_mapped_type_with_template_literal_key_remapping",
+    )
+}
+
+#[test]
+fn infer_flattened_keyof_interface() {
+    // Test that `keyof` on an interface resolves to a union of string literals.
+    const CODE: &str = r#"interface Things {
+    thing: string;
+    other: number;
+}
+
+type K = keyof Things;"#;
+
+    let root = parse_ts(CODE);
+    let interface_decl = get_interface_declaration(&root);
+    let mut resolver = GlobalsResolver::default();
+    let interface_ty =
+        TypeData::from_ts_interface_declaration(&mut resolver, ScopeId::GLOBAL, &interface_decl)
+            .expect("interface must be inferred");
+    resolver.run_inference();
+
+    let type_alias_decl = get_type_alias_declaration(&root);
+    let mut resolver = HardcodedSymbolResolver::new("Things", interface_ty, resolver);
+    let alias_ty =
+        TypeData::from_ts_type_alias_declaration(&mut resolver, ScopeId::GLOBAL, &type_alias_decl)
+            .expect("type alias must be inferred");
+    resolver.run_inference();
+    let alias_ty = alias_ty.inferred(&mut resolver);
+
+    assert_type_data_snapshot(
+        CODE,
+        &alias_ty,
+        &resolver,
+        "infer_flattened_keyof_interface",
+    )
+}
+
+#[test]
+fn infer_flattened_indexed_access_type() {
+    // Test that `T["key"]` resolves to the type of the member.
+    const CODE: &str = r#"interface Things {
+    thing: string;
+    other: number;
+}
+
+type T = Things["thing"];"#;
+
+    let root = parse_ts(CODE);
+    let interface_decl = get_interface_declaration(&root);
+    let mut resolver = GlobalsResolver::default();
+    let interface_ty =
+        TypeData::from_ts_interface_declaration(&mut resolver, ScopeId::GLOBAL, &interface_decl)
+            .expect("interface must be inferred");
+    resolver.run_inference();
+
+    let type_alias_decl = get_type_alias_declaration(&root);
+    let mut resolver = HardcodedSymbolResolver::new("Things", interface_ty, resolver);
+    let alias_ty =
+        TypeData::from_ts_type_alias_declaration(&mut resolver, ScopeId::GLOBAL, &type_alias_decl)
+            .expect("type alias must be inferred");
+    resolver.run_inference();
+    let alias_ty = alias_ty.inferred(&mut resolver);
+
+    assert_type_data_snapshot(
+        CODE,
+        &alias_ty,
+        &resolver,
+        "infer_flattened_indexed_access_type",
+    )
+}
+
+#[test]
+fn infer_flattened_simple_mapped_type_with_concrete_keys() {
+    // Test a non-generic mapped type with concrete keys.
+    // { [K in "a" | "b"]: string }
+    const CODE: &str = r#"type T = { [K in "a" | "b"]: string };"#;
+
+    let root = parse_ts(CODE);
+    let type_alias_decl = get_type_alias_declaration(&root);
+    let mut resolver = GlobalsResolver::default();
+    let alias_ty =
+        TypeData::from_ts_type_alias_declaration(&mut resolver, ScopeId::GLOBAL, &type_alias_decl)
+            .expect("type alias must be inferred");
+    resolver.run_inference();
+    let alias_ty = alias_ty.inferred(&mut resolver);
+
+    assert_type_data_snapshot(
+        CODE,
+        &alias_ty,
+        &resolver,
+        "infer_flattened_simple_mapped_type_with_concrete_keys",
     )
 }

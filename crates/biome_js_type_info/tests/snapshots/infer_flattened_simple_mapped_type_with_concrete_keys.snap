@@ -1,0 +1,29 @@
+---
+source: crates/biome_js_type_info/tests/utils.rs
+expression: content
+---
+## Input
+
+```ts
+type T = { [K in "a" | "b"]: string };
+
+```
+
+## Result
+
+```
+Object {
+  prototype: No prototype
+  members: ["a": string, "b": string]
+}
+```
+
+## Registered types
+
+```
+Global TypeId(0) => string: a
+
+Global TypeId(1) => string: b
+
+Global TypeId(2) => Global TypeId(0) | Global TypeId(1)
+```

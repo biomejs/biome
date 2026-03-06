@@ -1,0 +1,36 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: mappedTypesValid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+// Direct interface member access, properly awaited
+interface SimpleApi {
+    getThing: () => Promise<string>;
+}
+declare const api: SimpleApi;
+await api.getThing();
+
+// Concrete mapped type, properly handled
+type ConcreteMapping = {
+    [K in "foo" | "bar"]: () => Promise<string>;
+};
+declare const concrete: ConcreteMapping;
+await concrete.foo();
+concrete.bar().catch(() => {});
+
+// Generic mapped type, properly handled
+type AsyncActions<T> = {
+    [K in keyof T]: () => Promise<T[K]>;
+};
+interface Config {
+    name: string;
+    count: number;
+}
+declare const actions: AsyncActions<Config>;
+await actions.name();
+actions.count().catch(() => {});
+
+```

@@ -1,0 +1,16 @@
+/* should not generate diagnostics */
+
+// Mapped type producing Promise members, properly awaited in conditional
+type Promisified<T> = {
+    [K in keyof T]: Promise<T[K]>;
+};
+
+interface Data {
+    value: string;
+}
+
+declare const promisified: Promisified<Data>;
+
+if (await promisified.value) {
+    // Do something
+}

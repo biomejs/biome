@@ -33,11 +33,11 @@ use crate::literal::{BooleanLiteral, NumberLiteral, RegexpLiteral, StringLiteral
 use crate::{
     AssertsReturnType, CallArgumentType, Class, Constructor, ConstructorParameter,
     DestructureField, Function, FunctionParameter, FunctionParameterBinding, GenericTypeParameter,
-    Interface, Literal, Module, NamedFunctionParameter, Namespace, Object, Path,
-    PatternFunctionParameter, PredicateReturnType, ResolvedTypeId, ReturnType, ScopeId, Tuple,
-    TupleElementType, TypeData, TypeInstance, TypeMember, TypeMemberAccessibility, TypeMemberKind,
-    TypeOperator, TypeOperatorType, TypeReference, TypeReferenceQualifier, TypeResolver,
-    TypeofAdditionExpression, TypeofAwaitExpression, TypeofBitwiseNotExpression,
+    IndexedAccessType, Interface, Literal, MappedType, Module, NamedFunctionParameter, Namespace,
+    Object, Path, PatternFunctionParameter, PredicateReturnType, ResolvedTypeId, ReturnType,
+    ScopeId, Tuple, TupleElementType, TypeData, TypeInstance, TypeMember, TypeMemberAccessibility,
+    TypeMemberKind, TypeOperator, TypeOperatorType, TypeReference, TypeReferenceQualifier,
+    TypeResolver, TypeofAdditionExpression, TypeofAwaitExpression, TypeofBitwiseNotExpression,
     TypeofCallExpression, TypeofConditionalExpression, TypeofDestructureExpression,
     TypeofExpression, TypeofIndexExpression, TypeofIterableValueOfExpression,
     TypeofLogicalAndExpression, TypeofLogicalOrExpression, TypeofNewExpression,
@@ -703,10 +703,23 @@ impl TypeData {
                 // TODO: Handle import types (`import("./module").T`).
                 Self::unknown()
             }
-            AnyTsType::TsIndexedAccessType(_) => {
-                // TODO: Handle type indexing (`T[U]`).
-                Self::unknown()
-            }
+            AnyTsType::TsIndexedAccessType(ty) => match (ty.object_type(), ty.index_type()) {
+                (Ok(object_type), Ok(index_type)) => {
+                    Self::IndexedAccessType(Box::new(IndexedAccessType {
+                        object_type: TypeReference::from_any_ts_type(
+                            resolver,
+                            scope_id,
+                            &object_type,
+                        ),
+                        index_type: TypeReference::from_any_ts_type(
+                            resolver,
+                            scope_id,
+                            &index_type,
+                        ),
+                    }))
+                }
+                _ => Self::unknown(),
+            },
             AnyTsType::TsInferType(_) => {
                 // TODO: Handle `infer T` syntax.
                 Self::unknown()
@@ -718,10 +731,31 @@ impl TypeData {
                     .map(|ty| TypeReference::from_any_ts_type(resolver, scope_id, &ty))
                     .collect(),
             ),
-            AnyTsType::TsMappedType(_) => {
-                // TODO: Handle mapped types (`type T<U> = { [K in keyof U]: V }`).
-                Self::unknown()
-            }
+            AnyTsType::TsMappedType(ty) => match (ty.property_name(), ty.keys_type()) {
+                (Ok(property_name), Ok(keys_type)) => {
+                    let name_type = ty.as_clause().and_then(|clause| {
+                        clause
+                            .ty()
+                            .ok()
+                            .map(|t| TypeReference::from_any_ts_type(resolver, scope_id, &t))
+                    });
+                    let value_type = ty
+                        .mapped_type()
+                        .and_then(|annot| annot.ty().ok())
+                        .map(|t| TypeReference::from_any_ts_type(resolver, scope_id, &t))
+                        .unwrap_or_default();
+                    Self::MappedType(Box::new(MappedType {
+                        property_name: property_name.ident_token().map_or_else(
+                            |_| Text::new_static(""),
+                            |token| Text::new_token(token.token_text_trimmed()),
+                        ),
+                        keys_type: TypeReference::from_any_ts_type(resolver, scope_id, &keys_type),
+                        name_type,
+                        value_type,
+                    }))
+                }
+                _ => Self::unknown(),
+            },
             AnyTsType::TsNeverType(_) => Self::NeverKeyword,
             AnyTsType::TsNonPrimitiveType(_) => Self::ObjectKeyword,
             AnyTsType::TsNullLiteralType(_) => Self::Null,
@@ -753,7 +787,7 @@ impl TypeData {
             AnyTsType::TsStringType(_) => Self::reference(GLOBAL_STRING_ID),
             AnyTsType::TsSymbolType(_) => Self::Symbol,
             AnyTsType::TsTemplateLiteralType(ty) => {
-                Self::Literal(Box::new(Literal::Template(ty.to_string().into())))
+                Self::Literal(Box::new(Literal::Template(ty.to_trimmed_text())))
             }
             AnyTsType::TsThisType(_) => Self::ThisKeyword,
             AnyTsType::TsTupleType(ty) => {

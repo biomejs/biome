@@ -189,6 +189,8 @@ impl ConditionalType {
             }),
             TypeData::Null | TypeData::Undefined | TypeData::VoidKeyword => Some(Self::Nullish),
             TypeData::Generic(_)
+            | TypeData::IndexedAccessType(_)
+            | TypeData::MappedType(_)
             | TypeData::TypeOperator(_)
             | TypeData::TypeofExpression(_)
             | TypeData::TypeofType(_)

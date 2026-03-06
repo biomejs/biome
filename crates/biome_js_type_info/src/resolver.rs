@@ -752,6 +752,31 @@ impl Resolvable for TypeReference {
             Self::Qualifier(qualifier) => {
                 let resolved_id = resolver.resolve_qualifier(qualifier);
                 match resolved_id {
+                    Some(resolved_id) if qualifier.has_known_type_parameters() => {
+                        // The qualifier was resolved, but it has type parameters
+                        // (e.g., `AsyncActions<Config>`). We need to create an
+                        // InstanceOf that carries the type arguments so they
+                        // are available during flattening (e.g., for mapped types).
+                        let resolved = resolver
+                            .get_by_resolved_id(resolved_id)
+                            .map(|data| data.to_data());
+                        let parameters = resolved.as_ref().and_then(|data| data.type_parameters());
+                        match parameters {
+                            Some(parameters) => {
+                                let instance_id: ResolvedTypeId = resolver.register_and_resolve(
+                                    TypeData::instance_of(TypeInstance {
+                                        ty: resolved_id.into(),
+                                        type_parameters: Self::merge_parameters(
+                                            parameters,
+                                            &qualifier.type_parameters,
+                                        ),
+                                    }),
+                                );
+                                Some(instance_id.into())
+                            }
+                            None => Some(Self::Resolved(resolved_id)),
+                        }
+                    }
                     Some(resolved_id) => Some(Self::Resolved(resolved_id)),
                     None if qualifier.has_known_type_parameters() => Some({
                         // If we can't resolve the qualifier as is, attempt to

@@ -47,6 +47,10 @@ const INDEX_D_TS_CASES: &[(&str, &[u8])] = &[
         "astro_server.mjs",
         include_bytes!("./astro_server.mjs") as &[u8],
     ),
+    (
+        "prisma/library.d.ts",
+        include_bytes!("./prisma_library.d.ts") as &[u8],
+    ),
 ];
 
 fn index_d_ts_cases() -> impl Iterator<Item = &'static str> {

@@ -1,0 +1,39 @@
+---
+source: crates/biome_js_type_info/tests/utils.rs
+expression: content
+---
+## Input
+
+```ts
+interface Things {
+	thing: string;
+	other: number;
+}
+
+type T = Things["thing"];
+
+```
+
+## Result
+
+```
+string
+```
+
+## Registered types
+
+```
+Thin TypeId(0) => interface "Things" {
+  extends: []
+  type_args: []
+  members: ["thing": string, "other": number]
+}
+
+Thin TypeId(1) => interface "Things" {
+  extends: []
+  type_args: []
+  members: ["thing": string, "other": number]
+}
+
+Thin TypeId(2) => string: thing
+```
