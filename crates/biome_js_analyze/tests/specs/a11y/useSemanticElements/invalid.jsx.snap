@@ -505,25 +505,6 @@ invalid.jsx:31:10 lint/a11y/useSemanticElements ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:32:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The elements with this role can be changed to the following elements:
-    <div>
-    <span>
-  
-    30 │     <div role="term" ></div>
-    31 │     <div role="textbox" ></div>
-  > 32 │     <div role="generic" ></div>
-       │          ^^^^^^^^^^^^^^
-    33 │     <div role="caption" ></div>
-    34 │     <div role="main" ></div>
-  
-  i For examples and more information, see WAI-ARIA Roles
-  
-
-```
-
-```
 invalid.jsx:33:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The elements with this role can be changed to the following elements:

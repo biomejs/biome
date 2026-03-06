@@ -49,6 +49,20 @@ export const Component2 = () => (
 	</Card>
 </>
 
+{/* Semantic elements with a matching role should not be flagged (issue #5212) */}
+<>
+	<nav role="navigation"></nav>
+	<footer role="contentinfo"></footer>
+	<aside role="complementary"></aside>
+	<article role="article"></article>
+	<button role="button"></button>
+	<form role="form"></form>
+	<main role="main"></main>
+	<table role="table"></table>
+	<hr role="separator" />
+</>
+
+
 ```
 
 _Note: The parser emitted 4 diagnostics which are not shown here._
