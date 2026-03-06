@@ -3596,7 +3596,14 @@ fn check_tab_alignment_in_diff_output() {
     let file_path = Utf8Path::new("file.jsonc");
     fs.insert(
         file_path.into(),
-        "{\n\t\"$schema\": \"https://biomejs.dev/schemas/1.9.4/schema.json\",\n\t\"json\": {\n\t\t\"formatter\": { \"trailingCommas\": \"all\" }\n\t}\n}\n".as_bytes(),
+        r#"{
+	"$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+	"json": {
+		"formatter": { "trailingCommas": "all" }
+	}
+}
+"#
+        .as_bytes(),
     );
 
     let (fs, result) = run_cli(
