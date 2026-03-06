@@ -469,7 +469,7 @@ fn parse_embedded_nodes(
                             &opening.attributes(),
                             html_element.range(),
                             cache,
-                            &tailwind_attr_names,
+                            tailwind_attr_names,
                         ) {
                             nodes.push((content.into(), tw_source));
                         }
@@ -479,7 +479,7 @@ fn parse_embedded_nodes(
                         &self_closing.attributes(),
                         self_closing.range(),
                         cache,
-                        &tailwind_attr_names,
+                        tailwind_attr_names,
                     ) {
                         nodes.push((content.into(), tw_source));
                     }
@@ -586,7 +586,7 @@ fn parse_embedded_nodes(
                             &opening.attributes(),
                             html_element.range(),
                             cache,
-                            &tailwind_attr_names,
+                            tailwind_attr_names,
                         ) {
                             nodes.push((content.into(), tw_source));
                         }
@@ -596,7 +596,7 @@ fn parse_embedded_nodes(
                         &self_closing.attributes(),
                         self_closing.range(),
                         cache,
-                        &tailwind_attr_names,
+                        tailwind_attr_names,
                     ) {
                         nodes.push((content.into(), tw_source));
                     }
@@ -664,7 +664,7 @@ fn parse_embedded_nodes(
                             &opening.attributes(),
                             html_element.range(),
                             cache,
-                            &tailwind_attr_names,
+                            tailwind_attr_names,
                         ) {
                             nodes.push((content.into(), tw_source));
                         }
@@ -674,7 +674,7 @@ fn parse_embedded_nodes(
                         &self_closing.attributes(),
                         self_closing.range(),
                         cache,
-                        &tailwind_attr_names,
+                        tailwind_attr_names,
                     ) {
                         nodes.push((content.into(), tw_source));
                     }
@@ -810,7 +810,7 @@ fn parse_embedded_nodes(
                             &opening.attributes(),
                             html_element.range(),
                             cache,
-                            &tailwind_attr_names,
+                            tailwind_attr_names,
                         ) {
                             nodes.push((content.into(), tw_source));
                         }
@@ -820,7 +820,7 @@ fn parse_embedded_nodes(
                         &self_closing.attributes(),
                         self_closing.range(),
                         cache,
-                        &tailwind_attr_names,
+                        tailwind_attr_names,
                     ) {
                         nodes.push((content.into(), tw_source));
                     }
