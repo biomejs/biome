@@ -1,8 +1,8 @@
 use biome_analyze::utils::{is_separated_list_sorted_by, sorted_separated_list_by};
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsBinding, AnyJsImportAssertionEntry, JsExportNamedFromSpecifierList, JsImportAssertion,
-    JsNamedImportSpecifiers, T, inner_string_text,
+    AnyJsBinding, AnyJsImportAssertionEntry, JsExportNamedFromSpecifierList,
+    JsExportNamedSpecifierList, JsImportAssertion, JsNamedImportSpecifiers, T, inner_string_text,
 };
 use biome_rowan::{AstNode, AstSeparatedElement, AstSeparatedList, TriviaPieceKind};
 use biome_rule_options::organize_imports::SortOrder;
@@ -12,15 +12,19 @@ use std::cmp::Ordering;
 pub enum JsNamedSpecifiers {
     JsNamedImportSpecifiers(JsNamedImportSpecifiers),
     JsExportNamedFromSpecifierList(JsExportNamedFromSpecifierList),
+    JsExportNamedSpecifierList(JsExportNamedSpecifierList),
 }
 impl JsNamedSpecifiers {
     pub fn are_sorted(&self, sort_order: SortOrder) -> bool {
         match self {
-            Self::JsNamedImportSpecifiers(specifeirs) => {
-                are_import_specifiers_sorted(specifeirs, sort_order)
+            Self::JsNamedImportSpecifiers(specifiers) => {
+                are_import_specifiers_sorted(specifiers, sort_order)
             }
-            Self::JsExportNamedFromSpecifierList(specifeirs) => {
-                are_export_specifiers_sorted(specifeirs, sort_order)
+            Self::JsExportNamedFromSpecifierList(specifiers) => {
+                are_export_from_specifiers_sorted(specifiers, sort_order)
+            }
+            Self::JsExportNamedSpecifierList(specifiers) => {
+                are_export_specifiers_sorted(specifiers, sort_order)
             }
         }
         // Assume the import is already sorted if there are any bogus nodes, otherwise the `--write`
@@ -111,7 +115,7 @@ pub fn merge_import_specifiers(
     sort_import_specifiers(named_specifiers1.with_specifiers(new_list), sort_order)
 }
 
-pub fn are_export_specifiers_sorted(
+pub fn are_export_from_specifiers_sorted(
     specifiers: &JsExportNamedFromSpecifierList,
     sort_order: SortOrder,
 ) -> Option<bool> {
@@ -131,7 +135,7 @@ pub fn are_export_specifiers_sorted(
     .ok()
 }
 
-pub fn sort_export_specifiers(
+pub fn sort_export_from_specifiers(
     named_specifiers: &JsExportNamedFromSpecifierList,
     sort_order: SortOrder,
 ) -> Option<JsExportNamedFromSpecifierList> {
@@ -152,7 +156,7 @@ pub fn sort_export_specifiers(
     Some(new_list)
 }
 
-pub fn merge_export_specifiers(
+pub fn merge_export_from_specifiers(
     specifiers1: &JsExportNamedFromSpecifierList,
     specifiers2: &JsExportNamedFromSpecifierList,
     sort_order: SortOrder,
@@ -185,10 +189,51 @@ pub fn merge_export_specifiers(
             separators.push(separator);
         }
     }
-    sort_export_specifiers(
+    sort_export_from_specifiers(
         &make::js_export_named_from_specifier_list(nodes, separators),
         sort_order,
     )
+}
+
+pub fn are_export_specifiers_sorted(
+    specifiers: &JsExportNamedSpecifierList,
+    sort_order: SortOrder,
+) -> Option<bool> {
+    let comparator = get_comparator(sort_order);
+
+    is_separated_list_sorted_by(
+        specifiers,
+        |node| {
+            node.local_name()
+                .ok()?
+                .name()
+                .ok()
+                .map(ComparableToken::new)
+        },
+        comparator,
+    )
+    .ok()
+}
+
+pub fn sort_export_specifiers(
+    named_specifiers: &JsExportNamedSpecifierList,
+    sort_order: SortOrder,
+) -> Option<JsExportNamedSpecifierList> {
+    let comparator = get_comparator(sort_order);
+    let new_list = sorted_separated_list_by(
+        named_specifiers,
+        |node| {
+            node.local_name()
+                .ok()?
+                .name()
+                .ok()
+                .map(ComparableToken::new)
+        },
+        || make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+        comparator,
+    )
+    .ok()?;
+    Some(new_list)
 }
 
 pub fn are_import_attributes_sorted(
