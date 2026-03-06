@@ -706,7 +706,7 @@ pub struct ConfigurationOutsideProject;
 
 #[cfg(test)]
 mod test {
-    use crate::diagnostics::{CantReadFile, FileIgnored, NotFound, SourceFileNotSupported};
+    use crate::diagnostics::{CantReadFile, FileIgnored, SourceFileNotSupported};
     use crate::file_handlers::DocumentFileSource;
     use crate::{TransportError, WorkspaceError};
     use biome_diagnostics::{DiagnosticExt, Error, print_diagnostic_to_string};
