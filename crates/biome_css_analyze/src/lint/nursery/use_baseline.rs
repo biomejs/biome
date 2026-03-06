@@ -30,7 +30,7 @@ declare_lint_rule! {
     /// - **Newly available**: Available in all core browsers for less than 30 months.
     /// - **Widely available**: Available in all core browsers for at least 30 months.
     ///
-    /// By default, the rule warns on anything that is not Baseline **widely available**.
+    /// By default, the rule reports on anything that is not Baseline **widely available**.
     ///
     /// Code inside `@supports` blocks is exempt: if you feature-detect a capability before
     /// using it, the rule does not flag it.
