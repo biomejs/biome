@@ -310,8 +310,10 @@ fn is_in_overload_signature(binding: &Binding) -> bool {
         Some(
             AnyJsParameterParentFunction::TsConstructorSignatureClassMember(_)
                 | AnyJsParameterParentFunction::TsMethodSignatureClassMember(_)
+                | AnyJsParameterParentFunction::TsSetterSignatureClassMember(_)
                 | AnyJsParameterParentFunction::TsDeclareFunctionDeclaration(_)
                 | AnyJsParameterParentFunction::TsDeclareFunctionExportDefaultDeclaration(_)
         )
+    )
     )
 }
