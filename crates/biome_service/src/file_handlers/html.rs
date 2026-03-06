@@ -421,7 +421,7 @@ fn parse_embedded_nodes(
     let tailwind_attr_names = &settings
         .as_ref()
         .tailwind_class_detection_config()
-        .attribute_names;
+        .attributes;
 
     match file_source.variant() {
         HtmlVariant::Standard(text_expression) => {

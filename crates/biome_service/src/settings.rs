@@ -687,17 +687,35 @@ pub struct OverrideFilesSettings {
 pub struct TailwindClassDetectionConfig {
     /// HTML/JSX attribute names treated as Tailwind class lists.
     /// Default: `["class", "className"]`
-    pub attribute_names: Vec<String>,
+    pub attributes: Vec<String>,
     /// JS function names whose string arguments are treated as Tailwind class lists.
-    /// Default: `["cn", "twMerge", "clsx", "tw"]`
-    pub function_names: Vec<String>,
+    /// Default: `["clsx", "tw", "twMerge", "twJoin", "cva", "tv", "cn", "cc", "cnb", "ctl"]`
+    pub functions: Vec<String>,
 }
 
 impl Default for TailwindClassDetectionConfig {
     fn default() -> Self {
         Self {
-            attribute_names: vec!["class".into(), "className".into()],
-            function_names: vec!["cn".into(), "twMerge".into(), "clsx".into(), "tw".into()],
+            attributes: vec!["class".into(), "className".into()],
+            functions: vec![
+                "clsx".into(),
+                "tw".into(),
+                // tailwind merge
+                "twMerge".into(),
+                "twJoin".into(),
+                // class variance authority
+                "cva".into(),
+                // tailwind variants
+                "tv".into(),
+                // shadcn
+                "cn".into(),
+                // classcat
+                "cc".into(),
+                // class list builder
+                "cnb".into(),
+                // classnames template literals
+                "ctl".into(),
+            ],
         }
     }
 }

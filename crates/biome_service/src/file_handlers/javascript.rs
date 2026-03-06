@@ -615,8 +615,8 @@ fn parse_embedded_nodes(
 
     // Extract Tailwind class strings from JSX attributes and function calls
     let config = settings.as_ref().tailwind_class_detection_config();
-    let attr_names = &config.attribute_names;
-    let fn_names = &config.function_names;
+    let attr_names = &config.attributes;
+    let fn_names = &config.functions;
 
     for node in js_root.syntax().descendants() {
         // JSX opening element: <div className="...">
