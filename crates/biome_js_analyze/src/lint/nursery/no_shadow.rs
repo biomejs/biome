@@ -5,10 +5,9 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_semantic::{Binding, SemanticModel};
 use biome_js_syntax::{
-    binding_ext::AnyJsBindingDeclaration,
     JsClassExpression, JsFormalParameter, JsFunctionExpression, JsIdentifierBinding,
-    JsParameterList, JsRestParameter, JsVariableDeclarator, TsIdentifierBinding,
-    TsPropertySignatureTypeMember, TsTypeAliasDeclaration, TsTypeParameter, TsTypeParameterName,
+    JsParameterList, JsRestParameter, TsIdentifierBinding, TsPropertySignatureTypeMember,
+    TsTypeParameter, TsTypeParameterName, binding_ext::AnyJsBindingDeclaration,
     binding_ext::AnyJsParameterParentFunction,
 };
 use biome_rowan::{AstNode, SyntaxNodeCast, TokenText, declare_node_union};
