@@ -48,6 +48,7 @@ pub type HtmlFormatterEnabled = Bool<false>; // Keep it disabled by default whil
 pub type HtmlLinterEnabled = Bool<true>;
 pub type HtmlAssistEnabled = Bool<true>;
 pub type HtmlParseInterpolation = Bool<false>;
+pub type HtmlParseVue = Bool<false>;
 
 /// Options that changes how the HTML parser behaves
 #[derive(
@@ -58,6 +59,13 @@ pub type HtmlParseInterpolation = Bool<false>;
 pub struct HtmlParserConfiguration {
     /// Enables the parsing of double text expressions such as `{{ expression }}` inside `.html` files
     pub interpolation: Option<HtmlParseInterpolation>,
+
+    /// Enables parsing of Vue syntax (v-if, v-bind, etc.) in `.html` files.
+    ///
+    /// Biome will already automatically enable Vue parsing in `.vue` files, so you probably don't want
+    /// to enable this option. This will cause the parser to treat **all** HTML files (including `.svelte`
+    /// and `.astro` files) as if they were Vue files.
+    pub vue: Option<HtmlParseVue>,
 }
 
 /// Options that changes how the HTML formatter behaves

@@ -24,7 +24,8 @@ use crate::{
 use biome_analyze::{AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never};
 use biome_configuration::html::{
     HtmlAssistConfiguration, HtmlAssistEnabled, HtmlFormatterConfiguration, HtmlFormatterEnabled,
-    HtmlLinterConfiguration, HtmlLinterEnabled, HtmlParseInterpolation, HtmlParserConfiguration,
+    HtmlLinterConfiguration, HtmlLinterEnabled, HtmlParseInterpolation, HtmlParseVue,
+    HtmlParserConfiguration,
 };
 use biome_css_parser::{CssModulesKind, parse_css_with_offset_and_cache};
 use biome_css_syntax::{
@@ -72,12 +73,14 @@ use tracing::{debug_span, error, instrument, trace_span};
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct HtmlParserSettings {
     pub interpolation: Option<HtmlParseInterpolation>,
+    pub vue: Option<HtmlParseVue>,
 }
 
 impl From<HtmlParserConfiguration> for HtmlParserSettings {
     fn from(configuration: HtmlParserConfiguration) -> Self {
         Self {
             interpolation: configuration.interpolation,
+            vue: configuration.vue,
         }
     }
 }
@@ -325,6 +328,9 @@ impl ServiceLanguage for HtmlLanguage {
         let mut options = HtmlParserOptions::from(&html_file_source);
         if language.interpolation.unwrap_or_default().into() && html_file_source.is_html() {
             options = options.with_double_text_expression();
+        }
+        if language.vue.unwrap_or_default().into() && html_file_source.is_html() {
+            options = options.with_vue();
         }
 
         overrides.apply_override_html_parser_options(path, &mut options);

@@ -1,0 +1,68 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "html": {
+    "linter": {
+      "enabled": true
+    }
+  }
+}
+```
+
+## `file.html`
+
+```html
+<div v-if="show">{{ message }}</div>
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+file.html:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Vue syntax isn't enabled. Is this supposed to be a .vue file?
+  
+  > 1 │ <div v-if="show">{{ message }}</div>
+      │      ^^^^^^^^^^^
+    2 │ 
+  
+  i Remove it or enable the parsing using the html.parser.vue option.
+  
+
+```
+
+```block
+file.html:1:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Text expressions aren't supported.
+  
+  > 1 │ <div v-if="show">{{ message }}</div>
+      │                  ^^^^^^^^^^^^^
+    2 │ 
+  
+  i Remove it or enable the parsing using the html.parser.interpolation option.
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 2 errors.
+```

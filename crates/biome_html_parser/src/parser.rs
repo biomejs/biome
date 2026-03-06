@@ -153,6 +153,10 @@ impl HtmlParserOptions {
         self
     }
 
+    pub fn set_vue(&mut self, value: bool) {
+        self.vue = value;
+    }
+
     pub fn with_svelte(mut self) -> Self {
         self.svelte = true;
         self

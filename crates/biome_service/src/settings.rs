@@ -1879,6 +1879,9 @@ impl OverrideSettingPattern {
         if let Some(interpolation) = html_parser.interpolation {
             options.set_double_text_expression(interpolation.value());
         }
+        if let Some(vue) = html_parser.vue {
+            options.set_vue(vue.value());
+        }
     }
 
     fn apply_overrides_to_css_parser_options(&self, options: &mut CssParserOptions) {
