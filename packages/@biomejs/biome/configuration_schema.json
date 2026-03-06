@@ -3441,6 +3441,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoEmptyObjectKeysConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoEmptyObjectKeysOptions" }
+			]
+		},
+		"NoEmptyObjectKeysOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoEmptyPatternConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5850,6 +5860,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noEmptyObjectKeys": {
+					"description": "Disallow empty keys in JSON objects.\nSee https://biomejs.dev/linter/rules/no-empty-object-keys",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoEmptyObjectKeysConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noEqualsToNull": {
 					"description": "Require the use of === or !== for comparison with null.\nSee https://biomejs.dev/linter/rules/no-equals-to-null",
 					"anyOf": [
@@ -7759,6 +7776,15 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoEmptyInterfaceOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoEmptyObjectKeysOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoEmptyObjectKeysOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

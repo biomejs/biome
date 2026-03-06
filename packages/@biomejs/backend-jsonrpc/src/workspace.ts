@@ -2111,6 +2111,11 @@ See https://biomejs.dev/linter/rules/no-duplicated-spread-props
 	 */
 	noDuplicatedSpreadProps?: NoDuplicatedSpreadPropsConfiguration;
 	/**
+	* Disallow empty keys in JSON objects.
+See https://biomejs.dev/linter/rules/no-empty-object-keys 
+	 */
+	noEmptyObjectKeys?: NoEmptyObjectKeysConfiguration;
+	/**
 	* Require the use of === or !== for comparison with null.
 See https://biomejs.dev/linter/rules/no-equals-to-null 
 	 */
@@ -4102,6 +4107,9 @@ export type NoDuplicateVariableNamesConfiguration =
 export type NoDuplicatedSpreadPropsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicatedSpreadPropsOptions;
+export type NoEmptyObjectKeysConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoEmptyObjectKeysOptions;
 export type NoEqualsToNullConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoEqualsToNullOptions;
@@ -5743,6 +5751,10 @@ export interface RuleWithNoDuplicatedSpreadPropsOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicatedSpreadPropsOptions;
 }
+export interface RuleWithNoEmptyObjectKeysOptions {
+	level: RulePlainConfiguration;
+	options?: NoEmptyObjectKeysOptions;
+}
 export interface RuleWithNoEqualsToNullOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -7323,6 +7335,7 @@ export type NoDuplicateGraphqlOperationNameOptions = {};
 export type NoDuplicateInputFieldNamesOptions = {};
 export type NoDuplicateVariableNamesOptions = {};
 export type NoDuplicatedSpreadPropsOptions = {};
+export type NoEmptyObjectKeysOptions = {};
 export type NoEqualsToNullOptions = {};
 export interface NoExcessiveClassesPerFileOptions {
 	/**
@@ -8363,6 +8376,7 @@ export type Category =
 	| "lint/nursery/noDuplicateInputFieldNames"
 	| "lint/nursery/noDuplicateVariableNames"
 	| "lint/nursery/noDuplicatedSpreadProps"
+	| "lint/nursery/noEmptyObjectKeys"
 	| "lint/nursery/noEqualsToNull"
 	| "lint/nursery/noExcessiveClassesPerFile"
 	| "lint/nursery/noExcessiveLinesPerFile"
@@ -8430,14 +8444,15 @@ export type Category =
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useLoneAnonymousOperation"
 	| "lint/nursery/useLoneExecutableDefinition"
-	| "lint/nursery/useNullishCoalescing"
 	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useNamedCaptureGroup"
+	| "lint/nursery/useNullishCoalescing"
 	| "lint/nursery/usePlaywrightValidDescribeCallback"
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
 	| "lint/nursery/useRegexpExec"
 	| "lint/nursery/useRequiredScripts"
+	| "lint/nursery/useScopedStyles"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSpread"
 	| "lint/nursery/useUnicodeRegex"
@@ -8452,7 +8467,6 @@ export type Category =
 	| "lint/nursery/useVueDefineMacrosOrder"
 	| "lint/nursery/useVueHyphenatedAttributes"
 	| "lint/nursery/useVueMultiWordComponentNames"
-	| "lint/nursery/useScopedStyles"
 	| "lint/nursery/useVueVForKey"
 	| "lint/nursery/useVueValidTemplateRoot"
 	| "lint/nursery/useVueValidVBind"

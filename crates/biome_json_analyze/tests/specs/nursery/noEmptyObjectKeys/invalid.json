@@ -1,0 +1,6 @@
+{
+  "": "another value",
+  " ": "space as key",
+  "\t": "tab as key",
+  "\n": "newline as key"
+}
