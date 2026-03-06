@@ -200,8 +200,5 @@ fn has_type_image_attribute(element: &AnyHtmlElement) -> bool {
 
 /// Check if the element has a valid alt attribute
 fn has_valid_alt_text(element: &AnyHtmlElement) -> bool {
-    // The alt attribute exists - even an empty alt="" is valid for decorative images
-    // If there's no initializer, it's treated as an empty string (valid)
-    // If there's an initializer with a value, any value is valid
-    element.find_attribute_by_name("alt").is_some()
+    element.find_attribute_or_vue_binding("alt").is_some()
 }
