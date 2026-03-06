@@ -725,6 +725,7 @@ impl WorkspaceServer {
         Ok(embedded_nodes)
     }
 
+    #[expect(clippy::too_many_arguments)]
     fn fix_file_with_embeds<'a>(
         &self,
         mut parse: AnyParse,
