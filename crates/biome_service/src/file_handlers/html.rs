@@ -418,11 +418,10 @@ fn parse_embedded_nodes(
         return ParseEmbedResult::default();
     };
 
-    let tailwind_attr_names = settings
+    let tailwind_attr_names = &settings
         .as_ref()
         .tailwind_class_detection_config()
-        .attribute_names
-        .clone();
+        .attribute_names;
 
     match file_source.variant() {
         HtmlVariant::Standard(text_expression) => {
@@ -920,9 +919,10 @@ fn parse_embedded_nodes(
                         biome_path,
                         settings,
                         file_source,
-                    ) {
-                        nodes.push((content.into(), doc_source));
-                    }
+                    )
+                {
+                    nodes.push((content.into(), doc_source));
+                }
 
                 if let Some(attribute) = HtmlAttribute::cast_ref(&element)
                     && let Some(initializer) = attribute.initializer()
@@ -931,9 +931,9 @@ fn parse_embedded_nodes(
                     && let Ok(expression) = text_expression.expression()
                     && let Some((content, doc_source)) =
                         parse_text_expression(expression, cache, biome_path, settings, file_source)
-                    {
-                        nodes.push((content.into(), doc_source));
-                    }
+                {
+                    nodes.push((content.into(), doc_source));
+                }
             }
         }
     }

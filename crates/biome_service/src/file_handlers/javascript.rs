@@ -615,13 +615,13 @@ fn parse_embedded_nodes(
 
     // Extract Tailwind class strings from JSX attributes and function calls
     let config = settings.as_ref().tailwind_class_detection_config();
-    let attr_names = config.attribute_names.clone();
-    let fn_names = config.function_names.clone();
+    let attr_names = &config.attribute_names;
+    let fn_names = &config.function_names;
 
     for node in js_root.syntax().descendants() {
         // JSX opening element: <div className="...">
         if let Some(opening) = JsxOpeningElement::cast_ref(&node) {
-            for attr_name in &attr_names {
+            for attr_name in attr_names {
                 if let Some(snippets) = extract_tailwind_from_jsx_attribute(
                     opening.find_attribute_by_name(attr_name),
                     cache,
@@ -632,7 +632,7 @@ fn parse_embedded_nodes(
         }
         // JSX self-closing element: <div className="..." />
         else if let Some(self_closing) = JsxSelfClosingElement::cast_ref(&node) {
-            for attr_name in &attr_names {
+            for attr_name in attr_names {
                 if let Some(snippets) = extract_tailwind_from_jsx_attribute(
                     self_closing.find_attribute_by_name(attr_name),
                     cache,
@@ -643,7 +643,7 @@ fn parse_embedded_nodes(
         }
         // Function call: cn("...", "...") / twMerge("...") / clsx("...") / tw("...")
         else if let Some(call_expr) = JsCallExpression::cast_ref(&node) {
-            for fn_name in &fn_names {
+            for fn_name in fn_names {
                 if is_tailwind_function_call(&call_expr, fn_name) {
                     if let Ok(args) = call_expr.arguments() {
                         for arg in args.args() {
