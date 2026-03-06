@@ -19,14 +19,14 @@ mod language {
 /// `cargo insta review` or `cargo insta accept`
 ///
 /// The input and the expected output are stored as dedicated files in the `tests/specs` directory where
-/// the input file name is `{spec_name}.css` and the output file name is `{spec_name}.css.snap`.
+/// the input file name is `{spec_name}.md` and the output file name is `{spec_name}.md.snap`.
 ///
 /// Specs can be grouped in directories by specifying the directory name in the spec name. Examples:
 ///
 /// # Examples
 ///
-/// * `css/null` -> input: `tests/specs/css/null.css`, expected output: `tests/specs/css/null.css.snap`
-/// * `null` -> input: `tests/specs/null.css`, expected output: `tests/specs/null.css.snap`
+/// * `markdown/header` -> input: `tests/specs/markdown/header.md`, expected output: `tests/specs/markdown/header.md.snap`
+/// * `header` -> input: `tests/specs/header.md`, expected output: `tests/specs/header.md.snap`
 pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _file_type: &str) {
     let root_path = Utf8Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/specs/"));
     let settings = |project_key| {
