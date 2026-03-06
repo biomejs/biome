@@ -268,14 +268,15 @@ Available tags:
 ```rust
 // Good - shows code frame
 CodeFrameAdvice {
-    location: node.range(),
+    path: "file.js",
+    span: node.text_range(),
     source_code: source,
-    annotation: markup! { "This expression is always truthy" }
 }
 
 // Less helpful - just text
 LogAdvice {
-    message: markup! { "The expression at line 5 is always truthy" }
+    category: LogCategory::Info,
+    text: markup! { "The expression at line 5 is always truthy" },
 }
 ```
 
@@ -283,13 +284,13 @@ LogAdvice {
 ```rust
 // Good - shows exact change
 DiffAdvice {
-    old: "var x = 1;",
-    new: "const x = 1;",
+    diff: text_edit,  // AsRef<TextEdit>
 }
 
 // Less helpful - describes change
 LogAdvice {
-    message: markup! { "Change 'var' to 'const'" }
+    category: LogCategory::Info,
+    text: markup! { "Change 'var' to 'const'" },
 }
 ```
 

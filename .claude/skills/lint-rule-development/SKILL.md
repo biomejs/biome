@@ -249,7 +249,7 @@ For the full reference (merge strategies, design guidelines, common patterns), s
 
 **Quick workflow:**
 
-1. Define the options type in `biome_rule_options/src/<snake_case_rule_name>.rs`:
+**Step 1.** Define the options type in `biome_rule_options/src/<snake_case_rule_name>.rs`:
 
 ```rust
 use biome_deserialize_macros::{Deserializable, Merge};
@@ -264,7 +264,7 @@ pub struct UseMyRuleNameOptions {
 }
 ```
 
-2. Wire it into the rule:
+**Step 2.** Wire it into the rule:
 
 ```rust
 use biome_rule_options::use_my_rule_name::UseMyRuleNameOptions;
@@ -280,9 +280,9 @@ impl Rule for UseMyRuleName {
 }
 ```
 
-3. Test with `options.json` in the test directory (see [references/OPTIONS.md](references/OPTIONS.md) for examples).
+**Step 3.** Test with `options.json` in the test directory (see [references/OPTIONS.md](references/OPTIONS.md) for examples).
 
-4. Run codegen: `just gen-rules && just gen-configuration`
+**Step 4.** Run codegen: `just gen-rules && just gen-configuration`
 
 **Key rules:**
 - All fields must be `Option<T>` for config merging to work
