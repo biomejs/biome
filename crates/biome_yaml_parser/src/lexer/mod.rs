@@ -63,11 +63,15 @@ impl<'src> YamlLexer<'src> {
             c if is_space(c) => self.consume_whitespace_token().into(),
             b'#' => self.consume_comment().into(),
             b'.' if self.is_at_doc_end() => self.consume_doc_end(),
-            current if maybe_at_mapping_start(current, self.peek_byte()) => {
-                self.consume_potential_mapping_start(current)
-            }
-            // ':', '?', '-' can be a valid plain token start
-            b'?' | b':' => self.consume_mapping_key(current),
+            b'!' | b'&' => self.consume_block_properties(),
+            current if maybe_at_mapping_start(current, self.peek_byte()) => self
+                .consume_potential_mapping_start(
+                    current,
+                    LinkedList::new(),
+                    self.current_coordinate,
+                ),
+            // '?', '-' can be a valid plain token start
+            b'?' => self.consume_explicit_mapping_key(current),
             b'-' => self.consume_sequence_entry(),
             b'|' | b'>' => self.consume_block_scalar(current),
             _ => self.consume_unexpected_token().into(),
@@ -97,11 +101,7 @@ impl<'src> YamlLexer<'src> {
         }
     }
 
-    /// Consume a known mapping key, indicated by either '?' or ':'.
-    /// '?' signifies an explicit mapping key, while ':' represents an empty one.
-    /// For example, `: abc` is a valid yaml mapping, which is equivalent
-    /// to `{null: abc}`
-    fn consume_mapping_key(&mut self, current: u8) -> LinkedList<LexToken> {
+    fn consume_explicit_mapping_key(&mut self, current: u8) -> LinkedList<LexToken> {
         debug_assert!(matches!(current, b'?' | b':'));
         let indicator = if current == b'?' {
             self.consume_byte_as_token(T![?])
@@ -125,21 +125,32 @@ impl<'src> YamlLexer<'src> {
     }
 
     /// Consume and disambiguate a YAML value to determine whether it's a YAML block map or just a
-    /// YAML flow value
-    fn consume_potential_mapping_start(&mut self, current: u8) -> LinkedList<LexToken> {
+    /// YAML flow value.
+    fn consume_potential_mapping_start(
+        &mut self,
+        current: u8,
+        properties: LinkedList<LexToken>,
+        start_coordinate: TextCoordinate,
+    ) -> LinkedList<LexToken> {
         debug_assert!(maybe_at_mapping_start(current, self.peek_byte()));
 
-        let start = self.current_coordinate;
-        let mut tokens = self.consume_potential_mapping_key(current);
-        if self.scopes.last().is_none_or(|scope| scope.indent(start)) {
+        let mut tokens = properties;
+        let mut potential_mapping_keys = self.consume_potential_mapping_key(current);
+        tokens.append(&mut potential_mapping_keys);
+        if self
+            .scopes
+            .last()
+            .is_none_or(|scope| scope.indent(start_coordinate))
+        {
             if self.is_at_mapping_indicator() {
                 let indicator = self.consume_byte_as_token(T![:]);
-                tokens.push_front(LexToken::pseudo(MAPPING_START, start));
+                tokens.push_front(LexToken::pseudo(MAPPING_START, start_coordinate));
                 tokens.push_back(indicator);
-                self.scopes.push(BlockScope::new_mapping_scope(start));
+                self.scopes
+                    .push(BlockScope::new_mapping_scope(start_coordinate));
             } else {
                 // Just a normal flow value
-                tokens.push_front(LexToken::pseudo(FLOW_START, start));
+                tokens.push_front(LexToken::pseudo(FLOW_START, start_coordinate));
                 // Consume any trailing trivia remaining before closing the flow, as we must not
                 // have trailing trivia followed FLOW_END token
                 let mut trivia = self.consume_trivia(true);
@@ -306,8 +317,10 @@ impl<'src> YamlLexer<'src> {
             self.consume_double_quoted_literal().into()
         } else if current == b'\'' {
             self.consume_single_quoted_literal().into()
-        } else {
+        } else if is_start_of_plain(current, self.peek_byte(), false) {
             self.consume_plain_literal(current, false).into()
+        } else {
+            LinkedList::new()
         }
     }
 
@@ -373,6 +386,8 @@ impl<'src> YamlLexer<'src> {
                     self.consume_byte_as_token(T!['}'])
                 }
                 (b',', _) => self.consume_byte_as_token(T![,]),
+                (b'&', _) => self.consume_anchor_property(),
+                (b'!', _) => self.consume_tag_property(),
                 (current, peek) if is_start_of_plain(current, peek, true) => {
                     self.consume_plain_literal(current, true)
                 }
@@ -610,6 +625,91 @@ impl<'src> YamlLexer<'src> {
             self.advance(1);
         }
         LexToken::new(COMMENT, start, self.current_coordinate)
+    }
+
+    fn consume_block_properties(&mut self) -> LinkedList<LexToken> {
+        debug_assert!(matches!(self.current_byte(), Some(b'!' | b'&')));
+
+        let start_coordinate = self.current_coordinate;
+        let mut start_column = self.current_coordinate.column;
+        let mut properties = LinkedList::new();
+
+        // Lex all properties until we find a non-property
+        while let Some(current) = self.current_byte() {
+            match current {
+                b'&' => {
+                    start_column = start_column.min(self.current_coordinate.column);
+                    properties.push_back(self.consume_anchor_property());
+                }
+                b'!' => {
+                    start_column = start_column.min(self.current_coordinate.column);
+                    properties.push_back(self.consume_tag_property());
+                }
+                c if is_space(c) => properties.push_back(self.consume_whitespace_token()),
+                b'#' => properties.push_back(self.consume_comment()),
+                c if is_break(c) => {
+                    // Check if we would breach parent scope before consuming trivia
+                    let start = self.current_coordinate;
+                    let mut trivia = self.consume_trivia(false);
+                    if self.breach_parent_scope() {
+                        // Restore position and break
+                        self.current_coordinate = start;
+                        break;
+                    } else {
+                        properties.append(&mut trivia);
+                    }
+                }
+                _ => break,
+            }
+        }
+
+        let Some(current) = self.current_byte() else {
+            // EOF after properties - wrap in flow markers as properties for empty plain node
+            properties.push_front(LexToken::pseudo(FLOW_START, start_coordinate));
+            properties.push_back(LexToken::pseudo(FLOW_END, self.current_coordinate));
+            return properties;
+        };
+
+        if maybe_at_mapping_start(current, self.peek_byte())
+            && self.current_coordinate.column >= start_column
+        {
+            // properties of flow collection/scalar that could be a mapping key
+            self.consume_potential_mapping_start(current, properties, start_coordinate)
+        } else {
+            properties
+        }
+    }
+
+    fn consume_anchor_property(&mut self) -> LexToken {
+        self.assert_byte(b'&');
+        let start = self.current_coordinate;
+        self.advance(1);
+
+        while let Some(c) = self.current_byte() {
+            if is_anchor_char(c) {
+                self.advance(1);
+            } else {
+                break;
+            }
+        }
+
+        LexToken::new(ANCHOR_PROPERTY_LITERAL, start, self.current_coordinate)
+    }
+
+    fn consume_tag_property(&mut self) -> LexToken {
+        self.assert_byte(b'!');
+        let start = self.current_coordinate;
+        self.advance(1);
+
+        while let Some(c) = self.current_byte() {
+            if is_tag_char(c) {
+                self.advance(1);
+            } else {
+                break;
+            }
+        }
+
+        LexToken::new(TAG_PROPERTY_LITERAL, start, self.current_coordinate)
     }
 
     fn consume_unexpected_token(&mut self) -> LexToken {
@@ -950,13 +1050,15 @@ impl TextCoordinate {
     }
 }
 
-// https://yaml.org/spec/1.2.2/#rule-ns-s-block-map-implicit-key
+// https://yaml.org/spec/1.2.2/#rule-ns-l-block-map-implicit-entry
 #[inline]
 fn maybe_at_mapping_start(current: u8, peek: Option<u8>) -> bool {
     is_flow_collection_indicator(current)
         || is_start_of_plain(current, peek, false)
         || current == b'"'
         || current == b'\''
+        // empty key
+        || current == b':'
 }
 
 // https://yaml.org/spec/1.2.2/#rule-ns-plain-first
@@ -1024,4 +1126,16 @@ fn is_indicator(c: u8) -> bool {
 #[inline]
 fn is_flow_collection_indicator(c: u8) -> bool {
     c == b',' || c == b'[' || c == b']' || c == b'{' || c == b'}'
+}
+
+// https://yaml.org/spec/1.2.2/#rule-ns-anchor-char
+#[inline]
+fn is_anchor_char(c: u8) -> bool {
+    is_non_blank_char(c) && !is_flow_collection_indicator(c)
+}
+
+// https://yaml.org/spec/1.2.2/#rule-ns-tag-char
+#[inline]
+fn is_tag_char(c: u8) -> bool {
+    is_non_blank_char(c) && c != b'!' && !is_flow_collection_indicator(c)
 }
