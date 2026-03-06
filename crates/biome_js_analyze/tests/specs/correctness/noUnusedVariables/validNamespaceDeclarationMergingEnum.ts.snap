@@ -1,0 +1,17 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validNamespaceDeclarationMergingEnum.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+export enum Foo {
+    A,
+}
+
+namespace Foo {
+    export type Bar = string;
+}
+
+```

@@ -496,6 +496,7 @@ fn is_namespace_merge_value_declaration(decl: &AnyJsBindingDeclaration) -> bool 
         AnyJsBindingDeclaration::JsVariableDeclarator(_)
             | AnyJsBindingDeclaration::JsFunctionDeclaration(_)
             | AnyJsBindingDeclaration::JsClassDeclaration(_)
+            | AnyJsBindingDeclaration::TsEnumDeclaration(_)
     )
 }
 
