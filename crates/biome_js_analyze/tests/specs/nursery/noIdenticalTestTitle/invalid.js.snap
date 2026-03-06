@@ -1,0 +1,140 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+// Duplicate test titles inside a describe
+describe('foo', () => {
+  it('should do bar', () => {});
+  it('should do bar', () => {});
+});
+
+// Duplicate describe titles inside a describe
+describe('suite', () => {
+  describe('baz', () => {});
+  describe('baz', () => {});
+});
+
+// Top-level duplicate tests (no describe wrapper)
+it('is awesome', () => {});
+it('is awesome', () => {});
+
+// Duplicate no-substitution template literal test titles
+describe('template titles', () => {
+  it(`same title`, () => {});
+  it(`same title`, () => {});
+});
+
+// Duplicate describe titles using no-substitution templates
+describe(`suite alpha`, () => {});
+describe(`suite alpha`, () => {});
+
+```
+
+# Diagnostics
+```
+invalid.js:6:3 lint/nursery/noIdenticalTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate test title found.
+  
+    4 │ describe('foo', () => {
+    5 │   it('should do bar', () => {});
+  > 6 │   it('should do bar', () => {});
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ });
+    8 │ 
+  
+  i A test with this title already exists in the same scope.
+  
+  i Rename the test to give it a unique, descriptive title.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:3 lint/nursery/noIdenticalTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate describe title found.
+  
+    10 │ describe('suite', () => {
+    11 │   describe('baz', () => {});
+  > 12 │   describe('baz', () => {});
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ });
+    14 │ 
+  
+  i A describe with this title already exists in the same scope.
+  
+  i Rename the describe to give it a unique, descriptive title.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:1 lint/nursery/noIdenticalTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate test title found.
+  
+    15 │ // Top-level duplicate tests (no describe wrapper)
+    16 │ it('is awesome', () => {});
+  > 17 │ it('is awesome', () => {});
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ 
+    19 │ // Duplicate no-substitution template literal test titles
+  
+  i A test with this title already exists in the same scope.
+  
+  i Rename the test to give it a unique, descriptive title.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:3 lint/nursery/noIdenticalTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate test title found.
+  
+    20 │ describe('template titles', () => {
+    21 │   it(`same title`, () => {});
+  > 22 │   it(`same title`, () => {});
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ });
+    24 │ 
+  
+  i A test with this title already exists in the same scope.
+  
+  i Rename the test to give it a unique, descriptive title.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:1 lint/nursery/noIdenticalTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate describe title found.
+  
+    25 │ // Duplicate describe titles using no-substitution templates
+    26 │ describe(`suite alpha`, () => {});
+  > 27 │ describe(`suite alpha`, () => {});
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ 
+  
+  i A describe with this title already exists in the same scope.
+  
+  i Rename the describe to give it a unique, descriptive title.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
