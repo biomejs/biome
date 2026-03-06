@@ -4,8 +4,9 @@ use biome_analyze::{
 };
 use biome_console::{MarkupBuf, markup};
 use biome_css_syntax::{
-    AnyCssAtRule, CssAtRule, CssFunction, CssGenericProperty, CssPseudoClassIdentifier,
-    CssPseudoElementIdentifier, CssQueryFeaturePlain, CssSupportsAtRule, CssSupportsNotCondition,
+    AnyCssAtRule, AnyCssGenericComponentValue, CssAtRule, CssFunction, CssGenericProperty,
+    CssPseudoClassIdentifier, CssPseudoElementIdentifier, CssQueryFeaturePlain, CssSupportsAtRule,
+    CssSupportsNotCondition,
 };
 use biome_rowan::{AstNode, TextRange, TokenText, declare_node_union};
 use biome_rule_options::use_baseline::{AvailabilityNamed, AvailabilityTarget, UseBaselineOptions};
@@ -463,8 +464,15 @@ fn check_property(
     // If not in our data, assume it's fine (unknown = not checked)
 
     // Check property values (identifier keywords only)
-    for component in prop.value() {
-        if let Some(value) = component.as_any_css_value()
+    let value_list = prop
+        .value()
+        .ok()
+        .and_then(|v| v.as_css_generic_component_value_list().cloned());
+    let Some(value_list) = value_list else {
+        return None;
+    };
+    for component in value_list {
+        if let AnyCssGenericComponentValue::AnyCssValue(value) = &component
             && let AnyCssValue::CssIdentifier(ident) = value
         {
             let tok = ident.value_token().ok()?;
