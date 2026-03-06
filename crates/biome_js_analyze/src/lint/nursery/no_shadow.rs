@@ -315,5 +315,4 @@ fn is_in_overload_signature(binding: &Binding) -> bool {
                 | AnyJsParameterParentFunction::TsDeclareFunctionExportDefaultDeclaration(_)
         )
     )
-    )
 }
