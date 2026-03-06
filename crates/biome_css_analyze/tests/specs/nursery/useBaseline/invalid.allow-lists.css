@@ -14,4 +14,4 @@ a { width: abs(20% - 100px); }
 @media (inverted-colors: inverted) { a { color: red; } }
 
 /* allowPropertyValues: only clip-path:fill-box is allowed, stroke-box is still flagged */
-@supports (clip-path: fill-box) { a { clip-path: stroke-box; } }
+a { clip-path: stroke-box; }

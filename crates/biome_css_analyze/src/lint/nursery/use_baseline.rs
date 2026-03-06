@@ -467,10 +467,7 @@ fn check_property(
     let value_list = prop
         .value()
         .ok()
-        .and_then(|v| v.as_css_generic_component_value_list().cloned());
-    let Some(value_list) = value_list else {
-        return None;
-    };
+        .and_then(|v| v.as_css_generic_component_value_list().cloned())?;
     for component in value_list {
         if let AnyCssGenericComponentValue::AnyCssValue(value) = &component
             && let AnyCssValue::CssIdentifier(ident) = value

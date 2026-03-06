@@ -20,7 +20,7 @@ a { width: abs(20% - 100px); }
 @media (inverted-colors: inverted) { a { color: red; } }
 
 /* allowPropertyValues: only clip-path:fill-box is allowed, stroke-box is still flagged */
-@supports (clip-path: fill-box) { a { clip-path: stroke-box; } }
+a { clip-path: stroke-box; }
 
 ```
 
@@ -116,6 +116,29 @@ invalid.allow-lists.css:14:9 lint/nursery/useBaseline ━━━━━━━━�
   i See MDN Baseline for more information.
   
   i Check caniuse.com for more information about the feature inverted-colors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.allow-lists.css:17:16 lint/nursery/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i CSS property value clip-path: stroke-box isn't part of the chosen Baseline.
+  
+    16 │ /* allowPropertyValues: only clip-path:fill-box is allowed, stroke-box is still flagged */
+  > 17 │ a { clip-path: stroke-box; }
+       │                ^^^^^^^^^^
+    18 │ 
+  
+  i Using a feature that isn't part of the Baseline can lead to unexpected behavior in older browsers.
+  
+  i Either remove the feature, or use the @supports at-rule to gate the feature behind a browser-specific support condition.
+  
+  i See MDN Baseline for more information.
+  
+  i Check caniuse.com for more information about the value stroke-box for the property clip-path.Check caniuse.com for more information about the property clip-path.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
