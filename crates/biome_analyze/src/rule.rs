@@ -298,11 +298,11 @@ impl<'a> RuleSource<'a> {
             Self::Stylelint(_) => 36,
             Self::EslintTurbo(_) => 37,
             Self::HtmlEslint(_) => 38,
-            Self::EslintE18e(_) => 38,
-            Self::EslintBetterTailwindcss(_) => 39,
-            Self::EslintJson(_) => 40,
-            Self::EslintMarkdown(_) => 41,
-            Self::EslintYml(_) => 42,
+            Self::EslintE18e(_) => 39,
+            Self::EslintBetterTailwindcss(_) => 40,
+            Self::EslintJson(_) => 41,
+            Self::EslintMarkdown(_) => 42,
+            Self::EslintYml(_) => 43,
         }
     }
 
