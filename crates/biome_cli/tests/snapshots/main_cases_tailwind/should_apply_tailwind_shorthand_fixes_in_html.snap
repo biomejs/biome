@@ -1,6 +1,5 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-assertion_line: 520
 expression: redactor(content)
 ---
 ## `biome.json`
@@ -27,7 +26,7 @@ expression: redactor(content)
 ## `file.html`
 
 ```html
-<div class="mx-2"></div>\n
+<div class="mx-2"></div>
 ```
 
 # Emitted Messages

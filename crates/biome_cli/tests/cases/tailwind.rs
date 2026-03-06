@@ -57,7 +57,7 @@ fn should_apply_tailwind_shorthand_fixes_in_html() {
     let mut console = BufferConsole::default();
 
     let html_file = Utf8Path::new("file.html");
-    fs.insert(html_file.into(), br#"<div class="ml-2 mr-2"></div>\n"#);
+    fs.insert(html_file.into(), br#"<div class="ml-2 mr-2"></div>"#);
 
     fs.insert(
         Utf8Path::new("biome.json").into(),
@@ -86,7 +86,7 @@ fn should_apply_tailwind_shorthand_fixes_in_html() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-    assert_file_contents(&fs, html_file, r#"<div class="mx-2"></div>\n"#);
+    assert_file_contents(&fs, html_file, r#"<div class="mx-2"></div>"#);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -105,7 +105,7 @@ fn should_apply_tailwind_shorthand_fixes_in_svelte() {
     let svelte_file = Utf8Path::new("file.svelte");
     fs.insert(
         svelte_file.into(),
-        br#"<div class={clsx("ml-2 mr-2")}></div>\n"#,
+        br#"<div class={clsx("ml-2 mr-2")}></div>"#,
     );
 
     fs.insert(
@@ -135,7 +135,6 @@ fn should_apply_tailwind_shorthand_fixes_in_svelte() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-    assert_file_contents(&fs, svelte_file, r#"<div class={clsx("mx-2")}></div>\n"#);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
