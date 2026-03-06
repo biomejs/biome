@@ -152,8 +152,8 @@ invalid.js:6:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
      5  5 │   const constants = [
      6    │ - → 2.718281,·//·E
         6 │ + → Math.E,·//·E
-     7  7 │   	2.718_281, // E with separator
-     8  8 │   	2.302585, // LN10
+     7  7 │     2.718_281, // E with separator
+     8  8 │     2.302585, // LN10
   
 
 ```
@@ -173,11 +173,11 @@ invalid.js:7:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
   i Unsafe fix: Use Math.E instead.
   
      5  5 │   const constants = [
-     6  6 │   	2.718281, // E
+     6  6 │     2.718281, // E
      7    │ - → 2.718_281,·//·E·with·separator
         7 │ + → Math.E,·//·E·with·separator
-     8  8 │   	2.302585, // LN10
-     9  9 │   	0.693147, // LN2
+     8  8 │     2.302585, // LN10
+     9  9 │     0.693147, // LN2
   
 
 ```
@@ -196,12 +196,12 @@ invalid.js:8:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
   
   i Unsafe fix: Use Math.LN10 instead.
   
-     6  6 │   	2.718281, // E
-     7  7 │   	2.718_281, // E with separator
+     6  6 │     2.718281, // E
+     7  7 │     2.718_281, // E with separator
      8    │ - → 2.302585,·//·LN10
         8 │ + → Math.LN10,·//·LN10
-     9  9 │   	0.693147, // LN2
-    10 10 │   	0.434294, // LOG10E
+     9  9 │     0.693147, // LN2
+    10 10 │     0.434294, // LOG10E
   
 
 ```
@@ -220,12 +220,12 @@ invalid.js:9:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
   
   i Unsafe fix: Use Math.LN2 instead.
   
-     7  7 │   	2.718_281, // E with separator
-     8  8 │   	2.302585, // LN10
+     7  7 │     2.718_281, // E with separator
+     8  8 │     2.302585, // LN10
      9    │ - → 0.693147,·//·LN2
         9 │ + → Math.LN2,·//·LN2
-    10 10 │   	0.434294, // LOG10E
-    11 11 │   	1.442695, // LOG2E
+    10 10 │     0.434294, // LOG10E
+    11 11 │     1.442695, // LOG2E
   
 
 ```
@@ -244,12 +244,12 @@ invalid.js:10:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
   
   i Unsafe fix: Use Math.LOG10E instead.
   
-     8  8 │   	2.302585, // LN10
-     9  9 │   	0.693147, // LN2
+     8  8 │     2.302585, // LN10
+     9  9 │     0.693147, // LN2
     10    │ - → 0.434294,·//·LOG10E
        10 │ + → Math.LOG10E,·//·LOG10E
-    11 11 │   	1.442695, // LOG2E
-    12 12 │   	3.141592, // PI
+    11 11 │     1.442695, // LOG2E
+    12 12 │     3.141592, // PI
   
 
 ```
@@ -268,12 +268,12 @@ invalid.js:11:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
   
   i Unsafe fix: Use Math.LOG2E instead.
   
-     9  9 │   	0.693147, // LN2
-    10 10 │   	0.434294, // LOG10E
+     9  9 │     0.693147, // LN2
+    10 10 │     0.434294, // LOG10E
     11    │ - → 1.442695,·//·LOG2E
        11 │ + → Math.LOG2E,·//·LOG2E
-    12 12 │   	3.141592, // PI
-    13 13 │   	0.707106, // SQRT1_2
+    12 12 │     3.141592, // PI
+    13 13 │     0.707106, // SQRT1_2
   
 
 ```
@@ -292,12 +292,12 @@ invalid.js:12:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
   
   i Unsafe fix: Use Math.PI instead.
   
-    10 10 │   	0.434294, // LOG10E
-    11 11 │   	1.442695, // LOG2E
+    10 10 │     0.434294, // LOG10E
+    11 11 │     1.442695, // LOG2E
     12    │ - → 3.141592,·//·PI
        12 │ + → Math.PI,·//·PI
-    13 13 │   	0.707106, // SQRT1_2
-    14 14 │   	1.414213, // SQRT2
+    13 13 │     0.707106, // SQRT1_2
+    14 14 │     1.414213, // SQRT2
   
 
 ```
@@ -316,11 +316,11 @@ invalid.js:13:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
   
   i Unsafe fix: Use Math.SQRT1_2 instead.
   
-    11 11 │   	1.442695, // LOG2E
-    12 12 │   	3.141592, // PI
+    11 11 │     1.442695, // LOG2E
+    12 12 │     3.141592, // PI
     13    │ - → 0.707106,·//·SQRT1_2
        13 │ + → Math.SQRT1_2,·//·SQRT1_2
-    14 14 │   	1.414213, // SQRT2
+    14 14 │     1.414213, // SQRT2
     15 15 │   ];
   
 
@@ -340,8 +340,8 @@ invalid.js:14:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
   
   i Unsafe fix: Use Math.SQRT2 instead.
   
-    12 12 │   	3.141592, // PI
-    13 13 │   	0.707106, // SQRT1_2
+    12 12 │     3.141592, // PI
+    13 13 │     0.707106, // SQRT1_2
     14    │ - → 1.414213,·//·SQRT2
        14 │ + → Math.SQRT2,·//·SQRT2
     15 15 │   ];
@@ -367,8 +367,8 @@ invalid.js:18:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
     17 17 │   const constants1 = [
     18    │ - → 2.718,·//·E
        18 │ + → Math.E,·//·E
-    19 19 │   	2.302, // LN10
-    20 20 │   	0.693, // LN2
+    19 19 │     2.302, // LN10
+    20 20 │     0.693, // LN2
   
 
 ```
@@ -388,11 +388,11 @@ invalid.js:19:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
   i Unsafe fix: Use Math.LN10 instead.
   
     17 17 │   const constants1 = [
-    18 18 │   	2.718, // E
+    18 18 │     2.718, // E
     19    │ - → 2.302,·//·LN10
        19 │ + → Math.LN10,·//·LN10
-    20 20 │   	0.693, // LN2
-    21 21 │   	0.434, // LOG10E
+    20 20 │     0.693, // LN2
+    21 21 │     0.434, // LOG10E
   
 
 ```
@@ -411,12 +411,12 @@ invalid.js:20:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
   
   i Unsafe fix: Use Math.LN2 instead.
   
-    18 18 │   	2.718, // E
-    19 19 │   	2.302, // LN10
+    18 18 │     2.718, // E
+    19 19 │     2.302, // LN10
     20    │ - → 0.693,·//·LN2
        20 │ + → Math.LN2,·//·LN2
-    21 21 │   	0.434, // LOG10E
-    22 22 │   	1.442, // LOG2E
+    21 21 │     0.434, // LOG10E
+    22 22 │     1.442, // LOG2E
   
 
 ```
@@ -435,12 +435,12 @@ invalid.js:21:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
   
   i Unsafe fix: Use Math.LOG10E instead.
   
-    19 19 │   	2.302, // LN10
-    20 20 │   	0.693, // LN2
+    19 19 │     2.302, // LN10
+    20 20 │     0.693, // LN2
     21    │ - → 0.434,·//·LOG10E
        21 │ + → Math.LOG10E,·//·LOG10E
-    22 22 │   	1.442, // LOG2E
-    23 23 │   	3.141, // PI
+    22 22 │     1.442, // LOG2E
+    23 23 │     3.141, // PI
   
 
 ```
@@ -459,12 +459,12 @@ invalid.js:22:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
   
   i Unsafe fix: Use Math.LOG2E instead.
   
-    20 20 │   	0.693, // LN2
-    21 21 │   	0.434, // LOG10E
+    20 20 │     0.693, // LN2
+    21 21 │     0.434, // LOG10E
     22    │ - → 1.442,·//·LOG2E
        22 │ + → Math.LOG2E,·//·LOG2E
-    23 23 │   	3.141, // PI
-    24 24 │   	0.707, // SQRT1_2
+    23 23 │     3.141, // PI
+    24 24 │     0.707, // SQRT1_2
   
 
 ```
@@ -483,12 +483,12 @@ invalid.js:23:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
   
   i Unsafe fix: Use Math.PI instead.
   
-    21 21 │   	0.434, // LOG10E
-    22 22 │   	1.442, // LOG2E
+    21 21 │     0.434, // LOG10E
+    22 22 │     1.442, // LOG2E
     23    │ - → 3.141,·//·PI
        23 │ + → Math.PI,·//·PI
-    24 24 │   	0.707, // SQRT1_2
-    25 25 │   	1.414, // SQRT2
+    24 24 │     0.707, // SQRT1_2
+    25 25 │     1.414, // SQRT2
   
 
 ```
@@ -507,11 +507,11 @@ invalid.js:24:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
   
   i Unsafe fix: Use Math.SQRT1_2 instead.
   
-    22 22 │   	1.442, // LOG2E
-    23 23 │   	3.141, // PI
+    22 22 │     1.442, // LOG2E
+    23 23 │     3.141, // PI
     24    │ - → 0.707,·//·SQRT1_2
        24 │ + → Math.SQRT1_2,·//·SQRT1_2
-    25 25 │   	1.414, // SQRT2
+    25 25 │     1.414, // SQRT2
     26 26 │   ];
   
 
@@ -531,8 +531,8 @@ invalid.js:25:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
   
   i Unsafe fix: Use Math.SQRT2 instead.
   
-    23 23 │   	3.141, // PI
-    24 24 │   	0.707, // SQRT1_2
+    23 23 │     3.141, // PI
+    24 24 │     0.707, // SQRT1_2
     25    │ - → 1.414,·//·SQRT2
        25 │ + → Math.SQRT2,·//·SQRT2
     26 26 │   ];
@@ -771,7 +771,7 @@ invalid.js:42:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
   i Unsafe fix: Use Math.E instead.
   
     40 40 │   const rounded = [
-    41 41 │   	// rounded
+    41 41 │     // rounded
     42    │ - → 2.7183,·//·E
        42 │ + → Math.E,·//·E
     43 43 │       2.302585093, // LN10

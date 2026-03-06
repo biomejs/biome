@@ -32,12 +32,12 @@ noAssignInExpressions.ts:3:10 lint/suspicious/noAssignInExpressions  FIXABLE  �
   i Safe fix: Suppress rule lint/suspicious/noAssignInExpressions for this line.
   
     1 1 │   export function foo() {
-    2 2 │   	let x: number;
+    2 2 │     let x: number;
     3   │ - → while·((x·=·Math.random()·>·0.1))·{
       3 │ + → //·biome-ignore·lint/suspicious/noAssignInExpressions:·<explanation>
       4 │ + → while·((x·=·Math.random()·>·0.1))·{
-    4 5 │   		console.log(x);
-    5 6 │   	}
+    4 5 │       console.log(x);
+    5 6 │     }
   
   i Safe fix: Suppress rule lint/suspicious/noAssignInExpressions for the whole file.
   
