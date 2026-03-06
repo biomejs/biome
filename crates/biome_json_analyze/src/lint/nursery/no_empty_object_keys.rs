@@ -74,8 +74,8 @@ impl Rule for NoEmptyObjectKeys {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let value = node.inner_string_text().ok()?;
-        let trimmed_value = value.trim();
-        if trimmed_value.is_empty() || trimmed_value == "\\t" || trimmed_value == "\\n" {
+        let trimmed_value = value.trim().replace("\\n", "").replace("\\t", "");
+        if trimmed_value.is_empty() {
             return Some(());
         }
 
