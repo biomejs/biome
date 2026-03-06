@@ -14,9 +14,9 @@ use biome_configuration::{
     BiomeDiagnostic, Configuration, ConfigurationSource, CssConfiguration,
     DEFAULT_SCANNER_IGNORE_ENTRIES, ExtendedConfigurations, FilesConfiguration,
     FilesIgnoreUnknownEnabled, FormatterConfiguration, GraphqlConfiguration, GritConfiguration,
-    JsConfiguration, JsonConfiguration, LinterConfiguration, OverrideAssistConfiguration,
-    OverrideFormatterConfiguration, OverrideGlobs, OverrideLinterConfiguration, Overrides, Rules,
-    push_to_analyzer_assist, push_to_analyzer_rules,
+    JsConfiguration, JsonConfiguration, LinterConfiguration, MarkdownConfiguration,
+    OverrideAssistConfiguration, OverrideFormatterConfiguration, OverrideGlobs,
+    OverrideLinterConfiguration, Overrides, Rules, push_to_analyzer_assist, push_to_analyzer_rules,
 };
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::{CssModulesKind, CssParserOptions};
@@ -187,6 +187,13 @@ impl Settings {
         if let Some(html) = configuration.html {
             self.experimental_full_html_support = html.experimental_full_support_enabled;
             self.languages.html = html.into();
+        }
+
+        #[cfg(feature = "markdown")]
+        {
+            if let Some(markdown) = configuration.markdown {
+                self.languages.markdown = markdown.into();
+            }
         }
 
         // plugin settings
@@ -816,6 +823,17 @@ impl From<HtmlConfiguration> for LanguageSettings<HtmlLanguage> {
 
         if let Some(assist) = html.assist {
             language_setting.assist = assist.into();
+        }
+
+        language_setting
+    }
+}
+
+impl From<MarkdownConfiguration> for LanguageSettings<MarkdownLanguage> {
+    fn from(markdown: MarkdownConfiguration) -> Self {
+        let mut language_setting: Self = Self::default();
+        if let Some(formatter) = markdown.formatter {
+            language_setting.formatter = formatter.into();
         }
 
         language_setting

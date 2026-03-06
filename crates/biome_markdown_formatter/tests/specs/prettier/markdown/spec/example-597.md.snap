@@ -1,12 +1,13 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: markdown/spec/example-55.md
+info: markdown/spec/example-597.md
 ---
+
 # Input
 
 ```md
-Foo
-    ---
+foo  
+baz
 
 ```
 
@@ -17,14 +18,14 @@ Foo
 --- Prettier
 +++ Biome
 @@ -1,2 +1,2 @@
- Foo
-----
-+    ---
+-foo  
++foo
+ baz
 ```
 
 # Output
 
 ```md
-Foo
-    ---
+foo
+baz
 ```
