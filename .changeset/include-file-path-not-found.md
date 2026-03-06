@@ -2,4 +2,4 @@
 "@biomejs/biome": patch
 ---
 
-Include the file path in the `NotFound` diagnostic message so users can identify which file is missing from the workspace.
+Fixed [#9357](https://github.com/biomejs/biome/issues/9357). Improved the information emitted by some diagnostics. 
