@@ -789,15 +789,34 @@ impl WorkspaceServer {
     }
 
     fn load_plugins(&self, base_path: &Utf8Path, plugins: &Plugins) -> Vec<PluginDiagnostic> {
+        use rayon::prelude::*;
+
+        let results: Vec<_> = plugins
+            .iter()
+            .collect::<Vec<_>>()
+            .par_iter()
+            .map(|plugin_config| {
+                let plugin_path = plugin_config.path();
+                let options_json = plugin_config.options_json().map(String::from);
+                (
+                    plugin_path.to_owned(),
+                    BiomePlugin::load(
+                        self.fs.clone(),
+                        plugin_path,
+                        base_path,
+                        options_json,
+                    ),
+                )
+            })
+            .collect();
+
         let mut diagnostics = Vec::new();
         let plugin_cache = PluginCache::default();
 
-        for plugin_config in plugins.iter() {
-            let plugin_path = plugin_config.path();
-            let options_json = plugin_config.options_json().map(String::from);
-            match BiomePlugin::load(self.fs.clone(), plugin_path, base_path, options_json) {
+        for (path, result) in results {
+            match result {
                 Ok((plugin, _)) => {
-                    plugin_cache.insert_plugin(plugin_path.to_owned().into(), plugin);
+                    plugin_cache.insert_plugin(path.into(), plugin);
                 }
                 Err(diagnostic) => diagnostics.push(diagnostic),
             }

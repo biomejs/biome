@@ -8,6 +8,7 @@
 
 use std::collections::HashMap;
 use std::fmt;
+use std::path::Path;
 use std::sync::Arc;
 
 use biome_analyze::{
@@ -470,12 +471,119 @@ impl WasmPluginEngine {
         let engine = wasmtime::Engine::new(&config)?;
         let component = wasmtime::component::Component::new(&engine, wasm_bytes)?;
 
+        Self::from_component(engine, component)
+    }
+
+    /// Compile a WASM component with AOT caching.
+    ///
+    /// On first call, compiles the WASM bytes and writes the serialized
+    /// native code to `<wasm_path>.compiled`. On subsequent calls, loads
+    /// the cached artifact directly if the WASM content hasn't changed,
+    /// skipping the expensive compilation step.
+    ///
+    /// # Safety
+    /// Uses `unsafe` wasmtime deserialization internally. The cache file
+    /// is only ever written by this function from the same wasmtime version,
+    /// so this is safe as long as the cache isn't tampered with externally.
+    pub fn new_cached(wasm_bytes: &[u8], wasm_path: &Path) -> Result<Self, wasmtime::Error> {
+        let mut config = wasmtime::Config::new();
+        config.consume_fuel(true);
+        config.wasm_component_model(true);
+
+        let engine = wasmtime::Engine::new(&config)?;
+
+        let cache_path = wasm_path.with_extension("wasm.compiled");
+        let content_hash = Self::hash_for_cache(wasm_bytes, &engine);
+
+        // Try to load from cache.
+        if let Some(component) = Self::load_from_cache(&engine, &cache_path, &content_hash) {
+            return Self::from_component(engine, component);
+        }
+
+        // Compile from source.
+        let component = wasmtime::component::Component::new(&engine, wasm_bytes)?;
+
+        // Write cache (best-effort — failure is not fatal).
+        Self::write_cache(&component, &cache_path, &content_hash);
+
+        Self::from_component(engine, component)
+    }
+
+    /// Build the engine from an already-compiled component.
+    fn from_component(
+        engine: wasmtime::Engine,
+        component: wasmtime::component::Component,
+    ) -> Result<Self, wasmtime::Error> {
         let mut linker = wasmtime::component::Linker::new(&engine);
         Plugin::add_to_linker(&mut linker, |state: &mut HostState| state)?;
         wasmtime_wasi::add_to_linker_sync(&mut linker)?;
         let plugin_pre = PluginPre::new(linker.instantiate_pre(&component)?)?;
 
         Ok(Self { plugin_pre })
+    }
+
+    /// Compute a cache key from WASM content + engine precompile key.
+    /// The engine precompile key includes the wasmtime version and all
+    /// config flags, ensuring cache invalidation on engine changes.
+    fn hash_for_cache(wasm_bytes: &[u8], engine: &wasmtime::Engine) -> [u8; 32] {
+        use std::hash::{Hash, Hasher};
+        // Hash the engine's precompile compatibility key (encodes wasmtime
+        // version + config) together with the WASM content. We use two
+        // rounds of DefaultHasher to fill 32 bytes for the cache tag.
+        let mut hasher = std::collections::hash_map::DefaultHasher::new();
+        engine.precompile_compatibility_hash().hash(&mut hasher);
+        hasher.write(wasm_bytes);
+        let h1 = hasher.finish();
+
+        let mut hasher2 = std::collections::hash_map::DefaultHasher::new();
+        hasher2.write(&h1.to_le_bytes());
+        hasher2.write(wasm_bytes);
+        let h2 = hasher2.finish();
+
+        let mut out = [0u8; 32];
+        out[..8].copy_from_slice(&h1.to_le_bytes());
+        out[8..16].copy_from_slice(&h2.to_le_bytes());
+        out[16..24].copy_from_slice(&h1.to_be_bytes());
+        out[24..32].copy_from_slice(&h2.to_be_bytes());
+        out
+    }
+
+    /// Try to load a pre-compiled component from the cache file.
+    fn load_from_cache(
+        engine: &wasmtime::Engine,
+        cache_path: &Path,
+        expected_hash: &[u8; 32],
+    ) -> Option<wasmtime::component::Component> {
+        let data = std::fs::read(cache_path).ok()?;
+        if data.len() < 32 {
+            return None;
+        }
+        let (stored_hash, serialized) = data.split_at(32);
+        if stored_hash != expected_hash {
+            return None;
+        }
+        // SAFETY: The cache was written by this function using the same
+        // engine configuration (verified by the hash which includes
+        // engine.precompile_compatibility_hash()).
+        #[expect(unsafe_code)]
+        unsafe {
+            wasmtime::component::Component::deserialize(engine, serialized).ok()
+        }
+    }
+
+    /// Write a compiled component to the cache file (best-effort).
+    fn write_cache(
+        component: &wasmtime::component::Component,
+        cache_path: &Path,
+        hash: &[u8; 32],
+    ) {
+        let Ok(serialized) = component.serialize() else {
+            return;
+        };
+        let mut data = Vec::with_capacity(32 + serialized.len());
+        data.extend_from_slice(hash);
+        data.extend_from_slice(&serialized);
+        let _ = std::fs::write(cache_path, data);
     }
 
     /// Extract metadata (target language, rule names, query kinds, rule metadata)

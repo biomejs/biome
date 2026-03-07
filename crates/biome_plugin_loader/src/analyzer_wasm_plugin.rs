@@ -85,7 +85,7 @@ impl AnalyzerWasmPlugin {
             })
         })?;
 
-        let engine = Arc::new(WasmPluginEngine::new(&bytes)?);
+        let engine = Arc::new(WasmPluginEngine::new_cached(&bytes, path.as_std_path())?);
         let metadata = engine.metadata()?;
 
         let target_language = match metadata.language.as_str() {
