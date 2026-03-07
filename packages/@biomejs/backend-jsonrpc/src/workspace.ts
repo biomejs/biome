@@ -4951,8 +4951,20 @@ export interface NoDuplicateClassesOptions {
 	functions?: string[];
 }
 export interface OrganizeImportsOptions {
+	/**
+	 * Groups to change how imports and exports are sorted.
+	 */
 	groups?: ImportGroups;
+	/**
+	* Order used for sorting identifiers within impoprts and exports.
+
+Default: `natutal`. 
+	 */
 	identifierOrder?: SortOrder;
+	/**
+	 * If unset or `false`, bare imports such as `import "module"` are sorted with other imports.
+	 */
+	ignoreBareImports?: boolean;
 }
 export interface UseSortedAttributesOptions {
 	sortOrder?: SortOrder;

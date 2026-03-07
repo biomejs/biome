@@ -6532,10 +6532,16 @@
 			"type": "object",
 			"properties": {
 				"groups": {
+					"description": "Groups to change how imports and exports are sorted.",
 					"anyOf": [{ "$ref": "#/$defs/ImportGroups" }, { "type": "null" }]
 				},
 				"identifierOrder": {
+					"description": "Order used for sorting identifiers within impoprts and exports.\n\nDefault: `natutal`.",
 					"anyOf": [{ "$ref": "#/$defs/SortOrder" }, { "type": "null" }]
+				},
+				"ignoreBareImports": {
+					"description": "If unset or `false`, bare imports such as `import \"module\"` are sorted with other imports.",
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
