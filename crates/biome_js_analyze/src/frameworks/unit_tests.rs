@@ -3,10 +3,14 @@ use biome_js_syntax::{
 };
 
 /// The four lifecycle hooks recognised by Jest/Vitest/similar frameworks.
+///
+/// Variants are ordered by execution order (earliest first), so the derived
+/// `Ord` impl can be used directly to check whether hooks appear in the
+/// correct sequence.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub(crate) enum LifecycleHook {
-    BeforeEach,
     BeforeAll,
+    BeforeEach,
     AfterEach,
     AfterAll,
 }
@@ -15,8 +19,8 @@ impl LifecycleHook {
     /// Returns the canonical source-level name, e.g. `"beforeEach"`.
     pub(crate) fn as_str(self) -> &'static str {
         match self {
-            Self::BeforeEach => "beforeEach",
             Self::BeforeAll => "beforeAll",
+            Self::BeforeEach => "beforeEach",
             Self::AfterEach => "afterEach",
             Self::AfterAll => "afterAll",
         }
@@ -70,8 +74,8 @@ impl LifecycleHook {
 
     fn from_name(s: &str) -> Option<Self> {
         match s {
-            "beforeEach" => Some(Self::BeforeEach),
             "beforeAll" => Some(Self::BeforeAll),
+            "beforeEach" => Some(Self::BeforeEach),
             "afterEach" => Some(Self::AfterEach),
             "afterAll" => Some(Self::AfterAll),
             _ => None,
@@ -488,13 +492,13 @@ mod tests {
     // ── as_str ───────────────────────────────────────────────────────────────
 
     #[test]
-    fn as_str_before_each() {
-        assert_eq!(LifecycleHook::BeforeEach.as_str(), "beforeEach");
+    fn as_str_before_all() {
+        assert_eq!(LifecycleHook::BeforeAll.as_str(), "beforeAll");
     }
 
     #[test]
-    fn as_str_before_all() {
-        assert_eq!(LifecycleHook::BeforeAll.as_str(), "beforeAll");
+    fn as_str_before_each() {
+        assert_eq!(LifecycleHook::BeforeEach.as_str(), "beforeEach");
     }
 
     #[test]
@@ -505,6 +509,15 @@ mod tests {
     #[test]
     fn as_str_after_all() {
         assert_eq!(LifecycleHook::AfterAll.as_str(), "afterAll");
+    }
+
+    // ── Ord (execution order) ────────────────────────────────────────────────
+
+    #[test]
+    fn execution_order() {
+        assert!(LifecycleHook::BeforeAll < LifecycleHook::BeforeEach);
+        assert!(LifecycleHook::BeforeEach < LifecycleHook::AfterEach);
+        assert!(LifecycleHook::AfterEach < LifecycleHook::AfterAll);
     }
 
     #[test]

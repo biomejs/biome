@@ -1,0 +1,259 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+// beforeEach before beforeAll — wrong order
+describe('foo', () => {
+    beforeEach(() => {
+        seedMyDatabase();
+    });
+
+    beforeAll(() => {
+        createMyDatabase();
+    });
+
+    it('accepts this input', () => {});
+    it('returns that value', () => {});
+});
+
+// afterAll before afterEach — wrong order
+describe('bar', () => {
+    afterAll(() => {});
+    afterEach(() => {});
+});
+
+// Multiple violations in one block
+describe('baz', () => {
+    afterEach(() => {});
+    afterAll(() => {});
+    beforeAll(() => {});
+});
+
+// Nested describe with out-of-order hooks
+describe('outer', () => {
+    beforeAll(() => {});
+
+    describe('inner', () => {
+        afterAll(() => {});
+        afterEach(() => {});
+        beforeEach(() => {});
+    });
+
+    afterAll(() => {});
+});
+
+// Member form: out-of-order
+describe('member form', () => {
+    test.afterEach(() => {});
+    test.beforeEach(() => {});
+});
+
+// Top-level out-of-order hooks
+afterEach(() => {});
+beforeAll(() => {});
+
+```
+
+# Diagnostics
+```
+invalid.js:9:5 lint/nursery/useTestHooksInOrder ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! beforeAll should come after beforeEach.
+  
+     7 │     });
+     8 │ 
+   > 9 │     beforeAll(() => {
+       │     ^^^^^^^^^^^^^^^^^
+  > 10 │         createMyDatabase();
+  > 11 │     });
+       │     ^^
+    12 │ 
+    13 │     it('accepts this input', () => {});
+  
+  i beforeEach is declared here but executes after beforeAll.
+  
+    3 │ // beforeEach before beforeAll — wrong order
+    4 │ describe('foo', () => {
+  > 5 │     beforeEach(() => {
+      │     ^^^^^^^^^^^^^^^^^^
+  > 6 │         seedMyDatabase();
+  > 7 │     });
+      │     ^^
+    8 │ 
+    9 │     beforeAll(() => {
+  
+  i Hooks should appear in the order they execute: beforeAll, beforeEach, afterEach, afterAll.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:5 lint/nursery/useTestHooksInOrder ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! afterEach should come after afterAll.
+  
+    18 │ describe('bar', () => {
+    19 │     afterAll(() => {});
+  > 20 │     afterEach(() => {});
+       │     ^^^^^^^^^^^^^^^^^^^
+    21 │ });
+    22 │ 
+  
+  i afterAll is declared here but executes after afterEach.
+  
+    17 │ // afterAll before afterEach — wrong order
+    18 │ describe('bar', () => {
+  > 19 │     afterAll(() => {});
+       │     ^^^^^^^^^^^^^^^^^^
+    20 │     afterEach(() => {});
+    21 │ });
+  
+  i Hooks should appear in the order they execute: beforeAll, beforeEach, afterEach, afterAll.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:5 lint/nursery/useTestHooksInOrder ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! beforeAll should come after afterAll.
+  
+    25 │     afterEach(() => {});
+    26 │     afterAll(() => {});
+  > 27 │     beforeAll(() => {});
+       │     ^^^^^^^^^^^^^^^^^^^
+    28 │ });
+    29 │ 
+  
+  i afterAll is declared here but executes after beforeAll.
+  
+    24 │ describe('baz', () => {
+    25 │     afterEach(() => {});
+  > 26 │     afterAll(() => {});
+       │     ^^^^^^^^^^^^^^^^^^
+    27 │     beforeAll(() => {});
+    28 │ });
+  
+  i Hooks should appear in the order they execute: beforeAll, beforeEach, afterEach, afterAll.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:36:9 lint/nursery/useTestHooksInOrder ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! afterEach should come after afterAll.
+  
+    34 │     describe('inner', () => {
+    35 │         afterAll(() => {});
+  > 36 │         afterEach(() => {});
+       │         ^^^^^^^^^^^^^^^^^^^
+    37 │         beforeEach(() => {});
+    38 │     });
+  
+  i afterAll is declared here but executes after afterEach.
+  
+    34 │     describe('inner', () => {
+  > 35 │         afterAll(() => {});
+       │         ^^^^^^^^^^^^^^^^^^
+    36 │         afterEach(() => {});
+    37 │         beforeEach(() => {});
+  
+  i Hooks should appear in the order they execute: beforeAll, beforeEach, afterEach, afterAll.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:37:9 lint/nursery/useTestHooksInOrder ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! beforeEach should come after afterEach.
+  
+    35 │         afterAll(() => {});
+    36 │         afterEach(() => {});
+  > 37 │         beforeEach(() => {});
+       │         ^^^^^^^^^^^^^^^^^^^^
+    38 │     });
+    39 │ 
+  
+  i afterEach is declared here but executes after beforeEach.
+  
+    34 │     describe('inner', () => {
+    35 │         afterAll(() => {});
+  > 36 │         afterEach(() => {});
+       │         ^^^^^^^^^^^^^^^^^^^
+    37 │         beforeEach(() => {});
+    38 │     });
+  
+  i Hooks should appear in the order they execute: beforeAll, beforeEach, afterEach, afterAll.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:46:5 lint/nursery/useTestHooksInOrder ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! beforeEach should come after afterEach.
+  
+    44 │ describe('member form', () => {
+    45 │     test.afterEach(() => {});
+  > 46 │     test.beforeEach(() => {});
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^
+    47 │ });
+    48 │ 
+  
+  i afterEach is declared here but executes after beforeEach.
+  
+    43 │ // Member form: out-of-order
+    44 │ describe('member form', () => {
+  > 45 │     test.afterEach(() => {});
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^
+    46 │     test.beforeEach(() => {});
+    47 │ });
+  
+  i Hooks should appear in the order they execute: beforeAll, beforeEach, afterEach, afterAll.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:51:1 lint/nursery/useTestHooksInOrder ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! beforeAll should come after afterEach.
+  
+    49 │ // Top-level out-of-order hooks
+    50 │ afterEach(() => {});
+  > 51 │ beforeAll(() => {});
+       │ ^^^^^^^^^^^^^^^^^^^
+    52 │ 
+  
+  i afterEach is declared here but executes after beforeAll.
+  
+    49 │ // Top-level out-of-order hooks
+  > 50 │ afterEach(() => {});
+       │ ^^^^^^^^^^^^^^^^^^^
+    51 │ beforeAll(() => {});
+    52 │ 
+  
+  i Hooks should appear in the order they execute: beforeAll, beforeEach, afterEach, afterAll.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
