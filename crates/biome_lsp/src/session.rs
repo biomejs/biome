@@ -1027,14 +1027,41 @@ impl Session {
                 path.to_path_buf()
             }
             ConfigurationPathHint::FromUser(path) => {
-                if path.is_file() {
-                    path.parent()
-                        .map_or(fs.working_directory().unwrap_or_default(), |p| {
-                            p.to_path_buf()
-                        })
-                } else {
-                    path.to_path_buf()
-                }
+                // Collect workspace folder roots as absolute Utf8PathBufs.
+                let workspace_roots: Vec<Utf8PathBuf> = self
+                    .get_workspace_folders()
+                    .unwrap_or_default()
+                    .into_iter()
+                    .filter_map(|folder| {
+                        folder
+                            .uri
+                            .to_file_path()
+                            .and_then(|p| Utf8PathBuf::from_path_buf(p.to_path_buf()).ok())
+                    })
+                    .collect();
+
+                // Find the workspace folder that contains this config file.
+                // If it's outside all workspace folders (e.g. an external shared config),
+                // we should NOT use the config file's directory as the project root,
+                // because then workspace files won't match the project.
+                // Instead, we fallback to the first workspace root or the session's base_path.
+                workspace_roots
+                    .iter()
+                    .filter(|root| path.starts_with(*root))
+                    .max_by_key(|root| root.as_str().len())
+                    .cloned()
+                    .or_else(|| workspace_roots.first().cloned())
+                    .or_else(|| self.base_path())
+                    .unwrap_or_else(|| {
+                        if fs.path_is_file(path) {
+                            path.parent()
+                                .map_or(fs.working_directory().unwrap_or_default(), |p| {
+                                    p.to_path_buf()
+                                })
+                        } else {
+                            path.to_path_buf()
+                        }
+                    })
             }
             _ => self
                 .base_path()
