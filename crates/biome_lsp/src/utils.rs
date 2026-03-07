@@ -195,9 +195,17 @@ pub(crate) fn diagnostic_to_lsp<D: Diagnostic>(
         Severity::Hint => lsp::DiagnosticSeverity::HINT,
     };
 
-    let code = diagnostic
-        .category()
-        .map(|category| lsp::NumberOrString::String(category.name().to_string()));
+    let code = diagnostic.category().map(|category| {
+        // For plugin diagnostics, show the subcategory prefixed with "@"
+        // (e.g. "@wirex-biome-plugin/fileNamingConvention") so the editor
+        // renders it like ESLint: "(biome @wirex-biome-plugin/fileNamingConvention)".
+        if category.name() == "plugin" {
+            if let Some(sub) = diagnostic.subcategory() {
+                return lsp::NumberOrString::String(format!("@{sub}"));
+            }
+        }
+        lsp::NumberOrString::String(category.name().to_string())
+    });
 
     let code_description = diagnostic
         .category()

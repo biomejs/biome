@@ -24,6 +24,10 @@ use crate::{AnalyzerPlugin, PluginDiagnostic};
 pub struct AnalyzerWasmPlugin {
     engine: Arc<WasmPluginEngine>,
     rule_name: String,
+    /// Human-readable plugin name derived from the plugin path (e.g.
+    /// `"wirex-biome-plugin"`). Used to namespace the rule in diagnostics so
+    /// editors render it similarly to ESLint: `(biome pluginName/ruleName)`.
+    plugin_name: String,
     target_language: PluginTargetLanguage,
     query_kinds: Vec<RawSyntaxKind>,
     /// JSON-serialized options string, passed to the guest `configure` export.
@@ -42,8 +46,12 @@ pub struct AnalyzerWasmPlugin {
 
 impl AnalyzerWasmPlugin {
     /// Load a WASM plugin and return one `AnalyzerWasmPlugin` per rule it exposes.
+    ///
+    /// `plugin_name` is a human-readable identifier for the plugin (typically
+    /// derived from the directory or file name) used to namespace diagnostics.
     pub fn load(
         path: &Utf8Path,
+        plugin_name: &str,
         options_json: Option<String>,
     ) -> Result<Vec<Self>, PluginDiagnostic> {
         let bytes = std::fs::read(path.as_std_path()).map_err(|err| {
@@ -134,6 +142,7 @@ impl AnalyzerWasmPlugin {
             plugins.push(Self {
                 engine: Arc::clone(&engine),
                 rule_name: rule_name.clone(),
+                plugin_name: plugin_name.to_string(),
                 target_language,
                 query_kinds,
                 options_json: options_json.clone(),
@@ -207,6 +216,8 @@ impl AnalyzerPlugin for AnalyzerWasmPlugin {
 
         let file_path = path.as_str().to_string();
 
+        let qualified_name = format!("{}/{}", self.plugin_name, self.rule_name);
+
         match self.engine.check_node(
             node,
             &self.rule_name,
@@ -216,7 +227,15 @@ impl AnalyzerPlugin for AnalyzerWasmPlugin {
             file_path,
             self.options_json.as_deref(),
         ) {
-            Ok(diagnostics) => PluginEvaluationResult { diagnostics },
+            Ok(entries) => PluginEvaluationResult {
+                diagnostics: entries
+                    .into_iter()
+                    .map(|entry| PluginDiagnosticEntry {
+                        diagnostic: entry.diagnostic.subcategory(qualified_name.clone()),
+                        actions: entry.actions,
+                    })
+                    .collect(),
+            },
             Err(error) => PluginEvaluationResult {
                 diagnostics: vec![PluginDiagnosticEntry {
                     diagnostic: RuleDiagnostic::new(
@@ -227,7 +246,7 @@ impl AnalyzerPlugin for AnalyzerWasmPlugin {
                             " errored: "<Error>{error.to_string()}</Error>
                         ),
                     )
-                    .subcategory(self.rule_name.clone()),
+                    .subcategory(qualified_name),
                     actions: vec![],
                 }],
             },

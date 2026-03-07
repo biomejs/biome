@@ -54,6 +54,14 @@ impl BiomePlugin {
     ) -> Result<(Self, Utf8PathBuf), PluginDiagnostic> {
         let plugin_path = normalize_path(&base_path.join(plugin_path));
 
+        // Derive a human-readable plugin name from the path for diagnostic
+        // display. For a directory (manifest-based) plugin this is the
+        // directory name; for a single-file plugin it is the file stem.
+        let plugin_name = plugin_path
+            .file_stem()
+            .unwrap_or(plugin_path.as_str())
+            .to_string();
+
         // If the plugin path references a `.grit` file directly, treat it as
         // a single-rule plugin instead of going through the manifest process:
         if plugin_path
@@ -89,7 +97,7 @@ impl BiomePlugin {
             .extension()
             .is_some_and(|extension| extension == "wasm")
         {
-            let plugins = AnalyzerWasmPlugin::load(&plugin_path, options_json)?;
+            let plugins = AnalyzerWasmPlugin::load(&plugin_path, &plugin_name, options_json)?;
             return Ok((
                 Self {
                     analyzer_plugins: plugins
@@ -138,7 +146,7 @@ impl BiomePlugin {
                     } else if rule.as_os_str().as_encoded_bytes().ends_with(b".wasm") {
                         #[cfg(feature = "wasm_plugin")]
                         {
-                            let plugins = AnalyzerWasmPlugin::load(&plugin_path.join(rule), options_json.clone())?;
+                            let plugins = AnalyzerWasmPlugin::load(&plugin_path.join(rule), &plugin_name, options_json.clone())?;
                             Ok(plugins
                                 .into_iter()
                                 .map(|p| Arc::new(p) as Arc<dyn AnalyzerPlugin>)
