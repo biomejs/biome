@@ -264,6 +264,180 @@ pub struct WasmPluginMetadata {
     pub source_triggers_by_rule: HashMap<String, Vec<String>>,
 }
 
+/// Convert WIT check-results into [`PluginDiagnosticEntry`] values.
+fn convert_results(
+    results: Vec<biome::plugin::types::CheckResult>,
+    rule_name: &str,
+) -> Vec<PluginDiagnosticEntry> {
+    results
+        .into_iter()
+        .map(|result| {
+            let severity = match result.sev {
+                WitSeverity::Error => Severity::Error,
+                WitSeverity::Warning => Severity::Warning,
+                WitSeverity::Information => Severity::Information,
+                WitSeverity::Hint => Severity::Hint,
+            };
+
+            let (lo, hi) = normalize_range(result.start, result.end);
+            let range = TextRange::new(TextSize::from(lo), TextSize::from(hi));
+
+            let mut diagnostic =
+                RuleDiagnostic::new(category!("plugin"), range, markup!({ result.message }))
+                    .with_severity(severity)
+                    .subcategory(rule_name.to_string());
+
+            for label in &result.labels {
+                let (lo, hi) = normalize_range(label.start, label.end);
+                let label_range = TextRange::new(TextSize::from(lo), TextSize::from(hi));
+                diagnostic = diagnostic.label(label_range, markup!({ label.message }));
+            }
+
+            for note in &result.notes {
+                diagnostic = diagnostic.note(markup!({ note }));
+            }
+            for warning in &result.warnings {
+                diagnostic = diagnostic.warning(markup!({ warning }));
+            }
+
+            if result.unnecessary == Some(true) {
+                diagnostic = diagnostic.unnecessary();
+            }
+            if result.deprecated == Some(true) {
+                diagnostic = diagnostic.deprecated();
+            }
+            if result.verbose.unwrap_or(false) {
+                diagnostic = diagnostic.verbose();
+            }
+
+            let actions: Vec<PluginCodeAction> = result
+                .actions
+                .into_iter()
+                .map(|a| {
+                    let applicability = if a.safe {
+                        biome_diagnostics::Applicability::Always
+                    } else {
+                        biome_diagnostics::Applicability::MaybeIncorrect
+                    };
+                    PluginCodeAction {
+                        message: a.message,
+                        applicability,
+                        edits: a
+                            .edits
+                            .into_iter()
+                            .map(|e| {
+                                let (lo, hi) = normalize_range(e.start, e.end);
+                                PluginTextEdit {
+                                    range: TextRange::new(
+                                        TextSize::from(lo),
+                                        TextSize::from(hi),
+                                    ),
+                                    replacement: e.replacement,
+                                }
+                            })
+                            .collect(),
+                    }
+                })
+                .collect();
+
+            PluginDiagnosticEntry {
+                diagnostic,
+                actions,
+            }
+        })
+        .collect()
+}
+
+/// A live WASM plugin instance that can be reused across multiple `check()`
+/// calls within the same file, avoiding per-node instantiation overhead.
+///
+/// Not `Sync` — must be used behind a `Mutex` when shared across threads.
+pub struct WasmPluginSession {
+    // Note: Debug is manually implemented below since Store/Plugin don't impl Debug.
+    store: wasmtime::Store<HostState>,
+    bindings: Plugin,
+    configured: bool,
+    file_path: String,
+    language: PluginTargetLanguage,
+}
+
+impl fmt::Debug for WasmPluginSession {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("WasmPluginSession")
+            .field("file_path", &self.file_path)
+            .field("configured", &self.configured)
+            .finish_non_exhaustive()
+    }
+}
+
+impl WasmPluginSession {
+    /// The file path this session was created for.
+    pub fn file_path(&self) -> &str {
+        &self.file_path
+    }
+
+    /// Check a new node using the existing instance. Resets the handle table,
+    /// refuels the store, and calls `check()` without re-instantiation.
+    pub fn check_node(
+        &mut self,
+        node: AnySyntaxNode,
+        rule_name: &str,
+        options_json: Option<&str>,
+    ) -> Result<Vec<PluginDiagnosticEntry>, wasmtime::Error> {
+        // Reset handle table with new root node at handle 0.
+        self.store
+            .data_mut()
+            .reset_for_node(node, self.language);
+
+        self.check_current(rule_name, options_json)
+    }
+
+    /// Check the node already at handle 0. Used after `create_session` when
+    /// the node is already registered, or after `check_node` resets the table.
+    pub fn check_current(
+        &mut self,
+        rule_name: &str,
+        options_json: Option<&str>,
+    ) -> Result<Vec<PluginDiagnosticEntry>, wasmtime::Error> {
+        // Refuel for the next check.
+        self.store.set_fuel(1_000_000)?;
+
+        // Configure on first use within this session.
+        if !self.configured {
+            if let Some(options) = options_json {
+                self.bindings
+                    .call_configure(&mut self.store, rule_name, options)?;
+            }
+            self.configured = true;
+        }
+
+        let results = match self.bindings.call_check(&mut self.store, 0, rule_name) {
+            Ok(results) => results,
+            Err(err) => {
+                if let Some(trap) = err.downcast_ref::<wasmtime::Trap>()
+                    && *trap == wasmtime::Trap::OutOfFuel
+                {
+                    return Ok(vec![PluginDiagnosticEntry {
+                        diagnostic: RuleDiagnostic::new(
+                            category!("plugin"),
+                            None::<TextRange>,
+                            markup!(
+                                "Plugin rule "<Emphasis>{rule_name}</Emphasis>
+                                " exceeded its fuel budget and was terminated."
+                            ),
+                        )
+                        .subcategory(rule_name.to_string()),
+                        actions: vec![],
+                    }]);
+                }
+                return Err(err);
+            }
+        };
+
+        Ok(convert_results(results, rule_name))
+    }
+}
+
 /// Engine for loading and executing WASM plugins.
 ///
 /// Uses `PluginPre` to cache linker import resolution and component
@@ -354,15 +528,36 @@ impl WasmPluginEngine {
         })
     }
 
+    /// Create a reusable session for checking multiple nodes within the same file.
+    ///
+    /// The session holds a live WASM instance that persists across `check()`
+    /// calls, avoiding per-node instantiation overhead.
+    pub fn create_session(
+        &self,
+        node: AnySyntaxNode,
+        language: PluginTargetLanguage,
+        semantic_model: Option<SemanticModel>,
+        module_resolver: Option<Arc<ModuleResolver>>,
+        file_path: String,
+    ) -> Result<WasmPluginSession, wasmtime::Error> {
+        let state = HostState::new(node, language, semantic_model, module_resolver, file_path.clone());
+        let mut store = wasmtime::Store::new(self.plugin_pre.engine(), state);
+        store.set_fuel(1_000_000)?;
+        let bindings = self.plugin_pre.instantiate(&mut store)?;
+
+        Ok(WasmPluginSession {
+            store,
+            bindings,
+            configured: false,
+            file_path,
+            language,
+        })
+    }
+
     /// Check a single matched node and return diagnostics.
     ///
-    /// The host creates a fresh `Store<HostState>` seeded with the given
-    /// node at handle 0, then calls the guest's `check(0)` export. The
-    /// guest returns a list of `check-result` records which are converted
-    /// to `RuleDiagnostic`s on the host side.
-    ///
-    /// If `options_json` is provided, the guest's `configure(options)` export
-    /// is called before `check()`.
+    /// Creates a fresh WASM instance per call. Prefer [`create_session`] +
+    /// [`WasmPluginSession::check_node`] for repeated checks within a file.
     #[expect(clippy::too_many_arguments)]
     pub fn check_node(
         &self,
@@ -374,123 +569,11 @@ impl WasmPluginEngine {
         file_path: String,
         options_json: Option<&str>,
     ) -> Result<Vec<PluginDiagnosticEntry>, wasmtime::Error> {
-        let state = HostState::new(node, language, semantic_model, module_resolver, file_path);
-        let mut store = wasmtime::Store::new(self.plugin_pre.engine(), state);
-        // Per-node check uses less fuel than a full-tree traversal
-        store.set_fuel(1_000_000)?;
-
-        let bindings = self.plugin_pre.instantiate(&mut store)?;
-
-        // Send configuration to the guest before checking.
-        if let Some(options) = options_json {
-            bindings.call_configure(&mut store, rule_name, options)?;
-        }
-
-        let results = match bindings.call_check(&mut store, 0, rule_name) {
-            Ok(results) => results,
-            Err(err) => {
-                if let Some(trap) = err.downcast_ref::<wasmtime::Trap>()
-                    && *trap == wasmtime::Trap::OutOfFuel
-                {
-                    return Ok(vec![PluginDiagnosticEntry {
-                        diagnostic: RuleDiagnostic::new(
-                            category!("plugin"),
-                            None::<TextRange>,
-                            markup!(
-                                "Plugin rule "<Emphasis>{rule_name}</Emphasis>
-                                " exceeded its fuel budget and was terminated."
-                            ),
-                        )
-                        .subcategory(rule_name.to_string()),
-                        actions: vec![],
-                    }]);
-                }
-                return Err(err);
-            }
-        };
-
-        let entries = results
-            .into_iter()
-            .map(|result| {
-                let severity = match result.sev {
-                    WitSeverity::Error => Severity::Error,
-                    WitSeverity::Warning => Severity::Warning,
-                    WitSeverity::Information => Severity::Information,
-                    WitSeverity::Hint => Severity::Hint,
-                };
-
-                let (lo, hi) = normalize_range(result.start, result.end);
-                let range = TextRange::new(TextSize::from(lo), TextSize::from(hi));
-
-                let mut diagnostic =
-                    RuleDiagnostic::new(category!("plugin"), range, markup!({ result.message }))
-                        .with_severity(severity)
-                        .subcategory(rule_name.to_string());
-
-                // Secondary labels
-                for label in &result.labels {
-                    let (lo, hi) = normalize_range(label.start, label.end);
-                    let label_range = TextRange::new(TextSize::from(lo), TextSize::from(hi));
-                    diagnostic = diagnostic.label(label_range, markup!({ label.message }));
-                }
-
-                // Notes and warnings
-                for note in &result.notes {
-                    diagnostic = diagnostic.note(markup!({ note }));
-                }
-                for warning in &result.warnings {
-                    diagnostic = diagnostic.warning(markup!({ warning }));
-                }
-
-                // Diagnostic tags
-                if result.unnecessary == Some(true) {
-                    diagnostic = diagnostic.unnecessary();
-                }
-                if result.deprecated == Some(true) {
-                    diagnostic = diagnostic.deprecated();
-                }
-
-                if result.verbose.unwrap_or(false) {
-                    diagnostic = diagnostic.verbose();
-                }
-
-                let actions: Vec<PluginCodeAction> = result
-                    .actions
-                    .into_iter()
-                    .map(|a| {
-                        let applicability = if a.safe {
-                            biome_diagnostics::Applicability::Always
-                        } else {
-                            biome_diagnostics::Applicability::MaybeIncorrect
-                        };
-                        PluginCodeAction {
-                            message: a.message,
-                            applicability,
-                            edits: a
-                                .edits
-                                .into_iter()
-                                .map(|e| {
-                                    let (lo, hi) = normalize_range(e.start, e.end);
-                                    PluginTextEdit {
-                                        range: TextRange::new(
-                                            TextSize::from(lo),
-                                            TextSize::from(hi),
-                                        ),
-                                        replacement: e.replacement,
-                                    }
-                                })
-                                .collect(),
-                        }
-                    })
-                    .collect();
-
-                PluginDiagnosticEntry {
-                    diagnostic,
-                    actions,
-                }
-            })
-            .collect();
-
-        Ok(entries)
+        let mut session = self.create_session(
+            node, language, semantic_model, module_resolver, file_path,
+        )?;
+        // Node is already at handle 0 from create_session — call check directly.
+        session.check_current(rule_name, options_json)
     }
 }
+

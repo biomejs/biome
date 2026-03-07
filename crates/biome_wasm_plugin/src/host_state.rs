@@ -395,6 +395,34 @@ impl HostState {
         }
     }
 
+    /// Reset the handle table for a new node check within the same file.
+    ///
+    /// Clears the node table and registers `node` at handle 0, keeping the
+    /// semantic model, module resolver, file path, and regex cache intact.
+    /// This allows reusing a WASM instance across multiple `check()` calls
+    /// within the same file.
+    pub(crate) fn reset_for_node(
+        &mut self,
+        node: AnySyntaxNode,
+        language: PluginTargetLanguage,
+    ) {
+        self.nodes.clear();
+        let concrete = match language {
+            PluginTargetLanguage::JavaScript => node
+                .downcast_ref::<JsSyntaxNode>()
+                .map(|n| ConcreteNode::Js(n.clone())),
+            PluginTargetLanguage::Css => node
+                .downcast_ref::<CssSyntaxNode>()
+                .map(|n| ConcreteNode::Css(n.clone())),
+            PluginTargetLanguage::Json => node
+                .downcast_ref::<JsonSyntaxNode>()
+                .map(|n| ConcreteNode::Json(n.clone())),
+        };
+        if let Some(node) = concrete {
+            self.nodes.push(node);
+        }
+    }
+
     /// Intern a node and return its handle.
     ///
     /// Returns `u32::MAX` when the handle table is full. All host functions

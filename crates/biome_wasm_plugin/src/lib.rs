@@ -3,4 +3,4 @@
 mod engine;
 mod host_state;
 
-pub use engine::{WasmPluginEngine, WasmPluginMetadata};
+pub use engine::{WasmPluginEngine, WasmPluginMetadata, WasmPluginSession};

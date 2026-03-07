@@ -1,5 +1,5 @@
 use std::str::FromStr;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 use biome_analyze::{
     Phases, PluginDiagnosticEntry, PluginEvaluationResult, PluginTargetLanguage, RuleCategory,
@@ -10,7 +10,7 @@ use biome_diagnostics::{MessageAndDescription, category};
 use biome_js_semantic::SemanticModel;
 use biome_module_graph::ModuleResolver;
 use biome_rowan::{AnySyntaxNode, RawSyntaxKind, TextRange};
-use biome_wasm_plugin::WasmPluginEngine;
+use biome_wasm_plugin::{WasmPluginEngine, WasmPluginSession};
 use camino::{Utf8Path, Utf8PathBuf};
 
 use crate::diagnostics::CompileDiagnostic;
@@ -46,6 +46,9 @@ pub struct AnalyzerWasmPlugin {
     /// skips the WASM `check` call when the file source doesn't contain any of
     /// these strings (case-insensitive ASCII comparison).
     source_triggers: Vec<String>,
+    /// Cached WASM session for reuse across multiple `check()` calls within the
+    /// same file. Avoids per-node instantiation overhead.
+    session: Mutex<Option<WasmPluginSession>>,
 }
 
 impl AnalyzerWasmPlugin {
@@ -162,6 +165,7 @@ impl AnalyzerWasmPlugin {
                 rule_issue_number,
                 rule_recommended,
                 source_triggers,
+                session: Mutex::new(None),
             });
         }
 
@@ -221,27 +225,66 @@ impl AnalyzerPlugin for AnalyzerWasmPlugin {
         path: Arc<Utf8PathBuf>,
         services: &ServiceBag,
     ) -> PluginEvaluationResult {
-        // Extract SemanticModel from services when available (JS semantic phase).
-        let semantic_model = services.get_service::<SemanticModel>().cloned();
-
-        // Extract ModuleResolver from services when available (JS type inference).
-        let module_resolver: Option<Arc<ModuleResolver>> = services
-            .get_service::<Option<Arc<ModuleResolver>>>()
-            .and_then(|opt| opt.as_ref().map(Arc::clone));
-
         let file_path = path.as_str().to_string();
-
         let qualified_name = format!("{}/{}", self.plugin_name, self.rule_name);
 
-        match self.engine.check_node(
-            node,
-            &self.rule_name,
-            self.target_language,
-            semantic_model,
-            module_resolver,
-            file_path,
-            self.options_json.as_deref(),
-        ) {
+        let result = {
+            let mut guard = self.session.lock().unwrap_or_else(|e| e.into_inner());
+
+            // Reuse existing session if it's for the same file.
+            if guard
+                .as_ref()
+                .is_some_and(|s| s.file_path() == file_path)
+            {
+                // Session exists for this file — reset handle table and check.
+                guard
+                    .as_mut()
+                    .unwrap()
+                    .check_node(node, &self.rule_name, self.options_json.as_deref())
+            } else {
+                // Create a new session. The node is registered at handle 0
+                // by create_session, so we use check_current (no reset needed).
+                let semantic_model = services.get_service::<SemanticModel>().cloned();
+                let module_resolver: Option<Arc<ModuleResolver>> = services
+                    .get_service::<Option<Arc<ModuleResolver>>>()
+                    .and_then(|opt| opt.as_ref().map(Arc::clone));
+
+                match self.engine.create_session(
+                    node,
+                    self.target_language,
+                    semantic_model,
+                    module_resolver,
+                    file_path.clone(),
+                ) {
+                    Ok(mut session) => {
+                        let result = session.check_current(
+                            &self.rule_name,
+                            self.options_json.as_deref(),
+                        );
+                        *guard = Some(session);
+                        result
+                    }
+                    Err(error) => {
+                        return PluginEvaluationResult {
+                            diagnostics: vec![PluginDiagnosticEntry {
+                                diagnostic: RuleDiagnostic::new(
+                                    category!("plugin"),
+                                    None::<TextRange>,
+                                    markup!(
+                                        <Emphasis>{&self.rule_name}</Emphasis>
+                                        " errored: "<Error>{error.to_string()}</Error>
+                                    ),
+                                )
+                                .subcategory(qualified_name),
+                                actions: vec![],
+                            }],
+                        };
+                    }
+                }
+            }
+        };
+
+        match result {
             Ok(entries) => PluginEvaluationResult {
                 diagnostics: entries
                     .into_iter()
@@ -251,20 +294,26 @@ impl AnalyzerPlugin for AnalyzerWasmPlugin {
                     })
                     .collect(),
             },
-            Err(error) => PluginEvaluationResult {
-                diagnostics: vec![PluginDiagnosticEntry {
-                    diagnostic: RuleDiagnostic::new(
-                        category!("plugin"),
-                        None::<TextRange>,
-                        markup!(
-                            <Emphasis>{&self.rule_name}</Emphasis>
-                            " errored: "<Error>{error.to_string()}</Error>
-                        ),
-                    )
-                    .subcategory(qualified_name),
-                    actions: vec![],
-                }],
-            },
+            Err(error) => {
+                // Session is likely corrupted after an error — drop it.
+                if let Ok(mut guard) = self.session.lock() {
+                    *guard = None;
+                }
+                PluginEvaluationResult {
+                    diagnostics: vec![PluginDiagnosticEntry {
+                        diagnostic: RuleDiagnostic::new(
+                            category!("plugin"),
+                            None::<TextRange>,
+                            markup!(
+                                <Emphasis>{&self.rule_name}</Emphasis>
+                                " errored: "<Error>{error.to_string()}</Error>
+                            ),
+                        )
+                        .subcategory(qualified_name),
+                        actions: vec![],
+                    }],
+                }
+            }
         }
     }
 }
