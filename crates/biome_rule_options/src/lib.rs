@@ -84,6 +84,7 @@ pub mod no_empty_block;
 pub mod no_empty_block_statements;
 pub mod no_empty_character_class_in_regex;
 pub mod no_empty_interface;
+pub mod no_empty_object_keys;
 pub mod no_empty_pattern;
 pub mod no_empty_source;
 pub mod no_empty_type_parameters;

@@ -189,6 +189,7 @@ define_categories! {
     "lint/nursery/noDuplicateInputFieldNames": "https://biomejs.dev/linter/rules/no-duplicate-input-field-names",
     "lint/nursery/noDuplicateVariableNames": "https://biomejs.dev/linter/rules/no-duplicate-variable-names",
     "lint/nursery/noDuplicatedSpreadProps": "https://biomejs.dev/linter/rules/no-duplicated-spread-props",
+    "lint/nursery/noEmptyObjectKeys": "https://biomejs.dev/linter/rules/no-empty-object-keys",
     "lint/nursery/noEqualsToNull": "https://biomejs.dev/linter/rules/no-equals-to-null",
     "lint/nursery/noExcessiveClassesPerFile": "https://biomejs.dev/linter/rules/no-excessive-classes-per-file",
     "lint/nursery/noExcessiveLinesPerFile": "https://biomejs.dev/linter/rules/no-excessive-lines-per-file",

@@ -1144,6 +1144,7 @@ dependencies = [
  "biome_analyze_macros",
  "biome_configuration",
  "biome_console",
+ "biome_deserialize",
  "biome_diagnostics",
  "biome_json_factory",
  "biome_json_parser",
