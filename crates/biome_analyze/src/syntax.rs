@@ -59,7 +59,7 @@ pub struct SyntaxVisitor<L: Language> {
 
 impl<L: Language> SyntaxVisitor<L> {
     /// Create a [SyntaxVisitor] that only emits query matches for nodes whose
-    /// [SyntaxKind] is in the provided set. Nodes with kinds not in the set
+    /// `SyntaxKind` is in the provided set. Nodes with kinds not in the set
     /// are skipped entirely, avoiding per-node allocation overhead.
     pub fn with_kind_set(kind_set: SyntaxKindSet<L>) -> Self {
         Self {
@@ -106,10 +106,10 @@ impl<L: Language + 'static> Visitor for SyntaxVisitor<L> {
             return;
         }
 
-        if let Some(kind_set) = self.kind_set {
-            if !kind_set.matches(node.kind()) {
-                return;
-            }
+        if let Some(kind_set) = self.kind_set
+            && !kind_set.matches(node.kind())
+        {
+            return;
         }
 
         ctx.match_query(node.clone());
