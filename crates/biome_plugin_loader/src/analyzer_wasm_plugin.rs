@@ -1,5 +1,8 @@
+use std::cell::RefCell;
+use std::collections::HashMap;
 use std::str::FromStr;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
+use std::sync::atomic::{AtomicU64, Ordering};
 
 use biome_analyze::{
     Phases, PluginDiagnosticEntry, PluginEvaluationResult, PluginTargetLanguage, RuleCategory,
@@ -16,6 +19,15 @@ use camino::{Utf8Path, Utf8PathBuf};
 use crate::diagnostics::CompileDiagnostic;
 use crate::{AnalyzerPlugin, PluginDiagnostic};
 
+/// Global counter for assigning unique IDs to plugin instances.
+static NEXT_PLUGIN_ID: AtomicU64 = AtomicU64::new(0);
+
+thread_local! {
+    /// Per-thread WASM session cache. Each thread maintains its own sessions
+    /// so that parallel file analysis doesn't contend on a shared lock.
+    static SESSIONS: RefCell<HashMap<u64, WasmPluginSession>> = RefCell::new(HashMap::new());
+}
+
 /// An analyzer plugin backed by a WASM Component Model module.
 ///
 /// A single WASM module may expose multiple rules. Each `AnalyzerWasmPlugin`
@@ -23,6 +35,9 @@ use crate::{AnalyzerPlugin, PluginDiagnostic};
 #[derive(Debug)]
 pub struct AnalyzerWasmPlugin {
     engine: Arc<WasmPluginEngine>,
+    /// Unique ID for this plugin instance, used as the key in the thread-local
+    /// session cache.
+    plugin_id: u64,
     rule_name: String,
     /// Human-readable plugin name derived from the plugin path (e.g.
     /// `"wirex-biome-plugin"`). Used to namespace the rule in diagnostics so
@@ -46,9 +61,6 @@ pub struct AnalyzerWasmPlugin {
     /// skips the WASM `check` call when the file source doesn't contain any of
     /// these strings (case-insensitive ASCII comparison).
     source_triggers: Vec<String>,
-    /// Cached WASM session for reuse across multiple `check()` calls within the
-    /// same file. Avoids per-node instantiation overhead.
-    session: Mutex<Option<WasmPluginSession>>,
 }
 
 impl AnalyzerWasmPlugin {
@@ -154,6 +166,7 @@ impl AnalyzerWasmPlugin {
 
             plugins.push(Self {
                 engine: Arc::clone(&engine),
+                plugin_id: NEXT_PLUGIN_ID.fetch_add(1, Ordering::Relaxed),
                 rule_name: rule_name.clone(),
                 plugin_name: plugin_name.to_string(),
                 target_language,
@@ -165,7 +178,6 @@ impl AnalyzerWasmPlugin {
                 rule_issue_number,
                 rule_recommended,
                 source_triggers,
-                session: Mutex::new(None),
             });
         }
 
@@ -228,22 +240,16 @@ impl AnalyzerPlugin for AnalyzerWasmPlugin {
         let file_path = path.as_str().to_string();
         let qualified_name = format!("{}/{}", self.plugin_name, self.rule_name);
 
-        let result = {
-            let mut guard = self.session.lock().unwrap_or_else(|e| e.into_inner());
+        let result = SESSIONS.with(|sessions| {
+            let mut map = sessions.borrow_mut();
 
-            // Reuse existing session if it's for the same file.
-            if guard
-                .as_ref()
-                .is_some_and(|s| s.file_path() == file_path)
-            {
-                // Session exists for this file — reset handle table and check.
-                guard
-                    .as_mut()
-                    .unwrap()
-                    .check_node(node, &self.rule_name, self.options_json.as_deref())
-            } else {
-                // Create a new session. The node is registered at handle 0
-                // by create_session, so we use check_current (no reset needed).
+            // Check if we have a cached session for this plugin on this thread.
+            let needs_new_session = match map.get(&self.plugin_id) {
+                Some(session) => session.file_path() != file_path,
+                None => true,
+            };
+
+            if needs_new_session {
                 let semantic_model = services.get_service::<SemanticModel>().cloned();
                 let module_resolver: Option<Arc<ModuleResolver>> = services
                     .get_service::<Option<Arc<ModuleResolver>>>()
@@ -254,35 +260,23 @@ impl AnalyzerPlugin for AnalyzerWasmPlugin {
                     self.target_language,
                     semantic_model,
                     module_resolver,
-                    file_path.clone(),
+                    file_path,
                 ) {
                     Ok(mut session) => {
                         let result = session.check_current(
                             &self.rule_name,
                             self.options_json.as_deref(),
                         );
-                        *guard = Some(session);
+                        map.insert(self.plugin_id, session);
                         result
                     }
-                    Err(error) => {
-                        return PluginEvaluationResult {
-                            diagnostics: vec![PluginDiagnosticEntry {
-                                diagnostic: RuleDiagnostic::new(
-                                    category!("plugin"),
-                                    None::<TextRange>,
-                                    markup!(
-                                        <Emphasis>{&self.rule_name}</Emphasis>
-                                        " errored: "<Error>{error.to_string()}</Error>
-                                    ),
-                                )
-                                .subcategory(qualified_name),
-                                actions: vec![],
-                            }],
-                        };
-                    }
+                    Err(e) => Err(e),
                 }
+            } else {
+                let session = map.get_mut(&self.plugin_id).unwrap();
+                session.check_node(node, &self.rule_name, self.options_json.as_deref())
             }
-        };
+        });
 
         match result {
             Ok(entries) => PluginEvaluationResult {
@@ -295,10 +289,10 @@ impl AnalyzerPlugin for AnalyzerWasmPlugin {
                     .collect(),
             },
             Err(error) => {
-                // Session is likely corrupted after an error — drop it.
-                if let Ok(mut guard) = self.session.lock() {
-                    *guard = None;
-                }
+                // Session is likely corrupted after an error — remove it.
+                SESSIONS.with(|sessions| {
+                    sessions.borrow_mut().remove(&self.plugin_id);
+                });
                 PluginEvaluationResult {
                     diagnostics: vec![PluginDiagnosticEntry {
                         diagnostic: RuleDiagnostic::new(
