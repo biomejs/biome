@@ -21,6 +21,7 @@ name    = "json_analyzer"
 biome_analyze        = { workspace = true }
 biome_analyze_macros = { workspace = true }
 biome_console        = { workspace = true }
+biome_deserialize    = { workspace = true }
 biome_diagnostics    = { workspace = true }
 biome_json_factory   = { workspace = true }
 biome_json_syntax    = { workspace = true }
