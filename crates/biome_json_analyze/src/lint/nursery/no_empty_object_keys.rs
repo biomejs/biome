@@ -2,6 +2,7 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_deserialize::json::unescape_json_string;
 use biome_json_syntax::JsonMemberName;
 use biome_rowan::AstNode;
 use biome_rule_options::no_empty_object_keys::NoEmptyObjectKeysOptions;
@@ -74,8 +75,8 @@ impl Rule for NoEmptyObjectKeys {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let value = node.inner_string_text().ok()?;
-        let trimmed_value = value.trim().replace("\\n", "").replace("\\t", "");
-        if trimmed_value.is_empty() {
+        let binding = unescape_json_string(value);
+        if binding.trim().is_empty() {
             return Some(());
         }
 
