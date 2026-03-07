@@ -2,12 +2,21 @@
 "@biomejs/biome": patch
 ---
 
-Partially fix [#7583](https://github.com/biomejs/biome/issues/7583).
+Fixed [#7583](https://github.com/biomejs/biome/issues/7583):
 [`organizeImports`](https://biomejs.dev/assist/actions/organize-imports/) now
-sorts named specifiers inside bare exports.
-This fix doesn't merge adjacent bare exports.
+sorts named specifiers inside bare exports and merges bare exports.
 
 ```diff
 - export { b, a };
-+ export { a, b };
+- export { c };
++ export { a, b, c };
+```
+
+Also, `organizeImports` now correctly adds a blank line between an import chunk
+and an export chunk.
+
+```diff
+  import { A } from "package";
++
+  export { A };
 ```
