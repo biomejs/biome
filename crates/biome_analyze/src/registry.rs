@@ -1,19 +1,22 @@
 use crate::{
     AddVisitor, AnalysisFilter, GroupCategory, QueryMatcher, Rule, RuleGroup, RuleKey,
-    RuleMetadata, ServiceBag, SignalEntry, Visitor,
+    RuleMetadata, ServiceBag, SignalEntry, SyntaxVisitor, Visitor,
     context::RuleContext,
     matcher::{GroupKey, MatchQueryParams},
     query::{QueryKey, Queryable},
     signals::RuleSignal,
 };
 use biome_diagnostics::Error;
-use biome_rowan::{AstNode, Language, RawSyntaxKind, SyntaxKind, SyntaxNode};
+use biome_rowan::{AstNode, Language, RawSyntaxKind, SyntaxKind, SyntaxKindSet, SyntaxNode};
 use rustc_hash::{FxHashMap, FxHashSet};
 use std::{
     any::TypeId,
     borrow,
     collections::{BTreeMap, BTreeSet},
 };
+
+/// Number of phases supported by the [RuleRegistry].
+const PHASE_COUNT: usize = 2;
 
 /// Defines all the phases that the [RuleRegistry] supports.
 #[repr(usize)]
@@ -98,7 +101,7 @@ impl<L: Language> RegistryVisitor<L> for MetadataRegistry {
 ///   after the "SemanticModel" is ready, which demands a whole transverse of the parsed tree.
 pub struct RuleRegistry<L: Language> {
     /// Holds a collection of rules for each phase.
-    phase_rules: [PhaseRules<L>; 2],
+    phase_rules: [PhaseRules<L>; PHASE_COUNT],
 }
 
 impl<L: Language + Default> RuleRegistry<L> {
@@ -115,6 +118,7 @@ impl<L: Language + Default> RuleRegistry<L> {
             visitors: BTreeMap::default(),
             services: ServiceBag::default(),
             diagnostics: Vec::new(),
+            syntax_kind_sets: [SyntaxKindSet::empty(), SyntaxKindSet::empty()],
         }
     }
 }
@@ -143,6 +147,10 @@ pub struct RuleRegistryBuilder<'a, L: Language> {
     // Service Bag
     services: ServiceBag,
     diagnostics: Vec<Error>,
+    /// Per-phase union of all [SyntaxKindSet] values from registered rules.
+    /// Used to create a filtered [SyntaxVisitor] that only emits query matches
+    /// for node kinds that at least one rule cares about.
+    syntax_kind_sets: [SyntaxKindSet<L>; PHASE_COUNT],
 }
 
 impl<L: Language + Default + 'static> RegistryVisitor<L> for RuleRegistryBuilder<'_, L> {
@@ -167,13 +175,14 @@ impl<L: Language + Default + 'static> RegistryVisitor<L> for RuleRegistryBuilder
             return;
         }
 
-        let phase = R::phase() as usize;
-        let phase = &mut self.registry.phase_rules[phase];
+        let phase_index = R::phase() as usize;
+        let phase = &mut self.registry.phase_rules[phase_index];
 
         let rule = RegistryRule::new::<R>(phase.rule_states.len());
 
         match <R::Query as Queryable>::key() {
             QueryKey::Syntax(key) => {
+                self.syntax_kind_sets[phase_index] = self.syntax_kind_sets[phase_index].union(key);
                 let TypeRules::SyntaxRules { rules } = phase
                     .type_rules
                     .entry(TypeId::of::<SyntaxNode<L>>())
@@ -242,8 +251,25 @@ type BuilderResult<L> = (
     BTreeMap<(Phases, TypeId), Box<dyn Visitor<Language = L>>>,
 );
 
-impl<L: Language> RuleRegistryBuilder<'_, L> {
-    pub fn build(self) -> BuilderResult<L> {
+impl<L: Language + 'static> RuleRegistryBuilder<'_, L> {
+    pub fn build(mut self) -> BuilderResult<L> {
+        // Replace SyntaxVisitor instances with filtered versions that only
+        // emit query matches for node kinds that at least one rule queries.
+        // This avoids per-node Box::new() allocations for kinds no rule
+        // cares about.
+        let phases = [Phases::Syntax, Phases::Semantic];
+        for (phase_index, &phase) in phases.iter().enumerate() {
+            let key = (phase, TypeId::of::<SyntaxVisitor<L>>());
+            if self.visitors.contains_key(&key) {
+                self.visitors.insert(
+                    key,
+                    Box::new(SyntaxVisitor::with_kind_set(
+                        self.syntax_kind_sets[phase_index],
+                    )),
+                );
+            }
+        }
+
         (
             self.registry,
             self.services,

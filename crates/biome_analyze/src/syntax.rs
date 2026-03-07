@@ -1,4 +1,4 @@
-use biome_rowan::{AstNode, Language, SyntaxNode, WalkEvent};
+use biome_rowan::{AstNode, Language, SyntaxKindSet, SyntaxNode, WalkEvent};
 
 use crate::{
     AddVisitor, Phases, QueryKey, QueryMatch, Queryable, ServiceBag, Visitor, VisitorContext,
@@ -50,11 +50,31 @@ pub struct SyntaxVisitor<L: Language> {
     /// of that subtree. The visitor will then ignore all events until it
     /// receives a [WalkEvent::Leave] for the `skip_subtree` node
     skip_subtree: Option<SyntaxNode<L>>,
+    /// Optional filter to restrict which [SyntaxKind] values are emitted as
+    /// query matches. When [None], all nodes are emitted (unfiltered).
+    /// When [Some], only nodes whose kind is in the set are emitted,
+    /// avoiding unnecessary allocations for nodes no rule cares about.
+    kind_set: Option<SyntaxKindSet<L>>,
+}
+
+impl<L: Language> SyntaxVisitor<L> {
+    /// Create a [SyntaxVisitor] that only emits query matches for nodes whose
+    /// [SyntaxKind] is in the provided set. Nodes with kinds not in the set
+    /// are skipped entirely, avoiding per-node allocation overhead.
+    pub fn with_kind_set(kind_set: SyntaxKindSet<L>) -> Self {
+        Self {
+            skip_subtree: None,
+            kind_set: Some(kind_set),
+        }
+    }
 }
 
 impl<L: Language> Default for SyntaxVisitor<L> {
     fn default() -> Self {
-        Self { skip_subtree: None }
+        Self {
+            skip_subtree: None,
+            kind_set: None,
+        }
     }
 }
 
@@ -84,6 +104,12 @@ impl<L: Language + 'static> Visitor for SyntaxVisitor<L> {
         {
             self.skip_subtree = Some(node.clone());
             return;
+        }
+
+        if let Some(kind_set) = self.kind_set {
+            if !kind_set.matches(node.kind()) {
+                return;
+            }
         }
 
         ctx.match_query(node.clone());

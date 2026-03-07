@@ -24,6 +24,12 @@ use crate::{
 pub use batch::*;
 pub use mutation::{AstNodeExt, AstNodeListExt, AstSeparatedListExt};
 
+/// Number of `u128` buckets used by [SyntaxKindSet] to represent the bitfield.
+/// This determines the maximum [RawSyntaxKind] value that can be stored:
+/// `SYNTAX_KIND_SET_BUCKETS * 128 - 1`. All language syntax kind enums must
+/// have their `__LAST` variant within this limit.
+pub const SYNTAX_KIND_SET_BUCKETS: usize = 5;
+
 /// Represents a set of [SyntaxKind] as a bitfield, with each bit representing
 /// whether the corresponding [RawSyntaxKind] value is contained in the set
 ///
@@ -31,12 +37,17 @@ pub use mutation::{AstNodeExt, AstNodeListExt, AstSeparatedListExt};
 /// bitfield here being twice as large as it needs to cover all nodes as well
 /// as all token kinds
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct SyntaxKindSet<L: Language>([u128; 5], PhantomData<L>);
+pub struct SyntaxKindSet<L: Language>([u128; SYNTAX_KIND_SET_BUCKETS], PhantomData<L>);
 
 impl<L> SyntaxKindSet<L>
 where
     L: Language,
 {
+    /// Create an empty [SyntaxKindSet] containing no [SyntaxKind] values
+    pub const fn empty() -> Self {
+        Self([0; SYNTAX_KIND_SET_BUCKETS], PhantomData)
+    }
+
     /// Create a new [SyntaxKindSet] containing only the provided [SyntaxKind]
     pub fn of(kind: L::Kind) -> Self {
         Self::from_raw(kind.to_raw())
@@ -60,7 +71,7 @@ where
         let shift = kind % u128::BITS as u16;
         let mask = 1 << shift;
 
-        let mut bits = [0; 5];
+        let mut bits = [0; SYNTAX_KIND_SET_BUCKETS];
         bits[index] = mask;
 
         Self(bits, PhantomData)
