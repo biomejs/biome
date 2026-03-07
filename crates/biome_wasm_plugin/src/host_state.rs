@@ -12,7 +12,9 @@ use biome_js_syntax::{
 use biome_js_type_info::{Literal, TypeData};
 use biome_json_syntax::{JsonSyntaxNode, JsonSyntaxToken};
 use biome_module_graph::ModuleResolver;
-use biome_rowan::{AnySyntaxNode, AstNode, NodeOrToken, SyntaxKind, SyntaxNodeCast};
+use biome_rowan::{
+    AnySyntaxNode, AstNode, NodeOrToken, SyntaxKind, SyntaxNodeCast, TriviaPieceKind,
+};
 use biome_text_size::TextRange;
 use wasmtime::component::ResourceTable;
 use wasmtime_wasi::{IoView, WasiCtx, WasiCtxBuilder, WasiView};
@@ -253,6 +255,53 @@ impl ConcreteNode {
         dispatch_map!(self, |n| n.children().find(|c| c.kind().to_raw().0 == kind))
     }
 
+    /// Walk all tokens in the tree and collect comment trivia pieces.
+    /// Returns (text, start_offset, end_offset) for each comment.
+    fn collect_comments(&self) -> Vec<(String, u32, u32)> {
+        /// Helper: collect comments from a generic language node's token tree.
+        fn collect_from_tokens<L: biome_rowan::Language>(
+            node: &biome_rowan::SyntaxNode<L>,
+        ) -> Vec<(String, u32, u32)> {
+            let mut comments = Vec::new();
+            for token in node.tokens() {
+                for piece in token.leading_trivia().pieces() {
+                    let kind = piece.kind();
+                    if kind == TriviaPieceKind::SingleLineComment
+                        || kind == TriviaPieceKind::MultiLineComment
+                    {
+                        let range = piece.text_range();
+                        comments.push((
+                            piece.text().to_string(),
+                            u32::from(range.start()),
+                            u32::from(range.end()),
+                        ));
+                    }
+                }
+                for piece in token.trailing_trivia().pieces() {
+                    let kind = piece.kind();
+                    if kind == TriviaPieceKind::SingleLineComment
+                        || kind == TriviaPieceKind::MultiLineComment
+                    {
+                        let range = piece.text_range();
+                        comments.push((
+                            piece.text().to_string(),
+                            u32::from(range.start()),
+                            u32::from(range.end()),
+                        ));
+                    }
+                }
+            }
+            comments
+        }
+
+        match self {
+            Self::Js(n) => collect_from_tokens(n),
+            Self::Css(n) => collect_from_tokens(n),
+            Self::Json(n) => collect_from_tokens(n),
+            _ => Vec::new(),
+        }
+    }
+
     /// Returns the inner `JsSyntaxNode` if this is a JS node.
     fn as_js_node(&self) -> Option<&JsSyntaxNode> {
         match self {
@@ -433,6 +482,53 @@ impl HostState {
             let range = n.text_trimmed_range();
             (u32::from(range.start()), u32::from(range.end()))
         })
+    }
+
+    // --- Batch accessors ---
+
+    /// Return kind, trimmed text, trimmed range, child count, and is-token in one call.
+    pub(crate) fn node_info(&self, handle: u32) -> (u32, String, u32, u32, u32, bool) {
+        let Some(node) = self.get(handle) else {
+            return (0, String::new(), 0, 0, 0, false);
+        };
+        let kind = u32::from(node.kind_raw());
+        let trimmed_text = node.text_trimmed_string();
+        let trimmed_range = node.text_trimmed_range();
+        let child_count = node.child_count() as u32;
+        let is_token = node.is_token();
+        (
+            kind,
+            trimmed_text,
+            u32::from(trimmed_range.start()),
+            u32::from(trimmed_range.end()),
+            child_count,
+            is_token,
+        )
+    }
+
+    /// Return all children with their handle, kind, and trimmed text in one call.
+    pub(crate) fn node_children_info(&mut self, handle: u32) -> Vec<(u32, u32, String)> {
+        let Some(node) = self.get(handle) else {
+            return Vec::new();
+        };
+        let children = node.children();
+        children
+            .into_iter()
+            .map(|c| {
+                let kind = u32::from(c.kind_raw());
+                let text = c.text_trimmed_string();
+                let h = self.intern(c);
+                (h, kind, text)
+            })
+            .collect()
+    }
+
+    /// Return all comment trivia in the file (walks the root node's token tree).
+    pub(crate) fn file_comments(&self) -> Vec<(String, u32, u32)> {
+        let Some(root) = self.nodes.first() else {
+            return Vec::new();
+        };
+        root.collect_comments()
     }
 
     // --- Semantic model host function implementations ---

@@ -37,7 +37,9 @@ wasmtime::component::bindgen!({
 });
 
 use biome::plugin::host::Host;
-use biome::plugin::types::{Host as TypesHost, Severity as WitSeverity, TypeInfo};
+use biome::plugin::types::{
+    ChildInfo, CommentInfo, Host as TypesHost, NodeInfo, Severity as WitSeverity, TypeInfo,
+};
 
 impl TypesHost for HostState {}
 
@@ -202,6 +204,37 @@ impl Host for HostState {
     fn file_path(&mut self) -> String {
         Self::file_path(self)
     }
+
+    fn get_node_info(&mut self, node: u32) -> NodeInfo {
+        let (kind, trimmed_text, trimmed_range_start, trimmed_range_end, child_count, is_token) =
+            Self::node_info(self, node);
+        NodeInfo {
+            kind,
+            trimmed_text,
+            trimmed_range_start,
+            trimmed_range_end,
+            child_count,
+            is_token,
+        }
+    }
+
+    fn node_children_info(&mut self, node: u32) -> Vec<ChildInfo> {
+        Self::node_children_info(self, node)
+            .into_iter()
+            .map(|(handle, kind, trimmed_text)| ChildInfo {
+                handle,
+                kind,
+                trimmed_text,
+            })
+            .collect()
+    }
+
+    fn file_comments(&mut self) -> Vec<CommentInfo> {
+        Self::file_comments(self)
+            .into_iter()
+            .map(|(text, start, end)| CommentInfo { text, start, end })
+            .collect()
+    }
 }
 
 /// Metadata for a single rule within a WASM plugin.
@@ -225,6 +258,10 @@ pub struct WasmPluginMetadata {
     pub rule_names: Vec<String>,
     pub query_kinds_by_rule: HashMap<String, Vec<u32>>,
     pub rule_metadata_by_rule: HashMap<String, WasmRuleMetadata>,
+    /// Per-rule trigger strings for host-side pre-filtering. If non-empty,
+    /// the host skips calling `check` when the file source doesn't contain
+    /// any of these strings (case-insensitive). Empty means "always call".
+    pub source_triggers_by_rule: HashMap<String, Vec<String>>,
 }
 
 /// Engine for loading and executing WASM plugins.
@@ -279,6 +316,7 @@ impl WasmPluginEngine {
 
         let mut query_kinds_by_rule = HashMap::new();
         let mut rule_metadata_by_rule = HashMap::new();
+        let mut source_triggers_by_rule = HashMap::new();
 
         for rule_name in &rule_names {
             let query_kinds = bindings.call_query_kinds_for_rule(&mut store, rule_name)?;
@@ -299,6 +337,12 @@ impl WasmPluginEngine {
                     issue_number: meta.issue_number,
                 },
             );
+
+            let triggers =
+                bindings.call_source_triggers_for_rule(&mut store, rule_name)?;
+            if !triggers.is_empty() {
+                source_triggers_by_rule.insert(rule_name.clone(), triggers);
+            }
         }
 
         Ok(WasmPluginMetadata {
@@ -306,6 +350,7 @@ impl WasmPluginEngine {
             rule_names,
             query_kinds_by_rule,
             rule_metadata_by_rule,
+            source_triggers_by_rule,
         })
     }
 

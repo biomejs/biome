@@ -64,6 +64,30 @@ interface types {
         union-members: option<list<string>>,
     }
 
+    /// Batch info about a single node, returned by `node-info`.
+    record node-info {
+        kind: u32,
+        trimmed-text: string,
+        trimmed-range-start: u32,
+        trimmed-range-end: u32,
+        child-count: u32,
+        is-token: bool,
+    }
+
+    /// Info about a child node, returned by `node-children-info`.
+    record child-info {
+        handle: u32,
+        kind: u32,
+        trimmed-text: string,
+    }
+
+    /// Info about a comment trivia, returned by `file-comments`.
+    record comment-info {
+        text: string,
+        start: u32,
+        end: u32,
+    }
+
     /// Metadata about a rule exported by the plugin.
     record rule-metadata {
         /// The version when this rule was first introduced (e.g. "2.1.0").
@@ -131,6 +155,25 @@ interface host {
 
     /// Get the trimmed text range [start, end) excluding leading/trailing trivia.
     node-trimmed-range: func(node: u32) -> tuple<u32, u32>;
+
+    // --- Batch accessors (reduce WASM/host boundary crossings) ---
+
+    use types.{node-info, child-info, comment-info};
+
+    /// Get kind, trimmed text, trimmed range, child count, and token flag in one call.
+    /// Replaces separate calls to node-kind + node-trimmed-text + node-trimmed-range +
+    /// node-child-count + element-is-token.
+    get-node-info: func(node: u32) -> node-info;
+
+    /// Get all children with their handle, kind, and trimmed text in one call.
+    /// Replaces node-children + N × (node-kind + node-trimmed-text).
+    node-children-info: func(node: u32) -> list<child-info>;
+
+    /// Return all comment trivia in the current file as a flat list.
+    /// Each entry contains the comment text and its byte offset range.
+    /// Walks the root node's token tree to collect single-line (//) and
+    /// multi-line (/* */) comments.
+    file-comments: func() -> list<comment-info>;
 
     // --- Semantic model access (JS only; returns none/empty for CSS/JSON) ---
 
@@ -269,6 +312,12 @@ world plugin {
     /// Called once before any `check` calls for that rule.
     /// Plugins that do not accept options should implement this as a no-op.
     export configure: func(rule: string, options-json: string);
+
+    /// Optional trigger strings for a rule. If non-empty, the host will skip
+    /// calling `check` when the file source text does not contain any of the
+    /// returned strings (case-insensitive). Return an empty list to always be
+    /// called (default behavior for rules that cannot be pre-filtered).
+    export source-triggers-for-rule: func(rule: string) -> list<string>;
 
     /// Check a single matched node for a specific rule. Returns diagnostics.
     export check: func(node: u32, rule: string) -> list<check-result>;

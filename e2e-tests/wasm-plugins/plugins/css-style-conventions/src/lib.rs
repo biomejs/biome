@@ -68,6 +68,10 @@ impl Guest for CssStyleConventions {
         vec![css_kinds::CSS_DECLARATION]
     }
 
+    fn source_triggers_for_rule(_rule: String) -> Vec<String> {
+        vec![]
+    }
+
     fn configure(rule: String, options_json: String) {
         if rule == "customPropertyPattern" {
             if let Some(pattern) = biome_plugin_sdk::options::get_string(&options_json, "pattern") {

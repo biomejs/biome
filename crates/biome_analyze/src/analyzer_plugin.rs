@@ -143,6 +143,14 @@ pub trait AnalyzerPlugin: Debug + Send + Sync {
     fn issue_number(&self) -> Option<&str> {
         None
     }
+
+    /// Trigger strings for host-side pre-filtering. If non-empty, the host
+    /// skips calling [`evaluate`](Self::evaluate) when the file source text
+    /// doesn't contain any of these strings (case-insensitive ASCII).
+    /// Return an empty slice to always be called (the default).
+    fn source_triggers(&self) -> &[String] {
+        &[]
+    }
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
@@ -338,6 +346,11 @@ pub struct BatchPluginVisitor<L: Language> {
     /// Cached per-plugin results of `applies_to_file`. Populated lazily on
     /// first `WalkEvent::Enter` — the file path is constant for the entire walk.
     applicable: Option<Vec<bool>>,
+
+    /// Cached per-plugin results of source-trigger pre-filtering. `true` means
+    /// the file source contains at least one trigger string (or the plugin has
+    /// no triggers). Populated lazily on first `WalkEvent::Enter`.
+    trigger_matched: Option<Vec<bool>>,
 }
 
 impl<L> BatchPluginVisitor<L>
@@ -371,6 +384,7 @@ where
             kind_to_plugins,
             skip_subtree: None,
             applicable: None,
+            trigger_matched: None,
         }
     }
 }
@@ -424,8 +438,38 @@ where
                 .collect()
         });
 
+        // Lazily compute source-trigger pre-filter results for each plugin.
+        // Uses the file root's source text for a one-time check per file.
+        let trigger_matched = self.trigger_matched.get_or_insert_with(|| {
+            // Navigate to the root node to get the full file source text.
+            let root_node = {
+                let mut n = node.clone();
+                while let Some(parent) = n.parent() {
+                    n = parent;
+                }
+                n
+            };
+            let source = root_node.text_with_trivia().to_string();
+            self.plugins
+                .iter()
+                .map(|p| {
+                    let triggers = p.source_triggers();
+                    if triggers.is_empty() {
+                        return true; // no triggers = always run
+                    }
+                    triggers.iter().any(|t| {
+                        let t_bytes = t.as_bytes();
+                        source
+                            .as_bytes()
+                            .windows(t_bytes.len())
+                            .any(|w| w.eq_ignore_ascii_case(t_bytes))
+                    })
+                })
+                .collect()
+        });
+
         for &idx in plugin_indices {
-            if !applicable[idx] {
+            if !applicable[idx] || !trigger_matched[idx] {
                 continue;
             }
 

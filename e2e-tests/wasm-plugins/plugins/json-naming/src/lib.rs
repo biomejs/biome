@@ -55,6 +55,10 @@ impl Guest for JsonNaming {
         vec![json_kinds::JSON_MEMBER_NAME]
     }
 
+    fn source_triggers_for_rule(_rule: String) -> Vec<String> {
+        vec![]
+    }
+
     fn configure(_rule: String, options_json: String) {
         if let Some(convention) = biome_plugin_sdk::options::get_string(&options_json, "convention")
         {

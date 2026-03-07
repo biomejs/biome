@@ -48,6 +48,10 @@ impl Guest for BooleanNaming {
         vec![js_kinds::JS_VARIABLE_DECLARATOR]
     }
 
+    fn source_triggers_for_rule(_rule: String) -> Vec<String> {
+        vec![]
+    }
+
     fn configure(_rule: String, options_json: String) {
         if let Some(pattern) = biome_plugin_sdk::options::get_string(&options_json, "pattern") {
             let _ = PATTERN.set(pattern);

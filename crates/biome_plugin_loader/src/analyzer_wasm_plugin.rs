@@ -42,6 +42,10 @@ pub struct AnalyzerWasmPlugin {
     rule_issue_number: Option<String>,
     /// Whether this rule is recommended (defaults to true if not specified).
     rule_recommended: bool,
+    /// Trigger strings for host-side pre-filtering. If non-empty, `evaluate`
+    /// skips the WASM `check` call when the file source doesn't contain any of
+    /// these strings (case-insensitive ASCII comparison).
+    source_triggers: Vec<String>,
 }
 
 impl AnalyzerWasmPlugin {
@@ -139,6 +143,12 @@ impl AnalyzerWasmPlugin {
 
             let rule_recommended = rule_meta.is_none_or(|m| m.recommended);
 
+            let source_triggers = metadata
+                .source_triggers_by_rule
+                .get(rule_name)
+                .cloned()
+                .unwrap_or_default();
+
             plugins.push(Self {
                 engine: Arc::clone(&engine),
                 rule_name: rule_name.clone(),
@@ -151,6 +161,7 @@ impl AnalyzerWasmPlugin {
                 rule_deprecated,
                 rule_issue_number,
                 rule_recommended,
+                source_triggers,
             });
         }
 
@@ -198,6 +209,10 @@ impl AnalyzerPlugin for AnalyzerWasmPlugin {
 
     fn issue_number(&self) -> Option<&str> {
         self.rule_issue_number.as_deref()
+    }
+
+    fn source_triggers(&self) -> &[String] {
+        &self.source_triggers
     }
 
     fn evaluate(
