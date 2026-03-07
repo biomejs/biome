@@ -239,6 +239,8 @@ fn has_accessible_content(html_child_list: &HtmlElementList, is_astro: bool) -> 
                     });
                     !is_hidden
                 }
+                // Custom components (PascalCase) may render accessible content
+                Some(name) if name.starts_with(|c: char| c.is_uppercase()) => true,
                 _ => false,
             }
         }

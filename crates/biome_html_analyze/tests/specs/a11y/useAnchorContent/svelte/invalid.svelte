@@ -18,6 +18,3 @@
 
 <!-- Hidden input is not accessible -->
 <a><input type="hidden" /></a>
-
-<!-- Image component is not recognized outside Astro -->
-<a><Image alt="description" /></a>
