@@ -15,6 +15,9 @@ use std::{
     collections::{BTreeMap, BTreeSet},
 };
 
+/// Number of phases supported by the [RuleRegistry].
+const PHASE_COUNT: usize = 2;
+
 /// Defines all the phases that the [RuleRegistry] supports.
 #[repr(usize)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -98,7 +101,7 @@ impl<L: Language> RegistryVisitor<L> for MetadataRegistry {
 ///   after the "SemanticModel" is ready, which demands a whole transverse of the parsed tree.
 pub struct RuleRegistry<L: Language> {
     /// Holds a collection of rules for each phase.
-    phase_rules: [PhaseRules<L>; 2],
+    phase_rules: [PhaseRules<L>; PHASE_COUNT],
 }
 
 impl<L: Language + Default> RuleRegistry<L> {
@@ -286,6 +289,23 @@ impl<L: Language + 'static> QueryMatcher<L> for RuleRegistry<L> {
             // TODO: #3394 track error in the signal queue
             let _ = (rule.run)(&mut params, state);
         }
+    }
+
+    fn has_rules_for_syntax_kind(&self, phase: Phases, kind: L::Kind) -> bool {
+        let phase = &self.phase_rules[phase as usize];
+
+        let Some(rules) = phase.type_rules.get(&TypeId::of::<SyntaxNode<L>>()) else {
+            return false;
+        };
+
+        let TypeRules::SyntaxRules { rules } = rules else {
+            return false;
+        };
+
+        let RawSyntaxKind(kind) = kind.to_raw();
+        let kind = usize::from(kind);
+
+        matches!(rules.get(kind), Some(entry) if !entry.rules.is_empty())
     }
 }
 

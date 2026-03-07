@@ -31,6 +31,23 @@ impl<L: Language> VisitorContext<'_, '_, L> {
             options: self.options,
         })
     }
+
+    /// Optimized query match for syntax nodes. Checks whether any rule is
+    /// registered for the node's [SyntaxKind] before cloning the node and
+    /// allocating the [Query] wrapper. This avoids per-node heap allocations
+    /// for syntax kinds that no rule queries.
+    pub fn match_syntax_query(&mut self, node: &SyntaxNode<L>)
+    where
+        L: 'static,
+    {
+        if !self
+            .query_matcher
+            .has_rules_for_syntax_kind(self.phase, node.kind())
+        {
+            return;
+        }
+        self.match_query(node.clone());
+    }
 }
 
 /// Mutable context objects provided to the finish hook of visitors

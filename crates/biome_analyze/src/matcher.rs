@@ -17,6 +17,16 @@ use std::{
 pub trait QueryMatcher<L: Language> {
     /// Execute a single query match
     fn match_query(&mut self, params: MatchQueryParams<L>);
+
+    /// Returns `true` if any rule in the given `phase` is registered for
+    /// the specified syntax `kind`. This allows callers to skip expensive
+    /// allocations (cloning nodes, boxing queries) when no rule would match.
+    ///
+    /// The default implementation returns `true` unconditionally (conservative).
+    fn has_rules_for_syntax_kind(&self, phase: Phases, kind: <L as Language>::Kind) -> bool {
+        let _ = (phase, kind);
+        true
+    }
 }
 
 /// Parameters provided to [QueryMatcher::match_query] and require to run lint rules
@@ -214,6 +224,10 @@ where
     fn match_query(&mut self, params: MatchQueryParams<L>) {
         (self.func)(&params);
         self.inner.match_query(params);
+    }
+
+    fn has_rules_for_syntax_kind(&self, phase: Phases, kind: <L as Language>::Kind) -> bool {
+        self.inner.has_rules_for_syntax_kind(phase, kind)
     }
 }
 

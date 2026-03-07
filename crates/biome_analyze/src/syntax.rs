@@ -86,7 +86,7 @@ impl<L: Language + 'static> Visitor for SyntaxVisitor<L> {
             return;
         }
 
-        ctx.match_query(node.clone());
+        ctx.match_syntax_query(node);
     }
 }
 
