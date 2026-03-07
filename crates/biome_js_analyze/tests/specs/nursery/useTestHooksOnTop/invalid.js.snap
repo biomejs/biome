@@ -1,0 +1,270 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+// Hook after test in describe
+describe('foo', () => {
+  it('does something', () => {});
+  beforeEach(() => {});
+});
+
+// Multiple hooks after test
+describe('bar', () => {
+  it('test one', () => {});
+  beforeAll(() => {});
+  afterEach(() => {});
+});
+
+// Hook after test at top level
+it('first test', () => {});
+beforeEach(() => {});
+
+// Hook after test, with a valid hook earlier (only later one flagged)
+describe('qux', () => {
+  beforeAll(() => {});
+  it('first', () => {});
+  afterEach(() => {});
+});
+
+// From the ESLint docs: nested describe with hooks out of order
+describe('outer', () => {
+  beforeEach(() => {});
+  it('accepts this input', () => {});
+  beforeAll(() => {});
+  describe('inner', () => {
+    beforeEach(() => {});
+    it('accepts that input', () => {});
+    afterEach(() => {});
+    beforeEach(() => {});
+  });
+});
+
+```
+
+# Diagnostics
+```
+invalid.js:6:3 lint/nursery/useTestHooksOnTop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! beforeEach should appear before any test cases.
+  
+    4 │ describe('foo', () => {
+    5 │   it('does something', () => {});
+  > 6 │   beforeEach(() => {});
+      │   ^^^^^^^^^^^^^^^^^^^^
+    7 │ });
+    8 │ 
+  
+  i Placing the hook after this test case makes it harder to spot the setup and teardown for these tests at a glance.
+  
+    3 │ // Hook after test in describe
+    4 │ describe('foo', () => {
+  > 5 │   it('does something', () => {});
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │   beforeEach(() => {});
+    7 │ });
+  
+  i Move the hook above all test cases in the same block for better readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:3 lint/nursery/useTestHooksOnTop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! beforeAll should appear before any test cases.
+  
+    10 │ describe('bar', () => {
+    11 │   it('test one', () => {});
+  > 12 │   beforeAll(() => {});
+       │   ^^^^^^^^^^^^^^^^^^^
+    13 │   afterEach(() => {});
+    14 │ });
+  
+  i Placing the hook after this test case makes it harder to spot the setup and teardown for these tests at a glance.
+  
+     9 │ // Multiple hooks after test
+    10 │ describe('bar', () => {
+  > 11 │   it('test one', () => {});
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │   beforeAll(() => {});
+    13 │   afterEach(() => {});
+  
+  i Move the hook above all test cases in the same block for better readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:3 lint/nursery/useTestHooksOnTop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! afterEach should appear before any test cases.
+  
+    11 │   it('test one', () => {});
+    12 │   beforeAll(() => {});
+  > 13 │   afterEach(() => {});
+       │   ^^^^^^^^^^^^^^^^^^^
+    14 │ });
+    15 │ 
+  
+  i Placing the hook after this test case makes it harder to spot the setup and teardown for these tests at a glance.
+  
+     9 │ // Multiple hooks after test
+    10 │ describe('bar', () => {
+  > 11 │   it('test one', () => {});
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │   beforeAll(() => {});
+    13 │   afterEach(() => {});
+  
+  i Move the hook above all test cases in the same block for better readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:1 lint/nursery/useTestHooksOnTop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! beforeEach should appear before any test cases.
+  
+    16 │ // Hook after test at top level
+    17 │ it('first test', () => {});
+  > 18 │ beforeEach(() => {});
+       │ ^^^^^^^^^^^^^^^^^^^^
+    19 │ 
+    20 │ // Hook after test, with a valid hook earlier (only later one flagged)
+  
+  i Placing the hook after this test case makes it harder to spot the setup and teardown for these tests at a glance.
+  
+    16 │ // Hook after test at top level
+  > 17 │ it('first test', () => {});
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ beforeEach(() => {});
+    19 │ 
+  
+  i Move the hook above all test cases in the same block for better readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:24:3 lint/nursery/useTestHooksOnTop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! afterEach should appear before any test cases.
+  
+    22 │   beforeAll(() => {});
+    23 │   it('first', () => {});
+  > 24 │   afterEach(() => {});
+       │   ^^^^^^^^^^^^^^^^^^^
+    25 │ });
+    26 │ 
+  
+  i Placing the hook after this test case makes it harder to spot the setup and teardown for these tests at a glance.
+  
+    21 │ describe('qux', () => {
+    22 │   beforeAll(() => {});
+  > 23 │   it('first', () => {});
+       │   ^^^^^^^^^^^^^^^^^^^^^
+    24 │   afterEach(() => {});
+    25 │ });
+  
+  i Move the hook above all test cases in the same block for better readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:31:3 lint/nursery/useTestHooksOnTop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! beforeAll should appear before any test cases.
+  
+    29 │   beforeEach(() => {});
+    30 │   it('accepts this input', () => {});
+  > 31 │   beforeAll(() => {});
+       │   ^^^^^^^^^^^^^^^^^^^
+    32 │   describe('inner', () => {
+    33 │     beforeEach(() => {});
+  
+  i Placing the hook after this test case makes it harder to spot the setup and teardown for these tests at a glance.
+  
+    28 │ describe('outer', () => {
+    29 │   beforeEach(() => {});
+  > 30 │   it('accepts this input', () => {});
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │   beforeAll(() => {});
+    32 │   describe('inner', () => {
+  
+  i Move the hook above all test cases in the same block for better readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:35:5 lint/nursery/useTestHooksOnTop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! afterEach should appear before any test cases.
+  
+    33 │     beforeEach(() => {});
+    34 │     it('accepts that input', () => {});
+  > 35 │     afterEach(() => {});
+       │     ^^^^^^^^^^^^^^^^^^^
+    36 │     beforeEach(() => {});
+    37 │   });
+  
+  i Placing the hook after this test case makes it harder to spot the setup and teardown for these tests at a glance.
+  
+    32 │   describe('inner', () => {
+    33 │     beforeEach(() => {});
+  > 34 │     it('accepts that input', () => {});
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    35 │     afterEach(() => {});
+    36 │     beforeEach(() => {});
+  
+  i Move the hook above all test cases in the same block for better readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:36:5 lint/nursery/useTestHooksOnTop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! beforeEach should appear before any test cases.
+  
+    34 │     it('accepts that input', () => {});
+    35 │     afterEach(() => {});
+  > 36 │     beforeEach(() => {});
+       │     ^^^^^^^^^^^^^^^^^^^^
+    37 │   });
+    38 │ });
+  
+  i Placing the hook after this test case makes it harder to spot the setup and teardown for these tests at a glance.
+  
+    32 │   describe('inner', () => {
+    33 │     beforeEach(() => {});
+  > 34 │     it('accepts that input', () => {});
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    35 │     afterEach(() => {});
+    36 │     beforeEach(() => {});
+  
+  i Move the hook above all test cases in the same block for better readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
