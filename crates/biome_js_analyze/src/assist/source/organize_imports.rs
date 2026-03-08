@@ -692,8 +692,11 @@ declare_source_rule! {
     ///
     /// By default, bare imports are not sorted within other imports.
     /// Setting `sortBareImports` to `true`, allow sorting them with other imports.
-    /// Note that this can lead to issues because bare imports often signal the presence of side-effects.
+    ///
+    /// :::note
+    /// This can lead to issues because bare imports often signal the presence of side-effects.
     /// Thus changing their order can change the behavior of your code.
+    /// :::
     ///
     /// ```json,options
     /// {
