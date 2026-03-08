@@ -354,7 +354,6 @@ fn test_specificity_deeply_nested_rules() {
         .get_rule_by_id(id_rule_id)
         .expect("Expected to retrieve '#id' rule");
 
-
     // Check selectors and specificities at each level
     // 'a'
     let a_selector = &parent_rule.selectors[0];
