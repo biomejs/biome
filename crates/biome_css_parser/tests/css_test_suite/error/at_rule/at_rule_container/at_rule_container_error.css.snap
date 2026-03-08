@@ -1,5 +1,6 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
 expression: snapshot
 ---
 
@@ -963,6 +964,7 @@ at_rule_container_error.css:16:41 parse ━━━━━━━━━━━━━�
   
   - ( <container-query> )
   - ( <size-feature> )
+  - scroll-state( <scroll-state-query> )
   - style( <style-query> )
   
 at_rule_container_error.css:18:34 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

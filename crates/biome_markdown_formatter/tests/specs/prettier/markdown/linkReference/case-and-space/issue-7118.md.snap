@@ -1,0 +1,66 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/linkReference/case-and-space/issue-7118.md
+---
+# Input
+
+```md
+- see[Link to Foo][master-LinkToFoo]
+
+[master-LinkToFoo]: http://foo.com
+
+Bla bla [PascalCase][] bla.
+
+[PascalCase]: ./PascalCase.md
+
+## [Unreleased]
+…
+[Unreleased]: https://github.com/username/project/compare/v1.0.0...HEAD
+
+[darktable]: https://www.darktable.org/
+[js;dr]: https://indieweb.org/js;dr
+[LinuxFest Northwest]: https://www.linuxfestnorthwest.org/
+[OpenStreetMap]: https://www.openstreetmap.org/about
+[SeaGL]: https://seagl.org/
+[uBlock Origin]: https://github.com/gorhill/uBlock
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -7,7 +7,6 @@
+ [PascalCase]: ./PascalCase.md
+ 
+ ## [Unreleased]
+-
+ …
+ [Unreleased]: https://github.com/username/project/compare/v1.0.0...HEAD
+ 
+```
+
+# Output
+
+```md
+- see[Link to Foo][master-LinkToFoo]
+
+[master-LinkToFoo]: http://foo.com
+
+Bla bla [PascalCase][] bla.
+
+[PascalCase]: ./PascalCase.md
+
+## [Unreleased]
+…
+[Unreleased]: https://github.com/username/project/compare/v1.0.0...HEAD
+
+[darktable]: https://www.darktable.org/
+[js;dr]: https://indieweb.org/js;dr
+[LinuxFest Northwest]: https://www.linuxfestnorthwest.org/
+[OpenStreetMap]: https://www.openstreetmap.org/about
+[SeaGL]: https://seagl.org/
+[uBlock Origin]: https://github.com/gorhill/uBlock
+```

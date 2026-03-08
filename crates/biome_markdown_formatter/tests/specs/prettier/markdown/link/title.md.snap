@@ -1,0 +1,129 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/link/title.md
+---
+# Input
+
+```md
+[hello](#world "title")
+[hello](#world 'title')
+[hello](#world (title))
+
+[a](https://example.com "\"")
+[a](https://example.com '\"')
+[a](https://example.com (\"))
+
+[a](https://example.com "\'")
+[a](https://example.com '\'')
+[a](https://example.com (\'))
+
+[a](https://example.com "\'")
+[a](https://example.com '\)')
+[a](https://example.com (\)))
+
+[a](https://example.com "\\\"")
+[a](https://example.com '\\\'')
+[a](https://example.com (\\\)))
+
+[a](https://example.com "\\'")
+[a](https://example.com '\\"')
+[a](https://example.com (\\"))
+
+<!-- magical incantations -->
+
+[a](https://example.com "\"')")
+[a](https://example.com '"\')')
+[a](https://example.com ("'\)))
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,29 +1,29 @@
+ [hello](#world "title")
+-[hello](#world "title")
+-[hello](#world "title")
++[hello](#world 'title')
++[hello](#world (title))
+ 
+-[a](https://example.com '"')
+-[a](https://example.com '"')
+-[a](https://example.com '"')
++[a](https://example.com "\"")
++[a](https://example.com '\"')
++[a](https://example.com (\"))
+ 
+-[a](https://example.com "'")
+-[a](https://example.com "'")
+-[a](https://example.com "'")
++[a](https://example.com "\'")
++[a](https://example.com '\'')
++[a](https://example.com (\'))
+ 
+-[a](https://example.com "'")
+-[a](https://example.com ")")
+-[a](https://example.com ")")
++[a](https://example.com "\'")
++[a](https://example.com '\)')
++[a](https://example.com (\)))
+ 
+-[a](https://example.com '"')
+-[a](https://example.com "'")
+-[a](https://example.com ")")
++[a](https://example.com "\\\"")
++[a](https://example.com '\\\'')
++[a](https://example.com (\\\)))
+ 
+-[a](https://example.com "'")
+-[a](https://example.com '"')
+-[a](https://example.com '"')
++[a](https://example.com "\\'")
++[a](https://example.com '\\"')
++[a](https://example.com (\\"))
+ 
+ <!-- magical incantations -->
+ 
+ [a](https://example.com "\"')")
+-[a](https://example.com "\"')")
+-[a](https://example.com "\"')")
++[a](https://example.com '"\')')
++[a](https://example.com ("'\)))
+```
+
+# Output
+
+```md
+[hello](#world "title")
+[hello](#world 'title')
+[hello](#world (title))
+
+[a](https://example.com "\"")
+[a](https://example.com '\"')
+[a](https://example.com (\"))
+
+[a](https://example.com "\'")
+[a](https://example.com '\'')
+[a](https://example.com (\'))
+
+[a](https://example.com "\'")
+[a](https://example.com '\)')
+[a](https://example.com (\)))
+
+[a](https://example.com "\\\"")
+[a](https://example.com '\\\'')
+[a](https://example.com (\\\)))
+
+[a](https://example.com "\\'")
+[a](https://example.com '\\"')
+[a](https://example.com (\\"))
+
+<!-- magical incantations -->
+
+[a](https://example.com "\"')")
+[a](https://example.com '"\')')
+[a](https://example.com ("'\)))
+```

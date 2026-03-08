@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidCustomMax.js
+---
+# Input
+```js
+// should generate diagnostics - function exceeds max of 1
+function twoParams(a, b) {
+    return a + b;
+}
+```
+
+# Diagnostics
+```
+invalidCustomMax.js:2:19 lint/complexity/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Function has 2 parameters, but only 1 are allowed.
+  
+    1 │ // should generate diagnostics - function exceeds max of 1
+  > 2 │ function twoParams(a, b) {
+      │                   ^^^^^^
+    3 │     return a + b;
+    4 │ }
+  
+  i Functions with many parameters are hard to read and maintain.
+  
+  i Consider using an options object, splitting into smaller functions, or grouping related parameters.
+  
+
+```

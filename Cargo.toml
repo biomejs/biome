@@ -15,7 +15,7 @@ categories = ["development-tools", "web-programming"]
 
 [workspace.dependencies]
 # Crates needed in the workspace
-anyhow                       = "1.0.101"
+anyhow                       = "1.0.102"
 # publish
 biome_analyze                = { path = "./crates/biome_analyze", version = "0.5.7" }
 biome_analyze_macros         = { path = "./crates/biome_analyze_macros" }
@@ -128,8 +128,8 @@ hashbrown                    = { version = "0.15.5", default-features = false }
 ignore                       = "0.4.25"
 indexmap                     = { version = "2.13.0" }
 insta                        = "1.46.3"
-jiff                         = "0.2.18"
-libc                         = "0.2.180"
+jiff                         = "0.2.21"
+libc                         = "0.2.182"
 mimalloc                     = "0.1.48"
 papaya                       = "0.2.3"
 path-absolutize              = { version = "3.1.1", features = ["use_unix_paths_on_wasm"], optional = false }
@@ -141,7 +141,7 @@ quickcheck                   = "1.0.3"
 quickcheck_macros            = "1.1.0"
 quote                        = "1.0.44"
 rayon                        = "1.11.0"
-regex                        = "1.12.2"
+regex                        = "1.12.3"
 rust-lapper                  = "1.2.0"
 rustc-hash                   = "2.1.1"
 schemars                     = { version = "1.2.1", features = ["indexmap2", "smallvec1"] }

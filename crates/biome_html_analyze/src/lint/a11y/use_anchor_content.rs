@@ -7,6 +7,7 @@ use biome_html_syntax::{
     AnyHtmlContent, AnyHtmlElement, HtmlAttribute, HtmlElementList, HtmlFileSource,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::use_anchor_content::UseAnchorContentOptions;
 
 use crate::HtmlRuleAction;
 use crate::a11y::{
@@ -78,7 +79,7 @@ declare_lint_rule! {
     /// - [WCAG 4.1.2](https://www.w3.org/WAI/WCAG21/Understanding/name-role-value)
     ///
     pub UseAnchorContent {
-        version: "next",
+        version: "2.4.0",
         name: "useAnchorContent",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("anchor-has-content").same()],
@@ -97,7 +98,7 @@ impl Rule for UseAnchorContent {
     type Query = Ast<AnyHtmlElement>;
     type State = UseAnchorContentState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseAnchorContentOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

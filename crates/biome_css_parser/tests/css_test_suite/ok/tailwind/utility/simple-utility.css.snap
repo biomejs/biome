@@ -234,44 +234,36 @@ CssRoot {
                                             },
                                             l_paren_token: L_PAREN@215..216 "(" [] [],
                                             items: CssParameterList [
-                                                CssParameter {
-                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                        css_component_value_list: CssComponentValueList [
-                                                            CssNumber {
-                                                                value_token: CSS_NUMBER_LITERAL@216..217 "0" [] [],
-                                                            },
-                                                        ],
-                                                    },
+                                                CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssNumber {
+                                                            value_token: CSS_NUMBER_LITERAL@216..217 "0" [] [],
+                                                        },
+                                                    ],
                                                 },
                                                 COMMA@217..219 "," [] [Whitespace(" ")],
-                                                CssParameter {
-                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                        css_component_value_list: CssComponentValueList [
-                                                            CssNumber {
-                                                                value_token: CSS_NUMBER_LITERAL@219..220 "0" [] [],
-                                                            },
-                                                        ],
-                                                    },
+                                                CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssNumber {
+                                                            value_token: CSS_NUMBER_LITERAL@219..220 "0" [] [],
+                                                        },
+                                                    ],
                                                 },
                                                 COMMA@220..222 "," [] [Whitespace(" ")],
-                                                CssParameter {
-                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                        css_component_value_list: CssComponentValueList [
-                                                            CssNumber {
-                                                                value_token: CSS_NUMBER_LITERAL@222..223 "0" [] [],
-                                                            },
-                                                        ],
-                                                    },
+                                                CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssNumber {
+                                                            value_token: CSS_NUMBER_LITERAL@222..223 "0" [] [],
+                                                        },
+                                                    ],
                                                 },
                                                 COMMA@223..225 "," [] [Whitespace(" ")],
-                                                CssParameter {
-                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                        css_component_value_list: CssComponentValueList [
-                                                            CssNumber {
-                                                                value_token: CSS_NUMBER_LITERAL@225..226 "0" [] [],
-                                                            },
-                                                        ],
-                                                    },
+                                                CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssNumber {
+                                                            value_token: CSS_NUMBER_LITERAL@225..226 "0" [] [],
+                                                        },
+                                                    ],
                                                 },
                                             ],
                                             r_paren_token: R_PAREN@226..227 ")" [] [],
@@ -511,29 +503,25 @@ CssRoot {
                         0: IDENT@211..215 "rect" [] []
                       1: L_PAREN@215..216 "(" [] []
                       2: CSS_PARAMETER_LIST@216..226
-                        0: CSS_PARAMETER@216..217
-                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@216..217
-                            0: CSS_COMPONENT_VALUE_LIST@216..217
-                              0: CSS_NUMBER@216..217
-                                0: CSS_NUMBER_LITERAL@216..217 "0" [] []
+                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@216..217
+                          0: CSS_COMPONENT_VALUE_LIST@216..217
+                            0: CSS_NUMBER@216..217
+                              0: CSS_NUMBER_LITERAL@216..217 "0" [] []
                         1: COMMA@217..219 "," [] [Whitespace(" ")]
-                        2: CSS_PARAMETER@219..220
-                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@219..220
-                            0: CSS_COMPONENT_VALUE_LIST@219..220
-                              0: CSS_NUMBER@219..220
-                                0: CSS_NUMBER_LITERAL@219..220 "0" [] []
+                        2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@219..220
+                          0: CSS_COMPONENT_VALUE_LIST@219..220
+                            0: CSS_NUMBER@219..220
+                              0: CSS_NUMBER_LITERAL@219..220 "0" [] []
                         3: COMMA@220..222 "," [] [Whitespace(" ")]
-                        4: CSS_PARAMETER@222..223
-                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@222..223
-                            0: CSS_COMPONENT_VALUE_LIST@222..223
-                              0: CSS_NUMBER@222..223
-                                0: CSS_NUMBER_LITERAL@222..223 "0" [] []
+                        4: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@222..223
+                          0: CSS_COMPONENT_VALUE_LIST@222..223
+                            0: CSS_NUMBER@222..223
+                              0: CSS_NUMBER_LITERAL@222..223 "0" [] []
                         5: COMMA@223..225 "," [] [Whitespace(" ")]
-                        6: CSS_PARAMETER@225..226
-                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@225..226
-                            0: CSS_COMPONENT_VALUE_LIST@225..226
-                              0: CSS_NUMBER@225..226
-                                0: CSS_NUMBER_LITERAL@225..226 "0" [] []
+                        6: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@225..226
+                          0: CSS_COMPONENT_VALUE_LIST@225..226
+                            0: CSS_NUMBER@225..226
+                              0: CSS_NUMBER_LITERAL@225..226 "0" [] []
                       3: R_PAREN@226..227 ")" [] []
                 1: (empty)
               1: SEMICOLON@227..228 ";" [] []

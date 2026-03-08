@@ -1,0 +1,57 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/code/angular/angular-html.md
+---
+# Input
+
+```md
+```angular-html
+@if (orderForm.couponCode().disabled()) {
+      <div class="info">
+        @for (reason of orderForm.couponCode().disabledReasons(); track reason) {
+<p>{{ reason.message }}</p>
+        }</div>
+    }
+```
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,9 +1,8 @@
+ ```angular-html
+ @if (orderForm.couponCode().disabled()) {
+-  <div class="info">
+-    @for (reason of orderForm.couponCode().disabledReasons(); track reason) {
+-      <p>{{ reason.message }}</p>
++      <div class="info">
++        @for (reason of orderForm.couponCode().disabledReasons(); track reason) {
++<p>{{ reason.message }}</p>
++        }</div>
+     }
+-  </div>
+-}
+ ```
+```
+
+# Output
+
+```md
+```angular-html
+@if (orderForm.couponCode().disabled()) {
+      <div class="info">
+        @for (reason of orderForm.couponCode().disabledReasons(); track reason) {
+<p>{{ reason.message }}</p>
+        }</div>
+    }
+```
+```
+
+# Lines exceeding max width of 80 characters
+```
+    4:         @for (reason of orderForm.couponCode().disabledReasons(); track reason) {
+```

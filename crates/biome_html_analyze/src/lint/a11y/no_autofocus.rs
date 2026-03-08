@@ -54,7 +54,7 @@ declare_lint_rule! {
     /// - [MDN Web Docs, HTMLElement: autofocus property](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/autofocus)
     ///
     pub NoAutofocus {
-        version: "next",
+        version: "2.4.0",
         name: "noAutofocus",
         language: "html",
         sources: &[RuleSource::EslintJsxA11y("no-autofocus").same()],
@@ -127,7 +127,7 @@ fn is_inside_allowed_context(attr: &HtmlAttribute) -> Option<bool> {
     let mut skip_first_element = true;
 
     // Walk up the ancestors to find if we're inside a dialog or popover
-    for ancestor in attr.syntax().ancestors() {
+    for ancestor in attr.syntax().ancestors().skip(1) {
         let Some(tag_element) = get_tag_element(&ancestor) else {
             continue;
         };

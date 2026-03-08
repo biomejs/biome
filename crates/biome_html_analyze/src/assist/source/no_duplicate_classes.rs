@@ -36,7 +36,7 @@ declare_source_rule! {
     /// ```
     ///
     pub NoDuplicateClasses {
-        version: "next",
+        version: "2.4.0",
         name: "noDuplicateClasses",
         language: "html",
         sources: &[RuleSource::EslintBetterTailwindcss("no-duplicate-classes").inspired()],

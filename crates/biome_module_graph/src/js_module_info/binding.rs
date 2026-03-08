@@ -1,9 +1,10 @@
 use std::sync::Arc;
 
+use biome_js_semantic::ScopeId;
 use biome_js_syntax::{
     AnyJsDeclaration, JsImport, JsSyntaxNode, JsVariableKind, TextRange, TsTypeParameter,
 };
-use biome_js_type_info::{BindingId, ScopeId, TypeReference};
+use biome_js_type_info::TypeReference;
 use biome_rowan::{AstNode, Text, TextSize};
 
 use biome_jsdoc_comment::JsdocComment;
@@ -38,11 +39,6 @@ pub struct JsBindingReference {
 
 impl JsBindingReference {
     #[inline(always)]
-    pub fn is_read(&self) -> bool {
-        matches!(self.kind, JsBindingReferenceKind::Read { .. })
-    }
-
-    #[inline(always)]
     pub fn is_write(&self) -> bool {
         matches!(self.kind, JsBindingReferenceKind::Write { .. })
     }
@@ -50,47 +46,77 @@ impl JsBindingReference {
 
 /// Provides access to all semantic data of a specific binding.
 pub struct JsBinding {
-    pub(crate) data: Arc<JsModuleInfoInner>,
-    pub(crate) id: BindingId,
+    data: Arc<JsModuleInfoInner>,
+    semantic_binding: biome_js_semantic::Binding,
 }
 
 impl std::fmt::Debug for JsBinding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("Binding").field("id", &self.id).finish()
+        let name = self
+            .semantic_binding
+            .tree()
+            .name_token()
+            .ok()
+            .map(|t| t.text_trimmed().to_string());
+        f.debug_struct("JsBinding").field("name", &name).finish()
     }
 }
 
 impl JsBinding {
+    pub(crate) fn from_semantic_binding(
+        data: Arc<JsModuleInfoInner>,
+        semantic_binding: biome_js_semantic::Binding,
+    ) -> Self {
+        Self {
+            data,
+            semantic_binding,
+        }
+    }
+
     /// Returns whether the binding is exported.
     pub fn is_exported(&self) -> bool {
-        let binding = self.data.binding(self.id);
-        !binding.export_ranges.is_empty()
+        // Check if there are export ranges in the type augmentation data
+        let binding_range = self.semantic_binding.syntax().text_trimmed_range();
+        self.data
+            .binding_type_data
+            .get(&binding_range)
+            .is_some_and(|data| !data.export_ranges.is_empty())
     }
 
     /// Returns whether the binding is imported.
     pub fn is_imported(&self) -> bool {
-        let binding = self.data.binding(self.id);
-        binding.declaration_kind.is_import_declaration()
+        self.semantic_binding.is_imported()
     }
 
     /// Returns the binding's name.
     pub fn name(&self) -> Text {
-        let binding = self.data.binding(self.id);
-        binding.name.clone()
+        self.semantic_binding
+            .tree()
+            .name_token()
+            .ok()
+            .map(|t| t.token_text_trimmed().into())
+            .unwrap_or_default()
     }
 
     /// Returns the scope of this binding.
     pub fn scope(&self) -> JsScope {
-        let binding = self.data.binding(self.id);
         JsScope {
             info: self.data.clone(),
-            id: binding.scope_id,
+            scope: self.semantic_binding.scope(),
         }
     }
 
-    /// Returns a reference to the binding's type.
-    pub fn ty(&self) -> &TypeReference {
-        &self.data.binding(self.id).ty
+    /// Returns the binding's type.
+    ///
+    /// Returns an owned TypeReference since we may need to return
+    /// a default unknown type when no augmentation data exists.
+    pub fn ty(&self) -> TypeReference {
+        // Look up type augmentation data by binding range
+        let binding_range = self.semantic_binding.syntax().text_trimmed_range();
+        self.data
+            .binding_type_data
+            .get(&binding_range)
+            .map_or_else(TypeReference::unknown, |data| data.ty.clone())
     }
 }
 

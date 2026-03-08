@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-script-setup-to-refs-interface.vue
+---
+# Input
+```ts
+import { toRefs } from 'vue';
+interface Props {
+    videoUrl: string;
+    thumbnail?: string;
+}
+const props = defineProps<Props>()
+const { videoUrl, thumbnail } = toRefs(props)
+
+```

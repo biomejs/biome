@@ -1,5 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 212
 info: css/scss/declaration/mixed.scss
 ---
 
@@ -44,7 +45,7 @@ Trailing newline: true
 	$combined: green !default !global !global;
 
 	padding: $local-var;
-	margin:  ns.$namespaced-var;
+	margin: ns.$namespaced-var;
 }
 
 ```

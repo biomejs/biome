@@ -128,6 +128,32 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::CssContainerQueryInParens::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_CONTAINER_SCROLL_STATE_AND_QUERY => {
+                    let $pattern =
+                        unsafe { $crate::CssContainerScrollStateAndQuery::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_CONTAINER_SCROLL_STATE_IN_PARENS => {
+                    let $pattern =
+                        unsafe { $crate::CssContainerScrollStateInParens::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_CONTAINER_SCROLL_STATE_NOT_QUERY => {
+                    let $pattern =
+                        unsafe { $crate::CssContainerScrollStateNotQuery::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_CONTAINER_SCROLL_STATE_OR_QUERY => {
+                    let $pattern =
+                        unsafe { $crate::CssContainerScrollStateOrQuery::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_CONTAINER_SCROLL_STATE_QUERY_IN_PARENS => {
+                    let $pattern = unsafe {
+                        $crate::CssContainerScrollStateQueryInParens::new_unchecked(node)
+                    };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_CONTAINER_SIZE_FEATURE_IN_PARENS => {
                     let $pattern =
                         unsafe { $crate::CssContainerSizeFeatureInParens::new_unchecked(node) };
@@ -504,10 +530,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssPageSelectorPseudo::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_PARAMETER => {
-                    let $pattern = unsafe { $crate::CssParameter::new_unchecked(node) };
-                    $body
-                }
                 $crate::CssSyntaxKind::CSS_PARENTHESIZED_EXPRESSION => {
                     let $pattern =
                         unsafe { $crate::CssParenthesizedExpression::new_unchecked(node) };
@@ -814,6 +836,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssTypeSelector::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_UNARY_EXPRESSION => {
+                    let $pattern = unsafe { $crate::CssUnaryExpression::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_UNICODE_CODEPOINT => {
                     let $pattern = unsafe { $crate::CssUnicodeCodepoint::new_unchecked(node) };
                     $body
@@ -909,16 +935,70 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::CssViewTransitionAtRuleDeclarator::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::SCSS_ARBITRARY_ARGUMENT => {
+                    let $pattern = unsafe { $crate::ScssArbitraryArgument::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_BINARY_EXPRESSION => {
+                    let $pattern = unsafe { $crate::ScssBinaryExpression::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::SCSS_DECLARATION => {
                     let $pattern = unsafe { $crate::ScssDeclaration::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_EXPRESSION => {
+                    let $pattern = unsafe { $crate::ScssExpression::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::SCSS_IDENTIFIER => {
                     let $pattern = unsafe { $crate::ScssIdentifier::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::SCSS_KEYWORD_ARGUMENT => {
+                    let $pattern = unsafe { $crate::ScssKeywordArgument::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_LIST_EXPRESSION => {
+                    let $pattern = unsafe { $crate::ScssListExpression::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_LIST_EXPRESSION_ELEMENT => {
+                    let $pattern =
+                        unsafe { $crate::ScssListExpressionElement::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_MAP_EXPRESSION => {
+                    let $pattern = unsafe { $crate::ScssMapExpression::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_MAP_EXPRESSION_PAIR => {
+                    let $pattern = unsafe { $crate::ScssMapExpressionPair::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::SCSS_NAMESPACED_IDENTIFIER => {
                     let $pattern = unsafe { $crate::ScssNamespacedIdentifier::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_NESTING_DECLARATION => {
+                    let $pattern = unsafe { $crate::ScssNestingDeclaration::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_PARENT_SELECTOR_VALUE => {
+                    let $pattern = unsafe { $crate::ScssParentSelectorValue::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_PARENTHESIZED_EXPRESSION => {
+                    let $pattern =
+                        unsafe { $crate::ScssParenthesizedExpression::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_QUALIFIED_NAME => {
+                    let $pattern = unsafe { $crate::ScssQualifiedName::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_UNARY_EXPRESSION => {
+                    let $pattern = unsafe { $crate::ScssUnaryExpression::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::SCSS_VARIABLE_MODIFIER => {
@@ -1288,6 +1368,20 @@ macro_rules! map_syntax_node {
                 $crate::CssSyntaxKind::CSS_VALUE_AT_RULE_PROPERTY_LIST => {
                     let $pattern =
                         unsafe { $crate::CssValueAtRulePropertyList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_EXPRESSION_ITEM_LIST => {
+                    let $pattern = unsafe { $crate::ScssExpressionItemList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_LIST_EXPRESSION_ELEMENT_LIST => {
+                    let $pattern =
+                        unsafe { $crate::ScssListExpressionElementList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_MAP_EXPRESSION_PAIR_LIST => {
+                    let $pattern =
+                        unsafe { $crate::ScssMapExpressionPairList::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::SCSS_VARIABLE_MODIFIER_LIST => {

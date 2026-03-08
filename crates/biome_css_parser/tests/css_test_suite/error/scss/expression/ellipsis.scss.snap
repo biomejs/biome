@@ -1,0 +1,93 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+// Ellipsis outside argument lists should error
+$ellipsis-outside: $args...;
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssBogus {
+            items: [
+                ScssIdentifier {
+                    dollar_token: DOLLAR@0..49 "$" [Comments("// Ellipsis outside a ..."), Newline("\n")] [],
+                    name: CssIdentifier {
+                        value_token: IDENT@49..65 "ellipsis-outside" [] [],
+                    },
+                },
+                COLON@65..67 ":" [] [Whitespace(" ")],
+                CssBogus {
+                    items: [
+                        CssBogus {
+                            items: [
+                                ScssIdentifier {
+                                    dollar_token: DOLLAR@67..68 "$" [] [],
+                                    name: CssIdentifier {
+                                        value_token: IDENT@68..72 "args" [] [],
+                                    },
+                                },
+                                DOT3@72..75 "..." [] [],
+                            ],
+                        },
+                    ],
+                },
+                ScssVariableModifierList [],
+                SEMICOLON@75..76 ";" [] [],
+            ],
+        },
+    ],
+    eof_token: EOF@76..77 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..77
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..76
+    0: CSS_BOGUS@0..76
+      0: SCSS_IDENTIFIER@0..65
+        0: DOLLAR@0..49 "$" [Comments("// Ellipsis outside a ..."), Newline("\n")] []
+        1: CSS_IDENTIFIER@49..65
+          0: IDENT@49..65 "ellipsis-outside" [] []
+      1: COLON@65..67 ":" [] [Whitespace(" ")]
+      2: CSS_BOGUS@67..75
+        0: CSS_BOGUS@67..75
+          0: SCSS_IDENTIFIER@67..72
+            0: DOLLAR@67..68 "$" [] []
+            1: CSS_IDENTIFIER@68..72
+              0: IDENT@68..72 "args" [] []
+          1: DOT3@72..75 "..." [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@75..75
+      4: SEMICOLON@75..76 ";" [] []
+  2: EOF@76..77 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+ellipsis.scss:2:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × SCSS arbitrary arguments (`...`) are only allowed in function call arguments.
+  
+    1 │ // Ellipsis outside argument lists should error
+  > 2 │ $ellipsis-outside: $args...;
+      │                         ^^^
+    3 │ 
+  
+  i Use `...` only for function arguments, for example `fn($args...)`.
+  
+```

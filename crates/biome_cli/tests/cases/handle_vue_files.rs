@@ -1,7 +1,7 @@
 use crate::run_cli;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use biome_console::BufferConsole;
-use biome_fs::MemoryFileSystem;
+use biome_fs::{FileSystemExt, MemoryFileSystem};
 use bpaf::Args;
 use camino::Utf8Path;
 
@@ -1061,6 +1061,75 @@ function reasonText() {
 }
 
 #[test]
+fn no_unused_variables_in_vue_directives() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.vue");
+    fs.insert(
+        file.into(),
+        r#"<script setup>
+const supported = ref(true);
+const enabled = ref(false);
+const count = ref(0);
+const isActive = ref(false);
+
+function toggleCaptions() {
+	enabled.value = !enabled.value;
+}
+
+function handleClick() {
+	count.value++;
+}
+</script>
+
+<template>
+  <!-- v-on shorthand with function call -->
+  <button @click="toggleCaptions()">Toggle</button>
+  
+  <!-- v-on shorthand with function reference -->
+  <button @click="handleClick">Click</button>
+  
+  <!-- v-bind shorthand with expression -->
+  <button :disabled="!supported">Disabled</button>
+  
+  <!-- v-if directive -->
+  <div v-if="count > 0">Count: {{ count }}</div>
+  
+  <!-- v-show directive -->
+  <div v-show="isActive">Active</div>
+  
+  <!-- v-for directive - skip for now as it has special syntax -->
+  <!-- <li v-for="item in items" :key="item">{{ item }}</li> -->
+</template>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noUnusedVariables", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_unused_variables_in_vue_directives",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn use_const_not_triggered_in_snippet_sources() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
@@ -1395,6 +1464,265 @@ import { computed } from "vue";
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "lint_vue_should_not_add_extra_newlines_in_embedded_snippet",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn unused_suppression_has_correct_span_in_vue_file() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.vue");
+    fs.insert(
+        file.into(),
+        r#"<template>
+  <div>Hello</div>
+</template>
+
+<script lang="ts" setup>
+console.log("foo");
+// biome-ignore lint/correctness/noUnusedImports: migrating to biome
+import { mdiSquareOutline } from "@mdi/js";
+</script>"#
+            .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", file.as_str()].as_slice()),
+    );
+
+    // Note: result is Ok because warnings don't cause the CLI to fail
+    assert!(
+        result.is_ok(),
+        "run_cli returned {result:?}, output: {:?}",
+        console.out_buffer
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "unused_suppression_has_correct_span_in_vue_file",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn suppress_does_not_add_comments_for_imports_used_in_templates() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.vue");
+    fs.insert(
+        file.into(),
+        r#"<script>
+import { mdiSquareOutline } from "@mdi/js";
+</script>
+
+<template>
+  <v-icon :icon="mdiSquareOutline" />
+</template>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--suppress", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let mut buffer = String::new();
+    fs.open(file).unwrap().read_to_string(&mut buffer).unwrap();
+
+    // Verify no suppression comment was added - the import should not be flagged
+    // as unused since it's used in the template
+    assert!(
+        !buffer.contains("biome-ignore"),
+        "Suppress should not add comments for imports used in templates. File content:\n{}",
+        buffer
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "suppress_does_not_add_comments_for_imports_used_in_templates",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn no_comma_operator_not_triggered_in_v_for() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.vue");
+    fs.insert(
+        file.into(),
+        r#"<template>
+  <v-list-item
+    v-for="(rate, index) in playbackRate.availablePlaybackRates.value"
+    :key="index"
+    :value="rate"
+    @click="setRate(rate)"
+  >
+    <v-list-item-title>{{ formatRate(rate) }}</v-list-item-title>
+  </v-list-item>
+</template>"#
+            .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noCommaOperator", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_comma_operator_not_triggered_in_v_for",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn no_assign_in_expressions_not_triggered_in_v_on() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+    let file = Utf8Path::new("file.vue");
+    fs.insert(
+        file.into(),
+        r#"<script setup>
+let counter = 0;
+</script>
+<template>
+  <!-- shorthand @click -->
+  <button type="button" @click="counter += 1">+</button>
+  <!-- longhand v-on:click -->
+  <button type="button" v-on:click="counter -= 1">-</button>
+</template>"#
+            .as_bytes(),
+    );
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noAssignInExpressions", file.as_str()].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_assign_in_expressions_not_triggered_in_v_on",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn no_assign_in_expressions_triggered_in_template_interpolation() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+    let file = Utf8Path::new("file.vue");
+    fs.insert(
+        file.into(),
+        r#"<script setup>
+let counter = 0;
+</script>
+<template>
+  <p>{{ counter += 1 }}</p>
+</template>"#
+            .as_bytes(),
+    );
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noAssignInExpressions", file.as_str()].as_slice()),
+    );
+    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_assign_in_expressions_triggered_in_template_interpolation",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn no_undeclared_variables_not_triggered_for_script_setup_bindings() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.vue");
+    fs.insert(
+        file.into(),
+        r#"<script setup lang="ts">
+import { ALL_SKIP_CATEGORIES } from "ott-common";
+const model = defineModel<string[]>();
+</script>
+<template>
+  <div :data-categories="ALL_SKIP_CATEGORIES">{{ model }}</div>
+</template>"#
+            .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noUndeclaredVariables", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_undeclared_variables_not_triggered_for_script_setup_bindings",
         fs,
         console,
         result,

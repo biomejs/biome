@@ -1,15 +1,18 @@
+use crate::css_module_info::CssClassReference;
+use biome_js_semantic::ScopeId;
 use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsBinding, AnyJsBindingPattern, AnyJsDeclarationClause,
     AnyJsExportClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportClause,
-    AnyJsImportLike, AnyJsObjectBindingPatternMember, AnyJsRoot, AnyTsIdentifierBinding,
-    AnyTsModuleName, JsExportFromClause, JsExportNamedFromClause, JsExportNamedSpecifierList,
-    JsIdentifierBinding, JsVariableDeclaratorList, TsExportAssignmentClause, unescape_js_string,
+    AnyJsImportLike, AnyJsObjectBindingPatternMember, AnyJsRoot, AnyJsxAttributeName,
+    AnyJsxAttributeValue, AnyTsIdentifierBinding, AnyTsModuleName, JsExport, JsExportFromClause,
+    JsExportNamedFromClause, JsExportNamedSpecifierList, JsIdentifierBinding,
+    JsVariableDeclaratorList, JsxAttribute, TsExportAssignmentClause, unescape_js_string,
 };
-use biome_js_type_info::{ImportSymbol, ScopeId, TypeData, TypeReference, TypeResolver};
+use biome_js_type_info::{ImportSymbol, TypeData, TypeReference, TypeResolver};
 use biome_jsdoc_comment::JsdocComment;
 use biome_resolver::{ResolveOptions, resolve};
 use biome_rowan::{AstNode, TokenText, WalkEvent};
-use camino::Utf8Path;
+use camino::{Utf8Path, Utf8PathBuf};
 
 use crate::{
     JsImport, JsImportPhase, JsModuleInfo, JsReexport, SUPPORTED_EXTENSIONS,
@@ -28,22 +31,28 @@ const EXTENSION_ALIASES: &[(&str, &[&str])] = &[
 
 pub(crate) struct JsModuleVisitor<'a> {
     root: AnyJsRoot,
+    file_path: Utf8PathBuf,
     directory: &'a Utf8Path,
     fs_proxy: &'a ModuleGraphFsProxy<'a>,
+    semantic_model: std::sync::Arc<biome_js_semantic::SemanticModel>,
     infer_types: bool,
 }
 
 impl<'a> JsModuleVisitor<'a> {
     pub fn new(
         root: AnyJsRoot,
+        file_path: Utf8PathBuf,
         directory: &'a Utf8Path,
         fs_proxy: &'a ModuleGraphFsProxy,
+        semantic_model: std::sync::Arc<biome_js_semantic::SemanticModel>,
         infer_types: bool,
     ) -> Self {
         Self {
             root,
+            file_path,
             directory,
             fs_proxy,
+            semantic_model,
             infer_types,
         }
     }
@@ -57,8 +66,10 @@ impl<'a> JsModuleVisitor<'a> {
                 WalkEvent::Enter(node) => {
                     if let Some(import) = AnyJsImportLike::cast_ref(&node) {
                         self.visit_import(import, &mut collector);
-                    } else if let Some(export) = biome_js_syntax::JsExport::cast_ref(&node) {
+                    } else if let Some(export) = JsExport::cast_ref(&node) {
                         self.visit_export(export, &mut collector);
+                    } else if let Some(attr) = JsxAttribute::cast_ref(&node) {
+                        self.visit_jsx_attribute(attr, &mut collector);
                     }
 
                     collector.push_node(&node);
@@ -69,7 +80,46 @@ impl<'a> JsModuleVisitor<'a> {
             }
         }
 
-        JsModuleInfo::new(collector, self.infer_types)
+        JsModuleInfo::new(collector, self.semantic_model, self.infer_types)
+    }
+
+    /// Collects static CSS class references from JSX `class` and `className`
+    /// attributes.
+    ///
+    /// Only static string literals are collected; dynamic expressions are
+    /// skipped to avoid false positives in `noUnusedClasses`.
+    fn visit_jsx_attribute(&self, attr: JsxAttribute, collector: &mut JsModuleInfoCollector) {
+        if let Some(inner) = self.extract_jsx_class_attribute_inner(&attr) {
+            collector
+                .referenced_classes
+                .push(CssClassReference::new(inner, self.file_path.clone()));
+        }
+    }
+
+    /// Extracts the inner (quote-stripped) text from a JSX `class` or
+    /// `className` attribute, if it is a static string literal.
+    ///
+    /// Returns `None` if the attribute is not a class attribute, is not a
+    /// static string, or has malformed structure.
+    fn extract_jsx_class_attribute_inner(&self, attr: &JsxAttribute) -> Option<TokenText> {
+        let name_node = attr.name().ok()?;
+        let name_text = match name_node {
+            AnyJsxAttributeName::JsxName(n) => n.value_token().ok()?.token_text_trimmed(),
+            AnyJsxAttributeName::JsxNamespaceName(_) => return None,
+        };
+        if name_text != "class" && name_text != "className" {
+            return None;
+        }
+
+        let jsx_string = attr
+            .initializer()
+            .and_then(|init| init.value().ok())
+            .and_then(|val| match val {
+                AnyJsxAttributeValue::JsxString(s) => Some(s),
+                _ => None,
+            })?;
+
+        jsx_string.inner_string_text().ok()
     }
 
     fn visit_import(&self, node: AnyJsImportLike, collector: &mut JsModuleInfoCollector) {
@@ -117,11 +167,7 @@ impl<'a> JsModuleVisitor<'a> {
         }
     }
 
-    fn visit_export(
-        &self,
-        node: biome_js_syntax::JsExport,
-        collector: &mut JsModuleInfoCollector,
-    ) -> Option<()> {
+    fn visit_export(&self, node: JsExport, collector: &mut JsModuleInfoCollector) -> Option<()> {
         match node.export_clause().ok()? {
             AnyJsExportClause::AnyJsDeclarationClause(node) => {
                 self.visit_export_declaration_clause(node, collector)

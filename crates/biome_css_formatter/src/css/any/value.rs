@@ -21,6 +21,8 @@ impl FormatRule<AnyCssValue> for FormatAnyCssValue {
             AnyCssValue::CssString(node) => node.format().fmt(f),
             AnyCssValue::CssUnicodeRange(node) => node.format().fmt(f),
             AnyCssValue::ScssIdentifier(node) => node.format().fmt(f),
+            AnyCssValue::ScssParentSelectorValue(node) => node.format().fmt(f),
+            AnyCssValue::ScssQualifiedName(node) => node.format().fmt(f),
             AnyCssValue::TwValueThemeReference(node) => node.format().fmt(f),
         }
     }

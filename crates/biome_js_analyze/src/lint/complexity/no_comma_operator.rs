@@ -1,7 +1,7 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_diagnostics::Severity;
-use biome_js_syntax::{JsForStatement, JsSequenceExpression};
+use biome_js_syntax::{JsFileSource, JsForStatement, JsSequenceExpression};
 use biome_rowan::AstNode;
 use biome_rule_options::no_comma_operator::NoCommaOperatorOptions;
 
@@ -66,6 +66,15 @@ impl Rule for NoCommaOperator {
                 return None;
             }
         }
+
+        // HACK: Skip in Vue template expressions (e.g., v-for="(item, index) in items")
+        // This is a temporary workaround until v-for expressions are parsed correctly
+        // https://github.com/biomejs/biome/issues/9075
+        let file_source = ctx.source_type::<JsFileSource>();
+        if file_source.is_template_expression() && file_source.as_embedding_kind().is_vue() {
+            return None;
+        }
+
         Some(())
     }
 

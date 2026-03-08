@@ -278,7 +278,7 @@ fn is_react_export(binding: &Binding, lib: ReactLibrary) -> bool {
 }
 
 fn is_named_react_export(binding: &Binding, lib: ReactLibrary, name: &str) -> Option<bool> {
-    let ident = JsIdentifierBinding::cast_ref(binding.syntax())?;
+    let ident = JsIdentifierBinding::cast_ref(&binding.syntax())?;
     let import_specifier = ident.parent::<AnyJsNamedImportSpecifier>()?;
     let name_token = match &import_specifier {
         AnyJsNamedImportSpecifier::JsNamedImportSpecifier(named_import) => {

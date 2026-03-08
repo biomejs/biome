@@ -1,0 +1,4 @@
+.foo {
+  color: mod.fn(1, 2);
+  background-image: url(mod.fn.svg);
+}

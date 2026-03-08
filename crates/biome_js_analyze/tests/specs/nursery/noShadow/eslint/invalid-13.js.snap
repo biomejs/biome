@@ -12,7 +12,7 @@ function foo() { var a; } function a() {}
 ```
 invalid-13.js:1:22 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable shadows another variable with the same name in the outer scope.
+  ! This variable shadows another variable with the same name in the outer scope.
   
   > 1 │ function foo() { var a; } function a() {}
       │                      ^

@@ -12,7 +12,7 @@ expression: invalid-22.js
 ```
 invalid-22.js:1:46 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable shadows another variable with the same name in the outer scope.
+  ! This variable shadows another variable with the same name in the outer scope.
   
   > 1 │ (function() { var a = function() { (function a() {}); }; })()
       │                                              ^

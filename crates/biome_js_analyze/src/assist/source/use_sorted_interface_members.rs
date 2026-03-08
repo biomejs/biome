@@ -68,7 +68,7 @@ declare_source_rule! {
     /// ```
     ///
     pub UseSortedInterfaceMembers {
-        version: "next",
+        version: "2.4.0",
         name: "useSortedInterfaceMembers",
         language: "ts",
         recommended: false,

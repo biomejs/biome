@@ -161,11 +161,8 @@ fn should_not_trigger(
     let lowercase = pseudo_element_name.to_ascii_lowercase_cow();
     let lowercase = &lowercase.as_ref();
 
-    if file_source.is_css_modules() {
-        return ["global", "local"].contains(lowercase);
-    }
-
-    !vender_prefix(pseudo_element_name).is_empty()
+    (file_source.is_css_modules() && ["global", "local"].contains(lowercase))
+        || !vender_prefix(pseudo_element_name).is_empty()
         || is_pseudo_elements(lowercase)
         || should_ignore(pseudo_element_name, options)
 }

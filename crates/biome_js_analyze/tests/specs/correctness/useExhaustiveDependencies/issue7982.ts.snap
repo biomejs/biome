@@ -57,7 +57,7 @@ issue7982.ts:8:26 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency count to the list.
   
     10 │ ····},·[count]);
        │         +++++   
@@ -90,7 +90,7 @@ issue7982.ts:13:27 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━�
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency count to the list.
   
     17 │ ········[count],
        │          +++++  
@@ -123,7 +123,7 @@ issue7982.ts:20:35 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━�
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency count to the list.
   
     22 │ ····},·[count])·as·Function;
        │         +++++               

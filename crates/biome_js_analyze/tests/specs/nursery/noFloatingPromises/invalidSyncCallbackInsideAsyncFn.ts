@@ -17,3 +17,14 @@ async function doStuff2(db) {
         }
     });
 }
+
+// Sync function expression inside async — should diagnose but NOT suggest await
+async function doStuff3(db) {
+    const txStatements: Array<(tx) => Promise<any>> = [];
+
+    db.transaction(function(tx: any) {
+        for (const stmt of txStatements) {
+            stmt(tx)
+        }
+    });
+}

@@ -14,13 +14,10 @@ mod language {
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
     let src = r#"
-.component {
-	$global-var: modified !global;
-	$another-var: value !default!global;
-	$third-var:value!global!default!default;
-	color: $global-var;
-}
+.test{
+  colors: fn((primary: red));
 
+}
 
 "#;
     let parse = parse_css(src, CssFileSource::scss(), CssParserOptions::default());

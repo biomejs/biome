@@ -1,0 +1,101 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/paragraph/special-prefix.md
+---
+# Input
+
+```md
+abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc - abc abc abc 
+
+## Supported Rules
+
+- [no-disabled-tests](/packages/eslint-plugin-jest/docs/rules/no-disabled-tests.md) - disallow disabled tests.
+- [no-focused-tests](/packages/eslint-plugin-jest/docs/rules/no-focused-tests.md) - disallow focused tests.
+- [no-identical-title](/packages/eslint-plugin-jest/docs/rules/no-identical-title.md) - disallow identical titles.
+- [valid-expect](/packages/eslint-plugin-jest/docs/rules/valid-expect.md) - ensure expect is called correctly.
+
+## Supported Rules
+
+* [no-disabled-tests](/packages/eslint-plugin-jest/docs/rules/no-disabled-tests.md)
+  - disallow disabled tests.
+* [no-focused-tests](/packages/eslint-plugin-jest/docs/rules/no-focused-tests.md)
+  - disallow focused tests.
+* [no-identical-title](/packages/eslint-plugin-jest/docs/rules/no-identical-title.md)
+  - disallow identical titles.
+* [valid-expect](/packages/eslint-plugin-jest/docs/rules/valid-expect.md) -
+  ensure expect is called correctly.
+
+She grew up in an isolated village in the 19th century and met her father aged 29. Oh no, why are we in a numbered list now?
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,4 @@
+-abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc - abc abc abc
++abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc - abc abc abc 
+ 
+ ## Supported Rules
+ 
+@@ -9,13 +9,13 @@
+ 
+ ## Supported Rules
+ 
+-- [no-disabled-tests](/packages/eslint-plugin-jest/docs/rules/no-disabled-tests.md)
++* [no-disabled-tests](/packages/eslint-plugin-jest/docs/rules/no-disabled-tests.md)
+   - disallow disabled tests.
+-- [no-focused-tests](/packages/eslint-plugin-jest/docs/rules/no-focused-tests.md)
++* [no-focused-tests](/packages/eslint-plugin-jest/docs/rules/no-focused-tests.md)
+   - disallow focused tests.
+-- [no-identical-title](/packages/eslint-plugin-jest/docs/rules/no-identical-title.md)
++* [no-identical-title](/packages/eslint-plugin-jest/docs/rules/no-identical-title.md)
+   - disallow identical titles.
+-- [valid-expect](/packages/eslint-plugin-jest/docs/rules/valid-expect.md) -
++* [valid-expect](/packages/eslint-plugin-jest/docs/rules/valid-expect.md) -
+   ensure expect is called correctly.
+ 
+ She grew up in an isolated village in the 19th century and met her father aged 29. Oh no, why are we in a numbered list now?
+```
+
+# Output
+
+```md
+abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc - abc abc abc 
+
+## Supported Rules
+
+- [no-disabled-tests](/packages/eslint-plugin-jest/docs/rules/no-disabled-tests.md) - disallow disabled tests.
+- [no-focused-tests](/packages/eslint-plugin-jest/docs/rules/no-focused-tests.md) - disallow focused tests.
+- [no-identical-title](/packages/eslint-plugin-jest/docs/rules/no-identical-title.md) - disallow identical titles.
+- [valid-expect](/packages/eslint-plugin-jest/docs/rules/valid-expect.md) - ensure expect is called correctly.
+
+## Supported Rules
+
+* [no-disabled-tests](/packages/eslint-plugin-jest/docs/rules/no-disabled-tests.md)
+  - disallow disabled tests.
+* [no-focused-tests](/packages/eslint-plugin-jest/docs/rules/no-focused-tests.md)
+  - disallow focused tests.
+* [no-identical-title](/packages/eslint-plugin-jest/docs/rules/no-identical-title.md)
+  - disallow identical titles.
+* [valid-expect](/packages/eslint-plugin-jest/docs/rules/valid-expect.md) -
+  ensure expect is called correctly.
+
+She grew up in an isolated village in the 19th century and met her father aged 29. Oh no, why are we in a numbered list now?
+```
+
+# Lines exceeding max width of 80 characters
+```
+    1: abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc abc - abc abc abc 
+    5: - [no-disabled-tests](/packages/eslint-plugin-jest/docs/rules/no-disabled-tests.md) - disallow disabled tests.
+    6: - [no-focused-tests](/packages/eslint-plugin-jest/docs/rules/no-focused-tests.md) - disallow focused tests.
+    7: - [no-identical-title](/packages/eslint-plugin-jest/docs/rules/no-identical-title.md) - disallow identical titles.
+    8: - [valid-expect](/packages/eslint-plugin-jest/docs/rules/valid-expect.md) - ensure expect is called correctly.
+   12: * [no-disabled-tests](/packages/eslint-plugin-jest/docs/rules/no-disabled-tests.md)
+   14: * [no-focused-tests](/packages/eslint-plugin-jest/docs/rules/no-focused-tests.md)
+   16: * [no-identical-title](/packages/eslint-plugin-jest/docs/rules/no-identical-title.md)
+   21: She grew up in an isolated village in the 19th century and met her father aged 29. Oh no, why are we in a numbered list now?
+```

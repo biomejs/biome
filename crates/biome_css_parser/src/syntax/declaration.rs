@@ -1,15 +1,20 @@
 use crate::parser::CssParser;
 use crate::syntax::CssSyntaxFeatures;
 use crate::syntax::parse_error::{expected_declaration_item, scss_only_syntax_error};
-use crate::syntax::property::{is_at_any_property, parse_any_property};
-use crate::syntax::scss::{is_at_scss_declaration, parse_scss_declaration};
+use crate::syntax::property::{
+    is_at_any_property, parse_any_property, parse_any_property_with_value_end_set,
+};
+use crate::syntax::scss::{
+    is_at_scss_declaration, is_at_scss_nesting_declaration, parse_scss_declaration,
+    parse_scss_nesting_declaration,
+};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::{Parser, SyntaxFeature, token_set};
+use biome_parser::{CompletedMarker, Parser, SyntaxFeature, TokenSet, token_set};
 
 pub(crate) struct DeclarationList;
 
@@ -19,7 +24,15 @@ impl ParseNodeList for DeclarationList {
     const LIST_KIND: Self::Kind = CSS_DECLARATION_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_any_declaration_with_semicolon(p)
+        if is_at_scss_nesting_declaration(p) {
+            CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+                p,
+                parse_scss_nesting_declaration,
+                |p, marker| scss_only_syntax_error(p, "SCSS nesting declarations", marker.range(p)),
+            )
+        } else {
+            parse_any_declaration_with_semicolon(p)
+        }
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
@@ -45,13 +58,32 @@ pub(crate) fn is_at_declaration(p: &mut CssParser) -> bool {
 
 #[inline]
 pub(crate) fn parse_declaration(p: &mut CssParser) -> ParsedSyntax {
+    parse_declaration_with(p, parse_any_property)
+}
+
+#[inline]
+pub(crate) fn parse_declaration_with_value_end_set(
+    p: &mut CssParser,
+    value_end_set: TokenSet<CssSyntaxKind>,
+    recovery_end_set: TokenSet<CssSyntaxKind>,
+) -> ParsedSyntax {
+    parse_declaration_with(p, |p| {
+        parse_any_property_with_value_end_set(p, value_end_set, recovery_end_set)
+    })
+}
+
+#[inline]
+fn parse_declaration_with<F>(p: &mut CssParser, parse_property: F) -> ParsedSyntax
+where
+    F: FnOnce(&mut CssParser) -> ParsedSyntax,
+{
     if !is_at_declaration(p) {
         return Absent;
     }
 
     let m = p.start();
 
-    parse_any_property(p).ok();
+    parse_property(p).ok();
     parse_declaration_important(p).ok();
 
     Present(m.complete(p, CSS_DECLARATION))
@@ -96,9 +128,15 @@ pub(crate) fn parse_declaration_with_semicolon(p: &mut CssParser) -> ParsedSynta
         return Absent;
     }
 
-    let m = p.start();
+    parse_declaration(p).map(|declaration| complete_declaration_with_semicolon(p, declaration))
+}
 
-    parse_declaration(p).ok();
+#[inline]
+pub(crate) fn complete_declaration_with_semicolon(
+    p: &mut CssParser,
+    declaration: CompletedMarker,
+) -> CompletedMarker {
+    let declaration_with_semicolon = declaration.precede(p);
 
     // If the next token is a closing brace ('}'), the semicolon is optional.
     // Otherwise, a semicolon is expected and the parser will enforce its presence.
@@ -112,7 +150,7 @@ pub(crate) fn parse_declaration_with_semicolon(p: &mut CssParser) -> ParsedSynta
         }
     }
 
-    Present(m.complete(p, CSS_DECLARATION_WITH_SEMICOLON))
+    declaration_with_semicolon.complete(p, CSS_DECLARATION_WITH_SEMICOLON)
 }
 
 #[inline]
@@ -131,12 +169,12 @@ pub(crate) fn parse_empty_declaration(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
-fn is_at_declaration_important(p: &mut CssParser) -> bool {
+pub(crate) fn is_at_declaration_important(p: &mut CssParser) -> bool {
     p.at(T![!]) && p.nth_at(1, T![important])
 }
 
 #[inline]
-fn parse_declaration_important(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_declaration_important(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_declaration_important(p) {
         return Absent;
     }

@@ -14,29 +14,31 @@ use crate::parser::CssParser;
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::block::{DeclarationOrRuleList, parse_declaration_or_rule_list_block};
 use crate::syntax::parse_error::{
-    expected_any_rule, expected_component_value, expected_non_css_wide_keyword_identifier,
-    scss_only_syntax_error, tailwind_disabled,
+    expected_any_rule, expected_non_css_wide_keyword_identifier,
+    inconsistent_scss_bracketed_list_separators, scss_only_syntax_error, tailwind_disabled,
 };
 use crate::syntax::property::color::{is_at_color, parse_color};
 use crate::syntax::property::unicode_range::{is_at_unicode_range, parse_unicode_range};
 use crate::syntax::scss::{
-    is_at_scss_declaration, is_at_scss_identifier, parse_scss_declaration, parse_scss_identifier,
+    is_at_scss_declaration, is_at_scss_identifier, is_at_scss_parent_selector_value,
+    is_at_scss_qualified_name, parse_scss_declaration, parse_scss_identifier,
+    parse_scss_parent_selector_value, parse_scss_qualified_name,
 };
 use crate::syntax::selector::SelectorList;
 use crate::syntax::selector::is_nth_at_selector;
 use crate::syntax::selector::relative_selector::{RelativeSelectorList, is_at_relative_selector};
 use crate::syntax::value::function::{
-    BINARY_OPERATION_TOKEN, parse_tailwind_value_theme_reference,
+    is_at_any_function_with_context, parse_any_function_with_context,
+    parse_tailwind_value_theme_reference,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, EmbeddingKind, T};
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
-use biome_parser::parse_recovery::{ParseRecovery, ParseRecoveryTokenSet, RecoveryResult};
+use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::{Parser, SyntaxFeature, token_set};
+use biome_parser::{Parser, SyntaxFeature};
 use value::dimension::{is_at_any_dimension, parse_any_dimension};
-use value::function::{is_at_any_function, parse_any_function};
 
 pub(crate) enum CssSyntaxFeatures {
     /// Enable support for SCSS-specific syntax.
@@ -53,7 +55,7 @@ pub(crate) enum CssSyntaxFeatures {
 
 pub(crate) use declaration::{
     DeclarationList, is_at_any_declaration, is_at_any_declaration_with_semicolon,
-    is_at_declaration, parse_any_declaration_with_semicolon, parse_declaration,
+    is_at_declaration, parse_any_declaration_with_semicolon, parse_declaration_with_value_end_set,
 };
 
 impl SyntaxFeature for CssSyntaxFeatures {
@@ -244,17 +246,67 @@ pub(crate) fn is_at_nested_qualified_rule(p: &mut CssParser) -> bool {
 /// the success of parsing the block.
 #[inline]
 pub(crate) fn parse_nested_qualified_rule(p: &mut CssParser) -> ParsedSyntax {
+    parse_nested_qualified_rule_with_selector_recovery(p, false).map_or(Absent, |(rule, _)| rule)
+}
+
+/// Speculatively parses a nested qualified rule without selector recovery.
+///
+/// This is used to disambiguate SCSS nesting declarations from nested qualified rules.
+/// The parse is considered successful only when the selector is strict and the parsed
+/// block is complete.
+#[inline]
+pub(crate) fn try_parse_nested_qualified_rule_without_selector_recovery(
+    p: &mut CssParser,
+    end_kind: CssSyntaxKind,
+) -> Result<ParsedSyntax, ()> {
+    try_parse(p, |p| {
+        let Some((rule, block_kind)) = parse_nested_qualified_rule_with_selector_recovery(p, true)
+        else {
+            return Err(());
+        };
+
+        if block_kind != CSS_DECLARATION_OR_RULE_BLOCK
+            || p.last().is_none_or(|kind| kind != end_kind)
+        {
+            return Err(());
+        }
+
+        Ok(rule)
+    })
+}
+
+#[inline]
+fn parse_nested_qualified_rule_with_selector_recovery(
+    p: &mut CssParser,
+    disable_selector_recovery: bool,
+) -> Option<(ParsedSyntax, CssSyntaxKind)> {
     if !is_at_nested_qualified_rule(p) {
-        return Absent;
+        return None;
     }
 
     let m = p.start();
 
-    RelativeSelectorList::new(T!['{']).parse_list(p);
+    if disable_selector_recovery {
+        RelativeSelectorList::new(T!['{'])
+            .disable_recovery()
+            .parse_list(p);
 
-    parse_declaration_or_rule_list_block(p);
+        // In strict mode, reject selectors that don't reach the opening brace.
+        if !p.at(T!['{']) {
+            m.abandon(p);
+            return None;
+        }
+    } else {
+        RelativeSelectorList::new(T!['{']).parse_list(p);
+    }
 
-    Present(m.complete(p, CSS_NESTED_QUALIFIED_RULE))
+    let block = parse_declaration_or_rule_list_block(p);
+    let block_kind = block.kind(p);
+
+    Some((
+        Present(m.complete(p, CSS_NESTED_QUALIFIED_RULE)),
+        block_kind,
+    ))
 }
 
 #[inline]
@@ -279,9 +331,31 @@ fn parse_metavariable(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 pub(crate) fn is_at_any_value(p: &mut CssParser) -> bool {
-    is_at_any_function(p)
-        || is_at_scss_identifier(p)
-        || is_at_identifier(p)
+    is_at_any_value_with_mode(p, ValueParsingMode::ScssAware)
+}
+
+/// Checks if the parser is at the start of any value for the provided parsing mode.
+#[inline]
+pub(crate) fn is_at_any_value_with_mode(p: &mut CssParser, mode: ValueParsingMode) -> bool {
+    is_at_any_value_with_context(p, ValueParsingContext::new(p, mode))
+}
+
+#[inline]
+pub(crate) fn is_at_any_value_with_context(
+    p: &mut CssParser,
+    context: ValueParsingContext,
+) -> bool {
+    is_at_any_function_with_context(p, context)
+        || (context.is_scss_syntax_allowed()
+            && (is_at_scss_identifier(p)
+                || is_at_scss_qualified_name(p)
+                || is_at_scss_parent_selector_value(p)))
+        || is_at_any_non_function_css_value(p)
+}
+
+#[inline]
+fn is_at_any_non_function_css_value(p: &mut CssParser) -> bool {
+    is_at_identifier(p)
         || p.at(CSS_STRING_LITERAL)
         || is_at_any_dimension(p)
         || p.at(CSS_NUMBER_LITERAL)
@@ -294,13 +368,111 @@ pub(crate) fn is_at_any_value(p: &mut CssParser) -> bool {
 
 #[inline]
 pub(crate) fn parse_any_value(p: &mut CssParser) -> ParsedSyntax {
-    if is_at_scss_identifier(p) {
+    parse_any_value_with_mode(p, ValueParsingMode::ScssAware)
+}
+
+/// Parses any value using CSS-only branches.
+///
+/// This intentionally skips SCSS-only constructs and is used by
+/// `<general-enclosed>` fallback branches.
+#[inline]
+pub(crate) fn parse_any_css_value(p: &mut CssParser) -> ParsedSyntax {
+    parse_any_value_with_mode(p, ValueParsingMode::CssOnly)
+}
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub(crate) enum ValueParsingMode {
+    /// Enables SCSS-specific branches where available.
+    ScssAware,
+    /// Restricts parsing to CSS syntax branches only.
+    ///
+    /// Used by `<general-enclosed>` fallbacks to avoid SCSS-only diagnostics
+    /// for unknown-but-valid CSS constructs.
+    CssOnly,
+}
+
+impl ValueParsingMode {
+    #[inline]
+    pub(crate) const fn is_scss_syntax_allowed(self) -> bool {
+        matches!(self, Self::ScssAware)
+    }
+}
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub(crate) struct ValueParsingContext {
+    mode: ValueParsingMode,
+    scss_feature_supported: bool,
+}
+
+impl ValueParsingContext {
+    #[inline]
+    pub(crate) fn new(p: &CssParser, mode: ValueParsingMode) -> Self {
+        Self {
+            mode,
+            scss_feature_supported: CssSyntaxFeatures::Scss.is_supported(p),
+        }
+    }
+
+    /// Returns whether grammar branches that recognize SCSS-only syntax are enabled.
+    #[inline]
+    pub(crate) const fn is_scss_syntax_allowed(self) -> bool {
+        self.mode.is_scss_syntax_allowed()
+    }
+
+    /// Returns whether SCSS parsing is fully enabled in this context.
+    #[inline]
+    pub(crate) const fn is_scss_parsing_allowed(self) -> bool {
+        self.mode.is_scss_syntax_allowed() && self.scss_feature_supported
+    }
+}
+
+/// Parses any value while explicitly controlling whether SCSS-only branches are allowed.
+#[inline]
+pub(crate) fn parse_any_value_with_mode(p: &mut CssParser, mode: ValueParsingMode) -> ParsedSyntax {
+    parse_any_value_with_context(p, ValueParsingContext::new(p, mode))
+}
+
+#[inline]
+pub(crate) fn parse_any_value_with_context(
+    p: &mut CssParser,
+    context: ValueParsingContext,
+) -> ParsedSyntax {
+    if is_at_any_function_with_context(p, context) {
+        // Functions must win over SCSS name-like branches (`namespace.fn(...)`),
+        // otherwise we can parse only the name and leave `(...)` behind.
+        parse_any_function_with_context(p, context)
+    } else if context.is_scss_syntax_allowed() && is_at_scss_identifier(p) {
         CssSyntaxFeatures::Scss.parse_exclusive_syntax(p, parse_scss_identifier, |p, m| {
             scss_only_syntax_error(p, "SCSS variables", m.range(p))
         })
-    } else if is_at_any_function(p) {
-        parse_any_function(p)
-    } else if is_at_dashed_identifier(p) {
+    } else if context.is_scss_syntax_allowed() && is_at_scss_qualified_name(p) {
+        let has_dollar_member = p.nth_at(2, T![$]);
+        CssSyntaxFeatures::Scss
+            .parse_exclusive_syntax(p, parse_scss_qualified_name, |p, m| {
+                scss_only_syntax_error(p, "SCSS qualified names", m.range(p))
+            })
+            .map(|marker| {
+                if has_dollar_member && p.at(T!['(']) {
+                    p.error(
+                        p.err_builder(
+                            "Expected an identifier but instead found a variable member.",
+                            p.cur_range(),
+                        )
+                        .with_hint("Function names after `module.` cannot start with `$`."),
+                    );
+                }
+                marker
+            })
+    } else if context.is_scss_syntax_allowed() && is_at_scss_parent_selector_value(p) {
+        parse_scss_parent_selector_value(p)
+    } else {
+        parse_any_non_function_css_value(p)
+    }
+}
+
+#[inline]
+fn parse_any_non_function_css_value(p: &mut CssParser) -> ParsedSyntax {
+    if is_at_dashed_identifier(p) {
         if p.nth_at(1, T![-]) && p.nth_at(2, T![*]) {
             CssSyntaxFeatures::Tailwind.parse_exclusive_syntax(
                 p,
@@ -330,33 +502,6 @@ pub(crate) fn parse_any_value(p: &mut CssParser) -> ParsedSyntax {
         parse_metavariable(p)
     } else {
         Absent
-    }
-}
-
-struct CssComponentValueList;
-impl ParseNodeList for CssComponentValueList {
-    type Kind = CssSyntaxKind;
-    type Parser<'source> = CssParser<'source>;
-    const LIST_KIND: Self::Kind = CSS_COMPONENT_VALUE_LIST;
-
-    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_any_value(p)
-    }
-
-    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![,]) || p.at(T![')']) || p.at_ts(BINARY_OPERATION_TOKEN)
-    }
-
-    fn recover(
-        &mut self,
-        p: &mut Self::Parser<'_>,
-        parsed_element: ParsedSyntax,
-    ) -> RecoveryResult {
-        parsed_element.or_recover_with_token_set(
-            p,
-            &ParseRecoveryTokenSet::new(CSS_BOGUS, token_set!(T![')'], T![;])),
-            expected_component_value,
-        )
     }
 }
 
@@ -534,7 +679,7 @@ pub(crate) fn parse_bracketed_value(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(T!['[']);
-    BracketedValueList.parse_list(p);
+    BracketedValueList::default().parse_list(p);
     p.expect(T![']']);
 
     Present(m.complete(p, CSS_BRACKETED_VALUE))
@@ -543,7 +688,43 @@ pub(crate) fn parse_bracketed_value(p: &mut CssParser) -> ParsedSyntax {
 /// The list parser for bracketed values.
 ///
 /// This parser is responsible for parsing a list of identifiers inside a bracketed value.
-pub(crate) struct BracketedValueList;
+#[derive(Default)]
+pub(crate) struct BracketedValueList {
+    separator: Option<BracketedValueSeparator>,
+    mixed_separators_reported: bool,
+}
+
+#[derive(Copy, Clone, Eq, PartialEq)]
+enum BracketedValueSeparator {
+    Comma,
+    Slash,
+}
+
+impl BracketedValueSeparator {
+    fn from_current_token(p: &mut CssParser) -> Option<Self> {
+        if p.at(T![,]) {
+            Some(Self::Comma)
+        } else if p.at(T![/]) {
+            Some(Self::Slash)
+        } else {
+            None
+        }
+    }
+
+    fn bump(self, p: &mut CssParser) {
+        match self {
+            Self::Comma => p.bump(T![,]),
+            Self::Slash => p.bump(T![/]),
+        }
+    }
+
+    fn as_str(self) -> &'static str {
+        match self {
+            Self::Comma => "`,`",
+            Self::Slash => "`/`",
+        }
+    }
+}
 
 impl ParseNodeList for BracketedValueList {
     type Kind = CssSyntaxKind;
@@ -561,6 +742,10 @@ impl ParseNodeList for BracketedValueList {
                 },
                 |p, m| tailwind_disabled(p, m.range(p)),
             );
+        }
+
+        if let Some(separator) = BracketedValueSeparator::from_current_token(p) {
+            return self.parse_scss_bracketed_value_delimiter(p, separator);
         }
 
         parse_custom_identifier(p, CssLexContext::Regular)
@@ -583,6 +768,50 @@ impl ParseNodeList for BracketedValueList {
     }
 }
 
+impl BracketedValueList {
+    fn parse_scss_bracketed_value_delimiter(
+        &mut self,
+        p: &mut CssParser,
+        separator: BracketedValueSeparator,
+    ) -> ParsedSyntax {
+        // Preserve explicit separators inside bracketed values so Sass list
+        // separators survive parsing (e.g. `[a, b, c]`).
+        // Example: `$list: [a, b, c];`
+        // Docs: https://sass-lang.com/documentation/values/lists
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            |p| {
+                let m = p.start();
+                self.report_mixed_separator_if_needed(p, separator);
+                separator.bump(p);
+                Present(m.complete(p, CSS_GENERIC_DELIMITER))
+            },
+            |p, m| scss_only_syntax_error(p, "Sass list separators", m.range(p)),
+        )
+    }
+
+    fn report_mixed_separator_if_needed(
+        &mut self,
+        p: &mut CssParser,
+        separator: BracketedValueSeparator,
+    ) {
+        let Some(previous_separator) = self.separator else {
+            self.separator = Some(separator);
+            return;
+        };
+
+        if previous_separator != separator && !self.mixed_separators_reported {
+            p.error(inconsistent_scss_bracketed_list_separators(
+                p,
+                previous_separator.as_str(),
+                separator.as_str(),
+                p.cur_range(),
+            ));
+            self.mixed_separators_reported = true;
+        }
+    }
+}
+
 /// Recovery strategy for bracketed value lists.
 ///
 /// This recovery strategy handles the recovery process when parsing bracketed value lists.
@@ -595,7 +824,9 @@ impl ParseRecovery for BracketedValueListRecovery {
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
         // If the next token is the end of the list or the next element, we're at a recovery point.
-        p.at(T![']']) || is_at_identifier(p)
+        p.at(T![']'])
+            || is_at_identifier(p)
+            || (CssSyntaxFeatures::Scss.is_supported(p) && (p.at(T![,]) || p.at(T![/])))
     }
 }
 

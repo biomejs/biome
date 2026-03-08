@@ -1,0 +1,41 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-duplicate-in-data-object.vue
+---
+# Input
+```ts
+export default {
+    data: {
+        foo: null,
+        foo: null
+    }
+}
+
+```
+
+# Diagnostics
+```
+invalid-duplicate-in-data-object.vue:3:9 lint/correctness/noVueDuplicateKeys ━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate key foo found in Vue component.
+  
+    1 │ export default {
+    2 │     data: {
+  > 3 │         foo: null,
+      │         ^^^
+    4 │         foo: null
+    5 │     }
+  
+  i Key foo is also defined here.
+  
+    2 │     data: {
+    3 │         foo: null,
+  > 4 │         foo: null
+      │         ^^^
+    5 │     }
+    6 │ }
+  
+  i Keys defined in different Vue component options (props, data, methods, computed) can conflict when accessed in the template. Rename the key to avoid conflicts.
+  
+
+```

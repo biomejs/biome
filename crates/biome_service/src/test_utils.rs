@@ -11,7 +11,7 @@ use crate::{WatcherInstruction, Workspace, WorkspaceServer};
 /// Convenience call for setting up the workspace and opening a project.
 ///
 /// Uses the given `fs` and `project_path`. Does not set up a real watcher.
-pub(super) fn setup_workspace_and_open_project(
+pub fn setup_workspace_and_open_project(
     fs: impl FileSystem + 'static,
     project_path: &str,
 ) -> (WorkspaceServer, ProjectKey) {

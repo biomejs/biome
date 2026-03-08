@@ -1,0 +1,29 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/spec/commonmark-0.30-example-337.md
+---
+# Input
+
+```md
+`foo   bar 
+baz`
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,2 +1,2 @@
+ `foo   bar 
+-baz`
++baz`
+\ No newline at end of file
+```
+
+# Output
+
+```md
+`foo   bar 
+baz````

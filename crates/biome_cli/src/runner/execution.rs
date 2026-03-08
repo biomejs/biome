@@ -1,4 +1,4 @@
-use crate::cli_options::CliOptions;
+use crate::cli_options::{CliOptions, CliReporter};
 use biome_configuration::analyzer::AnalyzerSelector;
 use biome_console::MarkupBuf;
 use biome_diagnostics::Category;
@@ -161,6 +161,11 @@ pub(crate) trait Execution: Send + Sync + std::panic::RefUnwindSafe {
 
     /// Used when printing summary
     fn summary_phrase(&self, files: usize, duration: &Duration) -> MarkupBuf;
+
+    /// Uses additional reporters based on the environment execution
+    fn environment_to_reporter(&self) -> Option<CliReporter> {
+        None
+    }
 }
 
 #[derive(Debug, Default, Clone)]

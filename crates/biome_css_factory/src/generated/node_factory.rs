@@ -188,14 +188,14 @@ impl CssAttributeSelectorBuilder {
 }
 pub fn css_binary_expression(
     left: AnyCssExpression,
-    operator_token_token: SyntaxToken,
+    operator_token: SyntaxToken,
     right: AnyCssExpression,
 ) -> CssBinaryExpression {
     CssBinaryExpression::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BINARY_EXPRESSION,
         [
             Some(SyntaxElement::Node(left.into_syntax())),
-            Some(SyntaxElement::Token(operator_token_token)),
+            Some(SyntaxElement::Token(operator_token)),
             Some(SyntaxElement::Node(right.into_syntax())),
         ],
     ))
@@ -476,6 +476,76 @@ pub fn css_container_query_in_parens(
     CssContainerQueryInParens::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_CONTAINER_QUERY_IN_PARENS,
         [
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(query.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_container_scroll_state_and_query(
+    left: CssContainerScrollStateInParens,
+    and_token: SyntaxToken,
+    right: AnyCssContainerScrollStateAndCombinableQuery,
+) -> CssContainerScrollStateAndQuery {
+    CssContainerScrollStateAndQuery::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CONTAINER_SCROLL_STATE_AND_QUERY,
+        [
+            Some(SyntaxElement::Node(left.into_syntax())),
+            Some(SyntaxElement::Token(and_token)),
+            Some(SyntaxElement::Node(right.into_syntax())),
+        ],
+    ))
+}
+pub fn css_container_scroll_state_in_parens(
+    l_paren_token: SyntaxToken,
+    query: AnyCssContainerScrollStateInParens,
+    r_paren_token: SyntaxToken,
+) -> CssContainerScrollStateInParens {
+    CssContainerScrollStateInParens::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CONTAINER_SCROLL_STATE_IN_PARENS,
+        [
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(query.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_container_scroll_state_not_query(
+    not_token: SyntaxToken,
+    query: CssContainerScrollStateInParens,
+) -> CssContainerScrollStateNotQuery {
+    CssContainerScrollStateNotQuery::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CONTAINER_SCROLL_STATE_NOT_QUERY,
+        [
+            Some(SyntaxElement::Token(not_token)),
+            Some(SyntaxElement::Node(query.into_syntax())),
+        ],
+    ))
+}
+pub fn css_container_scroll_state_or_query(
+    left: CssContainerScrollStateInParens,
+    or_token: SyntaxToken,
+    right: AnyCssContainerScrollStateOrCombinableQuery,
+) -> CssContainerScrollStateOrQuery {
+    CssContainerScrollStateOrQuery::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CONTAINER_SCROLL_STATE_OR_QUERY,
+        [
+            Some(SyntaxElement::Node(left.into_syntax())),
+            Some(SyntaxElement::Token(or_token)),
+            Some(SyntaxElement::Node(right.into_syntax())),
+        ],
+    ))
+}
+pub fn css_container_scroll_state_query_in_parens(
+    name: CssIdentifier,
+    l_paren_token: SyntaxToken,
+    query: AnyCssContainerScrollStateQuery,
+    r_paren_token: SyntaxToken,
+) -> CssContainerScrollStateQueryInParens {
+    CssContainerScrollStateQueryInParens::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CONTAINER_SCROLL_STATE_QUERY_IN_PARENS,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
             Some(SyntaxElement::Token(l_paren_token)),
             Some(SyntaxElement::Node(query.into_syntax())),
             Some(SyntaxElement::Token(r_paren_token)),
@@ -865,7 +935,7 @@ pub fn css_font_palette_values_at_rule_declarator(
     ))
 }
 pub fn css_function(
-    name: CssIdentifier,
+    name: AnyCssFunctionName,
     l_paren_token: SyntaxToken,
     items: CssParameterList,
     r_paren_token: SyntaxToken,
@@ -991,7 +1061,7 @@ pub fn css_generic_delimiter(value_token: SyntaxToken) -> CssGenericDelimiter {
 pub fn css_generic_property(
     name: AnyCssDeclarationName,
     colon_token: SyntaxToken,
-    value: CssGenericComponentValueList,
+    value: AnyCssGenericPropertyValueOrExpression,
 ) -> CssGenericProperty {
     CssGenericProperty::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_GENERIC_PROPERTY,
@@ -1717,12 +1787,6 @@ pub fn css_page_selector_pseudo(
             Some(SyntaxElement::Token(colon_token)),
             Some(SyntaxElement::Node(selector.into_syntax())),
         ],
-    ))
-}
-pub fn css_parameter(any_css_expression: AnyCssExpression) -> CssParameter {
-    CssParameter::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_PARAMETER,
-        [Some(SyntaxElement::Node(any_css_expression.into_syntax()))],
     ))
 }
 pub fn css_parenthesized_expression(
@@ -2703,6 +2767,18 @@ impl CssTypeSelectorBuilder {
         ))
     }
 }
+pub fn css_unary_expression(
+    operator_token: SyntaxToken,
+    expression: AnyCssExpression,
+) -> CssUnaryExpression {
+    CssUnaryExpression::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_UNARY_EXPRESSION,
+        [
+            Some(SyntaxElement::Token(operator_token)),
+            Some(SyntaxElement::Node(expression.into_syntax())),
+        ],
+    ))
+}
 pub fn css_unicode_codepoint(value_token: SyntaxToken) -> CssUnicodeCodepoint {
     CssUnicodeCodepoint::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_UNICODE_CODEPOINT,
@@ -2964,10 +3040,36 @@ pub fn css_view_transition_at_rule_declarator(
         [Some(SyntaxElement::Token(view_transition_token))],
     ))
 }
+pub fn scss_arbitrary_argument(
+    value: AnyScssExpression,
+    dotdotdot_token: SyntaxToken,
+) -> ScssArbitraryArgument {
+    ScssArbitraryArgument::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_ARBITRARY_ARGUMENT,
+        [
+            Some(SyntaxElement::Node(value.into_syntax())),
+            Some(SyntaxElement::Token(dotdotdot_token)),
+        ],
+    ))
+}
+pub fn scss_binary_expression(
+    left: AnyScssExpression,
+    operator_token: SyntaxToken,
+    right: AnyScssExpression,
+) -> ScssBinaryExpression {
+    ScssBinaryExpression::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_BINARY_EXPRESSION,
+        [
+            Some(SyntaxElement::Node(left.into_syntax())),
+            Some(SyntaxElement::Token(operator_token)),
+            Some(SyntaxElement::Node(right.into_syntax())),
+        ],
+    ))
+}
 pub fn scss_declaration(
     name: AnyScssDeclarationName,
     colon_token: SyntaxToken,
-    value: CssGenericComponentValueList,
+    value: ScssExpression,
     modifiers: ScssVariableModifierList,
 ) -> ScssDeclarationBuilder {
     ScssDeclarationBuilder {
@@ -2981,7 +3083,7 @@ pub fn scss_declaration(
 pub struct ScssDeclarationBuilder {
     name: AnyScssDeclarationName,
     colon_token: SyntaxToken,
-    value: CssGenericComponentValueList,
+    value: ScssExpression,
     modifiers: ScssVariableModifierList,
     semicolon_token: Option<SyntaxToken>,
 }
@@ -3004,12 +3106,72 @@ impl ScssDeclarationBuilder {
         ))
     }
 }
+pub fn scss_expression(items: ScssExpressionItemList) -> ScssExpression {
+    ScssExpression::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_EXPRESSION,
+        [Some(SyntaxElement::Node(items.into_syntax()))],
+    ))
+}
 pub fn scss_identifier(dollar_token: SyntaxToken, name: CssIdentifier) -> ScssIdentifier {
     ScssIdentifier::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_IDENTIFIER,
         [
             Some(SyntaxElement::Token(dollar_token)),
             Some(SyntaxElement::Node(name.into_syntax())),
+        ],
+    ))
+}
+pub fn scss_keyword_argument(
+    name: ScssIdentifier,
+    colon_token: SyntaxToken,
+    value: AnyScssExpression,
+) -> ScssKeywordArgument {
+    ScssKeywordArgument::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_KEYWORD_ARGUMENT,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
+pub fn scss_list_expression(elements: ScssListExpressionElementList) -> ScssListExpression {
+    ScssListExpression::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_LIST_EXPRESSION,
+        [Some(SyntaxElement::Node(elements.into_syntax()))],
+    ))
+}
+pub fn scss_list_expression_element(value: AnyScssExpression) -> ScssListExpressionElement {
+    ScssListExpressionElement::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_LIST_EXPRESSION_ELEMENT,
+        [Some(SyntaxElement::Node(value.into_syntax()))],
+    ))
+}
+pub fn scss_map_expression(
+    l_paren_token: SyntaxToken,
+    pairs: ScssMapExpressionPairList,
+    r_paren_token: SyntaxToken,
+) -> ScssMapExpression {
+    ScssMapExpression::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_MAP_EXPRESSION,
+        [
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(pairs.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn scss_map_expression_pair(
+    key: AnyScssExpression,
+    colon_token: SyntaxToken,
+    value: AnyScssExpression,
+) -> ScssMapExpressionPair {
+    ScssMapExpressionPair::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_MAP_EXPRESSION_PAIR,
+        [
+            Some(SyntaxElement::Node(key.into_syntax())),
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
         ],
     ))
 }
@@ -3024,6 +3186,68 @@ pub fn scss_namespaced_identifier(
             Some(SyntaxElement::Node(namespace.into_syntax())),
             Some(SyntaxElement::Token(dot_token)),
             Some(SyntaxElement::Node(name.into_syntax())),
+        ],
+    ))
+}
+pub fn scss_nesting_declaration(
+    name: CssIdentifier,
+    colon_token: SyntaxToken,
+    value: ScssExpression,
+    block: AnyCssDeclarationOrRuleBlock,
+) -> ScssNestingDeclaration {
+    ScssNestingDeclaration::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_NESTING_DECLARATION,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
+pub fn scss_parent_selector_value(amp_token: SyntaxToken) -> ScssParentSelectorValue {
+    ScssParentSelectorValue::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_PARENT_SELECTOR_VALUE,
+        [Some(SyntaxElement::Token(amp_token))],
+    ))
+}
+pub fn scss_parenthesized_expression(
+    l_paren_token: SyntaxToken,
+    expression: AnyScssExpression,
+    r_paren_token: SyntaxToken,
+) -> ScssParenthesizedExpression {
+    ScssParenthesizedExpression::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_PARENTHESIZED_EXPRESSION,
+        [
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(expression.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn scss_qualified_name(
+    module: CssIdentifier,
+    dot_token: SyntaxToken,
+    member: AnyScssModuleMember,
+) -> ScssQualifiedName {
+    ScssQualifiedName::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_QUALIFIED_NAME,
+        [
+            Some(SyntaxElement::Node(module.into_syntax())),
+            Some(SyntaxElement::Token(dot_token)),
+            Some(SyntaxElement::Node(member.into_syntax())),
+        ],
+    ))
+}
+pub fn scss_unary_expression(
+    operator_token: SyntaxToken,
+    expression: AnyScssExpression,
+) -> ScssUnaryExpression {
+    ScssUnaryExpression::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_UNARY_EXPRESSION,
+        [
+            Some(SyntaxElement::Token(operator_token)),
+            Some(SyntaxElement::Node(expression.into_syntax())),
         ],
     ))
 }
@@ -3336,7 +3560,7 @@ where
 }
 pub fn css_bracketed_value_list<I>(items: I) -> CssBracketedValueList
 where
-    I: IntoIterator<Item = AnyCssCustomIdentifier>,
+    I: IntoIterator<Item = AnyCssBracketedValueItem>,
     I::IntoIter: ExactSizeIterator,
 {
     CssBracketedValueList::unwrap_cast(SyntaxNode::new_detached(
@@ -3728,7 +3952,7 @@ where
 }
 pub fn css_parameter_list<I, S>(items: I, separators: S) -> CssParameterList
 where
-    I: IntoIterator<Item = CssParameter>,
+    I: IntoIterator<Item = AnyCssExpression>,
     I::IntoIter: ExactSizeIterator,
     S: IntoIterator<Item = CssSyntaxToken>,
     S::IntoIter: ExactSizeIterator,
@@ -3929,6 +4153,63 @@ where
     let length = items.len() + separators.len();
     CssValueAtRulePropertyList::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_VALUE_AT_RULE_PROPERTY_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
+    ))
+}
+pub fn scss_expression_item_list<I>(items: I) -> ScssExpressionItemList
+where
+    I: IntoIterator<Item = AnyScssExpressionItem>,
+    I::IntoIter: ExactSizeIterator,
+{
+    ScssExpressionItemList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_EXPRESSION_ITEM_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn scss_list_expression_element_list<I, S>(
+    items: I,
+    separators: S,
+) -> ScssListExpressionElementList
+where
+    I: IntoIterator<Item = ScssListExpressionElement>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    ScssListExpressionElementList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_LIST_EXPRESSION_ELEMENT_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
+    ))
+}
+pub fn scss_map_expression_pair_list<I, S>(items: I, separators: S) -> ScssMapExpressionPairList
+where
+    I: IntoIterator<Item = ScssMapExpressionPair>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    ScssMapExpressionPairList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_MAP_EXPRESSION_PAIR_LIST,
         (0..length).map(|index| {
             if index % 2 == 0 {
                 Some(items.next()?.into_syntax().into())

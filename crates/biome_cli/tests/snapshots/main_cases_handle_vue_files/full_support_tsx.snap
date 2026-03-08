@@ -18,6 +18,7 @@ expression: redactor(content)
 
 ```vue
 <script lang="tsx">
+import s from "src/utils";
 import { sure } from "sure.js";
 import z from "zod";
 
@@ -27,7 +28,7 @@ interface Props {
 
 let schema = z.object().optional();
 schema + sure();
-const _props: Props = { title: "Hello" };
+const props: Props = { title: "Hello" };
 
 function _FunctionalComponent() {
 	return <div></div>;

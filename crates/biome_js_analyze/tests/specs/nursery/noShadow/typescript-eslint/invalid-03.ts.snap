@@ -14,7 +14,7 @@ function foo<T>() {
 ```
 invalid-03.ts:2:20 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable shadows another variable with the same name in the outer scope.
+  ! This variable shadows another variable with the same name in the outer scope.
   
     1 │ function foo<T>() {
   > 2 │   return function <T>() {};

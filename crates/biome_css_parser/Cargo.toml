@@ -27,6 +27,7 @@ tracing             = { workspace = true }
 
 [dev-dependencies]
 biome_configuration = { path = "../biome_configuration" }
+biome_css_syntax    = { path = "../biome_css_syntax", features = ["scss"] }
 biome_deserialize   = { path = "../biome_deserialize" }
 biome_fs            = { path = "../biome_fs" }
 biome_service       = { path = "../biome_service" }

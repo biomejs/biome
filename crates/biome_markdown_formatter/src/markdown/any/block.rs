@@ -10,6 +10,7 @@ impl FormatRule<AnyMdBlock> for FormatAnyMdBlock {
         match node {
             AnyMdBlock::AnyMdContainerBlock(node) => node.format().fmt(f),
             AnyMdBlock::AnyMdLeafBlock(node) => node.format().fmt(f),
+            AnyMdBlock::MdQuotePrefix(node) => node.format().fmt(f),
         }
     }
 }

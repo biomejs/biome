@@ -68,7 +68,9 @@ use biome_resolver::FsWithResolverProxy;
 use biome_text_edit::TextEdit;
 use camino::Utf8Path;
 use crossbeam::channel::bounded;
-pub use document::{AnyEmbeddedSnippet, CssDocumentServices, DocumentServices, EmbeddedSnippet};
+pub use document::{
+    AnyEmbeddedSnippet, CssDocumentServices, DocumentServices, EmbeddedSnippet, JsDocumentServices,
+};
 use enumflags2::{BitFlags, bitflags};
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
@@ -243,7 +245,7 @@ impl FeaturesSupported {
             self.insert(FeatureKind::HtmlFullSupport, SupportKind::Supported);
         }
 
-        debug!("The file has the following feature sets: {:?}", &self);
+        debug!("The file has the following feature sets: {}", &self);
 
         self
     }

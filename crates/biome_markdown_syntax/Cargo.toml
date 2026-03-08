@@ -14,12 +14,15 @@ publish              = false
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-biome_rowan = { workspace = true, features = ["serde"] }
-schemars    = { workspace = true, optional = true }
-serde       = { workspace = true, features = ["derive"] }
+biome_rowan       = { workspace = true, features = ["serde"] }
+biome_string_case = { workspace = true }
+camino            = { workspace = true }
+schemars          = { workspace = true, optional = true }
+serde             = { workspace = true, features = ["derive"] }
 
 [features]
-schema = ["biome_rowan/serde", "schemars"]
+experimental-markdown = []
+schema                = ["biome_rowan/serde", "schemars"]
 
 [lints]
 workspace = true

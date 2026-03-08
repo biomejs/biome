@@ -1,0 +1,443 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@container   scroll-state(  scrolled:   bottom  )   {  }
+
+@container scroll-state(stuck) {  }
+
+@container scroll-state(not (stuck)) { }
+
+@container scroll-state((stuck) and (scrolled: bottom)) { }
+
+@container scroll-state((stuck) or (snapped: x)) { }
+
+@container main-layout scroll-state(not ((stuck) and (scrolled: bottom))) {  }
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssContainerAtRule {
+                declarator: CssContainerAtRuleDeclarator {
+                    container_token: CONTAINER_KW@1..13 "container" [] [Whitespace("   ")],
+                    name: missing (optional),
+                    query: CssContainerScrollStateQueryInParens {
+                        name: CssIdentifier {
+                            value_token: IDENT@13..25 "scroll-state" [] [],
+                        },
+                        l_paren_token: L_PAREN@25..28 "(" [] [Whitespace("  ")],
+                        query: CssQueryFeaturePlain {
+                            name: CssIdentifier {
+                                value_token: IDENT@28..36 "scrolled" [] [],
+                            },
+                            colon_token: COLON@36..40 ":" [] [Whitespace("   ")],
+                            value: CssIdentifier {
+                                value_token: IDENT@40..48 "bottom" [] [Whitespace("  ")],
+                            },
+                        },
+                        r_paren_token: R_PAREN@48..52 ")" [] [Whitespace("   ")],
+                    },
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@52..55 "{" [] [Whitespace("  ")],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@55..56 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@56..59 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssContainerAtRule {
+                declarator: CssContainerAtRuleDeclarator {
+                    container_token: CONTAINER_KW@59..69 "container" [] [Whitespace(" ")],
+                    name: missing (optional),
+                    query: CssContainerScrollStateQueryInParens {
+                        name: CssIdentifier {
+                            value_token: IDENT@69..81 "scroll-state" [] [],
+                        },
+                        l_paren_token: L_PAREN@81..82 "(" [] [],
+                        query: CssQueryFeatureBoolean {
+                            name: CssIdentifier {
+                                value_token: IDENT@82..87 "stuck" [] [],
+                            },
+                        },
+                        r_paren_token: R_PAREN@87..89 ")" [] [Whitespace(" ")],
+                    },
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@89..92 "{" [] [Whitespace("  ")],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@92..93 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@93..96 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssContainerAtRule {
+                declarator: CssContainerAtRuleDeclarator {
+                    container_token: CONTAINER_KW@96..106 "container" [] [Whitespace(" ")],
+                    name: missing (optional),
+                    query: CssContainerScrollStateQueryInParens {
+                        name: CssIdentifier {
+                            value_token: IDENT@106..118 "scroll-state" [] [],
+                        },
+                        l_paren_token: L_PAREN@118..119 "(" [] [],
+                        query: CssContainerScrollStateNotQuery {
+                            not_token: NOT_KW@119..123 "not" [] [Whitespace(" ")],
+                            query: CssContainerScrollStateInParens {
+                                l_paren_token: L_PAREN@123..124 "(" [] [],
+                                query: CssQueryFeatureBoolean {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@124..129 "stuck" [] [],
+                                    },
+                                },
+                                r_paren_token: R_PAREN@129..130 ")" [] [],
+                            },
+                        },
+                        r_paren_token: R_PAREN@130..132 ")" [] [Whitespace(" ")],
+                    },
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@132..134 "{" [] [Whitespace(" ")],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@134..135 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@135..138 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssContainerAtRule {
+                declarator: CssContainerAtRuleDeclarator {
+                    container_token: CONTAINER_KW@138..148 "container" [] [Whitespace(" ")],
+                    name: missing (optional),
+                    query: CssContainerScrollStateQueryInParens {
+                        name: CssIdentifier {
+                            value_token: IDENT@148..160 "scroll-state" [] [],
+                        },
+                        l_paren_token: L_PAREN@160..161 "(" [] [],
+                        query: CssContainerScrollStateAndQuery {
+                            left: CssContainerScrollStateInParens {
+                                l_paren_token: L_PAREN@161..162 "(" [] [],
+                                query: CssQueryFeatureBoolean {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@162..167 "stuck" [] [],
+                                    },
+                                },
+                                r_paren_token: R_PAREN@167..169 ")" [] [Whitespace(" ")],
+                            },
+                            and_token: AND_KW@169..173 "and" [] [Whitespace(" ")],
+                            right: CssContainerScrollStateInParens {
+                                l_paren_token: L_PAREN@173..174 "(" [] [],
+                                query: CssQueryFeaturePlain {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@174..182 "scrolled" [] [],
+                                    },
+                                    colon_token: COLON@182..184 ":" [] [Whitespace(" ")],
+                                    value: CssIdentifier {
+                                        value_token: IDENT@184..190 "bottom" [] [],
+                                    },
+                                },
+                                r_paren_token: R_PAREN@190..191 ")" [] [],
+                            },
+                        },
+                        r_paren_token: R_PAREN@191..193 ")" [] [Whitespace(" ")],
+                    },
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@193..195 "{" [] [Whitespace(" ")],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@195..196 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@196..199 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssContainerAtRule {
+                declarator: CssContainerAtRuleDeclarator {
+                    container_token: CONTAINER_KW@199..209 "container" [] [Whitespace(" ")],
+                    name: missing (optional),
+                    query: CssContainerScrollStateQueryInParens {
+                        name: CssIdentifier {
+                            value_token: IDENT@209..221 "scroll-state" [] [],
+                        },
+                        l_paren_token: L_PAREN@221..222 "(" [] [],
+                        query: CssContainerScrollStateOrQuery {
+                            left: CssContainerScrollStateInParens {
+                                l_paren_token: L_PAREN@222..223 "(" [] [],
+                                query: CssQueryFeatureBoolean {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@223..228 "stuck" [] [],
+                                    },
+                                },
+                                r_paren_token: R_PAREN@228..230 ")" [] [Whitespace(" ")],
+                            },
+                            or_token: OR_KW@230..233 "or" [] [Whitespace(" ")],
+                            right: CssContainerScrollStateInParens {
+                                l_paren_token: L_PAREN@233..234 "(" [] [],
+                                query: CssQueryFeaturePlain {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@234..241 "snapped" [] [],
+                                    },
+                                    colon_token: COLON@241..243 ":" [] [Whitespace(" ")],
+                                    value: CssIdentifier {
+                                        value_token: IDENT@243..244 "x" [] [],
+                                    },
+                                },
+                                r_paren_token: R_PAREN@244..245 ")" [] [],
+                            },
+                        },
+                        r_paren_token: R_PAREN@245..247 ")" [] [Whitespace(" ")],
+                    },
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@247..249 "{" [] [Whitespace(" ")],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@249..250 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@250..253 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssContainerAtRule {
+                declarator: CssContainerAtRuleDeclarator {
+                    container_token: CONTAINER_KW@253..263 "container" [] [Whitespace(" ")],
+                    name: CssCustomIdentifier {
+                        value_token: IDENT@263..275 "main-layout" [] [Whitespace(" ")],
+                    },
+                    query: CssContainerScrollStateQueryInParens {
+                        name: CssIdentifier {
+                            value_token: IDENT@275..287 "scroll-state" [] [],
+                        },
+                        l_paren_token: L_PAREN@287..288 "(" [] [],
+                        query: CssContainerScrollStateNotQuery {
+                            not_token: NOT_KW@288..292 "not" [] [Whitespace(" ")],
+                            query: CssContainerScrollStateInParens {
+                                l_paren_token: L_PAREN@292..293 "(" [] [],
+                                query: CssContainerScrollStateAndQuery {
+                                    left: CssContainerScrollStateInParens {
+                                        l_paren_token: L_PAREN@293..294 "(" [] [],
+                                        query: CssQueryFeatureBoolean {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@294..299 "stuck" [] [],
+                                            },
+                                        },
+                                        r_paren_token: R_PAREN@299..301 ")" [] [Whitespace(" ")],
+                                    },
+                                    and_token: AND_KW@301..305 "and" [] [Whitespace(" ")],
+                                    right: CssContainerScrollStateInParens {
+                                        l_paren_token: L_PAREN@305..306 "(" [] [],
+                                        query: CssQueryFeaturePlain {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@306..314 "scrolled" [] [],
+                                            },
+                                            colon_token: COLON@314..316 ":" [] [Whitespace(" ")],
+                                            value: CssIdentifier {
+                                                value_token: IDENT@316..322 "bottom" [] [],
+                                            },
+                                        },
+                                        r_paren_token: R_PAREN@322..323 ")" [] [],
+                                    },
+                                },
+                                r_paren_token: R_PAREN@323..324 ")" [] [],
+                            },
+                        },
+                        r_paren_token: R_PAREN@324..326 ")" [] [Whitespace(" ")],
+                    },
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@326..329 "{" [] [Whitespace("  ")],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@329..330 "}" [] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@330..331 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..331
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..330
+    0: CSS_AT_RULE@0..56
+      0: AT@0..1 "@" [] []
+      1: CSS_CONTAINER_AT_RULE@1..56
+        0: CSS_CONTAINER_AT_RULE_DECLARATOR@1..52
+          0: CONTAINER_KW@1..13 "container" [] [Whitespace("   ")]
+          1: (empty)
+          2: CSS_CONTAINER_SCROLL_STATE_QUERY_IN_PARENS@13..52
+            0: CSS_IDENTIFIER@13..25
+              0: IDENT@13..25 "scroll-state" [] []
+            1: L_PAREN@25..28 "(" [] [Whitespace("  ")]
+            2: CSS_QUERY_FEATURE_PLAIN@28..48
+              0: CSS_IDENTIFIER@28..36
+                0: IDENT@28..36 "scrolled" [] []
+              1: COLON@36..40 ":" [] [Whitespace("   ")]
+              2: CSS_IDENTIFIER@40..48
+                0: IDENT@40..48 "bottom" [] [Whitespace("  ")]
+            3: R_PAREN@48..52 ")" [] [Whitespace("   ")]
+        1: CSS_RULE_BLOCK@52..56
+          0: L_CURLY@52..55 "{" [] [Whitespace("  ")]
+          1: CSS_RULE_LIST@55..55
+          2: R_CURLY@55..56 "}" [] []
+    1: CSS_AT_RULE@56..93
+      0: AT@56..59 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_CONTAINER_AT_RULE@59..93
+        0: CSS_CONTAINER_AT_RULE_DECLARATOR@59..89
+          0: CONTAINER_KW@59..69 "container" [] [Whitespace(" ")]
+          1: (empty)
+          2: CSS_CONTAINER_SCROLL_STATE_QUERY_IN_PARENS@69..89
+            0: CSS_IDENTIFIER@69..81
+              0: IDENT@69..81 "scroll-state" [] []
+            1: L_PAREN@81..82 "(" [] []
+            2: CSS_QUERY_FEATURE_BOOLEAN@82..87
+              0: CSS_IDENTIFIER@82..87
+                0: IDENT@82..87 "stuck" [] []
+            3: R_PAREN@87..89 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@89..93
+          0: L_CURLY@89..92 "{" [] [Whitespace("  ")]
+          1: CSS_RULE_LIST@92..92
+          2: R_CURLY@92..93 "}" [] []
+    2: CSS_AT_RULE@93..135
+      0: AT@93..96 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_CONTAINER_AT_RULE@96..135
+        0: CSS_CONTAINER_AT_RULE_DECLARATOR@96..132
+          0: CONTAINER_KW@96..106 "container" [] [Whitespace(" ")]
+          1: (empty)
+          2: CSS_CONTAINER_SCROLL_STATE_QUERY_IN_PARENS@106..132
+            0: CSS_IDENTIFIER@106..118
+              0: IDENT@106..118 "scroll-state" [] []
+            1: L_PAREN@118..119 "(" [] []
+            2: CSS_CONTAINER_SCROLL_STATE_NOT_QUERY@119..130
+              0: NOT_KW@119..123 "not" [] [Whitespace(" ")]
+              1: CSS_CONTAINER_SCROLL_STATE_IN_PARENS@123..130
+                0: L_PAREN@123..124 "(" [] []
+                1: CSS_QUERY_FEATURE_BOOLEAN@124..129
+                  0: CSS_IDENTIFIER@124..129
+                    0: IDENT@124..129 "stuck" [] []
+                2: R_PAREN@129..130 ")" [] []
+            3: R_PAREN@130..132 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@132..135
+          0: L_CURLY@132..134 "{" [] [Whitespace(" ")]
+          1: CSS_RULE_LIST@134..134
+          2: R_CURLY@134..135 "}" [] []
+    3: CSS_AT_RULE@135..196
+      0: AT@135..138 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_CONTAINER_AT_RULE@138..196
+        0: CSS_CONTAINER_AT_RULE_DECLARATOR@138..193
+          0: CONTAINER_KW@138..148 "container" [] [Whitespace(" ")]
+          1: (empty)
+          2: CSS_CONTAINER_SCROLL_STATE_QUERY_IN_PARENS@148..193
+            0: CSS_IDENTIFIER@148..160
+              0: IDENT@148..160 "scroll-state" [] []
+            1: L_PAREN@160..161 "(" [] []
+            2: CSS_CONTAINER_SCROLL_STATE_AND_QUERY@161..191
+              0: CSS_CONTAINER_SCROLL_STATE_IN_PARENS@161..169
+                0: L_PAREN@161..162 "(" [] []
+                1: CSS_QUERY_FEATURE_BOOLEAN@162..167
+                  0: CSS_IDENTIFIER@162..167
+                    0: IDENT@162..167 "stuck" [] []
+                2: R_PAREN@167..169 ")" [] [Whitespace(" ")]
+              1: AND_KW@169..173 "and" [] [Whitespace(" ")]
+              2: CSS_CONTAINER_SCROLL_STATE_IN_PARENS@173..191
+                0: L_PAREN@173..174 "(" [] []
+                1: CSS_QUERY_FEATURE_PLAIN@174..190
+                  0: CSS_IDENTIFIER@174..182
+                    0: IDENT@174..182 "scrolled" [] []
+                  1: COLON@182..184 ":" [] [Whitespace(" ")]
+                  2: CSS_IDENTIFIER@184..190
+                    0: IDENT@184..190 "bottom" [] []
+                2: R_PAREN@190..191 ")" [] []
+            3: R_PAREN@191..193 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@193..196
+          0: L_CURLY@193..195 "{" [] [Whitespace(" ")]
+          1: CSS_RULE_LIST@195..195
+          2: R_CURLY@195..196 "}" [] []
+    4: CSS_AT_RULE@196..250
+      0: AT@196..199 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_CONTAINER_AT_RULE@199..250
+        0: CSS_CONTAINER_AT_RULE_DECLARATOR@199..247
+          0: CONTAINER_KW@199..209 "container" [] [Whitespace(" ")]
+          1: (empty)
+          2: CSS_CONTAINER_SCROLL_STATE_QUERY_IN_PARENS@209..247
+            0: CSS_IDENTIFIER@209..221
+              0: IDENT@209..221 "scroll-state" [] []
+            1: L_PAREN@221..222 "(" [] []
+            2: CSS_CONTAINER_SCROLL_STATE_OR_QUERY@222..245
+              0: CSS_CONTAINER_SCROLL_STATE_IN_PARENS@222..230
+                0: L_PAREN@222..223 "(" [] []
+                1: CSS_QUERY_FEATURE_BOOLEAN@223..228
+                  0: CSS_IDENTIFIER@223..228
+                    0: IDENT@223..228 "stuck" [] []
+                2: R_PAREN@228..230 ")" [] [Whitespace(" ")]
+              1: OR_KW@230..233 "or" [] [Whitespace(" ")]
+              2: CSS_CONTAINER_SCROLL_STATE_IN_PARENS@233..245
+                0: L_PAREN@233..234 "(" [] []
+                1: CSS_QUERY_FEATURE_PLAIN@234..244
+                  0: CSS_IDENTIFIER@234..241
+                    0: IDENT@234..241 "snapped" [] []
+                  1: COLON@241..243 ":" [] [Whitespace(" ")]
+                  2: CSS_IDENTIFIER@243..244
+                    0: IDENT@243..244 "x" [] []
+                2: R_PAREN@244..245 ")" [] []
+            3: R_PAREN@245..247 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@247..250
+          0: L_CURLY@247..249 "{" [] [Whitespace(" ")]
+          1: CSS_RULE_LIST@249..249
+          2: R_CURLY@249..250 "}" [] []
+    5: CSS_AT_RULE@250..330
+      0: AT@250..253 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_CONTAINER_AT_RULE@253..330
+        0: CSS_CONTAINER_AT_RULE_DECLARATOR@253..326
+          0: CONTAINER_KW@253..263 "container" [] [Whitespace(" ")]
+          1: CSS_CUSTOM_IDENTIFIER@263..275
+            0: IDENT@263..275 "main-layout" [] [Whitespace(" ")]
+          2: CSS_CONTAINER_SCROLL_STATE_QUERY_IN_PARENS@275..326
+            0: CSS_IDENTIFIER@275..287
+              0: IDENT@275..287 "scroll-state" [] []
+            1: L_PAREN@287..288 "(" [] []
+            2: CSS_CONTAINER_SCROLL_STATE_NOT_QUERY@288..324
+              0: NOT_KW@288..292 "not" [] [Whitespace(" ")]
+              1: CSS_CONTAINER_SCROLL_STATE_IN_PARENS@292..324
+                0: L_PAREN@292..293 "(" [] []
+                1: CSS_CONTAINER_SCROLL_STATE_AND_QUERY@293..323
+                  0: CSS_CONTAINER_SCROLL_STATE_IN_PARENS@293..301
+                    0: L_PAREN@293..294 "(" [] []
+                    1: CSS_QUERY_FEATURE_BOOLEAN@294..299
+                      0: CSS_IDENTIFIER@294..299
+                        0: IDENT@294..299 "stuck" [] []
+                    2: R_PAREN@299..301 ")" [] [Whitespace(" ")]
+                  1: AND_KW@301..305 "and" [] [Whitespace(" ")]
+                  2: CSS_CONTAINER_SCROLL_STATE_IN_PARENS@305..323
+                    0: L_PAREN@305..306 "(" [] []
+                    1: CSS_QUERY_FEATURE_PLAIN@306..322
+                      0: CSS_IDENTIFIER@306..314
+                        0: IDENT@306..314 "scrolled" [] []
+                      1: COLON@314..316 ":" [] [Whitespace(" ")]
+                      2: CSS_IDENTIFIER@316..322
+                        0: IDENT@316..322 "bottom" [] []
+                    2: R_PAREN@322..323 ")" [] []
+                2: R_PAREN@323..324 ")" [] []
+            3: R_PAREN@324..326 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@326..330
+          0: L_CURLY@326..329 "{" [] [Whitespace("  ")]
+          1: CSS_RULE_LIST@329..329
+          2: R_CURLY@329..330 "}" [] []
+  2: EOF@330..331 "" [Newline("\n")] []
+
+```

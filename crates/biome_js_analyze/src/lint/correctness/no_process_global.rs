@@ -96,6 +96,7 @@ impl Rule for NoProcessGlobal {
             .query()
             .syntax()
             .ancestors()
+            .skip(1)
             .find(is_top_level_statement)?;
         // insert new import at:
         // 1. after the most recent import statement. Or, if no such import exist

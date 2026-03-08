@@ -26,6 +26,8 @@ biome_css_parser  = { path = "../biome_css_parser" }
 
 [features]
 schema = ["biome_rowan/serde", "schemars"]
+# Remove once SCSS parsing is fully ready
+scss   = []
 
 [lints]
 workspace = true

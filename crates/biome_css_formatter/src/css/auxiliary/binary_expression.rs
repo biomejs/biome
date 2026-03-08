@@ -8,7 +8,7 @@ impl FormatNodeRule<CssBinaryExpression> for FormatCssBinaryExpression {
     fn fmt_fields(&self, node: &CssBinaryExpression, f: &mut CssFormatter) -> FormatResult<()> {
         let CssBinaryExpressionFields {
             left,
-            operator_token,
+            operator,
             right,
         } = node.as_fields();
 
@@ -17,7 +17,7 @@ impl FormatNodeRule<CssBinaryExpression> for FormatCssBinaryExpression {
             [
                 left.format(),
                 space(),
-                operator_token.format(),
+                operator.format(),
                 soft_line_break_or_space(),
                 right.format()
             ]

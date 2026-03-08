@@ -45,8 +45,15 @@ invalidClass.cjs:3:3 lint/suspicious/noRedundantUseStrict  FIXABLE  ━━━━
   
   i Safe fix: Remove the redundant use strict directive.
   
-    3 │ → → "use·strict";
-      │     -------------
+     1  1 │   class C1 {
+     2  2 │   	test() {
+     3    │ - → → "use·strict";
+     4    │ - → }
+        3 │ + → → 
+        4 │ + → }
+     5  5 │   }
+     6  6 │   
+  
 
 ```
 
@@ -77,7 +84,14 @@ invalidClass.cjs:9:3 lint/suspicious/noRedundantUseStrict  FIXABLE  ━━━━
   
   i Safe fix: Remove the redundant use strict directive.
   
-    9 │ → → "use·strict";
-      │     -------------
+     7  7 │   const C2 = class {
+     8  8 │   	test() {
+     9    │ - → → "use·strict";
+    10    │ - → }
+        9 │ + → → 
+       10 │ + → }
+    11 11 │   };
+    12 12 │   
+  
 
 ```
