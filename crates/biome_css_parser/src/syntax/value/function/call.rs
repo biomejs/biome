@@ -32,7 +32,7 @@ pub(crate) fn is_at_any_function_with_context(
     context: ValueParsingContext,
 ) -> bool {
     is_at_url_function(p)
-        || is_at_if_function(p)
+        || is_at_css_if_function_in_context(p, context)
         || is_at_attr_function(p)
         || is_at_vue_v_bind_function(p)
         || is_at_function_with_context(p, context)
@@ -49,7 +49,7 @@ pub(crate) fn parse_any_function_with_context(
 
     if is_at_url_function(p) {
         parse_url_function_with_context(p, context)
-    } else if is_at_if_function(p) {
+    } else if is_at_css_if_function_in_context(p, context) {
         parse_if_function(p)
     } else if is_at_attr_function(p) {
         parse_attr_function(p)
@@ -62,6 +62,28 @@ pub(crate) fn parse_any_function_with_context(
     } else {
         parse_function_with_context(p, context)
     }
+}
+
+#[inline]
+fn is_at_css_if_function_in_context(p: &mut CssParser, context: ValueParsingContext) -> bool {
+    if !is_at_if_function(p) {
+        return false;
+    }
+
+    if !context.is_scss_parsing_allowed() {
+        return true;
+    }
+
+    // CSS if() branches can only start with supported condition syntax:
+    // `style(...)`, `media(...)`, `supports(...)`, `not`, `else`, or a
+    // parenthesized boolean expression. Anything else remains a regular
+    // function call in SCSS-aware mode, such as Sass `if($cond, a, b)`.
+    p.nth_at(2, T![style])
+        || p.nth_at(2, T![media])
+        || p.nth_at(2, T![supports])
+        || p.nth_at(2, T![not])
+        || p.nth_at(2, T![else])
+        || p.nth_at(2, T!['('])
 }
 
 #[inline]
@@ -101,7 +123,8 @@ fn is_nth_at_function_with_context(
     n: usize,
     context: ValueParsingContext,
 ) -> bool {
-    (is_nth_at_identifier(p, n) && p.nth_at(n + 1, T!['(']))
+    is_nth_at_identifier(p, n)
+        && p.nth_at(n + 1, T!['('])
         || (context.is_scss_syntax_allowed()
             && is_nth_at_scss_qualified_name(p, n)
             && p.nth_at(n + 3, T!['(']))
