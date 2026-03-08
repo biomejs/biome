@@ -63,7 +63,7 @@ declare_source_rule! {
     /// ```
     ///
     /// Chunks also end as soon as a statement or a **bare import** (also called _side-effect import_) is encountered.
-    /// Bare imports can be sorted with other imports by setting the `ignoreBareImports` option to `false`.
+    /// Bare imports can be sorted with other imports by setting the `sortBareImports` option to `true`.
     /// Every bare import forms an independent chunk.
     /// The following example contains six chunks:
     ///
@@ -576,7 +576,7 @@ declare_source_rule! {
     /// ```
     ///
     /// Also, note that bare imports are never merged with other imports
-    /// even if you set `ignoreBareImports` to `false`.
+    /// even if you set `sortBareImports` to `true`.
     ///
     /// ## Named imports, named exports and attributes sorting
     ///
@@ -691,14 +691,14 @@ declare_source_rule! {
     /// ## Sorting bare imports
     ///
     /// By default, bare imports are not sorted within other imports.
-    /// Setting `ignoreBareImports` to `false`, allow sorting them with other imports.
+    /// Setting `sortBareImports` to `true`, allow sorting them with other imports.
     /// Note that this can lead to issues because bare imports often signal the presence of side-effects.
     /// Thus changing their order can change the behavior of your code.
     ///
     /// ```json,options
     /// {
     ///     "options": {
-    ///         "ignoreBareImports": false
+    ///         "sortBareImports": true
     ///     }
     /// }
     /// ```
@@ -779,7 +779,7 @@ impl Rule for OrganizeImports {
         let options = ctx.options();
         let groups = options.groups.as_ref();
         let sort_order = options.identifier_order.unwrap_or_default();
-        let ignore_bare_imports = options.ignore_bare_imports();
+        let sort_bare_imports = options.sort_bare_imports.unwrap_or_default();
         let mut chunk: Option<ChunkBuilder> = None;
         let mut prev_kind: Option<JsSyntaxKind> = None;
         let mut prev_group = 0;
@@ -791,7 +791,7 @@ impl Rule for OrganizeImports {
                     // A detached comment marks the start of a new chunk
                     || has_detached_leading_comment(item.syntax())
                     // bare imports marks the start of a new chunk if they are ignored in the sort.
-                    || (ignore_bare_imports && info.kind == ImportStatementKind::Bare)
+                    || (!sort_bare_imports && info.kind == ImportStatementKind::Bare)
                 {
                     // The chunk ends, here
                     report_unsorted_chunk(chunk.take(), &mut result);

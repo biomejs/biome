@@ -18,18 +18,7 @@ pub struct OrganizeImportsOptions {
     /// Default: `natural`.
     #[serde(skip_serializing_if = "Option::<_>::is_none")]
     pub identifier_order: Option<SortOrder>,
-    /// If `false`, bare imports such as `import "module"` are sorted with other imports.
+    /// If `true`, bare imports such as `import "module"` are sorted with other imports.
     #[serde(skip_serializing_if = "Option::<_>::is_none")]
-    pub ignore_bare_imports: Option<bool>,
-}
-
-impl OrganizeImportsOptions {
-    pub const DEFAULT_IGNORE_BARE_IMPORTS: bool = true;
-
-    /// Returns [`Self::ignore_bare_imports`] if it is set.
-    /// Otherwise, returns [`Self::DEFAULT_IGNORE_BARE_IMPORTS`].
-    pub fn ignore_bare_imports(&self) -> bool {
-        self.ignore_bare_imports
-            .unwrap_or(Self::DEFAULT_IGNORE_BARE_IMPORTS)
-    }
+    pub sort_bare_imports: Option<bool>,
 }

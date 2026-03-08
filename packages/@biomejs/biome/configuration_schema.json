@@ -6539,8 +6539,8 @@
 					"description": "Order used for sorting identifiers within impports and exports.\n\nDefault: `natural`.",
 					"anyOf": [{ "$ref": "#/$defs/SortOrder" }, { "type": "null" }]
 				},
-				"ignoreBareImports": {
-					"description": "If `false`, bare imports such as `import \"module\"` are sorted with other imports.",
+				"sortBareImports": {
+					"description": "If `true`, bare imports such as `import \"module\"` are sorted with other imports.",
 					"type": ["boolean", "null"]
 				}
 			},
