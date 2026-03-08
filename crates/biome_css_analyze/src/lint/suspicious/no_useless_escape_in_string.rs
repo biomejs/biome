@@ -19,7 +19,7 @@ declare_lint_rule! {
     ///
     /// ```css,expect_diagnostic
     /// a::after {
-    ///   content: "\a"
+    ///   content: "\z"
     /// }
     /// ```
     ///
