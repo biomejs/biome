@@ -21,3 +21,14 @@
 .g::after {
     content: "\AB12CD"
 }
+/* hex digit 8-9 (not just a-f) */
+.h::after {
+    content: "\89"
+}
+/* hex prefix + non-hex suffix: \ee is valid 2-digit escape, zaf is literal */
+.i::after {
+    content: "\eezaf"
+}
+.j::after {
+    content: "\edk"
+}

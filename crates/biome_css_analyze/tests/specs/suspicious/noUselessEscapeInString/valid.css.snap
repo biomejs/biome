@@ -27,6 +27,17 @@ expression: valid.css
 .g::after {
     content: "\AB12CD"
 }
+/* hex digit 8-9 (not just a-f) */
+.h::after {
+    content: "\89"
+}
+/* hex prefix + non-hex suffix: \ee is valid 2-digit escape, zaf is literal */
+.i::after {
+    content: "\eezaf"
+}
+.j::after {
+    content: "\edk"
+}
 ```
 
 _Note: The parser emitted 2 diagnostics which are not shown here._
