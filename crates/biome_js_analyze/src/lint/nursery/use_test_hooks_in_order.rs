@@ -3,11 +3,11 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{AnyJsModuleItem, AnyJsStatement, JsCallExpression, JsModule, JsScript};
-use biome_rowan::{AstNode, TextRange, declare_node_union};
+use biome_js_syntax::JsCallExpression;
+use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::use_test_hooks_in_order::UseTestHooksInOrderOptions;
 
-use crate::frameworks::unit_tests::{LifecycleHook, describe_body_statements, is_describe_call};
+use crate::frameworks::unit_tests::{AnyTestScope, LifecycleHook, get_unit_test_scope_calls};
 
 declare_lint_rule! {
     /// Enforce that test lifecycle hooks are declared in the order they execute.
@@ -84,13 +84,6 @@ declare_lint_rule! {
     }
 }
 
-declare_node_union! {
-    /// A node that represents a scope containing test/hook calls:
-    /// either the top-level module/script, or a `describe(...)` call.
-    pub AnyTestScope = JsModule | JsScript | JsCallExpression
-}
-
-/// A lifecycle hook that is out of order.
 pub struct HookOrderViolation {
     /// The out-of-order hook.
     pub hook: JsCallExpression,
@@ -107,36 +100,8 @@ impl Rule for UseTestHooksInOrder {
     type Options = UseTestHooksInOrderOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let scope = ctx.query();
-
-        // For a JsCallExpression, only act when it is a describe block.
-        if let AnyTestScope::JsCallExpression(call) = scope {
-            if !is_describe_call(call) {
-                return vec![];
-            }
-            let Some(stmts) = describe_body_statements(call) else {
-                return vec![];
-            };
-            return check_hooks_order(&stmts);
-        }
-
-        // For the top-level module or script, gather the top-level statements.
-        let stmts: Vec<AnyJsStatement> = match scope {
-            AnyTestScope::JsModule(module) => module
-                .items()
-                .into_iter()
-                .filter_map(|item| {
-                    if let AnyJsModuleItem::AnyJsStatement(stmt) = item {
-                        Some(stmt)
-                    } else {
-                        None
-                    }
-                })
-                .collect(),
-            AnyTestScope::JsScript(script) => script.statements().into_iter().collect(),
-            AnyTestScope::JsCallExpression(_) => unreachable!(),
-        };
-        check_hooks_order(&stmts)
+        let calls = get_unit_test_scope_calls(ctx.query());
+        check_hooks_order(calls)
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -176,22 +141,12 @@ impl Rule for UseTestHooksInOrder {
 /// Only looks at the **direct children** of the current scope — does not
 /// recurse. Recursion is handled by the query firing again for each nested
 /// `describe` call.
-fn check_hooks_order(statements: &[AnyJsStatement]) -> Vec<HookOrderViolation> {
+fn check_hooks_order(calls: impl IntoIterator<Item = JsCallExpression>) -> Vec<HookOrderViolation> {
     let mut violations: Vec<HookOrderViolation> = vec![];
     // Tracks the last hook seen in the current contiguous run.
     let mut last_hook: Option<(JsCallExpression, LifecycleHook)> = None;
 
-    for stmt in statements {
-        let Some(call) = stmt
-            .as_js_expression_statement()
-            .and_then(|e| e.expression().ok())
-            .and_then(|e| e.as_js_call_expression().cloned())
-        else {
-            // A non-call statement breaks the contiguous hook run.
-            last_hook = None;
-            continue;
-        };
-
+    for call in calls {
         if let Some(hook) = LifecycleHook::from_call_expression(&call) {
             if let Some((ref prev_call, prev_hook)) = last_hook
                 && hook < prev_hook

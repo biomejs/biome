@@ -1,6 +1,14 @@
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsFunctionBody, AnyJsName, AnyJsStatement, JsCallExpression,
+    AnyJsExpression, AnyJsFunctionBody, AnyJsModuleItem, AnyJsName, AnyJsStatement,
+    JsCallExpression, JsLanguage, JsModule, JsScript, JsStatementList,
 };
+use biome_rowan::{AstNodeListIterator, declare_node_union};
+
+declare_node_union! {
+    /// A node that represents a scope containing test/describe calls:
+    /// either the top-level module/script, or a `describe(...)` call.
+    pub AnyTestScope = JsModule | JsScript | JsCallExpression
+}
 
 /// The four lifecycle hooks recognised by Jest/Vitest/similar frameworks.
 ///
@@ -160,12 +168,11 @@ pub(crate) fn is_describe_call(call: &JsCallExpression) -> bool {
     }
 }
 
-/// Returns the list of direct-child statements from the callback passed to a
-/// `describe(...)` call, or `None` if the callback is not a recognisable
-/// function literal with a block body.
-pub(crate) fn describe_body_statements(call: &JsCallExpression) -> Option<Vec<AnyJsStatement>> {
+/// Returns the `JsStatementList` from the callback body of a `describe(...)` call,
+/// or `None` if the callback is not a recognisable function literal with a block body.
+pub(crate) fn describe_body_statements(call: &JsCallExpression) -> Option<JsStatementList> {
     let args = call.arguments().ok()?;
-    let [_, callback_arg] = args.get_arguments_by_index([0, 1]);
+    let [callback_arg] = args.get_arguments_by_index([1]);
     let callback_arg = callback_arg?;
     let expr = callback_arg.as_any_js_expression()?;
 
@@ -181,14 +188,78 @@ pub(crate) fn describe_body_statements(call: &JsCallExpression) -> Option<Vec<An
         return None;
     };
 
-    Some(block.statements().into_iter().collect())
+    Some(block.statements())
+}
+
+/// An iterator over the direct-child [`JsCallExpression`] statements of a
+/// test scope — skipping anything that isn't an expression-statement call.
+///
+/// Constructed via [`get_unit_test_scope_calls`]. Zero heap allocations.
+pub(crate) struct TestScopeCallIter {
+    inner: TestScopeStmtIter,
+}
+
+enum TestScopeStmtIter {
+    /// The scope is not a valid describe block — yield nothing.
+    Empty,
+    /// JsScript or describe body — iterate a `JsStatementList`.
+    Statements(AstNodeListIterator<JsLanguage, AnyJsStatement>),
+    /// JsModule — iterate a `JsModuleItemList`, casting each item to a statement.
+    Module(AstNodeListIterator<JsLanguage, AnyJsModuleItem>),
+}
+
+impl Iterator for TestScopeCallIter {
+    type Item = JsCallExpression;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            let stmt: AnyJsStatement = match &mut self.inner {
+                TestScopeStmtIter::Empty => return None,
+                TestScopeStmtIter::Statements(iter) => iter.next()?,
+                TestScopeStmtIter::Module(iter) => loop {
+                    if let AnyJsModuleItem::AnyJsStatement(s) = iter.next()? {
+                        break s;
+                    }
+                },
+            };
+            if let Some(call) = stmt
+                .as_js_expression_statement()
+                .and_then(|e| e.expression().ok())
+                .and_then(|e| e.as_js_call_expression().cloned())
+            {
+                return Some(call);
+            }
+        }
+    }
+}
+
+/// Returns an iterator over the direct-child call expression statements of
+/// a test scope, with zero heap allocations.
+pub(crate) fn get_unit_test_scope_calls(scope: &AnyTestScope) -> TestScopeCallIter {
+    let inner = match scope {
+        AnyTestScope::JsCallExpression(call) => {
+            if !is_describe_call(call) {
+                TestScopeStmtIter::Empty
+            } else {
+                match describe_body_statements(call) {
+                    Some(list) => TestScopeStmtIter::Statements(list.into_iter()),
+                    None => TestScopeStmtIter::Empty,
+                }
+            }
+        }
+        AnyTestScope::JsModule(module) => TestScopeStmtIter::Module(module.items().into_iter()),
+        AnyTestScope::JsScript(script) => {
+            TestScopeStmtIter::Statements(script.statements().into_iter())
+        }
+    };
+    TestScopeCallIter { inner }
 }
 
 #[cfg(test)]
 mod tests {
     use biome_js_parser::JsParserOptions;
     use biome_js_syntax::{JsCallExpression, JsFileSource};
-    use biome_rowan::AstNode;
+    use biome_rowan::{AstNode, AstNodeList};
 
     use super::{LifecycleHook, describe_body_statements, is_describe_call, is_unit_test};
 
