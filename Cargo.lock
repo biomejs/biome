@@ -419,6 +419,7 @@ dependencies = [
  "biome_css_syntax",
  "biome_formatter",
  "biome_rowan",
+ "biome_string_case",
  "rustc-hash 2.1.1",
 ]
 

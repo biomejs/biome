@@ -2,12 +2,13 @@ use biome_css_syntax::{
     AnyCssRoot, CssComplexSelector, CssComposesPropertyValue, CssCompoundSelector,
     CssContainerAtRule, CssDashedIdentifier, CssDeclaration, CssGenericComponentValueList,
     CssIdentifier, CssMediaAtRule, CssNestedQualifiedRule, CssQualifiedRule,
-    CssStartingStyleAtRule, CssSupportsAtRule, ScssExpression, CssSyntaxKind, CssSyntaxToken,
+    CssStartingStyleAtRule, CssSupportsAtRule, CssSyntaxKind, CssSyntaxToken, ScssExpression,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstPtr, Direction, SendNode, SyntaxKind, SyntaxResult, TextRange,
     TextSize, TokenText, declare_node_union,
 };
+use biome_string_case::StrOnlyExtension;
 use rustc_hash::FxHashMap;
 use std::collections::BTreeMap;
 use std::hash::Hash;
@@ -349,9 +350,9 @@ impl ResolvedSelector {
                 // an IDENT (not DOT/HASH/COLON/COLON2), treat it as a type selector.
                 let token_text =
                     if i == 0 && matches!(*kind, CssSyntaxKind::IDENT | CssSyntaxKind::STAR) {
-                        text.to_lowercase()
+                        text.to_lowercase_cow()
                     } else {
-                        text.to_string()
+                        text.to_string().into()
                     };
 
                 chunk.push_str(&token_text);
