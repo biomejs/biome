@@ -530,6 +530,7 @@ impl WorkspaceServer {
                     && self.is_path_ignored(PathIsIgnoredParams {
                         project_key,
                         path: biome_path.clone(),
+                        is_dir: false,
                         features: FeaturesBuilder::new().with_all().build(),
                         ignore_kind: IgnoreKind::Ancestors,
                     })?
@@ -858,9 +859,9 @@ impl WorkspaceServer {
                 }
 
                 if self.projects.is_ignored_by_top_level_config(
-                    self.fs.as_ref(),
                     project_key,
                     &path,
+                    true,
                     ignore_kind,
                 ) {
                     return Ok(true); // Nobody cares about ignored paths.
@@ -891,9 +892,9 @@ impl WorkspaceServer {
                         IgnoreKind::Path => !path.is_required_during_scan(),
                         IgnoreKind::Ancestors => path.parent().is_none_or(|folder_path| {
                             self.projects.is_ignored_by_top_level_config(
-                                self.fs.as_ref(),
                                 project_key,
                                 folder_path,
+                                true,
                                 ignore_kind,
                             )
                         }),
@@ -915,18 +916,18 @@ impl WorkspaceServer {
                                 IgnoreKind::Path => false,
                                 IgnoreKind::Ancestors => path.parent().is_none_or(|folder_path| {
                                     self.projects.is_ignored_by_top_level_config(
-                                        self.fs.as_ref(),
                                         project_key,
                                         folder_path,
+                                        true,
                                         ignore_kind,
                                     )
                                 }),
                             }
                         } else {
                             self.projects.is_ignored_by_top_level_config(
-                                self.fs.as_ref(),
                                 project_key,
                                 &path,
+                                false,
                                 ignore_kind,
                             )
                         }
@@ -1367,9 +1368,9 @@ impl Workspace for WorkspaceServer {
         };
 
         Ok(self.projects.is_ignored(
-            self.fs.as_ref(),
             params.project_key,
             &params.path,
+            params.is_dir,
             params.features,
             params.ignore_kind,
         ))
