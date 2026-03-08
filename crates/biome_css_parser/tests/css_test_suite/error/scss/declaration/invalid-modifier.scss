@@ -1,4 +1,4 @@
-// Invalid modifier - `!important` is not allowed on SCSS variable declarations
+// Invalid modifier - `!important` falls back to the generic modifier error
 $color: red !important;
 
 // Invalid modifier - just a random word

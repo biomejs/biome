@@ -1,5 +1,6 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
 expression: snapshot
 ---
 
@@ -395,20 +396,34 @@ CssRoot {
                                 colon_token: COLON@527..529 ":" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
-                                        CssIdentifier {
-                                            value_token: IDENT@529..530 "a" [] [],
-                                        },
-                                        CssGenericDelimiter {
-                                            value: COMMA@530..531 "," [] [],
-                                        },
-                                        ScssBinaryExpression {
-                                            left: CssNumber {
-                                                value_token: CSS_NUMBER_LITERAL@531..533 "-1" [] [],
-                                            },
-                                            operator: STAR@533..534 "*" [] [],
-                                            right: CssIdentifier {
-                                                value_token: IDENT@534..535 "b" [] [],
-                                            },
+                                        ScssListExpression {
+                                            elements: ScssListExpressionElementList [
+                                                ScssListExpressionElement {
+                                                    value: ScssExpression {
+                                                        items: ScssExpressionItemList [
+                                                            CssIdentifier {
+                                                                value_token: IDENT@529..530 "a" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                                COMMA@530..531 "," [] [],
+                                                ScssListExpressionElement {
+                                                    value: ScssExpression {
+                                                        items: ScssExpressionItemList [
+                                                            ScssBinaryExpression {
+                                                                left: CssNumber {
+                                                                    value_token: CSS_NUMBER_LITERAL@531..533 "-1" [] [],
+                                                                },
+                                                                operator: STAR@533..534 "*" [] [],
+                                                                right: CssIdentifier {
+                                                                    value_token: IDENT@534..535 "b" [] [],
+                                                                },
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                            ],
                                         },
                                     ],
                                 },
@@ -656,16 +671,23 @@ CssRoot {
                 1: COLON@527..529 ":" [] [Whitespace(" ")]
                 2: SCSS_EXPRESSION@529..535
                   0: SCSS_EXPRESSION_ITEM_LIST@529..535
-                    0: CSS_IDENTIFIER@529..530
-                      0: IDENT@529..530 "a" [] []
-                    1: CSS_GENERIC_DELIMITER@530..531
-                      0: COMMA@530..531 "," [] []
-                    2: SCSS_BINARY_EXPRESSION@531..535
-                      0: CSS_NUMBER@531..533
-                        0: CSS_NUMBER_LITERAL@531..533 "-1" [] []
-                      1: STAR@533..534 "*" [] []
-                      2: CSS_IDENTIFIER@534..535
-                        0: IDENT@534..535 "b" [] []
+                    0: SCSS_LIST_EXPRESSION@529..535
+                      0: SCSS_LIST_EXPRESSION_ELEMENT_LIST@529..535
+                        0: SCSS_LIST_EXPRESSION_ELEMENT@529..530
+                          0: SCSS_EXPRESSION@529..530
+                            0: SCSS_EXPRESSION_ITEM_LIST@529..530
+                              0: CSS_IDENTIFIER@529..530
+                                0: IDENT@529..530 "a" [] []
+                        1: COMMA@530..531 "," [] []
+                        2: SCSS_LIST_EXPRESSION_ELEMENT@531..535
+                          0: SCSS_EXPRESSION@531..535
+                            0: SCSS_EXPRESSION_ITEM_LIST@531..535
+                              0: SCSS_BINARY_EXPRESSION@531..535
+                                0: CSS_NUMBER@531..533
+                                  0: CSS_NUMBER_LITERAL@531..533 "-1" [] []
+                                1: STAR@533..534 "*" [] []
+                                2: CSS_IDENTIFIER@534..535
+                                  0: IDENT@534..535 "b" [] []
               1: (empty)
             1: SEMICOLON@535..536 ";" [] []
         2: R_CURLY@536..538 "}" [Newline("\n")] []

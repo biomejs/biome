@@ -1,0 +1,306 @@
+// Advanced function tests
+/* TODO(scss at-rules):
+
+// Basic function
+@function simple() {
+  @return 42;
+}
+
+// Function with parameters
+@function add($a, $b) {
+  @return $a + $b;
+}
+
+// Function with default parameters
+@function with-defaults($width: 100px, $height: 50px) {
+  @return $width * $height;
+}
+
+// Function with variadic parameters
+@function sum($numbers...) {
+  $total: 0;
+  @each $num in $numbers {
+    $total: $total + $num;
+  }
+  @return $total;
+}
+
+// Function with conditional logic
+@function abs($number) {
+  @if $number < 0 {
+    @return -$number;
+  }
+  @return $number;
+}
+
+// Function with complex logic
+@function clamp($value, $min, $max) {
+  @if $value < $min {
+    @return $min;
+  } @else if $value > $max {
+    @return $max;
+  }
+  @return $value;
+}
+
+// Function with loop
+@function power($base, $exponent) {
+  $result: 1;
+  @for $i from 1 through $exponent {
+    $result: $result * $base;
+  }
+  @return $result;
+}
+
+// Function with @while
+@function factorial($n) {
+  $result: 1;
+  @while $n > 1 {
+    $result: $result * $n;
+    $n: $n - 1;
+  }
+  @return $result;
+}
+
+// Function with @each
+@function list-length($list) {
+  $count: 0;
+  @each $item in $list {
+    $count: $count + 1;
+  }
+  @return $count;
+}
+
+// Recursive function
+@function fibonacci($n) {
+  @if $n <= 1 {
+    @return $n;
+  }
+  @return fibonacci($n - 1) + fibonacci($n - 2);
+}
+
+// Function calling another function
+@function double($n) {
+  @return $n * 2;
+}
+
+@function quadruple($n) {
+  @return double(double($n));
+}
+
+// Function with map operations
+@function get-nested($map, $keys...) {
+  @each $key in $keys {
+    $map: map-get($map, $key);
+  }
+  @return $map;
+}
+
+// Function with string operations
+@function str-replace($string, $search, $replace) {
+  $index: str-index($string, $search);
+  @if $index {
+    @return str-slice($string, 1, $index - 1) + $replace + str-slice($string, $index + str-length($search));
+  }
+  @return $string;
+}
+
+// Function with color operations
+@function tint($color, $percentage) {
+  @return mix(white, $color, $percentage);
+}
+
+@function shade($color, $percentage) {
+  @return mix(black, $color, $percentage);
+}
+
+// Function with type checking
+@function to-number($value) {
+  @if type-of($value) == "number" {
+    @return $value;
+  }
+  @return 0;
+}
+
+// Function with unit conversion
+@function px-to-rem($px, $base: 16px) {
+  @return ($px / $base) * 1rem;
+}
+
+// Function with multiple returns
+@function validate($value) {
+  @if $value == null {
+    @return false;
+  }
+  @if $value == "" {
+    @return false;
+  }
+  @return true;
+}
+
+// Function with @warn and @error
+@function safe-divide($a, $b) {
+  @if $b == 0 {
+    @warn "Division by zero";
+    @return null;
+  }
+  @return $a / $b;
+}
+
+@function strict-divide($a, $b) {
+  @if $b == 0 {
+    @error "Cannot divide by zero";
+  }
+  @return $a / $b;
+}
+
+// Function with @debug
+@function debug-value($value) {
+  // TODO(interpolation support): @debug "Value: #{$value}";
+  @return $value;
+}
+
+// Function with keyword arguments
+@function spacing($top: 0, $right: 0, $bottom: 0, $left: 0) {
+  @return $top $right $bottom $left;
+}
+
+// Function with trailing comma in parameters
+@function trailing-comma($a, $b,) {
+  @return $a + $b;
+}
+
+// Function with calculations
+@function calculate-columns($width, $gap, $count) {
+  @return ($width - ($gap * ($count - 1))) / $count;
+}
+
+// Function with nested conditionals
+@function get-color($name, $variant: "normal") {
+  @if $name == "primary" {
+    @if $variant == "light" {
+      @return #6495ed;
+    } @else if $variant == "dark" {
+      @return #00008b;
+    } @else {
+      @return #0000ff;
+    }
+  }
+  @return gray;
+}
+
+// Function with list operations
+@function reverse-list($list) {
+  $result: ();
+  @for $i from length($list) through 1 {
+    $result: append($result, nth($list, $i));
+  }
+  @return $result;
+}
+
+// Function with map operations
+@function merge-deep($map1, $map2) {
+  $result: $map1;
+  @each $key, $value in $map2 {
+    $result: map-merge($result, ($key: $value));
+  }
+  @return $result;
+}
+
+// Function with interpolation
+@function generate-selector($prefix, $name) {
+  // TODO(interpolation support): @return "#{$prefix}-#{$name}";
+}
+
+// Function returning map
+@function create-theme($primary, $secondary) {
+  @return (
+    primary: $primary,
+    secondary: $secondary,
+    accent: mix($primary, $secondary, 50%)
+  );
+}
+
+// Function returning list
+@function create-spacing-scale($base) {
+  @return ($base, $base * 2, $base * 4, $base * 8);
+}
+
+// Function with null handling
+@function default-to($value, $default) {
+  @if $value == null or $value == "" {
+    @return $default;
+  }
+  @return $value;
+}
+
+// Function with boolean logic
+@function is-valid-size($size) {
+  @return $size > 0 and type-of($size) == "number";
+}
+
+// Complex real-world function
+@function responsive-size($min, $max, $min-vw: 320px, $max-vw: 1200px) {
+  $slope: ($max - $min) / ($max-vw - $min-vw);
+  $intercept: $min - $slope * $min-vw;
+  // TODO(interpolation support): @return clamp(#{$min}, #{$intercept} + #{$slope * 100}vw, #{$max});
+}
+
+// Function with @at-root (edge case)
+@function with-at-root() {
+  @at-root {
+    .global { color: red; }
+  }
+  @return true;
+}
+
+// Function with variable scoping
+@function scoped() {
+  $local: 10px;
+  @return $local * 2;
+}
+
+// Function with !global (edge case)
+@function global-setter() {
+  $global-var: 20px !global;
+  @return $global-var;
+}
+
+// Function with module namespace
+@function math-operation() {
+  @return math.pow(2, 3);
+}
+*/
+
+// Using functions
+.test {
+  simple: simple();
+  add: add(10, 20);
+  defaults: with-defaults();
+  sum: sum(1, 2, 3, 4, 5);
+  abs: abs(-42);
+  clamp: clamp(50, 0, 100);
+  power: power(2, 8);
+  factorial: factorial(5);
+  double: double(21);
+  quadruple: quadruple(10);
+  tint: tint(#f00, 50%);
+  px-to-rem: px-to-rem(16px);
+  spacing: spacing($top: 10px, $bottom: 20px);
+}
+
+// Nested function calls
+.complex {
+  value: add(multiply(2, 3), divide(10, 2));
+  color: shade(tint(#f00, 20%), 10%);
+  size: px-to-rem(calculate-columns(1000px, 20px, 4));
+}
+
+// Function in expressions
+.expressions {
+  width: power(2, 3) + 10px;
+  height: if(is-valid-size($size), $size, 100px);
+  margin: spacing($top: add(5px, 5px));
+}
+
+

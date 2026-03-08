@@ -1,4 +1,5 @@
-.demo {
+.keyword-arg-context {
+  width: fn($a: $b);
   first: fn($name: 1);
   second: fn(($name: 1), $args...);
 }
