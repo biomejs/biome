@@ -1,5 +1,6 @@
 use crate::parser::CssParser;
-use crate::syntax::scss::{SCSS_VARIABLE_MODIFIER_LIST_END_SET, expected_scss_variable_modifier};
+use crate::syntax::scss::{SCSS_IDENT_CONTINUATION_SET, SCSS_STATEMENT_START_SET, SCSS_VARIABLE_MODIFIER_LIST_END_SET,
+    expected_scss_variable_modifier};
 use biome_css_syntax::CssSyntaxKind::{
     CSS_BOGUS, SCSS_VARIABLE_MODIFIER, SCSS_VARIABLE_MODIFIER_LIST,
 };
@@ -85,7 +86,7 @@ impl ParseNodeList for ScssVariableModifierList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at_ts(SCSS_VARIABLE_MODIFIER_LIST_END_SET) || p.has_preceding_line_break()
+        p.at_ts(SCSS_VARIABLE_MODIFIER_LIST_END_SET) || is_at_scss_statement_boundary(p)
     }
 
     fn recover(
@@ -112,5 +113,21 @@ impl ParseRecovery for ScssVariableModifierListParseRecovery {
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
         p.at(T![!]) || p.at_ts(SCSS_VARIABLE_MODIFIER_LIST_END_SET) || p.has_preceding_line_break()
+            || is_at_scss_statement_boundary(p)
     }
+}
+
+#[inline]
+fn is_at_scss_statement_boundary(p: &mut CssParser) -> bool {
+    p.at_ts(SCSS_STATEMENT_START_SET) || is_at_identifier_started_scss_statement_boundary(p)
+}
+
+#[inline]
+fn is_at_identifier_started_scss_statement_boundary(p: &mut CssParser) -> bool {
+    p.at(T![ident])
+        && (p.nth_at(1, T![:])
+            || p.nth_at_ts(1, SCSS_IDENT_CONTINUATION_SET)
+            || (p.nth_at(1, T![*]) && p.nth_at(2, T![:]))
+            || (p.nth_at(1, T![-]) && p.nth_at(2, T![*]) && p.nth_at(3, T![:]))
+            || p.nth_at(1, T!['{']))
 }
