@@ -6536,7 +6536,7 @@
 					"anyOf": [{ "$ref": "#/$defs/ImportGroups" }, { "type": "null" }]
 				},
 				"identifierOrder": {
-          "description": "Order used for sorting identifiers within imports and exports.\n\nDefault: `natural`.",
+					"description": "Order used for sorting identifiers within imports and exports.\n\nDefault: `natural`.",
 					"anyOf": [{ "$ref": "#/$defs/SortOrder" }, { "type": "null" }]
 				},
 				"sortBareImports": {
