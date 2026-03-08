@@ -59,6 +59,6 @@ pub(crate) fn expected_scss_variable_modifier(p: &CssParser, range: TextRange) -
             ),
             range,
         )
-        .with_hint(format!("Remove {}", p.cur_text()))
+        .with_hint(format!("Remove {}", p.text(range)))
     }
 }

@@ -205,15 +205,15 @@ modifier-recovery.scss:5:18 parse ━━━━━━━━━━━━━━━�
   
   i Expected a variable modifier or the end of the declaration.
   
-modifier-recovery.scss:8:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+modifier-recovery.scss:8:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected 'default', or 'global' but instead found `important`
   
     7 │ // !important should report the generic invalid modifier diagnostic and allow later modifiers
   > 8 │ $size: 2 !important !global;
-      │           ^^^^^^^^^
+      │          ^^^^^^^^^^
     9 │ 
   
-  i Remove important
+  i Remove !important
   
 ```

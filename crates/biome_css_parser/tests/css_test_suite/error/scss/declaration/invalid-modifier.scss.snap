@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
 
@@ -286,74 +285,74 @@ CssRoot {
 ## Diagnostics
 
 ```
-invalid-modifier.scss:2:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-modifier.scss:2:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected 'default', or 'global' but instead found `important`
   
     1 │ // Invalid modifier - `!important` falls back to the generic modifier error
   > 2 │ $color: red !important;
-      │              ^^^^^^^^^
+      │             ^^^^^^^^^^
     3 │ 
     4 │ // Invalid modifier - just a random word
   
-  i Remove important
+  i Remove !important
   
-invalid-modifier.scss:5:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-modifier.scss:5:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected 'default', or 'global' but instead found `random`
   
     4 │ // Invalid modifier - just a random word
   > 5 │ $width: 100px !random;
-      │                ^^^^^^
+      │               ^^^^^^^
     6 │ 
     7 │ // Invalid modifier - typo in default
   
-  i Remove random
+  i Remove !random
   
-invalid-modifier.scss:8:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-modifier.scss:8:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected 'default', or 'global' but instead found `defalt`
   
      7 │ // Invalid modifier - typo in default
    > 8 │ $height: 50vh !defalt;
-       │                ^^^^^^
+       │               ^^^^^^^
      9 │ 
     10 │ // Invalid modifier - typo in global
   
-  i Remove defalt
+  i Remove !defalt
   
-invalid-modifier.scss:11:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-modifier.scss:11:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected 'default', or 'global' but instead found `globl`
   
     10 │ // Invalid modifier - typo in global
   > 11 │ $font-size: 16px !globl;
-       │                   ^^^^^
+       │                  ^^^^^^
     12 │ 
     13 │ // Multiple invalid modifiers
   
-  i Remove globl
+  i Remove !globl
   
-invalid-modifier.scss:14:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-modifier.scss:14:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected 'default', or 'global' but instead found `wrong`
   
     13 │ // Multiple invalid modifiers
   > 14 │ $margin: 10px !wrong !invalid;
-       │                ^^^^^
+       │               ^^^^^^
     15 │ 
   
-  i Remove wrong
+  i Remove !wrong
   
-invalid-modifier.scss:14:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-modifier.scss:14:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected 'default', or 'global' but instead found `invalid`
   
     13 │ // Multiple invalid modifiers
   > 14 │ $margin: 10px !wrong !invalid;
-       │                       ^^^^^^^
+       │                      ^^^^^^^^
     15 │ 
   
-  i Remove invalid
+  i Remove !invalid
   
 ```

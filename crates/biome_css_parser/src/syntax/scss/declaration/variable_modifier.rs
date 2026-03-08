@@ -1,7 +1,6 @@
 use crate::parser::CssParser;
 use crate::syntax::scss::{
-    SCSS_IDENT_CONTINUATION_SET, SCSS_STATEMENT_START_SET, SCSS_VARIABLE_MODIFIER_LIST_END_SET,
-    expected_scss_variable_modifier,
+    SCSS_VARIABLE_MODIFIER_LIST_END_SET, expected_scss_variable_modifier,
 };
 use biome_css_syntax::CssSyntaxKind::{
     CSS_BOGUS, SCSS_VARIABLE_MODIFIER, SCSS_VARIABLE_MODIFIER_LIST,
@@ -12,6 +11,7 @@ use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{Parser, TokenSet, token_set};
+use biome_rowan::TextRange;
 
 const SCSS_VARIABLE_MODIFIER_TOKEN_SET: TokenSet<CssSyntaxKind> =
     token_set![T![default], T![global]];
@@ -45,6 +45,7 @@ fn parse_scss_variable_modifier(p: &mut CssParser) -> ParsedSyntax {
         return Absent;
     }
 
+    let bang_range = p.cur_range();
     let m = p.start();
     p.bump(T![!]);
 
@@ -55,7 +56,7 @@ fn parse_scss_variable_modifier(p: &mut CssParser) -> ParsedSyntax {
             p.bump(T![global]);
         }
     } else {
-        let range = p.cur_range();
+        let range = TextRange::new(bang_range.start(), p.cur_range().end());
         p.error(expected_scss_variable_modifier(p, range));
         if !p.at_ts(SCSS_VARIABLE_MODIFIER_LIST_END_SET) {
             p.bump_any();
@@ -86,7 +87,7 @@ impl ParseNodeList for ScssVariableModifierList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at_ts(SCSS_VARIABLE_MODIFIER_LIST_END_SET) || is_at_scss_statement_boundary(p)
+        p.at_ts(SCSS_VARIABLE_MODIFIER_LIST_END_SET) || p.has_preceding_line_break()
     }
 
     fn recover(
@@ -114,21 +115,6 @@ impl ParseRecovery for ScssVariableModifierListParseRecovery {
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
         p.at(T![!])
             || p.at_ts(SCSS_VARIABLE_MODIFIER_LIST_END_SET)
-            || is_at_scss_statement_boundary(p)
+            || p.has_preceding_line_break()
     }
-}
-
-#[inline]
-fn is_at_scss_statement_boundary(p: &mut CssParser) -> bool {
-    p.at_ts(SCSS_STATEMENT_START_SET) || is_at_identifier_started_scss_statement_boundary(p)
-}
-
-#[inline]
-fn is_at_identifier_started_scss_statement_boundary(p: &mut CssParser) -> bool {
-    p.at(T![ident])
-        && (p.nth_at(1, T![:])
-            || p.nth_at_ts(1, SCSS_IDENT_CONTINUATION_SET)
-            || (p.nth_at(1, T![*]) && p.nth_at(2, T![:]))
-            || (p.nth_at(1, T![-]) && p.nth_at(2, T![*]) && p.nth_at(3, T![:]))
-            || p.nth_at(1, T!['{']))
 }
