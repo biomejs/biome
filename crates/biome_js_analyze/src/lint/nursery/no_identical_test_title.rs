@@ -4,13 +4,14 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsLiteralExpression, AnyJsModuleItem, AnyJsStatement, AnyJsTemplateElement,
-    JsCallExpression, JsModule, JsScript,
+    AnyJsExpression, AnyJsLiteralExpression, AnyJsTemplateElement, JsCallExpression,
 };
-use biome_rowan::{AstNode, TokenText, declare_node_union};
+use biome_rowan::{AstNode, TokenText};
 use biome_rule_options::no_identical_test_title::NoIdenticalTestTitleOptions;
 
-use crate::frameworks::unit_tests::{describe_body_statements, is_describe_call, is_unit_test};
+use crate::frameworks::unit_tests::{
+    AnyTestScope, get_unit_test_scope_calls, is_describe_call, is_unit_test,
+};
 
 declare_lint_rule! {
     /// Disallow identical titles in test suites and test cases.
@@ -70,12 +71,6 @@ declare_lint_rule! {
     }
 }
 
-declare_node_union! {
-    /// A node that represents a scope containing test/describe calls:
-    /// either the top-level module/script, or a `describe(...)` call.
-    pub AnyTestScope = JsModule | JsScript | JsCallExpression
-}
-
 impl Rule for NoIdenticalTestTitle {
     type Query = Ast<AnyTestScope>;
     type State = JsCallExpression;
@@ -83,36 +78,8 @@ impl Rule for NoIdenticalTestTitle {
     type Options = NoIdenticalTestTitleOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let scope = ctx.query();
-
-        // For a JsCallExpression, only act when it is a describe block.
-        if let AnyTestScope::JsCallExpression(call) = scope {
-            if !is_describe_call(call) {
-                return vec![];
-            }
-            let Some(stmts) = describe_body_statements(call) else {
-                return vec![];
-            };
-            return check_direct_children(&stmts);
-        }
-
-        // For the top-level module or script, gather the top-level statements.
-        let stmts: Vec<AnyJsStatement> = match scope {
-            AnyTestScope::JsModule(module) => module
-                .items()
-                .into_iter()
-                .filter_map(|item| {
-                    if let AnyJsModuleItem::AnyJsStatement(stmt) = item {
-                        Some(stmt)
-                    } else {
-                        None
-                    }
-                })
-                .collect(),
-            AnyTestScope::JsScript(script) => script.statements().into_iter().collect(),
-            AnyTestScope::JsCallExpression(_) => unreachable!(),
-        };
-        check_direct_children(&stmts)
+        let calls = get_unit_test_scope_calls(ctx.query());
+        check_direct_children(calls)
     }
 
     fn diagnostic(_: &RuleContext<Self>, node: &Self::State) -> Option<RuleDiagnostic> {
@@ -148,20 +115,14 @@ impl Rule for NoIdenticalTestTitle {
 ///
 /// Returns every call expression that is a duplicate (i.e. the second or later
 /// occurrence of a given title at this level).
-fn check_direct_children(statements: &[AnyJsStatement]) -> Vec<JsCallExpression> {
+fn check_direct_children(
+    calls: impl IntoIterator<Item = JsCallExpression>,
+) -> Vec<JsCallExpression> {
     let mut describe_titles: Vec<TokenText> = vec![];
     let mut test_titles: Vec<TokenText> = vec![];
     let mut duplicates: Vec<JsCallExpression> = vec![];
 
-    for stmt in statements {
-        let Some(call) = stmt
-            .as_js_expression_statement()
-            .and_then(|e| e.expression().ok())
-            .and_then(|e| e.as_js_call_expression().cloned())
-        else {
-            continue;
-        };
-
+    for call in calls {
         if is_describe_call(&call) {
             if let Some(title) = extract_call_title(&call) {
                 if describe_titles.contains(&title) {

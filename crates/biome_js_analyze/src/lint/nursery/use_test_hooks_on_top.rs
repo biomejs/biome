@@ -3,12 +3,12 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{AnyJsModuleItem, AnyJsStatement, JsCallExpression, JsModule, JsScript};
-use biome_rowan::{AstNode, TextRange, declare_node_union};
+use biome_js_syntax::JsCallExpression;
+use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::use_test_hooks_on_top::UseTestHooksOnTopOptions;
 
 use crate::frameworks::unit_tests::{
-    LifecycleHook, describe_body_statements, is_describe_call, is_unit_test,
+    AnyTestScope, LifecycleHook, get_unit_test_scope_calls, is_unit_test,
 };
 
 declare_lint_rule! {
@@ -54,14 +54,6 @@ declare_lint_rule! {
     }
 }
 
-declare_node_union! {
-    /// A node that represents a scope containing test/hook calls:
-    /// either the top-level module/script, or a `describe(...)` call.
-    pub AnyTestScope = JsModule | JsScript | JsCallExpression
-}
-
-/// A lifecycle hook that is misplaced, together with the range of the first
-/// test case that precedes it in the same block.
 pub struct HookViolation {
     /// The misplaced hook call.
     pub hook: JsCallExpression,
@@ -76,36 +68,8 @@ impl Rule for UseTestHooksOnTop {
     type Options = UseTestHooksOnTopOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let scope = ctx.query();
-
-        // For a JsCallExpression, only act when it is a describe block.
-        if let AnyTestScope::JsCallExpression(call) = scope {
-            if !is_describe_call(call) {
-                return vec![];
-            }
-            let Some(stmts) = describe_body_statements(call) else {
-                return vec![];
-            };
-            return check_hooks_after_tests(&stmts);
-        }
-
-        // For the top-level module or script, gather the top-level statements.
-        let stmts: Vec<AnyJsStatement> = match scope {
-            AnyTestScope::JsModule(module) => module
-                .items()
-                .into_iter()
-                .filter_map(|item| {
-                    if let AnyJsModuleItem::AnyJsStatement(stmt) = item {
-                        Some(stmt)
-                    } else {
-                        None
-                    }
-                })
-                .collect(),
-            AnyTestScope::JsScript(script) => script.statements().into_iter().collect(),
-            AnyTestScope::JsCallExpression(_) => unreachable!(),
-        };
-        check_hooks_after_tests(&stmts)
+        let calls = get_unit_test_scope_calls(ctx.query());
+        check_hooks_after_tests(calls)
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -138,19 +102,13 @@ impl Rule for UseTestHooksOnTop {
 /// Only looks at the **direct children** of the current scope — does not
 /// recurse. Recursion is handled by the query firing again for each nested
 /// `describe` call.
-fn check_hooks_after_tests(statements: &[AnyJsStatement]) -> Vec<HookViolation> {
+fn check_hooks_after_tests(
+    calls: impl IntoIterator<Item = JsCallExpression>,
+) -> Vec<HookViolation> {
     let mut first_test: Option<TextRange> = None;
     let mut violations: Vec<HookViolation> = vec![];
 
-    for stmt in statements {
-        let Some(call) = stmt
-            .as_js_expression_statement()
-            .and_then(|e| e.expression().ok())
-            .and_then(|e| e.as_js_call_expression().cloned())
-        else {
-            continue;
-        };
-
+    for call in calls {
         if is_unit_test(&call) {
             if first_test.is_none() {
                 first_test = Some(call.range());
@@ -163,7 +121,6 @@ fn check_hooks_after_tests(statements: &[AnyJsStatement]) -> Vec<HookViolation> 
                 first_test_range,
             });
         }
-        // describe blocks and other statements are ignored at this level.
     }
 
     violations
