@@ -1,0 +1,488 @@
+---
+source: crates/biome_tailwind_analyze/tests/spec_tests.rs
+expression: invalid.json
+---
+# Input
+```tw
+flex block
+```
+
+# Diagnostics
+```
+invalid.json:1:1 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind class conflicts with another class because both utilities set the same CSS property: display.
+  
+  > 1 │ flex block
+      │ ^^^^
+  
+  i The conflicting class is here.
+  
+  > 1 │ flex block
+      │      ^^^^^
+  
+  i When two Tailwind classes set the same CSS property in the same variant context, it can be unclear which style should apply. Remove one of the classes or move one behind a different variant so they no longer apply together.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.json:1:6 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind class conflicts with another class because both utilities set the same CSS property: display.
+  
+  > 1 │ flex block
+      │      ^^^^^
+  
+  i The conflicting class is here.
+  
+  > 1 │ flex block
+      │ ^^^^
+  
+  i When two Tailwind classes set the same CSS property in the same variant context, it can be unclear which style should apply. Remove one of the classes or move one behind a different variant so they no longer apply together.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```tw
+flex grid
+```
+
+# Diagnostics
+```
+invalid.json:1:1 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind class conflicts with another class because both utilities set the same CSS property: display.
+  
+  > 1 │ flex grid
+      │ ^^^^
+  
+  i The conflicting class is here.
+  
+  > 1 │ flex grid
+      │      ^^^^
+  
+  i When two Tailwind classes set the same CSS property in the same variant context, it can be unclear which style should apply. Remove one of the classes or move one behind a different variant so they no longer apply together.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.json:1:6 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind class conflicts with another class because both utilities set the same CSS property: display.
+  
+  > 1 │ flex grid
+      │      ^^^^
+  
+  i The conflicting class is here.
+  
+  > 1 │ flex grid
+      │ ^^^^
+  
+  i When two Tailwind classes set the same CSS property in the same variant context, it can be unclear which style should apply. Remove one of the classes or move one behind a different variant so they no longer apply together.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```tw
+hover:flex hover:block
+```
+
+# Diagnostics
+```
+invalid.json:1:1 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind class conflicts with another class because both utilities set the same CSS property: display.
+  
+  > 1 │ hover:flex hover:block
+      │ ^^^^^^^^^^
+  
+  i The conflicting class is here.
+  
+  > 1 │ hover:flex hover:block
+      │            ^^^^^^^^^^^
+  
+  i When two Tailwind classes set the same CSS property in the same variant context, it can be unclear which style should apply. Remove one of the classes or move one behind a different variant so they no longer apply together.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.json:1:12 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind class conflicts with another class because both utilities set the same CSS property: display.
+  
+  > 1 │ hover:flex hover:block
+      │            ^^^^^^^^^^^
+  
+  i The conflicting class is here.
+  
+  > 1 │ hover:flex hover:block
+      │ ^^^^^^^^^^
+  
+  i When two Tailwind classes set the same CSS property in the same variant context, it can be unclear which style should apply. Remove one of the classes or move one behind a different variant so they no longer apply together.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```tw
+outline outline-1
+```
+
+# Diagnostics
+```
+invalid.json:1:1 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind class conflicts with another class because both utilities set the same CSS property: outline-width.
+  
+  > 1 │ outline outline-1
+      │ ^^^^^^^
+  
+  i The conflicting class is here.
+  
+  > 1 │ outline outline-1
+      │         ^^^^^^^^^
+  
+  i When two Tailwind classes set the same CSS property in the same variant context, it can be unclear which style should apply. Remove one of the classes or move one behind a different variant so they no longer apply together.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.json:1:9 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind class conflicts with another class because both utilities set the same CSS property: outline-width.
+  
+  > 1 │ outline outline-1
+      │         ^^^^^^^^^
+  
+  i The conflicting class is here.
+  
+  > 1 │ outline outline-1
+      │ ^^^^^^^
+  
+  i When two Tailwind classes set the same CSS property in the same variant context, it can be unclear which style should apply. Remove one of the classes or move one behind a different variant so they no longer apply together.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```tw
+gap-2 gap-x-4
+```
+
+# Diagnostics
+```
+invalid.json:1:1 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind class conflicts with another class because both utilities set the same CSS property: column-gap.
+  
+  > 1 │ gap-2 gap-x-4
+      │ ^^^^^
+  
+  i The conflicting class is here.
+  
+  > 1 │ gap-2 gap-x-4
+      │       ^^^^^^^
+  
+  i When two Tailwind classes set the same CSS property in the same variant context, it can be unclear which style should apply. Remove one of the classes or move one behind a different variant so they no longer apply together.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.json:1:7 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind class conflicts with another class because both utilities set the same CSS property: column-gap.
+  
+  > 1 │ gap-2 gap-x-4
+      │       ^^^^^^^
+  
+  i The conflicting class is here.
+  
+  > 1 │ gap-2 gap-x-4
+      │ ^^^^^
+  
+  i When two Tailwind classes set the same CSS property in the same variant context, it can be unclear which style should apply. Remove one of the classes or move one behind a different variant so they no longer apply together.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```tw
+left-0 inset-x-2
+```
+
+# Diagnostics
+```
+invalid.json:1:1 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind class conflicts with another class because both utilities set the same CSS property: left.
+  
+  > 1 │ left-0 inset-x-2
+      │ ^^^^^^
+  
+  i The conflicting class is here.
+  
+  > 1 │ left-0 inset-x-2
+      │        ^^^^^^^^^
+  
+  i When two Tailwind classes set the same CSS property in the same variant context, it can be unclear which style should apply. Remove one of the classes or move one behind a different variant so they no longer apply together.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.json:1:8 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind class conflicts with another class because both utilities set the same CSS property: left.
+  
+  > 1 │ left-0 inset-x-2
+      │        ^^^^^^^^^
+  
+  i The conflicting class is here.
+  
+  > 1 │ left-0 inset-x-2
+      │ ^^^^^^
+  
+  i When two Tailwind classes set the same CSS property in the same variant context, it can be unclear which style should apply. Remove one of the classes or move one behind a different variant so they no longer apply together.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```tw
+w-4 size-8
+```
+
+# Diagnostics
+```
+invalid.json:1:1 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind class conflicts with another class because both utilities set the same CSS property: width.
+  
+  > 1 │ w-4 size-8
+      │ ^^^
+  
+  i The conflicting class is here.
+  
+  > 1 │ w-4 size-8
+      │     ^^^^^^
+  
+  i When two Tailwind classes set the same CSS property in the same variant context, it can be unclear which style should apply. Remove one of the classes or move one behind a different variant so they no longer apply together.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.json:1:5 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind class conflicts with another class because both utilities set the same CSS property: width.
+  
+  > 1 │ w-4 size-8
+      │     ^^^^^^
+  
+  i The conflicting class is here.
+  
+  > 1 │ w-4 size-8
+      │ ^^^
+  
+  i When two Tailwind classes set the same CSS property in the same variant context, it can be unclear which style should apply. Remove one of the classes or move one behind a different variant so they no longer apply together.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```tw
+translate-x-2 translate-y-4 translate-[2px]
+```
+
+# Diagnostics
+```
+invalid.json:1:1 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind class conflicts with another class because both utilities set the same CSS property: translate-x.
+  
+  > 1 │ translate-x-2 translate-y-4 translate-[2px]
+      │ ^^^^^^^^^^^^^
+  
+  i The conflicting class is here.
+  
+  > 1 │ translate-x-2 translate-y-4 translate-[2px]
+      │                             ^^^^^^^^^^^^^^^
+  
+  i When two Tailwind classes set the same CSS property in the same variant context, it can be unclear which style should apply. Remove one of the classes or move one behind a different variant so they no longer apply together.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.json:1:15 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind class conflicts with another class because both utilities set the same CSS property: translate-y.
+  
+  > 1 │ translate-x-2 translate-y-4 translate-[2px]
+      │               ^^^^^^^^^^^^^
+  
+  i The conflicting class is here.
+  
+  > 1 │ translate-x-2 translate-y-4 translate-[2px]
+      │                             ^^^^^^^^^^^^^^^
+  
+  i When two Tailwind classes set the same CSS property in the same variant context, it can be unclear which style should apply. Remove one of the classes or move one behind a different variant so they no longer apply together.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.json:1:29 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind class conflicts with another class because both utilities set the same CSS properties: translate-x, translate-y.
+  
+  > 1 │ translate-x-2 translate-y-4 translate-[2px]
+      │                             ^^^^^^^^^^^^^^^
+  
+  i The conflicting class is here.
+  
+  > 1 │ translate-x-2 translate-y-4 translate-[2px]
+      │ ^^^^^^^^^^^^^
+  
+  i The conflicting class is here.
+  
+  > 1 │ translate-x-2 translate-y-4 translate-[2px]
+      │               ^^^^^^^^^^^^^
+  
+  i When two Tailwind classes set the same CSS properties in the same variant context, it can be unclear which style should apply. Remove one of the classes or move one behind a different variant so they no longer apply together.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```tw
+md:hover:flex md:hover:block
+```
+
+# Diagnostics
+```
+invalid.json:1:1 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind class conflicts with another class because both utilities set the same CSS property: display.
+  
+  > 1 │ md:hover:flex md:hover:block
+      │ ^^^^^^^^^^^^^
+  
+  i The conflicting class is here.
+  
+  > 1 │ md:hover:flex md:hover:block
+      │               ^^^^^^^^^^^^^^
+  
+  i When two Tailwind classes set the same CSS property in the same variant context, it can be unclear which style should apply. Remove one of the classes or move one behind a different variant so they no longer apply together.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.json:1:15 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind class conflicts with another class because both utilities set the same CSS property: display.
+  
+  > 1 │ md:hover:flex md:hover:block
+      │               ^^^^^^^^^^^^^^
+  
+  i The conflicting class is here.
+  
+  > 1 │ md:hover:flex md:hover:block
+      │ ^^^^^^^^^^^^^
+  
+  i When two Tailwind classes set the same CSS property in the same variant context, it can be unclear which style should apply. Remove one of the classes or move one behind a different variant so they no longer apply together.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```tw
+flex-row flex-col
+```
+
+# Diagnostics
+```
+invalid.json:1:1 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind class conflicts with another class because both utilities set the same CSS property: flex-direction.
+  
+  > 1 │ flex-row flex-col
+      │ ^^^^^^^^
+  
+  i The conflicting class is here.
+  
+  > 1 │ flex-row flex-col
+      │          ^^^^^^^^
+  
+  i When two Tailwind classes set the same CSS property in the same variant context, it can be unclear which style should apply. Remove one of the classes or move one behind a different variant so they no longer apply together.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.json:1:10 lint/nursery/noTailwindConflictingClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind class conflicts with another class because both utilities set the same CSS property: flex-direction.
+  
+  > 1 │ flex-row flex-col
+      │          ^^^^^^^^
+  
+  i The conflicting class is here.
+  
+  > 1 │ flex-row flex-col
+      │ ^^^^^^^^
+  
+  i When two Tailwind classes set the same CSS property in the same variant context, it can be unclear which style should apply. Remove one of the classes or move one behind a different variant so they no longer apply together.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

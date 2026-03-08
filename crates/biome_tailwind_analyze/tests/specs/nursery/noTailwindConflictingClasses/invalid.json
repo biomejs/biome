@@ -1,0 +1,12 @@
+[
+  "flex block",
+  "flex grid",
+  "hover:flex hover:block",
+  "outline outline-1",
+  "gap-2 gap-x-4",
+  "left-0 inset-x-2",
+  "w-4 size-8",
+  "translate-x-2 translate-y-4 translate-[2px]",
+  "md:hover:flex md:hover:block",
+  "flex-row flex-col"
+]
