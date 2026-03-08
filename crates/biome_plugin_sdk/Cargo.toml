@@ -12,7 +12,7 @@ categories.workspace = true
 publish              = true
 
 [dependencies]
-biome_plugin_sdk_macros = { version = "0.0.1", path = "../biome_plugin_sdk_macros" }
+biome_plugin_sdk_macros = { path = "../biome_plugin_sdk_macros", version = "0.0.1" }
 
 [lints]
 workspace = true

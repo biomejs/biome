@@ -263,10 +263,8 @@ impl AnalyzerPlugin for AnalyzerWasmPlugin {
                     file_path,
                 ) {
                     Ok(mut session) => {
-                        let result = session.check_current(
-                            &self.rule_name,
-                            self.options_json.as_deref(),
-                        );
+                        let result =
+                            session.check_current(&self.rule_name, self.options_json.as_deref());
                         map.insert(self.plugin_id, session);
                         result
                     }

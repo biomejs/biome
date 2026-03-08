@@ -800,12 +800,7 @@ impl WorkspaceServer {
                 let options_json = plugin_config.options_json().map(String::from);
                 (
                     plugin_path.to_owned(),
-                    BiomePlugin::load(
-                        self.fs.clone(),
-                        plugin_path,
-                        base_path,
-                        options_json,
-                    ),
+                    BiomePlugin::load(self.fs.clone(), plugin_path, base_path, options_json),
                 )
             })
             .collect();

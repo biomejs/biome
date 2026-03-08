@@ -109,9 +109,12 @@ impl BiomePlugin {
             ));
         }
 
-        // options_json is only used by the wasm_plugin feature above.
+        // options_json and plugin_name are only used by the wasm_plugin feature.
         #[cfg(not(feature = "wasm_plugin"))]
-        let _ = options_json;
+        {
+            let _ = options_json;
+            let _ = plugin_name;
+        }
 
         let manifest_path = plugin_path.join("biome-manifest.jsonc");
         if !fs.path_is_file(&manifest_path) {
@@ -146,7 +149,11 @@ impl BiomePlugin {
                     } else if rule.as_os_str().as_encoded_bytes().ends_with(b".wasm") {
                         #[cfg(feature = "wasm_plugin")]
                         {
-                            let plugins = AnalyzerWasmPlugin::load(&plugin_path.join(rule), &plugin_name, options_json.clone())?;
+                            let plugins = AnalyzerWasmPlugin::load(
+                                &plugin_path.join(rule),
+                                &plugin_name,
+                                options_json.clone(),
+                            )?;
                             Ok(plugins
                                 .into_iter()
                                 .map(|p| Arc::new(p) as Arc<dyn AnalyzerPlugin>)

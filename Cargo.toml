@@ -3,7 +3,11 @@ resolver = "2"
 # Use the newer version of the cargo resolver
 # https://doc.rust-lang.org/cargo/reference/resolver.html#resolver-versions
 members  = ["crates/*", "xtask/codegen", "xtask/coverage", "xtask/glue", "xtask/rules_check"]
-exclude  = ["e2e-tests/wasm-plugins/plugins/boolean-naming", "e2e-tests/wasm-plugins/plugins/css-style-conventions", "e2e-tests/wasm-plugins/plugins/json-naming"]
+exclude  = [
+  "e2e-tests/wasm-plugins/plugins/boolean-naming",
+  "e2e-tests/wasm-plugins/plugins/css-style-conventions",
+  "e2e-tests/wasm-plugins/plugins/json-naming"
+]
 
 [workspace.package]
 authors    = ["Biome Developers and Contributors"]
@@ -168,11 +172,15 @@ ureq                         = "3.1.4"
 url                          = "2.5.8"
 uuid                         = "1.18.1"
 walkdir                      = "2.5.0"
-wasmtime                     = { version = "30", default-features = false, features = ["component-model", "cranelift", "std"] }
+wasmtime                     = { version = "30", default-features = false, features = [
+  "component-model",
+  "cranelift",
+  "std"
+] }
 wasmtime-wasi                = { version = "30", default-features = false }
-wit-bindgen                  = "0.39"
 web-time                     = "1.1.0"
 windows                      = "0.62.2"
+wit-bindgen                  = "0.39"
 xtask_codegen                = { path = "xtask/codegen" }
 xtask_coverage               = { path = "xtask/coverage" }
 xtask_glue                   = { path = "xtask/glue" }

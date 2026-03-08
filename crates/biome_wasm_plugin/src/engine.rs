@@ -329,10 +329,7 @@ fn convert_results(
                             .map(|e| {
                                 let (lo, hi) = normalize_range(e.start, e.end);
                                 PluginTextEdit {
-                                    range: TextRange::new(
-                                        TextSize::from(lo),
-                                        TextSize::from(hi),
-                                    ),
+                                    range: TextRange::new(TextSize::from(lo), TextSize::from(hi)),
                                     replacement: e.replacement,
                                 }
                             })
@@ -352,7 +349,8 @@ fn convert_results(
 /// A live WASM plugin instance that can be reused across multiple `check()`
 /// calls within the same file, avoiding per-node instantiation overhead.
 ///
-/// Not `Sync` — must be used behind a `Mutex` when shared across threads.
+/// Not `Send` or `Sync` — intended for use in a thread-local cache
+/// (one session per plugin per thread).
 pub struct WasmPluginSession {
     // Note: Debug is manually implemented below since Store/Plugin don't impl Debug.
     store: wasmtime::Store<HostState>,
@@ -386,9 +384,7 @@ impl WasmPluginSession {
         options_json: Option<&str>,
     ) -> Result<Vec<PluginDiagnosticEntry>, wasmtime::Error> {
         // Reset handle table with new root node at handle 0.
-        self.store
-            .data_mut()
-            .reset_for_node(node, self.language);
+        self.store.data_mut().reset_for_node(node, self.language);
 
         self.check_current(rule_name, options_json)
     }
@@ -572,11 +568,7 @@ impl WasmPluginEngine {
     }
 
     /// Write a compiled component to the cache file (best-effort).
-    fn write_cache(
-        component: &wasmtime::component::Component,
-        cache_path: &Path,
-        hash: &[u8; 32],
-    ) {
+    fn write_cache(component: &wasmtime::component::Component, cache_path: &Path, hash: &[u8; 32]) {
         let Ok(serialized) = component.serialize() else {
             return;
         };
@@ -620,8 +612,7 @@ impl WasmPluginEngine {
                 },
             );
 
-            let triggers =
-                bindings.call_source_triggers_for_rule(&mut store, rule_name)?;
+            let triggers = bindings.call_source_triggers_for_rule(&mut store, rule_name)?;
             if !triggers.is_empty() {
                 source_triggers_by_rule.insert(rule_name.clone(), triggers);
             }
@@ -648,7 +639,13 @@ impl WasmPluginEngine {
         module_resolver: Option<Arc<ModuleResolver>>,
         file_path: String,
     ) -> Result<WasmPluginSession, wasmtime::Error> {
-        let state = HostState::new(node, language, semantic_model, module_resolver, file_path.clone());
+        let state = HostState::new(
+            node,
+            language,
+            semantic_model,
+            module_resolver,
+            file_path.clone(),
+        );
         let mut store = wasmtime::Store::new(self.plugin_pre.engine(), state);
         store.set_fuel(1_000_000)?;
         let bindings = self.plugin_pre.instantiate(&mut store)?;
@@ -677,11 +674,104 @@ impl WasmPluginEngine {
         file_path: String,
         options_json: Option<&str>,
     ) -> Result<Vec<PluginDiagnosticEntry>, wasmtime::Error> {
-        let mut session = self.create_session(
-            node, language, semantic_model, module_resolver, file_path,
-        )?;
+        let mut session =
+            self.create_session(node, language, semantic_model, module_resolver, file_path)?;
         // Node is already at handle 0 from create_session — call check directly.
         session.check_current(rule_name, options_json)
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn test_engine() -> wasmtime::Engine {
+        let mut config = wasmtime::Config::new();
+        config.consume_fuel(true);
+        config.wasm_component_model(true);
+        wasmtime::Engine::new(&config).unwrap()
+    }
+
+    #[test]
+    fn hash_for_cache_deterministic() {
+        let engine = test_engine();
+        let bytes = b"fake wasm content";
+        let h1 = WasmPluginEngine::hash_for_cache(bytes, &engine);
+        let h2 = WasmPluginEngine::hash_for_cache(bytes, &engine);
+        assert_eq!(h1, h2);
+    }
+
+    #[test]
+    fn hash_for_cache_differs_for_different_content() {
+        let engine = test_engine();
+        let h1 = WasmPluginEngine::hash_for_cache(b"content A", &engine);
+        let h2 = WasmPluginEngine::hash_for_cache(b"content B", &engine);
+        assert_ne!(h1, h2);
+    }
+
+    #[test]
+    fn hash_for_cache_differs_for_different_engines() {
+        let engine1 = test_engine();
+        // A second engine with different config produces a different hash.
+        let mut config2 = wasmtime::Config::new();
+        config2.consume_fuel(false);
+        config2.wasm_component_model(true);
+        let engine2 = wasmtime::Engine::new(&config2).unwrap();
+
+        let bytes = b"same content";
+        let h1 = WasmPluginEngine::hash_for_cache(bytes, &engine1);
+        let h2 = WasmPluginEngine::hash_for_cache(bytes, &engine2);
+        assert_ne!(h1, h2);
+    }
+
+    #[test]
+    fn load_from_cache_returns_none_for_missing_file() {
+        let engine = test_engine();
+        let hash = [0u8; 32];
+        let result =
+            WasmPluginEngine::load_from_cache(&engine, Path::new("/nonexistent.compiled"), &hash);
+        assert!(result.is_none());
+    }
+
+    #[test]
+    fn load_from_cache_returns_none_for_short_file() {
+        let path = std::env::temp_dir().join("biome_test_short.compiled");
+        std::fs::write(&path, b"too short").unwrap();
+
+        let engine = test_engine();
+        let hash = [0u8; 32];
+        let result = WasmPluginEngine::load_from_cache(&engine, &path, &hash);
+        let _ = std::fs::remove_file(&path);
+        assert!(result.is_none());
+    }
+
+    #[test]
+    fn load_from_cache_returns_none_for_hash_mismatch() {
+        let path = std::env::temp_dir().join("biome_test_mismatch.compiled");
+        // Write a file with a different hash prefix.
+        let mut data = vec![0u8; 32]; // hash = all zeros
+        data.extend_from_slice(b"some serialized data");
+        std::fs::write(&path, &data).unwrap();
+
+        let engine = test_engine();
+        let expected_hash = [1u8; 32]; // different from stored
+        let result = WasmPluginEngine::load_from_cache(&engine, &path, &expected_hash);
+        let _ = std::fs::remove_file(&path);
+        assert!(result.is_none());
+    }
+
+    #[test]
+    fn load_from_cache_returns_none_for_corrupt_data() {
+        let path = std::env::temp_dir().join("biome_test_corrupt.compiled");
+        // Correct hash but corrupt serialized data.
+        let hash = [42u8; 32];
+        let mut data = hash.to_vec();
+        data.extend_from_slice(b"not valid serialized component");
+        std::fs::write(&path, &data).unwrap();
+
+        let engine = test_engine();
+        let result = WasmPluginEngine::load_from_cache(&engine, &path, &hash);
+        let _ = std::fs::remove_file(&path);
+        assert!(result.is_none());
+    }
+}

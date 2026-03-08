@@ -496,9 +496,7 @@ where
                                 skip = true;
                                 break;
                             }
-                            Some(&PluginDomainFilter::Recommended)
-                                if !plugin.is_recommended() =>
-                            {
+                            Some(&PluginDomainFilter::Recommended) if !plugin.is_recommended() => {
                                 skip = true;
                                 break;
                             }

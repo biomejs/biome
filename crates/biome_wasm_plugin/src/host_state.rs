@@ -401,11 +401,7 @@ impl HostState {
     /// semantic model, module resolver, file path, and regex cache intact.
     /// This allows reusing a WASM instance across multiple `check()` calls
     /// within the same file.
-    pub(crate) fn reset_for_node(
-        &mut self,
-        node: AnySyntaxNode,
-        language: PluginTargetLanguage,
-    ) {
+    pub(crate) fn reset_for_node(&mut self, node: AnySyntaxNode, language: PluginTargetLanguage) {
         self.nodes.clear();
         let concrete = match language {
             PluginTargetLanguage::JavaScript => node
@@ -1649,7 +1645,7 @@ mod tests {
         let fs = MemoryFileSystem::default();
         fs.insert("/src/test.ts".into(), source);
         let path = BiomePath::new("/src/test.ts");
-        let added_paths = vec![(&path, parse.tree())];
+        let added_paths = vec![(&path, parse.tree(), Arc::new(model.clone()))];
         let module_graph = Arc::new(ModuleGraph::default());
         module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, true);
         let module_info = module_graph
