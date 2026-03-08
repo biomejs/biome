@@ -138,6 +138,31 @@ declare_lint_rule! {
     /// const { brand: _, ...other } = car;
     /// console.log(other);
     /// ```
+    ///
+    /// ### `ignorePattern`
+    ///
+    /// A pattern that allows excluding matching variables from this rule with.
+    ///
+    /// Default: `null` (no variables are excluded)
+    ///
+    /// #### Example
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "ignorePattern": "Ignored"
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ```js,expect_diagnostic,use_options
+    /// const unusedVariable = 0;
+    /// ```
+    ///
+    /// ```js,use_options
+    /// const unusedVariableIgnored = 0;
+    /// ```
+    ///
     pub NoUnusedVariables {
         version: "1.0.0",
         name: "noUnusedVariables",
@@ -359,8 +384,9 @@ impl Rule for NoUnusedVariables {
                     )
                 });
         let is_used_as_reference = embedded_references.is_used_as_value(binding_name);
+        let is_ignored = ctx.options().ignore_pattern().is_match(binding_name);
 
-        if is_underscore_prefixed || is_defined_in_embedded_binding || is_used_as_reference {
+        if is_underscore_prefixed || is_defined_in_embedded_binding || is_used_as_reference || is_ignored {
             return None;
         }
 

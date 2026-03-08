@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 154
+expression: validIgnoredPattern.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+
+// With ignorePattern: Ignored, unused variables ending in Ignored should be ignored
+const firstVarIgnored = 1;
+const secondVar = 2;
+console.log(secondVar);
+
+```
