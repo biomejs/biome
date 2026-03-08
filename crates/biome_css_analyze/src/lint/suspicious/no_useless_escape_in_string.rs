@@ -19,7 +19,7 @@ declare_lint_rule! {
     ///
     /// ```css,expect_diagnostic
     /// a::after {
-    ///   content: "\a"
+    ///   content: "\g"
     /// }
     /// ```
     ///
@@ -40,6 +40,12 @@ declare_lint_rule! {
     /// ```css
     /// a::after {
     ///   content: "\n"
+    /// }
+    /// ```
+    ///
+    /// ```css
+    /// a::after {
+    ///   content: "\e7bb"
     /// }
     /// ```
     ///
@@ -109,16 +115,17 @@ fn next_useless_escape(str: &str, quote: u8) -> Option<usize> {
                 b'^'
                 | b'\r'
                 | b'\n'
-                | b'0'..=b'7'
                 | b'\\'
-                | b'b'
-                | b'f'
                 | b'n'
                 | b'r'
                 | b't'
                 | b'u'
                 | b'v'
-                | b'x' => {}
+                | b'x'
+                // CSS unicode escape: \ followed by 1-6 hex digits
+                | b'0'..=b'9'
+                | b'a'..=b'f'
+                | b'A'..=b'F' => {}
                 // Preserve escaping of Unicode characters U+2028 and U+2029
                 0xE2 => {
                     if !(matches!(it.next(), Some((_, 0x80)))

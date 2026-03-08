@@ -5,3 +5,19 @@
 .b::after {
     content: "\t"
 }
+/* CSS unicode escapes: \ followed by 1-6 hex digits */
+.c::after {
+    content: "\e7bb"
+}
+.d::after {
+    content: "\e644"
+}
+.e::after {
+    content: "\a"
+}
+.f::after {
+    content: "\0a"
+}
+.g::after {
+    content: "\AB12CD"
+}
