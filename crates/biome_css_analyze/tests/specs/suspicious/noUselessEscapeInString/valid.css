@@ -5,3 +5,16 @@
 .b::after {
     content: "\t"
 }
+/* CSS unicode escapes (hex digits after backslash) */
+.icon-file:before {
+    content: "\e7bb"
+}
+.icon-variable:before {
+    content: "\e644"
+}
+.icon-hex:before {
+    content: "\AB12"
+}
+.icon-digit:before {
+    content: "\39"
+}
