@@ -430,6 +430,7 @@ pub mod use_static_response_methods;
 pub mod use_strict_mode;
 pub mod use_symbol_description;
 pub mod use_template;
+pub mod use_test_hooks_in_order;
 pub mod use_test_hooks_on_top;
 pub mod use_throw_new_error;
 pub mod use_throw_only_error;

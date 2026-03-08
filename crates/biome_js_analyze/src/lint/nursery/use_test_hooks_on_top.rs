@@ -38,6 +38,8 @@ declare_lint_rule! {
     /// });
     /// ```
     ///
+    /// See also: [`useTestHooksInOrder`](https://biomejs.dev/linter/rules/use-test-hooks-in-order)
+    ///
     pub UseTestHooksOnTop {
         version: "next",
         name: "useTestHooksOnTop",
