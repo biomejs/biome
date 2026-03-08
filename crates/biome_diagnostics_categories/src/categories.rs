@@ -270,6 +270,7 @@ define_categories! {
     "lint/nursery/useSortedClasses": "https://biomejs.dev/linter/rules/use-sorted-classes",
     "lint/nursery/useSpread": "https://biomejs.dev/linter/rules/use-spread",
     "lint/nursery/noTopLevelLiterals": "https://biomejs.dev/linter/rules/no-top-level-literals",
+    "lint/nursery/useTestHooksOnTop": "https://biomejs.dev/linter/rules/use-test-hooks-on-top",
     "lint/nursery/useUnicodeRegex": "https://biomejs.dev/linter/rules/use-unicode-regex",
     "lint/nursery/useUniqueArgumentNames": "https://biomejs.dev/linter/rules/use-unique-argument-names",
     "lint/nursery/useUniqueFieldDefinitionNames": "https://biomejs.dev/linter/rules/use-unique-field-definition-names",

@@ -4,13 +4,13 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsModuleItem, AnyJsStatement,
-    AnyJsTemplateElement, JsCallExpression, JsModule, JsScript,
+    AnyJsExpression, AnyJsLiteralExpression, AnyJsModuleItem, AnyJsStatement, AnyJsTemplateElement,
+    JsCallExpression, JsModule, JsScript,
 };
 use biome_rowan::{AstNode, TokenText, declare_node_union};
 use biome_rule_options::no_identical_test_title::NoIdenticalTestTitleOptions;
 
-use crate::frameworks::unit_tests::{is_describe_call, is_unit_test};
+use crate::frameworks::unit_tests::{describe_body_statements, is_describe_call, is_unit_test};
 
 declare_lint_rule! {
     /// Disallow identical titles in test suites and test cases.
@@ -154,7 +154,11 @@ fn check_direct_children(statements: &[AnyJsStatement]) -> Vec<JsCallExpression>
     let mut duplicates: Vec<JsCallExpression> = vec![];
 
     for stmt in statements {
-        let Some(call) = call_from_statement(stmt) else {
+        let Some(call) = stmt
+            .as_js_expression_statement()
+            .and_then(|e| e.expression().ok())
+            .and_then(|e| e.as_js_call_expression().cloned())
+        else {
             continue;
         };
 
@@ -178,38 +182,6 @@ fn check_direct_children(statements: &[AnyJsStatement]) -> Vec<JsCallExpression>
     }
 
     duplicates
-}
-
-/// Returns the list of direct-child statements from the callback passed to a
-/// `describe(...)` call, or `None` if the callback is not a recognisable
-/// function literal with a block body.
-fn describe_body_statements(call: &JsCallExpression) -> Option<Vec<AnyJsStatement>> {
-    let args = call.arguments().ok()?;
-    let [_, callback_arg] = args.get_arguments_by_index([0, 1]);
-    let callback_arg = callback_arg?;
-    let expr = callback_arg.as_any_js_expression()?;
-
-    let body = match expr {
-        AnyJsExpression::JsArrowFunctionExpression(arrow) => arrow.body().ok()?,
-        AnyJsExpression::JsFunctionExpression(func) => {
-            AnyJsFunctionBody::JsFunctionBody(func.body().ok()?)
-        }
-        _ => return None,
-    };
-
-    let AnyJsFunctionBody::JsFunctionBody(block) = body else {
-        return None;
-    };
-
-    Some(block.statements().into_iter().collect())
-}
-
-/// Extracts the (single) `JsCallExpression` from an expression statement, if
-/// the statement is of the form `call_expr(...)`.
-fn call_from_statement(stmt: &AnyJsStatement) -> Option<JsCallExpression> {
-    let expr_stmt = stmt.as_js_expression_statement()?;
-    let expr = expr_stmt.expression().ok()?;
-    expr.as_js_call_expression().cloned()
 }
 
 /// Extracts the static title (first argument) from a test/describe call.
