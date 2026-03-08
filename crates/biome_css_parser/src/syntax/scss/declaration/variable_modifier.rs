@@ -1,7 +1,5 @@
 use crate::parser::CssParser;
-use crate::syntax::scss::{
-    SCSS_VARIABLE_MODIFIER_LIST_END_SET, expected_scss_variable_modifier,
-};
+use crate::syntax::scss::{SCSS_VARIABLE_MODIFIER_LIST_END_SET, expected_scss_variable_modifier};
 use biome_css_syntax::CssSyntaxKind::{
     CSS_BOGUS, SCSS_VARIABLE_MODIFIER, SCSS_VARIABLE_MODIFIER_LIST,
 };
@@ -113,8 +111,6 @@ impl ParseRecovery for ScssVariableModifierListParseRecovery {
     const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![!])
-            || p.at_ts(SCSS_VARIABLE_MODIFIER_LIST_END_SET)
-            || p.has_preceding_line_break()
+        p.at(T![!]) || p.at_ts(SCSS_VARIABLE_MODIFIER_LIST_END_SET) || p.has_preceding_line_break()
     }
 }
