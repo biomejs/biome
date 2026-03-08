@@ -59,11 +59,6 @@ declare_lint_rule! {
     }
 }
 
-pub struct RuleState {
-    redundant_attribute: HtmlAttribute,
-    role_attribute_value: Text,
-}
-
 impl Rule for NoRedundantRoles {
     type Query = Ast<AnyHtmlElement>;
     type State = RuleState;
@@ -86,12 +81,15 @@ impl Rule for NoRedundantRoles {
 
         let role_attribute = node.find_attribute_by_name("role")?;
         let role_attribute_value = role_attribute.initializer()?.value().ok()?.string_value()?;
-        let explicit_role = AriaRole::from_roles(role_attribute_value.trim())?;
+        let trimmed = role_attribute_value.trim();
+        let explicit_role = AriaRole::from_roles(trimmed)?;
 
         if AriaRoles.get_implicit_role(node)? == explicit_role {
+            let has_multiple_roles = trimmed.split_ascii_whitespace().nth(1).is_some();
             return Some(RuleState {
                 redundant_attribute: role_attribute,
                 role_attribute_value,
+                has_multiple_roles,
             });
         }
         None
@@ -111,6 +109,9 @@ impl Rule for NoRedundantRoles {
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<HtmlRuleAction> {
+        if state.has_multiple_roles {
+            return None;
+        }
         let mut mutation = ctx.root().begin();
         mutation.remove_node(state.redundant_attribute.clone());
         Some(HtmlRuleAction::new(
@@ -120,4 +121,10 @@ impl Rule for NoRedundantRoles {
             mutation,
         ))
     }
+}
+
+pub struct RuleState {
+    redundant_attribute: HtmlAttribute,
+    role_attribute_value: Text,
+    has_multiple_roles: bool,
 }
