@@ -117,7 +117,7 @@ declare_lint_rule! {
     ///
     /// Default: `true`
     ///
-    /// #### Example
+    /// #### Examples
     ///
     /// ```json,options
     /// {
@@ -145,7 +145,7 @@ declare_lint_rule! {
     ///
     /// Default: `null` (no variables are excluded)
     ///
-    /// #### Example
+    /// #### Examples
     ///
     /// ```json,options
     /// {
