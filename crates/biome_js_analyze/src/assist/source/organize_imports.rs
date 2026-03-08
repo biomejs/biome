@@ -782,21 +782,26 @@ impl Rule for OrganizeImports {
         let sort_bare_imports = options.sort_bare_imports.unwrap_or_default();
         let mut chunk: Option<ChunkBuilder> = None;
         let mut prev_kind: Option<JsSyntaxKind> = None;
+        let mut prev_is_bare_import = false;
         let mut prev_group = 0;
         for item in root.items() {
+            let current_kind = item.syntax().kind();
             if let Some((info, specifiers, attributes)) = ImportInfo::from_module_item(&item) {
-                let prev_is_distinct = prev_kind.is_some_and(|kind| kind != item.syntax().kind());
-                // switching of kind (import/export) marks the start of a new chunk.
+                let prev_is_distinct = prev_kind.is_some_and(|kind| kind != current_kind);
+                // switching of kind (import/statement/export) marks the start of a new chunk.
                 if prev_is_distinct
                     // A detached comment marks the start of a new chunk
                     || has_detached_leading_comment(item.syntax())
                     // bare imports marks the start of a new chunk if they are ignored in the sort.
-                    || (!sort_bare_imports && info.kind == ImportStatementKind::Bare)
+                    || (!sort_bare_imports && (
+                        prev_is_bare_import || info.kind == ImportStatementKind::Bare
+                    ))
                 {
                     // The chunk ends, here
                     report_unsorted_chunk(chunk.take(), &mut result);
                     prev_group = 0;
                 }
+                prev_is_bare_import = info.kind == ImportStatementKind::Bare;
                 let key = ImportKey::new(info, groups);
                 let blank_line_separated_groups = groups
                     .is_some_and(|groups| groups.separated_by_blank_line(prev_group, key.group));
@@ -810,7 +815,7 @@ impl Rule for OrganizeImports {
                 });
                 let newline_issue = if leading_newline_count == 1
                     // A chunk must start with a blank line (two newlines)
-                    // if an export or a statement precedes it.
+                    // if a distinct kind (import/statement/export) precedes it.
                     && ((starts_chunk && prev_is_distinct) ||
                     // Some groups must be separated by a blank line
                     blank_line_separated_groups)
@@ -866,8 +871,9 @@ impl Rule for OrganizeImports {
                         slot_index: statement.syntax().index() as u32,
                     });
                 }
+                prev_is_bare_import = false;
             }
-            prev_kind = Some(item.syntax().kind());
+            prev_kind = Some(current_kind);
         }
         // Report the last chunk
         report_unsorted_chunk(chunk.take(), &mut result);
