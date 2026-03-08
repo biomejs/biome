@@ -25,7 +25,7 @@ fn fixture_path(name: &str) -> camino::Utf8PathBuf {
 /// Run the analyzer with a WASM plugin and return (diagnostics, code_fixes).
 fn run_wasm_plugin(wasm_name: &str, source: &str) -> (Vec<String>, Vec<String>) {
     let plugin_path = fixture_path(wasm_name);
-    let loaded = AnalyzerWasmPlugin::load(plugin_path.as_ref(), None)
+    let loaded = AnalyzerWasmPlugin::load(plugin_path.as_ref(), wasm_name, None)
         .unwrap_or_else(|e| panic!("Failed to load {wasm_name}: {e:?}"));
 
     let source_type = JsFileSource::js_module();
@@ -46,7 +46,8 @@ fn run_wasm_plugin(wasm_name: &str, source: &str) -> (Vec<String>, Vec<String>) 
     let mut diagnostics = Vec::new();
     let input_file = Utf8Path::new("test.js");
     let mut diag_options = Vec::new();
-    let options = create_analyzer_options::<JsLanguage>(input_file, &mut diag_options);
+    let working_directory = input_file.parent().unwrap_or(input_file);
+    let options = create_analyzer_options::<JsLanguage>(input_file, working_directory, &mut diag_options);
     let services = JsAnalyzerServices::from((Default::default(), Default::default(), source_type));
 
     let mut code_fixes = Vec::new();

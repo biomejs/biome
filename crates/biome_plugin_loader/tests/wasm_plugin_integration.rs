@@ -57,13 +57,13 @@ fn find_node(
 #[test]
 fn load_wasm_plugin() {
     let path = fixture_path("boolean_naming.wasm");
-    let plugins = AnalyzerWasmPlugin::load(path.as_ref(), None).expect("should load WASM plugin");
+    let plugins = AnalyzerWasmPlugin::load(path.as_ref(), "boolean_naming", None).expect("should load WASM plugin");
     assert_eq!(plugins.len(), 1, "Expected 1 rule from boolean_naming");
 }
 
 #[test]
 fn load_invalid_path() {
-    let result = AnalyzerWasmPlugin::load(Utf8Path::new("/nonexistent/plugin.wasm"), None);
+    let result = AnalyzerWasmPlugin::load(Utf8Path::new("/nonexistent/plugin.wasm"), "nonexistent", None);
     assert!(result.is_err());
 }
 
@@ -74,21 +74,21 @@ fn load_invalid_path() {
 #[test]
 fn phase_is_semantic_for_js() {
     let plugins =
-        AnalyzerWasmPlugin::load(fixture_path("boolean_naming.wasm").as_ref(), None).unwrap();
+        AnalyzerWasmPlugin::load(fixture_path("boolean_naming.wasm").as_ref(), "boolean_naming", None).unwrap();
     assert_eq!(plugins[0].phase(), Phases::Semantic);
 }
 
 #[test]
 fn language_is_javascript() {
     let plugins =
-        AnalyzerWasmPlugin::load(fixture_path("boolean_naming.wasm").as_ref(), None).unwrap();
+        AnalyzerWasmPlugin::load(fixture_path("boolean_naming.wasm").as_ref(), "boolean_naming", None).unwrap();
     assert_eq!(plugins[0].language(), PluginTargetLanguage::JavaScript);
 }
 
 #[test]
 fn query_returns_correct_kinds() {
     let plugins =
-        AnalyzerWasmPlugin::load(fixture_path("boolean_naming.wasm").as_ref(), None).unwrap();
+        AnalyzerWasmPlugin::load(fixture_path("boolean_naming.wasm").as_ref(), "boolean_naming", None).unwrap();
     let kinds = plugins[0].query();
     assert!(
         kinds.contains(&RawSyntaxKind(JsSyntaxKind::JS_VARIABLE_DECLARATOR as u16)),
@@ -103,7 +103,7 @@ fn query_returns_correct_kinds() {
 #[test]
 fn evaluate_matching_node() {
     let plugins =
-        AnalyzerWasmPlugin::load(fixture_path("boolean_naming.wasm").as_ref(), None).unwrap();
+        AnalyzerWasmPlugin::load(fixture_path("boolean_naming.wasm").as_ref(), "boolean_naming", None).unwrap();
 
     let root = parse_js("const enabled = true;");
     let declarator = find_node(&root, JsSyntaxKind::JS_VARIABLE_DECLARATOR);
@@ -121,7 +121,7 @@ fn evaluate_matching_node() {
 #[test]
 fn evaluate_non_matching_node() {
     let plugins =
-        AnalyzerWasmPlugin::load(fixture_path("boolean_naming.wasm").as_ref(), None).unwrap();
+        AnalyzerWasmPlugin::load(fixture_path("boolean_naming.wasm").as_ref(), "boolean_naming", None).unwrap();
 
     let root = parse_js("const isEnabled = true;");
     let declarator = find_node(&root, JsSyntaxKind::JS_VARIABLE_DECLARATOR);
@@ -136,6 +136,7 @@ fn evaluate_non_matching_node() {
 fn evaluate_with_options() {
     let plugins = AnalyzerWasmPlugin::load(
         fixture_path("boolean_naming.wasm").as_ref(),
+        "boolean_naming",
         Some(r#"{"pattern": "^(is)[A-Z]"}"#.to_string()),
     )
     .unwrap();
@@ -173,7 +174,7 @@ fn find_css_node(
 #[test]
 fn load_css_plugin() {
     let path = fixture_path("css_style_conventions.wasm");
-    let plugins = AnalyzerWasmPlugin::load(path.as_ref(), None).expect("should load CSS plugin");
+    let plugins = AnalyzerWasmPlugin::load(path.as_ref(), "css_style_conventions", None).expect("should load CSS plugin");
     assert_eq!(
         plugins.len(),
         2,
@@ -184,7 +185,7 @@ fn load_css_plugin() {
 #[test]
 fn css_plugin_metadata() {
     let plugins =
-        AnalyzerWasmPlugin::load(fixture_path("css_style_conventions.wasm").as_ref(), None)
+        AnalyzerWasmPlugin::load(fixture_path("css_style_conventions.wasm").as_ref(), "css_style_conventions", None)
             .unwrap();
 
     // Check that both rules have correct language and phase
@@ -204,7 +205,7 @@ fn css_plugin_metadata() {
 #[test]
 fn css_plugin_evaluate() {
     let plugins =
-        AnalyzerWasmPlugin::load(fixture_path("css_style_conventions.wasm").as_ref(), None)
+        AnalyzerWasmPlugin::load(fixture_path("css_style_conventions.wasm").as_ref(), "css_style_conventions", None)
             .unwrap();
 
     // Find the customPropertyPattern rule
@@ -245,14 +246,14 @@ fn find_json_node(
 #[test]
 fn load_json_plugin() {
     let path = fixture_path("json_naming.wasm");
-    let plugins = AnalyzerWasmPlugin::load(path.as_ref(), None).expect("should load JSON plugin");
+    let plugins = AnalyzerWasmPlugin::load(path.as_ref(), "json_naming", None).expect("should load JSON plugin");
     assert_eq!(plugins.len(), 1, "Expected 1 rule from json-naming");
 }
 
 #[test]
 fn json_plugin_evaluate() {
     let plugins =
-        AnalyzerWasmPlugin::load(fixture_path("json_naming.wasm").as_ref(), None).unwrap();
+        AnalyzerWasmPlugin::load(fixture_path("json_naming.wasm").as_ref(), "json_naming", None).unwrap();
 
     let root = parse_json(r#"{ "another_key": "value" }"#);
     let member_name = find_json_node(&root, JsonSyntaxKind::JSON_MEMBER_NAME);
