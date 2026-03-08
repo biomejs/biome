@@ -11,7 +11,6 @@ fn test_resolve_selector_no_parents() {
     let model = semantic_model(&root);
 
     let rule = model.rules().first().unwrap();
-    let root = model.root();
     assert_eq!(rule.selectors.len(), 1);
     assert_eq!(rule.selectors[0].resolved().to_string(), "div");
 }
@@ -29,7 +28,6 @@ fn test_resolve_selector_simple_parent() {
     let root = parse.tree();
     let model = semantic_model(&root);
 
-    let root = model.root();
     let parent_rule = model.rules().first().unwrap();
     assert_eq!(parent_rule.selectors.len(), 1);
     assert_eq!(parent_rule.selectors[0].resolved().to_string(), ".parent");
@@ -57,7 +55,6 @@ fn test_resolve_selector_with_ampersand() {
     let root = parse.tree();
     let model = semantic_model(&root);
 
-    let root = model.root();
     let parent_rule = model.rules().first().unwrap();
     assert_eq!(parent_rule.selectors.len(), 1);
     assert_eq!(parent_rule.selectors[0].resolved().to_string(), "a");
@@ -84,7 +81,6 @@ fn test_resolve_selector_multiple_parents() {
     let root = parse.tree();
     let model = semantic_model(&root);
 
-    let root = model.root();
     let grandparent_rule = model.rules().first().unwrap();
     assert_eq!(grandparent_rule.selectors.len(), 1);
     assert_eq!(
@@ -122,7 +118,6 @@ fn test_resolve_selector_with_multi_ampersand() {
     let root = parse.tree();
     let model = semantic_model(&root);
 
-    let root = model.root();
     let parent_rule = model.rules().first().unwrap();
     assert_eq!(parent_rule.selectors.len(), 1);
     assert_eq!(parent_rule.selectors[0].resolved().to_string(), "p");
@@ -147,7 +142,6 @@ fn test_resolve_selector_no_ampersand_with_parents() {
     let root = parse.tree();
     let model = semantic_model(&root);
 
-    let root = model.root();
     let parent_rule = model.rules().first().unwrap();
     assert_eq!(parent_rule.selectors.len(), 1);
     assert_eq!(parent_rule.selectors[0].resolved().to_string(), ".list");
@@ -173,7 +167,6 @@ fn test_resolve_selector_with_complex_parent() {
     let root = parse.tree();
     let model = semantic_model(&root);
 
-    let root = model.root();
     let parent_rule = model.rules().first().unwrap();
     assert_eq!(parent_rule.selectors.len(), 1);
     assert_eq!(
@@ -204,7 +197,6 @@ fn test_resolve_selector_with_nested_ampersands() {
     let root = parse.tree();
     let model = semantic_model(&root);
 
-    let root = model.root();
     let parent_rule = model.rules().first().unwrap();
     assert_eq!(parent_rule.selectors.len(), 1);
     assert_eq!(parent_rule.selectors[0].resolved().to_string(), ".btn");
@@ -234,7 +226,6 @@ fn test_resolve_selector_with_multiple_parents_and_ampersand() {
     let root = parse.tree();
     let model = semantic_model(&root);
 
-    let root = model.root();
     let grandparent_rule = model.rules().first().unwrap();
     assert_eq!(grandparent_rule.selectors.len(), 1);
     assert_eq!(
@@ -266,7 +257,6 @@ fn test_descendant_combinator() {
     let root = parse.tree();
     let model = semantic_model(&root);
 
-    let root = model.root();
     let rule = model.rules().first().unwrap();
 
     assert_eq!(rule.selectors.len(), 1);
@@ -285,7 +275,6 @@ fn test_child_combinator() {
     let root = parse.tree();
     let model = semantic_model(&root);
 
-    let root = model.root();
     let rules = model.rules();
 
     assert_eq!(rules.len(), 4);
@@ -316,7 +305,6 @@ fn test_selector_list_with_nesting() {
     let root = parse.tree();
     let model = semantic_model(&root);
 
-    let root = model.root();
     let parent_rules = model.rules();
     assert_eq!(parent_rules.len(), 1);
 
@@ -346,7 +334,6 @@ fn test_ampersand_nesting_selector() {
     let root = parse.tree();
     let model = semantic_model(&root);
 
-    let root = model.root();
     let parent_rule = model.rules().first().unwrap();
     assert_eq!(parent_rule.selectors.len(), 1);
     assert_eq!(parent_rule.selectors[0].resolved().to_string(), ".foo");
@@ -372,7 +359,6 @@ fn test_attribute_class_id_selector() {
     let root = parse.tree();
     let model = semantic_model(&root);
 
-    let root = model.root();
     let rules = model.rules();
     assert_eq!(rules.len(), 1);
 
