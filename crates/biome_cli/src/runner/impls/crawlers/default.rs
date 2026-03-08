@@ -6,9 +6,6 @@ use crate::runner::impls::commands::traversal::TraverseResult;
 use crate::runner::impls::handlers::default::DefaultHandler;
 use crate::runner::process_file::ProcessFile;
 use biome_fs::BiomePath;
-use papaya::{HashSetRef, LocalGuard};
-use std::collections::BTreeSet;
-use std::hash::RandomState;
 use std::time::Duration;
 
 pub(crate) struct DefaultCrawler<P>(P);

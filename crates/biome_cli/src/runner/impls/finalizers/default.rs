@@ -19,7 +19,6 @@ use biome_fs::{BiomePath, FileSystem, OpenOptions};
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_rowan::AstNode;
 use std::cmp::Ordering;
-use std::collections::BTreeSet;
 
 pub(crate) struct DefaultFinalizer;
 

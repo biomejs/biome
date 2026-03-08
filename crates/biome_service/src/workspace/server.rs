@@ -798,6 +798,7 @@ impl WorkspaceServer {
         scan_kind: &ScanKind,
         path: &Utf8Path,
         request_kind: IndexRequestKind,
+        path_kind: Option<PathKind>,
     ) -> Result<bool, WorkspaceError> {
         if self.projects.is_force_ignored(project_key, path) {
             return Ok(true);
@@ -844,7 +845,12 @@ impl WorkspaceServer {
         };
 
         let path = BiomePath::new(path);
-        let is_ignored = match self.fs.symlink_path_kind(&path)? {
+        let path_kind = if let Some(path_kind) = path_kind {
+            path_kind
+        } else {
+            self.fs.symlink_path_kind(&path)?
+        };
+        let is_ignored = match path_kind {
             PathKind::Directory { .. } => {
                 if path.is_dependency() {
                     // Every mode ignores dependencies, except project mode.
@@ -2464,8 +2470,9 @@ impl WorkspaceScannerBridge for WorkspaceServer {
         scan_kind: &ScanKind,
         path: &Utf8Path,
         request_kind: IndexRequestKind,
+        path_kind: Option<PathKind>,
     ) -> Result<bool, WorkspaceError> {
-        self.is_ignored_by_scanner(project_key, scan_kind, path, request_kind)
+        self.is_ignored_by_scanner(project_key, scan_kind, path, request_kind, path_kind)
     }
 
     #[inline]

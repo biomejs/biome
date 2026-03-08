@@ -37,7 +37,7 @@ pub trait Handler: Default + Send + Sync + Debug + std::panic::RefUnwindSafe {
         let execution = ctx.execution();
         let path = biome_path.as_path();
         let project_key = ctx.project_key();
-        if fs.path_is_dir(path) || fs.path_is_symlink(path) {
+        if biome_path.path_kind().is_dir() || biome_path.path_kind().is_symlink() {
             // handle:
             // - directories
             // - symlinks

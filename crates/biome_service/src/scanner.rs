@@ -22,10 +22,9 @@ use crossbeam::channel::{Receiver, Sender, unbounded};
 use papaya::{HashMap, HashSet, HashSetRef, LocalGuard};
 use rayon::Scope;
 use rustc_hash::FxHashSet;
-use std::collections::BTreeSet;
 use std::hash::RandomState;
 use std::panic::catch_unwind;
-use std::sync::{Mutex, RwLock};
+use std::sync::Mutex;
 use std::time::Duration;
 use std::{mem, thread};
 use tracing::instrument;
@@ -439,7 +438,7 @@ impl Scanner {
         let mut ignore_paths = Vec::new();
         let mut folders_to_watch = FxHashSet::<Utf8PathBuf>::default();
 
-        evaluated_paths.sort_unstable_by(|a, b| a.cmp(b));
+        evaluated_paths.sort_unstable();
 
         // We want to process files that closest to the project root first. For
         // example, we must process first the `.gitignore` at the root of the
@@ -583,6 +582,7 @@ fn scan_dependencies<W: WorkspaceScannerBridge>(
                         &ctx.scan_kind,
                         &dependency_path,
                         IndexRequestKind::Dependency(ctx.trigger),
+                        None,
                     )
                     .unwrap_or(true);
                 if !is_ignored {
@@ -599,6 +599,7 @@ fn scan_dependencies<W: WorkspaceScannerBridge>(
                     &ctx.scan_kind,
                     &dependency_path,
                     IndexRequestKind::Dependency(ctx.trigger),
+                    None,
                 )
                 .unwrap_or(true);
             if !is_ignored {
@@ -787,6 +788,7 @@ impl<W: WorkspaceScannerBridge> TraversalContext for ScanContext<'_, W> {
             &self.scan_kind,
             path,
             IndexRequestKind::Explicit(self.trigger),
+            Some(path.path_kind()),
         ) {
             Ok(is_ignored) => !is_ignored,
             Err(_) => {

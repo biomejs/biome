@@ -11,7 +11,6 @@ use biome_diagnostics::PrintDiagnostic;
 use biome_diagnostics::advice::ListAdvice;
 use biome_fs::BiomePath;
 use camino::{Utf8Path, Utf8PathBuf};
-use std::collections::BTreeSet;
 use std::io;
 use std::time::Duration;
 

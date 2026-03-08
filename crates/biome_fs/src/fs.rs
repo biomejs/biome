@@ -7,7 +7,6 @@ pub use memory::{ErrorEntry, MemoryFileSystem};
 pub use os::{OsFileSystem, TemporaryFs};
 use papaya::{HashSetRef, LocalGuard};
 use serde::{Deserialize, Serialize};
-use std::collections::BTreeSet;
 use std::fmt::{Debug, Display, Formatter};
 use std::hash::RandomState;
 use std::panic::RefUnwindSafe;
@@ -39,10 +38,16 @@ impl ConfigName {
 }
 
 /// Represents the kind of filesystem entry a path points at.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum PathKind {
     File { is_symlink: bool },
     Directory { is_symlink: bool },
+}
+
+impl Default for PathKind {
+    fn default() -> Self {
+        Self::File { is_symlink: false }
+    }
 }
 
 impl PathKind {

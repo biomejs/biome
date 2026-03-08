@@ -3,7 +3,7 @@
 //! give additional information around the file that holds:
 //! - the [FileHandlers] for the specific file
 //! - shortcuts to open/write to the file
-use crate::ConfigName;
+use crate::{ConfigName, PathKind};
 use camino::{Utf8Path, Utf8PathBuf};
 use std::borrow::Cow;
 use std::cmp::Ordering;
@@ -47,6 +47,8 @@ pub struct BiomePath {
     kind: FileKinds,
     /// Whether this path (usually a file) was fixed as a result of a format/lint/check command with the `--write` flag.
     was_written: bool,
+    /// The kind of path e.g. file or directory
+    path_kind: PathKind,
 }
 
 impl PartialEq for BiomePath {
@@ -70,6 +72,18 @@ impl BiomePath {
             path,
             kind,
             was_written: false,
+            path_kind: PathKind::default(),
+        }
+    }
+
+    pub fn new_with_kind(path_to_file: impl Into<Utf8PathBuf>, path_kind: PathKind) -> Self {
+        let path = path_to_file.into();
+        let kind = path.file_name().map(Self::priority).unwrap_or_default();
+        Self {
+            path,
+            kind,
+            was_written: false,
+            path_kind,
         }
     }
 
@@ -80,6 +94,7 @@ impl BiomePath {
             path,
             kind,
             was_written: true,
+            path_kind: PathKind::default(),
         }
     }
 
@@ -89,6 +104,7 @@ impl BiomePath {
             path: self.path.clone(),
             kind: self.kind,
             was_written: true,
+            path_kind: self.path_kind,
         }
     }
 
@@ -165,6 +181,11 @@ impl BiomePath {
             self.kind,
             FileKinds::Config | FileKinds::Ignore | FileKinds::Manifest
         )
+    }
+
+    #[inline(always)]
+    pub fn path_kind(&self) -> PathKind {
+        self.path_kind
     }
 
     /// Returns `true` if the path is inside `node_modules`

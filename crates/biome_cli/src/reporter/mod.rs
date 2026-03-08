@@ -21,7 +21,6 @@ use biome_json_factory::make::{
 use biome_json_syntax::{AnyJsonMemberName, AnyJsonValue, JsonMember, T};
 use camino::Utf8Path;
 use serde::Serialize;
-use std::collections::BTreeSet;
 use std::io;
 use std::time::Duration;
 

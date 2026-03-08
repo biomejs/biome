@@ -10,10 +10,8 @@ use biome_service::projects::ProjectKey;
 use camino::Utf8PathBuf;
 use crossbeam::channel::{Sender, unbounded};
 use papaya::{HashSet, HashSetRef, LocalGuard};
-use std::collections::BTreeSet;
 use std::hash::RandomState;
 use std::marker::PhantomData;
-use std::sync::RwLock;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::thread;
 use std::time::{Duration, Instant};
@@ -82,11 +80,7 @@ pub trait Crawler<Output> {
             }
         }));
 
-        let mut handle_paths: Vec<_> = ctx
-            .evaluated_paths()
-            .into_iter()
-            .map(|p| p.clone())
-            .collect();
+        let mut handle_paths: Vec<_> = ctx.evaluated_paths().into_iter().cloned().collect();
         handle_paths.sort_unstable();
         fs.traversal(Box::new(|scope: &dyn TraversalScope| {
             for path in &handle_paths {
@@ -95,11 +89,7 @@ pub trait Crawler<Output> {
         }));
 
         // Re-collect after handle phase to capture was_written mutations
-        let mut evaluated_paths: Vec<_> = ctx
-            .evaluated_paths()
-            .into_iter()
-            .map(|p| p.clone())
-            .collect();
+        let mut evaluated_paths: Vec<_> = ctx.evaluated_paths().into_iter().cloned().collect();
         evaluated_paths.sort_unstable();
 
         (start.elapsed(), evaluated_paths)
@@ -254,8 +244,6 @@ where
     }
 
     fn store_path(&self, path: BiomePath) {
-        self.evaluated_paths
-            .pin()
-            .insert(BiomePath::new(path.as_path()));
+        self.evaluated_paths.pin().insert(path);
     }
 }
