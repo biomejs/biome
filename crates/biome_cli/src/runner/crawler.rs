@@ -146,7 +146,9 @@ where
 {
     fn increment_changed(&self, path: &BiomePath) {
         self.changed.fetch_add(1, Ordering::Relaxed);
-        self.evaluated_paths.pin().insert(path.to_written());
+        let guard = self.evaluated_paths.pin();
+        guard.remove(path);
+        guard.insert(path.to_written());
         self.push_message(Message::Stats(MessageStat::Changed));
     }
     fn increment_unchanged(&self) {

@@ -90,7 +90,7 @@ impl WorkspaceWatcherBridge for MockWorkspaceWatcherBridge<'_> {
         project_key: ProjectKey,
         scan_kind: &ScanKind,
         path: &Utf8Path,
-        path_kind: Option<PathKind>,
+        _path_kind: Option<PathKind>,
     ) -> Result<bool, WorkspaceError> {
         assert_eq!(project_key, self.project_key);
         assert_eq!(*scan_kind, self.scan_kind);

@@ -567,7 +567,7 @@ mod tests {
             scope.evaluate(&ctx, Utf8PathBuf::from("dir1"));
         }));
 
-        let visited = std::mem::replace(&mut ctx.visited, HashSet::default());
+        let visited = std::mem::take(&mut ctx.visited);
 
         assert_eq!(visited.len(), 2);
         assert!(visited.pin().contains(&BiomePath::new("dir1/file1")));
@@ -578,7 +578,7 @@ mod tests {
             scope.evaluate(&ctx, Utf8PathBuf::from("dir2/file2"));
         }));
 
-        let visited = std::mem::replace(&mut ctx.visited, HashSet::default());
+        let visited = std::mem::take(&mut ctx.visited);
 
         assert_eq!(visited.len(), 1);
         assert!(visited.pin().contains(&BiomePath::new("dir2/file2")));
