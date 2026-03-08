@@ -64,7 +64,7 @@ declare_source_rule! {
     ///
     /// By default, chunks also end as soon as a statement or a **bare import** (also called _side-effect import_) is encountered.
     /// Bare imports can be sorted with other imports by setting the `sortBareImports` option to `true`.
-    /// when `sortBareImports` is unset or `false`, every bare import forms an independent chunk.
+    /// When `sortBareImports` is unset or `false`, every bare import forms an independent chunk.
     /// The following example contains six chunks:
     ///
     /// ```js,ignore
@@ -671,7 +671,7 @@ declare_source_rule! {
     /// ## Change the sorting of import and export identifiers
     ///
     /// By default, attributes, imported and exported names are sorted with a `natural` sort.
-    /// Yo ucan opt for a `lexicographic` sort (sometimes referred as _binary_ sort) by
+    /// You can opt for a `lexicographic` sort (sometimes referred as _binary_ sort) by
     /// setting the `identifierOrder` option.
     ///
     /// ```json,options
