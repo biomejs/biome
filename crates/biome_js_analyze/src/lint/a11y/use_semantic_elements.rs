@@ -21,27 +21,27 @@ declare_lint_rule! {
     /// ### Invalid
     ///
     /// ```jsx,expect_diagnostic
-    /// <div role="button"></div>
+    /// <div role="checkbox"></div>
     /// ```
     ///
     /// ```jsx,expect_diagnostic
-    /// <div role="form"></div>
+    /// <div role="separator"></div>
     /// ```
     ///
     /// ```jsx,expect_diagnostic
-    /// <div role="button" />
+    /// <div role="checkbox" />
     /// ```
     ///
     /// ```jsx,expect_diagnostic
-    /// <div role="form" />
+    /// <div role="separator" />
     /// ```
     ///
     /// ### Valid
     ///
     /// ```jsx
     /// <>
-    ///   <button>label</button>
-    ///   <form></form>
+    ///   <input type="checkbox">label</input>
+    ///   <hr/>
     ///   <div role="status"></div>
     /// </>;
     /// ```
@@ -91,12 +91,20 @@ impl Rule for UseSemanticElements {
         // - option: <option> in browsers have divergent/unexpected behavior, with Safari hiding elements by default.
         // - listbox: <datalist> isn’t always correct for all listbox uses
         // See https://www.w3.org/WAI/ARIA/apg/patterns/combobox/. In most examples, roles are explicit
-        if role_value == "combobox" || role_value == "listbox" || role_value == "option" {
+        // - status: <output> is only a relatedConcept, not a baseConcept of the status role.
+        //   Using <output> for status is misleading (see #9245, eslint-plugin-jsx-a11y#920)
+        // - alert: <output> is only a relatedConcept, same issue as status
+        if role_value == "combobox"
+            || role_value == "listbox"
+            || role_value == "option"
+            || role_value == "status"
+            || role_value == "alert"
+        {
             return None;
         }
 
         let role = AriaRole::from_roles(role_value)?;
-        if role.base_html_elements().is_empty() {
+        if role.base_html_elements().is_empty() && role.related_html_elements().is_empty() {
             None
         } else {
             Some(role_attribute)
@@ -112,6 +120,7 @@ impl Rule for UseSemanticElements {
         let candidates = role
             .base_html_elements()
             .iter()
+            .chain(role.related_html_elements())
             .map(|element| element.to_string())
             .collect::<Vec<_>>();
         let candidate_list = candidates.join("\n");

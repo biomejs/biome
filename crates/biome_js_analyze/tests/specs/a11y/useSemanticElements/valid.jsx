@@ -43,27 +43,7 @@ export const Component2 = () => (
 	</Card>
 </>
 
-/* Roles with only relatedConcepts should not generate diagnostics */
+/* status role should not generate diagnostics (see #9245) */
 <>
-    <div role="checkbox"></div>
-    <div role="radio"></div>
-    <div role="heading"></div>
-    <div role="separator"></div>
-    <div role="article"></div>
-    <div role="figure"></div>
-    <div role="group"></div>
-    <div role="link"></div>
-    <div role="navigation"></div>
-    <div role="term"></div>
-    <div role="textbox"></div>
-    <div role="generic"></div>
-    <div role="caption"></div>
-    <div role="main"></div>
-    <div role="time"></div>
-    <div role="paragraph"></div>
-    <div role="complementary"></div>
-    <div role="blockquote"></div>
     <div role="status"></div>
-    <div role="contentinfo"></div>
-    <div role="region"></div>
 </>
