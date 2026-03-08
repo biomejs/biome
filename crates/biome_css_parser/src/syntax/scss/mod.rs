@@ -26,8 +26,7 @@ pub(crate) use parse_error::{
 };
 pub(crate) use token_sets::{
     END_OF_SCSS_EXPRESSION_TOKEN_SET, SCSS_IDENT_CONTINUATION_SET, SCSS_NESTING_VALUE_END_SET,
-    SCSS_STATEMENT_START_SET,
-    SCSS_VARIABLE_MODIFIER_LIST_END_SET,
+    SCSS_STATEMENT_START_SET, SCSS_VARIABLE_MODIFIER_LIST_END_SET,
 };
 pub(crate) use value::{
     is_at_scss_parent_selector_value, parse_scss_fallback_value, parse_scss_parent_selector_value,
