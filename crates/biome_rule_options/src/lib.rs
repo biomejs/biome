@@ -224,6 +224,7 @@ pub mod no_suspicious_semicolon_in_jsx;
 pub mod no_svg_without_title;
 pub mod no_switch_declarations;
 pub mod no_sync_scripts;
+pub mod no_tailwind_conflicting_classes;
 pub mod no_template_curly_in_string;
 pub mod no_ternary;
 pub mod no_then_property;

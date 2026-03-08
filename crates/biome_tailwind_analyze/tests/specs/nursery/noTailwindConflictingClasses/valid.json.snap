@@ -1,0 +1,53 @@
+---
+source: crates/biome_tailwind_analyze/tests/spec_tests.rs
+expression: valid.json
+---
+# Input
+```tw
+flex
+```
+
+# Input
+```tw
+flex w-full
+```
+
+# Input
+```tw
+flex hover:block
+```
+
+# Input
+```tw
+hover:flex focus:block
+```
+
+# Input
+```tw
+text-sm font-thin
+```
+
+# Input
+```tw
+overflow-x-auto overflow-y-auto
+```
+
+# Input
+```tw
+px-2 py-4
+```
+
+# Input
+```tw
+translate-x-2 rotate-45
+```
+
+# Input
+```tw
+size-8 min-w-0
+```
+
+# Input
+```tw
+outline-red-500 outline-offset-2
+```

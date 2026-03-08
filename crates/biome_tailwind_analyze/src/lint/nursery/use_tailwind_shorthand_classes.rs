@@ -1,20 +1,19 @@
-use std::hash::Hash;
-
 use biome_analyze::{
-    Ast, FixKind, QueryMatch, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext,
     declare_lint_rule,
 };
 use biome_console::markup;
-use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, Direction, WalkEvent};
+use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
 use biome_rule_options::use_tailwind_shorthand_classes::UseTailwindShorthandClassesOptions;
 use biome_tailwind_factory::make;
 use biome_tailwind_syntax::{
-    AnyTwCandidate, AnyTwModifier, AnyTwValue, TailwindSyntaxKind, TailwindSyntaxNode,
-    TailwindSyntaxToken, TwCandidateList, TwFullCandidate, TwVariantList,
+    AnyTwCandidate, AnyTwModifier, AnyTwValue, TailwindSyntaxKind, TailwindSyntaxToken,
+    TwCandidateList, TwFullCandidate, TwVariantList,
 };
 use rustc_hash::{FxHashMap, FxHashSet};
 
 use crate::TailwindRuleAction;
+use crate::utils::{hash_node, is_node_equal};
 
 declare_lint_rule! {
     /// Enforce using fewer Tailwind utilities instead of multiple utilities that are functionally the same.
@@ -225,20 +224,6 @@ impl std::hash::Hash for GroupKey {
         }
         if let Some(ref modifier) = self.modifier {
             hash_node(modifier.syntax(), state);
-        }
-    }
-}
-
-fn hash_node<H: std::hash::Hasher>(node: &TailwindSyntaxNode, state: &mut H) {
-    for event in node.preorder_with_tokens(Direction::Next) {
-        match event {
-            WalkEvent::Enter(element) => {
-                element.kind().hash(state);
-                if let Some(token) = element.as_token() {
-                    token.text_trimmed().hash(state);
-                }
-            }
-            WalkEvent::Leave(_) => {}
         }
     }
 }
@@ -467,43 +452,6 @@ fn analyze_tailwind_shorthand(candidates: &TwCandidateList) -> Vec<TailwindShort
     }
 
     violations
-}
-
-/// Verifies that both nodes are equal by checking their descendants (nodes included) kinds
-/// and tokens (same kind and inner token text).
-pub(crate) fn is_node_equal(a_node: &TailwindSyntaxNode, b_node: &TailwindSyntaxNode) -> bool {
-    // fast path: check the length of the text first without allocating strings
-    if a_node.text_range().len() != b_node.text_range().len() {
-        return false;
-    }
-
-    let a_tree = a_node.preorder_with_tokens(Direction::Next);
-    let b_tree = b_node.preorder_with_tokens(Direction::Next);
-    for (a_event, b_event) in std::iter::zip(a_tree, b_tree) {
-        let (a_child, b_child) = match (a_event, b_event) {
-            (WalkEvent::Enter(a), WalkEvent::Enter(b)) => (a, b),
-            (WalkEvent::Leave(_), WalkEvent::Leave(_)) => continue,
-            _ => return false,
-        };
-        if a_child.kind() != b_child.kind() {
-            return false;
-        }
-        let a_token = a_child.as_token();
-        let b_token = b_child.as_token();
-        match (a_token, b_token) {
-            // both are nodes
-            (None, None) => {}
-            // one of them is a node
-            (None, Some(_)) | (Some(_), None) => return false,
-            // both are tokens
-            (Some(a), Some(b)) => {
-                if a.text_trimmed() != b.text_trimmed() {
-                    return false;
-                }
-            }
-        }
-    }
-    true
 }
 
 pub static TW_COMPRESSABLES: &[&[(&[&str], &[&str])]] = &[

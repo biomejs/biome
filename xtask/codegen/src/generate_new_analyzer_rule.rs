@@ -11,6 +11,7 @@ pub enum LanguageKind {
     Graphql,
     Html,
     HtmlVue,
+    Tailwind,
 }
 
 impl LanguageKind {
@@ -22,6 +23,7 @@ impl LanguageKind {
             Self::Graphql => "graphql",
             Self::Html => "html",
             Self::HtmlVue => "html",
+            Self::Tailwind => "tailwind",
         }
     }
 }
@@ -36,6 +38,7 @@ impl FromStr for LanguageKind {
             "graphql" => Ok(Self::Graphql),
             "html" => Ok(Self::Html),
             "html-vue" => Ok(Self::HtmlVue),
+            "tailwind" => Ok(Self::Tailwind),
             _ => Err("Unsupported value"),
         }
     }
@@ -401,6 +404,91 @@ impl Rule for {rule_name_upper_camel} {{
 "#
             )
         }
+        LanguageKind::Tailwind => {
+            format!(
+                r#"use biome_analyze::{{context::RuleContext, {macro_name}, Ast, Rule, RuleDomain, RuleDiagnostic}};
+use biome_console::markup;
+use biome_rowan::AstNode;
+use biome_rule_options::{rule_name_snake_case}::{rule_name_upper_camel}Options;
+use biome_tailwind_syntax::TwCandidateList;
+
+{macro_name}! {{
+    /// Succinct description of the rule.
+    ///
+    /// Put context and details about the rule.
+    /// As a starting point, you can take the description of the corresponding rule (if any).
+    ///
+    /// Try to stay consistent with the descriptions of implemented rules.
+    ///
+    /// You can use asides to highlight important information:
+    /// :::note
+    /// Important information for users.
+    /// :::
+    ///
+    /// ## Examples
+    ///
+    /// ### Invalid
+    ///
+    /// ```tailwind,expect_diagnostic
+    /// px-2 py-2
+    /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```tailwind
+    /// p-2
+    /// ```
+    ///
+    pub {rule_name_upper_camel} {{
+        version: "next",
+        name: "{rule_name_lower_camel}",
+        language: "tailwind",
+        recommended: false,
+        domains: &[RuleDomain::Tailwind],
+    }}
+}}
+
+impl Rule for {rule_name_upper_camel} {{
+    type Query = Ast<TwCandidateList>;
+    type State = ();
+    type Signals = Option<Self::State>;
+    type Options = {rule_name_upper_camel}Options;
+
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {{
+        let node = ctx.query();
+        (node.len() > 1).then_some(())
+    }}
+
+    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {{
+        //
+        // Read our guidelines to write great diagnostics:
+        // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
+        //
+        // Essentially, it needs to say:
+        // 1. what the problem is
+        // 2. why it's a problem (even if obvious)
+        // 3. how to fix it (even if obvious)
+        //   - if you implement `action()`, this can be note for the action
+        //
+        // The "diagnostics-development" skill has more guidelines.
+        let span = ctx.query().range();
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                span,
+                markup! {{
+                    "Unexpected Tailwind utility sequence."
+                }},
+            )
+            .note(markup! {{
+                "This note will give you more information."
+            }}),
+        )
+    }}
+}}
+"#
+            )
+        }
         LanguageKind::HtmlVue => {
             format!(
                 r#"use biome_analyze::{{context::RuleContext, {macro_name}, Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource}};
@@ -565,6 +653,8 @@ pub fn generate_new_analyzer_rule(kind: LanguageKind, category: Category, rule_n
     let rule_kind = kind.as_str();
     let test_extension = if matches!(kind, LanguageKind::HtmlVue) {
         "vue"
+    } else if matches!(kind, LanguageKind::Tailwind) {
+        "json"
     } else {
         rule_kind
     };
@@ -575,6 +665,7 @@ pub fn generate_new_analyzer_rule(kind: LanguageKind, category: Category, rule_n
         LanguageKind::Html | LanguageKind::HtmlVue => {
             "<!-- should not generate diagnostics -->\n<div>ok</div>"
         }
+        LanguageKind::Tailwind => "[\n  \"p-2\"\n]",
         _ => "/* should not generate diagnostics */\n// var a = 1;",
     };
     let invalid_contents = match kind {
@@ -584,6 +675,7 @@ pub fn generate_new_analyzer_rule(kind: LanguageKind, category: Category, rule_n
         LanguageKind::Html | LanguageKind::HtmlVue => {
             "<!-- should generate diagnostics -->\n<div></div>"
         }
+        LanguageKind::Tailwind => "[\n  \"px-2 py-2\"\n]",
         _ => "/* should generate diagnostics */\nvar a = 1;\na = 2;\na = 3;",
     };
     let crate_folder = project_root().join(format!("crates/biome_{rule_kind}_analyze"));

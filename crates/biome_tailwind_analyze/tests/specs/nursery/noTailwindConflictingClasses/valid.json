@@ -1,0 +1,12 @@
+[
+  "flex",
+  "flex w-full",
+  "flex hover:block",
+  "hover:flex focus:block",
+  "text-sm font-thin",
+  "overflow-x-auto overflow-y-auto",
+  "px-2 py-4",
+  "translate-x-2 rotate-45",
+  "size-8 min-w-0",
+  "outline-red-500 outline-offset-2"
+]
