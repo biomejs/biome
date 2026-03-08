@@ -47,7 +47,8 @@ fn run_wasm_plugin(wasm_name: &str, source: &str) -> (Vec<String>, Vec<String>) 
     let input_file = Utf8Path::new("test.js");
     let mut diag_options = Vec::new();
     let working_directory = input_file.parent().unwrap_or(input_file);
-    let options = create_analyzer_options::<JsLanguage>(input_file, working_directory, &mut diag_options);
+    let options =
+        create_analyzer_options::<JsLanguage>(input_file, working_directory, &mut diag_options);
     let services = JsAnalyzerServices::from((Default::default(), Default::default(), source_type));
 
     let mut code_fixes = Vec::new();
