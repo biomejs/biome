@@ -1647,13 +1647,21 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             html_services,
             |signal| process_fix_all.process_signal(signal),
         );
-        let result = process_fix_all.process_action(action, |root| {
-            tree = match HtmlRoot::cast(root) {
-                Some(tree) => tree,
-                None => return None,
-            };
-            Some(tree.syntax().text_range_with_trivia().len().into())
-        })?;
+        let result = process_fix_all.process_action_with_reparse(
+            action,
+            |root| {
+                tree = match HtmlRoot::cast(root) {
+                    Some(tree) => tree,
+                    None => return None,
+                };
+                Some(tree.syntax().text_range_with_trivia().len().into())
+            },
+            |new_text| {
+                let new_parse =
+                    biome_html_parser::parse_html(new_text, HtmlParserOptions::default());
+                Some(new_parse.tree().syntax().clone())
+            },
+        )?;
 
         if result.is_none() {
             return process_fix_all.finish(|| {
