@@ -13,7 +13,7 @@ pub struct OrganizeImportsOptions {
     /// Groups to change how imports and exports are sorted.
     #[serde(skip_serializing_if = "Option::<_>::is_none")]
     pub groups: Option<ImportGroups>,
-    /// Order used for sorting identifiers within impports and exports.
+    /// Order used for sorting identifiers within imports and exports.
     ///
     /// Default: `natural`.
     #[serde(skip_serializing_if = "Option::<_>::is_none")]

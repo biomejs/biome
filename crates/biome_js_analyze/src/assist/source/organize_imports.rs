@@ -62,9 +62,9 @@ declare_source_rule! {
     /// export { F } from "f";
     /// ```
     ///
-    /// Chunks also end as soon as a statement or a **bare import** (also called _side-effect import_) is encountered.
+    /// By default, chunks also end as soon as a statement or a **bare import** (also called _side-effect import_) is encountered.
     /// Bare imports can be sorted with other imports by setting the `sortBareImports` option to `true`.
-    /// Every bare import forms an independent chunk.
+    /// when `sortBareImports` is unset or `false`, every bare import forms an independent chunk.
     /// The following example contains six chunks:
     ///
     /// ```js,ignore

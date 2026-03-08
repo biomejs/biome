@@ -4984,7 +4984,7 @@ export interface OrganizeImportsOptions {
 	 */
 	groups?: ImportGroups;
 	/**
-	* Order used for sorting identifiers within impports and exports.
+	* Order used for sorting identifiers within imports and exports.
 
 Default: `natural`. 
 	 */
