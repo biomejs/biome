@@ -9083,6 +9083,11 @@ When this field is empty, Biome checks only `files.includes`.
 	 */
 	ignoreKind?: IgnoreKind;
 	/**
+	* Whether the path is a directory. Used to skip stat calls when the caller
+already knows the file type from the filesystem traversal. 
+	 */
+	isDir?: boolean;
+	/**
 	 * The path to inspect
 	 */
 	path: BiomePath;
