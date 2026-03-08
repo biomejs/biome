@@ -29,5 +29,3 @@ which allows bare imports to be sorted within other imports when set to `false`.
   import { Local } from "./file";
 - import "./file";
 ```
-
-Note that bare imports are never merged with other imports.
