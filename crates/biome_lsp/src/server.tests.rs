@@ -435,11 +435,7 @@ async fn wait_for_notification(
 }
 
 /// Basic handler for requests and notifications coming from the server for tests
-async fn client_handler<I, O>(
-    stream: I,
-    sink: O,
-    notify: Sender<ServerNotification>,
-) -> Result<()>
+async fn client_handler<I, O>(stream: I, sink: O, notify: Sender<ServerNotification>) -> Result<()>
 where
     I: Stream<Item = Request> + Unpin,
     O: Sink<Response> + Unpin,
@@ -4902,10 +4898,7 @@ async fn absolute_configuration_path_resolves_outside_workspace() -> Result<()> 
         }
     }"#;
 
-    fs.insert(
-        external_config_path.clone(),
-        config,
-    );
+    fs.insert(external_config_path.clone(), config);
 
     let factory = ServerFactory::new_with_fs(Arc::new(fs));
     let (service, client) = factory.create().into_inner();
@@ -4914,13 +4907,13 @@ async fn absolute_configuration_path_resolves_outside_workspace() -> Result<()> 
 
     let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
     let settings = WorkspaceSettings {
-      configuration_path: Some(external_config_path.to_string()),
-      ..Default::default()};
+        configuration_path: Some(external_config_path.to_string()),
+        ..Default::default()
+    };
 
     // To reproduce the bug, the initial settings must have
     // `configuration_path` set. This matches what happens when an IDE starts.
     let reader = tokio::spawn(client_handler_with_settings(stream, sink, sender, settings));
-
 
     server.initialize().await?;
     server.initialized().await?;
@@ -4973,7 +4966,7 @@ async fn absolute_configuration_path_resolves_outside_workspace() -> Result<()> 
                     character: 13,
                 },
             },
-            new_text: "".to_string(),
+            new_text: String::new(),
         }]
     );
 
