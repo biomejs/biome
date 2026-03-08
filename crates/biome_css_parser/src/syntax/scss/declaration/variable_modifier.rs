@@ -95,14 +95,10 @@ impl ParseNodeList for ScssVariableModifierList {
         parsed_element: ParsedSyntax,
     ) -> RecoveryResult {
         match parsed_element {
-            Absent => Absent.or_recover(
-                p,
-                &ScssVariableModifierListParseRecovery,
-                |p, range| {
-                    p.err_builder("Unexpected value or character.", range)
-                        .with_hint("Expected a variable modifier or the end of the declaration.")
-                },
-            ),
+            Absent => Absent.or_recover(p, &ScssVariableModifierListParseRecovery, |p, range| {
+                p.err_builder("Unexpected value or character.", range)
+                    .with_hint("Expected a variable modifier or the end of the declaration.")
+            }),
             Present(m) => Ok(m),
         }
     }

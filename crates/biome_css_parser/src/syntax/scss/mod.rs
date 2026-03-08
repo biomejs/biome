@@ -29,6 +29,5 @@ pub(crate) use token_sets::{
     SCSS_STATEMENT_START_SET, SCSS_VARIABLE_MODIFIER_LIST_END_SET,
 };
 pub(crate) use value::{
-    is_at_scss_parent_selector_value, parse_scss_fallback_value,
-    parse_scss_parent_selector_value,
+    is_at_scss_parent_selector_value, parse_scss_fallback_value, parse_scss_parent_selector_value,
 };

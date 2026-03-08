@@ -123,8 +123,7 @@ fn is_nth_at_function_with_context(
     n: usize,
     context: ValueParsingContext,
 ) -> bool {
-    is_nth_at_identifier(p, n)
-        && p.nth_at(n + 1, T!['('])
+    is_nth_at_identifier(p, n) && p.nth_at(n + 1, T!['('])
         || (context.is_scss_syntax_allowed()
             && is_nth_at_scss_qualified_name(p, n)
             && p.nth_at(n + 3, T!['(']))

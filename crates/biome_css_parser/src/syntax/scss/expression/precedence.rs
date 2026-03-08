@@ -2,7 +2,9 @@ use crate::lexer::CssReLexContext;
 use crate::parser::CssParser;
 use crate::syntax::parse_error::expected_component_value;
 use crate::syntax::value::dimension::is_at_any_dimension;
-use biome_css_syntax::CssSyntaxKind::{CSS_NUMBER_LITERAL, SCSS_BINARY_EXPRESSION, SCSS_UNARY_EXPRESSION};
+use biome_css_syntax::CssSyntaxKind::{
+    CSS_NUMBER_LITERAL, SCSS_BINARY_EXPRESSION, SCSS_UNARY_EXPRESSION,
+};
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};

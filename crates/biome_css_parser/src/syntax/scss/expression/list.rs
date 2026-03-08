@@ -160,11 +160,8 @@ fn parse_scss_expression_sequence(
         if parsed_item
             .or_recover_with_token_set(
                 p,
-                &ParseRecoveryTokenSet::new(
-                    CSS_BOGUS_PROPERTY_VALUE,
-                    options.recovery_end_ts(),
-                )
-                .enable_recovery_on_line_break(),
+                &ParseRecoveryTokenSet::new(CSS_BOGUS_PROPERTY_VALUE, options.recovery_end_ts())
+                    .enable_recovery_on_line_break(),
                 expected_scss_expression,
             )
             .is_err()
@@ -178,10 +175,7 @@ fn parse_scss_expression_sequence(
 }
 
 #[inline]
-fn is_at_scss_expression_sequence_end(
-    p: &mut CssParser,
-    options: ScssExpressionOptions,
-) -> bool {
+fn is_at_scss_expression_sequence_end(p: &mut CssParser, options: ScssExpressionOptions) -> bool {
     p.at(EOF)
         || is_at_scss_expression_end(p, options)
         || (options.comma_separates_list() && p.at(T![,]))
@@ -289,11 +283,8 @@ pub(super) fn complete_scss_list_expression(
         if parse_scss_list_expression_element(p, options)
             .or_recover_with_token_set(
                 p,
-                &ParseRecoveryTokenSet::new(
-                    CSS_BOGUS_PROPERTY_VALUE,
-                    options.recovery_end_ts(),
-                )
-                .enable_recovery_on_line_break(),
+                &ParseRecoveryTokenSet::new(CSS_BOGUS_PROPERTY_VALUE, options.recovery_end_ts())
+                    .enable_recovery_on_line_break(),
                 expected_scss_expression,
             )
             .is_err()
@@ -313,7 +304,9 @@ fn complete_scss_expression_from_list(
     p: &mut CssParser,
     list_expression: CompletedMarker,
 ) -> CompletedMarker {
-    let expression_items = list_expression.precede(p).complete(p, SCSS_EXPRESSION_ITEM_LIST);
+    let expression_items = list_expression
+        .precede(p)
+        .complete(p, SCSS_EXPRESSION_ITEM_LIST);
     expression_items.precede(p).complete(p, SCSS_EXPRESSION)
 }
 
