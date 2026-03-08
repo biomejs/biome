@@ -1014,6 +1014,11 @@ See https://biomejs.dev/assist/actions/use-sorted-keys
 	 */
 	useSortedKeys?: UseSortedKeysConfiguration;
 	/**
+	* Organize package.json fields according to established conventions.
+See https://biomejs.dev/assist/actions/use-sorted-package-json 
+	 */
+	useSortedPackageJson?: UseSortedPackageJsonConfiguration;
+	/**
 	* Enforce ordering of CSS properties and nested rules.
 See https://biomejs.dev/assist/actions/use-sorted-properties 
 	 */
@@ -1200,6 +1205,9 @@ export type UseSortedInterfaceMembersConfiguration =
 export type UseSortedKeysConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithUseSortedKeysOptions;
+export type UseSortedPackageJsonConfiguration =
+	| RuleAssistPlainConfiguration
+	| RuleAssistWithUseSortedPackageJsonOptions;
 export type UseSortedPropertiesConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithUseSortedPropertiesOptions;
@@ -2276,6 +2284,11 @@ See https://biomejs.dev/linter/rules/no-ternary
 	 */
 	noTernary?: NoTernaryConfiguration;
 	/**
+	* Reports CSS class names in HTML class attributes that are not defined in any \<style> block or linked stylesheet available to the file.
+See https://biomejs.dev/linter/rules/no-undeclared-classes 
+	 */
+	noUndeclaredClasses?: NoUndeclaredClassesConfiguration;
+	/**
 	* Disallow the use of undeclared environment variables.
 See https://biomejs.dev/linter/rules/no-undeclared-env-vars 
 	 */
@@ -2290,6 +2303,11 @@ See https://biomejs.dev/linter/rules/no-unknown-attribute
 See https://biomejs.dev/linter/rules/no-unnecessary-conditions 
 	 */
 	noUnnecessaryConditions?: NoUnnecessaryConditionsConfiguration;
+	/**
+	* Reports CSS class selectors that are never referenced in any JSX or HTML file.
+See https://biomejs.dev/linter/rules/no-unused-classes 
+	 */
+	noUnusedClasses?: NoUnusedClassesConfiguration;
 	/**
 	* Disallow redundant return statements.
 See https://biomejs.dev/linter/rules/no-useless-return 
@@ -3573,6 +3591,10 @@ export interface RuleAssistWithUseSortedKeysOptions {
 	level: RuleAssistPlainConfiguration;
 	options: UseSortedKeysOptions;
 }
+export interface RuleAssistWithUseSortedPackageJsonOptions {
+	level: RuleAssistPlainConfiguration;
+	options: UseSortedPackageJsonOptions;
+}
 export interface RuleAssistWithUseSortedPropertiesOptions {
 	level: RuleAssistPlainConfiguration;
 	options: UseSortedPropertiesOptions;
@@ -4201,6 +4223,9 @@ export type NoSyncScriptsConfiguration =
 export type NoTernaryConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTernaryOptions;
+export type NoUndeclaredClassesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUndeclaredClassesOptions;
 export type NoUndeclaredEnvVarsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUndeclaredEnvVarsOptions;
@@ -4210,6 +4235,9 @@ export type NoUnknownAttributeConfiguration =
 export type NoUnnecessaryConditionsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnnecessaryConditionsOptions;
+export type NoUnusedClassesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUnusedClassesOptions;
 export type NoUselessReturnConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessReturnOptions;
@@ -4967,6 +4995,7 @@ followed by nested values (multi-line objects, multi-line arrays).
 	groupByNesting?: boolean;
 	sortOrder?: SortOrder;
 }
+export type UseSortedPackageJsonOptions = {};
 export type UseSortedPropertiesOptions = {};
 export type RulePlainConfiguration = "off" | "on" | "info" | "warn" | "error";
 export interface RuleWithNoAccessKeyOptions {
@@ -5883,6 +5912,10 @@ export interface RuleWithNoTernaryOptions {
 	level: RulePlainConfiguration;
 	options?: NoTernaryOptions;
 }
+export interface RuleWithNoUndeclaredClassesOptions {
+	level: RulePlainConfiguration;
+	options?: NoUndeclaredClassesOptions;
+}
 export interface RuleWithNoUndeclaredEnvVarsOptions {
 	level: RulePlainConfiguration;
 	options?: NoUndeclaredEnvVarsOptions;
@@ -5894,6 +5927,10 @@ export interface RuleWithNoUnknownAttributeOptions {
 export interface RuleWithNoUnnecessaryConditionsOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnnecessaryConditionsOptions;
+}
+export interface RuleWithNoUnusedClassesOptions {
+	level: RulePlainConfiguration;
+	options?: NoUnusedClassesOptions;
 }
 export interface RuleWithNoUselessReturnOptions {
 	fix?: FixKind;
@@ -7381,6 +7418,10 @@ export type NoScriptUrlOptions = {};
 export type NoShadowOptions = {};
 export type NoSyncScriptsOptions = {};
 export type NoTernaryOptions = {};
+/**
+ * Options for the `noUndeclaredClasses` rule.
+ */
+export type NoUndeclaredClassesOptions = {};
 export interface NoUndeclaredEnvVarsOptions {
 	/**
 	* Environment variables that should always be allowed.
@@ -7394,6 +7435,7 @@ export interface NoUnknownAttributeOptions {
 	ignore?: string[];
 }
 export type NoUnnecessaryConditionsOptions = {};
+export type NoUnusedClassesOptions = {};
 export type NoUselessReturnOptions = {};
 export type NoVueArrowFuncInWatchOptions = {};
 export type NoVueOptionsApiOptions = {};
@@ -8399,8 +8441,10 @@ export type Category =
 	| "lint/nursery/noSyncScripts"
 	| "lint/nursery/noTernary"
 	| "lint/nursery/noUndeclaredEnvVars"
+	| "lint/nursery/noUndeclaredClasses"
 	| "lint/nursery/noUnknownAttribute"
 	| "lint/nursery/noUnnecessaryConditions"
+	| "lint/nursery/noUnusedClasses"
 	| "lint/nursery/noUnwantedPolyfillio"
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessReturn"
@@ -8664,11 +8708,12 @@ export type Category =
 	| "lint/suspicious/useStaticResponseMethods"
 	| "lint/suspicious/useStrictMode"
 	| "assist/source/noDuplicateClasses"
+	| "assist/source/organizeImports"
+	| "assist/source/useSortedAttributes"
 	| "assist/source/useSortedInterfaceMembers"
 	| "assist/source/useSortedKeys"
+	| "assist/source/useSortedPackageJson"
 	| "assist/source/useSortedProperties"
-	| "assist/source/useSortedAttributes"
-	| "assist/source/organizeImports"
 	| "syntax/correctness/noTypeOnlyImportAttributes"
 	| "syntax/correctness/noSuperWithoutExtends"
 	| "syntax/correctness/noInitializerWithDefinite"
@@ -9022,8 +9067,17 @@ export type HtmlVariant =
 	| "Svelte";
 export type GritVariant = "Standard";
 export type MarkdownVariant = "Standard";
-export type EmbeddingHtmlKind = "None" | "Html" | "Vue" | "Astro" | "Svelte";
+export type EmbeddingHtmlKind =
+	| "None"
+	| "Html"
+	| { Vue: { applicability: EmbeddingStyleApplicability } }
+	| { Astro: { applicability: EmbeddingStyleApplicability } }
+	| { Svelte: { applicability: EmbeddingStyleApplicability } };
 export type HtmlTextExpressions = "None" | "Single" | "Double";
+/**
+ * How the CSS is applied inside a snippet
+ */
+export type EmbeddingStyleApplicability = "Local" | "Global" | "Unknown";
 export interface OpenFileResult {
 	diagnostics: Diagnostic[];
 }
@@ -9117,7 +9171,8 @@ export interface GetModuleGraphResult {
 }
 export type SerializedModuleInfo =
 	| { js: SerializedJsModuleInfo }
-	| { css: SerializedCssModuleInfo };
+	| { css: SerializedCssModuleInfo }
+	| { html: SerializedHtmlModuleInfo };
 export interface SerializedJsModuleInfo {
 	/**
 	 * Dynamic imports.
@@ -9127,6 +9182,10 @@ export interface SerializedJsModuleInfo {
 	 * Exported symbols.
 	 */
 	exports: string[];
+	/**
+	 * CSS class names referenced in JSX `className` or `class` attributes.
+	 */
+	referencedClasses: string[];
 	/**
 	* Map of all the paths from static imports in the module.
 
@@ -9153,11 +9212,25 @@ Maps from the local imported name to the absolute path it resolves to.
 }
 export interface SerializedCssModuleInfo {
 	/**
+	 * Set of all CSS class names defined in this file.
+	 */
+	classes: string[];
+	/**
 	* Map of all static imports found in the module.
 
 Maps from the local imported name to the absolute path it resolves to. 
 	 */
 	imports: string[];
+}
+export interface SerializedHtmlModuleInfo {
+	/**
+	 * CSS class names referenced in `class` attributes.
+	 */
+	referencedClasses: string[];
+	/**
+	 * CSS class names defined in `<style>` blocks.
+	 */
+	styleClasses: string[];
 }
 export interface PullDiagnosticsParams {
 	categories: RuleCategories;
