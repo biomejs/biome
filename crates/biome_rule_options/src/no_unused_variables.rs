@@ -16,6 +16,7 @@ pub struct NoUnusedVariablesOptions {
 
 impl NoUnusedVariablesOptions {
     pub const DEFAULT_IGNORE_REST_SIBLINGS: bool = true;
+    pub const DEFAULT_IGNORE_PATTERN: &'static str = "$-";
 
     /// Returns [`Self::ignore_rest_siblings`] if it is set.
     /// Otherwise, returns [`Self::DEFAULT_IGNORE_REST_SIBLINGS`].
@@ -24,10 +25,10 @@ impl NoUnusedVariablesOptions {
             .unwrap_or(Self::DEFAULT_IGNORE_REST_SIBLINGS)
     }
 
-    // TODO see if we can cache the compilation of the regex
-    // TODO see if proper errors are thrown on invalid regex
+    /// Returns [`Self::ignore_pattern`] compiled as a regex if it is set.
+    /// Otherwise, returns a regex that doesn't match anything.
     pub fn ignore_pattern(&self) -> Regex {
-        let pattern = self.ignore_pattern.clone().unwrap_or(Box::from("$-"));
+        let pattern = self.ignore_pattern.clone().unwrap_or(Box::from(Self::DEFAULT_IGNORE_PATTERN));
         Regex::new(&pattern).unwrap()
     }
 }
