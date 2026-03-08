@@ -19,7 +19,7 @@ pub(crate) struct ConsoleReporter<'a> {
     pub(crate) summary: TraversalSummary,
     pub(crate) diagnostics_payload: &'a DiagnosticsPayload,
     pub(crate) execution: &'a dyn Execution,
-    pub(crate) evaluated_paths: BTreeSet<BiomePath>,
+    pub(crate) evaluated_paths: Vec<BiomePath>,
     pub(crate) working_directory: Option<Utf8PathBuf>,
     pub(crate) verbose: bool,
 }
@@ -87,7 +87,7 @@ impl ReporterVisitor for ConsoleReporterVisitor {
     fn report_handled_paths(
         &mut self,
         writer: &mut dyn ReporterWriter,
-        evaluated_paths: BTreeSet<BiomePath>,
+        evaluated_paths: Vec<BiomePath>,
         working_directory: Option<&Utf8Path>,
     ) -> io::Result<()> {
         let evaluated_paths_diagnostic = EvaluatedPathsDiagnostic {

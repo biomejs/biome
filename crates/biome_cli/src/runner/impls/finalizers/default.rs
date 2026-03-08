@@ -156,7 +156,7 @@ struct PrintToReporter<'a> {
     cli_options: &'a CliOptions,
     diagnostics_payload: &'a DiagnosticsPayload,
     summary: TraversalSummary,
-    evaluated_paths: BTreeSet<BiomePath>,
+    evaluated_paths: Vec<BiomePath>,
     file_reporter_writer: &'a mut FileReporterWriter,
     console: &'a mut dyn Console,
     fs: &'a dyn FileSystem,

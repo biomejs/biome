@@ -183,7 +183,7 @@ pub(crate) trait ReporterVisitor {
     fn report_handled_paths(
         &mut self,
         _writer: &mut dyn ReporterWriter,
-        _evaluated_paths: BTreeSet<BiomePath>,
+        _evaluated_paths: Vec<BiomePath>,
         _working_directory: Option<&Utf8Path>,
     ) -> io::Result<()> {
         Ok(())

@@ -39,7 +39,7 @@ pub enum FileKinds {
 /// This is an internal representation of a path inside the Biome daemon.
 /// This type has its own [Ord] implementation driven by its [FileKinds], where certain files must be inspected
 /// before others. For example, configuration files and ignore files must have priority over other files.
-#[derive(Debug, Clone, Eq, PartialEq, Hash, Default)]
+#[derive(Debug, Clone, Eq, Default)]
 pub struct BiomePath {
     /// The path to the file
     path: Utf8PathBuf,
@@ -47,6 +47,19 @@ pub struct BiomePath {
     kind: FileKinds,
     /// Whether this path (usually a file) was fixed as a result of a format/lint/check command with the `--write` flag.
     was_written: bool,
+}
+
+impl PartialEq for BiomePath {
+    fn eq(&self, other: &Self) -> bool {
+        self.path == other.path && self.kind == other.kind
+    }
+}
+
+impl std::hash::Hash for BiomePath {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.path.hash(state);
+        self.kind.hash(state);
+    }
 }
 
 impl BiomePath {

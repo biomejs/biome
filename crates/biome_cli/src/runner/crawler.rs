@@ -9,7 +9,9 @@ use biome_service::Workspace;
 use biome_service::projects::ProjectKey;
 use camino::Utf8PathBuf;
 use crossbeam::channel::{Sender, unbounded};
+use papaya::{HashSet, HashSetRef, LocalGuard};
 use std::collections::BTreeSet;
+use std::hash::RandomState;
 use std::marker::PhantomData;
 use std::sync::RwLock;
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -24,7 +26,7 @@ pub trait Crawler<Output> {
 
     fn output(
         collector_result: <Self::Collector as Collector>::Result,
-        evaluated_paths: BTreeSet<BiomePath>,
+        evaluated_paths: Vec<BiomePath>,
         duration: Duration,
     ) -> Output;
 
@@ -68,11 +70,11 @@ pub trait Crawler<Output> {
 
     /// Initiate the filesystem traversal tasks with the provided input paths and
     /// run it to completion, returning the duration of the process and the evaluated paths
-    fn crawl_inputs(
-        fs: &dyn FileSystem,
+    fn crawl_inputs<'a>(
+        fs: &'a dyn FileSystem,
         inputs: Vec<String>,
-        ctx: &CrawlerOptions<Self::Handler, Self::ProcessFile>,
-    ) -> (Duration, BTreeSet<BiomePath>) {
+        ctx: &'a CrawlerOptions<Self::Handler, Self::ProcessFile>,
+    ) -> (Duration, Vec<BiomePath>) {
         let start = Instant::now();
         fs.traversal(Box::new(move |scope: &dyn TraversalScope| {
             for input in inputs {
@@ -80,14 +82,27 @@ pub trait Crawler<Output> {
             }
         }));
 
-        let paths = ctx.evaluated_paths();
+        let mut handle_paths: Vec<_> = ctx
+            .evaluated_paths()
+            .into_iter()
+            .map(|p| p.clone())
+            .collect();
+        handle_paths.sort_unstable();
         fs.traversal(Box::new(|scope: &dyn TraversalScope| {
-            for path in paths {
+            for path in &handle_paths {
                 scope.handle(ctx, path.to_path_buf());
             }
         }));
 
-        (start.elapsed(), ctx.evaluated_paths())
+        // Re-collect after handle phase to capture was_written mutations
+        let mut evaluated_paths: Vec<_> = ctx
+            .evaluated_paths()
+            .into_iter()
+            .map(|p| p.clone())
+            .collect();
+        evaluated_paths.sort_unstable();
+
+        (start.elapsed(), evaluated_paths)
     }
 }
 
@@ -125,7 +140,7 @@ pub(crate) struct CrawlerOptions<'ctx, 'app, H, P> {
     /// Channel sending messages to the display thread
     pub(crate) messages: Sender<Message>,
     /// List of paths that should be processed
-    pub(crate) evaluated_paths: RwLock<BTreeSet<BiomePath>>,
+    pub(crate) evaluated_paths: papaya::HashSet<BiomePath>,
 
     execution: &'app dyn Execution,
 
@@ -141,10 +156,7 @@ where
 {
     fn increment_changed(&self, path: &BiomePath) {
         self.changed.fetch_add(1, Ordering::Relaxed);
-        self.evaluated_paths
-            .write()
-            .unwrap()
-            .replace(path.to_written());
+        self.evaluated_paths.pin().insert(path.to_written());
         self.push_message(Message::Stats(MessageStat::Changed));
     }
     fn increment_unchanged(&self) {
@@ -203,7 +215,7 @@ where
             project_key,
             interner,
             messages: sender,
-            evaluated_paths: RwLock::default(),
+            evaluated_paths: HashSet::default(),
             handler: I::default(),
             changed: AtomicUsize::new(0),
             unchanged: AtomicUsize::new(0),
@@ -224,8 +236,8 @@ where
         &self.interner
     }
 
-    fn evaluated_paths(&self) -> BTreeSet<BiomePath> {
-        self.evaluated_paths.read().unwrap().clone()
+    fn evaluated_paths(&self) -> HashSetRef<'_, BiomePath, RandomState, LocalGuard<'_>> {
+        self.evaluated_paths.pin()
     }
 
     fn push_diagnostic(&self, error: Error) {
@@ -243,8 +255,7 @@ where
 
     fn store_path(&self, path: BiomePath) {
         self.evaluated_paths
-            .write()
-            .unwrap()
+            .pin()
             .insert(BiomePath::new(path.as_path()));
     }
 }

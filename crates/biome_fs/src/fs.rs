@@ -5,9 +5,11 @@ use camino::{Utf8Path, Utf8PathBuf};
 use directories::ProjectDirs;
 pub use memory::{ErrorEntry, MemoryFileSystem};
 pub use os::{OsFileSystem, TemporaryFs};
+use papaya::{HashSetRef, LocalGuard};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 use std::fmt::{Debug, Display, Formatter};
+use std::hash::RandomState;
 use std::panic::RefUnwindSafe;
 use std::path::Path;
 use std::sync::Arc;
@@ -424,7 +426,7 @@ pub trait TraversalContext: Sync {
     fn store_path(&self, path: BiomePath);
 
     /// Returns the paths that should be handled
-    fn evaluated_paths(&self) -> BTreeSet<BiomePath>;
+    fn evaluated_paths(&self) -> HashSetRef<'_, BiomePath, RandomState, LocalGuard<'_>>;
 
     /// Returns whether directories are stored and returned by
     /// `Self::evaluated_paths()`.
