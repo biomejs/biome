@@ -5,7 +5,7 @@ use biome_css_syntax::CssSyntaxKind::SCSS_WHILE_AT_RULE;
 use biome_css_syntax::T;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
-use biome_parser::{token_set, TokenSet};
+use biome_parser::{TokenSet, token_set};
 
 const SCSS_WHILE_CONDITION_END_SET: TokenSet<biome_css_syntax::CssSyntaxKind> = token_set![T!['{']];
 
