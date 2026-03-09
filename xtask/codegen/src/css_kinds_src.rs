@@ -90,6 +90,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "debug",
         "warn",
         "error",
+        "while",
         "sass",
         "style",
         "ltr",
@@ -578,6 +579,9 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_FUNCTION_PARAMETER_LIST",
         "CSS_RETURNS_STATEMENT",
         // SCSS
+        "SCSS_IF_AT_RULE",
+        "SCSS_WHILE_AT_RULE",
+        "SCSS_ELSE_CLAUSE",
         "SCSS_DEBUG_AT_RULE",
         "SCSS_WARN_AT_RULE",
         "SCSS_ERROR_AT_RULE",

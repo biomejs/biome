@@ -1,6 +1,9 @@
 mod debug;
+mod else_clause;
 mod error;
+mod if_at_rule;
 mod warn;
+mod while_at_rule;
 
 use crate::parser::CssParser;
 use crate::syntax::scss::{expected_scss_expression, parse_scss_expression_until};
@@ -10,8 +13,11 @@ use biome_parser::prelude::*;
 use biome_parser::{TokenSet, token_set};
 
 pub(crate) use debug::parse_scss_debug_at_rule;
+pub(crate) use else_clause::parse_bogus_scss_else_at_rule;
 pub(crate) use error::parse_scss_error_at_rule;
+pub(crate) use if_at_rule::parse_scss_if_at_rule;
 pub(crate) use warn::parse_scss_warn_at_rule;
+pub(crate) use while_at_rule::parse_scss_while_at_rule;
 
 const SCSS_STATEMENT_AT_RULE_VALUE_END_SET: TokenSet<CssSyntaxKind> = token_set![T![;], T!['}']];
 

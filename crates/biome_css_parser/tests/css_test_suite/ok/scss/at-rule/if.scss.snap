@@ -1,0 +1,618 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@if $theme == dark {
+  color: white;
+}
+
+@if $theme == dark {
+  color: white;
+} @else {
+  color: black;
+}
+
+@if $theme == dark {
+  color: white;
+} @else if $theme == light {
+  color: black;
+} @else {
+  color: gray;
+}
+
+.card {
+  @if $compact {
+    padding: 0;
+  } @else {
+    padding: 1rem;
+  }
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: ScssIfAtRule {
+                if_token: IF_KW@1..4 "if" [] [Whitespace(" ")],
+                condition: ScssExpression {
+                    items: ScssExpressionItemList [
+                        ScssBinaryExpression {
+                            left: ScssIdentifier {
+                                dollar_token: DOLLAR@4..5 "$" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@5..11 "theme" [] [Whitespace(" ")],
+                                },
+                            },
+                            operator: EQ2@11..14 "==" [] [Whitespace(" ")],
+                            right: CssIdentifier {
+                                value_token: IDENT@14..19 "dark" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@19..20 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@20..28 "color" [Newline("\n"), Whitespace("  ")] [],
+                                    },
+                                    colon_token: COLON@28..30 ":" [] [Whitespace(" ")],
+                                    value: ScssExpression {
+                                        items: ScssExpressionItemList [
+                                            CssIdentifier {
+                                                value_token: IDENT@30..35 "white" [] [],
+                                            },
+                                        ],
+                                    },
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@35..36 ";" [] [],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@36..38 "}" [Newline("\n")] [],
+                },
+                else_clause: missing (optional),
+            },
+        },
+        CssAtRule {
+            at_token: AT@38..41 "@" [Newline("\n"), Newline("\n")] [],
+            rule: ScssIfAtRule {
+                if_token: IF_KW@41..44 "if" [] [Whitespace(" ")],
+                condition: ScssExpression {
+                    items: ScssExpressionItemList [
+                        ScssBinaryExpression {
+                            left: ScssIdentifier {
+                                dollar_token: DOLLAR@44..45 "$" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@45..51 "theme" [] [Whitespace(" ")],
+                                },
+                            },
+                            operator: EQ2@51..54 "==" [] [Whitespace(" ")],
+                            right: CssIdentifier {
+                                value_token: IDENT@54..59 "dark" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@59..60 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@60..68 "color" [Newline("\n"), Whitespace("  ")] [],
+                                    },
+                                    colon_token: COLON@68..70 ":" [] [Whitespace(" ")],
+                                    value: ScssExpression {
+                                        items: ScssExpressionItemList [
+                                            CssIdentifier {
+                                                value_token: IDENT@70..75 "white" [] [],
+                                            },
+                                        ],
+                                    },
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@75..76 ";" [] [],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@76..79 "}" [Newline("\n")] [Whitespace(" ")],
+                },
+                else_clause: ScssElseClause {
+                    at_token: AT@79..80 "@" [] [],
+                    else_token: ELSE_KW@80..85 "else" [] [Whitespace(" ")],
+                    body: CssDeclarationOrRuleBlock {
+                        l_curly_token: L_CURLY@85..86 "{" [] [],
+                        items: CssDeclarationOrRuleList [
+                            CssDeclarationWithSemicolon {
+                                declaration: CssDeclaration {
+                                    property: CssGenericProperty {
+                                        name: CssIdentifier {
+                                            value_token: IDENT@86..94 "color" [Newline("\n"), Whitespace("  ")] [],
+                                        },
+                                        colon_token: COLON@94..96 ":" [] [Whitespace(" ")],
+                                        value: ScssExpression {
+                                            items: ScssExpressionItemList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@96..101 "black" [] [],
+                                                },
+                                            ],
+                                        },
+                                    },
+                                    important: missing (optional),
+                                },
+                                semicolon_token: SEMICOLON@101..102 ";" [] [],
+                            },
+                        ],
+                        r_curly_token: R_CURLY@102..104 "}" [Newline("\n")] [],
+                    },
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@104..107 "@" [Newline("\n"), Newline("\n")] [],
+            rule: ScssIfAtRule {
+                if_token: IF_KW@107..110 "if" [] [Whitespace(" ")],
+                condition: ScssExpression {
+                    items: ScssExpressionItemList [
+                        ScssBinaryExpression {
+                            left: ScssIdentifier {
+                                dollar_token: DOLLAR@110..111 "$" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@111..117 "theme" [] [Whitespace(" ")],
+                                },
+                            },
+                            operator: EQ2@117..120 "==" [] [Whitespace(" ")],
+                            right: CssIdentifier {
+                                value_token: IDENT@120..125 "dark" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@125..126 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@126..134 "color" [Newline("\n"), Whitespace("  ")] [],
+                                    },
+                                    colon_token: COLON@134..136 ":" [] [Whitespace(" ")],
+                                    value: ScssExpression {
+                                        items: ScssExpressionItemList [
+                                            CssIdentifier {
+                                                value_token: IDENT@136..141 "white" [] [],
+                                            },
+                                        ],
+                                    },
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@141..142 ";" [] [],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@142..145 "}" [Newline("\n")] [Whitespace(" ")],
+                },
+                else_clause: ScssElseClause {
+                    at_token: AT@145..146 "@" [] [],
+                    else_token: ELSE_KW@146..151 "else" [] [Whitespace(" ")],
+                    body: ScssIfAtRule {
+                        if_token: IF_KW@151..154 "if" [] [Whitespace(" ")],
+                        condition: ScssExpression {
+                            items: ScssExpressionItemList [
+                                ScssBinaryExpression {
+                                    left: ScssIdentifier {
+                                        dollar_token: DOLLAR@154..155 "$" [] [],
+                                        name: CssIdentifier {
+                                            value_token: IDENT@155..161 "theme" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                    operator: EQ2@161..164 "==" [] [Whitespace(" ")],
+                                    right: CssIdentifier {
+                                        value_token: IDENT@164..170 "light" [] [Whitespace(" ")],
+                                    },
+                                },
+                            ],
+                        },
+                        block: CssDeclarationOrRuleBlock {
+                            l_curly_token: L_CURLY@170..171 "{" [] [],
+                            items: CssDeclarationOrRuleList [
+                                CssDeclarationWithSemicolon {
+                                    declaration: CssDeclaration {
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@171..179 "color" [Newline("\n"), Whitespace("  ")] [],
+                                            },
+                                            colon_token: COLON@179..181 ":" [] [Whitespace(" ")],
+                                            value: ScssExpression {
+                                                items: ScssExpressionItemList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@181..186 "black" [] [],
+                                                    },
+                                                ],
+                                            },
+                                        },
+                                        important: missing (optional),
+                                    },
+                                    semicolon_token: SEMICOLON@186..187 ";" [] [],
+                                },
+                            ],
+                            r_curly_token: R_CURLY@187..190 "}" [Newline("\n")] [Whitespace(" ")],
+                        },
+                        else_clause: ScssElseClause {
+                            at_token: AT@190..191 "@" [] [],
+                            else_token: ELSE_KW@191..196 "else" [] [Whitespace(" ")],
+                            body: CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@196..197 "{" [] [],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@197..205 "color" [Newline("\n"), Whitespace("  ")] [],
+                                                },
+                                                colon_token: COLON@205..207 ":" [] [Whitespace(" ")],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        CssIdentifier {
+                                                            value_token: IDENT@207..211 "gray" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@211..212 ";" [] [],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@212..214 "}" [Newline("\n")] [],
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@214..217 "." [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@217..222 "card" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@222..223 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssAtRule {
+                        at_token: AT@223..227 "@" [Newline("\n"), Whitespace("  ")] [],
+                        rule: ScssIfAtRule {
+                            if_token: IF_KW@227..230 "if" [] [Whitespace(" ")],
+                            condition: ScssExpression {
+                                items: ScssExpressionItemList [
+                                    ScssIdentifier {
+                                        dollar_token: DOLLAR@230..231 "$" [] [],
+                                        name: CssIdentifier {
+                                            value_token: IDENT@231..239 "compact" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                ],
+                            },
+                            block: CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@239..240 "{" [] [],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@240..252 "padding" [Newline("\n"), Whitespace("    ")] [],
+                                                },
+                                                colon_token: COLON@252..254 ":" [] [Whitespace(" ")],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        CssNumber {
+                                                            value_token: CSS_NUMBER_LITERAL@254..255 "0" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@255..256 ";" [] [],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@256..261 "}" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                            },
+                            else_clause: ScssElseClause {
+                                at_token: AT@261..262 "@" [] [],
+                                else_token: ELSE_KW@262..267 "else" [] [Whitespace(" ")],
+                                body: CssDeclarationOrRuleBlock {
+                                    l_curly_token: L_CURLY@267..268 "{" [] [],
+                                    items: CssDeclarationOrRuleList [
+                                        CssDeclarationWithSemicolon {
+                                            declaration: CssDeclaration {
+                                                property: CssGenericProperty {
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@268..280 "padding" [Newline("\n"), Whitespace("    ")] [],
+                                                    },
+                                                    colon_token: COLON@280..282 ":" [] [Whitespace(" ")],
+                                                    value: ScssExpression {
+                                                        items: ScssExpressionItemList [
+                                                            CssRegularDimension {
+                                                                value_token: CSS_NUMBER_LITERAL@282..283 "1" [] [],
+                                                                unit_token: IDENT@283..286 "rem" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                                important: missing (optional),
+                                            },
+                                            semicolon_token: SEMICOLON@286..287 ";" [] [],
+                                        },
+                                    ],
+                                    r_curly_token: R_CURLY@287..291 "}" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@291..293 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@293..294 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..294
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..293
+    0: CSS_AT_RULE@0..38
+      0: AT@0..1 "@" [] []
+      1: SCSS_IF_AT_RULE@1..38
+        0: IF_KW@1..4 "if" [] [Whitespace(" ")]
+        1: SCSS_EXPRESSION@4..19
+          0: SCSS_EXPRESSION_ITEM_LIST@4..19
+            0: SCSS_BINARY_EXPRESSION@4..19
+              0: SCSS_IDENTIFIER@4..11
+                0: DOLLAR@4..5 "$" [] []
+                1: CSS_IDENTIFIER@5..11
+                  0: IDENT@5..11 "theme" [] [Whitespace(" ")]
+              1: EQ2@11..14 "==" [] [Whitespace(" ")]
+              2: CSS_IDENTIFIER@14..19
+                0: IDENT@14..19 "dark" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_OR_RULE_BLOCK@19..38
+          0: L_CURLY@19..20 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@20..36
+            0: CSS_DECLARATION_WITH_SEMICOLON@20..36
+              0: CSS_DECLARATION@20..35
+                0: CSS_GENERIC_PROPERTY@20..35
+                  0: CSS_IDENTIFIER@20..28
+                    0: IDENT@20..28 "color" [Newline("\n"), Whitespace("  ")] []
+                  1: COLON@28..30 ":" [] [Whitespace(" ")]
+                  2: SCSS_EXPRESSION@30..35
+                    0: SCSS_EXPRESSION_ITEM_LIST@30..35
+                      0: CSS_IDENTIFIER@30..35
+                        0: IDENT@30..35 "white" [] []
+                1: (empty)
+              1: SEMICOLON@35..36 ";" [] []
+          2: R_CURLY@36..38 "}" [Newline("\n")] []
+        3: (empty)
+    1: CSS_AT_RULE@38..104
+      0: AT@38..41 "@" [Newline("\n"), Newline("\n")] []
+      1: SCSS_IF_AT_RULE@41..104
+        0: IF_KW@41..44 "if" [] [Whitespace(" ")]
+        1: SCSS_EXPRESSION@44..59
+          0: SCSS_EXPRESSION_ITEM_LIST@44..59
+            0: SCSS_BINARY_EXPRESSION@44..59
+              0: SCSS_IDENTIFIER@44..51
+                0: DOLLAR@44..45 "$" [] []
+                1: CSS_IDENTIFIER@45..51
+                  0: IDENT@45..51 "theme" [] [Whitespace(" ")]
+              1: EQ2@51..54 "==" [] [Whitespace(" ")]
+              2: CSS_IDENTIFIER@54..59
+                0: IDENT@54..59 "dark" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_OR_RULE_BLOCK@59..79
+          0: L_CURLY@59..60 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@60..76
+            0: CSS_DECLARATION_WITH_SEMICOLON@60..76
+              0: CSS_DECLARATION@60..75
+                0: CSS_GENERIC_PROPERTY@60..75
+                  0: CSS_IDENTIFIER@60..68
+                    0: IDENT@60..68 "color" [Newline("\n"), Whitespace("  ")] []
+                  1: COLON@68..70 ":" [] [Whitespace(" ")]
+                  2: SCSS_EXPRESSION@70..75
+                    0: SCSS_EXPRESSION_ITEM_LIST@70..75
+                      0: CSS_IDENTIFIER@70..75
+                        0: IDENT@70..75 "white" [] []
+                1: (empty)
+              1: SEMICOLON@75..76 ";" [] []
+          2: R_CURLY@76..79 "}" [Newline("\n")] [Whitespace(" ")]
+        3: SCSS_ELSE_CLAUSE@79..104
+          0: AT@79..80 "@" [] []
+          1: ELSE_KW@80..85 "else" [] [Whitespace(" ")]
+          2: CSS_DECLARATION_OR_RULE_BLOCK@85..104
+            0: L_CURLY@85..86 "{" [] []
+            1: CSS_DECLARATION_OR_RULE_LIST@86..102
+              0: CSS_DECLARATION_WITH_SEMICOLON@86..102
+                0: CSS_DECLARATION@86..101
+                  0: CSS_GENERIC_PROPERTY@86..101
+                    0: CSS_IDENTIFIER@86..94
+                      0: IDENT@86..94 "color" [Newline("\n"), Whitespace("  ")] []
+                    1: COLON@94..96 ":" [] [Whitespace(" ")]
+                    2: SCSS_EXPRESSION@96..101
+                      0: SCSS_EXPRESSION_ITEM_LIST@96..101
+                        0: CSS_IDENTIFIER@96..101
+                          0: IDENT@96..101 "black" [] []
+                  1: (empty)
+                1: SEMICOLON@101..102 ";" [] []
+            2: R_CURLY@102..104 "}" [Newline("\n")] []
+    2: CSS_AT_RULE@104..214
+      0: AT@104..107 "@" [Newline("\n"), Newline("\n")] []
+      1: SCSS_IF_AT_RULE@107..214
+        0: IF_KW@107..110 "if" [] [Whitespace(" ")]
+        1: SCSS_EXPRESSION@110..125
+          0: SCSS_EXPRESSION_ITEM_LIST@110..125
+            0: SCSS_BINARY_EXPRESSION@110..125
+              0: SCSS_IDENTIFIER@110..117
+                0: DOLLAR@110..111 "$" [] []
+                1: CSS_IDENTIFIER@111..117
+                  0: IDENT@111..117 "theme" [] [Whitespace(" ")]
+              1: EQ2@117..120 "==" [] [Whitespace(" ")]
+              2: CSS_IDENTIFIER@120..125
+                0: IDENT@120..125 "dark" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_OR_RULE_BLOCK@125..145
+          0: L_CURLY@125..126 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@126..142
+            0: CSS_DECLARATION_WITH_SEMICOLON@126..142
+              0: CSS_DECLARATION@126..141
+                0: CSS_GENERIC_PROPERTY@126..141
+                  0: CSS_IDENTIFIER@126..134
+                    0: IDENT@126..134 "color" [Newline("\n"), Whitespace("  ")] []
+                  1: COLON@134..136 ":" [] [Whitespace(" ")]
+                  2: SCSS_EXPRESSION@136..141
+                    0: SCSS_EXPRESSION_ITEM_LIST@136..141
+                      0: CSS_IDENTIFIER@136..141
+                        0: IDENT@136..141 "white" [] []
+                1: (empty)
+              1: SEMICOLON@141..142 ";" [] []
+          2: R_CURLY@142..145 "}" [Newline("\n")] [Whitespace(" ")]
+        3: SCSS_ELSE_CLAUSE@145..214
+          0: AT@145..146 "@" [] []
+          1: ELSE_KW@146..151 "else" [] [Whitespace(" ")]
+          2: SCSS_IF_AT_RULE@151..214
+            0: IF_KW@151..154 "if" [] [Whitespace(" ")]
+            1: SCSS_EXPRESSION@154..170
+              0: SCSS_EXPRESSION_ITEM_LIST@154..170
+                0: SCSS_BINARY_EXPRESSION@154..170
+                  0: SCSS_IDENTIFIER@154..161
+                    0: DOLLAR@154..155 "$" [] []
+                    1: CSS_IDENTIFIER@155..161
+                      0: IDENT@155..161 "theme" [] [Whitespace(" ")]
+                  1: EQ2@161..164 "==" [] [Whitespace(" ")]
+                  2: CSS_IDENTIFIER@164..170
+                    0: IDENT@164..170 "light" [] [Whitespace(" ")]
+            2: CSS_DECLARATION_OR_RULE_BLOCK@170..190
+              0: L_CURLY@170..171 "{" [] []
+              1: CSS_DECLARATION_OR_RULE_LIST@171..187
+                0: CSS_DECLARATION_WITH_SEMICOLON@171..187
+                  0: CSS_DECLARATION@171..186
+                    0: CSS_GENERIC_PROPERTY@171..186
+                      0: CSS_IDENTIFIER@171..179
+                        0: IDENT@171..179 "color" [Newline("\n"), Whitespace("  ")] []
+                      1: COLON@179..181 ":" [] [Whitespace(" ")]
+                      2: SCSS_EXPRESSION@181..186
+                        0: SCSS_EXPRESSION_ITEM_LIST@181..186
+                          0: CSS_IDENTIFIER@181..186
+                            0: IDENT@181..186 "black" [] []
+                    1: (empty)
+                  1: SEMICOLON@186..187 ";" [] []
+              2: R_CURLY@187..190 "}" [Newline("\n")] [Whitespace(" ")]
+            3: SCSS_ELSE_CLAUSE@190..214
+              0: AT@190..191 "@" [] []
+              1: ELSE_KW@191..196 "else" [] [Whitespace(" ")]
+              2: CSS_DECLARATION_OR_RULE_BLOCK@196..214
+                0: L_CURLY@196..197 "{" [] []
+                1: CSS_DECLARATION_OR_RULE_LIST@197..212
+                  0: CSS_DECLARATION_WITH_SEMICOLON@197..212
+                    0: CSS_DECLARATION@197..211
+                      0: CSS_GENERIC_PROPERTY@197..211
+                        0: CSS_IDENTIFIER@197..205
+                          0: IDENT@197..205 "color" [Newline("\n"), Whitespace("  ")] []
+                        1: COLON@205..207 ":" [] [Whitespace(" ")]
+                        2: SCSS_EXPRESSION@207..211
+                          0: SCSS_EXPRESSION_ITEM_LIST@207..211
+                            0: CSS_IDENTIFIER@207..211
+                              0: IDENT@207..211 "gray" [] []
+                      1: (empty)
+                    1: SEMICOLON@211..212 ";" [] []
+                2: R_CURLY@212..214 "}" [Newline("\n")] []
+    3: CSS_QUALIFIED_RULE@214..293
+      0: CSS_SELECTOR_LIST@214..222
+        0: CSS_COMPOUND_SELECTOR@214..222
+          0: CSS_NESTED_SELECTOR_LIST@214..214
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@214..222
+            0: CSS_CLASS_SELECTOR@214..222
+              0: DOT@214..217 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@217..222
+                0: IDENT@217..222 "card" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@222..293
+        0: L_CURLY@222..223 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@223..291
+          0: CSS_AT_RULE@223..291
+            0: AT@223..227 "@" [Newline("\n"), Whitespace("  ")] []
+            1: SCSS_IF_AT_RULE@227..291
+              0: IF_KW@227..230 "if" [] [Whitespace(" ")]
+              1: SCSS_EXPRESSION@230..239
+                0: SCSS_EXPRESSION_ITEM_LIST@230..239
+                  0: SCSS_IDENTIFIER@230..239
+                    0: DOLLAR@230..231 "$" [] []
+                    1: CSS_IDENTIFIER@231..239
+                      0: IDENT@231..239 "compact" [] [Whitespace(" ")]
+              2: CSS_DECLARATION_OR_RULE_BLOCK@239..261
+                0: L_CURLY@239..240 "{" [] []
+                1: CSS_DECLARATION_OR_RULE_LIST@240..256
+                  0: CSS_DECLARATION_WITH_SEMICOLON@240..256
+                    0: CSS_DECLARATION@240..255
+                      0: CSS_GENERIC_PROPERTY@240..255
+                        0: CSS_IDENTIFIER@240..252
+                          0: IDENT@240..252 "padding" [Newline("\n"), Whitespace("    ")] []
+                        1: COLON@252..254 ":" [] [Whitespace(" ")]
+                        2: SCSS_EXPRESSION@254..255
+                          0: SCSS_EXPRESSION_ITEM_LIST@254..255
+                            0: CSS_NUMBER@254..255
+                              0: CSS_NUMBER_LITERAL@254..255 "0" [] []
+                      1: (empty)
+                    1: SEMICOLON@255..256 ";" [] []
+                2: R_CURLY@256..261 "}" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+              3: SCSS_ELSE_CLAUSE@261..291
+                0: AT@261..262 "@" [] []
+                1: ELSE_KW@262..267 "else" [] [Whitespace(" ")]
+                2: CSS_DECLARATION_OR_RULE_BLOCK@267..291
+                  0: L_CURLY@267..268 "{" [] []
+                  1: CSS_DECLARATION_OR_RULE_LIST@268..287
+                    0: CSS_DECLARATION_WITH_SEMICOLON@268..287
+                      0: CSS_DECLARATION@268..286
+                        0: CSS_GENERIC_PROPERTY@268..286
+                          0: CSS_IDENTIFIER@268..280
+                            0: IDENT@268..280 "padding" [Newline("\n"), Whitespace("    ")] []
+                          1: COLON@280..282 ":" [] [Whitespace(" ")]
+                          2: SCSS_EXPRESSION@282..286
+                            0: SCSS_EXPRESSION_ITEM_LIST@282..286
+                              0: CSS_REGULAR_DIMENSION@282..286
+                                0: CSS_NUMBER_LITERAL@282..283 "1" [] []
+                                1: IDENT@283..286 "rem" [] []
+                        1: (empty)
+                      1: SEMICOLON@286..287 ";" [] []
+                  2: R_CURLY@287..291 "}" [Newline("\n"), Whitespace("  ")] []
+        2: R_CURLY@291..293 "}" [Newline("\n")] []
+  2: EOF@293..294 "" [Newline("\n")] []
+
+```

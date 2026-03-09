@@ -3136,6 +3136,20 @@ impl ScssDeclarationBuilder {
         ))
     }
 }
+pub fn scss_else_clause(
+    at_token: SyntaxToken,
+    else_token: SyntaxToken,
+    body: AnyScssElseClauseBody,
+) -> ScssElseClause {
+    ScssElseClause::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_ELSE_CLAUSE,
+        [
+            Some(SyntaxElement::Token(at_token)),
+            Some(SyntaxElement::Token(else_token)),
+            Some(SyntaxElement::Node(body.into_syntax())),
+        ],
+    ))
+}
 pub fn scss_error_at_rule(
     error_token: SyntaxToken,
     value: ScssExpression,
@@ -3164,6 +3178,42 @@ pub fn scss_identifier(dollar_token: SyntaxToken, name: CssIdentifier) -> ScssId
             Some(SyntaxElement::Node(name.into_syntax())),
         ],
     ))
+}
+pub fn scss_if_at_rule(
+    if_token: SyntaxToken,
+    condition: ScssExpression,
+    block: CssDeclarationOrRuleBlock,
+) -> ScssIfAtRuleBuilder {
+    ScssIfAtRuleBuilder {
+        if_token,
+        condition,
+        block,
+        else_clause: None,
+    }
+}
+pub struct ScssIfAtRuleBuilder {
+    if_token: SyntaxToken,
+    condition: ScssExpression,
+    block: CssDeclarationOrRuleBlock,
+    else_clause: Option<ScssElseClause>,
+}
+impl ScssIfAtRuleBuilder {
+    pub fn with_else_clause(mut self, else_clause: ScssElseClause) -> Self {
+        self.else_clause = Some(else_clause);
+        self
+    }
+    pub fn build(self) -> ScssIfAtRule {
+        ScssIfAtRule::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::SCSS_IF_AT_RULE,
+            [
+                Some(SyntaxElement::Token(self.if_token)),
+                Some(SyntaxElement::Node(self.condition.into_syntax())),
+                Some(SyntaxElement::Node(self.block.into_syntax())),
+                self.else_clause
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn scss_keyword_argument(
     name: ScssIdentifier,
@@ -3318,6 +3368,20 @@ pub fn scss_warn_at_rule(
             Some(SyntaxElement::Token(warn_token)),
             Some(SyntaxElement::Node(value.into_syntax())),
             Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
+pub fn scss_while_at_rule(
+    while_token: SyntaxToken,
+    condition: ScssExpression,
+    block: CssDeclarationOrRuleBlock,
+) -> ScssWhileAtRule {
+    ScssWhileAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_WHILE_AT_RULE,
+        [
+            Some(SyntaxElement::Token(while_token)),
+            Some(SyntaxElement::Node(condition.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
         ],
     ))
 }
