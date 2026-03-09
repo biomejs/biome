@@ -1013,7 +1013,7 @@ See https://biomejs.dev/assist/actions/organize-imports
 	 */
 	recommended?: boolean;
 	/**
-	* Enforce attribute sorting in JSX elements.
+	* Enforce attribute sorting in HTML elements.
 See https://biomejs.dev/assist/actions/use-sorted-attributes 
 	 */
 	useSortedAttributes?: UseSortedAttributesConfiguration;

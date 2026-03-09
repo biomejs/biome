@@ -1,0 +1,124 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: unsorted.svelte
+---
+# Input
+```html
+<input type="checkbox" spellcheck="true" tabindex="-1" dir="auto" bind:checked={accepted} />
+<input type="checkbox" spellcheck="true" tabindex="-1" dir="auto" bind:checked defaultChecked={true}>
+<div style:color="red" spellcheck="true" tabindex="-1" dir="auto" class="mydiv">some text</div>
+
+<div
+	use:gestures
+    transition:fade
+	onswipeleft={next}
+	onswiperight={prev}
+    {@attach myAttachment}
+    spellcheck="true"
+    tabindex="-1"
+    dir="auto"
+    animate:flip
+    style:color="red"
+>...</div>
+
+```
+
+# Diagnostics
+```
+unsorted.svelte:1:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+  > 1 │ <input type="checkbox" spellcheck="true" tabindex="-1" dir="auto" bind:checked={accepted} />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ <input type="checkbox" spellcheck="true" tabindex="-1" dir="auto" bind:checked defaultChecked={true}>
+    3 │ <div style:color="red" spellcheck="true" tabindex="-1" dir="auto" class="mydiv">some text</div>
+  
+  i Safe fix: Sort the HTML attributes.
+  
+     1    │ - <input·type="checkbox"·spellcheck="true"·tabindex="-1"·dir="auto"·bind:checked={accepted}·/>
+        1 │ + <input·dir="auto"·spellcheck="true"·tabindex="-1"·type="checkbox"·bind:checked={accepted}·/>
+     2  2 │   <input type="checkbox" spellcheck="true" tabindex="-1" dir="auto" bind:checked defaultChecked={true}>
+     3  3 │   <div style:color="red" spellcheck="true" tabindex="-1" dir="auto" class="mydiv">some text</div>
+  
+
+```
+
+```
+unsorted.svelte:2:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+    1 │ <input type="checkbox" spellcheck="true" tabindex="-1" dir="auto" bind:checked={accepted} />
+  > 2 │ <input type="checkbox" spellcheck="true" tabindex="-1" dir="auto" bind:checked defaultChecked={true}>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <div style:color="red" spellcheck="true" tabindex="-1" dir="auto" class="mydiv">some text</div>
+    4 │ 
+  
+  i Safe fix: Sort the HTML attributes.
+  
+     1  1 │   <input type="checkbox" spellcheck="true" tabindex="-1" dir="auto" bind:checked={accepted} />
+     2    │ - <input·type="checkbox"·spellcheck="true"·tabindex="-1"·dir="auto"·bind:checked·defaultChecked={true}>
+        2 │ + <input·dir="auto"·spellcheck="true"·tabindex="-1"·type="checkbox"·bind:checked·defaultChecked={true}>
+     3  3 │   <div style:color="red" spellcheck="true" tabindex="-1" dir="auto" class="mydiv">some text</div>
+     4  4 │   
+  
+
+```
+
+```
+unsorted.svelte:3:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+    1 │ <input type="checkbox" spellcheck="true" tabindex="-1" dir="auto" bind:checked={accepted} />
+    2 │ <input type="checkbox" spellcheck="true" tabindex="-1" dir="auto" bind:checked defaultChecked={true}>
+  > 3 │ <div style:color="red" spellcheck="true" tabindex="-1" dir="auto" class="mydiv">some text</div>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ <div
+  
+  i Safe fix: Sort the HTML attributes.
+  
+     1  1 │   <input type="checkbox" spellcheck="true" tabindex="-1" dir="auto" bind:checked={accepted} />
+     2  2 │   <input type="checkbox" spellcheck="true" tabindex="-1" dir="auto" bind:checked defaultChecked={true}>
+     3    │ - <div·style:color="red"·spellcheck="true"·tabindex="-1"·dir="auto"·class="mydiv">some·text</div>
+        3 │ + <div·style:color="red"·class="mydiv"dir="auto"·spellcheck="true"·tabindex="-1"·>some·text</div>
+     4  4 │   
+     5  5 │   <div
+  
+
+```
+
+```
+unsorted.svelte:5:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+     3 │ <div style:color="red" spellcheck="true" tabindex="-1" dir="auto" class="mydiv">some text</div>
+     4 │ 
+   > 5 │ <div
+       │ ^^^^
+   > 6 │ 	use:gestures
+        ...
+  > 14 │     animate:flip
+  > 15 │     style:color="red"
+  > 16 │ >...</div>
+       │ ^
+    17 │ 
+  
+  i Safe fix: Sort the HTML attributes.
+  
+     9  9 │   	onswiperight={prev}
+    10 10 │       {@attach myAttachment}
+    11    │ - ····spellcheck="true"
+    12    │ - ····tabindex="-1"
+    13    │ - ····dir="auto"
+       11 │ + ····dir="auto"
+       12 │ + ····spellcheck="true"
+       13 │ + ····tabindex="-1"
+    14 14 │       animate:flip
+    15 15 │       style:color="red"
+  
+
+```
