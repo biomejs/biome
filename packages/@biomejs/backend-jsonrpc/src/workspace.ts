@@ -2151,6 +2151,11 @@ See https://biomejs.dev/linter/rules/no-increment-decrement
 	 */
 	noIncrementDecrement?: NoIncrementDecrementConfiguration;
 	/**
+	* Disallow the use of inline styles on elements.
+See https://biomejs.dev/linter/rules/no-inline-styles 
+	 */
+	noInlineStyles?: NoInlineStylesConfiguration;
+	/**
 	* Disallow .bind(), arrow functions, or function expressions in JSX props.
 See https://biomejs.dev/linter/rules/no-jsx-props-bind 
 	 */
@@ -4096,6 +4101,9 @@ export type NoHexColorsConfiguration =
 export type NoIncrementDecrementConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoIncrementDecrementOptions;
+export type NoInlineStylesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoInlineStylesOptions;
 export type NoJsxPropsBindConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoJsxPropsBindOptions;
@@ -5729,6 +5737,10 @@ export interface RuleWithNoIncrementDecrementOptions {
 	level: RulePlainConfiguration;
 	options?: NoIncrementDecrementOptions;
 }
+export interface RuleWithNoInlineStylesOptions {
+	level: RulePlainConfiguration;
+	options?: NoInlineStylesOptions;
+}
 export interface RuleWithNoJsxPropsBindOptions {
 	level: RulePlainConfiguration;
 	options?: NoJsxPropsBindOptions;
@@ -7274,6 +7286,7 @@ export interface NoIncrementDecrementOptions {
 	 */
 	allowForLoopAfterthoughts?: boolean;
 }
+export type NoInlineStylesOptions = {};
 export type NoJsxPropsBindOptions = {};
 export type NoLeakedRenderOptions = {};
 export type NoMisusedPromisesOptions = {};
@@ -8254,10 +8267,10 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
-	| "lint/nursery/useExpect"
 	| "lint/nursery/noAmbiguousAnchorText"
 	| "lint/nursery/noBeforeInteractiveScriptOutsideDocument"
 	| "lint/nursery/noColorInvalidHex"
+	| "lint/nursery/noConditionalExpect"
 	| "lint/nursery/noContinue"
 	| "lint/nursery/noDeprecatedMediaType"
 	| "lint/nursery/noDivRegex"
@@ -8279,6 +8292,7 @@ export type Category =
 	| "lint/nursery/noHexColors"
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noIncrementDecrement"
+	| "lint/nursery/noInlineStyles"
 	| "lint/nursery/noJsxPropsBind"
 	| "lint/nursery/noLeakedRender"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
@@ -8287,7 +8301,6 @@ export type Category =
 	| "lint/nursery/noMultiStr"
 	| "lint/nursery/noNestedPromises"
 	| "lint/nursery/noParametersOnlyUsedInRecursion"
-	| "lint/nursery/noConditionalExpect"
 	| "lint/nursery/noPlaywrightElementHandle"
 	| "lint/nursery/noPlaywrightEval"
 	| "lint/nursery/noPlaywrightForceOption"
@@ -8325,6 +8338,7 @@ export type Category =
 	| "lint/nursery/useDestructuring"
 	| "lint/nursery/useErrorCause"
 	| "lint/nursery/useExhaustiveSwitchCases"
+	| "lint/nursery/useExpect"
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useFind"
