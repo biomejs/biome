@@ -2,4 +2,8 @@
   color: red;
 }
 
-@while $count > 0 color: red;
+@while $count > {
+  color: red;
+}
+
+@while $count > 0
