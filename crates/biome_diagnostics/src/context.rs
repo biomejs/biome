@@ -283,6 +283,10 @@ mod internal {
             self.source.as_diagnostic().category()
         }
 
+        fn subcategory(&self) -> Option<&str> {
+            self.source.as_diagnostic().subcategory()
+        }
+
         fn severity(&self) -> Severity {
             self.source.as_diagnostic().severity()
         }
@@ -382,6 +386,17 @@ mod internal {
             )
         }
 
+        fn subcategory(&self) -> Option<&str> {
+            // Only forward the source's subcategory when it also has its own
+            // category. When `with_category()` injects a synthetic category
+            // the source's original subcategory would be stale/mismatched.
+            if self.source.as_diagnostic().category().is_some() {
+                self.source.as_diagnostic().subcategory()
+            } else {
+                None
+            }
+        }
+
         fn severity(&self) -> Severity {
             self.source.as_diagnostic().severity()
         }
@@ -430,6 +445,10 @@ mod internal {
     impl<E: AsDiagnostic> Diagnostic for FilePathDiagnostic<E> {
         fn category(&self) -> Option<&'static Category> {
             self.source.as_diagnostic().category()
+        }
+
+        fn subcategory(&self) -> Option<&str> {
+            self.source.as_diagnostic().subcategory()
         }
 
         fn severity(&self) -> Severity {
@@ -498,6 +517,10 @@ mod internal {
             self.source.as_diagnostic().category()
         }
 
+        fn subcategory(&self) -> Option<&str> {
+            self.source.as_diagnostic().subcategory()
+        }
+
         fn severity(&self) -> Severity {
             self.source.as_diagnostic().severity()
         }
@@ -552,6 +575,10 @@ mod internal {
     impl<E: AsDiagnostic> Diagnostic for FileSourceCodeDiagnostic<E> {
         fn category(&self) -> Option<&'static Category> {
             self.source.as_diagnostic().category()
+        }
+
+        fn subcategory(&self) -> Option<&str> {
+            self.source.as_diagnostic().subcategory()
         }
 
         fn severity(&self) -> Severity {
@@ -676,6 +703,10 @@ mod internal {
             self.source.as_diagnostic().category()
         }
 
+        fn subcategory(&self) -> Option<&str> {
+            self.source.as_diagnostic().subcategory()
+        }
+
         fn severity(&self) -> Severity {
             self.source.as_diagnostic().severity()
         }
@@ -724,6 +755,10 @@ mod internal {
     impl<E: AsDiagnostic> Diagnostic for SeverityDiagnostic<E> {
         fn category(&self) -> Option<&'static Category> {
             self.source.as_diagnostic().category()
+        }
+
+        fn subcategory(&self) -> Option<&str> {
+            self.source.as_diagnostic().subcategory()
         }
 
         fn severity(&self) -> Severity {

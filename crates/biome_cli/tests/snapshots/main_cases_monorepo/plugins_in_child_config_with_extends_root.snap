@@ -1,5 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 549
 expression: redactor(content)
 ---
 ## `packages/mobile/biome.json`
@@ -50,7 +51,7 @@ const merged = Object.assign({}, a, b);
 # Emitted Messages
 
 ```block
-packages/mobile/src/file.js:1:16 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+packages/mobile/src/file.js:1:16 plugin/no-object-assign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Prefer object spread instead of Object.assign()
   

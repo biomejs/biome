@@ -978,7 +978,7 @@ match these patterns.
 	 */
 	plugins?: Plugins;
 }
-export type PluginConfiguration = string;
+export type PluginConfiguration = string | PluginPathWithOptions;
 export type VcsClientKind = "git";
 /**
  * A list of rules that belong to this group
@@ -1184,6 +1184,28 @@ export interface OverrideLinterConfiguration {
 	 * List of rules
 	 */
 	rules?: Rules;
+}
+/**
+	* A plugin path paired with a JSON string of configuration options.
+
+Example biome.json:
+```json
+{ "path": "./my-plugin.wasm", "options": { "maxLength": 100 }, "rules": { "noConsoleLog": "off" } }
+```
+
+The `options` field is stored as a raw JSON string because plugin options
+are untyped — the guest receives them via the `configure(options-json)` export. 
+	 */
+export interface PluginPathWithOptions {
+	/**
+	 * Raw JSON string representing the plugin options.
+	 */
+	options: string;
+	path: string;
+	/**
+	 * Per-rule configuration overrides (severity, fix kind, enable/disable).
+	 */
+	rules?: Record<string, PluginRuleConfiguration>;
 }
 export type NoDuplicateClassesConfiguration =
 	| RuleAssistPlainConfiguration
@@ -3562,6 +3584,15 @@ See https://biomejs.dev/linter/rules/use-strict-mode
 	useStrictMode?: UseStrictModeConfiguration;
 }
 export type Glob = string;
+/**
+	* Per-rule configuration for a plugin rule.
+
+Can be a short string (`"off"`, `"warn"`, `"error"`) or an object
+with `level` and optional `fix` fields. 
+	 */
+export type PluginRuleConfiguration =
+	| PluginRulePlainConfiguration
+	| PluginRuleWithOptions;
 export type RuleAssistPlainConfiguration = "off" | "on";
 export interface RuleAssistWithNoDuplicateClassesOptions {
 	level: RuleAssistPlainConfiguration;
@@ -4956,6 +4987,25 @@ export type UseStaticResponseMethodsConfiguration =
 export type UseStrictModeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseStrictModeOptions;
+/**
+ * Short-form severity level for a plugin rule.
+ */
+export type PluginRulePlainConfiguration =
+	| "off"
+	| "on"
+	| "info"
+	| "warn"
+	| "error";
+/**
+ * Object form with a severity level and an optional fix kind.
+ */
+export interface PluginRuleWithOptions {
+	/**
+	 * Fix kind: `"safe"`, `"unsafe"`, or `"none"`.
+	 */
+	fix?: string;
+	level: PluginRulePlainConfiguration;
+}
 export interface NoDuplicateClassesOptions {
 	/**
 	 * Additional attributes that will be sorted.
@@ -8203,6 +8253,7 @@ export interface Diagnostic {
 	message: MarkupBuf;
 	severity: Severity;
 	source?: Diagnostic;
+	subcategory?: string;
 	tags: DiagnosticTags;
 	verboseAdvices: Advices;
 }

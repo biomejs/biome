@@ -51,6 +51,14 @@ impl Diagnostic for AnalyzerDiagnostic {
             DiagnosticKind::Raw(error) => error.category(),
         }
     }
+
+    fn subcategory(&self) -> Option<&str> {
+        match &self.kind {
+            DiagnosticKind::Rule(rule_diagnostic) => rule_diagnostic.subcategory.as_deref(),
+            DiagnosticKind::Raw(error) => error.subcategory(),
+        }
+    }
+
     fn description(&self, fmt: &mut Formatter<'_>) -> std::fmt::Result {
         match &self.kind {
             DiagnosticKind::Rule(rule_diagnostic) => Debug::fmt(&rule_diagnostic.message, fmt),
@@ -168,7 +176,7 @@ impl AnalyzerDiagnostic {
     pub fn add_code_suggestion(mut self, suggestion: CodeSuggestionAdvice<MarkupBuf>) -> Self {
         self.kind = match self.kind {
             DiagnosticKind::Rule(mut rule_diagnostic) => {
-                rule_diagnostic.tags = DiagnosticTags::FIXABLE;
+                rule_diagnostic.tags |= DiagnosticTags::FIXABLE;
                 DiagnosticKind::Rule(rule_diagnostic)
             }
             DiagnosticKind::Raw(error) => {
@@ -196,6 +204,14 @@ impl AnalyzerDiagnostic {
 
     pub const fn is_raw(&self) -> bool {
         matches!(self.kind, DiagnosticKind::Raw(_))
+    }
+
+    /// Returns the subcategory (plugin rule name) for Rule diagnostics.
+    pub fn subcategory(&self) -> Option<&str> {
+        match &self.kind {
+            DiagnosticKind::Rule(rule_diagnostic) => rule_diagnostic.subcategory.as_deref(),
+            DiagnosticKind::Raw(error) => error.subcategory(),
+        }
     }
 }
 

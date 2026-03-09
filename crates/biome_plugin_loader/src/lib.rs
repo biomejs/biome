@@ -10,10 +10,15 @@ mod analyzer_js_plugin;
 #[cfg(feature = "js_plugin")]
 mod thread_local;
 
+#[cfg(feature = "wasm_plugin")]
+mod analyzer_wasm_plugin;
+
 mod configuration;
 
 #[cfg(feature = "js_plugin")]
 pub use analyzer_js_plugin::AnalyzerJsPlugin;
+#[cfg(feature = "wasm_plugin")]
+pub use analyzer_wasm_plugin::{AnalyzerWasmPlugin, bump_generation as bump_wasm_generation};
 
 pub use analyzer_grit_plugin::AnalyzerGritPlugin;
 pub use configuration::*;
@@ -40,12 +45,22 @@ impl BiomePlugin {
     /// Loads a plugin from the given `plugin_path`.
     ///
     /// The base path is used to resolve relative paths.
+    /// `options_json` is an optional JSON string of rule options for WASM plugins.
     pub fn load(
         fs: Arc<dyn FsWithResolverProxy>,
         plugin_path: &str,
         base_path: &Utf8Path,
+        options_json: Option<String>,
     ) -> Result<(Self, Utf8PathBuf), PluginDiagnostic> {
         let plugin_path = normalize_path(&base_path.join(plugin_path));
+
+        // Derive a human-readable plugin name from the path for diagnostic
+        // display. For a directory (manifest-based) plugin this is the
+        // directory name; for a single-file plugin it is the file stem.
+        let plugin_name = plugin_path
+            .file_stem()
+            .unwrap_or(plugin_path.as_str())
+            .to_string();
 
         // If the plugin path references a `.grit` file directly, treat it as
         // a single-rule plugin instead of going through the manifest process:
@@ -56,7 +71,7 @@ impl BiomePlugin {
             let plugin = AnalyzerGritPlugin::load(fs.as_ref(), &plugin_path)?;
             return Ok((
                 Self {
-                    analyzer_plugins: vec![Arc::new(Box::new(plugin) as Box<dyn AnalyzerPlugin>)],
+                    analyzer_plugins: vec![Arc::new(plugin) as Arc<dyn AnalyzerPlugin>],
                 },
                 plugin_path,
             ));
@@ -71,10 +86,34 @@ impl BiomePlugin {
             let plugin = AnalyzerJsPlugin::load(fs.clone(), &plugin_path)?;
             return Ok((
                 Self {
-                    analyzer_plugins: vec![Arc::new(Box::new(plugin) as Box<dyn AnalyzerPlugin>)],
+                    analyzer_plugins: vec![Arc::new(plugin) as Arc<dyn AnalyzerPlugin>],
                 },
                 plugin_path,
             ));
+        }
+
+        #[cfg(feature = "wasm_plugin")]
+        if plugin_path
+            .extension()
+            .is_some_and(|extension| extension == "wasm")
+        {
+            let plugins = AnalyzerWasmPlugin::load(&plugin_path, &plugin_name, options_json)?;
+            return Ok((
+                Self {
+                    analyzer_plugins: plugins
+                        .into_iter()
+                        .map(|p| Arc::new(p) as Arc<dyn AnalyzerPlugin>)
+                        .collect(),
+                },
+                plugin_path,
+            ));
+        }
+
+        // options_json and plugin_name are only used by the wasm_plugin feature.
+        #[cfg(not(feature = "wasm_plugin"))]
+        {
+            let _ = options_json;
+            let _ = plugin_name;
         }
 
         let manifest_path = plugin_path.join("biome-manifest.jsonc");
@@ -106,7 +145,27 @@ impl BiomePlugin {
                     if rule.as_os_str().as_encoded_bytes().ends_with(b".grit") {
                         let plugin =
                             AnalyzerGritPlugin::load(fs.as_ref(), &plugin_path.join(rule))?;
-                        Ok(Arc::new(Box::new(plugin) as Box<dyn AnalyzerPlugin>))
+                        Ok(vec![Arc::new(plugin) as Arc<dyn AnalyzerPlugin>])
+                    } else if rule.as_os_str().as_encoded_bytes().ends_with(b".wasm") {
+                        #[cfg(feature = "wasm_plugin")]
+                        {
+                            let plugins = AnalyzerWasmPlugin::load(
+                                &plugin_path.join(rule),
+                                &plugin_name,
+                                options_json.clone(),
+                            )?;
+                            Ok(plugins
+                                .into_iter()
+                                .map(|p| Arc::new(p) as Arc<dyn AnalyzerPlugin>)
+                                .collect::<Vec<_>>())
+                        }
+                        #[cfg(not(feature = "wasm_plugin"))]
+                        {
+                            Err(PluginDiagnostic::unsupported_rule_format(markup!(
+                                "WASM plugins require the wasm_plugin feature. Rule: "
+                                <Emphasis>{rule.to_string()}</Emphasis>
+                            )))
+                        }
                     } else {
                         Err(PluginDiagnostic::unsupported_rule_format(markup!(
                             "Unsupported rule format for plugin rule "
@@ -114,7 +173,10 @@ impl BiomePlugin {
                         )))
                     }
                 })
-                .collect::<Result<_, _>>()?,
+                .collect::<Result<Vec<_>, _>>()?
+                .into_iter()
+                .flatten()
+                .collect(),
         };
 
         Ok((plugin, plugin_path))
@@ -154,8 +216,8 @@ mod test {
         fs.insert("/my-plugin/rules/1.grit".into(), r#"`hello`"#);
 
         let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;
-        let (plugin, _) =
-            BiomePlugin::load(fs, "./my-plugin", Utf8Path::new("/")).expect("Couldn't load plugin");
+        let (plugin, _) = BiomePlugin::load(fs, "./my-plugin", Utf8Path::new("/"), None)
+            .expect("Couldn't load plugin");
         assert_eq!(plugin.analyzer_plugins.len(), 1);
     }
 
@@ -165,7 +227,7 @@ mod test {
         fs.insert("/my-plugin/rules/1.grit".into(), r#"`hello`"#);
 
         let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;
-        let error = BiomePlugin::load(fs, "./my-plugin", Utf8Path::new("/"))
+        let error = BiomePlugin::load(fs, "./my-plugin", Utf8Path::new("/"), None)
             .expect_err("Plugin loading should've failed");
         snap_diagnostic("load_plugin_without_manifest", error.into());
     }
@@ -182,7 +244,7 @@ mod test {
         );
 
         let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;
-        let error = BiomePlugin::load(fs, "./my-plugin", Utf8Path::new("/"))
+        let error = BiomePlugin::load(fs, "./my-plugin", Utf8Path::new("/"), None)
             .expect_err("Plugin loading should've failed");
         snap_diagnostic("load_plugin_with_wrong_version", error.into());
     }
@@ -199,7 +261,7 @@ mod test {
         );
 
         let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;
-        let error = BiomePlugin::load(fs, "./my-plugin", Utf8Path::new("/"))
+        let error = BiomePlugin::load(fs, "./my-plugin", Utf8Path::new("/"), None)
             .expect_err("Plugin loading should've failed");
         snap_diagnostic("load_plugin_with_wrong_rule_extension", error.into());
     }
@@ -210,7 +272,7 @@ mod test {
         fs.insert("/my-plugin.grit".into(), r#"`hello`"#);
 
         let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;
-        let (plugin, _) = BiomePlugin::load(fs, "./my-plugin.grit", Utf8Path::new("/"))
+        let (plugin, _) = BiomePlugin::load(fs, "./my-plugin.grit", Utf8Path::new("/"), None)
             .expect("Couldn't load plugin");
         assert_eq!(plugin.analyzer_plugins.len(), 1);
     }
@@ -225,7 +287,7 @@ mod test {
         );
 
         let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;
-        let (plugin, _) = BiomePlugin::load(fs, "./my-plugin.js", Utf8Path::new("/"))
+        let (plugin, _) = BiomePlugin::load(fs, "./my-plugin.js", Utf8Path::new("/"), None)
             .expect("Couldn't load plugin");
 
         assert_eq!(plugin.analyzer_plugins.len(), 1);

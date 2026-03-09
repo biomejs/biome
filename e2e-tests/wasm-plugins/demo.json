@@ -1,0 +1,7 @@
+{
+  "validKey": "value",
+  "another_key": "bad - snake_case when expecting camelCase",
+  "kebab-key": "bad",
+  "PascalKey": "bad",
+  "valid": "single word is fine"
+}

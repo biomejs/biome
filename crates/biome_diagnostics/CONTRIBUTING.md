@@ -138,3 +138,33 @@ add it to `crates/biome_diagnostics_categories/src/categories.rs`
 
 `#[derive(Diagnostic)]` also works in enums. This assumes every variant of
 the enum contains a type that is themselves a diagnostic.
+
+## Subcategories (Plugin Rule Names)
+
+The `Diagnostic` trait has an optional `subcategory()` method that allows
+diagnostics to extend their category name dynamically. This is used by the
+plugin system to display rule names in diagnostic headers.
+
+For example, a plugin diagnostic with `category!("plugin")` and subcategory
+`"booleanNaming"` will render as:
+
+```
+demo.js:9:7 plugin/booleanNaming ━━━━━━━━━━━━━━━
+```
+
+The `subcategory()` method returns `Option<&str>` and defaults to `None`.
+When present, the display layer concatenates `category/subcategory` in the
+header. Native built-in rules do not use this — their full path is encoded
+in the static category (e.g. `lint/style/useConst`).
+
+When implementing a diagnostic wrapper type that delegates to an inner
+diagnostic, remember to propagate `subcategory()`:
+
+```rust
+fn subcategory(&self) -> Option<&str> {
+    self.inner.as_diagnostic().subcategory()
+}
+```
+
+The wrapper types in `context.rs` (e.g. `FilePathDiagnostic`,
+`SeverityDiagnostic`) already do this.

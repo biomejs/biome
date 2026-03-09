@@ -103,6 +103,14 @@ pub trait Diagnostic: Debug {
         DiagnosticTags::empty()
     }
 
+    /// An optional subcategory string for diagnostics that need to extend
+    /// their category name dynamically. For example, plugin rules use this
+    /// to append the rule name (e.g. `booleanNaming`) to the category
+    /// `plugin`, resulting in `plugin/booleanNaming` in the diagnostic header.
+    fn subcategory(&self) -> Option<&str> {
+        None
+    }
+
     /// Similarly to the `source` method of the [std::error::Error] trait, this
     /// returns another diagnostic that's the logical "cause" for this issue.
     /// For instance, a "request failed" diagnostic may have been cause by a

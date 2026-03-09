@@ -1,0 +1,327 @@
+use std::cell::RefCell;
+use std::collections::HashMap;
+use std::str::FromStr;
+use std::sync::Arc;
+use std::sync::atomic::{AtomicU64, Ordering};
+
+use biome_analyze::{
+    Phases, PluginDiagnosticEntry, PluginEvaluationResult, PluginTargetLanguage, RuleCategory,
+    RuleDiagnostic, RuleDomain, ServiceBag,
+};
+use biome_console::markup;
+use biome_diagnostics::{MessageAndDescription, category};
+use biome_js_semantic::SemanticModel;
+use biome_module_graph::ModuleResolver;
+use biome_rowan::{AnySyntaxNode, RawSyntaxKind, TextRange};
+use biome_wasm_plugin::{WasmPluginEngine, WasmPluginSession};
+use camino::{Utf8Path, Utf8PathBuf};
+
+use crate::diagnostics::CompileDiagnostic;
+use crate::{AnalyzerPlugin, PluginDiagnostic};
+
+/// Global counter for assigning unique IDs to plugin instances.
+static NEXT_PLUGIN_ID: AtomicU64 = AtomicU64::new(0);
+
+/// Generation counter. Bumped on each `load_plugins()` call to invalidate
+/// stale thread-local sessions from previous plugin configurations.
+static GENERATION: AtomicU64 = AtomicU64::new(0);
+
+/// Bump the generation counter. Call this when plugins are reloaded (e.g. on
+/// config change) so that stale sessions are discarded on next access.
+pub fn bump_generation() {
+    GENERATION.fetch_add(1, Ordering::Relaxed);
+}
+
+thread_local! {
+    /// Per-thread WASM session cache. Each thread maintains its own sessions
+    /// so that parallel file analysis doesn't contend on a shared lock.
+    /// Entries store `(generation, session)` — stale generations are discarded.
+    static SESSIONS: RefCell<HashMap<u64, (u64, WasmPluginSession)>> = RefCell::new(HashMap::new());
+}
+
+/// An analyzer plugin backed by a WASM Component Model module.
+///
+/// A single WASM module may expose multiple rules. Each `AnalyzerWasmPlugin`
+/// represents one rule and shares the engine via `Arc<WasmPluginEngine>`.
+#[derive(Debug)]
+pub struct AnalyzerWasmPlugin {
+    engine: Arc<WasmPluginEngine>,
+    /// Unique ID for this plugin instance, used as the key in the thread-local
+    /// session cache.
+    plugin_id: u64,
+    rule_name: String,
+    /// Human-readable plugin name derived from the plugin path (e.g.
+    /// `"wirex-biome-plugin"`). Used to namespace the rule in diagnostics so
+    /// editors render it similarly to ESLint: `(biome pluginName/ruleName)`.
+    plugin_name: String,
+    target_language: PluginTargetLanguage,
+    query_kinds: Vec<RawSyntaxKind>,
+    /// JSON-serialized options string, passed to the guest `configure` export.
+    options_json: Option<String>,
+    /// Rule category parsed from metadata.
+    rule_category: RuleCategory,
+    /// Domains this rule belongs to.
+    rule_domains: Vec<RuleDomain>,
+    /// Deprecation reason, if the rule is deprecated.
+    rule_deprecated: Option<String>,
+    /// GitHub issue number for WIP rules.
+    rule_issue_number: Option<String>,
+    /// Whether this rule is recommended (defaults to true if not specified).
+    rule_recommended: bool,
+    /// Trigger strings for host-side pre-filtering. If non-empty, `evaluate`
+    /// skips the WASM `check` call when the file source doesn't contain any of
+    /// these strings (case-insensitive ASCII comparison).
+    source_triggers: Vec<String>,
+}
+
+impl AnalyzerWasmPlugin {
+    /// Load a WASM plugin and return one `AnalyzerWasmPlugin` per rule it exposes.
+    ///
+    /// `plugin_name` is a human-readable identifier for the plugin (typically
+    /// derived from the directory or file name) used to namespace diagnostics.
+    pub fn load(
+        path: &Utf8Path,
+        plugin_name: &str,
+        options_json: Option<String>,
+    ) -> Result<Vec<Self>, PluginDiagnostic> {
+        let bytes = std::fs::read(path.as_std_path()).map_err(|err| {
+            PluginDiagnostic::Compile(CompileDiagnostic {
+                message: MessageAndDescription::from(
+                    markup! {
+                        "Failed to read WASM plugin: "{err.to_string()}
+                    }
+                    .to_owned(),
+                ),
+                source: None,
+            })
+        })?;
+
+        let engine = Arc::new(WasmPluginEngine::new_cached(&bytes, path.as_std_path())?);
+        let metadata = engine.metadata()?;
+
+        let target_language = match metadata.language.as_str() {
+            "javascript" => PluginTargetLanguage::JavaScript,
+            "css" => PluginTargetLanguage::Css,
+            "json" => PluginTargetLanguage::Json,
+            other => {
+                return Err(PluginDiagnostic::Compile(CompileDiagnostic {
+                    message: MessageAndDescription::from(
+                        markup! {
+                            "WASM plugin declared unsupported target language: "
+                            <Emphasis>{other}</Emphasis>
+                        }
+                        .to_owned(),
+                    ),
+                    source: None,
+                }));
+            }
+        };
+
+        // Treat empty or trivial "{}" options as None to skip the per-node
+        // configure() WASM call when no real options are provided.
+        let options_json = options_json.filter(|s| !s.is_empty() && s != "{}");
+
+        let mut plugins = Vec::with_capacity(metadata.rule_names.len());
+
+        for rule_name in &metadata.rule_names {
+            let raw_kinds = metadata
+                .query_kinds_by_rule
+                .get(rule_name)
+                .cloned()
+                .unwrap_or_default();
+
+            let query_kinds = raw_kinds
+                .into_iter()
+                .map(|k| {
+                    u16::try_from(k).map(RawSyntaxKind).map_err(|_| {
+                        PluginDiagnostic::Compile(CompileDiagnostic {
+                            message: MessageAndDescription::from(
+                                markup! {
+                                    "WASM plugin query kind exceeds u16::MAX: "{k.to_string()}
+                                }
+                                .to_owned(),
+                            ),
+                            source: None,
+                        })
+                    })
+                })
+                .collect::<Result<_, _>>()?;
+
+            // Parse per-rule metadata fields.
+            let rule_meta = metadata.rule_metadata_by_rule.get(rule_name);
+
+            let rule_category = rule_meta
+                .and_then(|m| m.category.as_deref())
+                .and_then(|s| RuleCategory::from_str(s).ok())
+                .unwrap_or(RuleCategory::Lint);
+
+            let rule_domains: Vec<RuleDomain> = rule_meta
+                .map(|m| {
+                    m.domains
+                        .iter()
+                        .filter_map(|s| RuleDomain::from_str(s).ok())
+                        .collect()
+                })
+                .unwrap_or_default();
+
+            let rule_deprecated = rule_meta.and_then(|m| m.deprecated.clone());
+            let rule_issue_number = rule_meta.and_then(|m| m.issue_number.clone());
+
+            let rule_recommended = rule_meta.is_none_or(|m| m.recommended);
+
+            let source_triggers = metadata
+                .source_triggers_by_rule
+                .get(rule_name)
+                .cloned()
+                .unwrap_or_default();
+
+            plugins.push(Self {
+                engine: Arc::clone(&engine),
+                plugin_id: NEXT_PLUGIN_ID.fetch_add(1, Ordering::Relaxed),
+                rule_name: rule_name.clone(),
+                plugin_name: plugin_name.to_string(),
+                target_language,
+                query_kinds,
+                options_json: options_json.clone(),
+                rule_category,
+                rule_domains,
+                rule_deprecated,
+                rule_issue_number,
+                rule_recommended,
+                source_triggers,
+            });
+        }
+
+        Ok(plugins)
+    }
+}
+
+impl AnalyzerPlugin for AnalyzerWasmPlugin {
+    fn language(&self) -> PluginTargetLanguage {
+        self.target_language
+    }
+
+    fn phase(&self) -> Phases {
+        // JS plugins run in the Semantic phase to access the semantic model.
+        // CSS/JSON plugins stay in Syntax since they have no semantic model support yet.
+        match self.target_language {
+            PluginTargetLanguage::JavaScript => Phases::Semantic,
+            _ => Phases::Syntax,
+        }
+    }
+
+    fn query(&self) -> Vec<RawSyntaxKind> {
+        self.query_kinds.clone()
+    }
+
+    fn rule_name(&self) -> &str {
+        &self.rule_name
+    }
+
+    fn category(&self) -> RuleCategory {
+        self.rule_category
+    }
+
+    fn domains(&self) -> &[RuleDomain] {
+        &self.rule_domains
+    }
+
+    fn is_recommended(&self) -> bool {
+        self.rule_recommended
+    }
+
+    fn deprecated(&self) -> Option<&str> {
+        self.rule_deprecated.as_deref()
+    }
+
+    fn issue_number(&self) -> Option<&str> {
+        self.rule_issue_number.as_deref()
+    }
+
+    fn source_triggers(&self) -> &[String] {
+        &self.source_triggers
+    }
+
+    fn evaluate(
+        &self,
+        node: AnySyntaxNode,
+        path: Arc<Utf8PathBuf>,
+        services: &ServiceBag,
+    ) -> PluginEvaluationResult {
+        let file_path = path.as_str().to_string();
+        let qualified_name = format!("{}/{}", self.plugin_name, self.rule_name);
+
+        let current_gen = GENERATION.load(Ordering::Relaxed);
+
+        let result = SESSIONS.with(|sessions| {
+            let mut map = sessions.borrow_mut();
+
+            // Evict stale sessions from previous generations.
+            map.retain(|_, (g, _)| *g == current_gen);
+
+            // Check if we have a cached session for this plugin on this thread.
+            let needs_new_session = match map.get(&self.plugin_id) {
+                Some((_, session)) => session.file_path() != file_path,
+                None => true,
+            };
+
+            if needs_new_session {
+                let semantic_model = services.get_service::<SemanticModel>().cloned();
+                let module_resolver: Option<Arc<ModuleResolver>> = services
+                    .get_service::<Option<Arc<ModuleResolver>>>()
+                    .and_then(|opt| opt.as_ref().map(Arc::clone));
+
+                match self.engine.create_session(
+                    node,
+                    self.target_language,
+                    semantic_model,
+                    module_resolver,
+                    file_path,
+                ) {
+                    Ok(mut session) => {
+                        let result =
+                            session.check_current(&self.rule_name, self.options_json.as_deref());
+                        map.insert(self.plugin_id, (current_gen, session));
+                        result
+                    }
+                    Err(e) => Err(e),
+                }
+            } else {
+                let (_, session) = map.get_mut(&self.plugin_id).unwrap();
+                session.check_node(node, &self.rule_name, self.options_json.as_deref())
+            }
+        });
+
+        match result {
+            Ok(entries) => PluginEvaluationResult {
+                diagnostics: entries
+                    .into_iter()
+                    .map(|entry| PluginDiagnosticEntry {
+                        diagnostic: entry.diagnostic.subcategory(qualified_name.clone()),
+                        actions: entry.actions,
+                    })
+                    .collect(),
+            },
+            Err(error) => {
+                // Session is likely corrupted after an error — remove it.
+                SESSIONS.with(|sessions| {
+                    sessions.borrow_mut().remove(&self.plugin_id);
+                });
+                PluginEvaluationResult {
+                    diagnostics: vec![PluginDiagnosticEntry {
+                        diagnostic: RuleDiagnostic::new(
+                            category!("plugin"),
+                            None::<TextRange>,
+                            markup!(
+                                <Emphasis>{&self.rule_name}</Emphasis>
+                                " errored: "<Error>{error.to_string()}</Error>
+                            ),
+                        )
+                        .subcategory(qualified_name),
+                        actions: vec![],
+                    }],
+                }
+            }
+        }
+    }
+}

@@ -1488,7 +1488,8 @@ fn lint(params: LintParams) -> LintResults {
         range: None,
     };
 
-    let mut process_lint = ProcessLint::new(&params);
+    let mut process_lint = ProcessLint::new(&params)
+        .with_plugin_overrides(analyzer_options.plugin_rule_overrides_map());
 
     let source_type = params.language.to_html_file_source().unwrap_or_default();
     let html_services = HtmlAnalyzerServices {
@@ -1646,13 +1647,23 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             html_services,
             |signal| process_fix_all.process_signal(signal),
         );
-        let result = process_fix_all.process_action(action, |root| {
-            tree = match HtmlRoot::cast(root) {
-                Some(tree) => tree,
-                None => return None,
-            };
-            Some(tree.syntax().text_range_with_trivia().len().into())
-        })?;
+        let result = process_fix_all.process_action_with_reparse(
+            action,
+            |root| {
+                tree = match HtmlRoot::cast(root) {
+                    Some(tree) => tree,
+                    None => return None,
+                };
+                Some(tree.syntax().text_range_with_trivia().len().into())
+            },
+            |new_text| {
+                let parse_options = params
+                    .settings
+                    .parse_options::<HtmlLanguage>(params.biome_path, &params.document_file_source);
+                let new_parse = biome_html_parser::parse_html(new_text, parse_options);
+                Some(new_parse.tree().syntax().clone())
+            },
+        )?;
 
         if result.is_none() {
             return process_fix_all.finish(|| {

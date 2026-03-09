@@ -18,8 +18,8 @@ use crate::workspace::{
 };
 use biome_analyze::{
     AnalyzerAction, AnalyzerDiagnostic, AnalyzerOptions, AnalyzerPluginVec, AnalyzerSignal,
-    ControlFlow, GroupCategory, Never, Queryable, RegistryVisitor, Rule, RuleCategories,
-    RuleCategory, RuleError, RuleFilter, RuleGroup,
+    ControlFlow, FixKind, GroupCategory, Never, PluginRuleOverride, Queryable, RegistryVisitor,
+    Rule, RuleCategories, RuleCategory, RuleError, RuleFilter, RuleGroup,
 };
 use biome_configuration::Rules;
 use biome_configuration::analyzer::{AnalyzerSelector, RuleDomainValue};
@@ -577,6 +577,45 @@ pub struct DebugCapabilities {
     pub(crate) debug_semantic_model: Option<DebugSemanticModel>,
 }
 
+/// Populates plugin rule overrides on `analyzer_options` from the given
+/// plugin configurations. Each plugin's `rules` map is iterated to set
+/// per-rule disabled state, severity, and fix kind overrides.
+fn populate_plugin_overrides(
+    analyzer_options: &mut AnalyzerOptions,
+    plugins_config: &biome_plugin_loader::Plugins,
+) {
+    use biome_plugin_loader::PluginRulePlainConfiguration;
+
+    for plugin_config in plugins_config.iter() {
+        let Some(rules) = plugin_config.rules() else {
+            continue;
+        };
+        for (rule_name, rule_cfg) in rules {
+            let disabled = rule_cfg.is_disabled();
+            let severity = match rule_cfg.level() {
+                PluginRulePlainConfiguration::Off | PluginRulePlainConfiguration::On => None,
+                PluginRulePlainConfiguration::Warn => Some(Severity::Warning),
+                PluginRulePlainConfiguration::Info => Some(Severity::Information),
+                PluginRulePlainConfiguration::Error => Some(Severity::Error),
+            };
+            let fix_kind = rule_cfg.fix_kind_str().and_then(|s| match s {
+                "safe" => Some(FixKind::Safe),
+                "unsafe" => Some(FixKind::Unsafe),
+                "none" => Some(FixKind::None),
+                _ => None,
+            });
+            analyzer_options.push_plugin_rule_override(
+                rule_name.as_str(),
+                PluginRuleOverride {
+                    disabled,
+                    severity,
+                    fix_kind,
+                },
+            );
+        }
+    }
+}
+
 #[derive(Debug)]
 pub(crate) struct LintParams<'a> {
     pub(crate) parse: AnyParse,
@@ -630,6 +669,9 @@ pub(crate) struct ProcessLint<'a> {
     rules: Option<Cow<'a, Rules>>,
     pull_code_actions: bool,
     diagnostic_offset: Option<TextSize>,
+    /// Plugin rule overrides for severity mapping. Keyed by rule name.
+    /// `None` means no overrides are configured.
+    plugin_rule_overrides: Option<&'a rustc_hash::FxHashMap<Box<str>, PluginRuleOverride>>,
 }
 
 impl<'a> ProcessLint<'a> {
@@ -649,7 +691,19 @@ impl<'a> ProcessLint<'a> {
                 .as_linter_rules(params.path.as_path()),
             pull_code_actions: params.pull_code_actions,
             diagnostic_offset: params.diagnostic_offset,
+            plugin_rule_overrides: None,
         }
+    }
+
+    /// Sets plugin rule overrides for severity mapping of plugin diagnostics.
+    pub(crate) fn with_plugin_overrides(
+        mut self,
+        overrides: &'a rustc_hash::FxHashMap<Box<str>, PluginRuleOverride>,
+    ) -> Self {
+        if !overrides.is_empty() {
+            self.plugin_rule_overrides = Some(overrides);
+        }
+        self
     }
 
     pub(crate) fn process_signal<L: biome_rowan::Language>(
@@ -669,11 +723,23 @@ impl<'a> ProcessLint<'a> {
             // The configuration allows to change the severity of the diagnostics emitted by rules.
             let severity = diagnostic
                 .category()
-                .filter(|category| category.name().starts_with("lint/"))
-                .and_then(|category| {
-                    self.rules.as_ref().and_then(|rules| {
-                        rules.get_severity_from_category(category, diagnostic.severity())
-                    })
+                .and_then(|cat| {
+                    let name = cat.name();
+                    if name.starts_with("lint/") {
+                        // Native rule path: look up severity from the linter config.
+                        self.rules.as_ref().and_then(|rules| {
+                            rules.get_severity_from_category(cat, diagnostic.severity())
+                        })
+                    } else if name == "plugin" {
+                        // Plugin rule path: check per-rule overrides.
+                        self.plugin_rule_overrides.and_then(|overrides| {
+                            diagnostic.subcategory().and_then(|rule_name| {
+                                overrides.get(rule_name).and_then(|o| o.severity)
+                            })
+                        })
+                    } else {
+                        None
+                    }
                 })
                 .or_else(|| Some(diagnostic.severity()))
                 .unwrap_or(Severity::Warning);
@@ -815,17 +881,105 @@ impl<'a> ProcessFixAll<'a> {
     /// the length of the text that was replaced by the mutation.
     ///
     /// If `None` is returned, it means that there aren't any more mutations to apply.
-    pub(crate) fn process_action<T, L>(
+    /// Processes the next action from the analyzer.
+    ///
+    /// The `update_tree_return_text_len` closure receives a new root
+    /// `SyntaxNode` (from either a native `BatchMutation` commit or a plugin
+    /// text-edit reparse) and must update the caller's tree variable, returning
+    /// the new root's text length. The `reparse_from_text` closure is called
+    /// only for plugin text-edit actions: it receives the edited source text
+    /// and must reparse it into a `SyntaxNode<L>`.
+    ///
+    /// If `None` is returned, it means that there aren't any more mutations
+    /// to apply.
+    pub(crate) fn process_action_with_reparse<T, R, L>(
         &mut self,
         action: Option<AnalyzerAction<L>>,
-        mut update_tree_return_text_len: T,
+        update_tree_return_text_len: T,
+        reparse_from_text: R,
     ) -> Result<Option<()>, WorkspaceError>
     where
         T: FnMut(SyntaxNode<L>) -> Option<u32>,
+        R: FnMut(&str) -> Option<SyntaxNode<L>>,
+        L: biome_rowan::Language,
+    {
+        self.process_action_impl(action, update_tree_return_text_len, reparse_from_text)
+    }
+
+    /// Checks that the tree size hasn't grown excessively, returning a
+    /// `ConflictingRuleFixesError` if the growth guard trips.
+    fn check_growth(&mut self, curr_len: u32) -> Result<(), WorkspaceError> {
+        if !self.growth_guard.check(curr_len) {
+            let mut seen_rules = HashSet::new();
+            for action in self.actions.iter().rev().take(10) {
+                if let Some((group, rule)) = action.rule_name.as_ref() {
+                    seen_rules.insert((group.clone(), rule.clone()));
+                }
+            }
+            return Err(WorkspaceError::RuleError(
+                RuleError::ConflictingRuleFixesError {
+                    rules: seen_rules.into_iter().collect(),
+                },
+            ));
+        }
+        Ok(())
+    }
+
+    fn process_action_impl<T, R, L>(
+        &mut self,
+        action: Option<AnalyzerAction<L>>,
+        mut update_tree_return_text_len: T,
+        mut reparse_from_text: R,
+    ) -> Result<Option<()>, WorkspaceError>
+    where
+        T: FnMut(SyntaxNode<L>) -> Option<u32>,
+        R: FnMut(&str) -> Option<SyntaxNode<L>>,
         L: biome_rowan::Language,
     {
         match action {
             Some(action) => {
+                // Plugin text edit path: apply the edit to the current source
+                // text, reparse, then pass the new root through the standard
+                // update_tree_return_text_len closure.
+                if let Some((span, ref text_edit)) = action.text_edit {
+                    let old_text = action.mutation.root().text_with_trivia().to_string();
+                    // The TextEdit was built from the substring at `span`,
+                    // so we must call `new_string` on that same substring
+                    // and splice the result back into the full source text.
+                    let span_start = usize::from(span.start());
+                    let span_end = usize::from(span.end());
+                    let old_slice = &old_text[span_start..span_end];
+                    let new_slice = text_edit.new_string(old_slice);
+                    let mut new_text =
+                        String::with_capacity(old_text.len() - old_slice.len() + new_slice.len());
+                    new_text.push_str(&old_text[..span_start]);
+                    new_text.push_str(&new_slice);
+                    new_text.push_str(&old_text[span_end..]);
+
+                    let applied = if let Some(new_root) = reparse_from_text(&new_text) {
+                        if let Some(curr_len) = update_tree_return_text_len(new_root) {
+                            self.actions.push(FixAction {
+                                rule_name: action.rule_name.map(|(group, rule)| {
+                                    (Cow::Borrowed(group), Cow::Borrowed(rule))
+                                }),
+                                range: span,
+                            });
+                            self.check_growth(curr_len)?;
+                            true
+                        } else {
+                            false
+                        }
+                    } else {
+                        false
+                    };
+
+                    // If the edit couldn't be applied (reparse or cast
+                    // failed), return None to break the fix-all loop rather
+                    // than retrying the same unapplied edit forever.
+                    return Ok(applied.then_some(()));
+                }
+
+                // Native mutation path.
                 if let (root, Some((range, _))) =
                     action.mutation.commit_with_text_range_and_edit(true)
                 {
@@ -845,26 +999,7 @@ impl<'a> ProcessFixAll<'a> {
                             .map(|(group, rule)| (Cow::Borrowed(group), Cow::Borrowed(rule))),
                         range,
                     });
-
-                    // Check for runaway edit growth
-                    if !self.growth_guard.check(curr_len) {
-                        // In order to provide a useful diagnostic, we want to flag the rules that caused the conflict.
-                        // We can do this by inspecting the last few fixes that were applied.
-                        // We limit it to the last 10 fixes. If there is a chain of conflicting fixes longer than that, something is **really** fucked up.
-
-                        let mut seen_rules = HashSet::new();
-                        for action in self.actions.iter().rev().take(10) {
-                            if let Some((group, rule)) = action.rule_name.as_ref() {
-                                seen_rules.insert((group.clone(), rule.clone()));
-                            }
-                        }
-
-                        return Err(WorkspaceError::RuleError(
-                            RuleError::ConflictingRuleFixesError {
-                                rules: seen_rules.into_iter().collect(),
-                            },
-                        ));
-                    };
+                    self.check_growth(curr_len)?;
                 };
 
                 Ok(Some(()))
@@ -2017,6 +2152,12 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
         let (assists_enabled_rules, assists_disabled_rules) = assist.finish();
         enabled_rules.extend(assists_enabled_rules);
         disabled_rules.extend(assists_disabled_rules);
+
+        // Populate plugin rule overrides from the plugin configuration.
+        if let Some(path) = self.path {
+            let plugins_config = self.settings.get_plugins_for_path(path);
+            populate_plugin_overrides(&mut analyzer_options, &plugins_config);
+        }
 
         (enabled_rules, disabled_rules, analyzer_options)
     }

@@ -1,5 +1,5 @@
 use crate::{AnalyzerPlugin, PluginDiagnostic};
-use biome_analyze::{PluginTargetLanguage, RuleDiagnostic};
+use biome_analyze::{PluginEvaluationResult, PluginTargetLanguage, RuleDiagnostic, ServiceBag};
 use biome_console::markup;
 use biome_css_syntax::{CssRoot, CssSyntaxNode};
 use biome_diagnostics::{Severity, category};
@@ -22,6 +22,8 @@ use std::{borrow::Cow, fmt::Debug, str::FromStr, sync::Arc};
 #[derive(Debug)]
 pub struct AnalyzerGritPlugin {
     grit_query: GritQuery,
+    /// Fallback name derived from the file stem when the query has no name.
+    fallback_name: String,
 }
 
 impl AnalyzerGritPlugin {
@@ -38,12 +40,23 @@ impl AnalyzerGritPlugin {
             ])
             .with_path(path);
         let grit_query = compile_pattern_with_options(&source, options)?;
+        let fallback_name = path.file_stem().unwrap_or("anonymous").to_string();
 
-        Ok(Self { grit_query })
+        Ok(Self {
+            grit_query,
+            fallback_name,
+        })
     }
 }
 
 impl AnalyzerPlugin for AnalyzerGritPlugin {
+    fn rule_name(&self) -> &str {
+        self.grit_query
+            .name
+            .as_deref()
+            .unwrap_or(&self.fallback_name)
+    }
+
     fn language(&self) -> PluginTargetLanguage {
         match &self.grit_query.language {
             GritTargetLanguage::JsTargetLanguage(_) => PluginTargetLanguage::JavaScript,
@@ -68,8 +81,13 @@ impl AnalyzerPlugin for AnalyzerGritPlugin {
         }
     }
 
-    fn evaluate(&self, node: AnySyntaxNode, path: Arc<Utf8PathBuf>) -> Vec<RuleDiagnostic> {
-        let name: &str = self.grit_query.name.as_deref().unwrap_or("anonymous");
+    fn evaluate(
+        &self,
+        node: AnySyntaxNode,
+        path: Arc<Utf8PathBuf>,
+        _services: &ServiceBag,
+    ) -> PluginEvaluationResult {
+        let name: &str = self.rule_name();
 
         let root = match self.language() {
             PluginTargetLanguage::JavaScript => node
@@ -107,24 +125,30 @@ impl AnalyzerPlugin for AnalyzerGritPlugin {
                     .iter()
                     .any(|diagnostic| diagnostic.span().is_none())
                 {
-                    diagnostics.push(RuleDiagnostic::new(
-                        category!("plugin"),
-                        None::<TextRange>,
-                        markup!(
-                            "Plugin "<Emphasis>{name}</Emphasis>" reported one or more diagnostics, "
-                            "but it didn't specify a valid "<Emphasis>"span"</Emphasis>". "
-                            "Diagnostics have been shown without context."
-                        ),
-                    ));
+                    diagnostics.push(
+                        RuleDiagnostic::new(
+                            category!("plugin"),
+                            None::<TextRange>,
+                            markup!(
+                                "Plugin "<Emphasis>{name}</Emphasis>" reported one or more diagnostics, "
+                                "but it didn't specify a valid "<Emphasis>"span"</Emphasis>". "
+                                "Diagnostics have been shown without context."
+                            ),
+                        )
+                        .subcategory(name.to_string()),
+                    );
                 }
 
-                diagnostics
+                PluginEvaluationResult::from_diagnostics(diagnostics)
             }
-            Err(error) => vec![RuleDiagnostic::new(
-                category!("plugin"),
-                None::<TextRange>,
-                markup!(<Emphasis>{name}</Emphasis>" errored: "<Error>{error.to_string()}</Error>),
-            )],
+            Err(error) => PluginEvaluationResult::from_diagnostics(vec![
+                RuleDiagnostic::new(
+                    category!("plugin"),
+                    None::<TextRange>,
+                    markup!(<Emphasis>{name}</Emphasis>" errored: "<Error>{error.to_string()}</Error>),
+                )
+                .subcategory(name.to_string()),
+            ]),
         }
     }
 }

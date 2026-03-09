@@ -6859,7 +6859,54 @@
 			},
 			"additionalProperties": false
 		},
-		"PluginConfiguration": { "anyOf": [{ "type": "string" }] },
+		"PluginConfiguration": {
+			"anyOf": [
+				{ "type": "string" },
+				{ "$ref": "#/$defs/PluginPathWithOptions" }
+			]
+		},
+		"PluginPathWithOptions": {
+			"description": "A plugin path paired with a JSON string of configuration options.\n\nExample biome.json:\n```json\n{ \"path\": \"./my-plugin.wasm\", \"options\": { \"maxLength\": 100 }, \"rules\": { \"noConsoleLog\": \"off\" } }\n```\n\nThe `options` field is stored as a raw JSON string because plugin options\nare untyped — the guest receives them via the `configure(options-json)` export.",
+			"type": "object",
+			"properties": {
+				"options": {
+					"description": "Raw JSON string representing the plugin options.",
+					"type": "string"
+				},
+				"path": { "type": "string" },
+				"rules": {
+					"description": "Per-rule configuration overrides (severity, fix kind, enable/disable).",
+					"type": ["object", "null"],
+					"additionalProperties": { "$ref": "#/$defs/PluginRuleConfiguration" }
+				}
+			},
+			"additionalProperties": false,
+			"required": ["path", "options"]
+		},
+		"PluginRuleConfiguration": {
+			"description": "Per-rule configuration for a plugin rule.\n\nCan be a short string (`\"off\"`, `\"warn\"`, `\"error\"`) or an object\nwith `level` and optional `fix` fields.",
+			"anyOf": [
+				{ "$ref": "#/$defs/PluginRulePlainConfiguration" },
+				{ "$ref": "#/$defs/PluginRuleWithOptions" }
+			]
+		},
+		"PluginRulePlainConfiguration": {
+			"description": "Short-form severity level for a plugin rule.",
+			"type": "string",
+			"enum": ["off", "on", "info", "warn", "error"]
+		},
+		"PluginRuleWithOptions": {
+			"description": "Object form with a severity level and an optional fix kind.",
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Fix kind: `\"safe\"`, `\"unsafe\"`, or `\"none\"`.",
+					"type": ["string", "null"]
+				},
+				"level": { "$ref": "#/$defs/PluginRulePlainConfiguration" }
+			},
+			"required": ["level"]
+		},
 		"Plugins": {
 			"type": "array",
 			"items": { "$ref": "#/$defs/PluginConfiguration" }

@@ -1,28 +1,106 @@
+use biome_diagnostics::Applicability;
+use biome_rowan::TextRange;
 use camino::{Utf8Path, Utf8PathBuf};
 use rustc_hash::{FxHashMap, FxHashSet};
 use std::hash::Hash;
 use std::{fmt::Debug, sync::Arc};
 
-use biome_rowan::{AnySyntaxNode, Language, RawSyntaxKind, SyntaxKind, SyntaxNode, WalkEvent};
+use biome_rowan::{
+    AnySyntaxNode, AstNode, Language, RawSyntaxKind, SyntaxKind, SyntaxNode, WalkEvent,
+};
 
 use crate::matcher::SignalRuleKey;
+use crate::options::PluginDomainFilter;
+use crate::registry::Phases;
+use crate::rule::RuleDomain;
+use crate::services::ServiceBag;
 use crate::{
     PluginSignal, RuleCategory, RuleDiagnostic, SignalEntry, Visitor, VisitorContext, profiling,
 };
 
+/// A single text replacement edit from a plugin code action.
+#[derive(Debug, Clone)]
+pub struct PluginTextEdit {
+    pub range: TextRange,
+    pub replacement: String,
+}
+
+/// A code action (fix) produced by a plugin rule.
+#[derive(Debug, Clone)]
+pub struct PluginCodeAction {
+    pub message: String,
+    /// How safe it is to automatically apply this action.
+    pub applicability: Applicability,
+    pub edits: Vec<PluginTextEdit>,
+}
+
+/// A diagnostic paired with code actions from a plugin.
+#[derive(Debug)]
+pub struct PluginDiagnosticEntry {
+    pub diagnostic: RuleDiagnostic,
+    pub actions: Vec<PluginCodeAction>,
+}
+
+/// Result returned by [`AnalyzerPlugin::evaluate`].
+#[derive(Debug, Default)]
+pub struct PluginEvaluationResult {
+    pub diagnostics: Vec<PluginDiagnosticEntry>,
+}
+
+impl PluginEvaluationResult {
+    /// Create a result with diagnostics only (no code actions).
+    pub fn from_diagnostics(diagnostics: Vec<RuleDiagnostic>) -> Self {
+        Self {
+            diagnostics: diagnostics
+                .into_iter()
+                .map(|d| PluginDiagnosticEntry {
+                    diagnostic: d,
+                    actions: vec![],
+                })
+                .collect(),
+        }
+    }
+}
+
 /// Slice of analyzer plugins that can be cheaply cloned.
-pub type AnalyzerPluginSlice<'a> = &'a [Arc<Box<dyn AnalyzerPlugin>>];
+pub type AnalyzerPluginSlice<'a> = &'a [Arc<dyn AnalyzerPlugin>];
 
 /// Vector of analyzer plugins that can be cheaply cloned.
-pub type AnalyzerPluginVec = Vec<Arc<Box<dyn AnalyzerPlugin>>>;
+pub type AnalyzerPluginVec = Vec<Arc<dyn AnalyzerPlugin>>;
 
 /// Definition of an analyzer plugin.
+///
+/// Implemented by WASM, GritQL, and JavaScript plugin loaders. Each plugin
+/// exposes one or more lint rules that participate in the analyzer pipeline
+/// alongside native rules.
+///
+/// The analyzer calls [`query`](Self::query) to learn which syntax node kinds
+/// the plugin cares about, then invokes [`evaluate`](Self::evaluate) for each
+/// matching node during traversal. Diagnostics returned by `evaluate` are
+/// displayed with the category `plugin/<rule_name>`.
 pub trait AnalyzerPlugin: Debug + Send + Sync {
+    /// The target language this plugin analyzes (JavaScript, CSS, or JSON).
     fn language(&self) -> PluginTargetLanguage;
 
+    /// The analysis phase this plugin runs in.
+    /// Override to [`Phases::Semantic`] to access the semantic model via services.
+    fn phase(&self) -> Phases {
+        Phases::Syntax
+    }
+
+    /// Syntax node kinds this plugin wants to inspect, as raw `u32` values.
+    /// The analyzer only calls [`evaluate`](Self::evaluate) for nodes whose
+    /// kind is in this list.
     fn query(&self) -> Vec<RawSyntaxKind>;
 
-    fn evaluate(&self, node: AnySyntaxNode, path: Arc<Utf8PathBuf>) -> Vec<RuleDiagnostic>;
+    /// Evaluate a matched syntax node and return diagnostics with optional
+    /// code actions. Called once per matched node during tree traversal.
+    fn evaluate(
+        &self,
+        node: AnySyntaxNode,
+        path: Arc<Utf8PathBuf>,
+        services: &ServiceBag,
+    ) -> PluginEvaluationResult;
 
     /// Returns true if this plugin should run on the given file path.
     ///
@@ -30,6 +108,48 @@ pub trait AnalyzerPlugin: Debug + Send + Sync {
     /// in a companion PR (#9171) via the `includes` plugin option.
     fn applies_to_file(&self, _path: &Utf8Path) -> bool {
         true
+    }
+
+    /// The rule name used for diagnostic headers, suppression comments, and
+    /// per-rule configuration overrides. For example, `"booleanNaming"` results
+    /// in the header `plugin/booleanNaming` and suppression comment
+    /// `biome-ignore lint/plugin/booleanNaming`.
+    fn rule_name(&self) -> &str;
+
+    /// The rule category (lint, action, syntax, transformation). Defaults to Lint.
+    fn category(&self) -> RuleCategory {
+        RuleCategory::Lint
+    }
+
+    /// Domains this rule belongs to (e.g. React, Test). When a rule has
+    /// domains, it is only enabled when the user opts into those domains.
+    /// Defaults to empty (always enabled if recommended).
+    fn domains(&self) -> &[RuleDomain] {
+        &[]
+    }
+
+    /// Whether this rule is recommended (enabled by default). Defaults to `true`.
+    fn is_recommended(&self) -> bool {
+        true
+    }
+
+    /// If the rule is deprecated, returns the deprecation reason string.
+    fn deprecated(&self) -> Option<&str> {
+        None
+    }
+
+    /// GitHub issue number for rules still under development. When set,
+    /// a footnote with a link to the issue is added to diagnostics.
+    fn issue_number(&self) -> Option<&str> {
+        None
+    }
+
+    /// Trigger strings for host-side pre-filtering. If non-empty, the host
+    /// skips calling [`evaluate`](Self::evaluate) when the file source text
+    /// doesn't contain any of these strings (case-insensitive ASCII).
+    /// Return an empty slice to always be called (the default).
+    fn source_triggers(&self) -> &[String] {
+        &[]
     }
 }
 
@@ -40,117 +160,13 @@ pub enum PluginTargetLanguage {
     Json,
 }
 
-/// A syntax visitor that queries nodes and evaluates in a plugin.
-/// Based on [`crate::SyntaxVisitor`].
-pub struct PluginVisitor<L: Language> {
-    query: FxHashSet<L::Kind>,
-    plugin: Arc<Box<dyn AnalyzerPlugin>>,
-
-    /// When set, all nodes in this subtree are skipped until we leave it.
-    /// Used to skip subtrees that fall entirely outside the analysis range
-    /// (see the `ctx.range` check in `visit`).
-    skip_subtree: Option<SyntaxNode<L>>,
-}
-
-impl<L> PluginVisitor<L>
-where
-    L: Language + 'static,
-    L::Kind: Eq + Hash,
-{
-    /// Creates a syntax visitor from the plugin.
-    ///
-    /// # Safety
-    /// Do not forget to check the plugin is targeted for the language `L`.
-    pub unsafe fn new_unchecked(plugin: Arc<Box<dyn AnalyzerPlugin>>) -> Self {
-        let query = plugin.query().into_iter().map(L::Kind::from_raw).collect();
-
-        Self {
-            query,
-            plugin,
-            skip_subtree: None,
-        }
-    }
-}
-
-impl<L> Visitor for PluginVisitor<L>
-where
-    L: Language + 'static,
-    L::Kind: Eq + Hash,
-{
-    type Language = L;
-
-    fn visit(
-        &mut self,
-        event: &WalkEvent<SyntaxNode<Self::Language>>,
-        ctx: VisitorContext<Self::Language>,
-    ) {
-        let node = match event {
-            WalkEvent::Enter(node) => node,
-            WalkEvent::Leave(node) => {
-                if let Some(skip_subtree) = &self.skip_subtree
-                    && skip_subtree == node
-                {
-                    self.skip_subtree = None;
-                }
-
-                return;
-            }
-        };
-
-        if self.skip_subtree.is_some() {
-            return;
-        }
-
-        if let Some(range) = ctx.range
-            && node.text_range_with_trivia().ordering(range).is_ne()
-        {
-            self.skip_subtree = Some(node.clone());
-            return;
-        }
-
-        // TODO: Integrate to [`VisitorContext::match_query`]?
-        let kind = node.kind();
-        if !self.query.contains(&kind) {
-            return;
-        }
-
-        if !self.plugin.applies_to_file(&ctx.options.file_path) {
-            return;
-        }
-
-        let rule_timer = profiling::start_plugin_rule("plugin");
-        let diagnostics = self
-            .plugin
-            .evaluate(node.clone().into(), ctx.options.file_path.clone());
-        rule_timer.stop();
-
-        let signals = diagnostics.into_iter().map(|diagnostic| {
-            let name = diagnostic
-                .subcategory
-                .clone()
-                .unwrap_or_else(|| "anonymous".into());
-
-            SignalEntry {
-                text_range: diagnostic.span().unwrap_or_default(),
-                signal: Box::new(PluginSignal::<L>::new(diagnostic)),
-                rule: SignalRuleKey::Plugin(name.into()),
-                category: RuleCategory::Lint,
-                instances: Default::default(),
-            }
-        });
-
-        ctx.signal_queue.extend(signals);
-    }
-}
-
-/// A batched syntax visitor that evaluates multiple plugins in a single visitor.
+/// Syntax visitor that evaluates analyzer plugins during tree traversal.
 ///
-/// Instead of registering N separate `PluginVisitor` instances (one per plugin),
-/// this holds all plugins together and dispatches using a kind-to-plugin lookup
-/// map. This reduces visitor-dispatch overhead and enables O(1) kind matching
-/// per node instead of iterating all plugins.
+/// Holds all plugins together and dispatches using a kind-to-plugin lookup
+/// map. This enables O(1) kind matching per node instead of iterating all
+/// plugins.
 pub struct BatchPluginVisitor<L: Language> {
-    plugins: Vec<Arc<Box<dyn AnalyzerPlugin>>>,
+    plugins: Vec<Arc<dyn AnalyzerPlugin>>,
 
     /// Maps each syntax kind to the indices of plugins that query for it.
     kind_to_plugins: FxHashMap<L::Kind, Vec<usize>>,
@@ -163,6 +179,11 @@ pub struct BatchPluginVisitor<L: Language> {
     /// Cached per-plugin results of `applies_to_file`. Populated lazily on
     /// first `WalkEvent::Enter` — the file path is constant for the entire walk.
     applicable: Option<Vec<bool>>,
+
+    /// Cached per-plugin results of source-trigger pre-filtering. `true` means
+    /// the file source contains at least one trigger string (or the plugin has
+    /// no triggers). Populated lazily on first `WalkEvent::Enter`.
+    trigger_matched: Option<Vec<bool>>,
 }
 
 impl<L> BatchPluginVisitor<L>
@@ -196,6 +217,7 @@ where
             kind_to_plugins,
             skip_subtree: None,
             applicable: None,
+            trigger_matched: None,
         }
     }
 }
@@ -249,30 +271,131 @@ where
                 .collect()
         });
 
+        // Lazily compute source-trigger pre-filter results for each plugin.
+        // Uses the file root's source text for a one-time check per file.
+        let trigger_matched = self.trigger_matched.get_or_insert_with(|| {
+            // Navigate to the root node to get the full file source text.
+            let root_node = {
+                let mut n = node.clone();
+                while let Some(parent) = n.parent() {
+                    n = parent;
+                }
+                n
+            };
+            let source = root_node.text_with_trivia().to_string();
+            self.plugins
+                .iter()
+                .map(|p| {
+                    let triggers = p.source_triggers();
+                    if triggers.is_empty() {
+                        return true; // no triggers = always run
+                    }
+                    triggers.iter().any(|t| {
+                        let t_bytes = t.as_bytes();
+                        source
+                            .as_bytes()
+                            .windows(t_bytes.len())
+                            .any(|w| w.eq_ignore_ascii_case(t_bytes))
+                    })
+                })
+                .collect()
+        });
+
         for &idx in plugin_indices {
-            if !applicable[idx] {
+            if !applicable[idx] || !trigger_matched[idx] {
                 continue;
             }
 
             let plugin = &self.plugins[idx];
+
+            // Per-rule disable check via configuration overrides.
+            let rule_name = plugin.rule_name();
+            if let Some(ovr) = ctx.options.plugin_rule_override(rule_name)
+                && ovr.disabled
+            {
+                continue;
+            }
+
+            // Domain filtering: skip plugin if its domain is disabled or
+            // restricted to recommended-only and the plugin is not recommended.
+            let plugin_domains = plugin.domains();
+            if !plugin_domains.is_empty() {
+                let domain_cfg = ctx.options.linter_domains();
+                if !domain_cfg.is_empty() {
+                    let mut skip = false;
+                    for domain in plugin_domains {
+                        match domain_cfg.get(domain) {
+                            Some(&PluginDomainFilter::Disabled) => {
+                                skip = true;
+                                break;
+                            }
+                            Some(&PluginDomainFilter::Recommended) if !plugin.is_recommended() => {
+                                skip = true;
+                                break;
+                            }
+                            _ => {}
+                        }
+                    }
+                    if skip {
+                        continue;
+                    }
+                }
+            }
+
             let rule_timer = profiling::start_plugin_rule("plugin");
-            let diagnostics = plugin.evaluate(node.clone().into(), ctx.options.file_path.clone());
+            let result = plugin.evaluate(
+                node.clone().into(),
+                ctx.options.file_path.clone(),
+                ctx.services,
+            );
             rule_timer.stop();
 
-            let signals = diagnostics.into_iter().map(|diagnostic| {
-                let name = diagnostic
-                    .subcategory
-                    .clone()
-                    .unwrap_or_else(|| "anonymous".into());
+            if result.diagnostics.is_empty() {
+                continue;
+            }
 
-                SignalEntry {
-                    text_range: diagnostic.span().unwrap_or_default(),
-                    signal: Box::new(PluginSignal::<L>::new(diagnostic)),
-                    rule: SignalRuleKey::Plugin(name.into()),
-                    category: RuleCategory::Lint,
+            // Obtain the full source text from the file root — needed for
+            // constructing TextEdit diffs for plugin code actions.
+            let has_any_action = result.diagnostics.iter().any(|e| !e.actions.is_empty());
+            let source_text: Arc<str> = if has_any_action {
+                ctx.root.syntax().text_with_trivia().to_string().into()
+            } else {
+                Arc::from("")
+            };
+
+            let root = ctx.root;
+            let suppression_action = ctx.suppression_action;
+            let options = ctx.options;
+            let plugin_category = plugin.category();
+            let plugin_deprecated: Option<Arc<str>> = plugin.deprecated().map(Arc::from);
+            let plugin_issue_number: Option<Arc<str>> = plugin.issue_number().map(Arc::from);
+
+            // Compute a stable rule id once — used for SignalRuleKey,
+            // suppression text, and fixKind lookups so they never drift apart.
+            let canonical_id: Arc<str> = Arc::from(rule_name);
+
+            let signals = result
+                .diagnostics
+                .into_iter()
+                .map(move |entry| SignalEntry {
+                    text_range: entry.diagnostic.span().unwrap_or_default(),
+                    signal: Box::new(
+                        PluginSignal::<L>::new(
+                            entry.diagnostic,
+                            entry.actions,
+                            Arc::clone(&source_text),
+                            root,
+                            suppression_action,
+                            options,
+                        )
+                        .with_category(plugin_category)
+                        .with_deprecated(plugin_deprecated.clone())
+                        .with_issue_number(plugin_issue_number.clone()),
+                    ),
+                    rule: SignalRuleKey::Plugin(Box::from(&*canonical_id)),
+                    category: plugin_category,
                     instances: Default::default(),
-                }
-            });
+                });
 
             ctx.signal_queue.extend(signals);
         }

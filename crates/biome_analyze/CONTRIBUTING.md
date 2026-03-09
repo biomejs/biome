@@ -1595,6 +1595,78 @@ Stage and commit your changes:
 
 Then push your changes to your forked repository and open a pull request.
 
+### Sidenote: WASM Plugin Rules
+
+In addition to native rules implemented in Rust, Biome supports external lint
+rules written as WASM Component Model plugins. These are loaded at runtime and
+participate in the same analyzer pipeline as built-in rules.
+
+#### How Plugin Rules Differ from Native Rules
+
+| Aspect | Native rules | Plugin rules |
+|---|---|---|
+| Implementation | Rust, compiled into Biome | Rust (or any language) → WASM, loaded at runtime |
+| Category | Static (e.g. `lint/style/useConst`) | `plugin` + subcategory (e.g. `plugin/booleanNaming`) |
+| Suppression format | `biome-ignore lint/style/useConst` | `biome-ignore lint/plugin/booleanNaming` |
+| Configuration | `linter.rules.<group>.<rule>` | `plugins` array in `biome.json` |
+| Languages | One rule type per language crate | One plugin can target JS, CSS, or JSON |
+
+#### Plugin Diagnostic Headers
+
+Plugin diagnostics use the `subcategory` field on `RuleDiagnostic` to display
+the rule name in diagnostic headers. The WASM engine sets `category!("plugin")`
+and calls `.subcategory(rule_name)`, resulting in headers like:
+
+```
+demo.js:9:7 plugin/booleanNaming ━━━━━━━━━━━━━━━
+```
+
+#### Suppression Comments
+
+Plugin rules are suppressed using the `lint/plugin` prefix:
+
+```js
+// biome-ignore lint/plugin/booleanNaming: this is intentional
+const isActive = x == 1;
+```
+
+The suppression system parses `lint/plugin/ruleName` into
+`category!("lint/plugin")` + subcategory `"ruleName"`, which is separate from
+the diagnostic's own `category!("plugin")`.
+
+#### Multi-Language Support
+
+WASM plugins declare their target language via `target-language()`:
+- `"javascript"` — access to JS syntax kinds, semantic model, and type inference
+- `"css"` — access to CSS syntax kinds
+- `"json"` — access to JSON syntax kinds
+
+Each language has a corresponding syntax kind module in `biome_plugin_sdk`
+(`js_kinds`, `css_kinds`, `json_kinds`).
+
+#### Configuration in biome.json
+
+Plugins are configured in the `plugins` array. Each entry can be a simple path
+or an object with options:
+
+```json
+{
+  "plugins": [
+    "./plugins/simple-rule.wasm",
+    {
+      "path": "./plugins/configurable-rule.wasm",
+      "options": { "convention": "camelCase" },
+      "rules": {
+        "myRule": "warn"
+      }
+    }
+  ]
+}
+```
+
+See `crates/biome_plugin_sdk` for the guest SDK documentation and
+`e2e-tests/wasm-plugins/` for working examples.
+
 ### Sidenote: Deprecating a rule
 
 There are occasions when a rule must be deprecated to avoid breaking changes.

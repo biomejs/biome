@@ -1,0 +1,14 @@
+{
+    "$schema": "../../packages/@biomejs/biome/configuration_schema.json",
+    "plugins": [
+        "plugins/boolean-naming/target/wasm32-wasip2/release/boolean_naming.wasm",
+        "plugins/css-style-conventions/target/wasm32-wasip2/release/css_style_conventions.wasm",
+        "plugins/json-naming/target/wasm32-wasip2/release/json_naming.wasm"
+    ],
+    "linter": {
+        "enabled": true,
+        "rules": {
+            "recommended": false
+        }
+    }
+}

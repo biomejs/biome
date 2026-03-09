@@ -3,6 +3,11 @@ resolver = "2"
 # Use the newer version of the cargo resolver
 # https://doc.rust-lang.org/cargo/reference/resolver.html#resolver-versions
 members  = ["crates/*", "xtask/codegen", "xtask/coverage", "xtask/glue", "xtask/rules_check"]
+exclude  = [
+  "e2e-tests/wasm-plugins/plugins/boolean-naming",
+  "e2e-tests/wasm-plugins/plugins/css-style-conventions",
+  "e2e-tests/wasm-plugins/plugins/json-naming"
+]
 
 [workspace.package]
 authors    = ["Biome Developers and Contributors"]
@@ -89,6 +94,8 @@ biome_module_graph           = { path = "./crates/biome_module_graph", version =
 biome_package                = { path = "./crates/biome_package", version = "0.5.7" }
 biome_parser                 = { path = "./crates/biome_parser", version = "0.5.7" }
 biome_plugin_loader          = { path = "./crates/biome_plugin_loader", version = "0.0.1" }
+biome_plugin_sdk             = { path = "./crates/biome_plugin_sdk" }
+biome_plugin_sdk_macros      = { path = "./crates/biome_plugin_sdk_macros" }
 biome_project_layout         = { path = "./crates/biome_project_layout", version = "0.0.1" }
 biome_resolver               = { path = "./crates/biome_resolver", version = "0.1.0" }
 biome_rowan                  = { path = "./crates/biome_rowan", version = "0.5.7" }
@@ -105,6 +112,7 @@ biome_text_edit              = { path = "./crates/biome_text_edit", version = "0
 biome_text_size              = { path = "./crates/biome_text_size", version = "0.5.7" }
 biome_ungrammar              = { path = "./crates/biome_ungrammar", version = "0.3.1" }
 biome_unicode_table          = { path = "./crates/biome_unicode_table", version = "0.5.7" }
+biome_wasm_plugin            = { path = "./crates/biome_wasm_plugin", version = "0.0.1" }
 biome_yaml_factory           = { path = "./crates/biome_yaml_factory", version = "0.0.1" }
 biome_yaml_parser            = { path = "./crates/biome_yaml_parser", version = "0.0.1" }
 biome_yaml_syntax            = { path = "./crates/biome_yaml_syntax", version = "0.0.1" }
@@ -166,8 +174,15 @@ ureq                         = "3.1.4"
 url                          = "2.5.8"
 uuid                         = "1.18.1"
 walkdir                      = "2.5.0"
+wasmtime                     = { version = "42", default-features = false, features = [
+  "component-model",
+  "cranelift",
+  "std"
+] }
+wasmtime-wasi                = { version = "42", default-features = false }
 web-time                     = "1.1.0"
 windows                      = "0.62.2"
+wit-bindgen                  = "0.53"
 xtask_codegen                = { path = "xtask/codegen" }
 xtask_coverage               = { path = "xtask/coverage" }
 xtask_glue                   = { path = "xtask/glue" }

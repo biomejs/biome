@@ -1,9 +1,8 @@
 use crate::categories::{ActionCategory, RuleCategory};
 use crate::context::RuleContext;
 use crate::registry::{RegistryVisitor, RuleLanguage, RuleSuppressions};
-use crate::{
-    Phase, Phases, Queryable, SourceActionKind, SuppressionAction, SuppressionCommentEmitterPayload,
-};
+use crate::suppression_action::{make_inline_suppression, make_top_level_suppression};
+use crate::{Phase, Phases, Queryable, SourceActionKind, SuppressionAction};
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{MarkupBuf, markup};
 use biome_diagnostics::location::AsSpan;
@@ -12,7 +11,7 @@ use biome_diagnostics::{
     Visit,
 };
 use biome_diagnostics::{Applicability, Severity};
-use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Language, TextRange, TextSize};
+use biome_rowan::{BatchMutation, Language, TextRange, TextSize};
 use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::fmt::Debug;
@@ -306,8 +305,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintJson(_) => 41,
             Self::EslintMarkdown(_) => 42,
             Self::EslintYml(_) => 43,
-                Self::SortPackageJson => 44,
-
+            Self::SortPackageJson => 44,
         }
     }
 
@@ -1339,32 +1337,15 @@ pub trait Rule: RuleMeta + Sized {
                 <Self::Group as RuleGroup>::NAME,
                 Self::METADATA.name
             );
-            let suppression_text = format!("biome-ignore-all {rule_category}");
-            let root = ctx.root();
-
-            if let Some(first_token) = root.syntax().first_token() {
-                let mut mutation = root.begin();
-                let comment =
-                    suppression_action.suppression_top_level_comment(suppression_text.as_str());
-                suppression_action.apply_top_level_suppression(
-                    &mut mutation,
-                    first_token,
-                    comment.as_str(),
-                );
-                let message = if category == RuleCategory::Action {
-                    "action"
-                } else {
-                    "rule"
-                };
-                return Some(SuppressAction {
-                    mutation,
-                    message:
-                        markup! { "Suppress " {message} " " {rule_category} " for the whole file."}
-                            .to_owned(),
-                });
-            }
+            let kind_label = if category == RuleCategory::Action {
+                "action"
+            } else {
+                "rule"
+            };
+            make_top_level_suppression(&rule_category, kind_label, &ctx.root(), suppression_action)
+        } else {
+            None
         }
-        None
     }
 
     /// Create a code action that allows to suppress the rule. The function
@@ -1390,29 +1371,19 @@ pub trait Rule: RuleMeta + Sized {
                 <Self::Group as RuleGroup>::NAME,
                 Self::METADATA.name
             );
-            let suppression_text = format!("biome-ignore {rule_category}");
-            let root = ctx.root();
-            let token = root.syntax().token_at_offset(text_range.start());
-            let mut mutation = root.begin();
-            suppression_action.inline_suppression(SuppressionCommentEmitterPayload {
-                suppression_text: suppression_text.as_str(),
-                mutation: &mut mutation,
-                token_offset: token,
-                diagnostic_text_range: text_range,
-                suppression_reason: suppression_reason.unwrap_or("<explanation>"),
-            });
-
-            let message = if category == RuleCategory::Action {
+            let kind_label = if category == RuleCategory::Action {
                 "action"
             } else {
                 "rule"
             };
-
-            Some(SuppressAction {
-                mutation,
-                message: markup! { "Suppress " {message} " " {rule_category} " for this line."}
-                    .to_owned(),
-            })
+            Some(make_inline_suppression(
+                &rule_category,
+                kind_label,
+                &ctx.root(),
+                text_range,
+                suppression_action,
+                suppression_reason.unwrap_or("<explanation>"),
+            ))
         } else {
             None
         }
@@ -1448,6 +1419,10 @@ impl Diagnostic for RuleDiagnostic {
 
     fn category(&self) -> Option<&'static Category> {
         Some(self.category)
+    }
+
+    fn subcategory(&self) -> Option<&str> {
+        self.subcategory.as_deref()
     }
 
     fn message(&self, fmt: &mut Formatter<'_>) -> std::io::Result<()> {

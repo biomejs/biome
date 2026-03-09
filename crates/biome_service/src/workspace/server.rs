@@ -55,8 +55,8 @@ use biome_json_syntax::JsonFileSource;
 use biome_module_graph::{HtmlEmbeddedContent, ModuleDependencies, ModuleDiagnostic, ModuleGraph};
 use biome_package::PackageType;
 use biome_parser::AnyParse;
+use biome_plugin_loader::Plugins;
 use biome_plugin_loader::{BiomePlugin, PluginCache, PluginDiagnostic};
-use biome_plugin_loader::{PluginConfiguration, Plugins};
 use biome_project_layout::ProjectLayout;
 use biome_resolver::FsWithResolverProxy;
 use biome_rowan::{NodeCache, SendNode};
@@ -789,19 +789,34 @@ impl WorkspaceServer {
     }
 
     fn load_plugins(&self, base_path: &Utf8Path, plugins: &Plugins) -> Vec<PluginDiagnostic> {
+        #[cfg(feature = "wasm_plugin")]
+        biome_plugin_loader::bump_wasm_generation();
+
+        use rayon::prelude::*;
+
+        let results: Vec<_> = plugins
+            .iter()
+            .collect::<Vec<_>>()
+            .par_iter()
+            .map(|plugin_config| {
+                let plugin_path = plugin_config.path();
+                let options_json = plugin_config.options_json().map(String::from);
+                (
+                    plugin_path.to_owned(),
+                    BiomePlugin::load(self.fs.clone(), plugin_path, base_path, options_json),
+                )
+            })
+            .collect();
+
         let mut diagnostics = Vec::new();
         let plugin_cache = PluginCache::default();
 
-        for plugin_config in plugins.iter() {
-            match plugin_config {
-                PluginConfiguration::Path(plugin_path) => {
-                    match BiomePlugin::load(self.fs.clone(), plugin_path, base_path) {
-                        Ok((plugin, _)) => {
-                            plugin_cache.insert_plugin(plugin_path.clone().into(), plugin);
-                        }
-                        Err(diagnostic) => diagnostics.push(diagnostic),
-                    }
+        for (path, result) in results {
+            match result {
+                Ok((plugin, _)) => {
+                    plugin_cache.insert_plugin(path.into(), plugin);
                 }
+                Err(diagnostic) => diagnostics.push(diagnostic),
             }
         }
 
@@ -1806,7 +1821,7 @@ impl Workspace for WorkspaceServer {
             || categories.is_assist())
             && let Some(lint) = capabilities.analyzer.lint
         {
-            let plugins = if categories.is_lint() {
+            let plugins = if categories.is_lint() || categories.is_assist() {
                 self.get_analyzer_plugins_for_project(
                     settings.source_path().unwrap_or_default().as_path(),
                     &settings.get_plugins_for_path(&path),
@@ -1941,7 +1956,7 @@ impl Workspace for WorkspaceServer {
             && let Some(pull_diagnostics_and_actions) =
                 capabilities.analyzer.pull_diagnostics_and_actions
         {
-            let plugins = if categories.is_lint() {
+            let plugins = if categories.is_lint() || categories.is_assist() {
                 self.get_analyzer_plugins_for_project(
                     settings.source_path().unwrap_or_default().as_path(),
                     &settings.get_plugins_for_path(&path),
@@ -2050,6 +2065,15 @@ impl Workspace for WorkspaceServer {
             self.get_parse_with_snippets_and_services(&path)?;
         let language =
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
+        let plugins = if categories.is_lint() || categories.is_assist() {
+            self.get_analyzer_plugins_for_project(
+                settings.source_path().unwrap_or_default().as_path(),
+                &settings.get_plugins_for_path(&path),
+            )
+            .map_err(WorkspaceError::plugin_errors)?
+        } else {
+            Vec::new()
+        };
         let settings = self.settings_handle(&settings, inline_config);
 
         let mut result = code_actions(CodeActionsParams {
@@ -2064,7 +2088,7 @@ impl Workspace for WorkspaceServer {
             skip: &skip,
             suppression_reason: None,
             enabled_rules: &enabled_rules,
-            plugins: Vec::new(),
+            plugins: plugins.clone(),
             categories,
             action_offset: None,
             document_services: &services,
@@ -2092,7 +2116,7 @@ impl Workspace for WorkspaceServer {
                 skip: &skip,
                 suppression_reason: None,
                 enabled_rules: &enabled_rules,
-                plugins: Vec::new(),
+                plugins: plugins.clone(),
                 categories,
                 action_offset: Some(embedded_snippet.content_offset()),
                 document_services: &services,
@@ -2276,7 +2300,9 @@ impl Workspace for WorkspaceServer {
             .map_err(WorkspaceError::plugin_errors)?;
         let language =
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
-        let plugins = if rule_categories.contains(RuleCategory::Lint) {
+        let plugins = if rule_categories.contains(RuleCategory::Lint)
+            || rule_categories.contains(RuleCategory::Action)
+        {
             plugins
         } else {
             Vec::new()
