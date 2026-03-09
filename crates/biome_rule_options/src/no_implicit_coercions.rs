@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 pub struct NoImplicitCoercionsOptions {
     /// Whether to allow implicitly coercing values to booleans via `!!value`.
     #[serde(skip_serializing_if = "Option::<_>::is_none")]
-    pub double_negation: Option<bool>,
+    pub allow_double_negation: Option<bool>,
 }
 
 impl NoImplicitCoercionsOptions {

@@ -13,6 +13,8 @@ use biome_js_syntax::{
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPieceKind, declare_node_union};
 use biome_rule_options::no_implicit_coercions::NoImplicitCoercionsOptions;
 
+// NB: please don't remove the NBSP in the markdown table, it is there to prevent merging backticks together
+
 declare_lint_rule! {
     /// Encourage use of explicit type conversion functions over their shorthand counterparts.
     ///
@@ -39,20 +41,22 @@ declare_lint_rule! {
     /// ### Disallowed patterns
     /// A full list of constructs linted by this rule are as follows:
     ///
-    /// | Pattern                                        | Target              | Example                |
-    /// | ---------------------------------------------- | ------------------- | ---------------------- |
-    /// | Double negation[^1]                            | `Boolean`           | `!!value`              |
-    /// | Unary plus                                     | `Number`            | `+value`               |
-    /// | Double unary negation                          | `Number`            | `-(-value)`            |
-    /// | Subtraction with zero                          | `Number`            | `value - 0`            |
-    /// | Multiplication with one                        | `Number`            | `value * 1`            |
-    /// | Division with one                              | `Number`            | `value / 1`            |
-    /// | Concatenation with an empty string             | `String`            | `value + ""`           |
-    /// | Bitwise NOT with `indexOf`[^2]                 | Check against `-1`  | `~arr.indexOf(value)`  |
+    /// | Pattern                                        | Target              | Example                       |
+    /// | ---------------------------------------------- | ------------------- | ----------------------------- |
+    /// | Double negation[^1]                            | `Boolean`           | `!!value       `              |
+    /// | Unary plus                                     | `Number`            | `+value`                      |
+    /// | Double unary negation                          | `Number`            | `-(-value)`                   |
+    /// | Subtraction with zero[^2]                      | `Number`            | `value - 0`                   |
+    /// | Multiplication with one[^2]                    | `Number`            | `value * 1`                   |
+    /// | Division with one[^2]                          | `Number`            | `value / 1`                   |
+    /// | Concatenation with an empty string[^2]         | `String`            | `value + ""`, ``value + `` `` |
+    /// | Bitwise NOT with `indexOf`[^3]                 | Check against `-1`  | `~arr.indexOf(value)`         |
     ///
-    /// [^1]: Unless the `doubleNegation` option is set to `true`, in which case it is ignored.
+    /// [^1]: Unless the `allowDoubleNegation` option is set to `true`, in which case it is ignored.
     ///
-    /// [^2]: Bitwise NOT produces the 2's complement negation of a number, which is `0` for `-1`.
+    /// [^2]: Including their assignment counterparts (`+=`, `-=`, `*=`, `/=`).
+    ///
+    /// [^3]: Bitwise NOT produces the 2's complement negation of a number, which is `0` for `-1`.
     ///
     /// ## Examples
     ///
@@ -83,15 +87,15 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// "" + foo;
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
     /// foo + "";
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// foo += ``;
+    /// '' + foo;
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// baz += ``;
     /// ```
     ///
     /// ```js,expect_diagnostic
@@ -124,7 +128,7 @@ declare_lint_rule! {
     /// tag`${foo}`;
     /// ```
     ///
-    /// These are not flagged because they have other effects on the produced value other than type coercion:
+    /// These are not flagged because they may have other effects on the produced value other than type coercion:
     /// ```js
     /// !foo;
     /// ~foo;
@@ -132,21 +136,21 @@ declare_lint_rule! {
     /// +1234;
     /// 2 * foo;
     /// foo + 'bar';
-    /// foo + 0; // has the potential to concatenate strings, unlike `foo - 0`
+    /// foo + 0; // has the potential to concatenate strings, unlike `foo - 0` which always produces a number
     /// ```
     ///
     /// ## Options
     ///
-    /// ### `doubleNegation`
+    /// ### `allowDoubleNegation`
     /// Whether to allow or disallow the use of double negation (`!!value`) for `Boolean` coercions.
     ///
     /// Default: `false` (disallow)
     ///
-    /// Examples of correct code with `doubleNegation` set to `true`:
+    /// Examples of correct code with `allowDoubleNegation` set to `true`:
     /// ```json,options
     /// {
     ///   "options": {
-    ///      "doubleNegation": true
+    ///      "allowDoubleNegation": true
     ///   }
     /// }
     /// ```
@@ -185,7 +189,7 @@ impl Rule for NoImplicitCoercions {
         let node = ctx.query();
         // TODO: Lint empty template expressions like `${value}`; while ESLint doesn't do this by default, it still falls under the bucket of "useless string coercion"
         // (and is a configurable option in the latter)
-        // (this will need to actively ignore anything with extra content, custom tagging functions, etc.)
+        // NB: this will need to actively ignore anything with extra content, custom tagging functions, etc.
         match node {
             PotentialImplicitCoercion::JsUnaryExpression(unary_expression) => {
                 match unary_expression.operator().ok()? {

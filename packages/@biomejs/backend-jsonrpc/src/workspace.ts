@@ -7003,7 +7003,7 @@ export interface NoImplicitCoercionsOptions {
 	/**
 	 * Whether to allow implicitly coercing values to booleans via `!!value`.
 	 */
-	doubleNegation?: boolean;
+	allowDoubleNegation?: boolean;
 }
 export type NoImportantStylesOptions = {};
 export type NoStaticOnlyClassOptions = {};
