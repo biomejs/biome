@@ -6,11 +6,7 @@ use biome_formatter::{format_args, write};
 pub(crate) struct FormatScssIncludeArgumentList;
 
 impl FormatNodeRule<ScssIncludeArgumentList> for FormatScssIncludeArgumentList {
-    fn fmt_fields(
-        &self,
-        node: &ScssIncludeArgumentList,
-        f: &mut CssFormatter,
-    ) -> FormatResult<()> {
+    fn fmt_fields(&self, node: &ScssIncludeArgumentList, f: &mut CssFormatter) -> FormatResult<()> {
         let ScssIncludeArgumentListFields {
             l_paren_token,
             items,
