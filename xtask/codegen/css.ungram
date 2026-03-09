@@ -688,6 +688,7 @@ AnyCssAtRule =
 	| ScssEachAtRule
 	| ScssForAtRule
 	| ScssIfAtRule
+	| ScssMixinAtRule
 	| ScssWhileAtRule
 	| ScssDebugAtRule
 	| ScssWarnAtRule
@@ -2580,6 +2581,42 @@ ScssForAtRule =
 	operator: ('to' | 'through')
 	upper_bound: ScssExpression
 	block: CssDeclarationOrRuleBlock
+
+// @mixin button($radius: 4px, $args...) { border-radius: $radius; }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssMixinAtRule =
+	'mixin'
+	name: CssIdentifier
+	parameters: ScssParameterList?
+	block: CssDeclarationOrRuleBlock
+
+// ($radius: 4px, $args...)
+// ^^^^^^^^^^^^^^^^^^^^^^^^
+ScssParameterList =
+	'('
+	items: ScssParameterItemList
+	')'
+
+ScssParameterItemList = AnyScssParameter (',' AnyScssParameter)* ','?
+
+AnyScssParameter =
+	ScssParameter
+	| CssBogusParameter
+
+// $radius: 4px
+// ^^^^^^^^^^^^
+// $args...
+// ^^^^^^^^
+ScssParameter =
+	name: ScssIdentifier
+	default_value: ScssParameterDefaultValue?
+	ellipsis: '...'?
+
+// : 4px
+// ^^^^^
+ScssParameterDefaultValue =
+	':'
+	value: ScssExpression
 
 // @if $theme == dark { color: white; } @else { color: black; }
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
