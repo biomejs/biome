@@ -87,6 +87,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "counter-style",
         "property",
         "container",
+        "each",
         "debug",
         "warn",
         "error",
@@ -579,6 +580,8 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_FUNCTION_PARAMETER_LIST",
         "CSS_RETURNS_STATEMENT",
         // SCSS
+        "SCSS_EACH_AT_RULE",
+        "SCSS_EACH_BINDING_LIST",
         "SCSS_IF_AT_RULE",
         "SCSS_WHILE_AT_RULE",
         "SCSS_ELSE_CLAUSE",

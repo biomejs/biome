@@ -3136,6 +3136,24 @@ impl ScssDeclarationBuilder {
         ))
     }
 }
+pub fn scss_each_at_rule(
+    each_token: SyntaxToken,
+    bindings: ScssEachBindingList,
+    in_token: SyntaxToken,
+    iterable: ScssExpression,
+    block: CssDeclarationOrRuleBlock,
+) -> ScssEachAtRule {
+    ScssEachAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_EACH_AT_RULE,
+        [
+            Some(SyntaxElement::Token(each_token)),
+            Some(SyntaxElement::Node(bindings.into_syntax())),
+            Some(SyntaxElement::Token(in_token)),
+            Some(SyntaxElement::Node(iterable.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
 pub fn scss_else_clause(
     at_token: SyntaxToken,
     else_token: SyntaxToken,
@@ -4275,6 +4293,27 @@ where
     let length = items.len() + separators.len();
     CssValueAtRulePropertyList::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_VALUE_AT_RULE_PROPERTY_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
+    ))
+}
+pub fn scss_each_binding_list<I, S>(items: I, separators: S) -> ScssEachBindingList
+where
+    I: IntoIterator<Item = ScssIdentifier>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    ScssEachBindingList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_EACH_BINDING_LIST,
         (0..length).map(|index| {
             if index % 2 == 0 {
                 Some(items.next()?.into_syntax().into())

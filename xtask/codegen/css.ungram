@@ -684,6 +684,8 @@ AnyCssAtRule =
 	| CssPositionTryAtRule
 	| CssViewTransitionAtRule
 	| CssFunctionAtRule
+	// SCSS at rules
+	| ScssEachAtRule
 	| ScssIfAtRule
 	| ScssWhileAtRule
 	| ScssDebugAtRule
@@ -725,41 +727,6 @@ AnyCssAtRuleDeclarator =
 	| CssScopeAtRuleDeclarator
 	| CssStartingStyleAtRuleDeclarator
 	| CssFunctionAtRuleDeclarator
-
-ScssIfAtRule =
-	'if'
-	condition: ScssExpression
-	block: CssDeclarationOrRuleBlock
-	else_clause: ScssElseClause?
-
-ScssWhileAtRule =
-	'while'
-	condition: ScssExpression
-	block: CssDeclarationOrRuleBlock
-
-ScssElseClause =
-	'@'
-	'else'
-	body: AnyScssElseClauseBody
-
-AnyScssElseClauseBody =
-	ScssIfAtRule
-	| CssDeclarationOrRuleBlock
-
-ScssDebugAtRule =
-	'debug'
-	value: ScssExpression
-	';'
-
-ScssWarnAtRule =
-	'warn'
-	value: ScssExpression
-	';'
-
-ScssErrorAtRule =
-	'error'
-	value: ScssExpression
-	';'
 
 // Conditional block declarator nodes
 CssMediaAtRuleDeclarator =
@@ -2588,6 +2555,68 @@ TwSlotAtRule =
 /////////////
 // SCSS
 /////////////
+
+// @each $item in $list { color: $item; }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssEachAtRule =
+	'each'
+	bindings: ScssEachBindingList
+	'in'
+	iterable: ScssExpression
+	block: CssDeclarationOrRuleBlock
+
+// @each $key, $value in $map { color: $key; }
+//       ^^^^^^^^^^^^
+ScssEachBindingList = ScssIdentifier (',' ScssIdentifier)*
+
+// @if $theme == dark { color: white; } @else { color: black; }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssIfAtRule =
+	'if'
+	condition: ScssExpression
+	block: CssDeclarationOrRuleBlock
+	else_clause: ScssElseClause?
+
+// @else if $theme == light { color: black; }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+// @else { color: black; }
+// ^^^^^^^^^^^^^^^^^^^^^^^
+ScssElseClause =
+	'@'
+	'else'
+	body: AnyScssElseClauseBody
+
+AnyScssElseClauseBody =
+	ScssIfAtRule
+	| CssDeclarationOrRuleBlock
+
+// @while $i > 0 { $i: $i - 1; }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssWhileAtRule =
+	'while'
+	condition: ScssExpression
+	block: CssDeclarationOrRuleBlock
+
+// @debug $width * 2;
+// ^^^^^^^^^^^^^^^^^^
+ScssDebugAtRule =
+	'debug'
+	value: ScssExpression
+	';'
+
+// @warn "deprecated";
+// ^^^^^^^^^^^^^^^^^^^
+ScssWarnAtRule =
+	'warn'
+	value: ScssExpression
+	';'
+
+// @error "Invalid state.";
+// ^^^^^^^^^^^^^^^^^^^^^^^^
+ScssErrorAtRule =
+	'error'
+	value: ScssExpression
+	';'
 
 // $variable: value;
 // ^^^^^^^^^^^^^^^^^

@@ -9178,6 +9178,61 @@ pub struct ScssDeclarationFields {
     pub semicolon_token: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssEachAtRule {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssEachAtRule {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssEachAtRuleFields {
+        ScssEachAtRuleFields {
+            each_token: self.each_token(),
+            bindings: self.bindings(),
+            in_token: self.in_token(),
+            iterable: self.iterable(),
+            block: self.block(),
+        }
+    }
+    pub fn each_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn bindings(&self) -> ScssEachBindingList {
+        support::list(&self.syntax, 1usize)
+    }
+    pub fn in_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+    pub fn iterable(&self) -> SyntaxResult<ScssExpression> {
+        support::required_node(&self.syntax, 3usize)
+    }
+    pub fn block(&self) -> SyntaxResult<CssDeclarationOrRuleBlock> {
+        support::required_node(&self.syntax, 4usize)
+    }
+}
+impl Serialize for ScssEachAtRule {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssEachAtRuleFields {
+    pub each_token: SyntaxResult<SyntaxToken>,
+    pub bindings: ScssEachBindingList,
+    pub in_token: SyntaxResult<SyntaxToken>,
+    pub iterable: SyntaxResult<ScssExpression>,
+    pub block: SyntaxResult<CssDeclarationOrRuleBlock>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssElseClause {
     pub(crate) syntax: SyntaxNode,
 }
@@ -10660,6 +10715,7 @@ pub enum AnyCssAtRule {
     CssValueAtRule(CssValueAtRule),
     CssViewTransitionAtRule(CssViewTransitionAtRule),
     ScssDebugAtRule(ScssDebugAtRule),
+    ScssEachAtRule(ScssEachAtRule),
     ScssErrorAtRule(ScssErrorAtRule),
     ScssIfAtRule(ScssIfAtRule),
     ScssWarnAtRule(ScssWarnAtRule),
@@ -10829,6 +10885,12 @@ impl AnyCssAtRule {
     pub fn as_scss_debug_at_rule(&self) -> Option<&ScssDebugAtRule> {
         match &self {
             Self::ScssDebugAtRule(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_each_at_rule(&self) -> Option<&ScssEachAtRule> {
+        match &self {
+            Self::ScssEachAtRule(item) => Some(item),
             _ => None,
         }
     }
@@ -25222,6 +25284,57 @@ impl From<ScssDeclaration> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for ScssEachAtRule {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_EACH_AT_RULE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_EACH_AT_RULE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssEachAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssEachAtRule")
+                .field("each_token", &support::DebugSyntaxResult(self.each_token()))
+                .field("bindings", &self.bindings())
+                .field("in_token", &support::DebugSyntaxResult(self.in_token()))
+                .field("iterable", &support::DebugSyntaxResult(self.iterable()))
+                .field("block", &support::DebugSyntaxResult(self.block()))
+                .finish()
+        } else {
+            f.debug_struct("ScssEachAtRule").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssEachAtRule> for SyntaxNode {
+    fn from(n: ScssEachAtRule) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssEachAtRule> for SyntaxElement {
+    fn from(n: ScssEachAtRule) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for ScssElseClause {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -27074,6 +27187,11 @@ impl From<ScssDebugAtRule> for AnyCssAtRule {
         Self::ScssDebugAtRule(node)
     }
 }
+impl From<ScssEachAtRule> for AnyCssAtRule {
+    fn from(node: ScssEachAtRule) -> Self {
+        Self::ScssEachAtRule(node)
+    }
+}
 impl From<ScssErrorAtRule> for AnyCssAtRule {
     fn from(node: ScssErrorAtRule) -> Self {
         Self::ScssErrorAtRule(node)
@@ -27172,6 +27290,7 @@ impl AstNode for AnyCssAtRule {
         .union(CssValueAtRule::KIND_SET)
         .union(CssViewTransitionAtRule::KIND_SET)
         .union(ScssDebugAtRule::KIND_SET)
+        .union(ScssEachAtRule::KIND_SET)
         .union(ScssErrorAtRule::KIND_SET)
         .union(ScssIfAtRule::KIND_SET)
         .union(ScssWarnAtRule::KIND_SET)
@@ -27215,6 +27334,7 @@ impl AstNode for AnyCssAtRule {
                 | CSS_VALUE_AT_RULE
                 | CSS_VIEW_TRANSITION_AT_RULE
                 | SCSS_DEBUG_AT_RULE
+                | SCSS_EACH_AT_RULE
                 | SCSS_ERROR_AT_RULE
                 | SCSS_IF_AT_RULE
                 | SCSS_WARN_AT_RULE
@@ -27275,6 +27395,7 @@ impl AstNode for AnyCssAtRule {
                 Self::CssViewTransitionAtRule(CssViewTransitionAtRule { syntax })
             }
             SCSS_DEBUG_AT_RULE => Self::ScssDebugAtRule(ScssDebugAtRule { syntax }),
+            SCSS_EACH_AT_RULE => Self::ScssEachAtRule(ScssEachAtRule { syntax }),
             SCSS_ERROR_AT_RULE => Self::ScssErrorAtRule(ScssErrorAtRule { syntax }),
             SCSS_IF_AT_RULE => Self::ScssIfAtRule(ScssIfAtRule { syntax }),
             SCSS_WARN_AT_RULE => Self::ScssWarnAtRule(ScssWarnAtRule { syntax }),
@@ -27323,6 +27444,7 @@ impl AstNode for AnyCssAtRule {
             Self::CssValueAtRule(it) => it.syntax(),
             Self::CssViewTransitionAtRule(it) => it.syntax(),
             Self::ScssDebugAtRule(it) => it.syntax(),
+            Self::ScssEachAtRule(it) => it.syntax(),
             Self::ScssErrorAtRule(it) => it.syntax(),
             Self::ScssIfAtRule(it) => it.syntax(),
             Self::ScssWarnAtRule(it) => it.syntax(),
@@ -27367,6 +27489,7 @@ impl AstNode for AnyCssAtRule {
             Self::CssValueAtRule(it) => it.into_syntax(),
             Self::CssViewTransitionAtRule(it) => it.into_syntax(),
             Self::ScssDebugAtRule(it) => it.into_syntax(),
+            Self::ScssEachAtRule(it) => it.into_syntax(),
             Self::ScssErrorAtRule(it) => it.into_syntax(),
             Self::ScssIfAtRule(it) => it.into_syntax(),
             Self::ScssWarnAtRule(it) => it.into_syntax(),
@@ -27413,6 +27536,7 @@ impl std::fmt::Debug for AnyCssAtRule {
             Self::CssValueAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::CssViewTransitionAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssDebugAtRule(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssEachAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssErrorAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssIfAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssWarnAtRule(it) => std::fmt::Debug::fmt(it, f),
@@ -27459,6 +27583,7 @@ impl From<AnyCssAtRule> for SyntaxNode {
             AnyCssAtRule::CssValueAtRule(it) => it.into_syntax(),
             AnyCssAtRule::CssViewTransitionAtRule(it) => it.into_syntax(),
             AnyCssAtRule::ScssDebugAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::ScssEachAtRule(it) => it.into_syntax(),
             AnyCssAtRule::ScssErrorAtRule(it) => it.into_syntax(),
             AnyCssAtRule::ScssIfAtRule(it) => it.into_syntax(),
             AnyCssAtRule::ScssWarnAtRule(it) => it.into_syntax(),
@@ -38223,6 +38348,11 @@ impl std::fmt::Display for ScssDeclaration {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for ScssEachAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for ScssElseClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -43383,6 +43513,88 @@ impl IntoIterator for CssValueAtRulePropertyList {
 impl IntoIterator for &CssValueAtRulePropertyList {
     type Item = SyntaxResult<AnyCssValueAtRuleProperty>;
     type IntoIter = AstSeparatedListNodesIterator<Language, AnyCssValueAtRuleProperty>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct ScssEachBindingList {
+    syntax_list: SyntaxList,
+}
+impl ScssEachBindingList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for ScssEachBindingList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_EACH_BINDING_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_EACH_BINDING_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for ScssEachBindingList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstSeparatedList for ScssEachBindingList {
+    type Language = Language;
+    type Node = ScssIdentifier;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for ScssEachBindingList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("ScssEachBindingList ")?;
+        f.debug_list().entries(self.elements()).finish()
+    }
+}
+impl IntoIterator for ScssEachBindingList {
+    type Item = SyntaxResult<ScssIdentifier>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, ScssIdentifier>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for &ScssEachBindingList {
+    type Item = SyntaxResult<ScssIdentifier>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, ScssIdentifier>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

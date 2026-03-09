@@ -295,6 +295,7 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "ScssBinaryExpression" => lang::ScssBinaryExpression::KIND_SET.iter().next(),
         "ScssDebugAtRule" => lang::ScssDebugAtRule::KIND_SET.iter().next(),
         "ScssDeclaration" => lang::ScssDeclaration::KIND_SET.iter().next(),
+        "ScssEachAtRule" => lang::ScssEachAtRule::KIND_SET.iter().next(),
         "ScssElseClause" => lang::ScssElseClause::KIND_SET.iter().next(),
         "ScssErrorAtRule" => lang::ScssErrorAtRule::KIND_SET.iter().next(),
         "ScssExpression" => lang::ScssExpression::KIND_SET.iter().next(),
