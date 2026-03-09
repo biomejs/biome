@@ -7491,6 +7491,82 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssIfAtRule {
         )
     }
 }
+impl FormatRule<biome_css_syntax::ScssIncludeArgumentList>
+    for crate::scss::auxiliary::include_argument_list::FormatScssIncludeArgumentList
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssIncludeArgumentList,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssIncludeArgumentList>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssIncludeArgumentList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssIncludeArgumentList,
+        crate::scss::auxiliary::include_argument_list::FormatScssIncludeArgumentList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::auxiliary::include_argument_list::FormatScssIncludeArgumentList::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssIncludeArgumentList {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssIncludeArgumentList,
+        crate::scss::auxiliary::include_argument_list::FormatScssIncludeArgumentList,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::auxiliary::include_argument_list::FormatScssIncludeArgumentList::default(),
+        )
+    }
+}
+impl FormatRule<biome_css_syntax::ScssIncludeAtRule>
+    for crate::scss::statements::include_at_rule::FormatScssIncludeAtRule
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssIncludeAtRule,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssIncludeAtRule>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssIncludeAtRule {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssIncludeAtRule,
+        crate::scss::statements::include_at_rule::FormatScssIncludeAtRule,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::statements::include_at_rule::FormatScssIncludeAtRule::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssIncludeAtRule {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssIncludeAtRule,
+        crate::scss::statements::include_at_rule::FormatScssIncludeAtRule,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::statements::include_at_rule::FormatScssIncludeAtRule::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::ScssKeywordArgument>
     for crate::scss::auxiliary::keyword_argument::FormatScssKeywordArgument
 {
@@ -13527,6 +13603,31 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyScssExpressionItem {
         FormatOwnedWithRule::new(
             self,
             crate::scss::any::expression_item::FormatAnyScssExpressionItem::default(),
+        )
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyScssIncludeTarget {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyScssIncludeTarget,
+        crate::scss::any::include_target::FormatAnyScssIncludeTarget,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::any::include_target::FormatAnyScssIncludeTarget::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyScssIncludeTarget {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyScssIncludeTarget,
+        crate::scss::any::include_target::FormatAnyScssIncludeTarget,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::any::include_target::FormatAnyScssIncludeTarget::default(),
         )
     }
 }

@@ -38,6 +38,7 @@ impl FormatRule<AnyCssAtRule> for FormatAnyCssAtRule {
             AnyCssAtRule::ScssErrorAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::ScssForAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::ScssIfAtRule(node) => node.format().fmt(f),
+            AnyCssAtRule::ScssIncludeAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::ScssMixinAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::ScssWarnAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::ScssWhileAtRule(node) => node.format().fmt(f),

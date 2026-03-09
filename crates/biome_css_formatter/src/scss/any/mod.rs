@@ -4,5 +4,6 @@ pub(crate) mod declaration_name;
 pub(crate) mod else_clause_body;
 pub(crate) mod expression;
 pub(crate) mod expression_item;
+pub(crate) mod include_target;
 pub(crate) mod module_member;
 pub(crate) mod parameter;

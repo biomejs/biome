@@ -5,6 +5,7 @@ pub(crate) mod each_at_rule;
 pub(crate) mod error_at_rule;
 pub(crate) mod for_at_rule;
 pub(crate) mod if_at_rule;
+pub(crate) mod include_at_rule;
 pub(crate) mod mixin_at_rule;
 pub(crate) mod warn_at_rule;
 pub(crate) mod while_at_rule;
