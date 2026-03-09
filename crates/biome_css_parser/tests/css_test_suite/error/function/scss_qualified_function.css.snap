@@ -202,4 +202,5 @@ scss_qualified_function.css:2:10 parse ━━━━━━━━━━━━━�
       │          ^^^^^^
     3 │   background-image: url(mod.fn.svg);
     4 │ }
+  
 ```
