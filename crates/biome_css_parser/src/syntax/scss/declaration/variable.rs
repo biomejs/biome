@@ -1,6 +1,7 @@
 use super::super::{
-    is_at_scss_identifier, is_at_scss_namespaced_identifier, parse_scss_identifier,
-    parse_scss_expression_in_variable_value_until, parse_scss_namespaced_identifier,
+    is_at_scss_identifier, is_at_scss_namespaced_identifier,
+    parse_scss_expression_in_variable_value_until, parse_scss_identifier,
+    parse_scss_namespaced_identifier,
 };
 use super::variable_modifier::parse_scss_variable_modifiers;
 use crate::parser::CssParser;
