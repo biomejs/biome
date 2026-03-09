@@ -837,6 +837,7 @@ impl<'src> CssLexer<'src> {
             b"debug" => DEBUG_KW,
             b"warn" => WARN_KW,
             b"error" => ERROR_KW,
+            b"while" => WHILE_KW,
             b"sass" => SASS_KW,
             b"style" => STYLE_KW,
             b"state" => STATE_KW,

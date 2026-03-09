@@ -2,4 +2,6 @@
 
 pub(crate) mod debug_at_rule;
 pub(crate) mod error_at_rule;
+pub(crate) mod if_at_rule;
 pub(crate) mod warn_at_rule;
+pub(crate) mod while_at_rule;

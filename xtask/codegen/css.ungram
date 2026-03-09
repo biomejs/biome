@@ -684,6 +684,8 @@ AnyCssAtRule =
 	| CssPositionTryAtRule
 	| CssViewTransitionAtRule
 	| CssFunctionAtRule
+	| ScssIfAtRule
+	| ScssWhileAtRule
 	| ScssDebugAtRule
 	| ScssWarnAtRule
 	| ScssErrorAtRule
@@ -723,6 +725,26 @@ AnyCssAtRuleDeclarator =
 	| CssScopeAtRuleDeclarator
 	| CssStartingStyleAtRuleDeclarator
 	| CssFunctionAtRuleDeclarator
+
+ScssIfAtRule =
+	'if'
+	condition: ScssExpression
+	block: CssDeclarationOrRuleBlock
+	else_clause: ScssElseClause?
+
+ScssWhileAtRule =
+	'while'
+	condition: ScssExpression
+	block: CssDeclarationOrRuleBlock
+
+ScssElseClause =
+	'@'
+	'else'
+	body: AnyScssElseClauseBody
+
+AnyScssElseClauseBody =
+	ScssIfAtRule
+	| CssDeclarationOrRuleBlock
 
 ScssDebugAtRule =
 	'debug'
