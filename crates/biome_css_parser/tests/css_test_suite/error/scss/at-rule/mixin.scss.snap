@@ -384,51 +384,51 @@ CssRoot {
 mixin.scss:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found '('.
-
+  
   > 1 │ @mixin ($radius) {
       │        ^
     2 │   border-radius: $radius;
     3 │ }
-
+  
   i Expected an identifier here.
-
+  
   > 1 │ @mixin ($radius) {
       │        ^
     2 │   border-radius: $radius;
     3 │ }
-
+  
 mixin.scss:5:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a SCSS expression but instead found ')'.
-
+  
     3 │ }
-    4 │
+    4 │ 
   > 5 │ @mixin button($radius: ) {
       │                        ^
     6 │   border-radius: 4px;
     7 │ }
-
+  
   i Expected a SCSS expression here.
-
+  
     3 │ }
-    4 │
+    4 │ 
   > 5 │ @mixin button($radius: ) {
       │                        ^
     6 │   border-radius: 4px;
     7 │ }
-
+  
 mixin.scss:14:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `{` but instead the file ends
-
+  
     13 │ @mixin button($radius)
-  > 14 │
-       │
-
+  > 14 │ 
+       │ 
+  
   i the file ends here
-
+  
     13 │ @mixin button($radius)
-  > 14 │
-       │
-
+  > 14 │ 
+       │ 
+  
 ```
