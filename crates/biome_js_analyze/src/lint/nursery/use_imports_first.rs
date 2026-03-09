@@ -16,6 +16,9 @@ declare_lint_rule! {
     /// Directives such as `"use strict"` are always allowed before
     /// imports, since they are parsed separately from module items.
     ///
+    /// This rule only applies to ES module `import` statements. CommonJS
+    /// `require()` calls are not covered.
+    ///
     /// ## Examples
     ///
     /// ### Invalid
