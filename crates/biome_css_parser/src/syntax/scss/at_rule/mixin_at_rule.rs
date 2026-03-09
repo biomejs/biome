@@ -1,11 +1,11 @@
 use crate::parser::CssParser;
 use crate::syntax::block::parse_declaration_or_rule_list_block;
 use crate::syntax::parse_error::expected_identifier;
+use crate::syntax::parse_regular_identifier;
 use crate::syntax::scss::{
     expected_scss_expression, is_at_scss_identifier, parse_scss_expression_until,
     parse_scss_identifier,
 };
-use crate::syntax::parse_regular_identifier;
 use biome_css_syntax::CssSyntaxKind::{
     self, CSS_BOGUS_PARAMETER, SCSS_MIXIN_AT_RULE, SCSS_PARAMETER, SCSS_PARAMETER_DEFAULT_VALUE,
     SCSS_PARAMETER_ITEM_LIST, SCSS_PARAMETER_LIST,
@@ -19,8 +19,7 @@ use biome_parser::{Parser, TokenSet, token_set};
 
 const SCSS_PARAMETER_DEFAULT_VALUE_END_SET: TokenSet<CssSyntaxKind> =
     token_set![T![,], T![')'], T![...]];
-const SCSS_PARAMETER_RECOVERY_SET: TokenSet<CssSyntaxKind> =
-    token_set![T![,], T![')'], T!['{']];
+const SCSS_PARAMETER_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![T![,], T![')'], T!['{']];
 
 /// Parses the SCSS `@mixin` at-rule.
 ///
@@ -150,7 +149,11 @@ impl ParseSeparatedList for ScssParameterItemList {
         p: &mut Self::Parser<'_>,
         parsed_element: ParsedSyntax,
     ) -> RecoveryResult {
-        parsed_element.or_recover(p, &ScssParameterItemListParseRecovery, expected_scss_parameter)
+        parsed_element.or_recover(
+            p,
+            &ScssParameterItemListParseRecovery,
+            expected_scss_parameter,
+        )
     }
 
     fn separating_element_kind(&mut self) -> Self::Kind {
