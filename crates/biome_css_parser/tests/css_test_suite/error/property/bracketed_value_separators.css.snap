@@ -333,9 +333,6 @@ bracketed_value_separators.css:2:38 parse ━━━━━━━━━━━━�
       │                                      ^
     3 │   grid-column: [col-start] /[col-end];
     4 │ }
-  
-  i SCSS only syntax
-  
 bracketed_value_separators.css:2:51 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Sass list separators are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
@@ -345,9 +342,6 @@ bracketed_value_separators.css:2:51 parse ━━━━━━━━━━━━�
       │                                                   ^
     3 │   grid-column: [col-start] /[col-end];
     4 │ }
-  
-  i SCSS only syntax
-  
 bracketed_value_separators.css:2:62 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Sass list separators are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
@@ -357,9 +351,6 @@ bracketed_value_separators.css:2:62 parse ━━━━━━━━━━━━�
       │                                                              ^
     3 │   grid-column: [col-start] /[col-end];
     4 │ }
-  
-  i SCSS only syntax
-  
 bracketed_value_separators.css:7:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Sass list separators are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
@@ -369,9 +360,6 @@ bracketed_value_separators.css:7:14 parse ━━━━━━━━━━━━�
       │              ^
     8 │ }
     9 │ 
-  
-  i SCSS only syntax
-  
 bracketed_value_separators.css:7:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Sass list separators are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
@@ -381,7 +369,4 @@ bracketed_value_separators.css:7:18 parse ━━━━━━━━━━━━�
       │                  ^
     8 │ }
     9 │ 
-  
-  i SCSS only syntax
-  
 ```

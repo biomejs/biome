@@ -6,9 +6,6 @@ expression: snapshot
 ## Input
 
 ```css
-// Invalid modifier - `!important` falls back to the generic modifier error
-$color: red !important;
-
 // Invalid modifier - just a random word
 $width: 100px !random;
 
@@ -33,16 +30,17 @@ CssRoot {
         CssBogus {
             items: [
                 ScssIdentifier {
-                    dollar_token: DOLLAR@0..77 "$" [Comments("// Invalid modifier - ..."), Newline("\n")] [],
+                    dollar_token: DOLLAR@0..42 "$" [Comments("// Invalid modifier - ..."), Newline("\n")] [],
                     name: CssIdentifier {
-                        value_token: IDENT@77..82 "color" [] [],
+                        value_token: IDENT@42..47 "width" [] [],
                     },
                 },
-                COLON@82..84 ":" [] [Whitespace(" ")],
+                COLON@47..49 ":" [] [Whitespace(" ")],
                 ScssExpression {
                     items: ScssExpressionItemList [
-                        CssIdentifier {
-                            value_token: IDENT@84..88 "red" [] [Whitespace(" ")],
+                        CssRegularDimension {
+                            value_token: CSS_NUMBER_LITERAL@49..52 "100" [] [],
+                            unit_token: IDENT@52..55 "px" [] [Whitespace(" ")],
                         },
                     ],
                 },
@@ -50,29 +48,29 @@ CssRoot {
                     items: [
                         CssBogus {
                             items: [
-                                BANG@88..89 "!" [] [],
-                                IMPORTANT_KW@89..98 "important" [] [],
+                                BANG@55..56 "!" [] [],
+                                IDENT@56..62 "random" [] [],
                             ],
                         },
                     ],
                 },
-                SEMICOLON@98..99 ";" [] [],
+                SEMICOLON@62..63 ";" [] [],
             ],
         },
         CssBogus {
             items: [
                 ScssIdentifier {
-                    dollar_token: DOLLAR@99..143 "$" [Newline("\n"), Newline("\n"), Comments("// Invalid modifier - ..."), Newline("\n")] [],
+                    dollar_token: DOLLAR@63..104 "$" [Newline("\n"), Newline("\n"), Comments("// Invalid modifier - ..."), Newline("\n")] [],
                     name: CssIdentifier {
-                        value_token: IDENT@143..148 "width" [] [],
+                        value_token: IDENT@104..110 "height" [] [],
                     },
                 },
-                COLON@148..150 ":" [] [Whitespace(" ")],
+                COLON@110..112 ":" [] [Whitespace(" ")],
                 ScssExpression {
                     items: ScssExpressionItemList [
                         CssRegularDimension {
-                            value_token: CSS_NUMBER_LITERAL@150..153 "100" [] [],
-                            unit_token: IDENT@153..156 "px" [] [Whitespace(" ")],
+                            value_token: CSS_NUMBER_LITERAL@112..114 "50" [] [],
+                            unit_token: IDENT@114..117 "vh" [] [Whitespace(" ")],
                         },
                     ],
                 },
@@ -80,29 +78,29 @@ CssRoot {
                     items: [
                         CssBogus {
                             items: [
-                                BANG@156..157 "!" [] [],
-                                IDENT@157..163 "random" [] [],
+                                BANG@117..118 "!" [] [],
+                                IDENT@118..124 "defalt" [] [],
                             ],
                         },
                     ],
                 },
-                SEMICOLON@163..164 ";" [] [],
+                SEMICOLON@124..125 ";" [] [],
             ],
         },
         CssBogus {
             items: [
                 ScssIdentifier {
-                    dollar_token: DOLLAR@164..205 "$" [Newline("\n"), Newline("\n"), Comments("// Invalid modifier - ..."), Newline("\n")] [],
+                    dollar_token: DOLLAR@125..165 "$" [Newline("\n"), Newline("\n"), Comments("// Invalid modifier - ..."), Newline("\n")] [],
                     name: CssIdentifier {
-                        value_token: IDENT@205..211 "height" [] [],
+                        value_token: IDENT@165..174 "font-size" [] [],
                     },
                 },
-                COLON@211..213 ":" [] [Whitespace(" ")],
+                COLON@174..176 ":" [] [Whitespace(" ")],
                 ScssExpression {
                     items: ScssExpressionItemList [
                         CssRegularDimension {
-                            value_token: CSS_NUMBER_LITERAL@213..215 "50" [] [],
-                            unit_token: IDENT@215..218 "vh" [] [Whitespace(" ")],
+                            value_token: CSS_NUMBER_LITERAL@176..178 "16" [] [],
+                            unit_token: IDENT@178..181 "px" [] [Whitespace(" ")],
                         },
                     ],
                 },
@@ -110,29 +108,29 @@ CssRoot {
                     items: [
                         CssBogus {
                             items: [
-                                BANG@218..219 "!" [] [],
-                                IDENT@219..225 "defalt" [] [],
+                                BANG@181..182 "!" [] [],
+                                IDENT@182..187 "globl" [] [],
                             ],
                         },
                     ],
                 },
-                SEMICOLON@225..226 ";" [] [],
+                SEMICOLON@187..188 ";" [] [],
             ],
         },
         CssBogus {
             items: [
                 ScssIdentifier {
-                    dollar_token: DOLLAR@226..266 "$" [Newline("\n"), Newline("\n"), Comments("// Invalid modifier - ..."), Newline("\n")] [],
+                    dollar_token: DOLLAR@188..221 "$" [Newline("\n"), Newline("\n"), Comments("// Multiple invalid m ..."), Newline("\n")] [],
                     name: CssIdentifier {
-                        value_token: IDENT@266..275 "font-size" [] [],
+                        value_token: IDENT@221..227 "margin" [] [],
                     },
                 },
-                COLON@275..277 ":" [] [Whitespace(" ")],
+                COLON@227..229 ":" [] [Whitespace(" ")],
                 ScssExpression {
                     items: ScssExpressionItemList [
                         CssRegularDimension {
-                            value_token: CSS_NUMBER_LITERAL@277..279 "16" [] [],
-                            unit_token: IDENT@279..282 "px" [] [Whitespace(" ")],
+                            value_token: CSS_NUMBER_LITERAL@229..231 "10" [] [],
+                            unit_token: IDENT@231..234 "px" [] [Whitespace(" ")],
                         },
                     ],
                 },
@@ -140,218 +138,161 @@ CssRoot {
                     items: [
                         CssBogus {
                             items: [
-                                BANG@282..283 "!" [] [],
-                                IDENT@283..288 "globl" [] [],
-                            ],
-                        },
-                    ],
-                },
-                SEMICOLON@288..289 ";" [] [],
-            ],
-        },
-        CssBogus {
-            items: [
-                ScssIdentifier {
-                    dollar_token: DOLLAR@289..322 "$" [Newline("\n"), Newline("\n"), Comments("// Multiple invalid m ..."), Newline("\n")] [],
-                    name: CssIdentifier {
-                        value_token: IDENT@322..328 "margin" [] [],
-                    },
-                },
-                COLON@328..330 ":" [] [Whitespace(" ")],
-                ScssExpression {
-                    items: ScssExpressionItemList [
-                        CssRegularDimension {
-                            value_token: CSS_NUMBER_LITERAL@330..332 "10" [] [],
-                            unit_token: IDENT@332..335 "px" [] [Whitespace(" ")],
-                        },
-                    ],
-                },
-                CssBogus {
-                    items: [
-                        CssBogus {
-                            items: [
-                                BANG@335..336 "!" [] [],
-                                IDENT@336..342 "wrong" [] [Whitespace(" ")],
+                                BANG@234..235 "!" [] [],
+                                IDENT@235..241 "wrong" [] [Whitespace(" ")],
                             ],
                         },
                         CssBogus {
                             items: [
-                                BANG@342..343 "!" [] [],
-                                IDENT@343..350 "invalid" [] [],
+                                BANG@241..242 "!" [] [],
+                                IDENT@242..249 "invalid" [] [],
                             ],
                         },
                     ],
                 },
-                SEMICOLON@350..351 ";" [] [],
+                SEMICOLON@249..250 ";" [] [],
             ],
         },
     ],
-    eof_token: EOF@351..352 "" [Newline("\n")] [],
+    eof_token: EOF@250..251 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..352
+0: CSS_ROOT@0..251
   0: (empty)
-  1: CSS_ROOT_ITEM_LIST@0..351
-    0: CSS_BOGUS@0..99
-      0: SCSS_IDENTIFIER@0..82
-        0: DOLLAR@0..77 "$" [Comments("// Invalid modifier - ..."), Newline("\n")] []
-        1: CSS_IDENTIFIER@77..82
-          0: IDENT@77..82 "color" [] []
-      1: COLON@82..84 ":" [] [Whitespace(" ")]
-      2: SCSS_EXPRESSION@84..88
-        0: SCSS_EXPRESSION_ITEM_LIST@84..88
-          0: CSS_IDENTIFIER@84..88
-            0: IDENT@84..88 "red" [] [Whitespace(" ")]
-      3: CSS_BOGUS@88..98
-        0: CSS_BOGUS@88..98
-          0: BANG@88..89 "!" [] []
-          1: IMPORTANT_KW@89..98 "important" [] []
-      4: SEMICOLON@98..99 ";" [] []
-    1: CSS_BOGUS@99..164
-      0: SCSS_IDENTIFIER@99..148
-        0: DOLLAR@99..143 "$" [Newline("\n"), Newline("\n"), Comments("// Invalid modifier - ..."), Newline("\n")] []
-        1: CSS_IDENTIFIER@143..148
-          0: IDENT@143..148 "width" [] []
-      1: COLON@148..150 ":" [] [Whitespace(" ")]
-      2: SCSS_EXPRESSION@150..156
-        0: SCSS_EXPRESSION_ITEM_LIST@150..156
-          0: CSS_REGULAR_DIMENSION@150..156
-            0: CSS_NUMBER_LITERAL@150..153 "100" [] []
-            1: IDENT@153..156 "px" [] [Whitespace(" ")]
-      3: CSS_BOGUS@156..163
-        0: CSS_BOGUS@156..163
-          0: BANG@156..157 "!" [] []
-          1: IDENT@157..163 "random" [] []
-      4: SEMICOLON@163..164 ";" [] []
-    2: CSS_BOGUS@164..226
-      0: SCSS_IDENTIFIER@164..211
-        0: DOLLAR@164..205 "$" [Newline("\n"), Newline("\n"), Comments("// Invalid modifier - ..."), Newline("\n")] []
-        1: CSS_IDENTIFIER@205..211
-          0: IDENT@205..211 "height" [] []
-      1: COLON@211..213 ":" [] [Whitespace(" ")]
-      2: SCSS_EXPRESSION@213..218
-        0: SCSS_EXPRESSION_ITEM_LIST@213..218
-          0: CSS_REGULAR_DIMENSION@213..218
-            0: CSS_NUMBER_LITERAL@213..215 "50" [] []
-            1: IDENT@215..218 "vh" [] [Whitespace(" ")]
-      3: CSS_BOGUS@218..225
-        0: CSS_BOGUS@218..225
-          0: BANG@218..219 "!" [] []
-          1: IDENT@219..225 "defalt" [] []
-      4: SEMICOLON@225..226 ";" [] []
-    3: CSS_BOGUS@226..289
-      0: SCSS_IDENTIFIER@226..275
-        0: DOLLAR@226..266 "$" [Newline("\n"), Newline("\n"), Comments("// Invalid modifier - ..."), Newline("\n")] []
-        1: CSS_IDENTIFIER@266..275
-          0: IDENT@266..275 "font-size" [] []
-      1: COLON@275..277 ":" [] [Whitespace(" ")]
-      2: SCSS_EXPRESSION@277..282
-        0: SCSS_EXPRESSION_ITEM_LIST@277..282
-          0: CSS_REGULAR_DIMENSION@277..282
-            0: CSS_NUMBER_LITERAL@277..279 "16" [] []
-            1: IDENT@279..282 "px" [] [Whitespace(" ")]
-      3: CSS_BOGUS@282..288
-        0: CSS_BOGUS@282..288
-          0: BANG@282..283 "!" [] []
-          1: IDENT@283..288 "globl" [] []
-      4: SEMICOLON@288..289 ";" [] []
-    4: CSS_BOGUS@289..351
-      0: SCSS_IDENTIFIER@289..328
-        0: DOLLAR@289..322 "$" [Newline("\n"), Newline("\n"), Comments("// Multiple invalid m ..."), Newline("\n")] []
-        1: CSS_IDENTIFIER@322..328
-          0: IDENT@322..328 "margin" [] []
-      1: COLON@328..330 ":" [] [Whitespace(" ")]
-      2: SCSS_EXPRESSION@330..335
-        0: SCSS_EXPRESSION_ITEM_LIST@330..335
-          0: CSS_REGULAR_DIMENSION@330..335
-            0: CSS_NUMBER_LITERAL@330..332 "10" [] []
-            1: IDENT@332..335 "px" [] [Whitespace(" ")]
-      3: CSS_BOGUS@335..350
-        0: CSS_BOGUS@335..342
-          0: BANG@335..336 "!" [] []
-          1: IDENT@336..342 "wrong" [] [Whitespace(" ")]
-        1: CSS_BOGUS@342..350
-          0: BANG@342..343 "!" [] []
-          1: IDENT@343..350 "invalid" [] []
-      4: SEMICOLON@350..351 ";" [] []
-  2: EOF@351..352 "" [Newline("\n")] []
+  1: CSS_ROOT_ITEM_LIST@0..250
+    0: CSS_BOGUS@0..63
+      0: SCSS_IDENTIFIER@0..47
+        0: DOLLAR@0..42 "$" [Comments("// Invalid modifier - ..."), Newline("\n")] []
+        1: CSS_IDENTIFIER@42..47
+          0: IDENT@42..47 "width" [] []
+      1: COLON@47..49 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@49..55
+        0: SCSS_EXPRESSION_ITEM_LIST@49..55
+          0: CSS_REGULAR_DIMENSION@49..55
+            0: CSS_NUMBER_LITERAL@49..52 "100" [] []
+            1: IDENT@52..55 "px" [] [Whitespace(" ")]
+      3: CSS_BOGUS@55..62
+        0: CSS_BOGUS@55..62
+          0: BANG@55..56 "!" [] []
+          1: IDENT@56..62 "random" [] []
+      4: SEMICOLON@62..63 ";" [] []
+    1: CSS_BOGUS@63..125
+      0: SCSS_IDENTIFIER@63..110
+        0: DOLLAR@63..104 "$" [Newline("\n"), Newline("\n"), Comments("// Invalid modifier - ..."), Newline("\n")] []
+        1: CSS_IDENTIFIER@104..110
+          0: IDENT@104..110 "height" [] []
+      1: COLON@110..112 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@112..117
+        0: SCSS_EXPRESSION_ITEM_LIST@112..117
+          0: CSS_REGULAR_DIMENSION@112..117
+            0: CSS_NUMBER_LITERAL@112..114 "50" [] []
+            1: IDENT@114..117 "vh" [] [Whitespace(" ")]
+      3: CSS_BOGUS@117..124
+        0: CSS_BOGUS@117..124
+          0: BANG@117..118 "!" [] []
+          1: IDENT@118..124 "defalt" [] []
+      4: SEMICOLON@124..125 ";" [] []
+    2: CSS_BOGUS@125..188
+      0: SCSS_IDENTIFIER@125..174
+        0: DOLLAR@125..165 "$" [Newline("\n"), Newline("\n"), Comments("// Invalid modifier - ..."), Newline("\n")] []
+        1: CSS_IDENTIFIER@165..174
+          0: IDENT@165..174 "font-size" [] []
+      1: COLON@174..176 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@176..181
+        0: SCSS_EXPRESSION_ITEM_LIST@176..181
+          0: CSS_REGULAR_DIMENSION@176..181
+            0: CSS_NUMBER_LITERAL@176..178 "16" [] []
+            1: IDENT@178..181 "px" [] [Whitespace(" ")]
+      3: CSS_BOGUS@181..187
+        0: CSS_BOGUS@181..187
+          0: BANG@181..182 "!" [] []
+          1: IDENT@182..187 "globl" [] []
+      4: SEMICOLON@187..188 ";" [] []
+    3: CSS_BOGUS@188..250
+      0: SCSS_IDENTIFIER@188..227
+        0: DOLLAR@188..221 "$" [Newline("\n"), Newline("\n"), Comments("// Multiple invalid m ..."), Newline("\n")] []
+        1: CSS_IDENTIFIER@221..227
+          0: IDENT@221..227 "margin" [] []
+      1: COLON@227..229 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@229..234
+        0: SCSS_EXPRESSION_ITEM_LIST@229..234
+          0: CSS_REGULAR_DIMENSION@229..234
+            0: CSS_NUMBER_LITERAL@229..231 "10" [] []
+            1: IDENT@231..234 "px" [] [Whitespace(" ")]
+      3: CSS_BOGUS@234..249
+        0: CSS_BOGUS@234..241
+          0: BANG@234..235 "!" [] []
+          1: IDENT@235..241 "wrong" [] [Whitespace(" ")]
+        1: CSS_BOGUS@241..249
+          0: BANG@241..242 "!" [] []
+          1: IDENT@242..249 "invalid" [] []
+      4: SEMICOLON@249..250 ";" [] []
+  2: EOF@250..251 "" [Newline("\n")] []
 
 ```
 
 ## Diagnostics
 
 ```
-invalid-modifier.scss:2:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected 'default', or 'global' but instead found `important`
-  
-    1 │ // Invalid modifier - `!important` falls back to the generic modifier error
-  > 2 │ $color: red !important;
-      │             ^^^^^^^^^^
-    3 │ 
-    4 │ // Invalid modifier - just a random word
-  
-  i Remove !important
-  
-invalid-modifier.scss:5:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-modifier.scss:2:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected 'default', or 'global' but instead found `random`
   
-    4 │ // Invalid modifier - just a random word
-  > 5 │ $width: 100px !random;
+    1 │ // Invalid modifier - just a random word
+  > 2 │ $width: 100px !random;
       │               ^^^^^^^
-    6 │ 
-    7 │ // Invalid modifier - typo in default
+    3 │ 
+    4 │ // Invalid modifier - typo in default
   
   i Remove !random
   
-invalid-modifier.scss:8:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-modifier.scss:5:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected 'default', or 'global' but instead found `defalt`
   
-     7 │ // Invalid modifier - typo in default
-   > 8 │ $height: 50vh !defalt;
-       │               ^^^^^^^
-     9 │ 
-    10 │ // Invalid modifier - typo in global
+    4 │ // Invalid modifier - typo in default
+  > 5 │ $height: 50vh !defalt;
+      │               ^^^^^^^
+    6 │ 
+    7 │ // Invalid modifier - typo in global
   
   i Remove !defalt
   
-invalid-modifier.scss:11:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-modifier.scss:8:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected 'default', or 'global' but instead found `globl`
   
-    10 │ // Invalid modifier - typo in global
-  > 11 │ $font-size: 16px !globl;
+     7 │ // Invalid modifier - typo in global
+   > 8 │ $font-size: 16px !globl;
        │                  ^^^^^^
-    12 │ 
-    13 │ // Multiple invalid modifiers
+     9 │ 
+    10 │ // Multiple invalid modifiers
   
   i Remove !globl
   
-invalid-modifier.scss:14:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-modifier.scss:11:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected 'default', or 'global' but instead found `wrong`
   
-    13 │ // Multiple invalid modifiers
-  > 14 │ $margin: 10px !wrong !invalid;
+    10 │ // Multiple invalid modifiers
+  > 11 │ $margin: 10px !wrong !invalid;
        │               ^^^^^^
-    15 │ 
+    12 │ 
   
   i Remove !wrong
   
-invalid-modifier.scss:14:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-modifier.scss:11:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected 'default', or 'global' but instead found `invalid`
   
-    13 │ // Multiple invalid modifiers
-  > 14 │ $margin: 10px !wrong !invalid;
+    10 │ // Multiple invalid modifiers
+  > 11 │ $margin: 10px !wrong !invalid;
        │                      ^^^^^^^^
-    15 │ 
+    12 │ 
   
   i Remove !invalid
   
