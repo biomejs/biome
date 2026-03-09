@@ -288,6 +288,8 @@ dependencies = [
  "biome_json_analyze",
  "biome_json_syntax",
  "biome_string_case",
+ "biome_tailwind_analyze",
+ "biome_tailwind_syntax",
  "proc-macro2",
  "pulldown-cmark",
  "quote",
@@ -936,6 +938,8 @@ dependencies = [
  "biome_service",
  "biome_string_case",
  "biome_suppression",
+ "biome_tailwind_parser",
+ "biome_tailwind_syntax",
  "biome_test_utils",
  "biome_unicode_table",
  "bitvec",
@@ -1650,6 +1654,9 @@ dependencies = [
  "biome_resolver",
  "biome_rowan",
  "biome_string_case",
+ "biome_tailwind_analyze",
+ "biome_tailwind_parser",
+ "biome_tailwind_syntax",
  "biome_text_edit",
  "boxcar",
  "bpaf",
@@ -1700,6 +1707,31 @@ dependencies = [
  "biome_ungrammar",
  "proc-macro2",
  "quote",
+]
+
+[[package]]
+name = "biome_tailwind_analyze"
+version = "0.0.1"
+dependencies = [
+ "biome_analyze",
+ "biome_analyze_macros",
+ "biome_console",
+ "biome_diagnostics",
+ "biome_rowan",
+ "biome_rule_options",
+ "biome_suppression",
+ "biome_tailwind_factory",
+ "biome_tailwind_parser",
+ "biome_tailwind_syntax",
+ "biome_test_utils",
+ "camino",
+ "filetime",
+ "insta",
+ "phf 0.13.1",
+ "rustc-hash 2.1.1",
+ "schemars",
+ "serde",
+ "tests_macros",
 ]
 
 [[package]]
@@ -4696,6 +4728,9 @@ dependencies = [
  "biome_rowan",
  "biome_ruledoc_utils",
  "biome_service",
+ "biome_tailwind_analyze",
+ "biome_tailwind_parser",
+ "biome_tailwind_syntax",
  "camino",
  "pulldown-cmark",
 ]
@@ -6562,6 +6597,8 @@ dependencies = [
  "biome_rowan",
  "biome_service",
  "biome_string_case",
+ "biome_tailwind_analyze",
+ "biome_tailwind_syntax",
  "biome_ungrammar",
  "bpaf",
  "git2",

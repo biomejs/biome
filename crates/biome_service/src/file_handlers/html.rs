@@ -33,7 +33,7 @@ use biome_formatter::{
 };
 use biome_fs::BiomePath;
 use biome_html_analyze::analyze;
-use biome_html_factory::make::ident;
+use biome_html_factory::make::{html_string_literal, ident};
 use biome_html_formatter::context::SelfCloseVoidElements;
 use biome_html_formatter::{
     HtmlFormatOptions,
@@ -43,11 +43,12 @@ use biome_html_formatter::{
 use biome_html_parser::{HtmlParserOptions, parse_html_with_cache};
 use biome_html_syntax::element_ext::AnyEmbeddedContent;
 use biome_html_syntax::{
-    AnySvelteDirective, AstroEmbeddedContent, HtmlAttributeInitializerClause,
+    AnySvelteDirective, AstroEmbeddedContent, HtmlAttribute, HtmlAttributeInitializerClause,
     HtmlDoubleTextExpression, HtmlElement, HtmlFileSource, HtmlLanguage, HtmlRoot,
-    HtmlSingleTextExpression, HtmlSyntaxNode, HtmlTextExpression, HtmlTextExpressions, HtmlVariant,
-    SvelteAwaitBlock, SvelteEachBlock, SvelteIfBlock, SvelteKeyBlock, VueDirective,
-    VueVBindShorthandDirective, VueVOnShorthandDirective, VueVSlotShorthandDirective,
+    HtmlSelfClosingElement, HtmlSingleTextExpression, HtmlSyntaxKind, HtmlSyntaxNode,
+    HtmlSyntaxToken, HtmlTextExpression, HtmlTextExpressions, HtmlVariant, SvelteAwaitBlock,
+    SvelteEachBlock, SvelteIfBlock, SvelteKeyBlock, VueDirective, VueVBindShorthandDirective,
+    VueVOnShorthandDirective, VueVSlotShorthandDirective,
 };
 use biome_js_parser::parse_js_with_offset_and_cache;
 use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage};
@@ -55,6 +56,8 @@ use biome_json_parser::parse_json_with_offset_and_cache;
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, AstNodeList, BatchMutation, NodeCache, SendNode, TextSize};
+use biome_tailwind_parser::parse_tailwind_with_offset_and_cache;
+use biome_tailwind_syntax::TailwindLanguage;
 use camino::Utf8Path;
 use either::Either;
 use std::borrow::Cow;
@@ -415,6 +418,11 @@ fn parse_embedded_nodes(
         return ParseEmbedResult::default();
     };
 
+    let tailwind_attr_names = &settings
+        .as_ref()
+        .tailwind_class_detection_config()
+        .attributes;
+
     match file_source.variant() {
         HtmlVariant::Standard(text_expression) => {
             for element in html_root.syntax().descendants() {
@@ -454,6 +462,26 @@ fn parse_embedded_nodes(
                         if let Some((content, services, file_source)) = result {
                             nodes.push(((content, services).into(), file_source));
                         }
+                    }
+
+                    if let Ok(opening) = html_element.opening_element() {
+                        for (content, tw_source) in parse_tailwind_class_attributes(
+                            &opening.attributes(),
+                            html_element.range(),
+                            cache,
+                            tailwind_attr_names,
+                        ) {
+                            nodes.push((content.into(), tw_source));
+                        }
+                    }
+                } else if let Some(self_closing) = HtmlSelfClosingElement::cast_ref(&element) {
+                    for (content, tw_source) in parse_tailwind_class_attributes(
+                        &self_closing.attributes(),
+                        self_closing.range(),
+                        cache,
+                        tailwind_attr_names,
+                    ) {
+                        nodes.push((content.into(), tw_source));
                     }
                 }
 
@@ -552,92 +580,118 @@ fn parse_embedded_nodes(
                             nodes.push(((content, services).into(), file_source));
                         }
                     }
+
+                    if let Ok(opening) = html_element.opening_element() {
+                        for (content, tw_source) in parse_tailwind_class_attributes(
+                            &opening.attributes(),
+                            html_element.range(),
+                            cache,
+                            tailwind_attr_names,
+                        ) {
+                            nodes.push((content.into(), tw_source));
+                        }
+                    }
+                } else if let Some(self_closing) = HtmlSelfClosingElement::cast_ref(&element) {
+                    for (content, tw_source) in parse_tailwind_class_attributes(
+                        &self_closing.attributes(),
+                        self_closing.range(),
+                        cache,
+                        tailwind_attr_names,
+                    ) {
+                        nodes.push((content.into(), tw_source));
+                    }
                 }
             }
         }
         HtmlVariant::Vue => {
-            let mut elements = vec![];
-            let mut snippet_expressions = vec![];
+            let mut embedded_file_source = JsFileSource::js_module();
+
             for element in html_root.syntax().descendants() {
                 if let Some(text_expression) = HtmlDoubleTextExpression::cast_ref(&element) {
-                    snippet_expressions.push(text_expression);
+                    let result = parse_vue_text_expression(
+                        text_expression,
+                        cache,
+                        biome_path,
+                        settings,
+                        embedded_file_source,
+                    );
+                    if let Some((content, file_source)) = result {
+                        nodes.push((content.into(), file_source));
+                    }
                 }
 
-                if let Some(element) = HtmlElement::cast_ref(&element) {
-                    elements.push(element);
-                }
-            }
-
-            let mut embedded_file_source = JsFileSource::js_module();
-            for element in elements {
-                if let Some(script_type) = element.get_script_type() {
-                    if script_type.is_javascript() {
-                        let result = parse_embedded_script(
-                            element.clone(),
+                if let Some(html_element) = HtmlElement::cast_ref(&element) {
+                    if let Some(script_type) = html_element.get_script_type() {
+                        if script_type.is_javascript() {
+                            let result = parse_embedded_script(
+                                html_element.clone(),
+                                cache,
+                                biome_path,
+                                &file_source,
+                                settings,
+                                builder,
+                            );
+                            if let Some((content, js_services, file_source)) = result {
+                                embedded_file_source = file_source;
+                                nodes.push(((content, js_services).into(), file_source.into()));
+                            }
+                        } else if script_type.is_json() {
+                            let result = parse_embedded_json(
+                                html_element.clone(),
+                                cache,
+                                biome_path,
+                                settings,
+                            );
+                            if let Some((content, file_source)) = result {
+                                nodes.push((content.into(), file_source));
+                            }
+                        }
+                    } else if html_element.is_style_tag() {
+                        let result = parse_embedded_style(
+                            html_element.clone(),
                             cache,
                             biome_path,
                             &file_source,
                             settings,
-                            builder,
                         );
-                        if let Some((content, js_services, file_source)) = result {
-                            embedded_file_source = file_source;
-                            nodes.push(((content, js_services).into(), file_source.into()));
-                        }
-                    } else if script_type.is_json() {
-                        let result =
-                            parse_embedded_json(element.clone(), cache, biome_path, settings);
-                        if let Some((content, file_source)) = result {
-                            nodes.push((content.into(), file_source));
+                        if let Some((content, services, file_source)) = result {
+                            nodes.push(((content, services).into(), file_source));
                         }
                     }
-                } else if element.is_style_tag() {
-                    let result = parse_embedded_style(
-                        element.clone(),
+
+                    if let Ok(opening) = html_element.opening_element() {
+                        for (content, tw_source) in parse_tailwind_class_attributes(
+                            &opening.attributes(),
+                            html_element.range(),
+                            cache,
+                            tailwind_attr_names,
+                        ) {
+                            nodes.push((content.into(), tw_source));
+                        }
+                    }
+                } else if let Some(self_closing) = HtmlSelfClosingElement::cast_ref(&element) {
+                    for (content, tw_source) in parse_tailwind_class_attributes(
+                        &self_closing.attributes(),
+                        self_closing.range(),
                         cache,
-                        biome_path,
-                        &file_source,
-                        settings,
-                    );
-                    if let Some((content, services, file_source)) = result {
-                        nodes.push(((content, services).into(), file_source));
+                        tailwind_attr_names,
+                    ) {
+                        nodes.push((content.into(), tw_source));
                     }
                 }
-            }
 
-            for snippet in snippet_expressions {
-                let result = parse_vue_text_expression(
-                    snippet,
-                    cache,
-                    biome_path,
-                    settings,
-                    embedded_file_source,
-                );
-
-                if let Some((content, file_source)) = result {
-                    nodes.push((content.into(), file_source));
-                }
-            }
-
-            // Parse Vue directive attributes (v-on, v-bind, v-if, etc.)
-            for element in html_root.syntax().descendants() {
                 // Handle @click shorthand (VueVOnShorthandDirective)
                 if let Some(directive) = VueVOnShorthandDirective::cast_ref(&element)
                     && let Some(initializer) = directive.initializer()
                 {
-                    let file_source =
-                        embedded_file_source.with_embedding_kind(EmbeddingKind::Vue {
-                            setup: false,
-                            is_source: false,
-                            event_handler: true,
-                        });
-                    if let Some((content, doc_source)) = parse_directive_string_value(
-                        &initializer,
-                        cache,
-                        biome_path,
-                        settings,
-                        file_source,
-                    ) {
+                    let fs = embedded_file_source.with_embedding_kind(EmbeddingKind::Vue {
+                        setup: false,
+                        is_source: false,
+                        event_handler: true,
+                    });
+                    if let Some((content, doc_source)) =
+                        parse_directive_string_value(&initializer, cache, biome_path, settings, fs)
+                    {
                         nodes.push((content.into(), doc_source));
                     }
                 }
@@ -646,19 +700,14 @@ fn parse_embedded_nodes(
                 if let Some(directive) = VueVBindShorthandDirective::cast_ref(&element)
                     && let Some(initializer) = directive.initializer()
                 {
-                    let file_source =
-                        embedded_file_source.with_embedding_kind(EmbeddingKind::Vue {
-                            setup: false,
-                            is_source: false,
-                            event_handler: false,
-                        });
-                    if let Some((content, doc_source)) = parse_directive_string_value(
-                        &initializer,
-                        cache,
-                        biome_path,
-                        settings,
-                        file_source,
-                    ) {
+                    let fs = embedded_file_source.with_embedding_kind(EmbeddingKind::Vue {
+                        setup: false,
+                        is_source: false,
+                        event_handler: false,
+                    });
+                    if let Some((content, doc_source)) =
+                        parse_directive_string_value(&initializer, cache, biome_path, settings, fs)
+                    {
                         nodes.push((content.into(), doc_source));
                     }
                 }
@@ -667,19 +716,14 @@ fn parse_embedded_nodes(
                 if let Some(directive) = VueVSlotShorthandDirective::cast_ref(&element)
                     && let Some(initializer) = directive.initializer()
                 {
-                    let file_source =
-                        embedded_file_source.with_embedding_kind(EmbeddingKind::Vue {
-                            setup: false,
-                            is_source: false,
-                            event_handler: false,
-                        });
-                    if let Some((content, doc_source)) = parse_directive_string_value(
-                        &initializer,
-                        cache,
-                        biome_path,
-                        settings,
-                        file_source,
-                    ) {
+                    let fs = embedded_file_source.with_embedding_kind(EmbeddingKind::Vue {
+                        setup: false,
+                        is_source: false,
+                        event_handler: false,
+                    });
+                    if let Some((content, doc_source)) =
+                        parse_directive_string_value(&initializer, cache, biome_path, settings, fs)
+                    {
                         nodes.push((content.into(), doc_source));
                     }
                 }
@@ -692,90 +736,96 @@ fn parse_embedded_nodes(
                         .name_token()
                         .map(|t| t.text_trimmed() == "v-on")
                         .unwrap_or(false);
-                    let file_source =
-                        embedded_file_source.with_embedding_kind(EmbeddingKind::Vue {
-                            setup: false,
-                            is_source: false,
-                            event_handler: is_v_on,
-                        });
-                    if let Some((content, doc_source)) = parse_directive_string_value(
-                        &initializer,
-                        cache,
-                        biome_path,
-                        settings,
-                        file_source,
-                    ) {
+                    let fs = embedded_file_source.with_embedding_kind(EmbeddingKind::Vue {
+                        setup: false,
+                        is_source: false,
+                        event_handler: is_v_on,
+                    });
+                    if let Some((content, doc_source)) =
+                        parse_directive_string_value(&initializer, cache, biome_path, settings, fs)
+                    {
                         nodes.push((content.into(), doc_source));
                     }
                 }
             }
         }
         HtmlVariant::Svelte => {
-            let mut elements = vec![];
-            let mut snippet_expressions = vec![];
+            let mut embedded_file_source = JsFileSource::js_module();
+
             for element in html_root.syntax().descendants() {
                 if let Some(text_expression) = HtmlSingleTextExpression::cast_ref(&element) {
-                    snippet_expressions.push(text_expression);
+                    let result = parse_svelte_text_expression(
+                        text_expression,
+                        cache,
+                        biome_path,
+                        settings,
+                        embedded_file_source,
+                    );
+                    if let Some((content, file_source)) = result {
+                        nodes.push((content.into(), file_source));
+                    }
                 }
 
-                if let Some(element) = HtmlElement::cast_ref(&element) {
-                    elements.push(element);
-                }
-            }
-
-            let mut embedded_file_source = JsFileSource::js_module();
-            for element in elements {
-                if let Some(script_type) = element.get_script_type() {
-                    if script_type.is_javascript() {
-                        let result = parse_embedded_script(
-                            element.clone(),
+                if let Some(html_element) = HtmlElement::cast_ref(&element) {
+                    if let Some(script_type) = html_element.get_script_type() {
+                        if script_type.is_javascript() {
+                            let result = parse_embedded_script(
+                                html_element.clone(),
+                                cache,
+                                biome_path,
+                                &file_source,
+                                settings,
+                                builder,
+                            );
+                            if let Some((content, js_services, file_source)) = result {
+                                embedded_file_source = file_source;
+                                nodes.push(((content, js_services).into(), file_source.into()));
+                            }
+                        } else if script_type.is_json() {
+                            let result = parse_embedded_json(
+                                html_element.clone(),
+                                cache,
+                                biome_path,
+                                settings,
+                            );
+                            if let Some((content, file_source)) = result {
+                                nodes.push((content.into(), file_source));
+                            }
+                        }
+                    } else if html_element.is_style_tag() {
+                        let result = parse_embedded_style(
+                            html_element.clone(),
                             cache,
                             biome_path,
                             &file_source,
                             settings,
-                            builder,
                         );
-                        if let Some((content, js_services, file_source)) = result {
-                            embedded_file_source = file_source;
-                            nodes.push(((content, js_services).into(), file_source.into()));
-                        }
-                    } else if script_type.is_json() {
-                        let result =
-                            parse_embedded_json(element.clone(), cache, biome_path, settings);
-                        if let Some((content, file_source)) = result {
-                            nodes.push((content.into(), file_source));
+                        if let Some((content, services, file_source)) = result {
+                            nodes.push(((content, services).into(), file_source));
                         }
                     }
-                } else if element.is_style_tag() {
-                    let result = parse_embedded_style(
-                        element.clone(),
+
+                    if let Ok(opening) = html_element.opening_element() {
+                        for (content, tw_source) in parse_tailwind_class_attributes(
+                            &opening.attributes(),
+                            html_element.range(),
+                            cache,
+                            tailwind_attr_names,
+                        ) {
+                            nodes.push((content.into(), tw_source));
+                        }
+                    }
+                } else if let Some(self_closing) = HtmlSelfClosingElement::cast_ref(&element) {
+                    for (content, tw_source) in parse_tailwind_class_attributes(
+                        &self_closing.attributes(),
+                        self_closing.range(),
                         cache,
-                        biome_path,
-                        &file_source,
-                        settings,
-                    );
-                    if let Some((content, services, file_source)) = result {
-                        nodes.push(((content, services).into(), file_source));
+                        tailwind_attr_names,
+                    ) {
+                        nodes.push((content.into(), tw_source));
                     }
                 }
-            }
 
-            for snippet in snippet_expressions {
-                let result = parse_svelte_text_expression(
-                    snippet,
-                    cache,
-                    biome_path,
-                    settings,
-                    embedded_file_source,
-                );
-
-                if let Some((content, file_source)) = result {
-                    nodes.push((content.into(), file_source));
-                }
-            }
-
-            // Parse Svelte control flow block expressions ({#if}, {#each}, {#await}, {#key})
-            for element in html_root.syntax().descendants() {
                 let file_source = embedded_file_source
                     .with_embedding_kind(EmbeddingKind::Svelte { is_source: false });
 
@@ -857,27 +907,32 @@ fn parse_embedded_nodes(
                 {
                     nodes.push((content.into(), doc_source));
                 }
-            }
 
-            // Parse Svelte directive attributes (bind:, class:, use:, etc.)
-            // Note: on: event handlers are legacy Svelte 3/4 syntax and not supported.
-            // Svelte 5 runes mode uses regular attributes for event handlers.
-            for element in html_root.syntax().descendants() {
                 // Handle special Svelte directives (bind:, class:, etc.)
+                // Note: on: event handlers are legacy Svelte 3/4 syntax and not supported.
+                // Svelte 5 runes mode uses regular attributes for event handlers.
                 if let Some(directive) = AnySvelteDirective::cast_ref(&element)
                     && let Some(initializer) = directive.initializer()
-                {
-                    let file_source = embedded_file_source
-                        .with_embedding_kind(EmbeddingKind::Svelte { is_source: false });
-                    if let Some((content, doc_source)) = parse_directive_text_expression(
+                    && let Some((content, doc_source)) = parse_directive_text_expression(
                         &initializer,
                         cache,
                         biome_path,
                         settings,
                         file_source,
-                    ) {
-                        nodes.push((content.into(), doc_source));
-                    }
+                    )
+                {
+                    nodes.push((content.into(), doc_source));
+                }
+
+                if let Some(attribute) = HtmlAttribute::cast_ref(&element)
+                    && let Some(initializer) = attribute.initializer()
+                    && let Ok(value) = initializer.value()
+                    && let Some(text_expression) = value.as_html_attribute_single_text_expression()
+                    && let Ok(expression) = text_expression.expression()
+                    && let Some((content, doc_source)) =
+                        parse_text_expression(expression, cache, biome_path, settings, file_source)
+                {
+                    nodes.push((content.into(), doc_source));
                 }
             }
         }
@@ -1231,6 +1286,55 @@ pub(crate) fn parse_vue_text_expression(
         event_handler: false,
     });
     parse_text_expression(expression, cache, biome_path, settings, file_source)
+}
+
+/// Extracts Tailwind class strings from HTML element attributes and parses them as Tailwind snippets.
+///
+/// Checks each attribute name in `attribute_names` against the element's attributes.
+/// If a matching attribute with a string value is found, the value is parsed as Tailwind.
+pub(crate) fn parse_tailwind_class_attributes(
+    element_attributes: &biome_html_syntax::HtmlAttributeList,
+    _element_range: biome_rowan::TextRange,
+    cache: &mut NodeCache,
+    attribute_names: &[String],
+) -> Vec<(EmbeddedSnippet<TailwindLanguage>, DocumentFileSource)> {
+    let mut results = Vec::new();
+    for attr_name in attribute_names {
+        let Some(attribute) = element_attributes.find_by_name(attr_name) else {
+            continue;
+        };
+        let Some(initializer) = attribute.initializer() else {
+            continue;
+        };
+        let Ok(value) = initializer.value() else {
+            continue;
+        };
+        let Some(html_string) = value.as_html_string() else {
+            continue;
+        };
+        let Ok(content_token) = html_string.value_token() else {
+            continue;
+        };
+        let Ok(inner_text) = html_string.inner_string_text() else {
+            continue;
+        };
+        let text = inner_text.text();
+
+        // Skip empty strings
+        if text.is_empty() {
+            continue;
+        }
+
+        // Calculate offset: start of token + 1 (to skip opening quote)
+        let token_range = content_token.text_trimmed_range();
+        let inner_offset = token_range.start() + TextSize::from(1);
+
+        let parse = parse_tailwind_with_offset_and_cache(text, inner_offset, cache);
+        let snippet =
+            EmbeddedSnippet::new(parse.into(), attribute.range(), token_range, inner_offset);
+        results.push((snippet, DocumentFileSource::Tailwind));
+    }
+    results
 }
 
 /// Parses a directive attribute's string value as JavaScript
@@ -1613,30 +1717,76 @@ pub(crate) fn update_snippets(
 ) -> Result<SendNode, WorkspaceError> {
     let tree: HtmlRoot = root.tree();
     let mut mutation = BatchMutation::new(tree.syntax().clone());
-    let iterator = tree
-        .syntax()
-        .descendants()
-        .filter_map(AnyEmbeddedContent::cast);
+    for node in tree.syntax().descendants() {
+        if let Some(element) = AnyEmbeddedContent::cast(node.clone()) {
+            let Some(snippet) = new_snippets
+                .iter()
+                .find(|snippet| snippet.range == element.range())
+            else {
+                continue;
+            };
 
-    for element in iterator {
+            if let Some(value_token) = element.value_token() {
+                let leading_trivia = read_leading_trivia(value_token.text_trimmed());
+                let trailing_trivia = read_trailing_trivia(value_token.text_trimmed());
+                let new_token = ident(&format!(
+                    "{}{}{}",
+                    leading_trivia,
+                    snippet.new_code.trim(),
+                    trailing_trivia
+                ));
+                mutation.replace_token(value_token, new_token);
+            }
+
+            continue;
+        }
+
+        let Some(attribute) = HtmlAttribute::cast(node.clone()) else {
+            let Some(text_expression) = HtmlTextExpression::cast(node) else {
+                continue;
+            };
+            let Some(snippet) = new_snippets
+                .iter()
+                .find(|snippet| snippet.range == text_expression.range())
+            else {
+                continue;
+            };
+
+            let Ok(value_token) = text_expression.html_literal_token() else {
+                continue;
+            };
+
+            let new_token = HtmlSyntaxToken::new_detached(
+                HtmlSyntaxKind::HTML_LITERAL,
+                snippet.new_code.as_str(),
+                [],
+                [],
+            );
+            mutation.replace_token(value_token, new_token);
+            continue;
+        };
         let Some(snippet) = new_snippets
             .iter()
-            .find(|snippet| snippet.range == element.range())
+            .find(|snippet| snippet.range == attribute.range())
         else {
             continue;
         };
 
-        if let Some(value_token) = element.value_token() {
-            let leading_trivia = read_leading_trivia(value_token.text_trimmed());
-            let trailing_trivia = read_trailing_trivia(value_token.text_trimmed());
-            let new_token = ident(&format!(
-                "{}{}{}",
-                leading_trivia,
-                snippet.new_code.trim(), // trim to avoid duplicating trivia
-                trailing_trivia
-            ));
-            mutation.replace_token(value_token, new_token);
-        }
+        let Some(initializer) = attribute.initializer() else {
+            continue;
+        };
+        let Ok(value) = initializer.value() else {
+            continue;
+        };
+        let Some(html_string) = value.as_html_string() else {
+            continue;
+        };
+        let Ok(value_token) = html_string.value_token() else {
+            continue;
+        };
+
+        let new_token = html_string_literal(snippet.new_code.as_str());
+        mutation.replace_token(value_token, new_token);
     }
 
     let root = mutation.commit();

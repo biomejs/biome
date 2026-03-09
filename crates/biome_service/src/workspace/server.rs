@@ -38,7 +38,7 @@ use biome_configuration::bool::Bool;
 use biome_configuration::max_size::MaxSize;
 use biome_configuration::vcs::VcsClientKind;
 use biome_configuration::{BiomeDiagnostic, Configuration, ConfigurationPathHint};
-use biome_css_syntax::{AnyCssRoot, CssVariant};
+use biome_css_syntax::{AnyCssRoot, CssLanguage, CssVariant};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, Merge};
 use biome_diagnostics::print_diagnostic_to_string;
@@ -47,11 +47,12 @@ use biome_diagnostics::{
 };
 use biome_formatter::Printed;
 use biome_fs::{BiomePath, ConfigName, PathKind};
+use biome_graphql_syntax::GraphqlLanguage;
 use biome_grit_patterns::{CompilePatternOptions, GritQuery, compile_pattern_with_options};
-use biome_html_syntax::HtmlRoot;
-use biome_js_syntax::{AnyJsRoot, LanguageVariant, ModuleKind};
+use biome_html_syntax::{HtmlLanguage, HtmlRoot};
+use biome_js_syntax::{AnyJsRoot, JsLanguage, LanguageVariant, ModuleKind};
 use biome_json_parser::JsonParserOptions;
-use biome_json_syntax::JsonFileSource;
+use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_module_graph::{ModuleDependencies, ModuleDiagnostic, ModuleGraph};
 use biome_package::PackageType;
 use biome_parser::AnyParse;
@@ -59,7 +60,8 @@ use biome_plugin_loader::{BiomePlugin, PluginCache, PluginDiagnostic};
 use biome_plugin_loader::{PluginConfiguration, Plugins};
 use biome_project_layout::ProjectLayout;
 use biome_resolver::FsWithResolverProxy;
-use biome_rowan::{NodeCache, SendNode};
+use biome_rowan::{NodeCache, SendNode, SyntaxNodeWithOffset};
+use biome_tailwind_syntax::TailwindLanguage;
 use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::Sender;
 use papaya::HashMap;
@@ -708,10 +710,7 @@ impl WorkspaceServer {
         builder: &mut EmbeddedBuilder,
     ) -> Result<Vec<AnyEmbeddedSnippet>, WorkspaceError> {
         let mut embedded_nodes = Vec::new();
-        let capabilities = self.get_file_capabilities(
-            path,
-            settings.as_ref().experimental_full_html_support_enabled(),
-        );
+        let capabilities = self.features.get_capabilities(*source);
         let Some(parse_embedded_nodes) = capabilities.parser.parse_embedded_nodes else {
             return Ok(Default::default());
         };
@@ -724,6 +723,182 @@ impl WorkspaceServer {
         }
 
         Ok(embedded_nodes)
+    }
+
+    #[expect(clippy::too_many_arguments)]
+    fn fix_file_with_embeds<'a>(
+        &self,
+        mut parse: AnyParse,
+        document_file_source: DocumentFileSource,
+        document_services: &'a DocumentServices,
+        path: &'a BiomePath,
+        fix_file_mode: FixFileMode,
+        should_format: bool,
+        only: &'a [AnalyzerSelector],
+        skip: &'a [AnalyzerSelector],
+        enabled_rules: &'a [AnalyzerSelector],
+        rule_categories: RuleCategories,
+        suppression_reason: Option<String>,
+        settings: &'a SettingsWithEditor<'a>,
+        plugins: AnalyzerPluginVec,
+    ) -> Result<FixFileResult, WorkspaceError> {
+        let capabilities = self.features.get_capabilities(document_file_source);
+        let fix_all = capabilities
+            .analyzer
+            .fix_all
+            .ok_or_else(self.build_capability_error(path.as_path()))?;
+
+        let mut errors = 0;
+        let mut actions = vec![];
+        let mut skipped_suggested_fixes = 0;
+
+        if let Some(update_snippets) = capabilities.analyzer.update_snippets {
+            let exported_bindings = EmbeddedExportedBindings::default();
+            let mut builder = exported_bindings.builder();
+            let mut node_cache = NodeCache::default();
+            let embedded_snippets = self.parse_embedded_language_snippets(
+                path,
+                &document_file_source,
+                &parse,
+                &mut node_cache,
+                settings,
+                &mut builder,
+            )?;
+
+            let mut new_snippets = vec![];
+            for embedded_snippet in embedded_snippets {
+                let Some(file_source) = self.get_source(embedded_snippet.file_source_index())
+                else {
+                    continue;
+                };
+
+                let results = self.fix_file_with_embeds(
+                    embedded_snippet.parse(),
+                    file_source,
+                    document_services,
+                    path,
+                    fix_file_mode,
+                    should_format,
+                    only,
+                    skip,
+                    enabled_rules,
+                    rule_categories,
+                    suppression_reason.clone(),
+                    settings,
+                    plugins.clone(),
+                )?;
+
+                actions.extend(results.actions);
+                errors += results.errors;
+                skipped_suggested_fixes += results.skipped_suggested_fixes;
+
+                new_snippets.push(UpdateSnippetsNodes {
+                    range: embedded_snippet.element_range(),
+                    new_code: results.code,
+                });
+            }
+
+            let new_root = update_snippets(parse.clone(), new_snippets)?;
+            if parse.is_embedded_node_parse() {
+                match document_file_source {
+                    DocumentFileSource::Js(_) => {
+                        let node = new_root.into_node::<JsLanguage>().unwrap();
+                        let current = parse
+                            .unwrap_as_embedded_syntax_node()
+                            .into_node::<JsLanguage>();
+                        parse.set_new_embedded_root(
+                            SyntaxNodeWithOffset::new(node, current.base_offset())
+                                .as_embedded_send(),
+                        );
+                    }
+                    DocumentFileSource::Css(_) => {
+                        let node = new_root.into_node::<CssLanguage>().unwrap();
+                        let current = parse
+                            .unwrap_as_embedded_syntax_node()
+                            .into_node::<CssLanguage>();
+                        parse.set_new_embedded_root(
+                            SyntaxNodeWithOffset::new(node, current.base_offset())
+                                .as_embedded_send(),
+                        );
+                    }
+                    DocumentFileSource::Graphql(_) => {
+                        let node = new_root.into_node::<GraphqlLanguage>().unwrap();
+                        let current = parse
+                            .unwrap_as_embedded_syntax_node()
+                            .into_node::<GraphqlLanguage>();
+                        parse.set_new_embedded_root(
+                            SyntaxNodeWithOffset::new(node, current.base_offset())
+                                .as_embedded_send(),
+                        );
+                    }
+                    DocumentFileSource::Html(_) => {
+                        let node = new_root.into_node::<HtmlLanguage>().unwrap();
+                        let current = parse
+                            .unwrap_as_embedded_syntax_node()
+                            .into_node::<HtmlLanguage>();
+                        parse.set_new_embedded_root(
+                            SyntaxNodeWithOffset::new(node, current.base_offset())
+                                .as_embedded_send(),
+                        );
+                    }
+                    DocumentFileSource::Json(_) => {
+                        let node = new_root.into_node::<JsonLanguage>().unwrap();
+                        let current = parse
+                            .unwrap_as_embedded_syntax_node()
+                            .into_node::<JsonLanguage>();
+                        parse.set_new_embedded_root(
+                            SyntaxNodeWithOffset::new(node, current.base_offset())
+                                .as_embedded_send(),
+                        );
+                    }
+                    DocumentFileSource::Tailwind => {
+                        let node = new_root.into_node::<TailwindLanguage>().unwrap();
+                        let current = parse
+                            .unwrap_as_embedded_syntax_node()
+                            .into_node::<TailwindLanguage>();
+                        parse.set_new_embedded_root(
+                            SyntaxNodeWithOffset::new(node, current.base_offset())
+                                .as_embedded_send(),
+                        );
+                    }
+                    DocumentFileSource::Grit(_)
+                    | DocumentFileSource::Markdown(_)
+                    | DocumentFileSource::Ignore
+                    | DocumentFileSource::Unknown => parse.set_new_root(new_root),
+                }
+            } else {
+                parse.set_new_root(new_root);
+            }
+        }
+
+        let fix_result = fix_all(FixAllParams {
+            parse,
+            fix_file_mode,
+            settings,
+            should_format,
+            biome_path: path,
+            module_graph: self.module_graph.clone(),
+            project_layout: self.project_layout.clone(),
+            document_file_source,
+            only,
+            skip,
+            rule_categories,
+            suppression_reason,
+            enabled_rules,
+            plugins,
+            document_services,
+        })?;
+
+        actions.extend(fix_result.actions);
+        errors += fix_result.errors;
+        skipped_suggested_fixes += fix_result.skipped_suggested_fixes;
+
+        Ok(FixFileResult {
+            errors,
+            code: fix_result.code,
+            actions,
+            skipped_suggested_fixes,
+        })
     }
 
     fn parse(
@@ -2183,16 +2358,7 @@ impl Workspace for WorkspaceServer {
             .projects
             .get_settings_based_on_path(project_key, &path)
             .ok_or_else(WorkspaceError::no_project)?;
-        let capabilities =
-            self.get_file_capabilities(&path, settings.experimental_full_html_support_enabled());
-
-        let fix_all = capabilities
-            .analyzer
-            .fix_all
-            .ok_or_else(self.build_capability_error(&path))?;
-
-        let (mut parse, embedded_snippets, services) =
-            self.get_parse_with_snippets_and_services(&path)?;
+        let (parse, _, services) = self.get_parse_with_snippets_and_services(&path)?;
 
         let plugins = self
             .get_analyzer_plugins_for_project(
@@ -2208,84 +2374,23 @@ impl Workspace for WorkspaceServer {
             Vec::new()
         };
 
-        let mut errors = 0;
-        let mut actions = vec![];
-        let mut skipped_suggested_fixes = 0;
         let settings = self.settings_handle(&settings, inline_config);
 
-        if let Some(update_snippets) = capabilities.analyzer.update_snippets {
-            let mut new_snippets = vec![];
-            for embedded_snippet in embedded_snippets {
-                let Some(document_file_source) =
-                    self.get_source(embedded_snippet.file_source_index())
-                else {
-                    continue;
-                };
-                let capabilities = self.features.get_capabilities(document_file_source);
-                let Some(fix_all) = capabilities.analyzer.fix_all else {
-                    continue;
-                };
-
-                let results = fix_all(FixAllParams {
-                    parse: embedded_snippet.parse(),
-                    fix_file_mode,
-                    settings: &settings,
-                    should_format,
-                    biome_path: &path,
-                    module_graph: self.module_graph.clone(),
-                    project_layout: self.project_layout.clone(),
-                    document_file_source,
-                    only: &only,
-                    skip: &skip,
-                    rule_categories,
-                    suppression_reason: suppression_reason.clone(),
-                    enabled_rules: &enabled_rules,
-                    plugins: plugins.clone(),
-                    document_services: &services,
-                })?;
-
-                actions.extend(results.actions);
-                errors += results.errors;
-                skipped_suggested_fixes += results.skipped_suggested_fixes;
-
-                new_snippets.push(UpdateSnippetsNodes {
-                    range: embedded_snippet.element_range(),
-                    new_code: results.code,
-                });
-            }
-
-            let new_root = update_snippets(parse.clone(), new_snippets)?;
-            parse.set_new_root(new_root);
-        }
-
-        let fix_result = fix_all(FixAllParams {
+        self.fix_file_with_embeds(
             parse,
+            language,
+            &services,
+            &path,
             fix_file_mode,
-            settings: &settings,
             should_format,
-            biome_path: &path,
-            module_graph: self.module_graph.clone(),
-            project_layout: self.project_layout.clone(),
-            document_file_source: language,
-            only: &only,
-            skip: &skip,
+            &only,
+            &skip,
+            &enabled_rules,
             rule_categories,
-            suppression_reason: suppression_reason.clone(),
-            enabled_rules: &enabled_rules,
-            plugins: plugins.clone(),
-            document_services: &services,
-        })?;
-
-        actions.extend(fix_result.actions);
-        errors += fix_result.errors;
-        skipped_suggested_fixes += fix_result.skipped_suggested_fixes;
-
-        Ok(FixFileResult {
-            errors,
-            code: fix_result.code,
-            actions,
-            skipped_suggested_fixes,
-        })
+            suppression_reason,
+            &settings,
+            plugins,
+        )
     }
 
     fn rename(&self, params: RenameParams) -> Result<RenameResult, WorkspaceError> {
