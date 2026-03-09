@@ -983,6 +983,14 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::ScssIfAtRule::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::SCSS_INCLUDE_ARGUMENT_LIST => {
+                    let $pattern = unsafe { $crate::ScssIncludeArgumentList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_INCLUDE_AT_RULE => {
+                    let $pattern = unsafe { $crate::ScssIncludeAtRule::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::SCSS_KEYWORD_ARGUMENT => {
                     let $pattern = unsafe { $crate::ScssKeywordArgument::new_unchecked(node) };
                     $body

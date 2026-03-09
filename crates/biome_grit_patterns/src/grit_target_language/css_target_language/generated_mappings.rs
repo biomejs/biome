@@ -302,6 +302,7 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "ScssForAtRule" => lang::ScssForAtRule::KIND_SET.iter().next(),
         "ScssIdentifier" => lang::ScssIdentifier::KIND_SET.iter().next(),
         "ScssIfAtRule" => lang::ScssIfAtRule::KIND_SET.iter().next(),
+        "ScssIncludeAtRule" => lang::ScssIncludeAtRule::KIND_SET.iter().next(),
         "ScssKeywordArgument" => lang::ScssKeywordArgument::KIND_SET.iter().next(),
         "ScssMapExpression" => lang::ScssMapExpression::KIND_SET.iter().next(),
         "ScssMapExpressionPair" => lang::ScssMapExpressionPair::KIND_SET.iter().next(),

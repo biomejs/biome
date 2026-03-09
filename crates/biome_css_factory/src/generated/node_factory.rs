@@ -3255,6 +3255,68 @@ impl ScssIfAtRuleBuilder {
         ))
     }
 }
+pub fn scss_include_argument_list(
+    l_paren_token: SyntaxToken,
+    items: CssParameterList,
+    r_paren_token: SyntaxToken,
+) -> ScssIncludeArgumentList {
+    ScssIncludeArgumentList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_INCLUDE_ARGUMENT_LIST,
+        [
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(items.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn scss_include_at_rule(
+    include_token: SyntaxToken,
+    name: AnyScssIncludeTarget,
+) -> ScssIncludeAtRuleBuilder {
+    ScssIncludeAtRuleBuilder {
+        include_token,
+        name,
+        arguments: None,
+        block: None,
+        semicolon_token: None,
+    }
+}
+pub struct ScssIncludeAtRuleBuilder {
+    include_token: SyntaxToken,
+    name: AnyScssIncludeTarget,
+    arguments: Option<ScssIncludeArgumentList>,
+    block: Option<CssDeclarationOrRuleBlock>,
+    semicolon_token: Option<SyntaxToken>,
+}
+impl ScssIncludeAtRuleBuilder {
+    pub fn with_arguments(mut self, arguments: ScssIncludeArgumentList) -> Self {
+        self.arguments = Some(arguments);
+        self
+    }
+    pub fn with_block(mut self, block: CssDeclarationOrRuleBlock) -> Self {
+        self.block = Some(block);
+        self
+    }
+    pub fn with_semicolon_token(mut self, semicolon_token: SyntaxToken) -> Self {
+        self.semicolon_token = Some(semicolon_token);
+        self
+    }
+    pub fn build(self) -> ScssIncludeAtRule {
+        ScssIncludeAtRule::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::SCSS_INCLUDE_AT_RULE,
+            [
+                Some(SyntaxElement::Token(self.include_token)),
+                Some(SyntaxElement::Node(self.name.into_syntax())),
+                self.arguments
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.block
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.semicolon_token
+                    .map(|token| SyntaxElement::Token(token)),
+            ],
+        ))
+    }
+}
 pub fn scss_keyword_argument(
     name: ScssIdentifier,
     colon_token: SyntaxToken,
