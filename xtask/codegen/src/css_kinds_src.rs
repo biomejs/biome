@@ -91,6 +91,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "debug",
         "warn",
         "error",
+        "for",
         "while",
         "sass",
         "style",
@@ -102,6 +103,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "of",
         "from",
         "to",
+        "through",
         "var",
         "url",
         "if",
@@ -582,6 +584,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         // SCSS
         "SCSS_EACH_AT_RULE",
         "SCSS_EACH_BINDING_LIST",
+        "SCSS_FOR_AT_RULE",
         "SCSS_IF_AT_RULE",
         "SCSS_WHILE_AT_RULE",
         "SCSS_ELSE_CLAUSE",

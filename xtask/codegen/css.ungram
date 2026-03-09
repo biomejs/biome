@@ -686,6 +686,7 @@ AnyCssAtRule =
 	| CssFunctionAtRule
 	// SCSS at rules
 	| ScssEachAtRule
+	| ScssForAtRule
 	| ScssIfAtRule
 	| ScssWhileAtRule
 	| ScssDebugAtRule
@@ -2568,6 +2569,17 @@ ScssEachAtRule =
 // @each $key, $value in $map { color: $key; }
 //       ^^^^^^^^^^^^
 ScssEachBindingList = ScssIdentifier (',' ScssIdentifier)*
+
+// @for $i from 1 through 3 { width: $i * 1px; }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssForAtRule =
+	'for'
+	variable: ScssIdentifier
+	'from'
+	lower_bound: ScssExpression
+	operator: ('to' | 'through')
+	upper_bound: ScssExpression
+	block: CssDeclarationOrRuleBlock
 
 // @if $theme == dark { color: white; } @else { color: black; }
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

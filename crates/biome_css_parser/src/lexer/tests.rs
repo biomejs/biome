@@ -309,7 +309,7 @@ fn cdo_and_cdc() {
 #[test]
 fn keywords() {
     assert_lex! {
-        "media keyframes important from sass each debug warn error",
+        "media keyframes important from through sass each debug warn error for",
         MEDIA_KW:5,
         WHITESPACE:1,
         KEYFRAMES_KW:9,
@@ -317,6 +317,8 @@ fn keywords() {
         IMPORTANT_KW:9,
         WHITESPACE:1,
         FROM_KW:4,
+        WHITESPACE:1,
+        THROUGH_KW:7,
         WHITESPACE:1,
         SASS_KW:4,
         WHITESPACE:1,
@@ -326,7 +328,9 @@ fn keywords() {
         WHITESPACE:1,
         WARN_KW:4,
         WHITESPACE:1,
-        ERROR_KW:5
+        ERROR_KW:5,
+        WHITESPACE:1,
+        FOR_KW:3
     }
 }
 

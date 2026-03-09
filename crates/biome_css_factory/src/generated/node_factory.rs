@@ -3188,6 +3188,28 @@ pub fn scss_expression(items: ScssExpressionItemList) -> ScssExpression {
         [Some(SyntaxElement::Node(items.into_syntax()))],
     ))
 }
+pub fn scss_for_at_rule(
+    for_token: SyntaxToken,
+    variable: ScssIdentifier,
+    from_token: SyntaxToken,
+    lower_bound: ScssExpression,
+    operator_token: SyntaxToken,
+    upper_bound: ScssExpression,
+    block: CssDeclarationOrRuleBlock,
+) -> ScssForAtRule {
+    ScssForAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_FOR_AT_RULE,
+        [
+            Some(SyntaxElement::Token(for_token)),
+            Some(SyntaxElement::Node(variable.into_syntax())),
+            Some(SyntaxElement::Token(from_token)),
+            Some(SyntaxElement::Node(lower_bound.into_syntax())),
+            Some(SyntaxElement::Token(operator_token)),
+            Some(SyntaxElement::Node(upper_bound.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
 pub fn scss_identifier(dollar_token: SyntaxToken, name: CssIdentifier) -> ScssIdentifier {
     ScssIdentifier::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_IDENTIFIER,
