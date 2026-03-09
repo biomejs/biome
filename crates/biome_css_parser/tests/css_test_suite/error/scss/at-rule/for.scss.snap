@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
 
@@ -437,72 +436,72 @@ CssRoot {
 for.scss:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a variable binding after `@for`.
-
+  
   > 1 │ @for from 1 through 3 {
       │      ^^^^
     2 │   width: 1px;
     3 │ }
-
+  
   i Add a variable like `$i` before `from`.
-
+  
 for.scss:5:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `from` but instead found `1`
-
+  
     3 │ }
-    4 │
+    4 │ 
   > 5 │ @for $i 1 through 3 {
       │         ^
     6 │   width: 1px;
     7 │ }
-
+  
   i Remove 1
-
+  
 for.scss:9:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected `to` or `through` in the `@for` range.
-
+  
      7 │ }
-     8 │
+     8 │ 
    > 9 │ @for $i from 1 {
        │                ^
     10 │   width: 1px;
     11 │ }
-
+  
   i Use `to` or `through` between the lower and upper bounds.
-
+  
 for.scss:13:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a SCSS expression but instead found '{'.
-
+  
     11 │ }
-    12 │
+    12 │ 
   > 13 │ @for $i from 1 to {
        │                   ^
     14 │   width: 1px;
     15 │ }
-
+  
   i Expected a SCSS expression here.
-
+  
     11 │ }
-    12 │
+    12 │ 
   > 13 │ @for $i from 1 to {
        │                   ^
     14 │   width: 1px;
     15 │ }
-
+  
 for.scss:18:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `{` but instead the file ends
-
+  
     17 │ @for $i from 1 through 3
-  > 18 │
-       │
-
+  > 18 │ 
+       │ 
+  
   i the file ends here
-
+  
     17 │ @for $i from 1 through 3
-  > 18 │
-       │
-
+  > 18 │ 
+       │ 
+  
 ```
