@@ -19,7 +19,7 @@ declare_lint_rule! {
     ///
     /// ```css,expect_diagnostic
     /// a::after {
-    ///   content: "\a"
+    ///   content: "\z"
     /// }
     /// ```
     ///
@@ -40,6 +40,12 @@ declare_lint_rule! {
     /// ```css
     /// a::after {
     ///   content: "\n"
+    /// }
+    /// ```
+    ///
+    /// ```css
+    /// a::after {
+    ///   content: "\e7bb"
     /// }
     /// ```
     ///
@@ -109,10 +115,10 @@ fn next_useless_escape(str: &str, quote: u8) -> Option<usize> {
                 b'^'
                 | b'\r'
                 | b'\n'
-                | b'0'..=b'7'
+                | b'0'..=b'9'
+                | b'a'..=b'f'
+                | b'A'..=b'F'
                 | b'\\'
-                | b'b'
-                | b'f'
                 | b'n'
                 | b'r'
                 | b't'
