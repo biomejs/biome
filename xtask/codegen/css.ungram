@@ -684,6 +684,9 @@ AnyCssAtRule =
 	| CssPositionTryAtRule
 	| CssViewTransitionAtRule
 	| CssFunctionAtRule
+	| ScssDebugAtRule
+	| ScssWarnAtRule
+	| ScssErrorAtRule
 	// Tailwind CSS 4.0 at rules
 	| TwThemeAtRule
 	| TwSourceAtRule
@@ -720,6 +723,21 @@ AnyCssAtRuleDeclarator =
 	| CssScopeAtRuleDeclarator
 	| CssStartingStyleAtRuleDeclarator
 	| CssFunctionAtRuleDeclarator
+
+ScssDebugAtRule =
+	'debug'
+	value: ScssExpression
+	';'
+
+ScssWarnAtRule =
+	'warn'
+	value: ScssExpression
+	';'
+
+ScssErrorAtRule =
+	'error'
+	value: ScssExpression
+	';'
 
 // Conditional block declarator nodes
 CssMediaAtRuleDeclarator =

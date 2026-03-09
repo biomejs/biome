@@ -190,6 +190,7 @@ pub(crate) fn expected_any_at_rule(p: &CssParser, range: TextRange) -> ParseDiag
             "container",
             "counter-style",
             "document",
+            "debug",
             "font-face",
             "font-feature-values",
             "font-palette-values",
@@ -201,8 +202,10 @@ pub(crate) fn expected_any_at_rule(p: &CssParser, range: TextRange) -> ParseDiag
             "page",
             "property",
             "supports",
+            "warn",
             "viewport",
             "scope",
+            "error",
         ],
         range,
     )

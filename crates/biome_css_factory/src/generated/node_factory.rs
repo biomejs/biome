@@ -3082,6 +3082,20 @@ pub fn scss_binary_expression(
         ],
     ))
 }
+pub fn scss_debug_at_rule(
+    debug_token: SyntaxToken,
+    value: ScssExpression,
+    semicolon_token: SyntaxToken,
+) -> ScssDebugAtRule {
+    ScssDebugAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_DEBUG_AT_RULE,
+        [
+            Some(SyntaxElement::Token(debug_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
 pub fn scss_declaration(
     name: AnyScssDeclarationName,
     colon_token: SyntaxToken,
@@ -3121,6 +3135,20 @@ impl ScssDeclarationBuilder {
             ],
         ))
     }
+}
+pub fn scss_error_at_rule(
+    error_token: SyntaxToken,
+    value: ScssExpression,
+    semicolon_token: SyntaxToken,
+) -> ScssErrorAtRule {
+    ScssErrorAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_ERROR_AT_RULE,
+        [
+            Some(SyntaxElement::Token(error_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
 }
 pub fn scss_expression(items: ScssExpressionItemList) -> ScssExpression {
     ScssExpression::unwrap_cast(SyntaxNode::new_detached(
@@ -3276,6 +3304,20 @@ pub fn scss_variable_modifier(
         [
             Some(SyntaxElement::Token(excl_token)),
             Some(SyntaxElement::Token(value_token)),
+        ],
+    ))
+}
+pub fn scss_warn_at_rule(
+    warn_token: SyntaxToken,
+    value: ScssExpression,
+    semicolon_token: SyntaxToken,
+) -> ScssWarnAtRule {
+    ScssWarnAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_WARN_AT_RULE,
+        [
+            Some(SyntaxElement::Token(warn_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
         ],
     ))
 }

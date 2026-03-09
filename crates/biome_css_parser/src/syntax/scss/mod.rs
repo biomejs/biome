@@ -1,3 +1,4 @@
+mod at_rule;
 mod declaration;
 mod expression;
 mod function_name;
@@ -6,6 +7,9 @@ mod parse_error;
 mod token_sets;
 mod value;
 
+pub(crate) use at_rule::{
+    parse_scss_debug_at_rule, parse_scss_error_at_rule, parse_scss_warn_at_rule,
+};
 pub(crate) use declaration::{
     is_at_scss_declaration, is_at_scss_nesting_declaration, is_at_scss_variable_modifier_start,
     parse_scss_declaration, parse_scss_nesting_declaration,
