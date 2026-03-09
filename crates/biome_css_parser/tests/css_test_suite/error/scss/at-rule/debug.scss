@@ -1,0 +1,6 @@
+@debug;
+
+.box {
+  @debug $value
+  color: red;
+}

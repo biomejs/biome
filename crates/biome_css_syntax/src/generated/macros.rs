@@ -947,8 +947,16 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::ScssBinaryExpression::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::SCSS_DEBUG_AT_RULE => {
+                    let $pattern = unsafe { $crate::ScssDebugAtRule::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::SCSS_DECLARATION => {
                     let $pattern = unsafe { $crate::ScssDeclaration::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_ERROR_AT_RULE => {
+                    let $pattern = unsafe { $crate::ScssErrorAtRule::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::SCSS_EXPRESSION => {
@@ -1007,6 +1015,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::SCSS_VARIABLE_MODIFIER => {
                     let $pattern = unsafe { $crate::ScssVariableModifier::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_WARN_AT_RULE => {
+                    let $pattern = unsafe { $crate::ScssWarnAtRule::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::TW_APPLY_AT_RULE => {

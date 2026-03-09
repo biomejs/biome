@@ -74,6 +74,9 @@ use crate::syntax::at_rule::view_transition::{
 
 use crate::syntax::CssSyntaxFeatures;
 use crate::syntax::parse_error::{expected_any_at_rule, tailwind_disabled};
+use crate::syntax::scss::{
+    parse_scss_debug_at_rule, parse_scss_error_at_rule, parse_scss_warn_at_rule,
+};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
 
@@ -134,6 +137,15 @@ pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
         T![value] => parse_value_at_rule(p),
         T![position_try] => parse_position_try_at_rule(p),
         T![view_transition] => parse_view_transition_at_rule(p),
+        T![debug] => CssSyntaxFeatures::Scss
+            .parse_supported_syntax(p, parse_scss_debug_at_rule)
+            .or_else(|| parse_unknown_at_rule(p)),
+        T![warn] => CssSyntaxFeatures::Scss
+            .parse_supported_syntax(p, parse_scss_warn_at_rule)
+            .or_else(|| parse_unknown_at_rule(p)),
+        T![error] => CssSyntaxFeatures::Scss
+            .parse_supported_syntax(p, parse_scss_error_at_rule)
+            .or_else(|| parse_unknown_at_rule(p)),
         // Tailwind at rules
         T![theme] => CssSyntaxFeatures::Tailwind
             .parse_exclusive_syntax(p, parse_theme_at_rule, |p, m| {
