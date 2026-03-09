@@ -3929,7 +3929,7 @@
 		"NoImplicitCoercionsOptions": {
 			"type": "object",
 			"properties": {
-				"doubleNegation": {
+				"allowDoubleNegation": {
 					"description": "Whether to allow implicitly coercing values to booleans via `!!value`.",
 					"type": ["boolean", "null"]
 				}

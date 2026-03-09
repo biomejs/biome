@@ -6,7 +6,7 @@
         "noImplicitCoercions": {
           "level": "error",
           "options": {
-            "doubleNegation": true
+            "allowDoubleNegation": true
           }
         }
       }
