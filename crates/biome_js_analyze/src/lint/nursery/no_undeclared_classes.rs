@@ -4,6 +4,7 @@ use biome_console::markup;
 use biome_js_syntax::{AnyJsxAttributeValue, JsxAttribute, JsxString};
 use biome_module_graph::{ImportTreeDisplay, ImportTreeNode};
 use biome_rowan::{TextRange, TextSize, TokenText};
+use biome_rule_options::no_undeclared_classes::NoUndeclaredClassesOptions;
 
 declare_lint_rule! {
     /// Reports CSS class names in JSX `className` or `class` attributes that are not defined
@@ -46,7 +47,7 @@ impl Rule for NoUndeclaredClasses {
     type Query = ResolvedImports<JsxAttribute>;
     type State = UndeclaredClass;
     type Signals = Vec<Self::State>;
-    type Options = ();
+    type Options = NoUndeclaredClassesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let attr = ctx.query();

@@ -3,6 +3,7 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, decl
 use biome_console::markup;
 use biome_css_syntax::{CssClassSelector, CssPseudoClassFunctionSelector};
 use biome_rowan::AstNode;
+use biome_rule_options::no_unused_classes::NoUnusedClassesOptions;
 
 declare_lint_rule! {
     /// Reports CSS class selectors that are never referenced in any JSX or HTML file.
@@ -59,7 +60,7 @@ impl Rule for NoUnusedClasses {
     type Query = CssModuleGraph<CssClassSelector>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUnusedClassesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
