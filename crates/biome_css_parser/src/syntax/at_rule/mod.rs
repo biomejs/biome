@@ -72,11 +72,11 @@ use crate::syntax::at_rule::view_transition::{
     parse_view_transition_at_rule, parse_view_transition_at_rule_declarator,
 };
 
+use crate::syntax::CssSyntaxFeatures;
+use crate::syntax::parse_error::{expected_any_at_rule, tailwind_disabled};
 use crate::syntax::scss::{
     parse_scss_debug_at_rule, parse_scss_error_at_rule, parse_scss_warn_at_rule,
 };
-use crate::syntax::CssSyntaxFeatures;
-use crate::syntax::parse_error::{expected_any_at_rule, tailwind_disabled};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
 
