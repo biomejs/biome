@@ -543,7 +543,7 @@ fn parse_embedded_nodes(
                 }
             }
 
-            // Pass 1: elements via registry (captures embedded_file_source)
+            // Pass 1: elements via registry, collecting JS file sources
             let mut embedded_file_source = JsFileSource::js_module();
             for element in elements {
                 if let Some(candidate) = build_html_candidate(&element)
@@ -555,15 +555,14 @@ fn parse_embedded_nodes(
                     && let Some(parsed) =
                         parse_matched_embed(&candidate, &embed_match, &mut ctx, None)
                 {
-                    // Capture file source from first successful JS parse
                     if let Some(js_fs) = parsed.js_file_source {
-                        embedded_file_source = js_fs;
+                        embedded_file_source = merge_js_file_source(embedded_file_source, js_fs);
                     }
                     nodes.push(parsed.node);
                 }
             }
 
-            // Pass 2: text expressions via registry using captured embedded_file_source
+            // Pass 2: text expressions via registry using merged embedded_file_source
             for snippet in snippet_expressions {
                 if let Ok(expression) = snippet.expression()
                     && let Some(candidate) = build_text_expression_candidate(&expression)
@@ -583,7 +582,7 @@ fn parse_embedded_nodes(
                 }
             }
 
-            // Pass 3: directive attributes via registry using captured embedded_file_source
+            // Pass 3: directive attributes via registry using merged embedded_file_source
             for element in html_root.syntax().descendants() {
                 // Handle @click shorthand (VueVOnShorthandDirective)
                 if let Some(directive) = VueVOnShorthandDirective::cast_ref(&element)
@@ -682,7 +681,7 @@ fn parse_embedded_nodes(
                 }
             }
 
-            // Pass 1: elements via registry (captures embedded_file_source)
+            // Pass 1: elements via registry, collecting JS file sources
             let mut embedded_file_source = JsFileSource::js_module();
             for element in elements {
                 if let Some(candidate) = build_html_candidate(&element)
@@ -694,15 +693,14 @@ fn parse_embedded_nodes(
                     && let Some(parsed) =
                         parse_matched_embed(&candidate, &embed_match, &mut ctx, None)
                 {
-                    // Capture file source from first successful JS parse
                     if let Some(js_fs) = parsed.js_file_source {
-                        embedded_file_source = js_fs;
+                        embedded_file_source = merge_js_file_source(embedded_file_source, js_fs);
                     }
                     nodes.push(parsed.node);
                 }
             }
 
-            // Pass 2: text expressions via registry using captured embedded_file_source
+            // Pass 2: text expressions via registry using merged embedded_file_source
             for snippet in snippet_expressions {
                 if let Ok(expression) = snippet.expression()
                     && let Some(candidate) = build_text_expression_candidate(&expression)
@@ -1017,6 +1015,25 @@ struct ParsedEmbed {
     node: (AnyEmbeddedSnippet, DocumentFileSource),
     /// If JS was parsed, the resolved JsFileSource (for `embedded_file_source` capture).
     js_file_source: Option<JsFileSource>,
+}
+
+/// Merge two `JsFileSource` values by picking the most permissive one.
+///
+/// Vue and Svelte files can have multiple `<script>` tags with different
+/// `lang` attributes. The merged result is used as the base file source
+/// for text expressions and directives, so it must be able to parse any
+/// syntax that might appear in the template.
+///
+/// Hierarchy: Tsx > Ts > Jsx > JsModule > JsScript.
+fn merge_js_file_source(a: JsFileSource, b: JsFileSource) -> JsFileSource {
+    let ts = a.is_typescript() || b.is_typescript();
+    let jsx = a.is_jsx() || b.is_jsx();
+    match (ts, jsx) {
+        (true, true) => JsFileSource::tsx(),
+        (true, false) => JsFileSource::ts(),
+        (false, true) => JsFileSource::jsx(),
+        (false, false) => JsFileSource::js_module(),
+    }
 }
 
 /// Shared parsing context passed to `parse_matched_embed`.
