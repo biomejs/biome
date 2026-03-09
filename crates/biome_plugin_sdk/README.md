@@ -24,7 +24,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 biome_plugin_sdk = "0.0.1"
-wit-bindgen = "0.39"
+wit-bindgen = "0.53"
 ```
 
 ```rust
@@ -71,7 +71,7 @@ cargo build --target wasm32-wasip2 --release
 ## Supported Languages
 
 | Language | Module | Target string | Semantic model |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | JavaScript/TypeScript | `js_kinds` | `"javascript"` | Full (scopes, references, types) |
 | CSS | `css_kinds` | `"css"` | None |
 | JSON | `json_kinds` | `"json"` | None |

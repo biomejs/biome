@@ -1,5 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 549
 expression: redactor(content)
 ---
 ## `biome.json`
@@ -89,7 +90,7 @@ file.vue:15:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━
 ```
 
 ```block
-file.vue:15:7 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.vue:15:7 plugin/noFoo ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Avoid using 'foo' as a variable name.
   

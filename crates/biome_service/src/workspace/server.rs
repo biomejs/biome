@@ -789,6 +789,9 @@ impl WorkspaceServer {
     }
 
     fn load_plugins(&self, base_path: &Utf8Path, plugins: &Plugins) -> Vec<PluginDiagnostic> {
+        #[cfg(feature = "wasm_plugin")]
+        biome_plugin_loader::bump_wasm_generation();
+
         use rayon::prelude::*;
 
         let results: Vec<_> = plugins

@@ -501,6 +501,12 @@ impl SemanticModel {
     pub fn binding_by_node(&self, node: &JsSyntaxNode) -> Option<Binding> {
         let range = node.text_trimmed_range();
         let id = *self.data.bindings_by_start.get(&range.start())?;
+        // Verify the full range matches — start-only lookup may collide when
+        // multiple nodes share the same start offset.
+        let binding_data = self.data.binding(id);
+        if binding_data.range != range {
+            return None;
+        }
         Some(Binding {
             data: self.data.clone(),
             id,

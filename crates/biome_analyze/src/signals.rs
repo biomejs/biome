@@ -180,6 +180,13 @@ fn apply_plugin_edits(source: &str, edits: &[PluginTextEdit]) -> Option<(TextRan
     let mut sorted: Vec<&PluginTextEdit> = edits.iter().collect();
     sorted.sort_by_key(|e| e.range.start());
 
+    // Bail out if any edits overlap.
+    for pair in sorted.windows(2) {
+        if pair[0].range.end() > pair[1].range.start() {
+            return None;
+        }
+    }
+
     // Compute the spanning range over all edits.
     let span_start = sorted.first()?.range.start();
     let span_end = sorted.iter().map(|e| e.range.end()).max()?;
@@ -226,14 +233,33 @@ impl<L: Language> AnalyzerSignal<L> for PluginSignal<'_, L> {
 
         let mut diag = AnalyzerDiagnostic::from(rule_diag);
 
-        for action in &self.actions {
-            if let Some((_span, text_edit)) = apply_plugin_edits(&self.source_text, &action.edits) {
-                let suggestion = CodeSuggestionAdvice {
-                    applicability: action.applicability,
-                    msg: markup!({ action.message }).to_owned(),
-                    suggestion: text_edit,
-                };
-                diag = diag.add_code_suggestion(suggestion);
+        let plugin_name = self
+            .diagnostic
+            .subcategory
+            .as_deref()
+            .unwrap_or("anonymous");
+        let fix_kind_override = self
+            .options
+            .plugin_rule_override(plugin_name)
+            .and_then(|o| o.fix_kind);
+
+        if fix_kind_override != Some(crate::FixKind::None) {
+            for action in &self.actions {
+                if let Some((_span, text_edit)) =
+                    apply_plugin_edits(&self.source_text, &action.edits)
+                {
+                    let applicability = match fix_kind_override {
+                        Some(crate::FixKind::Safe) => Applicability::Always,
+                        Some(crate::FixKind::Unsafe) => Applicability::MaybeIncorrect,
+                        _ => action.applicability,
+                    };
+                    let suggestion = CodeSuggestionAdvice {
+                        applicability,
+                        msg: markup!({ action.message }).to_owned(),
+                        suggestion: text_edit,
+                    };
+                    diag = diag.add_code_suggestion(suggestion);
+                }
             }
         }
 

@@ -21,6 +21,7 @@ use crate::{
 #[cfg_attr(test, derive(Eq, PartialEq))]
 pub struct Diagnostic {
     category: Option<&'static Category>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     subcategory: Option<String>,
     severity: Severity,
     description: String,

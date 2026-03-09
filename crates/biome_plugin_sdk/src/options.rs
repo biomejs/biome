@@ -104,35 +104,48 @@ fn find_value_start(json: &str, key: &str) -> Option<usize> {
     let search_bytes = search.as_bytes();
 
     let mut i = 0;
+    let mut depth: u32 = 0;
     while i < bytes.len() {
-        if bytes[i] == b'"' {
-            // Check if this position matches our key.
-            if i + search_bytes.len() <= bytes.len()
-                && &bytes[i..i + search_bytes.len()] == search_bytes
-            {
-                // Found the key — skip past `"key"`, then whitespace and `:`.
-                let after_key = &json[i + search.len()..];
-                let after_colon = after_key.trim_start().strip_prefix(':')?;
-                let trimmed = after_colon.trim_start();
-                let offset = json.len() - trimmed.len();
-                return Some(offset);
+        match bytes[i] {
+            b'{' | b'[' => {
+                depth += 1;
+                i += 1;
             }
+            b'}' | b']' => {
+                depth = depth.saturating_sub(1);
+                i += 1;
+            }
+            b'"' => {
+                // Only match keys at depth 1 (inside the top-level object).
+                if depth == 1
+                    && i + search_bytes.len() <= bytes.len()
+                    && &bytes[i..i + search_bytes.len()] == search_bytes
+                {
+                    // Found the key — skip past `"key"`, then whitespace and `:`.
+                    let after_key = &json[i + search.len()..];
+                    let after_colon = after_key.trim_start().strip_prefix(':')?;
+                    let trimmed = after_colon.trim_start();
+                    let offset = json.len() - trimmed.len();
+                    return Some(offset);
+                }
 
-            // Skip this entire string (it's not our key, or it's a value).
-            i += 1;
-            while i < bytes.len() {
-                if bytes[i] == b'\\' {
-                    i += 2;
-                } else if bytes[i] == b'"' {
-                    i += 1;
-                    break;
-                } else {
-                    i += 1;
+                // Skip this entire string (it's not our key, or it's a value).
+                i += 1;
+                while i < bytes.len() {
+                    if bytes[i] == b'\\' {
+                        i += 2;
+                    } else if bytes[i] == b'"' {
+                        i += 1;
+                        break;
+                    } else {
+                        i += 1;
+                    }
                 }
             }
-            continue;
+            _ => {
+                i += 1;
+            }
         }
-        i += 1;
     }
     None
 }
@@ -140,37 +153,35 @@ fn find_value_start(json: &str, key: &str) -> Option<usize> {
 /// Parse a JSON string starting after the opening quote.
 /// Returns the unescaped content.
 fn parse_json_string(s: &str) -> Option<String> {
-    let bytes = s.as_bytes();
     let mut result = String::new();
-    let mut i = 0;
-    while i < bytes.len() {
-        if bytes[i] == b'\\' && i + 1 < bytes.len() {
-            match bytes[i + 1] {
-                b'"' => result.push('"'),
-                b'\\' => result.push('\\'),
-                b'/' => result.push('/'),
-                b'n' => result.push('\n'),
-                b'r' => result.push('\r'),
-                b't' => result.push('\t'),
-                b'b' => result.push('\u{0008}'),
-                b'f' => result.push('\u{000C}'),
+    let mut chars = s.chars();
+    while let Some(c) = chars.next() {
+        match c {
+            '"' => return Some(result),
+            '\\' => match chars.next()? {
+                '"' => result.push('"'),
+                '\\' => result.push('\\'),
+                '/' => result.push('/'),
+                'n' => result.push('\n'),
+                'r' => result.push('\r'),
+                't' => result.push('\t'),
+                'b' => result.push('\u{0008}'),
+                'f' => result.push('\u{000C}'),
                 other => {
                     result.push('\\');
-                    result.push(other as char);
+                    result.push(other);
                 }
-            }
-            i += 2;
-        } else if bytes[i] == b'"' {
-            return Some(result);
-        } else {
-            result.push(bytes[i] as char);
-            i += 1;
+            },
+            _ => result.push(c),
         }
     }
     None
 }
 
 /// Count the number of bytes in a JSON string body (excluding the closing quote).
+///
+/// Byte-level scanning is safe here: we only look for `"` (0x22) and `\` (0x5C),
+/// both ASCII. Valid UTF-8 continuation bytes never collide with these.
 fn count_json_string_bytes(s: &str) -> Option<usize> {
     let bytes = s.as_bytes();
     let mut i = 0;
@@ -260,5 +271,18 @@ mod tests {
     fn test_whitespace_variations() {
         let json = r#"{  "key"  :  "value"  }"#;
         assert_eq!(get_string(json, "key"), Some("value".to_string()));
+    }
+
+    #[test]
+    fn test_nested_key_not_matched() {
+        // "name" at depth 2 should not be matched.
+        let json = r#"{"nested": {"name": "inner"}, "name": "outer"}"#;
+        assert_eq!(get_string(json, "name"), Some("outer".to_string()));
+    }
+
+    #[test]
+    fn test_utf8_string_value() {
+        let json = r#"{"greeting": "こんにちは"}"#;
+        assert_eq!(get_string(json, "greeting"), Some("こんにちは".to_string()));
     }
 }

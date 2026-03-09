@@ -9,10 +9,10 @@ repository.workspace = true
 license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
-publish              = true
+publish              = false
 
 [dependencies]
-biome_plugin_sdk_macros = { path = "../biome_plugin_sdk_macros", version = "0.0.1" }
+biome_plugin_sdk_macros = { workspace = true }
 
 [lints]
 workspace = true

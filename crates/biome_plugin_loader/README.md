@@ -12,7 +12,7 @@ This crate is responsible for:
 ## Plugin Types
 
 | Type | File extension | Engine |
-|---|---|---|
+| --- | --- | --- |
 | WASM | `.wasm` | `wasmtime` (Component Model) via `biome_wasm_plugin` |
 | GritQL | `.grit` | `biome_grit_patterns` |
 | JavaScript | `.js` / `.mjs` | `boa_engine` |

@@ -8,4 +8,4 @@ crate-type = ["cdylib"]
 
 [dependencies]
 biome_plugin_sdk = { path = "../../../../crates/biome_plugin_sdk" }
-wit-bindgen      = "0.39"
+wit-bindgen      = "0.53"

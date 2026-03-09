@@ -22,10 +22,21 @@ use crate::{AnalyzerPlugin, PluginDiagnostic};
 /// Global counter for assigning unique IDs to plugin instances.
 static NEXT_PLUGIN_ID: AtomicU64 = AtomicU64::new(0);
 
+/// Generation counter. Bumped on each `load_plugins()` call to invalidate
+/// stale thread-local sessions from previous plugin configurations.
+static GENERATION: AtomicU64 = AtomicU64::new(0);
+
+/// Bump the generation counter. Call this when plugins are reloaded (e.g. on
+/// config change) so that stale sessions are discarded on next access.
+pub fn bump_generation() {
+    GENERATION.fetch_add(1, Ordering::Relaxed);
+}
+
 thread_local! {
     /// Per-thread WASM session cache. Each thread maintains its own sessions
     /// so that parallel file analysis doesn't contend on a shared lock.
-    static SESSIONS: RefCell<HashMap<u64, WasmPluginSession>> = RefCell::new(HashMap::new());
+    /// Entries store `(generation, session)` — stale generations are discarded.
+    static SESSIONS: RefCell<HashMap<u64, (u64, WasmPluginSession)>> = RefCell::new(HashMap::new());
 }
 
 /// An analyzer plugin backed by a WASM Component Model module.
@@ -240,12 +251,17 @@ impl AnalyzerPlugin for AnalyzerWasmPlugin {
         let file_path = path.as_str().to_string();
         let qualified_name = format!("{}/{}", self.plugin_name, self.rule_name);
 
+        let current_gen = GENERATION.load(Ordering::Relaxed);
+
         let result = SESSIONS.with(|sessions| {
             let mut map = sessions.borrow_mut();
 
+            // Evict stale sessions from previous generations.
+            map.retain(|_, (g, _)| *g == current_gen);
+
             // Check if we have a cached session for this plugin on this thread.
             let needs_new_session = match map.get(&self.plugin_id) {
-                Some(session) => session.file_path() != file_path,
+                Some((_, session)) => session.file_path() != file_path,
                 None => true,
             };
 
@@ -265,13 +281,13 @@ impl AnalyzerPlugin for AnalyzerWasmPlugin {
                     Ok(mut session) => {
                         let result =
                             session.check_current(&self.rule_name, self.options_json.as_deref());
-                        map.insert(self.plugin_id, session);
+                        map.insert(self.plugin_id, (current_gen, session));
                         result
                     }
                     Err(e) => Err(e),
                 }
             } else {
-                let session = map.get_mut(&self.plugin_id).unwrap();
+                let (_, session) = map.get_mut(&self.plugin_id).unwrap();
                 session.check_node(node, &self.rule_name, self.options_json.as_deref())
             }
         });

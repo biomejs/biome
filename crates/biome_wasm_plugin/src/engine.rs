@@ -8,7 +8,9 @@
 
 use std::collections::HashMap;
 use std::fmt;
+use std::marker::PhantomData;
 use std::path::Path;
+use std::rc::Rc;
 use std::sync::Arc;
 
 use biome_analyze::{
@@ -358,6 +360,9 @@ pub struct WasmPluginSession {
     configured: bool,
     file_path: String,
     language: PluginTargetLanguage,
+    /// Enforce `!Send + !Sync` at the type level. Sessions hold WASM state
+    /// that is not safe to move between threads.
+    _not_send: PhantomData<Rc<()>>,
 }
 
 impl fmt::Debug for WasmPluginSession {
@@ -511,8 +516,11 @@ impl WasmPluginEngine {
         component: wasmtime::component::Component,
     ) -> Result<Self, wasmtime::Error> {
         let mut linker = wasmtime::component::Linker::new(&engine);
-        Plugin::add_to_linker(&mut linker, |state: &mut HostState| state)?;
-        wasmtime_wasi::add_to_linker_sync(&mut linker)?;
+        Plugin::add_to_linker::<_, wasmtime::component::HasSelf<_>>(
+            &mut linker,
+            |state: &mut HostState| state,
+        )?;
+        wasmtime_wasi::p2::add_to_linker_sync(&mut linker)?;
         let plugin_pre = PluginPre::new(linker.instantiate_pre(&component)?)?;
 
         Ok(Self { plugin_pre })
@@ -656,6 +664,7 @@ impl WasmPluginEngine {
             configured: false,
             file_path,
             language,
+            _not_send: PhantomData,
         })
     }
 

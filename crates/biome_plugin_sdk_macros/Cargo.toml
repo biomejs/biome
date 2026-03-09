@@ -9,7 +9,7 @@ repository.workspace = true
 license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
-publish              = true
+publish              = false
 
 [lib]
 proc-macro = true

@@ -1657,8 +1657,10 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                 Some(tree.syntax().text_range_with_trivia().len().into())
             },
             |new_text| {
-                let new_parse =
-                    biome_html_parser::parse_html(new_text, HtmlParserOptions::default());
+                let parse_options = params
+                    .settings
+                    .parse_options::<HtmlLanguage>(params.biome_path, &params.document_file_source);
+                let new_parse = biome_html_parser::parse_html(new_text, parse_options);
                 Some(new_parse.tree().syntax().clone())
             },
         )?;

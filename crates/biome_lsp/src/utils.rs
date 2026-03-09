@@ -199,10 +199,10 @@ pub(crate) fn diagnostic_to_lsp<D: Diagnostic>(
         // For plugin diagnostics, show the subcategory prefixed with "@"
         // (e.g. "@wirex-biome-plugin/fileNamingConvention") so the editor
         // renders it like ESLint: "(biome @wirex-biome-plugin/fileNamingConvention)".
-        if category.name() == "plugin" {
-            if let Some(sub) = diagnostic.subcategory() {
-                return lsp::NumberOrString::String(format!("@{sub}"));
-            }
+        if category.name() == "plugin"
+            && let Some(sub) = diagnostic.subcategory()
+        {
+            return lsp::NumberOrString::String(format!("@{sub}"));
         }
         lsp::NumberOrString::String(category.name().to_string())
     });

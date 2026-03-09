@@ -40,7 +40,7 @@
 //!
 //! [dependencies]
 //! biome_plugin_sdk = "0.0.1"
-//! wit-bindgen = "0.39"
+//! wit-bindgen = "0.53"
 //! ```
 //!
 //! ```ignore

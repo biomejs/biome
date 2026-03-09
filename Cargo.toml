@@ -94,6 +94,8 @@ biome_module_graph           = { path = "./crates/biome_module_graph", version =
 biome_package                = { path = "./crates/biome_package", version = "0.5.7" }
 biome_parser                 = { path = "./crates/biome_parser", version = "0.5.7" }
 biome_plugin_loader          = { path = "./crates/biome_plugin_loader", version = "0.0.1" }
+biome_plugin_sdk             = { path = "./crates/biome_plugin_sdk" }
+biome_plugin_sdk_macros      = { path = "./crates/biome_plugin_sdk_macros" }
 biome_project_layout         = { path = "./crates/biome_project_layout", version = "0.0.1" }
 biome_resolver               = { path = "./crates/biome_resolver", version = "0.1.0" }
 biome_rowan                  = { path = "./crates/biome_rowan", version = "0.5.7" }
@@ -172,15 +174,15 @@ ureq                         = "3.1.4"
 url                          = "2.5.8"
 uuid                         = "1.18.1"
 walkdir                      = "2.5.0"
-wasmtime                     = { version = "30", default-features = false, features = [
+wasmtime                     = { version = "42", default-features = false, features = [
   "component-model",
   "cranelift",
   "std"
 ] }
-wasmtime-wasi                = { version = "30", default-features = false }
+wasmtime-wasi                = { version = "42", default-features = false }
 web-time                     = "1.1.0"
 windows                      = "0.62.2"
-wit-bindgen                  = "0.39"
+wit-bindgen                  = "0.53"
 xtask_codegen                = { path = "xtask/codegen" }
 xtask_coverage               = { path = "xtask/coverage" }
 xtask_glue                   = { path = "xtask/glue" }

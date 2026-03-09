@@ -36,9 +36,7 @@ biome_js_parser      = { workspace = true }
 biome_json_parser    = { workspace = true }
 biome_plugin_sdk     = { path = "../biome_plugin_sdk" }
 biome_project_layout = { workspace = true }
-biome_test_utils     = { workspace = true }
 camino               = { workspace = true }
-insta                = { workspace = true }
 
 [lints]
 workspace = true

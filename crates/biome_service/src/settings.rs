@@ -315,8 +315,6 @@ impl Settings {
 
     /// Return all plugins configured in setting
     pub fn as_all_plugins(&self) -> Cow<'_, Plugins> {
-        let mut result = Cow::Borrowed(&self.plugins);
-
         let all_override_plugins = self
             .override_settings
             .patterns
@@ -324,11 +322,24 @@ impl Settings {
             .flat_map(|pattern| pattern.plugins.iter().cloned())
             .collect::<Vec<_>>();
 
-        if !all_override_plugins.is_empty() {
-            result.to_mut().0.extend(all_override_plugins);
+        if all_override_plugins.is_empty() {
+            return Cow::Borrowed(&self.plugins);
         }
 
-        result
+        // Merge and dedup by path (last-wins for override semantics).
+        let mut seen = std::collections::HashMap::new();
+        let mut merged = Vec::new();
+        for plugin in self.plugins.0.iter().cloned().chain(all_override_plugins) {
+            let path = plugin.path().to_string();
+            if let Some(idx) = seen.get(&path) {
+                merged[*idx] = plugin;
+            } else {
+                seen.insert(path, merged.len());
+                merged.push(plugin);
+            }
+        }
+
+        Cow::Owned(Plugins(merged))
     }
 
     pub fn is_formatter_enabled(&self) -> bool {

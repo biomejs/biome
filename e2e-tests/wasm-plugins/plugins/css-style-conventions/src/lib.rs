@@ -20,16 +20,24 @@ biome_plugin_sdk::generate_plugin!();
 use biome::plugin::host;
 use biome::plugin::types::Severity;
 
-use std::sync::OnceLock;
+use std::cell::RefCell;
 
 /// Default regex: kebab-case after the `--` prefix.
 const DEFAULT_PATTERN: &str = r"^--[a-z][a-z0-9]*(-[a-z0-9]+)*$";
 
-/// Configured pattern for `customPropertyPattern`.
-static PATTERN: OnceLock<String> = OnceLock::new();
+// Configured pattern for `customPropertyPattern`.
+// Uses `RefCell` so `configure()` can update it (WASM is single-threaded).
+thread_local! {
+    static PATTERN: RefCell<Option<String>> = const { RefCell::new(None) };
+}
 
-fn get_pattern() -> &'static str {
-    PATTERN.get().map(|s| s.as_str()).unwrap_or(DEFAULT_PATTERN)
+fn get_pattern() -> String {
+    PATTERN.with(|p| {
+        p.borrow()
+            .as_deref()
+            .unwrap_or(DEFAULT_PATTERN)
+            .to_string()
+    })
 }
 
 /// Given a `CSS_DECLARATION` node, extract the custom property name if the
@@ -75,7 +83,7 @@ impl Guest for CssStyleConventions {
     fn configure(rule: String, options_json: String) {
         if rule == "customPropertyPattern" {
             if let Some(pattern) = biome_plugin_sdk::options::get_string(&options_json, "pattern") {
-                let _ = PATTERN.set(pattern);
+                PATTERN.with(|p| *p.borrow_mut() = Some(pattern));
             }
         }
     }
@@ -109,7 +117,7 @@ fn check_custom_property_pattern(node: u32) -> Vec<CheckResult> {
     };
 
     let pattern = get_pattern();
-    if host::regex_matches(&name, pattern) {
+    if host::regex_matches(&name, &pattern) {
         return vec![];
     }
 

@@ -14,10 +14,10 @@ use biome_json_syntax::{JsonSyntaxNode, JsonSyntaxToken};
 use biome_module_graph::ModuleResolver;
 use biome_rowan::{
     AnySyntaxNode, AstNode, NodeOrToken, SyntaxKind, SyntaxNodeCast, TriviaPieceKind,
+    syntax::SyntaxElementKey,
 };
 use biome_text_size::TextRange;
-use wasmtime::component::ResourceTable;
-use wasmtime_wasi::{IoView, WasiCtx, WasiCtxBuilder, WasiView};
+use wasmtime_wasi::{ResourceTable, WasiCtx, WasiCtxBuilder, WasiCtxView, WasiView};
 
 /// Maximum number of node handles per check call. Prevents memory
 /// exhaustion from misbehaving guests before the fuel limit kicks in.
@@ -29,6 +29,9 @@ const MAX_NODE_HANDLES: usize = 1_000_000;
 pub(crate) struct HostState {
     /// Handle (u32 index) → node mapping.
     nodes: Vec<ConcreteNode>,
+    /// Dedup map: syntax element identity → handle. Avoids growing the node
+    /// vec when the same node/token is encountered multiple times.
+    key_to_handle: HashMap<SyntaxElementKey, u32>,
     /// Optional JS semantic model for semantic queries.
     /// Only set when checking JS nodes in the semantic phase.
     semantic_model: Option<SemanticModel>,
@@ -51,15 +54,12 @@ pub(crate) struct HostState {
 #[expect(unsafe_code)]
 unsafe impl Send for HostState {}
 
-impl IoView for HostState {
-    fn table(&mut self) -> &mut ResourceTable {
-        &mut self.resource_table
-    }
-}
-
 impl WasiView for HostState {
-    fn ctx(&mut self) -> &mut WasiCtx {
-        &mut self.wasi_ctx
+    fn ctx(&mut self) -> WasiCtxView<'_> {
+        WasiCtxView {
+            ctx: &mut self.wasi_ctx,
+            table: &mut self.resource_table,
+        }
     }
 }
 
@@ -235,6 +235,17 @@ impl ConcreteNode {
         )
     }
 
+    fn key(&self) -> SyntaxElementKey {
+        match self {
+            Self::Js(n) => n.key(),
+            Self::Css(n) => n.key(),
+            Self::Json(n) => n.key(),
+            Self::JsToken(t) => t.key(),
+            Self::CssToken(t) => t.key(),
+            Self::JsonToken(t) => t.key(),
+        }
+    }
+
     fn children(&self) -> Vec<Self> {
         dispatch_collect!(self, |n| n.children())
     }
@@ -367,12 +378,15 @@ impl HostState {
         };
 
         let mut nodes = Vec::with_capacity(256);
+        let mut key_to_handle = HashMap::new();
         if let Some(node) = concrete {
+            key_to_handle.insert(node.key(), 0);
             nodes.push(node);
         }
 
         Self {
             nodes,
+            key_to_handle,
             semantic_model,
             module_resolver,
             file_path,
@@ -386,6 +400,7 @@ impl HostState {
     pub(crate) fn empty() -> Self {
         Self {
             nodes: Vec::new(),
+            key_to_handle: HashMap::new(),
             semantic_model: None,
             module_resolver: None,
             file_path: String::new(),
@@ -403,6 +418,7 @@ impl HostState {
     /// within the same file.
     pub(crate) fn reset_for_node(&mut self, node: AnySyntaxNode, language: PluginTargetLanguage) {
         self.nodes.clear();
+        self.key_to_handle.clear();
         let concrete = match language {
             PluginTargetLanguage::JavaScript => node
                 .downcast_ref::<JsSyntaxNode>()
@@ -415,6 +431,7 @@ impl HostState {
                 .map(|n| ConcreteNode::Json(n.clone())),
         };
         if let Some(node) = concrete {
+            self.key_to_handle.insert(node.key(), 0);
             self.nodes.push(node);
         }
     }
@@ -424,10 +441,15 @@ impl HostState {
     /// Returns `u32::MAX` when the handle table is full. All host functions
     /// treat `u32::MAX` as an invalid handle, returning safe defaults.
     pub(crate) fn intern(&mut self, node: ConcreteNode) -> u32 {
+        let key = node.key();
+        if let Some(&existing) = self.key_to_handle.get(&key) {
+            return existing;
+        }
         if self.nodes.len() >= MAX_NODE_HANDLES {
             return u32::MAX;
         }
         let handle = self.nodes.len() as u32;
+        self.key_to_handle.insert(key, handle);
         self.nodes.push(node);
         handle
     }
@@ -1531,21 +1553,36 @@ mod tests {
     }
 
     // ---------------------------------------------------------------
-    // Node handle cap
+    // Node handle dedup and cap
     // ---------------------------------------------------------------
 
     #[test]
-    fn intern_cap_returns_max_at_limit() {
-        let root = parse_js("let x = 1;");
+    fn intern_dedup_returns_same_handle() {
         let mut state = js_state("let x = 1;");
-        // Fill to the cap (handle 0 is the root, so we need MAX - 1 more)
-        for _ in 1..MAX_NODE_HANDLES {
-            let h = state.intern(ConcreteNode::Js(root.clone()));
-            assert_ne!(h, u32::MAX);
+        // Navigate to children twice — second call should return same handles
+        let first = state.node_children(0);
+        let nodes_after_first = state.nodes.len();
+        let second = state.node_children(0);
+        assert_eq!(first, second, "Same children should have same handles");
+        assert_eq!(
+            state.nodes.len(),
+            nodes_after_first,
+            "Should not grow for duplicates"
+        );
+    }
+
+    #[test]
+    fn intern_cap_returns_max_at_limit() {
+        let mut state = js_state("let x = 1;");
+        let root = parse_js("let x = 1;");
+        // Fill nodes directly (bypassing dedup map) to reach the cap
+        while state.nodes.len() < MAX_NODE_HANDLES {
+            state.nodes.push(ConcreteNode::Js(root.clone()));
         }
         assert_eq!(state.nodes.len(), MAX_NODE_HANDLES);
-        // Next intern should return u32::MAX and not grow the vec
-        let overflow = state.intern(ConcreteNode::Js(root.clone()));
+        // Use a child node (not in the dedup map) to trigger the cap
+        let child = root.children().next().unwrap();
+        let overflow = state.intern(ConcreteNode::Js(child));
         assert_eq!(overflow, u32::MAX);
         assert_eq!(state.nodes.len(), MAX_NODE_HANDLES);
     }

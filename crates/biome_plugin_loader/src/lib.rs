@@ -18,7 +18,7 @@ mod configuration;
 #[cfg(feature = "js_plugin")]
 pub use analyzer_js_plugin::AnalyzerJsPlugin;
 #[cfg(feature = "wasm_plugin")]
-pub use analyzer_wasm_plugin::AnalyzerWasmPlugin;
+pub use analyzer_wasm_plugin::{AnalyzerWasmPlugin, bump_generation as bump_wasm_generation};
 
 pub use analyzer_grit_plugin::AnalyzerGritPlugin;
 pub use configuration::*;
