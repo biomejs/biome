@@ -577,7 +577,11 @@ AnyCssProperty =
 CssGenericProperty =
 	name: AnyCssDeclarationName
 	':'
-	value: CssGenericComponentValueList
+	value: AnyCssGenericPropertyValueOrExpression
+
+AnyCssGenericPropertyValueOrExpression =
+	CssGenericComponentValueList
+	| ScssExpression
 
 // This grammar is specific to CSS Modules and defines how composes classes.
 // https://github.com/css-modules/css-modules/blob/master/docs/composition.md
@@ -680,6 +684,13 @@ AnyCssAtRule =
 	| CssPositionTryAtRule
 	| CssViewTransitionAtRule
 	| CssFunctionAtRule
+	// SCSS at rules
+	| ScssEachAtRule
+	| ScssIfAtRule
+	| ScssWhileAtRule
+	| ScssDebugAtRule
+	| ScssWarnAtRule
+	| ScssErrorAtRule
 	// Tailwind CSS 4.0 at rules
 	| TwThemeAtRule
 	| TwSourceAtRule
@@ -2011,6 +2022,7 @@ CssParameterList = AnyCssExpression (',' AnyCssExpression)* ','?
 // <if-test> =
 //  supports( [ <ident> : <declaration-value> ] | <supports-condition> ) |
 //  media( <media-feature> | <media-condition> ) |
+//  sass( <expression> ) |
 //  style( <style-query> )
 //
 // if(style(--color: green)): red);
@@ -2127,6 +2139,12 @@ CssIfMediaTest =
 	test: AnyCssIfMediaTestQuery
 	')'
 
+CssIfSassTest =
+	'sass'
+	'('
+	test: ScssExpression
+	')'
+
 CssIfStyleTest =
 	'style'
 	'('
@@ -2136,6 +2154,7 @@ CssIfStyleTest =
 AnyCssIfTest =
 	CssIfSupportsTest
 	| CssIfMediaTest
+	| CssIfSassTest
 	| CssIfStyleTest
 	| CssBogusIfTest
 
@@ -2537,6 +2556,68 @@ TwSlotAtRule =
 // SCSS
 /////////////
 
+// @each $item in $list { color: $item; }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssEachAtRule =
+	'each'
+	bindings: ScssEachBindingList
+	'in'
+	iterable: ScssExpression
+	block: CssDeclarationOrRuleBlock
+
+// @each $key, $value in $map { color: $key; }
+//       ^^^^^^^^^^^^
+ScssEachBindingList = ScssIdentifier (',' ScssIdentifier)*
+
+// @if $theme == dark { color: white; } @else { color: black; }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssIfAtRule =
+	'if'
+	condition: ScssExpression
+	block: CssDeclarationOrRuleBlock
+	else_clause: ScssElseClause?
+
+// @else if $theme == light { color: black; }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+// @else { color: black; }
+// ^^^^^^^^^^^^^^^^^^^^^^^
+ScssElseClause =
+	'@'
+	'else'
+	body: AnyScssElseClauseBody
+
+AnyScssElseClauseBody =
+	ScssIfAtRule
+	| CssDeclarationOrRuleBlock
+
+// @while $i > 0 { $i: $i - 1; }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssWhileAtRule =
+	'while'
+	condition: ScssExpression
+	block: CssDeclarationOrRuleBlock
+
+// @debug $width * 2;
+// ^^^^^^^^^^^^^^^^^^
+ScssDebugAtRule =
+	'debug'
+	value: ScssExpression
+	';'
+
+// @warn "deprecated";
+// ^^^^^^^^^^^^^^^^^^^
+ScssWarnAtRule =
+	'warn'
+	value: ScssExpression
+	';'
+
+// @error "Invalid state.";
+// ^^^^^^^^^^^^^^^^^^^^^^^^
+ScssErrorAtRule =
+	'error'
+	value: ScssExpression
+	';'
+
 // $variable: value;
 // ^^^^^^^^^^^^^^^^^
 ScssDeclaration =
@@ -2564,7 +2645,7 @@ ScssNamespacedIdentifier =
 ScssNestingDeclaration =
 	name: CssIdentifier
 	':'
-	value: CssGenericComponentValueList
+	value: ScssExpression
 	block: AnyCssDeclarationOrRuleBlock
 
 // border: 1px solid $color;
@@ -2581,6 +2662,7 @@ ScssExpressionItemList = AnyScssExpressionItem*
 AnyScssExpressionItem =
 	AnyCssValue
 	| CssGenericDelimiter
+	| CssDeclarationImportant
 	| ScssKeywordArgument
 	| ScssArbitraryArgument
 	| ScssBinaryExpression
@@ -2666,8 +2748,6 @@ ScssMapExpressionPair =
 //        ^^
 AnyScssExpression =
 	ScssExpression
-	| ScssKeywordArgument
-	| ScssArbitraryArgument
 	| ScssBinaryExpression
 	| ScssUnaryExpression
 	| ScssParenthesizedExpression

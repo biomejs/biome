@@ -128,8 +128,8 @@ hashbrown                    = { version = "0.15.5", default-features = false }
 ignore                       = "0.4.25"
 indexmap                     = { version = "2.13.0" }
 insta                        = "1.46.3"
-jiff                         = "0.2.21"
-libc                         = "0.2.182"
+jiff                         = "0.2.23"
+libc                         = "0.2.183"
 mimalloc                     = "0.1.48"
 papaya                       = "0.2.3"
 path-absolutize              = { version = "3.1.1", features = ["use_unix_paths_on_wasm"], optional = false }
@@ -139,7 +139,7 @@ proc-macro-error2            = { version = "2.0.1", default-features = false }
 proc-macro2                  = "1.0.106"
 quickcheck                   = "1.0.3"
 quickcheck_macros            = "1.1.0"
-quote                        = "1.0.44"
+quote                        = "1.0.45"
 rayon                        = "1.11.0"
 regex                        = "1.12.3"
 rust-lapper                  = "1.2.0"

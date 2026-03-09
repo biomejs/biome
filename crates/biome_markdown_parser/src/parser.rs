@@ -15,7 +15,7 @@ use crate::token_source::{MarkdownTokenSource, MarkdownTokenSourceCheckpoint};
 
 /// Options for configuring the markdown parser.
 #[derive(Debug, Clone)]
-pub struct MarkdownParseOptions {
+pub struct MarkdownParserOptions {
     /// Maximum nesting depth for block quotes and lists.
     ///
     /// This limits recursion on pathological input to avoid stack overflow.
@@ -23,7 +23,7 @@ pub struct MarkdownParseOptions {
     // Reserved for future GFM options
 }
 
-impl Default for MarkdownParseOptions {
+impl Default for MarkdownParserOptions {
     fn default() -> Self {
         Self {
             max_nesting_depth: DEFAULT_MAX_NESTING_DEPTH,
@@ -112,12 +112,12 @@ pub struct QuoteIndent {
 pub(crate) struct MarkdownParser<'source> {
     context: ParserContext<MarkdownSyntaxKind>,
     source: MarkdownTokenSource<'source>,
-    options: MarkdownParseOptions,
+    options: MarkdownParserOptions,
     state: MarkdownParserState,
 }
 
 impl<'source> MarkdownParser<'source> {
-    pub fn new(source: &'source str, options: MarkdownParseOptions) -> Self {
+    pub fn new(source: &'source str, options: MarkdownParserOptions) -> Self {
         Self {
             context: ParserContext::default(),
             source: MarkdownTokenSource::from_str(source),
@@ -127,7 +127,7 @@ impl<'source> MarkdownParser<'source> {
     }
 
     /// Returns parser options. Reserved for GFM extensions.
-    pub(crate) fn options(&self) -> &MarkdownParseOptions {
+    pub(crate) fn options(&self) -> &MarkdownParserOptions {
         &self.options
     }
 
@@ -236,6 +236,27 @@ impl<'source> MarkdownParser<'source> {
     /// The next token will be lexed with whitespace as separate tokens.
     pub(crate) fn bump_link_definition(&mut self) {
         self.source.bump_link_definition();
+    }
+
+    /// Force re-lex the current token in ThematicBreakParts context.
+    /// Decomposes MD_THEMATIC_BREAK_LITERAL into individual marker/space tokens.
+    /// Must NOT be called inside lookahead.
+    pub(crate) fn force_relex_thematic_break_parts(&mut self) {
+        self.source
+            .force_relex_in_context(MarkdownLexContext::ThematicBreakParts);
+    }
+
+    /// Bump the current token and lex the next in ThematicBreakParts context,
+    /// ensuring sustained parts-mode tokenization across the loop.
+    ///
+    /// Unlike `source.bump_thematic_break_parts()` (which only advances the lexer),
+    /// this method also registers the token with the tree builder via `push_token`,
+    /// so the token appears in the CST.
+    pub(crate) fn bump_thematic_break_parts(&mut self) {
+        let kind = self.cur();
+        let end = self.cur_range().end();
+        self.context_mut().push_token(kind, end);
+        self.source.bump_thematic_break_parts();
     }
 
     pub fn checkpoint(&self) -> MarkdownParserCheckpoint {

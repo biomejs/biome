@@ -13,7 +13,7 @@
 //! ## Depth Limits
 //!
 //! To prevent stack overflow from pathological input (e.g., hundreds of `>`),
-//! nesting depth is limited by `MarkdownParseOptions::max_nesting_depth`
+//! nesting depth is limited by `MarkdownParserOptions::max_nesting_depth`
 //! (default: 100). Deeper nesting emits a diagnostic and treats additional
 //! `>` as content.
 //!

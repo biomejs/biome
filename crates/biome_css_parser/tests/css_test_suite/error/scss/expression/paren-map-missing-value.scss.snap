@@ -1,0 +1,181 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+// Map inferred from parens should recover missing pair values
+$inferred-map: ($a: , $b: 1, $c: 2);
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        ScssDeclaration {
+            name: ScssIdentifier {
+                dollar_token: DOLLAR@0..64 "$" [Comments("// Map inferred from  ..."), Newline("\n")] [],
+                name: CssIdentifier {
+                    value_token: IDENT@64..76 "inferred-map" [] [],
+                },
+            },
+            colon_token: COLON@76..78 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    ScssMapExpression {
+                        l_paren_token: L_PAREN@78..79 "(" [] [],
+                        pairs: ScssMapExpressionPairList [
+                            ScssMapExpressionPair {
+                                key: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        ScssIdentifier {
+                                            dollar_token: DOLLAR@79..80 "$" [] [],
+                                            name: CssIdentifier {
+                                                value_token: IDENT@80..81 "a" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                                colon_token: COLON@81..83 ":" [] [Whitespace(" ")],
+                                value: missing (required),
+                            },
+                            COMMA@83..85 "," [] [Whitespace(" ")],
+                            ScssMapExpressionPair {
+                                key: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        ScssIdentifier {
+                                            dollar_token: DOLLAR@85..86 "$" [] [],
+                                            name: CssIdentifier {
+                                                value_token: IDENT@86..87 "b" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                                colon_token: COLON@87..89 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssNumber {
+                                            value_token: CSS_NUMBER_LITERAL@89..90 "1" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            COMMA@90..92 "," [] [Whitespace(" ")],
+                            ScssMapExpressionPair {
+                                key: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        ScssIdentifier {
+                                            dollar_token: DOLLAR@92..93 "$" [] [],
+                                            name: CssIdentifier {
+                                                value_token: IDENT@93..94 "c" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                                colon_token: COLON@94..96 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssNumber {
+                                            value_token: CSS_NUMBER_LITERAL@96..97 "2" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                        ],
+                        r_paren_token: R_PAREN@97..98 ")" [] [],
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@98..99 ";" [] [],
+        },
+    ],
+    eof_token: EOF@99..100 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..100
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..99
+    0: SCSS_DECLARATION@0..99
+      0: SCSS_IDENTIFIER@0..76
+        0: DOLLAR@0..64 "$" [Comments("// Map inferred from  ..."), Newline("\n")] []
+        1: CSS_IDENTIFIER@64..76
+          0: IDENT@64..76 "inferred-map" [] []
+      1: COLON@76..78 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@78..98
+        0: SCSS_EXPRESSION_ITEM_LIST@78..98
+          0: SCSS_MAP_EXPRESSION@78..98
+            0: L_PAREN@78..79 "(" [] []
+            1: SCSS_MAP_EXPRESSION_PAIR_LIST@79..97
+              0: SCSS_MAP_EXPRESSION_PAIR@79..83
+                0: SCSS_EXPRESSION@79..81
+                  0: SCSS_EXPRESSION_ITEM_LIST@79..81
+                    0: SCSS_IDENTIFIER@79..81
+                      0: DOLLAR@79..80 "$" [] []
+                      1: CSS_IDENTIFIER@80..81
+                        0: IDENT@80..81 "a" [] []
+                1: COLON@81..83 ":" [] [Whitespace(" ")]
+                2: (empty)
+              1: COMMA@83..85 "," [] [Whitespace(" ")]
+              2: SCSS_MAP_EXPRESSION_PAIR@85..90
+                0: SCSS_EXPRESSION@85..87
+                  0: SCSS_EXPRESSION_ITEM_LIST@85..87
+                    0: SCSS_IDENTIFIER@85..87
+                      0: DOLLAR@85..86 "$" [] []
+                      1: CSS_IDENTIFIER@86..87
+                        0: IDENT@86..87 "b" [] []
+                1: COLON@87..89 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@89..90
+                  0: SCSS_EXPRESSION_ITEM_LIST@89..90
+                    0: CSS_NUMBER@89..90
+                      0: CSS_NUMBER_LITERAL@89..90 "1" [] []
+              3: COMMA@90..92 "," [] [Whitespace(" ")]
+              4: SCSS_MAP_EXPRESSION_PAIR@92..97
+                0: SCSS_EXPRESSION@92..94
+                  0: SCSS_EXPRESSION_ITEM_LIST@92..94
+                    0: SCSS_IDENTIFIER@92..94
+                      0: DOLLAR@92..93 "$" [] []
+                      1: CSS_IDENTIFIER@93..94
+                        0: IDENT@93..94 "c" [] []
+                1: COLON@94..96 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@96..97
+                  0: SCSS_EXPRESSION_ITEM_LIST@96..97
+                    0: CSS_NUMBER@96..97
+                      0: CSS_NUMBER_LITERAL@96..97 "2" [] []
+            2: R_PAREN@97..98 ")" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@98..98
+      4: SEMICOLON@98..99 ";" [] []
+  2: EOF@99..100 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+paren-map-missing-value.scss:2:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found ','.
+  
+    1 │ // Map inferred from parens should recover missing pair values
+  > 2 │ $inferred-map: ($a: , $b: 1, $c: 2);
+      │                     ^
+    3 │ 
+  
+  i Expected a SCSS expression here.
+  
+    1 │ // Map inferred from parens should recover missing pair values
+  > 2 │ $inferred-map: ($a: , $b: 1, $c: 2);
+      │                     ^
+    3 │ 
+  
+```

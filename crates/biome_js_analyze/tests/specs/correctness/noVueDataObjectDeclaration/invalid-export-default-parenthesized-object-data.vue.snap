@@ -38,7 +38,7 @@ invalid-export-default-parenthesized-object-data.vue:3:2 lint/correctness/noVueD
     3   │ - → data:·/*a*/·(/*b*/{
       3 │ + → data:·/*a*/·(/*b*/function()·{
       4 │ + return·{
-    4 5 │   		foo: 'bar'
+    4 5 │       foo: 'bar'
     5   │ - → })
       6 │ + → }
       7 │ + })

@@ -1,0 +1,33 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: mergeable-bare-exports.js
+---
+# Input
+```js
+export { a };
+export { c };
+export { b, d };
+
+```
+
+# Diagnostics
+```
+mergeable-bare-exports.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The imports and exports are not sorted.
+  
+  > 1 │ export { a };
+      │ ^^^^^^^^^^^^^
+    2 │ export { c };
+    3 │ export { b, d };
+  
+  i Safe fix: Organize Imports (Biome)
+  
+    1   │ - export·{·a·};
+    2   │ - export·{·c·};
+    3   │ - export·{·b,·d·};
+      1 │ + export·{·a,·b,·c,·d·};
+    4 2 │   
+  
+
+```

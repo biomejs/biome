@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
 
@@ -101,11 +100,13 @@ CssRoot {
                                                         value_token: IDENT@36..41 "color" [] [],
                                                     },
                                                     colon_token: COLON@41..43 ":" [] [Whitespace(" ")],
-                                                    value: CssGenericComponentValueList [
-                                                        CssIdentifier {
-                                                            value_token: IDENT@43..46 "red" [] [],
-                                                        },
-                                                    ],
+                                                    value: ScssExpression {
+                                                        items: ScssExpressionItemList [
+                                                            CssIdentifier {
+                                                                value_token: IDENT@43..46 "red" [] [],
+                                                            },
+                                                        ],
+                                                    },
                                                 },
                                                 important: missing (optional),
                                             },
@@ -215,11 +216,13 @@ CssRoot {
                                                         value_token: IDENT@109..114 "color" [] [],
                                                     },
                                                     colon_token: COLON@114..116 ":" [] [Whitespace(" ")],
-                                                    value: CssGenericComponentValueList [
-                                                        CssIdentifier {
-                                                            value_token: IDENT@116..120 "blue" [] [],
-                                                        },
-                                                    ],
+                                                    value: ScssExpression {
+                                                        items: ScssExpressionItemList [
+                                                            CssIdentifier {
+                                                                value_token: IDENT@116..120 "blue" [] [],
+                                                            },
+                                                        ],
+                                                    },
                                                 },
                                                 important: missing (optional),
                                             },
@@ -321,11 +324,13 @@ CssRoot {
                                                     value_token: IDENT@186..191 "color" [] [],
                                                 },
                                                 colon_token: COLON@191..193 ":" [] [Whitespace(" ")],
-                                                value: CssGenericComponentValueList [
-                                                    CssIdentifier {
-                                                        value_token: IDENT@193..198 "green" [] [],
-                                                    },
-                                                ],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        CssIdentifier {
+                                                            value_token: IDENT@193..198 "green" [] [],
+                                                        },
+                                                    ],
+                                                },
                                             },
                                             important: missing (optional),
                                         },
@@ -394,9 +399,10 @@ CssRoot {
                         0: CSS_IDENTIFIER@36..41
                           0: IDENT@36..41 "color" [] []
                         1: COLON@41..43 ":" [] [Whitespace(" ")]
-                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@43..46
-                          0: CSS_IDENTIFIER@43..46
-                            0: IDENT@43..46 "red" [] []
+                        2: SCSS_EXPRESSION@43..46
+                          0: SCSS_EXPRESSION_ITEM_LIST@43..46
+                            0: CSS_IDENTIFIER@43..46
+                              0: IDENT@43..46 "red" [] []
                       1: (empty)
                     1: SEMICOLON@46..48 ";" [] [Whitespace(" ")]
                 2: R_CURLY@48..49 "}" [] []
@@ -457,9 +463,10 @@ CssRoot {
                         0: CSS_IDENTIFIER@109..114
                           0: IDENT@109..114 "color" [] []
                         1: COLON@114..116 ":" [] [Whitespace(" ")]
-                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@116..120
-                          0: CSS_IDENTIFIER@116..120
-                            0: IDENT@116..120 "blue" [] []
+                        2: SCSS_EXPRESSION@116..120
+                          0: SCSS_EXPRESSION_ITEM_LIST@116..120
+                            0: CSS_IDENTIFIER@116..120
+                              0: IDENT@116..120 "blue" [] []
                       1: (empty)
                     1: SEMICOLON@120..122 ";" [] [Whitespace(" ")]
                 2: R_CURLY@122..123 "}" [] []
@@ -524,9 +531,10 @@ CssRoot {
                         0: CSS_IDENTIFIER@186..191
                           0: IDENT@186..191 "color" [] []
                         1: COLON@191..193 ":" [] [Whitespace(" ")]
-                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@193..198
-                          0: CSS_IDENTIFIER@193..198
-                            0: IDENT@193..198 "green" [] []
+                        2: SCSS_EXPRESSION@193..198
+                          0: SCSS_EXPRESSION_ITEM_LIST@193..198
+                            0: CSS_IDENTIFIER@193..198
+                              0: IDENT@193..198 "green" [] []
                       1: (empty)
                     1: SEMICOLON@198..200 ";" [] [Whitespace(" ")]
                 2: R_CURLY@200..201 "}" [] []

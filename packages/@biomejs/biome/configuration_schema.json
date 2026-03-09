@@ -3441,6 +3441,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoEmptyObjectKeysConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoEmptyObjectKeysOptions" }
+			]
+		},
+		"NoEmptyObjectKeysOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoEmptyPatternConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -4982,6 +4992,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoTopLevelLiteralsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoTopLevelLiteralsOptions" }
+			]
+		},
+		"NoTopLevelLiteralsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoTsIgnoreConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5850,6 +5870,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noEmptyObjectKeys": {
+					"description": "Disallow empty keys in JSON objects.\nSee https://biomejs.dev/linter/rules/no-empty-object-keys",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoEmptyObjectKeysConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noEqualsToNull": {
 					"description": "Require the use of === or !== for comparison with null.\nSee https://biomejs.dev/linter/rules/no-equals-to-null",
 					"anyOf": [
@@ -6078,6 +6105,13 @@
 					"description": "Disallow ternary operators.\nSee https://biomejs.dev/linter/rules/no-ternary",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoTernaryConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noTopLevelLiterals": {
+					"description": "Require the JSON top-level value to be an array or object.\nSee https://biomejs.dev/linter/rules/no-top-level-literals",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoTopLevelLiteralsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7770,6 +7804,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoEmptyObjectKeysOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoEmptyObjectKeysOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoEmptyPatternOptions": {
 			"type": "object",
 			"properties": {
@@ -9116,6 +9159,15 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoThisInStaticOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoTopLevelLiteralsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoTopLevelLiteralsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

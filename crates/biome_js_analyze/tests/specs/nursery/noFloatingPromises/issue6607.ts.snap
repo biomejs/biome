@@ -1,0 +1,177 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue6607.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+// IIFE with arrow function returning a Promise
+function pattern1() {
+	(() => {
+		return new Promise((resolve) => resolve('iife'));
+	})();
+}
+
+// IIFE with async arrow function
+function pattern2() {
+	(async () => {
+		return 'value';
+	})();
+}
+
+// IIFE with regular function returning a Promise
+function pattern3() {
+	(function() {
+		return new Promise((resolve) => resolve('iife'));
+	})();
+}
+
+// IIFE with async regular function
+function pattern4() {
+	(async function() {
+		return 'value';
+	})();
+}
+
+// Top-level IIFE returning a Promise
+(() => {
+	return new Promise((resolve) => resolve('iife'));
+})();
+
+// Top-level async IIFE
+(async () => {
+	return 'value';
+})();
+
+```
+
+# Diagnostics
+```
+issue6607.ts:5:2 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    3 │ // IIFE with arrow function returning a Promise
+    4 │ function pattern1() {
+  > 5 │ 	(() => {
+      │ 	^^^^^^^^
+  > 6 │ 		return new Promise((resolve) => resolve('iife'));
+  > 7 │ 	})();
+      │ 	^^^^^
+    8 │ }
+    9 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+issue6607.ts:12:2 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    10 │ // IIFE with async arrow function
+    11 │ function pattern2() {
+  > 12 │ 	(async () => {
+       │ 	^^^^^^^^^^^^^^
+  > 13 │ 		return 'value';
+  > 14 │ 	})();
+       │ 	^^^^^
+    15 │ }
+    16 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+issue6607.ts:19:2 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    17 │ // IIFE with regular function returning a Promise
+    18 │ function pattern3() {
+  > 19 │ 	(function() {
+       │ 	^^^^^^^^^^^^^
+  > 20 │ 		return new Promise((resolve) => resolve('iife'));
+  > 21 │ 	})();
+       │ 	^^^^^
+    22 │ }
+    23 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+issue6607.ts:26:2 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    24 │ // IIFE with async regular function
+    25 │ function pattern4() {
+  > 26 │ 	(async function() {
+       │ 	^^^^^^^^^^^^^^^^^^^
+  > 27 │ 		return 'value';
+  > 28 │ 	})();
+       │ 	^^^^^
+    29 │ }
+    30 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+issue6607.ts:32:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    31 │ // Top-level IIFE returning a Promise
+  > 32 │ (() => {
+       │ ^^^^^^^^
+  > 33 │ 	return new Promise((resolve) => resolve('iife'));
+  > 34 │ })();
+       │ ^^^^^
+    35 │ 
+    36 │ // Top-level async IIFE
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+issue6607.ts:37:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    36 │ // Top-level async IIFE
+  > 37 │ (async () => {
+       │ ^^^^^^^^^^^^^^
+  > 38 │ 	return 'value';
+  > 39 │ })();
+       │ ^^^^^
+    40 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

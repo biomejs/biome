@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: markdown/code/mdn-background-9.md
 ---
+
 # Input
 
 ```md

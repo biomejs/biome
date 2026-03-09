@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: markdown/liquid/unbalanced-template-open-only.md
 ---
+
 # Input
 
 ```md

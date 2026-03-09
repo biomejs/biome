@@ -91,12 +91,13 @@ fn is_thematic_break_pattern(p: &mut MarkdownParser) -> bool {
         return break_count >= THEMATIC_BREAK_MIN_CHARS && has_eol;
     }
 
-    // Get the break character from the first non-whitespace token
-    let break_char = if p.at(T![*]) {
+    // Get the break character from the first non-whitespace token.
+    // DOUBLE_STAR / DOUBLE_UNDERSCORE count as 2 of the underlying char.
+    let break_char = if p.at(T![*]) || p.at(T![**]) {
         '*'
     } else if p.at(T![-]) {
         '-'
-    } else if p.at(UNDERSCORE) {
+    } else if p.at(UNDERSCORE) || p.at(DOUBLE_UNDERSCORE) {
         '_'
     } else if p.at(MD_TEXTUAL_LITERAL) {
         let text = p.cur_text();
@@ -114,20 +115,24 @@ fn is_thematic_break_pattern(p: &mut MarkdownParser) -> bool {
         return false;
     };
 
-    // Count matching characters
+    // Count matching characters.
+    // DOUBLE_STAR / DOUBLE_UNDERSCORE contribute 2 to the count.
     let mut count = 0usize;
 
     loop {
-        // Check for the break character
-        let is_break = match break_char {
-            '*' => p.at(T![*]) || (p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == "*"),
-            '-' => p.at(T![-]) || (p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == "-"),
-            '_' => p.at(UNDERSCORE) || (p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == "_"),
-            _ => false,
+        let (is_break, char_count) = match break_char {
+            '*' if p.at(T![**]) => (true, 2),
+            '*' if p.at(T![*]) || (p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == "*") => (true, 1),
+            '-' if p.at(T![-]) || (p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == "-") => (true, 1),
+            '_' if p.at(DOUBLE_UNDERSCORE) => (true, 2),
+            '_' if p.at(UNDERSCORE) || (p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == "_") => {
+                (true, 1)
+            }
+            _ => (false, 0),
         };
 
         if is_break {
-            count += 1;
+            count += char_count;
             p.bump_any();
             continue;
         }
@@ -152,100 +157,93 @@ pub(crate) fn parse_thematic_break_block(p: &mut MarkdownParser) -> ParsedSyntax
     }
     let m = p.start();
 
+    // skip_line_indent unchanged — deferred to Phase 5
     p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
 
-    // If the lexer produced MD_THEMATIC_BREAK_LITERAL, use it directly.
-    // Otherwise, parse the thematic break pattern from individual tokens and
-    // ensure we emit a literal token (required by the grammar).
-    if p.at(MD_THEMATIC_BREAK_LITERAL) {
-        p.expect(MD_THEMATIC_BREAK_LITERAL);
-    } else {
-        parse_thematic_break_tokens(p);
-    }
+    parse_thematic_break_parts(p);
 
     Present(m.complete(p, MD_THEMATIC_BREAK_BLOCK))
 }
 
-/// Parse a thematic break from individual tokens when the lexer didn't produce
-/// MD_THEMATIC_BREAK_LITERAL (e.g., after a list marker was consumed).
-fn parse_thematic_break_tokens(p: &mut MarkdownParser) {
-    // Skip leading whitespace
-    while p.at(MD_TEXTUAL_LITERAL) && p.cur_text().chars().all(|c| c == ' ' || c == '\t') {
-        p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_TEXTUAL_LITERAL));
-    }
+// #region parse_thematic_break_parts
 
-    // If the entire thematic break is in a single textual token, remap it.
-    if p.at(MD_TEXTUAL_LITERAL)
-        && p.cur_text()
-            .chars()
-            .all(|c| c == ' ' || c == '\t' || c == '*' || c == '-' || c == '_')
-    {
-        let has_eol = p.lookahead(|p| {
-            p.bump(MD_TEXTUAL_LITERAL);
-            while p.at(MD_TEXTUAL_LITERAL) && p.cur_text().chars().all(|c| c == ' ' || c == '\t') {
-                p.bump(MD_TEXTUAL_LITERAL);
-            }
-            p.at(NEWLINE) || p.at(T![EOF])
-        });
-        if !has_eol {
-            return;
-        }
-        p.bump_remap(MD_THEMATIC_BREAK_LITERAL);
-        return;
-    }
+/// Parse thematic break content into a MdThematicBreakPartList.
+///
+/// Handles both paths:
+/// - Happy path: MD_THEMATIC_BREAK_LITERAL present -> re-lex into parts
+/// - Fallback path: individual tokens already available (e.g., after list marker)
+fn parse_thematic_break_parts(p: &mut MarkdownParser) {
+    let list_m = p.start();
 
-    // Determine the break character for multi-token cases.
-    let break_char = if p.at(T![*]) {
-        Some('*')
-    } else if p.at(T![-]) {
-        Some('-')
-    } else if p.at(UNDERSCORE) {
-        Some('_')
-    } else if p.at(MD_TEXTUAL_LITERAL) {
-        let text = p.cur_text();
-        match text.chars().next() {
-            Some('*') => Some('*'),
-            Some('-') => Some('-'),
-            Some('_') => Some('_'),
-            _ => None,
-        }
+    // If lexer produced a single literal, decompose it via re-lex.
+    // Track this so all subsequent bumps use parts-mode context.
+    // Mutable: fallback MD_TEXTUAL_LITERAL tokens also trigger re-lex (see below).
+    let mut relex_active = if p.at(MD_THEMATIC_BREAK_LITERAL) {
+        p.force_relex_thematic_break_parts();
+        true
     } else {
-        None
+        false
     };
 
-    // Emit the required literal token by remapping the first break marker token.
-    if break_char.is_some()
-        && (p.at(T![*]) || p.at(T![-]) || p.at(UNDERSCORE) || p.at(MD_TEXTUAL_LITERAL))
-    {
-        p.bump_remap(MD_THEMATIC_BREAK_LITERAL);
-    }
-
-    // Parse all break characters and whitespace until end of line
+    // Shared emission loop for both paths.
+    // In relex_active mode: tokens are STAR/MINUS/UNDERSCORE/MD_INDENT_CHAR
+    //   from the ThematicBreakParts context — use bump_thematic_break_parts().
+    // In fallback mode: tokens may be individual punctuation (STAR etc.) or
+    //   multi-char MD_TEXTUAL_LITERAL — the latter triggers re-lex on demand.
     loop {
         if p.at(NEWLINE) || p.at(T![EOF]) {
             break;
         }
 
-        // Check for the break character
-        let is_break = match break_char {
-            Some('*') => p.at(T![*]) || (p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == "*"),
-            Some('-') => p.at(T![-]) || (p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == "-"),
-            Some('_') => p.at(UNDERSCORE) || (p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == "_"),
-            _ => false,
-        };
-
-        if is_break {
-            p.parse_as_skipped_trivia_tokens(|p| p.bump_any());
+        // Break character (STAR/MINUS/UNDERSCORE) — from re-lex or regular context
+        if p.at(T![*]) || p.at(T![-]) || p.at(UNDERSCORE) {
+            let char_m = p.start();
+            if relex_active {
+                p.bump_thematic_break_parts();
+            } else {
+                p.bump_any();
+            }
+            char_m.complete(p, MD_THEMATIC_BREAK_CHAR);
             continue;
         }
 
-        // Skip whitespace between break characters
-        if p.at(MD_TEXTUAL_LITERAL) && p.cur_text().chars().all(|c| c == ' ' || c == '\t') {
-            p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_TEXTUAL_LITERAL));
+        // Whitespace (MD_INDENT_CHAR) — from re-lex or regular context
+        if p.at(MD_INDENT_CHAR) {
+            let char_m = p.start();
+            if relex_active {
+                p.bump_thematic_break_parts();
+            } else {
+                p.bump(MD_INDENT_CHAR);
+            }
+            char_m.complete(p, MD_INDENT_TOKEN);
             continue;
         }
 
-        // Other content - shouldn't happen if at_thematic_break_block returned true
+        // Grouped tokens (DOUBLE_STAR, DOUBLE_UNDERSCORE) or multi-char
+        // MD_TEXTUAL_LITERAL — force re-lex to decompose into single-char tokens.
+        if p.at(T![**]) || p.at(DOUBLE_UNDERSCORE) {
+            p.force_relex_thematic_break_parts();
+            relex_active = true;
+            continue;
+        }
+
+        if p.at(MD_TEXTUAL_LITERAL) {
+            let first_char = p.cur_text().as_bytes().first().copied();
+            match first_char {
+                Some(b'*' | b'-' | b'_' | b' ' | b'\t') => {
+                    p.force_relex_thematic_break_parts();
+                    relex_active = true;
+                    continue;
+                }
+                _ => break,
+            }
+        }
+
+        // Unexpected token — shouldn't happen if detection was correct
         break;
     }
+
+    list_m.complete(p, MD_THEMATIC_BREAK_PART_LIST);
 }
+
+// #endregion

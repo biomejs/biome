@@ -1,6 +1,6 @@
 use biome_formatter::{IndentStyle, IndentWidth};
 use biome_formatter_test::test_prettier_snapshot::{PrettierSnapshot, PrettierTestFile};
-use biome_markdown_formatter::{MarkdownFormatLanguage, context::MarkdownFormatOptions};
+use biome_markdown_formatter::{MdFormatLanguage, context::MdFormatOptions};
 use camino::Utf8Path;
 use std::env;
 
@@ -19,11 +19,11 @@ fn test_snapshot(input: &'static str, _: &str, _: &str, _: &str) {
     ));
 
     let test_file = PrettierTestFile::new(input, root_path);
-    let options = MarkdownFormatOptions::default()
+    let options = MdFormatOptions::default()
         .with_indent_style(IndentStyle::Space)
         .with_indent_width(IndentWidth::default());
     let language = language::MarkdownTestFormatLanguage::default();
-    let snapshot = PrettierSnapshot::new(test_file, language, MarkdownFormatLanguage::new(options));
+    let snapshot = PrettierSnapshot::new(test_file, language, MdFormatLanguage::new(options));
 
     snapshot.test()
 }

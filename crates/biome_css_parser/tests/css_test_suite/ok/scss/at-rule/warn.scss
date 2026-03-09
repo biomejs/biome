@@ -1,0 +1,5 @@
+@warn ("deprecated", $name);
+
+.card {
+  @warn $primary, $secondary;
+}

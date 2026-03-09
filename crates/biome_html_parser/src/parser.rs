@@ -17,11 +17,11 @@ pub(crate) type HtmlLosslessTreeSink<'source> =
 pub(crate) struct HtmlParser<'source> {
     context: ParserContext<HtmlSyntaxKind>,
     source: HtmlTokenSource<'source>,
-    options: HtmlParseOptions,
+    options: HtmlParserOptions,
 }
 
 impl<'source> HtmlParser<'source> {
-    pub fn new(source: &'source str, options: HtmlParseOptions) -> Self {
+    pub fn new(source: &'source str, options: HtmlParserOptions) -> Self {
         Self {
             context: ParserContext::default(),
             source: HtmlTokenSource::from_str(source),
@@ -29,7 +29,7 @@ impl<'source> HtmlParser<'source> {
         }
     }
 
-    pub(crate) fn options(&self) -> &HtmlParseOptions {
+    pub(crate) fn options(&self) -> &HtmlParserOptions {
         &self.options
     }
 
@@ -112,7 +112,7 @@ impl<'src> Parser for HtmlParser<'src> {
 }
 
 #[derive(Default, Debug)]
-pub struct HtmlParseOptions {
+pub struct HtmlParserOptions {
     pub(crate) frontmatter: bool,
     pub(crate) text_expression: Option<TextExpressionKind>,
     pub(crate) vue: bool,
@@ -120,7 +120,7 @@ pub struct HtmlParseOptions {
     pub(crate) is_html: bool,
 }
 
-impl HtmlParseOptions {
+impl HtmlParserOptions {
     pub fn with_single_text_expression(mut self) -> Self {
         self.text_expression = Some(TextExpressionKind::Single);
         self
@@ -140,7 +140,7 @@ impl HtmlParseOptions {
     ///
     /// When `value` is `true`, enables [`TextExpressionKind::Double`].
     /// When `false`, disables text expressions entirely (`None`).
-    /// Use [`HtmlParseOptions::with_single_text_expression`] to enable single-quoted mode.
+    /// Use [`HtmlParserOptions::with_single_text_expression`] to enable single-quoted mode.
     pub fn set_double_text_expression(&mut self, value: bool) {
         match value {
             true => self.text_expression = Some(TextExpressionKind::Double),
@@ -163,7 +163,7 @@ impl HtmlParseOptions {
     }
 }
 
-impl From<&HtmlFileSource> for HtmlParseOptions {
+impl From<&HtmlFileSource> for HtmlParserOptions {
     fn from(file_source: &HtmlFileSource) -> Self {
         let mut options = Self::default();
 

@@ -18,7 +18,7 @@ mod token_source;
 #[cfg(feature = "test_utils")]
 mod to_html;
 
-pub use parser::MarkdownParseOptions;
+pub use parser::MarkdownParserOptions;
 
 #[cfg(feature = "test_utils")]
 pub use to_html::document_to_html;
@@ -29,14 +29,14 @@ pub(crate) type MarkdownLosslessTreeSink<'source> =
 /// Parse markdown source code with default options.
 pub fn parse_markdown(source: &str) -> MarkdownParse {
     let mut cache = NodeCache::default();
-    parse_markdown_with_cache(source, &mut cache, MarkdownParseOptions::default())
+    parse_markdown_with_cache(source, &mut cache, MarkdownParserOptions::default())
 }
 
 /// Parse markdown source code with custom options and a node cache.
 pub fn parse_markdown_with_cache(
     source: &str,
     cache: &mut NodeCache,
-    options: MarkdownParseOptions,
+    options: MarkdownParserOptions,
 ) -> MarkdownParse {
     let link_definitions =
         link_reference::collect_link_reference_definitions(source, options.clone());

@@ -82,8 +82,8 @@ invalid-define.vue:10:13 lint/nursery/noVueArrowFuncInWatch  FIXABLE  ━━━�
      9  9 │       bar: {
     10    │ - → → → handler:·(val,·oldVal)·=>·{
        10 │ + → → → handler:·function(val,·oldVal)·{
-    11 11 │   				console.log('new: %s, old: %s', val, oldVal)
-    12 12 │   			}
+    11 11 │           console.log('new: %s, old: %s', val, oldVal)
+    12 12 │         }
   
 
 ```
