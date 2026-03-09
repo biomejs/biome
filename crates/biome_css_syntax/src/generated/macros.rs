@@ -955,6 +955,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::ScssDeclaration::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::SCSS_EACH_AT_RULE => {
+                    let $pattern = unsafe { $crate::ScssEachAtRule::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::SCSS_ELSE_CLAUSE => {
                     let $pattern = unsafe { $crate::ScssElseClause::new_unchecked(node) };
                     $body
@@ -1396,6 +1400,10 @@ macro_rules! map_syntax_node {
                 $crate::CssSyntaxKind::CSS_VALUE_AT_RULE_PROPERTY_LIST => {
                     let $pattern =
                         unsafe { $crate::CssValueAtRulePropertyList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_EACH_BINDING_LIST => {
+                    let $pattern = unsafe { $crate::ScssEachBindingList::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::SCSS_EXPRESSION_ITEM_LIST => {

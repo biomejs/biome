@@ -834,6 +834,7 @@ impl<'src> CssLexer<'src> {
             b"counter-style" => COUNTER_STYLE_KW,
             b"property" => PROPERTY_KW,
             b"container" => CONTAINER_KW,
+            b"each" => EACH_KW,
             b"debug" => DEBUG_KW,
             b"warn" => WARN_KW,
             b"error" => ERROR_KW,
