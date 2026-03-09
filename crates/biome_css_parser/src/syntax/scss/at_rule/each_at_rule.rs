@@ -12,8 +12,7 @@ use biome_parser::prelude::*;
 use biome_parser::{Parser, TokenSet, token_set};
 
 const SCSS_EACH_ITERABLE_END_SET: TokenSet<CssSyntaxKind> = token_set![T!['{']];
-const SCSS_EACH_BINDING_RECOVERY_SET: TokenSet<CssSyntaxKind> =
-    token_set![T![,], T![in], T!['{']];
+const SCSS_EACH_BINDING_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![T![,], T![in], T!['{']];
 
 /// Parses the SCSS `@each` at-rule.
 ///
@@ -90,7 +89,11 @@ impl ParseSeparatedList for ScssEachBindingList {
         p: &mut Self::Parser<'_>,
         parsed_element: ParsedSyntax,
     ) -> RecoveryResult {
-        parsed_element.or_recover(p, &ScssEachBindingListParseRecovery, expected_scss_each_binding)
+        parsed_element.or_recover(
+            p,
+            &ScssEachBindingListParseRecovery,
+            expected_scss_each_binding,
+        )
     }
 
     fn separating_element_kind(&mut self) -> Self::Kind {

@@ -1,5 +1,5 @@
-mod each_at_rule;
 mod debug;
+mod each_at_rule;
 mod else_clause;
 mod error;
 mod if_at_rule;
@@ -13,8 +13,8 @@ use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
 use biome_parser::{TokenSet, token_set};
 
-pub(crate) use each_at_rule::parse_scss_each_at_rule;
 pub(crate) use debug::parse_scss_debug_at_rule;
+pub(crate) use each_at_rule::parse_scss_each_at_rule;
 pub(crate) use else_clause::parse_bogus_scss_else_at_rule;
 pub(crate) use error::parse_scss_error_at_rule;
 pub(crate) use if_at_rule::parse_scss_if_at_rule;
