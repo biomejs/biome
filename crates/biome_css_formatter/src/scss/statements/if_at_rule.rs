@@ -14,7 +14,16 @@ impl FormatNodeRule<ScssIfAtRule> for FormatScssIfAtRule {
             else_clause,
         } = node.as_fields();
 
-        write!(f, [if_token.format(), space(), condition.format(), space(), block.format()])?;
+        write!(
+            f,
+            [
+                if_token.format(),
+                space(),
+                condition.format(),
+                space(),
+                block.format()
+            ]
+        )?;
 
         if let Some(else_clause) = else_clause {
             write!(f, [space(), else_clause.format()])?;
