@@ -1,0 +1,327 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@if {
+  color: red;
+}
+
+@if $theme == dark;
+
+@if $size > {
+  color: blue;
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: ScssIfAtRule {
+                if_token: IF_KW@1..4 "if" [] [Whitespace(" ")],
+                condition: missing (required),
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@4..5 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@5..13 "color" [Newline("\n"), Whitespace("  ")] [],
+                                    },
+                                    colon_token: COLON@13..15 ":" [] [Whitespace(" ")],
+                                    value: ScssExpression {
+                                        items: ScssExpressionItemList [
+                                            CssIdentifier {
+                                                value_token: IDENT@15..18 "red" [] [],
+                                            },
+                                        ],
+                                    },
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@18..19 ";" [] [],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@19..21 "}" [Newline("\n")] [],
+                },
+                else_clause: missing (optional),
+            },
+        },
+        CssAtRule {
+            at_token: AT@21..24 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    IF_KW@24..27 "if" [] [Whitespace(" ")],
+                    CssBogus {
+                        items: [
+                            CssBogus {
+                                items: [
+                                    ScssBinaryExpression {
+                                        left: ScssIdentifier {
+                                            dollar_token: DOLLAR@27..28 "$" [] [],
+                                            name: CssIdentifier {
+                                                value_token: IDENT@28..34 "theme" [] [Whitespace(" ")],
+                                            },
+                                        },
+                                        operator: EQ2@34..37 "==" [] [Whitespace(" ")],
+                                        right: CssIdentifier {
+                                            value_token: IDENT@37..41 "dark" [] [],
+                                        },
+                                    },
+                                    CssBogusPropertyValue {
+                                        items: [
+                                            SEMICOLON@41..42 ";" [] [],
+                                        ],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                    CssBogusBlock {
+                        items: [
+                            CssDeclarationOrRuleList [
+                                CssAtRule {
+                                    at_token: AT@42..45 "@" [Newline("\n"), Newline("\n")] [],
+                                    rule: ScssIfAtRule {
+                                        if_token: IF_KW@45..48 "if" [] [Whitespace(" ")],
+                                        condition: ScssExpression {
+                                            items: ScssExpressionItemList [
+                                                ScssBinaryExpression {
+                                                    left: ScssIdentifier {
+                                                        dollar_token: DOLLAR@48..49 "$" [] [],
+                                                        name: CssIdentifier {
+                                                            value_token: IDENT@49..54 "size" [] [Whitespace(" ")],
+                                                        },
+                                                    },
+                                                    operator: R_ANGLE@54..56 ">" [] [Whitespace(" ")],
+                                                    right: missing (required),
+                                                },
+                                            ],
+                                        },
+                                        block: CssDeclarationOrRuleBlock {
+                                            l_curly_token: L_CURLY@56..57 "{" [] [],
+                                            items: CssDeclarationOrRuleList [
+                                                CssDeclarationWithSemicolon {
+                                                    declaration: CssDeclaration {
+                                                        property: CssGenericProperty {
+                                                            name: CssIdentifier {
+                                                                value_token: IDENT@57..65 "color" [Newline("\n"), Whitespace("  ")] [],
+                                                            },
+                                                            colon_token: COLON@65..67 ":" [] [Whitespace(" ")],
+                                                            value: ScssExpression {
+                                                                items: ScssExpressionItemList [
+                                                                    CssIdentifier {
+                                                                        value_token: IDENT@67..71 "blue" [] [],
+                                                                    },
+                                                                ],
+                                                            },
+                                                        },
+                                                        important: missing (optional),
+                                                    },
+                                                    semicolon_token: SEMICOLON@71..72 ";" [] [],
+                                                },
+                                            ],
+                                            r_curly_token: R_CURLY@72..74 "}" [Newline("\n")] [],
+                                        },
+                                        else_clause: missing (optional),
+                                    },
+                                },
+                            ],
+                        ],
+                    },
+                ],
+            },
+        },
+    ],
+    eof_token: EOF@74..75 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..75
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..74
+    0: CSS_AT_RULE@0..21
+      0: AT@0..1 "@" [] []
+      1: SCSS_IF_AT_RULE@1..21
+        0: IF_KW@1..4 "if" [] [Whitespace(" ")]
+        1: (empty)
+        2: CSS_DECLARATION_OR_RULE_BLOCK@4..21
+          0: L_CURLY@4..5 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@5..19
+            0: CSS_DECLARATION_WITH_SEMICOLON@5..19
+              0: CSS_DECLARATION@5..18
+                0: CSS_GENERIC_PROPERTY@5..18
+                  0: CSS_IDENTIFIER@5..13
+                    0: IDENT@5..13 "color" [Newline("\n"), Whitespace("  ")] []
+                  1: COLON@13..15 ":" [] [Whitespace(" ")]
+                  2: SCSS_EXPRESSION@15..18
+                    0: SCSS_EXPRESSION_ITEM_LIST@15..18
+                      0: CSS_IDENTIFIER@15..18
+                        0: IDENT@15..18 "red" [] []
+                1: (empty)
+              1: SEMICOLON@18..19 ";" [] []
+          2: R_CURLY@19..21 "}" [Newline("\n")] []
+        3: (empty)
+    1: CSS_AT_RULE@21..74
+      0: AT@21..24 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@24..74
+        0: IF_KW@24..27 "if" [] [Whitespace(" ")]
+        1: CSS_BOGUS@27..42
+          0: CSS_BOGUS@27..42
+            0: SCSS_BINARY_EXPRESSION@27..41
+              0: SCSS_IDENTIFIER@27..34
+                0: DOLLAR@27..28 "$" [] []
+                1: CSS_IDENTIFIER@28..34
+                  0: IDENT@28..34 "theme" [] [Whitespace(" ")]
+              1: EQ2@34..37 "==" [] [Whitespace(" ")]
+              2: CSS_IDENTIFIER@37..41
+                0: IDENT@37..41 "dark" [] []
+            1: CSS_BOGUS_PROPERTY_VALUE@41..42
+              0: SEMICOLON@41..42 ";" [] []
+        2: CSS_BOGUS_BLOCK@42..74
+          0: CSS_DECLARATION_OR_RULE_LIST@42..74
+            0: CSS_AT_RULE@42..74
+              0: AT@42..45 "@" [Newline("\n"), Newline("\n")] []
+              1: SCSS_IF_AT_RULE@45..74
+                0: IF_KW@45..48 "if" [] [Whitespace(" ")]
+                1: SCSS_EXPRESSION@48..56
+                  0: SCSS_EXPRESSION_ITEM_LIST@48..56
+                    0: SCSS_BINARY_EXPRESSION@48..56
+                      0: SCSS_IDENTIFIER@48..54
+                        0: DOLLAR@48..49 "$" [] []
+                        1: CSS_IDENTIFIER@49..54
+                          0: IDENT@49..54 "size" [] [Whitespace(" ")]
+                      1: R_ANGLE@54..56 ">" [] [Whitespace(" ")]
+                      2: (empty)
+                2: CSS_DECLARATION_OR_RULE_BLOCK@56..74
+                  0: L_CURLY@56..57 "{" [] []
+                  1: CSS_DECLARATION_OR_RULE_LIST@57..72
+                    0: CSS_DECLARATION_WITH_SEMICOLON@57..72
+                      0: CSS_DECLARATION@57..71
+                        0: CSS_GENERIC_PROPERTY@57..71
+                          0: CSS_IDENTIFIER@57..65
+                            0: IDENT@57..65 "color" [Newline("\n"), Whitespace("  ")] []
+                          1: COLON@65..67 ":" [] [Whitespace(" ")]
+                          2: SCSS_EXPRESSION@67..71
+                            0: SCSS_EXPRESSION_ITEM_LIST@67..71
+                              0: CSS_IDENTIFIER@67..71
+                                0: IDENT@67..71 "blue" [] []
+                        1: (empty)
+                      1: SEMICOLON@71..72 ";" [] []
+                  2: R_CURLY@72..74 "}" [Newline("\n")] []
+                3: (empty)
+  2: EOF@74..75 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+if.scss:1:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found '{'.
+  
+  > 1 │ @if {
+      │     ^
+    2 │   color: red;
+    3 │ }
+  
+  i Expected a SCSS expression here.
+  
+  > 1 │ @if {
+      │     ^
+    2 │   color: red;
+    3 │ }
+  
+if.scss:5:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found ';'.
+  
+    3 │ }
+    4 │ 
+  > 5 │ @if $theme == dark;
+      │                   ^
+    6 │ 
+    7 │ @if $size > {
+  
+  i Expected a SCSS expression here.
+  
+    3 │ }
+    4 │ 
+  > 5 │ @if $theme == dark;
+      │                   ^
+    6 │ 
+    7 │ @if $size > {
+  
+if.scss:7:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found '@'.
+  
+    5 │ @if $theme == dark;
+    6 │ 
+  > 7 │ @if $size > {
+      │ ^
+    8 │   color: blue;
+    9 │ }
+  
+  i Expected a SCSS expression here.
+  
+    5 │ @if $theme == dark;
+    6 │ 
+  > 7 │ @if $size > {
+      │ ^
+    8 │   color: blue;
+    9 │ }
+  
+if.scss:7:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    5 │ @if $theme == dark;
+    6 │ 
+  > 7 │ @if $size > {
+      │             ^
+    8 │   color: blue;
+    9 │ }
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+if.scss:10:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead the file ends
+  
+     8 │   color: blue;
+     9 │ }
+  > 10 │ 
+       │ 
+  
+  i the file ends here
+  
+     8 │   color: blue;
+     9 │ }
+  > 10 │ 
+       │ 
+  
+```

@@ -1,7 +1,9 @@
 use crate::parser::CssParser;
 use crate::syntax::block::parse_declaration_or_rule_list_block;
 use crate::syntax::parse_error::expected_component_value;
-use crate::syntax::scss::parse_scss_expression_allow_empty_value_until;
+use crate::syntax::scss::{
+    SCSS_NESTING_VALUE_END_SET, parse_scss_expression_allow_empty_value_until,
+};
 use crate::syntax::{
     CssSyntaxFeatures, is_at_dashed_identifier, is_at_identifier, parse_regular_identifier,
 };
@@ -9,13 +11,10 @@ use biome_css_syntax::CssSyntaxKind::{
     CSS_DECLARATION, CSS_DECLARATION_IMPORTANT, CSS_DECLARATION_WITH_SEMICOLON,
     CSS_GENERIC_PROPERTY, EOF, SCSS_NESTING_DECLARATION,
 };
-use biome_css_syntax::{CssSyntaxKind, T};
+use biome_css_syntax::T;
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::{CompletedMarker, Parser, SyntaxFeature, TokenSet, token_set};
-
-const SCSS_NESTING_VALUE_END_SET: TokenSet<CssSyntaxKind> =
-    token_set![T!['{'], T![;], T!['}'], T![!], EOF];
+use biome_parser::{CompletedMarker, Parser, SyntaxFeature};
 
 /// Detects nested property syntax (`prop: { ... }`) while excluding custom properties
 /// and CSS Modules declarations that must remain regular properties.

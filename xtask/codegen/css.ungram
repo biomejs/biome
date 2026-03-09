@@ -684,6 +684,11 @@ AnyCssAtRule =
 	| CssPositionTryAtRule
 	| CssViewTransitionAtRule
 	| CssFunctionAtRule
+	| ScssIfAtRule
+	| ScssWhileAtRule
+	| ScssDebugAtRule
+	| ScssWarnAtRule
+	| ScssErrorAtRule
 	// Tailwind CSS 4.0 at rules
 	| TwThemeAtRule
 	| TwSourceAtRule
@@ -720,6 +725,41 @@ AnyCssAtRuleDeclarator =
 	| CssScopeAtRuleDeclarator
 	| CssStartingStyleAtRuleDeclarator
 	| CssFunctionAtRuleDeclarator
+
+ScssIfAtRule =
+	'if'
+	condition: ScssExpression
+	block: CssDeclarationOrRuleBlock
+	else_clause: ScssElseClause?
+
+ScssWhileAtRule =
+	'while'
+	condition: ScssExpression
+	block: CssDeclarationOrRuleBlock
+
+ScssElseClause =
+	'@'
+	'else'
+	body: AnyScssElseClauseBody
+
+AnyScssElseClauseBody =
+	ScssIfAtRule
+	| CssDeclarationOrRuleBlock
+
+ScssDebugAtRule =
+	'debug'
+	value: ScssExpression
+	';'
+
+ScssWarnAtRule =
+	'warn'
+	value: ScssExpression
+	';'
+
+ScssErrorAtRule =
+	'error'
+	value: ScssExpression
+	';'
 
 // Conditional block declarator nodes
 CssMediaAtRuleDeclarator =
@@ -2015,6 +2055,7 @@ CssParameterList = AnyCssExpression (',' AnyCssExpression)* ','?
 // <if-test> =
 //  supports( [ <ident> : <declaration-value> ] | <supports-condition> ) |
 //  media( <media-feature> | <media-condition> ) |
+//  sass( <expression> ) |
 //  style( <style-query> )
 //
 // if(style(--color: green)): red);
@@ -2131,6 +2172,12 @@ CssIfMediaTest =
 	test: AnyCssIfMediaTestQuery
 	')'
 
+CssIfSassTest =
+	'sass'
+	'('
+	test: ScssExpression
+	')'
+
 CssIfStyleTest =
 	'style'
 	'('
@@ -2140,6 +2187,7 @@ CssIfStyleTest =
 AnyCssIfTest =
 	CssIfSupportsTest
 	| CssIfMediaTest
+	| CssIfSassTest
 	| CssIfStyleTest
 	| CssBogusIfTest
 
@@ -2585,6 +2633,7 @@ ScssExpressionItemList = AnyScssExpressionItem*
 AnyScssExpressionItem =
 	AnyCssValue
 	| CssGenericDelimiter
+	| CssDeclarationImportant
 	| ScssKeywordArgument
 	| ScssArbitraryArgument
 	| ScssBinaryExpression

@@ -12,6 +12,7 @@ use biome_parser::prelude::{CompletedMarker, ParsedSyntax};
 use biome_parser::token_set;
 
 use crate::parser::CssParser;
+use crate::syntax::CssSyntaxFeatures;
 use crate::syntax::at_rule::container::error::expected_any_container_style_query;
 use crate::syntax::at_rule::container::parse_any_container_style_query;
 use crate::syntax::at_rule::error::AnyInParensParseRecovery;
@@ -23,13 +24,16 @@ use crate::syntax::at_rule::supports::AnySupportsConditionParseRecovery;
 use crate::syntax::at_rule::supports::error::expected_any_supports_condition;
 use crate::syntax::at_rule::supports::{parse_any_supports_condition, parse_supports_declaration};
 use crate::syntax::is_at_declaration;
+use crate::syntax::parse_error::scss_only_syntax_error;
 use crate::syntax::property::{
     END_OF_PROPERTY_VALUE_COMPONENT_LIST_TOKEN_SET, END_OF_PROPERTY_VALUE_TOKEN_SET,
     GenericComponentValueList,
 };
+use crate::syntax::scss::{expected_scss_expression, parse_scss_expression_until};
 use crate::syntax::value::parse_error::expected_if_branch;
 use crate::syntax::value::parse_error::expected_if_test_boolean_expr_group;
 use crate::syntax::value::parse_error::expected_if_test_boolean_not_expr;
+use biome_parser::SyntaxFeature;
 
 const IF_BRANCH_RECOVERY_TOKEN_SET: TokenSet<CssSyntaxKind> =
     token_set![T![;], T![')'], T!['}'], EOF];
@@ -100,6 +104,7 @@ pub(crate) fn is_at_if_function(p: &mut CssParser) -> bool {
 /// <if-test> =
 ///   supports( [ <ident> : <declaration-value> ] | <supports-condition> ) |
 ///   media( <media-feature> | <media-condition> ) |
+///   sass( <expression> ) |
 ///   style( <style-query> )
 /// ```
 pub(crate) fn parse_if_function(p: &mut CssParser) -> ParsedSyntax {
@@ -168,6 +173,11 @@ fn is_at_if_style_test(p: &mut CssParser) -> bool {
     p.at(T![style]) && p.nth_at(1, T!['('])
 }
 
+#[inline]
+fn is_at_if_sass_test(p: &mut CssParser) -> bool {
+    p.at(T![sass]) && p.nth_at(1, T!['('])
+}
+
 /// Parses a style if condition test.
 ///
 /// # Example
@@ -196,6 +206,36 @@ fn parse_if_style_test(p: &mut CssParser) -> ParsedSyntax {
     p.expect(T![')']);
 
     Present(m.complete(p, CSS_IF_STYLE_TEST))
+}
+
+/// Parses an SCSS-only `sass(...)` if condition test.
+///
+/// # Example
+///
+/// ```css
+/// sass($size > 10px)
+/// ```
+#[inline]
+fn parse_if_sass_test(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_if_sass_test(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump(T![sass]);
+    p.bump(T!['(']);
+
+    CssSyntaxFeatures::Scss
+        .parse_exclusive_syntax(
+            p,
+            |p| parse_scss_expression_until(p, token_set![T![')']]),
+            |p, marker| scss_only_syntax_error(p, "Sass if() tests", marker.range(p)),
+        )
+        .or_add_diagnostic(p, expected_scss_expression);
+
+    p.expect(T![')']);
+
+    Present(m.complete(p, CSS_IF_SASS_TEST))
 }
 
 #[inline]
@@ -238,7 +278,10 @@ fn parse_if_media_test(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 fn is_at_if_test(p: &mut CssParser) -> bool {
-    is_at_if_supports_test(p) || is_at_if_style_test(p) || is_at_if_media_test(p)
+    is_at_if_supports_test(p)
+        || is_at_if_style_test(p)
+        || is_at_if_media_test(p)
+        || is_at_if_sass_test(p)
 }
 
 #[inline]
@@ -253,6 +296,10 @@ fn parse_if_test(p: &mut CssParser) -> ParsedSyntax {
 
     if is_at_if_media_test(p) {
         return parse_if_media_test(p);
+    }
+
+    if is_at_if_sass_test(p) {
+        return parse_if_sass_test(p);
     }
 
     Absent

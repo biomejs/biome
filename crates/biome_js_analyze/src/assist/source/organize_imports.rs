@@ -19,7 +19,7 @@ use biome_rule_options::{organize_imports::OrganizeImportsOptions, sort_order::S
 use import_key::{ImportInfo, ImportKey};
 use rustc_hash::FxHashMap;
 use specifiers_attributes::{
-    JsNamedSpecifiers, are_import_attributes_sorted, merge_export_from_specifiers,
+    are_import_attributes_sorted, merge_export_from_specifiers, merge_export_specifiers,
     merge_import_specifiers, sort_attributes, sort_export_from_specifiers, sort_export_specifiers,
     sort_import_specifiers,
 };
@@ -825,43 +825,22 @@ impl Rule for OrganizeImports {
                     prev_group = key.group;
                     chunk = Some(ChunkBuilder::new(key));
                 }
-            } else {
-                if chunk.is_some() {
-                    // This is either
-                    // - a bare (side-effect) import
-                    // - an export without `from` clause
-                    // - a buggy import or export
-                    // - a statement
-                    //
-                    // In any case, the chunk ends here
-                    report_unsorted_chunk(chunk.take(), &mut result);
-                    prev_group = 0;
-                    // A statement must be separated of a chunk with a blank line
-                    if let AnyJsModuleItem::AnyJsStatement(statement) = &item
-                        && leading_newlines(statement.syntax()).count() == 1
-                    {
-                        result.push(Issue::AddLeadingNewline {
-                            slot_index: statement.syntax().index() as u32,
-                        });
-                    }
-                }
-                if let AnyJsModuleItem::JsExport(js_export) = &item
-                    && let Ok(AnyJsExportClause::JsExportNamedClause(clause)) =
-                        js_export.export_clause()
+            } else if chunk.is_some() {
+                // This is either
+                // - a bare (side-effect) import
+                // - a buggy import or export
+                // - a statement
+                //
+                // In any case, the chunk ends here
+                report_unsorted_chunk(chunk.take(), &mut result);
+                prev_group = 0;
+                // A statement must be separated of a chunk with a blank line
+                if let AnyJsModuleItem::AnyJsStatement(statement) = &item
+                    && leading_newlines(statement.syntax()).count() == 1
                 {
-                    let specifiers =
-                        JsNamedSpecifiers::JsExportNamedSpecifierList(clause.specifiers());
-                    let are_specifiers_unsorted = !specifiers.are_sorted(sort_order);
-                    if are_specifiers_unsorted {
-                        // Report the violation of one of the previous requirement
-                        result.push(Issue::UnorganizedItem {
-                            slot_index: item.syntax().index() as u32,
-                            are_specifiers_unsorted,
-                            // An export without `from` clause has no attributes.
-                            are_attributes_unsorted: false,
-                            newline_issue: NewLineIssue::None,
-                        });
-                    }
+                    result.push(Issue::AddLeadingNewline {
+                        slot_index: statement.syntax().index() as u32,
+                    });
                 }
             }
             prev_kind = Some(item.syntax().kind());
@@ -1168,33 +1147,45 @@ fn merge(
         (AnyJsModuleItem::JsExport(item1), AnyJsModuleItem::JsExport(item2)) => {
             let clause1 = item1.export_clause().ok()?;
             let clause2 = item2.export_clause().ok()?;
-            let AnyJsExportClause::JsExportNamedFromClause(clause1) = clause1 else {
-                return None;
+            let merged_item = match (clause1, clause2) {
+                (
+                    AnyJsExportClause::JsExportNamedFromClause(clause1),
+                    AnyJsExportClause::JsExportNamedFromClause(clause2),
+                ) => {
+                    let specifiers1 = clause1.specifiers();
+                    let specifiers2 = clause2.specifiers();
+                    let merged_specifiers =
+                        merge_export_from_specifiers(&specifiers1, &specifiers2, sort_order)?;
+                    let merged_specifiers = clause1.with_specifiers(merged_specifiers);
+                    item2.clone().with_export_clause(merged_specifiers.into())
+                }
+                (
+                    AnyJsExportClause::JsExportNamedClause(clause1),
+                    AnyJsExportClause::JsExportNamedClause(clause2),
+                ) => {
+                    let specifiers1 = clause1.specifiers();
+                    let specifiers2 = clause2.specifiers();
+                    let merged_specifiers =
+                        merge_export_specifiers(&specifiers1, &specifiers2, sort_order)?;
+                    let merged_specifiers = clause1.with_specifiers(merged_specifiers);
+                    item2.clone().with_export_clause(merged_specifiers.into())
+                }
+                _ => return None,
             };
-            let clause2 = clause2.as_js_export_named_from_clause()?;
-            let specifiers1 = clause1.specifiers();
-            let specifiers2 = clause2.specifiers();
-            if let Some(merged_specifiers) =
-                merge_export_from_specifiers(&specifiers1, &specifiers2, sort_order)
-            {
-                let merged_specifiers = clause1.with_specifiers(merged_specifiers);
-                let merged_item = item2.clone().with_export_clause(merged_specifiers.into());
-
-                let item1_leading_trivia = item1.syntax().first_leading_trivia()?;
-                let merged_item = if item1_leading_trivia.is_empty() {
-                    merged_item
-                } else {
-                    merged_item
-                        .trim_leading_trivia()?
-                        .prepend_trivia_pieces(item1.syntax().first_leading_trivia()?.pieces())?
-                };
-                return Some(merged_item.into());
-            }
+            let item1_leading_trivia = item1.syntax().first_leading_trivia()?;
+            let merged_item = if item1_leading_trivia.is_empty() {
+                merged_item
+            } else {
+                merged_item
+                    .trim_leading_trivia()?
+                    .prepend_trivia_pieces(item1_leading_trivia.pieces())?
+            };
+            Some(merged_item.into())
         }
         (AnyJsModuleItem::JsImport(item1), AnyJsModuleItem::JsImport(item2)) => {
             let clause1 = item1.import_clause().ok()?;
             let clause2 = item2.import_clause().ok()?;
-            match (clause1, clause2) {
+            let merged_item = match (clause1, clause2) {
                 (
                     AnyJsImportClause::JsImportDefaultClause(clause1),
                     AnyJsImportClause::JsImportNamespaceClause(clause2),
@@ -1215,17 +1206,7 @@ fn merge(
                         clause2.source().ok()?,
                     )
                     .build();
-                    let merged_item = item2.clone().with_import_clause(merged_clause.into());
-
-                    let item1_leading_trivia = item1.syntax().first_leading_trivia()?;
-                    let merged_item = if item1_leading_trivia.is_empty() {
-                        merged_item
-                    } else {
-                        merged_item.trim_leading_trivia()?.prepend_trivia_pieces(
-                            item1.syntax().first_leading_trivia()?.pieces(),
-                        )?
-                    };
-                    return Some(merged_item.into());
+                    item2.clone().with_import_clause(merged_clause.into())
                 }
                 (
                     AnyJsImportClause::JsImportCombinedClause(clause1),
@@ -1241,22 +1222,10 @@ fn merge(
                         return None;
                     };
                     let specifiers2 = clause2.named_specifiers().ok()?;
-                    if let Some(merged_specifiers) =
-                        merge_import_specifiers(specifiers1, &specifiers2, sort_order)
-                    {
-                        let merged_clause = clause1.with_specifier(merged_specifiers.into());
-                        let merged_item = item2.clone().with_import_clause(merged_clause.into());
-
-                        let item1_leading_trivia = item1.syntax().first_leading_trivia()?;
-                        let merged_item = if item1_leading_trivia.is_empty() {
-                            merged_item
-                        } else {
-                            merged_item.trim_leading_trivia()?.prepend_trivia_pieces(
-                                item1.syntax().first_leading_trivia()?.pieces(),
-                            )?
-                        };
-                        return Some(merged_item.into());
-                    }
+                    let merged_specifiers =
+                        merge_import_specifiers(specifiers1, &specifiers2, sort_order)?;
+                    let merged_clause = clause1.with_specifier(merged_specifiers.into());
+                    item2.clone().with_import_clause(merged_clause.into())
                 }
                 (
                     AnyJsImportClause::JsImportNamedClause(clause1),
@@ -1264,21 +1233,10 @@ fn merge(
                 ) => {
                     let specifiers1 = clause1.named_specifiers().ok()?;
                     let specifiers2 = clause2.named_specifiers().ok()?;
-                    if let Some(merged_specifiers) =
-                        merge_import_specifiers(specifiers1, &specifiers2, sort_order)
-                    {
-                        let merged_clause = clause1.with_named_specifiers(merged_specifiers);
-                        let merged_item = item2.clone().with_import_clause(merged_clause.into());
-                        let item1_leading_trivia = item1.syntax().first_leading_trivia()?;
-                        let merged_item = if item1_leading_trivia.is_empty() {
-                            merged_item
-                        } else {
-                            merged_item.trim_leading_trivia()?.prepend_trivia_pieces(
-                                item1.syntax().first_leading_trivia()?.pieces(),
-                            )?
-                        };
-                        return Some(merged_item.into());
-                    }
+                    let merged_specifiers =
+                        merge_import_specifiers(specifiers1, &specifiers2, sort_order)?;
+                    let merged_clause = clause1.with_named_specifiers(merged_specifiers);
+                    item2.clone().with_import_clause(merged_clause.into())
                 }
                 (
                     AnyJsImportClause::JsImportDefaultClause(clause1),
@@ -1300,21 +1258,20 @@ fn merge(
                         clause2.source().ok()?,
                     )
                     .build();
-                    let merged_item = item2.clone().with_import_clause(merged_clause.into());
-                    let item1_leading_trivia = item1.syntax().first_leading_trivia()?;
-                    let merged_item = if item1_leading_trivia.is_empty() {
-                        merged_item
-                    } else {
-                        merged_item.trim_leading_trivia()?.prepend_trivia_pieces(
-                            item1.syntax().first_leading_trivia()?.pieces(),
-                        )?
-                    };
-                    return Some(merged_item.into());
+                    item2.clone().with_import_clause(merged_clause.into())
                 }
-                _ => {}
-            }
+                _ => return None,
+            };
+            let item1_leading_trivia = item1.syntax().first_leading_trivia()?;
+            let merged_item = if item1_leading_trivia.is_empty() {
+                merged_item
+            } else {
+                merged_item
+                    .trim_leading_trivia()?
+                    .prepend_trivia_pieces(item1_leading_trivia.pieces())?
+            };
+            Some(merged_item.into())
         }
-        _ => {}
+        _ => None,
     }
-    None
 }

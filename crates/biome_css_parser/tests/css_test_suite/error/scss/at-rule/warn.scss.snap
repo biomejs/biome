@@ -1,0 +1,148 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@warn (1, 2;
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssBogusAtRule {
+                items: [
+                    WARN_KW@1..6 "warn" [] [Whitespace(" ")],
+                    CssBogus {
+                        items: [
+                            CssBogus {
+                                items: [
+                                    CssBogus {
+                                        items: [
+                                            L_PAREN@6..7 "(" [] [],
+                                            CssBogus {
+                                                items: [
+                                                    CssBogus {
+                                                        items: [
+                                                            ScssListExpressionElement {
+                                                                value: ScssExpression {
+                                                                    items: ScssExpressionItemList [
+                                                                        CssNumber {
+                                                                            value_token: CSS_NUMBER_LITERAL@7..8 "1" [] [],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                            },
+                                                            COMMA@8..10 "," [] [Whitespace(" ")],
+                                                            CssBogus {
+                                                                items: [
+                                                                    CssBogus {
+                                                                        items: [
+                                                                            CssBogus {
+                                                                                items: [
+                                                                                    CssNumber {
+                                                                                        value_token: CSS_NUMBER_LITERAL@10..11 "2" [] [],
+                                                                                    },
+                                                                                    CssBogusPropertyValue {
+                                                                                        items: [
+                                                                                            SEMICOLON@11..12 ";" [] [],
+                                                                                        ],
+                                                                                    },
+                                                                                ],
+                                                                            },
+                                                                        ],
+                                                                    },
+                                                                ],
+                                                            },
+                                                        ],
+                                                    },
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+            },
+        },
+    ],
+    eof_token: EOF@12..13 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..13
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..12
+    0: CSS_AT_RULE@0..12
+      0: AT@0..1 "@" [] []
+      1: CSS_BOGUS_AT_RULE@1..12
+        0: WARN_KW@1..6 "warn" [] [Whitespace(" ")]
+        1: CSS_BOGUS@6..12
+          0: CSS_BOGUS@6..12
+            0: CSS_BOGUS@6..12
+              0: L_PAREN@6..7 "(" [] []
+              1: CSS_BOGUS@7..12
+                0: CSS_BOGUS@7..12
+                  0: SCSS_LIST_EXPRESSION_ELEMENT@7..8
+                    0: SCSS_EXPRESSION@7..8
+                      0: SCSS_EXPRESSION_ITEM_LIST@7..8
+                        0: CSS_NUMBER@7..8
+                          0: CSS_NUMBER_LITERAL@7..8 "1" [] []
+                  1: COMMA@8..10 "," [] [Whitespace(" ")]
+                  2: CSS_BOGUS@10..12
+                    0: CSS_BOGUS@10..12
+                      0: CSS_BOGUS@10..12
+                        0: CSS_NUMBER@10..11
+                          0: CSS_NUMBER_LITERAL@10..11 "2" [] []
+                        1: CSS_BOGUS_PROPERTY_VALUE@11..12
+                          0: SEMICOLON@11..12 ";" [] []
+  2: EOF@12..13 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+warn.scss:1:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found ';'.
+  
+  > 1 │ @warn (1, 2;
+      │            ^
+    2 │ 
+  
+  i Expected a SCSS expression here.
+  
+  > 1 │ @warn (1, 2;
+      │            ^
+    2 │ 
+  
+warn.scss:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead the file ends
+  
+    1 │ @warn (1, 2;
+  > 2 │ 
+      │ 
+  
+  i the file ends here
+  
+    1 │ @warn (1, 2;
+  > 2 │ 
+      │ 
+  
+```

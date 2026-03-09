@@ -1,0 +1,13 @@
+@debug$width*2;
+@warn
+  ("deprecated",  $name );
+@error color.adjust( $color,$lightness:10% );
+
+.card{
+@debug(1,2,3);
+@warn
+$primary,
+$secondary;
+@error if($fatal,
+red, blue);
+}
