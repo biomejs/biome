@@ -596,7 +596,7 @@ fn parse_embedded_nodes(
     let nodes = js_root
         .syntax()
         .descendants()
-        .filter_map(|node| JsTemplateExpression::cast(node))
+        .filter_map(JsTemplateExpression::cast)
         .filter_map(|expr| {
             let candidate = build_js_template_candidate(&expr)?;
             let embed_match = EmbedDetectorsRegistry::detect_match(

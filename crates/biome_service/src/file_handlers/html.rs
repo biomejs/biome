@@ -1030,13 +1030,7 @@ struct EmbedParseContext<'a, 'b> {
     builder: &'a mut EmbeddedBuilder,
 }
 
-/// Parse an embed site that the registry matched.
-/// Dispatches on `embed_match.guest` to call the right parser, configures
-/// `EmbeddingKind` / `CssModulesKind` based on the framework context.
-///
-/// `embedded_file_source`: for Vue/Svelte pass 2+, the `JsFileSource` captured
-/// from the first `<script>` parse. Used as the base for text expressions and
-/// directives. `None` for pass 1 (element-level) embeds.
+/// Parse an embedded code fragment using the parser for the matched guest language.
 fn parse_matched_embed(
     candidate: &EmbedCandidate,
     embed_match: &EmbedMatch,
