@@ -37,6 +37,8 @@ a * 1 / (b * 1);
 /* test */ a * 1 + 2;
 /* test */ x /*comment*/ * 1 + 2;
 
+// TODO: Make this a linting error?
+// `${bar}`;
 ```
 
 # Diagnostics
@@ -812,6 +814,7 @@ invalid.js:32:12 lint/complexity/noImplicitCoercions  FIXABLE  ━━━━━�
   > 32 │ /* test */ x /*comment*/ * 1 + 2;
        │            ^^^^^^^^^^^^^^^^^
     33 │ 
+    34 │ // TODO: Make this a linting error?
   
   i Unsafe fix: Use Number() instead.
   
@@ -820,6 +823,7 @@ invalid.js:32:12 lint/complexity/noImplicitCoercions  FIXABLE  ━━━━━�
     32    │ - /*·test·*/·x·/*comment*/·*·1·+·2;
        32 │ + /*·test·*/·Number(x·/*comment*/)·+·2;
     33 33 │   
+    34 34 │   // TODO: Make this a linting error?
   
 
 ```
