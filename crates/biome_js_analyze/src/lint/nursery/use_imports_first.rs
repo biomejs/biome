@@ -13,7 +13,7 @@ declare_lint_rule! {
     /// find and may indicate disorganized code. Keeping all imports together at
     /// the top makes dependencies immediately visible.
     ///
-    /// Note that directives such as `"use strict"` are always allowed before
+    /// Directives such as `"use strict"` are always allowed before
     /// imports, since they are parsed separately from module items.
     ///
     /// ## Examples
