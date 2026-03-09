@@ -180,6 +180,12 @@ pub enum RuleSource<'a> {
     HtmlEslint(&'a str),
     /// Rules from [Eslint Plugin Playwright](https://github.com/playwright-community/eslint-plugin-playwright)
     EslintPlaywright(&'a str),
+    /// Rules from [Eslint Plugin Json](https://github.com/eslint/json)
+    EslintJson(&'a str),
+    /// Rules from [Eslint Plugin Markdown](https://github.com/eslint/markdown)
+    EslintMarkdown(&'a str),
+    /// Rules from [Eslint Plugin Yml](https://ota-meshi.github.io/eslint-plugin-yml/)
+    EslintYml(&'a str),
     /// Action for https://github.com/keithamus/sort-package-json
     SortPackageJson,
 }
@@ -232,6 +238,9 @@ impl<'a> std::fmt::Display for RuleSource<'a> {
             Self::EslintTurbo(_) => write!(f, "eslint-plugin-turbo"),
             Self::HtmlEslint(_) => write!(f, "@html-eslint/eslint-plugin"),
             Self::EslintPlaywright(_) => write!(f, "eslint-plugin-playwright"),
+            Self::EslintJson(_) => write!(f, "@eslint/json"),
+            Self::EslintMarkdown(_) => write!(f, "@eslint/markdown"),
+            Self::EslintYml(_) => write!(f, "eslint-plugin-yml"),
             Self::SortPackageJson => write!(f, "sort-package-json"),
         }
     }
@@ -294,7 +303,11 @@ impl<'a> RuleSource<'a> {
             Self::HtmlEslint(_) => 38,
             Self::EslintE18e(_) => 39,
             Self::EslintBetterTailwindcss(_) => 40,
-            Self::SortPackageJson => 41,
+            Self::EslintJson(_) => 41,
+            Self::EslintMarkdown(_) => 42,
+            Self::EslintYml(_) => 43,
+                Self::SortPackageJson => 44,
+
         }
     }
 
@@ -354,7 +367,10 @@ impl<'a> RuleSource<'a> {
             | Self::Stylelint(rule_name)
             | Self::EslintTurbo(rule_name)
             | Self::HtmlEslint(rule_name)
-            | Self::EslintPlaywright(rule_name) => rule_name,
+            | Self::EslintPlaywright(rule_name)
+            | Self::EslintJson(rule_name)
+            | Self::EslintMarkdown(rule_name)
+            | Self::EslintYml(rule_name) => rule_name,
             Self::SortPackageJson => "sort-package-json",
         }
     }
@@ -403,6 +419,9 @@ impl<'a> RuleSource<'a> {
             Self::EslintPlaywright(_) => "playwright",
             Self::EslintE18e(_) => "e18e",
             Self::EslintBetterTailwindcss(_) => "better-tailwindcss",
+            Self::EslintJson(_) => "json",
+            Self::EslintMarkdown(_) => "markdown",
+            Self::EslintYml(_) => "yml",
         }
     }
 
@@ -457,6 +476,9 @@ impl<'a> RuleSource<'a> {
             Self::EslintTurbo(rule_name) => format!("https://github.com/vercel/turborepo/blob/main/packages/eslint-plugin-turbo/docs/rules/{rule_name}.md"),
             Self::HtmlEslint(rule_name) => format!("https://html-eslint.org/docs/rules/{rule_name}"),
             Self::EslintPlaywright(rule_name) => format!("https://github.com/playwright-community/eslint-plugin-playwright/blob/main/docs/rules/{rule_name}.md"),
+            Self::EslintJson(rule_name) => format!("https://github.com/eslint/json/blob/main/docs/rules/{rule_name}.md"),
+            Self::EslintMarkdown(rule_name) => format!("https://github.com/eslint/markdown/blob/main/docs/rules/{rule_name}.md"),
+            Self::EslintYml(rule_name) => format!("https://ota-meshi.github.io/eslint-plugin-yml/rules/{rule_name}.html"),
             Self::SortPackageJson => "https://github.com/keithamus/sort-package-json".to_string(),
         }
     }

@@ -3441,6 +3441,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoEmptyObjectKeysConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoEmptyObjectKeysOptions" }
+			]
+		},
+		"NoEmptyObjectKeysOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoEmptyPatternConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -4982,6 +4992,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoTopLevelLiteralsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoTopLevelLiteralsOptions" }
+			]
+		},
+		"NoTopLevelLiteralsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoTsIgnoreConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -4996,17 +5016,6 @@
 			]
 		},
 		"NoUnassignedVariablesOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
-		"NoUndeclaredClassesConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithNoUndeclaredClassesOptions" }
-			]
-		},
-		"NoUndeclaredClassesOptions": {
-			"description": "Options for the `noUndeclaredClasses` rule.",
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -5285,16 +5294,6 @@
 			]
 		},
 		"NoUnsafeOptionalChainingOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
-		"NoUnusedClassesConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithNoUnusedClassesOptions" }
-			]
-		},
-		"NoUnusedClassesOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -5871,6 +5870,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noEmptyObjectKeys": {
+					"description": "Disallow empty keys in JSON objects.\nSee https://biomejs.dev/linter/rules/no-empty-object-keys",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoEmptyObjectKeysConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noEqualsToNull": {
 					"description": "Require the use of === or !== for comparison with null.\nSee https://biomejs.dev/linter/rules/no-equals-to-null",
 					"anyOf": [
@@ -6102,10 +6108,10 @@
 						{ "type": "null" }
 					]
 				},
-				"noUndeclaredClasses": {
-					"description": "Reports CSS class names in HTML class attributes that are not defined in any \\<style> block or linked stylesheet available to the file.\nSee https://biomejs.dev/linter/rules/no-undeclared-classes",
+				"noTopLevelLiterals": {
+					"description": "Require the JSON top-level value to be an array or object.\nSee https://biomejs.dev/linter/rules/no-top-level-literals",
 					"anyOf": [
-						{ "$ref": "#/$defs/NoUndeclaredClassesConfiguration" },
+						{ "$ref": "#/$defs/NoTopLevelLiteralsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6127,13 +6133,6 @@
 					"description": "Disallow unnecessary type-based conditions that can be statically determined as redundant.\nSee https://biomejs.dev/linter/rules/no-unnecessary-conditions",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnnecessaryConditionsConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUnusedClasses": {
-					"description": "Reports CSS class selectors that are never referenced in any JSX or HTML file.\nSee https://biomejs.dev/linter/rules/no-unused-classes",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoUnusedClassesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6532,16 +6531,10 @@
 			"type": "object",
 			"properties": {
 				"groups": {
-					"description": "Groups to change how imports and exports are sorted.",
 					"anyOf": [{ "$ref": "#/$defs/ImportGroups" }, { "type": "null" }]
 				},
 				"identifierOrder": {
-					"description": "Order used for sorting identifiers within imports and exports.\n\nDefault: `natural`.",
 					"anyOf": [{ "$ref": "#/$defs/SortOrder" }, { "type": "null" }]
-				},
-				"sortBareImports": {
-					"description": "If `true`, bare imports such as `import \"module\"` are sorted with other imports.",
-					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -6931,14 +6924,6 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseSortedKeysOptions" }
-			},
-			"required": ["level", "options"]
-		},
-		"RuleAssistWithUseSortedPackageJsonOptions": {
-			"type": "object",
-			"properties": {
-				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
-				"options": { "$ref": "#/$defs/UseSortedPackageJsonOptions" }
 			},
 			"required": ["level", "options"]
 		},
@@ -7808,6 +7793,15 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoEmptyInterfaceOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoEmptyObjectKeysOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoEmptyObjectKeysOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -9162,6 +9156,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoTopLevelLiteralsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoTopLevelLiteralsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoTsIgnoreOptions": {
 			"type": "object",
 			"properties": {
@@ -9177,15 +9180,6 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUnassignedVariablesOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
-		"RuleWithNoUndeclaredClassesOptions": {
-			"type": "object",
-			"properties": {
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/NoUndeclaredClassesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -9376,15 +9370,6 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUnsafeOptionalChainingOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
-		"RuleWithNoUnusedClassesOptions": {
-			"type": "object",
-			"properties": {
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/NoUnusedClassesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -11591,13 +11576,6 @@
 					"description": "Sort the keys of a JSON object in natural order.\nSee https://biomejs.dev/assist/actions/use-sorted-keys",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseSortedKeysConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useSortedPackageJson": {
-					"description": "Organize package.json fields according to established conventions.\nSee https://biomejs.dev/assist/actions/use-sorted-package-json",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseSortedPackageJsonConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -14349,16 +14327,6 @@
 					"anyOf": [{ "$ref": "#/$defs/SortOrder" }, { "type": "null" }]
 				}
 			},
-			"additionalProperties": false
-		},
-		"UseSortedPackageJsonConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RuleAssistPlainConfiguration" },
-				{ "$ref": "#/$defs/RuleAssistWithUseSortedPackageJsonOptions" }
-			]
-		},
-		"UseSortedPackageJsonOptions": {
-			"type": "object",
 			"additionalProperties": false
 		},
 		"UseSortedPropertiesConfiguration": {

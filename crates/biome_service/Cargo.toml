@@ -90,6 +90,7 @@ insta = { workspace = true }
 
 [features]
 js_plugin = ["biome_plugin_loader/js_plugin"]
+markdown  = ["biome_configuration/markdown"]
 schema    = [
   "biome_configuration/schema",
   "biome_css_syntax/schema",

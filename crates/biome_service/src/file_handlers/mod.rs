@@ -55,7 +55,7 @@ use either::Either;
 use grit::GritFileHandler;
 use html::HtmlFileHandler;
 pub use javascript::JsFormatterSettings;
-use markdown::MarkdownFileHandler;
+use md::MarkdownFileHandler;
 use rustc_hash::FxHashSet;
 use std::borrow::Cow;
 use std::collections::HashSet;
@@ -70,7 +70,7 @@ pub(crate) mod html;
 mod ignore;
 pub(crate) mod javascript;
 pub(crate) mod json;
-pub(crate) mod markdown;
+pub(crate) mod md;
 pub mod svelte;
 mod unknown;
 pub mod vue;
@@ -169,6 +169,11 @@ impl DocumentFileSource {
             return Ok(file_source.into());
         }
         if let Ok(file_source) = GraphqlFileSource::try_from_well_known(path) {
+            return Ok(file_source.into());
+        }
+
+        #[cfg(feature = "markdown")]
+        if let Ok(file_source) = MdFileSource::try_from_well_known(path) {
             return Ok(file_source.into());
         }
 
@@ -1401,8 +1406,6 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
 
     /// It loops over the domains of the current rule, and check each domain specify
     /// a dependency.
-    ///
-    /// Returns `true` if the rule was enabled, `false` otherwise
     fn record_rule_from_manifest<R, L>(&mut self, rule_filter: RuleFilter<'static>)
     where
         L: biome_rowan::Language,
@@ -1423,16 +1426,20 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         }
 
         let no_only = self.only.is_some_and(|only| only.is_empty());
-        let no_domains = self
-            .settings
-            .as_linter_domains(path)
-            .is_none_or(|d| d.is_empty());
-        if !(no_only && no_domains) {
+        if !no_only {
             return;
         }
 
+        let domains = self.settings.as_linter_domains(path);
         if let Some(manifest) = &self.package_json {
             for domain in R::METADATA.domains {
+                if domains
+                    .as_ref()
+                    .is_some_and(|domains| domains.contains_key(domain))
+                {
+                    continue;
+                }
+
                 let matches_a_dependency = domain
                     .manifest_dependencies()
                     .iter()
@@ -2012,43 +2019,5 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
         disabled_rules.extend(assists_disabled_rules);
 
         (enabled_rules, disabled_rules, analyzer_options)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::{DocumentFileSource, Features};
-    use camino::Utf8Path;
-
-    #[test]
-    fn markdown_file_source_detection_and_capabilities() {
-        let source = DocumentFileSource::from_path(Utf8Path::new("docs/readme.md"), false);
-        assert!(matches!(source, DocumentFileSource::Unknown));
-
-        let language_source = DocumentFileSource::from_language_id("markdown");
-        assert!(matches!(language_source, DocumentFileSource::Unknown));
-
-        assert!(!DocumentFileSource::can_parse(Utf8Path::new(
-            "docs/readme.md"
-        )));
-        assert!(!DocumentFileSource::can_read(Utf8Path::new(
-            "docs/readme.md"
-        )));
-        assert!(!DocumentFileSource::can_contain_embeds(
-            Utf8Path::new("docs/readme.md"),
-            false
-        ));
-    }
-
-    #[test]
-    fn markdown_features_provide_formatter_capabilities() {
-        let features = Features::new();
-        let capabilities = features.get_capabilities(DocumentFileSource::from_path(
-            Utf8Path::new("doc.md"),
-            false,
-        ));
-
-        assert!(capabilities.formatter.format.is_none());
-        assert!(capabilities.parser.parse.is_none());
     }
 }

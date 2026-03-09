@@ -1091,7 +1091,7 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
-                    && element.kind() == MD_THEMATIC_BREAK_LITERAL
+                    && MdThematicBreakPartList::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -1104,6 +1104,25 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                     );
                 }
                 slots.into_node(MD_THEMATIC_BREAK_BLOCK, children)
+            }
+            MD_THEMATIC_BREAK_CHAR => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && matches!(element.kind(), T ! [*] | T ! [-] | T!["_"])
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        MD_THEMATIC_BREAK_CHAR.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(MD_THEMATIC_BREAK_CHAR, children)
             }
             MD_BLOCK_LIST => Self::make_node_list_syntax(kind, children, AnyMdBlock::can_cast),
             MD_BULLET_LIST => {
@@ -1119,6 +1138,9 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
             }
             MD_QUOTE_INDENT_LIST => {
                 Self::make_node_list_syntax(kind, children, MdQuoteIndent::can_cast)
+            }
+            MD_THEMATIC_BREAK_PART_LIST => {
+                Self::make_node_list_syntax(kind, children, AnyMdThematicBreakPart::can_cast)
             }
             _ => unreachable!("Is {:?} a token?", kind),
         }

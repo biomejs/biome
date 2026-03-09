@@ -209,18 +209,6 @@ impl BindingInfo {
                 | JsSyntaxKind::JS_NAMED_IMPORT_SPECIFIER,
         )
     }
-
-    fn is_parameter(&self) -> bool {
-        matches!(
-            self.declaration_kind,
-            JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION
-                | JsSyntaxKind::JS_BOGUS_PARAMETER
-                | JsSyntaxKind::JS_FORMAL_PARAMETER
-                | JsSyntaxKind::JS_REST_PARAMETER
-                | JsSyntaxKind::TS_PROPERTY_PARAMETER
-                | JsSyntaxKind::JS_CATCH_DECLARATION,
-        )
-    }
 }
 
 /// This type allows reporting a reference and bind to a binding (if any) later.
@@ -473,8 +461,11 @@ impl SemanticEventExtractor {
             | TS_DECLARE_FUNCTION_EXPORT_DEFAULT_DECLARATION
             | TS_CALL_SIGNATURE_TYPE_MEMBER
             | TS_CONSTRUCT_SIGNATURE_TYPE_MEMBER
+            | TS_CONSTRUCTOR_SIGNATURE_CLASS_MEMBER
             | TS_METHOD_SIGNATURE_CLASS_MEMBER
             | TS_METHOD_SIGNATURE_TYPE_MEMBER
+            | TS_GETTER_SIGNATURE_CLASS_MEMBER
+            | TS_SETTER_SIGNATURE_CLASS_MEMBER
             | TS_INDEX_SIGNATURE_CLASS_MEMBER
             | TS_INDEX_SIGNATURE_TYPE_MEMBER => {
                 self.is_ambient_context = true;
@@ -880,8 +871,11 @@ impl SemanticEventExtractor {
             | TS_DECLARE_FUNCTION_EXPORT_DEFAULT_DECLARATION
             | TS_CALL_SIGNATURE_TYPE_MEMBER
             | TS_CONSTRUCT_SIGNATURE_TYPE_MEMBER
+            | TS_CONSTRUCTOR_SIGNATURE_CLASS_MEMBER
             | TS_METHOD_SIGNATURE_CLASS_MEMBER
             | TS_METHOD_SIGNATURE_TYPE_MEMBER
+            | TS_GETTER_SIGNATURE_CLASS_MEMBER
+            | TS_SETTER_SIGNATURE_CLASS_MEMBER
             | TS_INDEX_SIGNATURE_CLASS_MEMBER
             | TS_INDEX_SIGNATURE_TYPE_MEMBER
             | TS_INTERFACE_DECLARATION
@@ -1028,19 +1022,21 @@ impl SemanticEventExtractor {
                                     range: reference.range(),
                                 });
                             }
-                            // Handle edge case where a parameter has the same name that a parameter type name
-                            // For example `(stream: stream.T) => {}`
-                            // In this particular case, the reference should be promoted to the parent scope.
-                            if reference.is_ambient_read() && info.is_parameter() {
-                                // A parent scope should exist because the binding is a parameter.
-                                if let Some(parent) = self.scopes.last_mut() {
-                                    // Promote this reference to the parent scope
-                                    let parent_references =
-                                        parent.references.entry(name.clone()).or_default();
-                                    parent_references
-                                        .push(Reference::AmbientRead(reference.range()));
-                                    continue;
-                                }
+                            // Handle edge case where a non-import binding shadows a type import
+                            // and the reference appears in a type position (AmbientRead).
+                            // For example `(stream: stream.T) => {}` (parameter shadows import)
+                            // or `let hast: hast.Root` inside a block (variable shadows import)
+                            // In these cases, the reference should be promoted to the parent scope
+                            // so that the dual lookup can resolve it to the type-only import.
+                            if reference.is_ambient_read()
+                                && !info.is_imported()
+                                && let Some(parent) = self.scopes.last_mut()
+                            {
+                                // Promote this reference to the parent scope
+                                let parent_references =
+                                    parent.references.entry(name.clone()).or_default();
+                                parent_references.push(Reference::AmbientRead(reference.range()));
+                                continue;
                             }
                             if declaration_before_reference {
                                 SemanticEvent::Read {

@@ -1,9 +1,10 @@
 use crate::{
-    AnyHtmlContent, AnyHtmlElement, AnyHtmlTagName, AnyHtmlTextExpression, AnySvelteBlock,
-    AstroEmbeddedContent, HtmlAttribute, HtmlAttributeList, HtmlElement, HtmlEmbeddedContent,
-    HtmlOpeningElement, HtmlSelfClosingElement, HtmlSyntaxToken, HtmlTagName, ScriptType,
-    inner_string_text,
+    AnyHtmlAttribute, AnyHtmlContent, AnyHtmlElement, AnyHtmlTagName, AnyHtmlTextExpression,
+    AnySvelteBlock, AnyVueDirective, AstroEmbeddedContent, HtmlAttribute, HtmlAttributeList,
+    HtmlElement, HtmlEmbeddedContent, HtmlOpeningElement, HtmlSelfClosingElement, HtmlSyntaxToken,
+    HtmlTagName, ScriptType, inner_string_text,
 };
+
 use biome_rowan::{AstNodeList, SyntaxResult, TokenText, declare_node_union};
 
 /// https://html.spec.whatwg.org/#void-elements
@@ -122,6 +123,58 @@ impl AnyHtmlElement {
             // Other variants don't have attributes
             _ => None,
         }
+    }
+
+    /// Check if the element has a given HTML attribute or a Vue v-bind binding
+    /// targeting the same attribute name.
+    ///
+    /// Handles:
+    /// - `name="..."` — standard HTML attribute
+    /// - `:name="..."` — Vue v-bind shorthand (`VueVBindShorthandDirective`)
+    /// - `v-bind:name="..."` — explicit Vue v-bind (`VueDirective`)
+    pub fn find_attribute_or_vue_binding(&self, name_to_lookup: &str) -> Option<AnyHtmlAttribute> {
+        let attrs = self.attributes()?;
+
+        attrs.iter().find_map(|attr| {
+            let matches = match &attr {
+                AnyHtmlAttribute::HtmlAttribute(a) => a
+                    .name()
+                    .ok()
+                    .and_then(|n| n.value_token().ok())
+                    .is_some_and(|t| t.text_trimmed().eq_ignore_ascii_case(name_to_lookup)),
+
+                AnyHtmlAttribute::AnyVueDirective(vue) => match vue {
+                    // :name="..."
+                    AnyVueDirective::VueVBindShorthandDirective(d) => d
+                        .arg()
+                        .ok()
+                        .and_then(|arg| arg.arg().ok())
+                        .and_then(|arg| arg.as_vue_static_argument().cloned())
+                        .and_then(|s| s.name_token().ok())
+                        .is_some_and(|t| t.text_trimmed().eq_ignore_ascii_case(name_to_lookup)),
+
+                    // v-bind:name="..."
+                    AnyVueDirective::VueDirective(d) => {
+                        let is_bind = d
+                            .name_token()
+                            .is_ok_and(|t| t.text_trimmed().eq_ignore_ascii_case("v-bind"));
+                        is_bind
+                            && d.arg()
+                                .and_then(|arg| arg.arg().ok())
+                                .and_then(|arg| arg.as_vue_static_argument().cloned())
+                                .and_then(|s| s.name_token().ok())
+                                .is_some_and(|t| {
+                                    t.text_trimmed().eq_ignore_ascii_case(name_to_lookup)
+                                })
+                    }
+
+                    _ => false,
+                },
+
+                _ => false,
+            };
+            if matches { Some(attr) } else { None }
+        })
     }
 }
 

@@ -193,7 +193,7 @@ impl State {
                 globs.push(AnyJsonValue::JsonStringValue(new_glob));
             }
         }
-        let separator_count = globs.len().checked_sub(1).unwrap_or_default();
+        let separator_count = globs.len().saturating_sub(1);
         let separators = (0..separator_count)
             .map(|_| make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]));
         make::json_array_value(

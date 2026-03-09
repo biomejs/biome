@@ -1,0 +1,15 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: valid.json
+---
+# Input
+```json
+{
+  "key1": "value1",
+  "key2": {
+    "nestedKey": "nested value",
+    "   nestedKey \n\t  ": "nested value"
+  }
+}
+
+```

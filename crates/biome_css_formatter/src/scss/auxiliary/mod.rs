@@ -3,6 +3,7 @@
 pub(crate) mod arbitrary_argument;
 pub(crate) mod binary_expression;
 pub(crate) mod declaration;
+pub(crate) mod else_clause;
 pub(crate) mod expression;
 pub(crate) mod keyword_argument;
 pub(crate) mod list_expression;

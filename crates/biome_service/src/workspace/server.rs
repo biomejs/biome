@@ -256,7 +256,7 @@ impl WorkspaceServer {
             }
         }
 
-        Err(WorkspaceError::not_found())
+        Err(WorkspaceError::not_found(path.to_string()))
     }
 
     /// Checks whether the directory identified by the given `path` contains a
@@ -658,7 +658,7 @@ impl WorkspaceServer {
 
         match syntax {
             Ok(syntax) => match syntax {
-                None => Err(WorkspaceError::not_found()),
+                None => Err(WorkspaceError::not_found(path.to_string())),
                 Some(syntax) => Ok(syntax),
             },
             Err(FileTooLarge { .. }) => Err(WorkspaceError::file_ignored(path.to_string())),
@@ -676,11 +676,11 @@ impl WorkspaceServer {
             .pin()
             .get(path)
             .cloned()
-            .ok_or_else(WorkspaceError::not_found)?;
+            .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
 
         match syntax.transpose() {
             Ok(syntax) => match syntax {
-                None => Err(WorkspaceError::not_found()),
+                None => Err(WorkspaceError::not_found(path.to_string())),
                 Some(syntax) => Ok((syntax.clone(), services.clone())),
             },
             Err(FileTooLarge { .. }) => Err(WorkspaceError::file_ignored(path.to_string())),
@@ -694,7 +694,7 @@ impl WorkspaceServer {
         self.documents
             .pin()
             .get(path)
-            .ok_or_else(WorkspaceError::not_found)
+            .ok_or_else(|| WorkspaceError::not_found(path.to_string()))
             .and_then(|doc| match &doc.syntax {
                 Some(syntax) => match syntax {
                     Ok(syntax) => Ok((
@@ -704,7 +704,7 @@ impl WorkspaceServer {
                     )),
                     Err(FileTooLarge { .. }) => Err(WorkspaceError::file_ignored(path.to_string())),
                 },
-                None => Err(WorkspaceError::not_found()),
+                None => Err(WorkspaceError::not_found(path.to_string())),
             })
     }
 
@@ -715,7 +715,7 @@ impl WorkspaceServer {
         self.documents
             .pin()
             .get(path)
-            .ok_or_else(WorkspaceError::not_found)
+            .ok_or_else(|| WorkspaceError::not_found(path.to_string()))
             .and_then(|doc| match &doc.syntax {
                 Some(syntax) => match syntax {
                     Ok(syntax) => Ok((
@@ -727,7 +727,7 @@ impl WorkspaceServer {
                     )),
                     Err(FileTooLarge { .. }) => Err(WorkspaceError::file_ignored(path.to_string())),
                 },
-                None => Err(WorkspaceError::not_found()),
+                None => Err(WorkspaceError::not_found(path.to_string())),
             })
     }
 
@@ -770,7 +770,7 @@ impl WorkspaceServer {
     ) -> Result<ParseResult, WorkspaceError> {
         let file_source = self
             .get_source(file_source_index)
-            .ok_or_else(WorkspaceError::not_found)?;
+            .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
         let capabilities = self.features.get_capabilities(file_source);
 
         let parse = capabilities
@@ -979,7 +979,7 @@ impl WorkspaceServer {
             let package_path = path
                 .parent()
                 .map(|parent| parent.to_path_buf())
-                .ok_or_else(WorkspaceError::not_found)?;
+                .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
 
             match update_kind {
                 UpdateKind::AddedOrChanged(_, root, _) => {
@@ -994,7 +994,7 @@ impl WorkspaceServer {
             let package_path = path
                 .parent()
                 .map(|parent| parent.to_path_buf())
-                .ok_or_else(WorkspaceError::not_found)?;
+                .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
 
             match update_kind {
                 UpdateKind::AddedOrChanged(_, root, _) => {
@@ -1012,7 +1012,7 @@ impl WorkspaceServer {
             let package_path = path
                 .parent()
                 .map(|parent| parent.to_path_buf())
-                .ok_or_else(WorkspaceError::not_found)?;
+                .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
 
             match update_kind {
                 UpdateKind::AddedOrChanged(_, root, _) => {
@@ -1574,7 +1574,7 @@ impl Workspace for WorkspaceServer {
             .pin()
             .get(params.path.as_path())
             .map(|document| document.content.clone())
-            .ok_or_else(WorkspaceError::not_found)
+            .ok_or_else(|| WorkspaceError::not_found(params.path.to_string()))
     }
 
     fn check_file_size(
@@ -1583,7 +1583,7 @@ impl Workspace for WorkspaceServer {
     ) -> Result<CheckFileSizeResult, WorkspaceError> {
         let documents = self.documents.pin();
         let Some(document) = documents.get(params.path.as_path()) else {
-            return Err(WorkspaceError::not_found());
+            return Err(WorkspaceError::not_found(params.path.to_string()));
         };
         let file_size = document.content.len();
         let limit = self
@@ -1611,7 +1611,7 @@ impl Workspace for WorkspaceServer {
         let (index, existing_version) = documents
             .get(path.as_path())
             .map(|document| (document.file_source_index, document.version))
-            .ok_or_else(WorkspaceError::not_found)?;
+            .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
 
         if existing_version.is_some_and(|existing_version| existing_version >= version) {
             warn!(%version, %path, "outdated_file_change");
@@ -1731,7 +1731,7 @@ impl Workspace for WorkspaceServer {
 
         documents
             .insert(path.clone().into(), document)
-            .ok_or_else(WorkspaceError::not_found)?;
+            .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
 
         let mut final_diagnostics = vec![];
 

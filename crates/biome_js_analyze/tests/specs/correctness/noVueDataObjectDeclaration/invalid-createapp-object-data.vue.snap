@@ -39,7 +39,7 @@ invalid-createapp-object-data.vue:5:2 lint/correctness/noVueDataObjectDeclaratio
     5    │ - → data:·{
        5 │ + → data:·function()·{
        6 │ + return·{
-    6  7 │   		foo: 'bar'
+    6  7 │       foo: 'bar'
     7    │ - → }
        8 │ + → }
        9 │ + }

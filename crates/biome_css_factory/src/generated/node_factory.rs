@@ -1133,6 +1133,22 @@ pub fn css_if_media_test(
         ],
     ))
 }
+pub fn css_if_sass_test(
+    sass_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    test: ScssExpression,
+    r_paren_token: SyntaxToken,
+) -> CssIfSassTest {
+    CssIfSassTest::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_IF_SASS_TEST,
+        [
+            Some(SyntaxElement::Token(sass_token)),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(test.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
 pub fn css_if_style_test(
     style_token: SyntaxToken,
     l_paren_token: SyntaxToken,
@@ -3066,6 +3082,20 @@ pub fn scss_binary_expression(
         ],
     ))
 }
+pub fn scss_debug_at_rule(
+    debug_token: SyntaxToken,
+    value: ScssExpression,
+    semicolon_token: SyntaxToken,
+) -> ScssDebugAtRule {
+    ScssDebugAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_DEBUG_AT_RULE,
+        [
+            Some(SyntaxElement::Token(debug_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
 pub fn scss_declaration(
     name: AnyScssDeclarationName,
     colon_token: SyntaxToken,
@@ -3106,6 +3136,52 @@ impl ScssDeclarationBuilder {
         ))
     }
 }
+pub fn scss_each_at_rule(
+    each_token: SyntaxToken,
+    bindings: ScssEachBindingList,
+    in_token: SyntaxToken,
+    iterable: ScssExpression,
+    block: CssDeclarationOrRuleBlock,
+) -> ScssEachAtRule {
+    ScssEachAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_EACH_AT_RULE,
+        [
+            Some(SyntaxElement::Token(each_token)),
+            Some(SyntaxElement::Node(bindings.into_syntax())),
+            Some(SyntaxElement::Token(in_token)),
+            Some(SyntaxElement::Node(iterable.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
+pub fn scss_else_clause(
+    at_token: SyntaxToken,
+    else_token: SyntaxToken,
+    body: AnyScssElseClauseBody,
+) -> ScssElseClause {
+    ScssElseClause::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_ELSE_CLAUSE,
+        [
+            Some(SyntaxElement::Token(at_token)),
+            Some(SyntaxElement::Token(else_token)),
+            Some(SyntaxElement::Node(body.into_syntax())),
+        ],
+    ))
+}
+pub fn scss_error_at_rule(
+    error_token: SyntaxToken,
+    value: ScssExpression,
+    semicolon_token: SyntaxToken,
+) -> ScssErrorAtRule {
+    ScssErrorAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_ERROR_AT_RULE,
+        [
+            Some(SyntaxElement::Token(error_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
 pub fn scss_expression(items: ScssExpressionItemList) -> ScssExpression {
     ScssExpression::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_EXPRESSION,
@@ -3120,6 +3196,42 @@ pub fn scss_identifier(dollar_token: SyntaxToken, name: CssIdentifier) -> ScssId
             Some(SyntaxElement::Node(name.into_syntax())),
         ],
     ))
+}
+pub fn scss_if_at_rule(
+    if_token: SyntaxToken,
+    condition: ScssExpression,
+    block: CssDeclarationOrRuleBlock,
+) -> ScssIfAtRuleBuilder {
+    ScssIfAtRuleBuilder {
+        if_token,
+        condition,
+        block,
+        else_clause: None,
+    }
+}
+pub struct ScssIfAtRuleBuilder {
+    if_token: SyntaxToken,
+    condition: ScssExpression,
+    block: CssDeclarationOrRuleBlock,
+    else_clause: Option<ScssElseClause>,
+}
+impl ScssIfAtRuleBuilder {
+    pub fn with_else_clause(mut self, else_clause: ScssElseClause) -> Self {
+        self.else_clause = Some(else_clause);
+        self
+    }
+    pub fn build(self) -> ScssIfAtRule {
+        ScssIfAtRule::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::SCSS_IF_AT_RULE,
+            [
+                Some(SyntaxElement::Token(self.if_token)),
+                Some(SyntaxElement::Node(self.condition.into_syntax())),
+                Some(SyntaxElement::Node(self.block.into_syntax())),
+                self.else_clause
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn scss_keyword_argument(
     name: ScssIdentifier,
@@ -3260,6 +3372,34 @@ pub fn scss_variable_modifier(
         [
             Some(SyntaxElement::Token(excl_token)),
             Some(SyntaxElement::Token(value_token)),
+        ],
+    ))
+}
+pub fn scss_warn_at_rule(
+    warn_token: SyntaxToken,
+    value: ScssExpression,
+    semicolon_token: SyntaxToken,
+) -> ScssWarnAtRule {
+    ScssWarnAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_WARN_AT_RULE,
+        [
+            Some(SyntaxElement::Token(warn_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
+pub fn scss_while_at_rule(
+    while_token: SyntaxToken,
+    condition: ScssExpression,
+    block: CssDeclarationOrRuleBlock,
+) -> ScssWhileAtRule {
+    ScssWhileAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_WHILE_AT_RULE,
+        [
+            Some(SyntaxElement::Token(while_token)),
+            Some(SyntaxElement::Node(condition.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
         ],
     ))
 }
@@ -4153,6 +4293,27 @@ where
     let length = items.len() + separators.len();
     CssValueAtRulePropertyList::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_VALUE_AT_RULE_PROPERTY_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
+    ))
+}
+pub fn scss_each_binding_list<I, S>(items: I, separators: S) -> ScssEachBindingList
+where
+    I: IntoIterator<Item = ScssIdentifier>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    ScssEachBindingList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_EACH_BINDING_LIST,
         (0..length).map(|index| {
             if index % 2 == 0 {
                 Some(items.next()?.into_syntax().into())

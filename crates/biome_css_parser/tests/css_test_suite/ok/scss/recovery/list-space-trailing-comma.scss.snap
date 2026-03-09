@@ -1,5 +1,6 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
 expression: snapshot
 ---
 
@@ -46,20 +47,32 @@ CssRoot {
                                 colon_token: COLON@14..16 ":" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
-                                        CssNumber {
-                                            value_token: CSS_NUMBER_LITERAL@16..18 "1" [] [Whitespace(" ")],
-                                        },
-                                        CssNumber {
-                                            value_token: CSS_NUMBER_LITERAL@18..19 "2" [] [],
-                                        },
-                                        CssGenericDelimiter {
-                                            value: COMMA@19..21 "," [] [Whitespace(" ")],
-                                        },
-                                        CssNumber {
-                                            value_token: CSS_NUMBER_LITERAL@21..22 "3" [] [],
-                                        },
-                                        CssGenericDelimiter {
-                                            value: COMMA@22..23 "," [] [],
+                                        ScssListExpression {
+                                            elements: ScssListExpressionElementList [
+                                                ScssListExpressionElement {
+                                                    value: ScssExpression {
+                                                        items: ScssExpressionItemList [
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@16..18 "1" [] [Whitespace(" ")],
+                                                            },
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@18..19 "2" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                                COMMA@19..21 "," [] [Whitespace(" ")],
+                                                ScssListExpressionElement {
+                                                    value: ScssExpression {
+                                                        items: ScssExpressionItemList [
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@21..22 "3" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                                COMMA@22..23 "," [] [],
+                                            ],
                                         },
                                     ],
                                 },
@@ -104,16 +117,22 @@ CssRoot {
                 1: COLON@14..16 ":" [] [Whitespace(" ")]
                 2: SCSS_EXPRESSION@16..23
                   0: SCSS_EXPRESSION_ITEM_LIST@16..23
-                    0: CSS_NUMBER@16..18
-                      0: CSS_NUMBER_LITERAL@16..18 "1" [] [Whitespace(" ")]
-                    1: CSS_NUMBER@18..19
-                      0: CSS_NUMBER_LITERAL@18..19 "2" [] []
-                    2: CSS_GENERIC_DELIMITER@19..21
-                      0: COMMA@19..21 "," [] [Whitespace(" ")]
-                    3: CSS_NUMBER@21..22
-                      0: CSS_NUMBER_LITERAL@21..22 "3" [] []
-                    4: CSS_GENERIC_DELIMITER@22..23
-                      0: COMMA@22..23 "," [] []
+                    0: SCSS_LIST_EXPRESSION@16..23
+                      0: SCSS_LIST_EXPRESSION_ELEMENT_LIST@16..23
+                        0: SCSS_LIST_EXPRESSION_ELEMENT@16..19
+                          0: SCSS_EXPRESSION@16..19
+                            0: SCSS_EXPRESSION_ITEM_LIST@16..19
+                              0: CSS_NUMBER@16..18
+                                0: CSS_NUMBER_LITERAL@16..18 "1" [] [Whitespace(" ")]
+                              1: CSS_NUMBER@18..19
+                                0: CSS_NUMBER_LITERAL@18..19 "2" [] []
+                        1: COMMA@19..21 "," [] [Whitespace(" ")]
+                        2: SCSS_LIST_EXPRESSION_ELEMENT@21..22
+                          0: SCSS_EXPRESSION@21..22
+                            0: SCSS_EXPRESSION_ITEM_LIST@21..22
+                              0: CSS_NUMBER@21..22
+                                0: CSS_NUMBER_LITERAL@21..22 "3" [] []
+                        3: COMMA@22..23 "," [] []
               1: (empty)
             1: SEMICOLON@23..24 ";" [] []
         2: R_CURLY@24..26 "}" [Newline("\n")] []

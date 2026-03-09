@@ -1,0 +1,44 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue6607_valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+// IIFE returning a Promise that is awaited
+async function pattern1() {
+	await (() => {
+		return new Promise((resolve) => resolve('iife'));
+	})();
+}
+
+// IIFE returning a Promise that is voided
+function pattern2() {
+	void (() => {
+		return new Promise((resolve) => resolve('iife'));
+	})();
+}
+
+// IIFE returning a Promise with .catch()
+function pattern3() {
+	(() => {
+		return new Promise((resolve) => resolve('iife'));
+	})().catch(() => {});
+}
+
+// IIFE returning a Promise with .then() with two args
+function pattern4() {
+	(() => {
+		return new Promise((resolve) => resolve('iife'));
+	})().then(() => {}, () => {});
+}
+
+// Async IIFE that is awaited
+async function pattern5() {
+	await (async () => {
+		return 'value';
+	})();
+}
+
+```

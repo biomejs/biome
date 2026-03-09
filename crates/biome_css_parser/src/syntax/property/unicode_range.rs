@@ -64,9 +64,23 @@ pub(crate) fn parse_unicode_range(p: &mut CssParser) -> ParsedSyntax {
     p.bump_with_context(T!["U+"], CssLexContext::UnicodeRange);
 
     // Checks if the parser is positioned to parse a Unicode range wildcard.
-    // A wildcard cannot be combined with a range interval. For example, `U+????-U+????` is invalid.
+    // A wildcard cannot be combined with a range interval. For example, `U+????-2222` is invalid.
     if is_at_unicode_range_wildcard(p) {
         parse_unicode_range_wildcard(p).ok();
+
+        if p.at(T![-]) {
+            // Wildcards cannot start a range interval (e.g. `U+????-2222`); consume the tail to recover.
+            let range = p.cur_range();
+            p.error(wildcard_range_interval_not_allowed(p, range));
+            p.bump_with_context(T![-], CssLexContext::UnicodeRange);
+
+            if parse_unicode_codepoint(p).is_absent() && parse_unicode_range_wildcard(p).is_absent()
+            {
+                p.error(expected_codepoint(p, p.cur_range()));
+            }
+
+            return Present(m.complete(p, CSS_BOGUS_UNICODE_RANGE_VALUE));
+        }
 
         return Present(m.complete(p, CSS_UNICODE_RANGE));
     }
@@ -171,6 +185,22 @@ pub(crate) fn wildcard_not_allowed(p: &CssParser, range: TextRange) -> ParseDiag
             "Wildcards (`U+????`) are only allowed at the beginning of a Unicode range descriptor. \
              When specifying a range interval (`U+XXXX-YYYY`), wildcards cannot be used in the second position."
         )
+}
+
+/// Provides a diagnostic for invalid use of a wildcard range with an explicit interval.
+///
+/// Example: `U+11???-2222`
+pub(crate) fn wildcard_range_interval_not_allowed(
+    p: &CssParser,
+    range: TextRange,
+) -> ParseDiagnostic {
+    p.err_builder(
+        "Wildcard ranges cannot be combined with a range interval.",
+        range,
+    )
+    .with_hint(
+        "Use either a wildcard range (e.g. `U+11???`) or an explicit interval (e.g. `U+1100-2222`).",
+    )
 }
 
 /// Generates a parse diagnostic for an expected "codepoint" error message at the given range.

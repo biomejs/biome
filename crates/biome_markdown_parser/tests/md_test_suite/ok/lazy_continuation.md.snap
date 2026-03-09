@@ -226,7 +226,17 @@ MdDocument {
             ],
         },
         MdThematicBreakBlock {
-            value_token: MD_THEMATIC_BREAK_LITERAL@301..304 "---" [] [],
+            parts: MdThematicBreakPartList [
+                MdThematicBreakChar {
+                    value: MINUS@301..302 "-" [] [],
+                },
+                MdThematicBreakChar {
+                    value: MINUS@302..303 "-" [] [],
+                },
+                MdThematicBreakChar {
+                    value: MINUS@303..304 "-" [] [],
+                },
+            ],
         },
         MdNewline {
             value_token: NEWLINE@304..305 "\n" [] [],
@@ -345,7 +355,17 @@ MdDocument {
             ],
         },
         MdThematicBreakBlock {
-            value_token: MD_THEMATIC_BREAK_LITERAL@468..471 "---" [] [],
+            parts: MdThematicBreakPartList [
+                MdThematicBreakChar {
+                    value: MINUS@468..469 "-" [] [],
+                },
+                MdThematicBreakChar {
+                    value: MINUS@469..470 "-" [] [],
+                },
+                MdThematicBreakChar {
+                    value: MINUS@470..471 "-" [] [],
+                },
+            ],
         },
         MdNewline {
             value_token: NEWLINE@471..472 "\n" [] [],
@@ -508,7 +528,13 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@300..301 "\n" [] []
           1: (empty)
     11: MD_THEMATIC_BREAK_BLOCK@301..304
-      0: MD_THEMATIC_BREAK_LITERAL@301..304 "---" [] []
+      0: MD_THEMATIC_BREAK_PART_LIST@301..304
+        0: MD_THEMATIC_BREAK_CHAR@301..302
+          0: MINUS@301..302 "-" [] []
+        1: MD_THEMATIC_BREAK_CHAR@302..303
+          0: MINUS@302..303 "-" [] []
+        2: MD_THEMATIC_BREAK_CHAR@303..304
+          0: MINUS@303..304 "-" [] []
     12: MD_NEWLINE@304..305
       0: NEWLINE@304..305 "\n" [] []
     13: MD_NEWLINE@305..306
@@ -586,7 +612,13 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@467..468 "\n" [] []
           1: (empty)
     22: MD_THEMATIC_BREAK_BLOCK@468..471
-      0: MD_THEMATIC_BREAK_LITERAL@468..471 "---" [] []
+      0: MD_THEMATIC_BREAK_PART_LIST@468..471
+        0: MD_THEMATIC_BREAK_CHAR@468..469
+          0: MINUS@468..469 "-" [] []
+        1: MD_THEMATIC_BREAK_CHAR@469..470
+          0: MINUS@469..470 "-" [] []
+        2: MD_THEMATIC_BREAK_CHAR@470..471
+          0: MINUS@470..471 "-" [] []
     23: MD_NEWLINE@471..472
       0: NEWLINE@471..472 "\n" [] []
     24: MD_NEWLINE@472..473

@@ -1,6 +1,7 @@
 ---
 name: formatter-development
-description: Guide for implementing formatting rules using Biome's IR-based formatter infrastructure. Use when working on formatters for JavaScript, CSS, JSON, HTML, or other languages. Examples:<example>User needs to implement formatting for a new syntax node</example><example>User wants to handle comments in formatted output</example><example>User is comparing Biome's formatting against Prettier</example>
+description: Guide for implementing formatting rules using Biome's IR-based formatter infrastructure. Use when implementing formatting for new syntax nodes, handling comments in formatted output, or comparing Biome's formatting against Prettier for JavaScript, CSS, JSON, HTML, or other languages.
+compatibility: Designed for coding agents working on the Biome codebase (github.com/biomejs/biome).
 ---
 
 ## Purpose
@@ -94,7 +95,7 @@ write!(f, [
     space(),               // Single space
     soft_line_break(),     // Break if line is too long
     hard_line_break(),     // Always break
-    
+
     // Grouping and indentation
     group(&format_args![
         token("("),
@@ -103,7 +104,7 @@ write!(f, [
         ]),
         token(")"),
     ]),
-    
+
     // Conditional formatting
     format_with(|f| {
         if condition {

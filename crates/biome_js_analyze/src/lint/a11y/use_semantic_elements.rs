@@ -52,6 +52,15 @@ declare_lint_rule! {
     ///   <p>&#x1F408; &#x1F602;</p>
     /// </div>
     /// ```
+    ///
+    /// Semantic elements with a matching role are not flagged (see [noRedundantRoles](https://biomejs.dev/linter/rules/no-redundant-roles/)):
+    ///
+    /// ```jsx
+    /// <>
+    ///   <nav role="navigation"></nav>
+    ///   <footer role="contentinfo"></footer>
+    /// </>;
+    /// ```
     pub UseSemanticElements {
         version: "1.8.0",
         name: "useSemanticElements",
@@ -95,11 +104,34 @@ impl Rule for UseSemanticElements {
         }
 
         let role = AriaRole::from_roles(role_value)?;
-        if role.base_html_elements().is_empty() && role.related_html_elements().is_empty() {
-            None
-        } else {
-            Some(role_attribute)
+        let semantic_elements = role.base_html_elements();
+        let related_elements = role.related_html_elements();
+        if semantic_elements.is_empty() && related_elements.is_empty() {
+            return None;
         }
+
+        // If the current element is already a semantic element for this role
+        // (matching both the tag name and any required attributes),
+        // don't flag it. That case is handled by `noRedundantRoles`.
+        let element_name = node.name_value_token().ok()?;
+        let element_name = element_name.text_trimmed();
+        let is_already_semantic =
+            semantic_elements
+                .iter()
+                .chain(related_elements.iter())
+                .any(|instance| {
+                    instance.element.as_str() == element_name
+                        && instance.attributes.iter().all(|required_attr| {
+                            node.find_attribute_by_name(required_attr.attribute.as_str())
+                                .and_then(|attr| attr.as_static_value())
+                                .is_some_and(|value| value.text() == required_attr.value)
+                        })
+                });
+        if is_already_semantic {
+            return None;
+        }
+
+        Some(role_attribute)
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {

@@ -2370,6 +2370,44 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssIfMediaTest {
         )
     }
 }
+impl FormatRule<biome_css_syntax::CssIfSassTest>
+    for crate::css::auxiliary::if_sass_test::FormatCssIfSassTest
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssIfSassTest,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssIfSassTest>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssIfSassTest {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssIfSassTest,
+        crate::css::auxiliary::if_sass_test::FormatCssIfSassTest,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::css::auxiliary::if_sass_test::FormatCssIfSassTest::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssIfSassTest {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssIfSassTest,
+        crate::css::auxiliary::if_sass_test::FormatCssIfSassTest,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::auxiliary::if_sass_test::FormatCssIfSassTest::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::CssIfStyleTest>
     for crate::css::auxiliary::if_style_test::FormatCssIfStyleTest
 {
@@ -7115,6 +7153,44 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssBinaryExpression {
         )
     }
 }
+impl FormatRule<biome_css_syntax::ScssDebugAtRule>
+    for crate::scss::statements::debug_at_rule::FormatScssDebugAtRule
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssDebugAtRule,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssDebugAtRule>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssDebugAtRule {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssDebugAtRule,
+        crate::scss::statements::debug_at_rule::FormatScssDebugAtRule,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::statements::debug_at_rule::FormatScssDebugAtRule::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssDebugAtRule {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssDebugAtRule,
+        crate::scss::statements::debug_at_rule::FormatScssDebugAtRule,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::statements::debug_at_rule::FormatScssDebugAtRule::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::ScssDeclaration>
     for crate::scss::auxiliary::declaration::FormatScssDeclaration
 {
@@ -7150,6 +7226,120 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssDeclaration {
         FormatOwnedWithRule::new(
             self,
             crate::scss::auxiliary::declaration::FormatScssDeclaration::default(),
+        )
+    }
+}
+impl FormatRule<biome_css_syntax::ScssEachAtRule>
+    for crate::scss::statements::each_at_rule::FormatScssEachAtRule
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssEachAtRule,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssEachAtRule>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssEachAtRule {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssEachAtRule,
+        crate::scss::statements::each_at_rule::FormatScssEachAtRule,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::statements::each_at_rule::FormatScssEachAtRule::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssEachAtRule {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssEachAtRule,
+        crate::scss::statements::each_at_rule::FormatScssEachAtRule,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::statements::each_at_rule::FormatScssEachAtRule::default(),
+        )
+    }
+}
+impl FormatRule<biome_css_syntax::ScssElseClause>
+    for crate::scss::auxiliary::else_clause::FormatScssElseClause
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssElseClause,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssElseClause>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssElseClause {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssElseClause,
+        crate::scss::auxiliary::else_clause::FormatScssElseClause,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::auxiliary::else_clause::FormatScssElseClause::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssElseClause {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssElseClause,
+        crate::scss::auxiliary::else_clause::FormatScssElseClause,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::auxiliary::else_clause::FormatScssElseClause::default(),
+        )
+    }
+}
+impl FormatRule<biome_css_syntax::ScssErrorAtRule>
+    for crate::scss::statements::error_at_rule::FormatScssErrorAtRule
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssErrorAtRule,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssErrorAtRule>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssErrorAtRule {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssErrorAtRule,
+        crate::scss::statements::error_at_rule::FormatScssErrorAtRule,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::statements::error_at_rule::FormatScssErrorAtRule::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssErrorAtRule {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssErrorAtRule,
+        crate::scss::statements::error_at_rule::FormatScssErrorAtRule,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::statements::error_at_rule::FormatScssErrorAtRule::default(),
         )
     }
 }
@@ -7226,6 +7416,40 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssIdentifier {
         FormatOwnedWithRule::new(
             self,
             crate::scss::value::identifier::FormatScssIdentifier::default(),
+        )
+    }
+}
+impl FormatRule<biome_css_syntax::ScssIfAtRule>
+    for crate::scss::statements::if_at_rule::FormatScssIfAtRule
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(&self, node: &biome_css_syntax::ScssIfAtRule, f: &mut CssFormatter) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssIfAtRule>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssIfAtRule {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssIfAtRule,
+        crate::scss::statements::if_at_rule::FormatScssIfAtRule,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::statements::if_at_rule::FormatScssIfAtRule::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssIfAtRule {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssIfAtRule,
+        crate::scss::statements::if_at_rule::FormatScssIfAtRule,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::statements::if_at_rule::FormatScssIfAtRule::default(),
         )
     }
 }
@@ -7670,6 +7894,82 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssVariableModifier {
         FormatOwnedWithRule::new(
             self,
             crate::scss::auxiliary::variable_modifier::FormatScssVariableModifier::default(),
+        )
+    }
+}
+impl FormatRule<biome_css_syntax::ScssWarnAtRule>
+    for crate::scss::statements::warn_at_rule::FormatScssWarnAtRule
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssWarnAtRule,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssWarnAtRule>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssWarnAtRule {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssWarnAtRule,
+        crate::scss::statements::warn_at_rule::FormatScssWarnAtRule,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::statements::warn_at_rule::FormatScssWarnAtRule::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssWarnAtRule {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssWarnAtRule,
+        crate::scss::statements::warn_at_rule::FormatScssWarnAtRule,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::statements::warn_at_rule::FormatScssWarnAtRule::default(),
+        )
+    }
+}
+impl FormatRule<biome_css_syntax::ScssWhileAtRule>
+    for crate::scss::statements::while_at_rule::FormatScssWhileAtRule
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssWhileAtRule,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssWhileAtRule>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssWhileAtRule {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssWhileAtRule,
+        crate::scss::statements::while_at_rule::FormatScssWhileAtRule,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::statements::while_at_rule::FormatScssWhileAtRule::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssWhileAtRule {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssWhileAtRule,
+        crate::scss::statements::while_at_rule::FormatScssWhileAtRule,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::statements::while_at_rule::FormatScssWhileAtRule::default(),
         )
     }
 }
@@ -9034,6 +9334,31 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssValueAtRulePropertyLi
     >;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule :: new (self , crate :: css :: lists :: value_at_rule_property_list :: FormatCssValueAtRulePropertyList :: default ())
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssEachBindingList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssEachBindingList,
+        crate::scss::lists::each_binding_list::FormatScssEachBindingList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::lists::each_binding_list::FormatScssEachBindingList::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssEachBindingList {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssEachBindingList,
+        crate::scss::lists::each_binding_list::FormatScssEachBindingList,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::lists::each_binding_list::FormatScssEachBindingList::default(),
+        )
     }
 }
 impl AsFormat<CssFormatContext> for biome_css_syntax::ScssExpressionItemList {
@@ -12918,6 +13243,31 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyScssDeclarationName {
         FormatOwnedWithRule::new(
             self,
             crate::scss::any::declaration_name::FormatAnyScssDeclarationName::default(),
+        )
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyScssElseClauseBody {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyScssElseClauseBody,
+        crate::scss::any::else_clause_body::FormatAnyScssElseClauseBody,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::any::else_clause_body::FormatAnyScssElseClauseBody::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyScssElseClauseBody {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyScssElseClauseBody,
+        crate::scss::any::else_clause_body::FormatAnyScssElseClauseBody,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::any::else_clause_body::FormatAnyScssElseClauseBody::default(),
         )
     }
 }

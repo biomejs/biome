@@ -190,6 +190,7 @@ pub(crate) fn expected_any_at_rule(p: &CssParser, range: TextRange) -> ParseDiag
             "container",
             "counter-style",
             "document",
+            "debug",
             "font-face",
             "font-feature-values",
             "font-palette-values",
@@ -201,8 +202,10 @@ pub(crate) fn expected_any_at_rule(p: &CssParser, range: TextRange) -> ParseDiag
             "page",
             "property",
             "supports",
+            "warn",
             "viewport",
             "scope",
+            "error",
         ],
         range,
     )
@@ -227,20 +230,6 @@ pub(crate) fn expected_component_value(p: &CssParser, range: TextRange) -> Parse
         range,
     )
     .into_diagnostic(p)
-}
-
-pub(crate) fn expected_scss_expression(p: &CssParser, range: TextRange) -> ParseDiagnostic {
-    expected_node("SCSS expression", range, p)
-}
-
-pub(crate) fn scss_ellipsis_not_allowed(p: &CssParser, range: TextRange) -> ParseDiagnostic {
-    p.err_builder(
-        "SCSS arbitrary arguments (`...`) are only allowed in function call arguments.",
-        range,
-    )
-    .with_hint(markup! {
-        "Use `...` only for function arguments, for example `fn($args...)`."
-    })
 }
 
 pub(crate) fn expected_declaration(p: &CssParser, range: TextRange) -> ParseDiagnostic {
@@ -269,7 +258,6 @@ pub(crate) fn scss_only_syntax_error(
         ),
         range,
     )
-        .with_hint(markup! { "SCSS only syntax" })
 }
 
 pub(crate) fn inconsistent_scss_bracketed_list_separators(
