@@ -35,6 +35,7 @@ pub(crate) fn parse_scss_if_at_rule(p: &mut CssParser) -> ParsedSyntax {
     parse_scss_expression_until(p, SCSS_IF_CONDITION_END_SET)
         .or_add_diagnostic(p, expected_scss_expression);
     parse_declaration_or_rule_list_block(p);
+    // `@else` is optional after `@if`, so `Absent` is valid here.
     parse_scss_else_clause(p).ok();
 
     Present(m.complete(p, SCSS_IF_AT_RULE))

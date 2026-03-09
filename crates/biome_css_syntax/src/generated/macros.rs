@@ -1004,12 +1004,29 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::ScssMapExpressionPair::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::SCSS_MIXIN_AT_RULE => {
+                    let $pattern = unsafe { $crate::ScssMixinAtRule::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::SCSS_NAMESPACED_IDENTIFIER => {
                     let $pattern = unsafe { $crate::ScssNamespacedIdentifier::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::SCSS_NESTING_DECLARATION => {
                     let $pattern = unsafe { $crate::ScssNestingDeclaration::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_PARAMETER => {
+                    let $pattern = unsafe { $crate::ScssParameter::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_PARAMETER_DEFAULT_VALUE => {
+                    let $pattern =
+                        unsafe { $crate::ScssParameterDefaultValue::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_PARAMETER_LIST => {
+                    let $pattern = unsafe { $crate::ScssParameterList::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::SCSS_PARENT_SELECTOR_VALUE => {
@@ -1422,6 +1439,10 @@ macro_rules! map_syntax_node {
                 $crate::CssSyntaxKind::SCSS_MAP_EXPRESSION_PAIR_LIST => {
                     let $pattern =
                         unsafe { $crate::ScssMapExpressionPairList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_PARAMETER_ITEM_LIST => {
+                    let $pattern = unsafe { $crate::ScssParameterItemList::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::SCSS_VARIABLE_MODIFIER_LIST => {

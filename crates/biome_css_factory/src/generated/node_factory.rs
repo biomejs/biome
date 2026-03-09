@@ -3309,6 +3309,42 @@ pub fn scss_map_expression_pair(
         ],
     ))
 }
+pub fn scss_mixin_at_rule(
+    mixin_token: SyntaxToken,
+    name: CssIdentifier,
+    block: CssDeclarationOrRuleBlock,
+) -> ScssMixinAtRuleBuilder {
+    ScssMixinAtRuleBuilder {
+        mixin_token,
+        name,
+        block,
+        parameters: None,
+    }
+}
+pub struct ScssMixinAtRuleBuilder {
+    mixin_token: SyntaxToken,
+    name: CssIdentifier,
+    block: CssDeclarationOrRuleBlock,
+    parameters: Option<ScssParameterList>,
+}
+impl ScssMixinAtRuleBuilder {
+    pub fn with_parameters(mut self, parameters: ScssParameterList) -> Self {
+        self.parameters = Some(parameters);
+        self
+    }
+    pub fn build(self) -> ScssMixinAtRule {
+        ScssMixinAtRule::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::SCSS_MIXIN_AT_RULE,
+            [
+                Some(SyntaxElement::Token(self.mixin_token)),
+                Some(SyntaxElement::Node(self.name.into_syntax())),
+                self.parameters
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.block.into_syntax())),
+            ],
+        ))
+    }
+}
 pub fn scss_namespaced_identifier(
     namespace: CssIdentifier,
     dot_token: SyntaxToken,
@@ -3336,6 +3372,65 @@ pub fn scss_nesting_declaration(
             Some(SyntaxElement::Token(colon_token)),
             Some(SyntaxElement::Node(value.into_syntax())),
             Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
+pub fn scss_parameter(name: ScssIdentifier) -> ScssParameterBuilder {
+    ScssParameterBuilder {
+        name,
+        default_value: None,
+        ellipsis_token: None,
+    }
+}
+pub struct ScssParameterBuilder {
+    name: ScssIdentifier,
+    default_value: Option<ScssParameterDefaultValue>,
+    ellipsis_token: Option<SyntaxToken>,
+}
+impl ScssParameterBuilder {
+    pub fn with_default_value(mut self, default_value: ScssParameterDefaultValue) -> Self {
+        self.default_value = Some(default_value);
+        self
+    }
+    pub fn with_ellipsis_token(mut self, ellipsis_token: SyntaxToken) -> Self {
+        self.ellipsis_token = Some(ellipsis_token);
+        self
+    }
+    pub fn build(self) -> ScssParameter {
+        ScssParameter::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::SCSS_PARAMETER,
+            [
+                Some(SyntaxElement::Node(self.name.into_syntax())),
+                self.default_value
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.ellipsis_token.map(|token| SyntaxElement::Token(token)),
+            ],
+        ))
+    }
+}
+pub fn scss_parameter_default_value(
+    colon_token: SyntaxToken,
+    value: ScssExpression,
+) -> ScssParameterDefaultValue {
+    ScssParameterDefaultValue::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_PARAMETER_DEFAULT_VALUE,
+        [
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
+pub fn scss_parameter_list(
+    l_paren_token: SyntaxToken,
+    items: ScssParameterItemList,
+    r_paren_token: SyntaxToken,
+) -> ScssParameterList {
+    ScssParameterList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_PARAMETER_LIST,
+        [
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(items.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
         ],
     ))
 }
@@ -4393,6 +4488,27 @@ where
     let length = items.len() + separators.len();
     ScssMapExpressionPairList::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_MAP_EXPRESSION_PAIR_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
+    ))
+}
+pub fn scss_parameter_item_list<I, S>(items: I, separators: S) -> ScssParameterItemList
+where
+    I: IntoIterator<Item = AnyScssParameter>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    ScssParameterItemList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_PARAMETER_ITEM_LIST,
         (0..length).map(|index| {
             if index % 2 == 0 {
                 Some(items.next()?.into_syntax().into())

@@ -840,6 +840,7 @@ impl<'src> CssLexer<'src> {
             b"warn" => WARN_KW,
             b"error" => ERROR_KW,
             b"for" => FOR_KW,
+            b"mixin" => MIXIN_KW,
             b"while" => WHILE_KW,
             b"sass" => SASS_KW,
             b"style" => STYLE_KW,
