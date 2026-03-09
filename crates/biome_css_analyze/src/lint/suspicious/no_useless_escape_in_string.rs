@@ -19,7 +19,7 @@ declare_lint_rule! {
     ///
     /// ```css,expect_diagnostic
     /// a::after {
-    ///   content: "\a"
+    ///   content: "\z"
     /// }
     /// ```
     ///
@@ -39,7 +39,7 @@ declare_lint_rule! {
     ///
     /// ```css
     /// a::after {
-    ///   content: "\n"
+    ///   content: "\e7bb"
     /// }
     /// ```
     ///
@@ -98,6 +98,13 @@ impl Rule for NoUselessEscapeInString {
 }
 
 /// Returns the index in `str` of the first useless escape.
+///
+/// CSS escape sequences differ from JavaScript:
+/// - `\` followed by 1-6 hex digits (`0-9`, `a-f`, `A-F`) is a CSS unicode escape.
+/// - `\` followed by a newline or carriage return is a line continuation.
+/// - `\` followed by `\` is an escaped backslash.
+/// - `\` followed by the matching quote character is an escaped quote.
+/// - `\` followed by any other character is an identity escape (useless in strings).
 fn next_useless_escape(str: &str, quote: u8) -> Option<usize> {
     let mut it = str.bytes().enumerate();
     while let Some((i, c)) = it.next() {
@@ -105,28 +112,26 @@ fn next_useless_escape(str: &str, quote: u8) -> Option<usize> {
             && let Some((_, c)) = it.next()
         {
             match c {
-                // Meaningful escaped character
-                b'^'
-                | b'\r'
-                | b'\n'
-                | b'0'..=b'7'
-                | b'\\'
-                | b'b'
-                | b'f'
-                | b'n'
-                | b'r'
-                | b't'
-                | b'u'
-                | b'v'
-                | b'x' => {}
-                // Preserve escaping of Unicode characters U+2028 and U+2029
-                0xE2 => {
-                    if !(matches!(it.next(), Some((_, 0x80)))
-                        && matches!(it.next(), Some((_, 0xA8 | 0xA9))))
-                    {
-                        return Some(i);
+                // CSS unicode escape: \ followed by 1-6 hex digits
+                b'0'..=b'9' | b'a'..=b'f' | b'A'..=b'F' => {
+                    // Skip the remaining hex digits (up to 5 more, since 1 already consumed)
+                    for _ in 0..5 {
+                        match it.clone().next() {
+                            Some((_, b'0'..=b'9' | b'a'..=b'f' | b'A'..=b'F')) => {
+                                it.next();
+                            }
+                            _ => break,
+                        }
+                    }
+                    // CSS also consumes a single trailing whitespace after hex escape
+                    if let Some((_, b' ' | b'\t')) = it.clone().next() {
+                        it.next();
                     }
                 }
+                // Line continuation: \ followed by newline or carriage return
+                b'\r' | b'\n' => {}
+                // Escaped backslash
+                b'\\' => {}
                 _ => {
                     // The quote can be escaped
                     if c != quote {

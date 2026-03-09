@@ -8,7 +8,26 @@ expression: valid.css
 .a::after {
     content: "\""
 }
+/* CSS hex escapes: \ followed by 1-6 hex digits */
 .b::after {
-    content: "\t"
+    content: "\e7bb"
+}
+.c::after {
+    content: "\e644"
+}
+.d::after {
+    content: "\a"
+}
+.e::after {
+    content: "\abcdef"
+}
+.f::after {
+    content: "\0"
+}
+/* Backslash and newline continuation */
+.g::after {
+    content: "\\"
 }
 ```
+
+_Note: The parser emitted 4 diagnostics which are not shown here._
