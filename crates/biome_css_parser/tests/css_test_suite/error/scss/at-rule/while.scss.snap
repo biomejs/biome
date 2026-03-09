@@ -157,49 +157,49 @@ CssRoot {
 while.scss:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a SCSS expression but instead found '{'.
-
+  
   > 1 │ @while {
       │        ^
     2 │   color: red;
     3 │ }
-
+  
   i Expected a SCSS expression here.
-
+  
   > 1 │ @while {
       │        ^
     2 │   color: red;
     3 │ }
-
+  
 while.scss:5:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a SCSS expression but instead found ': red;'.
-
+  
     3 │ }
-    4 │
+    4 │ 
   > 5 │ @while $count > 0 color: red;
       │                        ^^^^^^
-    6 │
-
+    6 │ 
+  
   i Expected a SCSS expression here.
-
+  
     3 │ }
-    4 │
+    4 │ 
   > 5 │ @while $count > 0 color: red;
       │                        ^^^^^^
-    6 │
-
+    6 │ 
+  
 while.scss:6:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `{` but instead the file ends
-
+  
     5 │ @while $count > 0 color: red;
-  > 6 │
-      │
-
+  > 6 │ 
+      │ 
+  
   i the file ends here
-
+  
     5 │ @while $count > 0 color: red;
-  > 6 │
-      │
-
+  > 6 │ 
+      │ 
+  
 ```

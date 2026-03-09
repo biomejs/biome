@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
 
@@ -324,45 +323,45 @@ CssRoot {
 else.scss:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected `@else` without a preceding `@if`.
-
+  
   > 1 │ @else {
       │  ^^^^
     2 │   color: red;
     3 │ }
-
+  
   i Move this `@else` after an `@if` block.
-
+  
 else.scss:9:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected `if` or a block after `@else`.
-
+  
      7 │ } @else
-     8 │
+     8 │ 
    > 9 │ @if $state == loading {
        │ ^
     10 │   color: blue;
     11 │ } @else if {
-
+  
   i Add `if <condition>` or `{ ... }` after `@else`.
-
+  
 else.scss:11:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a SCSS expression but instead found '{'.
-
+  
      9 │ @if $state == loading {
     10 │   color: blue;
   > 11 │ } @else if {
        │            ^
     12 │   color: green;
     13 │ }
-
+  
   i Expected a SCSS expression here.
-
+  
      9 │ @if $state == loading {
     10 │   color: blue;
   > 11 │ } @else if {
        │            ^
     12 │   color: green;
     13 │ }
-
+  
 ```
