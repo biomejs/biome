@@ -305,8 +305,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintJson(_) => 41,
             Self::EslintMarkdown(_) => 42,
             Self::EslintYml(_) => 43,
-                Self::SortPackageJson => 44,
-
+            Self::SortPackageJson => 44,
         }
     }
 

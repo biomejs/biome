@@ -32,7 +32,6 @@ pub use biome_diagnostics::category_concat;
 pub use crate::analyzer_plugin::{
     AnalyzerPlugin, AnalyzerPluginSlice, AnalyzerPluginVec, BatchPluginVisitor, PluginCodeAction,
     PluginDiagnosticEntry, PluginEvaluationResult, PluginTargetLanguage, PluginTextEdit,
-    PluginVisitor,
 };
 pub use crate::categories::{
     ActionCategory, OtherActionCategory, RefactorKind, RuleCategories, RuleCategoriesBuilder,

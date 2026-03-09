@@ -160,178 +160,11 @@ pub enum PluginTargetLanguage {
     Json,
 }
 
-/// A syntax visitor that queries nodes and evaluates in a plugin.
-/// Based on [`crate::SyntaxVisitor`].
-pub struct PluginVisitor<L: Language> {
-    query: FxHashSet<L::Kind>,
-    plugin: Arc<dyn AnalyzerPlugin>,
-
-    /// When set, all nodes in this subtree are skipped until we leave it.
-    /// Used to skip subtrees that fall entirely outside the analysis range
-    /// (see the `ctx.range` check in `visit`).
-    skip_subtree: Option<SyntaxNode<L>>,
-}
-
-impl<L> PluginVisitor<L>
-where
-    L: Language + 'static,
-    L::Kind: Eq + Hash,
-{
-    /// Creates a syntax visitor from the plugin.
-    ///
-    /// # Safety
-    /// Do not forget to check the plugin is targeted for the language `L`.
-    pub unsafe fn new_unchecked(plugin: Arc<dyn AnalyzerPlugin>) -> Self {
-        let query = plugin.query().into_iter().map(L::Kind::from_raw).collect();
-
-        Self {
-            query,
-            plugin,
-            skip_subtree: None,
-        }
-    }
-}
-
-impl<L> Visitor for PluginVisitor<L>
-where
-    L: Language + 'static,
-    L::Kind: Eq + Hash,
-{
-    type Language = L;
-
-    fn visit(
-        &mut self,
-        event: &WalkEvent<SyntaxNode<Self::Language>>,
-        ctx: VisitorContext<Self::Language>,
-    ) {
-        let node = match event {
-            WalkEvent::Enter(node) => node,
-            WalkEvent::Leave(node) => {
-                if let Some(skip_subtree) = &self.skip_subtree
-                    && skip_subtree == node
-                {
-                    self.skip_subtree = None;
-                }
-
-                return;
-            }
-        };
-
-        if self.skip_subtree.is_some() {
-            return;
-        }
-
-        if let Some(range) = ctx.range
-            && node.text_range_with_trivia().ordering(range).is_ne()
-        {
-            self.skip_subtree = Some(node.clone());
-            return;
-        }
-
-        // TODO: Integrate to [`VisitorContext::match_query`]?
-        let kind = node.kind();
-        if !self.query.contains(&kind) {
-            return;
-        }
-
-        if !self.plugin.applies_to_file(&ctx.options.file_path) {
-            return;
-        }
-
-        // Per-rule disable check via configuration overrides.
-        let rule_name = self.plugin.rule_name();
-        if let Some(ovr) = ctx.options.plugin_rule_override(rule_name)
-            && ovr.disabled
-        {
-            return;
-        }
-
-        // Domain filtering: skip plugin if its domain is disabled or
-        // restricted to recommended-only and the plugin is not recommended.
-        let plugin_domains = self.plugin.domains();
-        if !plugin_domains.is_empty() {
-            let domain_cfg = ctx.options.linter_domains();
-            if !domain_cfg.is_empty() {
-                for domain in plugin_domains {
-                    match domain_cfg.get(domain) {
-                        Some(&PluginDomainFilter::Disabled) => return,
-                        Some(&PluginDomainFilter::Recommended) if !self.plugin.is_recommended() => {
-                            return;
-                        }
-                        _ => {}
-                    }
-                }
-            }
-        }
-
-        let rule_timer = profiling::start_plugin_rule("plugin");
-        let result = self.plugin.evaluate(
-            node.clone().into(),
-            ctx.options.file_path.clone(),
-            ctx.services,
-        );
-        rule_timer.stop();
-
-        if result.diagnostics.is_empty() {
-            return;
-        }
-
-        // Obtain the full source text from the file root — needed for
-        // constructing TextEdit diffs for plugin code actions. Only
-        // materialized when there are diagnostics, and shared via Arc
-        // to avoid cloning per-signal.
-        let has_any_action = result.diagnostics.iter().any(|e| !e.actions.is_empty());
-        let source_text: Arc<str> = if has_any_action {
-            ctx.root.syntax().text_with_trivia().to_string().into()
-        } else {
-            Arc::from("")
-        };
-
-        let root = ctx.root;
-        let suppression_action = ctx.suppression_action;
-        let options = ctx.options;
-        let plugin_category = self.plugin.category();
-        let plugin_deprecated: Option<Arc<str>> = self.plugin.deprecated().map(Arc::from);
-        let plugin_issue_number: Option<Arc<str>> = self.plugin.issue_number().map(Arc::from);
-
-        let signals = result.diagnostics.into_iter().map(move |entry| {
-            let name = entry
-                .diagnostic
-                .subcategory
-                .clone()
-                .unwrap_or_else(|| "anonymous".into());
-
-            SignalEntry {
-                text_range: entry.diagnostic.span().unwrap_or_default(),
-                signal: Box::new(
-                    PluginSignal::<L>::new(
-                        entry.diagnostic,
-                        entry.actions,
-                        Arc::clone(&source_text),
-                        root,
-                        suppression_action,
-                        options,
-                    )
-                    .with_category(plugin_category)
-                    .with_deprecated(plugin_deprecated.clone())
-                    .with_issue_number(plugin_issue_number.clone()),
-                ),
-                rule: SignalRuleKey::Plugin(name.into()),
-                category: plugin_category,
-                instances: Default::default(),
-            }
-        });
-
-        ctx.signal_queue.extend(signals);
-    }
-}
-
-/// A batched syntax visitor that evaluates multiple plugins in a single visitor.
+/// Syntax visitor that evaluates analyzer plugins during tree traversal.
 ///
-/// Instead of registering N separate `PluginVisitor` instances (one per plugin),
-/// this holds all plugins together and dispatches using a kind-to-plugin lookup
-/// map. This reduces visitor-dispatch overhead and enables O(1) kind matching
-/// per node instead of iterating all plugins.
+/// Holds all plugins together and dispatches using a kind-to-plugin lookup
+/// map. This enables O(1) kind matching per node instead of iterating all
+/// plugins.
 pub struct BatchPluginVisitor<L: Language> {
     plugins: Vec<Arc<dyn AnalyzerPlugin>>,
 
@@ -537,14 +370,14 @@ where
             let plugin_deprecated: Option<Arc<str>> = plugin.deprecated().map(Arc::from);
             let plugin_issue_number: Option<Arc<str>> = plugin.issue_number().map(Arc::from);
 
-            let signals = result.diagnostics.into_iter().map(move |entry| {
-                let name = entry
-                    .diagnostic
-                    .subcategory
-                    .clone()
-                    .unwrap_or_else(|| "anonymous".into());
+            // Compute a stable rule id once — used for SignalRuleKey,
+            // suppression text, and fixKind lookups so they never drift apart.
+            let canonical_id: Arc<str> = Arc::from(rule_name);
 
-                SignalEntry {
+            let signals = result
+                .diagnostics
+                .into_iter()
+                .map(move |entry| SignalEntry {
                     text_range: entry.diagnostic.span().unwrap_or_default(),
                     signal: Box::new(
                         PluginSignal::<L>::new(
@@ -559,11 +392,10 @@ where
                         .with_deprecated(plugin_deprecated.clone())
                         .with_issue_number(plugin_issue_number.clone()),
                     ),
-                    rule: SignalRuleKey::Plugin(name.into()),
+                    rule: SignalRuleKey::Plugin(Box::from(&*canonical_id)),
                     category: plugin_category,
                     instances: Default::default(),
-                }
-            });
+                });
 
             ctx.signal_queue.extend(signals);
         }

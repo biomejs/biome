@@ -152,7 +152,13 @@ impl<D: Diagnostic + ?Sized> fmt::Display for PrintHeader<'_, D> {
         if let Some(category) = diagnostic.category() {
             if let Some(subcategory) = diagnostic.subcategory() {
                 let full_name = format!("{}/{}", category.name(), subcategory);
-                fmt.write_markup(markup! { {full_name.as_str()}" " })?;
+                if let Some(link) = category.link() {
+                    fmt.write_markup(markup! {
+                        <Hyperlink href={link}>{full_name.as_str()}</Hyperlink>" "
+                    })?;
+                } else {
+                    fmt.write_markup(markup! { {full_name.as_str()}" " })?;
+                }
             } else if let Some(link) = category.link() {
                 fmt.write_markup(markup! {
                     <Hyperlink href={link}>{category.name()}</Hyperlink>" "

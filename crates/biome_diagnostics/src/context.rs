@@ -387,7 +387,14 @@ mod internal {
         }
 
         fn subcategory(&self) -> Option<&str> {
-            self.source.as_diagnostic().subcategory()
+            // Only forward the source's subcategory when it also has its own
+            // category. When `with_category()` injects a synthetic category
+            // the source's original subcategory would be stale/mismatched.
+            if self.source.as_diagnostic().category().is_some() {
+                self.source.as_diagnostic().subcategory()
+            } else {
+                None
+            }
         }
 
         fn severity(&self) -> Severity {
