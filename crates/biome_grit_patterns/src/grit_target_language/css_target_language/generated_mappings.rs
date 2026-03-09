@@ -299,6 +299,7 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "ScssElseClause" => lang::ScssElseClause::KIND_SET.iter().next(),
         "ScssErrorAtRule" => lang::ScssErrorAtRule::KIND_SET.iter().next(),
         "ScssExpression" => lang::ScssExpression::KIND_SET.iter().next(),
+        "ScssForAtRule" => lang::ScssForAtRule::KIND_SET.iter().next(),
         "ScssIdentifier" => lang::ScssIdentifier::KIND_SET.iter().next(),
         "ScssIfAtRule" => lang::ScssIfAtRule::KIND_SET.iter().next(),
         "ScssKeywordArgument" => lang::ScssKeywordArgument::KIND_SET.iter().next(),
