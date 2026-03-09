@@ -1,0 +1,72 @@
+name: Benchmarks GritQL
+
+on:
+  workflow_dispatch:
+  merge_group:
+  pull_request:
+    types: [ opened, synchronize ]
+    branches:
+      - main
+      - next
+    paths:
+      - 'Cargo.lock'
+      - 'crates/biome_grit_parser/**/*.rs'
+      - 'crates/biome_grit_patterns/**/*.rs'
+      - 'crates/biome_grit_syntax/**/*.rs'
+      - 'crates/biome_rowan/**/*.rs'
+  push:
+    branches:
+      - main
+      - next
+    paths:
+      - 'Cargo.lock'
+      - 'crates/biome_grit_parser/**/*.rs'
+      - 'crates/biome_grit_patterns/**/*.rs'
+      - 'crates/biome_grit_syntax/**/*.rs'
+      - 'crates/biome_rowan/**/*.rs'
+
+env:
+  RUST_LOG: info
+
+jobs:
+  bench:
+    permissions:
+      contents: read
+      pull-requests: write
+    name: Bench
+    runs-on: depot-ubuntu-24.04-arm-16
+    strategy:
+      matrix:
+        package:
+          - biome_grit_patterns
+
+    steps:
+
+      - name: Checkout PR Branch
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Install toolchain
+        uses: moonrepo/setup-rust@ede6de059f8046a5e236c94046823e2af11ca670 # v1.2.2
+        with:
+          channel: stable
+          cache-target: release
+          bins: cargo-codspeed
+          cache-base: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compile
+        timeout-minutes: 20
+        run: cargo codspeed build -p ${{ matrix.package }}
+        env:
+          CARGO_BUILD_JOBS: 3  # Default is 4 (equals to the vCPU count of the runner), which leads OOM on cargo build
+
+      - name: Run the benchmarks
+        uses: CodSpeedHQ/action@4deb3275dd364fb96fb074c953133d29ec96f80f # v4.10.6
+        timeout-minutes: 50
+        with:
+          mode: simulation
+          run: cargo codspeed run
+          token: ${{ secrets.CODSPEED_TOKEN }}

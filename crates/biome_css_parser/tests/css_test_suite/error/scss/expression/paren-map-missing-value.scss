@@ -1,0 +1,2 @@
+// Map inferred from parens should recover missing pair values
+$inferred-map: ($a: , $b: 1, $c: 2);

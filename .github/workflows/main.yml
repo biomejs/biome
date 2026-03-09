@@ -38,6 +38,8 @@ jobs:
       - uses: tombi-toml/setup-tombi@f7cb38e77d9a62bc27a8445bf50e660e9496b893 # v1.0.7
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          version: '0.7.32'
       - name: Format TOML files
         run: tombi format --check
 

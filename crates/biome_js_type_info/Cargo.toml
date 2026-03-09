@@ -13,6 +13,7 @@ publish              = true
 
 [dependencies]
 biome_formatter           = { workspace = true }
+biome_js_semantic         = { workspace = true }
 biome_js_syntax           = { workspace = true }
 biome_js_type_info_macros = { workspace = true }
 biome_resolver            = { workspace = true }

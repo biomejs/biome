@@ -1,0 +1,33 @@
+import { screen } from "@testing-library/react";
+
+test("testing-library element", () => {
+    const element = screen.getByRole("button");
+    expect(element).toBeVisible();
+    expect(element).toBeChecked();
+    expect(element).toHaveClass("active");
+});
+
+test("DOM query result", () => {
+    const el = document.querySelector(".item");
+    expect(el).toBeVisible();
+});
+
+test("knex query result", async () => {
+    const row = await db.select("*").from("users").first();
+    expect(row).toHaveValue("admin");
+});
+
+test("function return value", () => {
+    const result = getElement();
+    expect(result).toBeVisible();
+});
+
+test("awaited extracted playwright locator", async ({ page }) => {
+    const loc = page.locator(".item");
+    await expect(loc).toBeVisible();
+});
+
+test("returned extracted playwright locator", async ({ page }) => {
+    const loc = page.locator(".item");
+    return expect(loc).toBeVisible();
+});

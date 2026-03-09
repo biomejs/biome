@@ -1,0 +1,268 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+ > one space indent
+
+  > two space indent
+
+   > three space indent
+
+ >  > nested with outer indent
+
+	> tab before marker
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdQuote {
+            prefix: MdQuotePrefix {
+                pre_marker_indent: MdQuoteIndentList [
+                    MdQuoteIndent {
+                        md_quote_pre_marker_indent_token: MD_QUOTE_PRE_MARKER_INDENT@0..1 " " [] [],
+                    },
+                ],
+                marker_token: R_ANGLE@1..2 ">" [] [],
+                post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@2..3 " " [] [],
+            },
+            content: MdBlockList [
+                MdParagraph {
+                    list: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@3..19 "one space indent" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@19..20 "\n" [] [],
+                        },
+                    ],
+                    hard_line: missing (optional),
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@20..21 "\n" [] [],
+        },
+        MdQuote {
+            prefix: MdQuotePrefix {
+                pre_marker_indent: MdQuoteIndentList [
+                    MdQuoteIndent {
+                        md_quote_pre_marker_indent_token: MD_QUOTE_PRE_MARKER_INDENT@21..22 " " [] [],
+                    },
+                    MdQuoteIndent {
+                        md_quote_pre_marker_indent_token: MD_QUOTE_PRE_MARKER_INDENT@22..23 " " [] [],
+                    },
+                ],
+                marker_token: R_ANGLE@23..24 ">" [] [],
+                post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@24..25 " " [] [],
+            },
+            content: MdBlockList [
+                MdParagraph {
+                    list: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@25..41 "two space indent" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@41..42 "\n" [] [],
+                        },
+                    ],
+                    hard_line: missing (optional),
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@42..43 "\n" [] [],
+        },
+        MdQuote {
+            prefix: MdQuotePrefix {
+                pre_marker_indent: MdQuoteIndentList [
+                    MdQuoteIndent {
+                        md_quote_pre_marker_indent_token: MD_QUOTE_PRE_MARKER_INDENT@43..44 " " [] [],
+                    },
+                    MdQuoteIndent {
+                        md_quote_pre_marker_indent_token: MD_QUOTE_PRE_MARKER_INDENT@44..45 " " [] [],
+                    },
+                    MdQuoteIndent {
+                        md_quote_pre_marker_indent_token: MD_QUOTE_PRE_MARKER_INDENT@45..46 " " [] [],
+                    },
+                ],
+                marker_token: R_ANGLE@46..47 ">" [] [],
+                post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@47..48 " " [] [],
+            },
+            content: MdBlockList [
+                MdParagraph {
+                    list: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@48..66 "three space indent" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@66..67 "\n" [] [],
+                        },
+                    ],
+                    hard_line: missing (optional),
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@67..68 "\n" [] [],
+        },
+        MdQuote {
+            prefix: MdQuotePrefix {
+                pre_marker_indent: MdQuoteIndentList [
+                    MdQuoteIndent {
+                        md_quote_pre_marker_indent_token: MD_QUOTE_PRE_MARKER_INDENT@68..69 " " [] [],
+                    },
+                ],
+                marker_token: R_ANGLE@69..70 ">" [] [],
+                post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@70..71 " " [] [],
+            },
+            content: MdBlockList [
+                MdQuote {
+                    prefix: MdQuotePrefix {
+                        pre_marker_indent: MdQuoteIndentList [
+                            MdQuoteIndent {
+                                md_quote_pre_marker_indent_token: MD_QUOTE_PRE_MARKER_INDENT@71..72 " " [] [],
+                            },
+                        ],
+                        marker_token: R_ANGLE@72..73 ">" [] [],
+                        post_marker_space_token: missing (optional),
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@73..98 " nested with outer indent" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@98..99 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@99..100 "\n" [] [],
+        },
+        MdIndentCodeBlock {
+            content: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@100..102 ">" [Skipped("\t")] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@102..120 " tab before marker" [] [],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@120..120 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..120
+  0: (empty)
+  1: MD_BLOCK_LIST@0..120
+    0: MD_QUOTE@0..20
+      0: MD_QUOTE_PREFIX@0..3
+        0: MD_QUOTE_INDENT_LIST@0..1
+          0: MD_QUOTE_INDENT@0..1
+            0: MD_QUOTE_PRE_MARKER_INDENT@0..1 " " [] []
+        1: R_ANGLE@1..2 ">" [] []
+        2: MD_QUOTE_POST_MARKER_SPACE@2..3 " " [] []
+      1: MD_BLOCK_LIST@3..20
+        0: MD_PARAGRAPH@3..20
+          0: MD_INLINE_ITEM_LIST@3..20
+            0: MD_TEXTUAL@3..19
+              0: MD_TEXTUAL_LITERAL@3..19 "one space indent" [] []
+            1: MD_TEXTUAL@19..20
+              0: MD_TEXTUAL_LITERAL@19..20 "\n" [] []
+          1: (empty)
+    1: MD_NEWLINE@20..21
+      0: NEWLINE@20..21 "\n" [] []
+    2: MD_QUOTE@21..42
+      0: MD_QUOTE_PREFIX@21..25
+        0: MD_QUOTE_INDENT_LIST@21..23
+          0: MD_QUOTE_INDENT@21..22
+            0: MD_QUOTE_PRE_MARKER_INDENT@21..22 " " [] []
+          1: MD_QUOTE_INDENT@22..23
+            0: MD_QUOTE_PRE_MARKER_INDENT@22..23 " " [] []
+        1: R_ANGLE@23..24 ">" [] []
+        2: MD_QUOTE_POST_MARKER_SPACE@24..25 " " [] []
+      1: MD_BLOCK_LIST@25..42
+        0: MD_PARAGRAPH@25..42
+          0: MD_INLINE_ITEM_LIST@25..42
+            0: MD_TEXTUAL@25..41
+              0: MD_TEXTUAL_LITERAL@25..41 "two space indent" [] []
+            1: MD_TEXTUAL@41..42
+              0: MD_TEXTUAL_LITERAL@41..42 "\n" [] []
+          1: (empty)
+    3: MD_NEWLINE@42..43
+      0: NEWLINE@42..43 "\n" [] []
+    4: MD_QUOTE@43..67
+      0: MD_QUOTE_PREFIX@43..48
+        0: MD_QUOTE_INDENT_LIST@43..46
+          0: MD_QUOTE_INDENT@43..44
+            0: MD_QUOTE_PRE_MARKER_INDENT@43..44 " " [] []
+          1: MD_QUOTE_INDENT@44..45
+            0: MD_QUOTE_PRE_MARKER_INDENT@44..45 " " [] []
+          2: MD_QUOTE_INDENT@45..46
+            0: MD_QUOTE_PRE_MARKER_INDENT@45..46 " " [] []
+        1: R_ANGLE@46..47 ">" [] []
+        2: MD_QUOTE_POST_MARKER_SPACE@47..48 " " [] []
+      1: MD_BLOCK_LIST@48..67
+        0: MD_PARAGRAPH@48..67
+          0: MD_INLINE_ITEM_LIST@48..67
+            0: MD_TEXTUAL@48..66
+              0: MD_TEXTUAL_LITERAL@48..66 "three space indent" [] []
+            1: MD_TEXTUAL@66..67
+              0: MD_TEXTUAL_LITERAL@66..67 "\n" [] []
+          1: (empty)
+    5: MD_NEWLINE@67..68
+      0: NEWLINE@67..68 "\n" [] []
+    6: MD_QUOTE@68..99
+      0: MD_QUOTE_PREFIX@68..71
+        0: MD_QUOTE_INDENT_LIST@68..69
+          0: MD_QUOTE_INDENT@68..69
+            0: MD_QUOTE_PRE_MARKER_INDENT@68..69 " " [] []
+        1: R_ANGLE@69..70 ">" [] []
+        2: MD_QUOTE_POST_MARKER_SPACE@70..71 " " [] []
+      1: MD_BLOCK_LIST@71..99
+        0: MD_QUOTE@71..99
+          0: MD_QUOTE_PREFIX@71..73
+            0: MD_QUOTE_INDENT_LIST@71..72
+              0: MD_QUOTE_INDENT@71..72
+                0: MD_QUOTE_PRE_MARKER_INDENT@71..72 " " [] []
+            1: R_ANGLE@72..73 ">" [] []
+            2: (empty)
+          1: MD_BLOCK_LIST@73..99
+            0: MD_PARAGRAPH@73..99
+              0: MD_INLINE_ITEM_LIST@73..99
+                0: MD_TEXTUAL@73..98
+                  0: MD_TEXTUAL_LITERAL@73..98 " nested with outer indent" [] []
+                1: MD_TEXTUAL@98..99
+                  0: MD_TEXTUAL_LITERAL@98..99 "\n" [] []
+              1: (empty)
+    7: MD_NEWLINE@99..100
+      0: NEWLINE@99..100 "\n" [] []
+    8: MD_INDENT_CODE_BLOCK@100..120
+      0: MD_INLINE_ITEM_LIST@100..120
+        0: MD_TEXTUAL@100..102
+          0: MD_TEXTUAL_LITERAL@100..102 ">" [Skipped("\t")] []
+        1: MD_TEXTUAL@102..120
+          0: MD_TEXTUAL_LITERAL@102..120 " tab before marker" [] []
+  2: EOF@120..120 "" [] []
+
+```

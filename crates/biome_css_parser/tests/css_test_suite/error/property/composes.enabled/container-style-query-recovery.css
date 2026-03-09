@@ -1,0 +1,9 @@
+@container style(composes: 123) {
+  .a {
+    color: red;
+  }
+}
+
+.b {
+  color: blue;
+}

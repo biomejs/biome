@@ -409,3 +409,89 @@ fn svelte_keywords() {
         WHITESPACE: 2,
     )
 }
+
+#[test]
+fn svelte_line_comment_inside_tag() {
+    assert_lex! {
+        HtmlLexContext::InsideTagSvelte,
+        "// comment\n",
+        COMMENT: 10,
+        NEWLINE: 1,
+    }
+}
+
+#[test]
+fn svelte_line_comment_without_newline() {
+    assert_lex! {
+        HtmlLexContext::InsideTagSvelte,
+        "// comment",
+        COMMENT: 10,
+    }
+}
+
+#[test]
+fn svelte_block_comment_single_line() {
+    assert_lex! {
+        HtmlLexContext::InsideTagSvelte,
+        "/* comment */",
+        COMMENT: 13,
+    }
+}
+
+#[test]
+fn svelte_block_comment_multiline() {
+    assert_lex! {
+        HtmlLexContext::InsideTagSvelte,
+        "/* line1\nline2 */",
+        COMMENT: 17,
+    }
+}
+
+#[test]
+fn plain_slash_inside_tag_not_a_comment() {
+    assert_lex! {
+        HtmlLexContext::InsideTag,
+        "/",
+        SLASH: 1,
+    }
+}
+
+#[test]
+fn plain_double_slash_inside_tag_not_a_comment() {
+    assert_lex! {
+        HtmlLexContext::InsideTag,
+        "//",
+        SLASH: 1,
+        SLASH: 1,
+    }
+}
+
+#[test]
+fn plain_slash_asterisk_inside_tag_not_a_comment() {
+    assert_lex! {
+        HtmlLexContext::InsideTag,
+        "/*",
+        SLASH: 1,
+        HTML_LITERAL: 1,
+    }
+}
+
+#[test]
+fn svelte_slash_remains_slash_in_svelte_context() {
+    assert_lex! {
+        HtmlLexContext::InsideTagSvelte,
+        "/",
+        SLASH: 1,
+    }
+}
+
+#[test]
+fn svelte_slash_after_comment() {
+    assert_lex! {
+        HtmlLexContext::InsideTagSvelte,
+        "// comment\n/",
+        COMMENT: 10,
+        NEWLINE: 1,
+        SLASH: 1,
+    }
+}

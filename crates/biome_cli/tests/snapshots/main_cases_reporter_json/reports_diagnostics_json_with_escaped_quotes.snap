@@ -1,0 +1,81 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `quotes.ts`
+
+```ts
+function NaN() {}
+```
+
+# Termination Message
+
+```block
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+The --json option is unstable/experimental and its output might change between patches/minor releases.
+```
+
+```block
+{
+	"summary": {
+		"changed": 0,
+		"unchanged": 1,
+		"matches": 0,
+		"duration": "<TIME>",
+		"errors": 2,
+		"warnings": 1,
+		"infos": 0,
+		"skipped": 0,
+		"suggestedFixesSkipped": 0,
+		"diagnosticsNotPrinted": 0,
+		"scannerDuration": "<TIME>"
+	},
+	"diagnostics": [
+		{
+			"severity": "warning",
+			"message": "This function NaN is unused.",
+			"category": "lint/correctness/noUnusedVariables",
+			"location": {
+				"path": "quotes.ts",
+				"start": { "line": 1, "column": 10 },
+				"end": { "line": 1, "column": 13 }
+			},
+			"advices": []
+		},
+		{
+			"severity": "error",
+			"message": "Do not shadow the global \"NaN\" property.",
+			"category": "lint/suspicious/noShadowRestrictedNames",
+			"location": {
+				"path": "quotes.ts",
+				"start": { "line": 1, "column": 10 },
+				"end": { "line": 1, "column": 13 }
+			},
+			"advices": []
+		},
+		{
+			"severity": "error",
+			"message": "Formatter would have printed the following content:",
+			"category": "format",
+			"location": {
+				"path": "quotes.ts",
+				"start": { "line": 0, "column": 0 },
+				"end": { "line": 0, "column": 0 }
+			},
+			"advices": []
+		}
+	],
+	"command": "check"
+}
+
+```

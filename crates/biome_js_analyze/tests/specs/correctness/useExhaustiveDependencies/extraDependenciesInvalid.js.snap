@@ -210,7 +210,7 @@ extraDependenciesInvalid.js:28:3 lint/correctness/useExhaustiveDependencies  FIX
     Failing to specify dependencies can result in Effects not updating correctly when state changes.
     These "stale closures" are a common source of surprising bugs.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency someObj to the list.
   
     30 │ ··},·[someObj.id,·someObj]);
        │                 +++++++++   

@@ -61,7 +61,7 @@ issue1931.js:9:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━�
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency calc to the list.
   
     13 │ ····},·[calc]);
        │         ++++   
@@ -95,7 +95,7 @@ issue1931.js:21:19 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━�
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency calc to the list.
   
     25 │ ····},·[calc]);
        │         ++++   

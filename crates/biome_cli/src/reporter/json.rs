@@ -10,10 +10,20 @@ use biome_diagnostics::{
 use biome_json_factory::make::*;
 use biome_json_syntax::{AnyJsonMemberName, AnyJsonValue, JsonRoot, JsonSyntaxKind, T};
 use camino::{Utf8Path, Utf8PathBuf};
-use serde::Serialize;
 
-#[derive(Debug, Default, Serialize)]
-#[serde(rename_all = "camelCase")]
+/// Escapes special characters in a string for safe JSON output
+fn json_escape(input: &str) -> String {
+    input
+        .replace('\\', "\\\\")
+        .replace('"', "\\\"")
+        .replace('\n', "\\n")
+        .replace('\r', "\\r")
+        .replace('\t', "\\t")
+        .replace('\x08', "\\b")
+        .replace('\x0C', "\\f")
+}
+
+#[derive(Debug, Default)]
 pub(crate) struct JsonReporterVisitor {
     summary: TraversalSummary,
     diagnostics: Vec<JsonReport>,
@@ -136,7 +146,9 @@ fn suggestion_to_json(suggestion: &JsonSuggestion) -> AnyJsonValue {
         json_member(
             AnyJsonMemberName::JsonMemberName(json_member_name(json_string_literal("text"))),
             token(T![:]),
-            AnyJsonValue::JsonStringValue(json_string_value(json_string_literal(&suggestion.text))),
+            AnyJsonValue::JsonStringValue(json_string_value(json_string_literal(&json_escape(
+                &suggestion.text,
+            )))),
         ),
     ];
     let separators = vec![token(T![,]); members.len() - 1];
@@ -166,7 +178,9 @@ fn report_to_json(report: &JsonReport) -> AnyJsonValue {
         json_member(
             AnyJsonMemberName::JsonMemberName(json_member_name(json_string_literal("message"))),
             token(T![:]),
-            AnyJsonValue::JsonStringValue(json_string_value(json_string_literal(&report.message))),
+            AnyJsonValue::JsonStringValue(json_string_value(json_string_literal(&json_escape(
+                &report.message,
+            )))),
         ),
     ];
 
@@ -210,13 +224,6 @@ fn report_to_json(report: &JsonReport) -> AnyJsonValue {
         json_member_list(members, separators),
         token(T!['}']),
     ))
-}
-
-impl Display for JsonReporterVisitor {
-    fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
-        let content = serde_json::to_string(&self)?;
-        fmt.write_str(content.as_str())
-    }
 }
 
 pub struct JsonReporter<'a> {
@@ -344,34 +351,29 @@ fn to_location(location: &Location) -> Option<LocationReport> {
     })
 }
 
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug)]
 struct JsonReport {
     category: Option<&'static Category>,
     severity: Severity,
     message: String,
     advices: Vec<JsonSuggestion>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     location: Option<LocationReport>,
 }
 
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug)]
 struct LocationReport {
     path: String,
     start: LocationSpan,
     end: LocationSpan,
 }
 
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug)]
 struct LocationSpan {
     column: usize,
     line: usize,
 }
 
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug)]
 struct JsonSuggestion {
     start: LocationSpan,
     end: LocationSpan,

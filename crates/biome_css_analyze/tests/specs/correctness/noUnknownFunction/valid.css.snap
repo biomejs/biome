@@ -28,4 +28,4 @@ a { animation-delay: calc(sibling-count() * 50ms); }
 
 ```
 
-_Note: The parser emitted 4 diagnostics which are not shown here._
+_Note: The parser emitted 3 diagnostics which are not shown here._

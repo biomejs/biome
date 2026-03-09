@@ -1,12 +1,15 @@
 #![deny(clippy::use_self)]
 
+pub mod file_source;
 #[macro_use]
 mod generated;
 mod syntax_node;
 
+pub use file_source::MdFileSource;
+pub use syntax_node::*;
+
 pub use self::generated::*;
 use biome_rowan::{RawSyntaxKind, SyntaxKind, TriviaPieceKind};
-pub use syntax_node::*;
 
 impl From<u16> for MarkdownSyntaxKind {
     fn from(d: u16) -> Self {

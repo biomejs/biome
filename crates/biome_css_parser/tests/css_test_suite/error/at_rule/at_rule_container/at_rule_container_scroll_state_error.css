@@ -1,0 +1,5 @@
+@container scroll-state(scrolled: bottom and ) { }
+
+@container scroll-state(not stuck) { }
+
+@container scroll-state((stuck) or scrolled: bottom) { }

@@ -1031,7 +1031,6 @@ let {
 
 <!-- used as value here -->
 <AvatarPrimitive.Fallback
-	bind:ref
 	class="something nice"
 />
 "#

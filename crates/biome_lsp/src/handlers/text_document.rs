@@ -42,10 +42,17 @@ pub(crate) async fn did_open(
                 session.load_extension_settings(None).await;
             }
 
-            let status = if let Some(path) = session.get_settings_configuration_path() {
-                info!("Loading user configuration from text_document {}", &path);
+            let status = if let Some(config_path) = session.resolve_configuration_path(Some(&path))
+            {
+                info!(
+                    "Loading user configuration from text_document {}",
+                    &config_path
+                );
                 session
-                    .load_biome_configuration_file(ConfigurationPathHint::FromUser(path), false)
+                    .load_biome_configuration_file(
+                        ConfigurationPathHint::FromUser(config_path),
+                        false,
+                    )
                     .await
             } else {
                 let project_path = path

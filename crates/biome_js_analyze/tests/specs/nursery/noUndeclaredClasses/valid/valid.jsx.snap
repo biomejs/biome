@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+
+import "./styles.css";
+
+function Component() {
+	return <button className="btn primary">Valid classes</button>;
+}
+
+```

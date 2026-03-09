@@ -79,7 +79,12 @@ MdDocument {
         MdBulletListItem {
             md_bullet_list: MdBulletList [
                 MdBullet {
-                    bullet: MINUS@52..53 "-" [] [],
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@52..53 "-" [] [],
+                        post_marker_space_token: missing (optional),
+                        content_indent: MdIndentTokenList [],
+                    },
                     content: MdBlockList [
                         MdParagraph {
                             list: MdInlineItemList [
@@ -111,12 +116,16 @@ MdDocument {
             hard_line: missing (optional),
         },
         MdQuote {
-            marker_token: R_ANGLE@84..85 ">" [] [],
+            prefix: MdQuotePrefix {
+                pre_marker_indent: MdQuoteIndentList [],
+                marker_token: R_ANGLE@84..85 ">" [] [],
+                post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@85..86 " " [] [],
+            },
             content: MdBlockList [
                 MdParagraph {
                     list: MdInlineItemList [
                         MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@85..102 "Quote interrupts" [Skipped(" ")] [],
+                            value_token: MD_TEXTUAL_LITERAL@86..102 "Quote interrupts" [] [],
                         },
                         MdTextual {
                             value_token: MD_TEXTUAL_LITERAL@102..103 "\n" [] [],
@@ -221,7 +230,11 @@ MdDocument {
     5: MD_BULLET_LIST_ITEM@52..70
       0: MD_BULLET_LIST@52..70
         0: MD_BULLET@52..70
-          0: MINUS@52..53 "-" [] []
+          0: MD_LIST_MARKER_PREFIX@52..53
+            0: MD_INDENT_TOKEN_LIST@52..52
+            1: MINUS@52..53 "-" [] []
+            2: (empty)
+            3: MD_INDENT_TOKEN_LIST@53..53
           1: MD_BLOCK_LIST@53..70
             0: MD_PARAGRAPH@53..70
               0: MD_INLINE_ITEM_LIST@53..70
@@ -240,12 +253,15 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@83..84 "\n" [] []
       1: (empty)
     8: MD_QUOTE@84..103
-      0: R_ANGLE@84..85 ">" [] []
-      1: MD_BLOCK_LIST@85..103
-        0: MD_PARAGRAPH@85..103
-          0: MD_INLINE_ITEM_LIST@85..103
-            0: MD_TEXTUAL@85..102
-              0: MD_TEXTUAL_LITERAL@85..102 "Quote interrupts" [Skipped(" ")] []
+      0: MD_QUOTE_PREFIX@84..86
+        0: MD_QUOTE_INDENT_LIST@84..84
+        1: R_ANGLE@84..85 ">" [] []
+        2: MD_QUOTE_POST_MARKER_SPACE@85..86 " " [] []
+      1: MD_BLOCK_LIST@86..103
+        0: MD_PARAGRAPH@86..103
+          0: MD_INLINE_ITEM_LIST@86..103
+            0: MD_TEXTUAL@86..102
+              0: MD_TEXTUAL_LITERAL@86..102 "Quote interrupts" [] []
             1: MD_TEXTUAL@102..103
               0: MD_TEXTUAL_LITERAL@102..103 "\n" [] []
           1: (empty)

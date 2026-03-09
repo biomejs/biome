@@ -1,0 +1,41 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/ratio/issue_9249.css
+---
+
+# Input
+
+```css
+.merch-grid {
+	grid-column: 1 / -1; /* The last column that will be used to position the shop link */
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+Trailing newline: true
+-----
+
+```css
+.merch-grid {
+	grid-column: 1 / -1; /* The last column that will be used to position the shop link */
+}
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+    2: 	grid-column: 1 / -1; /* The last column that will be used to position the shop link */
+```

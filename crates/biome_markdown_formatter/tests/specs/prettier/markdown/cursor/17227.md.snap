@@ -1,0 +1,98 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/cursor/17227.md
+---
+# Input
+
+```md
+# Angular note
+
+```typescript
+  import {Component} from '@angular/core';
+
+  @Component({
+    selector: 'app-root',
+    standalone: true,
+    imports: [],
+    template: `
+      <h1>
+
+      {{ title }}</h1>
+    `,
+    styleUrls: ['./app.component.css'],
+  })
+  export class AppComponent {
+    title = 'default';
+  }
+```
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,20 +1,20 @@
+ # Angular note
+ 
+ ```typescript
+-import { Component } from "@angular/core";
++  import {Component} from '@angular/core';
+ 
+-@Component({
+-  selector: "app-root",
+-  standalone: true,
+-  imports: [],
+-  template: `
+-    <h1>
+-      {{ title }}
+-    </h1>
+-  `,
+-  styleUrls: ["./app.component.css"],
+-})
+-export class AppComponent {
+-  title = "default";
+-}
++  @Component({
++    selector: 'app-root',
++    standalone: true,
++    imports: [],
++    template: `
++      <h1>
++
++      {{ title }}</h1>
++    `,
++    styleUrls: ['./app.component.css'],
++  })
++  export class AppComponent {
++    title = 'default';
++  }
+ ```
+```
+
+# Output
+
+```md
+# Angular note
+
+```typescript
+  import {Component} from '@angular/core';
+
+  @Component({
+    selector: 'app-root',
+    standalone: true,
+    imports: [],
+    template: `
+      <h1>
+
+      {{ title }}</h1>
+    `,
+    styleUrls: ['./app.component.css'],
+  })
+  export class AppComponent {
+    title = 'default';
+  }
+```
+```

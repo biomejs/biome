@@ -1,0 +1,265 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/list/start.md
+---
+# Input
+
+```md
+5. abc
+6. def
+7. ghi
+
+---
+
+0. abc
+0. def
+0. ghi
+
+---
+
+1. abc
+1. def
+1. ghi
+
+---
+
+2. abc
+2. def
+2. ghi
+
+---
+
+0. abc
+1. def
+2. ghi
+
+---
+
+0. abc
+1. def
+1. ghi
+
+---
+
+1. abc
+2. def
+3. ghi
+
+---
+
+2. abc
+3. def
+4. ghi
+
+---
+
+999. abc
+145. def
+69. ghi
+
+---
+
+0. abc
+
+---
+
+1. abc
+
+---
+
+2. abc
+
+---
+
+999. abc
+
+---
+
+0. abc
+1. def
+
+---
+
+1. abc
+2. def
+
+---
+
+
+1. abc
+1. def
+
+---
+
+2. abc
+3. def
+
+---
+
+999. abc
+1. def
+
+---
+
+999. abc
+2. def
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -5,8 +5,8 @@
+ ---
+ 
+ 0. abc
+-1. def
+-2. ghi
++0. def
++0. ghi
+ 
+ ---
+ 
+@@ -17,8 +17,8 @@
+ ---
+ 
+ 2. abc
+-3. def
+-4. ghi
++2. def
++2. ghi
+ 
+ ---
+ 
+@@ -47,8 +47,8 @@
+ ---
+ 
+ 999. abc
+-1000. def
+-1001. ghi
++145. def
++69. ghi
+ 
+ ---
+ 
+@@ -78,6 +78,7 @@
+ 
+ ---
+ 
++
+ 1. abc
+ 1. def
+ 
+@@ -94,4 +95,4 @@
+ ---
+ 
+ 999. abc
+-1000. def
++2. def
+```
+
+# Output
+
+```md
+5. abc
+6. def
+7. ghi
+
+---
+
+0. abc
+0. def
+0. ghi
+
+---
+
+1. abc
+1. def
+1. ghi
+
+---
+
+2. abc
+2. def
+2. ghi
+
+---
+
+0. abc
+1. def
+2. ghi
+
+---
+
+0. abc
+1. def
+1. ghi
+
+---
+
+1. abc
+2. def
+3. ghi
+
+---
+
+2. abc
+3. def
+4. ghi
+
+---
+
+999. abc
+145. def
+69. ghi
+
+---
+
+0. abc
+
+---
+
+1. abc
+
+---
+
+2. abc
+
+---
+
+999. abc
+
+---
+
+0. abc
+1. def
+
+---
+
+1. abc
+2. def
+
+---
+
+
+1. abc
+1. def
+
+---
+
+2. abc
+3. def
+
+---
+
+999. abc
+1. def
+
+---
+
+999. abc
+2. def
+```

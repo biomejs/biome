@@ -138,7 +138,9 @@ impl Rule for NoVueDuplicateKeys {
         let mut key_declarations: FxHashMap<String, Vec<VueDeclaration>> = FxHashMap::default();
 
         // Collect all declarations across all Vue component sections
-        for declaration in component.declarations(VueDeclarationCollectionFilter::all()) {
+        for declaration in component.declarations(
+            VueDeclarationCollectionFilter::all() ^ VueDeclarationCollectionFilter::Watcher,
+        ) {
             if let Some(name) = declaration.declaration_name() {
                 // Handle cases like `const { foo } = defineProps(...);`.
                 if let VueDeclaration::Setup(ref setup_decl) = declaration

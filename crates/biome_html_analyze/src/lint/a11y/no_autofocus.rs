@@ -127,7 +127,7 @@ fn is_inside_allowed_context(attr: &HtmlAttribute) -> Option<bool> {
     let mut skip_first_element = true;
 
     // Walk up the ancestors to find if we're inside a dialog or popover
-    for ancestor in attr.syntax().ancestors() {
+    for ancestor in attr.syntax().ancestors().skip(1) {
         let Some(tag_element) = get_tag_element(&ancestor) else {
             continue;
         };

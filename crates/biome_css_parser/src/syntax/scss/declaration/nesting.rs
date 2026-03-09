@@ -1,20 +1,21 @@
 use crate::parser::CssParser;
 use crate::syntax::block::parse_declaration_or_rule_list_block;
 use crate::syntax::parse_error::expected_component_value;
-use crate::syntax::property::parse_generic_component_value;
+use crate::syntax::scss::parse_scss_expression_allow_empty_value_until;
 use crate::syntax::{
     CssSyntaxFeatures, is_at_dashed_identifier, is_at_identifier, parse_regular_identifier,
 };
 use biome_css_syntax::CssSyntaxKind::{
-    CSS_BOGUS_PROPERTY_VALUE, CSS_DECLARATION, CSS_DECLARATION_IMPORTANT,
-    CSS_DECLARATION_WITH_SEMICOLON, CSS_GENERIC_PROPERTY, EOF, SCSS_NESTING_DECLARATION,
+    CSS_DECLARATION, CSS_DECLARATION_IMPORTANT, CSS_DECLARATION_WITH_SEMICOLON,
+    CSS_GENERIC_PROPERTY, EOF, SCSS_NESTING_DECLARATION,
 };
 use biome_css_syntax::{CssSyntaxKind, T};
-use biome_parser::parse_lists::ParseNodeList;
-use biome_parser::parse_recovery::{ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::{CompletedMarker, Parser, SyntaxFeature, token_set};
+use biome_parser::{CompletedMarker, Parser, SyntaxFeature, TokenSet, token_set};
+
+const SCSS_NESTING_VALUE_END_SET: TokenSet<CssSyntaxKind> =
+    token_set![T!['{'], T![;], T!['}'], T![!], EOF];
 
 /// Detects nested property syntax (`prop: { ... }`) while excluding custom properties
 /// and CSS Modules declarations that must remain regular properties.
@@ -57,7 +58,7 @@ pub(crate) fn parse_scss_nesting_declaration(p: &mut CssParser) -> ParsedSyntax 
     parse_regular_identifier(p).ok();
     p.expect(T![:]);
     let missing_value = p.at(T![;]) || p.at(T!['}']) || p.at(EOF) || p.at(T![!]);
-    ScssNestingDeclarationValueList.parse_list(p);
+    parse_scss_expression_allow_empty_value_until(p, SCSS_NESTING_VALUE_END_SET).ok();
 
     if p.at(T!['{']) {
         // Upgrade to a nested-property block only if `{` follows the value.
@@ -108,35 +109,4 @@ fn parse_declaration_important(p: &mut CssParser) -> ParsedSyntax {
     p.bump(T![!]);
     p.bump(T![important]);
     Present(m.complete(p, CSS_DECLARATION_IMPORTANT))
-}
-
-struct ScssNestingDeclarationValueList;
-
-impl ParseNodeList for ScssNestingDeclarationValueList {
-    type Kind = CssSyntaxKind;
-    type Parser<'source> = CssParser<'source>;
-    const LIST_KIND: Self::Kind = CssSyntaxKind::CSS_GENERIC_COMPONENT_VALUE_LIST;
-
-    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_generic_component_value(p)
-    }
-
-    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T!['{']) || p.at(T![;]) || p.at(T!['}']) || p.at(EOF) || p.at(T![!])
-    }
-
-    fn recover(
-        &mut self,
-        p: &mut Self::Parser<'_>,
-        parsed_element: ParsedSyntax,
-    ) -> RecoveryResult {
-        parsed_element.or_recover_with_token_set(
-            p,
-            &ParseRecoveryTokenSet::new(
-                CSS_BOGUS_PROPERTY_VALUE,
-                token_set!(T!['{'], T![;], T!['}'], T![!], EOF),
-            ),
-            expected_component_value,
-        )
-    }
 }

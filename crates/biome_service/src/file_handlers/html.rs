@@ -9,7 +9,9 @@ use crate::settings::{
     OverrideSettings, SettingsWithEditor, check_feature_activity, check_override_feature_activity,
 };
 use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
-use crate::workspace::{CodeAction, CssDocumentServices, DocumentServices, EmbeddedSnippet};
+use crate::workspace::{
+    CodeAction, CssDocumentServices, DocumentServices, EmbeddedSnippet, JsDocumentServices,
+};
 use crate::workspace::{FixFileResult, PullActionsResult};
 use crate::{
     WorkspaceError,
@@ -22,7 +24,10 @@ use biome_configuration::html::{
     HtmlLinterConfiguration, HtmlLinterEnabled, HtmlParseInterpolation, HtmlParserConfiguration,
 };
 use biome_css_parser::{CssModulesKind, parse_css_with_offset_and_cache};
-use biome_css_syntax::{CssFileSource, CssLanguage};
+use biome_css_syntax::{
+    CssFileSource, CssLanguage, EmbeddingHtmlKind, EmbeddingKind as CssEmbeddingKind,
+    EmbeddingStyleApplicability,
+};
 use biome_formatter::format_element::{Interned, LineMode};
 use biome_formatter::prelude::{Document, Tag};
 use biome_formatter::{
@@ -30,7 +35,7 @@ use biome_formatter::{
     LineWidth, Printed, TrailingNewline,
 };
 use biome_fs::BiomePath;
-use biome_html_analyze::analyze;
+use biome_html_analyze::{HtmlAnalyzerServices, analyze};
 use biome_html_factory::make::ident;
 use biome_html_formatter::context::SelfCloseVoidElements;
 use biome_html_formatter::{
@@ -38,7 +43,7 @@ use biome_html_formatter::{
     context::{IndentScriptAndStyle, WhitespaceSensitivity},
     format_node,
 };
-use biome_html_parser::{HtmlParseOptions, parse_html_with_cache};
+use biome_html_parser::{HtmlParserOptions, parse_html_with_cache};
 use biome_html_syntax::element_ext::AnyEmbeddedContent;
 use biome_html_syntax::{
     AnySvelteDirective, AstroEmbeddedContent, HtmlAttributeInitializerClause,
@@ -304,7 +309,7 @@ impl ServiceLanguage for HtmlLanguage {
         None
     }
 
-    type ParserOptions = HtmlParseOptions;
+    type ParserOptions = HtmlParserOptions;
 
     fn resolve_parse_options(
         overrides: &OverrideSettings,
@@ -313,7 +318,7 @@ impl ServiceLanguage for HtmlLanguage {
         file_source: &DocumentFileSource,
     ) -> Self::ParserOptions {
         let html_file_source = file_source.to_html_file_source().unwrap_or_default();
-        let mut options = HtmlParseOptions::from(&html_file_source);
+        let mut options = HtmlParserOptions::from(&html_file_source);
         if language.interpolation.unwrap_or_default().into() && html_file_source.is_html() {
             options = options.with_double_text_expression();
         }
@@ -427,8 +432,8 @@ fn parse_embedded_nodes(
                                 settings,
                                 builder,
                             );
-                            if let Some((content, file_source)) = result {
-                                nodes.push((content.into(), file_source.into()));
+                            if let Some((content, js_services, file_source)) = result {
+                                nodes.push(((content, js_services).into(), file_source.into()));
                             }
                         } else if script_type.is_json() {
                             let result = parse_embedded_json(
@@ -500,8 +505,8 @@ fn parse_embedded_nodes(
                         settings,
                         builder,
                     );
-                    if let Some((content, file_source)) = result {
-                        nodes.push((content.into(), file_source));
+                    if let Some((content, js_services, file_source)) = result {
+                        nodes.push(((content, js_services).into(), file_source));
                     }
                 }
 
@@ -524,8 +529,8 @@ fn parse_embedded_nodes(
                                 settings,
                                 builder,
                             );
-                            if let Some((content, file_source)) = result {
-                                nodes.push((content.into(), file_source.into()));
+                            if let Some((content, js_services, file_source)) = result {
+                                nodes.push(((content, js_services).into(), file_source.into()));
                             }
                         } else if script_type.is_json() {
                             let result = parse_embedded_json(
@@ -578,9 +583,9 @@ fn parse_embedded_nodes(
                             settings,
                             builder,
                         );
-                        if let Some((content, file_source)) = result {
+                        if let Some((content, js_services, file_source)) = result {
                             embedded_file_source = file_source;
-                            nodes.push((content.into(), file_source.into()));
+                            nodes.push(((content, js_services).into(), file_source.into()));
                         }
                     } else if script_type.is_json() {
                         let result =
@@ -627,6 +632,7 @@ fn parse_embedded_nodes(
                         embedded_file_source.with_embedding_kind(EmbeddingKind::Vue {
                             setup: false,
                             is_source: false,
+                            event_handler: true,
                         });
                     if let Some((content, doc_source)) = parse_directive_string_value(
                         &initializer,
@@ -647,6 +653,7 @@ fn parse_embedded_nodes(
                         embedded_file_source.with_embedding_kind(EmbeddingKind::Vue {
                             setup: false,
                             is_source: false,
+                            event_handler: false,
                         });
                     if let Some((content, doc_source)) = parse_directive_string_value(
                         &initializer,
@@ -667,6 +674,7 @@ fn parse_embedded_nodes(
                         embedded_file_source.with_embedding_kind(EmbeddingKind::Vue {
                             setup: false,
                             is_source: false,
+                            event_handler: false,
                         });
                     if let Some((content, doc_source)) = parse_directive_string_value(
                         &initializer,
@@ -683,10 +691,15 @@ fn parse_embedded_nodes(
                 if let Some(directive) = VueDirective::cast_ref(&element)
                     && let Some(initializer) = directive.initializer()
                 {
+                    let is_v_on = directive
+                        .name_token()
+                        .map(|t| t.text_trimmed() == "v-on")
+                        .unwrap_or(false);
                     let file_source =
                         embedded_file_source.with_embedding_kind(EmbeddingKind::Vue {
                             setup: false,
                             is_source: false,
+                            event_handler: is_v_on,
                         });
                     if let Some((content, doc_source)) = parse_directive_string_value(
                         &initializer,
@@ -725,9 +738,9 @@ fn parse_embedded_nodes(
                             settings,
                             builder,
                         );
-                        if let Some((content, file_source)) = result {
+                        if let Some((content, js_services, file_source)) = result {
                             embedded_file_source = file_source;
-                            nodes.push((content.into(), file_source.into()));
+                            nodes.push(((content, js_services).into(), file_source.into()));
                         }
                     } else if script_type.is_json() {
                         let result =
@@ -882,7 +895,11 @@ pub(crate) fn parse_astro_embedded_script(
     path: &BiomePath,
     settings: &SettingsWithEditor,
     builder: &mut EmbeddedBuilder,
-) -> Option<(EmbeddedSnippet<JsLanguage>, DocumentFileSource)> {
+) -> Option<(
+    EmbeddedSnippet<JsLanguage>,
+    DocumentServices,
+    DocumentFileSource,
+)> {
     let content = element.content_token()?;
     let file_source =
         JsFileSource::ts().with_embedding_kind(EmbeddingKind::Astro { frontmatter: true });
@@ -897,15 +914,23 @@ pub(crate) fn parse_astro_embedded_script(
     );
     builder.visit_js_source_snippet(&parse.tree());
 
-    Some((
-        EmbeddedSnippet::new(
-            parse.into(),
-            element.range(),
-            content.text_trimmed_range(),
-            content.text_range().start(),
-        ),
-        document_file_source,
-    ))
+    let snippet = EmbeddedSnippet::new(
+        parse.into(),
+        element.range(),
+        content.text_trimmed_range(),
+        content.text_range().start(),
+    );
+
+    let js_services =
+        if settings.as_ref().is_linter_enabled() || settings.as_ref().is_assist_enabled() {
+            JsDocumentServices::default()
+                .with_js_semantic_model(&snippet.tree())
+                .into()
+        } else {
+            DocumentServices::none()
+        };
+
+    Some((snippet, js_services, document_file_source))
 }
 
 pub(crate) fn parse_embedded_script(
@@ -915,7 +940,7 @@ pub(crate) fn parse_embedded_script(
     html_file_source: &HtmlFileSource,
     settings: &SettingsWithEditor,
     builder: &mut EmbeddedBuilder,
-) -> Option<(EmbeddedSnippet<JsLanguage>, JsFileSource)> {
+) -> Option<(EmbeddedSnippet<JsLanguage>, DocumentServices, JsFileSource)> {
     if element.is_javascript_tag() {
         let file_source = if html_file_source.is_svelte() || html_file_source.is_vue() {
             let mut file_source = if element.is_typescript_lang() {
@@ -934,6 +959,7 @@ pub(crate) fn parse_embedded_script(
                 file_source = file_source.with_embedding_kind(EmbeddingKind::Vue {
                     setup: element.is_script_with_setup_attribute(),
                     is_source: true,
+                    event_handler: false,
                 });
             }
             file_source
@@ -980,7 +1006,17 @@ pub(crate) fn parse_embedded_script(
                 content.text_range().start(),
             ))
         })?;
-        Some((embedded_content, file_source))
+
+        let js_services =
+            if settings.as_ref().is_linter_enabled() || settings.as_ref().is_assist_enabled() {
+                JsDocumentServices::default()
+                    .with_js_semantic_model(&embedded_content.tree())
+                    .into()
+            } else {
+                DocumentServices::none()
+            };
+
+        Some((embedded_content, js_services, file_source))
     } else {
         None
     }
@@ -1010,10 +1046,43 @@ pub(crate) fn parse_embedded_style(
         }
 
         let file_source = if html_file_source.is_html() {
-            DocumentFileSource::Css(CssFileSource::css())
+            CssFileSource::css()
+                .with_embedding_kind(CssEmbeddingKind::Html(EmbeddingHtmlKind::Html))
+        } else if html_file_source.is_vue() {
+            // Vue `<style scoped>` and `<style module>` are both component-local.
+            // Plain `<style>` (no attribute) leaks into the global scope.
+            let applicability =
+                if element.is_style_scoped("scoped") || element.is_style_scoped("module") {
+                    EmbeddingStyleApplicability::Local
+                } else {
+                    EmbeddingStyleApplicability::Global
+                };
+            CssFileSource::new_css_modules().with_embedding_kind(CssEmbeddingKind::Html(
+                EmbeddingHtmlKind::Vue { applicability },
+            ))
+        } else if html_file_source.is_astro() {
+            // Astro: <style is:global> → Global; plain <style> → Local
+            let applicability = if element.is_style_scoped("is:global") {
+                EmbeddingStyleApplicability::Global
+            } else {
+                EmbeddingStyleApplicability::Local
+            };
+            CssFileSource::new_css_modules().with_embedding_kind(CssEmbeddingKind::Html(
+                EmbeddingHtmlKind::Astro { applicability },
+            ))
+        } else if html_file_source.is_svelte() {
+            // Svelte: plain <style> → Local (global classes via :global() are
+            // detected at the class-selector level by the CSS semantic model)
+            CssFileSource::new_css_modules().with_embedding_kind(CssEmbeddingKind::Html(
+                EmbeddingHtmlKind::Svelte {
+                    applicability: EmbeddingStyleApplicability::Local,
+                },
+            ))
         } else {
-            DocumentFileSource::Css(CssFileSource::new_css_modules())
+            CssFileSource::new_css_modules()
         };
+
+        let file_source = DocumentFileSource::Css(file_source);
         let (snippet, services) = element.children().iter().next().and_then(|child| {
             let child = child.as_any_html_content()?;
             let child = child.as_html_embedded_content()?;
@@ -1195,6 +1264,7 @@ pub(crate) fn parse_vue_text_expression(
     let file_source = js_file_source.with_embedding_kind(EmbeddingKind::Vue {
         setup: false,
         is_source: false,
+        event_handler: false,
     });
     parse_text_expression(expression, cache, biome_path, settings, file_source)
 }
@@ -1396,6 +1466,7 @@ fn lint(params: LintParams) -> LintResults {
     let workspace_settings = &params.settings;
     let analyzer_options = workspace_settings.analyzer_options::<HtmlLanguage>(
         params.path,
+        params.working_directory,
         &params.language,
         params.suppression_reason.as_deref(),
     );
@@ -1420,10 +1491,18 @@ fn lint(params: LintParams) -> LintResults {
     let mut process_lint = ProcessLint::new(&params);
 
     let source_type = params.language.to_html_file_source().unwrap_or_default();
-    let (_, analyze_diagnostics) =
-        analyze(&tree, filter, &analyzer_options, source_type, |signal| {
-            process_lint.process_signal(signal)
-        });
+    let html_services = HtmlAnalyzerServices {
+        module_graph: Some(params.module_graph.clone()),
+        project_layout: Some(params.project_layout.clone()),
+    };
+    let (_, analyze_diagnostics) = analyze(
+        &tree,
+        filter,
+        &analyzer_options,
+        source_type,
+        html_services,
+        |signal| process_lint.process_signal(signal),
+    );
 
     process_lint.into_result(
         params
@@ -1439,7 +1518,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         range,
         settings,
         path,
-        module_graph: _,
+        module_graph,
         project_layout,
         language,
         only,
@@ -1450,6 +1529,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         categories,
         action_offset,
         document_services: _,
+        working_directory,
     } = params;
     let _ = debug_span!("Code actions HTML", range =? range, path =? path).entered();
     let tree = parse.tree();
@@ -1460,8 +1540,12 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             actions: Vec::new(),
         };
     };
-    let analyzer_options =
-        settings.analyzer_options::<HtmlLanguage>(path, &language, suppression_reason.as_deref());
+    let analyzer_options = settings.analyzer_options::<HtmlLanguage>(
+        path,
+        working_directory,
+        &language,
+        suppression_reason.as_deref(),
+    );
     let mut actions = Vec::new();
     let (enabled_rules, disabled_rules, analyzer_options) =
         AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
@@ -1469,7 +1553,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             .with_skip(skip)
             .with_path(path.as_path())
             .with_enabled_selectors(rules)
-            .with_project_layout(project_layout)
+            .with_project_layout(project_layout.clone())
             .finish();
 
     let filter = AnalysisFilter {
@@ -1479,20 +1563,31 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         range,
     };
 
-    analyze(&tree, filter, &analyzer_options, source_type, |signal| {
-        actions.extend(signal.actions().into_code_action_iter().map(|item| {
-            CodeAction {
-                category: item.category.clone(),
-                rule_name: item
-                    .rule_name
-                    .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
-                suggestion: item.suggestion,
-                offset: action_offset,
-            }
-        }));
+    let html_services = HtmlAnalyzerServices {
+        module_graph: Some(module_graph),
+        project_layout: Some(project_layout),
+    };
+    analyze(
+        &tree,
+        filter,
+        &analyzer_options,
+        source_type,
+        html_services,
+        |signal| {
+            actions.extend(signal.actions().into_code_action_iter().map(|item| {
+                CodeAction {
+                    category: item.category.clone(),
+                    rule_name: item
+                        .rule_name
+                        .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
+                    suggestion: item.suggestion,
+                    offset: action_offset,
+                }
+            }));
 
-        ControlFlow::<Never>::Continue(())
-    });
+            ControlFlow::<Never>::Continue(())
+        },
+    );
 
     PullActionsResult { actions }
 }
@@ -1508,6 +1603,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         .as_linter_rules(params.biome_path.as_path());
     let analyzer_options = params.settings.analyzer_options::<HtmlLanguage>(
         params.biome_path,
+        params.working_directory,
         &params.document_file_source,
         params.suppression_reason.as_deref(),
     );
@@ -1538,9 +1634,18 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         .to_html_file_source()
         .unwrap_or_default();
     loop {
-        let (action, _) = analyze(&tree, filter, &analyzer_options, source_type, |signal| {
-            process_fix_all.process_signal(signal)
-        });
+        let html_services = HtmlAnalyzerServices {
+            module_graph: Some(params.module_graph.clone()),
+            project_layout: Some(params.project_layout.clone()),
+        };
+        let (action, _) = analyze(
+            &tree,
+            filter,
+            &analyzer_options,
+            source_type,
+            html_services,
+            |signal| process_fix_all.process_signal(signal),
+        );
         let result = process_fix_all.process_action(action, |root| {
             tree = match HtmlRoot::cast(root) {
                 Some(tree) => tree,

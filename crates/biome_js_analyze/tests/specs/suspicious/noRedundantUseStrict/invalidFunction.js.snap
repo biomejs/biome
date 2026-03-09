@@ -27,8 +27,14 @@ invalidFunction.js:2:2 lint/suspicious/noRedundantUseStrict  FIXABLE  ━━━�
   
   i Safe fix: Remove the redundant use strict directive.
   
-    2 │ → "use·strict";
-      │   -------------
+    1 1 │   function test() {
+    2   │ - → "use·strict";
+    3   │ - → "use·strict";
+      2 │ + → 
+      3 │ + → "use·strict";
+    4 4 │   }
+    5 5 │   
+  
 
 ```
 
@@ -48,7 +54,12 @@ invalidFunction.js:3:2 lint/suspicious/noRedundantUseStrict  FIXABLE  ━━━�
   
   i Safe fix: Remove the redundant use strict directive.
   
-    3 │ → "use·strict";
-      │   -------------
+    1 1 │   function test() {
+    2 2 │   	"use strict";
+    3   │ - → "use·strict";
+      3 │ + → 
+    4 4 │   }
+    5 5 │   
+  
 
 ```

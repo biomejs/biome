@@ -25,6 +25,16 @@ Use this skill when creating diagnostics - the error messages, warnings, and hin
 - Actionable: Always suggest how to fix
 - Show don't tell: Prefer code frames over textual explanations
 
+**CRITICAL: No Emojis in Diagnostics**
+
+Emojis are BANNED in all diagnostic messages, advice text, and error output:
+- NO emojis in diagnostic messages
+- NO emojis in advice notes
+- NO emojis in code frame annotations
+- NO emojis in log messages
+
+Keep all user-facing text professional and emoji-free.
+
 ## Common Workflows
 
 ### Create a Diagnostic Type
@@ -240,25 +250,25 @@ Available tags:
 
 **Good messages:**
 ```rust
-// ✅ Specific and actionable
+// Good: Specific and actionable
 "Use 'let' or 'const' instead of 'var'"
 
-// ✅ Explains why
+// Good: Explains why
 "This variable is never reassigned, consider using 'const'"
 
-// ✅ Shows what to do
+// Good: Shows what to do
 "Remove the unused import statement"
 ```
 
 **Bad messages:**
 ```rust
-// ❌ Too vague
+// Bad: Too vague
 "Invalid syntax"
 
-// ❌ Just states the obvious
+// Bad: Just states the obvious
 "Variable declared with 'var'"
 
-// ❌ No guidance
+// Bad: No guidance
 "This code has a problem"
 ```
 
@@ -266,14 +276,14 @@ Available tags:
 
 **Show, don't tell:**
 ```rust
-// ✅ Good - shows code frame
+// Good: Good - shows code frame
 CodeFrameAdvice {
     location: node.range(),
     source_code: source,
     annotation: markup! { "This expression is always truthy" }
 }
 
-// ❌ Less helpful - just text
+// Bad: Less helpful - just text
 LogAdvice {
     message: markup! { "The expression at line 5 is always truthy" }
 }
@@ -281,13 +291,13 @@ LogAdvice {
 
 **Provide actionable fixes:**
 ```rust
-// ✅ Good - shows exact change
+// Good: Good - shows exact change
 DiffAdvice {
     old: "var x = 1;",
     new: "const x = 1;",
 }
 
-// ❌ Less helpful - describes change
+// Bad: Less helpful - describes change
 LogAdvice {
     message: markup! { "Change 'var' to 'const'" }
 }
