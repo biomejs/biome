@@ -183,6 +183,15 @@ MdQuoteIndentList = MdQuoteIndent*
 MdIndentToken = 'md_indent_char'
 MdIndentTokenList = MdIndentToken*
 
+// Individual thematic break character (*, -, or _).
+MdThematicBreakChar = value: ('*' | '-' | '_')
+
+// A thematic break component: either a break character or inter-marker whitespace.
+AnyMdThematicBreakPart = MdThematicBreakChar | MdIndentToken
+
+// List of thematic break parts.
+MdThematicBreakPartList = AnyMdThematicBreakPart*
+
 MdBulletListItem = MdBulletList
 MdOrderedListItem = MdBulletList
 
@@ -330,7 +339,7 @@ MdEntityReference = value: 'md_entity_literal'
 // ---
 // ___
 // https://spec.commonmark.org/0.31.2/#container-blocks-and-leaf-blocks
-MdThematicBreakBlock = value: 'md_thematic_break_literal'
+MdThematicBreakBlock = parts: MdThematicBreakPartList
 
 // Explicit newline node for inter-block newlines.
 // This preserves NEWLINEs in the CST without creating "newline-only paragraphs".

@@ -183,7 +183,17 @@ MdDocument {
             hard_line: missing (optional),
         },
         MdThematicBreakBlock {
-            value_token: MD_THEMATIC_BREAK_LITERAL@151..154 "***" [] [],
+            parts: MdThematicBreakPartList [
+                MdThematicBreakChar {
+                    value: STAR@151..152 "*" [] [],
+                },
+                MdThematicBreakChar {
+                    value: STAR@152..153 "*" [] [],
+                },
+                MdThematicBreakChar {
+                    value: STAR@153..154 "*" [] [],
+                },
+            ],
         },
         MdNewline {
             value_token: NEWLINE@154..155 "\n" [] [],
@@ -297,7 +307,13 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@150..151 "\n" [] []
       1: (empty)
     15: MD_THEMATIC_BREAK_BLOCK@151..154
-      0: MD_THEMATIC_BREAK_LITERAL@151..154 "***" [] []
+      0: MD_THEMATIC_BREAK_PART_LIST@151..154
+        0: MD_THEMATIC_BREAK_CHAR@151..152
+          0: STAR@151..152 "*" [] []
+        1: MD_THEMATIC_BREAK_CHAR@152..153
+          0: STAR@152..153 "*" [] []
+        2: MD_THEMATIC_BREAK_CHAR@153..154
+          0: STAR@153..154 "*" [] []
     16: MD_NEWLINE@154..155
       0: NEWLINE@154..155 "\n" [] []
   2: EOF@155..155 "" [] []

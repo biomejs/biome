@@ -238,6 +238,27 @@ impl<'source> MarkdownParser<'source> {
         self.source.bump_link_definition();
     }
 
+    /// Force re-lex the current token in ThematicBreakParts context.
+    /// Decomposes MD_THEMATIC_BREAK_LITERAL into individual marker/space tokens.
+    /// Must NOT be called inside lookahead.
+    pub(crate) fn force_relex_thematic_break_parts(&mut self) {
+        self.source
+            .force_relex_in_context(MarkdownLexContext::ThematicBreakParts);
+    }
+
+    /// Bump the current token and lex the next in ThematicBreakParts context,
+    /// ensuring sustained parts-mode tokenization across the loop.
+    ///
+    /// Unlike `source.bump_thematic_break_parts()` (which only advances the lexer),
+    /// this method also registers the token with the tree builder via `push_token`,
+    /// so the token appears in the CST.
+    pub(crate) fn bump_thematic_break_parts(&mut self) {
+        let kind = self.cur();
+        let end = self.cur_range().end();
+        self.context_mut().push_token(kind, end);
+        self.source.bump_thematic_break_parts();
+    }
+
     pub fn checkpoint(&self) -> MarkdownParserCheckpoint {
         MarkdownParserCheckpoint {
             context: self.context.checkpoint(),

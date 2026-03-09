@@ -1442,6 +1442,94 @@ impl IntoFormat<MdFormatContext> for biome_markdown_syntax::MdThematicBreakBlock
         )
     }
 }
+impl FormatRule<biome_markdown_syntax::MdThematicBreakChar>
+    for crate::markdown::auxiliary::thematic_break_char::FormatMdThematicBreakChar
+{
+    type Context = MdFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_markdown_syntax::MdThematicBreakChar,
+        f: &mut MarkdownFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_markdown_syntax::MdThematicBreakChar>::fmt(self, node, f)
+    }
+}
+impl AsFormat<MdFormatContext> for biome_markdown_syntax::MdThematicBreakChar {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_markdown_syntax::MdThematicBreakChar,
+        crate::markdown::auxiliary::thematic_break_char::FormatMdThematicBreakChar,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::markdown::auxiliary::thematic_break_char::FormatMdThematicBreakChar::default(),
+        )
+    }
+}
+impl IntoFormat<MdFormatContext> for biome_markdown_syntax::MdThematicBreakChar {
+    type Format = FormatOwnedWithRule<
+        biome_markdown_syntax::MdThematicBreakChar,
+        crate::markdown::auxiliary::thematic_break_char::FormatMdThematicBreakChar,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::markdown::auxiliary::thematic_break_char::FormatMdThematicBreakChar::default(),
+        )
+    }
+}
+impl AsFormat<MdFormatContext> for biome_markdown_syntax::MdThematicBreakPartList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_markdown_syntax::MdThematicBreakPartList,
+        crate::markdown::lists::thematic_break_part_list::FormatMdThematicBreakPartList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::markdown::lists::thematic_break_part_list::FormatMdThematicBreakPartList::default(),
+        )
+    }
+}
+impl IntoFormat<MdFormatContext> for biome_markdown_syntax::MdThematicBreakPartList {
+    type Format = FormatOwnedWithRule<
+        biome_markdown_syntax::MdThematicBreakPartList,
+        crate::markdown::lists::thematic_break_part_list::FormatMdThematicBreakPartList,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::markdown::lists::thematic_break_part_list::FormatMdThematicBreakPartList::default(),
+        )
+    }
+}
+impl AsFormat<MdFormatContext> for biome_markdown_syntax::AnyMdThematicBreakPart {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_markdown_syntax::AnyMdThematicBreakPart,
+        crate::markdown::any::thematic_break_part::FormatAnyMdThematicBreakPart,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::markdown::any::thematic_break_part::FormatAnyMdThematicBreakPart::default(),
+        )
+    }
+}
+impl IntoFormat<MdFormatContext> for biome_markdown_syntax::AnyMdThematicBreakPart {
+    type Format = FormatOwnedWithRule<
+        biome_markdown_syntax::AnyMdThematicBreakPart,
+        crate::markdown::any::thematic_break_part::FormatAnyMdThematicBreakPart,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::markdown::any::thematic_break_part::FormatAnyMdThematicBreakPart::default(),
+        )
+    }
+}
 impl AsFormat<MdFormatContext> for biome_markdown_syntax::MdBlockList {
     type Format<'a> = FormatRefWithRule<
         'a,
