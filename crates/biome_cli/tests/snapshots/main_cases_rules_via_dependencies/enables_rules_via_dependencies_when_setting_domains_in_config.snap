@@ -131,7 +131,7 @@ test.jsx:6:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━�
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency local to the list.
   
     8 │ ····},·[local]);
       │         +++++   
