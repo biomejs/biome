@@ -89,6 +89,16 @@ pub(crate) fn parse_scss_expression_in_args_until(
     parse_scss_expression_with_options(p, ScssExpressionOptions::args(end_ts))
 }
 
+/// Parses a SCSS variable value, allowing `!important` to remain in the value
+/// while still stopping before trailing variable modifiers like `!default`.
+#[inline]
+pub(crate) fn parse_scss_expression_in_variable_value_until(
+    p: &mut CssParser,
+    end_ts: TokenSet<CssSyntaxKind>,
+) -> ParsedSyntax {
+    parse_scss_expression_with_options(p, ScssExpressionOptions::variable_value(end_ts))
+}
+
 #[inline]
 pub(super) fn parse_scss_inner_expression_until(
     p: &mut CssParser,
@@ -249,6 +259,7 @@ fn parse_scss_keyword_argument(p: &mut CssParser, options: ScssExpressionOptions
             allows_empty_value: false,
             allows_keyword_arguments: false,
             allows_ellipsis: false,
+            stops_before_variable_modifiers: false,
         },
     )
     .or_add_diagnostic(p, expected_component_value);

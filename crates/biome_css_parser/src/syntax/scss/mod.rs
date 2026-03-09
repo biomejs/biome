@@ -7,13 +7,13 @@ mod token_sets;
 mod value;
 
 pub(crate) use declaration::{
-    is_at_scss_declaration, is_at_scss_nesting_declaration, parse_scss_declaration,
-    parse_scss_nesting_declaration,
+    is_at_scss_declaration, is_at_scss_nesting_declaration, is_at_scss_variable_modifier_start,
+    parse_scss_declaration, parse_scss_nesting_declaration,
 };
 pub(crate) use expression::{
     SCSS_UNARY_OPERATOR_TOKEN_SET, parse_scss_expression,
     parse_scss_expression_allow_empty_value_until, parse_scss_expression_in_args_until,
-    parse_scss_expression_until,
+    parse_scss_expression_in_variable_value_until, parse_scss_expression_until,
 };
 pub(crate) use function_name::parse_scss_function_name;
 pub(crate) use identifiers::{

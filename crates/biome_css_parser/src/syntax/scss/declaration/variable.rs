@@ -1,15 +1,18 @@
 use super::super::{
-    is_at_scss_identifier, is_at_scss_namespaced_identifier, parse_scss_identifier,
+    is_at_scss_identifier, is_at_scss_namespaced_identifier,
+    parse_scss_expression_in_variable_value_until, parse_scss_identifier,
     parse_scss_namespaced_identifier,
 };
 use super::variable_modifier::parse_scss_variable_modifiers;
 use crate::parser::CssParser;
-use crate::syntax::scss::{expected_scss_expression, parse_scss_expression_until};
+use crate::syntax::scss::expected_scss_expression;
 use biome_css_syntax::CssSyntaxKind::{EOF, SCSS_DECLARATION};
-use biome_css_syntax::T;
+use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::{Parser, token_set};
+use biome_parser::{Parser, TokenSet, token_set};
+
+const SCSS_VARIABLE_VALUE_END_SET: TokenSet<CssSyntaxKind> = token_set![T![;], T!['}']];
 
 /// Detects a SCSS variable declaration (including module-qualified variables).
 ///
@@ -50,7 +53,7 @@ pub(crate) fn parse_scss_declaration(p: &mut CssParser) -> ParsedSyntax {
     parse_scss_declaration_name(p).ok();
     p.bump(T![:]);
 
-    parse_scss_expression_until(p, token_set![T![!], T![;], T!['}']])
+    parse_scss_expression_in_variable_value_until(p, SCSS_VARIABLE_VALUE_END_SET)
         .or_add_diagnostic(p, expected_scss_expression);
     parse_scss_variable_modifiers(p);
 

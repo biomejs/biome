@@ -109,6 +109,7 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssIfBranch" => lang::CssIfBranch::KIND_SET.iter().next(),
         "CssIfFunction" => lang::CssIfFunction::KIND_SET.iter().next(),
         "CssIfMediaTest" => lang::CssIfMediaTest::KIND_SET.iter().next(),
+        "CssIfSassTest" => lang::CssIfSassTest::KIND_SET.iter().next(),
         "CssIfStyleTest" => lang::CssIfStyleTest::KIND_SET.iter().next(),
         "CssIfSupportsIdentifierTest" => lang::CssIfSupportsIdentifierTest::KIND_SET.iter().next(),
         "CssIfSupportsTest" => lang::CssIfSupportsTest::KIND_SET.iter().next(),

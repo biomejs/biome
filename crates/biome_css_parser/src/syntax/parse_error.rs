@@ -255,7 +255,6 @@ pub(crate) fn scss_only_syntax_error(
         ),
         range,
     )
-        .with_hint(markup! { "SCSS only syntax" })
 }
 
 pub(crate) fn inconsistent_scss_bracketed_list_separators(

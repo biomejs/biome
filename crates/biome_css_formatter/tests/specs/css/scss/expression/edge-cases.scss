@@ -24,3 +24,11 @@ $paren-expr:(1+2*3 );
 2,
   3  4 );
 }
+
+.c{
+  inline-size:if(
+    sass(
+$size > 10px
+    ):12px;
+else: 10px;);
+}

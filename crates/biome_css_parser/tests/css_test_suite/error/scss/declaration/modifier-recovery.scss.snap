@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
 
@@ -12,9 +11,6 @@ $color: red foo !global;
 
 // Unexpected token between modifiers should not stop parsing later modifiers
 $gap: 1 !default bar !global;
-
-// !important should report the generic invalid modifier diagnostic and allow later modifiers
-$size: 2 !important !global;
 
 ```
 
@@ -87,50 +83,17 @@ CssRoot {
                 SEMICOLON@209..210 ";" [] [],
             ],
         },
-        CssBogus {
-            items: [
-                ScssIdentifier {
-                    dollar_token: DOLLAR@210..307 "$" [Newline("\n"), Newline("\n"), Comments("// !important should  ..."), Newline("\n")] [],
-                    name: CssIdentifier {
-                        value_token: IDENT@307..311 "size" [] [],
-                    },
-                },
-                COLON@311..313 ":" [] [Whitespace(" ")],
-                ScssExpression {
-                    items: ScssExpressionItemList [
-                        CssNumber {
-                            value_token: CSS_NUMBER_LITERAL@313..315 "2" [] [Whitespace(" ")],
-                        },
-                    ],
-                },
-                CssBogus {
-                    items: [
-                        CssBogus {
-                            items: [
-                                BANG@315..316 "!" [] [],
-                                IMPORTANT_KW@316..326 "important" [] [Whitespace(" ")],
-                            ],
-                        },
-                        ScssVariableModifier {
-                            excl_token: BANG@326..327 "!" [] [],
-                            value: GLOBAL_KW@327..333 "global" [] [],
-                        },
-                    ],
-                },
-                SEMICOLON@333..334 ";" [] [],
-            ],
-        },
     ],
-    eof_token: EOF@334..335 "" [Newline("\n")] [],
+    eof_token: EOF@210..211 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..335
+0: CSS_ROOT@0..211
   0: (empty)
-  1: CSS_ROOT_ITEM_LIST@0..334
+  1: CSS_ROOT_ITEM_LIST@0..210
     0: SCSS_DECLARATION@0..101
       0: SCSS_IDENTIFIER@0..83
         0: DOLLAR@0..78 "$" [Comments("// Unexpected token b ..."), Newline("\n")] []
@@ -168,25 +131,7 @@ CssRoot {
           0: BANG@202..203 "!" [] []
           1: GLOBAL_KW@203..209 "global" [] []
       4: SEMICOLON@209..210 ";" [] []
-    2: CSS_BOGUS@210..334
-      0: SCSS_IDENTIFIER@210..311
-        0: DOLLAR@210..307 "$" [Newline("\n"), Newline("\n"), Comments("// !important should  ..."), Newline("\n")] []
-        1: CSS_IDENTIFIER@307..311
-          0: IDENT@307..311 "size" [] []
-      1: COLON@311..313 ":" [] [Whitespace(" ")]
-      2: SCSS_EXPRESSION@313..315
-        0: SCSS_EXPRESSION_ITEM_LIST@313..315
-          0: CSS_NUMBER@313..315
-            0: CSS_NUMBER_LITERAL@313..315 "2" [] [Whitespace(" ")]
-      3: CSS_BOGUS@315..333
-        0: CSS_BOGUS@315..326
-          0: BANG@315..316 "!" [] []
-          1: IMPORTANT_KW@316..326 "important" [] [Whitespace(" ")]
-        1: SCSS_VARIABLE_MODIFIER@326..333
-          0: BANG@326..327 "!" [] []
-          1: GLOBAL_KW@327..333 "global" [] []
-      4: SEMICOLON@333..334 ";" [] []
-  2: EOF@334..335 "" [Newline("\n")] []
+  2: EOF@210..211 "" [Newline("\n")] []
 
 ```
 
@@ -201,19 +146,7 @@ modifier-recovery.scss:5:18 parse ━━━━━━━━━━━━━━━�
   > 5 │ $gap: 1 !default bar !global;
       │                  ^^^
     6 │ 
-    7 │ // !important should report the generic invalid modifier diagnostic and allow later modifiers
   
   i Expected a variable modifier or the end of the declaration.
-  
-modifier-recovery.scss:8:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected 'default', or 'global' but instead found `important`
-  
-    7 │ // !important should report the generic invalid modifier diagnostic and allow later modifiers
-  > 8 │ $size: 2 !important !global;
-      │          ^^^^^^^^^^
-    9 │ 
-  
-  i Remove !important
   
 ```

@@ -6,9 +6,12 @@ mod primary;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::{Parser, TokenSet, token_set};
 
+use super::is_at_scss_variable_modifier_start;
+
 pub(crate) use list::{
     parse_scss_expression, parse_scss_expression_allow_empty_value_until,
-    parse_scss_expression_in_args_until, parse_scss_expression_until,
+    parse_scss_expression_in_args_until, parse_scss_expression_in_variable_value_until,
+    parse_scss_expression_until,
 };
 pub(crate) use precedence::SCSS_UNARY_OPERATOR_TOKEN_SET;
 
@@ -23,6 +26,7 @@ pub(super) struct ScssExpressionOptions {
     allows_empty_value: bool,
     allows_keyword_arguments: bool,
     allows_ellipsis: bool,
+    stops_before_variable_modifiers: bool,
 }
 
 impl ScssExpressionOptions {
@@ -32,6 +36,7 @@ impl ScssExpressionOptions {
             allows_empty_value: false,
             allows_keyword_arguments: false,
             allows_ellipsis: false,
+            stops_before_variable_modifiers: false,
         }
     }
 
@@ -41,6 +46,7 @@ impl ScssExpressionOptions {
             allows_empty_value: true,
             allows_keyword_arguments: false,
             allows_ellipsis: false,
+            stops_before_variable_modifiers: false,
         }
     }
 
@@ -50,6 +56,17 @@ impl ScssExpressionOptions {
             allows_empty_value: false,
             allows_keyword_arguments: true,
             allows_ellipsis: true,
+            stops_before_variable_modifiers: false,
+        }
+    }
+
+    pub(super) fn variable_value(end_ts: TokenSet<CssSyntaxKind>) -> Self {
+        Self {
+            end_ts,
+            allows_empty_value: false,
+            allows_keyword_arguments: false,
+            allows_ellipsis: false,
+            stops_before_variable_modifiers: true,
         }
     }
 
@@ -71,5 +88,7 @@ pub(super) fn is_at_scss_expression_end(
     p: &mut crate::parser::CssParser,
     options: ScssExpressionOptions,
 ) -> bool {
-    p.at_ts(options.end_ts) || p.at(T![')'])
+    p.at_ts(options.end_ts)
+        || p.at(T![')'])
+        || (options.stops_before_variable_modifiers && is_at_scss_variable_modifier_start(p))
 }

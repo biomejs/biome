@@ -1133,6 +1133,22 @@ pub fn css_if_media_test(
         ],
     ))
 }
+pub fn css_if_sass_test(
+    sass_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    test: ScssExpression,
+    r_paren_token: SyntaxToken,
+) -> CssIfSassTest {
+    CssIfSassTest::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_IF_SASS_TEST,
+        [
+            Some(SyntaxElement::Token(sass_token)),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(test.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
 pub fn css_if_style_test(
     style_token: SyntaxToken,
     l_paren_token: SyntaxToken,
