@@ -50,15 +50,15 @@ CssRoot {
 content.scss:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `;` but instead the file ends
-
+  
     1 │ @content
-  > 2 │
-      │
-
+  > 2 │ 
+      │ 
+  
   i the file ends here
-
+  
     1 │ @content
-  > 2 │
-      │
-
+  > 2 │ 
+      │ 
+  
 ```
