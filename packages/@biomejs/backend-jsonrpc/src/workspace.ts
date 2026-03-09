@@ -2395,6 +2395,11 @@ See https://biomejs.dev/linter/rules/use-global-this
 	 */
 	useGlobalThis?: UseGlobalThisConfiguration;
 	/**
+	* Enforce the use of includes() over indexOf().
+See https://biomejs.dev/linter/rules/use-includes 
+	 */
+	useIncludes?: UseIncludesConfiguration;
+	/**
 	* Enforce id attribute on next/script components with inline content or dangerouslySetInnerHTML.
 See https://biomejs.dev/linter/rules/use-inline-script-id 
 	 */
@@ -4280,6 +4285,9 @@ export type UseFindConfiguration =
 export type UseGlobalThisConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseGlobalThisOptions;
+export type UseIncludesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseIncludesOptions;
 export type UseInlineScriptIdConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseInlineScriptIdOptions;
@@ -5995,6 +6003,11 @@ export interface RuleWithUseGlobalThisOptions {
 	level: RulePlainConfiguration;
 	options?: UseGlobalThisOptions;
 }
+export interface RuleWithUseIncludesOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseIncludesOptions;
+}
 export interface RuleWithUseInlineScriptIdOptions {
 	level: RulePlainConfiguration;
 	options?: UseInlineScriptIdOptions;
@@ -7461,6 +7474,7 @@ export type UseExpectOptions = {};
 export type UseExplicitTypeOptions = {};
 export type UseFindOptions = {};
 export type UseGlobalThisOptions = {};
+export type UseIncludesOptions = {};
 export type UseInlineScriptIdOptions = {};
 export interface UseInputNameOptions {
 	/**
@@ -8452,6 +8466,7 @@ export type Category =
 	| "lint/nursery/useFind"
 	| "lint/nursery/useGlobalThis"
 	| "lint/nursery/useImportRestrictions"
+	| "lint/nursery/useIncludes"
 	| "lint/nursery/useInlineScriptId"
 	| "lint/nursery/useInputName"
 	| "lint/nursery/useJsxCurlyBraceConvention"

@@ -252,6 +252,7 @@ define_categories! {
     "lint/nursery/useFind": "https://biomejs.dev/linter/rules/use-find",
     "lint/nursery/useGlobalThis": "https://biomejs.dev/linter/rules/use-global-this",
     "lint/nursery/useImportRestrictions": "https://biomejs.dev/linter/rules/use-import-restrictions",
+    "lint/nursery/useIncludes": "https://biomejs.dev/linter/rules/use-includes",
     "lint/nursery/useInlineScriptId": "https://biomejs.dev/linter/rules/use-inline-script-id",
     "lint/nursery/useInputName": "https://biomejs.dev/linter/rules/use-input-name",
     "lint/nursery/useJsxCurlyBraceConvention": "https://biomejs.dev/linter/rules/use-jsx-curly-brace-convention",

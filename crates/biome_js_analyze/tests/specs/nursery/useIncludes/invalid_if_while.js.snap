@@ -1,0 +1,256 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_if_while.js
+---
+# Input
+```js
+// should generate diagnostics
+
+// in if/while
+if ("foo".indexOf("o") !== -1) {}
+while (["a", "b", "c"].indexOf("a") === -1) {}
+if (("foo".indexOf("o")) !== -1) {}
+
+// With parentheses
+("hello".indexOf("e")) !== -1;
+
+// Basic regex patterns
+/a/.test("abc");
+
+// Unicode characters in regex
+/á/.test("café");
+/😀/.test("hello 😀");
+/中/.test("中文");
+
+// Whitespace in regex
+/ /.test("hello world");
+
+```
+
+# Diagnostics
+```
+invalid_if_while.js:4:5 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
+  
+    3 │ // in if/while
+  > 4 │ if ("foo".indexOf("o") !== -1) {}
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ while (["a", "b", "c"].indexOf("a") === -1) {}
+    6 │ if (("foo".indexOf("o")) !== -1) {}
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 'includes()'
+  
+     2  2 │   
+     3  3 │   // in if/while
+     4    │ - if·("foo".indexOf("o")·!==·-1)·{}
+        4 │ + if·("foo".includes("o"))·{}
+     5  5 │   while (["a", "b", "c"].indexOf("a") === -1) {}
+     6  6 │   if (("foo".indexOf("o")) !== -1) {}
+  
+
+```
+
+```
+invalid_if_while.js:5:8 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
+  
+    3 │ // in if/while
+    4 │ if ("foo".indexOf("o") !== -1) {}
+  > 5 │ while (["a", "b", "c"].indexOf("a") === -1) {}
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ if (("foo".indexOf("o")) !== -1) {}
+    7 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 'includes()'
+  
+     3  3 │   // in if/while
+     4  4 │   if ("foo".indexOf("o") !== -1) {}
+     5    │ - while·(["a",·"b",·"c"].indexOf("a")·===·-1)·{}
+        5 │ + while·(!["a",·"b",·"c"].includes("a"))·{}
+     6  6 │   if (("foo".indexOf("o")) !== -1) {}
+     7  7 │   
+  
+
+```
+
+```
+invalid_if_while.js:6:5 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
+  
+    4 │ if ("foo".indexOf("o") !== -1) {}
+    5 │ while (["a", "b", "c"].indexOf("a") === -1) {}
+  > 6 │ if (("foo".indexOf("o")) !== -1) {}
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ // With parentheses
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 'includes()'
+  
+     4  4 │   if ("foo".indexOf("o") !== -1) {}
+     5  5 │   while (["a", "b", "c"].indexOf("a") === -1) {}
+     6    │ - if·(("foo".indexOf("o"))·!==·-1)·{}
+        6 │ + if·("foo".includes("o"))·{}
+     7  7 │   
+     8  8 │   // With parentheses
+  
+
+```
+
+```
+invalid_if_while.js:9:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
+  
+     8 │ // With parentheses
+   > 9 │ ("hello".indexOf("e")) !== -1;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+    11 │ // Basic regex patterns
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 'includes()'
+  
+     7  7 │   
+     8  8 │   // With parentheses
+     9    │ - ("hello".indexOf("e"))·!==·-1;
+        9 │ + "hello".includes("e");
+    10 10 │   
+    11 11 │   // Basic regex patterns
+  
+
+```
+
+```
+invalid_if_while.js:12:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use String.prototype.includes() instead of RegExp.prototype.test() for simple searches as it is more readable and concise.
+  
+    11 │ // Basic regex patterns
+  > 12 │ /a/.test("abc");
+       │ ^^^^^^^^^^^^^^^
+    13 │ 
+    14 │ // Unicode characters in regex
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 'includes()'
+  
+    10 10 │   
+    11 11 │   // Basic regex patterns
+    12    │ - /a/.test("abc");
+       12 │ + "abc".includes("a");
+    13 13 │   
+    14 14 │   // Unicode characters in regex
+  
+
+```
+
+```
+invalid_if_while.js:15:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use String.prototype.includes() instead of RegExp.prototype.test() for simple searches as it is more readable and concise.
+  
+    14 │ // Unicode characters in regex
+  > 15 │ /á/.test("café");
+       │ ^^^^^^^^^^^^^^^^
+    16 │ /😀/.test("hello 😀");
+    17 │ /中/.test("中文");
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 'includes()'
+  
+    13 13 │   
+    14 14 │   // Unicode characters in regex
+    15    │ - /á/.test("café");
+       15 │ + "café".includes("á");
+    16 16 │   /😀/.test("hello 😀");
+    17 17 │   /中/.test("中文");
+  
+
+```
+
+```
+invalid_if_while.js:16:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use String.prototype.includes() instead of RegExp.prototype.test() for simple searches as it is more readable and concise.
+  
+    14 │ // Unicode characters in regex
+    15 │ /á/.test("café");
+  > 16 │ /😀/.test("hello 😀");
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    17 │ /中/.test("中文");
+    18 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 'includes()'
+  
+    14 14 │   // Unicode characters in regex
+    15 15 │   /á/.test("café");
+    16    │ - /😀/.test("hello·😀");
+       16 │ + "hello·😀".includes("😀");
+    17 17 │   /中/.test("中文");
+    18 18 │   
+  
+
+```
+
+```
+invalid_if_while.js:17:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use String.prototype.includes() instead of RegExp.prototype.test() for simple searches as it is more readable and concise.
+  
+    15 │ /á/.test("café");
+    16 │ /😀/.test("hello 😀");
+  > 17 │ /中/.test("中文");
+       │ ^^^^^^^^^^^^^^^^^
+    18 │ 
+    19 │ // Whitespace in regex
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 'includes()'
+  
+    15 15 │   /á/.test("café");
+    16 16 │   /😀/.test("hello 😀");
+    17    │ - /中/.test("中文");
+       17 │ + "中文".includes("中");
+    18 18 │   
+    19 19 │   // Whitespace in regex
+  
+
+```
+
+```
+invalid_if_while.js:20:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use String.prototype.includes() instead of RegExp.prototype.test() for simple searches as it is more readable and concise.
+  
+    19 │ // Whitespace in regex
+  > 20 │ / /.test("hello world");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 'includes()'
+  
+    18 18 │   
+    19 19 │   // Whitespace in regex
+    20    │ - /·/.test("hello·world");
+       20 │ + "hello·world".includes("·");
+    21 21 │   
+  
+
+```

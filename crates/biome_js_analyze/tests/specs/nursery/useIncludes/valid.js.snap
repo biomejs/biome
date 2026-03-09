@@ -1,0 +1,33 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+
+// Using includes directly (already correct)
+"foo".includes("o");
+!["a", "b", "c"].includes("a");
+"abc".includes("a");
+arr.includes(item);
+
+// indexOf with different comparison (not checking for inclusion)
+"foo".indexOf("o") > 0;  // checking position
+"foo".indexOf("o") === 1; // checking exact position
+"foo".indexOf("o") > 2;
+
+// Regex with flags (not simple)
+/a/i.test("abc");
+/a/g.test("abc");
+/a/m.test("abc");
+/a/ig.test("abc");
+
+// Complex regex patterns (not simple)
+/[ab]/.test("abc");
+/a|b/.test("abc");
+/a+/.test("abc");
+/a*/.test("abc");
+
+
+```

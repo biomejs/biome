@@ -1,0 +1,199 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_and_comments.js
+---
+# Input
+```js
+// should generate diagnostics
+
+// indexOf with comments
+"foo".indexOf("o") /* comment 0*/ !== -1;
+/* comment1 */ "foo".indexOf("o") !== -1;
+"foo"/* comment2 */.indexOf("o") !== -1;
+("foo".indexOf("o")) /* comment 3*/ !== -1;
+
+// Regex with comments
+/* comment */ /a/.test("abc");
+/a/.test("abc") /* comment */;
+/a//* comment */.test("abc");
+
+```
+
+# Diagnostics
+```
+invalid_and_comments.js:4:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
+  
+    3 │ // indexOf with comments
+  > 4 │ "foo".indexOf("o") /* comment 0*/ !== -1;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ /* comment1 */ "foo".indexOf("o") !== -1;
+    6 │ "foo"/* comment2 */.indexOf("o") !== -1;
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 'includes()'
+  
+     2  2 │   
+     3  3 │   // indexOf with comments
+     4    │ - "foo".indexOf("o")·/*·comment·0*/·!==·-1;
+        4 │ + "foo".includes("o");
+     5  5 │   /* comment1 */ "foo".indexOf("o") !== -1;
+     6  6 │   "foo"/* comment2 */.indexOf("o") !== -1;
+  
+
+```
+
+```
+invalid_and_comments.js:5:16 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
+  
+    3 │ // indexOf with comments
+    4 │ "foo".indexOf("o") /* comment 0*/ !== -1;
+  > 5 │ /* comment1 */ "foo".indexOf("o") !== -1;
+      │                ^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ "foo"/* comment2 */.indexOf("o") !== -1;
+    7 │ ("foo".indexOf("o")) /* comment 3*/ !== -1;
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 'includes()'
+  
+     3  3 │   // indexOf with comments
+     4  4 │   "foo".indexOf("o") /* comment 0*/ !== -1;
+     5    │ - /*·comment1·*/·"foo".indexOf("o")·!==·-1;
+        5 │ + /*·comment1·*/·"foo".includes("o");
+     6  6 │   "foo"/* comment2 */.indexOf("o") !== -1;
+     7  7 │   ("foo".indexOf("o")) /* comment 3*/ !== -1;
+  
+
+```
+
+```
+invalid_and_comments.js:6:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
+  
+    4 │ "foo".indexOf("o") /* comment 0*/ !== -1;
+    5 │ /* comment1 */ "foo".indexOf("o") !== -1;
+  > 6 │ "foo"/* comment2 */.indexOf("o") !== -1;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ ("foo".indexOf("o")) /* comment 3*/ !== -1;
+    8 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 'includes()'
+  
+     4  4 │   "foo".indexOf("o") /* comment 0*/ !== -1;
+     5  5 │   /* comment1 */ "foo".indexOf("o") !== -1;
+     6    │ - "foo"/*·comment2·*/.indexOf("o")·!==·-1;
+        6 │ + "foo"/*·comment2·*/.includes("o");
+     7  7 │   ("foo".indexOf("o")) /* comment 3*/ !== -1;
+     8  8 │   
+  
+
+```
+
+```
+invalid_and_comments.js:7:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
+  
+    5 │ /* comment1 */ "foo".indexOf("o") !== -1;
+    6 │ "foo"/* comment2 */.indexOf("o") !== -1;
+  > 7 │ ("foo".indexOf("o")) /* comment 3*/ !== -1;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ // Regex with comments
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 'includes()'
+  
+     5  5 │   /* comment1 */ "foo".indexOf("o") !== -1;
+     6  6 │   "foo"/* comment2 */.indexOf("o") !== -1;
+     7    │ - ("foo".indexOf("o"))·/*·comment·3*/·!==·-1;
+        7 │ + "foo".includes("o");
+     8  8 │   
+     9  9 │   // Regex with comments
+  
+
+```
+
+```
+invalid_and_comments.js:10:15 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use String.prototype.includes() instead of RegExp.prototype.test() for simple searches as it is more readable and concise.
+  
+     9 │ // Regex with comments
+  > 10 │ /* comment */ /a/.test("abc");
+       │               ^^^^^^^^^^^^^^^
+    11 │ /a/.test("abc") /* comment */;
+    12 │ /a//* comment */.test("abc");
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 'includes()'
+  
+     8  8 │   
+     9  9 │   // Regex with comments
+    10    │ - /*·comment·*/·/a/.test("abc");
+       10 │ + /*·comment·*/·"abc".includes("a");
+    11 11 │   /a/.test("abc") /* comment */;
+    12 12 │   /a//* comment */.test("abc");
+  
+
+```
+
+```
+invalid_and_comments.js:11:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use String.prototype.includes() instead of RegExp.prototype.test() for simple searches as it is more readable and concise.
+  
+     9 │ // Regex with comments
+    10 │ /* comment */ /a/.test("abc");
+  > 11 │ /a/.test("abc") /* comment */;
+       │ ^^^^^^^^^^^^^^^
+    12 │ /a//* comment */.test("abc");
+    13 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 'includes()'
+  
+     9  9 │   // Regex with comments
+    10 10 │   /* comment */ /a/.test("abc");
+    11    │ - /a/.test("abc")·/*·comment·*/;
+       11 │ + "abc".includes("a")·/*·comment·*/;
+    12 12 │   /a//* comment */.test("abc");
+    13 13 │   
+  
+
+```
+
+```
+invalid_and_comments.js:12:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use String.prototype.includes() instead of RegExp.prototype.test() for simple searches as it is more readable and concise.
+  
+    10 │ /* comment */ /a/.test("abc");
+    11 │ /a/.test("abc") /* comment */;
+  > 12 │ /a//* comment */.test("abc");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 'includes()'
+  
+    10 10 │   /* comment */ /a/.test("abc");
+    11 11 │   /a/.test("abc") /* comment */;
+    12    │ - /a//*·comment·*/.test("abc");
+       12 │ + "abc".includes("a");
+    13 13 │   
+  
+
+```

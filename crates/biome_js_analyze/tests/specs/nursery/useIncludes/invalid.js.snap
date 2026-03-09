@@ -1,0 +1,230 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+// should generate diagnostics
+
+// Basic indexOf patterns - not equal to -1
+"foo".indexOf("o") !== -1;
+"foo".indexOf(bar) >= 0;
+
+// Basic indexOf patterns - equal to -1 (negated)
+["a", "b", "c"].indexOf("a") === -1;
+["a", "b", "c"].indexOf(bar) < 0;
+
+// Greater than or equal to 0
+"hello".indexOf("e") >= 0;
+
+// Less than 0 (negated)
+"hello".indexOf("x") < 0;
+
+// Not equal to -1
+"test".indexOf("t") != -1;
+
+// Equal to -1 (negated)
+"test".indexOf("x") == -1;
+
+```
+
+# Diagnostics
+```
+invalid.js:4:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
+  
+    3 │ // Basic indexOf patterns - not equal to -1
+  > 4 │ "foo".indexOf("o") !== -1;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ "foo".indexOf(bar) >= 0;
+    6 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 'includes()'
+  
+     2  2 │   
+     3  3 │   // Basic indexOf patterns - not equal to -1
+     4    │ - "foo".indexOf("o")·!==·-1;
+        4 │ + "foo".includes("o");
+     5  5 │   "foo".indexOf(bar) >= 0;
+     6  6 │   
+  
+
+```
+
+```
+invalid.js:5:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
+  
+    3 │ // Basic indexOf patterns - not equal to -1
+    4 │ "foo".indexOf("o") !== -1;
+  > 5 │ "foo".indexOf(bar) >= 0;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ // Basic indexOf patterns - equal to -1 (negated)
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 'includes()'
+  
+     3  3 │   // Basic indexOf patterns - not equal to -1
+     4  4 │   "foo".indexOf("o") !== -1;
+     5    │ - "foo".indexOf(bar)·>=·0;
+        5 │ + "foo".includes(bar);
+     6  6 │   
+     7  7 │   // Basic indexOf patterns - equal to -1 (negated)
+  
+
+```
+
+```
+invalid.js:8:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
+  
+     7 │ // Basic indexOf patterns - equal to -1 (negated)
+   > 8 │ ["a", "b", "c"].indexOf("a") === -1;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ ["a", "b", "c"].indexOf(bar) < 0;
+    10 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 'includes()'
+  
+     6  6 │   
+     7  7 │   // Basic indexOf patterns - equal to -1 (negated)
+     8    │ - ["a",·"b",·"c"].indexOf("a")·===·-1;
+        8 │ + !["a",·"b",·"c"].includes("a");
+     9  9 │   ["a", "b", "c"].indexOf(bar) < 0;
+    10 10 │   
+  
+
+```
+
+```
+invalid.js:9:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
+  
+     7 │ // Basic indexOf patterns - equal to -1 (negated)
+     8 │ ["a", "b", "c"].indexOf("a") === -1;
+   > 9 │ ["a", "b", "c"].indexOf(bar) < 0;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+    11 │ // Greater than or equal to 0
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 'includes()'
+  
+     7  7 │   // Basic indexOf patterns - equal to -1 (negated)
+     8  8 │   ["a", "b", "c"].indexOf("a") === -1;
+     9    │ - ["a",·"b",·"c"].indexOf(bar)·<·0;
+        9 │ + !["a",·"b",·"c"].includes(bar);
+    10 10 │   
+    11 11 │   // Greater than or equal to 0
+  
+
+```
+
+```
+invalid.js:12:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
+  
+    11 │ // Greater than or equal to 0
+  > 12 │ "hello".indexOf("e") >= 0;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 
+    14 │ // Less than 0 (negated)
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 'includes()'
+  
+    10 10 │   
+    11 11 │   // Greater than or equal to 0
+    12    │ - "hello".indexOf("e")·>=·0;
+       12 │ + "hello".includes("e");
+    13 13 │   
+    14 14 │   // Less than 0 (negated)
+  
+
+```
+
+```
+invalid.js:15:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
+  
+    14 │ // Less than 0 (negated)
+  > 15 │ "hello".indexOf("x") < 0;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 
+    17 │ // Not equal to -1
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 'includes()'
+  
+    13 13 │   
+    14 14 │   // Less than 0 (negated)
+    15    │ - "hello".indexOf("x")·<·0;
+       15 │ + !"hello".includes("x");
+    16 16 │   
+    17 17 │   // Not equal to -1
+  
+
+```
+
+```
+invalid.js:18:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
+  
+    17 │ // Not equal to -1
+  > 18 │ "test".indexOf("t") != -1;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ 
+    20 │ // Equal to -1 (negated)
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 'includes()'
+  
+    16 16 │   
+    17 17 │   // Not equal to -1
+    18    │ - "test".indexOf("t")·!=·-1;
+       18 │ + "test".includes("t");
+    19 19 │   
+    20 20 │   // Equal to -1 (negated)
+  
+
+```
+
+```
+invalid.js:21:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use includes() instead of indexOf() to check for inclusion, as it is more readable and concise.
+  
+    20 │ // Equal to -1 (negated)
+  > 21 │ "test".indexOf("x") == -1;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 'includes()'
+  
+    19 19 │   
+    20 20 │   // Equal to -1 (negated)
+    21    │ - "test".indexOf("x")·==·-1;
+       21 │ + !"test".includes("x");
+    22 22 │   
+  
+
+```
