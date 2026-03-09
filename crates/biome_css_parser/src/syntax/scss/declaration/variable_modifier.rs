@@ -31,6 +31,11 @@ pub(crate) fn parse_scss_variable_modifiers(p: &mut CssParser) {
     ScssVariableModifierList.parse_list(p);
 }
 
+#[inline]
+pub(crate) fn is_at_scss_variable_modifier_start(p: &mut CssParser) -> bool {
+    p.at(T![!]) && !p.nth_at(1, T![important])
+}
+
 /// Parses `!default` or `!global` after a variable value and emits a targeted
 /// error for any other `!` token to avoid silently accepting invalid modifiers.
 ///
@@ -42,7 +47,7 @@ pub(crate) fn parse_scss_variable_modifiers(p: &mut CssParser) {
 /// Docs: https://sass-lang.com/documentation/variables
 #[inline]
 fn parse_scss_variable_modifier(p: &mut CssParser) -> ParsedSyntax {
-    if !p.at(T![!]) {
+    if !is_at_scss_variable_modifier_start(p) {
         return Absent;
     }
 

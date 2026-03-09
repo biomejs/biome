@@ -75,12 +75,13 @@ fn is_at_css_if_function_in_context(p: &mut CssParser, context: ValueParsingCont
     }
 
     // CSS if() branches can only start with supported condition syntax:
-    // `style(...)`, `media(...)`, `supports(...)`, `not`, `else`, or a
+    // `style(...)`, `media(...)`, `supports(...)`, `sass(...)`, `not`, `else`, or a
     // parenthesized boolean expression. Anything else remains a regular
     // function call in SCSS-aware mode, such as Sass `if($cond, a, b)`.
     p.nth_at(2, T![style])
         || p.nth_at(2, T![media])
         || p.nth_at(2, T![supports])
+        || p.nth_at(2, T![sass])
         || p.nth_at(2, T![not])
         || p.nth_at(2, T![else])
         || p.nth_at(2, T!['('])

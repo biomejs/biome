@@ -3108,6 +3108,56 @@ pub struct CssIfMediaTestFields {
     pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssIfSassTest {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssIfSassTest {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssIfSassTestFields {
+        CssIfSassTestFields {
+            sass_token: self.sass_token(),
+            l_paren_token: self.l_paren_token(),
+            test: self.test(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn sass_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn test(&self) -> SyntaxResult<ScssExpression> {
+        support::required_node(&self.syntax, 2usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+impl Serialize for CssIfSassTest {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssIfSassTestFields {
+    pub sass_token: SyntaxResult<SyntaxToken>,
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub test: SyntaxResult<ScssExpression>,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssIfStyleTest {
     pub(crate) syntax: SyntaxNode,
 }
@@ -11750,6 +11800,7 @@ impl AnyCssIfSupportsTestCondition {
 pub enum AnyCssIfTest {
     CssBogusIfTest(CssBogusIfTest),
     CssIfMediaTest(CssIfMediaTest),
+    CssIfSassTest(CssIfSassTest),
     CssIfStyleTest(CssIfStyleTest),
     CssIfSupportsTest(CssIfSupportsTest),
 }
@@ -11763,6 +11814,12 @@ impl AnyCssIfTest {
     pub fn as_css_if_media_test(&self) -> Option<&CssIfMediaTest> {
         match &self {
             Self::CssIfMediaTest(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_if_sass_test(&self) -> Option<&CssIfSassTest> {
+        match &self {
+            Self::CssIfSassTest(item) => Some(item),
             _ => None,
         }
     }
@@ -17438,6 +17495,62 @@ impl From<CssIfMediaTest> for SyntaxNode {
 }
 impl From<CssIfMediaTest> for SyntaxElement {
     fn from(n: CssIfMediaTest) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssIfSassTest {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_IF_SASS_TEST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_IF_SASS_TEST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssIfSassTest {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssIfSassTest")
+                .field("sass_token", &support::DebugSyntaxResult(self.sass_token()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("test", &support::DebugSyntaxResult(self.test()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssIfSassTest").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssIfSassTest> for SyntaxNode {
+    fn from(n: CssIfSassTest) -> Self {
+        n.syntax
+    }
+}
+impl From<CssIfSassTest> for SyntaxElement {
+    fn from(n: CssIfSassTest) -> Self {
         n.syntax.into()
     }
 }
@@ -30095,6 +30208,11 @@ impl From<CssIfMediaTest> for AnyCssIfTest {
         Self::CssIfMediaTest(node)
     }
 }
+impl From<CssIfSassTest> for AnyCssIfTest {
+    fn from(node: CssIfSassTest) -> Self {
+        Self::CssIfSassTest(node)
+    }
+}
 impl From<CssIfStyleTest> for AnyCssIfTest {
     fn from(node: CssIfStyleTest) -> Self {
         Self::CssIfStyleTest(node)
@@ -30109,18 +30227,24 @@ impl AstNode for AnyCssIfTest {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssBogusIfTest::KIND_SET
         .union(CssIfMediaTest::KIND_SET)
+        .union(CssIfSassTest::KIND_SET)
         .union(CssIfStyleTest::KIND_SET)
         .union(CssIfSupportsTest::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_BOGUS_IF_TEST | CSS_IF_MEDIA_TEST | CSS_IF_STYLE_TEST | CSS_IF_SUPPORTS_TEST
+            CSS_BOGUS_IF_TEST
+                | CSS_IF_MEDIA_TEST
+                | CSS_IF_SASS_TEST
+                | CSS_IF_STYLE_TEST
+                | CSS_IF_SUPPORTS_TEST
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_BOGUS_IF_TEST => Self::CssBogusIfTest(CssBogusIfTest { syntax }),
             CSS_IF_MEDIA_TEST => Self::CssIfMediaTest(CssIfMediaTest { syntax }),
+            CSS_IF_SASS_TEST => Self::CssIfSassTest(CssIfSassTest { syntax }),
             CSS_IF_STYLE_TEST => Self::CssIfStyleTest(CssIfStyleTest { syntax }),
             CSS_IF_SUPPORTS_TEST => Self::CssIfSupportsTest(CssIfSupportsTest { syntax }),
             _ => return None,
@@ -30131,6 +30255,7 @@ impl AstNode for AnyCssIfTest {
         match self {
             Self::CssBogusIfTest(it) => it.syntax(),
             Self::CssIfMediaTest(it) => it.syntax(),
+            Self::CssIfSassTest(it) => it.syntax(),
             Self::CssIfStyleTest(it) => it.syntax(),
             Self::CssIfSupportsTest(it) => it.syntax(),
         }
@@ -30139,6 +30264,7 @@ impl AstNode for AnyCssIfTest {
         match self {
             Self::CssBogusIfTest(it) => it.into_syntax(),
             Self::CssIfMediaTest(it) => it.into_syntax(),
+            Self::CssIfSassTest(it) => it.into_syntax(),
             Self::CssIfStyleTest(it) => it.into_syntax(),
             Self::CssIfSupportsTest(it) => it.into_syntax(),
         }
@@ -30149,6 +30275,7 @@ impl std::fmt::Debug for AnyCssIfTest {
         match self {
             Self::CssBogusIfTest(it) => std::fmt::Debug::fmt(it, f),
             Self::CssIfMediaTest(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssIfSassTest(it) => std::fmt::Debug::fmt(it, f),
             Self::CssIfStyleTest(it) => std::fmt::Debug::fmt(it, f),
             Self::CssIfSupportsTest(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -30159,6 +30286,7 @@ impl From<AnyCssIfTest> for SyntaxNode {
         match n {
             AnyCssIfTest::CssBogusIfTest(it) => it.into_syntax(),
             AnyCssIfTest::CssIfMediaTest(it) => it.into_syntax(),
+            AnyCssIfTest::CssIfSassTest(it) => it.into_syntax(),
             AnyCssIfTest::CssIfStyleTest(it) => it.into_syntax(),
             AnyCssIfTest::CssIfSupportsTest(it) => it.into_syntax(),
         }
@@ -36599,6 +36727,11 @@ impl std::fmt::Display for CssIfFunction {
     }
 }
 impl std::fmt::Display for CssIfMediaTest {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssIfSassTest {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

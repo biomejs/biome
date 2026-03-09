@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
 
@@ -14,6 +13,7 @@ expression: snapshot
   outline-color: if(not style(--scheme: light): white; else: black;);
   accent-color: if((style(--scheme: dark)): green; else: red;);
   height: if(is-valid-size($size), $size, 100px);
+	inline-size: if(sass($size > 10px): 12px;else: 10px;);
 }
 
 ```
@@ -433,22 +433,90 @@ CssRoot {
                         },
                         semicolon_token: SEMICOLON@362..363 ";" [] [],
                     },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@363..376 "inline-size" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@376..378 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssIfFunction {
+                                            if_token: IF_KW@378..380 "if" [] [],
+                                            l_paren_token: L_PAREN@380..381 "(" [] [],
+                                            css_if_branch_list: CssIfBranchList [
+                                                CssIfBranch {
+                                                    condition: CssIfSassTest {
+                                                        sass_token: SASS_KW@381..385 "sass" [] [],
+                                                        l_paren_token: L_PAREN@385..386 "(" [] [],
+                                                        test: ScssExpression {
+                                                            items: ScssExpressionItemList [
+                                                                ScssBinaryExpression {
+                                                                    left: ScssIdentifier {
+                                                                        dollar_token: DOLLAR@386..387 "$" [] [],
+                                                                        name: CssIdentifier {
+                                                                            value_token: IDENT@387..392 "size" [] [Whitespace(" ")],
+                                                                        },
+                                                                    },
+                                                                    operator: R_ANGLE@392..394 ">" [] [Whitespace(" ")],
+                                                                    right: CssRegularDimension {
+                                                                        value_token: CSS_NUMBER_LITERAL@394..396 "10" [] [],
+                                                                        unit_token: IDENT@396..398 "px" [] [],
+                                                                    },
+                                                                },
+                                                            ],
+                                                        },
+                                                        r_paren_token: R_PAREN@398..399 ")" [] [],
+                                                    },
+                                                    colon_token: COLON@399..401 ":" [] [Whitespace(" ")],
+                                                    value: CssGenericComponentValueList [
+                                                        CssRegularDimension {
+                                                            value_token: CSS_NUMBER_LITERAL@401..403 "12" [] [],
+                                                            unit_token: IDENT@403..405 "px" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                                SEMICOLON@405..406 ";" [] [],
+                                                CssIfBranch {
+                                                    condition: CssElseKeyword {
+                                                        else_token: ELSE_KW@406..410 "else" [] [],
+                                                    },
+                                                    colon_token: COLON@410..412 ":" [] [Whitespace(" ")],
+                                                    value: CssGenericComponentValueList [
+                                                        CssRegularDimension {
+                                                            value_token: CSS_NUMBER_LITERAL@412..414 "10" [] [],
+                                                            unit_token: IDENT@414..416 "px" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                                SEMICOLON@416..417 ";" [] [],
+                                            ],
+                                            r_paren_token: R_PAREN@417..418 ")" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@418..419 ";" [] [],
+                    },
                 ],
-                r_curly_token: R_CURLY@363..365 "}" [Newline("\n")] [],
+                r_curly_token: R_CURLY@419..421 "}" [Newline("\n")] [],
             },
         },
     ],
-    eof_token: EOF@365..366 "" [Newline("\n")] [],
+    eof_token: EOF@421..422 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..366
+0: CSS_ROOT@0..422
   0: (empty)
-  1: CSS_ROOT_ITEM_LIST@0..365
-    0: CSS_QUALIFIED_RULE@0..365
+  1: CSS_ROOT_ITEM_LIST@0..421
+    0: CSS_QUALIFIED_RULE@0..421
       0: CSS_SELECTOR_LIST@0..6
         0: CSS_COMPOUND_SELECTOR@0..6
           0: CSS_NESTED_SELECTOR_LIST@0..0
@@ -458,9 +526,9 @@ CssRoot {
               0: DOT@0..1 "." [] []
               1: CSS_CUSTOM_IDENTIFIER@1..6
                 0: IDENT@1..6 "test" [] [Whitespace(" ")]
-      1: CSS_DECLARATION_OR_RULE_BLOCK@6..365
+      1: CSS_DECLARATION_OR_RULE_BLOCK@6..421
         0: L_CURLY@6..7 "{" [] []
-        1: CSS_DECLARATION_OR_RULE_LIST@7..363
+        1: CSS_DECLARATION_OR_RULE_LIST@7..419
           0: CSS_DECLARATION_WITH_SEMICOLON@7..66
             0: CSS_DECLARATION@7..65
               0: CSS_GENERIC_PROPERTY@7..65
@@ -718,7 +786,53 @@ CssRoot {
                       3: R_PAREN@361..362 ")" [] []
               1: (empty)
             1: SEMICOLON@362..363 ";" [] []
-        2: R_CURLY@363..365 "}" [Newline("\n")] []
-  2: EOF@365..366 "" [Newline("\n")] []
+          6: CSS_DECLARATION_WITH_SEMICOLON@363..419
+            0: CSS_DECLARATION@363..418
+              0: CSS_GENERIC_PROPERTY@363..418
+                0: CSS_IDENTIFIER@363..376
+                  0: IDENT@363..376 "inline-size" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@376..378 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@378..418
+                  0: SCSS_EXPRESSION_ITEM_LIST@378..418
+                    0: CSS_IF_FUNCTION@378..418
+                      0: IF_KW@378..380 "if" [] []
+                      1: L_PAREN@380..381 "(" [] []
+                      2: CSS_IF_BRANCH_LIST@381..417
+                        0: CSS_IF_BRANCH@381..405
+                          0: CSS_IF_SASS_TEST@381..399
+                            0: SASS_KW@381..385 "sass" [] []
+                            1: L_PAREN@385..386 "(" [] []
+                            2: SCSS_EXPRESSION@386..398
+                              0: SCSS_EXPRESSION_ITEM_LIST@386..398
+                                0: SCSS_BINARY_EXPRESSION@386..398
+                                  0: SCSS_IDENTIFIER@386..392
+                                    0: DOLLAR@386..387 "$" [] []
+                                    1: CSS_IDENTIFIER@387..392
+                                      0: IDENT@387..392 "size" [] [Whitespace(" ")]
+                                  1: R_ANGLE@392..394 ">" [] [Whitespace(" ")]
+                                  2: CSS_REGULAR_DIMENSION@394..398
+                                    0: CSS_NUMBER_LITERAL@394..396 "10" [] []
+                                    1: IDENT@396..398 "px" [] []
+                            3: R_PAREN@398..399 ")" [] []
+                          1: COLON@399..401 ":" [] [Whitespace(" ")]
+                          2: CSS_GENERIC_COMPONENT_VALUE_LIST@401..405
+                            0: CSS_REGULAR_DIMENSION@401..405
+                              0: CSS_NUMBER_LITERAL@401..403 "12" [] []
+                              1: IDENT@403..405 "px" [] []
+                        1: SEMICOLON@405..406 ";" [] []
+                        2: CSS_IF_BRANCH@406..416
+                          0: CSS_ELSE_KEYWORD@406..410
+                            0: ELSE_KW@406..410 "else" [] []
+                          1: COLON@410..412 ":" [] [Whitespace(" ")]
+                          2: CSS_GENERIC_COMPONENT_VALUE_LIST@412..416
+                            0: CSS_REGULAR_DIMENSION@412..416
+                              0: CSS_NUMBER_LITERAL@412..414 "10" [] []
+                              1: IDENT@414..416 "px" [] []
+                        3: SEMICOLON@416..417 ";" [] []
+                      3: R_PAREN@417..418 ")" [] []
+              1: (empty)
+            1: SEMICOLON@418..419 ";" [] []
+        2: R_CURLY@419..421 "}" [Newline("\n")] []
+  2: EOF@421..422 "" [Newline("\n")] []
 
 ```

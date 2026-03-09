@@ -309,14 +309,16 @@ fn cdo_and_cdc() {
 #[test]
 fn keywords() {
     assert_lex! {
-        "media keyframes important from",
+        "media keyframes important from sass",
         MEDIA_KW:5,
         WHITESPACE:1,
         KEYFRAMES_KW:9,
         WHITESPACE:1,
         IMPORTANT_KW:9,
         WHITESPACE:1,
-        FROM_KW:4
+        FROM_KW:4,
+        WHITESPACE:1,
+        SASS_KW:4
     }
 }
 

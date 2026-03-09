@@ -2370,6 +2370,44 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssIfMediaTest {
         )
     }
 }
+impl FormatRule<biome_css_syntax::CssIfSassTest>
+    for crate::css::auxiliary::if_sass_test::FormatCssIfSassTest
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssIfSassTest,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssIfSassTest>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssIfSassTest {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssIfSassTest,
+        crate::css::auxiliary::if_sass_test::FormatCssIfSassTest,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::css::auxiliary::if_sass_test::FormatCssIfSassTest::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssIfSassTest {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssIfSassTest,
+        crate::css::auxiliary::if_sass_test::FormatCssIfSassTest,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::auxiliary::if_sass_test::FormatCssIfSassTest::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::CssIfStyleTest>
     for crate::css::auxiliary::if_style_test::FormatCssIfStyleTest
 {

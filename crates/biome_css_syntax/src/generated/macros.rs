@@ -331,6 +331,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssIfMediaTest::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_IF_SASS_TEST => {
+                    let $pattern = unsafe { $crate::CssIfSassTest::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_IF_STYLE_TEST => {
                     let $pattern = unsafe { $crate::CssIfStyleTest::new_unchecked(node) };
                     $body
