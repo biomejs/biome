@@ -9094,14 +9094,18 @@ impl ScssContentAtRule {
     pub fn as_fields(&self) -> ScssContentAtRuleFields {
         ScssContentAtRuleFields {
             content_token: self.content_token(),
+            arguments: self.arguments(),
             semicolon_token: self.semicolon_token(),
         }
     }
     pub fn content_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
+    pub fn arguments(&self) -> Option<ScssIncludeArgumentList> {
+        support::node(&self.syntax, 1usize)
+    }
     pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
+        support::required_token(&self.syntax, 2usize)
     }
 }
 impl Serialize for ScssContentAtRule {
@@ -9115,6 +9119,7 @@ impl Serialize for ScssContentAtRule {
 #[derive(Serialize)]
 pub struct ScssContentAtRuleFields {
     pub content_token: SyntaxResult<SyntaxToken>,
+    pub arguments: Option<ScssIncludeArgumentList>,
     pub semicolon_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]

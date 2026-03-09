@@ -8,6 +8,10 @@ info: css/scss/at-rule/content.scss
 ```scss
 @mixin hoverable{
 @content;
+@content(
+$value,
+  $fallback: 10px
+);
 }
 
 ```
@@ -31,6 +35,7 @@ Trailing newline: true
 ```scss
 @mixin hoverable {
 	@content;
+	@content($value, $fallback: 10px);
 }
 
 ```

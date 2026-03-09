@@ -2672,6 +2672,8 @@ ScssWhileAtRule =
 
 // @content;
 // ^^^^^^^^^
+// @content($value);
+// ^^^^^^^^^^^^^^^^^
 ScssContentAtRule =
 	'content'
 	';'

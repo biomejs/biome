@@ -9,9 +9,17 @@ impl FormatNodeRule<ScssContentAtRule> for FormatScssContentAtRule {
     fn fmt_fields(&self, node: &ScssContentAtRule, f: &mut CssFormatter) -> FormatResult<()> {
         let ScssContentAtRuleFields {
             content_token,
+            arguments,
             semicolon_token,
         } = node.as_fields();
 
-        write!(f, [content_token.format(), semicolon_token.format()])
+        write!(
+            f,
+            [
+                content_token.format(),
+                arguments.format(),
+                semicolon_token.format()
+            ]
+        )
     }
 }

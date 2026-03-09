@@ -49,7 +49,7 @@ fn is_at_scss_include_at_rule(p: &mut CssParser) -> bool {
 }
 
 #[inline]
-fn parse_scss_include_argument_list(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_scss_include_argument_list(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_scss_include_argument_list(p) {
         return Absent;
     }

@@ -146,7 +146,7 @@ pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
         T![for] => CssSyntaxFeatures::Scss
             .parse_supported_syntax(p, parse_scss_for_at_rule)
             .or_else(|| parse_unknown_at_rule(p)),
-        T![content] => CssSyntaxFeatures::Scss
+        T![ident] if p.cur_text() == "content" => CssSyntaxFeatures::Scss
             .parse_supported_syntax(p, parse_scss_content_at_rule)
             .or_else(|| parse_unknown_at_rule(p)),
         T![include] => CssSyntaxFeatures::Scss

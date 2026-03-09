@@ -7,6 +7,7 @@ expression: snapshot
 
 ```css
 @content
+@content(
 
 ```
 
@@ -24,23 +25,40 @@ CssRoot {
                 semicolon_token: missing (required),
             },
         },
+        CssAtRule {
+            at_token: AT@8..10 "@" [Newline("\n")] [],
+            rule: ScssContentAtRule {
+                content_token: CONTENT_KW@10..17 "content" [] [],
+                semicolon_token: missing (required),
+            },
+        },
     ],
-    eof_token: EOF@8..9 "" [Newline("\n")] [],
+    eof_token: EOF@18..19 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..9
+0: CSS_ROOT@0..19
   0: (empty)
-  1: CSS_ROOT_ITEM_LIST@0..8
+  1: CSS_ROOT_ITEM_LIST@0..18
     0: CSS_AT_RULE@0..8
       0: AT@0..1 "@" [] []
       1: SCSS_CONTENT_AT_RULE@1..8
         0: CONTENT_KW@1..8 "content" [] []
         1: (empty)
-  2: EOF@8..9 "" [Newline("\n")] []
+        2: (empty)
+    1: CSS_AT_RULE@8..18
+      0: AT@8..10 "@" [Newline("\n")] []
+      1: SCSS_CONTENT_AT_RULE@10..18
+        0: CONTENT_KW@10..17 "content" [] []
+        1: SCSS_INCLUDE_ARGUMENT_LIST@17..18
+          0: L_PAREN@17..18 "(" [] []
+          1: CSS_PARAMETER_LIST@18..18
+          2: (empty)
+        2: (empty)
+  2: EOF@18..19 "" [Newline("\n")] []
 
 ```
 
@@ -49,16 +67,29 @@ CssRoot {
 ```
 content.scss:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `;` but instead the file ends
+  × expected `;` but instead found `@`
   
     1 │ @content
-  > 2 │ 
+  > 2 │ @content(
+      │ ^
+    3 │ 
+  
+  i Remove @
+  
+content.scss:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead the file ends
+  
+    1 │ @content
+    2 │ @content(
+  > 3 │ 
       │ 
   
   i the file ends here
   
     1 │ @content
-  > 2 │ 
+    2 │ @content(
+  > 3 │ 
       │ 
   
 ```
