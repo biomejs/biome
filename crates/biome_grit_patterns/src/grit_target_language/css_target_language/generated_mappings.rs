@@ -293,6 +293,7 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
             .next(),
         "ScssArbitraryArgument" => lang::ScssArbitraryArgument::KIND_SET.iter().next(),
         "ScssBinaryExpression" => lang::ScssBinaryExpression::KIND_SET.iter().next(),
+        "ScssContentAtRule" => lang::ScssContentAtRule::KIND_SET.iter().next(),
         "ScssDebugAtRule" => lang::ScssDebugAtRule::KIND_SET.iter().next(),
         "ScssDeclaration" => lang::ScssDeclaration::KIND_SET.iter().next(),
         "ScssEachAtRule" => lang::ScssEachAtRule::KIND_SET.iter().next(),

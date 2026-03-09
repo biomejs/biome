@@ -947,6 +947,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::ScssBinaryExpression::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::SCSS_CONTENT_AT_RULE => {
+                    let $pattern = unsafe { $crate::ScssContentAtRule::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::SCSS_DEBUG_AT_RULE => {
                     let $pattern = unsafe { $crate::ScssDebugAtRule::new_unchecked(node) };
                     $body

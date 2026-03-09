@@ -3082,6 +3082,18 @@ pub fn scss_binary_expression(
         ],
     ))
 }
+pub fn scss_content_at_rule(
+    content_token: SyntaxToken,
+    semicolon_token: SyntaxToken,
+) -> ScssContentAtRule {
+    ScssContentAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_CONTENT_AT_RULE,
+        [
+            Some(SyntaxElement::Token(content_token)),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
 pub fn scss_debug_at_rule(
     debug_token: SyntaxToken,
     value: ScssExpression,

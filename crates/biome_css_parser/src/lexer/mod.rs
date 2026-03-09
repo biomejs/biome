@@ -850,6 +850,7 @@ impl<'src> CssLexer<'src> {
             b"debug" => DEBUG_KW,
             b"warn" => WARN_KW,
             b"error" => ERROR_KW,
+            b"content" => CONTENT_KW,
             b"for" => FOR_KW,
             b"include" => INCLUDE_KW,
             b"mixin" => MIXIN_KW,

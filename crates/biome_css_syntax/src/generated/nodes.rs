@@ -9078,6 +9078,46 @@ pub struct ScssBinaryExpressionFields {
     pub right: SyntaxResult<AnyScssExpression>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssContentAtRule {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssContentAtRule {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssContentAtRuleFields {
+        ScssContentAtRuleFields {
+            content_token: self.content_token(),
+            semicolon_token: self.semicolon_token(),
+        }
+    }
+    pub fn content_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+}
+impl Serialize for ScssContentAtRule {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssContentAtRuleFields {
+    pub content_token: SyntaxResult<SyntaxToken>,
+    pub semicolon_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssDebugAtRule {
     pub(crate) syntax: SyntaxNode,
 }
@@ -11059,6 +11099,7 @@ pub enum AnyCssAtRule {
     CssUnknownValueAtRule(CssUnknownValueAtRule),
     CssValueAtRule(CssValueAtRule),
     CssViewTransitionAtRule(CssViewTransitionAtRule),
+    ScssContentAtRule(ScssContentAtRule),
     ScssDebugAtRule(ScssDebugAtRule),
     ScssEachAtRule(ScssEachAtRule),
     ScssErrorAtRule(ScssErrorAtRule),
@@ -11227,6 +11268,12 @@ impl AnyCssAtRule {
     pub fn as_css_view_transition_at_rule(&self) -> Option<&CssViewTransitionAtRule> {
         match &self {
             Self::CssViewTransitionAtRule(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_content_at_rule(&self) -> Option<&ScssContentAtRule> {
+        match &self {
+            Self::ScssContentAtRule(item) => Some(item),
             _ => None,
         }
     }
@@ -25576,6 +25623,60 @@ impl From<ScssBinaryExpression> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for ScssContentAtRule {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_CONTENT_AT_RULE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_CONTENT_AT_RULE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssContentAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssContentAtRule")
+                .field(
+                    "content_token",
+                    &support::DebugSyntaxResult(self.content_token()),
+                )
+                .field(
+                    "semicolon_token",
+                    &support::DebugSyntaxResult(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("ScssContentAtRule").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssContentAtRule> for SyntaxNode {
+    fn from(n: ScssContentAtRule) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssContentAtRule> for SyntaxElement {
+    fn from(n: ScssContentAtRule) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for ScssDebugAtRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -27977,6 +28078,11 @@ impl From<CssViewTransitionAtRule> for AnyCssAtRule {
         Self::CssViewTransitionAtRule(node)
     }
 }
+impl From<ScssContentAtRule> for AnyCssAtRule {
+    fn from(node: ScssContentAtRule) -> Self {
+        Self::ScssContentAtRule(node)
+    }
+}
 impl From<ScssDebugAtRule> for AnyCssAtRule {
     fn from(node: ScssDebugAtRule) -> Self {
         Self::ScssDebugAtRule(node)
@@ -28099,6 +28205,7 @@ impl AstNode for AnyCssAtRule {
         .union(CssUnknownValueAtRule::KIND_SET)
         .union(CssValueAtRule::KIND_SET)
         .union(CssViewTransitionAtRule::KIND_SET)
+        .union(ScssContentAtRule::KIND_SET)
         .union(ScssDebugAtRule::KIND_SET)
         .union(ScssEachAtRule::KIND_SET)
         .union(ScssErrorAtRule::KIND_SET)
@@ -28146,6 +28253,7 @@ impl AstNode for AnyCssAtRule {
                 | CSS_UNKNOWN_VALUE_AT_RULE
                 | CSS_VALUE_AT_RULE
                 | CSS_VIEW_TRANSITION_AT_RULE
+                | SCSS_CONTENT_AT_RULE
                 | SCSS_DEBUG_AT_RULE
                 | SCSS_EACH_AT_RULE
                 | SCSS_ERROR_AT_RULE
@@ -28210,6 +28318,7 @@ impl AstNode for AnyCssAtRule {
             CSS_VIEW_TRANSITION_AT_RULE => {
                 Self::CssViewTransitionAtRule(CssViewTransitionAtRule { syntax })
             }
+            SCSS_CONTENT_AT_RULE => Self::ScssContentAtRule(ScssContentAtRule { syntax }),
             SCSS_DEBUG_AT_RULE => Self::ScssDebugAtRule(ScssDebugAtRule { syntax }),
             SCSS_EACH_AT_RULE => Self::ScssEachAtRule(ScssEachAtRule { syntax }),
             SCSS_ERROR_AT_RULE => Self::ScssErrorAtRule(ScssErrorAtRule { syntax }),
@@ -28262,6 +28371,7 @@ impl AstNode for AnyCssAtRule {
             Self::CssUnknownValueAtRule(it) => it.syntax(),
             Self::CssValueAtRule(it) => it.syntax(),
             Self::CssViewTransitionAtRule(it) => it.syntax(),
+            Self::ScssContentAtRule(it) => it.syntax(),
             Self::ScssDebugAtRule(it) => it.syntax(),
             Self::ScssEachAtRule(it) => it.syntax(),
             Self::ScssErrorAtRule(it) => it.syntax(),
@@ -28310,6 +28420,7 @@ impl AstNode for AnyCssAtRule {
             Self::CssUnknownValueAtRule(it) => it.into_syntax(),
             Self::CssValueAtRule(it) => it.into_syntax(),
             Self::CssViewTransitionAtRule(it) => it.into_syntax(),
+            Self::ScssContentAtRule(it) => it.into_syntax(),
             Self::ScssDebugAtRule(it) => it.into_syntax(),
             Self::ScssEachAtRule(it) => it.into_syntax(),
             Self::ScssErrorAtRule(it) => it.into_syntax(),
@@ -28360,6 +28471,7 @@ impl std::fmt::Debug for AnyCssAtRule {
             Self::CssUnknownValueAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::CssValueAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::CssViewTransitionAtRule(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssContentAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssDebugAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssEachAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssErrorAtRule(it) => std::fmt::Debug::fmt(it, f),
@@ -28410,6 +28522,7 @@ impl From<AnyCssAtRule> for SyntaxNode {
             AnyCssAtRule::CssUnknownValueAtRule(it) => it.into_syntax(),
             AnyCssAtRule::CssValueAtRule(it) => it.into_syntax(),
             AnyCssAtRule::CssViewTransitionAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::ScssContentAtRule(it) => it.into_syntax(),
             AnyCssAtRule::ScssDebugAtRule(it) => it.into_syntax(),
             AnyCssAtRule::ScssEachAtRule(it) => it.into_syntax(),
             AnyCssAtRule::ScssErrorAtRule(it) => it.into_syntax(),
@@ -39295,6 +39408,11 @@ impl std::fmt::Display for ScssArbitraryArgument {
     }
 }
 impl std::fmt::Display for ScssBinaryExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for ScssContentAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
