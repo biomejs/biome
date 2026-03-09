@@ -12,6 +12,6 @@ pub struct NoImplicitCoercionsOptions {
 impl NoImplicitCoercionsOptions {
     /// Whether to allow implicitly coercing values to booleans via `!!value`.
     pub fn double_negation(&self) -> bool {
-        self.double_negation.unwrap_or_default()
+        self.allow_double_negation.unwrap_or_default()
     }
 }
