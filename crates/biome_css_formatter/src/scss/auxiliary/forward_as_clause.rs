@@ -13,6 +13,14 @@ impl FormatNodeRule<ScssForwardAsClause> for FormatScssForwardAsClause {
             star_token,
         } = node.as_fields();
 
-        write!(f, [as_token.format(), space(), prefix.format(), star_token.format()])
+        write!(
+            f,
+            [
+                as_token.format(),
+                space(),
+                prefix.format(),
+                star_token.format()
+            ]
+        )
     }
 }
