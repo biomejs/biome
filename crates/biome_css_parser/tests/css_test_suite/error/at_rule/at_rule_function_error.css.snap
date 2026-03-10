@@ -1867,461 +1867,461 @@ CssRoot {
 at_rule_function_error.css:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a dashed identifier but instead found 'no-dash-name'.
-
+  
   > 1 │ @function no-dash-name() {}
       │           ^^^^^^^^^^^^
     2 │ @function --missing-param-dashes(param-with-default: rem) {}
     3 │ @function --missing-param-dashes(param-with-type type(*)) {}
-
+  
   i Expected a dashed identifier here.
-
+  
   > 1 │ @function no-dash-name() {}
       │           ^^^^^^^^^^^^
     2 │ @function --missing-param-dashes(param-with-default: rem) {}
     3 │ @function --missing-param-dashes(param-with-type type(*)) {}
-
+  
 at_rule_function_error.css:2:34 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a dashed identifier but instead found 'param-with-default'.
-
+  
     1 │ @function no-dash-name() {}
   > 2 │ @function --missing-param-dashes(param-with-default: rem) {}
       │                                  ^^^^^^^^^^^^^^^^^^
     3 │ @function --missing-param-dashes(param-with-type type(*)) {}
     4 │ @function --bogus-param-type(--param ###: rem) {}
-
+  
   i Expected a dashed identifier here.
-
+  
     1 │ @function no-dash-name() {}
   > 2 │ @function --missing-param-dashes(param-with-default: rem) {}
       │                                  ^^^^^^^^^^^^^^^^^^
     3 │ @function --missing-param-dashes(param-with-type type(*)) {}
     4 │ @function --bogus-param-type(--param ###: rem) {}
-
+  
 at_rule_function_error.css:3:34 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a dashed identifier but instead found 'param-with-type'.
-
+  
     1 │ @function no-dash-name() {}
     2 │ @function --missing-param-dashes(param-with-default: rem) {}
   > 3 │ @function --missing-param-dashes(param-with-type type(*)) {}
       │                                  ^^^^^^^^^^^^^^^
     4 │ @function --bogus-param-type(--param ###: rem) {}
     5 │ @function --bogus-param-type(--param ###, --param2: rem, --param3 type(*): !!!) {}
-
+  
   i Expected a dashed identifier here.
-
+  
     1 │ @function no-dash-name() {}
     2 │ @function --missing-param-dashes(param-with-default: rem) {}
   > 3 │ @function --missing-param-dashes(param-with-type type(*)) {}
       │                                  ^^^^^^^^^^^^^^^
     4 │ @function --bogus-param-type(--param ###: rem) {}
     5 │ @function --bogus-param-type(--param ###, --param2: rem, --param3 type(*): !!!) {}
-
+  
 at_rule_function_error.css:4:38 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `#`
-
+  
     2 │ @function --missing-param-dashes(param-with-default: rem) {}
     3 │ @function --missing-param-dashes(param-with-type type(*)) {}
   > 4 │ @function --bogus-param-type(--param ###: rem) {}
       │                                      ^
     5 │ @function --bogus-param-type(--param ###, --param2: rem, --param3 type(*): !!!) {}
-    6 │
-
+    6 │ 
+  
   i Remove #
-
+  
 at_rule_function_error.css:5:38 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `#`
-
+  
     3 │ @function --missing-param-dashes(param-with-type type(*)) {}
     4 │ @function --bogus-param-type(--param ###: rem) {}
   > 5 │ @function --bogus-param-type(--param ###, --param2: rem, --param3 type(*): !!!) {}
       │                                      ^
-    6 │
+    6 │ 
     7 │ /* Missing function name */
-
+  
   i Remove #
-
+  
 at_rule_function_error.css:5:76 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a function parameter default value but instead found '!!!'.
-
+  
     3 │ @function --missing-param-dashes(param-with-type type(*)) {}
     4 │ @function --bogus-param-type(--param ###: rem) {}
   > 5 │ @function --bogus-param-type(--param ###, --param2: rem, --param3 type(*): !!!) {}
       │                                                                            ^^^
-    6 │
+    6 │ 
     7 │ /* Missing function name */
-
+  
   i Expected a function parameter default value here.
-
+  
     3 │ @function --missing-param-dashes(param-with-type type(*)) {}
     4 │ @function --bogus-param-type(--param ###: rem) {}
   > 5 │ @function --bogus-param-type(--param ###, --param2: rem, --param3 type(*): !!!) {}
       │                                                                            ^^^
-    6 │
+    6 │ 
     7 │ /* Missing function name */
-
+  
 at_rule_function_error.css:8:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a dashed identifier but instead found '('.
-
+  
      7 │ /* Missing function name */
    > 8 │ @function () {}
        │           ^
-     9 │
+     9 │ 
     10 │ /* Missing parentheses */
-
+  
   i Expected a dashed identifier here.
-
+  
      7 │ /* Missing function name */
    > 8 │ @function () {}
        │           ^
-     9 │
+     9 │ 
     10 │ /* Missing parentheses */
-
+  
 at_rule_function_error.css:11:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `(` but instead found `{`
-
+  
     10 │ /* Missing parentheses */
   > 11 │ @function --test {}
        │                  ^
     12 │ @function --test( {}
     13 │ @function --test --param) {}
-
+  
   i Remove {
-
+  
 at_rule_function_error.css:12:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a function parameter but instead found '{'.
-
+  
     10 │ /* Missing parentheses */
     11 │ @function --test {}
   > 12 │ @function --test( {}
        │                   ^
     13 │ @function --test --param) {}
-    14 │
-
+    14 │ 
+  
   i Expected a function parameter here.
-
+  
     10 │ /* Missing parentheses */
     11 │ @function --test {}
   > 12 │ @function --test( {}
        │                   ^
     13 │ @function --test --param) {}
-    14 │
-
+    14 │ 
+  
 at_rule_function_error.css:13:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `(` but instead found `--param`
-
+  
     11 │ @function --test {}
     12 │ @function --test( {}
   > 13 │ @function --test --param) {}
        │                  ^^^^^^^
-    14 │
+    14 │ 
     15 │ /* Missing/invalid body */
-
+  
   i Remove --param
-
+  
 at_rule_function_error.css:17:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `{` but instead found `@`
-
+  
     15 │ /* Missing/invalid body */
     16 │ @function --test()
   > 17 │ @function --test();
        │ ^
-    18 │
+    18 │ 
     19 │ /* Empty default value (colon with nothing after) */
-
+  
   i Remove @
-
+  
 at_rule_function_error.css:17:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `{` but instead found `;`
-
+  
     15 │ /* Missing/invalid body */
     16 │ @function --test()
   > 17 │ @function --test();
        │                   ^
-    18 │
+    18 │ 
     19 │ /* Empty default value (colon with nothing after) */
-
+  
   i Remove ;
-
+  
 at_rule_function_error.css:20:35 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a function parameter default value but instead found ')'.
-
+  
     19 │ /* Empty default value (colon with nothing after) */
   > 20 │ @function --empty-default(--param:) {}
        │                                   ^
     21 │ @function --empty-default2(--param: , --other) {}
-    22 │
-
+    22 │ 
+  
   i Expected a function parameter default value here.
-
+  
     19 │ /* Empty default value (colon with nothing after) */
   > 20 │ @function --empty-default(--param:) {}
        │                                   ^
     21 │ @function --empty-default2(--param: , --other) {}
-    22 │
-
+    22 │ 
+  
 at_rule_function_error.css:21:37 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a function parameter default value but instead found ','.
-
+  
     19 │ /* Empty default value (colon with nothing after) */
     20 │ @function --empty-default(--param:) {}
   > 21 │ @function --empty-default2(--param: , --other) {}
        │                                     ^
-    22 │
+    22 │ 
     23 │ /* Invalid returns clause */
-
+  
   i Expected a function parameter default value here.
-
+  
     19 │ /* Empty default value (colon with nothing after) */
     20 │ @function --empty-default(--param:) {}
   > 21 │ @function --empty-default2(--param: , --other) {}
        │                                     ^
-    22 │
+    22 │ 
     23 │ /* Invalid returns clause */
-
+  
 at_rule_function_error.css:24:35 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a type function, or a syntax single component but instead found '{'.
-
+  
     23 │ /* Invalid returns clause */
   > 24 │ @function --bad-returns() returns {}
        │                                   ^
     25 │ @function --bad-returns2() returns ### {}
     26 │ @function --bad-returns3() returns <> {}
-
+  
   i Expected a type function, or a syntax single component here.
-
+  
     23 │ /* Invalid returns clause */
   > 24 │ @function --bad-returns() returns {}
        │                                   ^
     25 │ @function --bad-returns2() returns ### {}
     26 │ @function --bad-returns3() returns <> {}
-
+  
 at_rule_function_error.css:25:36 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a type function, or a syntax single component but instead found '###'.
-
+  
     23 │ /* Invalid returns clause */
     24 │ @function --bad-returns() returns {}
   > 25 │ @function --bad-returns2() returns ### {}
        │                                    ^^^
     26 │ @function --bad-returns3() returns <> {}
-    27 │
-
+    27 │ 
+  
   i Expected a type function, or a syntax single component here.
-
+  
     23 │ /* Invalid returns clause */
     24 │ @function --bad-returns() returns {}
   > 25 │ @function --bad-returns2() returns ### {}
        │                                    ^^^
     26 │ @function --bad-returns3() returns <> {}
-    27 │
-
+    27 │ 
+  
 at_rule_function_error.css:26:37 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a syntax type name but instead found '>'.
-
+  
     24 │ @function --bad-returns() returns {}
     25 │ @function --bad-returns2() returns ### {}
   > 26 │ @function --bad-returns3() returns <> {}
        │                                     ^
-    27 │
+    27 │ 
     28 │ /* Parameter list issues */
-
+  
   i Expected a syntax type name here.
-
+  
     24 │ @function --bad-returns() returns {}
     25 │ @function --bad-returns2() returns ### {}
   > 26 │ @function --bad-returns3() returns <> {}
        │                                     ^
-    27 │
+    27 │ 
     28 │ /* Parameter list issues */
-
+  
 at_rule_function_error.css:32:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a function parameter but instead found ':'.
-
+  
     30 │ @function --leading-comma(, --param) {}
     31 │ @function --just-comma(,) {}
   > 32 │ @function --just-colon(:) {}
        │                        ^
-    33 │
+    33 │ 
     34 │ /* Invalid parameter names */
-
+  
   i Expected a function parameter here.
-
+  
     30 │ @function --leading-comma(, --param) {}
     31 │ @function --just-comma(,) {}
   > 32 │ @function --just-colon(:) {}
        │                        ^
-    33 │
+    33 │ 
     34 │ /* Invalid parameter names */
-
+  
 at_rule_function_error.css:35:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a function parameter but instead found '123'.
-
+  
     34 │ /* Invalid parameter names */
   > 35 │ @function --numeric-param(123) {}
        │                           ^^^
     36 │ @function --at-param(@foo) {}
-    37 │
-
+    37 │ 
+  
   i Expected a function parameter here.
-
+  
     34 │ /* Invalid parameter names */
   > 35 │ @function --numeric-param(123) {}
        │                           ^^^
     36 │ @function --at-param(@foo) {}
-    37 │
-
+    37 │ 
+  
 at_rule_function_error.css:36:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a function parameter but instead found '@foo'.
-
+  
     34 │ /* Invalid parameter names */
     35 │ @function --numeric-param(123) {}
   > 36 │ @function --at-param(@foo) {}
        │                      ^^^^
-    37 │
+    37 │ 
     38 │ /* Type after default value (wrong order) */
-
+  
   i Expected a function parameter here.
-
+  
     34 │ /* Invalid parameter names */
     35 │ @function --numeric-param(123) {}
   > 36 │ @function --at-param(@foo) {}
        │                      ^^^^
-    37 │
+    37 │ 
     38 │ /* Type after default value (wrong order) */
-
+  
 at_rule_function_error.css:39:39 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `<`
-
+  
     38 │ /* Type after default value (wrong order) */
   > 39 │ @function --wrong-order(--param: 10px <length>) {}
        │                                       ^
-    40 │
+    40 │ 
     41 │ /* Unclosed type syntax */
-
+  
   i Remove <
-
+  
 at_rule_function_error.css:42:42 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `>` but instead found `)`
-
+  
     41 │ /* Unclosed type syntax */
   > 42 │ @function --unclosed-type(--param <string) {}
        │                                          ^
     43 │ @function --empty-type(--param <>) {}
-    44 │
-
+    44 │ 
+  
   i Remove )
-
+  
 at_rule_function_error.css:43:33 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a syntax type name but instead found '>'.
-
+  
     41 │ /* Unclosed type syntax */
     42 │ @function --unclosed-type(--param <string) {}
   > 43 │ @function --empty-type(--param <>) {}
        │                                 ^
-    44 │
+    44 │ 
     45 │ /* Multiple colons/defaults */
-
+  
   i Expected a syntax type name here.
-
+  
     41 │ /* Unclosed type syntax */
     42 │ @function --unclosed-type(--param <string) {}
   > 43 │ @function --empty-type(--param <>) {}
        │                                 ^
-    44 │
+    44 │ 
     45 │ /* Multiple colons/defaults */
-
+  
 at_rule_function_error.css:46:38 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `:`
-
+  
     45 │ /* Multiple colons/defaults */
   > 46 │ @function --double-default(--param: 1: 2) {}
        │                                      ^
-    47 │
+    47 │ 
     48 │ /* Misspelled returns */
-
+  
   i Remove :
-
+  
 at_rule_function_error.css:49:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `{` but instead found `return`
-
+  
     48 │ /* Misspelled returns */
   > 49 │ @function --misspelled() return <number> {}
        │                          ^^^^^^
-    50 │
+    50 │ 
     51 │ /* Extra tokens after valid parts */
-
+  
   i Remove return
-
+  
 at_rule_function_error.css:52:47 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `garbage`
-
+  
     51 │ /* Extra tokens after valid parts */
   > 52 │ @function --extra-after-type(--param <string> garbage: 1) {}
        │                                               ^^^^^^^
     53 │ @function --extra-after-returns() returns <number> extra {}
-    54 │
-
+    54 │ 
+  
   i Remove garbage
-
+  
 at_rule_function_error.css:53:52 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `{` but instead found `extra`
-
+  
     51 │ /* Extra tokens after valid parts */
     52 │ @function --extra-after-type(--param <string> garbage: 1) {}
   > 53 │ @function --extra-after-returns() returns <number> extra {}
        │                                                    ^^^^^
-    54 │
+    54 │ 
     55 │ /* Nested @function (if not allowed) */
-
+  
   i Remove extra
-
+  
 at_rule_function_error.css:61:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `(` but instead found `spaces`
-
+  
     60 │ /* Special characters in names */
   > 61 │ @function --has spaces() {}
        │                 ^^^^^^
     62 │ @function --has@at() {}
-    63 │
-
+    63 │ 
+  
   i Remove spaces
-
+  
 at_rule_function_error.css:62:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `(` but instead found `@`
-
+  
     60 │ /* Special characters in names */
     61 │ @function --has spaces() {}
   > 62 │ @function --has@at() {}
        │                ^
-    63 │
-
+    63 │ 
+  
   i Remove @
-
+  
 ```

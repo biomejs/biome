@@ -274,44 +274,44 @@ CssRoot {
 function.scss:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found '('.
-
+  
   > 1 │ @function ($value) {
       │           ^
     2 │   @return $value;
     3 │ }
-
+  
   i Expected an identifier here.
-
+  
   > 1 │ @function ($value) {
       │           ^
     2 │   @return $value;
     3 │ }
-
+  
 function.scss:5:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `2`
-
+  
     3 │ }
-    4 │
+    4 │ 
   > 5 │ @function double($value 2) {
       │                         ^
     6 │   @return $value;
     7 │ }
-
+  
   i Remove 2
-
+  
 function.scss:10:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `{` but instead the file ends
-
+  
      9 │ @function double($value: 2)
-  > 10 │
-       │
-
+  > 10 │ 
+       │ 
+  
   i the file ends here
-
+  
      9 │ @function double($value: 2)
-  > 10 │
-       │
-
+  > 10 │ 
+       │ 
+  
 ```

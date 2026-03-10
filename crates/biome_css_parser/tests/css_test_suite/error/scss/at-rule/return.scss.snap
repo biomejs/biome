@@ -67,33 +67,33 @@ CssRoot {
 return.scss:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a SCSS expression but instead found ';'.
-
+  
   > 1 │ @return;
       │        ^
     2 │ @return
-    3 │
-
+    3 │ 
+  
   i Expected a SCSS expression here.
-
+  
   > 1 │ @return;
       │        ^
     2 │ @return
-    3 │
-
+    3 │ 
+  
 return.scss:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a SCSS expression but instead found the end of the file.
-
+  
     1 │ @return;
     2 │ @return
-  > 3 │
-      │
-
+  > 3 │ 
+      │ 
+  
   i Expected a SCSS expression here.
-
+  
     1 │ @return;
     2 │ @return
-  > 3 │
-      │
-
+  > 3 │ 
+      │ 
+  
 ```
