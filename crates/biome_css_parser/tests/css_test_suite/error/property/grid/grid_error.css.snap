@@ -69,7 +69,7 @@ CssRoot {
                                             CssCustomIdentifier {
                                                 value_token: IDENT@49..55 "first" [] [Whitespace(" ")],
                                             },
-                                            CssBogusCustomIdentifier {
+                                            CssBogus {
                                                 items: [
                                                     CSS_NUMBER_LITERAL@55..59 "123" [] [Whitespace(" ")],
                                                 ],
@@ -90,7 +90,7 @@ CssRoot {
                                             CssCustomIdentifier {
                                                 value_token: IDENT@77..88 "main-start" [] [Whitespace(" ")],
                                             },
-                                            CssBogusCustomIdentifier {
+                                            CssBogus {
                                                 items: [
                                                     CSS_DIMENSION_VALUE@88..89 "1" [] [],
                                                 ],
@@ -98,7 +98,7 @@ CssRoot {
                                             CssCustomIdentifier {
                                                 value_token: IDENT@89..92 "fr" [] [Whitespace(" ")],
                                             },
-                                            CssBogusCustomIdentifier {
+                                            CssBogus {
                                                 items: [
                                                     L_BRACK@92..93 "[" [] [],
                                                 ],
@@ -166,7 +166,7 @@ CssRoot {
                     1: CSS_BRACKETED_VALUE_LIST@49..68
                       0: CSS_CUSTOM_IDENTIFIER@49..55
                         0: IDENT@49..55 "first" [] [Whitespace(" ")]
-                      1: CSS_BOGUS_CUSTOM_IDENTIFIER@55..59
+                      1: CSS_BOGUS@55..59
                         0: CSS_NUMBER_LITERAL@55..59 "123" [] [Whitespace(" ")]
                       2: CSS_CUSTOM_IDENTIFIER@59..68
                         0: IDENT@59..68 "nav-start" [] []
@@ -179,11 +179,11 @@ CssRoot {
                     1: CSS_BRACKETED_VALUE_LIST@77..97
                       0: CSS_CUSTOM_IDENTIFIER@77..88
                         0: IDENT@77..88 "main-start" [] [Whitespace(" ")]
-                      1: CSS_BOGUS_CUSTOM_IDENTIFIER@88..89
+                      1: CSS_BOGUS@88..89
                         0: CSS_DIMENSION_VALUE@88..89 "1" [] []
                       2: CSS_CUSTOM_IDENTIFIER@89..92
                         0: IDENT@89..92 "fr" [] [Whitespace(" ")]
-                      3: CSS_BOGUS_CUSTOM_IDENTIFIER@92..93
+                      3: CSS_BOGUS@92..93
                         0: L_BRACK@92..93 "[" [] []
                       4: CSS_CUSTOM_IDENTIFIER@93..97
                         0: IDENT@93..97 "last" [] []

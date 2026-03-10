@@ -223,12 +223,12 @@ CssRoot {
                         r_paren_token: R_PAREN@302..304 ")" [] [Whitespace(" ")],
                     },
                 },
-                block: CssBogusBlock {
+                block: CssBogus {
                     items: [],
                 },
             },
         },
-        CssBogusRule {
+        CssBogus {
             items: [
                 R_PAREN@304..306 ")" [] [Whitespace(" ")],
                 L_CURLY@306..307 "{" [] [],
@@ -414,12 +414,12 @@ CssRoot {
                         r_paren_token: missing (required),
                     },
                 },
-                block: CssBogusBlock {
+                block: CssBogus {
                     items: [],
                 },
             },
         },
-        CssBogusRule {
+        CssBogus {
             items: [
                 ERROR_TOKEN@969..970 "?" [] [],
                 ERROR_TOKEN@970..971 "?" [] [],
@@ -449,7 +449,7 @@ CssRoot {
                     ],
                 },
                 missing separator,
-                CssBogusSelector {
+                CssBogus {
                     items: [
                         R_PAREN@983..984 ")" [] [],
                         R_PAREN@984..986 ")" [] [Whitespace(" ")],
@@ -464,7 +464,7 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@989..1084 "@" [Newline("\n"), Newline("\n"), Comments("/*\n  ERROR CASE 8: Mi ..."), Newline("\n")] [],
-            rule: CssBogusAtRule {
+            rule: CssBogus {
                 items: [
                     CssBogus {
                         items: [
@@ -503,7 +503,7 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@1119..1226 "@" [Newline("\n"), Newline("\n"), Comments("/*\n  ERROR CASE 9: In ..."), Newline("\n")] [],
-            rule: CssBogusAtRule {
+            rule: CssBogus {
                 items: [
                     CssBogus {
                         items: [
@@ -547,13 +547,13 @@ CssRoot {
                             },
                         ],
                     },
-                    CssBogusBlock {
+                    CssBogus {
                         items: [],
                     },
                 ],
             },
         },
-        CssBogusRule {
+        CssBogus {
             items: [
                 L_PAREN@1265..1266 "(" [] [],
             ],
@@ -580,7 +580,7 @@ CssRoot {
                     ],
                 },
                 missing separator,
-                CssBogusSelector {
+                CssBogus {
                     items: [
                         R_PAREN@1274..1275 ")" [] [],
                         R_PAREN@1275..1277 ")" [] [Whitespace(" ")],
@@ -625,12 +625,12 @@ CssRoot {
                         r_paren_token: R_PAREN@1429..1430 ")" [] [],
                     },
                 },
-                block: CssBogusBlock {
+                block: CssBogus {
                     items: [],
                 },
             },
         },
-        CssBogusRule {
+        CssBogus {
             items: [
                 ERROR_TOKEN@1430..1431 "?" [] [],
                 ERROR_TOKEN@1431..1433 "?" [] [Whitespace(" ")],
@@ -744,8 +744,8 @@ CssRoot {
                     2: R_PAREN@299..300 ")" [] []
                 2: R_PAREN@300..302 ")" [] [Whitespace(" ")]
             3: R_PAREN@302..304 ")" [] [Whitespace(" ")]
-        1: CSS_BOGUS_BLOCK@304..304
-    2: CSS_BOGUS_RULE@304..309
+        1: CSS_BOGUS@304..304
+    2: CSS_BOGUS@304..309
       0: R_PAREN@304..306 ")" [] [Whitespace(" ")]
       1: L_CURLY@306..307 "{" [] []
       2: R_CURLY@307..309 "}" [Newline("\n")] []
@@ -875,8 +875,8 @@ CssRoot {
                 1: (empty)
               2: R_PAREN@967..969 ")" [] [Whitespace(" ")]
             3: (empty)
-        1: CSS_BOGUS_BLOCK@969..969
-    8: CSS_BOGUS_RULE@969..974
+        1: CSS_BOGUS@969..969
+    8: CSS_BOGUS@969..974
       0: ERROR_TOKEN@969..970 "?" [] []
       1: ERROR_TOKEN@970..971 "?" [] []
       2: ERROR_TOKEN@971..973 "?" [] [Whitespace(" ")]
@@ -896,7 +896,7 @@ CssRoot {
                 0: CSS_IDENTIFIER@979..983
                   0: IDENT@979..983 "blue" [] []
         1: (empty)
-        2: CSS_BOGUS_SELECTOR@983..986
+        2: CSS_BOGUS@983..986
           0: R_PAREN@983..984 ")" [] []
           1: R_PAREN@984..986 ")" [] [Whitespace(" ")]
       1: CSS_DECLARATION_OR_RULE_BLOCK@986..989
@@ -905,7 +905,7 @@ CssRoot {
         2: R_CURLY@987..989 "}" [Newline("\n")] []
     10: CSS_AT_RULE@989..1119
       0: AT@989..1084 "@" [Newline("\n"), Newline("\n"), Comments("/*\n  ERROR CASE 8: Mi ..."), Newline("\n")] []
-      1: CSS_BOGUS_AT_RULE@1084..1119
+      1: CSS_BOGUS@1084..1119
         0: CSS_BOGUS@1084..1116
           0: CONTAINER_KW@1084..1094 "container" [] [Whitespace(" ")]
           1: CSS_CUSTOM_IDENTIFIER@1094..1099
@@ -926,7 +926,7 @@ CssRoot {
           2: R_CURLY@1117..1119 "}" [Newline("\n")] []
     11: CSS_AT_RULE@1119..1265
       0: AT@1119..1226 "@" [Newline("\n"), Newline("\n"), Comments("/*\n  ERROR CASE 9: In ..."), Newline("\n")] []
-      1: CSS_BOGUS_AT_RULE@1226..1265
+      1: CSS_BOGUS@1226..1265
         0: CSS_BOGUS@1226..1265
           0: CONTAINER_KW@1226..1236 "container" [] [Whitespace(" ")]
           1: CSS_CUSTOM_IDENTIFIER@1236..1241
@@ -950,8 +950,8 @@ CssRoot {
               1: AND_KW@1258..1262 "and" [] [Whitespace(" ")]
               2: CSS_BOGUS@1262..1265
                 0: OR_KW@1262..1265 "or" [] [Whitespace(" ")]
-        1: CSS_BOGUS_BLOCK@1265..1265
-    12: CSS_BOGUS_RULE@1265..1266
+        1: CSS_BOGUS@1265..1265
+    12: CSS_BOGUS@1265..1266
       0: L_PAREN@1265..1266 "(" [] []
     13: CSS_QUALIFIED_RULE@1266..1280
       0: CSS_SELECTOR_LIST@1266..1277
@@ -968,7 +968,7 @@ CssRoot {
                 0: CSS_IDENTIFIER@1271..1274
                   0: IDENT@1271..1274 "red" [] []
         1: (empty)
-        2: CSS_BOGUS_SELECTOR@1274..1277
+        2: CSS_BOGUS@1274..1277
           0: R_PAREN@1274..1275 ")" [] []
           1: R_PAREN@1275..1277 ")" [] [Whitespace(" ")]
       1: CSS_DECLARATION_OR_RULE_BLOCK@1277..1280
@@ -998,8 +998,8 @@ CssRoot {
                 1: (empty)
               2: R_PAREN@1428..1429 ")" [] []
             3: R_PAREN@1429..1430 ")" [] []
-        1: CSS_BOGUS_BLOCK@1430..1430
-    15: CSS_BOGUS_RULE@1430..1436
+        1: CSS_BOGUS@1430..1430
+    15: CSS_BOGUS@1430..1436
       0: ERROR_TOKEN@1430..1431 "?" [] []
       1: ERROR_TOKEN@1431..1433 "?" [] [Whitespace(" ")]
       2: L_CURLY@1433..1434 "{" [] []

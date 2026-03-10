@@ -169,7 +169,7 @@ struct CssFunctionParameterListParseRecovery;
 impl ParseRecovery for CssFunctionParameterListParseRecovery {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
-    const RECOVERED_KIND: Self::Kind = CSS_BOGUS_FUNCTION_PARAMETER;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
         p.at(T![,]) || p.at(T![')']) || p.at(T![returns]) || p.at(T!['{'])

@@ -39,7 +39,7 @@ CssRoot {
                 items: CssDeclarationOrRuleList [
                     CssAtRule {
                         at_token: AT@6..9 "@" [Newline("\n"), Whitespace("\t")] [],
-                        rule: CssBogusAtRule {
+                        rule: CssBogus {
                             items: [
                                 APPLY_KW@9..15 "apply" [] [Whitespace(" ")],
                                 TwApplyClassList [
@@ -84,7 +84,7 @@ CssRoot {
         1: CSS_DECLARATION_OR_RULE_LIST@6..33
           0: CSS_AT_RULE@6..33
             0: AT@6..9 "@" [Newline("\n"), Whitespace("\t")] []
-            1: CSS_BOGUS_AT_RULE@9..33
+            1: CSS_BOGUS@9..33
               0: APPLY_KW@9..15 "apply" [] [Whitespace(" ")]
               1: TW_APPLY_CLASS_LIST@15..32
                 0: CSS_IDENTIFIER@15..23

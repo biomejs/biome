@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
 
@@ -162,7 +161,7 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBogusProperty {
+                            property: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@89..107 "missing-map-key" [Newline("\n"), Whitespace("  ")] [],
@@ -172,7 +171,7 @@ CssRoot {
                                         items: [
                                             CssBogus {
                                                 items: [
-                                                    CssBogusSupportsCondition {
+                                                    CssBogus {
                                                         items: [
                                                             CssIdentifier {
                                                                 value_token: IDENT@109..111 "fn" [] [],
@@ -207,7 +206,7 @@ CssRoot {
                                                                                                         },
                                                                                                     },
                                                                                                     COMMA@125..127 "," [] [Whitespace(" ")],
-                                                                                                    CssBogusPropertyValue {
+                                                                                                    CssBogus {
                                                                                                         items: [
                                                                                                             COLON@127..129 ":" [] [Whitespace(" ")],
                                                                                                             IDENT@129..133 "blue" [] [],
@@ -341,13 +340,13 @@ CssRoot {
             1: SEMICOLON@88..89 ";" [] []
           2: CSS_DECLARATION_WITH_SEMICOLON@89..136
             0: CSS_DECLARATION@89..135
-              0: CSS_BOGUS_PROPERTY@89..135
+              0: CSS_BOGUS@89..135
                 0: CSS_IDENTIFIER@89..107
                   0: IDENT@89..107 "missing-map-key" [Newline("\n"), Whitespace("  ")] []
                 1: COLON@107..109 ":" [] [Whitespace(" ")]
                 2: CSS_BOGUS@109..135
                   0: CSS_BOGUS@109..135
-                    0: CSS_BOGUS_SUPPORTS_CONDITION@109..135
+                    0: CSS_BOGUS@109..135
                       0: CSS_IDENTIFIER@109..111
                         0: IDENT@109..111 "fn" [] []
                       1: L_PAREN@111..112 "(" [] []
@@ -368,7 +367,7 @@ CssRoot {
                                       0: CSS_IDENTIFIER@122..125
                                         0: IDENT@122..125 "red" [] []
                                 1: COMMA@125..127 "," [] [Whitespace(" ")]
-                                2: CSS_BOGUS_PROPERTY_VALUE@127..133
+                                2: CSS_BOGUS@127..133
                                   0: COLON@127..129 ":" [] [Whitespace(" ")]
                                   1: IDENT@129..133 "blue" [] []
                               2: R_PAREN@133..134 ")" [] []

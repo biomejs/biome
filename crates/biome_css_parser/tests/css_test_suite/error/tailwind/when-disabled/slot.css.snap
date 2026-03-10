@@ -19,7 +19,7 @@ CssRoot {
     items: CssRootItemList [
         CssAtRule {
             at_token: AT@0..1 "@" [] [],
-            rule: CssBogusAtRule {
+            rule: CssBogus {
                 items: [
                     SLOT_KW@1..5 "slot" [] [],
                     SEMICOLON@5..6 ";" [] [],
@@ -39,7 +39,7 @@ CssRoot {
   1: CSS_ROOT_ITEM_LIST@0..6
     0: CSS_AT_RULE@0..6
       0: AT@0..1 "@" [] []
-      1: CSS_BOGUS_AT_RULE@1..6
+      1: CSS_BOGUS@1..6
         0: SLOT_KW@1..5 "slot" [] []
         1: SEMICOLON@5..6 ";" [] []
   2: EOF@6..7 "" [Newline("\n")] []

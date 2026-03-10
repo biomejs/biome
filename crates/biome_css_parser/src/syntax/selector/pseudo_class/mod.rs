@@ -69,7 +69,7 @@ pub(crate) fn parse_pseudo_class_selector(p: &mut CssParser) -> ParsedSyntax {
         Present(_) => CSS_PSEUDO_CLASS_SELECTOR,
         Absent => {
             p.error(expected_any_pseudo_class(p, range));
-            CSS_BOGUS_SUB_SELECTOR
+            CSS_BOGUS
         }
     };
 

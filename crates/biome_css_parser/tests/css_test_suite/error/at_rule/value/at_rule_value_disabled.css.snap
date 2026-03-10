@@ -18,7 +18,7 @@ expression: snapshot
 CssRoot {
     bom_token: missing (optional),
     items: CssRootItemList [
-        CssBogusRule {
+        CssBogus {
             items: [
                 AT@0..1 "@" [] [],
                 VALUE_KW@1..7 "value" [] [Whitespace(" ")],
@@ -28,7 +28,7 @@ CssRoot {
                 SEMICOLON@29..30 ";" [] [],
             ],
         },
-        CssBogusRule {
+        CssBogus {
             items: [
                 AT@30..32 "@" [Newline("\n")] [],
                 VALUE_KW@32..38 "value" [] [Whitespace(" ")],
@@ -62,14 +62,14 @@ CssRoot {
 0: CSS_ROOT@0..118
   0: (empty)
   1: CSS_ROOT_ITEM_LIST@0..117
-    0: CSS_BOGUS_RULE@0..30
+    0: CSS_BOGUS@0..30
       0: AT@0..1 "@" [] []
       1: VALUE_KW@1..7 "value" [] [Whitespace(" ")]
       2: IDENT@7..13 "colors" [] []
       3: COLON@13..15 ":" [] [Whitespace(" ")]
       4: CSS_STRING_LITERAL@15..29 "\"./colors.css\"" [] []
       5: SEMICOLON@29..30 ";" [] []
-    1: CSS_BOGUS_RULE@30..117
+    1: CSS_BOGUS@30..117
       0: AT@30..32 "@" [Newline("\n")] []
       1: VALUE_KW@32..38 "value" [] [Whitespace(" ")]
       2: IDENT@38..53 "common-gradient" [] []

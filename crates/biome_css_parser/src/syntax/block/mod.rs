@@ -45,7 +45,7 @@ pub(crate) trait ParseBlockBody {
             && (!self.is_at_element(p) && !p.at(T!['}']) || p.state().speculative_parsing)
         {
             p.error(expected_block(p, p.cur_range()));
-            return m.complete(p, CSS_BOGUS_BLOCK);
+            return m.complete(p, CSS_BOGUS);
         }
 
         let old_nesting_block = std::mem::replace(&mut p.state_mut().is_nesting_block, true);
@@ -56,7 +56,7 @@ pub(crate) trait ParseBlockBody {
         p.state_mut().is_nesting_block = old_nesting_block;
 
         let kind = if is_open_brace_missing || is_close_brace_missing {
-            CSS_BOGUS_BLOCK
+            CSS_BOGUS
         } else {
             Self::BLOCK_KIND
         };

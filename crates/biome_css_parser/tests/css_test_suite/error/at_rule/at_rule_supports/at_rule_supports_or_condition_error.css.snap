@@ -106,7 +106,7 @@ CssRoot {
                         right: missing (required),
                     },
                 },
-                block: CssBogusBlock {
+                block: CssBogus {
                     items: [
                         CssRuleList [],
                         R_CURLY@142..144 "}" [Newline("\n")] [],
@@ -119,7 +119,7 @@ CssRoot {
             rule: CssSupportsAtRule {
                 declarator: CssSupportsAtRuleDeclarator {
                     supports_token: SUPPORTS_KW@190..199 "supports" [] [Whitespace(" ")],
-                    condition: CssBogusSupportsCondition {
+                    condition: CssBogus {
                         items: [
                             CssSupportsFeatureDeclaration {
                                 l_paren_token: L_PAREN@199..200 "(" [] [],
@@ -241,7 +241,7 @@ CssRoot {
                         right: CssSupportsFeatureDeclaration {
                             l_paren_token: L_PAREN@386..387 "(" [] [],
                             declaration: CssDeclaration {
-                                property: CssBogusProperty {
+                                property: CssBogus {
                                     items: [
                                         CssIdentifier {
                                             value_token: IDENT@387..394 "display" [] [],
@@ -252,7 +252,7 @@ CssRoot {
                                                 CssIdentifier {
                                                     value_token: IDENT@395..400 "flex" [] [Whitespace(" ")],
                                                 },
-                                                CssBogusPropertyValue {
+                                                CssBogus {
                                                     items: [
                                                         L_CURLY@400..401 "{" [] [],
                                                     ],
@@ -267,7 +267,7 @@ CssRoot {
                         },
                     },
                 },
-                block: CssBogusBlock {
+                block: CssBogus {
                     items: [
                         CssRuleList [],
                         R_CURLY@401..403 "}" [Newline("\n")] [],
@@ -280,7 +280,7 @@ CssRoot {
             rule: CssSupportsAtRule {
                 declarator: CssSupportsAtRuleDeclarator {
                     supports_token: SUPPORTS_KW@482..491 "supports" [] [Whitespace(" ")],
-                    condition: CssBogusSupportsCondition {
+                    condition: CssBogus {
                         items: [
                             CssSupportsFeatureDeclaration {
                                 l_paren_token: L_PAREN@491..492 "(" [] [],
@@ -301,7 +301,7 @@ CssRoot {
                                 r_paren_token: R_PAREN@504..506 ")" [] [Whitespace(" ")],
                             },
                             OR_KW@506..509 "or" [] [Whitespace(" ")],
-                            CssBogusSupportsCondition {
+                            CssBogus {
                                 items: [
                                     CssBogus {
                                         items: [],
@@ -342,7 +342,7 @@ CssRoot {
             rule: CssSupportsAtRule {
                 declarator: CssSupportsAtRuleDeclarator {
                     supports_token: SUPPORTS_KW@557..566 "supports" [] [Whitespace(" ")],
-                    condition: CssBogusSupportsCondition {
+                    condition: CssBogus {
                         items: [
                             CssSupportsFeatureDeclaration {
                                 l_paren_token: L_PAREN@566..567 "(" [] [],
@@ -363,7 +363,7 @@ CssRoot {
                                 r_paren_token: R_PAREN@579..581 ")" [] [Whitespace(" ")],
                             },
                             OR_KW@581..584 "or" [] [Whitespace(" ")],
-                            CssBogusSupportsCondition {
+                            CssBogus {
                                 items: [
                                     CssBogus {
                                         items: [
@@ -458,7 +458,7 @@ CssRoot {
               2: R_PAREN@138..140 ")" [] [Whitespace(" ")]
             1: OR_KW@140..142 "or" [] []
             2: (empty)
-        1: CSS_BOGUS_BLOCK@142..144
+        1: CSS_BOGUS@142..144
           0: CSS_RULE_LIST@142..142
           1: R_CURLY@142..144 "}" [Newline("\n")] []
     2: CSS_AT_RULE@144..228
@@ -466,7 +466,7 @@ CssRoot {
       1: CSS_SUPPORTS_AT_RULE@190..228
         0: CSS_SUPPORTS_AT_RULE_DECLARATOR@190..225
           0: SUPPORTS_KW@190..199 "supports" [] [Whitespace(" ")]
-          1: CSS_BOGUS_SUPPORTS_CONDITION@199..225
+          1: CSS_BOGUS@199..225
             0: CSS_SUPPORTS_FEATURE_DECLARATION@199..214
               0: L_PAREN@199..200 "(" [] []
               1: CSS_DECLARATION@200..212
@@ -548,18 +548,18 @@ CssRoot {
             2: CSS_SUPPORTS_FEATURE_DECLARATION@386..401
               0: L_PAREN@386..387 "(" [] []
               1: CSS_DECLARATION@387..401
-                0: CSS_BOGUS_PROPERTY@387..401
+                0: CSS_BOGUS@387..401
                   0: CSS_IDENTIFIER@387..394
                     0: IDENT@387..394 "display" [] []
                   1: COLON@394..395 ":" [] []
                   2: CSS_BOGUS@395..401
                     0: CSS_IDENTIFIER@395..400
                       0: IDENT@395..400 "flex" [] [Whitespace(" ")]
-                    1: CSS_BOGUS_PROPERTY_VALUE@400..401
+                    1: CSS_BOGUS@400..401
                       0: L_CURLY@400..401 "{" [] []
                 1: (empty)
               2: (empty)
-        1: CSS_BOGUS_BLOCK@401..403
+        1: CSS_BOGUS@401..403
           0: CSS_RULE_LIST@401..401
           1: R_CURLY@401..403 "}" [Newline("\n")] []
     5: CSS_AT_RULE@403..530
@@ -567,7 +567,7 @@ CssRoot {
       1: CSS_SUPPORTS_AT_RULE@482..530
         0: CSS_SUPPORTS_AT_RULE_DECLARATOR@482..527
           0: SUPPORTS_KW@482..491 "supports" [] [Whitespace(" ")]
-          1: CSS_BOGUS_SUPPORTS_CONDITION@491..527
+          1: CSS_BOGUS@491..527
             0: CSS_SUPPORTS_FEATURE_DECLARATION@491..506
               0: L_PAREN@491..492 "(" [] []
               1: CSS_DECLARATION@492..504
@@ -581,7 +581,7 @@ CssRoot {
                 1: (empty)
               2: R_PAREN@504..506 ")" [] [Whitespace(" ")]
             1: OR_KW@506..509 "or" [] [Whitespace(" ")]
-            2: CSS_BOGUS_SUPPORTS_CONDITION@509..527
+            2: CSS_BOGUS@509..527
               0: CSS_BOGUS@509..509
               1: OR_KW@509..512 "or" [] [Whitespace(" ")]
               2: CSS_SUPPORTS_FEATURE_DECLARATION@512..527
@@ -605,7 +605,7 @@ CssRoot {
       1: CSS_SUPPORTS_AT_RULE@557..613
         0: CSS_SUPPORTS_AT_RULE_DECLARATOR@557..610
           0: SUPPORTS_KW@557..566 "supports" [] [Whitespace(" ")]
-          1: CSS_BOGUS_SUPPORTS_CONDITION@566..610
+          1: CSS_BOGUS@566..610
             0: CSS_SUPPORTS_FEATURE_DECLARATION@566..581
               0: L_PAREN@566..567 "(" [] []
               1: CSS_DECLARATION@567..579
@@ -619,7 +619,7 @@ CssRoot {
                 1: (empty)
               2: R_PAREN@579..581 ")" [] [Whitespace(" ")]
             1: OR_KW@581..584 "or" [] [Whitespace(" ")]
-            2: CSS_BOGUS_SUPPORTS_CONDITION@584..610
+            2: CSS_BOGUS@584..610
               0: CSS_BOGUS@584..592
                 0: MINUS@584..585 "-" [] []
                 1: MINUS@585..587 "-" [] [Whitespace(" ")]

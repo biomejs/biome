@@ -254,7 +254,7 @@ struct SyntaxTypeListParseRecovery;
 impl ParseRecovery for SyntaxTypeListParseRecovery {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
-    const RECOVERED_KIND: Self::Kind = CSS_BOGUS_SYNTAX_SINGLE_COMPONENT;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
         p.at(T![|]) || p.at(T![')']) || p.at(T![;]) || p.has_preceding_line_break()

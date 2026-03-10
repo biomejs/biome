@@ -44,7 +44,7 @@ pub(crate) fn parse_import_at_rule(p: &mut CssParser) -> ParsedSyntax {
         parse_import_url(p).ok();
         CSS_IMPORT_AT_RULE
     } else {
-        CSS_BOGUS_AT_RULE
+        CSS_BOGUS
     };
 
     skip_possible_tailwind_syntax(p);

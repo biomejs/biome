@@ -246,7 +246,7 @@ impl RecessOrderMember {
             AnyCssDeclarationOrRule::ScssNestingDeclaration(_) => NodeKindOrder::UnknownKind,
             AnyCssDeclarationOrRule::AnyCssRule(rule) => match rule {
                 AnyCssRule::CssAtRule(_) => NodeKindOrder::NestedRuleOrAtRule,
-                AnyCssRule::CssBogusRule(_) => NodeKindOrder::UnknownKind,
+                AnyCssRule::CssBogus(_) => NodeKindOrder::UnknownKind,
                 AnyCssRule::CssNestedQualifiedRule(_) => NodeKindOrder::NestedRuleOrAtRule,
                 AnyCssRule::CssQualifiedRule(_) => NodeKindOrder::UnknownKind,
             },
@@ -259,7 +259,7 @@ impl RecessOrderMember {
                     return NodeKindOrder::UnknownKind;
                 };
                 match prop {
-                    AnyCssProperty::CssBogusProperty(_) => NodeKindOrder::UnknownKind,
+                    AnyCssProperty::CssBogus(_) => NodeKindOrder::UnknownKind,
                     AnyCssProperty::CssComposesProperty(_) => NodeKindOrder::ComposesProperty,
                     AnyCssProperty::CssGenericProperty(prop) => {
                         let Some(prop) = prop.name().ok() else {

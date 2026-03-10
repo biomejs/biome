@@ -30,7 +30,7 @@ CssRoot {
                 name: CssString {
                     value_token: CSS_STRING_LITERAL@8..20 "\"my-plugin\"" [] [Whitespace(" ")],
                 },
-                block: CssBogusBlock {
+                block: CssBogus {
                     items: [
                         L_CURLY@20..21 "{" [] [],
                         CssBogus {
@@ -60,7 +60,7 @@ CssRoot {
                 semicolon_token: missing (optional),
             },
         },
-        CssBogusRule {
+        CssBogus {
             items: [
                 R_CURLY@93..95 "}" [Newline("\n")] [],
             ],
@@ -82,7 +82,7 @@ CssRoot {
         0: PLUGIN_KW@1..8 "plugin" [] [Whitespace(" ")]
         1: CSS_STRING@8..20
           0: CSS_STRING_LITERAL@8..20 "\"my-plugin\"" [] [Whitespace(" ")]
-        2: CSS_BOGUS_BLOCK@20..93
+        2: CSS_BOGUS@20..93
           0: L_CURLY@20..21 "{" [] []
           1: CSS_BOGUS@21..89
             0: CSS_BOGUS@21..89
@@ -101,7 +101,7 @@ CssRoot {
               12: SEMICOLON@88..89 ";" [] []
           2: R_CURLY@89..93 "}" [Newline("\n"), Whitespace("  ")] []
         3: (empty)
-    1: CSS_BOGUS_RULE@93..95
+    1: CSS_BOGUS@93..95
       0: R_CURLY@93..95 "}" [Newline("\n")] []
   2: EOF@95..150 "" [Newline("\n"), Newline("\n"), Comments("/* Error: `@plugin` c ...")] []
 

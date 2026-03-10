@@ -43,7 +43,7 @@ CssRoot {
                 items: CssDeclarationOrRuleList [
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBogusProperty {
+                            property: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@17..24 "color" [Newline("\n"), Whitespace("\t")] [],
@@ -51,7 +51,7 @@ CssRoot {
                                     COLON@24..26 ":" [] [Whitespace(" ")],
                                     CssBogus {
                                         items: [
-                                            CssBogusSupportsCondition {
+                                            CssBogus {
                                                 items: [
                                                     CssIdentifier {
                                                         value_token: IDENT@26..28 "fn" [] [],
@@ -124,7 +124,7 @@ CssRoot {
                 items: CssDeclarationOrRuleList [
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBogusProperty {
+                            property: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@69..76 "color" [Newline("\n"), Whitespace("\t")] [],
@@ -132,7 +132,7 @@ CssRoot {
                                     COLON@76..78 ":" [] [Whitespace(" ")],
                                     CssBogus {
                                         items: [
-                                            CssBogusSupportsCondition {
+                                            CssBogus {
                                                 items: [
                                                     CssIdentifier {
                                                         value_token: IDENT@78..80 "fn" [] [],
@@ -215,12 +215,12 @@ CssRoot {
         1: CSS_DECLARATION_OR_RULE_LIST@17..45
           0: CSS_DECLARATION_WITH_SEMICOLON@17..45
             0: CSS_DECLARATION@17..44
-              0: CSS_BOGUS_PROPERTY@17..44
+              0: CSS_BOGUS@17..44
                 0: CSS_IDENTIFIER@17..24
                   0: IDENT@17..24 "color" [Newline("\n"), Whitespace("\t")] []
                 1: COLON@24..26 ":" [] [Whitespace(" ")]
                 2: CSS_BOGUS@26..44
-                  0: CSS_BOGUS_SUPPORTS_CONDITION@26..44
+                  0: CSS_BOGUS@26..44
                     0: CSS_IDENTIFIER@26..28
                       0: IDENT@26..28 "fn" [] []
                     1: L_PAREN@28..29 "(" [] []
@@ -259,12 +259,12 @@ CssRoot {
         1: CSS_DECLARATION_OR_RULE_LIST@69..98
           0: CSS_DECLARATION_WITH_SEMICOLON@69..98
             0: CSS_DECLARATION@69..97
-              0: CSS_BOGUS_PROPERTY@69..97
+              0: CSS_BOGUS@69..97
                 0: CSS_IDENTIFIER@69..76
                   0: IDENT@69..76 "color" [Newline("\n"), Whitespace("\t")] []
                 1: COLON@76..78 ":" [] [Whitespace(" ")]
                 2: CSS_BOGUS@78..97
-                  0: CSS_BOGUS_SUPPORTS_CONDITION@78..97
+                  0: CSS_BOGUS@78..97
                     0: CSS_IDENTIFIER@78..80
                       0: IDENT@78..80 "fn" [] []
                     1: L_PAREN@80..81 "(" [] []

@@ -110,7 +110,7 @@ struct CssFontFamilyNameListParseRecovery;
 impl ParseRecovery for CssFontFamilyNameListParseRecovery {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
-    const RECOVERED_KIND: Self::Kind = CSS_BOGUS_FONT_FAMILY_NAME;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
     /// Determines if the parser has reached a point where it can recover from an error
     /// while parsing a font family name list.
     ///
@@ -202,7 +202,7 @@ struct CssCustomIdentifierSpaceSeparatedListParseRecovery;
 impl ParseRecovery for CssCustomIdentifierSpaceSeparatedListParseRecovery {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
-    const RECOVERED_KIND: Self::Kind = CSS_BOGUS_CUSTOM_IDENTIFIER;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
     /// Determines if the parser has reached a point where it can recover from an error
     /// while parsing a custom identifier list.
     ///
@@ -263,7 +263,7 @@ impl ParseNodeList for FontFeatureValuesItemList {
         parsed_element.or_recover_with_token_set(
             p,
             &ParseRecoveryTokenSet::new(
-                CSS_BOGUS_FONT_FEATURE_VALUES_ITEM,
+                CSS_BOGUS,
                 FONT_FEATURE_VALUES_ITEM_LIST_RECOVERY_SET,
             ),
             expected_font_feature_values_item,

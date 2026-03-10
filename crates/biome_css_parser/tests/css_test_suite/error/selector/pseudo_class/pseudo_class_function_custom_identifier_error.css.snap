@@ -38,7 +38,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
                             colon_token: COLON@15..16 ":" [] [],
-                            class: CssBogusPseudoClass {
+                            class: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@16..21 "state" [] [],
@@ -70,7 +70,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
                             colon_token: COLON@42..43 ":" [] [],
-                            class: CssBogusPseudoClass {
+                            class: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@43..48 "state" [] [],
@@ -126,7 +126,7 @@ CssRoot {
                     },
                 },
                 missing separator,
-                CssBogusSelector {
+                CssBogus {
                     items: [
                         R_PAREN@89..91 ")" [] [Whitespace(" ")],
                     ],
@@ -151,7 +151,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
                             colon_token: COLON@109..110 ":" [] [],
-                            class: CssBogusPseudoClass {
+                            class: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@110..115 "state" [] [],
@@ -191,7 +191,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
                             colon_token: COLON@148..149 ":" [] [],
-                            class: CssBogusPseudoClass {
+                            class: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@149..154 "state" [] [],
@@ -228,7 +228,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
                             colon_token: COLON@178..179 ":" [] [],
-                            class: CssBogusPseudoClass {
+                            class: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@179..184 "state" [] [],
@@ -271,7 +271,7 @@ CssRoot {
                                     sub_selectors: CssSubSelectorList [
                                         CssPseudoClassSelector {
                                             colon_token: COLON@204..205 ":" [] [],
-                                            class: CssBogusPseudoClass {
+                                            class: CssBogus {
                                                 items: [
                                                     CssIdentifier {
                                                         value_token: IDENT@205..210 "state" [] [],
@@ -330,7 +330,7 @@ CssRoot {
                                     sub_selectors: CssSubSelectorList [
                                         CssPseudoClassSelector {
                                             colon_token: COLON@243..244 ":" [] [],
-                                            class: CssBogusPseudoClass {
+                                            class: CssBogus {
                                                 items: [
                                                     CssIdentifier {
                                                         value_token: IDENT@244..249 "state" [] [],
@@ -386,7 +386,7 @@ CssRoot {
                                     sub_selectors: CssSubSelectorList [
                                         CssPseudoClassSelector {
                                             colon_token: COLON@273..274 ":" [] [],
-                                            class: CssBogusPseudoClass {
+                                            class: CssBogus {
                                                 items: [
                                                     CssIdentifier {
                                                         value_token: IDENT@274..279 "state" [] [],
@@ -445,7 +445,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@15..24
             0: CSS_PSEUDO_CLASS_SELECTOR@15..24
               0: COLON@15..16 ":" [] []
-              1: CSS_BOGUS_PSEUDO_CLASS@16..24
+              1: CSS_BOGUS@16..24
                 0: CSS_IDENTIFIER@16..21
                   0: IDENT@16..21 "state" [] []
                 1: L_PAREN@21..22 "(" [] []
@@ -465,7 +465,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@42..57
             0: CSS_PSEUDO_CLASS_SELECTOR@42..57
               0: COLON@42..43 ":" [] []
-              1: CSS_BOGUS_PSEUDO_CLASS@43..57
+              1: CSS_BOGUS@43..57
                 0: CSS_IDENTIFIER@43..48
                   0: IDENT@43..48 "state" [] []
                 1: L_PAREN@48..49 "(" [] []
@@ -499,7 +499,7 @@ CssRoot {
                 0: IDENT@82..89 "checked" [] []
             2: CSS_SUB_SELECTOR_LIST@89..89
         1: (empty)
-        2: CSS_BOGUS_SELECTOR@89..91
+        2: CSS_BOGUS@89..91
           0: R_PAREN@89..91 ")" [] [Whitespace(" ")]
       1: CSS_DECLARATION_OR_RULE_BLOCK@91..93
         0: L_CURLY@91..92 "{" [] []
@@ -516,7 +516,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@109..130
             0: CSS_PSEUDO_CLASS_SELECTOR@109..130
               0: COLON@109..110 ":" [] []
-              1: CSS_BOGUS_PSEUDO_CLASS@110..130
+              1: CSS_BOGUS@110..130
                 0: CSS_IDENTIFIER@110..115
                   0: IDENT@110..115 "state" [] []
                 1: L_PAREN@115..116 "(" [] []
@@ -540,7 +540,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@148..160
             0: CSS_PSEUDO_CLASS_SELECTOR@148..160
               0: COLON@148..149 ":" [] []
-              1: CSS_BOGUS_PSEUDO_CLASS@149..160
+              1: CSS_BOGUS@149..160
                 0: CSS_IDENTIFIER@149..154
                   0: IDENT@149..154 "state" [] []
                 1: L_PAREN@154..155 "(" [] []
@@ -562,7 +562,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@178..195
             0: CSS_PSEUDO_CLASS_SELECTOR@178..195
               0: COLON@178..179 ":" [] []
-              1: CSS_BOGUS_PSEUDO_CLASS@179..195
+              1: CSS_BOGUS@179..195
                 0: CSS_IDENTIFIER@179..184
                   0: IDENT@179..184 "state" [] []
                 1: L_PAREN@184..185 "(" [] []
@@ -591,7 +591,7 @@ CssRoot {
                   2: CSS_SUB_SELECTOR_LIST@204..224
                     0: CSS_PSEUDO_CLASS_SELECTOR@204..224
                       0: COLON@204..205 ":" [] []
-                      1: CSS_BOGUS_PSEUDO_CLASS@205..224
+                      1: CSS_BOGUS@205..224
                         0: CSS_IDENTIFIER@205..210
                           0: IDENT@205..210 "state" [] []
                         1: L_PAREN@210..211 "(" [] []
@@ -628,7 +628,7 @@ CssRoot {
                   2: CSS_SUB_SELECTOR_LIST@243..254
                     0: CSS_PSEUDO_CLASS_SELECTOR@243..254
                       0: COLON@243..244 ":" [] []
-                      1: CSS_BOGUS_PSEUDO_CLASS@244..254
+                      1: CSS_BOGUS@244..254
                         0: CSS_IDENTIFIER@244..249
                           0: IDENT@244..249 "state" [] []
                         1: L_PAREN@249..250 "(" [] []
@@ -663,7 +663,7 @@ CssRoot {
                   2: CSS_SUB_SELECTOR_LIST@273..289
                     0: CSS_PSEUDO_CLASS_SELECTOR@273..289
                       0: COLON@273..274 ":" [] []
-                      1: CSS_BOGUS_PSEUDO_CLASS@274..289
+                      1: CSS_BOGUS@274..289
                         0: CSS_IDENTIFIER@274..279
                           0: IDENT@274..279 "state" [] []
                         1: L_PAREN@279..280 "(" [] []

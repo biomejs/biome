@@ -36,13 +36,13 @@ pub(crate) fn parse_pseudo_class_function_compound_selector(p: &mut CssParser) -
             {
                 CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR
             } else {
-                CSS_BOGUS_PSEUDO_CLASS
+                CSS_BOGUS
             }
         }
         Absent => {
             recover_selector_function_parameter(p, expected_compound_selector);
             p.expect(T![')']);
-            CSS_BOGUS_PSEUDO_CLASS
+            CSS_BOGUS
         }
     };
 

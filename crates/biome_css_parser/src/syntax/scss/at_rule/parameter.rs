@@ -4,7 +4,7 @@ use crate::syntax::scss::{
     parse_scss_identifier,
 };
 use biome_css_syntax::CssSyntaxKind::{
-    self, CSS_BOGUS_PARAMETER, SCSS_PARAMETER, SCSS_PARAMETER_DEFAULT_VALUE,
+    self, CSS_BOGUS, SCSS_PARAMETER, SCSS_PARAMETER_DEFAULT_VALUE,
     SCSS_PARAMETER_ITEM_LIST, SCSS_PARAMETER_LIST,
 };
 use biome_css_syntax::T;
@@ -87,7 +87,7 @@ struct ScssParameterItemListParseRecovery;
 impl ParseRecovery for ScssParameterItemListParseRecovery {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
-    const RECOVERED_KIND: Self::Kind = CSS_BOGUS_PARAMETER;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
         p.at_ts(SCSS_PARAMETER_RECOVERY_SET)

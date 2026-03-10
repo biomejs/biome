@@ -71,12 +71,12 @@ pub(crate) fn parse_scope_range_start_or_interval(p: &mut CssParser) -> ParsedSy
     let m = p.start();
 
     if parse_or_recover_scope_edge(p).is_err() {
-        return Present(m.complete(p, CSS_BOGUS_SCOPE_RANGE));
+        return Present(m.complete(p, CSS_BOGUS));
     }
 
     let kind = if p.eat(T![to]) {
         if parse_or_recover_scope_edge(p).is_err() {
-            return Present(m.complete(p, CSS_BOGUS_SCOPE_RANGE));
+            return Present(m.complete(p, CSS_BOGUS));
         }
         CSS_SCOPE_RANGE_INTERVAL
     } else {
@@ -102,7 +102,7 @@ pub(crate) fn parse_scope_range_end(p: &mut CssParser) -> ParsedSyntax {
     p.bump(T![to]);
 
     if parse_or_recover_scope_edge(p).is_err() {
-        return Present(m.complete(p, CSS_BOGUS_SCOPE_RANGE));
+        return Present(m.complete(p, CSS_BOGUS));
     }
 
     Present(m.complete(p, CSS_SCOPE_RANGE_END))

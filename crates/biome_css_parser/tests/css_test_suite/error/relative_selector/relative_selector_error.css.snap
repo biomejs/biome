@@ -67,7 +67,7 @@ CssRoot {
                                 },
                             },
                             COMMA@15..17 "," [] [Whitespace(" ")],
-                            CssBogusSelector {
+                            CssBogus {
                                 items: [
                                     CSS_NUMBER_LITERAL@17..26 "12312312" [] [Whitespace(" ")],
                                 ],
@@ -135,7 +135,7 @@ CssRoot {
                                 },
                             },
                             COMMA@62..64 "," [] [Whitespace(" ")],
-                            CssBogusSelector {
+                            CssBogus {
                                 items: [
                                     CSS_NUMBER_LITERAL@64..73 "12312312" [] [Whitespace(" ")],
                                 ],
@@ -217,7 +217,7 @@ CssRoot {
                                 },
                             },
                             COMMA@118..120 "," [] [Whitespace(" ")],
-                            CssBogusSelector {
+                            CssBogus {
                                 items: [
                                     CSS_NUMBER_LITERAL@120..129 "12312312" [] [Whitespace(" ")],
                                 ],
@@ -301,7 +301,7 @@ CssRoot {
                       1: CSS_CUSTOM_IDENTIFIER@8..15
                         0: IDENT@8..15 "class1" [] [Whitespace(" ")]
               1: COMMA@15..17 "," [] [Whitespace(" ")]
-              2: CSS_BOGUS_SELECTOR@17..26
+              2: CSS_BOGUS@17..26
                 0: CSS_NUMBER_LITERAL@17..26 "12312312" [] [Whitespace(" ")]
             1: CSS_DECLARATION_OR_RULE_BLOCK@26..43
               0: L_CURLY@26..27 "{" [] []
@@ -344,7 +344,7 @@ CssRoot {
                       1: CSS_CUSTOM_IDENTIFIER@55..62
                         0: IDENT@55..62 "class1" [] [Whitespace(" ")]
               1: COMMA@62..64 "," [] [Whitespace(" ")]
-              2: CSS_BOGUS_SELECTOR@64..73
+              2: CSS_BOGUS@64..73
                 0: CSS_NUMBER_LITERAL@64..73 "12312312" [] [Whitespace(" ")]
               3: COMMA@73..75 "," [] [Whitespace(" ")]
               4: CSS_RELATIVE_SELECTOR@75..82
@@ -397,7 +397,7 @@ CssRoot {
                       1: CSS_CUSTOM_IDENTIFIER@111..118
                         0: IDENT@111..118 "class1" [] [Whitespace(" ")]
               1: COMMA@118..120 "," [] [Whitespace(" ")]
-              2: CSS_BOGUS_SELECTOR@120..129
+              2: CSS_BOGUS@120..129
                 0: CSS_NUMBER_LITERAL@120..129 "12312312" [] [Whitespace(" ")]
               3: (empty)
               4: CSS_RELATIVE_SELECTOR@129..136

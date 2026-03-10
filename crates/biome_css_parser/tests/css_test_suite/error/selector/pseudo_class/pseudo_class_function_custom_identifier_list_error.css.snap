@@ -41,7 +41,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
                             colon_token: COLON@4..5 ":" [] [],
-                            class: CssBogusPseudoClass {
+                            class: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@5..32 "active-view-transition-type" [] [],
@@ -84,7 +84,7 @@ CssRoot {
                                         value_token: IDENT@74..79 "first" [] [],
                                     },
                                     COMMA@79..81 "," [] [Whitespace(" ")],
-                                    CssBogusCustomIdentifier {
+                                    CssBogus {
                                         items: [
                                             CSS_NUMBER_LITERAL@81..87 "123213" [] [],
                                         ],
@@ -125,7 +125,7 @@ CssRoot {
                                         value_token: IDENT@127..132 "first" [] [],
                                     },
                                     COMMA@132..134 "," [] [Whitespace(" ")],
-                                    CssBogusCustomIdentifier {
+                                    CssBogus {
                                         items: [
                                             CSS_NUMBER_LITERAL@134..140 "123213" [] [],
                                             COMMA@140..142 "," [] [Whitespace(" ")],
@@ -171,7 +171,7 @@ CssRoot {
                                         value_token: IDENT@188..193 "first" [] [],
                                     },
                                     COMMA@193..195 "," [] [Whitespace(" ")],
-                                    CssBogusCustomIdentifier {
+                                    CssBogus {
                                         items: [
                                             CSS_STRING_LITERAL@195..205 "\"string??\"" [] [],
                                             COMMA@205..207 "," [] [Whitespace(" ")],
@@ -216,7 +216,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@4..35
             0: CSS_PSEUDO_CLASS_SELECTOR@4..35
               0: COLON@4..5 ":" [] []
-              1: CSS_BOGUS_PSEUDO_CLASS@5..35
+              1: CSS_BOGUS@5..35
                 0: CSS_IDENTIFIER@5..32
                   0: IDENT@5..32 "active-view-transition-type" [] []
                 1: L_PAREN@32..33 "(" [] []
@@ -245,7 +245,7 @@ CssRoot {
                   0: CSS_CUSTOM_IDENTIFIER@74..79
                     0: IDENT@74..79 "first" [] []
                   1: COMMA@79..81 "," [] [Whitespace(" ")]
-                  2: CSS_BOGUS_CUSTOM_IDENTIFIER@81..87
+                  2: CSS_BOGUS@81..87
                     0: CSS_NUMBER_LITERAL@81..87 "123213" [] []
                 3: R_PAREN@87..89 ")" [] [Whitespace(" ")]
       1: CSS_DECLARATION_OR_RULE_BLOCK@89..92
@@ -271,7 +271,7 @@ CssRoot {
                   0: CSS_CUSTOM_IDENTIFIER@127..132
                     0: IDENT@127..132 "first" [] []
                   1: COMMA@132..134 "," [] [Whitespace(" ")]
-                  2: CSS_BOGUS_CUSTOM_IDENTIFIER@134..142
+                  2: CSS_BOGUS@134..142
                     0: CSS_NUMBER_LITERAL@134..140 "123213" [] []
                     1: COMMA@140..142 "," [] [Whitespace(" ")]
                   3: (empty)
@@ -301,7 +301,7 @@ CssRoot {
                   0: CSS_CUSTOM_IDENTIFIER@188..193
                     0: IDENT@188..193 "first" [] []
                   1: COMMA@193..195 "," [] [Whitespace(" ")]
-                  2: CSS_BOGUS_CUSTOM_IDENTIFIER@195..207
+                  2: CSS_BOGUS@195..207
                     0: CSS_STRING_LITERAL@195..205 "\"string??\"" [] []
                     1: COMMA@205..207 "," [] [Whitespace(" ")]
                   3: (empty)

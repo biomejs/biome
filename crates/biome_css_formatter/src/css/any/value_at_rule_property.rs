@@ -8,7 +8,7 @@ impl FormatRule<AnyCssValueAtRuleProperty> for FormatAnyCssValueAtRuleProperty {
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssValueAtRuleProperty, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
-            AnyCssValueAtRuleProperty::CssBogusProperty(node) => node.format().fmt(f),
+            AnyCssValueAtRuleProperty::CssBogus(node) => node.format().fmt(f),
             AnyCssValueAtRuleProperty::CssValueAtRuleGenericProperty(node) => node.format().fmt(f),
         }
     }

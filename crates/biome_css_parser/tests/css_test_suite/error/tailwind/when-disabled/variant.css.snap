@@ -60,7 +60,7 @@ CssRoot {
                     },
                     CssAtRule {
                         at_token: AT@33..37 "@" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
-                        rule: CssBogusAtRule {
+                        rule: CssBogus {
                             items: [
                                 VARIANT_KW@37..45 "variant" [] [Whitespace(" ")],
                                 CssIdentifier {
@@ -133,7 +133,7 @@ CssRoot {
             1: SEMICOLON@32..33 ";" [] []
           1: CSS_AT_RULE@33..76
             0: AT@33..37 "@" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
-            1: CSS_BOGUS_AT_RULE@37..76
+            1: CSS_BOGUS@37..76
               0: VARIANT_KW@37..45 "variant" [] [Whitespace(" ")]
               1: CSS_IDENTIFIER@45..51
                 0: IDENT@45..51 "hover" [] [Whitespace(" ")]

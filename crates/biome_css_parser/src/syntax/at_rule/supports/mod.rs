@@ -105,7 +105,7 @@ pub(crate) struct AnySupportsConditionParseRecovery;
 impl ParseRecovery for AnySupportsConditionParseRecovery {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
-    const RECOVERED_KIND: Self::Kind = CSS_BOGUS_SUPPORTS_CONDITION;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
         // We need to recover the invalid container query:

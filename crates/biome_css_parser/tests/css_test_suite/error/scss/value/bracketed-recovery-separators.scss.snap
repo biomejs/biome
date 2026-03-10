@@ -37,7 +37,7 @@ CssRoot {
                             CssGenericDelimiter {
                                 value: COMMA@15..17 "," [] [Whitespace(" ")],
                             },
-                            CssBogusCustomIdentifier {
+                            CssBogus {
                                 items: [
                                     CSS_NUMBER_LITERAL@17..18 "1" [] [],
                                 ],
@@ -81,7 +81,7 @@ CssRoot {
                             CssGenericDelimiter {
                                 value: SLASH@43..45 "/" [] [Whitespace(" ")],
                             },
-                            CssBogusCustomIdentifier {
+                            CssBogus {
                                 items: [
                                     CSS_NUMBER_LITERAL@45..47 "2" [] [Whitespace(" ")],
                                 ],
@@ -132,7 +132,7 @@ CssRoot {
                 0: IDENT@14..15 "a" [] []
               1: CSS_GENERIC_DELIMITER@15..17
                 0: COMMA@15..17 "," [] [Whitespace(" ")]
-              2: CSS_BOGUS_CUSTOM_IDENTIFIER@17..18
+              2: CSS_BOGUS@17..18
                 0: CSS_NUMBER_LITERAL@17..18 "1" [] []
               3: CSS_GENERIC_DELIMITER@18..20
                 0: COMMA@18..20 "," [] [Whitespace(" ")]
@@ -160,7 +160,7 @@ CssRoot {
                 0: IDENT@41..43 "x" [] [Whitespace(" ")]
               1: CSS_GENERIC_DELIMITER@43..45
                 0: SLASH@43..45 "/" [] [Whitespace(" ")]
-              2: CSS_BOGUS_CUSTOM_IDENTIFIER@45..47
+              2: CSS_BOGUS@45..47
                 0: CSS_NUMBER_LITERAL@45..47 "2" [] [Whitespace(" ")]
               3: CSS_GENERIC_DELIMITER@47..49
                 0: SLASH@47..49 "/" [] [Whitespace(" ")]

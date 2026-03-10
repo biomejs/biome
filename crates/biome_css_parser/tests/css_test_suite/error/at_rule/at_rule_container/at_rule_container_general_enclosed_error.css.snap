@@ -29,7 +29,7 @@ CssRoot {
     items: CssRootItemList [
         CssAtRule {
             at_token: AT@0..1 "@" [] [],
-            rule: CssBogusAtRule {
+            rule: CssBogus {
                 items: [
                     CssBogus {
                         items: [
@@ -37,7 +37,7 @@ CssRoot {
                             CssBogus {
                                 items: [
                                     L_PAREN@11..12 "(" [] [],
-                                    CssBogusSupportsCondition {
+                                    CssBogus {
                                         items: [
                                             CssIdentifier {
                                                 value_token: IDENT@12..15 "foo" [] [],
@@ -122,7 +122,7 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@51..54 "@" [Newline("\n"), Newline("\n")] [],
-            rule: CssBogusAtRule {
+            rule: CssBogus {
                 items: [
                     CssBogus {
                         items: [
@@ -132,7 +132,7 @@ CssRoot {
                                     CssBogus {
                                         items: [
                                             L_PAREN@64..65 "(" [] [],
-                                            CssBogusSupportsCondition {
+                                            CssBogus {
                                                 items: [
                                                     CssIdentifier {
                                                         value_token: IDENT@65..68 "foo" [] [],
@@ -344,12 +344,12 @@ CssRoot {
   1: CSS_ROOT_ITEM_LIST@0..193
     0: CSS_AT_RULE@0..51
       0: AT@0..1 "@" [] []
-      1: CSS_BOGUS_AT_RULE@1..51
+      1: CSS_BOGUS@1..51
         0: CSS_BOGUS@1..27
           0: CONTAINER_KW@1..11 "container" [] [Whitespace(" ")]
           1: CSS_BOGUS@11..27
             0: L_PAREN@11..12 "(" [] []
-            1: CSS_BOGUS_SUPPORTS_CONDITION@12..25
+            1: CSS_BOGUS@12..25
               0: CSS_IDENTIFIER@12..15
                 0: IDENT@12..15 "foo" [] []
               1: L_PAREN@15..16 "(" [] []
@@ -394,13 +394,13 @@ CssRoot {
           2: R_CURLY@49..51 "}" [Newline("\n")] []
     1: CSS_AT_RULE@51..125
       0: AT@51..54 "@" [Newline("\n"), Newline("\n")] []
-      1: CSS_BOGUS_AT_RULE@54..125
+      1: CSS_BOGUS@54..125
         0: CSS_BOGUS@54..100
           0: CONTAINER_KW@54..64 "container" [] [Whitespace(" ")]
           1: CSS_BOGUS@64..100
             0: CSS_BOGUS@64..80
               0: L_PAREN@64..65 "(" [] []
-              1: CSS_BOGUS_SUPPORTS_CONDITION@65..78
+              1: CSS_BOGUS@65..78
                 0: CSS_IDENTIFIER@65..68
                   0: IDENT@65..68 "foo" [] []
                 1: L_PAREN@68..69 "(" [] []

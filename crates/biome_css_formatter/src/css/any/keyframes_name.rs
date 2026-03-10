@@ -9,7 +9,7 @@ impl FormatRule<AnyCssKeyframesName> for FormatAnyCssKeyframesName {
     fn fmt(&self, node: &AnyCssKeyframesName, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
             AnyCssKeyframesName::AnyCssKeyframesIdentifier(node) => node.format().fmt(f),
-            AnyCssKeyframesName::CssBogusKeyframesName(node) => node.format().fmt(f),
+            AnyCssKeyframesName::CssBogus(node) => node.format().fmt(f),
             AnyCssKeyframesName::CssKeyframesScopedName(node) => node.format().fmt(f),
         }
     }

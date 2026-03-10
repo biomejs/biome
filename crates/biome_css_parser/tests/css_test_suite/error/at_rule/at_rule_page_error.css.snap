@@ -210,7 +210,7 @@ CssRoot {
                     items: CssPageAtRuleItemList [
                         CssDeclarationWithSemicolon {
                             declaration: CssDeclaration {
-                                property: CssBogusProperty {
+                                property: CssBogus {
                                     items: [
                                         CssIdentifier {
                                             value_token: IDENT@164..169 "div" [Newline("\n"), Whitespace("\t")] [],
@@ -221,7 +221,7 @@ CssRoot {
                                                 CssIdentifier {
                                                     value_token: IDENT@170..176 "hover" [] [Whitespace(" ")],
                                                 },
-                                                CssBogusPropertyValue {
+                                                CssBogus {
                                                     items: [
                                                         L_CURLY@176..177 "{" [] [],
                                                     ],
@@ -229,7 +229,7 @@ CssRoot {
                                                 CssIdentifier {
                                                     value_token: IDENT@177..185 "color" [Newline("\n"), Whitespace("\t\t")] [],
                                                 },
-                                                CssBogusPropertyValue {
+                                                CssBogus {
                                                     items: [
                                                         COLON@185..187 ":" [] [Whitespace(" ")],
                                                         IDENT@187..192 "green" [] [],
@@ -248,7 +248,7 @@ CssRoot {
                 },
             },
         },
-        CssBogusRule {
+        CssBogus {
             items: [
                 R_CURLY@196..198 "}" [Newline("\n")] [],
             ],
@@ -775,24 +775,24 @@ CssRoot {
           1: CSS_PAGE_AT_RULE_ITEM_LIST@164..193
             0: CSS_DECLARATION_WITH_SEMICOLON@164..193
               0: CSS_DECLARATION@164..192
-                0: CSS_BOGUS_PROPERTY@164..192
+                0: CSS_BOGUS@164..192
                   0: CSS_IDENTIFIER@164..169
                     0: IDENT@164..169 "div" [Newline("\n"), Whitespace("\t")] []
                   1: COLON@169..170 ":" [] []
                   2: CSS_BOGUS@170..192
                     0: CSS_IDENTIFIER@170..176
                       0: IDENT@170..176 "hover" [] [Whitespace(" ")]
-                    1: CSS_BOGUS_PROPERTY_VALUE@176..177
+                    1: CSS_BOGUS@176..177
                       0: L_CURLY@176..177 "{" [] []
                     2: CSS_IDENTIFIER@177..185
                       0: IDENT@177..185 "color" [Newline("\n"), Whitespace("\t\t")] []
-                    3: CSS_BOGUS_PROPERTY_VALUE@185..192
+                    3: CSS_BOGUS@185..192
                       0: COLON@185..187 ":" [] [Whitespace(" ")]
                       1: IDENT@187..192 "green" [] []
                 1: (empty)
               1: SEMICOLON@192..193 ";" [] []
           2: R_CURLY@193..196 "}" [Newline("\n"), Whitespace("\t")] []
-    3: CSS_BOGUS_RULE@196..198
+    3: CSS_BOGUS@196..198
       0: R_CURLY@196..198 "}" [Newline("\n")] []
     4: CSS_AT_RULE@198..296
       0: AT@198..201 "@" [Newline("\n"), Newline("\n")] []

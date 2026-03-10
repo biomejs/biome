@@ -218,7 +218,7 @@ impl ParseNodeList for CommaSeparatedValueValueList {
     ) -> RecoveryResult {
         parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecoveryTokenSet::new(CSS_BOGUS_PROPERTY_VALUE, token_set![T!['}']])
+            &ParseRecoveryTokenSet::new(CSS_BOGUS, token_set![T!['}']])
                 .enable_recovery_on_line_break(),
             expected_component_value,
         )

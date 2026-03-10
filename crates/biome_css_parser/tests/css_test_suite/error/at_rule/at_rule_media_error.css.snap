@@ -53,7 +53,7 @@ CssRoot {
                             },
                         },
                         missing separator,
-                        CssBogusMediaQuery {
+                        CssBogus {
                             items: [
                                 DOLLAR@27..28 "$" [] [],
                                 IDENT@28..39 "-breakpoint" [] [],
@@ -97,7 +97,7 @@ CssRoot {
                             },
                         },
                         missing separator,
-                        CssBogusMediaQuery {
+                        CssBogus {
                             items: [
                                 LTEQ@74..77 "<=" [] [Whitespace(" ")],
                                 CSS_DIMENSION_VALUE@77..80 "500" [] [],
@@ -181,7 +181,7 @@ CssRoot {
                             },
                         },
                         missing separator,
-                        CssBogusMediaQuery {
+                        CssBogus {
                             items: [
                                 CSS_DIMENSION_VALUE@151..154 "500" [] [],
                                 PX_KW@154..156 "px" [] [],
@@ -269,7 +269,7 @@ CssRoot {
                             },
                         },
                         missing separator,
-                        CssBogusMediaQuery {
+                        CssBogus {
                             items: [
                                 R_ANGLE@224..226 ">" [] [Whitespace(" ")],
                                 CSS_DIMENSION_VALUE@226..229 "500" [] [],
@@ -352,7 +352,7 @@ CssRoot {
                     0: IDENT@8..27 "--umrel-breakpoints" [] []
                 2: (empty)
             1: (empty)
-            2: CSS_BOGUS_MEDIA_QUERY@27..41
+            2: CSS_BOGUS@27..41
               0: DOLLAR@27..28 "$" [] []
               1: IDENT@28..39 "-breakpoint" [] []
               2: R_PAREN@39..41 ")" [] [Whitespace(" ")]
@@ -381,7 +381,7 @@ CssRoot {
                 0: CSS_IDENTIFIER@68..74
                   0: IDENT@68..74 "width" [] [Whitespace(" ")]
             3: (empty)
-            4: CSS_BOGUS_MEDIA_QUERY@74..83
+            4: CSS_BOGUS@74..83
               0: LTEQ@74..77 "<=" [] [Whitespace(" ")]
               1: CSS_DIMENSION_VALUE@77..80 "500" [] []
               2: PX_KW@80..83 "px" [] [Whitespace(" ")]
@@ -435,7 +435,7 @@ CssRoot {
                     0: IDENT@145..151 "width" [] [Whitespace(" ")]
                 2: (empty)
             1: (empty)
-            2: CSS_BOGUS_MEDIA_QUERY@151..158
+            2: CSS_BOGUS@151..158
               0: CSS_DIMENSION_VALUE@151..154 "500" [] []
               1: PX_KW@154..156 "px" [] []
               2: R_PAREN@156..158 ")" [] [Whitespace(" ")]
@@ -492,7 +492,7 @@ CssRoot {
                   2: (empty)
                 2: (empty)
             1: (empty)
-            2: CSS_BOGUS_MEDIA_QUERY@224..233
+            2: CSS_BOGUS@224..233
               0: R_ANGLE@224..226 ">" [] [Whitespace(" ")]
               1: CSS_DIMENSION_VALUE@226..229 "500" [] []
               2: PX_KW@229..231 "px" [] []

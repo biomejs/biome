@@ -19,7 +19,7 @@ CssRoot {
     items: CssRootItemList [
         CssAtRule {
             at_token: AT@0..1 "@" [] [],
-            rule: CssBogusAtRule {
+            rule: CssBogus {
                 items: [
                     WARN_KW@1..6 "warn" [] [Whitespace(" ")],
                     CssBogus {
@@ -52,7 +52,7 @@ CssRoot {
                                                                                     CssNumber {
                                                                                         value_token: CSS_NUMBER_LITERAL@10..11 "2" [] [],
                                                                                     },
-                                                                                    CssBogusPropertyValue {
+                                                                                    CssBogus {
                                                                                         items: [
                                                                                             SEMICOLON@11..12 ";" [] [],
                                                                                         ],
@@ -89,7 +89,7 @@ CssRoot {
   1: CSS_ROOT_ITEM_LIST@0..12
     0: CSS_AT_RULE@0..12
       0: AT@0..1 "@" [] []
-      1: CSS_BOGUS_AT_RULE@1..12
+      1: CSS_BOGUS@1..12
         0: WARN_KW@1..6 "warn" [] [Whitespace(" ")]
         1: CSS_BOGUS@6..12
           0: CSS_BOGUS@6..12
@@ -108,7 +108,7 @@ CssRoot {
                       0: CSS_BOGUS@10..12
                         0: CSS_NUMBER@10..11
                           0: CSS_NUMBER_LITERAL@10..11 "2" [] []
-                        1: CSS_BOGUS_PROPERTY_VALUE@11..12
+                        1: CSS_BOGUS@11..12
                           0: SEMICOLON@11..12 ";" [] []
   2: EOF@12..13 "" [Newline("\n")] []
 

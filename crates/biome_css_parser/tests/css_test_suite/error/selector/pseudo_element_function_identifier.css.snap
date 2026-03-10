@@ -27,7 +27,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@0..2 "::" [] [],
-                            element: CssBogusPseudoElement {
+                            element: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@2..11 "highlight" [] [],
@@ -63,7 +63,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@25..28 "::" [Newline("\n")] [],
-                            element: CssBogusPseudoElement {
+                            element: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@28..37 "highlight" [] [],
@@ -89,7 +89,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@41..44 "::" [Newline("\n")] [],
-                            element: CssBogusPseudoElement {
+                            element: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@44..53 "highlight" [] [],
@@ -101,7 +101,7 @@ CssRoot {
                     ],
                 },
             ],
-            block: CssBogusBlock {
+            block: CssBogus {
                 items: [],
             },
         },
@@ -124,7 +124,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@0..23
             0: CSS_PSEUDO_ELEMENT_SELECTOR@0..23
               0: COLON2@0..2 "::" [] []
-              1: CSS_BOGUS_PSEUDO_ELEMENT@2..23
+              1: CSS_BOGUS@2..23
                 0: CSS_IDENTIFIER@2..11
                   0: IDENT@2..11 "highlight" [] []
                 1: L_PAREN@11..12 "(" [] []
@@ -146,7 +146,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@25..39
             0: CSS_PSEUDO_ELEMENT_SELECTOR@25..39
               0: COLON2@25..28 "::" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_ELEMENT@28..39
+              1: CSS_BOGUS@28..39
                 0: CSS_IDENTIFIER@28..37
                   0: IDENT@28..37 "highlight" [] []
                 1: L_PAREN@37..39 "(" [] [Whitespace(" ")]
@@ -162,11 +162,11 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@41..54
             0: CSS_PSEUDO_ELEMENT_SELECTOR@41..54
               0: COLON2@41..44 "::" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_ELEMENT@44..54
+              1: CSS_BOGUS@44..54
                 0: CSS_IDENTIFIER@44..53
                   0: IDENT@44..53 "highlight" [] []
                 1: L_PAREN@53..54 "(" [] []
-      1: CSS_BOGUS_BLOCK@54..54
+      1: CSS_BOGUS@54..54
   2: EOF@54..55 "" [Newline("\n")] []
 
 ```

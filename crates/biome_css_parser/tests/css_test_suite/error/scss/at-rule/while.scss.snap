@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
 
@@ -105,7 +104,7 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@59..62 "@" [Newline("\n"), Newline("\n")] [],
-            rule: CssBogusAtRule {
+            rule: CssBogus {
                 items: [
                     WHILE_KW@62..68 "while" [] [Whitespace(" ")],
                     ScssExpression {
@@ -124,7 +123,7 @@ CssRoot {
                             },
                         ],
                     },
-                    CssBogusBlock {
+                    CssBogus {
                         items: [],
                     },
                 ],
@@ -193,7 +192,7 @@ CssRoot {
           2: R_CURLY@57..59 "}" [Newline("\n")] []
     2: CSS_AT_RULE@59..78
       0: AT@59..62 "@" [Newline("\n"), Newline("\n")] []
-      1: CSS_BOGUS_AT_RULE@62..78
+      1: CSS_BOGUS@62..78
         0: WHILE_KW@62..68 "while" [] [Whitespace(" ")]
         1: SCSS_EXPRESSION@68..78
           0: SCSS_EXPRESSION_ITEM_LIST@68..78
@@ -205,7 +204,7 @@ CssRoot {
               1: R_ANGLE@75..77 ">" [] [Whitespace(" ")]
               2: CSS_NUMBER@77..78
                 0: CSS_NUMBER_LITERAL@77..78 "0" [] []
-        2: CSS_BOGUS_BLOCK@78..78
+        2: CSS_BOGUS@78..78
   2: EOF@78..79 "" [Newline("\n")] []
 
 ```

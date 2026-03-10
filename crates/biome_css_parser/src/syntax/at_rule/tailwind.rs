@@ -43,13 +43,13 @@ pub(crate) fn parse_utility_at_rule(p: &mut CssParser) -> ParsedSyntax {
     // Parse utility name - can be simple or functional
     if !is_at_utility_identifier(p) {
         p.error(expected_identifier(p, p.cur_range()));
-        return Present(m.complete(p, CSS_BOGUS_AT_RULE));
+        return Present(m.complete(p, CSS_BOGUS));
     }
 
     parse_utility_name(p)
         .or_recover_with_token_set(
             p,
-            &ParseRecoveryTokenSet::new(CSS_BOGUS_CUSTOM_IDENTIFIER, token_set![T!['{']]),
+            &ParseRecoveryTokenSet::new(CSS_BOGUS, token_set![T!['{']]),
             expected_identifier,
         )
         .ok();
@@ -107,7 +107,7 @@ pub(crate) fn parse_variant_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     if !is_at_identifier(p) {
         p.error(expected_identifier(p, p.cur_range()));
-        return Present(m.complete(p, CSS_BOGUS_AT_RULE));
+        return Present(m.complete(p, CSS_BOGUS));
     }
 
     parse_regular_identifier(p).ok();
@@ -128,7 +128,7 @@ pub(crate) fn parse_custom_variant_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     if !is_at_identifier(p) {
         p.error(expected_identifier(p, p.cur_range()));
-        return Present(m.complete(p, CSS_BOGUS_AT_RULE));
+        return Present(m.complete(p, CSS_BOGUS));
     }
 
     parse_regular_identifier(p).ok();
@@ -210,7 +210,7 @@ impl ParseNodeList for ApplyClassList {
     ) -> RecoveryResult {
         parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecoveryTokenSet::new(CSS_BOGUS_CUSTOM_IDENTIFIER, TW_APPLY_CLASS_LIST_END)
+            &ParseRecoveryTokenSet::new(CSS_BOGUS, TW_APPLY_CLASS_LIST_END)
                 .enable_recovery_on_line_break(),
             expected_identifier,
         )

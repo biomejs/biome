@@ -41,7 +41,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
                             colon_token: COLON@0..1 ":" [] [],
-                            class: CssBogusPseudoClass {
+                            class: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@1..10 "nth-child" [] [],
@@ -73,7 +73,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
                             colon_token: COLON@22..24 ":" [Newline("\n")] [],
-                            class: CssBogusPseudoClass {
+                            class: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@24..33 "nth-child" [] [],
@@ -116,7 +116,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
                             colon_token: COLON@42..44 ":" [Newline("\n")] [],
-                            class: CssBogusPseudoClass {
+                            class: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@44..53 "nth-child" [] [],
@@ -165,7 +165,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
                             colon_token: COLON@68..70 ":" [Newline("\n")] [],
-                            class: CssBogusPseudoClass {
+                            class: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@70..79 "nth-child" [] [],
@@ -254,7 +254,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
                             colon_token: COLON@116..118 ":" [Newline("\n")] [],
-                            class: CssBogusPseudoClass {
+                            class: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@118..127 "nth-child" [] [],
@@ -298,7 +298,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
                             colon_token: COLON@145..147 ":" [Newline("\n")] [],
-                            class: CssBogusPseudoClass {
+                            class: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@147..156 "nth-child" [] [],
@@ -340,7 +340,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
                             colon_token: COLON@167..169 ":" [Newline("\n")] [],
-                            class: CssBogusPseudoClass {
+                            class: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@169..178 "nth-child" [] [],
@@ -386,7 +386,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
                             colon_token: COLON@191..193 ":" [Newline("\n")] [],
-                            class: CssBogusPseudoClass {
+                            class: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@193..202 "nth-child" [] [],
@@ -431,7 +431,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
                             colon_token: COLON@214..216 ":" [Newline("\n")] [],
-                            class: CssBogusPseudoClass {
+                            class: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@216..225 "nth-child" [] [],
@@ -470,7 +470,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
                             colon_token: COLON@239..241 ":" [Newline("\n")] [],
-                            class: CssBogusPseudoClass {
+                            class: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@241..250 "nth-child" [] [],
@@ -520,7 +520,7 @@ CssRoot {
                                     of_selector: CssPseudoClassOfNthSelector {
                                         of_token: OF_KW@280..283 "of" [] [Whitespace(" ")],
                                         selectors: CssSelectorList [
-                                            CssBogusSelector {
+                                            CssBogus {
                                                 items: [
                                                     CARET@283..284 "^" [] [],
                                                 ],
@@ -561,7 +561,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
                             colon_token: COLON@292..294 ":" [Newline("\n")] [],
-                            class: CssBogusPseudoClass {
+                            class: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@294..303 "nth-child" [] [],
@@ -574,7 +574,7 @@ CssRoot {
                                         of_selector: CssPseudoClassOfNthSelector {
                                             of_token: OF_KW@309..312 "of" [] [Whitespace(" ")],
                                             selectors: CssSelectorList [
-                                                CssBogusSelector {
+                                                CssBogus {
                                                     items: [
                                                         CARET@312..313 "^" [] [],
                                                     ],
@@ -615,7 +615,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
                             colon_token: COLON@320..322 ":" [Newline("\n")] [],
-                            class: CssBogusPseudoClass {
+                            class: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@322..331 "nth-child" [] [],
@@ -656,7 +656,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
                             colon_token: COLON@347..349 ":" [Newline("\n")] [],
-                            class: CssBogusPseudoClass {
+                            class: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@349..358 "nth-child" [] [],
@@ -696,7 +696,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
                             colon_token: COLON@373..375 ":" [Newline("\n")] [],
-                            class: CssBogusPseudoClass {
+                            class: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@375..384 "nth-child" [] [],
@@ -737,7 +737,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
                             colon_token: COLON@392..394 ":" [Newline("\n")] [],
-                            class: CssBogusPseudoClass {
+                            class: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@394..403 "nth-child" [] [],
@@ -780,7 +780,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
                             colon_token: COLON@415..417 ":" [Newline("\n")] [],
-                            class: CssBogusPseudoClass {
+                            class: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@417..426 "nth-child" [] [],
@@ -808,7 +808,7 @@ CssRoot {
                     ],
                 },
             ],
-            block: CssBogusBlock {
+            block: CssBogus {
                 items: [],
             },
         },
@@ -831,7 +831,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@0..20
             0: CSS_PSEUDO_CLASS_SELECTOR@0..20
               0: COLON@0..1 ":" [] []
-              1: CSS_BOGUS_PSEUDO_CLASS@1..20
+              1: CSS_BOGUS@1..20
                 0: CSS_IDENTIFIER@1..10
                   0: IDENT@1..10 "nth-child" [] []
                 1: L_PAREN@10..11 "(" [] []
@@ -850,7 +850,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@22..40
             0: CSS_PSEUDO_CLASS_SELECTOR@22..40
               0: COLON@22..24 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@24..40
+              1: CSS_BOGUS@24..40
                 0: CSS_IDENTIFIER@24..33
                   0: IDENT@24..33 "nth-child" [] []
                 1: L_PAREN@33..34 "(" [] []
@@ -877,7 +877,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@42..66
             0: CSS_PSEUDO_CLASS_SELECTOR@42..66
               0: COLON@42..44 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@44..66
+              1: CSS_BOGUS@44..66
                 0: CSS_IDENTIFIER@44..53
                   0: IDENT@44..53 "nth-child" [] []
                 1: L_PAREN@53..54 "(" [] []
@@ -908,7 +908,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@68..91
             0: CSS_PSEUDO_CLASS_SELECTOR@68..91
               0: COLON@68..70 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@70..91
+              1: CSS_BOGUS@70..91
                 0: CSS_IDENTIFIER@70..79
                   0: IDENT@70..79 "nth-child" [] []
                 1: L_PAREN@79..80 "(" [] []
@@ -966,7 +966,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@116..143
             0: CSS_PSEUDO_CLASS_SELECTOR@116..143
               0: COLON@116..118 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@118..143
+              1: CSS_BOGUS@118..143
                 0: CSS_IDENTIFIER@118..127
                   0: IDENT@118..127 "nth-child" [] []
                 1: L_PAREN@127..128 "(" [] []
@@ -994,7 +994,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@145..165
             0: CSS_PSEUDO_CLASS_SELECTOR@145..165
               0: COLON@145..147 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@147..165
+              1: CSS_BOGUS@147..165
                 0: CSS_IDENTIFIER@147..156
                   0: IDENT@147..156 "nth-child" [] []
                 1: L_PAREN@156..157 "(" [] []
@@ -1021,7 +1021,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@167..189
             0: CSS_PSEUDO_CLASS_SELECTOR@167..189
               0: COLON@167..169 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@169..189
+              1: CSS_BOGUS@169..189
                 0: CSS_IDENTIFIER@169..178
                   0: IDENT@169..178 "nth-child" [] []
                 1: L_PAREN@178..179 "(" [] []
@@ -1050,7 +1050,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@191..212
             0: CSS_PSEUDO_CLASS_SELECTOR@191..212
               0: COLON@191..193 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@193..212
+              1: CSS_BOGUS@193..212
                 0: CSS_IDENTIFIER@193..202
                   0: IDENT@193..202 "nth-child" [] []
                 1: L_PAREN@202..203 "(" [] []
@@ -1078,7 +1078,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@214..237
             0: CSS_PSEUDO_CLASS_SELECTOR@214..237
               0: COLON@214..216 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@216..237
+              1: CSS_BOGUS@216..237
                 0: CSS_IDENTIFIER@216..225
                   0: IDENT@216..225 "nth-child" [] []
                 1: L_PAREN@225..226 "(" [] []
@@ -1102,7 +1102,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@239..261
             0: CSS_PSEUDO_CLASS_SELECTOR@239..261
               0: COLON@239..241 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@241..261
+              1: CSS_BOGUS@241..261
                 0: CSS_IDENTIFIER@241..250
                   0: IDENT@241..250 "nth-child" [] []
                 1: L_PAREN@250..251 "(" [] []
@@ -1135,7 +1135,7 @@ CssRoot {
                   1: CSS_PSEUDO_CLASS_OF_NTH_SELECTOR@280..288
                     0: OF_KW@280..283 "of" [] [Whitespace(" ")]
                     1: CSS_SELECTOR_LIST@283..288
-                      0: CSS_BOGUS_SELECTOR@283..284
+                      0: CSS_BOGUS@283..284
                         0: CARET@283..284 "^" [] []
                       1: (empty)
                       2: CSS_COMPOUND_SELECTOR@284..288
@@ -1159,7 +1159,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@292..318
             0: CSS_PSEUDO_CLASS_SELECTOR@292..318
               0: COLON@292..294 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@294..318
+              1: CSS_BOGUS@294..318
                 0: CSS_IDENTIFIER@294..303
                   0: IDENT@294..303 "nth-child" [] []
                 1: L_PAREN@303..304 "(" [] []
@@ -1169,7 +1169,7 @@ CssRoot {
                   1: CSS_PSEUDO_CLASS_OF_NTH_SELECTOR@309..318
                     0: OF_KW@309..312 "of" [] [Whitespace(" ")]
                     1: CSS_SELECTOR_LIST@312..318
-                      0: CSS_BOGUS_SELECTOR@312..313
+                      0: CSS_BOGUS@312..313
                         0: CARET@312..313 "^" [] []
                       1: (empty)
                       2: CSS_COMPOUND_SELECTOR@313..318
@@ -1192,7 +1192,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@320..345
             0: CSS_PSEUDO_CLASS_SELECTOR@320..345
               0: COLON@320..322 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@322..345
+              1: CSS_BOGUS@322..345
                 0: CSS_IDENTIFIER@322..331
                   0: IDENT@322..331 "nth-child" [] []
                 1: L_PAREN@331..332 "(" [] []
@@ -1218,7 +1218,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@347..371
             0: CSS_PSEUDO_CLASS_SELECTOR@347..371
               0: COLON@347..349 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@349..371
+              1: CSS_BOGUS@349..371
                 0: CSS_IDENTIFIER@349..358
                   0: IDENT@349..358 "nth-child" [] []
                 1: L_PAREN@358..359 "(" [] []
@@ -1243,7 +1243,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@373..390
             0: CSS_PSEUDO_CLASS_SELECTOR@373..390
               0: COLON@373..375 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@375..390
+              1: CSS_BOGUS@375..390
                 0: CSS_IDENTIFIER@375..384
                   0: IDENT@375..384 "nth-child" [] []
                 1: L_PAREN@384..385 "(" [] []
@@ -1268,7 +1268,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@392..413
             0: CSS_PSEUDO_CLASS_SELECTOR@392..413
               0: COLON@392..394 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@394..413
+              1: CSS_BOGUS@394..413
                 0: CSS_IDENTIFIER@394..403
                   0: IDENT@394..403 "nth-child" [] []
                 1: L_PAREN@403..404 "(" [] []
@@ -1295,7 +1295,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@415..433
             0: CSS_PSEUDO_CLASS_SELECTOR@415..433
               0: COLON@415..417 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@417..433
+              1: CSS_BOGUS@417..433
                 0: CSS_IDENTIFIER@417..426
                   0: IDENT@417..426 "nth-child" [] []
                 1: L_PAREN@426..427 "(" [] []
@@ -1310,7 +1310,7 @@ CssRoot {
                       1: CSS_NUMBER@432..433
                         0: CSS_NUMBER_LITERAL@432..433 "1" [] []
                   1: (empty)
-      1: CSS_BOGUS_BLOCK@433..433
+      1: CSS_BOGUS@433..433
   2: EOF@433..433 "" [] []
 
 ```

@@ -56,7 +56,7 @@ CssRoot {
             rule: CssFontFeatureValuesAtRule {
                 font_feature_values_token: FONT_FEATURE_VALUES_KW@29..49 "font-feature-values" [] [Whitespace(" ")],
                 names: CssFontFamilyNameList [
-                    CssBogusFontFamilyName {
+                    CssBogus {
                         items: [
                             CSS_NUMBER_LITERAL@49..54 "6788" [] [Whitespace(" ")],
                         ],
@@ -79,7 +79,7 @@ CssRoot {
                             CssCustomIdentifier {
                                 value_token: IDENT@81..86 "ident" [] [],
                             },
-                            CssBogusCustomIdentifier {
+                            CssBogus {
                                 items: [
                                     AT@86..89 "@" [Newline("\n"), Newline("\n")] [],
                                 ],
@@ -87,7 +87,7 @@ CssRoot {
                             CssCustomIdentifier {
                                 value_token: IDENT@89..109 "font-feature-values" [] [Whitespace(" ")],
                             },
-                            CssBogusCustomIdentifier {
+                            CssBogus {
                                 items: [
                                     SEMICOLON@109..110 ";" [] [],
                                     AT@110..113 "@" [Newline("\n"), Newline("\n")] [],
@@ -105,7 +105,7 @@ CssRoot {
                 block: CssFontFeatureValuesBlock {
                     l_curly_token: L_CURLY@139..140 "{" [] [],
                     items: CssFontFeatureValuesItemList [
-                        CssBogusFontFeatureValuesItem {
+                        CssBogus {
                             items: [
                                 L_CURLY@140..144 "{" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
                             ],
@@ -115,7 +115,7 @@ CssRoot {
                 },
             },
         },
-        CssBogusRule {
+        CssBogus {
             items: [
                 R_CURLY@145..147 "}" [Newline("\n")] [],
             ],
@@ -139,11 +139,11 @@ CssRoot {
                         CssFontFeatureValuesItem {
                             at_token: AT@177..180 "@" [Newline("\n"), Whitespace("\t")] [],
                             name: missing (required),
-                            block: CssBogusBlock {
+                            block: CssBogus {
                                 items: [],
                             },
                         },
-                        CssBogusFontFeatureValuesItem {
+                        CssBogus {
                             items: [
                                 IDENT@180..184 "xxx" [] [Whitespace(" ")],
                                 L_CURLY@184..186 "{" [] [Whitespace(" ")],
@@ -154,7 +154,7 @@ CssRoot {
                 },
             },
         },
-        CssBogusRule {
+        CssBogus {
             items: [
                 R_CURLY@187..189 "}" [Newline("\n")] [],
             ],
@@ -168,7 +168,7 @@ CssRoot {
                         value_token: CSS_STRING_LITERAL@212..219 "\"first\"" [] [],
                     },
                     COMMA@219..221 "," [] [Whitespace(" ")],
-                    CssBogusFontFamilyName {
+                    CssBogus {
                         items: [
                             CSS_NUMBER_LITERAL@221..224 "123" [] [],
                         ],
@@ -195,7 +195,7 @@ CssRoot {
                             CssCustomIdentifier {
                                 value_token: IDENT@262..268 "first" [] [Whitespace(" ")],
                             },
-                            CssBogusCustomIdentifier {
+                            CssBogus {
                                 items: [
                                     CSS_NUMBER_LITERAL@268..272 "123" [] [Whitespace(" ")],
                                 ],
@@ -203,7 +203,7 @@ CssRoot {
                             CssCustomIdentifier {
                                 value_token: IDENT@272..279 "second" [] [Whitespace(" ")],
                             },
-                            CssBogusCustomIdentifier {
+                            CssBogus {
                                 items: [
                                     CSS_NUMBER_LITERAL@279..282 "123" [] [],
                                 ],
@@ -216,7 +216,7 @@ CssRoot {
                             CssCustomIdentifier {
                                 value_token: IDENT@284..290 "third" [] [Whitespace(" ")],
                             },
-                            CssBogusCustomIdentifier {
+                            CssBogus {
                                 items: [
                                     CSS_STRING_LITERAL@290..299 "\"second\"" [] [Whitespace(" ")],
                                 ],
@@ -256,7 +256,7 @@ CssRoot {
       1: CSS_FONT_FEATURE_VALUES_AT_RULE@29..58
         0: FONT_FEATURE_VALUES_KW@29..49 "font-feature-values" [] [Whitespace(" ")]
         1: CSS_FONT_FAMILY_NAME_LIST@49..54
-          0: CSS_BOGUS_FONT_FAMILY_NAME@49..54
+          0: CSS_BOGUS@49..54
             0: CSS_NUMBER_LITERAL@49..54 "6788" [] [Whitespace(" ")]
         2: CSS_FONT_FEATURE_VALUES_BLOCK@54..58
           0: L_CURLY@54..57 "{" [] [Whitespace("  ")]
@@ -271,11 +271,11 @@ CssRoot {
             0: CSS_CUSTOM_IDENTIFIER_SPACE_SEPARATED_LIST@81..139
               0: CSS_CUSTOM_IDENTIFIER@81..86
                 0: IDENT@81..86 "ident" [] []
-              1: CSS_BOGUS_CUSTOM_IDENTIFIER@86..89
+              1: CSS_BOGUS@86..89
                 0: AT@86..89 "@" [Newline("\n"), Newline("\n")] []
               2: CSS_CUSTOM_IDENTIFIER@89..109
                 0: IDENT@89..109 "font-feature-values" [] [Whitespace(" ")]
-              3: CSS_BOGUS_CUSTOM_IDENTIFIER@109..113
+              3: CSS_BOGUS@109..113
                 0: SEMICOLON@109..110 ";" [] []
                 1: AT@110..113 "@" [Newline("\n"), Newline("\n")] []
               4: CSS_CUSTOM_IDENTIFIER@113..133
@@ -285,10 +285,10 @@ CssRoot {
         2: CSS_FONT_FEATURE_VALUES_BLOCK@139..145
           0: L_CURLY@139..140 "{" [] []
           1: CSS_FONT_FEATURE_VALUES_ITEM_LIST@140..144
-            0: CSS_BOGUS_FONT_FEATURE_VALUES_ITEM@140..144
+            0: CSS_BOGUS@140..144
               0: L_CURLY@140..144 "{" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
           2: R_CURLY@144..145 "}" [] []
-    3: CSS_BOGUS_RULE@145..147
+    3: CSS_BOGUS@145..147
       0: R_CURLY@145..147 "}" [Newline("\n")] []
     4: CSS_AT_RULE@147..187
       0: AT@147..150 "@" [Newline("\n"), Newline("\n")] []
@@ -305,12 +305,12 @@ CssRoot {
             0: CSS_FONT_FEATURE_VALUES_ITEM@177..180
               0: AT@177..180 "@" [Newline("\n"), Whitespace("\t")] []
               1: (empty)
-              2: CSS_BOGUS_BLOCK@180..180
-            1: CSS_BOGUS_FONT_FEATURE_VALUES_ITEM@180..186
+              2: CSS_BOGUS@180..180
+            1: CSS_BOGUS@180..186
               0: IDENT@180..184 "xxx" [] [Whitespace(" ")]
               1: L_CURLY@184..186 "{" [] [Whitespace(" ")]
           2: R_CURLY@186..187 "}" [] []
-    5: CSS_BOGUS_RULE@187..189
+    5: CSS_BOGUS@187..189
       0: R_CURLY@187..189 "}" [Newline("\n")] []
     6: CSS_AT_RULE@189..239
       0: AT@189..192 "@" [Newline("\n"), Newline("\n")] []
@@ -320,7 +320,7 @@ CssRoot {
           0: CSS_STRING@212..219
             0: CSS_STRING_LITERAL@212..219 "\"first\"" [] []
           1: COMMA@219..221 "," [] [Whitespace(" ")]
-          2: CSS_BOGUS_FONT_FAMILY_NAME@221..224
+          2: CSS_BOGUS@221..224
             0: CSS_NUMBER_LITERAL@221..224 "123" [] []
           3: COMMA@224..226 "," [] [Whitespace(" ")]
           4: CSS_STRING@226..235
@@ -338,18 +338,18 @@ CssRoot {
             0: CSS_CUSTOM_IDENTIFIER_SPACE_SEPARATED_LIST@262..282
               0: CSS_CUSTOM_IDENTIFIER@262..268
                 0: IDENT@262..268 "first" [] [Whitespace(" ")]
-              1: CSS_BOGUS_CUSTOM_IDENTIFIER@268..272
+              1: CSS_BOGUS@268..272
                 0: CSS_NUMBER_LITERAL@268..272 "123" [] [Whitespace(" ")]
               2: CSS_CUSTOM_IDENTIFIER@272..279
                 0: IDENT@272..279 "second" [] [Whitespace(" ")]
-              3: CSS_BOGUS_CUSTOM_IDENTIFIER@279..282
+              3: CSS_BOGUS@279..282
                 0: CSS_NUMBER_LITERAL@279..282 "123" [] []
           1: COMMA@282..284 "," [] [Whitespace(" ")]
           2: CSS_FONT_FAMILY_NAME@284..299
             0: CSS_CUSTOM_IDENTIFIER_SPACE_SEPARATED_LIST@284..299
               0: CSS_CUSTOM_IDENTIFIER@284..290
                 0: IDENT@284..290 "third" [] [Whitespace(" ")]
-              1: CSS_BOGUS_CUSTOM_IDENTIFIER@290..299
+              1: CSS_BOGUS@290..299
                 0: CSS_STRING_LITERAL@290..299 "\"second\"" [] [Whitespace(" ")]
         2: CSS_FONT_FEATURE_VALUES_BLOCK@299..303
           0: L_CURLY@299..300 "{" [] []

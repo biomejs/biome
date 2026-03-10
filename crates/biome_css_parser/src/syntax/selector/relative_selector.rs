@@ -78,7 +78,7 @@ impl RelativeSelectorListParseRecovery {
 impl ParseRecovery for RelativeSelectorListParseRecovery {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
-    const RECOVERED_KIND: Self::Kind = CSS_BOGUS_SELECTOR;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
 
     /// Determines if the current parser position is a point of recovery.
     ///

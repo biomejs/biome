@@ -49,7 +49,7 @@ pub(crate) fn parse_pseudo_class_function_compound_selector_list(
     {
         CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST
     } else {
-        CSS_BOGUS_PSEUDO_CLASS
+        CSS_BOGUS
     };
 
     Present(m.complete(p, kind))

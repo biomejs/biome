@@ -37,38 +37,6 @@
 SyntaxElement = SyntaxElement
 
 CssBogus = SyntaxElement*
-CssBogusSelector = SyntaxElement*
-CssBogusSubSelector = SyntaxElement*
-CssBogusPseudoClass = SyntaxElement*
-CssBogusPageSelectorPseudo = SyntaxElement*
-CssBogusPseudoElement = SyntaxElement*
-CssBogusAtRule = SyntaxElement*
-CssBogusLayer = SyntaxElement*
-CssBogusBlock =  SyntaxElement*
-CssBogusScopeRange =  SyntaxElement*
-CssBogusFontFeatureValuesItem = SyntaxElement*
-CssBogusKeyframesItem =  SyntaxElement*
-CssBogusRule =  SyntaxElement*
-CssBogusParameter = SyntaxElement*
-CssBogusDeclarationItem = SyntaxElement*
-CssBogusMediaQuery =  SyntaxElement*
-CssBogusProperty =  SyntaxElement*
-CssBogusUrlModifier =  SyntaxElement*
-CssBogusPropertyValue = SyntaxElement*
-CssBogusDocumentMatcher = SyntaxElement*
-CssBogusFontFamilyName = SyntaxElement*
-CssBogusCustomIdentifier = SyntaxElement*
-CssBogusKeyframesName = SyntaxElement*
-CssBogusUnicodeRangeValue = SyntaxElement*
-CssBogusSupportsCondition = SyntaxElement*
-CssBogusIfBranch = SyntaxElement*
-CssBogusIfTest = SyntaxElement*
-CssBogusSyntax = SyntaxElement*
-CssBogusSyntaxSingleComponent = SyntaxElement*
-CssBogusAttrName = SyntaxElement*
-CssBogusFunctionParameter = SyntaxElement*
-CssBogusType = SyntaxElement*
-CssBogusIfTestBooleanExpr = SyntaxElement*
 
 AnyCssRoot =
 	CssRoot
@@ -96,7 +64,7 @@ AnyCssRule =
 	CssQualifiedRule
 	| CssNestedQualifiedRule
 	| CssAtRule
-	| CssBogusRule
+	| CssBogus
 
 // .header { color: red }
 // ^^^^^^^^^^^^^^^^^^^^^
@@ -119,7 +87,7 @@ CssSelectorList = (AnyCssSelector (',' AnyCssSelector)*)
 AnyCssSelector =
 	CssComplexSelector
 	| CssCompoundSelector
-	| CssBogusSelector
+	| CssBogus
 	| CssMetavariable
 
 // div a {}
@@ -160,7 +128,7 @@ AnyCssSubSelector =
 	| CssAttributeSelector
 	| CssPseudoClassSelector
 	| CssPseudoElementSelector
-	| CssBogusSubSelector
+	| CssBogus
 
 // * {}
 // ^
@@ -250,7 +218,7 @@ AnyCssPseudoClass =
 	| CssPseudoClassFunctionNth
 	| CssPseudoClassFunctionCustomIdentifierList
 	| CssPseudoClassFunctionCustomIdentifier
-	| CssBogusPseudoClass
+	| CssBogus
 
 CssPseudoClassIdentifier =
 	name: CssIdentifier
@@ -301,7 +269,7 @@ CssPseudoClassFunctionCompoundSelector =
 
 AnyCssCompoundSelector =
 	CssCompoundSelector
-	| CssBogusSelector
+	| CssBogus
 
 // :has(> img, +dt) {}
 // ^^^^^^^^^^^^^^^^
@@ -317,7 +285,7 @@ CssRelativeSelectorList = (AnyCssRelativeSelector (',' AnyCssRelativeSelector)*)
 
 AnyCssRelativeSelector =
 	CssRelativeSelector
-	| CssBogusSelector
+	| CssBogus
 
 // :has(> img, +dt) {}
 //      ^^^^^  ^^^
@@ -353,7 +321,7 @@ CssPseudoClassFunctionNth =
 
 AnyCssPseudoClassNthSelector =
 	CssPseudoClassNthSelector
-	| CssBogusSelector
+	| CssBogus
 
 // :nth-child(2n+1 of li, .test) {}
 //        ^^^^^^^^^^^^^^^^^
@@ -440,7 +408,7 @@ AnyCssPseudoElement =
 	| CssPseudoElementFunctionSelector
 	| CssPseudoElementFunctionCustomIdentifier
 	| CssPseudoElementFunction
-	| CssBogusPseudoElement
+	| CssBogus
 
 // a::after {}
 //    ^^^^^
@@ -480,7 +448,7 @@ CssPseudoElementFunctionParameterList = CssIdentifier*
 
 AnyCssDeclarationOrRuleBlock =
 	CssDeclarationOrRuleBlock
-	| CssBogusBlock
+	| CssBogus
 
 CssDeclarationOrRuleBlock =
 	'{'
@@ -502,7 +470,7 @@ AnyCssDeclarationOrRule =
 // 						 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AnyCssDeclarationOrAtRuleBlock =
 	CssDeclarationOrAtRuleBlock
-	| CssBogusBlock
+	| CssBogus
 
 CssDeclarationOrAtRuleBlock =
 	'{'
@@ -523,7 +491,7 @@ AnyCssDeclarationOrAtRule =
 AnyCssConditionalBlock =
 	CssDeclarationOrRuleBlock
 	| CssRuleBlock
-	| CssBogusBlock
+	| CssBogus
 
 // @page :left { background: red; @media (500px <= width <= 500px) {  } }
 // 						   ^^^^^^^^^^^^^^^^
@@ -537,7 +505,7 @@ CssEmptyDeclaration =
 
 AnyCssDeclarationBlock =
 	CssDeclarationBlock
-	| CssBogusBlock
+	| CssBogus
 
 CssDeclarationBlock =
 	'{'
@@ -554,7 +522,7 @@ AnyCssDeclaration =
 
 AnyCssRuleBlock =
 	CssRuleBlock
-	| CssBogusBlock
+	| CssBogus
 
 CssRuleBlock =
 	'{'
@@ -572,7 +540,7 @@ CssDeclaration =
 AnyCssProperty =
 	CssGenericProperty
 	| CssComposesProperty
-	| CssBogusProperty
+	| CssBogus
 
 CssGenericProperty =
 	name: AnyCssDeclarationName
@@ -711,7 +679,7 @@ AnyCssAtRule =
 	// Unknowns
 	| CssUnknownBlockAtRule
 	| CssUnknownValueAtRule
-	| CssBogusAtRule
+	| CssBogus
 
 // An at-rule declarator is an at-rule, without the block part.
 // Used primarily in tailwind `@custom-variant` definitions.
@@ -847,7 +815,7 @@ CssFontFamilyNameList = (AnyCssFontFamilyName (',' AnyCssFontFamilyName)*)
 AnyCssFontFamilyName =
     CssFontFamilyName
     | CssString
-    | CssBogusFontFamilyName
+    | CssBogus
 
 CssFontFamilyName =
 	names: CssCustomIdentifierSpaceSeparatedList
@@ -862,7 +830,7 @@ CssCustomIdentifierCommaSeparatedList = (AnyCssCustomIdentifier (',' AnyCssCusto
 
 AnyCssFontFeatureValuesBlock =
 	CssFontFeatureValuesBlock
-	| CssBogusBlock
+	| CssBogus
 
 // @font-feature-values Font One { @styleset { nice-style: 12; } }
 //                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -875,7 +843,7 @@ CssFontFeatureValuesItemList = AnyCssFontFeatureValuesItem*
 
 AnyCssFontFeatureValuesItem =
 	CssFontFeatureValuesItem
-	| CssBogusFontFeatureValuesItem
+	| CssBogus
 
 // @font-feature-values Font One { @styleset { nice-style: 12; } }
 //                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1125,11 +1093,11 @@ CssKeyframesAtRule =
 AnyCssKeyframesName =
 	CssKeyframesScopedName
 	| AnyCssKeyframesIdentifier
-	| CssBogusKeyframesName
+	| CssBogus
 
 AnyCssKeyframesBlock =
 	CssKeyframesBlock
-	| CssBogusBlock
+	| CssBogus
 
 // This grammar is specific to CSS Modules and defines how scoped keyframes are parsed.
 // In CSS Modules, keyframes can be scoped locally or globally using the `:local` and `:global` pseudo-classes.
@@ -1174,7 +1142,7 @@ CssKeyframesItemList = AnyCssKeyframesItem*
 
 AnyCssKeyframesItem =
 	CssKeyframesItem
-	| CssBogusKeyframesItem
+	| CssBogus
 
 // @keyframes "something" { 30%, 60% {} }
 //                          ^^^^^^^^^^^
@@ -1187,7 +1155,7 @@ CssKeyframesSelectorList =  (AnyCssKeyframesSelector (',' AnyCssKeyframesSelecto
 AnyCssKeyframesSelector =
 	CssKeyframesIdentSelector
 	| CssKeyframesPercentageSelector
-	| CssBogusSelector
+	| CssBogus
 
 // @keyframes "something" { from {} to {} }
 //                          ^^^^    ^^
@@ -1244,7 +1212,7 @@ CssMediaQueryList = (AnyCssMediaQuery (',' AnyCssMediaQuery)*)
 AnyCssMediaQuery =
 	CssMediaConditionQuery
 	| AnyCssMediaTypeQuery
-	| CssBogusMediaQuery
+	| CssBogus
 	| CssMetavariable
 
 // @media screen, (width > 500px), print {}
@@ -1410,7 +1378,7 @@ CssPageSelectorList = (AnyCssPageSelector (',' AnyCssPageSelector)*)
 
 AnyCssPageSelector =
 	CssPageSelector
-	| CssBogusSelector
+	| CssBogus
 
 // @page name:first,:blank:first {  }
 //       ^^^^^^^^^^ ^^^^^^^^^^^^
@@ -1425,7 +1393,7 @@ CssPageSelectorPseudoList = AnyCssPageSelectorPseudo*
 
 AnyCssPageSelectorPseudo =
 	CssPageSelectorPseudo
-	| CssBogusPageSelectorPseudo
+	| CssBogus
 
 // @page name:first,:blank:first {  }
 // 			     ^^^^^^ ^^^^^^^^^^^^
@@ -1435,7 +1403,7 @@ CssPageSelectorPseudo =
 
 AnyCssPageAtRuleBlock =
 	CssPageAtRuleBlock
-	| CssBogusBlock
+	| CssBogus
 
 // @page :left { @left-middle {} background: red; @media (500px <= width <= 500px) {  } }
 // 						 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1498,7 +1466,7 @@ CssLayerAtRule =
 AnyCssLayer =
 	CssLayerDeclaration
 	| CssLayerReference
-	| CssBogusLayer
+	| CssBogus
 
 // @layer override.bar { }
 //        ^^^^^^^^^^^^^^^^
@@ -1546,7 +1514,7 @@ AnyCssSupportsCondition =
 	| CssSupportsOrCondition
 	| CssSupportsAndCondition
 	| AnyCssSupportsInParens
-	| CssBogusSupportsCondition
+	| CssBogus
 
 // @supports not (display: grid) {}
 //           ^^^^^^^^^^^^^^^^^^^
@@ -1621,7 +1589,7 @@ AnyCssScopeRange =
 	CssScopeRangeStart
 	| CssScopeRangeEnd
 	| CssScopeRangeInterval
-	| CssBogusScopeRange
+	| CssBogus
 
 CssScopeRangeStart =
 	start: CssScopeEdge
@@ -1739,7 +1707,7 @@ CssDocumentMatcherList = (AnyCssDocumentMatcher (',' AnyCssDocumentMatcher)*)
 AnyCssDocumentMatcher =
 	CssUrlFunction
 	| CssDocumentCustomMatcher
-	| CssBogusDocumentMatcher
+	| CssBogus
 
 CssDocumentCustomMatcher =
 	name: ('url-prefix' | 'domain' | 'media-document' | 'regexp')
@@ -1803,7 +1771,7 @@ CssValueAtRulePropertyList = (AnyCssValueAtRuleProperty (',' AnyCssValueAtRulePr
 
 AnyCssValueAtRuleProperty =
 	CssValueAtRuleGenericProperty
-	| CssBogusProperty
+	| CssBogus
 
 CssValueAtRuleGenericProperty =
 	name: AnyCssDeclarationName
@@ -1875,7 +1843,7 @@ CssFunctionParameterList = AnyCssFunctionParameter (',' AnyCssFunctionParameter)
 
 AnyCssFunctionParameter =
 	CssFunctionParameter
-	| CssBogusFunctionParameter
+	| CssBogus
 
 // <css-type>
 //
@@ -1884,7 +1852,7 @@ AnyCssFunctionParameter =
 AnyCssType =
 	CssTypeFunction
 	| AnyCssSyntaxComponent
-	| CssBogusType
+	| CssBogus
 
 // @function --transparent(--color <color>: red, --alpha <number>: 0.5) { }
 //                         ^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^
@@ -2013,7 +1981,7 @@ CssUrlModifierList = AnyCssUrlModifier*
 AnyCssUrlModifier =
 	CssIdentifier
 	| CssFunction
-	| CssBogusUrlModifier
+	| CssBogus
 
 AnyCssUrlValue =
 	CssUrlValueRaw
@@ -2051,7 +2019,7 @@ AnyCssIfTestBooleanExpr =
 	CssIfTestBooleanNotExpr
 	| AnyCssIfTestBooleanAndCombinableExpr
 	| AnyCssIfTestBooleanOrCombinableExpr
-	| CssBogusIfTestBooleanExpr
+	| CssBogus
 
 // not <boolean-expr-group>
 //
@@ -2112,7 +2080,7 @@ CssIfBranch =
 
 AnyCssIfBranch =
 	CssIfBranch
-	| CssBogusIfBranch
+	| CssBogus
 
 // supports(color: lch(75% 0 0)): lch(75% 0 0)
 //          ^^^^^^^^^^^^^^^^^^^
@@ -2162,7 +2130,7 @@ AnyCssIfTest =
 	| CssIfMediaTest
 	| CssIfSassTest
 	| CssIfStyleTest
-	| CssBogusIfTest
+	| CssBogus
 
 
 AnyCssExpression =
@@ -2219,7 +2187,7 @@ AnyCssBracketedValueItem =
 
 AnyCssCustomIdentifier =
 	CssCustomIdentifier
-	| CssBogusCustomIdentifier
+	| CssBogus
 
 // https://drafts.csswg.org/css-fonts/#unicode-range-desc
 // https://www.w3.org/TR/css-syntax-3/#typedef-urange
@@ -2240,7 +2208,7 @@ AnyCssUnicodeValue =
 	CssUnicodeCodepoint
 	| CssUnicodeRangeWildcard
 	| CssUnicodeRangeInterval
-	| CssBogusUnicodeRangeValue
+	| CssBogus
 
 CssUnicodeRangeInterval =
 	start: CssUnicodeCodepoint
@@ -2288,7 +2256,7 @@ CssAttrNameList = (AnyCssAttrName  ('|' AnyCssAttrName)*)
 
 AnyCssAttrName =
 	CssIdentifier
-	| CssBogusAttrName
+	| CssBogus
 
 // Literal value that can be used as a type in the attr() function.
 // attr(data-test raw-string)
@@ -2358,7 +2326,7 @@ AnyCssSyntax =
 	| CssSyntaxComponentList
 	| AnyCssSyntaxComponent
 	| CssString
-	| CssBogusSyntax
+	| CssBogus
 
 // <syntax-component> [ <syntax-combinator> <syntax-component> ]*
 //
@@ -2397,7 +2365,7 @@ CssSyntaxComponent =
 AnyCssSyntaxSingleComponent =
 	CssSyntaxType
 	| CssIdentifier
-	| CssBogusSyntaxSingleComponent
+	| CssBogus
 
 // '<' <syntax-type-name> '>'
 //
@@ -2635,7 +2603,7 @@ ScssParameterItemList = AnyScssParameter (',' AnyScssParameter)* ','?
 
 AnyScssParameter =
 	ScssParameter
-	| CssBogusParameter
+	| CssBogus
 
 // $radius: 4px
 // ^^^^^^^^^^^^

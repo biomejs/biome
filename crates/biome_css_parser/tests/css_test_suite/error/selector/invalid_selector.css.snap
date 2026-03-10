@@ -19,7 +19,7 @@ expression: snapshot
 CssRoot {
     bom_token: missing (optional),
     items: CssRootItemList [
-        CssBogusRule {
+        CssBogus {
             items: [
                 BANG@0..1 "!" [] [],
             ],
@@ -56,7 +56,7 @@ CssRoot {
 0: CSS_ROOT@0..16
   0: (empty)
   1: CSS_ROOT_ITEM_LIST@0..15
-    0: CSS_BOGUS_RULE@0..1
+    0: CSS_BOGUS@0..1
       0: BANG@0..1 "!" [] []
     1: CSS_QUALIFIED_RULE@1..15
       0: CSS_SELECTOR_LIST@1..11

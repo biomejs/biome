@@ -38,7 +38,7 @@ CssRoot {
                         r_paren_token: R_PAREN@33..34 ")" [] [],
                     },
                     COMMA@34..35 "," [] [],
-                    CssBogusDocumentMatcher {
+                    CssBogus {
                         items: [
                             IDENT@35..50 "invalid-url" [Newline("\n"), Whitespace("\t\t ")] [],
                         ],
@@ -76,7 +76,7 @@ CssRoot {
                         r_paren_token: R_PAREN@149..150 ")" [] [],
                     },
                     COMMA@150..151 "," [] [],
-                    CssBogusDocumentMatcher {
+                    CssBogus {
                         items: [
                             IDENT@151..164 "invalid-url" [Newline("\n"), Whitespace(" ")] [],
                         ],
@@ -115,7 +115,7 @@ CssRoot {
             3: CSS_URL_MODIFIER_LIST@33..33
             4: R_PAREN@33..34 ")" [] []
           1: COMMA@34..35 "," [] []
-          2: CSS_BOGUS_DOCUMENT_MATCHER@35..50
+          2: CSS_BOGUS@35..50
             0: IDENT@35..50 "invalid-url" [Newline("\n"), Whitespace("\t\t ")] []
           3: COMMA@50..85 "," [] [Whitespace(" "), Comments("/* Error in URL, reco ..."), Whitespace(" ")]
           4: CSS_URL_FUNCTION@85..109
@@ -142,7 +142,7 @@ CssRoot {
             3: CSS_URL_MODIFIER_LIST@149..149
             4: R_PAREN@149..150 ")" [] []
           1: COMMA@150..151 "," [] []
-          2: CSS_BOGUS_DOCUMENT_MATCHER@151..164
+          2: CSS_BOGUS@151..164
             0: IDENT@151..164 "invalid-url" [Newline("\n"), Whitespace(" ")] []
           3: COMMA@164..199 "," [] [Whitespace(" "), Comments("/* Error in URL, reco ..."), Whitespace(" ")]
           4: (empty)

@@ -51,12 +51,12 @@ pub(crate) fn parse_namespace_at_rule(p: &mut CssParser) -> ParsedSyntax {
     ) {
         Ok(m) => {
             if m.kind(p).is_bogus() {
-                CSS_BOGUS_AT_RULE
+                CSS_BOGUS
             } else {
                 CSS_NAMESPACE_AT_RULE
             }
         }
-        Err(_) => CSS_BOGUS_AT_RULE,
+        Err(_) => CSS_BOGUS,
     };
 
     p.expect(T![;]);

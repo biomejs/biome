@@ -40,7 +40,7 @@ CssRoot {
                 items: CssDeclarationOrRuleList [
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBogusProperty {
+                            property: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@6..14 "color" [Newline("\n"), Whitespace("  ")] [],
@@ -48,9 +48,9 @@ CssRoot {
                                     COLON@14..16 ":" [] [Whitespace(" ")],
                                     CssBogus {
                                         items: [
-                                            CssBogusSupportsCondition {
+                                            CssBogus {
                                                 items: [
-                                                    CssBogusSupportsCondition {
+                                                    CssBogus {
                                                         items: [
                                                             CssIdentifier {
                                                                 value_token: IDENT@16..19 "mod" [] [],
@@ -143,13 +143,13 @@ CssRoot {
         1: CSS_DECLARATION_OR_RULE_LIST@6..66
           0: CSS_DECLARATION_WITH_SEMICOLON@6..29
             0: CSS_DECLARATION@6..28
-              0: CSS_BOGUS_PROPERTY@6..28
+              0: CSS_BOGUS@6..28
                 0: CSS_IDENTIFIER@6..14
                   0: IDENT@6..14 "color" [Newline("\n"), Whitespace("  ")] []
                 1: COLON@14..16 ":" [] [Whitespace(" ")]
                 2: CSS_BOGUS@16..28
-                  0: CSS_BOGUS_SUPPORTS_CONDITION@16..28
-                    0: CSS_BOGUS_SUPPORTS_CONDITION@16..22
+                  0: CSS_BOGUS@16..28
+                    0: CSS_BOGUS@16..22
                       0: CSS_IDENTIFIER@16..19
                         0: IDENT@16..19 "mod" [] []
                       1: DOT@19..20 "." [] []

@@ -82,7 +82,7 @@ impl ParseSeparatedList for PageSelectorList {
     ) -> RecoveryResult {
         parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecoveryTokenSet::new(CSS_BOGUS_SELECTOR, PAGE_SELECTOR_LIST_RECOVERY_SET),
+            &ParseRecoveryTokenSet::new(CSS_BOGUS, PAGE_SELECTOR_LIST_RECOVERY_SET),
             expected_page_selector,
         )
     }
@@ -143,7 +143,7 @@ impl ParseNodeList for PageSelectorPseudoList {
         parsed_element.or_recover_with_token_set(
             p,
             &ParseRecoveryTokenSet::new(
-                CSS_BOGUS_PSEUDO_CLASS,
+                CSS_BOGUS,
                 PAGE_SELECTOR_PSEUDO_LIST_RECOVERY_SET,
             ),
             expected_page_selector_pseudo,
@@ -173,7 +173,7 @@ pub(crate) fn parse_page_selector_pseudo(p: &mut CssParser) -> ParsedSyntax {
         parse_regular_identifier(p).ok();
         CSS_PAGE_SELECTOR_PSEUDO
     } else {
-        CSS_BOGUS_PAGE_SELECTOR_PSEUDO
+        CSS_BOGUS
     };
 
     Present(m.complete(p, kind))

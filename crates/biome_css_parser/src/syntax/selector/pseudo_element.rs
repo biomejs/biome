@@ -67,13 +67,13 @@ pub(crate) fn parse_pseudo_element_function_custom_identifier(p: &mut CssParser)
             if eat_or_recover_selector_function_close_token(p, selector, expected_identifier) {
                 CSS_PSEUDO_ELEMENT_FUNCTION_CUSTOM_IDENTIFIER
             } else {
-                CSS_BOGUS_PSEUDO_ELEMENT
+                CSS_BOGUS
             }
         }
         Absent => {
             recover_selector_function_parameter(p, expected_identifier);
             p.expect(T![')']);
-            CSS_BOGUS_PSEUDO_ELEMENT
+            CSS_BOGUS
         }
     };
 
@@ -100,7 +100,7 @@ pub(crate) fn parse_pseudo_element_function(p: &mut CssParser) -> ParsedSyntax {
     let kind = if eat_or_recover_selector_function_close_token(p, list, expected_identifier) {
         CSS_PSEUDO_ELEMENT_FUNCTION
     } else {
-        CSS_BOGUS_PSEUDO_ELEMENT
+        CSS_BOGUS
     };
 
     Present(m.complete(p, kind))
@@ -169,13 +169,13 @@ pub(crate) fn parse_pseudo_element_function_selector(p: &mut CssParser) -> Parse
             if eat_or_recover_selector_function_close_token(p, selector, expected_selector) {
                 CSS_PSEUDO_ELEMENT_FUNCTION_SELECTOR
             } else {
-                CSS_BOGUS_PSEUDO_ELEMENT
+                CSS_BOGUS
             }
         }
         Absent => {
             recover_selector_function_parameter(p, expected_selector);
             p.expect(T![')']);
-            CSS_BOGUS_PSEUDO_ELEMENT
+            CSS_BOGUS
         }
     };
 

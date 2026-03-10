@@ -1,7 +1,7 @@
 use crate::parser::CssParser;
 use crate::syntax::block::parse_declaration_or_rule_list_block;
 use crate::syntax::scss::at_rule::if_at_rule::{is_at_scss_if_at_rule, parse_scss_if_at_rule};
-use biome_css_syntax::CssSyntaxKind::{CSS_BOGUS_AT_RULE, SCSS_ELSE_CLAUSE};
+use biome_css_syntax::CssSyntaxKind::{CSS_BOGUS, SCSS_ELSE_CLAUSE};
 use biome_css_syntax::T;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
@@ -65,7 +65,7 @@ pub(crate) fn parse_bogus_scss_else_at_rule(p: &mut CssParser) -> ParsedSyntax {
     );
     parse_scss_else_body(p).or_add_diagnostic(p, expected_scss_else_body);
 
-    Present(m.complete(p, CSS_BOGUS_AT_RULE))
+    Present(m.complete(p, CSS_BOGUS))
 }
 
 #[inline]

@@ -353,7 +353,7 @@ impl ParseNodeList for GenericComponentValueList {
 
         parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecoveryTokenSet::new(CSS_BOGUS_PROPERTY_VALUE, self.recovery_set)
+            &ParseRecoveryTokenSet::new(CSS_BOGUS, self.recovery_set)
                 .enable_recovery_on_line_break(),
             expected_component_value,
         )

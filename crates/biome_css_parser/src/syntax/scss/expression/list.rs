@@ -7,7 +7,7 @@ use crate::syntax::scss::{
     parse_scss_identifier, scss_ellipsis_not_allowed,
 };
 use biome_css_syntax::CssSyntaxKind::{
-    CSS_BOGUS_PROPERTY_VALUE, EOF, SCSS_ARBITRARY_ARGUMENT, SCSS_EXPRESSION,
+    CSS_BOGUS, EOF, SCSS_ARBITRARY_ARGUMENT, SCSS_EXPRESSION,
     SCSS_EXPRESSION_ITEM_LIST, SCSS_KEYWORD_ARGUMENT, SCSS_LIST_EXPRESSION,
     SCSS_LIST_EXPRESSION_ELEMENT, SCSS_LIST_EXPRESSION_ELEMENT_LIST,
 };
@@ -170,7 +170,7 @@ fn parse_scss_expression_sequence(
         if parsed_item
             .or_recover_with_token_set(
                 p,
-                &ParseRecoveryTokenSet::new(CSS_BOGUS_PROPERTY_VALUE, options.recovery_end_ts())
+                &ParseRecoveryTokenSet::new(CSS_BOGUS, options.recovery_end_ts())
                     .enable_recovery_on_line_break(),
                 expected_scss_expression,
             )
@@ -294,7 +294,7 @@ pub(super) fn complete_scss_list_expression(
         if parse_scss_list_expression_element(p, options)
             .or_recover_with_token_set(
                 p,
-                &ParseRecoveryTokenSet::new(CSS_BOGUS_PROPERTY_VALUE, options.recovery_end_ts())
+                &ParseRecoveryTokenSet::new(CSS_BOGUS, options.recovery_end_ts())
                     .enable_recovery_on_line_break(),
                 expected_scss_expression,
             )

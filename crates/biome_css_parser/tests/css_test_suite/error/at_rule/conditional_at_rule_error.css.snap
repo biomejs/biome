@@ -218,7 +218,7 @@ CssRoot {
                         },
                     ],
                 },
-                block: CssBogusBlock {
+                block: CssBogus {
                     items: [
                         L_CURLY@33..34 "{" [] [],
                         CssRuleList [
@@ -244,7 +244,7 @@ CssRoot {
                                         ],
                                     },
                                 ],
-                                block: CssBogusBlock {
+                                block: CssBogus {
                                     items: [
                                         CssDeclarationOrRuleList [
                                             CssEmptyDeclaration {
@@ -2220,7 +2220,7 @@ CssRoot {
                     0: CSS_NUMBER_LITERAL@26..29 "700" [] []
                     1: IDENT@29..31 "px" [] []
                 2: R_PAREN@31..33 ")" [] [Whitespace(" ")]
-        1: CSS_BOGUS_BLOCK@33..1594
+        1: CSS_BOGUS@33..1594
           0: L_CURLY@33..34 "{" [] []
           1: CSS_RULE_LIST@34..1594
             0: CSS_QUALIFIED_RULE@34..301
@@ -2237,7 +2237,7 @@ CssRoot {
                       1: CSS_PSEUDO_CLASS_IDENTIFIER@43..46
                         0: CSS_IDENTIFIER@43..46
                           0: IDENT@43..46 "red" [] []
-              1: CSS_BOGUS_BLOCK@46..301
+              1: CSS_BOGUS@46..301
                 0: CSS_DECLARATION_OR_RULE_LIST@46..299
                   0: CSS_EMPTY_DECLARATION@46..47
                     0: SEMICOLON@46..47 ";" [] []

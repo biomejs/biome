@@ -234,7 +234,7 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@149..152 "@" [Newline("\n"), Newline("\n")] [],
-            rule: CssBogusAtRule {
+            rule: CssBogus {
                 items: [
                     FOR_KW@152..156 "for" [] [Whitespace(" ")],
                     ScssIdentifier {
@@ -259,7 +259,7 @@ CssRoot {
                             },
                         ],
                     },
-                    CssBogusBlock {
+                    CssBogus {
                         items: [],
                     },
                 ],
@@ -409,7 +409,7 @@ CssRoot {
           2: R_CURLY@147..149 "}" [Newline("\n")] []
     4: CSS_AT_RULE@149..175
       0: AT@149..152 "@" [Newline("\n"), Newline("\n")] []
-      1: CSS_BOGUS_AT_RULE@152..175
+      1: CSS_BOGUS@152..175
         0: FOR_KW@152..156 "for" [] [Whitespace(" ")]
         1: SCSS_IDENTIFIER@156..159
           0: DOLLAR@156..157 "$" [] []
@@ -425,7 +425,7 @@ CssRoot {
           0: SCSS_EXPRESSION_ITEM_LIST@174..175
             0: CSS_NUMBER@174..175
               0: CSS_NUMBER_LITERAL@174..175 "3" [] []
-        6: CSS_BOGUS_BLOCK@175..175
+        6: CSS_BOGUS@175..175
   2: EOF@175..176 "" [Newline("\n")] []
 
 ```

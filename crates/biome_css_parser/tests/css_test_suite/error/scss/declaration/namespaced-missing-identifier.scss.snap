@@ -1,8 +1,8 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
+
 ## Input
 
 ```css
@@ -34,7 +34,7 @@ CssRoot {
                     ],
                 },
             ],
-            block: CssBogusBlock {
+            block: CssBogus {
                 items: [
                     L_CURLY@5..6 "{" [] [],
                     CssDeclarationOrRuleList [
@@ -59,7 +59,7 @@ CssRoot {
                                     },
                                 },
                                 missing separator,
-                                CssBogusSelector {
+                                CssBogus {
                                     items: [
                                         DOLLAR@13..14 "$" [] [],
                                     ],
@@ -71,7 +71,7 @@ CssRoot {
                                         nesting_selectors: CssNestedSelectorList [],
                                         simple_selector: missing (optional),
                                         sub_selectors: CssSubSelectorList [
-                                            CssBogusSubSelector {
+                                            CssBogus {
                                                 items: [
                                                     COLON@14..16 ":" [] [Whitespace(" ")],
                                                 ],
@@ -80,7 +80,7 @@ CssRoot {
                                     },
                                 },
                                 missing separator,
-                                CssBogusSelector {
+                                CssBogus {
                                     items: [
                                         CSS_NUMBER_LITERAL@16..17 "1" [] [],
                                         SEMICOLON@17..18 ";" [] [],
@@ -88,7 +88,7 @@ CssRoot {
                                     ],
                                 },
                             ],
-                            block: CssBogusBlock {
+                            block: CssBogus {
                                 items: [],
                             },
                         },
@@ -117,7 +117,7 @@ CssRoot {
               0: DOT@0..1 "." [] []
               1: CSS_CUSTOM_IDENTIFIER@1..5
                 0: IDENT@1..5 "bad" [] [Whitespace(" ")]
-      1: CSS_BOGUS_BLOCK@5..20
+      1: CSS_BOGUS@5..20
         0: L_CURLY@5..6 "{" [] []
         1: CSS_DECLARATION_OR_RULE_LIST@6..20
           0: CSS_NESTED_QUALIFIED_RULE@6..20
@@ -135,7 +135,7 @@ CssRoot {
                       0: DOT@12..13 "." [] []
                       1: (empty)
               1: (empty)
-              2: CSS_BOGUS_SELECTOR@13..14
+              2: CSS_BOGUS@13..14
                 0: DOLLAR@13..14 "$" [] []
               3: (empty)
               4: CSS_RELATIVE_SELECTOR@14..16
@@ -144,14 +144,14 @@ CssRoot {
                   0: CSS_NESTED_SELECTOR_LIST@14..14
                   1: (empty)
                   2: CSS_SUB_SELECTOR_LIST@14..16
-                    0: CSS_BOGUS_SUB_SELECTOR@14..16
+                    0: CSS_BOGUS@14..16
                       0: COLON@14..16 ":" [] [Whitespace(" ")]
               5: (empty)
-              6: CSS_BOGUS_SELECTOR@16..20
+              6: CSS_BOGUS@16..20
                 0: CSS_NUMBER_LITERAL@16..17 "1" [] []
                 1: SEMICOLON@17..18 ";" [] []
                 2: R_CURLY@18..20 "}" [Newline("\n")] []
-            1: CSS_BOGUS_BLOCK@20..20
+            1: CSS_BOGUS@20..20
   2: EOF@20..21 "" [Newline("\n")] []
 
 ```

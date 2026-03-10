@@ -258,7 +258,7 @@ CssRoot {
                                         if_token: IF_KW@84..86 "if" [] [],
                                         l_paren_token: L_PAREN@86..87 "(" [] [],
                                         css_if_branch_list: CssIfBranchList [
-                                            CssBogusIfBranch {
+                                            CssBogus {
                                                 items: [
                                                     COLON@87..89 ":" [] [Whitespace(" ")],
                                                     IDENT@89..94 "black" [] [],
@@ -312,7 +312,7 @@ CssRoot {
                                                     style_token: STYLE_KW@129..134 "style" [] [],
                                                     l_paren_token: L_PAREN@134..135 "(" [] [],
                                                     test: CssDeclaration {
-                                                        property: CssBogusProperty {
+                                                        property: CssBogus {
                                                             items: [
                                                                 CssDashedIdentifier {
                                                                     value_token: IDENT@135..140 "--foo" [] [],
@@ -323,7 +323,7 @@ CssRoot {
                                                                         CssIdentifier {
                                                                             value_token: IDENT@142..145 "bar" [] [],
                                                                         },
-                                                                        CssBogusPropertyValue {
+                                                                        CssBogus {
                                                                             items: [
                                                                                 COLON@145..147 ":" [] [Whitespace(" ")],
                                                                                 IDENT@147..152 "black" [] [],
@@ -385,7 +385,7 @@ CssRoot {
                                         l_paren_token: L_PAREN@191..192 "(" [] [],
                                         css_if_branch_list: CssIfBranchList [
                                             CssIfBranch {
-                                                condition: CssBogusIfTest {
+                                                condition: CssBogus {
                                                     items: [
                                                         STYLE_KW@192..197 "style" [] [],
                                                         L_PAREN@197..198 "(" [] [],
@@ -444,7 +444,7 @@ CssRoot {
                 items: CssDeclarationOrRuleList [
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBogusProperty {
+                            property: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@242..249 "color" [Newline("\n"), Whitespace("\t")] [],
@@ -457,17 +457,15 @@ CssRoot {
                                                 l_paren_token: L_PAREN@253..254 "(" [] [],
                                                 css_if_branch_list: CssIfBranchList [
                                                     CssIfBranch {
-                                                        condition: CssBogusIfTestBooleanExpr {
-                                                            items: [
-                                                                NOT_KW@254..258 "not" [] [Whitespace(" ")],
-                                                                CssBogusIfTestBooleanExpr {
-                                                                    items: [
-                                                                        NOT_KW@258..261 "not" [] [],
-                                                                        L_PAREN@261..262 "(" [] [],
-                                                                        IDENT@262..269 "--style" [] [],
-                                                                    ],
-                                                                },
-                                                            ],
+                                                        condition: CssIfTestBooleanNotExpr {
+                                                            not_token: NOT_KW@254..258 "not" [] [Whitespace(" ")],
+                                                            expression: CssBogus {
+                                                                items: [
+                                                                    NOT_KW@258..261 "not" [] [],
+                                                                    L_PAREN@261..262 "(" [] [],
+                                                                    IDENT@262..269 "--style" [] [],
+                                                                ],
+                                                            },
                                                         },
                                                         colon_token: COLON@269..271 ":" [] [Whitespace(" ")],
                                                         value: CssGenericComponentValueList [
@@ -479,7 +477,7 @@ CssRoot {
                                                 ],
                                                 r_paren_token: R_PAREN@276..277 ")" [] [],
                                             },
-                                            CssBogusPropertyValue {
+                                            CssBogus {
                                                 items: [
                                                     COLON@277..279 ":" [] [Whitespace(" ")],
                                                     IDENT@279..284 "black" [] [],
@@ -525,7 +523,7 @@ CssRoot {
                 items: CssDeclarationOrRuleList [
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBogusProperty {
+                            property: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@308..315 "color" [Newline("\n"), Whitespace("\t")] [],
@@ -537,7 +535,7 @@ CssRoot {
                                                 if_token: IF_KW@317..319 "if" [] [],
                                                 l_paren_token: L_PAREN@319..320 "(" [] [],
                                                 css_if_branch_list: CssIfBranchList [
-                                                    CssBogusIfBranch {
+                                                    CssBogus {
                                                         items: [
                                                             CssIfTestBooleanNotExpr {
                                                                 not_token: NOT_KW@320..324 "not" [] [Whitespace(" ")],
@@ -571,7 +569,7 @@ CssRoot {
                                                             },
                                                             CssBogus {
                                                                 items: [
-                                                                    CssBogusSupportsCondition {
+                                                                    CssBogus {
                                                                         items: [
                                                                             CssIdentifier {
                                                                                 value_token: IDENT@351..354 "not" [] [],
@@ -608,7 +606,7 @@ CssRoot {
                                                 ],
                                                 r_paren_token: R_PAREN@370..371 ")" [] [],
                                             },
-                                            CssBogusPropertyValue {
+                                            CssBogus {
                                                 items: [
                                                     COLON@371..373 ":" [] [Whitespace(" ")],
                                                     IDENT@373..378 "black" [] [],
@@ -725,7 +723,7 @@ CssRoot {
                 items: CssDeclarationOrRuleList [
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBogusProperty {
+                            property: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@474..481 "color" [Newline("\n"), Whitespace("\t")] [],
@@ -737,7 +735,7 @@ CssRoot {
                                                 if_token: IF_KW@483..485 "if" [] [],
                                                 l_paren_token: L_PAREN@485..486 "(" [] [],
                                                 css_if_branch_list: CssIfBranchList [
-                                                    CssBogusIfBranch {
+                                                    CssBogus {
                                                         items: [
                                                             SUPPORTS_KW@486..495 "supports" [] [Whitespace(" ")],
                                                             IDENT@495..500 "--foo" [] [],
@@ -748,7 +746,7 @@ CssRoot {
                                                 ],
                                                 r_paren_token: R_PAREN@505..506 ")" [] [],
                                             },
-                                            CssBogusPropertyValue {
+                                            CssBogus {
                                                 items: [
                                                     COLON@506..508 ":" [] [Whitespace(" ")],
                                                     IDENT@508..513 "black" [] [],
@@ -867,36 +865,34 @@ CssRoot {
                                         l_paren_token: L_PAREN@618..619 "(" [] [],
                                         css_if_branch_list: CssIfBranchList [
                                             CssIfBranch {
-                                                condition: CssBogusIfTestBooleanExpr {
-                                                    items: [
-                                                        CssIfStyleTest {
-                                                            style_token: STYLE_KW@619..624 "style" [] [],
-                                                            l_paren_token: L_PAREN@624..625 "(" [] [],
-                                                            test: CssDeclaration {
-                                                                property: CssGenericProperty {
-                                                                    name: CssDashedIdentifier {
-                                                                        value_token: IDENT@625..630 "--foo" [] [],
-                                                                    },
-                                                                    colon_token: COLON@630..632 ":" [] [Whitespace(" ")],
-                                                                    value: CssGenericComponentValueList [
-                                                                        CssIdentifier {
-                                                                            value_token: IDENT@632..635 "bar" [] [],
-                                                                        },
-                                                                    ],
+                                                condition: CssIfTestBooleanAndExpr {
+                                                    left: CssIfStyleTest {
+                                                        style_token: STYLE_KW@619..624 "style" [] [],
+                                                        l_paren_token: L_PAREN@624..625 "(" [] [],
+                                                        test: CssDeclaration {
+                                                            property: CssGenericProperty {
+                                                                name: CssDashedIdentifier {
+                                                                    value_token: IDENT@625..630 "--foo" [] [],
                                                                 },
-                                                                important: missing (optional),
+                                                                colon_token: COLON@630..632 ":" [] [Whitespace(" ")],
+                                                                value: CssGenericComponentValueList [
+                                                                    CssIdentifier {
+                                                                        value_token: IDENT@632..635 "bar" [] [],
+                                                                    },
+                                                                ],
                                                             },
-                                                            r_paren_token: R_PAREN@635..637 ")" [] [Whitespace(" ")],
+                                                            important: missing (optional),
                                                         },
-                                                        AND_KW@637..640 "and" [] [],
-                                                        CssBogusIfTestBooleanExpr {
-                                                            items: [
-                                                                COLON@640..642 ":" [] [Whitespace(" ")],
-                                                                IDENT@642..647 "black" [] [],
-                                                                SEMICOLON@647..648 ";" [] [],
-                                                            ],
-                                                        },
-                                                    ],
+                                                        r_paren_token: R_PAREN@635..637 ")" [] [Whitespace(" ")],
+                                                    },
+                                                    and_token: AND_KW@637..640 "and" [] [],
+                                                    right: CssBogus {
+                                                        items: [
+                                                            COLON@640..642 ":" [] [Whitespace(" ")],
+                                                            IDENT@642..647 "black" [] [],
+                                                            SEMICOLON@647..648 ";" [] [],
+                                                        ],
+                                                    },
                                                 },
                                                 colon_token: missing (required),
                                                 value: CssGenericComponentValueList [],
@@ -945,36 +941,34 @@ CssRoot {
                                         l_paren_token: L_PAREN@686..687 "(" [] [],
                                         css_if_branch_list: CssIfBranchList [
                                             CssIfBranch {
-                                                condition: CssBogusIfTestBooleanExpr {
-                                                    items: [
-                                                        CssIfStyleTest {
-                                                            style_token: STYLE_KW@687..692 "style" [] [],
-                                                            l_paren_token: L_PAREN@692..693 "(" [] [],
-                                                            test: CssDeclaration {
-                                                                property: CssGenericProperty {
-                                                                    name: CssDashedIdentifier {
-                                                                        value_token: IDENT@693..698 "--foo" [] [],
-                                                                    },
-                                                                    colon_token: COLON@698..700 ":" [] [Whitespace(" ")],
-                                                                    value: CssGenericComponentValueList [
-                                                                        CssIdentifier {
-                                                                            value_token: IDENT@700..703 "bar" [] [],
-                                                                        },
-                                                                    ],
+                                                condition: CssIfTestBooleanOrExpr {
+                                                    left: CssIfStyleTest {
+                                                        style_token: STYLE_KW@687..692 "style" [] [],
+                                                        l_paren_token: L_PAREN@692..693 "(" [] [],
+                                                        test: CssDeclaration {
+                                                            property: CssGenericProperty {
+                                                                name: CssDashedIdentifier {
+                                                                    value_token: IDENT@693..698 "--foo" [] [],
                                                                 },
-                                                                important: missing (optional),
+                                                                colon_token: COLON@698..700 ":" [] [Whitespace(" ")],
+                                                                value: CssGenericComponentValueList [
+                                                                    CssIdentifier {
+                                                                        value_token: IDENT@700..703 "bar" [] [],
+                                                                    },
+                                                                ],
                                                             },
-                                                            r_paren_token: R_PAREN@703..705 ")" [] [Whitespace(" ")],
+                                                            important: missing (optional),
                                                         },
-                                                        OR_KW@705..707 "or" [] [],
-                                                        CssBogusIfTestBooleanExpr {
-                                                            items: [
-                                                                COLON@707..709 ":" [] [Whitespace(" ")],
-                                                                IDENT@709..714 "black" [] [],
-                                                                SEMICOLON@714..715 ";" [] [],
-                                                            ],
-                                                        },
-                                                    ],
+                                                        r_paren_token: R_PAREN@703..705 ")" [] [Whitespace(" ")],
+                                                    },
+                                                    or_token: OR_KW@705..707 "or" [] [],
+                                                    right: CssBogus {
+                                                        items: [
+                                                            COLON@707..709 ":" [] [Whitespace(" ")],
+                                                            IDENT@709..714 "black" [] [],
+                                                            SEMICOLON@714..715 ";" [] [],
+                                                        ],
+                                                    },
                                                 },
                                                 colon_token: missing (required),
                                                 value: CssGenericComponentValueList [],
@@ -1050,7 +1044,7 @@ CssRoot {
                                                 ],
                                             },
                                             SEMICOLON@772..774 ";" [] [Whitespace(" ")],
-                                            CssBogusIfBranch {
+                                            CssBogus {
                                                 items: [
                                                     IDENT@774..779 "elsif" [] [],
                                                     COLON@779..781 ":" [] [Whitespace(" ")],
@@ -1177,7 +1171,7 @@ CssRoot {
                                             CssIfBranch {
                                                 condition: CssIfTestBooleanExprInParens {
                                                     l_paren_token: L_PAREN@891..892 "(" [] [],
-                                                    expression: CssBogusIfTestBooleanExpr {
+                                                    expression: CssBogus {
                                                         items: [
                                                             IDENT@892..897 "--foo" [] [],
                                                             COLON@897..899 ":" [] [Whitespace(" ")],
@@ -1227,7 +1221,7 @@ CssRoot {
                 items: CssDeclarationOrRuleList [
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBogusProperty {
+                            property: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@932..939 "color" [Newline("\n"), Whitespace("\t")] [],
@@ -1239,7 +1233,7 @@ CssRoot {
                                                 if_token: IF_KW@941..943 "if" [] [],
                                                 l_paren_token: L_PAREN@943..944 "(" [] [],
                                                 css_if_branch_list: CssIfBranchList [
-                                                    CssBogusIfBranch {
+                                                    CssBogus {
                                                         items: [
                                                             IDENT@944..950 "custom" [] [],
                                                             L_PAREN@950..951 "(" [] [],
@@ -1251,7 +1245,7 @@ CssRoot {
                                                 ],
                                                 r_paren_token: R_PAREN@961..962 ")" [] [],
                                             },
-                                            CssBogusPropertyValue {
+                                            CssBogus {
                                                 items: [
                                                     COLON@962..964 ":" [] [Whitespace(" ")],
                                                     IDENT@964..969 "black" [] [],
@@ -1310,7 +1304,7 @@ CssRoot {
                                             CssIfBranch {
                                                 condition: CssIfTestBooleanExprInParens {
                                                     l_paren_token: L_PAREN@1013..1014 "(" [] [],
-                                                    expression: CssBogusIfTestBooleanExpr {
+                                                    expression: CssBogus {
                                                         items: [
                                                             COLON@1014..1016 ":" [] [Whitespace(" ")],
                                                             IDENT@1016..1021 "black" [] [],
@@ -1366,7 +1360,7 @@ CssRoot {
                                         if_token: IF_KW@1055..1057 "if" [] [],
                                         l_paren_token: L_PAREN@1057..1058 "(" [] [],
                                         css_if_branch_list: CssIfBranchList [
-                                            CssBogusIfBranch {
+                                            CssBogus {
                                                 items: [
                                                     CssIfTestBooleanAndExpr {
                                                         left: CssIfStyleTest {
@@ -1414,7 +1408,7 @@ CssRoot {
                                                             CssIdentifier {
                                                                 value_token: IDENT@1090..1093 "or" [] [Whitespace(" ")],
                                                             },
-                                                            CssBogusSupportsCondition {
+                                                            CssBogus {
                                                                 items: [
                                                                     CssIdentifier {
                                                                         value_token: IDENT@1093..1098 "style" [] [],
@@ -1444,7 +1438,7 @@ CssRoot {
                                                                     R_PAREN@1105..1106 ")" [] [],
                                                                 ],
                                                             },
-                                                            CssBogusPropertyValue {
+                                                            CssBogus {
                                                                 items: [
                                                                     COLON@1106..1108 ":" [] [Whitespace(" ")],
                                                                     IDENT@1108..1113 "black" [] [],
@@ -1566,7 +1560,7 @@ CssRoot {
                 items: CssDeclarationOrRuleList [
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBogusProperty {
+                            property: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@1195..1202 "color" [Newline("\n"), Whitespace("\t")] [],
@@ -1578,7 +1572,7 @@ CssRoot {
                                                 if_token: IF_KW@1204..1206 "if" [] [],
                                                 l_paren_token: L_PAREN@1206..1207 "(" [] [],
                                                 css_if_branch_list: CssIfBranchList [
-                                                    CssBogusIfBranch {
+                                                    CssBogus {
                                                         items: [
                                                             AND_KW@1207..1211 "and" [] [Whitespace(" ")],
                                                             STYLE_KW@1211..1216 "style" [] [],
@@ -1591,7 +1585,7 @@ CssRoot {
                                                 ],
                                                 r_paren_token: R_PAREN@1227..1228 ")" [] [],
                                             },
-                                            CssBogusPropertyValue {
+                                            CssBogus {
                                                 items: [
                                                     COLON@1228..1230 ":" [] [Whitespace(" ")],
                                                     IDENT@1230..1235 "black" [] [],
@@ -1637,7 +1631,7 @@ CssRoot {
                 items: CssDeclarationOrRuleList [
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBogusProperty {
+                            property: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@1255..1262 "color" [Newline("\n"), Whitespace("\t")] [],
@@ -1649,7 +1643,7 @@ CssRoot {
                                                 if_token: IF_KW@1264..1266 "if" [] [],
                                                 l_paren_token: L_PAREN@1266..1267 "(" [] [],
                                                 css_if_branch_list: CssIfBranchList [
-                                                    CssBogusIfBranch {
+                                                    CssBogus {
                                                         items: [
                                                             OR_KW@1267..1270 "or" [] [Whitespace(" ")],
                                                             STYLE_KW@1270..1275 "style" [] [],
@@ -1662,7 +1656,7 @@ CssRoot {
                                                 ],
                                                 r_paren_token: R_PAREN@1286..1287 ")" [] [],
                                             },
-                                            CssBogusPropertyValue {
+                                            CssBogus {
                                                 items: [
                                                     COLON@1287..1289 ":" [] [Whitespace(" ")],
                                                     IDENT@1289..1294 "black" [] [],
@@ -1788,7 +1782,7 @@ CssRoot {
                                                 ],
                                             },
                                             SEMICOLON@1388..1390 ";" [] [Whitespace(" ")],
-                                            CssBogusIfBranch {
+                                            CssBogus {
                                                 items: [
                                                     BANG@1390..1391 "!" [] [],
                                                     IDENT@1391..1396 "bogus" [] [],
@@ -1855,7 +1849,7 @@ CssRoot {
                                                 ],
                                             },
                                             SEMICOLON@1443..1445 ";" [] [Whitespace(" ")],
-                                            CssBogusIfBranch {
+                                            CssBogus {
                                                 items: [
                                                     ERROR_TOKEN@1445..1446 "?" [] [],
                                                     ERROR_TOKEN@1446..1447 "?" [] [],
@@ -1941,7 +1935,7 @@ CssRoot {
                                                     and_token: AND_KW@1509..1513 "and" [] [Whitespace(" ")],
                                                     right: CssIfTestBooleanExprInParens {
                                                         l_paren_token: L_PAREN@1513..1514 "(" [] [],
-                                                        expression: CssBogusIfTestBooleanExpr {
+                                                        expression: CssBogus {
                                                             items: [
                                                                 BANG@1514..1515 "!" [] [],
                                                                 IDENT@1515..1520 "bogus" [] [],
@@ -1980,15 +1974,13 @@ CssRoot {
                                         l_paren_token: L_PAREN@1545..1546 "(" [] [],
                                         css_if_branch_list: CssIfBranchList [
                                             CssIfBranch {
-                                                condition: CssBogusIfTestBooleanExpr {
-                                                    items: [
-                                                        NOT_KW@1546..1550 "not" [] [Whitespace(" ")],
-                                                        CssBogusIfTestBooleanExpr {
-                                                            items: [
-                                                                IDENT@1550..1553 "foo" [] [],
-                                                            ],
-                                                        },
-                                                    ],
+                                                condition: CssIfTestBooleanNotExpr {
+                                                    not_token: NOT_KW@1546..1550 "not" [] [Whitespace(" ")],
+                                                    expression: CssBogus {
+                                                        items: [
+                                                            IDENT@1550..1553 "foo" [] [],
+                                                        ],
+                                                    },
                                                 },
                                                 colon_token: COLON@1553..1555 ":" [] [Whitespace(" ")],
                                                 value: CssGenericComponentValueList [
@@ -2069,7 +2061,7 @@ CssRoot {
                                                 ],
                                             },
                                             SEMICOLON@1622..1624 ";" [] [Whitespace(" ")],
-                                            CssBogusIfBranch {
+                                            CssBogus {
                                                 items: [
                                                     BANG@1624..1625 "!" [] [],
                                                     IDENT@1625..1630 "bogus" [] [],
@@ -2158,7 +2150,7 @@ CssRoot {
                                                 ],
                                             },
                                             SEMICOLON@1723..1725 ";" [] [Whitespace(" ")],
-                                            CssBogusIfBranch {
+                                            CssBogus {
                                                 items: [
                                                     BANG@1725..1726 "!" [] [],
                                                     IDENT@1726..1731 "bogus" [] [],
@@ -2247,7 +2239,7 @@ CssRoot {
                                                 ],
                                             },
                                             SEMICOLON@1803..1805 ";" [] [Whitespace(" ")],
-                                            CssBogusIfBranch {
+                                            CssBogus {
                                                 items: [
                                                     BANG@1805..1806 "!" [] [],
                                                     BANG@1806..1807 "!" [] [],
@@ -2283,7 +2275,7 @@ CssRoot {
                                                 ],
                                             },
                                             SEMICOLON@1829..1831 ";" [] [Whitespace(" ")],
-                                            CssBogusIfBranch {
+                                            CssBogus {
                                                 items: [
                                                     AT@1831..1832 "@" [] [],
                                                     AT@1832..1833 "@" [] [],
@@ -2345,7 +2337,7 @@ CssRoot {
                                         if_token: IF_KW@1879..1881 "if" [] [],
                                         l_paren_token: L_PAREN@1881..1882 "(" [] [],
                                         css_if_branch_list: CssIfBranchList [
-                                            CssBogusIfBranch {
+                                            CssBogus {
                                                 items: [
                                                     HASH@1882..1883 "#" [] [],
                                                     HASH@1883..1884 "#" [] [],
@@ -2465,7 +2457,7 @@ CssRoot {
                                                 ],
                                             },
                                             SEMICOLON@1990..1992 ";" [] [Whitespace(" ")],
-                                            CssBogusIfBranch {
+                                            CssBogus {
                                                 items: [
                                                     IDENT@1992..2006 "bogus-no-colon" [] [],
                                                 ],
@@ -2586,7 +2578,7 @@ CssRoot {
                                         l_paren_token: L_PAREN@2106..2107 "(" [] [],
                                         css_if_branch_list: CssIfBranchList [
                                             CssIfBranch {
-                                                condition: CssBogusIfTest {
+                                                condition: CssBogus {
                                                     items: [
                                                         STYLE_KW@2107..2112 "style" [] [],
                                                         L_PAREN@2112..2113 "(" [] [],
@@ -2606,7 +2598,7 @@ CssRoot {
                                                 ],
                                             },
                                             SEMICOLON@2128..2130 ";" [] [Whitespace(" ")],
-                                            CssBogusIfBranch {
+                                            CssBogus {
                                                 items: [
                                                     BANG@2130..2131 "!" [] [],
                                                     BANG@2131..2132 "!" [] [],
@@ -2777,7 +2769,7 @@ CssRoot {
                                                             ],
                                                         },
                                                         SEMICOLON@2288..2290 ";" [] [Whitespace(" ")],
-                                                        CssBogusIfBranch {
+                                                        CssBogus {
                                                             items: [
                                                                 BANG@2290..2291 "!" [] [],
                                                                 IDENT@2291..2296 "bogus" [] [],
@@ -2972,7 +2964,7 @@ CssRoot {
                                                                         ],
                                                                     },
                                                                     SEMICOLON@2484..2486 ";" [] [Whitespace(" ")],
-                                                                    CssBogusIfBranch {
+                                                                    CssBogus {
                                                                         items: [
                                                                             BANG@2486..2487 "!" [] [],
                                                                             BANG@2487..2488 "!" [] [],
@@ -3103,7 +3095,7 @@ CssRoot {
                                         l_paren_token: L_PAREN@2596..2597 "(" [] [],
                                         css_if_branch_list: CssIfBranchList [
                                             CssIfBranch {
-                                                condition: CssBogusIfTest {
+                                                condition: CssBogus {
                                                     items: [
                                                         SASS_KW@2597..2601 "sass" [] [],
                                                         L_PAREN@2601..2602 "(" [] [],
@@ -3233,7 +3225,7 @@ CssRoot {
                     0: IF_KW@84..86 "if" [] []
                     1: L_PAREN@86..87 "(" [] []
                     2: CSS_IF_BRANCH_LIST@87..94
-                      0: CSS_BOGUS_IF_BRANCH@87..94
+                      0: CSS_BOGUS@87..94
                         0: COLON@87..89 ":" [] [Whitespace(" ")]
                         1: IDENT@89..94 "black" [] []
                     3: R_PAREN@94..95 ")" [] []
@@ -3269,14 +3261,14 @@ CssRoot {
                           0: STYLE_KW@129..134 "style" [] []
                           1: L_PAREN@134..135 "(" [] []
                           2: CSS_DECLARATION@135..152
-                            0: CSS_BOGUS_PROPERTY@135..152
+                            0: CSS_BOGUS@135..152
                               0: CSS_DASHED_IDENTIFIER@135..140
                                 0: IDENT@135..140 "--foo" [] []
                               1: COLON@140..142 ":" [] [Whitespace(" ")]
                               2: CSS_BOGUS@142..152
                                 0: CSS_IDENTIFIER@142..145
                                   0: IDENT@142..145 "bar" [] []
-                                1: CSS_BOGUS_PROPERTY_VALUE@145..152
+                                1: CSS_BOGUS@145..152
                                   0: COLON@145..147 ":" [] [Whitespace(" ")]
                                   1: IDENT@147..152 "black" [] []
                             1: (empty)
@@ -3313,7 +3305,7 @@ CssRoot {
                     1: L_PAREN@191..192 "(" [] []
                     2: CSS_IF_BRANCH_LIST@192..223
                       0: CSS_IF_BRANCH@192..223
-                        0: CSS_BOGUS_IF_TEST@192..216
+                        0: CSS_BOGUS@192..216
                           0: STYLE_KW@192..197 "style" [] []
                           1: L_PAREN@197..198 "(" [] []
                           2: CSS_BOGUS@198..215
@@ -3346,7 +3338,7 @@ CssRoot {
         1: CSS_DECLARATION_OR_RULE_LIST@242..287
           0: CSS_DECLARATION_WITH_SEMICOLON@242..285
             0: CSS_DECLARATION@242..284
-              0: CSS_BOGUS_PROPERTY@242..284
+              0: CSS_BOGUS@242..284
                 0: CSS_IDENTIFIER@242..249
                   0: IDENT@242..249 "color" [Newline("\n"), Whitespace("\t")] []
                 1: COLON@249..251 ":" [] [Whitespace(" ")]
@@ -3356,9 +3348,9 @@ CssRoot {
                     1: L_PAREN@253..254 "(" [] []
                     2: CSS_IF_BRANCH_LIST@254..276
                       0: CSS_IF_BRANCH@254..276
-                        0: CSS_BOGUS_IF_TEST_BOOLEAN_EXPR@254..269
+                        0: CSS_IF_TEST_BOOLEAN_NOT_EXPR@254..269
                           0: NOT_KW@254..258 "not" [] [Whitespace(" ")]
-                          1: CSS_BOGUS_IF_TEST_BOOLEAN_EXPR@258..269
+                          1: CSS_BOGUS@258..269
                             0: NOT_KW@258..261 "not" [] []
                             1: L_PAREN@261..262 "(" [] []
                             2: IDENT@262..269 "--style" [] []
@@ -3367,7 +3359,7 @@ CssRoot {
                           0: CSS_IDENTIFIER@271..276
                             0: IDENT@271..276 "black" [] []
                     3: R_PAREN@276..277 ")" [] []
-                  1: CSS_BOGUS_PROPERTY_VALUE@277..284
+                  1: CSS_BOGUS@277..284
                     0: COLON@277..279 ":" [] [Whitespace(" ")]
                     1: IDENT@279..284 "black" [] []
               1: (empty)
@@ -3392,7 +3384,7 @@ CssRoot {
         1: CSS_DECLARATION_OR_RULE_LIST@308..381
           0: CSS_DECLARATION_WITH_SEMICOLON@308..379
             0: CSS_DECLARATION@308..378
-              0: CSS_BOGUS_PROPERTY@308..378
+              0: CSS_BOGUS@308..378
                 0: CSS_IDENTIFIER@308..315
                   0: IDENT@308..315 "color" [Newline("\n"), Whitespace("\t")] []
                 1: COLON@315..317 ":" [] [Whitespace(" ")]
@@ -3401,7 +3393,7 @@ CssRoot {
                     0: IF_KW@317..319 "if" [] []
                     1: L_PAREN@319..320 "(" [] []
                     2: CSS_IF_BRANCH_LIST@320..370
-                      0: CSS_BOGUS_IF_BRANCH@320..370
+                      0: CSS_BOGUS@320..370
                         0: CSS_IF_TEST_BOOLEAN_NOT_EXPR@320..351
                           0: NOT_KW@320..324 "not" [] [Whitespace(" ")]
                           1: CSS_IF_TEST_BOOLEAN_EXPR_IN_PARENS@324..351
@@ -3424,7 +3416,7 @@ CssRoot {
                               2: (empty)
                             2: (empty)
                         1: CSS_BOGUS@351..370
-                          0: CSS_BOGUS_SUPPORTS_CONDITION@351..370
+                          0: CSS_BOGUS@351..370
                             0: CSS_IDENTIFIER@351..354
                               0: IDENT@351..354 "not" [] []
                             1: L_PAREN@354..355 "(" [] []
@@ -3438,7 +3430,7 @@ CssRoot {
                                     1: IDENT@364..369 "black" [] []
                             3: R_PAREN@369..370 ")" [] []
                     3: R_PAREN@370..371 ")" [] []
-                  1: CSS_BOGUS_PROPERTY_VALUE@371..378
+                  1: CSS_BOGUS@371..378
                     0: COLON@371..373 ":" [] [Whitespace(" ")]
                     1: IDENT@373..378 "black" [] []
               1: (empty)
@@ -3510,7 +3502,7 @@ CssRoot {
         1: CSS_DECLARATION_OR_RULE_LIST@474..516
           0: CSS_DECLARATION_WITH_SEMICOLON@474..514
             0: CSS_DECLARATION@474..513
-              0: CSS_BOGUS_PROPERTY@474..513
+              0: CSS_BOGUS@474..513
                 0: CSS_IDENTIFIER@474..481
                   0: IDENT@474..481 "color" [Newline("\n"), Whitespace("\t")] []
                 1: COLON@481..483 ":" [] [Whitespace(" ")]
@@ -3519,13 +3511,13 @@ CssRoot {
                     0: IF_KW@483..485 "if" [] []
                     1: L_PAREN@485..486 "(" [] []
                     2: CSS_IF_BRANCH_LIST@486..505
-                      0: CSS_BOGUS_IF_BRANCH@486..505
+                      0: CSS_BOGUS@486..505
                         0: SUPPORTS_KW@486..495 "supports" [] [Whitespace(" ")]
                         1: IDENT@495..500 "--foo" [] []
                         2: COLON@500..502 ":" [] [Whitespace(" ")]
                         3: IDENT@502..505 "bar" [] []
                     3: R_PAREN@505..506 ")" [] []
-                  1: CSS_BOGUS_PROPERTY_VALUE@506..513
+                  1: CSS_BOGUS@506..513
                     0: COLON@506..508 ":" [] [Whitespace(" ")]
                     1: IDENT@508..513 "black" [] []
               1: (empty)
@@ -3602,7 +3594,7 @@ CssRoot {
                     1: L_PAREN@618..619 "(" [] []
                     2: CSS_IF_BRANCH_LIST@619..648
                       0: CSS_IF_BRANCH@619..648
-                        0: CSS_BOGUS_IF_TEST_BOOLEAN_EXPR@619..648
+                        0: CSS_IF_TEST_BOOLEAN_AND_EXPR@619..648
                           0: CSS_IF_STYLE_TEST@619..637
                             0: STYLE_KW@619..624 "style" [] []
                             1: L_PAREN@624..625 "(" [] []
@@ -3617,7 +3609,7 @@ CssRoot {
                               1: (empty)
                             3: R_PAREN@635..637 ")" [] [Whitespace(" ")]
                           1: AND_KW@637..640 "and" [] []
-                          2: CSS_BOGUS_IF_TEST_BOOLEAN_EXPR@640..648
+                          2: CSS_BOGUS@640..648
                             0: COLON@640..642 ":" [] [Whitespace(" ")]
                             1: IDENT@642..647 "black" [] []
                             2: SEMICOLON@647..648 ";" [] []
@@ -3652,7 +3644,7 @@ CssRoot {
                     1: L_PAREN@686..687 "(" [] []
                     2: CSS_IF_BRANCH_LIST@687..715
                       0: CSS_IF_BRANCH@687..715
-                        0: CSS_BOGUS_IF_TEST_BOOLEAN_EXPR@687..715
+                        0: CSS_IF_TEST_BOOLEAN_OR_EXPR@687..715
                           0: CSS_IF_STYLE_TEST@687..705
                             0: STYLE_KW@687..692 "style" [] []
                             1: L_PAREN@692..693 "(" [] []
@@ -3667,7 +3659,7 @@ CssRoot {
                               1: (empty)
                             3: R_PAREN@703..705 ")" [] [Whitespace(" ")]
                           1: OR_KW@705..707 "or" [] []
-                          2: CSS_BOGUS_IF_TEST_BOOLEAN_EXPR@707..715
+                          2: CSS_BOGUS@707..715
                             0: COLON@707..709 ":" [] [Whitespace(" ")]
                             1: IDENT@709..714 "black" [] []
                             2: SEMICOLON@714..715 ";" [] []
@@ -3720,7 +3712,7 @@ CssRoot {
                           0: CSS_IDENTIFIER@767..772
                             0: IDENT@767..772 "black" [] []
                       1: SEMICOLON@772..774 ";" [] [Whitespace(" ")]
-                      2: CSS_BOGUS_IF_BRANCH@774..786
+                      2: CSS_BOGUS@774..786
                         0: IDENT@774..779 "elsif" [] []
                         1: COLON@779..781 ":" [] [Whitespace(" ")]
                         2: IDENT@781..786 "white" [] []
@@ -3805,7 +3797,7 @@ CssRoot {
                       0: CSS_IF_BRANCH@891..910
                         0: CSS_IF_TEST_BOOLEAN_EXPR_IN_PARENS@891..903
                           0: L_PAREN@891..892 "(" [] []
-                          1: CSS_BOGUS_IF_TEST_BOOLEAN_EXPR@892..902
+                          1: CSS_BOGUS@892..902
                             0: IDENT@892..897 "--foo" [] []
                             1: COLON@897..899 ":" [] [Whitespace(" ")]
                             2: IDENT@899..902 "bar" [] []
@@ -3834,7 +3826,7 @@ CssRoot {
         1: CSS_DECLARATION_OR_RULE_LIST@932..972
           0: CSS_DECLARATION_WITH_SEMICOLON@932..970
             0: CSS_DECLARATION@932..969
-              0: CSS_BOGUS_PROPERTY@932..969
+              0: CSS_BOGUS@932..969
                 0: CSS_IDENTIFIER@932..939
                   0: IDENT@932..939 "color" [Newline("\n"), Whitespace("\t")] []
                 1: COLON@939..941 ":" [] [Whitespace(" ")]
@@ -3843,14 +3835,14 @@ CssRoot {
                     0: IF_KW@941..943 "if" [] []
                     1: L_PAREN@943..944 "(" [] []
                     2: CSS_IF_BRANCH_LIST@944..961
-                      0: CSS_BOGUS_IF_BRANCH@944..961
+                      0: CSS_BOGUS@944..961
                         0: IDENT@944..950 "custom" [] []
                         1: L_PAREN@950..951 "(" [] []
                         2: IDENT@951..956 "--foo" [] []
                         3: COLON@956..958 ":" [] [Whitespace(" ")]
                         4: IDENT@958..961 "bar" [] []
                     3: R_PAREN@961..962 ")" [] []
-                  1: CSS_BOGUS_PROPERTY_VALUE@962..969
+                  1: CSS_BOGUS@962..969
                     0: COLON@962..964 ":" [] [Whitespace(" ")]
                     1: IDENT@964..969 "black" [] []
               1: (empty)
@@ -3887,7 +3879,7 @@ CssRoot {
                       0: CSS_IF_BRANCH@1013..1023
                         0: CSS_IF_TEST_BOOLEAN_EXPR_IN_PARENS@1013..1023
                           0: L_PAREN@1013..1014 "(" [] []
-                          1: CSS_BOGUS_IF_TEST_BOOLEAN_EXPR@1014..1022
+                          1: CSS_BOGUS@1014..1022
                             0: COLON@1014..1016 ":" [] [Whitespace(" ")]
                             1: IDENT@1016..1021 "black" [] []
                             2: SEMICOLON@1021..1022 ";" [] []
@@ -3923,7 +3915,7 @@ CssRoot {
                     0: IF_KW@1055..1057 "if" [] []
                     1: L_PAREN@1057..1058 "(" [] []
                     2: CSS_IF_BRANCH_LIST@1058..1114
-                      0: CSS_BOGUS_IF_BRANCH@1058..1113
+                      0: CSS_BOGUS@1058..1113
                         0: CSS_IF_TEST_BOOLEAN_AND_EXPR@1058..1090
                           0: CSS_IF_STYLE_TEST@1058..1072
                             0: STYLE_KW@1058..1063 "style" [] []
@@ -3955,7 +3947,7 @@ CssRoot {
                         1: CSS_BOGUS@1090..1113
                           0: CSS_IDENTIFIER@1090..1093
                             0: IDENT@1090..1093 "or" [] [Whitespace(" ")]
-                          1: CSS_BOGUS_SUPPORTS_CONDITION@1093..1106
+                          1: CSS_BOGUS@1093..1106
                             0: CSS_IDENTIFIER@1093..1098
                               0: IDENT@1093..1098 "style" [] []
                             1: L_PAREN@1098..1099 "(" [] []
@@ -3968,7 +3960,7 @@ CssRoot {
                                     0: COLON@1102..1104 ":" [] [Whitespace(" ")]
                                     1: CSS_NUMBER_LITERAL@1104..1105 "3" [] []
                             3: R_PAREN@1105..1106 ")" [] []
-                          2: CSS_BOGUS_PROPERTY_VALUE@1106..1113
+                          2: CSS_BOGUS@1106..1113
                             0: COLON@1106..1108 ":" [] [Whitespace(" ")]
                             1: IDENT@1108..1113 "black" [] []
                       1: SEMICOLON@1113..1114 ";" [] []
@@ -4043,7 +4035,7 @@ CssRoot {
         1: CSS_DECLARATION_OR_RULE_LIST@1195..1238
           0: CSS_DECLARATION_WITH_SEMICOLON@1195..1236
             0: CSS_DECLARATION@1195..1235
-              0: CSS_BOGUS_PROPERTY@1195..1235
+              0: CSS_BOGUS@1195..1235
                 0: CSS_IDENTIFIER@1195..1202
                   0: IDENT@1195..1202 "color" [Newline("\n"), Whitespace("\t")] []
                 1: COLON@1202..1204 ":" [] [Whitespace(" ")]
@@ -4052,7 +4044,7 @@ CssRoot {
                     0: IF_KW@1204..1206 "if" [] []
                     1: L_PAREN@1206..1207 "(" [] []
                     2: CSS_IF_BRANCH_LIST@1207..1227
-                      0: CSS_BOGUS_IF_BRANCH@1207..1227
+                      0: CSS_BOGUS@1207..1227
                         0: AND_KW@1207..1211 "and" [] [Whitespace(" ")]
                         1: STYLE_KW@1211..1216 "style" [] []
                         2: L_PAREN@1216..1217 "(" [] []
@@ -4060,7 +4052,7 @@ CssRoot {
                         4: COLON@1222..1224 ":" [] [Whitespace(" ")]
                         5: IDENT@1224..1227 "bar" [] []
                     3: R_PAREN@1227..1228 ")" [] []
-                  1: CSS_BOGUS_PROPERTY_VALUE@1228..1235
+                  1: CSS_BOGUS@1228..1235
                     0: COLON@1228..1230 ":" [] [Whitespace(" ")]
                     1: IDENT@1230..1235 "black" [] []
               1: (empty)
@@ -4085,7 +4077,7 @@ CssRoot {
         1: CSS_DECLARATION_OR_RULE_LIST@1255..1297
           0: CSS_DECLARATION_WITH_SEMICOLON@1255..1295
             0: CSS_DECLARATION@1255..1294
-              0: CSS_BOGUS_PROPERTY@1255..1294
+              0: CSS_BOGUS@1255..1294
                 0: CSS_IDENTIFIER@1255..1262
                   0: IDENT@1255..1262 "color" [Newline("\n"), Whitespace("\t")] []
                 1: COLON@1262..1264 ":" [] [Whitespace(" ")]
@@ -4094,7 +4086,7 @@ CssRoot {
                     0: IF_KW@1264..1266 "if" [] []
                     1: L_PAREN@1266..1267 "(" [] []
                     2: CSS_IF_BRANCH_LIST@1267..1286
-                      0: CSS_BOGUS_IF_BRANCH@1267..1286
+                      0: CSS_BOGUS@1267..1286
                         0: OR_KW@1267..1270 "or" [] [Whitespace(" ")]
                         1: STYLE_KW@1270..1275 "style" [] []
                         2: L_PAREN@1275..1276 "(" [] []
@@ -4102,7 +4094,7 @@ CssRoot {
                         4: COLON@1281..1283 ":" [] [Whitespace(" ")]
                         5: IDENT@1283..1286 "bar" [] []
                     3: R_PAREN@1286..1287 ")" [] []
-                  1: CSS_BOGUS_PROPERTY_VALUE@1287..1294
+                  1: CSS_BOGUS@1287..1294
                     0: COLON@1287..1289 ":" [] [Whitespace(" ")]
                     1: IDENT@1289..1294 "black" [] []
               1: (empty)
@@ -4183,7 +4175,7 @@ CssRoot {
                           0: CSS_IDENTIFIER@1383..1388
                             0: IDENT@1383..1388 "black" [] []
                       1: SEMICOLON@1388..1390 ";" [] [Whitespace(" ")]
-                      2: CSS_BOGUS_IF_BRANCH@1390..1396
+                      2: CSS_BOGUS@1390..1396
                         0: BANG@1390..1391 "!" [] []
                         1: IDENT@1391..1396 "bogus" [] []
                       3: SEMICOLON@1396..1398 ";" [] [Whitespace(" ")]
@@ -4227,7 +4219,7 @@ CssRoot {
                           0: CSS_IDENTIFIER@1438..1443
                             0: IDENT@1438..1443 "black" [] []
                       1: SEMICOLON@1443..1445 ";" [] [Whitespace(" ")]
-                      2: CSS_BOGUS_IF_BRANCH@1445..1448
+                      2: CSS_BOGUS@1445..1448
                         0: ERROR_TOKEN@1445..1446 "?" [] []
                         1: ERROR_TOKEN@1446..1447 "?" [] []
                         2: ERROR_TOKEN@1447..1448 "?" [] []
@@ -4285,7 +4277,7 @@ CssRoot {
                           1: AND_KW@1509..1513 "and" [] [Whitespace(" ")]
                           2: CSS_IF_TEST_BOOLEAN_EXPR_IN_PARENS@1513..1521
                             0: L_PAREN@1513..1514 "(" [] []
-                            1: CSS_BOGUS_IF_TEST_BOOLEAN_EXPR@1514..1520
+                            1: CSS_BOGUS@1514..1520
                               0: BANG@1514..1515 "!" [] []
                               1: IDENT@1515..1520 "bogus" [] []
                             2: R_PAREN@1520..1521 ")" [] []
@@ -4309,9 +4301,9 @@ CssRoot {
                     1: L_PAREN@1545..1546 "(" [] []
                     2: CSS_IF_BRANCH_LIST@1546..1559
                       0: CSS_IF_BRANCH@1546..1558
-                        0: CSS_BOGUS_IF_TEST_BOOLEAN_EXPR@1546..1553
+                        0: CSS_IF_TEST_BOOLEAN_NOT_EXPR@1546..1553
                           0: NOT_KW@1546..1550 "not" [] [Whitespace(" ")]
-                          1: CSS_BOGUS_IF_TEST_BOOLEAN_EXPR@1550..1553
+                          1: CSS_BOGUS@1550..1553
                             0: IDENT@1550..1553 "foo" [] []
                         1: COLON@1553..1555 ":" [] [Whitespace(" ")]
                         2: CSS_GENERIC_COMPONENT_VALUE_LIST@1555..1558
@@ -4365,7 +4357,7 @@ CssRoot {
                           0: CSS_IDENTIFIER@1617..1622
                             0: IDENT@1617..1622 "black" [] []
                       1: SEMICOLON@1622..1624 ";" [] [Whitespace(" ")]
-                      2: CSS_BOGUS_IF_BRANCH@1624..1630
+                      2: CSS_BOGUS@1624..1630
                         0: BANG@1624..1625 "!" [] []
                         1: IDENT@1625..1630 "bogus" [] []
                       3: SEMICOLON@1630..1632 ";" [] [Whitespace(" ")]
@@ -4423,7 +4415,7 @@ CssRoot {
                           0: CSS_IDENTIFIER@1718..1723
                             0: IDENT@1718..1723 "black" [] []
                       1: SEMICOLON@1723..1725 ";" [] [Whitespace(" ")]
-                      2: CSS_BOGUS_IF_BRANCH@1725..1731
+                      2: CSS_BOGUS@1725..1731
                         0: BANG@1725..1726 "!" [] []
                         1: IDENT@1726..1731 "bogus" [] []
                       3: SEMICOLON@1731..1733 ";" [] [Whitespace(" ")]
@@ -4481,7 +4473,7 @@ CssRoot {
                           0: CSS_IDENTIFIER@1800..1803
                             0: IDENT@1800..1803 "red" [] []
                       1: SEMICOLON@1803..1805 ";" [] [Whitespace(" ")]
-                      2: CSS_BOGUS_IF_BRANCH@1805..1808
+                      2: CSS_BOGUS@1805..1808
                         0: BANG@1805..1806 "!" [] []
                         1: BANG@1806..1807 "!" [] []
                         2: BANG@1807..1808 "!" [] []
@@ -4505,7 +4497,7 @@ CssRoot {
                           0: CSS_IDENTIFIER@1825..1829
                             0: IDENT@1825..1829 "blue" [] []
                       5: SEMICOLON@1829..1831 ";" [] [Whitespace(" ")]
-                      6: CSS_BOGUS_IF_BRANCH@1831..1834
+                      6: CSS_BOGUS@1831..1834
                         0: AT@1831..1832 "@" [] []
                         1: AT@1832..1833 "@" [] []
                         2: AT@1833..1834 "@" [] []
@@ -4545,7 +4537,7 @@ CssRoot {
                     0: IF_KW@1879..1881 "if" [] []
                     1: L_PAREN@1881..1882 "(" [] []
                     2: CSS_IF_BRANCH_LIST@1882..1928
-                      0: CSS_BOGUS_IF_BRANCH@1882..1890
+                      0: CSS_BOGUS@1882..1890
                         0: HASH@1882..1883 "#" [] []
                         1: HASH@1883..1884 "#" [] []
                         2: HASH@1884..1885 "#" [] []
@@ -4625,7 +4617,7 @@ CssRoot {
                           0: CSS_IDENTIFIER@1985..1990
                             0: IDENT@1985..1990 "black" [] []
                       1: SEMICOLON@1990..1992 ";" [] [Whitespace(" ")]
-                      2: CSS_BOGUS_IF_BRANCH@1992..2006
+                      2: CSS_BOGUS@1992..2006
                         0: IDENT@1992..2006 "bogus-no-colon" [] []
                       3: SEMICOLON@2006..2008 ";" [] [Whitespace(" ")]
                       4: CSS_IF_BRANCH@2008..2019
@@ -4704,7 +4696,7 @@ CssRoot {
                     1: L_PAREN@2106..2107 "(" [] []
                     2: CSS_IF_BRANCH_LIST@2107..2145
                       0: CSS_IF_BRANCH@2107..2128
-                        0: CSS_BOGUS_IF_TEST@2107..2123
+                        0: CSS_BOGUS@2107..2123
                           0: STYLE_KW@2107..2112 "style" [] []
                           1: L_PAREN@2112..2113 "(" [] []
                           2: CSS_BOGUS@2113..2122
@@ -4715,7 +4707,7 @@ CssRoot {
                           0: CSS_IDENTIFIER@2125..2128
                             0: IDENT@2125..2128 "red" [] []
                       1: SEMICOLON@2128..2130 ";" [] [Whitespace(" ")]
-                      2: CSS_BOGUS_IF_BRANCH@2130..2133
+                      2: CSS_BOGUS@2130..2133
                         0: BANG@2130..2131 "!" [] []
                         1: BANG@2131..2132 "!" [] []
                         2: BANG@2132..2133 "!" [] []
@@ -4829,7 +4821,7 @@ CssRoot {
                                 0: CSS_IDENTIFIER@2285..2288
                                   0: IDENT@2285..2288 "red" [] []
                             1: SEMICOLON@2288..2290 ";" [] [Whitespace(" ")]
-                            2: CSS_BOGUS_IF_BRANCH@2290..2296
+                            2: CSS_BOGUS@2290..2296
                               0: BANG@2290..2291 "!" [] []
                               1: IDENT@2291..2296 "bogus" [] []
                             3: SEMICOLON@2296..2298 ";" [] [Whitespace(" ")]
@@ -4958,7 +4950,7 @@ CssRoot {
                                       0: CSS_IDENTIFIER@2481..2484
                                         0: IDENT@2481..2484 "red" [] []
                                   1: SEMICOLON@2484..2486 ";" [] [Whitespace(" ")]
-                                  2: CSS_BOGUS_IF_BRANCH@2486..2489
+                                  2: CSS_BOGUS@2486..2489
                                     0: BANG@2486..2487 "!" [] []
                                     1: BANG@2487..2488 "!" [] []
                                     2: BANG@2488..2489 "!" [] []
@@ -5041,7 +5033,7 @@ CssRoot {
                     1: L_PAREN@2596..2597 "(" [] []
                     2: CSS_IF_BRANCH_LIST@2597..2626
                       0: CSS_IF_BRANCH@2597..2613
-                        0: CSS_BOGUS_IF_TEST@2597..2607
+                        0: CSS_BOGUS@2597..2607
                           0: SASS_KW@2597..2601 "sass" [] []
                           1: L_PAREN@2601..2602 "(" [] []
                           2: CSS_BOGUS@2602..2606

@@ -10,7 +10,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_css_syntax::{
-    CssBogusPseudoClass, CssFileSource, CssPageSelectorPseudo,
+    CssBogus, CssFileSource, CssPageSelectorPseudo,
     CssPseudoClassFunctionCompoundSelector, CssPseudoClassFunctionCompoundSelectorList,
     CssPseudoClassFunctionIdentifier, CssPseudoClassFunctionNth,
     CssPseudoClassFunctionRelativeSelectorList, CssPseudoClassFunctionSelector,
@@ -105,14 +105,14 @@ declare_node_union! {
       | CssPseudoClassFunctionSelectorList
       | CssPseudoClassFunctionValueList
       | CssPseudoClassIdentifier
-      | CssBogusPseudoClass
+      | CssBogus
       | CssPageSelectorPseudo
 }
 
 impl AnyPseudoLike {
     fn name(&self) -> Option<CssSyntaxToken> {
         let ident = match self {
-            Self::CssBogusPseudoClass(_) => return None,
+            Self::CssBogus(_) => return None,
             Self::CssPseudoClassFunctionCompoundSelector(selector) => selector.name(),
             Self::CssPseudoClassFunctionCompoundSelectorList(selector_list) => selector_list.name(),
             Self::CssPseudoClassFunctionIdentifier(ident) => ident.name(),

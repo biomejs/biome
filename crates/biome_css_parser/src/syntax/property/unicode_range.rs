@@ -1,7 +1,7 @@
 use crate::lexer::{CssLexContext, CssReLexContext};
 use crate::parser::CssParser;
 use biome_css_syntax::CssSyntaxKind::{
-    self, CSS_BOGUS_UNICODE_RANGE_VALUE, CSS_DIMENSION_VALUE, CSS_NUMBER_LITERAL,
+    self, CSS_BOGUS, CSS_DIMENSION_VALUE, CSS_NUMBER_LITERAL,
     CSS_UNICODE_CODEPOINT, CSS_UNICODE_CODEPOINT_LITERAL, CSS_UNICODE_RANGE,
     CSS_UNICODE_RANGE_INTERVAL, CSS_UNICODE_RANGE_WILDCARD, CSS_UNICODE_RANGE_WILDCARD_LITERAL,
 };
@@ -79,7 +79,7 @@ pub(crate) fn parse_unicode_range(p: &mut CssParser) -> ParsedSyntax {
                 p.error(expected_codepoint(p, p.cur_range()));
             }
 
-            return Present(m.complete(p, CSS_BOGUS_UNICODE_RANGE_VALUE));
+            return Present(m.complete(p, CSS_BOGUS));
         }
 
         return Present(m.complete(p, CSS_UNICODE_RANGE));
@@ -88,7 +88,7 @@ pub(crate) fn parse_unicode_range(p: &mut CssParser) -> ParsedSyntax {
     let codepoint = parse_unicode_codepoint(p).or_add_diagnostic(p, expected_codepoint_value);
 
     let Some(codepoint) = codepoint else {
-        return Present(m.complete(p, CSS_BOGUS_UNICODE_RANGE_VALUE));
+        return Present(m.complete(p, CSS_BOGUS));
     };
 
     // Checks if the parser is positioned to parse a Unicode range interval.
@@ -109,7 +109,7 @@ pub(crate) fn parse_unicode_range(p: &mut CssParser) -> ParsedSyntax {
                 p.error(expected_codepoint(p, p.cur_range()));
             }
             range.abandon(p);
-            return Present(m.complete(p, CSS_BOGUS_UNICODE_RANGE_VALUE));
+            return Present(m.complete(p, CSS_BOGUS));
         }
 
         range.complete(p, CSS_UNICODE_RANGE_INTERVAL);

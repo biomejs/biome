@@ -81,14 +81,14 @@ CssRoot {
                                         attr_type: CssTypeFunction {
                                             name_token: TYPE_KW@67..71 "type" [] [],
                                             l_paren_token: L_PAREN@71..72 "(" [] [],
-                                            ty: CssBogusSyntax {
+                                            ty: CssBogus {
                                                 items: [
                                                     CssSyntaxComponentWithoutMultiplier {
                                                         l_angle_token: L_ANGLE@72..73 "<" [] [],
                                                         type_name_token: IDENT@73..87 "transform-list" [] [],
                                                         r_angle_token: R_ANGLE@87..88 ">" [] [],
                                                     },
-                                                    CssBogusSyntaxSingleComponent {
+                                                    CssBogus {
                                                         items: [
                                                             PLUS@88..89 "+" [] [],
                                                         ],
@@ -125,14 +125,14 @@ CssRoot {
                                         attr_type: CssTypeFunction {
                                             name_token: TYPE_KW@113..117 "type" [] [],
                                             l_paren_token: L_PAREN@117..118 "(" [] [],
-                                            ty: CssBogusSyntax {
+                                            ty: CssBogus {
                                                 items: [
                                                     CssSyntaxComponentWithoutMultiplier {
                                                         l_angle_token: L_ANGLE@118..119 "<" [] [],
                                                         type_name_token: IDENT@119..133 "transform-list" [] [],
                                                         r_angle_token: R_ANGLE@133..134 ">" [] [],
                                                     },
-                                                    CssBogusSyntaxSingleComponent {
+                                                    CssBogus {
                                                         items: [
                                                             HASH@134..135 "#" [] [],
                                                         ],
@@ -367,7 +367,7 @@ CssRoot {
                                         attr_type: CssTypeFunction {
                                             name_token: TYPE_KW@424..428 "type" [] [],
                                             l_paren_token: L_PAREN@428..429 "(" [] [],
-                                            ty: CssBogusSyntax {
+                                            ty: CssBogus {
                                                 items: [
                                                     CssSyntaxComponent {
                                                         component: CssIdentifier {
@@ -375,7 +375,7 @@ CssRoot {
                                                         },
                                                         multiplier: missing (optional),
                                                     },
-                                                    CssBogusSyntaxSingleComponent {
+                                                    CssBogus {
                                                         items: [
                                                             R_ANGLE@435..436 ">" [] [],
                                                         ],
@@ -412,7 +412,7 @@ CssRoot {
                                         attr_type: CssTypeFunction {
                                             name_token: TYPE_KW@460..464 "type" [] [],
                                             l_paren_token: L_PAREN@464..465 "(" [] [],
-                                            ty: CssBogusSyntax {
+                                            ty: CssBogus {
                                                 items: [
                                                     CssSyntaxComponent {
                                                         component: CssIdentifier {
@@ -420,7 +420,7 @@ CssRoot {
                                                         },
                                                         multiplier: missing (optional),
                                                     },
-                                                    CssBogusSyntaxSingleComponent {
+                                                    CssBogus {
                                                         items: [
                                                             R_ANGLE@471..472 ">" [] [],
                                                         ],
@@ -464,7 +464,7 @@ CssRoot {
                                         attr_type: CssTypeFunction {
                                             name_token: TYPE_KW@523..527 "type" [] [],
                                             l_paren_token: L_PAREN@527..528 "(" [] [],
-                                            ty: CssBogusSyntax {
+                                            ty: CssBogus {
                                                 items: [
                                                     CssSyntaxComponent {
                                                         component: CssSyntaxType {
@@ -478,7 +478,7 @@ CssRoot {
                                                             multiplier: HASH@536..537 "#" [] [],
                                                         },
                                                     },
-                                                    CssBogusSyntaxSingleComponent {
+                                                    CssBogus {
                                                         items: [
                                                             HASH@537..538 "#" [] [],
                                                         ],
@@ -522,7 +522,7 @@ CssRoot {
                                         attr_type: CssTypeFunction {
                                             name_token: TYPE_KW@565..569 "type" [] [],
                                             l_paren_token: L_PAREN@569..570 "(" [] [],
-                                            ty: CssBogusSyntax {
+                                            ty: CssBogus {
                                                 items: [
                                                     CssSyntaxComponent {
                                                         component: CssSyntaxType {
@@ -536,7 +536,7 @@ CssRoot {
                                                             multiplier: PLUS@578..579 "+" [] [],
                                                         },
                                                     },
-                                                    CssBogusSyntaxSingleComponent {
+                                                    CssBogus {
                                                         items: [
                                                             PLUS@579..580 "+" [] [],
                                                         ],
@@ -617,7 +617,7 @@ CssRoot {
                                                 value_token: IDENT@678..685 "data-a" [] [Whitespace(" ")],
                                             },
                                             PIPE@685..687 "|" [] [Whitespace(" ")],
-                                            CssBogusAttrName {
+                                            CssBogus {
                                                 items: [
                                                     HASH@687..688 "#" [] [],
                                                     IDENT@688..693 "bogus" [] [],
@@ -629,7 +629,7 @@ CssRoot {
                                                 value_token: IDENT@697..704 "data-b" [] [Whitespace(" ")],
                                             },
                                             PIPE@704..706 "|" [] [Whitespace(" ")],
-                                            CssBogusAttrName {
+                                            CssBogus {
                                                 items: [
                                                     AMP@706..707 "&" [] [],
                                                     IDENT@707..714 "unknown" [] [],
@@ -666,7 +666,7 @@ CssRoot {
                                         attr_type: CssTypeFunction {
                                             name_token: TYPE_KW@763..767 "type" [] [],
                                             l_paren_token: L_PAREN@767..768 "(" [] [],
-                                            ty: CssBogusSyntax {
+                                            ty: CssBogus {
                                                 items: [
                                                     CssSyntaxComponent {
                                                         component: CssSyntaxType {
@@ -679,7 +679,7 @@ CssRoot {
                                                         multiplier: missing (optional),
                                                     },
                                                     PIPE@777..779 "|" [] [Whitespace(" ")],
-                                                    CssBogusSyntaxSingleComponent {
+                                                    CssBogus {
                                                         items: [
                                                             HASH@779..780 "#" [] [],
                                                             IDENT@780..785 "bogus" [] [],
@@ -849,12 +849,12 @@ CssRoot {
                     3: CSS_TYPE_FUNCTION@67..90
                       0: TYPE_KW@67..71 "type" [] []
                       1: L_PAREN@71..72 "(" [] []
-                      2: CSS_BOGUS_SYNTAX@72..89
+                      2: CSS_BOGUS@72..89
                         0: CSS_SYNTAX_COMPONENT_WITHOUT_MULTIPLIER@72..88
                           0: L_ANGLE@72..73 "<" [] []
                           1: IDENT@73..87 "transform-list" [] []
                           2: R_ANGLE@87..88 ">" [] []
-                        1: CSS_BOGUS_SYNTAX_SINGLE_COMPONENT@88..89
+                        1: CSS_BOGUS@88..89
                           0: PLUS@88..89 "+" [] []
                       3: R_PAREN@89..90 ")" [] []
                     4: (empty)
@@ -877,12 +877,12 @@ CssRoot {
                     3: CSS_TYPE_FUNCTION@113..136
                       0: TYPE_KW@113..117 "type" [] []
                       1: L_PAREN@117..118 "(" [] []
-                      2: CSS_BOGUS_SYNTAX@118..135
+                      2: CSS_BOGUS@118..135
                         0: CSS_SYNTAX_COMPONENT_WITHOUT_MULTIPLIER@118..134
                           0: L_ANGLE@118..119 "<" [] []
                           1: IDENT@119..133 "transform-list" [] []
                           2: R_ANGLE@133..134 ">" [] []
-                        1: CSS_BOGUS_SYNTAX_SINGLE_COMPONENT@134..135
+                        1: CSS_BOGUS@134..135
                           0: HASH@134..135 "#" [] []
                       3: R_PAREN@135..136 ")" [] []
                     4: (empty)
@@ -1042,12 +1042,12 @@ CssRoot {
                     3: CSS_TYPE_FUNCTION@424..437
                       0: TYPE_KW@424..428 "type" [] []
                       1: L_PAREN@428..429 "(" [] []
-                      2: CSS_BOGUS_SYNTAX@429..436
+                      2: CSS_BOGUS@429..436
                         0: CSS_SYNTAX_COMPONENT@429..435
                           0: CSS_IDENTIFIER@429..435
                             0: IDENT@429..435 "string" [] []
                           1: (empty)
-                        1: CSS_BOGUS_SYNTAX_SINGLE_COMPONENT@435..436
+                        1: CSS_BOGUS@435..436
                           0: R_ANGLE@435..436 ">" [] []
                       3: R_PAREN@436..437 ")" [] []
                     4: (empty)
@@ -1070,12 +1070,12 @@ CssRoot {
                     3: CSS_TYPE_FUNCTION@460..473
                       0: TYPE_KW@460..464 "type" [] []
                       1: L_PAREN@464..465 "(" [] []
-                      2: CSS_BOGUS_SYNTAX@465..472
+                      2: CSS_BOGUS@465..472
                         0: CSS_SYNTAX_COMPONENT@465..471
                           0: CSS_IDENTIFIER@465..471
                             0: IDENT@465..471 "string" [] []
                           1: (empty)
-                        1: CSS_BOGUS_SYNTAX_SINGLE_COMPONENT@471..472
+                        1: CSS_BOGUS@471..472
                           0: R_ANGLE@471..472 ">" [] []
                       3: R_PAREN@472..473 ")" [] []
                     4: CSS_ATTR_FALLBACK_VALUE@473..476
@@ -1102,7 +1102,7 @@ CssRoot {
                     3: CSS_TYPE_FUNCTION@523..539
                       0: TYPE_KW@523..527 "type" [] []
                       1: L_PAREN@527..528 "(" [] []
-                      2: CSS_BOGUS_SYNTAX@528..538
+                      2: CSS_BOGUS@528..538
                         0: CSS_SYNTAX_COMPONENT@528..537
                           0: CSS_SYNTAX_TYPE@528..536
                             0: L_ANGLE@528..529 "<" [] []
@@ -1111,7 +1111,7 @@ CssRoot {
                             2: R_ANGLE@535..536 ">" [] []
                           1: CSS_SYNTAX_MULTIPLIER@536..537
                             0: HASH@536..537 "#" [] []
-                        1: CSS_BOGUS_SYNTAX_SINGLE_COMPONENT@537..538
+                        1: CSS_BOGUS@537..538
                           0: HASH@537..538 "#" [] []
                       3: R_PAREN@538..539 ")" [] []
                     4: CSS_ATTR_FALLBACK_VALUE@539..542
@@ -1138,7 +1138,7 @@ CssRoot {
                     3: CSS_TYPE_FUNCTION@565..581
                       0: TYPE_KW@565..569 "type" [] []
                       1: L_PAREN@569..570 "(" [] []
-                      2: CSS_BOGUS_SYNTAX@570..580
+                      2: CSS_BOGUS@570..580
                         0: CSS_SYNTAX_COMPONENT@570..579
                           0: CSS_SYNTAX_TYPE@570..578
                             0: L_ANGLE@570..571 "<" [] []
@@ -1147,7 +1147,7 @@ CssRoot {
                             2: R_ANGLE@577..578 ">" [] []
                           1: CSS_SYNTAX_MULTIPLIER@578..579
                             0: PLUS@578..579 "+" [] []
-                        1: CSS_BOGUS_SYNTAX_SINGLE_COMPONENT@579..580
+                        1: CSS_BOGUS@579..580
                           0: PLUS@579..580 "+" [] []
                       3: R_PAREN@580..581 ")" [] []
                     4: CSS_ATTR_FALLBACK_VALUE@581..584
@@ -1200,7 +1200,7 @@ CssRoot {
                       0: CSS_IDENTIFIER@678..685
                         0: IDENT@678..685 "data-a" [] [Whitespace(" ")]
                       1: PIPE@685..687 "|" [] [Whitespace(" ")]
-                      2: CSS_BOGUS_ATTR_NAME@687..695
+                      2: CSS_BOGUS@687..695
                         0: HASH@687..688 "#" [] []
                         1: IDENT@688..693 "bogus" [] []
                         2: BANG@693..695 "!" [] [Whitespace(" ")]
@@ -1208,7 +1208,7 @@ CssRoot {
                       4: CSS_IDENTIFIER@697..704
                         0: IDENT@697..704 "data-b" [] [Whitespace(" ")]
                       5: PIPE@704..706 "|" [] [Whitespace(" ")]
-                      6: CSS_BOGUS_ATTR_NAME@706..715
+                      6: CSS_BOGUS@706..715
                         0: AMP@706..707 "&" [] []
                         1: IDENT@707..714 "unknown" [] []
                         2: AMP@714..715 "&" [] []
@@ -1233,7 +1233,7 @@ CssRoot {
                     3: CSS_TYPE_FUNCTION@763..798
                       0: TYPE_KW@763..767 "type" [] []
                       1: L_PAREN@767..768 "(" [] []
-                      2: CSS_BOGUS_SYNTAX@768..797
+                      2: CSS_BOGUS@768..797
                         0: CSS_SYNTAX_COMPONENT@768..777
                           0: CSS_SYNTAX_TYPE@768..777
                             0: L_ANGLE@768..769 "<" [] []
@@ -1242,7 +1242,7 @@ CssRoot {
                             2: R_ANGLE@775..777 ">" [] [Whitespace(" ")]
                           1: (empty)
                         1: PIPE@777..779 "|" [] [Whitespace(" ")]
-                        2: CSS_BOGUS_SYNTAX_SINGLE_COMPONENT@779..787
+                        2: CSS_BOGUS@779..787
                           0: HASH@779..780 "#" [] []
                           1: IDENT@780..785 "bogus" [] []
                           2: BANG@785..787 "!" [] [Whitespace(" ")]

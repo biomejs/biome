@@ -50,7 +50,7 @@ CssRoot {
                     right: missing (required),
                 },
                 missing separator,
-                CssBogusSelector {
+                CssBogus {
                     items: [
                         L_PAREN@5..6 "(" [] [],
                         R_PAREN@6..7 ")" [] [],
@@ -93,7 +93,7 @@ CssRoot {
                     ],
                 },
                 COMMA@25..27 "," [] [Whitespace(" ")],
-                CssBogusSelector {
+                CssBogus {
                     items: [
                         L_PAREN@27..28 "(" [] [],
                         R_PAREN@28..29 ")" [] [],
@@ -140,7 +140,7 @@ CssRoot {
                     right: missing (required),
                 },
                 missing separator,
-                CssBogusSelector {
+                CssBogus {
                     items: [
                         CSS_STRING_LITERAL@49..57 "\"string\"" [] [],
                     ],
@@ -178,7 +178,7 @@ CssRoot {
                     ],
                 },
                 COMMA@71..73 "," [] [Whitespace(" ")],
-                CssBogusSelector {
+                CssBogus {
                     items: [
                         CSS_STRING_LITERAL@73..81 "\"string\"" [] [],
                     ],
@@ -220,7 +220,7 @@ CssRoot {
                     right: missing (required),
                 },
                 missing separator,
-                CssBogusSelector {
+                CssBogus {
                     items: [
                         CSS_NUMBER_LITERAL@97..102 "21312" [] [],
                     ],
@@ -258,7 +258,7 @@ CssRoot {
                     ],
                 },
                 COMMA@116..118 "," [] [Whitespace(" ")],
-                CssBogusSelector {
+                CssBogus {
                     items: [
                         CSS_NUMBER_LITERAL@118..124 "123213" [] [],
                     ],
@@ -300,7 +300,7 @@ CssRoot {
                     right: missing (required),
                 },
                 missing separator,
-                CssBogusSelector {
+                CssBogus {
                     items: [
                         L_PAREN@140..141 "(" [] [],
                         R_PAREN@141..143 ")" [] [Whitespace(" ")],
@@ -341,7 +341,7 @@ CssRoot {
                     ],
                 },
                 COMMA@171..173 "," [] [Whitespace(" ")],
-                CssBogusSelector {
+                CssBogus {
                     items: [
                         L_PAREN@173..174 "(" [] [],
                         R_PAREN@174..176 ")" [] [Whitespace(" ")],
@@ -409,11 +409,11 @@ CssRoot {
                     right: missing (required),
                 },
             ],
-            block: CssBogusBlock {
+            block: CssBogus {
                 items: [],
             },
         },
-        CssBogusRule {
+        CssBogus {
             items: [
                 CSS_STRING_LITERAL@214..216 "\"\"" [] [],
             ],
@@ -440,7 +440,7 @@ CssRoot {
                     ],
                 },
             ],
-            block: CssBogusBlock {
+            block: CssBogus {
                 items: [
                     CssDeclarationOrRuleList [
                         CssEmptyDeclaration {
@@ -476,7 +476,7 @@ CssRoot {
           1: CSS_SPACE_LITERAL@4..5 " " [] []
           2: (empty)
         1: (empty)
-        2: CSS_BOGUS_SELECTOR@5..11
+        2: CSS_BOGUS@5..11
           0: L_PAREN@5..6 "(" [] []
           1: R_PAREN@6..7 ")" [] []
           2: R_PAREN@7..8 ")" [] []
@@ -506,7 +506,7 @@ CssRoot {
               1: CSS_CUSTOM_IDENTIFIER@22..25
                 0: IDENT@22..25 "div" [] []
         1: COMMA@25..27 "," [] [Whitespace(" ")]
-        2: CSS_BOGUS_SELECTOR@27..33
+        2: CSS_BOGUS@27..33
           0: L_PAREN@27..28 "(" [] []
           1: R_PAREN@28..29 ")" [] []
           2: R_PAREN@29..30 ")" [] []
@@ -539,7 +539,7 @@ CssRoot {
           1: CSS_SPACE_LITERAL@48..49 " " [] []
           2: (empty)
         1: (empty)
-        2: CSS_BOGUS_SELECTOR@49..57
+        2: CSS_BOGUS@49..57
           0: CSS_STRING_LITERAL@49..57 "\"string\"" [] []
         3: COMMA@57..59 "," [] [Whitespace(" ")]
         4: CSS_COMPOUND_SELECTOR@59..64
@@ -564,7 +564,7 @@ CssRoot {
               1: CSS_CUSTOM_IDENTIFIER@68..71
                 0: IDENT@68..71 "div" [] []
         1: COMMA@71..73 "," [] [Whitespace(" ")]
-        2: CSS_BOGUS_SELECTOR@73..81
+        2: CSS_BOGUS@73..81
           0: CSS_STRING_LITERAL@73..81 "\"string\"" [] []
         3: COMMA@81..83 "," [] [Whitespace(" ")]
         4: CSS_COMPOUND_SELECTOR@83..88
@@ -592,7 +592,7 @@ CssRoot {
           1: CSS_SPACE_LITERAL@96..97 " " [] []
           2: (empty)
         1: (empty)
-        2: CSS_BOGUS_SELECTOR@97..102
+        2: CSS_BOGUS@97..102
           0: CSS_NUMBER_LITERAL@97..102 "21312" [] []
         3: COMMA@102..104 "," [] [Whitespace(" ")]
         4: CSS_COMPOUND_SELECTOR@104..109
@@ -617,7 +617,7 @@ CssRoot {
               1: CSS_CUSTOM_IDENTIFIER@113..116
                 0: IDENT@113..116 "div" [] []
         1: COMMA@116..118 "," [] [Whitespace(" ")]
-        2: CSS_BOGUS_SELECTOR@118..124
+        2: CSS_BOGUS@118..124
           0: CSS_NUMBER_LITERAL@118..124 "123213" [] []
         3: COMMA@124..126 "," [] [Whitespace(" ")]
         4: CSS_COMPOUND_SELECTOR@126..131
@@ -645,7 +645,7 @@ CssRoot {
           1: CSS_SPACE_LITERAL@139..140 " " [] []
           2: (empty)
         1: (empty)
-        2: CSS_BOGUS_SELECTOR@140..157
+        2: CSS_BOGUS@140..157
           0: L_PAREN@140..141 "(" [] []
           1: R_PAREN@141..143 ")" [] [Whitespace(" ")]
           2: CSS_NUMBER_LITERAL@143..149 "12321" [] [Whitespace(" ")]
@@ -673,7 +673,7 @@ CssRoot {
               1: CSS_CUSTOM_IDENTIFIER@168..171
                 0: IDENT@168..171 "div" [] []
         1: COMMA@171..173 "," [] [Whitespace(" ")]
-        2: CSS_BOGUS_SELECTOR@173..190
+        2: CSS_BOGUS@173..190
           0: L_PAREN@173..174 "(" [] []
           1: R_PAREN@174..176 ")" [] [Whitespace(" ")]
           2: CSS_NUMBER_LITERAL@176..182 "12321" [] [Whitespace(" ")]
@@ -719,8 +719,8 @@ CssRoot {
                   0: IDENT@210..213 "div" [] []
           1: CSS_SPACE_LITERAL@213..214 " " [] []
           2: (empty)
-      1: CSS_BOGUS_BLOCK@214..214
-    10: CSS_BOGUS_RULE@214..216
+      1: CSS_BOGUS@214..214
+    10: CSS_BOGUS@214..216
       0: CSS_STRING_LITERAL@214..216 "\"\"" [] []
     11: CSS_QUALIFIED_RULE@216..232
       0: CSS_SELECTOR_LIST@216..229
@@ -736,7 +736,7 @@ CssRoot {
               1: CSS_PSEUDO_CLASS_IDENTIFIER@226..229
                 0: CSS_IDENTIFIER@226..229
                   0: IDENT@226..229 "red" [] []
-      1: CSS_BOGUS_BLOCK@229..232
+      1: CSS_BOGUS@229..232
         0: CSS_DECLARATION_OR_RULE_LIST@229..230
           0: CSS_EMPTY_DECLARATION@229..230
             0: SEMICOLON@229..230 ";" [] []

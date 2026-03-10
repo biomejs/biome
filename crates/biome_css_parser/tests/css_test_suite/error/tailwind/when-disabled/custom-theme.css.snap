@@ -41,9 +41,9 @@ CssRoot {
                 items: CssDeclarationOrRuleList [
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBogusProperty {
+                            property: CssBogus {
                                 items: [
-                                    CssBogusSupportsCondition {
+                                    CssBogus {
                                         items: [
                                             CssDashedIdentifier {
                                                 value_token: IDENT@113..117 "--" [Newline("\n"), Whitespace("\t")] [],
@@ -93,8 +93,8 @@ CssRoot {
         1: CSS_DECLARATION_OR_RULE_LIST@113..128
           0: CSS_DECLARATION_WITH_SEMICOLON@113..128
             0: CSS_DECLARATION@113..127
-              0: CSS_BOGUS_PROPERTY@113..127
-                0: CSS_BOGUS_SUPPORTS_CONDITION@113..118
+              0: CSS_BOGUS@113..127
+                0: CSS_BOGUS@113..118
                   0: CSS_DASHED_IDENTIFIER@113..117
                     0: IDENT@113..117 "--" [Newline("\n"), Whitespace("\t")] []
                   1: STAR@117..118 "*" [] []

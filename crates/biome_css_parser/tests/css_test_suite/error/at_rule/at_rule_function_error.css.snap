@@ -80,7 +80,7 @@ CssRoot {
     items: CssRootItemList [
         CssAtRule {
             at_token: AT@0..1 "@" [] [],
-            rule: CssBogusAtRule {
+            rule: CssBogus {
                 items: [
                     CssBogus {
                         items: [
@@ -113,20 +113,19 @@ CssRoot {
                     },
                     l_paren_token: L_PAREN@60..61 "(" [] [],
                     parameters: CssFunctionParameterList [
-                        CssBogusFunctionParameter {
-                            items: [
-                                CssBogus {
-                                    items: [
-                                        IDENT@61..79 "param-with-default" [] [],
-                                    ],
+                        CssFunctionParameter {
+                            name: missing (required),
+                            ty: CssBogus {
+                                items: [
+                                    IDENT@61..79 "param-with-default" [] [],
+                                ],
+                            },
+                            default_value: CssFunctionParameterDefaultValue {
+                                colon_token: COLON@79..81 ":" [] [Whitespace(" ")],
+                                value: CssIdentifier {
+                                    value_token: IDENT@81..84 "rem" [] [],
                                 },
-                                CssFunctionParameterDefaultValue {
-                                    colon_token: COLON@79..81 ":" [] [Whitespace(" ")],
-                                    value: CssIdentifier {
-                                        value_token: IDENT@81..84 "rem" [] [],
-                                    },
-                                },
-                            ],
+                            },
                         },
                     ],
                     r_paren_token: R_PAREN@84..86 ")" [] [Whitespace(" ")],
@@ -149,7 +148,7 @@ CssRoot {
                     },
                     l_paren_token: L_PAREN@121..122 "(" [] [],
                     parameters: CssFunctionParameterList [
-                        CssBogusFunctionParameter {
+                        CssBogus {
                             items: [
                                 CssBogus {
                                     items: [
@@ -195,7 +194,7 @@ CssRoot {
                             default_value: missing (optional),
                         },
                         missing separator,
-                        CssBogusFunctionParameter {
+                        CssBogus {
                             items: [
                                 HASH@187..188 "#" [] [],
                                 HASH@188..189 "#" [] [],
@@ -233,7 +232,7 @@ CssRoot {
                             default_value: missing (optional),
                         },
                         missing separator,
-                        CssBogusFunctionParameter {
+                        CssBogus {
                             items: [
                                 HASH@237..238 "#" [] [],
                                 HASH@238..239 "#" [] [],
@@ -254,7 +253,7 @@ CssRoot {
                             },
                         },
                         COMMA@255..257 "," [] [Whitespace(" ")],
-                        CssBogusFunctionParameter {
+                        CssBogus {
                             items: [
                                 CssDashedIdentifier {
                                     value_token: IDENT@257..266 "--param3" [] [Whitespace(" ")],
@@ -380,7 +379,7 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@424..454 "@" [Newline("\n"), Newline("\n"), Comments("/* Missing/invalid bo ..."), Newline("\n")] [],
-            rule: CssBogusAtRule {
+            rule: CssBogus {
                 items: [
                     CssFunctionAtRuleDeclarator {
                         function_token: FUNCTION_KW@454..463 "function" [] [Whitespace(" ")],
@@ -392,13 +391,13 @@ CssRoot {
                         r_paren_token: R_PAREN@470..471 ")" [] [],
                         returns: missing (optional),
                     },
-                    CssBogusBlock {
+                    CssBogus {
                         items: [
                             CssBogus {
                                 items: [
                                     CssAtRule {
                                         at_token: AT@471..473 "@" [Newline("\n")] [],
-                                        rule: CssBogusAtRule {
+                                        rule: CssBogus {
                                             items: [
                                                 CssFunctionAtRuleDeclarator {
                                                     function_token: FUNCTION_KW@473..482 "function" [] [Whitespace(" ")],
@@ -410,7 +409,7 @@ CssRoot {
                                                     r_paren_token: R_PAREN@489..490 ")" [] [],
                                                     returns: missing (optional),
                                                 },
-                                                CssBogusBlock {
+                                                CssBogus {
                                                     items: [
                                                         CssBogus {
                                                             items: [
@@ -512,37 +511,31 @@ CssRoot {
                                                                 },
                                                                 CssAtRule {
                                                                     at_token: AT@701..703 "@" [Newline("\n")] [],
-                                                                    rule: CssBogusAtRule {
-                                                                        items: [
-                                                                            CssBogus {
-                                                                                items: [
-                                                                                    FUNCTION_KW@703..712 "function" [] [Whitespace(" ")],
-                                                                                    CssDashedIdentifier {
-                                                                                        value_token: IDENT@712..726 "--bad-returns2" [] [],
-                                                                                    },
-                                                                                    L_PAREN@726..727 "(" [] [],
-                                                                                    CssFunctionParameterList [],
-                                                                                    R_PAREN@727..729 ")" [] [Whitespace(" ")],
-                                                                                    CssBogus {
-                                                                                        items: [
-                                                                                            RETURNS_KW@729..737 "returns" [] [Whitespace(" ")],
-                                                                                            CssBogus {
-                                                                                                items: [
-                                                                                                    HASH@737..738 "#" [] [],
-                                                                                                    HASH@738..739 "#" [] [],
-                                                                                                    HASH@739..741 "#" [] [Whitespace(" ")],
-                                                                                                ],
-                                                                                            },
-                                                                                        ],
-                                                                                    },
-                                                                                ],
+                                                                    rule: CssFunctionAtRule {
+                                                                        declarator: CssFunctionAtRuleDeclarator {
+                                                                            function_token: FUNCTION_KW@703..712 "function" [] [Whitespace(" ")],
+                                                                            name: CssDashedIdentifier {
+                                                                                value_token: IDENT@712..726 "--bad-returns2" [] [],
                                                                             },
-                                                                            CssDeclarationOrAtRuleBlock {
-                                                                                l_curly_token: L_CURLY@741..742 "{" [] [],
-                                                                                items: CssDeclarationOrAtRuleList [],
-                                                                                r_curly_token: R_CURLY@742..743 "}" [] [],
+                                                                            l_paren_token: L_PAREN@726..727 "(" [] [],
+                                                                            parameters: CssFunctionParameterList [],
+                                                                            r_paren_token: R_PAREN@727..729 ")" [] [Whitespace(" ")],
+                                                                            returns: CssReturnsStatement {
+                                                                                returns_token: RETURNS_KW@729..737 "returns" [] [Whitespace(" ")],
+                                                                                ty: CssBogus {
+                                                                                    items: [
+                                                                                        HASH@737..738 "#" [] [],
+                                                                                        HASH@738..739 "#" [] [],
+                                                                                        HASH@739..741 "#" [] [Whitespace(" ")],
+                                                                                    ],
+                                                                                },
                                                                             },
-                                                                        ],
+                                                                        },
+                                                                        block: CssDeclarationOrAtRuleBlock {
+                                                                            l_curly_token: L_CURLY@741..742 "{" [] [],
+                                                                            items: CssDeclarationOrAtRuleList [],
+                                                                            r_curly_token: R_CURLY@742..743 "}" [] [],
+                                                                        },
                                                                     },
                                                                 },
                                                                 CssAtRule {
@@ -677,7 +670,7 @@ CssRoot {
                                                                             },
                                                                             l_paren_token: L_PAREN@944..945 "(" [] [],
                                                                             parameters: CssFunctionParameterList [
-                                                                                CssBogusFunctionParameter {
+                                                                                CssBogus {
                                                                                     items: [
                                                                                         COLON@945..946 ":" [] [],
                                                                                     ],
@@ -703,7 +696,7 @@ CssRoot {
                                                                             },
                                                                             l_paren_token: L_PAREN@1007..1008 "(" [] [],
                                                                             parameters: CssFunctionParameterList [
-                                                                                CssBogusFunctionParameter {
+                                                                                CssBogus {
                                                                                     items: [
                                                                                         CSS_NUMBER_LITERAL@1008..1011 "123" [] [],
                                                                                     ],
@@ -729,7 +722,7 @@ CssRoot {
                                                                             },
                                                                             l_paren_token: L_PAREN@1036..1037 "(" [] [],
                                                                             parameters: CssFunctionParameterList [
-                                                                                CssBogusFunctionParameter {
+                                                                                CssBogus {
                                                                                     items: [
                                                                                         AT@1037..1038 "@" [] [],
                                                                                         IDENT@1038..1041 "foo" [] [],
@@ -770,7 +763,7 @@ CssRoot {
                                                                                     },
                                                                                 },
                                                                                 missing separator,
-                                                                                CssBogusFunctionParameter {
+                                                                                CssBogus {
                                                                                     items: [
                                                                                         L_ANGLE@1130..1131 "<" [] [],
                                                                                         IDENT@1131..1137 "length" [] [],
@@ -883,7 +876,7 @@ CssRoot {
                                                                                     },
                                                                                 },
                                                                                 missing separator,
-                                                                                CssBogusFunctionParameter {
+                                                                                CssBogus {
                                                                                     items: [
                                                                                         COLON@1324..1326 ":" [] [Whitespace(" ")],
                                                                                         CSS_NUMBER_LITERAL@1326..1327 "2" [] [],
@@ -902,7 +895,7 @@ CssRoot {
                                                                 },
                                                                 CssAtRule {
                                                                     at_token: AT@1331..1359 "@" [Newline("\n"), Newline("\n"), Comments("/* Misspelled returns */"), Newline("\n")] [],
-                                                                    rule: CssBogusAtRule {
+                                                                    rule: CssBogus {
                                                                         items: [
                                                                             CssFunctionAtRuleDeclarator {
                                                                                 function_token: FUNCTION_KW@1359..1368 "function" [] [Whitespace(" ")],
@@ -914,7 +907,7 @@ CssRoot {
                                                                                 r_paren_token: R_PAREN@1381..1383 ")" [] [Whitespace(" ")],
                                                                                 returns: missing (optional),
                                                                             },
-                                                                            CssBogusBlock {
+                                                                            CssBogus {
                                                                                 items: [],
                                                                             },
                                                                         ],
@@ -964,20 +957,19 @@ CssRoot {
                                                         default_value: missing (optional),
                                                     },
                                                     missing separator,
-                                                    CssBogusFunctionParameter {
-                                                        items: [
-                                                            CssBogus {
-                                                                items: [
-                                                                    IDENT@1486..1493 "garbage" [] [],
-                                                                ],
+                                                    CssFunctionParameter {
+                                                        name: missing (required),
+                                                        ty: CssBogus {
+                                                            items: [
+                                                                IDENT@1486..1493 "garbage" [] [],
+                                                            ],
+                                                        },
+                                                        default_value: CssFunctionParameterDefaultValue {
+                                                            colon_token: COLON@1493..1495 ":" [] [Whitespace(" ")],
+                                                            value: CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@1495..1496 "1" [] [],
                                                             },
-                                                            CssFunctionParameterDefaultValue {
-                                                                colon_token: COLON@1493..1495 ":" [] [Whitespace(" ")],
-                                                                value: CssNumber {
-                                                                    value_token: CSS_NUMBER_LITERAL@1495..1496 "1" [] [],
-                                                                },
-                                                            },
-                                                        ],
+                                                        },
                                                     },
                                                 ],
                                                 r_paren_token: R_PAREN@1496..1498 ")" [] [Whitespace(" ")],
@@ -992,7 +984,7 @@ CssRoot {
                                     },
                                     CssAtRule {
                                         at_token: AT@1500..1502 "@" [Newline("\n")] [],
-                                        rule: CssBogusAtRule {
+                                        rule: CssBogus {
                                             items: [
                                                 CssFunctionAtRuleDeclarator {
                                                     function_token: FUNCTION_KW@1502..1511 "function" [] [Whitespace(" ")],
@@ -1016,7 +1008,7 @@ CssRoot {
                                                         },
                                                     },
                                                 },
-                                                CssBogusBlock {
+                                                CssBogus {
                                                     items: [],
                                                 },
                                             ],
@@ -1087,15 +1079,15 @@ CssRoot {
                     },
                     l_paren_token: missing (required),
                     parameters: CssFunctionParameterList [
-                        CssBogusFunctionParameter {
-                            items: [
-                                CssBogus {
-                                    items: [
-                                        IDENT@1702..1708 "spaces" [] [],
-                                        L_PAREN@1708..1709 "(" [] [],
-                                    ],
-                                },
-                            ],
+                        CssFunctionParameter {
+                            name: missing (required),
+                            ty: CssBogus {
+                                items: [
+                                    IDENT@1702..1708 "spaces" [] [],
+                                    L_PAREN@1708..1709 "(" [] [],
+                                ],
+                            },
+                            default_value: missing (optional),
                         },
                     ],
                     r_paren_token: R_PAREN@1709..1711 ")" [] [Whitespace(" ")],
@@ -1118,7 +1110,7 @@ CssRoot {
                     },
                     l_paren_token: missing (required),
                     parameters: CssFunctionParameterList [
-                        CssBogusFunctionParameter {
+                        CssBogus {
                             items: [
                                 AT@1729..1730 "@" [] [],
                                 IDENT@1730..1732 "at" [] [],
@@ -1149,7 +1141,7 @@ CssRoot {
   1: CSS_ROOT_ITEM_LIST@0..1737
     0: CSS_AT_RULE@0..27
       0: AT@0..1 "@" [] []
-      1: CSS_BOGUS_AT_RULE@1..27
+      1: CSS_BOGUS@1..27
         0: CSS_BOGUS@1..25
           0: FUNCTION_KW@1..10 "function" [] [Whitespace(" ")]
           1: CSS_BOGUS@10..22
@@ -1170,10 +1162,11 @@ CssRoot {
             0: IDENT@38..60 "--missing-param-dashes" [] []
           2: L_PAREN@60..61 "(" [] []
           3: CSS_FUNCTION_PARAMETER_LIST@61..84
-            0: CSS_BOGUS_FUNCTION_PARAMETER@61..84
-              0: CSS_BOGUS@61..79
+            0: CSS_FUNCTION_PARAMETER@61..84
+              0: (empty)
+              1: CSS_BOGUS@61..79
                 0: IDENT@61..79 "param-with-default" [] []
-              1: CSS_FUNCTION_PARAMETER_DEFAULT_VALUE@79..84
+              2: CSS_FUNCTION_PARAMETER_DEFAULT_VALUE@79..84
                 0: COLON@79..81 ":" [] [Whitespace(" ")]
                 1: CSS_IDENTIFIER@81..84
                   0: IDENT@81..84 "rem" [] []
@@ -1192,7 +1185,7 @@ CssRoot {
             0: IDENT@99..121 "--missing-param-dashes" [] []
           2: L_PAREN@121..122 "(" [] []
           3: CSS_FUNCTION_PARAMETER_LIST@122..145
-            0: CSS_BOGUS_FUNCTION_PARAMETER@122..145
+            0: CSS_BOGUS@122..145
               0: CSS_BOGUS@122..138
                 0: IDENT@122..138 "param-with-type" [] [Whitespace(" ")]
               1: CSS_TYPE_FUNCTION@138..145
@@ -1222,7 +1215,7 @@ CssRoot {
               1: (empty)
               2: (empty)
             1: (empty)
-            2: CSS_BOGUS_FUNCTION_PARAMETER@187..195
+            2: CSS_BOGUS@187..195
               0: HASH@187..188 "#" [] []
               1: HASH@188..189 "#" [] []
               2: HASH@189..190 "#" [] []
@@ -1249,7 +1242,7 @@ CssRoot {
               1: (empty)
               2: (empty)
             1: (empty)
-            2: CSS_BOGUS_FUNCTION_PARAMETER@237..240
+            2: CSS_BOGUS@237..240
               0: HASH@237..238 "#" [] []
               1: HASH@238..239 "#" [] []
               2: HASH@239..240 "#" [] []
@@ -1263,7 +1256,7 @@ CssRoot {
                 1: CSS_IDENTIFIER@252..255
                   0: IDENT@252..255 "rem" [] []
             5: COMMA@255..257 "," [] [Whitespace(" ")]
-            6: CSS_BOGUS_FUNCTION_PARAMETER@257..278
+            6: CSS_BOGUS@257..278
               0: CSS_DASHED_IDENTIFIER@257..266
                 0: IDENT@257..266 "--param3" [] [Whitespace(" ")]
               1: CSS_TYPE_FUNCTION@266..273
@@ -1350,7 +1343,7 @@ CssRoot {
           2: R_CURLY@423..424 "}" [] []
     9: CSS_AT_RULE@424..1560
       0: AT@424..454 "@" [Newline("\n"), Newline("\n"), Comments("/* Missing/invalid bo ..."), Newline("\n")] []
-      1: CSS_BOGUS_AT_RULE@454..1560
+      1: CSS_BOGUS@454..1560
         0: CSS_FUNCTION_AT_RULE_DECLARATOR@454..471
           0: FUNCTION_KW@454..463 "function" [] [Whitespace(" ")]
           1: CSS_DASHED_IDENTIFIER@463..469
@@ -1359,11 +1352,11 @@ CssRoot {
           3: CSS_FUNCTION_PARAMETER_LIST@470..470
           4: R_PAREN@470..471 ")" [] []
           5: (empty)
-        1: CSS_BOGUS_BLOCK@471..1560
+        1: CSS_BOGUS@471..1560
           0: CSS_BOGUS@471..1559
             0: CSS_AT_RULE@471..1401
               0: AT@471..473 "@" [Newline("\n")] []
-              1: CSS_BOGUS_AT_RULE@473..1401
+              1: CSS_BOGUS@473..1401
                 0: CSS_FUNCTION_AT_RULE_DECLARATOR@473..490
                   0: FUNCTION_KW@473..482 "function" [] [Whitespace(" ")]
                   1: CSS_DASHED_IDENTIFIER@482..488
@@ -1372,7 +1365,7 @@ CssRoot {
                   3: CSS_FUNCTION_PARAMETER_LIST@489..489
                   4: R_PAREN@489..490 ")" [] []
                   5: (empty)
-                1: CSS_BOGUS_BLOCK@490..1401
+                1: CSS_BOGUS@490..1401
                   0: CSS_BOGUS@490..1400
                     0: CSS_EMPTY_DECLARATION@490..491
                       0: SEMICOLON@490..491 ";" [] []
@@ -1445,15 +1438,15 @@ CssRoot {
                           2: R_CURLY@700..701 "}" [] []
                     4: CSS_AT_RULE@701..743
                       0: AT@701..703 "@" [Newline("\n")] []
-                      1: CSS_BOGUS_AT_RULE@703..743
-                        0: CSS_BOGUS@703..741
+                      1: CSS_FUNCTION_AT_RULE@703..743
+                        0: CSS_FUNCTION_AT_RULE_DECLARATOR@703..741
                           0: FUNCTION_KW@703..712 "function" [] [Whitespace(" ")]
                           1: CSS_DASHED_IDENTIFIER@712..726
                             0: IDENT@712..726 "--bad-returns2" [] []
                           2: L_PAREN@726..727 "(" [] []
                           3: CSS_FUNCTION_PARAMETER_LIST@727..727
                           4: R_PAREN@727..729 ")" [] [Whitespace(" ")]
-                          5: CSS_BOGUS@729..741
+                          5: CSS_RETURNS_STATEMENT@729..741
                             0: RETURNS_KW@729..737 "returns" [] [Whitespace(" ")]
                             1: CSS_BOGUS@737..741
                               0: HASH@737..738 "#" [] []
@@ -1562,7 +1555,7 @@ CssRoot {
                             0: IDENT@932..944 "--just-colon" [] []
                           2: L_PAREN@944..945 "(" [] []
                           3: CSS_FUNCTION_PARAMETER_LIST@945..946
-                            0: CSS_BOGUS_FUNCTION_PARAMETER@945..946
+                            0: CSS_BOGUS@945..946
                               0: COLON@945..946 ":" [] []
                           4: R_PAREN@946..948 ")" [] [Whitespace(" ")]
                           5: (empty)
@@ -1579,7 +1572,7 @@ CssRoot {
                             0: IDENT@992..1007 "--numeric-param" [] []
                           2: L_PAREN@1007..1008 "(" [] []
                           3: CSS_FUNCTION_PARAMETER_LIST@1008..1011
-                            0: CSS_BOGUS_FUNCTION_PARAMETER@1008..1011
+                            0: CSS_BOGUS@1008..1011
                               0: CSS_NUMBER_LITERAL@1008..1011 "123" [] []
                           4: R_PAREN@1011..1013 ")" [] [Whitespace(" ")]
                           5: (empty)
@@ -1596,7 +1589,7 @@ CssRoot {
                             0: IDENT@1026..1036 "--at-param" [] []
                           2: L_PAREN@1036..1037 "(" [] []
                           3: CSS_FUNCTION_PARAMETER_LIST@1037..1041
-                            0: CSS_BOGUS_FUNCTION_PARAMETER@1037..1041
+                            0: CSS_BOGUS@1037..1041
                               0: AT@1037..1038 "@" [] []
                               1: IDENT@1038..1041 "foo" [] []
                           4: R_PAREN@1041..1043 ")" [] [Whitespace(" ")]
@@ -1624,7 +1617,7 @@ CssRoot {
                                   0: CSS_NUMBER_LITERAL@1125..1127 "10" [] []
                                   1: IDENT@1127..1130 "px" [] [Whitespace(" ")]
                             1: (empty)
-                            2: CSS_BOGUS_FUNCTION_PARAMETER@1130..1138
+                            2: CSS_BOGUS@1130..1138
                               0: L_ANGLE@1130..1131 "<" [] []
                               1: IDENT@1131..1137 "length" [] []
                               2: R_ANGLE@1137..1138 ">" [] []
@@ -1703,7 +1696,7 @@ CssRoot {
                                 1: CSS_NUMBER@1323..1324
                                   0: CSS_NUMBER_LITERAL@1323..1324 "1" [] []
                             1: (empty)
-                            2: CSS_BOGUS_FUNCTION_PARAMETER@1324..1327
+                            2: CSS_BOGUS@1324..1327
                               0: COLON@1324..1326 ":" [] [Whitespace(" ")]
                               1: CSS_NUMBER_LITERAL@1326..1327 "2" [] []
                           4: R_PAREN@1327..1329 ")" [] [Whitespace(" ")]
@@ -1714,7 +1707,7 @@ CssRoot {
                           2: R_CURLY@1330..1331 "}" [] []
                     16: CSS_AT_RULE@1331..1383
                       0: AT@1331..1359 "@" [Newline("\n"), Newline("\n"), Comments("/* Misspelled returns */"), Newline("\n")] []
-                      1: CSS_BOGUS_AT_RULE@1359..1383
+                      1: CSS_BOGUS@1359..1383
                         0: CSS_FUNCTION_AT_RULE_DECLARATOR@1359..1383
                           0: FUNCTION_KW@1359..1368 "function" [] [Whitespace(" ")]
                           1: CSS_DASHED_IDENTIFIER@1368..1380
@@ -1723,7 +1716,7 @@ CssRoot {
                           3: CSS_FUNCTION_PARAMETER_LIST@1381..1381
                           4: R_PAREN@1381..1383 ")" [] [Whitespace(" ")]
                           5: (empty)
-                        1: CSS_BOGUS_BLOCK@1383..1383
+                        1: CSS_BOGUS@1383..1383
                     17: CSS_BOGUS@1383..1400
                       0: RETURN_KW@1383..1390 "return" [] [Whitespace(" ")]
                       1: L_ANGLE@1390..1391 "<" [] []
@@ -1752,10 +1745,11 @@ CssRoot {
                         1: (empty)
                       2: (empty)
                     1: (empty)
-                    2: CSS_BOGUS_FUNCTION_PARAMETER@1486..1496
-                      0: CSS_BOGUS@1486..1493
+                    2: CSS_FUNCTION_PARAMETER@1486..1496
+                      0: (empty)
+                      1: CSS_BOGUS@1486..1493
                         0: IDENT@1486..1493 "garbage" [] []
-                      1: CSS_FUNCTION_PARAMETER_DEFAULT_VALUE@1493..1496
+                      2: CSS_FUNCTION_PARAMETER_DEFAULT_VALUE@1493..1496
                         0: COLON@1493..1495 ":" [] [Whitespace(" ")]
                         1: CSS_NUMBER@1495..1496
                           0: CSS_NUMBER_LITERAL@1495..1496 "1" [] []
@@ -1767,7 +1761,7 @@ CssRoot {
                   2: R_CURLY@1499..1500 "}" [] []
             2: CSS_AT_RULE@1500..1552
               0: AT@1500..1502 "@" [Newline("\n")] []
-              1: CSS_BOGUS_AT_RULE@1502..1552
+              1: CSS_BOGUS@1502..1552
                 0: CSS_FUNCTION_AT_RULE_DECLARATOR@1502..1552
                   0: FUNCTION_KW@1502..1511 "function" [] [Whitespace(" ")]
                   1: CSS_DASHED_IDENTIFIER@1511..1532
@@ -1784,7 +1778,7 @@ CssRoot {
                           0: IDENT@1544..1550 "number" [] []
                         2: R_ANGLE@1550..1552 ">" [] [Whitespace(" ")]
                       1: (empty)
-                1: CSS_BOGUS_BLOCK@1552..1552
+                1: CSS_BOGUS@1552..1552
             3: CSS_BOGUS@1552..1559
               0: IDENT@1552..1558 "extra" [] [Whitespace(" ")]
               1: L_CURLY@1558..1559 "{" [] []
@@ -1828,10 +1822,12 @@ CssRoot {
             0: IDENT@1696..1702 "--has" [] [Whitespace(" ")]
           2: (empty)
           3: CSS_FUNCTION_PARAMETER_LIST@1702..1709
-            0: CSS_BOGUS_FUNCTION_PARAMETER@1702..1709
-              0: CSS_BOGUS@1702..1709
+            0: CSS_FUNCTION_PARAMETER@1702..1709
+              0: (empty)
+              1: CSS_BOGUS@1702..1709
                 0: IDENT@1702..1708 "spaces" [] []
                 1: L_PAREN@1708..1709 "(" [] []
+              2: (empty)
           4: R_PAREN@1709..1711 ")" [] [Whitespace(" ")]
           5: (empty)
         1: CSS_DECLARATION_OR_AT_RULE_BLOCK@1711..1713
@@ -1847,7 +1843,7 @@ CssRoot {
             0: IDENT@1724..1729 "--has" [] []
           2: (empty)
           3: CSS_FUNCTION_PARAMETER_LIST@1729..1733
-            0: CSS_BOGUS_FUNCTION_PARAMETER@1729..1733
+            0: CSS_BOGUS@1729..1733
               0: AT@1729..1730 "@" [] []
               1: IDENT@1730..1732 "at" [] []
               2: L_PAREN@1732..1733 "(" [] []

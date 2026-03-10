@@ -43,7 +43,7 @@ pub(crate) fn parse_any_layer(p: &mut CssParser) -> CompletedMarker {
     } else if p.expect(T![;]) {
         CSS_LAYER_REFERENCE
     } else {
-        CSS_BOGUS_LAYER
+        CSS_BOGUS
     };
     m.complete(p, kind)
 }

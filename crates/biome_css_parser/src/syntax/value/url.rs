@@ -174,7 +174,7 @@ struct UrlModifierListParseRecovery {
 impl ParseRecovery for UrlModifierListParseRecovery {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
-    const RECOVERED_KIND: Self::Kind = CSS_BOGUS_URL_MODIFIER;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
         // url("//aa.com/img.svg" foo "bar" func(test));

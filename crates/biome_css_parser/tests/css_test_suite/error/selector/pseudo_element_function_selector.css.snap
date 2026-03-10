@@ -29,7 +29,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@0..2 "::" [] [],
-                            element: CssBogusPseudoElement {
+                            element: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@2..6 "cure" [] [],
@@ -55,7 +55,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@10..13 "::" [Newline("\n")] [],
-                            element: CssBogusPseudoElement {
+                            element: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@13..17 "cure" [] [],
@@ -82,7 +82,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@22..25 "::" [Newline("\n")] [],
-                            element: CssBogusPseudoElement {
+                            element: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@25..29 "cure" [] [],
@@ -128,7 +128,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@46..49 "::" [Newline("\n")] [],
-                            element: CssBogusPseudoElement {
+                            element: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@49..53 "cure" [] [],
@@ -173,7 +173,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@69..72 "::" [Newline("\n")] [],
-                            element: CssBogusPseudoElement {
+                            element: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@72..76 "cure" [] [],
@@ -237,7 +237,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@0..8
             0: CSS_PSEUDO_ELEMENT_SELECTOR@0..8
               0: COLON2@0..2 "::" [] []
-              1: CSS_BOGUS_PSEUDO_ELEMENT@2..8
+              1: CSS_BOGUS@2..8
                 0: CSS_IDENTIFIER@2..6
                   0: IDENT@2..6 "cure" [] []
                 1: L_PAREN@6..8 "(" [] [Whitespace(" ")]
@@ -253,7 +253,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@10..20
             0: CSS_PSEUDO_ELEMENT_SELECTOR@10..20
               0: COLON2@10..13 "::" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_ELEMENT@13..20
+              1: CSS_BOGUS@13..20
                 0: CSS_IDENTIFIER@13..17
                   0: IDENT@13..17 "cure" [] []
                 1: L_PAREN@17..18 "(" [] []
@@ -270,7 +270,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@22..44
             0: CSS_PSEUDO_ELEMENT_SELECTOR@22..44
               0: COLON2@22..25 "::" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_ELEMENT@25..44
+              1: CSS_BOGUS@25..44
                 0: CSS_IDENTIFIER@25..29
                   0: IDENT@25..29 "cure" [] []
                 1: L_PAREN@29..30 "(" [] []
@@ -299,7 +299,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@46..67
             0: CSS_PSEUDO_ELEMENT_SELECTOR@46..67
               0: COLON2@46..49 "::" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_ELEMENT@49..67
+              1: CSS_BOGUS@49..67
                 0: CSS_IDENTIFIER@49..53
                   0: IDENT@49..53 "cure" [] []
                 1: L_PAREN@53..54 "(" [] []
@@ -327,7 +327,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@69..89
             0: CSS_PSEUDO_ELEMENT_SELECTOR@69..89
               0: COLON2@69..72 "::" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_ELEMENT@72..89
+              1: CSS_BOGUS@72..89
                 0: CSS_IDENTIFIER@72..76
                   0: IDENT@72..76 "cure" [] []
                 1: L_PAREN@76..77 "(" [] []

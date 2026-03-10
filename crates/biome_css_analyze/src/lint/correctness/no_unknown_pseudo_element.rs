@@ -95,7 +95,7 @@ impl Rule for NoUnknownPseudoElement {
         let file_source = ctx.source_type::<CssFileSource>();
 
         let should_not_trigger = match &pseudo_element {
-            AnyCssPseudoElement::CssBogusPseudoElement(element) => {
+            AnyCssPseudoElement::CssBogus(element) => {
                 should_not_trigger(element.to_trimmed_text().text(), file_source, ctx.options())
             }
             AnyCssPseudoElement::CssPseudoElementFunctionCustomIdentifier(ident) => {

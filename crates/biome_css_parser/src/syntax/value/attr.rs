@@ -179,7 +179,7 @@ impl ParseNodeList for AttrFallbackValueList {
     ) -> RecoveryResult {
         parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecoveryTokenSet::new(CSS_BOGUS_PROPERTY_VALUE, token_set!(T![')'], T![;]))
+            &ParseRecoveryTokenSet::new(CSS_BOGUS, token_set!(T![')'], T![;]))
                 .enable_recovery_on_line_break(),
             expected_component_value,
         )
@@ -191,7 +191,7 @@ struct AttrNameListParseRecovery;
 impl ParseRecovery for AttrNameListParseRecovery {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
-    const RECOVERED_KIND: Self::Kind = CSS_BOGUS_ATTR_NAME;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
         // 1. At a new attr name

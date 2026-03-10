@@ -277,7 +277,7 @@ struct ValueAtRulePropertyListParseRecovery;
 impl ParseRecovery for ValueAtRulePropertyListParseRecovery {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
-    const RECOVERED_KIND: Self::Kind = CSS_BOGUS_PROPERTY;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
         p.at(T![;]) || is_at_identifier(p) || p.has_nth_preceding_line_break(0)

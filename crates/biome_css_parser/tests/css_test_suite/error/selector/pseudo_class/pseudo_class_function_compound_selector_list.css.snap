@@ -33,7 +33,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
                             colon_token: COLON@0..1 ":" [] [],
-                            class: CssBogusPseudoClass {
+                            class: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@1..5 "past" [] [],
@@ -60,7 +60,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
                             colon_token: COLON@9..11 ":" [Newline("\n")] [],
-                            class: CssBogusPseudoClass {
+                            class: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@11..15 "past" [] [],
@@ -88,7 +88,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
                             colon_token: COLON@20..22 ":" [Newline("\n")] [],
-                            class: CssBogusPseudoClass {
+                            class: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@22..26 "past" [] [],
@@ -122,7 +122,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
                             colon_token: COLON@39..41 ":" [Newline("\n")] [],
-                            class: CssBogusPseudoClass {
+                            class: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@41..45 "past" [] [],
@@ -155,7 +155,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
                             colon_token: COLON@57..59 ":" [Newline("\n")] [],
-                            class: CssBogusPseudoClass {
+                            class: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@59..63 "past" [] [],
@@ -203,7 +203,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
                             colon_token: COLON@79..81 ":" [Newline("\n")] [],
-                            class: CssBogusPseudoClass {
+                            class: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@81..85 "past" [] [],
@@ -252,7 +252,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
                             colon_token: COLON@102..104 ":" [Newline("\n")] [],
-                            class: CssBogusPseudoClass {
+                            class: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@104..108 "past" [] [],
@@ -299,7 +299,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
                             colon_token: COLON@123..125 ":" [Newline("\n")] [],
-                            class: CssBogusPseudoClass {
+                            class: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@125..129 "past" [] [],
@@ -339,7 +339,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
                             colon_token: COLON@137..139 ":" [Newline("\n")] [],
-                            class: CssBogusPseudoClass {
+                            class: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@139..143 "past" [] [],
@@ -370,7 +370,7 @@ CssRoot {
                     ],
                 },
             ],
-            block: CssBogusBlock {
+            block: CssBogus {
                 items: [],
             },
         },
@@ -393,7 +393,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@0..7
             0: CSS_PSEUDO_CLASS_SELECTOR@0..7
               0: COLON@0..1 ":" [] []
-              1: CSS_BOGUS_PSEUDO_CLASS@1..7
+              1: CSS_BOGUS@1..7
                 0: CSS_IDENTIFIER@1..5
                   0: IDENT@1..5 "past" [] []
                 1: L_PAREN@5..7 "(" [] [Whitespace(" ")]
@@ -410,7 +410,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@9..18
             0: CSS_PSEUDO_CLASS_SELECTOR@9..18
               0: COLON@9..11 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@11..18
+              1: CSS_BOGUS@11..18
                 0: CSS_IDENTIFIER@11..15
                   0: IDENT@11..15 "past" [] []
                 1: L_PAREN@15..16 "(" [] []
@@ -428,7 +428,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@20..37
             0: CSS_PSEUDO_CLASS_SELECTOR@20..37
               0: COLON@20..22 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@22..37
+              1: CSS_BOGUS@22..37
                 0: CSS_IDENTIFIER@22..26
                   0: IDENT@22..26 "past" [] []
                 1: L_PAREN@26..27 "(" [] []
@@ -449,7 +449,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@39..55
             0: CSS_PSEUDO_CLASS_SELECTOR@39..55
               0: COLON@39..41 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@41..55
+              1: CSS_BOGUS@41..55
                 0: CSS_IDENTIFIER@41..45
                   0: IDENT@41..45 "past" [] []
                 1: L_PAREN@45..46 "(" [] []
@@ -469,7 +469,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@57..77
             0: CSS_PSEUDO_CLASS_SELECTOR@57..77
               0: COLON@57..59 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@59..77
+              1: CSS_BOGUS@59..77
                 0: CSS_IDENTIFIER@59..63
                   0: IDENT@59..63 "past" [] []
                 1: L_PAREN@63..64 "(" [] []
@@ -499,7 +499,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@79..100
             0: CSS_PSEUDO_CLASS_SELECTOR@79..100
               0: COLON@79..81 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@81..100
+              1: CSS_BOGUS@81..100
                 0: CSS_IDENTIFIER@81..85
                   0: IDENT@81..85 "past" [] []
                 1: L_PAREN@85..86 "(" [] []
@@ -530,7 +530,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@102..121
             0: CSS_PSEUDO_CLASS_SELECTOR@102..121
               0: COLON@102..104 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@104..121
+              1: CSS_BOGUS@104..121
                 0: CSS_IDENTIFIER@104..108
                   0: IDENT@104..108 "past" [] []
                 1: L_PAREN@108..109 "(" [] []
@@ -559,7 +559,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@123..135
             0: CSS_PSEUDO_CLASS_SELECTOR@123..135
               0: COLON@123..125 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@125..135
+              1: CSS_BOGUS@125..135
                 0: CSS_IDENTIFIER@125..129
                   0: IDENT@125..129 "past" [] []
                 1: L_PAREN@129..130 "(" [] []
@@ -584,7 +584,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@137..149
             0: CSS_PSEUDO_CLASS_SELECTOR@137..149
               0: COLON@137..139 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@139..149
+              1: CSS_BOGUS@139..149
                 0: CSS_IDENTIFIER@139..143
                   0: IDENT@139..143 "past" [] []
                 1: L_PAREN@143..144 "(" [] []
@@ -599,7 +599,7 @@ CssRoot {
                           0: IDENT@145..148 "div" [] []
                 3: CSS_BOGUS@148..149
                   0: CSS_SPACE_LITERAL@148..149 "\n" [] []
-      1: CSS_BOGUS_BLOCK@149..149
+      1: CSS_BOGUS@149..149
   2: EOF@149..149 "" [] []
 
 ```

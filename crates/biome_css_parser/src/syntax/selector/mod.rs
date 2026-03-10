@@ -145,7 +145,7 @@ impl SelectorListParseRecovery {
 impl ParseRecovery for SelectorListParseRecovery {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
-    const RECOVERED_KIND: Self::Kind = CSS_BOGUS_SELECTOR;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
 
     /// Determines if the parser is at a point where it can recover from an error
     /// while parsing a selector list.
@@ -416,7 +416,7 @@ impl ParseNodeList for SubSelectorList {
     fn recover(&mut self, p: &mut CssParser, parsed_element: ParsedSyntax) -> RecoveryResult {
         parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecoveryTokenSet::new(CSS_BOGUS_SUB_SELECTOR, Self::START_SET),
+            &ParseRecoveryTokenSet::new(CSS_BOGUS, Self::START_SET),
             expected_any_sub_selector,
         )
     }

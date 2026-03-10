@@ -24,7 +24,7 @@ CssRoot {
             at_token: AT@0..1 "@" [] [],
             rule: CssKeyframesAtRule {
                 keyframes_token: KEYFRAMES_KW@1..11 "keyframes" [] [Whitespace(" ")],
-                name: CssBogusKeyframesName {
+                name: CssBogus {
                     items: [
                         COLON@11..12 ":" [] [],
                         CssBogus {
@@ -50,7 +50,7 @@ CssRoot {
             at_token: AT@28..30 "@" [Newline("\n")] [],
             rule: CssKeyframesAtRule {
                 keyframes_token: KEYFRAMES_KW@30..40 "keyframes" [] [Whitespace(" ")],
-                name: CssBogusKeyframesName {
+                name: CssBogus {
                     items: [
                         COLON@40..41 ":" [] [],
                         CssBogus {
@@ -96,7 +96,7 @@ CssRoot {
             at_token: AT@83..85 "@" [Newline("\n")] [],
             rule: CssKeyframesAtRule {
                 keyframes_token: KEYFRAMES_KW@85..95 "keyframes" [] [Whitespace(" ")],
-                name: CssBogusKeyframesName {
+                name: CssBogus {
                     items: [
                         COLON@95..96 ":" [] [],
                         CssKeyframesScopeFunction {
@@ -129,7 +129,7 @@ CssRoot {
       0: AT@0..1 "@" [] []
       1: CSS_KEYFRAMES_AT_RULE@1..28
         0: KEYFRAMES_KW@1..11 "keyframes" [] [Whitespace(" ")]
-        1: CSS_BOGUS_KEYFRAMES_NAME@11..26
+        1: CSS_BOGUS@11..26
           0: COLON@11..12 ":" [] []
           1: CSS_BOGUS@12..26
             0: IDENT@12..19 "invalid" [] []
@@ -145,7 +145,7 @@ CssRoot {
       0: AT@28..30 "@" [Newline("\n")] []
       1: CSS_KEYFRAMES_AT_RULE@30..56
         0: KEYFRAMES_KW@30..40 "keyframes" [] [Whitespace(" ")]
-        1: CSS_BOGUS_KEYFRAMES_NAME@40..54
+        1: CSS_BOGUS@40..54
           0: COLON@40..41 ":" [] []
           1: CSS_BOGUS@41..54
             0: IDENT@41..49 "invalid" [] [Whitespace(" ")]
@@ -175,7 +175,7 @@ CssRoot {
       0: AT@83..85 "@" [Newline("\n")] []
       1: CSS_KEYFRAMES_AT_RULE@85..106
         0: KEYFRAMES_KW@85..95 "keyframes" [] [Whitespace(" ")]
-        1: CSS_BOGUS_KEYFRAMES_NAME@95..104
+        1: CSS_BOGUS@95..104
           0: COLON@95..96 ":" [] []
           1: CSS_KEYFRAMES_SCOPE_FUNCTION@96..104
             0: LOCAL_KW@96..101 "local" [] []

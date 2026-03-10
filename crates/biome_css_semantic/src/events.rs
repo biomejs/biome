@@ -154,7 +154,7 @@ impl SemanticEventExtractor {
                                 value,
                             });
                         }
-                        AnyCssProperty::CssBogusProperty(_) => {}
+                        AnyCssProperty::CssBogus(_) => {}
                     }
                 }
             }

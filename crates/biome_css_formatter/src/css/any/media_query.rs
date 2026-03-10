@@ -9,7 +9,7 @@ impl FormatRule<AnyCssMediaQuery> for FormatAnyCssMediaQuery {
     fn fmt(&self, node: &AnyCssMediaQuery, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
             AnyCssMediaQuery::AnyCssMediaTypeQuery(node) => node.format().fmt(f),
-            AnyCssMediaQuery::CssBogusMediaQuery(node) => node.format().fmt(f),
+            AnyCssMediaQuery::CssBogus(node) => node.format().fmt(f),
             AnyCssMediaQuery::CssMediaConditionQuery(node) => node.format().fmt(f),
             AnyCssMediaQuery::CssMetavariable(node) => node.format().fmt(f),
         }

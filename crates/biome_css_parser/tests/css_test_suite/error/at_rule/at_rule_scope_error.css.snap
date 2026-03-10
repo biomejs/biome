@@ -154,7 +154,7 @@ CssRoot {
                                     right: missing (required),
                                 },
                                 missing separator,
-                                CssBogusSelector {
+                                CssBogus {
                                     items: [
                                         L_PAREN@93..94 "(" [] [],
                                     ],
@@ -301,7 +301,7 @@ CssRoot {
                   1: CSS_SPACE_LITERAL@92..93 " " [] []
                   2: (empty)
                 1: (empty)
-                2: CSS_BOGUS_SELECTOR@93..94
+                2: CSS_BOGUS@93..94
                   0: L_PAREN@93..94 "(" [] []
                 3: (empty)
                 4: CSS_COMPLEX_SELECTOR@94..106

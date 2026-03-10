@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
 
@@ -40,7 +39,7 @@ CssRoot {
     items: CssRootItemList [
         CssAtRule {
             at_token: AT@0..1 "@" [] [],
-            rule: CssBogusAtRule {
+            rule: CssBogus {
                 items: [
                     CssBogus {
                         items: [
@@ -78,7 +77,7 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@39..41 "@" [Newline("\n")] [],
-            rule: CssBogusAtRule {
+            rule: CssBogus {
                 items: [
                     CssBogus {
                         items: [
@@ -116,7 +115,7 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@79..81 "@" [Newline("\n")] [],
-            rule: CssBogusAtRule {
+            rule: CssBogus {
                 items: [
                     CssBogus {
                         items: [
@@ -154,7 +153,7 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@117..119 "@" [Newline("\n")] [],
-            rule: CssBogusAtRule {
+            rule: CssBogus {
                 items: [
                     CssBogus {
                         items: [
@@ -192,7 +191,7 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@156..158 "@" [Newline("\n")] [],
-            rule: CssBogusAtRule {
+            rule: CssBogus {
                 items: [
                     CssBogus {
                         items: [
@@ -230,7 +229,7 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@201..203 "@" [Newline("\n")] [],
-            rule: CssBogusAtRule {
+            rule: CssBogus {
                 items: [
                     CssBogus {
                         items: [
@@ -261,7 +260,7 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@240..243 "@" [Newline("\n"), Newline("\n")] [],
-            rule: CssBogusAtRule {
+            rule: CssBogus {
                 items: [
                     CssBogus {
                         items: [
@@ -457,7 +456,7 @@ CssRoot {
                         r_paren_token: R_PAREN@491..494 ")" [] [Whitespace("  ")],
                     },
                 },
-                block: CssBogusBlock {
+                block: CssBogus {
                     items: [
                         CssRuleList [],
                         R_CURLY@494..495 "}" [] [],
@@ -512,7 +511,7 @@ CssRoot {
   1: CSS_ROOT_ITEM_LIST@0..529
     0: CSS_AT_RULE@0..39
       0: AT@0..1 "@" [] []
-      1: CSS_BOGUS_AT_RULE@1..39
+      1: CSS_BOGUS@1..39
         0: CSS_BOGUS@1..36
           0: CONTAINER_KW@1..11 "container" [] [Whitespace(" ")]
           1: CSS_BOGUS@11..19
@@ -534,7 +533,7 @@ CssRoot {
           2: R_CURLY@38..39 "}" [] []
     1: CSS_AT_RULE@39..79
       0: AT@39..41 "@" [Newline("\n")] []
-      1: CSS_BOGUS_AT_RULE@41..79
+      1: CSS_BOGUS@41..79
         0: CSS_BOGUS@41..76
           0: CONTAINER_KW@41..51 "container" [] [Whitespace(" ")]
           1: CSS_BOGUS@51..59
@@ -556,7 +555,7 @@ CssRoot {
           2: R_CURLY@78..79 "}" [] []
     2: CSS_AT_RULE@79..117
       0: AT@79..81 "@" [Newline("\n")] []
-      1: CSS_BOGUS_AT_RULE@81..117
+      1: CSS_BOGUS@81..117
         0: CSS_BOGUS@81..114
           0: CONTAINER_KW@81..91 "container" [] [Whitespace(" ")]
           1: CSS_BOGUS@91..97
@@ -578,7 +577,7 @@ CssRoot {
           2: R_CURLY@116..117 "}" [] []
     3: CSS_AT_RULE@117..156
       0: AT@117..119 "@" [Newline("\n")] []
-      1: CSS_BOGUS_AT_RULE@119..156
+      1: CSS_BOGUS@119..156
         0: CSS_BOGUS@119..153
           0: CONTAINER_KW@119..129 "container" [] [Whitespace(" ")]
           1: CSS_BOGUS@129..136
@@ -600,7 +599,7 @@ CssRoot {
           2: R_CURLY@155..156 "}" [] []
     4: CSS_AT_RULE@156..201
       0: AT@156..158 "@" [Newline("\n")] []
-      1: CSS_BOGUS_AT_RULE@158..201
+      1: CSS_BOGUS@158..201
         0: CSS_BOGUS@158..198
           0: CONTAINER_KW@158..168 "container" [] [Whitespace(" ")]
           1: CSS_BOGUS@168..181
@@ -622,7 +621,7 @@ CssRoot {
           2: R_CURLY@200..201 "}" [] []
     5: CSS_AT_RULE@201..240
       0: AT@201..203 "@" [Newline("\n")] []
-      1: CSS_BOGUS_AT_RULE@203..240
+      1: CSS_BOGUS@203..240
         0: CSS_BOGUS@203..237
           0: CONTAINER_KW@203..213 "container" [] [Whitespace(" ")]
           1: CSS_BOGUS@213..221
@@ -639,7 +638,7 @@ CssRoot {
           2: R_CURLY@239..240 "}" [] []
     6: CSS_AT_RULE@240..277
       0: AT@240..243 "@" [Newline("\n"), Newline("\n")] []
-      1: CSS_BOGUS_AT_RULE@243..277
+      1: CSS_BOGUS@243..277
         0: CSS_BOGUS@243..273
           0: CONTAINER_KW@243..253 "container" [] [Whitespace(" ")]
           1: CSS_CUSTOM_IDENTIFIER@253..257
@@ -772,7 +771,7 @@ CssRoot {
                 0: CSS_NUMBER_LITERAL@488..489 "0" [] []
                 1: IDENT@489..491 "px" [] []
             2: R_PAREN@491..494 ")" [] [Whitespace("  ")]
-        1: CSS_BOGUS_BLOCK@494..495
+        1: CSS_BOGUS@494..495
           0: CSS_RULE_LIST@494..494
           1: R_CURLY@494..495 "}" [] []
     13: CSS_AT_RULE@495..511

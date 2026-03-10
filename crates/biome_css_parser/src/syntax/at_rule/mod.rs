@@ -109,7 +109,7 @@ pub(crate) fn parse_at_rule(p: &mut CssParser) -> ParsedSyntax {
         Present(_) => CSS_AT_RULE,
         Absent => {
             p.error(expected_any_at_rule(p, range));
-            CSS_BOGUS_RULE
+            CSS_BOGUS
         }
     };
 

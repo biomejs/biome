@@ -74,13 +74,13 @@ fn parse_pseudo_selector(p: &mut CssParser) -> ParsedSyntax {
             if eat_or_recover_selector_function_close_token(p, selector, expected_selector) {
                 CSS_PSEUDO_CLASS_FUNCTION_SELECTOR
             } else {
-                CSS_BOGUS_PSEUDO_CLASS
+                CSS_BOGUS
             }
         }
         Absent => {
             recover_selector_function_parameter(p, expected_selector);
             p.expect(T![')']);
-            CSS_BOGUS_PSEUDO_CLASS
+            CSS_BOGUS
         }
     };
 

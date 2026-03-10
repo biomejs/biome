@@ -8,7 +8,7 @@ impl FormatRule<AnyCssIfTest> for FormatAnyCssIfTest {
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssIfTest, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
-            AnyCssIfTest::CssBogusIfTest(node) => node.format().fmt(f),
+            AnyCssIfTest::CssBogus(node) => node.format().fmt(f),
             AnyCssIfTest::CssIfMediaTest(node) => node.format().fmt(f),
             AnyCssIfTest::CssIfSassTest(node) => node.format().fmt(f),
             AnyCssIfTest::CssIfStyleTest(node) => node.format().fmt(f),

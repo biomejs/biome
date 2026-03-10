@@ -58,7 +58,7 @@ CssRoot {
             at_token: AT@39..41 "@" [Newline("\n")] [],
             rule: CssKeyframesAtRule {
                 keyframes_token: KEYFRAMES_KW@41..51 "keyframes" [] [Whitespace(" ")],
-                name: CssBogusKeyframesName {
+                name: CssBogus {
                     items: [
                         COLON@51..52 ":" [] [],
                         LOCAL_KW@52..57 "local" [] [],
@@ -78,7 +78,7 @@ CssRoot {
             at_token: AT@66..68 "@" [Newline("\n")] [],
             rule: CssKeyframesAtRule {
                 keyframes_token: KEYFRAMES_KW@68..78 "keyframes" [] [Whitespace(" ")],
-                name: CssBogusKeyframesName {
+                name: CssBogus {
                     items: [
                         COLON@78..79 ":" [] [],
                         LOCAL_KW@79..84 "local" [] [],
@@ -98,7 +98,7 @@ CssRoot {
             at_token: AT@95..97 "@" [Newline("\n")] [],
             rule: CssKeyframesAtRule {
                 keyframes_token: KEYFRAMES_KW@97..107 "keyframes" [] [Whitespace(" ")],
-                name: CssBogusKeyframesName {
+                name: CssBogus {
                     items: [
                         COLON@107..108 ":" [] [],
                         LOCAL_KW@108..114 "local" [] [Whitespace(" ")],
@@ -116,7 +116,7 @@ CssRoot {
             at_token: AT@121..123 "@" [Newline("\n")] [],
             rule: CssKeyframesAtRule {
                 keyframes_token: KEYFRAMES_KW@123..133 "keyframes" [] [Whitespace(" ")],
-                name: CssBogusKeyframesName {
+                name: CssBogus {
                     items: [
                         COLON@133..134 ":" [] [],
                         LOCAL_KW@134..140 "local" [] [Whitespace(" ")],
@@ -134,7 +134,7 @@ CssRoot {
             at_token: AT@149..151 "@" [Newline("\n")] [],
             rule: CssKeyframesAtRule {
                 keyframes_token: KEYFRAMES_KW@151..161 "keyframes" [] [Whitespace(" ")],
-                name: CssBogusKeyframesName {
+                name: CssBogus {
                     items: [
                         COLON@161..162 ":" [] [],
                         GLOBAL_KW@162..168 "global" [] [],
@@ -154,7 +154,7 @@ CssRoot {
             at_token: AT@177..179 "@" [Newline("\n")] [],
             rule: CssKeyframesAtRule {
                 keyframes_token: KEYFRAMES_KW@179..189 "keyframes" [] [Whitespace(" ")],
-                name: CssBogusKeyframesName {
+                name: CssBogus {
                     items: [
                         COLON@189..190 ":" [] [],
                         GLOBAL_KW@190..196 "global" [] [],
@@ -174,7 +174,7 @@ CssRoot {
             at_token: AT@207..209 "@" [Newline("\n")] [],
             rule: CssKeyframesAtRule {
                 keyframes_token: KEYFRAMES_KW@209..219 "keyframes" [] [Whitespace(" ")],
-                name: CssBogusKeyframesName {
+                name: CssBogus {
                     items: [
                         COLON@219..220 ":" [] [],
                         GLOBAL_KW@220..227 "global" [] [Whitespace(" ")],
@@ -192,7 +192,7 @@ CssRoot {
             at_token: AT@234..236 "@" [Newline("\n")] [],
             rule: CssKeyframesAtRule {
                 keyframes_token: KEYFRAMES_KW@236..246 "keyframes" [] [Whitespace(" ")],
-                name: CssBogusKeyframesName {
+                name: CssBogus {
                     items: [
                         COLON@246..247 ":" [] [],
                         GLOBAL_KW@247..254 "global" [] [Whitespace(" ")],
@@ -241,7 +241,7 @@ CssRoot {
       0: AT@39..41 "@" [Newline("\n")] []
       1: CSS_KEYFRAMES_AT_RULE@41..66
         0: KEYFRAMES_KW@41..51 "keyframes" [] [Whitespace(" ")]
-        1: CSS_BOGUS_KEYFRAMES_NAME@51..64
+        1: CSS_BOGUS@51..64
           0: COLON@51..52 ":" [] []
           1: LOCAL_KW@52..57 "local" [] []
           2: L_PAREN@57..58 "(" [] []
@@ -255,7 +255,7 @@ CssRoot {
       0: AT@66..68 "@" [Newline("\n")] []
       1: CSS_KEYFRAMES_AT_RULE@68..95
         0: KEYFRAMES_KW@68..78 "keyframes" [] [Whitespace(" ")]
-        1: CSS_BOGUS_KEYFRAMES_NAME@78..93
+        1: CSS_BOGUS@78..93
           0: COLON@78..79 ":" [] []
           1: LOCAL_KW@79..84 "local" [] []
           2: L_PAREN@84..85 "(" [] []
@@ -269,7 +269,7 @@ CssRoot {
       0: AT@95..97 "@" [Newline("\n")] []
       1: CSS_KEYFRAMES_AT_RULE@97..121
         0: KEYFRAMES_KW@97..107 "keyframes" [] [Whitespace(" ")]
-        1: CSS_BOGUS_KEYFRAMES_NAME@107..119
+        1: CSS_BOGUS@107..119
           0: COLON@107..108 ":" [] []
           1: LOCAL_KW@108..114 "local" [] [Whitespace(" ")]
           2: IDENT@114..119 "test" [] [Whitespace(" ")]
@@ -281,7 +281,7 @@ CssRoot {
       0: AT@121..123 "@" [Newline("\n")] []
       1: CSS_KEYFRAMES_AT_RULE@123..149
         0: KEYFRAMES_KW@123..133 "keyframes" [] [Whitespace(" ")]
-        1: CSS_BOGUS_KEYFRAMES_NAME@133..147
+        1: CSS_BOGUS@133..147
           0: COLON@133..134 ":" [] []
           1: LOCAL_KW@134..140 "local" [] [Whitespace(" ")]
           2: CSS_STRING_LITERAL@140..147 "\"test\"" [] [Whitespace(" ")]
@@ -293,7 +293,7 @@ CssRoot {
       0: AT@149..151 "@" [Newline("\n")] []
       1: CSS_KEYFRAMES_AT_RULE@151..177
         0: KEYFRAMES_KW@151..161 "keyframes" [] [Whitespace(" ")]
-        1: CSS_BOGUS_KEYFRAMES_NAME@161..175
+        1: CSS_BOGUS@161..175
           0: COLON@161..162 ":" [] []
           1: GLOBAL_KW@162..168 "global" [] []
           2: L_PAREN@168..169 "(" [] []
@@ -307,7 +307,7 @@ CssRoot {
       0: AT@177..179 "@" [Newline("\n")] []
       1: CSS_KEYFRAMES_AT_RULE@179..207
         0: KEYFRAMES_KW@179..189 "keyframes" [] [Whitespace(" ")]
-        1: CSS_BOGUS_KEYFRAMES_NAME@189..205
+        1: CSS_BOGUS@189..205
           0: COLON@189..190 ":" [] []
           1: GLOBAL_KW@190..196 "global" [] []
           2: L_PAREN@196..197 "(" [] []
@@ -321,7 +321,7 @@ CssRoot {
       0: AT@207..209 "@" [Newline("\n")] []
       1: CSS_KEYFRAMES_AT_RULE@209..234
         0: KEYFRAMES_KW@209..219 "keyframes" [] [Whitespace(" ")]
-        1: CSS_BOGUS_KEYFRAMES_NAME@219..232
+        1: CSS_BOGUS@219..232
           0: COLON@219..220 ":" [] []
           1: GLOBAL_KW@220..227 "global" [] [Whitespace(" ")]
           2: IDENT@227..232 "test" [] [Whitespace(" ")]
@@ -333,7 +333,7 @@ CssRoot {
       0: AT@234..236 "@" [Newline("\n")] []
       1: CSS_KEYFRAMES_AT_RULE@236..263
         0: KEYFRAMES_KW@236..246 "keyframes" [] [Whitespace(" ")]
-        1: CSS_BOGUS_KEYFRAMES_NAME@246..261
+        1: CSS_BOGUS@246..261
           0: COLON@246..247 ":" [] []
           1: GLOBAL_KW@247..254 "global" [] [Whitespace(" ")]
           2: CSS_STRING_LITERAL@254..261 "\"test\"" [] [Whitespace(" ")]

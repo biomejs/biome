@@ -8,7 +8,7 @@ impl FormatRule<AnyCssUnicodeValue> for FormatAnyCssUnicodeValue {
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssUnicodeValue, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
-            AnyCssUnicodeValue::CssBogusUnicodeRangeValue(node) => node.format().fmt(f),
+            AnyCssUnicodeValue::CssBogus(node) => node.format().fmt(f),
             AnyCssUnicodeValue::CssUnicodeCodepoint(node) => node.format().fmt(f),
             AnyCssUnicodeValue::CssUnicodeRangeInterval(node) => node.format().fmt(f),
             AnyCssUnicodeValue::CssUnicodeRangeWildcard(node) => node.format().fmt(f),

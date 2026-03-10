@@ -36,7 +36,7 @@ CssRoot {
                     declarations: CssDeclarationList [
                         CssDeclarationWithSemicolon {
                             declaration: CssDeclaration {
-                                property: CssBogusProperty {
+                                property: CssBogus {
                                     items: [
                                         CssIdentifier {
                                             value_token: IDENT@12..27 "unicode-range" [Newline("\n"), Whitespace("\t")] [],
@@ -44,7 +44,7 @@ CssRoot {
                                         COLON@27..29 ":" [] [Whitespace(" ")],
                                         CssBogus {
                                             items: [
-                                                CssBogusUnicodeRangeValue {
+                                                CssBogus {
                                                     items: [
                                                         UNICODE@29..31 "U+" [] [],
                                                     ],
@@ -79,7 +79,7 @@ CssRoot {
                         },
                         CssDeclarationWithSemicolon {
                             declaration: CssDeclaration {
-                                property: CssBogusProperty {
+                                property: CssBogus {
                                     items: [
                                         CssIdentifier {
                                             value_token: IDENT@62..77 "unicode-range" [Newline("\n"), Whitespace("\t")] [],
@@ -87,7 +87,7 @@ CssRoot {
                                         COLON@77..79 ":" [] [Whitespace(" ")],
                                         CssBogus {
                                             items: [
-                                                CssBogusUnicodeRangeValue {
+                                                CssBogus {
                                                     items: [
                                                         UNICODE@79..81 "U+" [] [],
                                                         CssUnicodeRangeWildcard {
@@ -109,7 +109,7 @@ CssRoot {
                         },
                         CssDeclarationWithSemicolon {
                             declaration: CssDeclaration {
-                                property: CssBogusProperty {
+                                property: CssBogus {
                                     items: [
                                         CssIdentifier {
                                             value_token: IDENT@92..107 "unicode-range" [Newline("\n"), Whitespace("\t")] [],
@@ -117,7 +117,7 @@ CssRoot {
                                         COLON@107..109 ":" [] [Whitespace(" ")],
                                         CssBogus {
                                             items: [
-                                                CssBogusUnicodeRangeValue {
+                                                CssBogus {
                                                     items: [
                                                         UNICODE@109..111 "U+" [] [],
                                                         CssUnicodeRangeWildcard {
@@ -139,7 +139,7 @@ CssRoot {
                         },
                         CssDeclarationWithSemicolon {
                             declaration: CssDeclaration {
-                                property: CssBogusProperty {
+                                property: CssBogus {
                                     items: [
                                         CssIdentifier {
                                             value_token: IDENT@121..136 "unicode-range" [Newline("\n"), Whitespace("\t")] [],
@@ -147,7 +147,7 @@ CssRoot {
                                         COLON@136..138 ":" [] [Whitespace(" ")],
                                         CssBogus {
                                             items: [
-                                                CssBogusUnicodeRangeValue {
+                                                CssBogus {
                                                     items: [
                                                         UNICODE@138..140 "U+" [] [],
                                                         CssUnicodeRangeWildcard {
@@ -166,7 +166,7 @@ CssRoot {
                         },
                         CssDeclarationWithSemicolon {
                             declaration: CssDeclaration {
-                                property: CssBogusProperty {
+                                property: CssBogus {
                                     items: [
                                         CssIdentifier {
                                             value_token: IDENT@147..162 "unicode-range" [Newline("\n"), Whitespace("\t")] [],
@@ -174,7 +174,7 @@ CssRoot {
                                         COLON@162..164 ":" [] [Whitespace(" ")],
                                         CssBogus {
                                             items: [
-                                                CssBogusUnicodeRangeValue {
+                                                CssBogus {
                                                     items: [
                                                         UNICODE@164..166 "U+" [] [],
                                                         CssUnicodeCodepoint {
@@ -196,7 +196,7 @@ CssRoot {
                         },
                         CssDeclarationWithSemicolon {
                             declaration: CssDeclaration {
-                                property: CssBogusProperty {
+                                property: CssBogus {
                                     items: [
                                         CssIdentifier {
                                             value_token: IDENT@173..188 "unicode-range" [Newline("\n"), Whitespace("\t")] [],
@@ -204,7 +204,7 @@ CssRoot {
                                         COLON@188..190 ":" [] [Whitespace(" ")],
                                         CssBogus {
                                             items: [
-                                                CssBogusUnicodeRangeValue {
+                                                CssBogus {
                                                     items: [
                                                         UNICODE@190..192 "U+" [] [],
                                                         CssUnicodeCodepoint {
@@ -247,12 +247,12 @@ CssRoot {
           1: CSS_DECLARATION_LIST@12..196
             0: CSS_DECLARATION_WITH_SEMICOLON@12..32
               0: CSS_DECLARATION@12..31
-                0: CSS_BOGUS_PROPERTY@12..31
+                0: CSS_BOGUS@12..31
                   0: CSS_IDENTIFIER@12..27
                     0: IDENT@12..27 "unicode-range" [Newline("\n"), Whitespace("\t")] []
                   1: COLON@27..29 ":" [] [Whitespace(" ")]
                   2: CSS_BOGUS@29..31
-                    0: CSS_BOGUS_UNICODE_RANGE_VALUE@29..31
+                    0: CSS_BOGUS@29..31
                       0: UNICODE@29..31 "U+" [] []
                 1: (empty)
               1: SEMICOLON@31..32 ";" [] []
@@ -271,12 +271,12 @@ CssRoot {
               1: SEMICOLON@61..62 ";" [] []
             2: CSS_DECLARATION_WITH_SEMICOLON@62..92
               0: CSS_DECLARATION@62..91
-                0: CSS_BOGUS_PROPERTY@62..91
+                0: CSS_BOGUS@62..91
                   0: CSS_IDENTIFIER@62..77
                     0: IDENT@62..77 "unicode-range" [Newline("\n"), Whitespace("\t")] []
                   1: COLON@77..79 ":" [] [Whitespace(" ")]
                   2: CSS_BOGUS@79..91
-                    0: CSS_BOGUS_UNICODE_RANGE_VALUE@79..91
+                    0: CSS_BOGUS@79..91
                       0: UNICODE@79..81 "U+" [] []
                       1: CSS_UNICODE_RANGE_WILDCARD@81..86
                         0: CSS_UNICODE_RANGE_WILDCARD_LITERAL@81..86 "11???" [] []
@@ -287,12 +287,12 @@ CssRoot {
               1: SEMICOLON@91..92 ";" [] []
             3: CSS_DECLARATION_WITH_SEMICOLON@92..121
               0: CSS_DECLARATION@92..120
-                0: CSS_BOGUS_PROPERTY@92..120
+                0: CSS_BOGUS@92..120
                   0: CSS_IDENTIFIER@92..107
                     0: IDENT@92..107 "unicode-range" [Newline("\n"), Whitespace("\t")] []
                   1: COLON@107..109 ":" [] [Whitespace(" ")]
                   2: CSS_BOGUS@109..120
-                    0: CSS_BOGUS_UNICODE_RANGE_VALUE@109..120
+                    0: CSS_BOGUS@109..120
                       0: UNICODE@109..111 "U+" [] []
                       1: CSS_UNICODE_RANGE_WILDCARD@111..116
                         0: CSS_UNICODE_RANGE_WILDCARD_LITERAL@111..116 "11???" [] []
@@ -303,12 +303,12 @@ CssRoot {
               1: SEMICOLON@120..121 ";" [] []
             4: CSS_DECLARATION_WITH_SEMICOLON@121..147
               0: CSS_DECLARATION@121..146
-                0: CSS_BOGUS_PROPERTY@121..146
+                0: CSS_BOGUS@121..146
                   0: CSS_IDENTIFIER@121..136
                     0: IDENT@121..136 "unicode-range" [Newline("\n"), Whitespace("\t")] []
                   1: COLON@136..138 ":" [] [Whitespace(" ")]
                   2: CSS_BOGUS@138..146
-                    0: CSS_BOGUS_UNICODE_RANGE_VALUE@138..146
+                    0: CSS_BOGUS@138..146
                       0: UNICODE@138..140 "U+" [] []
                       1: CSS_UNICODE_RANGE_WILDCARD@140..145
                         0: CSS_UNICODE_RANGE_WILDCARD_LITERAL@140..145 "11???" [] []
@@ -317,12 +317,12 @@ CssRoot {
               1: SEMICOLON@146..147 ";" [] []
             5: CSS_DECLARATION_WITH_SEMICOLON@147..173
               0: CSS_DECLARATION@147..172
-                0: CSS_BOGUS_PROPERTY@147..172
+                0: CSS_BOGUS@147..172
                   0: CSS_IDENTIFIER@147..162
                     0: IDENT@147..162 "unicode-range" [Newline("\n"), Whitespace("\t")] []
                   1: COLON@162..164 ":" [] [Whitespace(" ")]
                   2: CSS_BOGUS@164..172
-                    0: CSS_BOGUS_UNICODE_RANGE_VALUE@164..172
+                    0: CSS_BOGUS@164..172
                       0: UNICODE@164..166 "U+" [] []
                       1: CSS_UNICODE_CODEPOINT@166..168
                         0: CSS_UNICODE_CODEPOINT_LITERAL@166..168 "11" [] []
@@ -333,12 +333,12 @@ CssRoot {
               1: SEMICOLON@172..173 ";" [] []
             6: CSS_DECLARATION_WITH_SEMICOLON@173..196
               0: CSS_DECLARATION@173..195
-                0: CSS_BOGUS_PROPERTY@173..195
+                0: CSS_BOGUS@173..195
                   0: CSS_IDENTIFIER@173..188
                     0: IDENT@173..188 "unicode-range" [Newline("\n"), Whitespace("\t")] []
                   1: COLON@188..190 ":" [] [Whitespace(" ")]
                   2: CSS_BOGUS@190..195
-                    0: CSS_BOGUS_UNICODE_RANGE_VALUE@190..195
+                    0: CSS_BOGUS@190..195
                       0: UNICODE@190..192 "U+" [] []
                       1: CSS_UNICODE_CODEPOINT@192..194
                         0: CSS_UNICODE_CODEPOINT_LITERAL@192..194 "11" [] []

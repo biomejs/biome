@@ -52,7 +52,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@5..9 "::" [Newline("\n"), Newline("\n")] [],
-                            element: CssBogusPseudoElement {
+                            element: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@9..13 "mark" [] [],
@@ -78,7 +78,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@17..21 "::" [Newline("\n"), Newline("\n")] [],
-                            element: CssBogusPseudoElement {
+                            element: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@21..25 "mark" [] [],
@@ -114,7 +114,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@33..37 "::" [Newline("\n"), Newline("\n")] [],
-                            element: CssBogusPseudoElement {
+                            element: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@37..41 "mark" [] [],
@@ -146,7 +146,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@51..55 "::" [Newline("\n"), Newline("\n")] [],
-                            element: CssBogusPseudoElement {
+                            element: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@55..64 "highlight" [] [],
@@ -206,7 +206,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@5..15
             0: CSS_PSEUDO_ELEMENT_SELECTOR@5..15
               0: COLON2@5..9 "::" [Newline("\n"), Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_ELEMENT@9..15
+              1: CSS_BOGUS@9..15
                 0: CSS_IDENTIFIER@9..13
                   0: IDENT@9..13 "mark" [] []
                 1: L_PAREN@13..15 "(" [] [Whitespace(" ")]
@@ -222,7 +222,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@17..31
             0: CSS_PSEUDO_ELEMENT_SELECTOR@17..31
               0: COLON2@17..21 "::" [Newline("\n"), Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_ELEMENT@21..31
+              1: CSS_BOGUS@21..31
                 0: CSS_IDENTIFIER@21..25
                   0: IDENT@21..25 "mark" [] []
                 1: L_PAREN@25..27 "(" [] [Whitespace(" ")]
@@ -245,7 +245,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@33..49
             0: CSS_PSEUDO_ELEMENT_SELECTOR@33..49
               0: COLON2@33..37 "::" [Newline("\n"), Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_ELEMENT@37..49
+              1: CSS_BOGUS@37..49
                 0: CSS_IDENTIFIER@37..41
                   0: IDENT@37..41 "mark" [] []
                 1: L_PAREN@41..43 "(" [] [Whitespace(" ")]
@@ -264,7 +264,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@51..76
             0: CSS_PSEUDO_ELEMENT_SELECTOR@51..76
               0: COLON2@51..55 "::" [Newline("\n"), Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_ELEMENT@55..76
+              1: CSS_BOGUS@55..76
                 0: CSS_IDENTIFIER@55..64
                   0: IDENT@55..64 "highlight" [] []
                 1: L_PAREN@64..65 "(" [] []

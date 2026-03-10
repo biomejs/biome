@@ -34,13 +34,13 @@ pub(crate) fn parse_pseudo_class_function_custom_identifier(p: &mut CssParser) -
             if eat_or_recover_selector_function_close_token(p, ident, expected_identifier) {
                 CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER
             } else {
-                CSS_BOGUS_PSEUDO_CLASS
+                CSS_BOGUS
             }
         }
         Absent => {
             recover_selector_function_parameter(p, expected_identifier);
             p.expect(T![')']);
-            CSS_BOGUS_PSEUDO_CLASS
+            CSS_BOGUS
         }
     };
 

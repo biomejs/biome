@@ -8,7 +8,7 @@ impl FormatRule<AnyCssPageSelector> for FormatAnyCssPageSelector {
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssPageSelector, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
-            AnyCssPageSelector::CssBogusSelector(node) => node.format().fmt(f),
+            AnyCssPageSelector::CssBogus(node) => node.format().fmt(f),
             AnyCssPageSelector::CssPageSelector(node) => node.format().fmt(f),
         }
     }

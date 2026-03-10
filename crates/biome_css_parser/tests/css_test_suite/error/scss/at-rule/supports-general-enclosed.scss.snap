@@ -32,7 +32,7 @@ CssRoot {
             rule: CssSupportsAtRule {
                 declarator: CssSupportsAtRuleDeclarator {
                     supports_token: SUPPORTS_KW@1..10 "supports" [] [Whitespace(" ")],
-                    condition: CssBogusSupportsCondition {
+                    condition: CssBogus {
                         items: [
                             CssIdentifier {
                                 value_token: IDENT@10..13 "foo" [] [],
@@ -120,7 +120,7 @@ CssRoot {
                     condition: CssSupportsAndCondition {
                         left: CssSupportsConditionInParens {
                             l_paren_token: L_PAREN@60..61 "(" [] [],
-                            condition: CssBogusSupportsCondition {
+                            condition: CssBogus {
                                 items: [
                                     CssIdentifier {
                                         value_token: IDENT@61..64 "foo" [] [],
@@ -247,7 +247,7 @@ CssRoot {
                                             CssIdentifier {
                                                 value_token: IDENT@151..160 "namespace" [] [],
                                             },
-                                            CssBogusUrlModifier {
+                                            CssBogus {
                                                 items: [
                                                     DOT@160..161 "." [] [],
                                                 ],
@@ -342,7 +342,7 @@ CssRoot {
       1: CSS_SUPPORTS_AT_RULE@1..48
         0: CSS_SUPPORTS_AT_RULE_DECLARATOR@1..24
           0: SUPPORTS_KW@1..10 "supports" [] [Whitespace(" ")]
-          1: CSS_BOGUS_SUPPORTS_CONDITION@10..24
+          1: CSS_BOGUS@10..24
             0: CSS_IDENTIFIER@10..13
               0: IDENT@10..13 "foo" [] []
             1: L_PAREN@13..14 "(" [] []
@@ -393,7 +393,7 @@ CssRoot {
           1: CSS_SUPPORTS_AND_CONDITION@60..96
             0: CSS_SUPPORTS_CONDITION_IN_PARENS@60..76
               0: L_PAREN@60..61 "(" [] []
-              1: CSS_BOGUS_SUPPORTS_CONDITION@61..74
+              1: CSS_BOGUS@61..74
                 0: CSS_IDENTIFIER@61..64
                   0: IDENT@61..64 "foo" [] []
                 1: L_PAREN@64..65 "(" [] []
@@ -471,7 +471,7 @@ CssRoot {
                     3: CSS_URL_MODIFIER_LIST@151..169
                       0: CSS_IDENTIFIER@151..160
                         0: IDENT@151..160 "namespace" [] []
-                      1: CSS_BOGUS_URL_MODIFIER@160..161
+                      1: CSS_BOGUS@160..161
                         0: DOT@160..161 "." [] []
                       2: CSS_FUNCTION@161..169
                         0: CSS_IDENTIFIER@161..163

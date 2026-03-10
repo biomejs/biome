@@ -244,7 +244,7 @@ fn get_property_name(node: &CssDashedIdentifier) -> Option<Text> {
         if let Some(node) = CssDeclaration::cast(parent.clone()) {
             let prop = node.property().ok()?;
             return match prop {
-                AnyCssProperty::CssBogusProperty(_) => None,
+                AnyCssProperty::CssBogus(_) => None,
                 AnyCssProperty::CssComposesProperty(prop) => {
                     Some(prop.name().ok()?.to_trimmed_text())
                 }

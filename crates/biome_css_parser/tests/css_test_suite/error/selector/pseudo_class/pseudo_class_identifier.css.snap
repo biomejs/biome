@@ -26,7 +26,7 @@ CssRoot {
                     nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
-                        CssBogusSubSelector {
+                        CssBogus {
                             items: [
                                 COLON@0..2 ":" [] [Whitespace(" ")],
                             ],
@@ -46,7 +46,7 @@ CssRoot {
                     nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
-                        CssBogusSubSelector {
+                        CssBogus {
                             items: [
                                 COLON@4..7 ":" [Newline("\n")] [Whitespace(" ")],
                             ],
@@ -78,7 +78,7 @@ CssRoot {
                                 value_token: IDENT@17..22 "class" [] [],
                             },
                         },
-                        CssBogusSubSelector {
+                        CssBogus {
                             items: [
                                 COLON@22..24 ":" [] [Whitespace(" ")],
                             ],
@@ -98,7 +98,7 @@ CssRoot {
                     nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
-                        CssBogusSubSelector {
+                        CssBogus {
                             items: [
                                 COLON@26..28 ":" [Newline("\n")] [],
                             ],
@@ -106,7 +106,7 @@ CssRoot {
                     ],
                 },
             ],
-            block: CssBogusBlock {
+            block: CssBogus {
                 items: [],
             },
         },
@@ -127,7 +127,7 @@ CssRoot {
           0: CSS_NESTED_SELECTOR_LIST@0..0
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@0..2
-            0: CSS_BOGUS_SUB_SELECTOR@0..2
+            0: CSS_BOGUS@0..2
               0: COLON@0..2 ":" [] [Whitespace(" ")]
       1: CSS_DECLARATION_OR_RULE_BLOCK@2..4
         0: L_CURLY@2..3 "{" [] []
@@ -139,7 +139,7 @@ CssRoot {
           0: CSS_NESTED_SELECTOR_LIST@4..4
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@4..13
-            0: CSS_BOGUS_SUB_SELECTOR@4..7
+            0: CSS_BOGUS@4..7
               0: COLON@4..7 ":" [Newline("\n")] [Whitespace(" ")]
             1: CSS_CLASS_SELECTOR@7..13
               0: DOT@7..8 "." [] []
@@ -159,7 +159,7 @@ CssRoot {
               0: DOT@15..17 "." [Newline("\n")] []
               1: CSS_CUSTOM_IDENTIFIER@17..22
                 0: IDENT@17..22 "class" [] []
-            1: CSS_BOGUS_SUB_SELECTOR@22..24
+            1: CSS_BOGUS@22..24
               0: COLON@22..24 ":" [] [Whitespace(" ")]
       1: CSS_DECLARATION_OR_RULE_BLOCK@24..26
         0: L_CURLY@24..25 "{" [] []
@@ -171,9 +171,9 @@ CssRoot {
           0: CSS_NESTED_SELECTOR_LIST@26..26
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@26..28
-            0: CSS_BOGUS_SUB_SELECTOR@26..28
+            0: CSS_BOGUS@26..28
               0: COLON@26..28 ":" [Newline("\n")] []
-      1: CSS_BOGUS_BLOCK@28..28
+      1: CSS_BOGUS@28..28
   2: EOF@28..29 "" [Newline("\n")] []
 
 ```

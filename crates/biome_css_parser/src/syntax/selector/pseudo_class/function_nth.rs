@@ -50,12 +50,12 @@ pub(crate) fn parse_pseudo_class_function_nth(p: &mut CssParser) -> ParsedSyntax
         {
             CSS_PSEUDO_CLASS_FUNCTION_NTH
         } else {
-            CSS_BOGUS_PSEUDO_CLASS
+            CSS_BOGUS
         }
     } else {
         recover_selector_function_parameter(p, expected_any_pseudo_class_nth);
         p.expect(T![')']);
-        CSS_BOGUS_PSEUDO_CLASS
+        CSS_BOGUS
     };
 
     Present(m.complete(p, kind))

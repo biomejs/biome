@@ -34,12 +34,12 @@ pub(crate) fn parse_charset_at_rule(p: &mut CssParser) -> ParsedSyntax {
             if eat_or_recover_close_token(p, encoding) {
                 CSS_CHARSET_AT_RULE
             } else {
-                CSS_BOGUS_AT_RULE
+                CSS_BOGUS
             }
         }
         _ => {
             p.expect(T![;]);
-            CSS_BOGUS_AT_RULE
+            CSS_BOGUS
         }
     };
 

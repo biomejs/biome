@@ -100,7 +100,7 @@ CssRoot {
                         },
                     },
                 },
-                block: CssBogusBlock {
+                block: CssBogus {
                     items: [
                         CssRuleList [
                             CssQualifiedRule {
@@ -163,7 +163,7 @@ CssRoot {
                                             },
                                         },
                                     },
-                                    block: CssBogusBlock {
+                                    block: CssBogus {
                                         items: [
                                             CssDeclarationOrRuleList [
                                                 CssNestedQualifiedRule {
@@ -182,7 +182,7 @@ CssRoot {
                                                             },
                                                         },
                                                         missing separator,
-                                                        CssBogusSelector {
+                                                        CssBogus {
                                                             items: [
                                                                 R_PAREN@275..277 ")" [] [Whitespace(" ")],
                                                             ],
@@ -210,7 +210,7 @@ CssRoot {
                                                                 },
                                                             },
                                                         },
-                                                        block: CssBogusBlock {
+                                                        block: CssBogus {
                                                             items: [
                                                                 CssDeclarationOrRuleList [
                                                                     CssNestedQualifiedRule {
@@ -229,7 +229,7 @@ CssRoot {
                                                                                 },
                                                                             },
                                                                             missing separator,
-                                                                            CssBogusSelector {
+                                                                            CssBogus {
                                                                                 items: [
                                                                                     R_PAREN@393..395 ")" [] [Whitespace(" ")],
                                                                                 ],
@@ -268,7 +268,7 @@ CssRoot {
                                                                                     },
                                                                                 },
                                                                             },
-                                                                            block: CssBogusBlock {
+                                                                            block: CssBogus {
                                                                                 items: [
                                                                                     CssDeclarationOrRuleList [
                                                                                         CssAtRule {
@@ -298,7 +298,7 @@ CssRoot {
                                                                                                         },
                                                                                                     },
                                                                                                 },
-                                                                                                block: CssBogusBlock {
+                                                                                                block: CssBogus {
                                                                                                     items: [],
                                                                                                 },
                                                                                             },
@@ -342,7 +342,7 @@ CssRoot {
                                                                                     },
                                                                                 },
                                                                             },
-                                                                            block: CssBogusBlock {
+                                                                            block: CssBogus {
                                                                                 items: [
                                                                                     CssDeclarationOrRuleList [
                                                                                         CssNestedQualifiedRule {
@@ -376,7 +376,7 @@ CssRoot {
                                                                                                         not_token: NOT_KW@672..676 "not" [] [Whitespace(" ")],
                                                                                                         query: CssSupportsConditionInParens {
                                                                                                             l_paren_token: L_PAREN@676..677 "(" [] [],
-                                                                                                            condition: CssBogusSupportsCondition {
+                                                                                                            condition: CssBogus {
                                                                                                                 items: [
                                                                                                                     CssSupportsFeatureDeclaration {
                                                                                                                         l_paren_token: L_PAREN@677..678 "(" [] [],
@@ -420,10 +420,10 @@ CssRoot {
                                                                                             rule: CssSupportsAtRule {
                                                                                                 declarator: CssSupportsAtRuleDeclarator {
                                                                                                     supports_token: SUPPORTS_KW@759..768 "supports" [] [Whitespace(" ")],
-                                                                                                    condition: CssBogusSupportsCondition {
+                                                                                                    condition: CssBogus {
                                                                                                         items: [
                                                                                                             NOT_KW@768..772 "not" [] [Whitespace(" ")],
-                                                                                                            CssBogusSupportsCondition {
+                                                                                                            CssBogus {
                                                                                                                 items: [
                                                                                                                     CssIdentifier {
                                                                                                                         value_token: IDENT@772..776 "not" [] [Whitespace(" ")],
@@ -479,7 +479,7 @@ CssRoot {
                                                                                                         },
                                                                                                     },
                                                                                                 },
-                                                                                                block: CssBogusBlock {
+                                                                                                block: CssBogus {
                                                                                                     items: [
                                                                                                         CssDeclarationOrRuleList [
                                                                                                             CssNestedQualifiedRule {
@@ -498,7 +498,7 @@ CssRoot {
                                                                                                                         },
                                                                                                                     },
                                                                                                                     missing separator,
-                                                                                                                    CssBogusSelector {
+                                                                                                                    CssBogus {
                                                                                                                         items: [
                                                                                                                             R_PAREN@893..895 ")" [] [Whitespace(" ")],
                                                                                                                         ],
@@ -522,7 +522,7 @@ CssRoot {
                                                                                                                         },
                                                                                                                     },
                                                                                                                     missing separator,
-                                                                                                                    CssBogusSelector {
+                                                                                                                    CssBogus {
                                                                                                                         items: [
                                                                                                                             L_PAREN@899..900 "(" [] [],
                                                                                                                         ],
@@ -551,7 +551,7 @@ CssRoot {
                                                                                                                         },
                                                                                                                     },
                                                                                                                     missing separator,
-                                                                                                                    CssBogusSelector {
+                                                                                                                    CssBogus {
                                                                                                                         items: [
                                                                                                                             R_PAREN@913..915 ")" [] [Whitespace(" ")],
                                                                                                                         ],
@@ -633,7 +633,7 @@ CssRoot {
                                                                                                                             },
                                                                                                                         },
                                                                                                                     },
-                                                                                                                    block: CssBogusBlock {
+                                                                                                                    block: CssBogus {
                                                                                                                         items: [
                                                                                                                             CssDeclarationOrRuleList [
                                                                                                                                 CssNestedQualifiedRule {
@@ -717,7 +717,7 @@ CssRoot {
                                                                                                                                                 },
                                                                                                                                             },
                                                                                                                                         },
-                                                                                                                                        block: CssBogusBlock {
+                                                                                                                                        block: CssBogus {
                                                                                                                                             items: [
                                                                                                                                                 CssDeclarationOrRuleList [
                                                                                                                                                     CssNestedQualifiedRule {
@@ -736,7 +736,7 @@ CssRoot {
                                                                                                                                                                 },
                                                                                                                                                             },
                                                                                                                                                             missing separator,
-                                                                                                                                                            CssBogusSelector {
+                                                                                                                                                            CssBogus {
                                                                                                                                                                 items: [
                                                                                                                                                                     R_PAREN@1212..1214 ")" [] [Whitespace(" ")],
                                                                                                                                                                 ],
@@ -760,7 +760,7 @@ CssRoot {
                                                                                                                                                                 },
                                                                                                                                                             },
                                                                                                                                                             missing separator,
-                                                                                                                                                            CssBogusSelector {
+                                                                                                                                                            CssBogus {
                                                                                                                                                                 items: [
                                                                                                                                                                     L_PAREN@1217..1218 "(" [] [],
                                                                                                                                                                 ],
@@ -789,7 +789,7 @@ CssRoot {
                                                                                                                                                                 },
                                                                                                                                                             },
                                                                                                                                                             missing separator,
-                                                                                                                                                            CssBogusSelector {
+                                                                                                                                                            CssBogus {
                                                                                                                                                                 items: [
                                                                                                                                                                     R_PAREN@1231..1233 ")" [] [Whitespace(" ")],
                                                                                                                                                                 ],
@@ -854,7 +854,7 @@ CssRoot {
                                                                                                                                                                     query: CssSupportsFeatureDeclaration {
                                                                                                                                                                         l_paren_token: L_PAREN@1369..1370 "(" [] [],
                                                                                                                                                                         declaration: CssDeclaration {
-                                                                                                                                                                            property: CssBogusProperty {
+                                                                                                                                                                            property: CssBogus {
                                                                                                                                                                                 items: [
                                                                                                                                                                                     CssIdentifier {
                                                                                                                                                                                         value_token: IDENT@1370..1377 "display" [] [],
@@ -868,7 +868,7 @@ CssRoot {
                                                                                                                                                                                             CssIdentifier {
                                                                                                                                                                                                 value_token: IDENT@1384..1398 "invalid-stuff" [] [Whitespace(" ")],
                                                                                                                                                                                             },
-                                                                                                                                                                                            CssBogusPropertyValue {
+                                                                                                                                                                                            CssBogus {
                                                                                                                                                                                                 items: [
                                                                                                                                                                                                     L_CURLY@1398..1399 "{" [] [],
                                                                                                                                                                                                 ],
@@ -883,7 +883,7 @@ CssRoot {
                                                                                                                                                                     },
                                                                                                                                                                 },
                                                                                                                                                             },
-                                                                                                                                                            block: CssBogusBlock {
+                                                                                                                                                            block: CssBogus {
                                                                                                                                                                 items: [
                                                                                                                                                                     CssDeclarationOrRuleList [
                                                                                                                                                                         CssNestedQualifiedRule {
@@ -961,7 +961,7 @@ CssRoot {
                                                                                                                                                                     },
                                                                                                                                                                 },
                                                                                                                                                             },
-                                                                                                                                                            block: CssBogusBlock {
+                                                                                                                                                            block: CssBogus {
                                                                                                                                                                 items: [
                                                                                                                                                                     CssDeclarationOrRuleList [
                                                                                                                                                                         CssAtRule {
@@ -1102,7 +1102,7 @@ CssRoot {
             0: NOT_KW@116..120 "not" [] [Whitespace(" ")]
             1: CSS_IDENTIFIER@120..127
               0: IDENT@120..127 "display" [] []
-        1: CSS_BOGUS_BLOCK@127..1518
+        1: CSS_BOGUS@127..1518
           0: CSS_RULE_LIST@127..1518
             0: CSS_QUALIFIED_RULE@127..136
               0: CSS_SELECTOR_LIST@127..134
@@ -1146,7 +1146,7 @@ CssRoot {
                       1: CSS_IDENTIFIER@263..271
                         0: IDENT@263..271 "display" [] [Whitespace(" ")]
                       2: (empty)
-                1: CSS_BOGUS_BLOCK@271..1518
+                1: CSS_BOGUS@271..1518
                   0: CSS_DECLARATION_OR_RULE_LIST@271..1518
                     0: CSS_NESTED_QUALIFIED_RULE@271..279
                       0: CSS_RELATIVE_SELECTOR_LIST@271..277
@@ -1160,7 +1160,7 @@ CssRoot {
                                 0: IDENT@271..275 "flex" [] []
                             2: CSS_SUB_SELECTOR_LIST@275..275
                         1: (empty)
-                        2: CSS_BOGUS_SELECTOR@275..277
+                        2: CSS_BOGUS@275..277
                           0: R_PAREN@275..277 ")" [] [Whitespace(" ")]
                       1: CSS_DECLARATION_OR_RULE_BLOCK@277..279
                         0: L_CURLY@277..278 "{" [] []
@@ -1178,7 +1178,7 @@ CssRoot {
                               1: CSS_IDENTIFIER@381..390
                                 0: IDENT@381..390 "selector" [] [Whitespace(" ")]
                               2: (empty)
-                        1: CSS_BOGUS_BLOCK@390..1518
+                        1: CSS_BOGUS@390..1518
                           0: CSS_DECLARATION_OR_RULE_LIST@390..1518
                             0: CSS_NESTED_QUALIFIED_RULE@390..397
                               0: CSS_RELATIVE_SELECTOR_LIST@390..395
@@ -1192,7 +1192,7 @@ CssRoot {
                                         0: IDENT@390..393 "div" [] []
                                     2: CSS_SUB_SELECTOR_LIST@393..393
                                 1: (empty)
-                                2: CSS_BOGUS_SELECTOR@393..395
+                                2: CSS_BOGUS@393..395
                                   0: R_PAREN@393..395 ")" [] [Whitespace(" ")]
                               1: CSS_DECLARATION_OR_RULE_BLOCK@395..397
                                 0: L_CURLY@395..396 "{" [] []
@@ -1217,7 +1217,7 @@ CssRoot {
                                               0: IDENT@450..454 "flex" [] []
                                         1: (empty)
                                       2: (empty)
-                                1: CSS_BOGUS_BLOCK@454..521
+                                1: CSS_BOGUS@454..521
                                   0: CSS_DECLARATION_OR_RULE_LIST@454..520
                                     0: CSS_AT_RULE@454..517
                                       0: AT@454..489 "@" [Newline("\n"), Newline("\n"), Comments("/* extra closing pare ..."), Newline("\n")] []
@@ -1238,7 +1238,7 @@ CssRoot {
                                                       0: IDENT@512..516 "flex" [] []
                                                 1: (empty)
                                               2: R_PAREN@516..517 ")" [] []
-                                        1: CSS_BOGUS_BLOCK@517..517
+                                        1: CSS_BOGUS@517..517
                                     1: CSS_BOGUS@517..520
                                       0: R_PAREN@517..519 ")" [] [Whitespace(" ")]
                                       1: L_CURLY@519..520 "{" [] []
@@ -1262,7 +1262,7 @@ CssRoot {
                                               0: IDENT@603..607 "flex" [] []
                                         1: (empty)
                                       2: R_PAREN@607..609 ")" [] [Whitespace(" ")]
-                                1: CSS_BOGUS_BLOCK@609..1518
+                                1: CSS_BOGUS@609..1518
                                   0: CSS_DECLARATION_OR_RULE_LIST@609..1518
                                     0: CSS_NESTED_QUALIFIED_RULE@609..615
                                       0: CSS_RELATIVE_SELECTOR_LIST@609..613
@@ -1288,7 +1288,7 @@ CssRoot {
                                             0: NOT_KW@672..676 "not" [] [Whitespace(" ")]
                                             1: CSS_SUPPORTS_CONDITION_IN_PARENS@676..698
                                               0: L_PAREN@676..677 "(" [] []
-                                              1: CSS_BOGUS_SUPPORTS_CONDITION@677..698
+                                              1: CSS_BOGUS@677..698
                                                 0: CSS_SUPPORTS_FEATURE_DECLARATION@677..693
                                                   0: L_PAREN@677..678 "(" [] []
                                                   1: CSS_DECLARATION@678..691
@@ -1314,9 +1314,9 @@ CssRoot {
                                       1: CSS_SUPPORTS_AT_RULE@759..794
                                         0: CSS_SUPPORTS_AT_RULE_DECLARATOR@759..792
                                           0: SUPPORTS_KW@759..768 "supports" [] [Whitespace(" ")]
-                                          1: CSS_BOGUS_SUPPORTS_CONDITION@768..792
+                                          1: CSS_BOGUS@768..792
                                             0: NOT_KW@768..772 "not" [] [Whitespace(" ")]
-                                            1: CSS_BOGUS_SUPPORTS_CONDITION@772..792
+                                            1: CSS_BOGUS@772..792
                                               0: CSS_IDENTIFIER@772..776
                                                 0: IDENT@772..776 "not" [] [Whitespace(" ")]
                                               1: L_PAREN@776..777 "(" [] []
@@ -1345,7 +1345,7 @@ CssRoot {
                                               1: CSS_IDENTIFIER@881..889
                                                 0: IDENT@881..889 "display" [] [Whitespace(" ")]
                                               2: (empty)
-                                        1: CSS_BOGUS_BLOCK@889..1518
+                                        1: CSS_BOGUS@889..1518
                                           0: CSS_DECLARATION_OR_RULE_LIST@889..1518
                                             0: CSS_NESTED_QUALIFIED_RULE@889..981
                                               0: CSS_RELATIVE_SELECTOR_LIST@889..915
@@ -1359,7 +1359,7 @@ CssRoot {
                                                         0: IDENT@889..893 "flex" [] []
                                                     2: CSS_SUB_SELECTOR_LIST@893..893
                                                 1: (empty)
-                                                2: CSS_BOGUS_SELECTOR@893..895
+                                                2: CSS_BOGUS@893..895
                                                   0: R_PAREN@893..895 ")" [] [Whitespace(" ")]
                                                 3: (empty)
                                                 4: CSS_RELATIVE_SELECTOR@895..899
@@ -1375,7 +1375,7 @@ CssRoot {
                                                     1: CSS_SPACE_LITERAL@898..899 " " [] []
                                                     2: (empty)
                                                 5: (empty)
-                                                6: CSS_BOGUS_SELECTOR@899..900
+                                                6: CSS_BOGUS@899..900
                                                   0: L_PAREN@899..900 "(" [] []
                                                 7: (empty)
                                                 8: CSS_RELATIVE_SELECTOR@900..913
@@ -1393,7 +1393,7 @@ CssRoot {
                                                           0: CSS_IDENTIFIER@909..913
                                                             0: IDENT@909..913 "grid" [] []
                                                 9: (empty)
-                                                10: CSS_BOGUS_SELECTOR@913..915
+                                                10: CSS_BOGUS@913..915
                                                   0: R_PAREN@913..915 ")" [] [Whitespace(" ")]
                                               1: CSS_DECLARATION_OR_RULE_BLOCK@915..981
                                                 0: L_CURLY@915..916 "{" [] []
@@ -1445,7 +1445,7 @@ CssRoot {
                                                               0: IDENT@1073..1077 "flex" [] []
                                                         1: (empty)
                                                       2: R_PAREN@1077..1079 ")" [] [Whitespace(" ")]
-                                                1: CSS_BOGUS_BLOCK@1079..1518
+                                                1: CSS_BOGUS@1079..1518
                                                   0: CSS_DECLARATION_OR_RULE_LIST@1079..1518
                                                     0: CSS_NESTED_QUALIFIED_RULE@1079..1116
                                                       0: CSS_RELATIVE_SELECTOR_LIST@1079..1083
@@ -1501,7 +1501,7 @@ CssRoot {
                                                               1: CSS_IDENTIFIER@1200..1209
                                                                 0: IDENT@1200..1209 "selector" [] [Whitespace(" ")]
                                                               2: (empty)
-                                                        1: CSS_BOGUS_BLOCK@1209..1518
+                                                        1: CSS_BOGUS@1209..1518
                                                           0: CSS_DECLARATION_OR_RULE_LIST@1209..1518
                                                             0: CSS_NESTED_QUALIFIED_RULE@1209..1263
                                                               0: CSS_RELATIVE_SELECTOR_LIST@1209..1233
@@ -1515,7 +1515,7 @@ CssRoot {
                                                                         0: IDENT@1209..1212 "div" [] []
                                                                     2: CSS_SUB_SELECTOR_LIST@1212..1212
                                                                 1: (empty)
-                                                                2: CSS_BOGUS_SELECTOR@1212..1214
+                                                                2: CSS_BOGUS@1212..1214
                                                                   0: R_PAREN@1212..1214 ")" [] [Whitespace(" ")]
                                                                 3: (empty)
                                                                 4: CSS_RELATIVE_SELECTOR@1214..1217
@@ -1531,7 +1531,7 @@ CssRoot {
                                                                     1: CSS_SPACE_LITERAL@1216..1217 " " [] []
                                                                     2: (empty)
                                                                 5: (empty)
-                                                                6: CSS_BOGUS_SELECTOR@1217..1218
+                                                                6: CSS_BOGUS@1217..1218
                                                                   0: L_PAREN@1217..1218 "(" [] []
                                                                 7: (empty)
                                                                 8: CSS_RELATIVE_SELECTOR@1218..1231
@@ -1549,7 +1549,7 @@ CssRoot {
                                                                           0: CSS_IDENTIFIER@1227..1231
                                                                             0: IDENT@1227..1231 "grid" [] []
                                                                 9: (empty)
-                                                                10: CSS_BOGUS_SELECTOR@1231..1233
+                                                                10: CSS_BOGUS@1231..1233
                                                                   0: R_PAREN@1231..1233 ")" [] [Whitespace(" ")]
                                                               1: CSS_DECLARATION_OR_RULE_BLOCK@1233..1263
                                                                 0: L_CURLY@1233..1234 "{" [] []
@@ -1592,7 +1592,7 @@ CssRoot {
                                                                     1: CSS_SUPPORTS_FEATURE_DECLARATION@1369..1399
                                                                       0: L_PAREN@1369..1370 "(" [] []
                                                                       1: CSS_DECLARATION@1370..1399
-                                                                        0: CSS_BOGUS_PROPERTY@1370..1399
+                                                                        0: CSS_BOGUS@1370..1399
                                                                           0: CSS_IDENTIFIER@1370..1377
                                                                             0: IDENT@1370..1377 "display" [] []
                                                                           1: COLON@1377..1379 ":" [] [Whitespace(" ")]
@@ -1601,11 +1601,11 @@ CssRoot {
                                                                               0: IDENT@1379..1384 "flex" [] [Whitespace(" ")]
                                                                             1: CSS_IDENTIFIER@1384..1398
                                                                               0: IDENT@1384..1398 "invalid-stuff" [] [Whitespace(" ")]
-                                                                            2: CSS_BOGUS_PROPERTY_VALUE@1398..1399
+                                                                            2: CSS_BOGUS@1398..1399
                                                                               0: L_CURLY@1398..1399 "{" [] []
                                                                         1: (empty)
                                                                       2: (empty)
-                                                                1: CSS_BOGUS_BLOCK@1399..1435
+                                                                1: CSS_BOGUS@1399..1435
                                                                   0: CSS_DECLARATION_OR_RULE_LIST@1399..1433
                                                                     0: CSS_NESTED_QUALIFIED_RULE@1399..1433
                                                                       0: CSS_RELATIVE_SELECTOR_LIST@1399..1415
@@ -1654,7 +1654,7 @@ CssRoot {
                                                                               0: IDENT@1461..1465 "flex" [] []
                                                                         1: (empty)
                                                                       2: (empty)
-                                                                1: CSS_BOGUS_BLOCK@1465..1518
+                                                                1: CSS_BOGUS@1465..1518
                                                                   0: CSS_DECLARATION_OR_RULE_LIST@1465..1518
                                                                     0: CSS_AT_RULE@1465..1518
                                                                       0: AT@1465..1467 "@" [Newline("\n")] []

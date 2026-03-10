@@ -8,7 +8,7 @@ impl FormatRule<AnyCssPseudoClassNthSelector> for FormatAnyCssPseudoClassNthSele
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssPseudoClassNthSelector, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
-            AnyCssPseudoClassNthSelector::CssBogusSelector(node) => node.format().fmt(f),
+            AnyCssPseudoClassNthSelector::CssBogus(node) => node.format().fmt(f),
             AnyCssPseudoClassNthSelector::CssPseudoClassNthSelector(node) => node.format().fmt(f),
         }
     }

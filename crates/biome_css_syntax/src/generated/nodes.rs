@@ -11174,7 +11174,7 @@ pub struct TwVariantAtRuleFields {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssAtRule {
-    CssBogusAtRule(CssBogusAtRule),
+    CssBogus(CssBogus),
     CssCharsetAtRule(CssCharsetAtRule),
     CssColorProfileAtRule(CssColorProfileAtRule),
     CssContainerAtRule(CssContainerAtRule),
@@ -11223,9 +11223,9 @@ pub enum AnyCssAtRule {
     TwVariantAtRule(TwVariantAtRule),
 }
 impl AnyCssAtRule {
-    pub fn as_css_bogus_at_rule(&self) -> Option<&CssBogusAtRule> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusAtRule(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -11616,13 +11616,13 @@ impl AnyCssAtRuleDeclarator {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssAttrName {
-    CssBogusAttrName(CssBogusAttrName),
+    CssBogus(CssBogus),
     CssIdentifier(CssIdentifier),
 }
 impl AnyCssAttrName {
-    pub fn as_css_bogus_attr_name(&self) -> Option<&CssBogusAttrName> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusAttrName(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -11744,13 +11744,13 @@ impl AnyCssComposesImportSource {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssCompoundSelector {
-    CssBogusSelector(CssBogusSelector),
+    CssBogus(CssBogus),
     CssCompoundSelector(CssCompoundSelector),
 }
 impl AnyCssCompoundSelector {
-    pub fn as_css_bogus_selector(&self) -> Option<&CssBogusSelector> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusSelector(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -11763,14 +11763,14 @@ impl AnyCssCompoundSelector {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssConditionalBlock {
-    CssBogusBlock(CssBogusBlock),
+    CssBogus(CssBogus),
     CssDeclarationOrRuleBlock(CssDeclarationOrRuleBlock),
     CssRuleBlock(CssRuleBlock),
 }
 impl AnyCssConditionalBlock {
-    pub fn as_css_bogus_block(&self) -> Option<&CssBogusBlock> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusBlock(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -12118,13 +12118,13 @@ impl AnyCssContainerStyleQuery {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssCustomIdentifier {
-    CssBogusCustomIdentifier(CssBogusCustomIdentifier),
+    CssBogus(CssBogus),
     CssCustomIdentifier(CssCustomIdentifier),
 }
 impl AnyCssCustomIdentifier {
-    pub fn as_css_bogus_custom_identifier(&self) -> Option<&CssBogusCustomIdentifier> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusCustomIdentifier(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -12170,13 +12170,13 @@ impl AnyCssDeclaration {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssDeclarationBlock {
-    CssBogusBlock(CssBogusBlock),
+    CssBogus(CssBogus),
     CssDeclarationBlock(CssDeclarationBlock),
 }
 impl AnyCssDeclarationBlock {
-    pub fn as_css_bogus_block(&self) -> Option<&CssBogusBlock> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusBlock(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -12255,13 +12255,13 @@ impl AnyCssDeclarationOrAtRule {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssDeclarationOrAtRuleBlock {
-    CssBogusBlock(CssBogusBlock),
+    CssBogus(CssBogus),
     CssDeclarationOrAtRuleBlock(CssDeclarationOrAtRuleBlock),
 }
 impl AnyCssDeclarationOrAtRuleBlock {
-    pub fn as_css_bogus_block(&self) -> Option<&CssBogusBlock> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusBlock(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -12328,13 +12328,13 @@ impl AnyCssDeclarationOrRule {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssDeclarationOrRuleBlock {
-    CssBogusBlock(CssBogusBlock),
+    CssBogus(CssBogus),
     CssDeclarationOrRuleBlock(CssDeclarationOrRuleBlock),
 }
 impl AnyCssDeclarationOrRuleBlock {
-    pub fn as_css_bogus_block(&self) -> Option<&CssBogusBlock> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusBlock(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -12373,14 +12373,14 @@ impl AnyCssDimension {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssDocumentMatcher {
-    CssBogusDocumentMatcher(CssBogusDocumentMatcher),
+    CssBogus(CssBogus),
     CssDocumentCustomMatcher(CssDocumentCustomMatcher),
     CssUrlFunction(CssUrlFunction),
 }
 impl AnyCssDocumentMatcher {
-    pub fn as_css_bogus_document_matcher(&self) -> Option<&CssBogusDocumentMatcher> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusDocumentMatcher(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -12448,14 +12448,14 @@ impl AnyCssExpression {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssFontFamilyName {
-    CssBogusFontFamilyName(CssBogusFontFamilyName),
+    CssBogus(CssBogus),
     CssFontFamilyName(CssFontFamilyName),
     CssString(CssString),
 }
 impl AnyCssFontFamilyName {
-    pub fn as_css_bogus_font_family_name(&self) -> Option<&CssBogusFontFamilyName> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusFontFamilyName(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -12474,13 +12474,13 @@ impl AnyCssFontFamilyName {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssFontFeatureValuesBlock {
-    CssBogusBlock(CssBogusBlock),
+    CssBogus(CssBogus),
     CssFontFeatureValuesBlock(CssFontFeatureValuesBlock),
 }
 impl AnyCssFontFeatureValuesBlock {
-    pub fn as_css_bogus_block(&self) -> Option<&CssBogusBlock> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusBlock(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -12493,13 +12493,13 @@ impl AnyCssFontFeatureValuesBlock {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssFontFeatureValuesItem {
-    CssBogusFontFeatureValuesItem(CssBogusFontFeatureValuesItem),
+    CssBogus(CssBogus),
     CssFontFeatureValuesItem(CssFontFeatureValuesItem),
 }
 impl AnyCssFontFeatureValuesItem {
-    pub fn as_css_bogus_font_feature_values_item(&self) -> Option<&CssBogusFontFeatureValuesItem> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusFontFeatureValuesItem(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -12564,13 +12564,13 @@ impl AnyCssFunctionName {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssFunctionParameter {
-    CssBogusFunctionParameter(CssBogusFunctionParameter),
+    CssBogus(CssBogus),
     CssFunctionParameter(CssFunctionParameter),
 }
 impl AnyCssFunctionParameter {
-    pub fn as_css_bogus_function_parameter(&self) -> Option<&CssBogusFunctionParameter> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusFunctionParameter(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -12621,13 +12621,13 @@ impl AnyCssGenericPropertyValueOrExpression {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssIfBranch {
-    CssBogusIfBranch(CssBogusIfBranch),
+    CssBogus(CssBogus),
     CssIfBranch(CssIfBranch),
 }
 impl AnyCssIfBranch {
-    pub fn as_css_bogus_if_branch(&self) -> Option<&CssBogusIfBranch> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusIfBranch(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -12697,16 +12697,16 @@ impl AnyCssIfSupportsTestCondition {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssIfTest {
-    CssBogusIfTest(CssBogusIfTest),
+    CssBogus(CssBogus),
     CssIfMediaTest(CssIfMediaTest),
     CssIfSassTest(CssIfSassTest),
     CssIfStyleTest(CssIfStyleTest),
     CssIfSupportsTest(CssIfSupportsTest),
 }
 impl AnyCssIfTest {
-    pub fn as_css_bogus_if_test(&self) -> Option<&CssBogusIfTest> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusIfTest(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -12758,7 +12758,7 @@ impl AnyCssIfTestBooleanAndCombinableExpr {
 pub enum AnyCssIfTestBooleanExpr {
     AnyCssIfTestBooleanAndCombinableExpr(AnyCssIfTestBooleanAndCombinableExpr),
     AnyCssIfTestBooleanOrCombinableExpr(AnyCssIfTestBooleanOrCombinableExpr),
-    CssBogusIfTestBooleanExpr(CssBogusIfTestBooleanExpr),
+    CssBogus(CssBogus),
     CssIfTestBooleanNotExpr(CssIfTestBooleanNotExpr),
 }
 impl AnyCssIfTestBooleanExpr {
@@ -12778,9 +12778,9 @@ impl AnyCssIfTestBooleanExpr {
             _ => None,
         }
     }
-    pub fn as_css_bogus_if_test_boolean_expr(&self) -> Option<&CssBogusIfTestBooleanExpr> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusIfTestBooleanExpr(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -12888,13 +12888,13 @@ impl AnyCssImportUrl {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssKeyframesBlock {
-    CssBogusBlock(CssBogusBlock),
+    CssBogus(CssBogus),
     CssKeyframesBlock(CssKeyframesBlock),
 }
 impl AnyCssKeyframesBlock {
-    pub fn as_css_bogus_block(&self) -> Option<&CssBogusBlock> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusBlock(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -12926,13 +12926,13 @@ impl AnyCssKeyframesIdentifier {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssKeyframesItem {
-    CssBogusKeyframesItem(CssBogusKeyframesItem),
+    CssBogus(CssBogus),
     CssKeyframesItem(CssKeyframesItem),
 }
 impl AnyCssKeyframesItem {
-    pub fn as_css_bogus_keyframes_item(&self) -> Option<&CssBogusKeyframesItem> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusKeyframesItem(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -12946,7 +12946,7 @@ impl AnyCssKeyframesItem {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssKeyframesName {
     AnyCssKeyframesIdentifier(AnyCssKeyframesIdentifier),
-    CssBogusKeyframesName(CssBogusKeyframesName),
+    CssBogus(CssBogus),
     CssKeyframesScopedName(CssKeyframesScopedName),
 }
 impl AnyCssKeyframesName {
@@ -12956,9 +12956,9 @@ impl AnyCssKeyframesName {
             _ => None,
         }
     }
-    pub fn as_css_bogus_keyframes_name(&self) -> Option<&CssBogusKeyframesName> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusKeyframesName(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -12990,14 +12990,14 @@ impl AnyCssKeyframesScope {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssKeyframesSelector {
-    CssBogusSelector(CssBogusSelector),
+    CssBogus(CssBogus),
     CssKeyframesIdentSelector(CssKeyframesIdentSelector),
     CssKeyframesPercentageSelector(CssKeyframesPercentageSelector),
 }
 impl AnyCssKeyframesSelector {
-    pub fn as_css_bogus_selector(&self) -> Option<&CssBogusSelector> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusSelector(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -13016,14 +13016,14 @@ impl AnyCssKeyframesSelector {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssLayer {
-    CssBogusLayer(CssBogusLayer),
+    CssBogus(CssBogus),
     CssLayerDeclaration(CssLayerDeclaration),
     CssLayerReference(CssLayerReference),
 }
 impl AnyCssLayer {
-    pub fn as_css_bogus_layer(&self) -> Option<&CssBogusLayer> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusLayer(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -13133,7 +13133,7 @@ impl AnyCssMediaOrCombinableCondition {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssMediaQuery {
     AnyCssMediaTypeQuery(AnyCssMediaTypeQuery),
-    CssBogusMediaQuery(CssBogusMediaQuery),
+    CssBogus(CssBogus),
     CssMediaConditionQuery(CssMediaConditionQuery),
     CssMetavariable(CssMetavariable),
 }
@@ -13144,9 +13144,9 @@ impl AnyCssMediaQuery {
             _ => None,
         }
     }
-    pub fn as_css_bogus_media_query(&self) -> Option<&CssBogusMediaQuery> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusMediaQuery(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -13248,13 +13248,13 @@ impl AnyCssNamespaceUrl {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssPageAtRuleBlock {
-    CssBogusBlock(CssBogusBlock),
+    CssBogus(CssBogus),
     CssPageAtRuleBlock(CssPageAtRuleBlock),
 }
 impl AnyCssPageAtRuleBlock {
-    pub fn as_css_bogus_block(&self) -> Option<&CssBogusBlock> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusBlock(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -13321,13 +13321,13 @@ impl AnyCssPageAtRuleItem {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssPageSelector {
-    CssBogusSelector(CssBogusSelector),
+    CssBogus(CssBogus),
     CssPageSelector(CssPageSelector),
 }
 impl AnyCssPageSelector {
-    pub fn as_css_bogus_selector(&self) -> Option<&CssBogusSelector> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusSelector(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -13340,13 +13340,13 @@ impl AnyCssPageSelector {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssPageSelectorPseudo {
-    CssBogusPageSelectorPseudo(CssBogusPageSelectorPseudo),
+    CssBogus(CssBogus),
     CssPageSelectorPseudo(CssPageSelectorPseudo),
 }
 impl AnyCssPageSelectorPseudo {
-    pub fn as_css_bogus_page_selector_pseudo(&self) -> Option<&CssBogusPageSelectorPseudo> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusPageSelectorPseudo(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -13359,14 +13359,14 @@ impl AnyCssPageSelectorPseudo {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssProperty {
-    CssBogusProperty(CssBogusProperty),
+    CssBogus(CssBogus),
     CssComposesProperty(CssComposesProperty),
     CssGenericProperty(CssGenericProperty),
 }
 impl AnyCssProperty {
-    pub fn as_css_bogus_property(&self) -> Option<&CssBogusProperty> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusProperty(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -13385,7 +13385,7 @@ impl AnyCssProperty {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssPseudoClass {
-    CssBogusPseudoClass(CssBogusPseudoClass),
+    CssBogus(CssBogus),
     CssPseudoClassFunctionCompoundSelector(CssPseudoClassFunctionCompoundSelector),
     CssPseudoClassFunctionCompoundSelectorList(CssPseudoClassFunctionCompoundSelectorList),
     CssPseudoClassFunctionCustomIdentifier(CssPseudoClassFunctionCustomIdentifier),
@@ -13399,9 +13399,9 @@ pub enum AnyCssPseudoClass {
     CssPseudoClassIdentifier(CssPseudoClassIdentifier),
 }
 impl AnyCssPseudoClass {
-    pub fn as_css_bogus_pseudo_class(&self) -> Option<&CssBogusPseudoClass> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusPseudoClass(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -13516,13 +13516,13 @@ impl AnyCssPseudoClassNth {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssPseudoClassNthSelector {
-    CssBogusSelector(CssBogusSelector),
+    CssBogus(CssBogus),
     CssPseudoClassNthSelector(CssPseudoClassNthSelector),
 }
 impl AnyCssPseudoClassNthSelector {
-    pub fn as_css_bogus_selector(&self) -> Option<&CssBogusSelector> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusSelector(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -13535,16 +13535,16 @@ impl AnyCssPseudoClassNthSelector {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssPseudoElement {
-    CssBogusPseudoElement(CssBogusPseudoElement),
+    CssBogus(CssBogus),
     CssPseudoElementFunction(CssPseudoElementFunction),
     CssPseudoElementFunctionCustomIdentifier(CssPseudoElementFunctionCustomIdentifier),
     CssPseudoElementFunctionSelector(CssPseudoElementFunctionSelector),
     CssPseudoElementIdentifier(CssPseudoElementIdentifier),
 }
 impl AnyCssPseudoElement {
-    pub fn as_css_bogus_pseudo_element(&self) -> Option<&CssBogusPseudoElement> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusPseudoElement(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -13678,13 +13678,13 @@ impl AnyCssQueryFeatureValue {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssRelativeSelector {
-    CssBogusSelector(CssBogusSelector),
+    CssBogus(CssBogus),
     CssRelativeSelector(CssRelativeSelector),
 }
 impl AnyCssRelativeSelector {
-    pub fn as_css_bogus_selector(&self) -> Option<&CssBogusSelector> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusSelector(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -13743,7 +13743,7 @@ impl AnyCssRootItem {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssRule {
     CssAtRule(CssAtRule),
-    CssBogusRule(CssBogusRule),
+    CssBogus(CssBogus),
     CssNestedQualifiedRule(CssNestedQualifiedRule),
     CssQualifiedRule(CssQualifiedRule),
 }
@@ -13754,9 +13754,9 @@ impl AnyCssRule {
             _ => None,
         }
     }
-    pub fn as_css_bogus_rule(&self) -> Option<&CssBogusRule> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusRule(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -13775,13 +13775,13 @@ impl AnyCssRule {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssRuleBlock {
-    CssBogusBlock(CssBogusBlock),
+    CssBogus(CssBogus),
     CssRuleBlock(CssRuleBlock),
 }
 impl AnyCssRuleBlock {
-    pub fn as_css_bogus_block(&self) -> Option<&CssBogusBlock> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusBlock(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -13794,15 +13794,15 @@ impl AnyCssRuleBlock {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssScopeRange {
-    CssBogusScopeRange(CssBogusScopeRange),
+    CssBogus(CssBogus),
     CssScopeRangeEnd(CssScopeRangeEnd),
     CssScopeRangeInterval(CssScopeRangeInterval),
     CssScopeRangeStart(CssScopeRangeStart),
 }
 impl AnyCssScopeRange {
-    pub fn as_css_bogus_scope_range(&self) -> Option<&CssBogusScopeRange> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusScopeRange(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -13827,15 +13827,15 @@ impl AnyCssScopeRange {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssSelector {
-    CssBogusSelector(CssBogusSelector),
+    CssBogus(CssBogus),
     CssComplexSelector(CssComplexSelector),
     CssCompoundSelector(CssCompoundSelector),
     CssMetavariable(CssMetavariable),
 }
 impl AnyCssSelector {
-    pub fn as_css_bogus_selector(&self) -> Option<&CssBogusSelector> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusSelector(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -13880,7 +13880,7 @@ impl AnyCssSimpleSelector {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssSubSelector {
     CssAttributeSelector(CssAttributeSelector),
-    CssBogusSubSelector(CssBogusSubSelector),
+    CssBogus(CssBogus),
     CssClassSelector(CssClassSelector),
     CssIdSelector(CssIdSelector),
     CssPseudoClassSelector(CssPseudoClassSelector),
@@ -13893,9 +13893,9 @@ impl AnyCssSubSelector {
             _ => None,
         }
     }
-    pub fn as_css_bogus_sub_selector(&self) -> Option<&CssBogusSubSelector> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusSubSelector(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -13946,7 +13946,7 @@ impl AnyCssSupportsAndCombinableCondition {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssSupportsCondition {
     AnyCssSupportsInParens(AnyCssSupportsInParens),
-    CssBogusSupportsCondition(CssBogusSupportsCondition),
+    CssBogus(CssBogus),
     CssSupportsAndCondition(CssSupportsAndCondition),
     CssSupportsNotCondition(CssSupportsNotCondition),
     CssSupportsOrCondition(CssSupportsOrCondition),
@@ -13958,9 +13958,9 @@ impl AnyCssSupportsCondition {
             _ => None,
         }
     }
-    pub fn as_css_bogus_supports_condition(&self) -> Option<&CssBogusSupportsCondition> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusSupportsCondition(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -14038,7 +14038,7 @@ impl AnyCssSupportsOrCombinableCondition {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssSyntax {
     AnyCssSyntaxComponent(AnyCssSyntaxComponent),
-    CssBogusSyntax(CssBogusSyntax),
+    CssBogus(CssBogus),
     CssString(CssString),
     CssSyntaxComponentList(CssSyntaxComponentList),
     CssUniversalSyntax(CssUniversalSyntax),
@@ -14050,9 +14050,9 @@ impl AnyCssSyntax {
             _ => None,
         }
     }
-    pub fn as_css_bogus_syntax(&self) -> Option<&CssBogusSyntax> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusSyntax(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -14098,14 +14098,14 @@ impl AnyCssSyntaxComponent {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssSyntaxSingleComponent {
-    CssBogusSyntaxSingleComponent(CssBogusSyntaxSingleComponent),
+    CssBogus(CssBogus),
     CssIdentifier(CssIdentifier),
     CssSyntaxType(CssSyntaxType),
 }
 impl AnyCssSyntaxSingleComponent {
-    pub fn as_css_bogus_syntax_single_component(&self) -> Option<&CssBogusSyntaxSingleComponent> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusSyntaxSingleComponent(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -14144,7 +14144,7 @@ impl AnyCssSyntaxTypeName {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssType {
     AnyCssSyntaxComponent(AnyCssSyntaxComponent),
-    CssBogusType(CssBogusType),
+    CssBogus(CssBogus),
     CssTypeFunction(CssTypeFunction),
 }
 impl AnyCssType {
@@ -14154,9 +14154,9 @@ impl AnyCssType {
             _ => None,
         }
     }
-    pub fn as_css_bogus_type(&self) -> Option<&CssBogusType> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusType(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -14169,15 +14169,15 @@ impl AnyCssType {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssUnicodeValue {
-    CssBogusUnicodeRangeValue(CssBogusUnicodeRangeValue),
+    CssBogus(CssBogus),
     CssUnicodeCodepoint(CssUnicodeCodepoint),
     CssUnicodeRangeInterval(CssUnicodeRangeInterval),
     CssUnicodeRangeWildcard(CssUnicodeRangeWildcard),
 }
 impl AnyCssUnicodeValue {
-    pub fn as_css_bogus_unicode_range_value(&self) -> Option<&CssBogusUnicodeRangeValue> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusUnicodeRangeValue(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -14202,14 +14202,14 @@ impl AnyCssUnicodeValue {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssUrlModifier {
-    CssBogusUrlModifier(CssBogusUrlModifier),
+    CssBogus(CssBogus),
     CssFunction(CssFunction),
     CssIdentifier(CssIdentifier),
 }
 impl AnyCssUrlModifier {
-    pub fn as_css_bogus_url_modifier(&self) -> Option<&CssBogusUrlModifier> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusUrlModifier(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -14425,13 +14425,13 @@ impl AnyCssValueAtRuleImportSpecifier {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssValueAtRuleProperty {
-    CssBogusProperty(CssBogusProperty),
+    CssBogus(CssBogus),
     CssValueAtRuleGenericProperty(CssValueAtRuleGenericProperty),
 }
 impl AnyCssValueAtRuleProperty {
-    pub fn as_css_bogus_property(&self) -> Option<&CssBogusProperty> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusProperty(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -14649,13 +14649,13 @@ impl AnyScssModuleMember {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyScssParameter {
-    CssBogusParameter(CssBogusParameter),
+    CssBogus(CssBogus),
     ScssParameter(ScssParameter),
 }
 impl AnyScssParameter {
-    pub fn as_css_bogus_parameter(&self) -> Option<&CssBogusParameter> {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
-            Self::CssBogusParameter(item) => Some(item),
+            Self::CssBogus(item) => Some(item),
             _ => None,
         }
     }
@@ -28182,9 +28182,9 @@ impl From<TwVariantAtRule> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl From<CssBogusAtRule> for AnyCssAtRule {
-    fn from(node: CssBogusAtRule) -> Self {
-        Self::CssBogusAtRule(node)
+impl From<CssBogus> for AnyCssAtRule {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssCharsetAtRule> for AnyCssAtRule {
@@ -28419,7 +28419,7 @@ impl From<TwVariantAtRule> for AnyCssAtRule {
 }
 impl AstNode for AnyCssAtRule {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssBogusAtRule::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = CssBogus::KIND_SET
         .union(CssCharsetAtRule::KIND_SET)
         .union(CssColorProfileAtRule::KIND_SET)
         .union(CssContainerAtRule::KIND_SET)
@@ -28469,7 +28469,7 @@ impl AstNode for AnyCssAtRule {
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_BOGUS_AT_RULE
+            CSS_BOGUS
                 | CSS_CHARSET_AT_RULE
                 | CSS_COLOR_PROFILE_AT_RULE
                 | CSS_CONTAINER_AT_RULE
@@ -28520,7 +28520,7 @@ impl AstNode for AnyCssAtRule {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_AT_RULE => Self::CssBogusAtRule(CssBogusAtRule { syntax }),
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_CHARSET_AT_RULE => Self::CssCharsetAtRule(CssCharsetAtRule { syntax }),
             CSS_COLOR_PROFILE_AT_RULE => {
                 Self::CssColorProfileAtRule(CssColorProfileAtRule { syntax })
@@ -28591,7 +28591,7 @@ impl AstNode for AnyCssAtRule {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusAtRule(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssCharsetAtRule(it) => it.syntax(),
             Self::CssColorProfileAtRule(it) => it.syntax(),
             Self::CssContainerAtRule(it) => it.syntax(),
@@ -28642,7 +28642,7 @@ impl AstNode for AnyCssAtRule {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusAtRule(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssCharsetAtRule(it) => it.into_syntax(),
             Self::CssColorProfileAtRule(it) => it.into_syntax(),
             Self::CssContainerAtRule(it) => it.into_syntax(),
@@ -28695,7 +28695,7 @@ impl AstNode for AnyCssAtRule {
 impl std::fmt::Debug for AnyCssAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CssBogusAtRule(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssCharsetAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::CssColorProfileAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::CssContainerAtRule(it) => std::fmt::Debug::fmt(it, f),
@@ -28748,7 +28748,7 @@ impl std::fmt::Debug for AnyCssAtRule {
 impl From<AnyCssAtRule> for SyntaxNode {
     fn from(n: AnyCssAtRule) -> Self {
         match n {
-            AnyCssAtRule::CssBogusAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::CssBogus(it) => it.into_syntax(),
             AnyCssAtRule::CssCharsetAtRule(it) => it.into_syntax(),
             AnyCssAtRule::CssColorProfileAtRule(it) => it.into_syntax(),
             AnyCssAtRule::CssContainerAtRule(it) => it.into_syntax(),
@@ -29030,9 +29030,9 @@ impl From<AnyCssAtRuleDeclarator> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusAttrName> for AnyCssAttrName {
-    fn from(node: CssBogusAttrName) -> Self {
-        Self::CssBogusAttrName(node)
+impl From<CssBogus> for AnyCssAttrName {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssIdentifier> for AnyCssAttrName {
@@ -29042,14 +29042,13 @@ impl From<CssIdentifier> for AnyCssAttrName {
 }
 impl AstNode for AnyCssAttrName {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        CssBogusAttrName::KIND_SET.union(CssIdentifier::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = CssBogus::KIND_SET.union(CssIdentifier::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_BOGUS_ATTR_NAME | CSS_IDENTIFIER)
+        matches!(kind, CSS_BOGUS | CSS_IDENTIFIER)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_ATTR_NAME => Self::CssBogusAttrName(CssBogusAttrName { syntax }),
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_IDENTIFIER => Self::CssIdentifier(CssIdentifier { syntax }),
             _ => return None,
         };
@@ -29057,13 +29056,13 @@ impl AstNode for AnyCssAttrName {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusAttrName(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssIdentifier(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusAttrName(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssIdentifier(it) => it.into_syntax(),
         }
     }
@@ -29071,7 +29070,7 @@ impl AstNode for AnyCssAttrName {
 impl std::fmt::Debug for AnyCssAttrName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CssBogusAttrName(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -29079,7 +29078,7 @@ impl std::fmt::Debug for AnyCssAttrName {
 impl From<AnyCssAttrName> for SyntaxNode {
     fn from(n: AnyCssAttrName) -> Self {
         match n {
-            AnyCssAttrName::CssBogusAttrName(it) => it.into_syntax(),
+            AnyCssAttrName::CssBogus(it) => it.into_syntax(),
             AnyCssAttrName::CssIdentifier(it) => it.into_syntax(),
         }
     }
@@ -29418,9 +29417,9 @@ impl From<AnyCssComposesImportSource> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusSelector> for AnyCssCompoundSelector {
-    fn from(node: CssBogusSelector) -> Self {
-        Self::CssBogusSelector(node)
+impl From<CssBogus> for AnyCssCompoundSelector {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssCompoundSelector> for AnyCssCompoundSelector {
@@ -29431,13 +29430,13 @@ impl From<CssCompoundSelector> for AnyCssCompoundSelector {
 impl AstNode for AnyCssCompoundSelector {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        CssBogusSelector::KIND_SET.union(CssCompoundSelector::KIND_SET);
+        CssBogus::KIND_SET.union(CssCompoundSelector::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_BOGUS_SELECTOR | CSS_COMPOUND_SELECTOR)
+        matches!(kind, CSS_BOGUS | CSS_COMPOUND_SELECTOR)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_SELECTOR => Self::CssBogusSelector(CssBogusSelector { syntax }),
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_COMPOUND_SELECTOR => Self::CssCompoundSelector(CssCompoundSelector { syntax }),
             _ => return None,
         };
@@ -29445,13 +29444,13 @@ impl AstNode for AnyCssCompoundSelector {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusSelector(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssCompoundSelector(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusSelector(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssCompoundSelector(it) => it.into_syntax(),
         }
     }
@@ -29459,7 +29458,7 @@ impl AstNode for AnyCssCompoundSelector {
 impl std::fmt::Debug for AnyCssCompoundSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CssBogusSelector(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssCompoundSelector(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -29467,7 +29466,7 @@ impl std::fmt::Debug for AnyCssCompoundSelector {
 impl From<AnyCssCompoundSelector> for SyntaxNode {
     fn from(n: AnyCssCompoundSelector) -> Self {
         match n {
-            AnyCssCompoundSelector::CssBogusSelector(it) => it.into_syntax(),
+            AnyCssCompoundSelector::CssBogus(it) => it.into_syntax(),
             AnyCssCompoundSelector::CssCompoundSelector(it) => it.into_syntax(),
         }
     }
@@ -29478,9 +29477,9 @@ impl From<AnyCssCompoundSelector> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusBlock> for AnyCssConditionalBlock {
-    fn from(node: CssBogusBlock) -> Self {
-        Self::CssBogusBlock(node)
+impl From<CssBogus> for AnyCssConditionalBlock {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssDeclarationOrRuleBlock> for AnyCssConditionalBlock {
@@ -29495,18 +29494,18 @@ impl From<CssRuleBlock> for AnyCssConditionalBlock {
 }
 impl AstNode for AnyCssConditionalBlock {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssBogusBlock::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = CssBogus::KIND_SET
         .union(CssDeclarationOrRuleBlock::KIND_SET)
         .union(CssRuleBlock::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_BOGUS_BLOCK | CSS_DECLARATION_OR_RULE_BLOCK | CSS_RULE_BLOCK
+            CSS_BOGUS | CSS_DECLARATION_OR_RULE_BLOCK | CSS_RULE_BLOCK
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_BLOCK => Self::CssBogusBlock(CssBogusBlock { syntax }),
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_DECLARATION_OR_RULE_BLOCK => {
                 Self::CssDeclarationOrRuleBlock(CssDeclarationOrRuleBlock { syntax })
             }
@@ -29517,14 +29516,14 @@ impl AstNode for AnyCssConditionalBlock {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusBlock(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssDeclarationOrRuleBlock(it) => it.syntax(),
             Self::CssRuleBlock(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusBlock(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssDeclarationOrRuleBlock(it) => it.into_syntax(),
             Self::CssRuleBlock(it) => it.into_syntax(),
         }
@@ -29533,7 +29532,7 @@ impl AstNode for AnyCssConditionalBlock {
 impl std::fmt::Debug for AnyCssConditionalBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CssBogusBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssDeclarationOrRuleBlock(it) => std::fmt::Debug::fmt(it, f),
             Self::CssRuleBlock(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -29542,7 +29541,7 @@ impl std::fmt::Debug for AnyCssConditionalBlock {
 impl From<AnyCssConditionalBlock> for SyntaxNode {
     fn from(n: AnyCssConditionalBlock) -> Self {
         match n {
-            AnyCssConditionalBlock::CssBogusBlock(it) => it.into_syntax(),
+            AnyCssConditionalBlock::CssBogus(it) => it.into_syntax(),
             AnyCssConditionalBlock::CssDeclarationOrRuleBlock(it) => it.into_syntax(),
             AnyCssConditionalBlock::CssRuleBlock(it) => it.into_syntax(),
         }
@@ -30519,9 +30518,9 @@ impl From<AnyCssContainerStyleQuery> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusCustomIdentifier> for AnyCssCustomIdentifier {
-    fn from(node: CssBogusCustomIdentifier) -> Self {
-        Self::CssBogusCustomIdentifier(node)
+impl From<CssBogus> for AnyCssCustomIdentifier {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssCustomIdentifier> for AnyCssCustomIdentifier {
@@ -30532,15 +30531,13 @@ impl From<CssCustomIdentifier> for AnyCssCustomIdentifier {
 impl AstNode for AnyCssCustomIdentifier {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        CssBogusCustomIdentifier::KIND_SET.union(CssCustomIdentifier::KIND_SET);
+        CssBogus::KIND_SET.union(CssCustomIdentifier::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_BOGUS_CUSTOM_IDENTIFIER | CSS_CUSTOM_IDENTIFIER)
+        matches!(kind, CSS_BOGUS | CSS_CUSTOM_IDENTIFIER)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_CUSTOM_IDENTIFIER => {
-                Self::CssBogusCustomIdentifier(CssBogusCustomIdentifier { syntax })
-            }
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_CUSTOM_IDENTIFIER => Self::CssCustomIdentifier(CssCustomIdentifier { syntax }),
             _ => return None,
         };
@@ -30548,13 +30545,13 @@ impl AstNode for AnyCssCustomIdentifier {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusCustomIdentifier(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssCustomIdentifier(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusCustomIdentifier(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssCustomIdentifier(it) => it.into_syntax(),
         }
     }
@@ -30562,7 +30559,7 @@ impl AstNode for AnyCssCustomIdentifier {
 impl std::fmt::Debug for AnyCssCustomIdentifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CssBogusCustomIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssCustomIdentifier(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -30570,7 +30567,7 @@ impl std::fmt::Debug for AnyCssCustomIdentifier {
 impl From<AnyCssCustomIdentifier> for SyntaxNode {
     fn from(n: AnyCssCustomIdentifier) -> Self {
         match n {
-            AnyCssCustomIdentifier::CssBogusCustomIdentifier(it) => it.into_syntax(),
+            AnyCssCustomIdentifier::CssBogus(it) => it.into_syntax(),
             AnyCssCustomIdentifier::CssCustomIdentifier(it) => it.into_syntax(),
         }
     }
@@ -30673,9 +30670,9 @@ impl From<AnyCssDeclaration> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusBlock> for AnyCssDeclarationBlock {
-    fn from(node: CssBogusBlock) -> Self {
-        Self::CssBogusBlock(node)
+impl From<CssBogus> for AnyCssDeclarationBlock {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssDeclarationBlock> for AnyCssDeclarationBlock {
@@ -30686,13 +30683,13 @@ impl From<CssDeclarationBlock> for AnyCssDeclarationBlock {
 impl AstNode for AnyCssDeclarationBlock {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        CssBogusBlock::KIND_SET.union(CssDeclarationBlock::KIND_SET);
+        CssBogus::KIND_SET.union(CssDeclarationBlock::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_BOGUS_BLOCK | CSS_DECLARATION_BLOCK)
+        matches!(kind, CSS_BOGUS | CSS_DECLARATION_BLOCK)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_BLOCK => Self::CssBogusBlock(CssBogusBlock { syntax }),
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_DECLARATION_BLOCK => Self::CssDeclarationBlock(CssDeclarationBlock { syntax }),
             _ => return None,
         };
@@ -30700,13 +30697,13 @@ impl AstNode for AnyCssDeclarationBlock {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusBlock(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssDeclarationBlock(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusBlock(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssDeclarationBlock(it) => it.into_syntax(),
         }
     }
@@ -30714,7 +30711,7 @@ impl AstNode for AnyCssDeclarationBlock {
 impl std::fmt::Debug for AnyCssDeclarationBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CssBogusBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssDeclarationBlock(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -30722,7 +30719,7 @@ impl std::fmt::Debug for AnyCssDeclarationBlock {
 impl From<AnyCssDeclarationBlock> for SyntaxNode {
     fn from(n: AnyCssDeclarationBlock) -> Self {
         match n {
-            AnyCssDeclarationBlock::CssBogusBlock(it) => it.into_syntax(),
+            AnyCssDeclarationBlock::CssBogus(it) => it.into_syntax(),
             AnyCssDeclarationBlock::CssDeclarationBlock(it) => it.into_syntax(),
         }
     }
@@ -30913,9 +30910,9 @@ impl From<AnyCssDeclarationOrAtRule> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusBlock> for AnyCssDeclarationOrAtRuleBlock {
-    fn from(node: CssBogusBlock) -> Self {
-        Self::CssBogusBlock(node)
+impl From<CssBogus> for AnyCssDeclarationOrAtRuleBlock {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssDeclarationOrAtRuleBlock> for AnyCssDeclarationOrAtRuleBlock {
@@ -30926,13 +30923,13 @@ impl From<CssDeclarationOrAtRuleBlock> for AnyCssDeclarationOrAtRuleBlock {
 impl AstNode for AnyCssDeclarationOrAtRuleBlock {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        CssBogusBlock::KIND_SET.union(CssDeclarationOrAtRuleBlock::KIND_SET);
+        CssBogus::KIND_SET.union(CssDeclarationOrAtRuleBlock::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_BOGUS_BLOCK | CSS_DECLARATION_OR_AT_RULE_BLOCK)
+        matches!(kind, CSS_BOGUS | CSS_DECLARATION_OR_AT_RULE_BLOCK)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_BLOCK => Self::CssBogusBlock(CssBogusBlock { syntax }),
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_DECLARATION_OR_AT_RULE_BLOCK => {
                 Self::CssDeclarationOrAtRuleBlock(CssDeclarationOrAtRuleBlock { syntax })
             }
@@ -30942,13 +30939,13 @@ impl AstNode for AnyCssDeclarationOrAtRuleBlock {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusBlock(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssDeclarationOrAtRuleBlock(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusBlock(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssDeclarationOrAtRuleBlock(it) => it.into_syntax(),
         }
     }
@@ -30956,7 +30953,7 @@ impl AstNode for AnyCssDeclarationOrAtRuleBlock {
 impl std::fmt::Debug for AnyCssDeclarationOrAtRuleBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CssBogusBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssDeclarationOrAtRuleBlock(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -30964,7 +30961,7 @@ impl std::fmt::Debug for AnyCssDeclarationOrAtRuleBlock {
 impl From<AnyCssDeclarationOrAtRuleBlock> for SyntaxNode {
     fn from(n: AnyCssDeclarationOrAtRuleBlock) -> Self {
         match n {
-            AnyCssDeclarationOrAtRuleBlock::CssBogusBlock(it) => it.into_syntax(),
+            AnyCssDeclarationOrAtRuleBlock::CssBogus(it) => it.into_syntax(),
             AnyCssDeclarationOrAtRuleBlock::CssDeclarationOrAtRuleBlock(it) => it.into_syntax(),
         }
     }
@@ -31102,9 +31099,9 @@ impl From<AnyCssDeclarationOrRule> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusBlock> for AnyCssDeclarationOrRuleBlock {
-    fn from(node: CssBogusBlock) -> Self {
-        Self::CssBogusBlock(node)
+impl From<CssBogus> for AnyCssDeclarationOrRuleBlock {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssDeclarationOrRuleBlock> for AnyCssDeclarationOrRuleBlock {
@@ -31115,13 +31112,13 @@ impl From<CssDeclarationOrRuleBlock> for AnyCssDeclarationOrRuleBlock {
 impl AstNode for AnyCssDeclarationOrRuleBlock {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        CssBogusBlock::KIND_SET.union(CssDeclarationOrRuleBlock::KIND_SET);
+        CssBogus::KIND_SET.union(CssDeclarationOrRuleBlock::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_BOGUS_BLOCK | CSS_DECLARATION_OR_RULE_BLOCK)
+        matches!(kind, CSS_BOGUS | CSS_DECLARATION_OR_RULE_BLOCK)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_BLOCK => Self::CssBogusBlock(CssBogusBlock { syntax }),
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_DECLARATION_OR_RULE_BLOCK => {
                 Self::CssDeclarationOrRuleBlock(CssDeclarationOrRuleBlock { syntax })
             }
@@ -31131,13 +31128,13 @@ impl AstNode for AnyCssDeclarationOrRuleBlock {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusBlock(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssDeclarationOrRuleBlock(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusBlock(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssDeclarationOrRuleBlock(it) => it.into_syntax(),
         }
     }
@@ -31145,7 +31142,7 @@ impl AstNode for AnyCssDeclarationOrRuleBlock {
 impl std::fmt::Debug for AnyCssDeclarationOrRuleBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CssBogusBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssDeclarationOrRuleBlock(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -31153,7 +31150,7 @@ impl std::fmt::Debug for AnyCssDeclarationOrRuleBlock {
 impl From<AnyCssDeclarationOrRuleBlock> for SyntaxNode {
     fn from(n: AnyCssDeclarationOrRuleBlock) -> Self {
         match n {
-            AnyCssDeclarationOrRuleBlock::CssBogusBlock(it) => it.into_syntax(),
+            AnyCssDeclarationOrRuleBlock::CssBogus(it) => it.into_syntax(),
             AnyCssDeclarationOrRuleBlock::CssDeclarationOrRuleBlock(it) => it.into_syntax(),
         }
     }
@@ -31238,9 +31235,9 @@ impl From<AnyCssDimension> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusDocumentMatcher> for AnyCssDocumentMatcher {
-    fn from(node: CssBogusDocumentMatcher) -> Self {
-        Self::CssBogusDocumentMatcher(node)
+impl From<CssBogus> for AnyCssDocumentMatcher {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssDocumentCustomMatcher> for AnyCssDocumentMatcher {
@@ -31255,20 +31252,18 @@ impl From<CssUrlFunction> for AnyCssDocumentMatcher {
 }
 impl AstNode for AnyCssDocumentMatcher {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssBogusDocumentMatcher::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = CssBogus::KIND_SET
         .union(CssDocumentCustomMatcher::KIND_SET)
         .union(CssUrlFunction::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_BOGUS_DOCUMENT_MATCHER | CSS_DOCUMENT_CUSTOM_MATCHER | CSS_URL_FUNCTION
+            CSS_BOGUS | CSS_DOCUMENT_CUSTOM_MATCHER | CSS_URL_FUNCTION
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_DOCUMENT_MATCHER => {
-                Self::CssBogusDocumentMatcher(CssBogusDocumentMatcher { syntax })
-            }
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_DOCUMENT_CUSTOM_MATCHER => {
                 Self::CssDocumentCustomMatcher(CssDocumentCustomMatcher { syntax })
             }
@@ -31279,14 +31274,14 @@ impl AstNode for AnyCssDocumentMatcher {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusDocumentMatcher(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssDocumentCustomMatcher(it) => it.syntax(),
             Self::CssUrlFunction(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusDocumentMatcher(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssDocumentCustomMatcher(it) => it.into_syntax(),
             Self::CssUrlFunction(it) => it.into_syntax(),
         }
@@ -31295,7 +31290,7 @@ impl AstNode for AnyCssDocumentMatcher {
 impl std::fmt::Debug for AnyCssDocumentMatcher {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CssBogusDocumentMatcher(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssDocumentCustomMatcher(it) => std::fmt::Debug::fmt(it, f),
             Self::CssUrlFunction(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -31304,7 +31299,7 @@ impl std::fmt::Debug for AnyCssDocumentMatcher {
 impl From<AnyCssDocumentMatcher> for SyntaxNode {
     fn from(n: AnyCssDocumentMatcher) -> Self {
         match n {
-            AnyCssDocumentMatcher::CssBogusDocumentMatcher(it) => it.into_syntax(),
+            AnyCssDocumentMatcher::CssBogus(it) => it.into_syntax(),
             AnyCssDocumentMatcher::CssDocumentCustomMatcher(it) => it.into_syntax(),
             AnyCssDocumentMatcher::CssUrlFunction(it) => it.into_syntax(),
         }
@@ -31436,9 +31431,9 @@ impl From<AnyCssExpression> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusFontFamilyName> for AnyCssFontFamilyName {
-    fn from(node: CssBogusFontFamilyName) -> Self {
-        Self::CssBogusFontFamilyName(node)
+impl From<CssBogus> for AnyCssFontFamilyName {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssFontFamilyName> for AnyCssFontFamilyName {
@@ -31453,20 +31448,15 @@ impl From<CssString> for AnyCssFontFamilyName {
 }
 impl AstNode for AnyCssFontFamilyName {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssBogusFontFamilyName::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = CssBogus::KIND_SET
         .union(CssFontFamilyName::KIND_SET)
         .union(CssString::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(
-            kind,
-            CSS_BOGUS_FONT_FAMILY_NAME | CSS_FONT_FAMILY_NAME | CSS_STRING
-        )
+        matches!(kind, CSS_BOGUS | CSS_FONT_FAMILY_NAME | CSS_STRING)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_FONT_FAMILY_NAME => {
-                Self::CssBogusFontFamilyName(CssBogusFontFamilyName { syntax })
-            }
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_FONT_FAMILY_NAME => Self::CssFontFamilyName(CssFontFamilyName { syntax }),
             CSS_STRING => Self::CssString(CssString { syntax }),
             _ => return None,
@@ -31475,14 +31465,14 @@ impl AstNode for AnyCssFontFamilyName {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusFontFamilyName(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssFontFamilyName(it) => it.syntax(),
             Self::CssString(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusFontFamilyName(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssFontFamilyName(it) => it.into_syntax(),
             Self::CssString(it) => it.into_syntax(),
         }
@@ -31491,7 +31481,7 @@ impl AstNode for AnyCssFontFamilyName {
 impl std::fmt::Debug for AnyCssFontFamilyName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CssBogusFontFamilyName(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssFontFamilyName(it) => std::fmt::Debug::fmt(it, f),
             Self::CssString(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -31500,7 +31490,7 @@ impl std::fmt::Debug for AnyCssFontFamilyName {
 impl From<AnyCssFontFamilyName> for SyntaxNode {
     fn from(n: AnyCssFontFamilyName) -> Self {
         match n {
-            AnyCssFontFamilyName::CssBogusFontFamilyName(it) => it.into_syntax(),
+            AnyCssFontFamilyName::CssBogus(it) => it.into_syntax(),
             AnyCssFontFamilyName::CssFontFamilyName(it) => it.into_syntax(),
             AnyCssFontFamilyName::CssString(it) => it.into_syntax(),
         }
@@ -31512,9 +31502,9 @@ impl From<AnyCssFontFamilyName> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusBlock> for AnyCssFontFeatureValuesBlock {
-    fn from(node: CssBogusBlock) -> Self {
-        Self::CssBogusBlock(node)
+impl From<CssBogus> for AnyCssFontFeatureValuesBlock {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssFontFeatureValuesBlock> for AnyCssFontFeatureValuesBlock {
@@ -31525,13 +31515,13 @@ impl From<CssFontFeatureValuesBlock> for AnyCssFontFeatureValuesBlock {
 impl AstNode for AnyCssFontFeatureValuesBlock {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        CssBogusBlock::KIND_SET.union(CssFontFeatureValuesBlock::KIND_SET);
+        CssBogus::KIND_SET.union(CssFontFeatureValuesBlock::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_BOGUS_BLOCK | CSS_FONT_FEATURE_VALUES_BLOCK)
+        matches!(kind, CSS_BOGUS | CSS_FONT_FEATURE_VALUES_BLOCK)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_BLOCK => Self::CssBogusBlock(CssBogusBlock { syntax }),
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_FONT_FEATURE_VALUES_BLOCK => {
                 Self::CssFontFeatureValuesBlock(CssFontFeatureValuesBlock { syntax })
             }
@@ -31541,13 +31531,13 @@ impl AstNode for AnyCssFontFeatureValuesBlock {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusBlock(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssFontFeatureValuesBlock(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusBlock(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssFontFeatureValuesBlock(it) => it.into_syntax(),
         }
     }
@@ -31555,7 +31545,7 @@ impl AstNode for AnyCssFontFeatureValuesBlock {
 impl std::fmt::Debug for AnyCssFontFeatureValuesBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CssBogusBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssFontFeatureValuesBlock(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -31563,7 +31553,7 @@ impl std::fmt::Debug for AnyCssFontFeatureValuesBlock {
 impl From<AnyCssFontFeatureValuesBlock> for SyntaxNode {
     fn from(n: AnyCssFontFeatureValuesBlock) -> Self {
         match n {
-            AnyCssFontFeatureValuesBlock::CssBogusBlock(it) => it.into_syntax(),
+            AnyCssFontFeatureValuesBlock::CssBogus(it) => it.into_syntax(),
             AnyCssFontFeatureValuesBlock::CssFontFeatureValuesBlock(it) => it.into_syntax(),
         }
     }
@@ -31574,9 +31564,9 @@ impl From<AnyCssFontFeatureValuesBlock> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusFontFeatureValuesItem> for AnyCssFontFeatureValuesItem {
-    fn from(node: CssBogusFontFeatureValuesItem) -> Self {
-        Self::CssBogusFontFeatureValuesItem(node)
+impl From<CssBogus> for AnyCssFontFeatureValuesItem {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssFontFeatureValuesItem> for AnyCssFontFeatureValuesItem {
@@ -31587,18 +31577,13 @@ impl From<CssFontFeatureValuesItem> for AnyCssFontFeatureValuesItem {
 impl AstNode for AnyCssFontFeatureValuesItem {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        CssBogusFontFeatureValuesItem::KIND_SET.union(CssFontFeatureValuesItem::KIND_SET);
+        CssBogus::KIND_SET.union(CssFontFeatureValuesItem::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(
-            kind,
-            CSS_BOGUS_FONT_FEATURE_VALUES_ITEM | CSS_FONT_FEATURE_VALUES_ITEM
-        )
+        matches!(kind, CSS_BOGUS | CSS_FONT_FEATURE_VALUES_ITEM)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_FONT_FEATURE_VALUES_ITEM => {
-                Self::CssBogusFontFeatureValuesItem(CssBogusFontFeatureValuesItem { syntax })
-            }
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_FONT_FEATURE_VALUES_ITEM => {
                 Self::CssFontFeatureValuesItem(CssFontFeatureValuesItem { syntax })
             }
@@ -31608,13 +31593,13 @@ impl AstNode for AnyCssFontFeatureValuesItem {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusFontFeatureValuesItem(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssFontFeatureValuesItem(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusFontFeatureValuesItem(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssFontFeatureValuesItem(it) => it.into_syntax(),
         }
     }
@@ -31622,7 +31607,7 @@ impl AstNode for AnyCssFontFeatureValuesItem {
 impl std::fmt::Debug for AnyCssFontFeatureValuesItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CssBogusFontFeatureValuesItem(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssFontFeatureValuesItem(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -31630,7 +31615,7 @@ impl std::fmt::Debug for AnyCssFontFeatureValuesItem {
 impl From<AnyCssFontFeatureValuesItem> for SyntaxNode {
     fn from(n: AnyCssFontFeatureValuesItem) -> Self {
         match n {
-            AnyCssFontFeatureValuesItem::CssBogusFontFeatureValuesItem(it) => it.into_syntax(),
+            AnyCssFontFeatureValuesItem::CssBogus(it) => it.into_syntax(),
             AnyCssFontFeatureValuesItem::CssFontFeatureValuesItem(it) => it.into_syntax(),
         }
     }
@@ -31786,9 +31771,9 @@ impl From<AnyCssFunctionName> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusFunctionParameter> for AnyCssFunctionParameter {
-    fn from(node: CssBogusFunctionParameter) -> Self {
-        Self::CssBogusFunctionParameter(node)
+impl From<CssBogus> for AnyCssFunctionParameter {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssFunctionParameter> for AnyCssFunctionParameter {
@@ -31799,15 +31784,13 @@ impl From<CssFunctionParameter> for AnyCssFunctionParameter {
 impl AstNode for AnyCssFunctionParameter {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        CssBogusFunctionParameter::KIND_SET.union(CssFunctionParameter::KIND_SET);
+        CssBogus::KIND_SET.union(CssFunctionParameter::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_BOGUS_FUNCTION_PARAMETER | CSS_FUNCTION_PARAMETER)
+        matches!(kind, CSS_BOGUS | CSS_FUNCTION_PARAMETER)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_FUNCTION_PARAMETER => {
-                Self::CssBogusFunctionParameter(CssBogusFunctionParameter { syntax })
-            }
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_FUNCTION_PARAMETER => Self::CssFunctionParameter(CssFunctionParameter { syntax }),
             _ => return None,
         };
@@ -31815,13 +31798,13 @@ impl AstNode for AnyCssFunctionParameter {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusFunctionParameter(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssFunctionParameter(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusFunctionParameter(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssFunctionParameter(it) => it.into_syntax(),
         }
     }
@@ -31829,7 +31812,7 @@ impl AstNode for AnyCssFunctionParameter {
 impl std::fmt::Debug for AnyCssFunctionParameter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CssBogusFunctionParameter(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssFunctionParameter(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -31837,7 +31820,7 @@ impl std::fmt::Debug for AnyCssFunctionParameter {
 impl From<AnyCssFunctionParameter> for SyntaxNode {
     fn from(n: AnyCssFunctionParameter) -> Self {
         match n {
-            AnyCssFunctionParameter::CssBogusFunctionParameter(it) => it.into_syntax(),
+            AnyCssFunctionParameter::CssBogus(it) => it.into_syntax(),
             AnyCssFunctionParameter::CssFunctionParameter(it) => it.into_syntax(),
         }
     }
@@ -31975,9 +31958,9 @@ impl From<AnyCssGenericPropertyValueOrExpression> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusIfBranch> for AnyCssIfBranch {
-    fn from(node: CssBogusIfBranch) -> Self {
-        Self::CssBogusIfBranch(node)
+impl From<CssBogus> for AnyCssIfBranch {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssIfBranch> for AnyCssIfBranch {
@@ -31987,14 +31970,13 @@ impl From<CssIfBranch> for AnyCssIfBranch {
 }
 impl AstNode for AnyCssIfBranch {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        CssBogusIfBranch::KIND_SET.union(CssIfBranch::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = CssBogus::KIND_SET.union(CssIfBranch::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_BOGUS_IF_BRANCH | CSS_IF_BRANCH)
+        matches!(kind, CSS_BOGUS | CSS_IF_BRANCH)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_IF_BRANCH => Self::CssBogusIfBranch(CssBogusIfBranch { syntax }),
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_IF_BRANCH => Self::CssIfBranch(CssIfBranch { syntax }),
             _ => return None,
         };
@@ -32002,13 +31984,13 @@ impl AstNode for AnyCssIfBranch {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusIfBranch(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssIfBranch(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusIfBranch(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssIfBranch(it) => it.into_syntax(),
         }
     }
@@ -32016,7 +31998,7 @@ impl AstNode for AnyCssIfBranch {
 impl std::fmt::Debug for AnyCssIfBranch {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CssBogusIfBranch(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssIfBranch(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -32024,7 +32006,7 @@ impl std::fmt::Debug for AnyCssIfBranch {
 impl From<AnyCssIfBranch> for SyntaxNode {
     fn from(n: AnyCssIfBranch) -> Self {
         match n {
-            AnyCssIfBranch::CssBogusIfBranch(it) => it.into_syntax(),
+            AnyCssIfBranch::CssBogus(it) => it.into_syntax(),
             AnyCssIfBranch::CssIfBranch(it) => it.into_syntax(),
         }
     }
@@ -32225,9 +32207,9 @@ impl From<AnyCssIfSupportsTestCondition> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusIfTest> for AnyCssIfTest {
-    fn from(node: CssBogusIfTest) -> Self {
-        Self::CssBogusIfTest(node)
+impl From<CssBogus> for AnyCssIfTest {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssIfMediaTest> for AnyCssIfTest {
@@ -32252,7 +32234,7 @@ impl From<CssIfSupportsTest> for AnyCssIfTest {
 }
 impl AstNode for AnyCssIfTest {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssBogusIfTest::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = CssBogus::KIND_SET
         .union(CssIfMediaTest::KIND_SET)
         .union(CssIfSassTest::KIND_SET)
         .union(CssIfStyleTest::KIND_SET)
@@ -32260,7 +32242,7 @@ impl AstNode for AnyCssIfTest {
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_BOGUS_IF_TEST
+            CSS_BOGUS
                 | CSS_IF_MEDIA_TEST
                 | CSS_IF_SASS_TEST
                 | CSS_IF_STYLE_TEST
@@ -32269,7 +32251,7 @@ impl AstNode for AnyCssIfTest {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_IF_TEST => Self::CssBogusIfTest(CssBogusIfTest { syntax }),
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_IF_MEDIA_TEST => Self::CssIfMediaTest(CssIfMediaTest { syntax }),
             CSS_IF_SASS_TEST => Self::CssIfSassTest(CssIfSassTest { syntax }),
             CSS_IF_STYLE_TEST => Self::CssIfStyleTest(CssIfStyleTest { syntax }),
@@ -32280,7 +32262,7 @@ impl AstNode for AnyCssIfTest {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusIfTest(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssIfMediaTest(it) => it.syntax(),
             Self::CssIfSassTest(it) => it.syntax(),
             Self::CssIfStyleTest(it) => it.syntax(),
@@ -32289,7 +32271,7 @@ impl AstNode for AnyCssIfTest {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusIfTest(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssIfMediaTest(it) => it.into_syntax(),
             Self::CssIfSassTest(it) => it.into_syntax(),
             Self::CssIfStyleTest(it) => it.into_syntax(),
@@ -32300,7 +32282,7 @@ impl AstNode for AnyCssIfTest {
 impl std::fmt::Debug for AnyCssIfTest {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CssBogusIfTest(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssIfMediaTest(it) => std::fmt::Debug::fmt(it, f),
             Self::CssIfSassTest(it) => std::fmt::Debug::fmt(it, f),
             Self::CssIfStyleTest(it) => std::fmt::Debug::fmt(it, f),
@@ -32311,7 +32293,7 @@ impl std::fmt::Debug for AnyCssIfTest {
 impl From<AnyCssIfTest> for SyntaxNode {
     fn from(n: AnyCssIfTest) -> Self {
         match n {
-            AnyCssIfTest::CssBogusIfTest(it) => it.into_syntax(),
+            AnyCssIfTest::CssBogus(it) => it.into_syntax(),
             AnyCssIfTest::CssIfMediaTest(it) => it.into_syntax(),
             AnyCssIfTest::CssIfSassTest(it) => it.into_syntax(),
             AnyCssIfTest::CssIfStyleTest(it) => it.into_syntax(),
@@ -32396,9 +32378,9 @@ impl From<AnyCssIfTestBooleanAndCombinableExpr> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusIfTestBooleanExpr> for AnyCssIfTestBooleanExpr {
-    fn from(node: CssBogusIfTestBooleanExpr) -> Self {
-        Self::CssBogusIfTestBooleanExpr(node)
+impl From<CssBogus> for AnyCssIfTestBooleanExpr {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssIfTestBooleanNotExpr> for AnyCssIfTestBooleanExpr {
@@ -32410,11 +32392,11 @@ impl AstNode for AnyCssIfTestBooleanExpr {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyCssIfTestBooleanAndCombinableExpr::KIND_SET
         .union(AnyCssIfTestBooleanOrCombinableExpr::KIND_SET)
-        .union(CssBogusIfTestBooleanExpr::KIND_SET)
+        .union(CssBogus::KIND_SET)
         .union(CssIfTestBooleanNotExpr::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            CSS_BOGUS_IF_TEST_BOOLEAN_EXPR | CSS_IF_TEST_BOOLEAN_NOT_EXPR => true,
+            CSS_BOGUS | CSS_IF_TEST_BOOLEAN_NOT_EXPR => true,
             k if AnyCssIfTestBooleanAndCombinableExpr::can_cast(k) => true,
             k if AnyCssIfTestBooleanOrCombinableExpr::can_cast(k) => true,
             _ => false,
@@ -32422,9 +32404,7 @@ impl AstNode for AnyCssIfTestBooleanExpr {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_IF_TEST_BOOLEAN_EXPR => {
-                Self::CssBogusIfTestBooleanExpr(CssBogusIfTestBooleanExpr { syntax })
-            }
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_IF_TEST_BOOLEAN_NOT_EXPR => {
                 Self::CssIfTestBooleanNotExpr(CssIfTestBooleanNotExpr { syntax })
             }
@@ -32451,7 +32431,7 @@ impl AstNode for AnyCssIfTestBooleanExpr {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusIfTestBooleanExpr(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssIfTestBooleanNotExpr(it) => it.syntax(),
             Self::AnyCssIfTestBooleanAndCombinableExpr(it) => it.syntax(),
             Self::AnyCssIfTestBooleanOrCombinableExpr(it) => it.syntax(),
@@ -32459,7 +32439,7 @@ impl AstNode for AnyCssIfTestBooleanExpr {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusIfTestBooleanExpr(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssIfTestBooleanNotExpr(it) => it.into_syntax(),
             Self::AnyCssIfTestBooleanAndCombinableExpr(it) => it.into_syntax(),
             Self::AnyCssIfTestBooleanOrCombinableExpr(it) => it.into_syntax(),
@@ -32471,7 +32451,7 @@ impl std::fmt::Debug for AnyCssIfTestBooleanExpr {
         match self {
             Self::AnyCssIfTestBooleanAndCombinableExpr(it) => std::fmt::Debug::fmt(it, f),
             Self::AnyCssIfTestBooleanOrCombinableExpr(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssBogusIfTestBooleanExpr(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssIfTestBooleanNotExpr(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -32481,7 +32461,7 @@ impl From<AnyCssIfTestBooleanExpr> for SyntaxNode {
         match n {
             AnyCssIfTestBooleanExpr::AnyCssIfTestBooleanAndCombinableExpr(it) => it.into_syntax(),
             AnyCssIfTestBooleanExpr::AnyCssIfTestBooleanOrCombinableExpr(it) => it.into_syntax(),
-            AnyCssIfTestBooleanExpr::CssBogusIfTestBooleanExpr(it) => it.into_syntax(),
+            AnyCssIfTestBooleanExpr::CssBogus(it) => it.into_syntax(),
             AnyCssIfTestBooleanExpr::CssIfTestBooleanNotExpr(it) => it.into_syntax(),
         }
     }
@@ -32812,9 +32792,9 @@ impl From<AnyCssImportUrl> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusBlock> for AnyCssKeyframesBlock {
-    fn from(node: CssBogusBlock) -> Self {
-        Self::CssBogusBlock(node)
+impl From<CssBogus> for AnyCssKeyframesBlock {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssKeyframesBlock> for AnyCssKeyframesBlock {
@@ -32824,14 +32804,13 @@ impl From<CssKeyframesBlock> for AnyCssKeyframesBlock {
 }
 impl AstNode for AnyCssKeyframesBlock {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        CssBogusBlock::KIND_SET.union(CssKeyframesBlock::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = CssBogus::KIND_SET.union(CssKeyframesBlock::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_BOGUS_BLOCK | CSS_KEYFRAMES_BLOCK)
+        matches!(kind, CSS_BOGUS | CSS_KEYFRAMES_BLOCK)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_BLOCK => Self::CssBogusBlock(CssBogusBlock { syntax }),
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_KEYFRAMES_BLOCK => Self::CssKeyframesBlock(CssKeyframesBlock { syntax }),
             _ => return None,
         };
@@ -32839,13 +32818,13 @@ impl AstNode for AnyCssKeyframesBlock {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusBlock(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssKeyframesBlock(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusBlock(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssKeyframesBlock(it) => it.into_syntax(),
         }
     }
@@ -32853,7 +32832,7 @@ impl AstNode for AnyCssKeyframesBlock {
 impl std::fmt::Debug for AnyCssKeyframesBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CssBogusBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssKeyframesBlock(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -32861,7 +32840,7 @@ impl std::fmt::Debug for AnyCssKeyframesBlock {
 impl From<AnyCssKeyframesBlock> for SyntaxNode {
     fn from(n: AnyCssKeyframesBlock) -> Self {
         match n {
-            AnyCssKeyframesBlock::CssBogusBlock(it) => it.into_syntax(),
+            AnyCssKeyframesBlock::CssBogus(it) => it.into_syntax(),
             AnyCssKeyframesBlock::CssKeyframesBlock(it) => it.into_syntax(),
         }
     }
@@ -32932,9 +32911,9 @@ impl From<AnyCssKeyframesIdentifier> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusKeyframesItem> for AnyCssKeyframesItem {
-    fn from(node: CssBogusKeyframesItem) -> Self {
-        Self::CssBogusKeyframesItem(node)
+impl From<CssBogus> for AnyCssKeyframesItem {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssKeyframesItem> for AnyCssKeyframesItem {
@@ -32944,16 +32923,13 @@ impl From<CssKeyframesItem> for AnyCssKeyframesItem {
 }
 impl AstNode for AnyCssKeyframesItem {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        CssBogusKeyframesItem::KIND_SET.union(CssKeyframesItem::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = CssBogus::KIND_SET.union(CssKeyframesItem::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_BOGUS_KEYFRAMES_ITEM | CSS_KEYFRAMES_ITEM)
+        matches!(kind, CSS_BOGUS | CSS_KEYFRAMES_ITEM)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_KEYFRAMES_ITEM => {
-                Self::CssBogusKeyframesItem(CssBogusKeyframesItem { syntax })
-            }
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_KEYFRAMES_ITEM => Self::CssKeyframesItem(CssKeyframesItem { syntax }),
             _ => return None,
         };
@@ -32961,13 +32937,13 @@ impl AstNode for AnyCssKeyframesItem {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusKeyframesItem(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssKeyframesItem(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusKeyframesItem(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssKeyframesItem(it) => it.into_syntax(),
         }
     }
@@ -32975,7 +32951,7 @@ impl AstNode for AnyCssKeyframesItem {
 impl std::fmt::Debug for AnyCssKeyframesItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CssBogusKeyframesItem(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssKeyframesItem(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -32983,7 +32959,7 @@ impl std::fmt::Debug for AnyCssKeyframesItem {
 impl From<AnyCssKeyframesItem> for SyntaxNode {
     fn from(n: AnyCssKeyframesItem) -> Self {
         match n {
-            AnyCssKeyframesItem::CssBogusKeyframesItem(it) => it.into_syntax(),
+            AnyCssKeyframesItem::CssBogus(it) => it.into_syntax(),
             AnyCssKeyframesItem::CssKeyframesItem(it) => it.into_syntax(),
         }
     }
@@ -32994,9 +32970,9 @@ impl From<AnyCssKeyframesItem> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusKeyframesName> for AnyCssKeyframesName {
-    fn from(node: CssBogusKeyframesName) -> Self {
-        Self::CssBogusKeyframesName(node)
+impl From<CssBogus> for AnyCssKeyframesName {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssKeyframesScopedName> for AnyCssKeyframesName {
@@ -33007,20 +32983,18 @@ impl From<CssKeyframesScopedName> for AnyCssKeyframesName {
 impl AstNode for AnyCssKeyframesName {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyCssKeyframesIdentifier::KIND_SET
-        .union(CssBogusKeyframesName::KIND_SET)
+        .union(CssBogus::KIND_SET)
         .union(CssKeyframesScopedName::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            CSS_BOGUS_KEYFRAMES_NAME | CSS_KEYFRAMES_SCOPED_NAME => true,
+            CSS_BOGUS | CSS_KEYFRAMES_SCOPED_NAME => true,
             k if AnyCssKeyframesIdentifier::can_cast(k) => true,
             _ => false,
         }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_KEYFRAMES_NAME => {
-                Self::CssBogusKeyframesName(CssBogusKeyframesName { syntax })
-            }
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_KEYFRAMES_SCOPED_NAME => {
                 Self::CssKeyframesScopedName(CssKeyframesScopedName { syntax })
             }
@@ -33038,14 +33012,14 @@ impl AstNode for AnyCssKeyframesName {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusKeyframesName(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssKeyframesScopedName(it) => it.syntax(),
             Self::AnyCssKeyframesIdentifier(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusKeyframesName(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssKeyframesScopedName(it) => it.into_syntax(),
             Self::AnyCssKeyframesIdentifier(it) => it.into_syntax(),
         }
@@ -33055,7 +33029,7 @@ impl std::fmt::Debug for AnyCssKeyframesName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::AnyCssKeyframesIdentifier(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssBogusKeyframesName(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssKeyframesScopedName(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -33064,7 +33038,7 @@ impl From<AnyCssKeyframesName> for SyntaxNode {
     fn from(n: AnyCssKeyframesName) -> Self {
         match n {
             AnyCssKeyframesName::AnyCssKeyframesIdentifier(it) => it.into_syntax(),
-            AnyCssKeyframesName::CssBogusKeyframesName(it) => it.into_syntax(),
+            AnyCssKeyframesName::CssBogus(it) => it.into_syntax(),
             AnyCssKeyframesName::CssKeyframesScopedName(it) => it.into_syntax(),
         }
     }
@@ -33142,9 +33116,9 @@ impl From<AnyCssKeyframesScope> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusSelector> for AnyCssKeyframesSelector {
-    fn from(node: CssBogusSelector) -> Self {
-        Self::CssBogusSelector(node)
+impl From<CssBogus> for AnyCssKeyframesSelector {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssKeyframesIdentSelector> for AnyCssKeyframesSelector {
@@ -33159,18 +33133,18 @@ impl From<CssKeyframesPercentageSelector> for AnyCssKeyframesSelector {
 }
 impl AstNode for AnyCssKeyframesSelector {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssBogusSelector::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = CssBogus::KIND_SET
         .union(CssKeyframesIdentSelector::KIND_SET)
         .union(CssKeyframesPercentageSelector::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_BOGUS_SELECTOR | CSS_KEYFRAMES_IDENT_SELECTOR | CSS_KEYFRAMES_PERCENTAGE_SELECTOR
+            CSS_BOGUS | CSS_KEYFRAMES_IDENT_SELECTOR | CSS_KEYFRAMES_PERCENTAGE_SELECTOR
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_SELECTOR => Self::CssBogusSelector(CssBogusSelector { syntax }),
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_KEYFRAMES_IDENT_SELECTOR => {
                 Self::CssKeyframesIdentSelector(CssKeyframesIdentSelector { syntax })
             }
@@ -33183,14 +33157,14 @@ impl AstNode for AnyCssKeyframesSelector {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusSelector(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssKeyframesIdentSelector(it) => it.syntax(),
             Self::CssKeyframesPercentageSelector(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusSelector(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssKeyframesIdentSelector(it) => it.into_syntax(),
             Self::CssKeyframesPercentageSelector(it) => it.into_syntax(),
         }
@@ -33199,7 +33173,7 @@ impl AstNode for AnyCssKeyframesSelector {
 impl std::fmt::Debug for AnyCssKeyframesSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CssBogusSelector(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssKeyframesIdentSelector(it) => std::fmt::Debug::fmt(it, f),
             Self::CssKeyframesPercentageSelector(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -33208,7 +33182,7 @@ impl std::fmt::Debug for AnyCssKeyframesSelector {
 impl From<AnyCssKeyframesSelector> for SyntaxNode {
     fn from(n: AnyCssKeyframesSelector) -> Self {
         match n {
-            AnyCssKeyframesSelector::CssBogusSelector(it) => it.into_syntax(),
+            AnyCssKeyframesSelector::CssBogus(it) => it.into_syntax(),
             AnyCssKeyframesSelector::CssKeyframesIdentSelector(it) => it.into_syntax(),
             AnyCssKeyframesSelector::CssKeyframesPercentageSelector(it) => it.into_syntax(),
         }
@@ -33220,9 +33194,9 @@ impl From<AnyCssKeyframesSelector> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusLayer> for AnyCssLayer {
-    fn from(node: CssBogusLayer) -> Self {
-        Self::CssBogusLayer(node)
+impl From<CssBogus> for AnyCssLayer {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssLayerDeclaration> for AnyCssLayer {
@@ -33237,18 +33211,18 @@ impl From<CssLayerReference> for AnyCssLayer {
 }
 impl AstNode for AnyCssLayer {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssBogusLayer::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = CssBogus::KIND_SET
         .union(CssLayerDeclaration::KIND_SET)
         .union(CssLayerReference::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_BOGUS_LAYER | CSS_LAYER_DECLARATION | CSS_LAYER_REFERENCE
+            CSS_BOGUS | CSS_LAYER_DECLARATION | CSS_LAYER_REFERENCE
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_LAYER => Self::CssBogusLayer(CssBogusLayer { syntax }),
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_LAYER_DECLARATION => Self::CssLayerDeclaration(CssLayerDeclaration { syntax }),
             CSS_LAYER_REFERENCE => Self::CssLayerReference(CssLayerReference { syntax }),
             _ => return None,
@@ -33257,14 +33231,14 @@ impl AstNode for AnyCssLayer {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusLayer(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssLayerDeclaration(it) => it.syntax(),
             Self::CssLayerReference(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusLayer(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssLayerDeclaration(it) => it.into_syntax(),
             Self::CssLayerReference(it) => it.into_syntax(),
         }
@@ -33273,7 +33247,7 @@ impl AstNode for AnyCssLayer {
 impl std::fmt::Debug for AnyCssLayer {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CssBogusLayer(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssLayerDeclaration(it) => std::fmt::Debug::fmt(it, f),
             Self::CssLayerReference(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -33282,7 +33256,7 @@ impl std::fmt::Debug for AnyCssLayer {
 impl From<AnyCssLayer> for SyntaxNode {
     fn from(n: AnyCssLayer) -> Self {
         match n {
-            AnyCssLayer::CssBogusLayer(it) => it.into_syntax(),
+            AnyCssLayer::CssBogus(it) => it.into_syntax(),
             AnyCssLayer::CssLayerDeclaration(it) => it.into_syntax(),
             AnyCssLayer::CssLayerReference(it) => it.into_syntax(),
         }
@@ -33572,9 +33546,9 @@ impl From<AnyCssMediaOrCombinableCondition> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusMediaQuery> for AnyCssMediaQuery {
-    fn from(node: CssBogusMediaQuery) -> Self {
-        Self::CssBogusMediaQuery(node)
+impl From<CssBogus> for AnyCssMediaQuery {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssMediaConditionQuery> for AnyCssMediaQuery {
@@ -33590,19 +33564,19 @@ impl From<CssMetavariable> for AnyCssMediaQuery {
 impl AstNode for AnyCssMediaQuery {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyCssMediaTypeQuery::KIND_SET
-        .union(CssBogusMediaQuery::KIND_SET)
+        .union(CssBogus::KIND_SET)
         .union(CssMediaConditionQuery::KIND_SET)
         .union(CssMetavariable::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            CSS_BOGUS_MEDIA_QUERY | CSS_MEDIA_CONDITION_QUERY | CSS_METAVARIABLE => true,
+            CSS_BOGUS | CSS_MEDIA_CONDITION_QUERY | CSS_METAVARIABLE => true,
             k if AnyCssMediaTypeQuery::can_cast(k) => true,
             _ => false,
         }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_MEDIA_QUERY => Self::CssBogusMediaQuery(CssBogusMediaQuery { syntax }),
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_MEDIA_CONDITION_QUERY => {
                 Self::CssMediaConditionQuery(CssMediaConditionQuery { syntax })
             }
@@ -33618,7 +33592,7 @@ impl AstNode for AnyCssMediaQuery {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusMediaQuery(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssMediaConditionQuery(it) => it.syntax(),
             Self::CssMetavariable(it) => it.syntax(),
             Self::AnyCssMediaTypeQuery(it) => it.syntax(),
@@ -33626,7 +33600,7 @@ impl AstNode for AnyCssMediaQuery {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusMediaQuery(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssMediaConditionQuery(it) => it.into_syntax(),
             Self::CssMetavariable(it) => it.into_syntax(),
             Self::AnyCssMediaTypeQuery(it) => it.into_syntax(),
@@ -33637,7 +33611,7 @@ impl std::fmt::Debug for AnyCssMediaQuery {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::AnyCssMediaTypeQuery(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssBogusMediaQuery(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssMediaConditionQuery(it) => std::fmt::Debug::fmt(it, f),
             Self::CssMetavariable(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -33647,7 +33621,7 @@ impl From<AnyCssMediaQuery> for SyntaxNode {
     fn from(n: AnyCssMediaQuery) -> Self {
         match n {
             AnyCssMediaQuery::AnyCssMediaTypeQuery(it) => it.into_syntax(),
-            AnyCssMediaQuery::CssBogusMediaQuery(it) => it.into_syntax(),
+            AnyCssMediaQuery::CssBogus(it) => it.into_syntax(),
             AnyCssMediaQuery::CssMediaConditionQuery(it) => it.into_syntax(),
             AnyCssMediaQuery::CssMetavariable(it) => it.into_syntax(),
         }
@@ -33919,9 +33893,9 @@ impl From<AnyCssNamespaceUrl> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusBlock> for AnyCssPageAtRuleBlock {
-    fn from(node: CssBogusBlock) -> Self {
-        Self::CssBogusBlock(node)
+impl From<CssBogus> for AnyCssPageAtRuleBlock {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssPageAtRuleBlock> for AnyCssPageAtRuleBlock {
@@ -33932,13 +33906,13 @@ impl From<CssPageAtRuleBlock> for AnyCssPageAtRuleBlock {
 impl AstNode for AnyCssPageAtRuleBlock {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        CssBogusBlock::KIND_SET.union(CssPageAtRuleBlock::KIND_SET);
+        CssBogus::KIND_SET.union(CssPageAtRuleBlock::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_BOGUS_BLOCK | CSS_PAGE_AT_RULE_BLOCK)
+        matches!(kind, CSS_BOGUS | CSS_PAGE_AT_RULE_BLOCK)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_BLOCK => Self::CssBogusBlock(CssBogusBlock { syntax }),
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_PAGE_AT_RULE_BLOCK => Self::CssPageAtRuleBlock(CssPageAtRuleBlock { syntax }),
             _ => return None,
         };
@@ -33946,13 +33920,13 @@ impl AstNode for AnyCssPageAtRuleBlock {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusBlock(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssPageAtRuleBlock(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusBlock(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssPageAtRuleBlock(it) => it.into_syntax(),
         }
     }
@@ -33960,7 +33934,7 @@ impl AstNode for AnyCssPageAtRuleBlock {
 impl std::fmt::Debug for AnyCssPageAtRuleBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CssBogusBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssPageAtRuleBlock(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -33968,7 +33942,7 @@ impl std::fmt::Debug for AnyCssPageAtRuleBlock {
 impl From<AnyCssPageAtRuleBlock> for SyntaxNode {
     fn from(n: AnyCssPageAtRuleBlock) -> Self {
         match n {
-            AnyCssPageAtRuleBlock::CssBogusBlock(it) => it.into_syntax(),
+            AnyCssPageAtRuleBlock::CssBogus(it) => it.into_syntax(),
             AnyCssPageAtRuleBlock::CssPageAtRuleBlock(it) => it.into_syntax(),
         }
     }
@@ -34107,9 +34081,9 @@ impl From<AnyCssPageAtRuleItem> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusSelector> for AnyCssPageSelector {
-    fn from(node: CssBogusSelector) -> Self {
-        Self::CssBogusSelector(node)
+impl From<CssBogus> for AnyCssPageSelector {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssPageSelector> for AnyCssPageSelector {
@@ -34119,14 +34093,13 @@ impl From<CssPageSelector> for AnyCssPageSelector {
 }
 impl AstNode for AnyCssPageSelector {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        CssBogusSelector::KIND_SET.union(CssPageSelector::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = CssBogus::KIND_SET.union(CssPageSelector::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_BOGUS_SELECTOR | CSS_PAGE_SELECTOR)
+        matches!(kind, CSS_BOGUS | CSS_PAGE_SELECTOR)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_SELECTOR => Self::CssBogusSelector(CssBogusSelector { syntax }),
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_PAGE_SELECTOR => Self::CssPageSelector(CssPageSelector { syntax }),
             _ => return None,
         };
@@ -34134,13 +34107,13 @@ impl AstNode for AnyCssPageSelector {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusSelector(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssPageSelector(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusSelector(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssPageSelector(it) => it.into_syntax(),
         }
     }
@@ -34148,7 +34121,7 @@ impl AstNode for AnyCssPageSelector {
 impl std::fmt::Debug for AnyCssPageSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CssBogusSelector(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssPageSelector(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -34156,7 +34129,7 @@ impl std::fmt::Debug for AnyCssPageSelector {
 impl From<AnyCssPageSelector> for SyntaxNode {
     fn from(n: AnyCssPageSelector) -> Self {
         match n {
-            AnyCssPageSelector::CssBogusSelector(it) => it.into_syntax(),
+            AnyCssPageSelector::CssBogus(it) => it.into_syntax(),
             AnyCssPageSelector::CssPageSelector(it) => it.into_syntax(),
         }
     }
@@ -34167,9 +34140,9 @@ impl From<AnyCssPageSelector> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusPageSelectorPseudo> for AnyCssPageSelectorPseudo {
-    fn from(node: CssBogusPageSelectorPseudo) -> Self {
-        Self::CssBogusPageSelectorPseudo(node)
+impl From<CssBogus> for AnyCssPageSelectorPseudo {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssPageSelectorPseudo> for AnyCssPageSelectorPseudo {
@@ -34180,18 +34153,13 @@ impl From<CssPageSelectorPseudo> for AnyCssPageSelectorPseudo {
 impl AstNode for AnyCssPageSelectorPseudo {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        CssBogusPageSelectorPseudo::KIND_SET.union(CssPageSelectorPseudo::KIND_SET);
+        CssBogus::KIND_SET.union(CssPageSelectorPseudo::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(
-            kind,
-            CSS_BOGUS_PAGE_SELECTOR_PSEUDO | CSS_PAGE_SELECTOR_PSEUDO
-        )
+        matches!(kind, CSS_BOGUS | CSS_PAGE_SELECTOR_PSEUDO)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_PAGE_SELECTOR_PSEUDO => {
-                Self::CssBogusPageSelectorPseudo(CssBogusPageSelectorPseudo { syntax })
-            }
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_PAGE_SELECTOR_PSEUDO => {
                 Self::CssPageSelectorPseudo(CssPageSelectorPseudo { syntax })
             }
@@ -34201,13 +34169,13 @@ impl AstNode for AnyCssPageSelectorPseudo {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusPageSelectorPseudo(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssPageSelectorPseudo(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusPageSelectorPseudo(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssPageSelectorPseudo(it) => it.into_syntax(),
         }
     }
@@ -34215,7 +34183,7 @@ impl AstNode for AnyCssPageSelectorPseudo {
 impl std::fmt::Debug for AnyCssPageSelectorPseudo {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CssBogusPageSelectorPseudo(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssPageSelectorPseudo(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -34223,7 +34191,7 @@ impl std::fmt::Debug for AnyCssPageSelectorPseudo {
 impl From<AnyCssPageSelectorPseudo> for SyntaxNode {
     fn from(n: AnyCssPageSelectorPseudo) -> Self {
         match n {
-            AnyCssPageSelectorPseudo::CssBogusPageSelectorPseudo(it) => it.into_syntax(),
+            AnyCssPageSelectorPseudo::CssBogus(it) => it.into_syntax(),
             AnyCssPageSelectorPseudo::CssPageSelectorPseudo(it) => it.into_syntax(),
         }
     }
@@ -34234,9 +34202,9 @@ impl From<AnyCssPageSelectorPseudo> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusProperty> for AnyCssProperty {
-    fn from(node: CssBogusProperty) -> Self {
-        Self::CssBogusProperty(node)
+impl From<CssBogus> for AnyCssProperty {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssComposesProperty> for AnyCssProperty {
@@ -34251,18 +34219,18 @@ impl From<CssGenericProperty> for AnyCssProperty {
 }
 impl AstNode for AnyCssProperty {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssBogusProperty::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = CssBogus::KIND_SET
         .union(CssComposesProperty::KIND_SET)
         .union(CssGenericProperty::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_BOGUS_PROPERTY | CSS_COMPOSES_PROPERTY | CSS_GENERIC_PROPERTY
+            CSS_BOGUS | CSS_COMPOSES_PROPERTY | CSS_GENERIC_PROPERTY
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_PROPERTY => Self::CssBogusProperty(CssBogusProperty { syntax }),
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_COMPOSES_PROPERTY => Self::CssComposesProperty(CssComposesProperty { syntax }),
             CSS_GENERIC_PROPERTY => Self::CssGenericProperty(CssGenericProperty { syntax }),
             _ => return None,
@@ -34271,14 +34239,14 @@ impl AstNode for AnyCssProperty {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusProperty(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssComposesProperty(it) => it.syntax(),
             Self::CssGenericProperty(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusProperty(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssComposesProperty(it) => it.into_syntax(),
             Self::CssGenericProperty(it) => it.into_syntax(),
         }
@@ -34287,7 +34255,7 @@ impl AstNode for AnyCssProperty {
 impl std::fmt::Debug for AnyCssProperty {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CssBogusProperty(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssComposesProperty(it) => std::fmt::Debug::fmt(it, f),
             Self::CssGenericProperty(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -34296,7 +34264,7 @@ impl std::fmt::Debug for AnyCssProperty {
 impl From<AnyCssProperty> for SyntaxNode {
     fn from(n: AnyCssProperty) -> Self {
         match n {
-            AnyCssProperty::CssBogusProperty(it) => it.into_syntax(),
+            AnyCssProperty::CssBogus(it) => it.into_syntax(),
             AnyCssProperty::CssComposesProperty(it) => it.into_syntax(),
             AnyCssProperty::CssGenericProperty(it) => it.into_syntax(),
         }
@@ -34308,9 +34276,9 @@ impl From<AnyCssProperty> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusPseudoClass> for AnyCssPseudoClass {
-    fn from(node: CssBogusPseudoClass) -> Self {
-        Self::CssBogusPseudoClass(node)
+impl From<CssBogus> for AnyCssPseudoClass {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssPseudoClassFunctionCompoundSelector> for AnyCssPseudoClass {
@@ -34370,7 +34338,7 @@ impl From<CssPseudoClassIdentifier> for AnyCssPseudoClass {
 }
 impl AstNode for AnyCssPseudoClass {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssBogusPseudoClass::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = CssBogus::KIND_SET
         .union(CssPseudoClassFunctionCompoundSelector::KIND_SET)
         .union(CssPseudoClassFunctionCompoundSelectorList::KIND_SET)
         .union(CssPseudoClassFunctionCustomIdentifier::KIND_SET)
@@ -34385,7 +34353,7 @@ impl AstNode for AnyCssPseudoClass {
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_BOGUS_PSEUDO_CLASS
+            CSS_BOGUS
                 | CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR
                 | CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST
                 | CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER
@@ -34401,7 +34369,7 @@ impl AstNode for AnyCssPseudoClass {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_PSEUDO_CLASS => Self::CssBogusPseudoClass(CssBogusPseudoClass { syntax }),
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR => {
                 Self::CssPseudoClassFunctionCompoundSelector(
                     CssPseudoClassFunctionCompoundSelector { syntax },
@@ -34453,7 +34421,7 @@ impl AstNode for AnyCssPseudoClass {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusPseudoClass(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssPseudoClassFunctionCompoundSelector(it) => it.syntax(),
             Self::CssPseudoClassFunctionCompoundSelectorList(it) => it.syntax(),
             Self::CssPseudoClassFunctionCustomIdentifier(it) => it.syntax(),
@@ -34469,7 +34437,7 @@ impl AstNode for AnyCssPseudoClass {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusPseudoClass(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssPseudoClassFunctionCompoundSelector(it) => it.into_syntax(),
             Self::CssPseudoClassFunctionCompoundSelectorList(it) => it.into_syntax(),
             Self::CssPseudoClassFunctionCustomIdentifier(it) => it.into_syntax(),
@@ -34487,7 +34455,7 @@ impl AstNode for AnyCssPseudoClass {
 impl std::fmt::Debug for AnyCssPseudoClass {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CssBogusPseudoClass(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssPseudoClassFunctionCompoundSelector(it) => std::fmt::Debug::fmt(it, f),
             Self::CssPseudoClassFunctionCompoundSelectorList(it) => std::fmt::Debug::fmt(it, f),
             Self::CssPseudoClassFunctionCustomIdentifier(it) => std::fmt::Debug::fmt(it, f),
@@ -34505,7 +34473,7 @@ impl std::fmt::Debug for AnyCssPseudoClass {
 impl From<AnyCssPseudoClass> for SyntaxNode {
     fn from(n: AnyCssPseudoClass) -> Self {
         match n {
-            AnyCssPseudoClass::CssBogusPseudoClass(it) => it.into_syntax(),
+            AnyCssPseudoClass::CssBogus(it) => it.into_syntax(),
             AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelector(it) => it.into_syntax(),
             AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelectorList(it) => it.into_syntax(),
             AnyCssPseudoClass::CssPseudoClassFunctionCustomIdentifier(it) => it.into_syntax(),
@@ -34604,9 +34572,9 @@ impl From<AnyCssPseudoClassNth> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusSelector> for AnyCssPseudoClassNthSelector {
-    fn from(node: CssBogusSelector) -> Self {
-        Self::CssBogusSelector(node)
+impl From<CssBogus> for AnyCssPseudoClassNthSelector {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssPseudoClassNthSelector> for AnyCssPseudoClassNthSelector {
@@ -34617,13 +34585,13 @@ impl From<CssPseudoClassNthSelector> for AnyCssPseudoClassNthSelector {
 impl AstNode for AnyCssPseudoClassNthSelector {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        CssBogusSelector::KIND_SET.union(CssPseudoClassNthSelector::KIND_SET);
+        CssBogus::KIND_SET.union(CssPseudoClassNthSelector::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_BOGUS_SELECTOR | CSS_PSEUDO_CLASS_NTH_SELECTOR)
+        matches!(kind, CSS_BOGUS | CSS_PSEUDO_CLASS_NTH_SELECTOR)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_SELECTOR => Self::CssBogusSelector(CssBogusSelector { syntax }),
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_PSEUDO_CLASS_NTH_SELECTOR => {
                 Self::CssPseudoClassNthSelector(CssPseudoClassNthSelector { syntax })
             }
@@ -34633,13 +34601,13 @@ impl AstNode for AnyCssPseudoClassNthSelector {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusSelector(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssPseudoClassNthSelector(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusSelector(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssPseudoClassNthSelector(it) => it.into_syntax(),
         }
     }
@@ -34647,7 +34615,7 @@ impl AstNode for AnyCssPseudoClassNthSelector {
 impl std::fmt::Debug for AnyCssPseudoClassNthSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CssBogusSelector(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssPseudoClassNthSelector(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -34655,7 +34623,7 @@ impl std::fmt::Debug for AnyCssPseudoClassNthSelector {
 impl From<AnyCssPseudoClassNthSelector> for SyntaxNode {
     fn from(n: AnyCssPseudoClassNthSelector) -> Self {
         match n {
-            AnyCssPseudoClassNthSelector::CssBogusSelector(it) => it.into_syntax(),
+            AnyCssPseudoClassNthSelector::CssBogus(it) => it.into_syntax(),
             AnyCssPseudoClassNthSelector::CssPseudoClassNthSelector(it) => it.into_syntax(),
         }
     }
@@ -34666,9 +34634,9 @@ impl From<AnyCssPseudoClassNthSelector> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusPseudoElement> for AnyCssPseudoElement {
-    fn from(node: CssBogusPseudoElement) -> Self {
-        Self::CssBogusPseudoElement(node)
+impl From<CssBogus> for AnyCssPseudoElement {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssPseudoElementFunction> for AnyCssPseudoElement {
@@ -34693,7 +34661,7 @@ impl From<CssPseudoElementIdentifier> for AnyCssPseudoElement {
 }
 impl AstNode for AnyCssPseudoElement {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssBogusPseudoElement::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = CssBogus::KIND_SET
         .union(CssPseudoElementFunction::KIND_SET)
         .union(CssPseudoElementFunctionCustomIdentifier::KIND_SET)
         .union(CssPseudoElementFunctionSelector::KIND_SET)
@@ -34701,7 +34669,7 @@ impl AstNode for AnyCssPseudoElement {
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_BOGUS_PSEUDO_ELEMENT
+            CSS_BOGUS
                 | CSS_PSEUDO_ELEMENT_FUNCTION
                 | CSS_PSEUDO_ELEMENT_FUNCTION_CUSTOM_IDENTIFIER
                 | CSS_PSEUDO_ELEMENT_FUNCTION_SELECTOR
@@ -34710,9 +34678,7 @@ impl AstNode for AnyCssPseudoElement {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_PSEUDO_ELEMENT => {
-                Self::CssBogusPseudoElement(CssBogusPseudoElement { syntax })
-            }
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_PSEUDO_ELEMENT_FUNCTION => {
                 Self::CssPseudoElementFunction(CssPseudoElementFunction { syntax })
             }
@@ -34733,7 +34699,7 @@ impl AstNode for AnyCssPseudoElement {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusPseudoElement(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssPseudoElementFunction(it) => it.syntax(),
             Self::CssPseudoElementFunctionCustomIdentifier(it) => it.syntax(),
             Self::CssPseudoElementFunctionSelector(it) => it.syntax(),
@@ -34742,7 +34708,7 @@ impl AstNode for AnyCssPseudoElement {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusPseudoElement(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssPseudoElementFunction(it) => it.into_syntax(),
             Self::CssPseudoElementFunctionCustomIdentifier(it) => it.into_syntax(),
             Self::CssPseudoElementFunctionSelector(it) => it.into_syntax(),
@@ -34753,7 +34719,7 @@ impl AstNode for AnyCssPseudoElement {
 impl std::fmt::Debug for AnyCssPseudoElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CssBogusPseudoElement(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssPseudoElementFunction(it) => std::fmt::Debug::fmt(it, f),
             Self::CssPseudoElementFunctionCustomIdentifier(it) => std::fmt::Debug::fmt(it, f),
             Self::CssPseudoElementFunctionSelector(it) => std::fmt::Debug::fmt(it, f),
@@ -34764,7 +34730,7 @@ impl std::fmt::Debug for AnyCssPseudoElement {
 impl From<AnyCssPseudoElement> for SyntaxNode {
     fn from(n: AnyCssPseudoElement) -> Self {
         match n {
-            AnyCssPseudoElement::CssBogusPseudoElement(it) => it.into_syntax(),
+            AnyCssPseudoElement::CssBogus(it) => it.into_syntax(),
             AnyCssPseudoElement::CssPseudoElementFunction(it) => it.into_syntax(),
             AnyCssPseudoElement::CssPseudoElementFunctionCustomIdentifier(it) => it.into_syntax(),
             AnyCssPseudoElement::CssPseudoElementFunctionSelector(it) => it.into_syntax(),
@@ -35040,9 +35006,9 @@ impl From<AnyCssQueryFeatureValue> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusSelector> for AnyCssRelativeSelector {
-    fn from(node: CssBogusSelector) -> Self {
-        Self::CssBogusSelector(node)
+impl From<CssBogus> for AnyCssRelativeSelector {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssRelativeSelector> for AnyCssRelativeSelector {
@@ -35053,13 +35019,13 @@ impl From<CssRelativeSelector> for AnyCssRelativeSelector {
 impl AstNode for AnyCssRelativeSelector {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        CssBogusSelector::KIND_SET.union(CssRelativeSelector::KIND_SET);
+        CssBogus::KIND_SET.union(CssRelativeSelector::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_BOGUS_SELECTOR | CSS_RELATIVE_SELECTOR)
+        matches!(kind, CSS_BOGUS | CSS_RELATIVE_SELECTOR)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_SELECTOR => Self::CssBogusSelector(CssBogusSelector { syntax }),
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_RELATIVE_SELECTOR => Self::CssRelativeSelector(CssRelativeSelector { syntax }),
             _ => return None,
         };
@@ -35067,13 +35033,13 @@ impl AstNode for AnyCssRelativeSelector {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusSelector(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssRelativeSelector(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusSelector(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssRelativeSelector(it) => it.into_syntax(),
         }
     }
@@ -35081,7 +35047,7 @@ impl AstNode for AnyCssRelativeSelector {
 impl std::fmt::Debug for AnyCssRelativeSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CssBogusSelector(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssRelativeSelector(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -35089,7 +35055,7 @@ impl std::fmt::Debug for AnyCssRelativeSelector {
 impl From<AnyCssRelativeSelector> for SyntaxNode {
     fn from(n: AnyCssRelativeSelector) -> Self {
         match n {
-            AnyCssRelativeSelector::CssBogusSelector(it) => it.into_syntax(),
+            AnyCssRelativeSelector::CssBogus(it) => it.into_syntax(),
             AnyCssRelativeSelector::CssRelativeSelector(it) => it.into_syntax(),
         }
     }
@@ -35238,9 +35204,9 @@ impl From<CssAtRule> for AnyCssRule {
         Self::CssAtRule(node)
     }
 }
-impl From<CssBogusRule> for AnyCssRule {
-    fn from(node: CssBogusRule) -> Self {
-        Self::CssBogusRule(node)
+impl From<CssBogus> for AnyCssRule {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssNestedQualifiedRule> for AnyCssRule {
@@ -35256,19 +35222,19 @@ impl From<CssQualifiedRule> for AnyCssRule {
 impl AstNode for AnyCssRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssAtRule::KIND_SET
-        .union(CssBogusRule::KIND_SET)
+        .union(CssBogus::KIND_SET)
         .union(CssNestedQualifiedRule::KIND_SET)
         .union(CssQualifiedRule::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_AT_RULE | CSS_BOGUS_RULE | CSS_NESTED_QUALIFIED_RULE | CSS_QUALIFIED_RULE
+            CSS_AT_RULE | CSS_BOGUS | CSS_NESTED_QUALIFIED_RULE | CSS_QUALIFIED_RULE
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_AT_RULE => Self::CssAtRule(CssAtRule { syntax }),
-            CSS_BOGUS_RULE => Self::CssBogusRule(CssBogusRule { syntax }),
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_NESTED_QUALIFIED_RULE => {
                 Self::CssNestedQualifiedRule(CssNestedQualifiedRule { syntax })
             }
@@ -35280,7 +35246,7 @@ impl AstNode for AnyCssRule {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             Self::CssAtRule(it) => it.syntax(),
-            Self::CssBogusRule(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssNestedQualifiedRule(it) => it.syntax(),
             Self::CssQualifiedRule(it) => it.syntax(),
         }
@@ -35288,7 +35254,7 @@ impl AstNode for AnyCssRule {
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssAtRule(it) => it.into_syntax(),
-            Self::CssBogusRule(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssNestedQualifiedRule(it) => it.into_syntax(),
             Self::CssQualifiedRule(it) => it.into_syntax(),
         }
@@ -35298,7 +35264,7 @@ impl std::fmt::Debug for AnyCssRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::CssAtRule(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssBogusRule(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssNestedQualifiedRule(it) => std::fmt::Debug::fmt(it, f),
             Self::CssQualifiedRule(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -35308,7 +35274,7 @@ impl From<AnyCssRule> for SyntaxNode {
     fn from(n: AnyCssRule) -> Self {
         match n {
             AnyCssRule::CssAtRule(it) => it.into_syntax(),
-            AnyCssRule::CssBogusRule(it) => it.into_syntax(),
+            AnyCssRule::CssBogus(it) => it.into_syntax(),
             AnyCssRule::CssNestedQualifiedRule(it) => it.into_syntax(),
             AnyCssRule::CssQualifiedRule(it) => it.into_syntax(),
         }
@@ -35320,9 +35286,9 @@ impl From<AnyCssRule> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusBlock> for AnyCssRuleBlock {
-    fn from(node: CssBogusBlock) -> Self {
-        Self::CssBogusBlock(node)
+impl From<CssBogus> for AnyCssRuleBlock {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssRuleBlock> for AnyCssRuleBlock {
@@ -35332,13 +35298,13 @@ impl From<CssRuleBlock> for AnyCssRuleBlock {
 }
 impl AstNode for AnyCssRuleBlock {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssBogusBlock::KIND_SET.union(CssRuleBlock::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = CssBogus::KIND_SET.union(CssRuleBlock::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_BOGUS_BLOCK | CSS_RULE_BLOCK)
+        matches!(kind, CSS_BOGUS | CSS_RULE_BLOCK)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_BLOCK => Self::CssBogusBlock(CssBogusBlock { syntax }),
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_RULE_BLOCK => Self::CssRuleBlock(CssRuleBlock { syntax }),
             _ => return None,
         };
@@ -35346,13 +35312,13 @@ impl AstNode for AnyCssRuleBlock {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusBlock(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssRuleBlock(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusBlock(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssRuleBlock(it) => it.into_syntax(),
         }
     }
@@ -35360,7 +35326,7 @@ impl AstNode for AnyCssRuleBlock {
 impl std::fmt::Debug for AnyCssRuleBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CssBogusBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssRuleBlock(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -35368,7 +35334,7 @@ impl std::fmt::Debug for AnyCssRuleBlock {
 impl From<AnyCssRuleBlock> for SyntaxNode {
     fn from(n: AnyCssRuleBlock) -> Self {
         match n {
-            AnyCssRuleBlock::CssBogusBlock(it) => it.into_syntax(),
+            AnyCssRuleBlock::CssBogus(it) => it.into_syntax(),
             AnyCssRuleBlock::CssRuleBlock(it) => it.into_syntax(),
         }
     }
@@ -35379,9 +35345,9 @@ impl From<AnyCssRuleBlock> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusScopeRange> for AnyCssScopeRange {
-    fn from(node: CssBogusScopeRange) -> Self {
-        Self::CssBogusScopeRange(node)
+impl From<CssBogus> for AnyCssScopeRange {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssScopeRangeEnd> for AnyCssScopeRange {
@@ -35401,22 +35367,19 @@ impl From<CssScopeRangeStart> for AnyCssScopeRange {
 }
 impl AstNode for AnyCssScopeRange {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssBogusScopeRange::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = CssBogus::KIND_SET
         .union(CssScopeRangeEnd::KIND_SET)
         .union(CssScopeRangeInterval::KIND_SET)
         .union(CssScopeRangeStart::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_BOGUS_SCOPE_RANGE
-                | CSS_SCOPE_RANGE_END
-                | CSS_SCOPE_RANGE_INTERVAL
-                | CSS_SCOPE_RANGE_START
+            CSS_BOGUS | CSS_SCOPE_RANGE_END | CSS_SCOPE_RANGE_INTERVAL | CSS_SCOPE_RANGE_START
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_SCOPE_RANGE => Self::CssBogusScopeRange(CssBogusScopeRange { syntax }),
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_SCOPE_RANGE_END => Self::CssScopeRangeEnd(CssScopeRangeEnd { syntax }),
             CSS_SCOPE_RANGE_INTERVAL => {
                 Self::CssScopeRangeInterval(CssScopeRangeInterval { syntax })
@@ -35428,7 +35391,7 @@ impl AstNode for AnyCssScopeRange {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusScopeRange(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssScopeRangeEnd(it) => it.syntax(),
             Self::CssScopeRangeInterval(it) => it.syntax(),
             Self::CssScopeRangeStart(it) => it.syntax(),
@@ -35436,7 +35399,7 @@ impl AstNode for AnyCssScopeRange {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusScopeRange(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssScopeRangeEnd(it) => it.into_syntax(),
             Self::CssScopeRangeInterval(it) => it.into_syntax(),
             Self::CssScopeRangeStart(it) => it.into_syntax(),
@@ -35446,7 +35409,7 @@ impl AstNode for AnyCssScopeRange {
 impl std::fmt::Debug for AnyCssScopeRange {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CssBogusScopeRange(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssScopeRangeEnd(it) => std::fmt::Debug::fmt(it, f),
             Self::CssScopeRangeInterval(it) => std::fmt::Debug::fmt(it, f),
             Self::CssScopeRangeStart(it) => std::fmt::Debug::fmt(it, f),
@@ -35456,7 +35419,7 @@ impl std::fmt::Debug for AnyCssScopeRange {
 impl From<AnyCssScopeRange> for SyntaxNode {
     fn from(n: AnyCssScopeRange) -> Self {
         match n {
-            AnyCssScopeRange::CssBogusScopeRange(it) => it.into_syntax(),
+            AnyCssScopeRange::CssBogus(it) => it.into_syntax(),
             AnyCssScopeRange::CssScopeRangeEnd(it) => it.into_syntax(),
             AnyCssScopeRange::CssScopeRangeInterval(it) => it.into_syntax(),
             AnyCssScopeRange::CssScopeRangeStart(it) => it.into_syntax(),
@@ -35469,9 +35432,9 @@ impl From<AnyCssScopeRange> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusSelector> for AnyCssSelector {
-    fn from(node: CssBogusSelector) -> Self {
-        Self::CssBogusSelector(node)
+impl From<CssBogus> for AnyCssSelector {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssComplexSelector> for AnyCssSelector {
@@ -35491,19 +35454,19 @@ impl From<CssMetavariable> for AnyCssSelector {
 }
 impl AstNode for AnyCssSelector {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssBogusSelector::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = CssBogus::KIND_SET
         .union(CssComplexSelector::KIND_SET)
         .union(CssCompoundSelector::KIND_SET)
         .union(CssMetavariable::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_BOGUS_SELECTOR | CSS_COMPLEX_SELECTOR | CSS_COMPOUND_SELECTOR | CSS_METAVARIABLE
+            CSS_BOGUS | CSS_COMPLEX_SELECTOR | CSS_COMPOUND_SELECTOR | CSS_METAVARIABLE
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_SELECTOR => Self::CssBogusSelector(CssBogusSelector { syntax }),
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_COMPLEX_SELECTOR => Self::CssComplexSelector(CssComplexSelector { syntax }),
             CSS_COMPOUND_SELECTOR => Self::CssCompoundSelector(CssCompoundSelector { syntax }),
             CSS_METAVARIABLE => Self::CssMetavariable(CssMetavariable { syntax }),
@@ -35513,7 +35476,7 @@ impl AstNode for AnyCssSelector {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusSelector(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssComplexSelector(it) => it.syntax(),
             Self::CssCompoundSelector(it) => it.syntax(),
             Self::CssMetavariable(it) => it.syntax(),
@@ -35521,7 +35484,7 @@ impl AstNode for AnyCssSelector {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusSelector(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssComplexSelector(it) => it.into_syntax(),
             Self::CssCompoundSelector(it) => it.into_syntax(),
             Self::CssMetavariable(it) => it.into_syntax(),
@@ -35531,7 +35494,7 @@ impl AstNode for AnyCssSelector {
 impl std::fmt::Debug for AnyCssSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CssBogusSelector(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssComplexSelector(it) => std::fmt::Debug::fmt(it, f),
             Self::CssCompoundSelector(it) => std::fmt::Debug::fmt(it, f),
             Self::CssMetavariable(it) => std::fmt::Debug::fmt(it, f),
@@ -35541,7 +35504,7 @@ impl std::fmt::Debug for AnyCssSelector {
 impl From<AnyCssSelector> for SyntaxNode {
     fn from(n: AnyCssSelector) -> Self {
         match n {
-            AnyCssSelector::CssBogusSelector(it) => it.into_syntax(),
+            AnyCssSelector::CssBogus(it) => it.into_syntax(),
             AnyCssSelector::CssComplexSelector(it) => it.into_syntax(),
             AnyCssSelector::CssCompoundSelector(it) => it.into_syntax(),
             AnyCssSelector::CssMetavariable(it) => it.into_syntax(),
@@ -35619,9 +35582,9 @@ impl From<CssAttributeSelector> for AnyCssSubSelector {
         Self::CssAttributeSelector(node)
     }
 }
-impl From<CssBogusSubSelector> for AnyCssSubSelector {
-    fn from(node: CssBogusSubSelector) -> Self {
-        Self::CssBogusSubSelector(node)
+impl From<CssBogus> for AnyCssSubSelector {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssClassSelector> for AnyCssSubSelector {
@@ -35647,7 +35610,7 @@ impl From<CssPseudoElementSelector> for AnyCssSubSelector {
 impl AstNode for AnyCssSubSelector {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssAttributeSelector::KIND_SET
-        .union(CssBogusSubSelector::KIND_SET)
+        .union(CssBogus::KIND_SET)
         .union(CssClassSelector::KIND_SET)
         .union(CssIdSelector::KIND_SET)
         .union(CssPseudoClassSelector::KIND_SET)
@@ -35656,7 +35619,7 @@ impl AstNode for AnyCssSubSelector {
         matches!(
             kind,
             CSS_ATTRIBUTE_SELECTOR
-                | CSS_BOGUS_SUB_SELECTOR
+                | CSS_BOGUS
                 | CSS_CLASS_SELECTOR
                 | CSS_ID_SELECTOR
                 | CSS_PSEUDO_CLASS_SELECTOR
@@ -35666,7 +35629,7 @@ impl AstNode for AnyCssSubSelector {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_ATTRIBUTE_SELECTOR => Self::CssAttributeSelector(CssAttributeSelector { syntax }),
-            CSS_BOGUS_SUB_SELECTOR => Self::CssBogusSubSelector(CssBogusSubSelector { syntax }),
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_CLASS_SELECTOR => Self::CssClassSelector(CssClassSelector { syntax }),
             CSS_ID_SELECTOR => Self::CssIdSelector(CssIdSelector { syntax }),
             CSS_PSEUDO_CLASS_SELECTOR => {
@@ -35682,7 +35645,7 @@ impl AstNode for AnyCssSubSelector {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             Self::CssAttributeSelector(it) => it.syntax(),
-            Self::CssBogusSubSelector(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssClassSelector(it) => it.syntax(),
             Self::CssIdSelector(it) => it.syntax(),
             Self::CssPseudoClassSelector(it) => it.syntax(),
@@ -35692,7 +35655,7 @@ impl AstNode for AnyCssSubSelector {
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssAttributeSelector(it) => it.into_syntax(),
-            Self::CssBogusSubSelector(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssClassSelector(it) => it.into_syntax(),
             Self::CssIdSelector(it) => it.into_syntax(),
             Self::CssPseudoClassSelector(it) => it.into_syntax(),
@@ -35704,7 +35667,7 @@ impl std::fmt::Debug for AnyCssSubSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::CssAttributeSelector(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssBogusSubSelector(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssClassSelector(it) => std::fmt::Debug::fmt(it, f),
             Self::CssIdSelector(it) => std::fmt::Debug::fmt(it, f),
             Self::CssPseudoClassSelector(it) => std::fmt::Debug::fmt(it, f),
@@ -35716,7 +35679,7 @@ impl From<AnyCssSubSelector> for SyntaxNode {
     fn from(n: AnyCssSubSelector) -> Self {
         match n {
             AnyCssSubSelector::CssAttributeSelector(it) => it.into_syntax(),
-            AnyCssSubSelector::CssBogusSubSelector(it) => it.into_syntax(),
+            AnyCssSubSelector::CssBogus(it) => it.into_syntax(),
             AnyCssSubSelector::CssClassSelector(it) => it.into_syntax(),
             AnyCssSubSelector::CssIdSelector(it) => it.into_syntax(),
             AnyCssSubSelector::CssPseudoClassSelector(it) => it.into_syntax(),
@@ -35795,9 +35758,9 @@ impl From<AnyCssSupportsAndCombinableCondition> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusSupportsCondition> for AnyCssSupportsCondition {
-    fn from(node: CssBogusSupportsCondition) -> Self {
-        Self::CssBogusSupportsCondition(node)
+impl From<CssBogus> for AnyCssSupportsCondition {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssSupportsAndCondition> for AnyCssSupportsCondition {
@@ -35818,13 +35781,13 @@ impl From<CssSupportsOrCondition> for AnyCssSupportsCondition {
 impl AstNode for AnyCssSupportsCondition {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyCssSupportsInParens::KIND_SET
-        .union(CssBogusSupportsCondition::KIND_SET)
+        .union(CssBogus::KIND_SET)
         .union(CssSupportsAndCondition::KIND_SET)
         .union(CssSupportsNotCondition::KIND_SET)
         .union(CssSupportsOrCondition::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            CSS_BOGUS_SUPPORTS_CONDITION
+            CSS_BOGUS
             | CSS_SUPPORTS_AND_CONDITION
             | CSS_SUPPORTS_NOT_CONDITION
             | CSS_SUPPORTS_OR_CONDITION => true,
@@ -35834,9 +35797,7 @@ impl AstNode for AnyCssSupportsCondition {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_SUPPORTS_CONDITION => {
-                Self::CssBogusSupportsCondition(CssBogusSupportsCondition { syntax })
-            }
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_SUPPORTS_AND_CONDITION => {
                 Self::CssSupportsAndCondition(CssSupportsAndCondition { syntax })
             }
@@ -35857,7 +35818,7 @@ impl AstNode for AnyCssSupportsCondition {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusSupportsCondition(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssSupportsAndCondition(it) => it.syntax(),
             Self::CssSupportsNotCondition(it) => it.syntax(),
             Self::CssSupportsOrCondition(it) => it.syntax(),
@@ -35866,7 +35827,7 @@ impl AstNode for AnyCssSupportsCondition {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusSupportsCondition(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssSupportsAndCondition(it) => it.into_syntax(),
             Self::CssSupportsNotCondition(it) => it.into_syntax(),
             Self::CssSupportsOrCondition(it) => it.into_syntax(),
@@ -35878,7 +35839,7 @@ impl std::fmt::Debug for AnyCssSupportsCondition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::AnyCssSupportsInParens(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssBogusSupportsCondition(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssSupportsAndCondition(it) => std::fmt::Debug::fmt(it, f),
             Self::CssSupportsNotCondition(it) => std::fmt::Debug::fmt(it, f),
             Self::CssSupportsOrCondition(it) => std::fmt::Debug::fmt(it, f),
@@ -35889,7 +35850,7 @@ impl From<AnyCssSupportsCondition> for SyntaxNode {
     fn from(n: AnyCssSupportsCondition) -> Self {
         match n {
             AnyCssSupportsCondition::AnyCssSupportsInParens(it) => it.into_syntax(),
-            AnyCssSupportsCondition::CssBogusSupportsCondition(it) => it.into_syntax(),
+            AnyCssSupportsCondition::CssBogus(it) => it.into_syntax(),
             AnyCssSupportsCondition::CssSupportsAndCondition(it) => it.into_syntax(),
             AnyCssSupportsCondition::CssSupportsNotCondition(it) => it.into_syntax(),
             AnyCssSupportsCondition::CssSupportsOrCondition(it) => it.into_syntax(),
@@ -36060,9 +36021,9 @@ impl From<AnyCssSupportsOrCombinableCondition> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusSyntax> for AnyCssSyntax {
-    fn from(node: CssBogusSyntax) -> Self {
-        Self::CssBogusSyntax(node)
+impl From<CssBogus> for AnyCssSyntax {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssString> for AnyCssSyntax {
@@ -36083,22 +36044,20 @@ impl From<CssUniversalSyntax> for AnyCssSyntax {
 impl AstNode for AnyCssSyntax {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyCssSyntaxComponent::KIND_SET
-        .union(CssBogusSyntax::KIND_SET)
+        .union(CssBogus::KIND_SET)
         .union(CssString::KIND_SET)
         .union(CssSyntaxComponentList::KIND_SET)
         .union(CssUniversalSyntax::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            CSS_BOGUS_SYNTAX | CSS_STRING | CSS_SYNTAX_COMPONENT_LIST | CSS_UNIVERSAL_SYNTAX => {
-                true
-            }
+            CSS_BOGUS | CSS_STRING | CSS_SYNTAX_COMPONENT_LIST | CSS_UNIVERSAL_SYNTAX => true,
             k if AnyCssSyntaxComponent::can_cast(k) => true,
             _ => false,
         }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_SYNTAX => Self::CssBogusSyntax(CssBogusSyntax { syntax }),
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_STRING => Self::CssString(CssString { syntax }),
             CSS_SYNTAX_COMPONENT_LIST => {
                 Self::CssSyntaxComponentList(CssSyntaxComponentList::cast(syntax)?)
@@ -36115,7 +36074,7 @@ impl AstNode for AnyCssSyntax {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusSyntax(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssString(it) => it.syntax(),
             Self::CssSyntaxComponentList(it) => it.syntax(),
             Self::CssUniversalSyntax(it) => it.syntax(),
@@ -36124,7 +36083,7 @@ impl AstNode for AnyCssSyntax {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusSyntax(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssString(it) => it.into_syntax(),
             Self::CssSyntaxComponentList(it) => it.into_syntax(),
             Self::CssUniversalSyntax(it) => it.into_syntax(),
@@ -36136,7 +36095,7 @@ impl std::fmt::Debug for AnyCssSyntax {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::AnyCssSyntaxComponent(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssBogusSyntax(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssString(it) => std::fmt::Debug::fmt(it, f),
             Self::CssSyntaxComponentList(it) => std::fmt::Debug::fmt(it, f),
             Self::CssUniversalSyntax(it) => std::fmt::Debug::fmt(it, f),
@@ -36147,7 +36106,7 @@ impl From<AnyCssSyntax> for SyntaxNode {
     fn from(n: AnyCssSyntax) -> Self {
         match n {
             AnyCssSyntax::AnyCssSyntaxComponent(it) => it.into_syntax(),
-            AnyCssSyntax::CssBogusSyntax(it) => it.into_syntax(),
+            AnyCssSyntax::CssBogus(it) => it.into_syntax(),
             AnyCssSyntax::CssString(it) => it.into_syntax(),
             AnyCssSyntax::CssSyntaxComponentList(it) => it.into_syntax(),
             AnyCssSyntax::CssUniversalSyntax(it) => it.into_syntax(),
@@ -36227,9 +36186,9 @@ impl From<AnyCssSyntaxComponent> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusSyntaxSingleComponent> for AnyCssSyntaxSingleComponent {
-    fn from(node: CssBogusSyntaxSingleComponent) -> Self {
-        Self::CssBogusSyntaxSingleComponent(node)
+impl From<CssBogus> for AnyCssSyntaxSingleComponent {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssIdentifier> for AnyCssSyntaxSingleComponent {
@@ -36244,20 +36203,15 @@ impl From<CssSyntaxType> for AnyCssSyntaxSingleComponent {
 }
 impl AstNode for AnyCssSyntaxSingleComponent {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssBogusSyntaxSingleComponent::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = CssBogus::KIND_SET
         .union(CssIdentifier::KIND_SET)
         .union(CssSyntaxType::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(
-            kind,
-            CSS_BOGUS_SYNTAX_SINGLE_COMPONENT | CSS_IDENTIFIER | CSS_SYNTAX_TYPE
-        )
+        matches!(kind, CSS_BOGUS | CSS_IDENTIFIER | CSS_SYNTAX_TYPE)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_SYNTAX_SINGLE_COMPONENT => {
-                Self::CssBogusSyntaxSingleComponent(CssBogusSyntaxSingleComponent { syntax })
-            }
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_IDENTIFIER => Self::CssIdentifier(CssIdentifier { syntax }),
             CSS_SYNTAX_TYPE => Self::CssSyntaxType(CssSyntaxType { syntax }),
             _ => return None,
@@ -36266,14 +36220,14 @@ impl AstNode for AnyCssSyntaxSingleComponent {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusSyntaxSingleComponent(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssIdentifier(it) => it.syntax(),
             Self::CssSyntaxType(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusSyntaxSingleComponent(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssIdentifier(it) => it.into_syntax(),
             Self::CssSyntaxType(it) => it.into_syntax(),
         }
@@ -36282,7 +36236,7 @@ impl AstNode for AnyCssSyntaxSingleComponent {
 impl std::fmt::Debug for AnyCssSyntaxSingleComponent {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CssBogusSyntaxSingleComponent(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
             Self::CssSyntaxType(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -36291,7 +36245,7 @@ impl std::fmt::Debug for AnyCssSyntaxSingleComponent {
 impl From<AnyCssSyntaxSingleComponent> for SyntaxNode {
     fn from(n: AnyCssSyntaxSingleComponent) -> Self {
         match n {
-            AnyCssSyntaxSingleComponent::CssBogusSyntaxSingleComponent(it) => it.into_syntax(),
+            AnyCssSyntaxSingleComponent::CssBogus(it) => it.into_syntax(),
             AnyCssSyntaxSingleComponent::CssIdentifier(it) => it.into_syntax(),
             AnyCssSyntaxSingleComponent::CssSyntaxType(it) => it.into_syntax(),
         }
@@ -36370,9 +36324,9 @@ impl From<AnyCssSyntaxTypeName> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusType> for AnyCssType {
-    fn from(node: CssBogusType) -> Self {
-        Self::CssBogusType(node)
+impl From<CssBogus> for AnyCssType {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssTypeFunction> for AnyCssType {
@@ -36383,18 +36337,18 @@ impl From<CssTypeFunction> for AnyCssType {
 impl AstNode for AnyCssType {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyCssSyntaxComponent::KIND_SET
-        .union(CssBogusType::KIND_SET)
+        .union(CssBogus::KIND_SET)
         .union(CssTypeFunction::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            CSS_BOGUS_TYPE | CSS_TYPE_FUNCTION => true,
+            CSS_BOGUS | CSS_TYPE_FUNCTION => true,
             k if AnyCssSyntaxComponent::can_cast(k) => true,
             _ => false,
         }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_TYPE => Self::CssBogusType(CssBogusType { syntax }),
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_TYPE_FUNCTION => Self::CssTypeFunction(CssTypeFunction { syntax }),
             _ => {
                 if let Some(any_css_syntax_component) = AnyCssSyntaxComponent::cast(syntax) {
@@ -36407,14 +36361,14 @@ impl AstNode for AnyCssType {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusType(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssTypeFunction(it) => it.syntax(),
             Self::AnyCssSyntaxComponent(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusType(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssTypeFunction(it) => it.into_syntax(),
             Self::AnyCssSyntaxComponent(it) => it.into_syntax(),
         }
@@ -36424,7 +36378,7 @@ impl std::fmt::Debug for AnyCssType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::AnyCssSyntaxComponent(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssBogusType(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssTypeFunction(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -36433,7 +36387,7 @@ impl From<AnyCssType> for SyntaxNode {
     fn from(n: AnyCssType) -> Self {
         match n {
             AnyCssType::AnyCssSyntaxComponent(it) => it.into_syntax(),
-            AnyCssType::CssBogusType(it) => it.into_syntax(),
+            AnyCssType::CssBogus(it) => it.into_syntax(),
             AnyCssType::CssTypeFunction(it) => it.into_syntax(),
         }
     }
@@ -36444,9 +36398,9 @@ impl From<AnyCssType> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusUnicodeRangeValue> for AnyCssUnicodeValue {
-    fn from(node: CssBogusUnicodeRangeValue) -> Self {
-        Self::CssBogusUnicodeRangeValue(node)
+impl From<CssBogus> for AnyCssUnicodeValue {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssUnicodeCodepoint> for AnyCssUnicodeValue {
@@ -36466,14 +36420,14 @@ impl From<CssUnicodeRangeWildcard> for AnyCssUnicodeValue {
 }
 impl AstNode for AnyCssUnicodeValue {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssBogusUnicodeRangeValue::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = CssBogus::KIND_SET
         .union(CssUnicodeCodepoint::KIND_SET)
         .union(CssUnicodeRangeInterval::KIND_SET)
         .union(CssUnicodeRangeWildcard::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_BOGUS_UNICODE_RANGE_VALUE
+            CSS_BOGUS
                 | CSS_UNICODE_CODEPOINT
                 | CSS_UNICODE_RANGE_INTERVAL
                 | CSS_UNICODE_RANGE_WILDCARD
@@ -36481,9 +36435,7 @@ impl AstNode for AnyCssUnicodeValue {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_UNICODE_RANGE_VALUE => {
-                Self::CssBogusUnicodeRangeValue(CssBogusUnicodeRangeValue { syntax })
-            }
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_UNICODE_CODEPOINT => Self::CssUnicodeCodepoint(CssUnicodeCodepoint { syntax }),
             CSS_UNICODE_RANGE_INTERVAL => {
                 Self::CssUnicodeRangeInterval(CssUnicodeRangeInterval { syntax })
@@ -36497,7 +36449,7 @@ impl AstNode for AnyCssUnicodeValue {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusUnicodeRangeValue(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssUnicodeCodepoint(it) => it.syntax(),
             Self::CssUnicodeRangeInterval(it) => it.syntax(),
             Self::CssUnicodeRangeWildcard(it) => it.syntax(),
@@ -36505,7 +36457,7 @@ impl AstNode for AnyCssUnicodeValue {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusUnicodeRangeValue(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssUnicodeCodepoint(it) => it.into_syntax(),
             Self::CssUnicodeRangeInterval(it) => it.into_syntax(),
             Self::CssUnicodeRangeWildcard(it) => it.into_syntax(),
@@ -36515,7 +36467,7 @@ impl AstNode for AnyCssUnicodeValue {
 impl std::fmt::Debug for AnyCssUnicodeValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CssBogusUnicodeRangeValue(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssUnicodeCodepoint(it) => std::fmt::Debug::fmt(it, f),
             Self::CssUnicodeRangeInterval(it) => std::fmt::Debug::fmt(it, f),
             Self::CssUnicodeRangeWildcard(it) => std::fmt::Debug::fmt(it, f),
@@ -36525,7 +36477,7 @@ impl std::fmt::Debug for AnyCssUnicodeValue {
 impl From<AnyCssUnicodeValue> for SyntaxNode {
     fn from(n: AnyCssUnicodeValue) -> Self {
         match n {
-            AnyCssUnicodeValue::CssBogusUnicodeRangeValue(it) => it.into_syntax(),
+            AnyCssUnicodeValue::CssBogus(it) => it.into_syntax(),
             AnyCssUnicodeValue::CssUnicodeCodepoint(it) => it.into_syntax(),
             AnyCssUnicodeValue::CssUnicodeRangeInterval(it) => it.into_syntax(),
             AnyCssUnicodeValue::CssUnicodeRangeWildcard(it) => it.into_syntax(),
@@ -36538,9 +36490,9 @@ impl From<AnyCssUnicodeValue> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusUrlModifier> for AnyCssUrlModifier {
-    fn from(node: CssBogusUrlModifier) -> Self {
-        Self::CssBogusUrlModifier(node)
+impl From<CssBogus> for AnyCssUrlModifier {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssFunction> for AnyCssUrlModifier {
@@ -36555,15 +36507,15 @@ impl From<CssIdentifier> for AnyCssUrlModifier {
 }
 impl AstNode for AnyCssUrlModifier {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssBogusUrlModifier::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = CssBogus::KIND_SET
         .union(CssFunction::KIND_SET)
         .union(CssIdentifier::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_BOGUS_URL_MODIFIER | CSS_FUNCTION | CSS_IDENTIFIER)
+        matches!(kind, CSS_BOGUS | CSS_FUNCTION | CSS_IDENTIFIER)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_URL_MODIFIER => Self::CssBogusUrlModifier(CssBogusUrlModifier { syntax }),
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_FUNCTION => Self::CssFunction(CssFunction { syntax }),
             CSS_IDENTIFIER => Self::CssIdentifier(CssIdentifier { syntax }),
             _ => return None,
@@ -36572,14 +36524,14 @@ impl AstNode for AnyCssUrlModifier {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusUrlModifier(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssFunction(it) => it.syntax(),
             Self::CssIdentifier(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusUrlModifier(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssFunction(it) => it.into_syntax(),
             Self::CssIdentifier(it) => it.into_syntax(),
         }
@@ -36588,7 +36540,7 @@ impl AstNode for AnyCssUrlModifier {
 impl std::fmt::Debug for AnyCssUrlModifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CssBogusUrlModifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssFunction(it) => std::fmt::Debug::fmt(it, f),
             Self::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -36597,7 +36549,7 @@ impl std::fmt::Debug for AnyCssUrlModifier {
 impl From<AnyCssUrlModifier> for SyntaxNode {
     fn from(n: AnyCssUrlModifier) -> Self {
         match n {
-            AnyCssUrlModifier::CssBogusUrlModifier(it) => it.into_syntax(),
+            AnyCssUrlModifier::CssBogus(it) => it.into_syntax(),
             AnyCssUrlModifier::CssFunction(it) => it.into_syntax(),
             AnyCssUrlModifier::CssIdentifier(it) => it.into_syntax(),
         }
@@ -37100,9 +37052,9 @@ impl From<AnyCssValueAtRuleImportSpecifier> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusProperty> for AnyCssValueAtRuleProperty {
-    fn from(node: CssBogusProperty) -> Self {
-        Self::CssBogusProperty(node)
+impl From<CssBogus> for AnyCssValueAtRuleProperty {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<CssValueAtRuleGenericProperty> for AnyCssValueAtRuleProperty {
@@ -37113,16 +37065,13 @@ impl From<CssValueAtRuleGenericProperty> for AnyCssValueAtRuleProperty {
 impl AstNode for AnyCssValueAtRuleProperty {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        CssBogusProperty::KIND_SET.union(CssValueAtRuleGenericProperty::KIND_SET);
+        CssBogus::KIND_SET.union(CssValueAtRuleGenericProperty::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(
-            kind,
-            CSS_BOGUS_PROPERTY | CSS_VALUE_AT_RULE_GENERIC_PROPERTY
-        )
+        matches!(kind, CSS_BOGUS | CSS_VALUE_AT_RULE_GENERIC_PROPERTY)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_PROPERTY => Self::CssBogusProperty(CssBogusProperty { syntax }),
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             CSS_VALUE_AT_RULE_GENERIC_PROPERTY => {
                 Self::CssValueAtRuleGenericProperty(CssValueAtRuleGenericProperty { syntax })
             }
@@ -37132,13 +37081,13 @@ impl AstNode for AnyCssValueAtRuleProperty {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusProperty(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::CssValueAtRuleGenericProperty(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusProperty(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::CssValueAtRuleGenericProperty(it) => it.into_syntax(),
         }
     }
@@ -37146,7 +37095,7 @@ impl AstNode for AnyCssValueAtRuleProperty {
 impl std::fmt::Debug for AnyCssValueAtRuleProperty {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CssBogusProperty(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssValueAtRuleGenericProperty(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -37154,7 +37103,7 @@ impl std::fmt::Debug for AnyCssValueAtRuleProperty {
 impl From<AnyCssValueAtRuleProperty> for SyntaxNode {
     fn from(n: AnyCssValueAtRuleProperty) -> Self {
         match n {
-            AnyCssValueAtRuleProperty::CssBogusProperty(it) => it.into_syntax(),
+            AnyCssValueAtRuleProperty::CssBogus(it) => it.into_syntax(),
             AnyCssValueAtRuleProperty::CssValueAtRuleGenericProperty(it) => it.into_syntax(),
         }
     }
@@ -37699,9 +37648,9 @@ impl From<AnyScssModuleMember> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBogusParameter> for AnyScssParameter {
-    fn from(node: CssBogusParameter) -> Self {
-        Self::CssBogusParameter(node)
+impl From<CssBogus> for AnyScssParameter {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
     }
 }
 impl From<ScssParameter> for AnyScssParameter {
@@ -37711,14 +37660,13 @@ impl From<ScssParameter> for AnyScssParameter {
 }
 impl AstNode for AnyScssParameter {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        CssBogusParameter::KIND_SET.union(ScssParameter::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = CssBogus::KIND_SET.union(ScssParameter::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_BOGUS_PARAMETER | SCSS_PARAMETER)
+        matches!(kind, CSS_BOGUS | SCSS_PARAMETER)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BOGUS_PARAMETER => Self::CssBogusParameter(CssBogusParameter { syntax }),
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
             SCSS_PARAMETER => Self::ScssParameter(ScssParameter { syntax }),
             _ => return None,
         };
@@ -37726,13 +37674,13 @@ impl AstNode for AnyScssParameter {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::CssBogusParameter(it) => it.syntax(),
+            Self::CssBogus(it) => it.syntax(),
             Self::ScssParameter(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::CssBogusParameter(it) => it.into_syntax(),
+            Self::CssBogus(it) => it.into_syntax(),
             Self::ScssParameter(it) => it.into_syntax(),
         }
     }
@@ -37740,7 +37688,7 @@ impl AstNode for AnyScssParameter {
 impl std::fmt::Debug for AnyScssParameter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CssBogusParameter(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssParameter(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -37748,7 +37696,7 @@ impl std::fmt::Debug for AnyScssParameter {
 impl From<AnyScssParameter> for SyntaxNode {
     fn from(n: AnyScssParameter) -> Self {
         match n {
-            AnyScssParameter::CssBogusParameter(it) => it.into_syntax(),
+            AnyScssParameter::CssBogus(it) => it.into_syntax(),
             AnyScssParameter::ScssParameter(it) => it.into_syntax(),
         }
     }
@@ -39952,1798 +39900,6 @@ impl From<CssBogus> for SyntaxElement {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct CssBogusAtRule {
-    syntax: SyntaxNode,
-}
-impl CssBogusAtRule {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn items(&self) -> SyntaxElementChildren {
-        support::elements(&self.syntax)
-    }
-}
-impl AstNode for CssBogusAtRule {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_AT_RULE as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_BOGUS_AT_RULE
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssBogusAtRule {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssBogusAtRule")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
-    }
-}
-impl From<CssBogusAtRule> for SyntaxNode {
-    fn from(n: CssBogusAtRule) -> Self {
-        n.syntax
-    }
-}
-impl From<CssBogusAtRule> for SyntaxElement {
-    fn from(n: CssBogusAtRule) -> Self {
-        n.syntax.into()
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct CssBogusAttrName {
-    syntax: SyntaxNode,
-}
-impl CssBogusAttrName {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn items(&self) -> SyntaxElementChildren {
-        support::elements(&self.syntax)
-    }
-}
-impl AstNode for CssBogusAttrName {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_ATTR_NAME as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_BOGUS_ATTR_NAME
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssBogusAttrName {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssBogusAttrName")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
-    }
-}
-impl From<CssBogusAttrName> for SyntaxNode {
-    fn from(n: CssBogusAttrName) -> Self {
-        n.syntax
-    }
-}
-impl From<CssBogusAttrName> for SyntaxElement {
-    fn from(n: CssBogusAttrName) -> Self {
-        n.syntax.into()
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct CssBogusBlock {
-    syntax: SyntaxNode,
-}
-impl CssBogusBlock {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn items(&self) -> SyntaxElementChildren {
-        support::elements(&self.syntax)
-    }
-}
-impl AstNode for CssBogusBlock {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_BLOCK as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_BOGUS_BLOCK
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssBogusBlock {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssBogusBlock")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
-    }
-}
-impl From<CssBogusBlock> for SyntaxNode {
-    fn from(n: CssBogusBlock) -> Self {
-        n.syntax
-    }
-}
-impl From<CssBogusBlock> for SyntaxElement {
-    fn from(n: CssBogusBlock) -> Self {
-        n.syntax.into()
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct CssBogusCustomIdentifier {
-    syntax: SyntaxNode,
-}
-impl CssBogusCustomIdentifier {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn items(&self) -> SyntaxElementChildren {
-        support::elements(&self.syntax)
-    }
-}
-impl AstNode for CssBogusCustomIdentifier {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_CUSTOM_IDENTIFIER as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_BOGUS_CUSTOM_IDENTIFIER
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssBogusCustomIdentifier {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssBogusCustomIdentifier")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
-    }
-}
-impl From<CssBogusCustomIdentifier> for SyntaxNode {
-    fn from(n: CssBogusCustomIdentifier) -> Self {
-        n.syntax
-    }
-}
-impl From<CssBogusCustomIdentifier> for SyntaxElement {
-    fn from(n: CssBogusCustomIdentifier) -> Self {
-        n.syntax.into()
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct CssBogusDeclarationItem {
-    syntax: SyntaxNode,
-}
-impl CssBogusDeclarationItem {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn items(&self) -> SyntaxElementChildren {
-        support::elements(&self.syntax)
-    }
-}
-impl AstNode for CssBogusDeclarationItem {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_DECLARATION_ITEM as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_BOGUS_DECLARATION_ITEM
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssBogusDeclarationItem {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssBogusDeclarationItem")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
-    }
-}
-impl From<CssBogusDeclarationItem> for SyntaxNode {
-    fn from(n: CssBogusDeclarationItem) -> Self {
-        n.syntax
-    }
-}
-impl From<CssBogusDeclarationItem> for SyntaxElement {
-    fn from(n: CssBogusDeclarationItem) -> Self {
-        n.syntax.into()
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct CssBogusDocumentMatcher {
-    syntax: SyntaxNode,
-}
-impl CssBogusDocumentMatcher {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn items(&self) -> SyntaxElementChildren {
-        support::elements(&self.syntax)
-    }
-}
-impl AstNode for CssBogusDocumentMatcher {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_DOCUMENT_MATCHER as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_BOGUS_DOCUMENT_MATCHER
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssBogusDocumentMatcher {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssBogusDocumentMatcher")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
-    }
-}
-impl From<CssBogusDocumentMatcher> for SyntaxNode {
-    fn from(n: CssBogusDocumentMatcher) -> Self {
-        n.syntax
-    }
-}
-impl From<CssBogusDocumentMatcher> for SyntaxElement {
-    fn from(n: CssBogusDocumentMatcher) -> Self {
-        n.syntax.into()
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct CssBogusFontFamilyName {
-    syntax: SyntaxNode,
-}
-impl CssBogusFontFamilyName {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn items(&self) -> SyntaxElementChildren {
-        support::elements(&self.syntax)
-    }
-}
-impl AstNode for CssBogusFontFamilyName {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_FONT_FAMILY_NAME as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_BOGUS_FONT_FAMILY_NAME
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssBogusFontFamilyName {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssBogusFontFamilyName")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
-    }
-}
-impl From<CssBogusFontFamilyName> for SyntaxNode {
-    fn from(n: CssBogusFontFamilyName) -> Self {
-        n.syntax
-    }
-}
-impl From<CssBogusFontFamilyName> for SyntaxElement {
-    fn from(n: CssBogusFontFamilyName) -> Self {
-        n.syntax.into()
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct CssBogusFontFeatureValuesItem {
-    syntax: SyntaxNode,
-}
-impl CssBogusFontFeatureValuesItem {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn items(&self) -> SyntaxElementChildren {
-        support::elements(&self.syntax)
-    }
-}
-impl AstNode for CssBogusFontFeatureValuesItem {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_FONT_FEATURE_VALUES_ITEM as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_BOGUS_FONT_FEATURE_VALUES_ITEM
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssBogusFontFeatureValuesItem {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssBogusFontFeatureValuesItem")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
-    }
-}
-impl From<CssBogusFontFeatureValuesItem> for SyntaxNode {
-    fn from(n: CssBogusFontFeatureValuesItem) -> Self {
-        n.syntax
-    }
-}
-impl From<CssBogusFontFeatureValuesItem> for SyntaxElement {
-    fn from(n: CssBogusFontFeatureValuesItem) -> Self {
-        n.syntax.into()
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct CssBogusFunctionParameter {
-    syntax: SyntaxNode,
-}
-impl CssBogusFunctionParameter {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn items(&self) -> SyntaxElementChildren {
-        support::elements(&self.syntax)
-    }
-}
-impl AstNode for CssBogusFunctionParameter {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_FUNCTION_PARAMETER as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_BOGUS_FUNCTION_PARAMETER
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssBogusFunctionParameter {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssBogusFunctionParameter")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
-    }
-}
-impl From<CssBogusFunctionParameter> for SyntaxNode {
-    fn from(n: CssBogusFunctionParameter) -> Self {
-        n.syntax
-    }
-}
-impl From<CssBogusFunctionParameter> for SyntaxElement {
-    fn from(n: CssBogusFunctionParameter) -> Self {
-        n.syntax.into()
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct CssBogusIfBranch {
-    syntax: SyntaxNode,
-}
-impl CssBogusIfBranch {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn items(&self) -> SyntaxElementChildren {
-        support::elements(&self.syntax)
-    }
-}
-impl AstNode for CssBogusIfBranch {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_IF_BRANCH as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_BOGUS_IF_BRANCH
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssBogusIfBranch {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssBogusIfBranch")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
-    }
-}
-impl From<CssBogusIfBranch> for SyntaxNode {
-    fn from(n: CssBogusIfBranch) -> Self {
-        n.syntax
-    }
-}
-impl From<CssBogusIfBranch> for SyntaxElement {
-    fn from(n: CssBogusIfBranch) -> Self {
-        n.syntax.into()
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct CssBogusIfTest {
-    syntax: SyntaxNode,
-}
-impl CssBogusIfTest {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn items(&self) -> SyntaxElementChildren {
-        support::elements(&self.syntax)
-    }
-}
-impl AstNode for CssBogusIfTest {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_IF_TEST as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_BOGUS_IF_TEST
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssBogusIfTest {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssBogusIfTest")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
-    }
-}
-impl From<CssBogusIfTest> for SyntaxNode {
-    fn from(n: CssBogusIfTest) -> Self {
-        n.syntax
-    }
-}
-impl From<CssBogusIfTest> for SyntaxElement {
-    fn from(n: CssBogusIfTest) -> Self {
-        n.syntax.into()
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct CssBogusIfTestBooleanExpr {
-    syntax: SyntaxNode,
-}
-impl CssBogusIfTestBooleanExpr {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn items(&self) -> SyntaxElementChildren {
-        support::elements(&self.syntax)
-    }
-}
-impl AstNode for CssBogusIfTestBooleanExpr {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_IF_TEST_BOOLEAN_EXPR as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_BOGUS_IF_TEST_BOOLEAN_EXPR
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssBogusIfTestBooleanExpr {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssBogusIfTestBooleanExpr")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
-    }
-}
-impl From<CssBogusIfTestBooleanExpr> for SyntaxNode {
-    fn from(n: CssBogusIfTestBooleanExpr) -> Self {
-        n.syntax
-    }
-}
-impl From<CssBogusIfTestBooleanExpr> for SyntaxElement {
-    fn from(n: CssBogusIfTestBooleanExpr) -> Self {
-        n.syntax.into()
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct CssBogusKeyframesItem {
-    syntax: SyntaxNode,
-}
-impl CssBogusKeyframesItem {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn items(&self) -> SyntaxElementChildren {
-        support::elements(&self.syntax)
-    }
-}
-impl AstNode for CssBogusKeyframesItem {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_KEYFRAMES_ITEM as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_BOGUS_KEYFRAMES_ITEM
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssBogusKeyframesItem {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssBogusKeyframesItem")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
-    }
-}
-impl From<CssBogusKeyframesItem> for SyntaxNode {
-    fn from(n: CssBogusKeyframesItem) -> Self {
-        n.syntax
-    }
-}
-impl From<CssBogusKeyframesItem> for SyntaxElement {
-    fn from(n: CssBogusKeyframesItem) -> Self {
-        n.syntax.into()
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct CssBogusKeyframesName {
-    syntax: SyntaxNode,
-}
-impl CssBogusKeyframesName {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn items(&self) -> SyntaxElementChildren {
-        support::elements(&self.syntax)
-    }
-}
-impl AstNode for CssBogusKeyframesName {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_KEYFRAMES_NAME as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_BOGUS_KEYFRAMES_NAME
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssBogusKeyframesName {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssBogusKeyframesName")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
-    }
-}
-impl From<CssBogusKeyframesName> for SyntaxNode {
-    fn from(n: CssBogusKeyframesName) -> Self {
-        n.syntax
-    }
-}
-impl From<CssBogusKeyframesName> for SyntaxElement {
-    fn from(n: CssBogusKeyframesName) -> Self {
-        n.syntax.into()
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct CssBogusLayer {
-    syntax: SyntaxNode,
-}
-impl CssBogusLayer {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn items(&self) -> SyntaxElementChildren {
-        support::elements(&self.syntax)
-    }
-}
-impl AstNode for CssBogusLayer {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_LAYER as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_BOGUS_LAYER
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssBogusLayer {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssBogusLayer")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
-    }
-}
-impl From<CssBogusLayer> for SyntaxNode {
-    fn from(n: CssBogusLayer) -> Self {
-        n.syntax
-    }
-}
-impl From<CssBogusLayer> for SyntaxElement {
-    fn from(n: CssBogusLayer) -> Self {
-        n.syntax.into()
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct CssBogusMediaQuery {
-    syntax: SyntaxNode,
-}
-impl CssBogusMediaQuery {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn items(&self) -> SyntaxElementChildren {
-        support::elements(&self.syntax)
-    }
-}
-impl AstNode for CssBogusMediaQuery {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_MEDIA_QUERY as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_BOGUS_MEDIA_QUERY
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssBogusMediaQuery {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssBogusMediaQuery")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
-    }
-}
-impl From<CssBogusMediaQuery> for SyntaxNode {
-    fn from(n: CssBogusMediaQuery) -> Self {
-        n.syntax
-    }
-}
-impl From<CssBogusMediaQuery> for SyntaxElement {
-    fn from(n: CssBogusMediaQuery) -> Self {
-        n.syntax.into()
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct CssBogusPageSelectorPseudo {
-    syntax: SyntaxNode,
-}
-impl CssBogusPageSelectorPseudo {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn items(&self) -> SyntaxElementChildren {
-        support::elements(&self.syntax)
-    }
-}
-impl AstNode for CssBogusPageSelectorPseudo {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_PAGE_SELECTOR_PSEUDO as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_BOGUS_PAGE_SELECTOR_PSEUDO
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssBogusPageSelectorPseudo {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssBogusPageSelectorPseudo")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
-    }
-}
-impl From<CssBogusPageSelectorPseudo> for SyntaxNode {
-    fn from(n: CssBogusPageSelectorPseudo) -> Self {
-        n.syntax
-    }
-}
-impl From<CssBogusPageSelectorPseudo> for SyntaxElement {
-    fn from(n: CssBogusPageSelectorPseudo) -> Self {
-        n.syntax.into()
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct CssBogusParameter {
-    syntax: SyntaxNode,
-}
-impl CssBogusParameter {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn items(&self) -> SyntaxElementChildren {
-        support::elements(&self.syntax)
-    }
-}
-impl AstNode for CssBogusParameter {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_PARAMETER as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_BOGUS_PARAMETER
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssBogusParameter {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssBogusParameter")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
-    }
-}
-impl From<CssBogusParameter> for SyntaxNode {
-    fn from(n: CssBogusParameter) -> Self {
-        n.syntax
-    }
-}
-impl From<CssBogusParameter> for SyntaxElement {
-    fn from(n: CssBogusParameter) -> Self {
-        n.syntax.into()
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct CssBogusProperty {
-    syntax: SyntaxNode,
-}
-impl CssBogusProperty {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn items(&self) -> SyntaxElementChildren {
-        support::elements(&self.syntax)
-    }
-}
-impl AstNode for CssBogusProperty {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_PROPERTY as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_BOGUS_PROPERTY
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssBogusProperty {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssBogusProperty")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
-    }
-}
-impl From<CssBogusProperty> for SyntaxNode {
-    fn from(n: CssBogusProperty) -> Self {
-        n.syntax
-    }
-}
-impl From<CssBogusProperty> for SyntaxElement {
-    fn from(n: CssBogusProperty) -> Self {
-        n.syntax.into()
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct CssBogusPropertyValue {
-    syntax: SyntaxNode,
-}
-impl CssBogusPropertyValue {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn items(&self) -> SyntaxElementChildren {
-        support::elements(&self.syntax)
-    }
-}
-impl AstNode for CssBogusPropertyValue {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_PROPERTY_VALUE as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_BOGUS_PROPERTY_VALUE
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssBogusPropertyValue {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssBogusPropertyValue")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
-    }
-}
-impl From<CssBogusPropertyValue> for SyntaxNode {
-    fn from(n: CssBogusPropertyValue) -> Self {
-        n.syntax
-    }
-}
-impl From<CssBogusPropertyValue> for SyntaxElement {
-    fn from(n: CssBogusPropertyValue) -> Self {
-        n.syntax.into()
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct CssBogusPseudoClass {
-    syntax: SyntaxNode,
-}
-impl CssBogusPseudoClass {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn items(&self) -> SyntaxElementChildren {
-        support::elements(&self.syntax)
-    }
-}
-impl AstNode for CssBogusPseudoClass {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_PSEUDO_CLASS as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_BOGUS_PSEUDO_CLASS
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssBogusPseudoClass {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssBogusPseudoClass")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
-    }
-}
-impl From<CssBogusPseudoClass> for SyntaxNode {
-    fn from(n: CssBogusPseudoClass) -> Self {
-        n.syntax
-    }
-}
-impl From<CssBogusPseudoClass> for SyntaxElement {
-    fn from(n: CssBogusPseudoClass) -> Self {
-        n.syntax.into()
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct CssBogusPseudoElement {
-    syntax: SyntaxNode,
-}
-impl CssBogusPseudoElement {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn items(&self) -> SyntaxElementChildren {
-        support::elements(&self.syntax)
-    }
-}
-impl AstNode for CssBogusPseudoElement {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_PSEUDO_ELEMENT as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_BOGUS_PSEUDO_ELEMENT
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssBogusPseudoElement {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssBogusPseudoElement")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
-    }
-}
-impl From<CssBogusPseudoElement> for SyntaxNode {
-    fn from(n: CssBogusPseudoElement) -> Self {
-        n.syntax
-    }
-}
-impl From<CssBogusPseudoElement> for SyntaxElement {
-    fn from(n: CssBogusPseudoElement) -> Self {
-        n.syntax.into()
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct CssBogusRule {
-    syntax: SyntaxNode,
-}
-impl CssBogusRule {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn items(&self) -> SyntaxElementChildren {
-        support::elements(&self.syntax)
-    }
-}
-impl AstNode for CssBogusRule {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_RULE as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_BOGUS_RULE
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssBogusRule {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssBogusRule")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
-    }
-}
-impl From<CssBogusRule> for SyntaxNode {
-    fn from(n: CssBogusRule) -> Self {
-        n.syntax
-    }
-}
-impl From<CssBogusRule> for SyntaxElement {
-    fn from(n: CssBogusRule) -> Self {
-        n.syntax.into()
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct CssBogusScopeRange {
-    syntax: SyntaxNode,
-}
-impl CssBogusScopeRange {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn items(&self) -> SyntaxElementChildren {
-        support::elements(&self.syntax)
-    }
-}
-impl AstNode for CssBogusScopeRange {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_SCOPE_RANGE as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_BOGUS_SCOPE_RANGE
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssBogusScopeRange {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssBogusScopeRange")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
-    }
-}
-impl From<CssBogusScopeRange> for SyntaxNode {
-    fn from(n: CssBogusScopeRange) -> Self {
-        n.syntax
-    }
-}
-impl From<CssBogusScopeRange> for SyntaxElement {
-    fn from(n: CssBogusScopeRange) -> Self {
-        n.syntax.into()
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct CssBogusSelector {
-    syntax: SyntaxNode,
-}
-impl CssBogusSelector {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn items(&self) -> SyntaxElementChildren {
-        support::elements(&self.syntax)
-    }
-}
-impl AstNode for CssBogusSelector {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_SELECTOR as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_BOGUS_SELECTOR
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssBogusSelector {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssBogusSelector")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
-    }
-}
-impl From<CssBogusSelector> for SyntaxNode {
-    fn from(n: CssBogusSelector) -> Self {
-        n.syntax
-    }
-}
-impl From<CssBogusSelector> for SyntaxElement {
-    fn from(n: CssBogusSelector) -> Self {
-        n.syntax.into()
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct CssBogusSubSelector {
-    syntax: SyntaxNode,
-}
-impl CssBogusSubSelector {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn items(&self) -> SyntaxElementChildren {
-        support::elements(&self.syntax)
-    }
-}
-impl AstNode for CssBogusSubSelector {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_SUB_SELECTOR as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_BOGUS_SUB_SELECTOR
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssBogusSubSelector {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssBogusSubSelector")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
-    }
-}
-impl From<CssBogusSubSelector> for SyntaxNode {
-    fn from(n: CssBogusSubSelector) -> Self {
-        n.syntax
-    }
-}
-impl From<CssBogusSubSelector> for SyntaxElement {
-    fn from(n: CssBogusSubSelector) -> Self {
-        n.syntax.into()
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct CssBogusSupportsCondition {
-    syntax: SyntaxNode,
-}
-impl CssBogusSupportsCondition {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn items(&self) -> SyntaxElementChildren {
-        support::elements(&self.syntax)
-    }
-}
-impl AstNode for CssBogusSupportsCondition {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_SUPPORTS_CONDITION as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_BOGUS_SUPPORTS_CONDITION
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssBogusSupportsCondition {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssBogusSupportsCondition")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
-    }
-}
-impl From<CssBogusSupportsCondition> for SyntaxNode {
-    fn from(n: CssBogusSupportsCondition) -> Self {
-        n.syntax
-    }
-}
-impl From<CssBogusSupportsCondition> for SyntaxElement {
-    fn from(n: CssBogusSupportsCondition) -> Self {
-        n.syntax.into()
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct CssBogusSyntax {
-    syntax: SyntaxNode,
-}
-impl CssBogusSyntax {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn items(&self) -> SyntaxElementChildren {
-        support::elements(&self.syntax)
-    }
-}
-impl AstNode for CssBogusSyntax {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_SYNTAX as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_BOGUS_SYNTAX
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssBogusSyntax {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssBogusSyntax")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
-    }
-}
-impl From<CssBogusSyntax> for SyntaxNode {
-    fn from(n: CssBogusSyntax) -> Self {
-        n.syntax
-    }
-}
-impl From<CssBogusSyntax> for SyntaxElement {
-    fn from(n: CssBogusSyntax) -> Self {
-        n.syntax.into()
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct CssBogusSyntaxSingleComponent {
-    syntax: SyntaxNode,
-}
-impl CssBogusSyntaxSingleComponent {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn items(&self) -> SyntaxElementChildren {
-        support::elements(&self.syntax)
-    }
-}
-impl AstNode for CssBogusSyntaxSingleComponent {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_SYNTAX_SINGLE_COMPONENT as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_BOGUS_SYNTAX_SINGLE_COMPONENT
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssBogusSyntaxSingleComponent {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssBogusSyntaxSingleComponent")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
-    }
-}
-impl From<CssBogusSyntaxSingleComponent> for SyntaxNode {
-    fn from(n: CssBogusSyntaxSingleComponent) -> Self {
-        n.syntax
-    }
-}
-impl From<CssBogusSyntaxSingleComponent> for SyntaxElement {
-    fn from(n: CssBogusSyntaxSingleComponent) -> Self {
-        n.syntax.into()
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct CssBogusType {
-    syntax: SyntaxNode,
-}
-impl CssBogusType {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn items(&self) -> SyntaxElementChildren {
-        support::elements(&self.syntax)
-    }
-}
-impl AstNode for CssBogusType {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_TYPE as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_BOGUS_TYPE
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssBogusType {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssBogusType")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
-    }
-}
-impl From<CssBogusType> for SyntaxNode {
-    fn from(n: CssBogusType) -> Self {
-        n.syntax
-    }
-}
-impl From<CssBogusType> for SyntaxElement {
-    fn from(n: CssBogusType) -> Self {
-        n.syntax.into()
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct CssBogusUnicodeRangeValue {
-    syntax: SyntaxNode,
-}
-impl CssBogusUnicodeRangeValue {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn items(&self) -> SyntaxElementChildren {
-        support::elements(&self.syntax)
-    }
-}
-impl AstNode for CssBogusUnicodeRangeValue {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_UNICODE_RANGE_VALUE as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_BOGUS_UNICODE_RANGE_VALUE
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssBogusUnicodeRangeValue {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssBogusUnicodeRangeValue")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
-    }
-}
-impl From<CssBogusUnicodeRangeValue> for SyntaxNode {
-    fn from(n: CssBogusUnicodeRangeValue) -> Self {
-        n.syntax
-    }
-}
-impl From<CssBogusUnicodeRangeValue> for SyntaxElement {
-    fn from(n: CssBogusUnicodeRangeValue) -> Self {
-        n.syntax.into()
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct CssBogusUrlModifier {
-    syntax: SyntaxNode,
-}
-impl CssBogusUrlModifier {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn items(&self) -> SyntaxElementChildren {
-        support::elements(&self.syntax)
-    }
-}
-impl AstNode for CssBogusUrlModifier {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_URL_MODIFIER as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_BOGUS_URL_MODIFIER
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssBogusUrlModifier {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssBogusUrlModifier")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
-    }
-}
-impl From<CssBogusUrlModifier> for SyntaxNode {
-    fn from(n: CssBogusUrlModifier) -> Self {
-        n.syntax
-    }
-}
-impl From<CssBogusUrlModifier> for SyntaxElement {
-    fn from(n: CssBogusUrlModifier) -> Self {
-        n.syntax.into()
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct CssUnknownAtRuleComponentList {
     syntax: SyntaxNode,
 }
@@ -41855,7 +40011,7 @@ impl From<CssValueAtRuleGenericValue> for SyntaxElement {
         n.syntax.into()
     }
 }
-biome_rowan::declare_node_union! { pub AnyCssBogusNode = CssBogus | CssBogusAtRule | CssBogusAttrName | CssBogusBlock | CssBogusCustomIdentifier | CssBogusDeclarationItem | CssBogusDocumentMatcher | CssBogusFontFamilyName | CssBogusFontFeatureValuesItem | CssBogusFunctionParameter | CssBogusIfBranch | CssBogusIfTest | CssBogusIfTestBooleanExpr | CssBogusKeyframesItem | CssBogusKeyframesName | CssBogusLayer | CssBogusMediaQuery | CssBogusPageSelectorPseudo | CssBogusParameter | CssBogusProperty | CssBogusPropertyValue | CssBogusPseudoClass | CssBogusPseudoElement | CssBogusRule | CssBogusScopeRange | CssBogusSelector | CssBogusSubSelector | CssBogusSupportsCondition | CssBogusSyntax | CssBogusSyntaxSingleComponent | CssBogusType | CssBogusUnicodeRangeValue | CssBogusUrlModifier | CssUnknownAtRuleComponentList | CssValueAtRuleGenericValue }
+biome_rowan::declare_node_union! { pub AnyCssBogusNode = CssBogus | CssUnknownAtRuleComponentList | CssValueAtRuleGenericValue }
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub struct CssAttrNameList {
     syntax_list: SyntaxList,

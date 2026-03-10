@@ -19,7 +19,7 @@ CssRoot {
     items: CssRootItemList [
         CssAtRule {
             at_token: AT@0..1 "@" [] [],
-            rule: CssBogusAtRule {
+            rule: CssBogus {
                 items: [
                     UTILITY_KW@1..9 "utility" [] [Whitespace(" ")],
                     CssIdentifier {
@@ -46,7 +46,7 @@ CssRoot {
   1: CSS_ROOT_ITEM_LIST@0..22
     0: CSS_AT_RULE@0..22
       0: AT@0..1 "@" [] []
-      1: CSS_BOGUS_AT_RULE@1..22
+      1: CSS_BOGUS@1..22
         0: UTILITY_KW@1..9 "utility" [] [Whitespace(" ")]
         1: CSS_IDENTIFIER@9..20
           0: IDENT@9..20 "empty-util" [] [Whitespace(" ")]

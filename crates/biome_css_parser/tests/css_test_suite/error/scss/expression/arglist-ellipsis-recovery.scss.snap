@@ -31,7 +31,7 @@ CssRoot {
                     items: [
                         CssBogus {
                             items: [
-                                CssBogusSupportsCondition {
+                                CssBogus {
                                     items: [
                                         CssIdentifier {
                                             value_token: IDENT@85..88 "foo" [] [],
@@ -53,7 +53,7 @@ CssRoot {
                                                     ],
                                                 },
                                                 COMMA@94..96 "," [] [Whitespace(" ")],
-                                                CssBogusParameter {
+                                                CssBogus {
                                                     items: [
                                                         ERROR_TOKEN@96..97 "?" [] [],
                                                         ERROR_TOKEN@97..98 "?" [] [],
@@ -113,7 +113,7 @@ CssRoot {
       1: COLON@83..85 ":" [] [Whitespace(" ")]
       2: CSS_BOGUS@85..107
         0: CSS_BOGUS@85..107
-          0: CSS_BOGUS_SUPPORTS_CONDITION@85..107
+          0: CSS_BOGUS@85..107
             0: CSS_IDENTIFIER@85..88
               0: IDENT@85..88 "foo" [] []
             1: L_PAREN@88..89 "(" [] []
@@ -127,7 +127,7 @@ CssRoot {
                         0: IDENT@90..91 "a" [] []
                     1: DOT3@91..94 "..." [] []
               1: COMMA@94..96 "," [] [Whitespace(" ")]
-              2: CSS_BOGUS_PARAMETER@96..99
+              2: CSS_BOGUS@96..99
                 0: ERROR_TOKEN@96..97 "?" [] []
                 1: ERROR_TOKEN@97..98 "?" [] []
                 2: ERROR_TOKEN@98..99 "?" [] []

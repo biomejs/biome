@@ -85,7 +85,7 @@ impl ParseSeparatedList for MediaQueryList {
     ) -> RecoveryResult {
         parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecoveryTokenSet::new(CSS_BOGUS_MEDIA_QUERY, token_set!(T![,], T!['{'])),
+            &ParseRecoveryTokenSet::new(CSS_BOGUS, token_set!(T![,], T!['{'])),
             expected_media_query,
         )
     }

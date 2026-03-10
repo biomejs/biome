@@ -8,7 +8,7 @@ impl FormatRule<AnyCssIfBranch> for FormatAnyCssIfBranch {
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssIfBranch, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
-            AnyCssIfBranch::CssBogusIfBranch(node) => node.format().fmt(f),
+            AnyCssIfBranch::CssBogus(node) => node.format().fmt(f),
             AnyCssIfBranch::CssIfBranch(node) => node.format().fmt(f),
         }
     }

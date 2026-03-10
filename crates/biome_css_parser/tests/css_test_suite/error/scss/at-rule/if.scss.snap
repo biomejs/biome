@@ -60,7 +60,7 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@21..24 "@" [Newline("\n"), Newline("\n")] [],
-            rule: CssBogusAtRule {
+            rule: CssBogus {
                 items: [
                     IF_KW@24..27 "if" [] [Whitespace(" ")],
                     CssBogus {
@@ -79,7 +79,7 @@ CssRoot {
                                             value_token: IDENT@37..41 "dark" [] [],
                                         },
                                     },
-                                    CssBogusPropertyValue {
+                                    CssBogus {
                                         items: [
                                             SEMICOLON@41..42 ";" [] [],
                                         ],
@@ -88,7 +88,7 @@ CssRoot {
                             },
                         ],
                     },
-                    CssBogusBlock {
+                    CssBogus {
                         items: [
                             CssDeclarationOrRuleList [
                                 CssAtRule {
@@ -178,7 +178,7 @@ CssRoot {
         3: (empty)
     1: CSS_AT_RULE@21..74
       0: AT@21..24 "@" [Newline("\n"), Newline("\n")] []
-      1: CSS_BOGUS_AT_RULE@24..74
+      1: CSS_BOGUS@24..74
         0: IF_KW@24..27 "if" [] [Whitespace(" ")]
         1: CSS_BOGUS@27..42
           0: CSS_BOGUS@27..42
@@ -190,9 +190,9 @@ CssRoot {
               1: EQ2@34..37 "==" [] [Whitespace(" ")]
               2: CSS_IDENTIFIER@37..41
                 0: IDENT@37..41 "dark" [] []
-            1: CSS_BOGUS_PROPERTY_VALUE@41..42
+            1: CSS_BOGUS@41..42
               0: SEMICOLON@41..42 ";" [] []
-        2: CSS_BOGUS_BLOCK@42..74
+        2: CSS_BOGUS@42..74
           0: CSS_DECLARATION_OR_RULE_LIST@42..74
             0: CSS_AT_RULE@42..74
               0: AT@42..45 "@" [Newline("\n"), Newline("\n")] []

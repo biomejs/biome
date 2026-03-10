@@ -32,7 +32,7 @@ const fn evaluate_pseudo_function_selector(name: &str) -> Option<Specificity> {
 fn evaluate_any_pseudo_class(class: &AnyCssPseudoClass) -> Specificity {
     // https://www.w3.org/TR/selectors-4/#specificity-rules
     match class {
-        AnyCssPseudoClass::CssBogusPseudoClass(_) => ZERO_SPECIFICITY,
+        AnyCssPseudoClass::CssBogus(_) => ZERO_SPECIFICITY,
         AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelector(selector) => {
             CLASS_SPECIFICITY
                 + selector
@@ -128,7 +128,7 @@ fn evaluate_any_subselector(selector: &AnyCssSubSelector) -> Specificity {
         AnyCssSubSelector::CssAttributeSelector(_) => CLASS_SPECIFICITY,
         AnyCssSubSelector::CssPseudoClassSelector(s) => evaluate_pseudo_selector(s),
         AnyCssSubSelector::CssPseudoElementSelector(_) => TYPE_SPECIFICITY,
-        AnyCssSubSelector::CssBogusSubSelector(_) => ZERO_SPECIFICITY,
+        AnyCssSubSelector::CssBogus(_) => ZERO_SPECIFICITY,
     }
 }
 
@@ -152,7 +152,7 @@ declare_node_union! {
 
 fn evaluate_any_compound_selector(selector: &AnyCssCompoundSelector) -> Specificity {
     match selector {
-        AnyCssCompoundSelector::CssBogusSelector(_) => ZERO_SPECIFICITY,
+        AnyCssCompoundSelector::CssBogus(_) => ZERO_SPECIFICITY,
         AnyCssCompoundSelector::CssCompoundSelector(s) => evaluate_compound_selector(s),
     }
 }
@@ -171,7 +171,7 @@ pub fn evaluate_any_selector(selector: &AnyCssSelector) -> Specificity {
     match selector {
         AnyCssSelector::CssCompoundSelector(s) => evaluate_compound_selector(s),
         AnyCssSelector::CssComplexSelector(s) => evaluate_complex_selector(s),
-        AnyCssSelector::CssBogusSelector(_) => ZERO_SPECIFICITY,
+        AnyCssSelector::CssBogus(_) => ZERO_SPECIFICITY,
         AnyCssSelector::CssMetavariable(_) => {
             // TODO: Implement this
             ZERO_SPECIFICITY
@@ -181,7 +181,7 @@ pub fn evaluate_any_selector(selector: &AnyCssSelector) -> Specificity {
 
 fn evaluate_any_relative_selector(selector: &AnyCssRelativeSelector) -> Specificity {
     match selector {
-        AnyCssRelativeSelector::CssBogusSelector(_) => ZERO_SPECIFICITY,
+        AnyCssRelativeSelector::CssBogus(_) => ZERO_SPECIFICITY,
         AnyCssRelativeSelector::CssRelativeSelector(s) => s
             .selector()
             .map_or(ZERO_SPECIFICITY, |s| evaluate_any_selector(&s)),

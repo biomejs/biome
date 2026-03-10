@@ -8,7 +8,7 @@ impl FormatRule<AnyCssPseudoElement> for FormatAnyCssPseudoElement {
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssPseudoElement, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
-            AnyCssPseudoElement::CssBogusPseudoElement(node) => node.format().fmt(f),
+            AnyCssPseudoElement::CssBogus(node) => node.format().fmt(f),
             AnyCssPseudoElement::CssPseudoElementFunction(node) => node.format().fmt(f),
             AnyCssPseudoElement::CssPseudoElementFunctionCustomIdentifier(node) => {
                 node.format().fmt(f)

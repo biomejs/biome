@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
 
@@ -113,7 +112,7 @@ CssRoot {
                         right: missing (required),
                     },
                 },
-                block: CssBogusBlock {
+                block: CssBogus {
                     items: [
                         CssRuleList [],
                         R_CURLY@169..171 "}" [Newline("\n")] [],
@@ -123,7 +122,7 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@171..223 "@" [Newline("\n"), Newline("\n"), Comments("/* 200px is not a val ..."), Newline("\n")] [],
-            rule: CssBogusAtRule {
+            rule: CssBogus {
                 items: [
                     CssBogus {
                         items: [
@@ -220,7 +219,7 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@362..392 "@" [Newline("\n"), Newline("\n"), Comments("/* Missing parenthesi ..."), Newline("\n")] [],
-            rule: CssBogusAtRule {
+            rule: CssBogus {
                 items: [
                     CssBogus {
                         items: [
@@ -287,7 +286,7 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@458..533 "@" [Newline("\n"), Newline("\n"), Comments("/* There's an extra ` ..."), Newline("\n")] [],
-            rule: CssBogusAtRule {
+            rule: CssBogus {
                 items: [
                     CssBogus {
                         items: [
@@ -349,7 +348,7 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@585..613 "@" [Newline("\n"), Newline("\n"), Comments("/* Invalid query name */"), Newline("\n")] [],
-            rule: CssBogusAtRule {
+            rule: CssBogus {
                 items: [
                     CssBogus {
                         items: [
@@ -413,7 +412,7 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@676..689 "@" [Newline("\n"), Newline("\n"), Comments("/* not */"), Newline("\n")] [],
-            rule: CssBogusAtRule {
+            rule: CssBogus {
                 items: [
                     CssBogus {
                         items: [
@@ -443,7 +442,7 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@719..722 "@" [Newline("\n"), Newline("\n")] [],
-            rule: CssBogusAtRule {
+            rule: CssBogus {
                 items: [
                     CssBogus {
                         items: [
@@ -463,7 +462,7 @@ CssRoot {
                             },
                         ],
                     },
-                    CssBogusBlock {
+                    CssBogus {
                         items: [
                             CssRuleList [],
                             R_CURLY@748..750 "}" [Newline("\n")] [],
@@ -527,12 +526,12 @@ CssRoot {
               2: R_PAREN@165..167 ")" [] [Whitespace(" ")]
             1: OR_KW@167..169 "or" [] []
             2: (empty)
-        1: CSS_BOGUS_BLOCK@169..171
+        1: CSS_BOGUS@169..171
           0: CSS_RULE_LIST@169..169
           1: R_CURLY@169..171 "}" [Newline("\n")] []
     2: CSS_AT_RULE@171..261
       0: AT@171..223 "@" [Newline("\n"), Newline("\n"), Comments("/* 200px is not a val ..."), Newline("\n")] []
-      1: CSS_BOGUS_AT_RULE@223..261
+      1: CSS_BOGUS@223..261
         0: CSS_BOGUS@223..258
           0: CONTAINER_KW@223..233 "container" [] [Whitespace(" ")]
           1: CSS_BOGUS@233..258
@@ -594,7 +593,7 @@ CssRoot {
           2: R_CURLY@360..362 "}" [Newline("\n")] []
     4: CSS_AT_RULE@362..458
       0: AT@362..392 "@" [Newline("\n"), Newline("\n"), Comments("/* Missing parenthesi ..."), Newline("\n")] []
-      1: CSS_BOGUS_AT_RULE@392..458
+      1: CSS_BOGUS@392..458
         0: CSS_BOGUS@392..455
           0: CONTAINER_KW@392..402 "container" [] [Whitespace(" ")]
           1: CSS_BOGUS@402..455
@@ -634,7 +633,7 @@ CssRoot {
           2: R_CURLY@456..458 "}" [Newline("\n")] []
     5: CSS_AT_RULE@458..585
       0: AT@458..533 "@" [Newline("\n"), Newline("\n"), Comments("/* There's an extra ` ..."), Newline("\n")] []
-      1: CSS_BOGUS_AT_RULE@533..585
+      1: CSS_BOGUS@533..585
         0: CSS_BOGUS@533..582
           0: CONTAINER_KW@533..543 "container" [] [Whitespace(" ")]
           1: CSS_BOGUS@543..582
@@ -670,7 +669,7 @@ CssRoot {
           2: R_CURLY@583..585 "}" [Newline("\n")] []
     6: CSS_AT_RULE@585..676
       0: AT@585..613 "@" [Newline("\n"), Newline("\n"), Comments("/* Invalid query name */"), Newline("\n")] []
-      1: CSS_BOGUS_AT_RULE@613..676
+      1: CSS_BOGUS@613..676
         0: CSS_BOGUS@613..673
           0: CONTAINER_KW@613..623 "container" [] [Whitespace(" ")]
           1: CSS_BOGUS@623..673
@@ -707,7 +706,7 @@ CssRoot {
           2: R_CURLY@674..676 "}" [Newline("\n")] []
     7: CSS_AT_RULE@676..719
       0: AT@676..689 "@" [Newline("\n"), Newline("\n"), Comments("/* not */"), Newline("\n")] []
-      1: CSS_BOGUS_AT_RULE@689..719
+      1: CSS_BOGUS@689..719
         0: CSS_BOGUS@689..716
           0: CONTAINER_KW@689..699 "container" [] [Whitespace(" ")]
           1: CSS_CUSTOM_IDENTIFIER@699..704
@@ -722,7 +721,7 @@ CssRoot {
           2: R_CURLY@717..719 "}" [Newline("\n")] []
     8: CSS_AT_RULE@719..750
       0: AT@719..722 "@" [Newline("\n"), Newline("\n")] []
-      1: CSS_BOGUS_AT_RULE@722..750
+      1: CSS_BOGUS@722..750
         0: CSS_BOGUS@722..748
           0: CONTAINER_KW@722..732 "container" [] [Whitespace(" ")]
           1: CSS_CUSTOM_IDENTIFIER@732..737
@@ -731,7 +730,7 @@ CssRoot {
             0: NOT_KW@737..741 "not" [] [Whitespace(" ")]
             1: CSS_BOGUS@741..748
               0: IDENT@741..748 "invalid" [] []
-        1: CSS_BOGUS_BLOCK@748..750
+        1: CSS_BOGUS@748..750
           0: CSS_RULE_LIST@748..748
           1: R_CURLY@748..750 "}" [Newline("\n")] []
   2: EOF@750..751 "" [Newline("\n")] []

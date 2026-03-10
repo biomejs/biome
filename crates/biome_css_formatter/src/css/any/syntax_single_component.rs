@@ -8,9 +8,7 @@ impl FormatRule<AnyCssSyntaxSingleComponent> for FormatAnyCssSyntaxSingleCompone
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssSyntaxSingleComponent, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
-            AnyCssSyntaxSingleComponent::CssBogusSyntaxSingleComponent(node) => {
-                node.format().fmt(f)
-            }
+            AnyCssSyntaxSingleComponent::CssBogus(node) => node.format().fmt(f),
             AnyCssSyntaxSingleComponent::CssIdentifier(node) => node.format().fmt(f),
             AnyCssSyntaxSingleComponent::CssSyntaxType(node) => node.format().fmt(f),
         }

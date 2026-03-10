@@ -23,7 +23,7 @@ struct ParameterListParseRecovery {
 impl ParseRecovery for ParameterListParseRecovery {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
-    const RECOVERED_KIND: Self::Kind = CSS_BOGUS_PARAMETER;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
         p.at_ts(PARAMETER_RECOVERY_TOKEN_SET) || is_at_parameter_with_context(p, self.context)

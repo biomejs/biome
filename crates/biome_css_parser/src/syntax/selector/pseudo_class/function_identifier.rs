@@ -39,12 +39,12 @@ pub(crate) fn parse_pseudo_class_function_identifier(p: &mut CssParser) -> Parse
         ) {
             CSS_PSEUDO_CLASS_FUNCTION_IDENTIFIER
         } else {
-            CSS_BOGUS_PSEUDO_CLASS
+            CSS_BOGUS
         }
     } else {
         recover_selector_function_parameter(p, expected_dir_parameter_identifier);
         p.expect(T![')']);
-        CSS_BOGUS_PSEUDO_CLASS
+        CSS_BOGUS
     };
 
     Present(m.complete(p, kind))

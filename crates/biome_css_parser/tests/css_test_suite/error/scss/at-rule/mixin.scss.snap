@@ -202,7 +202,7 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@159..162 "@" [Newline("\n"), Newline("\n")] [],
-            rule: CssBogusAtRule {
+            rule: CssBogus {
                 items: [
                     MIXIN_KW@162..168 "mixin" [] [Whitespace(" ")],
                     CssIdentifier {
@@ -224,7 +224,7 @@ CssRoot {
                         ],
                         r_paren_token: R_PAREN@182..183 ")" [] [],
                     },
-                    CssBogusBlock {
+                    CssBogus {
                         items: [],
                     },
                 ],
@@ -358,7 +358,7 @@ CssRoot {
           2: R_CURLY@157..159 "}" [Newline("\n")] []
     3: CSS_AT_RULE@159..183
       0: AT@159..162 "@" [Newline("\n"), Newline("\n")] []
-      1: CSS_BOGUS_AT_RULE@162..183
+      1: CSS_BOGUS@162..183
         0: MIXIN_KW@162..168 "mixin" [] [Whitespace(" ")]
         1: CSS_IDENTIFIER@168..174
           0: IDENT@168..174 "button" [] []
@@ -373,7 +373,7 @@ CssRoot {
               1: (empty)
               2: (empty)
           2: R_PAREN@182..183 ")" [] []
-        3: CSS_BOGUS_BLOCK@183..183
+        3: CSS_BOGUS@183..183
   2: EOF@183..184 "" [Newline("\n")] []
 
 ```

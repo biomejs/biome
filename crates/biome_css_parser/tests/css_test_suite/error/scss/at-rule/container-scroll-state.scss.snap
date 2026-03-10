@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
 
@@ -24,7 +23,7 @@ CssRoot {
     items: CssRootItemList [
         CssAtRule {
             at_token: AT@0..1 "@" [] [],
-            rule: CssBogusAtRule {
+            rule: CssBogus {
                 items: [
                     CssBogus {
                         items: [
@@ -67,7 +66,7 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@50..53 "@" [Newline("\n"), Newline("\n")] [],
-            rule: CssBogusAtRule {
+            rule: CssBogus {
                 items: [
                     CssBogus {
                         items: [
@@ -103,7 +102,7 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@90..93 "@" [Newline("\n"), Newline("\n")] [],
-            rule: CssBogusAtRule {
+            rule: CssBogus {
                 items: [
                     CssBogus {
                         items: [
@@ -161,7 +160,7 @@ CssRoot {
   1: CSS_ROOT_ITEM_LIST@0..148
     0: CSS_AT_RULE@0..50
       0: AT@0..1 "@" [] []
-      1: CSS_BOGUS_AT_RULE@1..50
+      1: CSS_BOGUS@1..50
         0: CSS_BOGUS@1..47
           0: CONTAINER_KW@1..11 "container" [] [Whitespace(" ")]
           1: CSS_BOGUS@11..47
@@ -185,7 +184,7 @@ CssRoot {
           2: R_CURLY@49..50 "}" [] []
     1: CSS_AT_RULE@50..90
       0: AT@50..53 "@" [Newline("\n"), Newline("\n")] []
-      1: CSS_BOGUS_AT_RULE@53..90
+      1: CSS_BOGUS@53..90
         0: CSS_BOGUS@53..87
           0: CONTAINER_KW@53..63 "container" [] [Whitespace(" ")]
           1: CSS_BOGUS@63..87
@@ -203,7 +202,7 @@ CssRoot {
           2: R_CURLY@89..90 "}" [] []
     2: CSS_AT_RULE@90..148
       0: AT@90..93 "@" [Newline("\n"), Newline("\n")] []
-      1: CSS_BOGUS_AT_RULE@93..148
+      1: CSS_BOGUS@93..148
         0: CSS_BOGUS@93..145
           0: CONTAINER_KW@93..103 "container" [] [Whitespace(" ")]
           1: CSS_BOGUS@103..145

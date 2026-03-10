@@ -101,7 +101,7 @@ struct RootItemListParseRecovery;
 impl ParseRecovery for RootItemListParseRecovery {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
-    const RECOVERED_KIND: Self::Kind = CSS_BOGUS_RULE;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
         p.at(EOF) || is_at_root_item_list_element(p)
@@ -172,7 +172,7 @@ impl RuleListParseRecovery {
 impl ParseRecovery for RuleListParseRecovery {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
-    const RECOVERED_KIND: Self::Kind = CSS_BOGUS_RULE;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
         p.at(self.end_kind) || is_at_rule_list_element(p)
@@ -820,7 +820,7 @@ struct BracketedValueListRecovery;
 impl ParseRecovery for BracketedValueListRecovery {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
-    const RECOVERED_KIND: Self::Kind = CSS_BOGUS_CUSTOM_IDENTIFIER;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
         // If the next token is the end of the list or the next element, we're at a recovery point.

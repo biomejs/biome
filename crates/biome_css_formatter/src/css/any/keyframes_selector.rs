@@ -8,7 +8,7 @@ impl FormatRule<AnyCssKeyframesSelector> for FormatAnyCssKeyframesSelector {
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssKeyframesSelector, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
-            AnyCssKeyframesSelector::CssBogusSelector(node) => node.format().fmt(f),
+            AnyCssKeyframesSelector::CssBogus(node) => node.format().fmt(f),
             AnyCssKeyframesSelector::CssKeyframesIdentSelector(node) => node.format().fmt(f),
             AnyCssKeyframesSelector::CssKeyframesPercentageSelector(node) => node.format().fmt(f),
         }

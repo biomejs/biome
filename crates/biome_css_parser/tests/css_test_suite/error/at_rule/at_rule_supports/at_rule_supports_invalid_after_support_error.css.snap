@@ -26,7 +26,7 @@ CssRoot {
             rule: CssSupportsAtRule {
                 declarator: CssSupportsAtRuleDeclarator {
                     supports_token: SUPPORTS_KW@1..10 "supports" [] [Whitespace(" ")],
-                    condition: CssBogusSupportsCondition {
+                    condition: CssBogus {
                         items: [
                             MINUS@10..11 "-" [] [],
                             MINUS@11..13 "-" [] [Whitespace(" ")],
@@ -46,7 +46,7 @@ CssRoot {
             rule: CssSupportsAtRule {
                 declarator: CssSupportsAtRuleDeclarator {
                     supports_token: SUPPORTS_KW@23..32 "supports" [] [Whitespace(" ")],
-                    condition: CssBogusSupportsCondition {
+                    condition: CssBogus {
                         items: [
                             MINUS@32..33 "-" [] [],
                             MINUS@33..35 "-" [] [Whitespace(" ")],
@@ -54,7 +54,7 @@ CssRoot {
                         ],
                     },
                 },
-                block: CssBogusBlock {
+                block: CssBogus {
                     items: [
                         CssRuleList [],
                         R_CURLY@38..40 "}" [Newline("\n")] [],
@@ -78,7 +78,7 @@ CssRoot {
       1: CSS_SUPPORTS_AT_RULE@1..20
         0: CSS_SUPPORTS_AT_RULE_DECLARATOR@1..17
           0: SUPPORTS_KW@1..10 "supports" [] [Whitespace(" ")]
-          1: CSS_BOGUS_SUPPORTS_CONDITION@10..17
+          1: CSS_BOGUS@10..17
             0: MINUS@10..11 "-" [] []
             1: MINUS@11..13 "-" [] [Whitespace(" ")]
             2: IDENT@13..17 "kek" [] [Whitespace(" ")]
@@ -91,11 +91,11 @@ CssRoot {
       1: CSS_SUPPORTS_AT_RULE@23..40
         0: CSS_SUPPORTS_AT_RULE_DECLARATOR@23..38
           0: SUPPORTS_KW@23..32 "supports" [] [Whitespace(" ")]
-          1: CSS_BOGUS_SUPPORTS_CONDITION@32..38
+          1: CSS_BOGUS@32..38
             0: MINUS@32..33 "-" [] []
             1: MINUS@33..35 "-" [] [Whitespace(" ")]
             2: IDENT@35..38 "kek" [] []
-        1: CSS_BOGUS_BLOCK@38..40
+        1: CSS_BOGUS@38..40
           0: CSS_RULE_LIST@38..38
           1: R_CURLY@38..40 "}" [Newline("\n")] []
   2: EOF@40..41 "" [Newline("\n")] []

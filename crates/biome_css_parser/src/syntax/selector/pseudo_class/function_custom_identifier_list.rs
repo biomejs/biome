@@ -48,7 +48,7 @@ pub(crate) fn parse_pseudo_class_function_custom_identifier_list(
     {
         CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_LIST
     } else {
-        CSS_BOGUS_PSEUDO_CLASS
+        CSS_BOGUS
     };
 
     Present(m.complete(p, kind))
@@ -91,7 +91,7 @@ struct CssCustomIdentifierListParseRecovery;
 impl ParseRecovery for CssCustomIdentifierListParseRecovery {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
-    const RECOVERED_KIND: Self::Kind = CSS_BOGUS_CUSTOM_IDENTIFIER;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
         p.at(T![')']) || is_at_identifier(p)

@@ -118,7 +118,7 @@ fn parse_keyframes_scoped_name(p: &mut CssParser) -> ParsedSyntax {
             p.bump_any();
         }
 
-        return Present(m.complete(p, CSS_BOGUS_KEYFRAMES_NAME));
+        return Present(m.complete(p, CSS_BOGUS));
     }
 
     let kind = {
@@ -151,7 +151,7 @@ fn parse_keyframes_scoped_name(p: &mut CssParser) -> ParsedSyntax {
             CSS_KEYFRAMES_SCOPED_NAME
         } else {
             // if we have an invalid name return a bogus keyframes name
-            CSS_BOGUS_KEYFRAMES_NAME
+            CSS_BOGUS
         }
     };
 
@@ -199,7 +199,7 @@ struct KeyframesItemListParseRecovery;
 impl ParseRecovery for KeyframesItemListParseRecovery {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
-    const RECOVERED_KIND: Self::Kind = CSS_BOGUS_KEYFRAMES_ITEM;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
         p.at(T!['}']) || is_at_keyframes_item_selector(p)
@@ -252,7 +252,7 @@ struct KeyframesSelectorListParseRecovery;
 impl ParseRecovery for KeyframesSelectorListParseRecovery {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
-    const RECOVERED_KIND: Self::Kind = CSS_BOGUS_SELECTOR;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
         // If we have an invalid selector, we need to skip tokens until we find a recover point:

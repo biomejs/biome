@@ -27,7 +27,7 @@ CssRoot {
     items: CssRootItemList [
         CssAtRule {
             at_token: AT@0..1 "@" [] [],
-            rule: CssBogusAtRule {
+            rule: CssBogus {
                 items: [
                     CssBogus {
                         items: [
@@ -44,7 +44,7 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@20..22 "@" [Newline("\n")] [],
-            rule: CssBogusAtRule {
+            rule: CssBogus {
                 items: [
                     CssBogus {
                         items: [
@@ -66,7 +66,7 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@45..47 "@" [Newline("\n")] [],
-            rule: CssBogusAtRule {
+            rule: CssBogus {
                 items: [
                     CssBogus {
                         items: [
@@ -95,14 +95,14 @@ CssRoot {
                         value_token: IDENT@90..95 "ident" [] [],
                     },
                 },
-                block: CssBogusBlock {
+                block: CssBogus {
                     items: [],
                 },
             },
         },
         CssAtRule {
             at_token: AT@95..98 "@" [Newline("\n"), Newline("\n")] [],
-            rule: CssBogusAtRule {
+            rule: CssBogus {
                 items: [
                     CssBogus {
                         items: [
@@ -124,7 +124,7 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@123..125 "@" [Newline("\n")] [],
-            rule: CssBogusAtRule {
+            rule: CssBogus {
                 items: [
                     CssBogus {
                         items: [
@@ -146,7 +146,7 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@150..152 "@" [Newline("\n")] [],
-            rule: CssBogusAtRule {
+            rule: CssBogus {
                 items: [
                     CssBogus {
                         items: [
@@ -168,7 +168,7 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@175..177 "@" [Newline("\n")] [],
-            rule: CssBogusAtRule {
+            rule: CssBogus {
                 items: [
                     CssBogus {
                         items: [
@@ -190,7 +190,7 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@201..203 "@" [Newline("\n")] [],
-            rule: CssBogusAtRule {
+            rule: CssBogus {
                 items: [
                     CssBogus {
                         items: [
@@ -223,7 +223,7 @@ CssRoot {
   1: CSS_ROOT_ITEM_LIST@0..233
     0: CSS_AT_RULE@0..20
       0: AT@0..1 "@" [] []
-      1: CSS_BOGUS_AT_RULE@1..20
+      1: CSS_BOGUS@1..20
         0: CSS_BOGUS@1..16
           0: COUNTER_STYLE_KW@1..16 "counter-style" [] [Whitespace("  ")]
         1: CSS_DECLARATION_BLOCK@16..20
@@ -232,7 +232,7 @@ CssRoot {
           2: R_CURLY@19..20 "}" [] []
     1: CSS_AT_RULE@20..45
       0: AT@20..22 "@" [Newline("\n")] []
-      1: CSS_BOGUS_AT_RULE@22..45
+      1: CSS_BOGUS@22..45
         0: CSS_BOGUS@22..41
           0: COUNTER_STYLE_KW@22..36 "counter-style" [] [Whitespace(" ")]
           1: CSS_BOGUS@36..41
@@ -243,7 +243,7 @@ CssRoot {
           2: R_CURLY@44..45 "}" [] []
     2: CSS_AT_RULE@45..74
       0: AT@45..47 "@" [Newline("\n")] []
-      1: CSS_BOGUS_AT_RULE@47..74
+      1: CSS_BOGUS@47..74
         0: CSS_BOGUS@47..70
           0: COUNTER_STYLE_KW@47..61 "counter-style" [] [Whitespace(" ")]
           1: CSS_BOGUS@61..70
@@ -259,10 +259,10 @@ CssRoot {
           0: COUNTER_STYLE_KW@76..90 "counter-style" [] [Whitespace(" ")]
           1: CSS_CUSTOM_IDENTIFIER@90..95
             0: IDENT@90..95 "ident" [] []
-        1: CSS_BOGUS_BLOCK@95..95
+        1: CSS_BOGUS@95..95
     4: CSS_AT_RULE@95..123
       0: AT@95..98 "@" [Newline("\n"), Newline("\n")] []
-      1: CSS_BOGUS_AT_RULE@98..123
+      1: CSS_BOGUS@98..123
         0: CSS_BOGUS@98..120
           0: COUNTER_STYLE_KW@98..112 "counter-style" [] [Whitespace(" ")]
           1: CSS_BOGUS@112..120
@@ -273,7 +273,7 @@ CssRoot {
           2: R_CURLY@122..123 "}" [] []
     5: CSS_AT_RULE@123..150
       0: AT@123..125 "@" [Newline("\n")] []
-      1: CSS_BOGUS_AT_RULE@125..150
+      1: CSS_BOGUS@125..150
         0: CSS_BOGUS@125..147
           0: COUNTER_STYLE_KW@125..139 "counter-style" [] [Whitespace(" ")]
           1: CSS_BOGUS@139..147
@@ -284,7 +284,7 @@ CssRoot {
           2: R_CURLY@149..150 "}" [] []
     6: CSS_AT_RULE@150..175
       0: AT@150..152 "@" [Newline("\n")] []
-      1: CSS_BOGUS_AT_RULE@152..175
+      1: CSS_BOGUS@152..175
         0: CSS_BOGUS@152..172
           0: COUNTER_STYLE_KW@152..166 "counter-style" [] [Whitespace(" ")]
           1: CSS_BOGUS@166..172
@@ -295,7 +295,7 @@ CssRoot {
           2: R_CURLY@174..175 "}" [] []
     7: CSS_AT_RULE@175..201
       0: AT@175..177 "@" [Newline("\n")] []
-      1: CSS_BOGUS_AT_RULE@177..201
+      1: CSS_BOGUS@177..201
         0: CSS_BOGUS@177..198
           0: COUNTER_STYLE_KW@177..191 "counter-style" [] [Whitespace(" ")]
           1: CSS_BOGUS@191..198
@@ -306,7 +306,7 @@ CssRoot {
           2: R_CURLY@200..201 "}" [] []
     8: CSS_AT_RULE@201..233
       0: AT@201..203 "@" [Newline("\n")] []
-      1: CSS_BOGUS_AT_RULE@203..233
+      1: CSS_BOGUS@203..233
         0: CSS_BOGUS@203..230
           0: COUNTER_STYLE_KW@203..217 "counter-style" [] [Whitespace(" ")]
           1: CSS_BOGUS@217..230

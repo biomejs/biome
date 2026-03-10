@@ -33,7 +33,7 @@ CssRoot {
                     declarations: CssDeclarationList [
                         CssDeclarationWithSemicolon {
                             declaration: CssDeclaration {
-                                property: CssBogusProperty {
+                                property: CssBogus {
                                     items: [
                                         CssIdentifier {
                                             value_token: IDENT@21..29 "color" [Newline("\n"), Whitespace("  ")] [],
@@ -41,7 +41,7 @@ CssRoot {
                                         COLON@29..31 ":" [] [Whitespace(" ")],
                                         CssBogus {
                                             items: [
-                                                CssBogusPropertyValue {
+                                                CssBogus {
                                                     items: [
                                                         L_CURLY@31..33 "{" [] [Whitespace(" ")],
                                                         IDENT@33..36 "red" [] [],
@@ -97,7 +97,7 @@ CssRoot {
                 semicolon_token: SEMICOLON@66..67 ";" [] [],
             },
         },
-        CssBogusRule {
+        CssBogus {
             items: [
                 R_CURLY@67..69 "}" [Newline("\n")] [],
             ],
@@ -124,12 +124,12 @@ CssRoot {
           1: CSS_DECLARATION_LIST@21..65
             0: CSS_DECLARATION_WITH_SEMICOLON@21..43
               0: CSS_DECLARATION@21..41
-                0: CSS_BOGUS_PROPERTY@21..41
+                0: CSS_BOGUS@21..41
                   0: CSS_IDENTIFIER@21..29
                     0: IDENT@21..29 "color" [Newline("\n"), Whitespace("  ")] []
                   1: COLON@29..31 ":" [] [Whitespace(" ")]
                   2: CSS_BOGUS@31..41
-                    0: CSS_BOGUS_PROPERTY_VALUE@31..41
+                    0: CSS_BOGUS@31..41
                       0: L_CURLY@31..33 "{" [] [Whitespace(" ")]
                       1: IDENT@33..36 "red" [] []
                       2: COLON@36..38 ":" [] [Whitespace(" ")]
@@ -160,7 +160,7 @@ CssRoot {
               1: (empty)
           2: R_CURLY@65..66 "}" [] []
         3: SEMICOLON@66..67 ";" [] []
-    1: CSS_BOGUS_RULE@67..69
+    1: CSS_BOGUS@67..69
       0: R_CURLY@67..69 "}" [Newline("\n")] []
   2: EOF@69..132 "" [Newline("\n"), Newline("\n"), Comments("/* Error: Objects are ..."), Newline("\n")] []
 

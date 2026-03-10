@@ -60,7 +60,7 @@ struct DocumentMatcherListParseRecovery;
 impl ParseRecovery for DocumentMatcherListParseRecovery {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
-    const RECOVERED_KIND: Self::Kind = CSS_BOGUS_DOCUMENT_MATCHER;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
     /// Determines if the parser has reached a point where it can recover from an error
     /// while parsing a document matcher list.
     ///

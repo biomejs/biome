@@ -28,7 +28,7 @@ CssRoot {
                     nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
-                        CssBogusSubSelector {
+                        CssBogus {
                             items: [
                                 L_BRACK@0..2 "[" [] [Whitespace(" ")],
                                 CssBogus {
@@ -54,7 +54,7 @@ CssRoot {
                     nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
-                        CssBogusSubSelector {
+                        CssBogus {
                             items: [
                                 L_BRACK@11..14 "[" [Newline("\n"), Newline("\n")] [],
                                 CssAttributeName {
@@ -148,7 +148,7 @@ CssRoot {
                     ],
                 },
             ],
-            block: CssBogusBlock {
+            block: CssBogus {
                 items: [],
             },
         },
@@ -169,7 +169,7 @@ CssRoot {
           0: CSS_NESTED_SELECTOR_LIST@0..0
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@0..9
-            0: CSS_BOGUS_SUB_SELECTOR@0..9
+            0: CSS_BOGUS@0..9
               0: L_BRACK@0..2 "[" [] [Whitespace(" ")]
               1: CSS_BOGUS@2..9
                 0: DOT@2..3 "." [] []
@@ -184,7 +184,7 @@ CssRoot {
           0: CSS_NESTED_SELECTOR_LIST@11..11
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@11..29
-            0: CSS_BOGUS_SUB_SELECTOR@11..29
+            0: CSS_BOGUS@11..29
               0: L_BRACK@11..14 "[" [Newline("\n"), Newline("\n")] []
               1: CSS_ATTRIBUTE_NAME@14..19
                 0: (empty)
@@ -243,7 +243,7 @@ CssRoot {
                     0: CSS_STRING_LITERAL@58..64 "\"foo\"" [] [Whitespace(" ")]
                 2: S_KW@64..65 "s" [] []
               3: (empty)
-      1: CSS_BOGUS_BLOCK@65..65
+      1: CSS_BOGUS@65..65
   2: EOF@65..66 "" [Newline("\n")] []
 
 ```

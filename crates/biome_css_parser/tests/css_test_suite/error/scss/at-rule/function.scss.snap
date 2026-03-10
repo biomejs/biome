@@ -92,7 +92,7 @@ CssRoot {
                             ellipsis_token: missing (optional),
                         },
                         missing separator,
-                        CssBogusParameter {
+                        CssBogus {
                             items: [
                                 CSS_NUMBER_LITERAL@66..67 "2" [] [],
                             ],
@@ -127,7 +127,7 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@90..93 "@" [Newline("\n"), Newline("\n")] [],
-            rule: CssBogusAtRule {
+            rule: CssBogus {
                 items: [
                     FUNCTION_KW@93..102 "function" [] [Whitespace(" ")],
                     CssIdentifier {
@@ -158,7 +158,7 @@ CssRoot {
                         ],
                         r_paren_token: R_PAREN@118..119 ")" [] [],
                     },
-                    CssBogusBlock {
+                    CssBogus {
                         items: [],
                     },
                 ],
@@ -223,7 +223,7 @@ CssRoot {
               1: (empty)
               2: (empty)
             1: (empty)
-            2: CSS_BOGUS_PARAMETER@66..67
+            2: CSS_BOGUS@66..67
               0: CSS_NUMBER_LITERAL@66..67 "2" [] []
           2: R_PAREN@67..69 ")" [] [Whitespace(" ")]
         3: CSS_DECLARATION_OR_RULE_BLOCK@69..90
@@ -243,7 +243,7 @@ CssRoot {
           2: R_CURLY@88..90 "}" [Newline("\n")] []
     2: CSS_AT_RULE@90..119
       0: AT@90..93 "@" [Newline("\n"), Newline("\n")] []
-      1: CSS_BOGUS_AT_RULE@93..119
+      1: CSS_BOGUS@93..119
         0: FUNCTION_KW@93..102 "function" [] [Whitespace(" ")]
         1: CSS_IDENTIFIER@102..108
           0: IDENT@102..108 "double" [] []
@@ -263,7 +263,7 @@ CssRoot {
                       0: CSS_NUMBER_LITERAL@117..118 "2" [] []
               2: (empty)
           2: R_PAREN@118..119 ")" [] []
-        3: CSS_BOGUS_BLOCK@119..119
+        3: CSS_BOGUS@119..119
   2: EOF@119..120 "" [Newline("\n")] []
 
 ```

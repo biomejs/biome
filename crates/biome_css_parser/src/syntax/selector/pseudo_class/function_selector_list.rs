@@ -45,7 +45,7 @@ pub(crate) fn parse_pseudo_class_function_selector_list(p: &mut CssParser) -> Pa
     {
         CSS_PSEUDO_CLASS_FUNCTION_SELECTOR_LIST
     } else {
-        CSS_BOGUS_PSEUDO_CLASS
+        CSS_BOGUS
     };
 
     Present(m.complete(p, kind))

@@ -9,7 +9,7 @@ impl FormatRule<AnyCssSyntax> for FormatAnyCssSyntax {
     fn fmt(&self, node: &AnyCssSyntax, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
             AnyCssSyntax::AnyCssSyntaxComponent(node) => node.format().fmt(f),
-            AnyCssSyntax::CssBogusSyntax(node) => node.format().fmt(f),
+            AnyCssSyntax::CssBogus(node) => node.format().fmt(f),
             AnyCssSyntax::CssString(node) => node.format().fmt(f),
             AnyCssSyntax::CssSyntaxComponentList(node) => node.format().fmt(f),
             AnyCssSyntax::CssUniversalSyntax(node) => node.format().fmt(f),

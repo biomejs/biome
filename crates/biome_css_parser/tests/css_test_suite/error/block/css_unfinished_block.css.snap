@@ -35,7 +35,7 @@ CssRoot {
                     right: missing (required),
                 },
             ],
-            block: CssBogusBlock {
+            block: CssBogus {
                 items: [
                     CssDeclarationOrRuleList [],
                     R_CURLY@4..5 "}" [] [],
@@ -57,7 +57,7 @@ CssRoot {
                     ],
                 },
             ],
-            block: CssBogusBlock {
+            block: CssBogus {
                 items: [
                     L_CURLY@14..15 "{" [] [],
                     CssDeclarationOrRuleList [],
@@ -87,7 +87,7 @@ CssRoot {
             2: CSS_SUB_SELECTOR_LIST@3..3
           1: CSS_SPACE_LITERAL@3..4 " " [] []
           2: (empty)
-      1: CSS_BOGUS_BLOCK@4..5
+      1: CSS_BOGUS@4..5
         0: CSS_DECLARATION_OR_RULE_LIST@4..4
         1: R_CURLY@4..5 "}" [] []
     1: CSS_QUALIFIED_RULE@5..15
@@ -100,7 +100,7 @@ CssRoot {
               0: DOT@5..7 "." [Newline("\n")] []
               1: CSS_CUSTOM_IDENTIFIER@7..14
                 0: IDENT@7..14 "action" [] [Whitespace(" ")]
-      1: CSS_BOGUS_BLOCK@14..15
+      1: CSS_BOGUS@14..15
         0: L_CURLY@14..15 "{" [] []
         1: CSS_DECLARATION_OR_RULE_LIST@15..15
   2: EOF@15..16 "" [Newline("\n")] []

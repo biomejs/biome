@@ -8,7 +8,7 @@ impl FormatRule<AnyCssRelativeSelector> for FormatAnyCssRelativeSelector {
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssRelativeSelector, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
-            AnyCssRelativeSelector::CssBogusSelector(node) => node.format().fmt(f),
+            AnyCssRelativeSelector::CssBogus(node) => node.format().fmt(f),
             AnyCssRelativeSelector::CssRelativeSelector(node) => node.format().fmt(f),
         }
     }

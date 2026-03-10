@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
 
@@ -52,7 +51,7 @@ CssRoot {
                                             if_token: IF_KW@17..19 "if" [] [],
                                             l_paren_token: L_PAREN@19..20 "(" [] [],
                                             css_if_branch_list: CssIfBranchList [
-                                                CssBogusIfBranch {
+                                                CssBogus {
                                                     items: [
                                                         CssIfTestBooleanNotExpr {
                                                             not_token: NOT_KW@20..24 "not" [] [Whitespace(" ")],
@@ -84,7 +83,7 @@ CssRoot {
                                                                 CssIdentifier {
                                                                     value_token: IDENT@43..49 "black" [] [Whitespace(" ")],
                                                                 },
-                                                                CssBogusPropertyValue {
+                                                                CssBogus {
                                                                     items: [
                                                                         ERROR_TOKEN@49..50 "?" [] [],
                                                                         ERROR_TOKEN@50..51 "?" [] [],
@@ -130,7 +129,7 @@ CssRoot {
                                             if_token: IF_KW@81..83 "if" [] [],
                                             l_paren_token: L_PAREN@83..84 "(" [] [],
                                             css_if_branch_list: CssIfBranchList [
-                                                CssBogusIfBranch {
+                                                CssBogus {
                                                     items: [
                                                         CssIfTestBooleanExprInParens {
                                                             l_paren_token: L_PAREN@84..85 "(" [] [],
@@ -163,7 +162,7 @@ CssRoot {
                                                                 CssIdentifier {
                                                                     value_token: IDENT@105..109 "red" [] [Whitespace(" ")],
                                                                 },
-                                                                CssBogusPropertyValue {
+                                                                CssBogus {
                                                                     items: [
                                                                         ERROR_TOKEN@109..110 "?" [] [],
                                                                         ERROR_TOKEN@110..111 "?" [] [],
@@ -236,7 +235,7 @@ CssRoot {
                       0: IF_KW@17..19 "if" [] []
                       1: L_PAREN@19..20 "(" [] []
                       2: CSS_IF_BRANCH_LIST@20..64
-                        0: CSS_BOGUS_IF_BRANCH@20..53
+                        0: CSS_BOGUS@20..53
                           0: CSS_IF_TEST_BOOLEAN_NOT_EXPR@20..41
                             0: NOT_KW@20..24 "not" [] [Whitespace(" ")]
                             1: CSS_IF_STYLE_TEST@24..41
@@ -257,7 +256,7 @@ CssRoot {
                           2: CSS_BOGUS@43..53
                             0: CSS_IDENTIFIER@43..49
                               0: IDENT@43..49 "black" [] [Whitespace(" ")]
-                            1: CSS_BOGUS_PROPERTY_VALUE@49..53
+                            1: CSS_BOGUS@49..53
                               0: ERROR_TOKEN@49..50 "?" [] []
                               1: ERROR_TOKEN@50..51 "?" [] []
                               2: ERROR_TOKEN@51..53 "?" [] [Whitespace(" ")]
@@ -284,7 +283,7 @@ CssRoot {
                       0: IF_KW@81..83 "if" [] []
                       1: L_PAREN@83..84 "(" [] []
                       2: CSS_IF_BRANCH_LIST@84..123
-                        0: CSS_BOGUS_IF_BRANCH@84..113
+                        0: CSS_BOGUS@84..113
                           0: CSS_IF_TEST_BOOLEAN_EXPR_IN_PARENS@84..103
                             0: L_PAREN@84..85 "(" [] []
                             1: CSS_IF_STYLE_TEST@85..102
@@ -306,7 +305,7 @@ CssRoot {
                           2: CSS_BOGUS@105..113
                             0: CSS_IDENTIFIER@105..109
                               0: IDENT@105..109 "red" [] [Whitespace(" ")]
-                            1: CSS_BOGUS_PROPERTY_VALUE@109..113
+                            1: CSS_BOGUS@109..113
                               0: ERROR_TOKEN@109..110 "?" [] []
                               1: ERROR_TOKEN@110..111 "?" [] []
                               2: ERROR_TOKEN@111..113 "?" [] [Whitespace(" ")]
