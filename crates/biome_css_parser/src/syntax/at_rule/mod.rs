@@ -77,8 +77,8 @@ use crate::syntax::parse_error::{expected_any_at_rule, tailwind_disabled};
 use crate::syntax::scss::{
     parse_bogus_scss_else_at_rule, parse_scss_content_at_rule, parse_scss_debug_at_rule,
     parse_scss_each_at_rule, parse_scss_error_at_rule, parse_scss_for_at_rule,
-    parse_scss_if_at_rule, parse_scss_include_at_rule, parse_scss_mixin_at_rule,
-    parse_scss_warn_at_rule, parse_scss_while_at_rule,
+    parse_scss_function_at_rule, parse_scss_if_at_rule, parse_scss_include_at_rule,
+    parse_scss_mixin_at_rule, parse_scss_return_at_rule, parse_scss_warn_at_rule, parse_scss_while_at_rule,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
@@ -125,7 +125,13 @@ pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
         T![font_face] => parse_font_face_at_rule(p),
         T![font_feature_values] => parse_font_feature_values_at_rule(p),
         T![font_palette_values] => parse_font_palette_values_at_rule(p),
-        T![function] => parse_function_at_rule(p),
+        T![function] => {
+            if CssSyntaxFeatures::Scss.is_supported(p) {
+                parse_scss_function_at_rule(p)
+            } else {
+                parse_function_at_rule(p)
+            }
+        }
         T![media] => parse_media_at_rule(p),
         T![keyframes] => parse_keyframes_at_rule(p),
         T![page] => parse_page_at_rule(p),
@@ -148,6 +154,9 @@ pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
             .or_else(|| parse_unknown_at_rule(p)),
         T![ident] if p.cur_text() == "content" => CssSyntaxFeatures::Scss
             .parse_supported_syntax(p, parse_scss_content_at_rule)
+            .or_else(|| parse_unknown_at_rule(p)),
+        T![return] => CssSyntaxFeatures::Scss
+            .parse_supported_syntax(p, parse_scss_return_at_rule)
             .or_else(|| parse_unknown_at_rule(p)),
         T![include] => CssSyntaxFeatures::Scss
             .parse_supported_syntax(p, parse_scss_include_at_rule)

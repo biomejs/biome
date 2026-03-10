@@ -687,10 +687,12 @@ AnyCssAtRule =
 	// SCSS at rules
 	| ScssEachAtRule
 	| ScssForAtRule
+	| ScssFunctionAtRule
 	| ScssIfAtRule
 	| ScssContentAtRule
 	| ScssIncludeAtRule
 	| ScssMixinAtRule
+	| ScssReturnAtRule
 	| ScssWhileAtRule
 	| ScssDebugAtRule
 	| ScssWarnAtRule
@@ -2592,6 +2594,14 @@ ScssMixinAtRule =
 	parameters: ScssParameterList?
 	block: CssDeclarationOrRuleBlock
 
+// @function double($value: 2) { @return $value * 2; }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssFunctionAtRule =
+	'function'
+	name: CssIdentifier
+	parameters: ScssParameterList?
+	block: CssDeclarationOrRuleBlock
+
 // @include button($radius: 4px);
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 // @include button {
@@ -2677,6 +2687,13 @@ ScssWhileAtRule =
 ScssContentAtRule =
 	'content'
 	arguments: ScssIncludeArgumentList?
+	';'
+
+// @return $width * 2;
+// ^^^^^^^^^^^^^^^^^^^
+ScssReturnAtRule =
+	'return'
+	value: ScssExpression
 	';'
 
 // @debug $width * 2;

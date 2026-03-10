@@ -3242,6 +3242,42 @@ pub fn scss_for_at_rule(
         ],
     ))
 }
+pub fn scss_function_at_rule(
+    function_token: SyntaxToken,
+    name: CssIdentifier,
+    block: CssDeclarationOrRuleBlock,
+) -> ScssFunctionAtRuleBuilder {
+    ScssFunctionAtRuleBuilder {
+        function_token,
+        name,
+        block,
+        parameters: None,
+    }
+}
+pub struct ScssFunctionAtRuleBuilder {
+    function_token: SyntaxToken,
+    name: CssIdentifier,
+    block: CssDeclarationOrRuleBlock,
+    parameters: Option<ScssParameterList>,
+}
+impl ScssFunctionAtRuleBuilder {
+    pub fn with_parameters(mut self, parameters: ScssParameterList) -> Self {
+        self.parameters = Some(parameters);
+        self
+    }
+    pub fn build(self) -> ScssFunctionAtRule {
+        ScssFunctionAtRule::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::SCSS_FUNCTION_AT_RULE,
+            [
+                Some(SyntaxElement::Token(self.function_token)),
+                Some(SyntaxElement::Node(self.name.into_syntax())),
+                self.parameters
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.block.into_syntax())),
+            ],
+        ))
+    }
+}
 pub fn scss_identifier(dollar_token: SyntaxToken, name: CssIdentifier) -> ScssIdentifier {
     ScssIdentifier::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_IDENTIFIER,
@@ -3559,6 +3595,20 @@ pub fn scss_qualified_name(
             Some(SyntaxElement::Node(module.into_syntax())),
             Some(SyntaxElement::Token(dot_token)),
             Some(SyntaxElement::Node(member.into_syntax())),
+        ],
+    ))
+}
+pub fn scss_return_at_rule(
+    return_token: SyntaxToken,
+    value: ScssExpression,
+    semicolon_token: SyntaxToken,
+) -> ScssReturnAtRule {
+    ScssReturnAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_RETURN_AT_RULE,
+        [
+            Some(SyntaxElement::Token(return_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
         ],
     ))
 }
