@@ -476,6 +476,7 @@ impl TypeData {
                         scope_id,
                         expr.arguments().ok(),
                     ),
+                    is_optional: expr.optional_chain_token().is_some(),
                 })),
                 Err(_) => Self::unknown(),
             },

@@ -403,11 +403,16 @@ fn flattened_call(
                     continue;
                 };
                 match resolved.as_raw_data() {
-                    // `undefined` or `null` callee
+                    // Optional call (`?.`): an `undefined` or `null` callee
                     // short-circuits to `undefined`, so preserve it in the
                     // result union instead of silently dropping it.
-                    TypeData::Undefined | TypeData::Null => {
+                    TypeData::Undefined | TypeData::Null if expr.is_optional => {
                         return_types.push(TypeData::Undefined);
+                        continue;
+                    }
+                    // Non-optional call on undefined/null is a type error in
+                    // TS; skip the variant so it doesn't pollute the result.
+                    TypeData::Undefined | TypeData::Null => {
                         continue;
                     }
                     TypeData::Unknown | TypeData::TypeofExpression(_) => {

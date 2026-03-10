@@ -10,7 +10,9 @@ expression: recordValid.ts
 const cache: Record<string, Promise<string>> = {};
 await cache["key"];
 
-// Awaiting the result of a Record function value that returns a Promise
+// Awaiting the result of a Record function value that returns a Promise (optional call)
+// The ?.() on (() => Promise<void>) | undefined resolves to Promise<void> | undefined;
+// the Promise variant means this await is valid.
 const fetchers: Record<string, (() => Promise<void>) | undefined> = {};
 await fetchers["getData"]?.();
 

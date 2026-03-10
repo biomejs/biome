@@ -1098,6 +1098,8 @@ pub struct TypeofBitwiseNotExpression {
 pub struct TypeofCallExpression {
     pub callee: TypeReference,
     pub arguments: Box<[CallArgumentType]>,
+    /// Whether this call uses optional chaining (`?.()`) syntax.
+    pub is_optional: bool,
 }
 
 /// Represents the type of a ternary expression.
