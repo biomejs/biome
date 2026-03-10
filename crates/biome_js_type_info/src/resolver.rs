@@ -784,13 +784,14 @@ impl Resolvable for TypeReference {
                                     let parameters = resolved
                                         .as_ref()
                                         .and_then(|data| data.type_parameters())?;
+                                    let resolved_params = self.resolved_params(resolver);
                                     let resolved_id: ResolvedTypeId = resolver
                                         .register_and_resolve(TypeData::instance_of(
                                             TypeInstance {
                                                 ty: resolved_id.into(),
                                                 type_parameters: Self::merge_parameters(
                                                     parameters,
-                                                    &qualifier.type_parameters,
+                                                    &resolved_params,
                                                 ),
                                             },
                                         ));
