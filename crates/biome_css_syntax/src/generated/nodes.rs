@@ -25661,6 +25661,10 @@ impl std::fmt::Debug for ScssContentAtRule {
                     &support::DebugSyntaxResult(self.content_token()),
                 )
                 .field(
+                    "arguments",
+                    &support::DebugOptionalElement(self.arguments()),
+                )
+                .field(
                     "semicolon_token",
                     &support::DebugSyntaxResult(self.semicolon_token()),
                 )

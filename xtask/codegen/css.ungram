@@ -2676,6 +2676,7 @@ ScssWhileAtRule =
 // ^^^^^^^^^^^^^^^^^
 ScssContentAtRule =
 	'content'
+	arguments: ScssIncludeArgumentList?
 	';'
 
 // @debug $width * 2;

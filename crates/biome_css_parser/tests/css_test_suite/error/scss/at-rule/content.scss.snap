@@ -22,6 +22,7 @@ CssRoot {
             at_token: AT@0..1 "@" [] [],
             rule: ScssContentAtRule {
                 content_token: CONTENT_KW@1..8 "content" [] [],
+                arguments: missing (optional),
                 semicolon_token: missing (required),
             },
         },
@@ -29,6 +30,11 @@ CssRoot {
             at_token: AT@8..10 "@" [Newline("\n")] [],
             rule: ScssContentAtRule {
                 content_token: CONTENT_KW@10..17 "content" [] [],
+                arguments: ScssIncludeArgumentList {
+                    l_paren_token: L_PAREN@17..18 "(" [] [],
+                    items: CssParameterList [],
+                    r_paren_token: missing (required),
+                },
                 semicolon_token: missing (required),
             },
         },

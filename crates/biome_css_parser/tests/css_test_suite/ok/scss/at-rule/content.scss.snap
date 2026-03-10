@@ -35,6 +35,7 @@ CssRoot {
                             at_token: AT@18..22 "@" [Newline("\n"), Whitespace("  ")] [],
                             rule: ScssContentAtRule {
                                 content_token: CONTENT_KW@22..29 "content" [] [],
+                                arguments: missing (optional),
                                 semicolon_token: SEMICOLON@29..30 ";" [] [],
                             },
                         },
@@ -42,6 +43,44 @@ CssRoot {
                             at_token: AT@30..34 "@" [Newline("\n"), Whitespace("  ")] [],
                             rule: ScssContentAtRule {
                                 content_token: CONTENT_KW@34..41 "content" [] [],
+                                arguments: ScssIncludeArgumentList {
+                                    l_paren_token: L_PAREN@41..42 "(" [] [],
+                                    items: CssParameterList [
+                                        ScssExpression {
+                                            items: ScssExpressionItemList [
+                                                ScssIdentifier {
+                                                    dollar_token: DOLLAR@42..43 "$" [] [],
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@43..48 "value" [] [],
+                                                    },
+                                                },
+                                            ],
+                                        },
+                                        COMMA@48..50 "," [] [Whitespace(" ")],
+                                        ScssExpression {
+                                            items: ScssExpressionItemList [
+                                                ScssKeywordArgument {
+                                                    name: ScssIdentifier {
+                                                        dollar_token: DOLLAR@50..51 "$" [] [],
+                                                        name: CssIdentifier {
+                                                            value_token: IDENT@51..59 "fallback" [] [],
+                                                        },
+                                                    },
+                                                    colon_token: COLON@59..61 ":" [] [Whitespace(" ")],
+                                                    value: ScssExpression {
+                                                        items: ScssExpressionItemList [
+                                                            CssRegularDimension {
+                                                                value_token: CSS_NUMBER_LITERAL@61..63 "10" [] [],
+                                                                unit_token: IDENT@63..65 "px" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                    r_paren_token: R_PAREN@65..66 ")" [] [],
+                                },
                                 semicolon_token: SEMICOLON@66..67 ";" [] [],
                             },
                         },
