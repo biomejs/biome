@@ -48,14 +48,10 @@ fn parse_scss_parameter(p: &mut CssParser) -> ParsedSyntax {
 
     // We only enter this branch after `is_at_scss_identifier`, so `Absent` is impossible here.
     parse_scss_identifier(p).ok();
-    // The default value is optional for a SCSS parameter, so we only parse it when `:` is present.
-    if is_at_scss_parameter_default_value(p) {
-        parse_scss_parameter_default_value(p).ok();
-    }
+    // The default value is optional in the grammar, so `Absent` is expected when `:` is missing.
+    parse_scss_parameter_default_value(p).ok();
 
-    if p.at(T![...]) {
-        p.bump(T![...]);
-    }
+    p.eat(T![...]);
 
     Present(m.complete(p, SCSS_PARAMETER))
 }
@@ -130,10 +126,6 @@ impl ParseSeparatedList for ScssParameterItemList {
     }
 
     fn allow_trailing_separating_element(&self) -> bool {
-        true
-    }
-
-    fn allow_empty(&self) -> bool {
         true
     }
 }
