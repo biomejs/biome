@@ -3246,36 +3246,15 @@ pub fn scss_forward_as_clause(
     as_token: SyntaxToken,
     prefix: CssIdentifier,
     star_token: SyntaxToken,
-) -> ScssForwardAsClauseBuilder {
-    ScssForwardAsClauseBuilder {
-        as_token,
-        prefix,
-        star_token,
-        minus_token: None,
-    }
-}
-pub struct ScssForwardAsClauseBuilder {
-    as_token: SyntaxToken,
-    prefix: CssIdentifier,
-    star_token: SyntaxToken,
-    minus_token: Option<SyntaxToken>,
-}
-impl ScssForwardAsClauseBuilder {
-    pub fn with_minus_token(mut self, minus_token: SyntaxToken) -> Self {
-        self.minus_token = Some(minus_token);
-        self
-    }
-    pub fn build(self) -> ScssForwardAsClause {
-        ScssForwardAsClause::unwrap_cast(SyntaxNode::new_detached(
-            CssSyntaxKind::SCSS_FORWARD_AS_CLAUSE,
-            [
-                Some(SyntaxElement::Token(self.as_token)),
-                Some(SyntaxElement::Node(self.prefix.into_syntax())),
-                self.minus_token.map(|token| SyntaxElement::Token(token)),
-                Some(SyntaxElement::Token(self.star_token)),
-            ],
-        ))
-    }
+) -> ScssForwardAsClause {
+    ScssForwardAsClause::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_FORWARD_AS_CLAUSE,
+        [
+            Some(SyntaxElement::Token(as_token)),
+            Some(SyntaxElement::Node(prefix.into_syntax())),
+            Some(SyntaxElement::Token(star_token)),
+        ],
+    ))
 }
 pub fn scss_forward_at_rule(
     forward_token: SyntaxToken,

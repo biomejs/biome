@@ -3,6 +3,7 @@ use super::use_at_rule::parse_scss_with_clause;
 use crate::parser::CssParser;
 use crate::syntax::parse_error::{expected_identifier, expected_string};
 use crate::syntax::{parse_regular_identifier, parse_string};
+use biome_css_syntax::CssSyntaxKind::CSS_BOGUS;
 use biome_css_syntax::CssSyntaxKind::{
     SCSS_FORWARD_AS_CLAUSE, SCSS_FORWARD_AT_RULE, SCSS_HIDE_CLAUSE, SCSS_SHOW_CLAUSE,
 };
@@ -65,7 +66,11 @@ fn parse_scss_forward_as_clause(p: &mut CssParser) -> ParsedSyntax {
 
     p.bump(T![as]);
     let prefix = parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
-    if prefix.is_none_or(|prefix| !prefix.text(p).ends_with('-')) {
+    if let Some(prefix) = prefix {
+        if !prefix.text(p).ends_with('-') {
+            recover_scss_forward_as_missing_hyphen(p, prefix);
+        }
+    } else {
         p.expect(T![-]);
     }
     p.expect(T![*]);
@@ -76,6 +81,27 @@ fn parse_scss_forward_as_clause(p: &mut CssParser) -> ParsedSyntax {
 #[inline]
 fn is_at_scss_forward_as_clause(p: &mut CssParser) -> bool {
     p.at(T![as])
+}
+
+#[inline]
+fn recover_scss_forward_as_missing_hyphen(p: &mut CssParser, prefix: CompletedMarker) {
+    if !p.at(T![-]) {
+        p.expect(T![-]);
+        return;
+    }
+
+    let range = prefix.range(p).cover(p.cur_range());
+    p.error(
+        p.err_builder(
+            "Expected the `@forward` prefix to end with `-` before `*`.",
+            range,
+        )
+        .with_hint("Write the clause as `as prefix-*` without spaces."),
+    );
+
+    let bogus = p.start();
+    p.bump(T![-]);
+    bogus.complete(p, CSS_BOGUS);
 }
 
 #[inline]

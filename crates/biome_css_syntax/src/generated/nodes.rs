@@ -9485,7 +9485,6 @@ impl ScssForwardAsClause {
         ScssForwardAsClauseFields {
             as_token: self.as_token(),
             prefix: self.prefix(),
-            minus_token: self.minus_token(),
             star_token: self.star_token(),
         }
     }
@@ -9495,11 +9494,8 @@ impl ScssForwardAsClause {
     pub fn prefix(&self) -> SyntaxResult<CssIdentifier> {
         support::required_node(&self.syntax, 1usize)
     }
-    pub fn minus_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, 2usize)
-    }
     pub fn star_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 3usize)
+        support::required_token(&self.syntax, 2usize)
     }
 }
 impl Serialize for ScssForwardAsClause {
@@ -9514,7 +9510,6 @@ impl Serialize for ScssForwardAsClause {
 pub struct ScssForwardAsClauseFields {
     pub as_token: SyntaxResult<SyntaxToken>,
     pub prefix: SyntaxResult<CssIdentifier>,
-    pub minus_token: Option<SyntaxToken>,
     pub star_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -26712,10 +26707,6 @@ impl std::fmt::Debug for ScssForwardAsClause {
             f.debug_struct("ScssForwardAsClause")
                 .field("as_token", &support::DebugSyntaxResult(self.as_token()))
                 .field("prefix", &support::DebugSyntaxResult(self.prefix()))
-                .field(
-                    "minus_token",
-                    &support::DebugOptionalElement(self.minus_token()),
-                )
                 .field("star_token", &support::DebugSyntaxResult(self.star_token()))
                 .finish()
         } else {

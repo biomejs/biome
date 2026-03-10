@@ -2642,7 +2642,6 @@ ScssForwardAtRule =
 ScssForwardAsClause =
 	'as'
 	prefix: CssIdentifier
-	minus: '-'?
 	'*'
 
 AnyScssForwardVisibilityClause =

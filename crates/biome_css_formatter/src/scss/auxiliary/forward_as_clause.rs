@@ -10,19 +10,9 @@ impl FormatNodeRule<ScssForwardAsClause> for FormatScssForwardAsClause {
         let ScssForwardAsClauseFields {
             as_token,
             prefix,
-            minus_token,
             star_token,
         } = node.as_fields();
 
-        write!(
-            f,
-            [
-                as_token.format(),
-                space(),
-                prefix.format(),
-                minus_token.format(),
-                star_token.format()
-            ]
-        )
+        write!(f, [as_token.format(), space(), prefix.format(), star_token.format()])
     }
 }
