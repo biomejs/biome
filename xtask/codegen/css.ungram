@@ -688,6 +688,7 @@ AnyCssAtRule =
 	| ScssEachAtRule
 	| ScssForAtRule
 	| ScssIfAtRule
+	| ScssContentAtRule
 	| ScssIncludeAtRule
 	| ScssMixinAtRule
 	| ScssWhileAtRule
@@ -2668,6 +2669,15 @@ ScssWhileAtRule =
 	'while'
 	condition: ScssExpression
 	block: CssDeclarationOrRuleBlock
+
+// @content;
+// ^^^^^^^^^
+// @content($value);
+// ^^^^^^^^^^^^^^^^^
+ScssContentAtRule =
+	'content'
+	arguments: ScssIncludeArgumentList?
+	';'
 
 // @debug $width * 2;
 // ^^^^^^^^^^^^^^^^^^

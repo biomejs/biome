@@ -75,10 +75,10 @@ use crate::syntax::at_rule::view_transition::{
 use crate::syntax::CssSyntaxFeatures;
 use crate::syntax::parse_error::{expected_any_at_rule, tailwind_disabled};
 use crate::syntax::scss::{
-    parse_bogus_scss_else_at_rule, parse_scss_debug_at_rule, parse_scss_each_at_rule,
-    parse_scss_error_at_rule, parse_scss_for_at_rule, parse_scss_if_at_rule,
-    parse_scss_include_at_rule, parse_scss_mixin_at_rule, parse_scss_warn_at_rule,
-    parse_scss_while_at_rule,
+    parse_bogus_scss_else_at_rule, parse_scss_content_at_rule, parse_scss_debug_at_rule,
+    parse_scss_each_at_rule, parse_scss_error_at_rule, parse_scss_for_at_rule,
+    parse_scss_if_at_rule, parse_scss_include_at_rule, parse_scss_mixin_at_rule,
+    parse_scss_warn_at_rule, parse_scss_while_at_rule,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
@@ -145,6 +145,9 @@ pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
             .or_else(|| parse_unknown_at_rule(p)),
         T![for] => CssSyntaxFeatures::Scss
             .parse_supported_syntax(p, parse_scss_for_at_rule)
+            .or_else(|| parse_unknown_at_rule(p)),
+        T![ident] if p.cur_text() == "content" => CssSyntaxFeatures::Scss
+            .parse_supported_syntax(p, parse_scss_content_at_rule)
             .or_else(|| parse_unknown_at_rule(p)),
         T![include] => CssSyntaxFeatures::Scss
             .parse_supported_syntax(p, parse_scss_include_at_rule)
