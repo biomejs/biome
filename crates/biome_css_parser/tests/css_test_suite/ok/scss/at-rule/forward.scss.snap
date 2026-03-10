@@ -106,7 +106,6 @@ CssRoot {
                     prefix: CssIdentifier {
                         value_token: IDENT@127..133 "theme-" [] [],
                     },
-                    minus_token: missing (optional),
                     star_token: STAR@133..134 "*" [] [],
                 },
                 visibility_clause: missing (optional),
@@ -164,7 +163,6 @@ CssRoot {
                     prefix: CssIdentifier {
                         value_token: IDENT@197..203 "theme-" [] [],
                     },
-                    minus_token: missing (optional),
                     star_token: STAR@203..205 "*" [] [Whitespace(" ")],
                 },
                 visibility_clause: ScssShowClause {
@@ -280,8 +278,7 @@ CssRoot {
           0: AS_KW@124..127 "as" [] [Whitespace(" ")]
           1: CSS_IDENTIFIER@127..133
             0: IDENT@127..133 "theme-" [] []
-          2: (empty)
-          3: STAR@133..134 "*" [] []
+          2: STAR@133..134 "*" [] []
         3: (empty)
         4: (empty)
         5: SEMICOLON@134..135 ";" [] []
@@ -321,8 +318,7 @@ CssRoot {
           0: AS_KW@194..197 "as" [] [Whitespace(" ")]
           1: CSS_IDENTIFIER@197..203
             0: IDENT@197..203 "theme-" [] []
-          2: (empty)
-          3: STAR@203..205 "*" [] [Whitespace(" ")]
+          2: STAR@203..205 "*" [] [Whitespace(" ")]
         3: SCSS_SHOW_CLAUSE@205..225
           0: SHOW_KW@205..210 "show" [] [Whitespace(" ")]
           1: SCSS_MODULE_MEMBER_LIST@210..225
