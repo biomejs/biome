@@ -45,12 +45,12 @@ pub(crate) async fn did_open(
             let status = if let Some(config_path) = session.resolve_configuration_path(Some(&path))
             {
                 info!(
-                    "Loading user configuration from text_document {}",
+                    "Loading user configuration from text_document {:?}",
                     &config_path
                 );
                 session
                     .load_biome_configuration_file(
-                        ConfigurationPathHint::FromUser(config_path),
+                        config_path,
                         false,
                     )
                     .await

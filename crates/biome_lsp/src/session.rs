@@ -700,12 +700,8 @@ impl Session {
     pub(crate) fn resolve_configuration_path(
         &self,
         file_path: Option<&Utf8PathBuf>,
-    ) -> Option<Utf8PathBuf> {
+    ) -> Option<ConfigurationPathHint> {
         let config_path = self.get_settings_configuration_path()?;
-
-        if config_path.is_absolute() {
-            return Some(config_path);
-        }
 
         // Collect workspace folder roots as absolute Utf8PathBufs.
         let workspace_roots: Vec<Utf8PathBuf> = self
@@ -720,6 +716,16 @@ impl Session {
             })
             .collect();
 
+        if config_path.is_absolute() {
+            return Some(
+                if workspace_roots.iter().any(|root| config_path.starts_with(root)) {
+                    ConfigurationPathHint::FromUser(config_path)
+                } else {
+                    ConfigurationPathHint::FromUserExternal(config_path)
+                },
+            )
+        }
+
         if let Some(file_path) = file_path {
             // Find the workspace folder that contains this file and resolve
             // the relative config path against that folder.
@@ -728,7 +734,12 @@ impl Session {
                 .filter(|root| file_path.starts_with(*root))
                 .max_by_key(|root| root.as_str().len())
             {
-                return Some(root.join(&config_path));
+                let joined = root.join(config_path);
+                return Some(if workspace_roots.iter().any(|r| joined.starts_with(r)) {
+                  ConfigurationPathHint::FromUser(joined)
+                } else {
+                  ConfigurationPathHint::FromUserExternal(joined)
+                })
             }
         }
 
@@ -739,17 +750,17 @@ impl Session {
         // correct per-file resolution happens in `did_open` where the file
         // path is available.
         if let Some(root) = workspace_roots.first() {
-            return Some(root.join(&config_path));
+            return Some(ConfigurationPathHint::FromUserExternal(root.join(&config_path)));
         }
 
         // Fall back to the (deprecated) root_uri base path.
         if let Some(base) = self.base_path() {
-            return Some(base.join(&config_path));
+            return Some(ConfigurationPathHint::FromUserExternal(base.join(&config_path)));
         }
 
         // Nothing to resolve against; return the path unchanged and let the
         // downstream loader produce a meaningful error.
-        Some(config_path)
+        Some(ConfigurationPathHint::FromUserExternal(config_path))
     }
 
     /// This function attempts to read the `biome.json` configuration file from
@@ -761,7 +772,7 @@ impl Session {
             self.set_configuration_status(ConfigurationStatus::Loading);
 
             let status = self
-                .load_biome_configuration_file(ConfigurationPathHint::FromUser(config_path), reload)
+                .load_biome_configuration_file(config_path, reload)
                 .await;
             debug!("Configuration status: {:?}", status);
             self.set_configuration_status(status);
@@ -1022,58 +1033,33 @@ impl Session {
         // the working directory. Otherwise, the base path of the session is used, then the current
         // working directory is used as the last resort.
         debug!("Configuration path provided {:?}", &base_path);
-        let path = match &base_path {
+        let project_path = match &base_path {
             ConfigurationPathHint::FromLsp(path) | ConfigurationPathHint::FromWorkspace(path) => {
                 path.to_path_buf()
             }
             ConfigurationPathHint::FromUser(path) => {
-                // Collect workspace folder roots as absolute Utf8PathBufs.
-                let workspace_roots: Vec<Utf8PathBuf> = self
-                    .get_workspace_folders()
-                    .unwrap_or_default()
-                    .into_iter()
-                    .filter_map(|folder| {
-                        folder
-                            .uri
-                            .to_file_path()
-                            .and_then(|p| Utf8PathBuf::from_path_buf(p.to_path_buf()).ok())
-                    })
-                    .collect();
-
-                // Find the workspace folder that contains this config file.
-                // If it's outside all workspace folders (e.g. an external shared config),
-                // we should NOT use the config file's directory as the project root,
-                // because then workspace files won't match the project.
-                // Instead, we fallback to the first workspace root or the session's base_path.
-                workspace_roots
-                    .iter()
-                    .filter(|root| path.starts_with(*root))
-                    .max_by_key(|root| root.as_str().len())
-                    .cloned()
-                    .or_else(|| workspace_roots.first().cloned())
-                    .or_else(|| self.base_path())
-                    .unwrap_or_else(|| {
-                        if fs.path_is_file(path) {
-                            path.parent()
-                                .map_or(fs.working_directory().unwrap_or_default(), |p| {
-                                    p.to_path_buf()
-                                })
-                        } else {
-                            path.to_path_buf()
-                        }
-                    })
+                if fs.path_is_file(path) {
+                    path.parent()
+                        .map_or(fs.working_directory().unwrap_or_default(), |p| {
+                            p.to_path_buf()
+                        })
+                } else {
+                    path.to_path_buf()
+                }
             }
-            _ => self
+            ConfigurationPathHint::FromUserExternal(_) | _ => {
+              self
                 .base_path()
                 .or_else(|| fs.working_directory())
-                .unwrap_or_default(),
+                .unwrap_or_default()
+            }
         };
 
-        let project_key = match self.project_for_path(&path) {
+        let project_key = match self.project_for_path(&project_path) {
             Some(project_key) => project_key,
             None => {
                 let register_result = self.workspace.open_project(OpenProjectParams {
-                    path: path.as_path().into(),
+                    path: project_path.as_path().into(),
                     open_uninitialized: true,
                 });
                 let OpenProjectResult { project_key } = match register_result {
@@ -1106,7 +1092,7 @@ impl Session {
             module_graph_resolution_kind: ModuleGraphResolutionKind::from(&scan_kind),
         });
 
-        self.insert_and_scan_project(project_key, path.into(), scan_kind, force)
+        self.insert_and_scan_project(project_key, project_path.into(), scan_kind, force)
             .await;
 
         if let Err(WorkspaceError::PluginErrors(error)) = result {
