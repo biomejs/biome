@@ -6,11 +6,7 @@ use biome_formatter::write;
 pub(crate) struct FormatScssModuleConfiguration;
 
 impl FormatNodeRule<ScssModuleConfiguration> for FormatScssModuleConfiguration {
-    fn fmt_fields(
-        &self,
-        node: &ScssModuleConfiguration,
-        f: &mut CssFormatter,
-    ) -> FormatResult<()> {
+    fn fmt_fields(&self, node: &ScssModuleConfiguration, f: &mut CssFormatter) -> FormatResult<()> {
         let ScssModuleConfigurationFields {
             name,
             colon_token,

@@ -2,8 +2,8 @@ use super::module_clauses::{
     expected_scss_module_configuration, parse_scss_module_configuration_list,
 };
 use crate::parser::CssParser;
-use crate::syntax::parse_error::expected_string;
 use crate::syntax::parse_error::expected_identifier;
+use crate::syntax::parse_error::expected_string;
 use crate::syntax::{parse_regular_identifier, parse_string};
 use biome_css_syntax::CssSyntaxKind::{
     SCSS_USE_ALL_NAMESPACE, SCSS_USE_AS_CLAUSE, SCSS_USE_AT_RULE,

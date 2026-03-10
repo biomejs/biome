@@ -7,7 +7,10 @@ pub(crate) struct FormatScssUseAsClause;
 
 impl FormatNodeRule<ScssUseAsClause> for FormatScssUseAsClause {
     fn fmt_fields(&self, node: &ScssUseAsClause, f: &mut CssFormatter) -> FormatResult<()> {
-        let ScssUseAsClauseFields { as_token, namespace } = node.as_fields();
+        let ScssUseAsClauseFields {
+            as_token,
+            namespace,
+        } = node.as_fields();
 
         write!(f, [as_token.format(), space(), namespace.format()])
     }

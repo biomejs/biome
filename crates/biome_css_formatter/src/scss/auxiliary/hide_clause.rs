@@ -7,7 +7,10 @@ pub(crate) struct FormatScssHideClause;
 
 impl FormatNodeRule<ScssHideClause> for FormatScssHideClause {
     fn fmt_fields(&self, node: &ScssHideClause, f: &mut CssFormatter) -> FormatResult<()> {
-        let ScssHideClauseFields { hide_token, members } = node.as_fields();
+        let ScssHideClauseFields {
+            hide_token,
+            members,
+        } = node.as_fields();
 
         write!(f, [hide_token.format(), space(), members.format()])
     }

@@ -16,10 +16,8 @@ use biome_parser::prelude::*;
 use biome_parser::{Parser, TokenSet, token_set};
 use biome_rowan::TextRange;
 
-const SCSS_MODULE_CONFIGURATION_VALUE_END_SET: TokenSet<CssSyntaxKind> =
-    token_set![T![,], T![')']];
-const SCSS_MODULE_CONFIGURATION_RECOVERY_SET: TokenSet<CssSyntaxKind> =
-    token_set![T![,], T![')']];
+const SCSS_MODULE_CONFIGURATION_VALUE_END_SET: TokenSet<CssSyntaxKind> = token_set![T![,], T![')']];
+const SCSS_MODULE_CONFIGURATION_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![T![,], T![')']];
 const SCSS_MODULE_MEMBER_RECOVERY_SET: TokenSet<CssSyntaxKind> =
     token_set![T![,], T![with], T![;], EOF];
 
@@ -116,9 +114,8 @@ pub(super) fn expected_scss_module_configuration(
     p: &CssParser,
     range: TextRange,
 ) -> ParseDiagnostic {
-    p.err_builder("Expected a module configuration.", range).with_hint(
-        "Add a configuration like `$name: value` or remove the extra separator.",
-    )
+    p.err_builder("Expected a module configuration.", range)
+        .with_hint("Add a configuration like `$name: value` or remove the extra separator.")
 }
 
 #[inline]
@@ -159,7 +156,11 @@ impl ParseSeparatedList for ScssModuleMemberList {
         p: &mut Self::Parser<'_>,
         parsed_element: ParsedSyntax,
     ) -> RecoveryResult {
-        parsed_element.or_recover(p, &ScssModuleMemberListRecovery, expected_scss_module_member)
+        parsed_element.or_recover(
+            p,
+            &ScssModuleMemberListRecovery,
+            expected_scss_module_member,
+        )
     }
 
     fn separating_element_kind(&mut self) -> Self::Kind {

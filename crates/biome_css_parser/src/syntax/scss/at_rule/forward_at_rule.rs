@@ -1,6 +1,4 @@
-use super::module_clauses::{
-    expected_scss_module_member, parse_scss_module_member_list,
-};
+use super::module_clauses::{expected_scss_module_member, parse_scss_module_member_list};
 use super::use_at_rule::parse_scss_with_clause;
 use crate::parser::CssParser;
 use crate::syntax::parse_error::{expected_identifier, expected_string};
