@@ -1,8 +1,8 @@
 use crate::parser::CssParser;
 use crate::syntax::scss::expected_scss_expression;
 use biome_css_syntax::CssSyntaxKind::{
-    CSS_BOGUS, SCSS_MAP_EXPRESSION, SCSS_MAP_EXPRESSION_PAIR,
-    SCSS_MAP_EXPRESSION_PAIR_LIST, SCSS_PARENTHESIZED_EXPRESSION,
+    CSS_BOGUS, SCSS_MAP_EXPRESSION, SCSS_MAP_EXPRESSION_PAIR, SCSS_MAP_EXPRESSION_PAIR_LIST,
+    SCSS_PARENTHESIZED_EXPRESSION,
 };
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_recovery::ParseRecoveryTokenSet;
@@ -120,11 +120,8 @@ fn complete_scss_map_expression_pair_list(p: &mut CssParser, first_pair: Complet
         if pair
             .or_recover_with_token_set(
                 p,
-                &ParseRecoveryTokenSet::new(
-                    CSS_BOGUS,
-                    SCSS_MAP_EXPRESSION_VALUE_END_TOKEN_SET,
-                )
-                .enable_recovery_on_line_break(),
+                &ParseRecoveryTokenSet::new(CSS_BOGUS, SCSS_MAP_EXPRESSION_VALUE_END_TOKEN_SET)
+                    .enable_recovery_on_line_break(),
                 expected_scss_expression,
             )
             .is_err()

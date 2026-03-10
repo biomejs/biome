@@ -489,10 +489,7 @@ fn parse_if_branch(p: &mut CssParser) -> ParsedSyntax {
     parse_any_if_condition(p)
         .or_recover_with_token_set(
             p,
-            &ParseRecoveryTokenSet::new(
-                CSS_BOGUS,
-                IF_BRANCH_CONDITION_RECOVERY_TOKEN_SET,
-            ),
+            &ParseRecoveryTokenSet::new(CSS_BOGUS, IF_BRANCH_CONDITION_RECOVERY_TOKEN_SET),
             expected_if_branch,
         )
         .ok();

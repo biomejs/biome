@@ -4,8 +4,8 @@ use crate::syntax::scss::{
     parse_scss_identifier,
 };
 use biome_css_syntax::CssSyntaxKind::{
-    self, CSS_BOGUS, SCSS_PARAMETER, SCSS_PARAMETER_DEFAULT_VALUE,
-    SCSS_PARAMETER_ITEM_LIST, SCSS_PARAMETER_LIST,
+    self, CSS_BOGUS, SCSS_PARAMETER, SCSS_PARAMETER_DEFAULT_VALUE, SCSS_PARAMETER_ITEM_LIST,
+    SCSS_PARAMETER_LIST,
 };
 use biome_css_syntax::T;
 use biome_parser::parse_lists::ParseSeparatedList;

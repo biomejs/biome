@@ -142,10 +142,7 @@ impl ParseNodeList for PageSelectorPseudoList {
     ) -> RecoveryResult {
         parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecoveryTokenSet::new(
-                CSS_BOGUS,
-                PAGE_SELECTOR_PSEUDO_LIST_RECOVERY_SET,
-            ),
+            &ParseRecoveryTokenSet::new(CSS_BOGUS, PAGE_SELECTOR_PSEUDO_LIST_RECOVERY_SET),
             expected_page_selector_pseudo,
         )
     }

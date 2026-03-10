@@ -7,9 +7,9 @@ use crate::syntax::scss::{
     parse_scss_identifier, scss_ellipsis_not_allowed,
 };
 use biome_css_syntax::CssSyntaxKind::{
-    CSS_BOGUS, EOF, SCSS_ARBITRARY_ARGUMENT, SCSS_EXPRESSION,
-    SCSS_EXPRESSION_ITEM_LIST, SCSS_KEYWORD_ARGUMENT, SCSS_LIST_EXPRESSION,
-    SCSS_LIST_EXPRESSION_ELEMENT, SCSS_LIST_EXPRESSION_ELEMENT_LIST,
+    CSS_BOGUS, EOF, SCSS_ARBITRARY_ARGUMENT, SCSS_EXPRESSION, SCSS_EXPRESSION_ITEM_LIST,
+    SCSS_KEYWORD_ARGUMENT, SCSS_LIST_EXPRESSION, SCSS_LIST_EXPRESSION_ELEMENT,
+    SCSS_LIST_EXPRESSION_ELEMENT_LIST,
 };
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_recovery::ParseRecoveryTokenSet;

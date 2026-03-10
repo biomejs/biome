@@ -262,10 +262,7 @@ impl ParseNodeList for FontFeatureValuesItemList {
     ) -> RecoveryResult {
         parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecoveryTokenSet::new(
-                CSS_BOGUS,
-                FONT_FEATURE_VALUES_ITEM_LIST_RECOVERY_SET,
-            ),
+            &ParseRecoveryTokenSet::new(CSS_BOGUS, FONT_FEATURE_VALUES_ITEM_LIST_RECOVERY_SET),
             expected_font_feature_values_item,
         )
     }
