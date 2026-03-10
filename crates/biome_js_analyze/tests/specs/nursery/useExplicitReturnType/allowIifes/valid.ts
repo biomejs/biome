@@ -1,0 +1,40 @@
+/* should not generate diagnostics */
+
+// Function expression with return type (always valid)
+let foo1 = function (): number {
+  return 1;
+};
+
+// IIFE function expression
+const foo2 = (function () {
+  return 1;
+})();
+
+// Arrow IIFE
+const foo3 = (() => {
+  return 1;
+})();
+
+// Arrow IIFE with return type
+const foo4 = ((arg: number): number => {
+  return arg;
+})(0);
+
+// Nested IIFE
+const foo5 = (() => (() => 'foo')())();
+
+// IIFE returning function with return type (double call)
+let foo6 = (() => (): string => {
+  return 'foo';
+})()();
+
+// IIFE with allowHigherOrderFunctions behavior
+let foo7 = (() => (): string => {
+  return 'foo';
+})();
+
+// Nested chained IIFEs
+let foo8 = (() => (): void => {})()();
+
+// Deeply nested IIFE
+let foo9 = (() => (() => {})())();
