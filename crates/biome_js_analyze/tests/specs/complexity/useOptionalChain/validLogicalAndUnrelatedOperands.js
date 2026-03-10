@@ -1,0 +1,13 @@
+/* should not generate diagnostics */
+
+// Unrelated identifiers with negation prefix (#9428)
+hasMore && !isLoading && inView;
+a && !b && c;
+foo && !bar && baz.qux;
+
+// Unrelated identifiers without member access
+a && b && c;
+
+// Negation at different positions
+!a && b && c;
+a && b && !c;
