@@ -13909,6 +13909,7 @@
 			]
 		},
 		"UseExplicitReturnTypeOptions": {
+			"description": "Options for the `useExplicitReturnType` rule.",
 			"type": "object",
 			"properties": {
 				"allowExpressions": {
