@@ -30,7 +30,7 @@ class Test {
   get prop() {
     return 1;
   }
-  set prop() {}
+  set prop(value: number) {}
   method() {
     return;
   }
@@ -148,8 +148,6 @@ const fooIife = (function () {
 
 ```
 
-_Note: The parser emitted 1 diagnostics which are not shown here._
-
 # Diagnostics
 ```
 invalid.ts:4:1 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -254,7 +252,7 @@ invalid.ts:24:3 lint/nursery/useExplicitReturnType ━━━━━━━━━�
   > 25 │     return 1;
   > 26 │   }
        │   ^
-    27 │   set prop() {}
+    27 │   set prop(value: number) {}
     28 │   method() {
   
   i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
@@ -274,7 +272,7 @@ invalid.ts:28:3 lint/nursery/useExplicitReturnType ━━━━━━━━━�
   ! Missing return type on function.
   
     26 │   }
-    27 │   set prop() {}
+    27 │   set prop(value: number) {}
   > 28 │   method() {
        │   ^^^^^^^^^^
   > 29 │     return;

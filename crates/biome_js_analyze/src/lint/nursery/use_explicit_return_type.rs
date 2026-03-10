@@ -263,7 +263,7 @@ declare_lint_rule! {
         recommended: false,
         severity: Severity::Warning,
         sources: &[
-            RuleSource::EslintTypeScript("explicit-function-return-type").same(),
+            RuleSource::EslintTypeScript("explicit-function-return-type").inspired(),
         ],
         issue_number: Some("2017"),
     }

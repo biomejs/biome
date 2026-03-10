@@ -16,7 +16,6 @@ const foo = () => {};
 const bar = function () {};
 
 // Export default without return type
-export default () => {};
 export default function () {}
 
 // Class property functions still require return types
@@ -30,8 +29,6 @@ class Foo {
 }
 
 ```
-
-_Note: The parser emitted 1 diagnostics which are not shown here._
 
 # Diagnostics
 ```
@@ -102,16 +99,38 @@ invalid.ts:10:13 lint/nursery/useExplicitReturnType ━━━━━━━━━�
 ```
 
 ```
-invalid.ts:14:16 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:13:16 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing return type on function.
   
     12 │ // Export default without return type
-    13 │ export default () => {};
-  > 14 │ export default function () {}
+  > 13 │ export default function () {}
        │                ^^^^^^^^^^^^^^
-    15 │ 
-    16 │ // Class property functions still require return types
+    14 │ 
+    15 │ // Class property functions still require return types
+  
+  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:17:14 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    15 │ // Class property functions still require return types
+    16 │ class Foo {
+  > 17 │   public a = () => {};
+       │              ^^^^^^^^
+    18 │   public b = function () {};
+    19 │   public c = function test() {};
   
   i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
   
@@ -129,12 +148,12 @@ invalid.ts:18:14 lint/nursery/useExplicitReturnType ━━━━━━━━━�
 
   ! Missing return type on function.
   
-    16 │ // Class property functions still require return types
-    17 │ class Foo {
-  > 18 │   public a = () => {};
-       │              ^^^^^^^^
-    19 │   public b = function () {};
-    20 │   public c = function test() {};
+    16 │ class Foo {
+    17 │   public a = () => {};
+  > 18 │   public b = function () {};
+       │              ^^^^^^^^^^^^^^
+    19 │   public c = function test() {};
+    20 │ 
   
   i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
   
@@ -152,12 +171,12 @@ invalid.ts:19:14 lint/nursery/useExplicitReturnType ━━━━━━━━━�
 
   ! Missing return type on function.
   
-    17 │ class Foo {
-    18 │   public a = () => {};
-  > 19 │   public b = function () {};
-       │              ^^^^^^^^^^^^^^
-    20 │   public c = function test() {};
-    21 │ 
+    17 │   public a = () => {};
+    18 │   public b = function () {};
+  > 19 │   public c = function test() {};
+       │              ^^^^^^^^^^^^^
+    20 │ 
+    21 │   static d = () => {};
   
   i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
   
@@ -171,16 +190,16 @@ invalid.ts:19:14 lint/nursery/useExplicitReturnType ━━━━━━━━━�
 ```
 
 ```
-invalid.ts:20:14 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:21:14 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing return type on function.
   
-    18 │   public a = () => {};
-    19 │   public b = function () {};
-  > 20 │   public c = function test() {};
-       │              ^^^^^^^^^^^^^
-    21 │ 
-    22 │   static d = () => {};
+    19 │   public c = function test() {};
+    20 │ 
+  > 21 │   static d = () => {};
+       │              ^^^^^^^^
+    22 │   static e = function () {};
+    23 │ }
   
   i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
   
@@ -198,34 +217,11 @@ invalid.ts:22:14 lint/nursery/useExplicitReturnType ━━━━━━━━━�
 
   ! Missing return type on function.
   
-    20 │   public c = function test() {};
-    21 │ 
-  > 22 │   static d = () => {};
-       │              ^^^^^^^^
-    23 │   static e = function () {};
-    24 │ }
-  
-  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
-  
-  i Add a return type to the function.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.ts:23:14 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Missing return type on function.
-  
-    22 │   static d = () => {};
-  > 23 │   static e = function () {};
+    21 │   static d = () => {};
+  > 22 │   static e = function () {};
        │              ^^^^^^^^^^^^^^
-    24 │ }
-    25 │ 
+    23 │ }
+    24 │ 
   
   i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
   

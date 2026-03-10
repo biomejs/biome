@@ -24,7 +24,7 @@ class Test {
   get prop() {
     return 1;
   }
-  set prop() {}
+  set prop(value: number) {}
   method() {
     return;
   }

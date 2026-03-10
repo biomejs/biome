@@ -10,7 +10,6 @@ const foo = () => {};
 const bar = function () {};
 
 // Export default without return type
-export default () => {};
 export default function () {}
 
 // Class property functions still require return types

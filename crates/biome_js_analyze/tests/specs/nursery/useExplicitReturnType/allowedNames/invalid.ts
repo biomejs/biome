@@ -12,9 +12,11 @@ const baz = function () {
 };
 
 // Destructured assignment doesn't match allowedNames
-let [test, test] = function () {
-  return;
-};
+let [unlistedName] = [
+  function () {
+    return;
+  },
+];
 
 // Computed member name doesn't match allowedNames
 class X {
