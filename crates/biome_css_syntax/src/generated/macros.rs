@@ -979,6 +979,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::ScssForAtRule::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::SCSS_FUNCTION_AT_RULE => {
+                    let $pattern = unsafe { $crate::ScssFunctionAtRule::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::SCSS_IDENTIFIER => {
                     let $pattern = unsafe { $crate::ScssIdentifier::new_unchecked(node) };
                     $body
@@ -1052,6 +1056,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::SCSS_QUALIFIED_NAME => {
                     let $pattern = unsafe { $crate::ScssQualifiedName::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_RETURN_AT_RULE => {
+                    let $pattern = unsafe { $crate::ScssReturnAtRule::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::SCSS_UNARY_EXPRESSION => {

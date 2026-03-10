@@ -9468,6 +9468,56 @@ pub struct ScssForAtRuleFields {
     pub block: SyntaxResult<CssDeclarationOrRuleBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssFunctionAtRule {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssFunctionAtRule {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssFunctionAtRuleFields {
+        ScssFunctionAtRuleFields {
+            function_token: self.function_token(),
+            name: self.name(),
+            parameters: self.parameters(),
+            block: self.block(),
+        }
+    }
+    pub fn function_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn parameters(&self) -> Option<ScssParameterList> {
+        support::node(&self.syntax, 2usize)
+    }
+    pub fn block(&self) -> SyntaxResult<CssDeclarationOrRuleBlock> {
+        support::required_node(&self.syntax, 3usize)
+    }
+}
+impl Serialize for ScssFunctionAtRule {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssFunctionAtRuleFields {
+    pub function_token: SyntaxResult<SyntaxToken>,
+    pub name: SyntaxResult<CssIdentifier>,
+    pub parameters: Option<ScssParameterList>,
+    pub block: SyntaxResult<CssDeclarationOrRuleBlock>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssIdentifier {
     pub(crate) syntax: SyntaxNode,
 }
@@ -10261,6 +10311,51 @@ pub struct ScssQualifiedNameFields {
     pub module: SyntaxResult<CssIdentifier>,
     pub dot_token: SyntaxResult<SyntaxToken>,
     pub member: SyntaxResult<AnyScssModuleMember>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssReturnAtRule {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssReturnAtRule {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssReturnAtRuleFields {
+        ScssReturnAtRuleFields {
+            return_token: self.return_token(),
+            value: self.value(),
+            semicolon_token: self.semicolon_token(),
+        }
+    }
+    pub fn return_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn value(&self) -> SyntaxResult<ScssExpression> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for ScssReturnAtRule {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssReturnAtRuleFields {
+    pub return_token: SyntaxResult<SyntaxToken>,
+    pub value: SyntaxResult<ScssExpression>,
+    pub semicolon_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssUnaryExpression {
@@ -11109,9 +11204,11 @@ pub enum AnyCssAtRule {
     ScssEachAtRule(ScssEachAtRule),
     ScssErrorAtRule(ScssErrorAtRule),
     ScssForAtRule(ScssForAtRule),
+    ScssFunctionAtRule(ScssFunctionAtRule),
     ScssIfAtRule(ScssIfAtRule),
     ScssIncludeAtRule(ScssIncludeAtRule),
     ScssMixinAtRule(ScssMixinAtRule),
+    ScssReturnAtRule(ScssReturnAtRule),
     ScssWarnAtRule(ScssWarnAtRule),
     ScssWhileAtRule(ScssWhileAtRule),
     TwApplyAtRule(TwApplyAtRule),
@@ -11306,6 +11403,12 @@ impl AnyCssAtRule {
             _ => None,
         }
     }
+    pub fn as_scss_function_at_rule(&self) -> Option<&ScssFunctionAtRule> {
+        match &self {
+            Self::ScssFunctionAtRule(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_scss_if_at_rule(&self) -> Option<&ScssIfAtRule> {
         match &self {
             Self::ScssIfAtRule(item) => Some(item),
@@ -11321,6 +11424,12 @@ impl AnyCssAtRule {
     pub fn as_scss_mixin_at_rule(&self) -> Option<&ScssMixinAtRule> {
         match &self {
             Self::ScssMixinAtRule(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_return_at_rule(&self) -> Option<&ScssReturnAtRule> {
+        match &self {
+            Self::ScssReturnAtRule(item) => Some(item),
             _ => None,
         }
     }
@@ -26059,6 +26168,62 @@ impl From<ScssForAtRule> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for ScssFunctionAtRule {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_FUNCTION_AT_RULE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_FUNCTION_AT_RULE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssFunctionAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssFunctionAtRule")
+                .field(
+                    "function_token",
+                    &support::DebugSyntaxResult(self.function_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "parameters",
+                    &support::DebugOptionalElement(self.parameters()),
+                )
+                .field("block", &support::DebugSyntaxResult(self.block()))
+                .finish()
+        } else {
+            f.debug_struct("ScssFunctionAtRule").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssFunctionAtRule> for SyntaxNode {
+    fn from(n: ScssFunctionAtRule) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssFunctionAtRule> for SyntaxElement {
+    fn from(n: ScssFunctionAtRule) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for ScssIdentifier {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -26998,6 +27163,61 @@ impl From<ScssQualifiedName> for SyntaxNode {
 }
 impl From<ScssQualifiedName> for SyntaxElement {
     fn from(n: ScssQualifiedName) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for ScssReturnAtRule {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_RETURN_AT_RULE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_RETURN_AT_RULE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssReturnAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssReturnAtRule")
+                .field(
+                    "return_token",
+                    &support::DebugSyntaxResult(self.return_token()),
+                )
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .field(
+                    "semicolon_token",
+                    &support::DebugSyntaxResult(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("ScssReturnAtRule").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssReturnAtRule> for SyntaxNode {
+    fn from(n: ScssReturnAtRule) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssReturnAtRule> for SyntaxElement {
+    fn from(n: ScssReturnAtRule) -> Self {
         n.syntax.into()
     }
 }
@@ -28112,6 +28332,11 @@ impl From<ScssForAtRule> for AnyCssAtRule {
         Self::ScssForAtRule(node)
     }
 }
+impl From<ScssFunctionAtRule> for AnyCssAtRule {
+    fn from(node: ScssFunctionAtRule) -> Self {
+        Self::ScssFunctionAtRule(node)
+    }
+}
 impl From<ScssIfAtRule> for AnyCssAtRule {
     fn from(node: ScssIfAtRule) -> Self {
         Self::ScssIfAtRule(node)
@@ -28125,6 +28350,11 @@ impl From<ScssIncludeAtRule> for AnyCssAtRule {
 impl From<ScssMixinAtRule> for AnyCssAtRule {
     fn from(node: ScssMixinAtRule) -> Self {
         Self::ScssMixinAtRule(node)
+    }
+}
+impl From<ScssReturnAtRule> for AnyCssAtRule {
+    fn from(node: ScssReturnAtRule) -> Self {
+        Self::ScssReturnAtRule(node)
     }
 }
 impl From<ScssWarnAtRule> for AnyCssAtRule {
@@ -28219,9 +28449,11 @@ impl AstNode for AnyCssAtRule {
         .union(ScssEachAtRule::KIND_SET)
         .union(ScssErrorAtRule::KIND_SET)
         .union(ScssForAtRule::KIND_SET)
+        .union(ScssFunctionAtRule::KIND_SET)
         .union(ScssIfAtRule::KIND_SET)
         .union(ScssIncludeAtRule::KIND_SET)
         .union(ScssMixinAtRule::KIND_SET)
+        .union(ScssReturnAtRule::KIND_SET)
         .union(ScssWarnAtRule::KIND_SET)
         .union(ScssWhileAtRule::KIND_SET)
         .union(TwApplyAtRule::KIND_SET)
@@ -28267,9 +28499,11 @@ impl AstNode for AnyCssAtRule {
                 | SCSS_EACH_AT_RULE
                 | SCSS_ERROR_AT_RULE
                 | SCSS_FOR_AT_RULE
+                | SCSS_FUNCTION_AT_RULE
                 | SCSS_IF_AT_RULE
                 | SCSS_INCLUDE_AT_RULE
                 | SCSS_MIXIN_AT_RULE
+                | SCSS_RETURN_AT_RULE
                 | SCSS_WARN_AT_RULE
                 | SCSS_WHILE_AT_RULE
                 | TW_APPLY_AT_RULE
@@ -28332,9 +28566,11 @@ impl AstNode for AnyCssAtRule {
             SCSS_EACH_AT_RULE => Self::ScssEachAtRule(ScssEachAtRule { syntax }),
             SCSS_ERROR_AT_RULE => Self::ScssErrorAtRule(ScssErrorAtRule { syntax }),
             SCSS_FOR_AT_RULE => Self::ScssForAtRule(ScssForAtRule { syntax }),
+            SCSS_FUNCTION_AT_RULE => Self::ScssFunctionAtRule(ScssFunctionAtRule { syntax }),
             SCSS_IF_AT_RULE => Self::ScssIfAtRule(ScssIfAtRule { syntax }),
             SCSS_INCLUDE_AT_RULE => Self::ScssIncludeAtRule(ScssIncludeAtRule { syntax }),
             SCSS_MIXIN_AT_RULE => Self::ScssMixinAtRule(ScssMixinAtRule { syntax }),
+            SCSS_RETURN_AT_RULE => Self::ScssReturnAtRule(ScssReturnAtRule { syntax }),
             SCSS_WARN_AT_RULE => Self::ScssWarnAtRule(ScssWarnAtRule { syntax }),
             SCSS_WHILE_AT_RULE => Self::ScssWhileAtRule(ScssWhileAtRule { syntax }),
             TW_APPLY_AT_RULE => Self::TwApplyAtRule(TwApplyAtRule { syntax }),
@@ -28385,9 +28621,11 @@ impl AstNode for AnyCssAtRule {
             Self::ScssEachAtRule(it) => it.syntax(),
             Self::ScssErrorAtRule(it) => it.syntax(),
             Self::ScssForAtRule(it) => it.syntax(),
+            Self::ScssFunctionAtRule(it) => it.syntax(),
             Self::ScssIfAtRule(it) => it.syntax(),
             Self::ScssIncludeAtRule(it) => it.syntax(),
             Self::ScssMixinAtRule(it) => it.syntax(),
+            Self::ScssReturnAtRule(it) => it.syntax(),
             Self::ScssWarnAtRule(it) => it.syntax(),
             Self::ScssWhileAtRule(it) => it.syntax(),
             Self::TwApplyAtRule(it) => it.syntax(),
@@ -28434,9 +28672,11 @@ impl AstNode for AnyCssAtRule {
             Self::ScssEachAtRule(it) => it.into_syntax(),
             Self::ScssErrorAtRule(it) => it.into_syntax(),
             Self::ScssForAtRule(it) => it.into_syntax(),
+            Self::ScssFunctionAtRule(it) => it.into_syntax(),
             Self::ScssIfAtRule(it) => it.into_syntax(),
             Self::ScssIncludeAtRule(it) => it.into_syntax(),
             Self::ScssMixinAtRule(it) => it.into_syntax(),
+            Self::ScssReturnAtRule(it) => it.into_syntax(),
             Self::ScssWarnAtRule(it) => it.into_syntax(),
             Self::ScssWhileAtRule(it) => it.into_syntax(),
             Self::TwApplyAtRule(it) => it.into_syntax(),
@@ -28485,9 +28725,11 @@ impl std::fmt::Debug for AnyCssAtRule {
             Self::ScssEachAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssErrorAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssForAtRule(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssFunctionAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssIfAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssIncludeAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssMixinAtRule(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssReturnAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssWarnAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssWhileAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::TwApplyAtRule(it) => std::fmt::Debug::fmt(it, f),
@@ -28536,9 +28778,11 @@ impl From<AnyCssAtRule> for SyntaxNode {
             AnyCssAtRule::ScssEachAtRule(it) => it.into_syntax(),
             AnyCssAtRule::ScssErrorAtRule(it) => it.into_syntax(),
             AnyCssAtRule::ScssForAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::ScssFunctionAtRule(it) => it.into_syntax(),
             AnyCssAtRule::ScssIfAtRule(it) => it.into_syntax(),
             AnyCssAtRule::ScssIncludeAtRule(it) => it.into_syntax(),
             AnyCssAtRule::ScssMixinAtRule(it) => it.into_syntax(),
+            AnyCssAtRule::ScssReturnAtRule(it) => it.into_syntax(),
             AnyCssAtRule::ScssWarnAtRule(it) => it.into_syntax(),
             AnyCssAtRule::ScssWhileAtRule(it) => it.into_syntax(),
             AnyCssAtRule::TwApplyAtRule(it) => it.into_syntax(),
@@ -39461,6 +39705,11 @@ impl std::fmt::Display for ScssForAtRule {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for ScssFunctionAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for ScssIdentifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -39547,6 +39796,11 @@ impl std::fmt::Display for ScssParenthesizedExpression {
     }
 }
 impl std::fmt::Display for ScssQualifiedName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for ScssReturnAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

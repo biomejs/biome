@@ -309,7 +309,7 @@ fn cdo_and_cdc() {
 #[test]
 fn keywords() {
     assert_lex! {
-        "media keyframes important from through sass each debug warn error for include mixin",
+        "media keyframes important from through sass each debug warn error for function include mixin return",
         MEDIA_KW:5,
         WHITESPACE:1,
         KEYFRAMES_KW:9,
@@ -332,9 +332,13 @@ fn keywords() {
         WHITESPACE:1,
         FOR_KW:3,
         WHITESPACE:1,
+        FUNCTION_KW:8,
+        WHITESPACE:1,
         INCLUDE_KW:7,
         WHITESPACE:1,
-        MIXIN_KW:5
+        MIXIN_KW:5,
+        WHITESPACE:1,
+        RETURN_KW:6
     }
 }
 
