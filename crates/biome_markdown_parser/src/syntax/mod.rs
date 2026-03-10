@@ -539,7 +539,9 @@ fn consume_indent_prefix(p: &mut MarkdownParser, indent: usize) {
             break;
         }
 
-        p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_TEXTUAL_LITERAL));
+        let token_m = p.start();
+        p.bump_remap(MD_INDENT_CHAR);
+        token_m.complete(p, MD_INDENT_TOKEN);
     }
 }
 
@@ -899,8 +901,8 @@ fn handle_inline_newline(p: &mut MarkdownParser, has_content: bool) -> InlineNew
     if has_content && p.state().list_item_required_indent == 0 && allow_setext_heading(p) {
         let is_setext = p.lookahead(|p| at_setext_underline_after_newline(p).is_some());
         if is_setext {
-            // Skip the indent so parse_paragraph sees the underline
-            p.skip_line_indent(INDENT_CODE_BLOCK_SPACES);
+            // Emit the indent so parse_paragraph sees the underline
+            p.emit_indent_tokens(INDENT_CODE_BLOCK_SPACES);
             return InlineNewlineAction::Break;
         }
     }
@@ -921,8 +923,8 @@ fn handle_inline_newline(p: &mut MarkdownParser, has_content: bool) -> InlineNew
                     || (p.at(MD_THEMATIC_BREAK_LITERAL) && is_dash_only_thematic_break(p))
             });
             if is_setext && has_content {
-                // Skip the indent so parse_paragraph sees the underline
-                p.skip_line_indent(required_indent);
+                // Emit the indent so parse_paragraph sees the underline
+                p.emit_indent_tokens(required_indent);
                 return InlineNewlineAction::Break;
             }
         }
@@ -965,17 +967,17 @@ fn handle_inline_newline(p: &mut MarkdownParser, has_content: bool) -> InlineNew
     if required_indent > 0 {
         let indent = p.line_start_leading_indent();
         if indent >= required_indent {
-            // Sufficient indentation - skip it
-            p.skip_line_indent(required_indent);
+            // Sufficient indentation - emit it as real nodes
+            p.emit_indent_tokens(required_indent);
         }
-        // else: Lazy continuation - don't break, don't skip indent.
+        // else: Lazy continuation - don't break, don't emit indent.
         // The at_block_interrupt check above handles real interruptions.
         // Content continues at its actual position.
     }
 
     // For plain paragraphs, strip up to 4 leading spaces on continuation lines.
     if required_indent == 0 {
-        p.skip_line_indent(INDENT_CODE_BLOCK_SPACES);
+        p.emit_indent_tokens(INDENT_CODE_BLOCK_SPACES);
     }
 
     InlineNewlineAction::Continue
@@ -1297,13 +1299,25 @@ fn line_starts_with_fence(p: &mut MarkdownParser) -> bool {
 fn consume_partial_quote_prefix(p: &mut MarkdownParser, depth: usize) -> bool {
     let mut consumed = 0usize;
     while consumed < depth && p.at(R_ANGLE) {
-        p.parse_as_skipped_trivia_tokens(|p| p.bump(R_ANGLE));
+        // Emit as MdQuotePrefix (same structure as Phase 1 full quote prefixes)
+        let prefix_m = p.start();
+
+        // Empty pre-marker indent list
+        let indent_list_m = p.start();
+        indent_list_m.complete(p, MD_QUOTE_INDENT_LIST);
+
+        // The `>` marker
+        p.bump(R_ANGLE);
+
+        // Optional post-marker space
         if p.at(MD_TEXTUAL_LITERAL) {
             let text = p.cur_text();
             if text == " " || text == "\t" {
-                p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_TEXTUAL_LITERAL));
+                p.bump_remap(MD_QUOTE_POST_MARKER_SPACE);
             }
         }
+
+        prefix_m.complete(p, MD_QUOTE_PREFIX);
         consumed += 1;
     }
     consumed > 0

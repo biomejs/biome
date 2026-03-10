@@ -73,6 +73,7 @@ AnyMdContainerBlock =
 // ## Lorem
 // ^^^^^^^^
 MdHeader =
+	indent: MdIndentTokenList
 	before: MdHashList
 	content: MdParagraph?
 	after: MdHashList
@@ -101,7 +102,7 @@ AnyMdCodeBlock =
 //     code
 // ^^^^^^^^
 // The space before "code" is intentional.
-// Indentation is tracked in trivia, so we use MdInlineItemList for content.
+// Content indentation uses MdInlineItemList which can contain MdIndentToken nodes.
 MdIndentCodeBlock =
 	content: MdInlineItemList
 
@@ -114,20 +115,25 @@ MdIndentCodeBlock =
 //
 // ~~~
 MdFencedCodeBlock =
+	indent: MdIndentTokenList
 	l_fence: ('```' | '~~~')
 	code_list: MdCodeNameList
 	content: MdInlineItemList
+	r_fence_indent: MdIndentTokenList
 	r_fence: ('```' | '~~~')
 
 MdCodeNameList = MdTextual*
 
 // html block - content is stored as raw text (multiple textual tokens)
-MdHtmlBlock = content: MdInlineItemList
+MdHtmlBlock =
+	indent: MdIndentTokenList
+	content: MdInlineItemList
 
 // Link reference definition per CommonMark §4.7
 // [label]: destination "title" or [label]: destination 'title' or [label]: destination (title)
 // Labels are case-insensitive and whitespace-normalized
 MdLinkReferenceDefinition =
+	indent: MdIndentTokenList
 	'['
 	label: MdLinkLabel
 	']'

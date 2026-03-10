@@ -50,7 +50,7 @@ use crate::syntax::parse_any_block_with_indent_code_policy;
 use crate::syntax::parse_error::list_nesting_too_deep;
 use crate::syntax::quote::{
     at_quote_indented_code_start, consume_quote_prefix, consume_quote_prefix_without_virtual,
-    has_quote_prefix, parse_quote, parse_quote_block_list, skip_optional_marker_space,
+    emit_optional_marker_space, has_quote_prefix, parse_quote, parse_quote_block_list,
 };
 use crate::syntax::thematic_break_block::parse_thematic_break_block;
 use crate::syntax::with_virtual_line_start;
@@ -1832,11 +1832,17 @@ fn parse_first_line_blockquote(p: &mut MarkdownParser, state: &mut ListItemLoopS
 
     let parsed = if p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == ">" {
         let quote_m = p.start();
+
+        // Wrap `>` and optional space in a proper MdQuotePrefix node
+        let prefix_m = p.start();
+        let indent_m = p.start();
+        indent_m.complete(p, MD_QUOTE_INDENT_LIST);
         p.bump_remap(T![>]);
         p.state_mut().block_quote_depth += 1;
 
         let has_indented_code = at_quote_indented_code_start(p);
-        let marker_space = skip_optional_marker_space(p, has_indented_code);
+        let marker_space = emit_optional_marker_space(p, has_indented_code);
+        prefix_m.complete(p, MD_QUOTE_PREFIX);
         p.set_virtual_line_start();
 
         parse_quote_block_list(p);
@@ -1900,6 +1906,8 @@ fn check_continuation_indent(
             allow_indent_code_block && indent >= state.required_indent + INDENT_CODE_BLOCK_SPACES;
         if !is_indent_code_block {
             // Sufficient indentation - skip it and continue
+            // (emitting indent tokens here is not possible because MdIndentToken
+            // is not a valid child of MdBlockList — leave as trivia)
             p.skip_line_indent(state.required_indent);
             let prev_virtual = p.state().virtual_line_start;
             p.state_mut().virtual_line_start = Some(p.cur_range().start());

@@ -236,23 +236,31 @@ impl MdFencedCodeBlock {
     }
     pub fn as_fields(&self) -> MdFencedCodeBlockFields {
         MdFencedCodeBlockFields {
+            indent: self.indent(),
             l_fence: self.l_fence(),
             code_list: self.code_list(),
             content: self.content(),
+            r_fence_indent: self.r_fence_indent(),
             r_fence: self.r_fence(),
         }
     }
+    pub fn indent(&self) -> MdIndentTokenList {
+        support::list(&self.syntax, 0usize)
+    }
     pub fn l_fence(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
+        support::required_token(&self.syntax, 1usize)
     }
     pub fn code_list(&self) -> MdCodeNameList {
-        support::list(&self.syntax, 1usize)
-    }
-    pub fn content(&self) -> MdInlineItemList {
         support::list(&self.syntax, 2usize)
     }
+    pub fn content(&self) -> MdInlineItemList {
+        support::list(&self.syntax, 3usize)
+    }
+    pub fn r_fence_indent(&self) -> MdIndentTokenList {
+        support::list(&self.syntax, 4usize)
+    }
     pub fn r_fence(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 3usize)
+        support::required_token(&self.syntax, 5usize)
     }
 }
 impl Serialize for MdFencedCodeBlock {
@@ -265,9 +273,11 @@ impl Serialize for MdFencedCodeBlock {
 }
 #[derive(Serialize)]
 pub struct MdFencedCodeBlockFields {
+    pub indent: MdIndentTokenList,
     pub l_fence: SyntaxResult<SyntaxToken>,
     pub code_list: MdCodeNameList,
     pub content: MdInlineItemList,
+    pub r_fence_indent: MdIndentTokenList,
     pub r_fence: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -356,19 +366,23 @@ impl MdHeader {
     }
     pub fn as_fields(&self) -> MdHeaderFields {
         MdHeaderFields {
+            indent: self.indent(),
             before: self.before(),
             content: self.content(),
             after: self.after(),
         }
     }
-    pub fn before(&self) -> MdHashList {
+    pub fn indent(&self) -> MdIndentTokenList {
         support::list(&self.syntax, 0usize)
     }
+    pub fn before(&self) -> MdHashList {
+        support::list(&self.syntax, 1usize)
+    }
     pub fn content(&self) -> Option<MdParagraph> {
-        support::node(&self.syntax, 1usize)
+        support::node(&self.syntax, 2usize)
     }
     pub fn after(&self) -> MdHashList {
-        support::list(&self.syntax, 2usize)
+        support::list(&self.syntax, 3usize)
     }
 }
 impl Serialize for MdHeader {
@@ -381,6 +395,7 @@ impl Serialize for MdHeader {
 }
 #[derive(Serialize)]
 pub struct MdHeaderFields {
+    pub indent: MdIndentTokenList,
     pub before: MdHashList,
     pub content: Option<MdParagraph>,
     pub after: MdHashList,
@@ -401,11 +416,15 @@ impl MdHtmlBlock {
     }
     pub fn as_fields(&self) -> MdHtmlBlockFields {
         MdHtmlBlockFields {
+            indent: self.indent(),
             content: self.content(),
         }
     }
-    pub fn content(&self) -> MdInlineItemList {
+    pub fn indent(&self) -> MdIndentTokenList {
         support::list(&self.syntax, 0usize)
+    }
+    pub fn content(&self) -> MdInlineItemList {
+        support::list(&self.syntax, 1usize)
     }
 }
 impl Serialize for MdHtmlBlock {
@@ -418,6 +437,7 @@ impl Serialize for MdHtmlBlock {
 }
 #[derive(Serialize)]
 pub struct MdHtmlBlockFields {
+    pub indent: MdIndentTokenList,
     pub content: MdInlineItemList,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -961,6 +981,7 @@ impl MdLinkReferenceDefinition {
     }
     pub fn as_fields(&self) -> MdLinkReferenceDefinitionFields {
         MdLinkReferenceDefinitionFields {
+            indent: self.indent(),
             l_brack_token: self.l_brack_token(),
             label: self.label(),
             r_brack_token: self.r_brack_token(),
@@ -969,23 +990,26 @@ impl MdLinkReferenceDefinition {
             title: self.title(),
         }
     }
+    pub fn indent(&self) -> MdIndentTokenList {
+        support::list(&self.syntax, 0usize)
+    }
     pub fn l_brack_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
+        support::required_token(&self.syntax, 1usize)
     }
     pub fn label(&self) -> SyntaxResult<MdLinkLabel> {
-        support::required_node(&self.syntax, 1usize)
+        support::required_node(&self.syntax, 2usize)
     }
     pub fn r_brack_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
-    }
-    pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 3usize)
     }
+    pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 4usize)
+    }
     pub fn destination(&self) -> SyntaxResult<MdLinkDestination> {
-        support::required_node(&self.syntax, 4usize)
+        support::required_node(&self.syntax, 5usize)
     }
     pub fn title(&self) -> Option<MdLinkTitle> {
-        support::node(&self.syntax, 5usize)
+        support::node(&self.syntax, 6usize)
     }
 }
 impl Serialize for MdLinkReferenceDefinition {
@@ -998,6 +1022,7 @@ impl Serialize for MdLinkReferenceDefinition {
 }
 #[derive(Serialize)]
 pub struct MdLinkReferenceDefinitionFields {
+    pub indent: MdIndentTokenList,
     pub l_brack_token: SyntaxResult<SyntaxToken>,
     pub label: SyntaxResult<MdLinkLabel>,
     pub r_brack_token: SyntaxResult<SyntaxToken>,
@@ -2224,9 +2249,11 @@ impl std::fmt::Debug for MdFencedCodeBlock {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("MdFencedCodeBlock")
+                .field("indent", &self.indent())
                 .field("l_fence", &support::DebugSyntaxResult(self.l_fence()))
                 .field("code_list", &self.code_list())
                 .field("content", &self.content())
+                .field("r_fence_indent", &self.r_fence_indent())
                 .field("r_fence", &support::DebugSyntaxResult(self.r_fence()))
                 .finish()
         } else {
@@ -2371,6 +2398,7 @@ impl std::fmt::Debug for MdHeader {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("MdHeader")
+                .field("indent", &self.indent())
                 .field("before", &self.before())
                 .field("content", &support::DebugOptionalElement(self.content()))
                 .field("after", &self.after())
@@ -2420,6 +2448,7 @@ impl std::fmt::Debug for MdHtmlBlock {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("MdHtmlBlock")
+                .field("indent", &self.indent())
                 .field("content", &self.content())
                 .finish()
         } else {
@@ -3088,6 +3117,7 @@ impl std::fmt::Debug for MdLinkReferenceDefinition {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("MdLinkReferenceDefinition")
+                .field("indent", &self.indent())
                 .field(
                     "l_brack_token",
                     &support::DebugSyntaxResult(self.l_brack_token()),
