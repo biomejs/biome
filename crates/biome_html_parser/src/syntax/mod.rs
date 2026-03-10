@@ -1,3 +1,4 @@
+mod angular;
 mod astro;
 mod parse_error;
 mod svelte;
@@ -5,7 +6,11 @@ mod vue;
 
 use crate::parser::HtmlParser;
 use crate::syntax::HtmlSyntaxFeatures::{
-    Astro, DoubleTextExpressions, SingleTextExpressions, Svelte, Vue,
+    Angular, Astro, DoubleTextExpressions, SingleTextExpressions, Svelte, Vue,
+};
+use crate::syntax::angular::{
+    parse_angular_event_binding, parse_angular_property_binding,
+    parse_angular_structural_directive, parse_angular_template_ref, parse_angular_two_way_binding,
 };
 use crate::syntax::astro::{
     is_at_astro_directive_keyword, is_at_astro_directive_start, parse_astro_directive,
@@ -44,6 +49,8 @@ pub(crate) enum HtmlSyntaxFeatures {
     Svelte,
     /// Exclusive to those documents that support Vue
     Vue,
+    /// Exclusive to those documents that support Angular
+    Angular,
 }
 
 impl SyntaxFeature for HtmlSyntaxFeatures {
@@ -60,6 +67,7 @@ impl SyntaxFeature for HtmlSyntaxFeatures {
             }
             Svelte => p.options().svelte,
             Vue => p.options().vue,
+            Angular => p.options().angular,
         }
     }
 }
@@ -498,6 +506,7 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
             parse_vue_v_on_shorthand_directive,
             |p, m| disabled_vue(p, m.range(p)),
         ),
+        T![#] if Angular.is_supported(p) => parse_angular_template_ref(p),
         T![#] => HtmlSyntaxFeatures::Vue.parse_exclusive_syntax(
             p,
             parse_vue_v_slot_shorthand_directive,
@@ -515,6 +524,26 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
             p,
             |p| parse_attach_attribute(p),
             |p: &HtmlParser<'_>, m: &CompletedMarker| disabled_svelte(p, m.range(p)),
+        ),
+        T!['('] => Angular.parse_exclusive_syntax(
+            p,
+            parse_angular_event_binding,
+            |p: &HtmlParser<'_>, m: &CompletedMarker| disabled_angular(p, m.range(p)),
+        ),
+        T!['['] => Angular.parse_exclusive_syntax(
+            p,
+            parse_angular_property_binding,
+            |p: &HtmlParser<'_>, m: &CompletedMarker| disabled_angular(p, m.range(p)),
+        ),
+        T!["[("] => Angular.parse_exclusive_syntax(
+            p,
+            parse_angular_two_way_binding,
+            |p: &HtmlParser<'_>, m: &CompletedMarker| disabled_angular(p, m.range(p)),
+        ),
+        T![*] => Angular.parse_exclusive_syntax(
+            p,
+            parse_angular_structural_directive,
+            |p: &HtmlParser<'_>, m: &CompletedMarker| disabled_angular(p, m.range(p)),
         ),
         _ if p.cur_text().starts_with("v-") => {
             Vue.parse_exclusive_syntax(p, parse_vue_directive, |p, m| disabled_vue(p, m.range(p)))
@@ -550,6 +579,10 @@ fn is_at_attribute_start(p: &mut HtmlParser) -> bool {
         T![:],
         T![@],
         T![#],
+        T!['('],
+        T!['['],
+        T!["[("],
+        T![*],
     ]) || (Svelte.is_supported(p) && p.at(T!["{@"]))
         || (Astro.is_supported(p) && is_at_astro_directive_keyword(p))
 }

@@ -186,6 +186,7 @@ AnyHtmlAttribute =
 	| HtmlAttributeSingleTextExpression
 	| SvelteAttachAttribute
 	| HtmlSpreadAttribute
+	| AnyAngularAttribute
 	| AnySvelteDirective
 	| AnyVueDirective
 	| AnyAstroDirective
@@ -757,3 +758,55 @@ AstroDirectiveValue =
 	colon_token: ':'
 	name: HtmlAttributeName
 	initializer: HtmlAttributeInitializerClause?
+
+// ==================================
+// Angular
+// ==================================
+
+// reference: https://angular.dev/guide/templates
+
+AnyAngularAttribute =
+	AngularEventBinding
+	| AngularPropertyBinding
+	| AngularTwoWayBinding
+	| AngularStructuralDirective
+	| AngularTemplateRefVariable
+
+// <button (click)="onClick()">
+//         ^^^^^^^^^^^^^^^^^^
+AngularEventBinding =
+	'('
+	name: AngularBindingName
+	')'
+	initializer: HtmlAttributeInitializerClause?
+
+// <input [value]="val">
+//        ^^^^^^^^^^^^^^
+AngularPropertyBinding =
+	'['
+	name: AngularBindingName
+	']'
+	initializer: HtmlAttributeInitializerClause?
+
+// <input [(ngModel)]="value">
+//        ^^^^^^^^^^^^^^^^^^^
+AngularTwoWayBinding =
+	'[('
+	name: AngularBindingName
+	')]'
+	initializer: HtmlAttributeInitializerClause?
+
+// <div *ngIf="cond">
+//      ^^^^^^^^^^^^^
+AngularStructuralDirective =
+	'*'
+	name: AngularBindingName
+	initializer: HtmlAttributeInitializerClause?
+
+// <ng-template #tmpl>
+//               ^^^^^
+AngularTemplateRefVariable =
+	'#'
+	name: AngularBindingName
+
+AngularBindingName = value: 'html_literal'

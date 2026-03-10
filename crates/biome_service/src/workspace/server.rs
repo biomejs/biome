@@ -48,7 +48,7 @@ use biome_diagnostics::{
 use biome_formatter::Printed;
 use biome_fs::{BiomePath, ConfigName, PathKind};
 use biome_grit_patterns::{CompilePatternOptions, GritQuery, compile_pattern_with_options};
-use biome_html_syntax::HtmlRoot;
+use biome_html_syntax::{HtmlRoot, HtmlVariant};
 use biome_js_syntax::{AnyJsRoot, LanguageVariant, ModuleKind};
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonFileSource;
@@ -399,6 +399,18 @@ impl WorkspaceServer {
             {
                 css.set_variant(CssVariant::TailwindCss)
             }
+        }
+
+        if let DocumentFileSource::Html(html) = &mut source
+            && settings
+                .languages
+                .html
+                .parser
+                .angular
+                .unwrap_or_default()
+                .into()
+        {
+            html.set_variant(HtmlVariant::Angular)
         }
 
         let (content, version) = match content {
