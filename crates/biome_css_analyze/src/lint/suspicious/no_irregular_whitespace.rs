@@ -47,7 +47,20 @@ impl Rule for NoIrregularWhitespace {
     type Options = NoIrregularWhitespaceOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        get_irregular_whitespace(ctx.query().syntax()).into_boxed_slice()
+        let syntax = ctx.query().syntax();
+
+        // Scan only the outermost rule node. After collapsing typed bogus nodes into `CssBogus`,
+        // malformed subtrees can also match `AnyCssRule`; without this guard, both the outer rule
+        // and the nested bogus rule would walk the same descendant tokens and report duplicates.
+        if syntax
+            .ancestors()
+            .skip(1)
+            .any(|ancestor| AnyCssRule::can_cast(ancestor.kind()))
+        {
+            return Box::default();
+        }
+
+        get_irregular_whitespace(syntax).into_boxed_slice()
     }
 
     fn diagnostic(_: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {

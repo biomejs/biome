@@ -311,23 +311,6 @@ invalid.css:56:11 lint/suspicious/noIrregularWhitespace ━━━━━━━━
 ```
 
 ```
-invalid.css:56:11 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Irregular whitespace found.
-  
-    54 │ @layer state {
-    55 │ 	body {
-  > 56 │ 		padding:␠10px;
-       │ 		        ^
-    57 │ 	}
-    58 │ }
-  
-  i Replace the irregular whitespace with normal whitespaces.
-  
-
-```
-
-```
 invalid.css:60:7 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Irregular whitespace found.
