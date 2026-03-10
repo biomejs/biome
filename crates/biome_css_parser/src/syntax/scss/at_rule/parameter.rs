@@ -18,6 +18,16 @@ const SCSS_PARAMETER_DEFAULT_VALUE_END_SET: TokenSet<CssSyntaxKind> =
     token_set![T![,], T![')'], T![...]];
 const SCSS_PARAMETER_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![T![,], T![')'], T!['{']];
 
+/// Parses the SCSS parameter list used by `@mixin` and `@function`.
+///
+/// # Example
+///
+/// ```scss
+/// @mixin button($radius: 4px, $args...) {}
+///              ^^^^^^^^^^^^^^^^^^^^^^^^
+/// ```
+///
+/// Docs: https://sass-lang.com/documentation/at-rules/mixin/
 #[inline]
 pub(super) fn parse_scss_parameter_list(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_scss_parameter_list(p) {
@@ -56,6 +66,16 @@ fn parse_scss_parameter(p: &mut CssParser) -> ParsedSyntax {
     Present(m.complete(p, SCSS_PARAMETER))
 }
 
+/// Parses the optional default-value clause of an SCSS parameter.
+///
+/// # Example
+///
+/// ```scss
+/// @mixin button($radius: 4px, $args...) {}
+///                       ^^^^^
+/// ```
+///
+/// Docs: https://sass-lang.com/documentation/at-rules/mixin/
 #[inline]
 fn parse_scss_parameter_default_value(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_scss_parameter_default_value(p) {

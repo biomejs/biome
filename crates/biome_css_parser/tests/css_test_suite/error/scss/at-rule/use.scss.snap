@@ -1,0 +1,239 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@use;
+
+@use "theme" as;
+
+@use "theme" with ();
+
+@use "theme" with ($primary:);
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: ScssUseAtRule {
+                use_token: USE_KW@1..4 "use" [] [],
+                url: missing (required),
+                as_clause: missing (optional),
+                with_clause: missing (optional),
+                semicolon_token: SEMICOLON@4..5 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@5..8 "@" [Newline("\n"), Newline("\n")] [],
+            rule: ScssUseAtRule {
+                use_token: USE_KW@8..12 "use" [] [Whitespace(" ")],
+                url: CssString {
+                    value_token: CSS_STRING_LITERAL@12..20 "\"theme\"" [] [Whitespace(" ")],
+                },
+                as_clause: ScssUseAsClause {
+                    as_token: AS_KW@20..22 "as" [] [],
+                    namespace: missing (required),
+                },
+                with_clause: missing (optional),
+                semicolon_token: SEMICOLON@22..23 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@23..26 "@" [Newline("\n"), Newline("\n")] [],
+            rule: ScssUseAtRule {
+                use_token: USE_KW@26..30 "use" [] [Whitespace(" ")],
+                url: CssString {
+                    value_token: CSS_STRING_LITERAL@30..38 "\"theme\"" [] [Whitespace(" ")],
+                },
+                as_clause: missing (optional),
+                with_clause: ScssWithClause {
+                    with_token: WITH_KW@38..43 "with" [] [Whitespace(" ")],
+                    configurations: ScssModuleConfigurationList {
+                        l_paren_token: L_PAREN@43..44 "(" [] [],
+                        items: ScssModuleConfigurationItemList [],
+                        r_paren_token: R_PAREN@44..45 ")" [] [],
+                    },
+                },
+                semicolon_token: SEMICOLON@45..46 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@46..49 "@" [Newline("\n"), Newline("\n")] [],
+            rule: ScssUseAtRule {
+                use_token: USE_KW@49..53 "use" [] [Whitespace(" ")],
+                url: CssString {
+                    value_token: CSS_STRING_LITERAL@53..61 "\"theme\"" [] [Whitespace(" ")],
+                },
+                as_clause: missing (optional),
+                with_clause: ScssWithClause {
+                    with_token: WITH_KW@61..66 "with" [] [Whitespace(" ")],
+                    configurations: ScssModuleConfigurationList {
+                        l_paren_token: L_PAREN@66..67 "(" [] [],
+                        items: ScssModuleConfigurationItemList [
+                            ScssModuleConfiguration {
+                                name: ScssIdentifier {
+                                    dollar_token: DOLLAR@67..68 "$" [] [],
+                                    name: CssIdentifier {
+                                        value_token: IDENT@68..75 "primary" [] [],
+                                    },
+                                },
+                                colon_token: COLON@75..76 ":" [] [],
+                                value: missing (required),
+                            },
+                        ],
+                        r_paren_token: R_PAREN@76..77 ")" [] [],
+                    },
+                },
+                semicolon_token: SEMICOLON@77..78 ";" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@78..79 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..79
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..78
+    0: CSS_AT_RULE@0..5
+      0: AT@0..1 "@" [] []
+      1: SCSS_USE_AT_RULE@1..5
+        0: USE_KW@1..4 "use" [] []
+        1: (empty)
+        2: (empty)
+        3: (empty)
+        4: SEMICOLON@4..5 ";" [] []
+    1: CSS_AT_RULE@5..23
+      0: AT@5..8 "@" [Newline("\n"), Newline("\n")] []
+      1: SCSS_USE_AT_RULE@8..23
+        0: USE_KW@8..12 "use" [] [Whitespace(" ")]
+        1: CSS_STRING@12..20
+          0: CSS_STRING_LITERAL@12..20 "\"theme\"" [] [Whitespace(" ")]
+        2: SCSS_USE_AS_CLAUSE@20..22
+          0: AS_KW@20..22 "as" [] []
+          1: (empty)
+        3: (empty)
+        4: SEMICOLON@22..23 ";" [] []
+    2: CSS_AT_RULE@23..46
+      0: AT@23..26 "@" [Newline("\n"), Newline("\n")] []
+      1: SCSS_USE_AT_RULE@26..46
+        0: USE_KW@26..30 "use" [] [Whitespace(" ")]
+        1: CSS_STRING@30..38
+          0: CSS_STRING_LITERAL@30..38 "\"theme\"" [] [Whitespace(" ")]
+        2: (empty)
+        3: SCSS_WITH_CLAUSE@38..45
+          0: WITH_KW@38..43 "with" [] [Whitespace(" ")]
+          1: SCSS_MODULE_CONFIGURATION_LIST@43..45
+            0: L_PAREN@43..44 "(" [] []
+            1: SCSS_MODULE_CONFIGURATION_ITEM_LIST@44..44
+            2: R_PAREN@44..45 ")" [] []
+        4: SEMICOLON@45..46 ";" [] []
+    3: CSS_AT_RULE@46..78
+      0: AT@46..49 "@" [Newline("\n"), Newline("\n")] []
+      1: SCSS_USE_AT_RULE@49..78
+        0: USE_KW@49..53 "use" [] [Whitespace(" ")]
+        1: CSS_STRING@53..61
+          0: CSS_STRING_LITERAL@53..61 "\"theme\"" [] [Whitespace(" ")]
+        2: (empty)
+        3: SCSS_WITH_CLAUSE@61..77
+          0: WITH_KW@61..66 "with" [] [Whitespace(" ")]
+          1: SCSS_MODULE_CONFIGURATION_LIST@66..77
+            0: L_PAREN@66..67 "(" [] []
+            1: SCSS_MODULE_CONFIGURATION_ITEM_LIST@67..76
+              0: SCSS_MODULE_CONFIGURATION@67..76
+                0: SCSS_IDENTIFIER@67..75
+                  0: DOLLAR@67..68 "$" [] []
+                  1: CSS_IDENTIFIER@68..75
+                    0: IDENT@68..75 "primary" [] []
+                1: COLON@75..76 ":" [] []
+                2: (empty)
+            2: R_PAREN@76..77 ")" [] []
+        4: SEMICOLON@77..78 ";" [] []
+  2: EOF@78..79 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+use.scss:1:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a string but instead found ';'.
+  
+  > 1 │ @use;
+      │     ^
+    2 │ 
+    3 │ @use "theme" as;
+  
+  i Expected a string here.
+  
+  > 1 │ @use;
+      │     ^
+    2 │ 
+    3 │ @use "theme" as;
+  
+use.scss:3:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found ';'.
+  
+    1 │ @use;
+    2 │ 
+  > 3 │ @use "theme" as;
+      │                ^
+    4 │ 
+    5 │ @use "theme" with ();
+  
+  i Expected an identifier here.
+  
+    1 │ @use;
+    2 │ 
+  > 3 │ @use "theme" as;
+      │                ^
+    4 │ 
+    5 │ @use "theme" with ();
+  
+use.scss:5:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a module configuration.
+  
+    3 │ @use "theme" as;
+    4 │ 
+  > 5 │ @use "theme" with ();
+      │                    ^
+    6 │ 
+    7 │ @use "theme" with ($primary:);
+  
+  i Add a configuration like `$name: value` or remove the extra separator.
+  
+use.scss:7:29 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found ')'.
+  
+    5 │ @use "theme" with ();
+    6 │ 
+  > 7 │ @use "theme" with ($primary:);
+      │                             ^
+    8 │ 
+  
+  i Expected a SCSS expression here.
+  
+    5 │ @use "theme" with ();
+    6 │ 
+  > 7 │ @use "theme" with ($primary:);
+      │                             ^
+    8 │ 
+  
+```

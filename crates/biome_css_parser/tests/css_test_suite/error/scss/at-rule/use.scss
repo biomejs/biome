@@ -1,0 +1,7 @@
+@use;
+
+@use "theme" as;
+
+@use "theme" with ();
+
+@use "theme" with ($primary:);

@@ -3242,6 +3242,96 @@ pub fn scss_for_at_rule(
         ],
     ))
 }
+pub fn scss_forward_as_clause(
+    as_token: SyntaxToken,
+    prefix: CssIdentifier,
+    star_token: SyntaxToken,
+) -> ScssForwardAsClauseBuilder {
+    ScssForwardAsClauseBuilder {
+        as_token,
+        prefix,
+        star_token,
+        minus_token: None,
+    }
+}
+pub struct ScssForwardAsClauseBuilder {
+    as_token: SyntaxToken,
+    prefix: CssIdentifier,
+    star_token: SyntaxToken,
+    minus_token: Option<SyntaxToken>,
+}
+impl ScssForwardAsClauseBuilder {
+    pub fn with_minus_token(mut self, minus_token: SyntaxToken) -> Self {
+        self.minus_token = Some(minus_token);
+        self
+    }
+    pub fn build(self) -> ScssForwardAsClause {
+        ScssForwardAsClause::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::SCSS_FORWARD_AS_CLAUSE,
+            [
+                Some(SyntaxElement::Token(self.as_token)),
+                Some(SyntaxElement::Node(self.prefix.into_syntax())),
+                self.minus_token.map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Token(self.star_token)),
+            ],
+        ))
+    }
+}
+pub fn scss_forward_at_rule(
+    forward_token: SyntaxToken,
+    url: CssString,
+    semicolon_token: SyntaxToken,
+) -> ScssForwardAtRuleBuilder {
+    ScssForwardAtRuleBuilder {
+        forward_token,
+        url,
+        semicolon_token,
+        as_clause: None,
+        visibility_clause: None,
+        with_clause: None,
+    }
+}
+pub struct ScssForwardAtRuleBuilder {
+    forward_token: SyntaxToken,
+    url: CssString,
+    semicolon_token: SyntaxToken,
+    as_clause: Option<ScssForwardAsClause>,
+    visibility_clause: Option<AnyScssForwardVisibilityClause>,
+    with_clause: Option<ScssWithClause>,
+}
+impl ScssForwardAtRuleBuilder {
+    pub fn with_as_clause(mut self, as_clause: ScssForwardAsClause) -> Self {
+        self.as_clause = Some(as_clause);
+        self
+    }
+    pub fn with_visibility_clause(
+        mut self,
+        visibility_clause: AnyScssForwardVisibilityClause,
+    ) -> Self {
+        self.visibility_clause = Some(visibility_clause);
+        self
+    }
+    pub fn with_with_clause(mut self, with_clause: ScssWithClause) -> Self {
+        self.with_clause = Some(with_clause);
+        self
+    }
+    pub fn build(self) -> ScssForwardAtRule {
+        ScssForwardAtRule::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::SCSS_FORWARD_AT_RULE,
+            [
+                Some(SyntaxElement::Token(self.forward_token)),
+                Some(SyntaxElement::Node(self.url.into_syntax())),
+                self.as_clause
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.visibility_clause
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.with_clause
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.semicolon_token)),
+            ],
+        ))
+    }
+}
 pub fn scss_function_at_rule(
     function_token: SyntaxToken,
     name: CssIdentifier,
@@ -3277,6 +3367,15 @@ impl ScssFunctionAtRuleBuilder {
             ],
         ))
     }
+}
+pub fn scss_hide_clause(hide_token: SyntaxToken, members: ScssModuleMemberList) -> ScssHideClause {
+    ScssHideClause::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_HIDE_CLAUSE,
+        [
+            Some(SyntaxElement::Token(hide_token)),
+            Some(SyntaxElement::Node(members.into_syntax())),
+        ],
+    ))
 }
 pub fn scss_identifier(dollar_token: SyntaxToken, name: CssIdentifier) -> ScssIdentifier {
     ScssIdentifier::unwrap_cast(SyntaxNode::new_detached(
@@ -3475,6 +3574,34 @@ impl ScssMixinAtRuleBuilder {
         ))
     }
 }
+pub fn scss_module_configuration(
+    name: ScssIdentifier,
+    colon_token: SyntaxToken,
+    value: ScssExpression,
+) -> ScssModuleConfiguration {
+    ScssModuleConfiguration::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_MODULE_CONFIGURATION,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
+pub fn scss_module_configuration_list(
+    l_paren_token: SyntaxToken,
+    items: ScssModuleConfigurationItemList,
+    r_paren_token: SyntaxToken,
+) -> ScssModuleConfigurationList {
+    ScssModuleConfigurationList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_MODULE_CONFIGURATION_LIST,
+        [
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(items.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
 pub fn scss_namespaced_identifier(
     namespace: CssIdentifier,
     dot_token: SyntaxToken,
@@ -3612,6 +3739,15 @@ pub fn scss_return_at_rule(
         ],
     ))
 }
+pub fn scss_show_clause(show_token: SyntaxToken, members: ScssModuleMemberList) -> ScssShowClause {
+    ScssShowClause::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_SHOW_CLAUSE,
+        [
+            Some(SyntaxElement::Token(show_token)),
+            Some(SyntaxElement::Node(members.into_syntax())),
+        ],
+    ))
+}
 pub fn scss_unary_expression(
     operator_token: SyntaxToken,
     expression: AnyScssExpression,
@@ -3623,6 +3759,68 @@ pub fn scss_unary_expression(
             Some(SyntaxElement::Node(expression.into_syntax())),
         ],
     ))
+}
+pub fn scss_use_all_namespace(star_token: SyntaxToken) -> ScssUseAllNamespace {
+    ScssUseAllNamespace::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_USE_ALL_NAMESPACE,
+        [Some(SyntaxElement::Token(star_token))],
+    ))
+}
+pub fn scss_use_as_clause(
+    as_token: SyntaxToken,
+    namespace: AnyScssUseNamespace,
+) -> ScssUseAsClause {
+    ScssUseAsClause::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_USE_AS_CLAUSE,
+        [
+            Some(SyntaxElement::Token(as_token)),
+            Some(SyntaxElement::Node(namespace.into_syntax())),
+        ],
+    ))
+}
+pub fn scss_use_at_rule(
+    use_token: SyntaxToken,
+    url: CssString,
+    semicolon_token: SyntaxToken,
+) -> ScssUseAtRuleBuilder {
+    ScssUseAtRuleBuilder {
+        use_token,
+        url,
+        semicolon_token,
+        as_clause: None,
+        with_clause: None,
+    }
+}
+pub struct ScssUseAtRuleBuilder {
+    use_token: SyntaxToken,
+    url: CssString,
+    semicolon_token: SyntaxToken,
+    as_clause: Option<ScssUseAsClause>,
+    with_clause: Option<ScssWithClause>,
+}
+impl ScssUseAtRuleBuilder {
+    pub fn with_as_clause(mut self, as_clause: ScssUseAsClause) -> Self {
+        self.as_clause = Some(as_clause);
+        self
+    }
+    pub fn with_with_clause(mut self, with_clause: ScssWithClause) -> Self {
+        self.with_clause = Some(with_clause);
+        self
+    }
+    pub fn build(self) -> ScssUseAtRule {
+        ScssUseAtRule::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::SCSS_USE_AT_RULE,
+            [
+                Some(SyntaxElement::Token(self.use_token)),
+                Some(SyntaxElement::Node(self.url.into_syntax())),
+                self.as_clause
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.with_clause
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.semicolon_token)),
+            ],
+        ))
+    }
 }
 pub fn scss_variable_modifier(
     excl_token: SyntaxToken,
@@ -3661,6 +3859,18 @@ pub fn scss_while_at_rule(
             Some(SyntaxElement::Token(while_token)),
             Some(SyntaxElement::Node(condition.into_syntax())),
             Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
+pub fn scss_with_clause(
+    with_token: SyntaxToken,
+    configurations: ScssModuleConfigurationList,
+) -> ScssWithClause {
+    ScssWithClause::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_WITH_CLAUSE,
+        [
+            Some(SyntaxElement::Token(with_token)),
+            Some(SyntaxElement::Node(configurations.into_syntax())),
         ],
     ))
 }
@@ -4641,6 +4851,51 @@ where
         }),
     ))
 }
+pub fn scss_module_configuration_item_list<I, S>(
+    items: I,
+    separators: S,
+) -> ScssModuleConfigurationItemList
+where
+    I: IntoIterator<Item = AnyScssModuleConfiguration>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    ScssModuleConfigurationItemList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_MODULE_CONFIGURATION_ITEM_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
+    ))
+}
+pub fn scss_module_member_list<I, S>(items: I, separators: S) -> ScssModuleMemberList
+where
+    I: IntoIterator<Item = AnyScssModuleMember>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    ScssModuleMemberList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_MODULE_MEMBER_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
+    ))
+}
 pub fn scss_parameter_item_list<I, S>(items: I, separators: S) -> ScssParameterItemList
 where
     I: IntoIterator<Item = AnyScssParameter>,
@@ -4730,16 +4985,6 @@ where
 {
     CssBogusCustomIdentifier::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_CUSTOM_IDENTIFIER,
-        slots,
-    ))
-}
-pub fn css_bogus_declaration_item<I>(slots: I) -> CssBogusDeclarationItem
-where
-    I: IntoIterator<Item = Option<SyntaxElement>>,
-    I::IntoIter: ExactSizeIterator,
-{
-    CssBogusDeclarationItem::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_BOGUS_DECLARATION_ITEM,
         slots,
     ))
 }
@@ -4980,16 +5225,6 @@ where
 {
     CssBogusSyntaxSingleComponent::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_SYNTAX_SINGLE_COMPONENT,
-        slots,
-    ))
-}
-pub fn css_bogus_type<I>(slots: I) -> CssBogusType
-where
-    I: IntoIterator<Item = Option<SyntaxElement>>,
-    I::IntoIter: ExactSizeIterator,
-{
-    CssBogusType::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_BOGUS_TYPE,
         slots,
     ))
 }

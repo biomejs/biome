@@ -50,7 +50,6 @@ CssBogusFontFeatureValuesItem = SyntaxElement*
 CssBogusKeyframesItem =  SyntaxElement*
 CssBogusRule =  SyntaxElement*
 CssBogusParameter = SyntaxElement*
-CssBogusDeclarationItem = SyntaxElement*
 CssBogusMediaQuery =  SyntaxElement*
 CssBogusProperty =  SyntaxElement*
 CssBogusUrlModifier =  SyntaxElement*
@@ -67,7 +66,6 @@ CssBogusSyntax = SyntaxElement*
 CssBogusSyntaxSingleComponent = SyntaxElement*
 CssBogusAttrName = SyntaxElement*
 CssBogusFunctionParameter = SyntaxElement*
-CssBogusType = SyntaxElement*
 CssBogusIfTestBooleanExpr = SyntaxElement*
 
 AnyCssRoot =
@@ -690,9 +688,11 @@ AnyCssAtRule =
 	| ScssFunctionAtRule
 	| ScssIfAtRule
 	| ScssContentAtRule
+	| ScssForwardAtRule
 	| ScssIncludeAtRule
 	| ScssMixinAtRule
 	| ScssReturnAtRule
+	| ScssUseAtRule
 	| ScssWhileAtRule
 	| ScssDebugAtRule
 	| ScssWarnAtRule
@@ -1884,7 +1884,6 @@ AnyCssFunctionParameter =
 AnyCssType =
 	CssTypeFunction
 	| AnyCssSyntaxComponent
-	| CssBogusType
 
 // @function --transparent(--color <color>: red, --alpha <number>: 0.5) { }
 //                         ^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^
@@ -2601,6 +2600,100 @@ ScssFunctionAtRule =
 	name: CssIdentifier
 	parameters: ScssParameterList?
 	block: CssDeclarationOrRuleBlock
+
+// @use "sass:math";
+// ^^^^^^^^^^^^^^^^^
+// @use "theme" as * with ($primary: blue);
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssUseAtRule =
+	'use'
+	url: CssString
+	as_clause: ScssUseAsClause?
+	with_clause: ScssWithClause?
+	';'
+
+// as *
+// ^^^^
+// as theme
+// ^^^^^^^^
+ScssUseAsClause =
+	'as'
+	namespace: AnyScssUseNamespace
+
+AnyScssUseNamespace =
+	CssIdentifier
+	| ScssUseAllNamespace
+
+ScssUseAllNamespace =
+	'*'
+
+// @forward "theme" as theme-* show $color, button with ($spacing: 4px);
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssForwardAtRule =
+	'forward'
+	url: CssString
+	as_clause: ScssForwardAsClause?
+	visibility_clause: AnyScssForwardVisibilityClause?
+	with_clause: ScssWithClause?
+	';'
+
+// as theme-*
+// ^^^^^^^^^^^
+ScssForwardAsClause =
+	'as'
+	prefix: CssIdentifier
+	minus: '-'?
+	'*'
+
+AnyScssForwardVisibilityClause =
+	ScssShowClause
+	| ScssHideClause
+
+// show $color, button
+// ^^^^^^^^^^^^^^^^^^^
+ScssShowClause =
+	'show'
+	members: ScssModuleMemberList
+
+// hide $private, internal
+// ^^^^^^^^^^^^^^^^^^^^^^^^
+ScssHideClause =
+	'hide'
+	members: ScssModuleMemberList
+
+// with ($primary: blue, $spacing: 4px)
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssWithClause =
+	'with'
+	configurations: ScssModuleConfigurationList
+
+ScssModuleConfigurationList =
+	'('
+	items: ScssModuleConfigurationItemList
+	')'
+
+ScssModuleConfigurationItemList =
+	AnyScssModuleConfiguration
+	(',' AnyScssModuleConfiguration)*
+	','?
+
+AnyScssModuleConfiguration =
+	ScssModuleConfiguration
+	| CssBogusParameter
+
+// $primary: blue
+// ^^^^^^^^^^^^^^
+ScssModuleConfiguration =
+	name: ScssIdentifier
+	':'
+	value: ScssExpression
+
+// $color, button
+// ^^^^^^^^^^^^^^
+ScssModuleMemberList =
+	AnyScssModuleMember
+	(',' AnyScssModuleMember)*
+	','?
 
 // @include button($radius: 4px);
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

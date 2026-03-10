@@ -979,8 +979,20 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::ScssForAtRule::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::SCSS_FORWARD_AS_CLAUSE => {
+                    let $pattern = unsafe { $crate::ScssForwardAsClause::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_FORWARD_AT_RULE => {
+                    let $pattern = unsafe { $crate::ScssForwardAtRule::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::SCSS_FUNCTION_AT_RULE => {
                     let $pattern = unsafe { $crate::ScssFunctionAtRule::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_HIDE_CLAUSE => {
+                    let $pattern = unsafe { $crate::ScssHideClause::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::SCSS_IDENTIFIER => {
@@ -1024,6 +1036,15 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::ScssMixinAtRule::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::SCSS_MODULE_CONFIGURATION => {
+                    let $pattern = unsafe { $crate::ScssModuleConfiguration::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_MODULE_CONFIGURATION_LIST => {
+                    let $pattern =
+                        unsafe { $crate::ScssModuleConfigurationList::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::SCSS_NAMESPACED_IDENTIFIER => {
                     let $pattern = unsafe { $crate::ScssNamespacedIdentifier::new_unchecked(node) };
                     $body
@@ -1062,8 +1083,24 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::ScssReturnAtRule::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::SCSS_SHOW_CLAUSE => {
+                    let $pattern = unsafe { $crate::ScssShowClause::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::SCSS_UNARY_EXPRESSION => {
                     let $pattern = unsafe { $crate::ScssUnaryExpression::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_USE_ALL_NAMESPACE => {
+                    let $pattern = unsafe { $crate::ScssUseAllNamespace::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_USE_AS_CLAUSE => {
+                    let $pattern = unsafe { $crate::ScssUseAsClause::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_USE_AT_RULE => {
+                    let $pattern = unsafe { $crate::ScssUseAtRule::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::SCSS_VARIABLE_MODIFIER => {
@@ -1076,6 +1113,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::SCSS_WHILE_AT_RULE => {
                     let $pattern = unsafe { $crate::ScssWhileAtRule::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_WITH_CLAUSE => {
+                    let $pattern = unsafe { $crate::ScssWithClause::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::TW_APPLY_AT_RULE => {
@@ -1152,10 +1193,6 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_BOGUS_CUSTOM_IDENTIFIER => {
                     let $pattern = unsafe { $crate::CssBogusCustomIdentifier::new_unchecked(node) };
-                    $body
-                }
-                $crate::CssSyntaxKind::CSS_BOGUS_DECLARATION_ITEM => {
-                    let $pattern = unsafe { $crate::CssBogusDeclarationItem::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_BOGUS_DOCUMENT_MATCHER => {
@@ -1258,10 +1295,6 @@ macro_rules! map_syntax_node {
                 $crate::CssSyntaxKind::CSS_BOGUS_SYNTAX_SINGLE_COMPONENT => {
                     let $pattern =
                         unsafe { $crate::CssBogusSyntaxSingleComponent::new_unchecked(node) };
-                    $body
-                }
-                $crate::CssSyntaxKind::CSS_BOGUS_TYPE => {
-                    let $pattern = unsafe { $crate::CssBogusType::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_BOGUS_UNICODE_RANGE_VALUE => {
@@ -1459,6 +1492,15 @@ macro_rules! map_syntax_node {
                 $crate::CssSyntaxKind::SCSS_MAP_EXPRESSION_PAIR_LIST => {
                     let $pattern =
                         unsafe { $crate::ScssMapExpressionPairList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_MODULE_CONFIGURATION_ITEM_LIST => {
+                    let $pattern =
+                        unsafe { $crate::ScssModuleConfigurationItemList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_MODULE_MEMBER_LIST => {
+                    let $pattern = unsafe { $crate::ScssModuleMemberList::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::SCSS_PARAMETER_ITEM_LIST => {
