@@ -6,24 +6,6 @@ use bpaf::Args;
 use camino::Utf8Path;
 
 #[test]
-fn init_help() {
-    let fs = MemoryFileSystem::default();
-    let mut console = BufferConsole::default();
-
-    let (fs, result) = run_cli(fs, &mut console, Args::from(["init", "--help"].as_slice()));
-
-    assert!(result.is_ok(), "run_cli returned {result:?}");
-
-    assert_cli_snapshot(SnapshotPayload::new(
-        module_path!(),
-        "init_help",
-        fs,
-        console,
-        result,
-    ));
-}
-
-#[test]
 fn creates_config_file() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

@@ -17,5 +17,5 @@ The --json option is unstable/experimental and its output might change between p
 ```
 
 ```block
-{"summary":{"changed":1,"unchanged":0,"matches":0,"errors":0,"warnings":0,"infos":0,"skipped":0,"suggestedFixesSkipped":0,"diagnosticsNotPrinted":0},"diagnostics":[],"command":"check"}
+{"summary":{"changed":1,"unchanged":0,"matches":0,"duration":"<TIME>","errors":0,"warnings":0,"infos":0,"skipped":0,"suggestedFixesSkipped":0,"diagnosticsNotPrinted":0,"scannerDuration":"<TIME>"},"diagnostics":[],"command":"check"}
 ```

@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/type/intersection_type.ts
 ---
+
 # Input
 
 ```ts
@@ -89,6 +90,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -203,4 +205,5 @@ type SoftBreakBetweenNotObjectTypeInChain = {} & SomeLongType & {
 	NotObjectLongLongLongLongLongLongType2 & {
 		somelonglonglongkey: SomeLongLongType;
 	} & { somelonglonglongkey: SomeLongLongType };
+
 ```

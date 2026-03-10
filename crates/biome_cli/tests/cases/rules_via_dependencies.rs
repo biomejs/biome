@@ -94,6 +94,72 @@ describe("foo", () => {
 }
 
 #[test]
+fn mocha_globals_are_not_flagged_as_undeclared() {
+    let mut console = BufferConsole::default();
+    let mut fs = TemporaryFs::new("mocha_globals_are_not_flagged_as_undeclared");
+    fs.create_file(
+        "package.json",
+        r#"{
+    "dependencies": {
+        "mocha": "10.0.0"
+    }
+}
+"#,
+    );
+
+    // Exercise globals from the BDD interface (describe, it, before/after hooks,
+    // aliases and pending variants) and the TDD interface (suite, test, setup/teardown
+    // hooks) so that none of them are reported as undeclared variables.
+    let content = r#"
+// BDD interface
+describe("bdd suite", () => {
+    context("a context block", () => {
+        before(() => {});
+        after(() => {});
+        beforeEach(() => {});
+        afterEach(() => {});
+
+        it("passes", () => {});
+        specify("also passes", () => {});
+
+        xit("is pending", () => {});
+        xspecify("also pending", () => {});
+    });
+
+    xdescribe("pending suite", () => {});
+    xcontext("pending context", () => {});
+});
+
+// TDD interface
+suite("tdd suite", () => {
+    suiteSetup(() => {});
+    suiteTeardown(() => {});
+    setup(() => {});
+    teardown(() => {});
+
+    test("passes", () => {});
+});
+    "#;
+    fs.create_file("test.js", content);
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["lint", fs.cli_path()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "mocha_globals_are_not_flagged_as_undeclared",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn enables_rules_via_dependencies_but_disable_rule_from_config() {
     let mut console = BufferConsole::default();
     let mut fs = TemporaryFs::new("enables_rules_via_dependencies_but_disable_rule_from_config");
@@ -144,6 +210,116 @@ function Component2() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "enables_rules_via_dependencies_but_disable_rule_from_config",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn enables_rules_via_dependencies_but_disable_domain_from_config() {
+    let mut console = BufferConsole::default();
+    let mut fs = TemporaryFs::new("enables_rules_via_dependencies_but_disable_domain_from_config");
+    fs.create_file(
+        "package.json",
+        r#"{
+    "dependencies": {
+        "react": "^18.0.0"
+    }
+}
+"#,
+    );
+
+    let content = r#"
+import { useEffect, useState } from "react";
+
+function Component2() {
+    const [local, setLocal] = useState(0);
+    useEffect(() => {
+      console.log(local);
+    }, []);
+}
+    "#;
+    fs.create_file("test.jsx", content);
+
+    fs.create_file(
+        "biome.json",
+        r#"{
+    "linter": {
+        "domains": {
+            "react": "none"
+        }
+    }
+}
+"#,
+    );
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["lint", fs.cli_path()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "enables_rules_via_dependencies_but_disable_domain_from_config",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn enables_rules_via_dependencies_when_setting_domains_in_config() {
+    let mut console = BufferConsole::default();
+    let mut fs = TemporaryFs::new("enables_rules_via_dependencies_when_setting_domains_in_config");
+    fs.create_file(
+        "package.json",
+        r#"{
+    "dependencies": {
+        "react": "^18.0.0"
+    }
+}
+"#,
+    );
+
+    let content = r#"
+import { useEffect, useState } from "react";
+
+function Component2() {
+    const [local, setLocal] = useState(0);
+    useEffect(() => {
+      console.log(local);
+    }, []);
+}
+    "#;
+    fs.create_file("test.jsx", content);
+
+    fs.create_file(
+        "biome.json",
+        r#"{
+    "linter": {
+        "domains": {
+            "test": "recommended"
+        }
+    }
+}
+"#,
+    );
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["lint", fs.cli_path()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "enables_rules_via_dependencies_when_setting_domains_in_config",
         fs.create_mem(),
         console,
         result,

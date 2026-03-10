@@ -404,7 +404,12 @@ pub(crate) fn generate_workspace_bindings(mode: Mode) -> Result<()> {
     )
     .build();
 
-    let formatted = format_node(JsFormatOptions::new(JsFileSource::ts()), module.syntax()).unwrap();
+    let formatted = format_node(
+        JsFormatOptions::new(JsFileSource::ts()),
+        module.syntax(),
+        false,
+    )
+    .unwrap();
     let printed = formatted.print().unwrap();
     let code = printed.into_code();
 

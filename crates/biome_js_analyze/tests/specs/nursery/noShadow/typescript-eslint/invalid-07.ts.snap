@@ -16,7 +16,7 @@ interface Test {
 ```
 invalid-07.ts:4:4 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable shadows another variable with the same name in the outer scope.
+  ! This variable shadows another variable with the same name in the outer scope.
   
     3 │ interface Test {
   > 4 │   (arg: string): typeof arg;

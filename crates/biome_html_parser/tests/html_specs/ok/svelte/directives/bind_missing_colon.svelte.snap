@@ -1,0 +1,89 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<input bind value={name} />
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@0..1 "<" [] [],
+            name: HtmlTagName {
+                value_token: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [
+                HtmlAttribute {
+                    name: HtmlAttributeName {
+                        value_token: HTML_LITERAL@7..12 "bind" [] [Whitespace(" ")],
+                    },
+                    initializer: missing (optional),
+                },
+                HtmlAttribute {
+                    name: HtmlAttributeName {
+                        value_token: HTML_LITERAL@12..17 "value" [] [],
+                    },
+                    initializer: HtmlAttributeInitializerClause {
+                        eq_token: EQ@17..18 "=" [] [],
+                        value: HtmlAttributeSingleTextExpression {
+                            l_curly_token: L_CURLY@18..19 "{" [] [],
+                            expression: HtmlTextExpression {
+                                html_literal_token: HTML_LITERAL@19..23 "name" [] [],
+                            },
+                            r_curly_token: R_CURLY@23..25 "}" [] [Whitespace(" ")],
+                        },
+                    },
+                },
+            ],
+            slash_token: SLASH@25..26 "/" [] [],
+            r_angle_token: R_ANGLE@26..27 ">" [] [],
+        },
+    ],
+    eof_token: EOF@27..28 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..28
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..27
+    0: HTML_SELF_CLOSING_ELEMENT@0..27
+      0: L_ANGLE@0..1 "<" [] []
+      1: HTML_TAG_NAME@1..7
+        0: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@7..25
+        0: HTML_ATTRIBUTE@7..12
+          0: HTML_ATTRIBUTE_NAME@7..12
+            0: HTML_LITERAL@7..12 "bind" [] [Whitespace(" ")]
+          1: (empty)
+        1: HTML_ATTRIBUTE@12..25
+          0: HTML_ATTRIBUTE_NAME@12..17
+            0: HTML_LITERAL@12..17 "value" [] []
+          1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@17..25
+            0: EQ@17..18 "=" [] []
+            1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@18..25
+              0: L_CURLY@18..19 "{" [] []
+              1: HTML_TEXT_EXPRESSION@19..23
+                0: HTML_LITERAL@19..23 "name" [] []
+              2: R_CURLY@23..25 "}" [] [Whitespace(" ")]
+      3: SLASH@25..26 "/" [] []
+      4: R_ANGLE@26..27 ">" [] []
+  4: EOF@27..28 "" [Newline("\n")] []
+
+```

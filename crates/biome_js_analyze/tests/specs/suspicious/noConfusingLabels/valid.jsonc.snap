@@ -56,5 +56,3 @@ A: for (let a in obj) { for (;;) { switch (a) { case 0: break A; } } }
 ```cjs
 A: for (let a of arr) { for (;;) { switch (a) { case 0: break A; } } }
 ```
-
-

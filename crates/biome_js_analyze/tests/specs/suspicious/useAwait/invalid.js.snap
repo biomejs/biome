@@ -95,6 +95,11 @@ class Sample {
 	}
 }
 
+async function* yieldWithoutStar() {
+	yield 1;
+	yield 2;
+}
+
 ```
 
 # Diagnostics
@@ -584,6 +589,38 @@ invalid.js:86:2 lint/suspicious/useAwait ━━━━━━━━━━━━━
        │ 	^
     90 │ }
     91 │ 
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+```
+
+```
+invalid.js:92:1 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This async function lacks an await expression.
+  
+    90 │ }
+    91 │ 
+  > 92 │ async function* yieldWithoutStar() {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 93 │ 	yield 1;
+  > 94 │ 	yield 2;
+  > 95 │ }
+       │ ^
+    96 │ 
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+    90 │ }
+    91 │ 
+  > 92 │ async function* yieldWithoutStar() {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 93 │ 	yield 1;
+  > 94 │ 	yield 2;
+  > 95 │ }
+       │ ^
+    96 │ 
   
   i Async functions without await expressions may not need to be declared async.
   

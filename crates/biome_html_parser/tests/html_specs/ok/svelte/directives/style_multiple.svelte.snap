@@ -1,0 +1,160 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<div style:color="red" style:width="100px" style:height="50px">
+  Multiple styles
+</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteStyleDirective {
+                        style_token: STYLE_KW@5..10 "style" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@10..11 ":" [] [],
+                            property: SvelteLiteral {
+                                value_token: HTML_LITERAL@11..16 "color" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@16..17 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@17..23 "\"red\"" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                    },
+                    SvelteStyleDirective {
+                        style_token: STYLE_KW@23..28 "style" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@28..29 ":" [] [],
+                            property: SvelteLiteral {
+                                value_token: HTML_LITERAL@29..34 "width" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@34..35 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@35..43 "\"100px\"" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                    },
+                    SvelteStyleDirective {
+                        style_token: STYLE_KW@43..48 "style" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@48..49 ":" [] [],
+                            property: SvelteLiteral {
+                                value_token: HTML_LITERAL@49..55 "height" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@55..56 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@56..62 "\"50px\"" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@62..63 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@63..81 "Multiple styles" [Newline("\n"), Whitespace("  ")] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@81..83 "<" [Newline("\n")] [],
+                slash_token: SLASH@83..84 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@84..87 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@87..88 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@88..89 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..89
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..88
+    0: HTML_ELEMENT@0..88
+      0: HTML_OPENING_ELEMENT@0..63
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..62
+          0: SVELTE_STYLE_DIRECTIVE@5..23
+            0: STYLE_KW@5..10 "style" [] []
+            1: SVELTE_DIRECTIVE_VALUE@10..23
+              0: COLON@10..11 ":" [] []
+              1: SVELTE_LITERAL@11..16
+                0: HTML_LITERAL@11..16 "color" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@16..16
+              3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@16..23
+                0: EQ@16..17 "=" [] []
+                1: HTML_STRING@17..23
+                  0: HTML_STRING_LITERAL@17..23 "\"red\"" [] [Whitespace(" ")]
+          1: SVELTE_STYLE_DIRECTIVE@23..43
+            0: STYLE_KW@23..28 "style" [] []
+            1: SVELTE_DIRECTIVE_VALUE@28..43
+              0: COLON@28..29 ":" [] []
+              1: SVELTE_LITERAL@29..34
+                0: HTML_LITERAL@29..34 "width" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@34..34
+              3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@34..43
+                0: EQ@34..35 "=" [] []
+                1: HTML_STRING@35..43
+                  0: HTML_STRING_LITERAL@35..43 "\"100px\"" [] [Whitespace(" ")]
+          2: SVELTE_STYLE_DIRECTIVE@43..62
+            0: STYLE_KW@43..48 "style" [] []
+            1: SVELTE_DIRECTIVE_VALUE@48..62
+              0: COLON@48..49 ":" [] []
+              1: SVELTE_LITERAL@49..55
+                0: HTML_LITERAL@49..55 "height" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@55..55
+              3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@55..62
+                0: EQ@55..56 "=" [] []
+                1: HTML_STRING@56..62
+                  0: HTML_STRING_LITERAL@56..62 "\"50px\"" [] []
+        3: R_ANGLE@62..63 ">" [] []
+      1: HTML_ELEMENT_LIST@63..81
+        0: HTML_CONTENT@63..81
+          0: HTML_LITERAL@63..81 "Multiple styles" [Newline("\n"), Whitespace("  ")] []
+      2: HTML_CLOSING_ELEMENT@81..88
+        0: L_ANGLE@81..83 "<" [Newline("\n")] []
+        1: SLASH@83..84 "/" [] []
+        2: HTML_TAG_NAME@84..87
+          0: HTML_LITERAL@84..87 "div" [] []
+        3: R_ANGLE@87..88 ">" [] []
+  4: EOF@88..89 "" [Newline("\n")] []
+
+```

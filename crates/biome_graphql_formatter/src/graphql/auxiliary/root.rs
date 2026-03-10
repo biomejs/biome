@@ -12,14 +12,12 @@ impl FormatNodeRule<GraphqlRoot> for FormatGraphqlRoot {
             eof_token,
         } = node.as_fields();
 
-        write!(
-            f,
-            [
-                bom_token.format(),
-                definitions.format(),
-                hard_line_break(),
-                format_removed(&eof_token?),
-            ]
-        )
+        write!(f, [bom_token.format(), definitions.format()])?;
+
+        if f.options().trailing_newline().value() {
+            write!(f, [hard_line_break()])?;
+        }
+
+        write!(f, [format_removed(&eof_token?)])
     }
 }

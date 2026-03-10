@@ -68,6 +68,7 @@ Indent width: 2
 Line ending: LF
 Line width: 80
 Quote style: Double Quotes
+Trailing newline: true
 -----
 
 ```css
@@ -125,6 +126,5 @@ Quote style: Double Quotes
 	all and (min--moz-device-pixel-ratio: 1.5),
 	all and (min-device-pixel-ratio: 1.5) {
 }
+
 ```
-
-

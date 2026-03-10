@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: index.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+import { getValue } from "./reexport";
+
+async function test() {
+    // Valid: Promise returned from async function
+    return getValue();
+}
+
+```

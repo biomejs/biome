@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: svelte/await_array_destructuring.svelte
 ---
+
 # Input
 
 ```svelte
@@ -29,6 +30,7 @@ Bracket same line: false
 Whitespace sensitivity: css
 Indent script and style: false
 Self close void elements: never
+Trailing newline: true
 -----
 
 ```svelte
@@ -36,4 +38,5 @@ Self close void elements: never
 	<p>First: {first}, Second: {second}</p>
 	<p>Rest: {rest.join(', ')}</p>
 {/await}
+
 ```

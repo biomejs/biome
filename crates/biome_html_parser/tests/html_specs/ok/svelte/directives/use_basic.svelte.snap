@@ -1,0 +1,96 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<div use:tooltip>Hover me</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteUseDirective {
+                        use_token: USE_KW@5..8 "use" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@8..9 ":" [] [],
+                            property: SvelteName {
+                                ident_token: IDENT@9..16 "tooltip" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: missing (optional),
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@16..17 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@17..25 "Hover me" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@25..26 "<" [] [],
+                slash_token: SLASH@26..27 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@27..30 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@30..31 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@31..32 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..32
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..31
+    0: HTML_ELEMENT@0..31
+      0: HTML_OPENING_ELEMENT@0..17
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..16
+          0: SVELTE_USE_DIRECTIVE@5..16
+            0: USE_KW@5..8 "use" [] []
+            1: SVELTE_DIRECTIVE_VALUE@8..16
+              0: COLON@8..9 ":" [] []
+              1: SVELTE_NAME@9..16
+                0: IDENT@9..16 "tooltip" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@16..16
+              3: (empty)
+        3: R_ANGLE@16..17 ">" [] []
+      1: HTML_ELEMENT_LIST@17..25
+        0: HTML_CONTENT@17..25
+          0: HTML_LITERAL@17..25 "Hover me" [] []
+      2: HTML_CLOSING_ELEMENT@25..31
+        0: L_ANGLE@25..26 "<" [] []
+        1: SLASH@26..27 "/" [] []
+        2: HTML_TAG_NAME@27..30
+          0: HTML_LITERAL@27..30 "div" [] []
+        3: R_ANGLE@30..31 ">" [] []
+  4: EOF@31..32 "" [Newline("\n")] []
+
+```

@@ -1,0 +1,300 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<input type="radio" bind:group={selected} value="a" />
+<input type="radio" bind:group={selected} value="b" />
+<input type="checkbox" bind:group={flavours} value="mint" />
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@0..1 "<" [] [],
+            name: HtmlTagName {
+                value_token: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [
+                HtmlAttribute {
+                    name: HtmlAttributeName {
+                        value_token: HTML_LITERAL@7..11 "type" [] [],
+                    },
+                    initializer: HtmlAttributeInitializerClause {
+                        eq_token: EQ@11..12 "=" [] [],
+                        value: HtmlString {
+                            value_token: HTML_STRING_LITERAL@12..20 "\"radio\"" [] [Whitespace(" ")],
+                        },
+                    },
+                },
+                SvelteBindDirective {
+                    bind_token: BIND_KW@20..24 "bind" [] [],
+                    value: SvelteDirectiveValue {
+                        colon_token: COLON@24..25 ":" [] [],
+                        property: SvelteName {
+                            ident_token: IDENT@25..30 "group" [] [],
+                        },
+                        modifiers: SvelteDirectiveModifierList [],
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@30..31 "=" [] [],
+                            value: HtmlAttributeSingleTextExpression {
+                                l_curly_token: L_CURLY@31..32 "{" [] [],
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@32..40 "selected" [] [],
+                                },
+                                r_curly_token: R_CURLY@40..42 "}" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                },
+                HtmlAttribute {
+                    name: HtmlAttributeName {
+                        value_token: HTML_LITERAL@42..47 "value" [] [],
+                    },
+                    initializer: HtmlAttributeInitializerClause {
+                        eq_token: EQ@47..48 "=" [] [],
+                        value: HtmlString {
+                            value_token: HTML_STRING_LITERAL@48..52 "\"a\"" [] [Whitespace(" ")],
+                        },
+                    },
+                },
+            ],
+            slash_token: SLASH@52..53 "/" [] [],
+            r_angle_token: R_ANGLE@53..54 ">" [] [],
+        },
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@54..56 "<" [Newline("\n")] [],
+            name: HtmlTagName {
+                value_token: HTML_LITERAL@56..62 "input" [] [Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [
+                HtmlAttribute {
+                    name: HtmlAttributeName {
+                        value_token: HTML_LITERAL@62..66 "type" [] [],
+                    },
+                    initializer: HtmlAttributeInitializerClause {
+                        eq_token: EQ@66..67 "=" [] [],
+                        value: HtmlString {
+                            value_token: HTML_STRING_LITERAL@67..75 "\"radio\"" [] [Whitespace(" ")],
+                        },
+                    },
+                },
+                SvelteBindDirective {
+                    bind_token: BIND_KW@75..79 "bind" [] [],
+                    value: SvelteDirectiveValue {
+                        colon_token: COLON@79..80 ":" [] [],
+                        property: SvelteName {
+                            ident_token: IDENT@80..85 "group" [] [],
+                        },
+                        modifiers: SvelteDirectiveModifierList [],
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@85..86 "=" [] [],
+                            value: HtmlAttributeSingleTextExpression {
+                                l_curly_token: L_CURLY@86..87 "{" [] [],
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@87..95 "selected" [] [],
+                                },
+                                r_curly_token: R_CURLY@95..97 "}" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                },
+                HtmlAttribute {
+                    name: HtmlAttributeName {
+                        value_token: HTML_LITERAL@97..102 "value" [] [],
+                    },
+                    initializer: HtmlAttributeInitializerClause {
+                        eq_token: EQ@102..103 "=" [] [],
+                        value: HtmlString {
+                            value_token: HTML_STRING_LITERAL@103..107 "\"b\"" [] [Whitespace(" ")],
+                        },
+                    },
+                },
+            ],
+            slash_token: SLASH@107..108 "/" [] [],
+            r_angle_token: R_ANGLE@108..109 ">" [] [],
+        },
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@109..111 "<" [Newline("\n")] [],
+            name: HtmlTagName {
+                value_token: HTML_LITERAL@111..117 "input" [] [Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [
+                HtmlAttribute {
+                    name: HtmlAttributeName {
+                        value_token: HTML_LITERAL@117..121 "type" [] [],
+                    },
+                    initializer: HtmlAttributeInitializerClause {
+                        eq_token: EQ@121..122 "=" [] [],
+                        value: HtmlString {
+                            value_token: HTML_STRING_LITERAL@122..133 "\"checkbox\"" [] [Whitespace(" ")],
+                        },
+                    },
+                },
+                SvelteBindDirective {
+                    bind_token: BIND_KW@133..137 "bind" [] [],
+                    value: SvelteDirectiveValue {
+                        colon_token: COLON@137..138 ":" [] [],
+                        property: SvelteName {
+                            ident_token: IDENT@138..143 "group" [] [],
+                        },
+                        modifiers: SvelteDirectiveModifierList [],
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@143..144 "=" [] [],
+                            value: HtmlAttributeSingleTextExpression {
+                                l_curly_token: L_CURLY@144..145 "{" [] [],
+                                expression: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@145..153 "flavours" [] [],
+                                },
+                                r_curly_token: R_CURLY@153..155 "}" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                },
+                HtmlAttribute {
+                    name: HtmlAttributeName {
+                        value_token: HTML_LITERAL@155..160 "value" [] [],
+                    },
+                    initializer: HtmlAttributeInitializerClause {
+                        eq_token: EQ@160..161 "=" [] [],
+                        value: HtmlString {
+                            value_token: HTML_STRING_LITERAL@161..168 "\"mint\"" [] [Whitespace(" ")],
+                        },
+                    },
+                },
+            ],
+            slash_token: SLASH@168..169 "/" [] [],
+            r_angle_token: R_ANGLE@169..170 ">" [] [],
+        },
+    ],
+    eof_token: EOF@170..171 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..171
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..170
+    0: HTML_SELF_CLOSING_ELEMENT@0..54
+      0: L_ANGLE@0..1 "<" [] []
+      1: HTML_TAG_NAME@1..7
+        0: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@7..52
+        0: HTML_ATTRIBUTE@7..20
+          0: HTML_ATTRIBUTE_NAME@7..11
+            0: HTML_LITERAL@7..11 "type" [] []
+          1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@11..20
+            0: EQ@11..12 "=" [] []
+            1: HTML_STRING@12..20
+              0: HTML_STRING_LITERAL@12..20 "\"radio\"" [] [Whitespace(" ")]
+        1: SVELTE_BIND_DIRECTIVE@20..42
+          0: BIND_KW@20..24 "bind" [] []
+          1: SVELTE_DIRECTIVE_VALUE@24..42
+            0: COLON@24..25 ":" [] []
+            1: SVELTE_NAME@25..30
+              0: IDENT@25..30 "group" [] []
+            2: SVELTE_DIRECTIVE_MODIFIER_LIST@30..30
+            3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@30..42
+              0: EQ@30..31 "=" [] []
+              1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@31..42
+                0: L_CURLY@31..32 "{" [] []
+                1: HTML_TEXT_EXPRESSION@32..40
+                  0: HTML_LITERAL@32..40 "selected" [] []
+                2: R_CURLY@40..42 "}" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE@42..52
+          0: HTML_ATTRIBUTE_NAME@42..47
+            0: HTML_LITERAL@42..47 "value" [] []
+          1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@47..52
+            0: EQ@47..48 "=" [] []
+            1: HTML_STRING@48..52
+              0: HTML_STRING_LITERAL@48..52 "\"a\"" [] [Whitespace(" ")]
+      3: SLASH@52..53 "/" [] []
+      4: R_ANGLE@53..54 ">" [] []
+    1: HTML_SELF_CLOSING_ELEMENT@54..109
+      0: L_ANGLE@54..56 "<" [Newline("\n")] []
+      1: HTML_TAG_NAME@56..62
+        0: HTML_LITERAL@56..62 "input" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@62..107
+        0: HTML_ATTRIBUTE@62..75
+          0: HTML_ATTRIBUTE_NAME@62..66
+            0: HTML_LITERAL@62..66 "type" [] []
+          1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@66..75
+            0: EQ@66..67 "=" [] []
+            1: HTML_STRING@67..75
+              0: HTML_STRING_LITERAL@67..75 "\"radio\"" [] [Whitespace(" ")]
+        1: SVELTE_BIND_DIRECTIVE@75..97
+          0: BIND_KW@75..79 "bind" [] []
+          1: SVELTE_DIRECTIVE_VALUE@79..97
+            0: COLON@79..80 ":" [] []
+            1: SVELTE_NAME@80..85
+              0: IDENT@80..85 "group" [] []
+            2: SVELTE_DIRECTIVE_MODIFIER_LIST@85..85
+            3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@85..97
+              0: EQ@85..86 "=" [] []
+              1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@86..97
+                0: L_CURLY@86..87 "{" [] []
+                1: HTML_TEXT_EXPRESSION@87..95
+                  0: HTML_LITERAL@87..95 "selected" [] []
+                2: R_CURLY@95..97 "}" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE@97..107
+          0: HTML_ATTRIBUTE_NAME@97..102
+            0: HTML_LITERAL@97..102 "value" [] []
+          1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@102..107
+            0: EQ@102..103 "=" [] []
+            1: HTML_STRING@103..107
+              0: HTML_STRING_LITERAL@103..107 "\"b\"" [] [Whitespace(" ")]
+      3: SLASH@107..108 "/" [] []
+      4: R_ANGLE@108..109 ">" [] []
+    2: HTML_SELF_CLOSING_ELEMENT@109..170
+      0: L_ANGLE@109..111 "<" [Newline("\n")] []
+      1: HTML_TAG_NAME@111..117
+        0: HTML_LITERAL@111..117 "input" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@117..168
+        0: HTML_ATTRIBUTE@117..133
+          0: HTML_ATTRIBUTE_NAME@117..121
+            0: HTML_LITERAL@117..121 "type" [] []
+          1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@121..133
+            0: EQ@121..122 "=" [] []
+            1: HTML_STRING@122..133
+              0: HTML_STRING_LITERAL@122..133 "\"checkbox\"" [] [Whitespace(" ")]
+        1: SVELTE_BIND_DIRECTIVE@133..155
+          0: BIND_KW@133..137 "bind" [] []
+          1: SVELTE_DIRECTIVE_VALUE@137..155
+            0: COLON@137..138 ":" [] []
+            1: SVELTE_NAME@138..143
+              0: IDENT@138..143 "group" [] []
+            2: SVELTE_DIRECTIVE_MODIFIER_LIST@143..143
+            3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@143..155
+              0: EQ@143..144 "=" [] []
+              1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@144..155
+                0: L_CURLY@144..145 "{" [] []
+                1: HTML_TEXT_EXPRESSION@145..153
+                  0: HTML_LITERAL@145..153 "flavours" [] []
+                2: R_CURLY@153..155 "}" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE@155..168
+          0: HTML_ATTRIBUTE_NAME@155..160
+            0: HTML_LITERAL@155..160 "value" [] []
+          1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@160..168
+            0: EQ@160..161 "=" [] []
+            1: HTML_STRING@161..168
+              0: HTML_STRING_LITERAL@161..168 "\"mint\"" [] [Whitespace(" ")]
+      3: SLASH@168..169 "/" [] []
+      4: R_ANGLE@169..170 ">" [] []
+  4: EOF@170..171 "" [Newline("\n")] []
+
+```

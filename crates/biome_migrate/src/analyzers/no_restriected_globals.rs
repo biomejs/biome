@@ -25,7 +25,7 @@ impl Rule for NoRestrictedGlobals {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        if node.name().ok()?.inner_string_text().ok()?.text() != "noRestrictedGlobals" {
+        if node.name().ok()?.inner_string_text()?.ok()?.text() != "noRestrictedGlobals" {
             return None;
         }
 
@@ -73,7 +73,7 @@ impl Rule for NoRestrictedGlobals {
                 let value = value.with_trailing_trivia_pieces([])?;
 
                 Some(make::json_member(
-                    make::json_member_name(value.value_token().ok()?),
+                    make::json_member_name(value.value_token().ok()?).into(),
                     make::token(T![:]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
                     make::json_string_value(make::json_string_literal(
                         "TODO: Add a custom message here.",
@@ -116,7 +116,8 @@ fn find_json_member_by_name(members: JsonMemberList, name: &str) -> Option<JsonM
         member
             .name()
             .ok()
-            .and_then(|name| name.inner_string_text().ok())
+            .and_then(|name| name.inner_string_text())
+            .and_then(|r| r.ok())
             .is_some_and(|text| text.text() == name)
     })
 }

@@ -1,0 +1,68 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-ignoreOption.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+// Valid: ignored hook after early return
+function Component3({ a }) {
+    if (a != 1) {
+        return;
+    }
+    useIgnoredHook();
+}
+
+// Invalid: non-ignored hook in conditional (should still fail)
+function Component4({ a }) {
+    if (a == 1) {
+        useRealHook();
+    }
+}
+
+// Invalid: non-ignored hook called from non-component (should fail)
+function notAComponent2() {
+    useRealHook();
+}
+
+```
+
+# Diagnostics
+```
+invalid-ignoreOption.js:14:9 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
+  
+    12 │ function Component4({ a }) {
+    13 │     if (a == 1) {
+  > 14 │         useRealHook();
+       │         ^^^^^^^^^^^
+    15 │     }
+    16 │ }
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://react.dev/reference/rules/rules-of-hooks
+  
+
+```
+
+```
+invalid-ignoreOption.js:20:5 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook is being called from within a function or method that is not a hook or component.
+  
+    18 │ // Invalid: non-ignored hook called from non-component (should fail)
+    19 │ function notAComponent2() {
+  > 20 │     useRealHook();
+       │     ^^^^^^^^^^^
+    21 │ }
+    22 │ 
+  
+  i Move the hook call into the top level of a hook or component in order to use it.
+  
+  i See https://react.dev/reference/rules/rules-of-hooks
+  
+
+```

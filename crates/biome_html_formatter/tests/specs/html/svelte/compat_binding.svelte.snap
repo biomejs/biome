@@ -1,0 +1,40 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/compat_binding.svelte
+---
+
+# Input
+
+```svelte
+<div bind:y={y}></div>
+<div x={x}></div>
+<div class="class"></div>
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+Bracket same line: false
+Whitespace sensitivity: css
+Indent script and style: false
+Self close void elements: never
+Trailing newline: true
+-----
+
+```svelte
+<div bind:y></div>
+<div {x}></div>
+<div class="class"></div>
+
+```

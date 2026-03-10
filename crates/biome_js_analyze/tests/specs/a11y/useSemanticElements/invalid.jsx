@@ -38,4 +38,12 @@
     <div role="blockquote" ></div>
     <div role="contentinfo" ></div>
     <div role="region" ></div>
+
+    {/* Constrained elements: tag matches but required attributes are missing */}
+    <input role="checkbox" ></input>
+    <input role="radio" ></input>
+    <input role="searchbox" ></input>
+    <input role="textbox" ></input>
+    <th role="columnheader" ></th>
+    <th role="rowheader" ></th>
 </>

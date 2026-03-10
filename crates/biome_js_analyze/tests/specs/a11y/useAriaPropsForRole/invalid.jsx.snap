@@ -1,13 +1,11 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
-snapshot_kind: text
 ---
 # Input
 ```jsx
 var a = <span role="checkbox"></span>;
 var a = <span role="switch"></span>;
-var a = <span role="spinbutton"></span>;
 var a = <span role="slider" aria-valuemin="0"></span>;
 var a = <span role="slider" aria-valuemax="100"></span>;
 var a = <span role="slider" aria-valuemin="0" aria-valuemax="100"></span>;
@@ -17,7 +15,6 @@ var a = <span role="scrollbar" aria-valuemin="0" aria-valuemax="100"></span>;
 var a = <span role="scrollbar" aria-valuemin="0" aria-valuemax="100" aria-orientation="horizontal"></span>;
 var a = <span role="radio"></span>;
 var a = <span role="heading"></span>;
-var a = <span role="combobox" aria-expanded="true"></span>;
 var a = <span role="combobox" aria-controls="true"></span>;
 var a = <span role="menuitemcheckbox" ></span>;
 
@@ -32,7 +29,7 @@ invalid.jsx:1:15 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━
   > 1 │ var a = <span role="checkbox"></span>;
       │               ^^^^^^^^^^^^^^^
     2 │ var a = <span role="switch"></span>;
-    3 │ var a = <span role="spinbutton"></span>;
+    3 │ var a = <span role="slider" aria-valuemin="0"></span>;
   
   i Missing ARIA prop(s):
   
@@ -49,12 +46,31 @@ invalid.jsx:2:15 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━
     1 │ var a = <span role="checkbox"></span>;
   > 2 │ var a = <span role="switch"></span>;
       │               ^^^^^^^^^^^^^
-    3 │ var a = <span role="spinbutton"></span>;
-    4 │ var a = <span role="slider" aria-valuemin="0"></span>;
+    3 │ var a = <span role="slider" aria-valuemin="0"></span>;
+    4 │ var a = <span role="slider" aria-valuemax="100"></span>;
   
   i Missing ARIA prop(s):
   
   - aria-checked
+  
+
+```
+
+```
+invalid.jsx:3:15 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The element with the slider ARIA role does not have the required ARIA attributes.
+  
+    1 │ var a = <span role="checkbox"></span>;
+    2 │ var a = <span role="switch"></span>;
+  > 3 │ var a = <span role="slider" aria-valuemin="0"></span>;
+      │               ^^^^^^^^^^^^^
+    4 │ var a = <span role="slider" aria-valuemax="100"></span>;
+    5 │ var a = <span role="slider" aria-valuemin="0" aria-valuemax="100"></span>;
+  
+  i Missing ARIA prop(s):
+  
+  - aria-valuenow
   
 
 ```
@@ -65,11 +81,11 @@ invalid.jsx:4:15 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━
   × The element with the slider ARIA role does not have the required ARIA attributes.
   
     2 │ var a = <span role="switch"></span>;
-    3 │ var a = <span role="spinbutton"></span>;
-  > 4 │ var a = <span role="slider" aria-valuemin="0"></span>;
+    3 │ var a = <span role="slider" aria-valuemin="0"></span>;
+  > 4 │ var a = <span role="slider" aria-valuemax="100"></span>;
       │               ^^^^^^^^^^^^^
-    5 │ var a = <span role="slider" aria-valuemax="100"></span>;
-    6 │ var a = <span role="slider" aria-valuemin="0" aria-valuemax="100"></span>;
+    5 │ var a = <span role="slider" aria-valuemin="0" aria-valuemax="100"></span>;
+    6 │ var a = <span role="scrollbar" aria-valuemin="0"></span>;
   
   i Missing ARIA prop(s):
   
@@ -83,12 +99,12 @@ invalid.jsx:5:15 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━
 
   × The element with the slider ARIA role does not have the required ARIA attributes.
   
-    3 │ var a = <span role="spinbutton"></span>;
-    4 │ var a = <span role="slider" aria-valuemin="0"></span>;
-  > 5 │ var a = <span role="slider" aria-valuemax="100"></span>;
+    3 │ var a = <span role="slider" aria-valuemin="0"></span>;
+    4 │ var a = <span role="slider" aria-valuemax="100"></span>;
+  > 5 │ var a = <span role="slider" aria-valuemin="0" aria-valuemax="100"></span>;
       │               ^^^^^^^^^^^^^
-    6 │ var a = <span role="slider" aria-valuemin="0" aria-valuemax="100"></span>;
-    7 │ var a = <span role="scrollbar" aria-valuemin="0"></span>;
+    6 │ var a = <span role="scrollbar" aria-valuemin="0"></span>;
+    7 │ var a = <span role="scrollbar" aria-valuemax="100"></span>;
   
   i Missing ARIA prop(s):
   
@@ -100,17 +116,18 @@ invalid.jsx:5:15 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━
 ```
 invalid.jsx:6:15 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The element with the slider ARIA role does not have the required ARIA attributes.
+  × The element with the scrollbar ARIA role does not have the required ARIA attributes.
   
-    4 │ var a = <span role="slider" aria-valuemin="0"></span>;
-    5 │ var a = <span role="slider" aria-valuemax="100"></span>;
-  > 6 │ var a = <span role="slider" aria-valuemin="0" aria-valuemax="100"></span>;
-      │               ^^^^^^^^^^^^^
-    7 │ var a = <span role="scrollbar" aria-valuemin="0"></span>;
-    8 │ var a = <span role="scrollbar" aria-valuemax="100"></span>;
+    4 │ var a = <span role="slider" aria-valuemax="100"></span>;
+    5 │ var a = <span role="slider" aria-valuemin="0" aria-valuemax="100"></span>;
+  > 6 │ var a = <span role="scrollbar" aria-valuemin="0"></span>;
+      │               ^^^^^^^^^^^^^^^^
+    7 │ var a = <span role="scrollbar" aria-valuemax="100"></span>;
+    8 │ var a = <span role="scrollbar" aria-valuemin="0" aria-valuemax="100"></span>;
   
   i Missing ARIA prop(s):
   
+  - aria-controls
   - aria-valuenow
   
 
@@ -121,12 +138,12 @@ invalid.jsx:7:15 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━
 
   × The element with the scrollbar ARIA role does not have the required ARIA attributes.
   
-    5 │ var a = <span role="slider" aria-valuemax="100"></span>;
-    6 │ var a = <span role="slider" aria-valuemin="0" aria-valuemax="100"></span>;
-  > 7 │ var a = <span role="scrollbar" aria-valuemin="0"></span>;
+    5 │ var a = <span role="slider" aria-valuemin="0" aria-valuemax="100"></span>;
+    6 │ var a = <span role="scrollbar" aria-valuemin="0"></span>;
+  > 7 │ var a = <span role="scrollbar" aria-valuemax="100"></span>;
       │               ^^^^^^^^^^^^^^^^
-    8 │ var a = <span role="scrollbar" aria-valuemax="100"></span>;
-    9 │ var a = <span role="scrollbar" aria-valuemin="0" aria-valuemax="100"></span>;
+    8 │ var a = <span role="scrollbar" aria-valuemin="0" aria-valuemax="100"></span>;
+    9 │ var a = <span role="scrollbar" aria-valuemin="0" aria-valuemax="100" aria-orientation="horizontal"></span>;
   
   i Missing ARIA prop(s):
   
@@ -141,12 +158,12 @@ invalid.jsx:8:15 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━
 
   × The element with the scrollbar ARIA role does not have the required ARIA attributes.
   
-     6 │ var a = <span role="slider" aria-valuemin="0" aria-valuemax="100"></span>;
-     7 │ var a = <span role="scrollbar" aria-valuemin="0"></span>;
-   > 8 │ var a = <span role="scrollbar" aria-valuemax="100"></span>;
+     6 │ var a = <span role="scrollbar" aria-valuemin="0"></span>;
+     7 │ var a = <span role="scrollbar" aria-valuemax="100"></span>;
+   > 8 │ var a = <span role="scrollbar" aria-valuemin="0" aria-valuemax="100"></span>;
        │               ^^^^^^^^^^^^^^^^
-     9 │ var a = <span role="scrollbar" aria-valuemin="0" aria-valuemax="100"></span>;
-    10 │ var a = <span role="scrollbar" aria-valuemin="0" aria-valuemax="100" aria-orientation="horizontal"></span>;
+     9 │ var a = <span role="scrollbar" aria-valuemin="0" aria-valuemax="100" aria-orientation="horizontal"></span>;
+    10 │ var a = <span role="radio"></span>;
   
   i Missing ARIA prop(s):
   
@@ -161,12 +178,12 @@ invalid.jsx:9:15 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━
 
   × The element with the scrollbar ARIA role does not have the required ARIA attributes.
   
-     7 │ var a = <span role="scrollbar" aria-valuemin="0"></span>;
-     8 │ var a = <span role="scrollbar" aria-valuemax="100"></span>;
-   > 9 │ var a = <span role="scrollbar" aria-valuemin="0" aria-valuemax="100"></span>;
+     7 │ var a = <span role="scrollbar" aria-valuemax="100"></span>;
+     8 │ var a = <span role="scrollbar" aria-valuemin="0" aria-valuemax="100"></span>;
+   > 9 │ var a = <span role="scrollbar" aria-valuemin="0" aria-valuemax="100" aria-orientation="horizontal"></span>;
        │               ^^^^^^^^^^^^^^^^
-    10 │ var a = <span role="scrollbar" aria-valuemin="0" aria-valuemax="100" aria-orientation="horizontal"></span>;
-    11 │ var a = <span role="radio"></span>;
+    10 │ var a = <span role="radio"></span>;
+    11 │ var a = <span role="heading"></span>;
   
   i Missing ARIA prop(s):
   
@@ -179,34 +196,14 @@ invalid.jsx:9:15 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━
 ```
 invalid.jsx:10:15 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The element with the scrollbar ARIA role does not have the required ARIA attributes.
-  
-     8 │ var a = <span role="scrollbar" aria-valuemax="100"></span>;
-     9 │ var a = <span role="scrollbar" aria-valuemin="0" aria-valuemax="100"></span>;
-  > 10 │ var a = <span role="scrollbar" aria-valuemin="0" aria-valuemax="100" aria-orientation="horizontal"></span>;
-       │               ^^^^^^^^^^^^^^^^
-    11 │ var a = <span role="radio"></span>;
-    12 │ var a = <span role="heading"></span>;
-  
-  i Missing ARIA prop(s):
-  
-  - aria-controls
-  - aria-valuenow
-  
-
-```
-
-```
-invalid.jsx:11:15 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
   × The element with the radio ARIA role does not have the required ARIA attributes.
   
-     9 │ var a = <span role="scrollbar" aria-valuemin="0" aria-valuemax="100"></span>;
-    10 │ var a = <span role="scrollbar" aria-valuemin="0" aria-valuemax="100" aria-orientation="horizontal"></span>;
-  > 11 │ var a = <span role="radio"></span>;
+     8 │ var a = <span role="scrollbar" aria-valuemin="0" aria-valuemax="100"></span>;
+     9 │ var a = <span role="scrollbar" aria-valuemin="0" aria-valuemax="100" aria-orientation="horizontal"></span>;
+  > 10 │ var a = <span role="radio"></span>;
        │               ^^^^^^^^^^^^
-    12 │ var a = <span role="heading"></span>;
-    13 │ var a = <span role="combobox" aria-expanded="true"></span>;
+    11 │ var a = <span role="heading"></span>;
+    12 │ var a = <span role="combobox" aria-controls="true"></span>;
   
   i Missing ARIA prop(s):
   
@@ -216,16 +213,16 @@ invalid.jsx:11:15 lint/a11y/useAriaPropsForRole ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:12:15 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:11:15 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The element with the heading ARIA role does not have the required ARIA attributes.
   
-    10 │ var a = <span role="scrollbar" aria-valuemin="0" aria-valuemax="100" aria-orientation="horizontal"></span>;
-    11 │ var a = <span role="radio"></span>;
-  > 12 │ var a = <span role="heading"></span>;
+     9 │ var a = <span role="scrollbar" aria-valuemin="0" aria-valuemax="100" aria-orientation="horizontal"></span>;
+    10 │ var a = <span role="radio"></span>;
+  > 11 │ var a = <span role="heading"></span>;
        │               ^^^^^^^^^^^^^^
-    13 │ var a = <span role="combobox" aria-expanded="true"></span>;
-    14 │ var a = <span role="combobox" aria-controls="true"></span>;
+    12 │ var a = <span role="combobox" aria-controls="true"></span>;
+    13 │ var a = <span role="menuitemcheckbox" ></span>;
   
   i Missing ARIA prop(s):
   
@@ -235,16 +232,16 @@ invalid.jsx:12:15 lint/a11y/useAriaPropsForRole ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:14:15 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:12:15 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The element with the combobox ARIA role does not have the required ARIA attributes.
   
-    12 │ var a = <span role="heading"></span>;
-    13 │ var a = <span role="combobox" aria-expanded="true"></span>;
-  > 14 │ var a = <span role="combobox" aria-controls="true"></span>;
+    10 │ var a = <span role="radio"></span>;
+    11 │ var a = <span role="heading"></span>;
+  > 12 │ var a = <span role="combobox" aria-controls="true"></span>;
        │               ^^^^^^^^^^^^^^^
-    15 │ var a = <span role="menuitemcheckbox" ></span>;
-    16 │ 
+    13 │ var a = <span role="menuitemcheckbox" ></span>;
+    14 │ 
   
   i Missing ARIA prop(s):
   
@@ -254,15 +251,15 @@ invalid.jsx:14:15 lint/a11y/useAriaPropsForRole ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:15:15 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:13:15 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The element with the menuitemcheckbox ARIA role does not have the required ARIA attributes.
   
-    13 │ var a = <span role="combobox" aria-expanded="true"></span>;
-    14 │ var a = <span role="combobox" aria-controls="true"></span>;
-  > 15 │ var a = <span role="menuitemcheckbox" ></span>;
+    11 │ var a = <span role="heading"></span>;
+    12 │ var a = <span role="combobox" aria-controls="true"></span>;
+  > 13 │ var a = <span role="menuitemcheckbox" ></span>;
        │               ^^^^^^^^^^^^^^^^^^^^^^^
-    16 │ 
+    14 │ 
   
   i Missing ARIA prop(s):
   

@@ -11,5 +11,3 @@ export type WithSelectors<S> = S extends { getState: () => infer T }
 type A = number extends infer T ? T : never;
 
 ```
-
-

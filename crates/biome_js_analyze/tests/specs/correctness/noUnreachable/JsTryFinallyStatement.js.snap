@@ -1,10 +1,11 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: JsTryFinallyStatement.js
-snapshot_kind: text
 ---
 # Input
 ```js
+// should generate diagnostics
+
 function JsTryFinallyStatement1() {
     try {
         tryBlock();
@@ -66,142 +67,298 @@ function JsTryFinallyStatement4() {
     afterTryStatement();
 }
 
+// https://github.com/biomejs/biome/issues/4946
+// finally block should be reachable when there is a jump (break/continue/return) before it
+function JsTryFinallyStatement5() {
+    while (true) {
+        try {
+            break;
+        } finally {
+            console.log("reachable");
+        }
+        console.log("unreachable");
+    }
+}
+
+function JsTryFinallyStatement6() {
+    while (true) {
+        try {
+            continue;
+        } finally {
+            console.log("reachable");
+        }
+        console.log("unreachable");
+    }
+}
+
+function JsTryFinallyStatement7() {
+    try {
+        return;
+    } finally {
+        console.log("reachable");
+    }
+    console.log("unreachable");
+}
+
+// finally itself contains a return: code after the try/finally is unreachable
+// due to the finally's return (not the try's return)
+function JsTryFinallyStatement8() {
+    try {
+        return 1;
+    } finally {
+        return 2;
+    }
+    console.log("unreachable");
+}
+
+// nested try/finally: both inner and outer finally blocks should be reachable
+function JsTryFinallyStatement9() {
+    while (true) {
+        try {
+            try {
+                break;
+            } finally {
+                console.log("inner finally reachable");
+            }
+        } finally {
+            console.log("outer finally reachable");
+        }
+        console.log("unreachable");
+    }
+}
+
 ```
 
 # Diagnostics
 ```
-JsTryFinallyStatement.js:11:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+JsTryFinallyStatement.js:13:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This code will never be reached ...
   
-     9 │     }
-    10 │ 
-  > 11 │     afterFinallyReturn();
+    11 │     }
+    12 │ 
+  > 13 │     afterFinallyReturn();
        │     ^^^^^^^^^^^^^^^^^^^^^
-    12 │ }
-    13 │ 
+    14 │ }
+    15 │ 
   
   i ... because this statement will return from the function beforehand
   
-     6 │     } finally {
-     7 │         finallyClause();
-   > 8 │         return;
+     8 │     } finally {
+     9 │         finallyClause();
+  > 10 │         return;
        │         ^^^^^^^
-     9 │     }
-    10 │ 
+    11 │     }
+    12 │ 
   
 
 ```
 
 ```
-JsTryFinallyStatement.js:17:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+JsTryFinallyStatement.js:19:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This code will never be reached ...
   
-    15 │     return;
-    16 │ 
-  > 17 │     try {
+    17 │     return;
+    18 │ 
+  > 19 │     try {
        │     ^^^^^
-  > 18 │         tryBlock();
+  > 20 │         tryBlock();
         ...
-  > 22 │         finallyClause();
-  > 23 │     }
+  > 24 │         finallyClause();
+  > 25 │     }
        │     ^
-    24 │ }
-    25 │ 
+    26 │ }
+    27 │ 
   
   i ... because this statement will return from the function beforehand
   
-    14 │ function JsTryFinallyStatement2() {
-  > 15 │     return;
+    16 │ function JsTryFinallyStatement2() {
+  > 17 │     return;
        │     ^^^^^^^
-    16 │ 
-    17 │     try {
+    18 │ 
+    19 │     try {
   
 
 ```
 
 ```
-JsTryFinallyStatement.js:35:9 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+JsTryFinallyStatement.js:37:9 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This code will never be reached ...
   
-    33 │         }
-    34 │ 
-  > 35 │         afterTryStatement1();
+    35 │         }
+    36 │ 
+  > 37 │         afterTryStatement1();
        │         ^^^^^^^^^^^^^^^^^^^^^
-    36 │     } catch (err) {
-    37 │         catchClause2();
+    38 │     } catch (err) {
+    39 │         catchClause2();
   
   i ... because this statement will return from the function beforehand
   
-    30 │         } catch {
-    31 │         } finally {
-  > 32 │             return;
+    32 │         } catch {
+    33 │         } finally {
+  > 34 │             return;
        │             ^^^^^^^
-    33 │         }
-    34 │ 
+    35 │         }
+    36 │ 
   
 
 ```
 
 ```
-JsTryFinallyStatement.js:36:19 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+JsTryFinallyStatement.js:38:19 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This code will never be reached ...
   
-    35 │         afterTryStatement1();
-  > 36 │     } catch (err) {
+    37 │         afterTryStatement1();
+  > 38 │     } catch (err) {
        │                   ^
-  > 37 │         catchClause2();
-  > 38 │     }
-  > 39 │ 
-  > 40 │     afterTryStatement2();
+  > 39 │         catchClause2();
+  > 40 │     }
+  > 41 │ 
+  > 42 │     afterTryStatement2();
        │     ^^^^^^^^^^^^^^^^^^^^^
-    41 │ }
-    42 │ 
+    43 │ }
+    44 │ 
   
   i ... because this statement will return from the function beforehand
   
-    30 │         } catch {
-    31 │         } finally {
-  > 32 │             return;
+    32 │         } catch {
+    33 │         } finally {
+  > 34 │             return;
        │             ^^^^^^^
-    33 │         }
-    34 │ 
+    35 │         }
+    36 │ 
   
 
 ```
 
 ```
-JsTryFinallyStatement.js:59:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+JsTryFinallyStatement.js:61:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This code will never be reached ...
   
-    57 │     }
-    58 │ 
-  > 59 │     afterTryStatement();
+    59 │     }
+    60 │ 
+  > 61 │     afterTryStatement();
        │     ^^^^^^^^^^^^^^^^^^^^
-    60 │ }
-    61 │ 
+    62 │ }
+    63 │ 
   
   i ... because either this statement ...
   
-    44 │     try {
-    45 │         tryBlock1();
-  > 46 │         return;
+    46 │     try {
+    47 │         tryBlock1();
+  > 48 │         return;
        │         ^^^^^^^
-    47 │     } catch {
-    48 │         return;
+    49 │     } catch {
+    50 │         return;
   
   i ... or this statement will return from the function beforehand
   
-    46 │         return;
-    47 │     } catch {
-  > 48 │         return;
+    48 │         return;
+    49 │     } catch {
+  > 50 │         return;
        │         ^^^^^^^
-    49 │     } finally {
-    50 │         if (value) {
+    51 │     } finally {
+    52 │         if (value) {
+  
+
+```
+
+```
+JsTryFinallyStatement.js:73:9 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This code will never be reached ...
+  
+    71 │             console.log("reachable");
+    72 │         }
+  > 73 │         console.log("unreachable");
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    74 │     }
+    75 │ }
+  
+  i ... because this statement will break the flow of the code beforehand
+  
+    67 │     while (true) {
+    68 │         try {
+  > 69 │             break;
+       │             ^^^^^^
+    70 │         } finally {
+    71 │             console.log("reachable");
+  
+
+```
+
+```
+JsTryFinallyStatement.js:84:9 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This code will never be reached ...
+  
+    82 │             console.log("reachable");
+    83 │         }
+  > 84 │         console.log("unreachable");
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    85 │     }
+    86 │ }
+  
+  i ... because this statement will continue the loop beforehand
+  
+    78 │     while (true) {
+    79 │         try {
+  > 80 │             continue;
+       │             ^^^^^^^^^
+    81 │         } finally {
+    82 │             console.log("reachable");
+  
+
+```
+
+```
+JsTryFinallyStatement.js:94:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This code will never be reached ...
+  
+    92 │         console.log("reachable");
+    93 │     }
+  > 94 │     console.log("unreachable");
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    95 │ }
+    96 │ 
+  
+  i ... because this statement will return from the function beforehand
+  
+    88 │ function JsTryFinallyStatement7() {
+    89 │     try {
+  > 90 │         return;
+       │         ^^^^^^^
+    91 │     } finally {
+    92 │         console.log("reachable");
+  
+
+```
+
+```
+JsTryFinallyStatement.js:105:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This code will never be reached ...
+  
+    103 │         return 2;
+    104 │     }
+  > 105 │     console.log("unreachable");
+        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    106 │ }
+    107 │ 
+  
+  i ... because this statement will return from the function beforehand
+  
+    101 │         return 1;
+    102 │     } finally {
+  > 103 │         return 2;
+        │         ^^^^^^^^^
+    104 │     }
+    105 │     console.log("unreachable");
   
 
 ```

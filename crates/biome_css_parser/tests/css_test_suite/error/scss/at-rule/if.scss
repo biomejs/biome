@@ -1,0 +1,9 @@
+@if {
+  color: red;
+}
+
+@if $theme == dark;
+
+@if $size > {
+  color: blue;
+}

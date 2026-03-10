@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/function/trailing_commas/none/function_trailing_commas.ts
 ---
+
 # Input
 
 ```ts
@@ -68,6 +69,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -110,6 +112,7 @@ connect(
 	mapDispatchToPropsmapDispatchToProps,
 	mergePropsmergeProps,
 )(Component);
+
 ```
 
 ## Output 1
@@ -130,6 +133,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -172,4 +176,5 @@ connect(
 	mapDispatchToPropsmapDispatchToProps,
 	mergePropsmergeProps
 )(Component);
+
 ```

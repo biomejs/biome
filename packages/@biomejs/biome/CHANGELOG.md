@@ -1,5 +1,1500 @@
 # @biomejs/biome
 
+## 2.4.6
+
+### Patch Changes
+
+- [#9305](https://github.com/biomejs/biome/pull/9305) [`40869b5`](https://github.com/biomejs/biome/commit/40869b5a698de5e0d2c06bc7587a9cad8c0389c5) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#4946](https://github.com/biomejs/biome/issues/4946): `noUnreachable` no longer reports code inside `finally` blocks as unreachable when there is a `break`, `continue`, or `return` in the corresponding `try` body.
+
+- [#9303](https://github.com/biomejs/biome/pull/9303) [`464910c`](https://github.com/biomejs/biome/commit/464910c06058454a0a0ed08998e1b32cb4a6ca67) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#2786](https://github.com/biomejs/biome/issues/2786): The formatter no longer produces different output on subsequent runs when a `case` clause has a trailing line comment followed by a single block statement.
+
+- [#9324](https://github.com/biomejs/biome/pull/9324) [`6294aa2`](https://github.com/biomejs/biome/commit/6294aa2e2710e90a05ed53edfc4dd80e3c4cbd9a) Thanks [@arendjr](https://github.com/arendjr)! - Fixed [`#7730`](https://github.com/biomejs/biome/issues/7730): [`useAnchorContent`](https://biomejs.dev/linter/rules/use-anchor-content/) now recognises SolidJS's `innerHTML` the same way as React's `dangerouslySetInnerHTML`.
+
+- [#9298](https://github.com/biomejs/biome/pull/9298) [`1003229`](https://github.com/biomejs/biome/commit/1003229853c80569751137b6f52dcc1b08aed659) Thanks [@Netail](https://github.com/Netail)! - Fixed [`#9296`](https://github.com/biomejs/biome/issues/9296), so comments are moved along with the attributes in the useSortedAttributes assist rule code fix.
+
+- [#9329](https://github.com/biomejs/biome/pull/9329) [`855b451`](https://github.com/biomejs/biome/commit/855b45125ad33933066eb363f706e1f00dc149d2) Thanks [@dyc3](https://github.com/dyc3)! - Improved performance of [`noEmptyBlockStatements`](https://biomejs.dev/linter/rules/no-empty-block-statements/). The rule is now smarter about short-circuiting its logic.
+
+- [#9326](https://github.com/biomejs/biome/pull/9326) [`85dfe9b`](https://github.com/biomejs/biome/commit/85dfe9b00b820fee0ad936a54328491446e085f5) Thanks [@dyc3](https://github.com/dyc3)! - Improved performance for [`noImportCycles`](https://biomejs.dev/linter/rules/no-import-cycles/) by explicitly excluding node_modules from the cycle detection. The performance improvement is directly proportional to how big your dependency tree is.
+
+- [#9323](https://github.com/biomejs/biome/pull/9323) [`d5ee469`](https://github.com/biomejs/biome/commit/d5ee4690bba0a3bb8a97da029732afde56cd4cd7) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#9217](https://github.com/biomejs/biome/issues/9217) and [biomejs/biome-vscode#959](https://github.com/biomejs/biome-vscode/issues/959), where the Biome language server didn't correctly resolve the editor setting `configurationPath` when the provided value is a relative path.
+
+- [#9302](https://github.com/biomejs/biome/pull/9302) [`86fbc70`](https://github.com/biomejs/biome/commit/86fbc70e8f5a63fd9ece11a99b2684c25c301dba) Thanks [@sepagian](https://github.com/sepagian)! - Fixed [#9300](https://github.com/biomejs/biome/issues/9300): Lowercase component member expressions like `<form.Field>` in Svelte and Astro files are now correctly formatted.
+
+  ```diff
+  -<form .Field></form.Field>
+  +<form.Field></form.Field>
+  ```
+
+## 2.4.5
+
+### Patch Changes
+
+- [#9185](https://github.com/biomejs/biome/pull/9185) [`e43e730`](https://github.com/biomejs/biome/commit/e43e730f603bb360d2993842d1b883a787224c29) Thanks [@dyc3](https://github.com/dyc3)! - Added the nursery rule `useVueScopedStyles` for Vue SFCs. This rule enforces that `<style>` blocks have the `scoped` attribute (or `module` for CSS Modules), preventing style leakage and conflicts between components.
+
+- [#9184](https://github.com/biomejs/biome/pull/9184) [`49c8fde`](https://github.com/biomejs/biome/commit/49c8fdecf69089e1be9e58fa52f6b72fd54ce08e) Thanks [@chocky335](https://github.com/chocky335)! - Improved plugin performance by batching all plugins into a single syntax visitor with a kind-to-plugin lookup map, reducing per-node dispatch overhead from O(N) to O(1) where N is the number of plugins.
+
+- [#9283](https://github.com/biomejs/biome/pull/9283) [`071c700`](https://github.com/biomejs/biome/commit/071c70053b63c60bccc170a9d84b8b3f08060a94) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [`noUndeclaredVariables`](https://biomejs.dev/linter/rules/no-undeclared-variables/) erroneously flagging functions and variables defined in the `<script setup>` section of Vue SFCs.
+
+- [#9221](https://github.com/biomejs/biome/pull/9221) [`4612133`](https://github.com/biomejs/biome/commit/4612133cd9677cda3c2eedb52fd8b46be579410d) Thanks [@ematipico](https://github.com/ematipico)! - Fixed an issue where the JSON reporter didn't contain the duration of the command.
+
+- [#9294](https://github.com/biomejs/biome/pull/9294) [`1805c8f`](https://github.com/biomejs/biome/commit/1805c8fb18081e88d81da2a6a542f7d69cd317a2) Thanks [@Netail](https://github.com/Netail)! - Extra rule source reference. `biome migrate eslint` should do a bit better detecting rules in your eslint configurations.
+
+- [#9178](https://github.com/biomejs/biome/pull/9178) [`101b3bb`](https://github.com/biomejs/biome/commit/101b3bb2658dd2fb7ce562f82b784fd5d068df62) Thanks [@Bertie690](https://github.com/Bertie690)! - Fixed [#9172](https://github.com/biomejs/biome/issues/9172) and [#9168](https://github.com/biomejs/biome/issues/9168):
+  Biome now considers more constructs as valid test assertions.
+
+  Previously, [`assert`](https://vitest.dev/api/assert.html), [`expectTypeOf`](https://vitest.dev/api/expect-typeof.html) and [`assertType`](https://vitest.dev/api/assert-type.html)
+  were not recognized as valid assertions by Biome's linting rules, producing false positives in [`lint/nursery/useExpect`](https://biomejs.dev/linter/rules/use-expect) and other similar rules.
+
+  Now, these rules will no longer produce errors in test cases that used these constructs instead of `expect`:
+
+  ```ts
+  import { expectTypeOf, assert, assertType } from "vitest";
+
+  const myStr = "Hello from vitest!";
+  it("should be a string", () => {
+    expectTypeOf(myStr).toBeString();
+  });
+  test("should still be a string", () => {
+    assertType<string>(myStr);
+  });
+  it.todo("should still still be a string", () => {
+    assert(typeof myStr === "string");
+  });
+  ```
+
+- [#9173](https://github.com/biomejs/biome/pull/9173) [`32dad2d`](https://github.com/biomejs/biome/commit/32dad2deb5373950ee52f0e1c544b3313bbe6b52) Thanks [@dyc3](https://github.com/dyc3)! - Added parsing support for Svelte's new [comments-in-tags](https://github.com/sveltejs/svelte/pull/17671) feature.
+
+  The HTML parser will now accept JS style comments in tags in Svelte files.
+
+  ```svelte
+  <button
+    // single-line comment
+    onclick={doTheThing}
+  >click me</button>
+
+  <div
+    /* block comment */
+    class="foo"
+  >text</div>
+  ```
+
+- [#8952](https://github.com/biomejs/biome/pull/8952) [`1d2ca15`](https://github.com/biomejs/biome/commit/1d2ca15f85f6968b4e4ad262a65aadc76fc54f50) Thanks [@pkallos](https://github.com/pkallos)! - Added the nursery rule [`useNullishCoalescing`](https://biomejs.dev/linter/rules/use-nullish-coalescing/). This rule suggests using the nullish coalescing operator (`??`) instead of logical OR (`||`) when the left operand may be nullish. This prevents bugs where falsy values like `0`, `''`, or `false` are incorrectly treated as missing. Addresses [#8043](https://github.com/biomejs/biome/issues/8043)
+
+  ```ts
+  // Invalid
+  declare const x: string | null;
+  const value = x || "default";
+
+  // Valid
+  const value = x ?? "default";
+  ```
+
+- [#9243](https://github.com/biomejs/biome/pull/9243) [`1992a85`](https://github.com/biomejs/biome/commit/1992a852d83eb86bae4f6adb999cde284ffa9427) Thanks [@Netail](https://github.com/Netail)! - Fixed [#7813](https://github.com/biomejs/biome/issues/7813): improved the diagnostic of the rule [`useExhaustiveDependencies`](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/). The diagnostic now shows the name of the variable to add to the dependency array.
+
+- [#9063](https://github.com/biomejs/biome/pull/9063) [`3d0648f`](https://github.com/biomejs/biome/commit/3d0648f95a0f7a3fd8ddff58d57a239e68183fe1) Thanks [@taga3s](https://github.com/taga3s)! - Added the nursery rule [`noVueRefAsOperand`](https://biomejs.dev/linter/rules/no-vue-ref-as-operand/). This rule disallows cases where a ref is used as an operand.
+
+  The following code is now flagged:
+
+  ```js
+  import { ref } from "vue";
+
+  const count = ref(0);
+  count++; // Should be: count.value++
+  ```
+
+  ```js
+  import { ref } from "vue";
+
+  const ok = ref(false);
+  if (ok) {
+    // Should be: if (ok.value)
+    //
+  }
+  ```
+
+- [#9273](https://github.com/biomejs/biome/pull/9273) [`f239e20`](https://github.com/biomejs/biome/commit/f239e2053673fcd8ba9a0ab400420b514876f39c) Thanks [@denbezrukov](https://github.com/denbezrukov)! - Fixed [#9253](https://github.com/biomejs/biome/issues/9253): parsing of `@container scroll-state(...)` queries.
+
+  ```css
+  @container scroll-state(scrolled: bottom) {
+  }
+  @container scroll-state(stuck) {
+  }
+  @container scroll-state(not (stuck)) {
+  }
+  @container scroll-state((stuck) and (scrolled: bottom)) {
+  }
+  @container scroll-state((stuck) or (snapped: x)) {
+  }
+  @container main-layout scroll-state(not ((stuck) and (scrolled: bottom))) {
+  }
+  ```
+
+- [#9259](https://github.com/biomejs/biome/pull/9259) [`96939c0`](https://github.com/biomejs/biome/commit/96939c050e34d685c2ec7d603b9bc2478e476a8e) Thanks [@ematipico](https://github.com/ematipico)! - Fixed CSS formatter incorrectly collapsing selectors when a BOM (Byte Order Mark) character is present at the start of the file. The formatter now correctly preserves line breaks between comments and selectors in BOM-prefixed CSS files, matching Prettier's behavior.
+
+- [#9251](https://github.com/biomejs/biome/pull/9251) [`59e33fb`](https://github.com/biomejs/biome/commit/59e33fb90432fed33e349245a40d352c85f5b131) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#9249](https://github.com/biomejs/biome/issues/9249): The CSS formatter no longer incorrectly breaks ratio values (like `1 / -1`) across lines when followed by comments.
+
+- [#9284](https://github.com/biomejs/biome/pull/9284) [`ec3a17f`](https://github.com/biomejs/biome/commit/ec3a17f321482ddb8ac2d67b701169a4b25df0b0) Thanks [@denbezrukov](https://github.com/denbezrukov)! - Fixed [#9253](https://github.com/biomejs/biome/issues/9253): removed false-positive diagnostics for valid `@container`/`@supports` general-enclosed queries.
+
+  ```css
+  @container scroll-state(scrolled: bottom) {
+  }
+  @supports foo(bar: baz) {
+  }
+  ```
+
+- [#9215](https://github.com/biomejs/biome/pull/9215) [`b2619a1`](https://github.com/biomejs/biome/commit/b2619a1810f8c2dfc83f03ac2d810b1d34d658c5) Thanks [@FrederickStempfle](https://github.com/FrederickStempfle)! - Fixed [#9189](https://github.com/biomejs/biome/issues/9189): `biome ci` in GitHub Actions now correctly disables colors so that `::error`/`::warning` workflow commands are not wrapped in ANSI escape codes.
+
+- [#9256](https://github.com/biomejs/biome/pull/9256) [`65ae4c1`](https://github.com/biomejs/biome/commit/65ae4c12fe1d2ac1b1cb57547a42a083c15eeb35) Thanks [@ematipico](https://github.com/ematipico)! - Fixed JSON reporter escaping of special characters in diagnostic messages. The JSON reporter now properly escapes double quotes, backslashes, and control characters in error messages and advice text, preventing invalid JSON output when diagnostics contain these characters.
+
+- [#9223](https://github.com/biomejs/biome/pull/9223) [`5b9da81`](https://github.com/biomejs/biome/commit/5b9da81189b09152d6a19b11c2911818ef812975) Thanks [@ematipico](https://github.com/ematipico)! - Fixed an issue where the JSON reporter didn't write output to a file when `--reporter-file` was specified. The output is now correctly written to the specified file instead of always going to stdout.
+
+- [#9154](https://github.com/biomejs/biome/pull/9154) [`c487e54`](https://github.com/biomejs/biome/commit/c487e54ebea4b4aa110d5b87ecf0513d0b0c7c9b) Thanks [@abossenbroek](https://github.com/abossenbroek)! - Fixed [#9115](https://github.com/biomejs/biome/issues/9115): The [`noPlaywrightMissingAwait`](https://biomejs.dev/linter/rules/no-playwright-missing-await/) rule no longer produces false positives on jest-dom matchers like `toBeVisible`, `toBeChecked`, `toHaveAttribute`, etc. For matchers shared between Playwright and jest-dom, the rule now checks whether `expect()`'s argument is a Playwright locator or page object before flagging. Added semantic variable resolution so that extracted Playwright locators (e.g. `const loc = page.locator('.item'); expect(loc).toBeVisible()`) are still correctly flagged.
+
+- [#9269](https://github.com/biomejs/biome/pull/9269) [`33e5cdf`](https://github.com/biomejs/biome/commit/33e5cdfb65fb4c63c5b186d4bf4aced73900140f) Thanks [@dyc3](https://github.com/dyc3)! - Fixed a false positive where `noUndeclaredVariables` reported bindings from Vue `<script setup>` as undeclared when used in `<template>`.
+
+  This change ensures embedded bindings collected from script snippets (like imports and `defineModel` results) are respected by the rule.
+
+- [#9267](https://github.com/biomejs/biome/pull/9267) [`2c2e060`](https://github.com/biomejs/biome/commit/2c2e060207ccbe1b96fc9dd982cadff30fda259a) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#9143](https://github.com/biomejs/biome/issues/9143) and [#8849](https://github.com/biomejs/biome/issues/8849): The [`noUnresolvedImports`](https://biomejs.dev/linter/rules/no-unresolved-imports/) rule no longer reports false positives for several common patterns:
+  - `node:fs`, `node:path`, `node:url`, and other Node.js built-in modules with the `node:` prefix are now accepted.
+  - Packages that declare their TypeScript entry point via `"typings"` (instead of `"types"`) in `package.json` now resolve correctly.
+  - Named imports from aliased re-export chains (e.g. `export { x as y } from "..."`) are now resolved correctly through the alias.
+  - Namespace re-exports (e.g. `export * as Ns from "..."`) are now recognized as own exports of the barrel module.
+
+- [#9254](https://github.com/biomejs/biome/pull/9254) [`f7bf12b`](https://github.com/biomejs/biome/commit/f7bf12bd53d783ce88650450603642f8034aeeeb) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#8842](https://github.com/biomejs/biome/issues/8842): The CSS formatter now correctly formats `@container scroll-state()` without adding an unwanted space between the function name and opening parenthesis.
+
+- [#9211](https://github.com/biomejs/biome/pull/9211) [`2d0b8e6`](https://github.com/biomejs/biome/commit/2d0b8e62d24876bc93933123cccda07a50ad5084) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#7905](https://github.com/biomejs/biome/issues/7905). Improved the accuracy of type-aware lint rules when analyzing re-exported functions and values.
+
+  Previously, when a binding was imported from another module, its type was not correctly inferred during the type analysis phase. This caused type-aware lint rules to fail to detect issues when working with re-exported imports.
+
+  The following rules now correctly handle re-exported imports:
+  - [`useAwaitThenable`](https://biomejs.dev/linter/rules/use-await-thenable/)
+  - [`noFloatingPromises`](https://biomejs.dev/linter/rules/no-floating-promises/)
+  - [`noMisusedPromises`](https://biomejs.dev/linter/rules/no-misused-promises/)
+  - [`useArraySortCompare`](https://biomejs.dev/linter/rules/use-array-sort-compare/)
+
+  Example of now-working detection:
+
+  ```ts
+  // getValue.ts
+  export async function getValue(): Promise<number> {
+    return 42;
+  }
+
+  // reexport.ts
+  export { getValue } from "./getValue";
+
+  // index.ts
+  import { getValue } from "./reexport";
+
+  // Previously: no diagnostic (type was unknown)
+  // Now: correctly detects that getValue() returns a Promise
+  await getValue(); // Valid - properly awaited
+  getValue(); // Diagnostic - floating promise
+  ```
+
+- [#8934](https://github.com/biomejs/biome/pull/8934) [`b49707c`](https://github.com/biomejs/biome/commit/b49707c5a35572ee314000eda2437c7a77b5efaa) Thanks [@tim-we](https://github.com/tim-we)! - Fixed [#8265](https://github.com/biomejs/biome/issues/8265): Biome now correctly detects test framework calls that use three arguments (label, options, callback) (e.g., `describe("foo", { retry: 2 }, () => {})`). This fixes both formatting and the [`noDuplicateTestHooks`](https://biomejs.dev/linter/rules/no-duplicate-test-hooks/) lint rule for test frameworks like Vitest.
+
+- [#9191](https://github.com/biomejs/biome/pull/9191) [`688fd34`](https://github.com/biomejs/biome/commit/688fd3480ae5c4b1d8d3a43fc5fe41c64ed0d0d1) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#9180](https://github.com/biomejs/biome/issues/9180): fixed a panic caused by an interaction between `noRedundantUseStrict` and the formatter
+
+- [#9048](https://github.com/biomejs/biome/pull/9048) [`9bbdf4d`](https://github.com/biomejs/biome/commit/9bbdf4dda73e589c82709d514083cb49ae9cda37) Thanks [@ff1451](https://github.com/ff1451)! - Added the nursery rule [`useNamedCaptureGroup`](https://biomejs.dev/linter/rules/use-named-capture-group/).
+  The rule enforces using named capture groups in regular expressions instead of numbered ones. It supports both regex literals and `RegExp` constructor calls.
+
+  ```js
+  // Invalid: unnamed capture group
+  /(foo)/;
+  new RegExp("(foo)");
+
+  // Valid: named capture group
+  /(?<id>foo)/;
+  new RegExp("(?<id>foo)");
+  ```
+
+- [#9255](https://github.com/biomejs/biome/pull/9255) [`9b6685b`](https://github.com/biomejs/biome/commit/9b6685b4537e2b21d1fac0e761c81868676d6eb8) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [`#9234`](https://github.com/biomejs/biome/issues/9234), where some nursery rules panicked when they were configured with the option `level` without the corresponding `options`.
+
+- [#8968](https://github.com/biomejs/biome/pull/8968) [`a2b4494`](https://github.com/biomejs/biome/commit/a2b4494e86defb0d9c3796b4df6fb696ed9ff7f7) Thanks [@LouisLau-art](https://github.com/LouisLau-art)! - Fixed [#8812](https://github.com/biomejs/biome/issues/8812): `lint/suspicious/noArrayIndexKey` will now report index usage anywhere in JSX `key` template or binary expressions, not only in the last visited identifier.
+
+- [#9266](https://github.com/biomejs/biome/pull/9266) [`84935a4`](https://github.com/biomejs/biome/commit/84935a484cf7eeae0e2e0bb4be747b48db2d2d4e) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#9250](https://github.com/biomejs/biome/issues/9250): `noVueDuplicateKeys` will no longer flag keys under `watch`, preventing false positives.
+
+- [#9056](https://github.com/biomejs/biome/pull/9056) [`1f2fe2e`](https://github.com/biomejs/biome/commit/1f2fe2e716c9e47c7c37a2ec57ef32caac0746ab) Thanks [@ruidosujeira](https://github.com/ruidosujeira)! - Added the nursery rule `useArraySome` to prefer `.some()` over verbose existence checks like `filter(...).length > 0` and `findIndex(...) !== -1`, with suggestions for `find`/`findLast` existence checks. This also applies to ES2025 iterator helpers such as `Iterator.prototype.find`.
+
+- [#9163](https://github.com/biomejs/biome/pull/9163) [`f87acf6`](https://github.com/biomejs/biome/commit/f87acf675ebeca794878158cd122496b9c271673) Thanks [@JUSTIVE](https://github.com/JUSTIVE)! - Added `graphql` to valid embedded graphql template tags inside JavaScript files, when the feature `javascript.experimentalEmbeddedSnippetsEnabled` is enabled. This allows proper support for graphql tags used in RelayJS.
+
+  Now, code snippets like the following are correctly formatted and limited:
+
+  ```js
+  import { graphql } from "react-relay";
+
+  const query = graphql`
+    query {
+      user(id: 1) {
+        id
+        name
+      }
+    }
+  `;
+  ```
+
+- [#8773](https://github.com/biomejs/biome/pull/8773) [`6b01778`](https://github.com/biomejs/biome/commit/6b01778301978eba61ab68dabbd2bba814bb6ef3) Thanks [@xcb3d](https://github.com/xcb3d)! - Added the new nursery rule [`useUnicodeRegex`](https://biomejs.dev/linter/rules/use-unicode-regex/).
+
+  The rule enforces the use of the `u` or `v` flag for regular expressions. This ensures proper handling of Unicode characters like emoji.
+
+  ```js
+  // Invalid
+  /foo/;
+  new RegExp("foo", "gi");
+
+  // Valid
+  /foo/u;
+  new RegExp("foo", "giu");
+  ```
+
+## 2.4.4
+
+### Patch Changes
+
+- [#9150](https://github.com/biomejs/biome/pull/9150) [`6946835`](https://github.com/biomejs/biome/commit/6946835b2c12078b326da5b51e4e4c62fbba525c) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#9138](https://github.com/biomejs/biome/issues/9138): Astro files containing `---` in HTML content (e.g., `<h1>---Hi</h1>`) are now parsed correctly, both when a frontmatter block is present and when there is no frontmatter at all.
+
+- [#9150](https://github.com/biomejs/biome/pull/9150) [`aa6f837`](https://github.com/biomejs/biome/commit/aa6f8370ae7e4694901d04914689611c9f42ad1a) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#9138](https://github.com/biomejs/biome/issues/9138): The HTML parser incorrectly failing to parse bracket characters (`[` and `]`) in text content (e.g. `<div>[Foo]</div>`).
+
+- [#9151](https://github.com/biomejs/biome/pull/9151) [`c0d4b0c`](https://github.com/biomejs/biome/commit/c0d4b0c06dac60ff2a7f52de38adad3ca37dffc4) Thanks [@dyc3](https://github.com/dyc3)! - Fixed parsing of Svelte directive keywords (`use`, `style`) when used as plain text content in HTML/Svelte files. Previously, `<p>use JavaScript</p>` or `<p>style it</p>` would incorrectly produce a bogus element instead of proper text content.
+
+- [#9162](https://github.com/biomejs/biome/pull/9162) [`7f1e060`](https://github.com/biomejs/biome/commit/7f1e0608099cb1245a29e80eee671e181e9e470b) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#9161](https://github.com/biomejs/biome/issues/9161): The Vue parser now correctly handles colon attributes like `xlink:href` and `xmlns:xlink` by parsing them as single attributes instead of splitting them into separate tokens.
+
+- [#9164](https://github.com/biomejs/biome/pull/9164) [`458211b`](https://github.com/biomejs/biome/commit/458211bd5c9167c474f1411f48167999fb9f4b9f) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#9161](https://github.com/biomejs/biome/issues/9161): The `noAssignInExpressions` rule no longer flags assignments in Vue v-on directives (e.g., `@click="counter += 1"`). Assignments in event handlers are idiomatic Vue patterns and are now skipped by the rule.
+
+## 2.4.3
+
+### Patch Changes
+
+- [#9120](https://github.com/biomejs/biome/pull/9120) [`aa40fc2`](https://github.com/biomejs/biome/commit/aa40fc237a1379188edcbbbf4dc37fd7de7c58f5) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#9109](https://github.com/biomejs/biome/issues/9109), where the GitHub reporter wasn't correctly enabled when `biome ci` runs on GitHub Actions.
+
+- [#9128](https://github.com/biomejs/biome/pull/9128) [`8ca3f7f`](https://github.com/biomejs/biome/commit/8ca3f7fcd1b0041fd7ade381032dfbb0f9693a41) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#9107](https://github.com/biomejs/biome/issues/9107): The HTML parser can now correctly parse Astro directives (client/set/class/is/server), which fixes the formatting for Astro directives.
+
+- [#9124](https://github.com/biomejs/biome/pull/9124) [`f5b0e8d`](https://github.com/biomejs/biome/commit/f5b0e8d0761c08d79d6cb1ad8df33da8605f20a9) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#8882](https://github.com/biomejs/biome/issues/8882) and [#9108](https://github.com/biomejs/biome/issues/9108): The Astro frontmatter lexer now correctly identifies the closing `---` fence when the frontmatter contains multi-line block comments with quote characters, strings that mix quote types (e.g. `"it's"`), or escaped quote characters (e.g. `"\"`).
+
+- [#9142](https://github.com/biomejs/biome/pull/9142) [`3ca066b`](https://github.com/biomejs/biome/commit/3ca066bbb73cfbe1a1bcb1c9fc76f4a79966efc0) Thanks [@THernandez03](https://github.com/THernandez03)! - Fixed [#9141](https://github.com/biomejs/biome/issues/9141): The `noUnknownAttribute` rule no longer reports `closedby` as an unknown attribute on `<dialog>` elements.
+
+- [#9126](https://github.com/biomejs/biome/pull/9126) [`792013e`](https://github.com/biomejs/biome/commit/792013eb767188608d0b6dd4dfa24413832dcb93) Thanks [@ematipico](https://github.com/ematipico)! - Added missing Mocha globals to the `Test` domain: `context`, `run`, `setup`, `specify`, `suite`, `suiteSetup`, `suiteTeardown`, `teardown`, `xcontext`, `xdescribe`, `xit`, and `xspecify`. These are injected by Mocha's BDD and TDD interfaces and were previously flagged as undeclared variables in projects using Mocha.
+
+- [#8855](https://github.com/biomejs/biome/pull/8855) [`6918c9e`](https://github.com/biomejs/biome/commit/6918c9e2bf4da19b3ac9f772272bc1a28f454fc1) Thanks [@ruidosujeira](https://github.com/ruidosujeira)! - Fixed [#8840](https://github.com/biomejs/biome/issues/8840). Now the Biome CSS parser correctly parses `not + scroll-state` inside `@container` queries.
+
+- [#9111](https://github.com/biomejs/biome/pull/9111) [`4fb55cf`](https://github.com/biomejs/biome/commit/4fb55cf998a3d41c4451679fe359ebec47692f5d) Thanks [@Jayllyz](https://github.com/Jayllyz)! - Slightly improved performance of [`noIrregularWhitespace`](https://biomejs.dev/linter/rules/no-irregular-whitespace/) by adding early return optimization and simplifying character detection logic.
+
+- [#8975](https://github.com/biomejs/biome/pull/8975) [`086a0c5`](https://github.com/biomejs/biome/commit/086a0c5c35a147df13197642bead23aa7df18a84) Thanks [@FrankFMY](https://github.com/FrankFMY)! - Fixed [#8478](https://github.com/biomejs/biome/issues/8478): [`useDestructuring`](https://biomejs.dev/linter/rules/use-destructuring/) no longer suggests destructuring when the variable has a type annotation, like `const foo: string = object.foo`.
+
+## 2.4.2
+
+### Patch Changes
+
+- [#9103](https://github.com/biomejs/biome/pull/9103) [`fc9850c`](https://github.com/biomejs/biome/commit/fc9850c4858f6d1a9c1314d782fd561a6c2253c3) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#9098](https://github.com/biomejs/biome/issues/9098): `useImportType` no longer incorrectly flags imports used in Svelte control flow blocks (`{#if}`, `{#each}`, `{#await}`, `{#key}`) as type-only imports.
+
+- [#9106](https://github.com/biomejs/biome/pull/9106) [`f4b7296`](https://github.com/biomejs/biome/commit/f4b729679e0ff4452758e026e053bb7b08add4b2) Thanks [@dyc3](https://github.com/dyc3)! - Updated rule source metadata for rules from `html-eslint`.
+
+- [#8960](https://github.com/biomejs/biome/pull/8960) [`4a5ff40`](https://github.com/biomejs/biome/commit/4a5ff4034d8406d7de28aa6ce8095987c3fef547) Thanks [@abossenbroek](https://github.com/abossenbroek)! - Added the nursery rule [`noConditionalExpect`](https://biomejs.dev/linter/rules/no-conditional-expect/). This rule disallows conditional `expect()` calls inside tests, which can lead to tests that silently pass when assertions never run.
+
+  ```js
+  // Invalid - conditional expect may not run
+  test("conditional", async ({ page }) => {
+    if (someCondition) {
+      await expect(page).toHaveTitle("Title");
+    }
+  });
+
+  // Valid - unconditional expect
+  test("unconditional", async ({ page }) => {
+    await expect(page).toHaveTitle("Title");
+  });
+  ```
+
+- [#8960](https://github.com/biomejs/biome/pull/8960) [`4a5ff40`](https://github.com/biomejs/biome/commit/4a5ff4034d8406d7de28aa6ce8095987c3fef547) Thanks [@abossenbroek](https://github.com/abossenbroek)! - Added the nursery rule [`noPlaywrightElementHandle`](https://biomejs.dev/linter/rules/no-playwright-element-handle/). Prefers locators to element handles.
+
+  ```js
+  const el = await page.$(".btn");
+  ```
+
+- [#8960](https://github.com/biomejs/biome/pull/8960) [`4a5ff40`](https://github.com/biomejs/biome/commit/4a5ff4034d8406d7de28aa6ce8095987c3fef547) Thanks [@abossenbroek](https://github.com/abossenbroek)! - Added the nursery rule [`noPlaywrightEval`](https://biomejs.dev/linter/rules/no-playwright-eval/). Disallows `page.$eval()` and `page.$$eval()` methods.
+
+  ```js
+  await page.$eval(".btn", (el) => el.textContent);
+  ```
+
+- [#8960](https://github.com/biomejs/biome/pull/8960) [`4a5ff40`](https://github.com/biomejs/biome/commit/4a5ff4034d8406d7de28aa6ce8095987c3fef547) Thanks [@abossenbroek](https://github.com/abossenbroek)! - Added the nursery rule [`noPlaywrightForceOption`](https://biomejs.dev/linter/rules/no-playwright-force-option/). Disallows the `force` option on user interactions.
+
+  ```js
+  await locator.click({ force: true });
+  ```
+
+- [#8960](https://github.com/biomejs/biome/pull/8960) [`4a5ff40`](https://github.com/biomejs/biome/commit/4a5ff4034d8406d7de28aa6ce8095987c3fef547) Thanks [@abossenbroek](https://github.com/abossenbroek)! - Added the nursery rule [`noPlaywrightMissingAwait`](https://biomejs.dev/linter/rules/no-playwright-missing-await/). Enforces awaiting async Playwright APIs.
+
+  ```js
+  const el = page.locator(".btn");
+  el.click(); // Missing await
+  ```
+
+- [#8960](https://github.com/biomejs/biome/pull/8960) [`4a5ff40`](https://github.com/biomejs/biome/commit/4a5ff4034d8406d7de28aa6ce8095987c3fef547) Thanks [@abossenbroek](https://github.com/abossenbroek)! - Added the nursery rule [`noPlaywrightNetworkidle`](https://biomejs.dev/linter/rules/no-playwright-networkidle/). Disallows deprecated `networkidle` wait option.
+
+  ```js
+  await page.goto(url, { waitUntil: "networkidle" });
+  ```
+
+- [#8960](https://github.com/biomejs/biome/pull/8960) [`4a5ff40`](https://github.com/biomejs/biome/commit/4a5ff4034d8406d7de28aa6ce8095987c3fef547) Thanks [@abossenbroek](https://github.com/abossenbroek)! - Added the nursery rule [`noPlaywrightPagePause`](https://biomejs.dev/linter/rules/no-playwright-page-pause/). Disallows `page.pause()` debugging calls in committed code.
+
+  ```js
+  await page.pause();
+  ```
+
+- [#8960](https://github.com/biomejs/biome/pull/8960) [`4a5ff40`](https://github.com/biomejs/biome/commit/4a5ff4034d8406d7de28aa6ce8095987c3fef547) Thanks [@abossenbroek](https://github.com/abossenbroek)! - Added the nursery rule [`noPlaywrightUselessAwait`](https://biomejs.dev/linter/rules/no-playwright-useless-await/). Disallows unnecessary `await` on synchronous Playwright methods.
+
+  ```js
+  // Incorrect - locator() is synchronous
+  const loc = await page.locator(".btn");
+  ```
+
+- [#8960](https://github.com/biomejs/biome/pull/8960) [`4a5ff40`](https://github.com/biomejs/biome/commit/4a5ff4034d8406d7de28aa6ce8095987c3fef547) Thanks [@abossenbroek](https://github.com/abossenbroek)! - Added the nursery rule [`noPlaywrightWaitForNavigation`](https://biomejs.dev/linter/rules/no-playwright-wait-for-navigation/). Prefers modern navigation APIs over deprecated `waitForNavigation()`.
+
+  ```js
+  await page.waitForNavigation();
+  ```
+
+- [#8960](https://github.com/biomejs/biome/pull/8960) [`4a5ff40`](https://github.com/biomejs/biome/commit/4a5ff4034d8406d7de28aa6ce8095987c3fef547) Thanks [@abossenbroek](https://github.com/abossenbroek)! - Added the nursery rule [`noPlaywrightWaitForSelector`](https://biomejs.dev/linter/rules/no-playwright-wait-for-selector/). Prefers locators over deprecated `waitForSelector()`.
+
+  ```js
+  await page.waitForSelector(".btn");
+  ```
+
+- [#8960](https://github.com/biomejs/biome/pull/8960) [`4a5ff40`](https://github.com/biomejs/biome/commit/4a5ff4034d8406d7de28aa6ce8095987c3fef547) Thanks [@abossenbroek](https://github.com/abossenbroek)! - Added the nursery rule [`noPlaywrightWaitForTimeout`](https://biomejs.dev/linter/rules/no-playwright-wait-for-timeout/). Disallows hard-coded timeouts with `waitForTimeout()`.
+
+  ```js
+  await page.waitForTimeout(5000);
+  ```
+
+- [#8960](https://github.com/biomejs/biome/pull/8960) [`4a5ff40`](https://github.com/biomejs/biome/commit/4a5ff4034d8406d7de28aa6ce8095987c3fef547) Thanks [@abossenbroek](https://github.com/abossenbroek)! - Enhanced `noSkippedTests` to detect Playwright patterns (`.fixme`, `test.describe`, `test.step`, bracket notation, bare calls). Consolidated `noPlaywrightSkippedTest` into this rule.
+
+- [#9101](https://github.com/biomejs/biome/pull/9101) [`0c0fb6f`](https://github.com/biomejs/biome/commit/0c0fb6fe1b5b2a935cf61101a7bc5323a979dce9) Thanks [@siketyan](https://github.com/siketyan)! - Fixed [`#9080`](https://github.com/biomejs/biome/issues/9080): The `noUnusedVariables` rule no longer reports a top-level `Props` interface or type alias as unused in Astro files.
+
+- [#8960](https://github.com/biomejs/biome/pull/8960) [`4a5ff40`](https://github.com/biomejs/biome/commit/4a5ff4034d8406d7de28aa6ce8095987c3fef547) Thanks [@abossenbroek](https://github.com/abossenbroek)! - Added the nursery rule [`useExpect`](https://biomejs.dev/linter/rules/use-expect/). This rule ensures that test functions contain at least one `expect()` assertion.
+
+  ```js
+  // Invalid - test without assertion
+  test("no assertion", async ({ page }) => {
+    await page.goto("/");
+  });
+
+  // Valid - test with assertion
+  test("has assertion", async ({ page }) => {
+    await expect(page).toHaveTitle("Title");
+  });
+  ```
+
+- [#8960](https://github.com/biomejs/biome/pull/8960) [`4a5ff40`](https://github.com/biomejs/biome/commit/4a5ff4034d8406d7de28aa6ce8095987c3fef547) Thanks [@abossenbroek](https://github.com/abossenbroek)! - Added the nursery rule [`usePlaywrightValidDescribeCallback`](https://biomejs.dev/linter/rules/use-playwright-valid-describe-callback/). Validates that describe callback signatures are not async.
+
+  ```js
+  test.describe("suite", async () => {});
+  ```
+
+## 2.4.1
+
+### Patch Changes
+
+- [#9092](https://github.com/biomejs/biome/pull/9092) [`6edd600`](https://github.com/biomejs/biome/commit/6edd6006b3f58e2e60f16eecd232cb6029794d5e) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#9052](https://github.com/biomejs/biome/issues/9052). This PR reverts changes introduced by https://github.com/biomejs/biome/pull/8519, which caused unwanted changes on how paths are resolved.
+
+- [#9091](https://github.com/biomejs/biome/pull/9091) [`3bf674d`](https://github.com/biomejs/biome/commit/3bf674d2b30dc039b2488f2e57a779aea29024ae) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#9090](https://github.com/biomejs/biome/issues/9090), where SCSS files were incorrectly processed by Biome. This was a regressions caused by the latest developments for supporting SCSS out of the box.
+
+- [#9100](https://github.com/biomejs/biome/pull/9100) [`66931a8`](https://github.com/biomejs/biome/commit/66931a8d024fb33b004b1aad3ae8fe63ddac4781) Thanks [@siketyan](https://github.com/siketyan)! - Fixed [#9081](https://github.com/biomejs/biome/issues/9081): The `noUnknownPseudoElement` rule no longer reports false positives for any known pseudo elements in CSS modules. This was a regression introduced in v2.4.0.
+
+- [#9102](https://github.com/biomejs/biome/pull/9102) [`d01b903`](https://github.com/biomejs/biome/commit/d01b90322ee587c65fbb7920ecd5d21ae13eeb52) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#9095](https://github.com/biomejs/biome/issues/9095), where Biome didn't print anything in stdin mode. This was a regression caused by a recent, internal refactor.
+
+## 2.4.0
+
+### Minor Changes
+
+- [#8964](https://github.com/biomejs/biome/pull/8964) [`0353fa0`](https://github.com/biomejs/biome/commit/0353fa0132ee683073b3f00ca51d53a914d11038) Thanks [@dyc3](https://github.com/dyc3)! - Added `ignore` option to the [`useHookAtTopLevel`](https://biomejs.dev/linter/rules/use-hook-at-top-level/) rule.
+
+  You can now specify function names that should not be treated as hooks, even if they follow the `use*` naming convention.
+
+  Example configuration:
+
+  ```json
+  {
+    "linter": {
+      "rules": {
+        "correctness": {
+          "useHookAtTopLevel": {
+            "options": {
+              "ignore": ["useDebounce", "useCustomUtility"]
+            }
+          }
+        }
+      }
+    }
+  }
+  ```
+
+- [#8769](https://github.com/biomejs/biome/pull/8769) [`d0358b0`](https://github.com/biomejs/biome/commit/d0358b0c96dfd014973e5336fc7ebfb8c68affb2) Thanks [@rahuld109](https://github.com/rahuld109)! - Added the rule [`useAnchorContent`](https://biomejs.dev/linter/rules/use-anchor-content/) for HTML to enforce that anchor elements have accessible content for screen readers. The rule flags empty anchors, anchors with only whitespace, and anchors where all content is hidden with `aria-hidden`. Anchors with `aria-label` or `title` attributes providing a non-empty accessible name are considered valid.
+
+- [#8742](https://github.com/biomejs/biome/pull/8742) [`6340ce6`](https://github.com/biomejs/biome/commit/6340ce62c850b727b11c62a4886b94bc25dac05c) Thanks [@rahuld109](https://github.com/rahuld109)! - Added the rule [`useMediaCaption`](https://biomejs.dev/linter/rules/use-media-caption/) to the HTML language. Enforces that `audio` and `video` elements have a `track` element with `kind="captions"` for accessibility. Muted videos are allowed without captions.
+
+- [#8621](https://github.com/biomejs/biome/pull/8621) [`d11130b`](https://github.com/biomejs/biome/commit/d11130b202b5db7219d28ade03bc55e02812de20) Thanks [@Netail](https://github.com/Netail)! - Added support for multiple reporters, and the ability to save reporters on arbitrary files.
+
+  #### Combine two reporters in CI
+
+  If you run Biome on GitHub, take advantage of the reporter and still see the errors in console, you can now use both reporters:
+
+  ```shell
+  biome ci --reporter=default --reporter=github
+  ```
+
+  #### Save reporter output to a file
+
+  With the new `--reporter-file` CLI option, it's now possible to save the output of all reporters to a file. The file is a path,
+  so you can pass a relative or an absolute path:
+
+  ```shell
+  biome ci --reporter=rdjson --reporter-file=/etc/tmp/report.json
+  biome ci --reporter=summary --reporter-file=./reports/file.txt
+  ```
+
+  You can combine these two features. For example, have the `default` reporter written on terminal, and the `rdjson` reporter written on file:
+
+  ```shell
+  biome ci --reporter=default --reporter=rdjson --reporter-file=/etc/tmp/report.json
+  ```
+
+  **The `--reporter` and `--reporter-file` flags must appear next to each other, otherwise an error is thrown.**
+
+- [#8399](https://github.com/biomejs/biome/pull/8399) [`ab88099`](https://github.com/biomejs/biome/commit/ab8809959c3dfeeb21d02528edaa3f8637de749a) Thanks [@ematipico](https://github.com/ematipico)! - The Biome CSS parser is now able to parse Vue SFC syntax such as `:slotted` and `:deep`. These pseudo functions are only correctly parsed when the CSS is defined inside `.vue` components. Otherwise, Biome will a emit a parse error.
+
+  This capability is only available when `experimentalFullHtmlSupportedEnabled` is set to `true`.
+
+- [#8663](https://github.com/biomejs/biome/pull/8663) [`3dfea16`](https://github.com/biomejs/biome/commit/3dfea169c7632b59fa6fdca3593802dd8fc9948a) Thanks [@ematipico](https://github.com/ematipico)! - Added support for Cursor files. When Biome sees a Cursor JSON file, it will parse it with comments enabled and trailing commas enabled:
+  - `$PROJECT/.cursor/`
+  - `%APPDATA%\Cursor\User\` on Windows
+  - `~/Library/Application Support/Cursor/User/` on macOS
+  - `~/.config/Cursor/User/` on Linux
+
+- [#8723](https://github.com/biomejs/biome/pull/8723) [`fe2c642`](https://github.com/biomejs/biome/commit/fe2c6427176aeb46b3f1a269be080a2fc80a5643) Thanks [@cbstns](https://github.com/cbstns)! - Added JSON as a target language for GritQL pattern matching. You can now write Grit plugins for JSON files.
+
+  This enables users to write GritQL patterns that match against JSON files, useful for:
+  - Searching and transforming JSON configuration files
+  - Enforcing patterns in `package.json` and other JSON configs
+  - Writing custom lint rules for JSON using GritQL
+
+  **Example patterns:**
+
+  Match all key-value pairs:
+
+  ```grit
+  language json
+
+  pair(key = $k, value = $v)
+  ```
+
+  Match objects with specific structure:
+
+  ```grit
+  language json
+
+  JsonObjectValue()
+  ```
+
+  Supports both native Biome AST names (`JsonMember`, `JsonObjectValue`) and TreeSitter-compatible names (`pair`, `object`, `array`) for compatibility with existing Grit patterns.
+
+  For more details, see the [GritQL documentation](https://biomejs.dev/reference/gritql/).
+
+- [#8814](https://github.com/biomejs/biome/pull/8814) [`4d9c676`](https://github.com/biomejs/biome/commit/4d9c676854990b776d3ec9dc47c7470fd481c4be) Thanks [@Netail](https://github.com/Netail)! - Added `ignore` option to [`noUnknownProperty`](https://biomejs.dev/linter/rules/no-unknown-property). If an unknown property name matches any of the items provided in `ignore`, a diagnostic won't be emitted.
+
+- [#8631](https://github.com/biomejs/biome/pull/8631) [`4d8f19d`](https://github.com/biomejs/biome/commit/4d8f19d56c84783842f66bdc0a78376e18734ab1) Thanks [@Netail](https://github.com/Netail)! - Add a new reporter `--reporter=sarif`, that emits diagnostics using the [SARIF](https://sarifweb.azurewebsites.net/) format.
+
+- [#8270](https://github.com/biomejs/biome/pull/8270) [`4f7909d`](https://github.com/biomejs/biome/commit/4f7909d1155b6ffa9c6d9f7a8fae783f7f7f38da) Thanks [@lucasweng](https://github.com/lucasweng)! - Added the `useIframeTitle` lint rule for HTML. The rule enforces the usage of the `title` attribute for the `iframe` element.
+
+  Invalid:
+
+  ```html
+  <iframe></iframe> <iframe title=""></iframe>
+  ```
+
+  Valid:
+
+  ```html
+  <iframe title="title"></iframe>
+  ```
+
+- [#8164](https://github.com/biomejs/biome/pull/8164) [`1d25856`](https://github.com/biomejs/biome/commit/1d25856483d81a3b8c268ffddd27c1bb00e79710) Thanks [@ematipico](https://github.com/ematipico)! - Added a new assist action `useSortedInterfaceMembers` that sorts TypeScript interface members, for readability.
+
+  It includes an autofix.
+
+  Invalid example.
+
+  ```ts,expect_diagnostic
+  interface MixedMembers {
+    z: string;
+    a: number;
+    (): void;
+    y: boolean;
+  }
+  ```
+
+  Valid example (after using the assist).
+
+  ```ts
+  interface MixedMembers {
+    a: number;
+    y: boolean;
+    z: string;
+    (): void;
+  }
+  ```
+
+- [#8647](https://github.com/biomejs/biome/pull/8647) [`4c7c06f`](https://github.com/biomejs/biome/commit/4c7c06f0db7ab86f7a14df46d3dc2737bccda45b) Thanks [@siketyan](https://github.com/siketyan)! - It's now possible to provide the stacktrace for a fatal error. The stacktrace is only available when the environment variable `RUST_BACKTRACE=1` is set, either via the CLI or exported `$PATH`. This is useful when providing detailed information for debugging purposes:
+
+  ```shell
+  RUST_BACKTRACE=1 biome lint
+  ```
+
+- [#7961](https://github.com/biomejs/biome/pull/7961) [`a04c8df`](https://github.com/biomejs/biome/commit/a04c8dfbd7b4f45ffc07fbf457d30faa8c1e1b9d) Thanks [@siketyan](https://github.com/siketyan)! - The Biome Language Server now reports progress while scanning files and dependencies in the project.
+
+- [#8289](https://github.com/biomejs/biome/pull/8289) [`a9025d4`](https://github.com/biomejs/biome/commit/a9025d4c560a8c6056dd715fe3eebf772b8f951b) Thanks [@theshadow27](https://github.com/theshadow27)! - Fixed [#8024](https://github.com/biomejs/biome/issues/8024). The rule [`useIterableCallbackReturn`](https://biomejs.dev/linter/rules/use-iterable-callback-return/) now supports a `checkForEach` option. When set to `false`, the rule will skip checking for `forEach()` callbacks for returning values.
+
+- [#8690](https://github.com/biomejs/biome/pull/8690) [`e06e5d1`](https://github.com/biomejs/biome/commit/e06e5d1177837a573fa934f329579c05ce83cd21) Thanks [@ematipico](https://github.com/ematipico)! - Added the rule [`useValidLang`](https://biomejs.dev/linter/rules/use-valid-lang) to the HTML language.
+
+- [#7847](https://github.com/biomejs/biome/pull/7847) [`e90b14f`](https://github.com/biomejs/biome/commit/e90b14f0e6789b4f402bf9621dfa322ebed565ea) Thanks [@Jagget](https://github.com/Jagget)! - Added support for `jsxFactory` and `jsxFragmentFactory`.Biome now respects `jsxFactory` and `jsxFragmentFactory` settings from `tsconfig.json` when using the classic JSX runtime, preventing false positive [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports/) errors for custom JSX libraries like Preact.
+
+  ```json5
+  // tsconfig.json
+  {
+    compilerOptions: {
+      jsx: "react",
+      jsxFactory: "h",
+      jsxFragmentFactory: "Fragment",
+    },
+  }
+  ```
+
+  ```jsx
+  // Component.jsx
+  import { h, Fragment } from "preact";
+
+  function App() {
+    return <div>Hello</div>;
+  }
+  ```
+
+- [#8071](https://github.com/biomejs/biome/pull/8071) [`7f5bcf4`](https://github.com/biomejs/biome/commit/7f5bcf46844405a663d6c399ab3c3275ea6c25a2) Thanks [@ematipico](https://github.com/ematipico)! - Added new CLI options to the commands `lsp-proxy` and `start` that allow to control the Biome file watcher.
+
+  #### `--watcher-kind`
+
+  Controls how the Biome file watcher should behave. By default, Biome chooses the best watcher strategy for the
+  current OS, however sometimes this could result in some issues, such as folders locked.
+
+  The option accepts the current values:
+  - `recommended`: the default option, which chooses the best watcher for the current platform.
+  - `polling`: uses the polling strategy.
+  - `none`: it doesn't enable the watcher. When the watcher is disabled, changes to files aren't recorded anymore by Biome. This might have
+    repercussions on some lint rules that might rely on updated types or updated paths.
+
+  The environment variable `BIOME_WATCHER_KIND` can be used as alias.
+
+  #### `--watcher-polling-interval`
+
+  The polling interval in milliseconds. This is only applicable when using the `polling` watcher. It defaults to `2000` milliseconds.
+
+  The environment variable `BIOME_WATCHER_POLLING_INTERVAL` can be used as alias.
+
+- [#8262](https://github.com/biomejs/biome/pull/8262) [`4186b83`](https://github.com/biomejs/biome/commit/4186b8324338d357dee94e6343133c8d1ee81a55) Thanks [@lucasweng](https://github.com/lucasweng)! - Added the `useHtmlLang` lint rule for HTML. The rule enforces that the `html` element has a `lang` attribute.
+
+  Invalid:
+
+  ```html
+  <html></html>
+  <html lang></html>
+  <html lang=""></html>
+  ```
+
+  Valid:
+
+  ```html
+  <html lang="en"></html>
+  ```
+
+- [#8376](https://github.com/biomejs/biome/pull/8376) [`1a9334c`](https://github.com/biomejs/biome/commit/1a9334c3ebf90863e429ffd9bfe74533514a3f42) Thanks [@siketyan](https://github.com/siketyan)! - Added support for formatting and linting embedded GraphQL snippets in JavaScript.
+
+  For example, the following snippets are now formatted:
+
+  ```js
+  import gql from "graphql-tag";
+
+  const PeopleCountQuery = gql`
+    query PeopleCount {
+      allPeople {
+        totalCount
+      }
+    }
+  `;
+  ```
+
+  ```js
+  import { graphql } from "./graphql";
+
+  const PeopleCountQuery = graphql(`
+    query PeopleCount {
+      allPeople {
+        totalCount
+      }
+    }
+  `);
+  ```
+
+  This feature is experimental and must be enabled explicitly in the configuration:
+
+  ```json
+  {
+    "javascript": {
+      "experimentalEmbeddedSnippetsEnabled": true
+    }
+  }
+  ```
+
+- [#7799](https://github.com/biomejs/biome/pull/7799) [`54682aa`](https://github.com/biomejs/biome/commit/54682aa67abb5014a92291c287afb39c646ae00c) Thanks [@PaulRBerg](https://github.com/PaulRBerg)! - Added `groupByNesting` option to the `useSortedKeys` assist. When enabled, object keys are grouped by their value's nesting depth before sorting alphabetically.
+
+  Simple values (primitives, single-line arrays, and single-line objects) are sorted first, followed by nested values (multi-line arrays and multi-line objects).
+
+  #### Example
+
+  To enable this option, configure it in your `biome.json`:
+
+  ```json
+  {
+    "linter": {
+      "rules": {
+        "source": {
+          "useSortedKeys": {
+            "options": {
+              "groupByNesting": true
+            }
+          }
+        }
+      }
+    }
+  }
+  ```
+
+  With this option, the following unsorted object:
+
+  ```js
+  const object = {
+    name: "Sample",
+    details: {
+      description: "nested",
+    },
+    id: 123,
+  };
+  ```
+
+  Will be sorted as:
+
+  ```js
+  const object = {
+    id: 123,
+    name: "Sample",
+    details: {
+      description: "nested",
+    },
+  };
+  ```
+
+- [#8641](https://github.com/biomejs/biome/pull/8641) [`1dc8dc2`](https://github.com/biomejs/biome/commit/1dc8dc23e06af42af00330e2949db48e987909db) Thanks [@tt-a1i](https://github.com/tt-a1i)! - Added the [`noAutofocus`](https://biomejs.dev/linter/rules/no-autofocus/) lint rule for HTML. This rule enforces that the `autofocus` attribute is not used on elements, as it can cause usability issues for sighted and non-sighted users. The rule allows `autofocus` inside `dialog` elements or elements with the `popover` attribute, as these are modal contexts where autofocus is expected.
+
+- [#8501](https://github.com/biomejs/biome/pull/8501) [`8eb3f19`](https://github.com/biomejs/biome/commit/8eb3f192e4ff534e456b042747e63a6260a50adf) Thanks [@tt-a1i](https://github.com/tt-a1i)! - Added [`noPositiveTabindex`](https://biomejs.dev/linter/rules/no-positive-tabindex/) to HTML. This rule prevents the usage of positive integers on the `tabindex` attribute, which can disrupt natural keyboard navigation order.
+
+- [#8661](https://github.com/biomejs/biome/pull/8661) [`b36ff03`](https://github.com/biomejs/biome/commit/b36ff03b7d2df3b39b30b18e401123b08fabf76a) Thanks [@tt-a1i](https://github.com/tt-a1i)! - Added the [`useAltText`](https://biomejs.dev/linter/rules/use-alt-text/) lint rule for HTML. This rule enforces that elements requiring alternative text (`<img>`, `<area>`, `<input type="image">`, `<object>`) provide meaningful information for screen reader users via `alt`, `title` (for objects), `aria-label`, or `aria-labelledby` attributes. Elements with `aria-hidden="true"` are exempt.
+
+- [#7749](https://github.com/biomejs/biome/pull/7749) [`1c59333`](https://github.com/biomejs/biome/commit/1c59333368e3e28266b2c9557e34c280830b6190) Thanks [@andogq](https://github.com/andogq)! - Implements [#1984](https://github.com/biomejs/biome/issues/1984). Updated [`useHookAtTopLevel`](https://biomejs.dev/linter/rules/use-hook-at-top-level/) to better catch invalid hook usage.
+
+  This rule is now capable of finding invalid hook usage in more locations. A diagnostic will now be generated if:
+  - A hook is used at the module level (top of the file, outside any function).
+  - A hook is used within a function or method which is not a hook or component, unless it is a function expression (such as arrow functions commonly used in tests).
+
+  **Invalid:**
+
+  ```js
+  // Invalid: hooks cannot be called at the module level.
+  useHook();
+  ```
+
+  ```js
+  // Invalid: hooks must be called from another hook or component.
+  function notAHook() {
+    useHook();
+  }
+  ```
+
+  **Valid:**
+
+  ```js
+  // Valid: hooks may be called from function expressions, such as in tests.
+  test("my hook", () => {
+    renderHook(() => useHook());
+
+    renderHook(function () {
+      return useHook();
+    });
+  });
+  ```
+
+- [#8307](https://github.com/biomejs/biome/pull/8307) [`789b0e7`](https://github.com/biomejs/biome/commit/789b0e7ef610a191d7542f00b232367992f7edc3) Thanks [@mehm8128](https://github.com/mehm8128)! - Added the `useValidAriaRole` lint rule for HTML. The rule enforces that elements with ARIA roles must use a valid, non-abstract ARIA role.
+
+- [#8814](https://github.com/biomejs/biome/pull/8814) [`4d9c676`](https://github.com/biomejs/biome/commit/4d9c676854990b776d3ec9dc47c7470fd481c4be) Thanks [@Netail](https://github.com/Netail)! - Added `ignore` option to [`noUnknownFunction`](https://biomejs.dev/linter/rules/no-unknown-function). If an unknown function name matches any of the items provided in `ignore`, a diagnostic won't be emitted.
+
+- [#8814](https://github.com/biomejs/biome/pull/8814) [`4d9c676`](https://github.com/biomejs/biome/commit/4d9c676854990b776d3ec9dc47c7470fd481c4be) Thanks [@Netail](https://github.com/Netail)! - Added `ignore` option to [`noUnknownPseudoClass`](https://biomejs.dev/linter/rules/no-unknown-pseudo-class). If an unknown pseudo-class name matches any of the items provided in `ignore`, a diagnostic won't be emitted.
+
+- [#8623](https://github.com/biomejs/biome/pull/8623) [`dc1f94e`](https://github.com/biomejs/biome/commit/dc1f94e9449e815b127a8553f0117836328d723e) Thanks [@mldangelo](https://github.com/mldangelo)! - Added the [`noDuplicateClasses`](https://biomejs.dev/assist/actions/no-duplicate-classes/) assist action to detect and remove duplicate CSS classes.
+
+  **For JSX files:** Supports `class`, `className` attributes and utility functions like `clsx`, `cn`, `cva`.
+
+  **For HTML files:** Checks `class` attributes. This is the first assist action for HTML.
+
+  ```jsx
+  // Before
+  <div class="flex p-4 flex" />;
+
+  // After
+  <div class="flex p-4" />;
+  ```
+
+- [#8399](https://github.com/biomejs/biome/pull/8399) [`ab88099`](https://github.com/biomejs/biome/commit/ab8809959c3dfeeb21d02528edaa3f8637de749a) Thanks [@ematipico](https://github.com/ematipico)! - Improved the CSS parser for CSS modules. Biome now automatically enables CSS modules parsing for `*.module.css` files.
+
+  If your codebase has only `*.module.css` files, you can remove the parser feature as follows, because now Biome does it for you:
+
+  ```diff
+  {
+    "css": {
+      "parser": {
+  -      "cssModules": true
+      }
+    }
+  }
+  ```
+
+- [#8399](https://github.com/biomejs/biome/pull/8399) [`ab88099`](https://github.com/biomejs/biome/commit/ab8809959c3dfeeb21d02528edaa3f8637de749a) Thanks [@ematipico](https://github.com/ematipico)! - Added support for parsing `:global` and `:local` inside `.astro`, `.svelte` and `.vue` files, in `<style>` portion of the file.
+
+  This capability is only available when `experimentalFullHtmlSupportedEnabled` is set to `true`.
+
+- [#9011](https://github.com/biomejs/biome/pull/9011) [`e014336`](https://github.com/biomejs/biome/commit/e0143366bd60eb6f123ea1325135754bf2107f34) Thanks [@ematipico](https://github.com/ematipico)! - Promoted 21 nursery rules to stable groups.
+
+  #### Correctness
+
+  Promoted the following rules to the `correctness` group:
+  - [`noUnresolvedImports`](https://biomejs.dev/linter/rules/no-unresolved-imports/). The rule reports imports that cannot be resolved.
+    The default rule severity is set to `error`.
+  - [`noVueReservedProps`](https://biomejs.dev/linter/rules/no-vue-reserved-props/). The rule reports Vue reserved props usage.
+    The default rule severity is set to `error`.
+  - [`noVueReservedKeys`](https://biomejs.dev/linter/rules/no-vue-reserved-keys/). The rule reports Vue reserved keys usage.
+    The default rule severity is set to `error`.
+  - [`noVueDataObjectDeclaration`](https://biomejs.dev/linter/rules/no-vue-data-object-declaration/). The rule reports Vue 2 data declared as an object instead of a function.
+    The default rule severity is set to `warn`.
+  - [`noNextAsyncClientComponent`](https://biomejs.dev/linter/rules/no-next-async-client-component/). The rule reports async Next.js client components.
+    The default rule severity is set to `warn`.
+  - [`noVueDuplicateKeys`](https://biomejs.dev/linter/rules/no-vue-duplicate-keys/). The rule reports duplicate keys in Vue component options.
+    The default rule severity is set to `error`.
+  - [`noVueSetupPropsReactivityLoss`](https://biomejs.dev/linter/rules/no-vue-setup-props-reactivity-loss/). The rule reports destructuring of props in Vue 3 setup which causes reactivity loss.
+    The default rule severity is set to `error`.
+  - [`useQwikMethodUsage`](https://biomejs.dev/linter/rules/use-qwik-method-usage/). The rule enforces correct Qwik framework method usage.
+    The default rule severity is set to `error`.
+  - [`useQwikValidLexicalScope`](https://biomejs.dev/linter/rules/use-qwik-valid-lexical-scope/). The rule enforces valid lexical scope in Qwik framework.
+    The default rule severity is set to `error`.
+
+  #### Suspicious
+
+  Promoted the following rules to the `suspicious` group:
+  - [`noImportCycles`](https://biomejs.dev/linter/rules/no-import-cycles/). The rule reports circular imports.
+    The default rule severity is set to `warn`.
+  - [`noDeprecatedImports`](https://biomejs.dev/linter/rules/no-deprecated-imports/). The rule reports imports of deprecated symbols.
+    The default rule severity is set to `warn`.
+  - [`noReactForwardRef`](https://biomejs.dev/linter/rules/no-react-forward-ref/). The rule reports usage of `React.forwardRef`.
+    The default rule severity is set to `warn`.
+  - [`noUnusedExpressions`](https://biomejs.dev/linter/rules/no-unused-expressions/). The rule reports expressions that are never used.
+    The default rule severity is set to `warn`.
+  - [`noEmptySource`](https://biomejs.dev/linter/rules/no-empty-source/). The rule reports empty source files.
+    The default rule severity is set to `warn`.
+  - [`useDeprecatedDate`](https://biomejs.dev/linter/rules/use-deprecated-date/). The rule enforces use of GraphQL `@deprecated` directive with date.
+    The default rule severity is set to `warn`.
+  - [`noDuplicateDependencies`](https://biomejs.dev/linter/rules/no-duplicate-dependencies/). The rule reports duplicate dependencies in package.json.
+    The default rule severity is set to `warn`.
+
+  #### Complexity
+
+  Promoted the following rules to the `complexity` group:
+  - [`noUselessUndefined`](https://biomejs.dev/linter/rules/no-useless-undefined/). The rule reports useless `undefined` initialization and returns.
+    The default rule severity is set to `info`.
+  - [`useMaxParams`](https://biomejs.dev/linter/rules/use-max-params/). The rule enforces a maximum number of function parameters.
+    The default rule severity is set to `warn`.
+  - [`noUselessCatchBinding`](https://biomejs.dev/linter/rules/no-useless-catch-binding/). The rule reports useless catch binding parameters.
+    The default rule severity is set to `info`.
+
+  #### Style
+
+  Promoted the following rules to the `style` group:
+  - [`useConsistentArrowReturn`](https://biomejs.dev/linter/rules/use-consistent-arrow-return/). The rule enforces consistent return in arrow functions.
+    The default rule severity is set to `info`.
+  - [`noJsxLiterals`](https://biomejs.dev/linter/rules/no-jsx-literals/). The rule reports literal strings in JSX.
+    The default rule severity is set to `info`.
+
+- [#8695](https://github.com/biomejs/biome/pull/8695) [`d8f0309`](https://github.com/biomejs/biome/commit/d8f03099e6e712f63599914a6498fb2b1d90243c) Thanks [@ematipico](https://github.com/ematipico)! - Added support for the top-level suppression comment `biome-ignore-all format: <explanation>`.
+
+  When the comment `biome-ignore-all format: <explanation>` is placed at the beginning of the document, Biome won't format the code.
+
+  The feature works for all supported languages. In the following JavaScript snippet, the code isn't formatted and will stay as is.
+
+  ```js
+  // biome-ignore-all format: generated
+
+  const a = [];
+
+  const a = [];
+
+  const a = [];
+  ```
+
+- [#8255](https://github.com/biomejs/biome/pull/8255) [`da85e3c`](https://github.com/biomejs/biome/commit/da85e3ca2dd2521c89f9191d2d62172acdb52ae2) Thanks [@ryan-m-walker](https://github.com/ryan-m-walker)! - Added support for the typed `attr` function. Addresses issue #6183.
+
+  **Example**
+
+  ```css
+  .btn {
+    width: attr(data-size type(<length> | <percentage>), 0px);
+  }
+  ```
+
+- [#8165](https://github.com/biomejs/biome/pull/8165) [`e0b3f62`](https://github.com/biomejs/biome/commit/e0b3f626231339293f841fda9a060bb4948d9aac) Thanks [@lucasweng](https://github.com/lucasweng)! - Added the `noAccessKey` lint rule for HTML. The rule enforces that the `accesskey` attribute is not used on any HTML element, as it can conflict with keyboard commands used by screen readers and keyboard-only users.
+
+  Invalid:
+
+  ```html
+  <input type="submit" accesskey="s" value="Submit" />
+  <a href="https://webaim.org/" accesskey="w">WebAIM.org</a>
+  <button accesskey="n">Next</button>
+  ```
+
+  Valid:
+
+  ```html
+  <input type="submit" value="Submit" />
+  <a href="https://webaim.org/">WebAIM.org</a>
+  <button>Next</button>
+  ```
+
+- [#8278](https://github.com/biomejs/biome/pull/8278) [`7207eff`](https://github.com/biomejs/biome/commit/7207eff718f850c261849afd29c2b1ebefc2d52c) Thanks [@ematipico](https://github.com/ematipico)! - Added a feature that allows editors to inject a Biome configuration to the Biome Language Server without affecting the configuration of the project.
+
+  If you have a Biome extension that is compatible with your preferred LSP-ready editor, you can map `inlineConfig`. The configuration will be merged with the configuration of the project (or the default configuration):
+
+  For example, with the Zed editor, you would have the following configuration, which will format all files using four spaces as indentation style:
+
+  ```json5
+  // .zed/settings.json
+  {
+    lsp: {
+      biome: {
+        settings: {
+          inline_config: {
+            formatter: {
+              indentStyle: "space",
+              indentWidth: 4,
+            },
+          },
+        },
+      },
+    },
+  }
+  ```
+
+- [#8368](https://github.com/biomejs/biome/pull/8368) [`8aa5f5b`](https://github.com/biomejs/biome/commit/8aa5f5b1cb27beee67b0fe579575e570f28e1d45) Thanks [@Bertie690](https://github.com/Bertie690)! - Added 2 options from `typescript-eslint` (`ignoreDifferentlyNamedParameters` and `ignoreDifferentJsDoc`) to [`useUnifiedTypeSignatures`](https://biomejs.dev/linter/rules/use-unified-type-signatures/).
+
+  Each option makes the rule ignore overload signatures whose parameter names or JSDoc comments differ.
+
+  #### Examples
+
+  Valid code with `ignoreDifferentlyNamedParameters` set to `true`:
+
+  ```ts
+  function cook(scoops: IceCreamScoop[]): void;
+  function cook(cakeType: string): void;
+  ```
+
+  Valid code with `ignoreDifferentJsDoc` set to `true`:
+
+  ```ts
+  /** Does objs have "cow" inside it? */
+  function hasCow(objs: string[]): boolean;
+  /** @deprecated - convert to array */
+  function hasCow(objs: string): boolean;
+  ```
+
+- [#8562](https://github.com/biomejs/biome/pull/8562) [`361350e`](https://github.com/biomejs/biome/commit/361350e6549fe67baec80bdf931648f872e0647c) Thanks [@dyc3](https://github.com/dyc3)! - Added the rule profiler behind the `--profile-rules` cli flag. You can now see a report of which lint rules took the longest to execute.
+
+- [#8234](https://github.com/biomejs/biome/pull/8234) [`e2e6e66`](https://github.com/biomejs/biome/commit/e2e6e6618e54c048a1be8adb8067d7f115e245d7) Thanks [@ongyuxing](https://github.com/ongyuxing)! - Updated the CSS properties ordering to align with `stylelint-config-recess-order` v7.4.0.
+
+  It adds support for:
+  - Containment properties
+  - Font synthesis properties
+  - Ruby properties
+  - Color adjustment properties
+  - View transitions properties
+  - Shapes properties
+  - Motion path properties
+  - etc.
+
+  For the complete list of changes, see: https://github.com/stormwarning/stylelint-config-recess-order/compare/v6.0.0...v7.4.0.
+
+- [#8814](https://github.com/biomejs/biome/pull/8814) [`4d9c676`](https://github.com/biomejs/biome/commit/4d9c676854990b776d3ec9dc47c7470fd481c4be) Thanks [@Netail](https://github.com/Netail)! - Added `ignore` option to [`noUnknownPseudoElement`](https://biomejs.dev/linter/rules/no-unknown-selector-pseudo-element). If an unknown pseudo-element name matches any of the items provided in `ignore`, a diagnostic won't be emitted.
+
+- [#8663](https://github.com/biomejs/biome/pull/8663) [`3dfea16`](https://github.com/biomejs/biome/commit/3dfea169c7632b59fa6fdca3593802dd8fc9948a) Thanks [@ematipico](https://github.com/ematipico)! - Added the ability to load the configuration from new known paths. Biome now attempts to load the configuration files
+  from the following locations:
+  - `$XDG_CONFIG_HOME` or `$HOME/.config/biome` on Linux
+  - `/Users/$USER/Library/Application Support/biome` on macOS
+  - `C:\Users\$USER\AppData\Roaming\biome\config` on Windows
+
+  The priority how Biome will attempt to load the configuration files is the following:
+  1. project folder (working directory)
+  2. parent folders
+  3. config home
+     1. `$XDG_CONFIG_HOME` or `$HOME/.config/biome` on Linux
+     2. `/Users/$USER/Library/Application Support/biome` on macOS
+     3. `C:\Users\$USER\AppData\Roaming\biome\config` on Windows
+
+- [#7973](https://github.com/biomejs/biome/pull/7973) [`bc0e8b4`](https://github.com/biomejs/biome/commit/bc0e8b47a276efabb0b76169d13dfc9d5325953f) Thanks [@siketyan](https://github.com/siketyan)! - Added support for formatting and linting embedded CSS snippets in JavaScript.
+
+  For example, the following snippets are now formatted and linted:
+
+  ```js
+  import styled from "styled-components";
+
+  const Foo = styled.div`
+    display: flex;
+    color: red;
+  `;
+  ```
+
+  ```js
+  import styled from "@emotion/styled";
+
+  const Foo = styled(Box)`
+    display: flex;
+    color: red;
+  `;
+  ```
+
+  ```js
+  import { css } from "@emotion/react";
+
+  const style = css`
+    display: flex;
+    color: red;
+  `;
+  ```
+
+  However, snippets with interpolations are not supported yet. For example, the following snippet **isn't** formatted:
+
+  ```ts
+  import styled from "@emotion/styled";
+
+  const Foo = styled.div<{ color: string }>`
+    display: flex;
+    color: ${(props) => props.color};
+  `;
+  ```
+
+  This feature is experimental and must be enabled explicitly in the configuration:
+
+  ```json
+  {
+    "javascript": {
+      "experimentalEmbeddedSnippetsEnabled": true
+    }
+  }
+  ```
+
+- [#8381](https://github.com/biomejs/biome/pull/8381) [`50c3513`](https://github.com/biomejs/biome/commit/50c351357e4400c3c1890fc2e10a11a37c8fca49) Thanks [@mehm8128](https://github.com/mehm8128)! - Added the `useAriaPropsForRole` lint rule for HTML. The rule enforces that elements with ARIA roles must have all required ARIA attributes for that role.
+
+- [#7762](https://github.com/biomejs/biome/pull/7762) [`5901d79`](https://github.com/biomejs/biome/commit/5901d79132178a1ceae2cab3abe94dcced3daff6) Thanks [@dyc3](https://github.com/dyc3)! - Added the `extensionMappings` option to `useImportExtensions`. This allows users to specify custom file extensions for different module types.
+
+  For example, if you want to ban all `.ts` imports in favor of `.js` imports, you can now do so with this option:
+
+  ```json
+  {
+    "options": {
+      "extensionMappings": {
+        "ts": "js"
+      }
+    }
+  }
+  ```
+
+- [#8532](https://github.com/biomejs/biome/pull/8532) [`01bccc8`](https://github.com/biomejs/biome/commit/01bccc8bfe8e54ff0d84728c2d4d6053c68d3ccb) Thanks [@jonaylor89](https://github.com/jonaylor89)! - Added `--only` and `--skip` options to `biome check` and `biome ci`, covering both lint diagnostics and assist actions. Biome now lets you run or exclude specific lint rules, assist actions, group or rules and actions, or domains when running these commands.
+
+  Examples:
+
+  ```shell
+  biome check --only=suspicious/noDebugger src/**/*.js
+  biome ci --skip=project src/**
+  ```
+
+- [#8666](https://github.com/biomejs/biome/pull/8666) [`7733f90`](https://github.com/biomejs/biome/commit/7733f905be5c48efc90b167232ec39259f9fa6a7) Thanks [@ematipico](https://github.com/ematipico)! - Added the rule [`noRedundantAlt`](https://biomejs.dev/linter/rules/no-redundant-alt/) to HTML. The rule enforces that the `img` element `alt` attribute does not contain the words “image”, “picture”, or “photo”.
+
+- [#8287](https://github.com/biomejs/biome/pull/8287) [`a248e88`](https://github.com/biomejs/biome/commit/a248e887af550d77525c2f9080c62dace79b8f91) Thanks [@mehm8128](https://github.com/mehm8128)! - Added the `noDistractingElements` lint rule for HTML. The rule enforces that no distracting elements like `<marquee>` or `<blink>` are used.
+
+- [#8564](https://github.com/biomejs/biome/pull/8564) [`adcce82`](https://github.com/biomejs/biome/commit/adcce82eaede7d2db2ef95f27a6109b2475595b5) Thanks [@ematipico](https://github.com/ematipico)! - Added the new linter domain `types`. This is a domain that enables all rules that require the type inference engine.
+
+  As opposed to the `project` domain, which only enables rules that require the module graph to function.
+
+  The following **nursery** rules have been moved to the `types` domain:
+  - `useArraySortCompare`
+  - `useAwaitThenable`
+  - `useFind`
+  - `useRegexpExec`
+  - `noUnnecessaryConditions`
+  - `noMisusedPromises`
+  - `noFloatingPromises`
+
+- [#8556](https://github.com/biomejs/biome/pull/8556) [`47a79f1`](https://github.com/biomejs/biome/commit/47a79f1b22c0d0577dd23b927a6cf04b17d603e9) Thanks [@mehm8128](https://github.com/mehm8128)! - Added two new behaviors to the `noSvgWithoutTitle` rule.
+  - Support for `graphics-document` and `graphics-symbol` roles.
+  - Support for multiple role specifications.
+
+- [#8663](https://github.com/biomejs/biome/pull/8663) [`3dfea16`](https://github.com/biomejs/biome/commit/3dfea169c7632b59fa6fdca3593802dd8fc9948a) Thanks [@ematipico](https://github.com/ematipico)! - Added the ability to load the hidden files `.biome.json` and `.biome.jsonc`. This is the order how Biome will attempt the configuration file is:
+  1. `biome.json`
+  2. `biome.jsonc`
+  3. `.biome.json`
+  4. `.biome.jsonc`
+
+- [#8334](https://github.com/biomejs/biome/pull/8334) [`ae8ac8e`](https://github.com/biomejs/biome/commit/ae8ac8e62fb6276e32192875219edf7a6ee463a8) Thanks [@ematipico](https://github.com/ematipico)! - Added the formatter option [`trailingNewline`](https://biomejs.dev/reference/configuration/#formattertrailingnewline).
+
+  When set to `false`, the formatter will remove the trailing newline at the end of formatted files. The default value is `true`, which preserves the current behavior of adding a trailing newline.
+
+  This option is available globally and for each language-specific formatter configuration:
+
+  ```json
+  {
+    "formatter": {
+      "trailingNewline": false
+    },
+    "javascript": {
+      "formatter": {
+        "trailingNewline": true
+      }
+    }
+  }
+  ```
+
+  The following CLI flags have been added. They accept `true` or `false` as value:
+  - `--formatter-trailing-newline`
+  - `--javascript-formatter-trailing-newline`
+  - `--json-formatter-trailing-newline`
+  - `--graphql-formatter-trailing-newline`
+  - `--css-formatter-trailing-newline`
+  - `--html-formatter-trailing-newline`
+
+- [#8854](https://github.com/biomejs/biome/pull/8854) [`1469968`](https://github.com/biomejs/biome/commit/14699685a0689432d663d1555e404efe2a6a1768) Thanks [@ematipico](https://github.com/ematipico)! - Formatting is now applied when applying safe/unsafe fixes via `biome check`.
+
+- [#8642](https://github.com/biomejs/biome/pull/8642) [`46f33a7`](https://github.com/biomejs/biome/commit/46f33a749ba11f8299a00e9d8a22eac5fa33aa87) Thanks [@ematipico](https://github.com/ematipico)! - Improved the rule `noUnusedVariables` in Svelte files, by correctly detecting variables defined in the JavaScript blocks, and used inside the templates.
+
+- [#8839](https://github.com/biomejs/biome/pull/8839) [`79b38aa`](https://github.com/biomejs/biome/commit/79b38aa9eef36578f32303002bc23b926ff35496) Thanks [@ryan-m-walker](https://github.com/ryan-m-walker)! - Added support for parsing and formatting the CSS `@function` at-rule from the [CSS Mixins Module Level 1](https://drafts.csswg.org/css-mixins-1/#function-rule) specification. Addresses issue [#8184](https://github.com/biomejs/biome/issues/8184).
+
+  ```css
+  @function --transparent(--color <color>, --alpha <number>: 0.5) returns
+    <color> {
+    result: oklch(from var(--color) l c h / var(--alpha));
+  }
+  ```
+
+- [#8412](https://github.com/biomejs/biome/pull/8412) [`73f4f53`](https://github.com/biomejs/biome/commit/73f4f53ae1fb0318d8f77658fa61757f1792bccc) Thanks [@mehm8128](https://github.com/mehm8128)! - Added the [`noSvgWithoutTitle`](https://biomejs.dev/linter/rules/no-svg-without-title/) lint rule to HTML. The rule enforces the usage of the `title` element for the `svg` element.
+
+- [#8243](https://github.com/biomejs/biome/pull/8243) [`4291ff3`](https://github.com/biomejs/biome/commit/4291ff37f5d782c0c3d1d56fac7f0817bcece498) Thanks [@ashnewmanjones](https://github.com/ashnewmanjones)! - Added the `useButtonType` lint rule for HTML. The rule enforces that the `type` attribute is present and valid on all button elements.
+
+  Invalid:
+
+  ```html
+  <button>Do something</button>
+  <button type="incorrectType">Do something</button>
+  <button type>Do something</button>
+  <button type />
+  ```
+
+  Valid:
+
+  ```html
+  <button type="button">Do something</button>
+  <button type="reset">Do something</button>
+  <button type="submit" />
+  ```
+
+### Patch Changes
+
+- [#8898](https://github.com/biomejs/biome/pull/8898) [`7e48bd4`](https://github.com/biomejs/biome/commit/7e48bd40257eaa4e584d2bb567b0ce8b8d1e0e47) Thanks [@ematipico](https://github.com/ematipico)! - Added e18e ESLint plugin as a recognized rule source. Six Biome rules now reference their e18e equivalents: `useAtIndex`, `useExponentiationOperator`, `noPrototypeBuiltins`, `useDateNow`, `useSpread`, and `useObjectSpread`.
+
+- [#8719](https://github.com/biomejs/biome/pull/8719) [`a215408`](https://github.com/biomejs/biome/commit/a215408715ed0af661c9a95a030773ccdfb13057) Thanks [@ematipico](https://github.com/ematipico)! - Added proper parsing and formatting for Svelte directives when the `html.experimentalFullSupportEnabled` is set to `true`.
+
+- [#8071](https://github.com/biomejs/biome/pull/8071) [`7f5bcf4`](https://github.com/biomejs/biome/commit/7f5bcf46844405a663d6c399ab3c3275ea6c25a2) Thanks [@ematipico](https://github.com/ematipico)! - Revamped the logging options for all Biome commands. Now the commands `format`, `lint`, `check`, `ci`, `search`, `lsp-proxy` and `start` accept the following CLI options.
+
+  Some options might have been present before, but they were inconsistent. Plus, all new options have an environment variable as aliases.
+
+  #### `--log-file`
+
+  Optional path/file to redirect log messages to. This option is applicable only to the CLI. If omitted, logs are printed to stdout.
+
+  Environment variable alias: `BIOME_LOG_FILE`
+
+  #### `--log-prefix-name`
+
+  Allows changing the prefix applied to the file name of the logs. This option is applicable only to the daemon.
+
+  Environment variable alias: `BIOME_LOG_PREFIX_NAME`
+
+  #### `--log-path`
+
+  Allows changing the folder where logs are stored. This option is applicable only to the daemon.
+
+  Environment variable alias: `BIOME_LOG_PATH`
+
+  #### `--log-level`
+
+  The level of logging. In order, from the most verbose to the least verbose: `debug`, `info`, `warn`, `error`
+
+  The value `none` won't show any logging.
+
+  Environment variable alias: `BIOME_LOG_LEVEL`
+
+  #### `--log-kind`
+
+  What the log should look like.
+
+  Environment variable alias: `BIOME_LOG_KIND`
+
+  #### Reduce dumping of LSP logs
+
+  When you use a Biome editor extension, Biome's Daemon dumps its logs using the `debug` level. If you want to reduce
+  the quantity of these logs, you can now customize it:
+
+  ```shell
+  BIOME_LOG_LEVEL=info biome lsp-proxy
+  ```
+
+- [#8663](https://github.com/biomejs/biome/pull/8663) [`3dfea16`](https://github.com/biomejs/biome/commit/3dfea169c7632b59fa6fdca3593802dd8fc9948a) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#901](https://github.com/biomejs/biome-vscode/issues/901). Biome now allows trailing commas in inside Zed `settings.json` and VSCode `settings.json`.
+
+- [#8669](https://github.com/biomejs/biome/pull/8669) [`683f50d`](https://github.com/biomejs/biome/commit/683f50dff3091d1949d98dddf7ddaf7999cced72) Thanks [@tt-a1i](https://github.com/tt-a1i)! - Fixed [#8628](https://github.com/biomejs/biome/issues/8628): [`useComponentExportOnlyModules`](https://biomejs.dev/linter/rules/use-component-export-only-modules/) now allows components referenced as object property values in exported expressions. This fixes false positives for TanStack Router patterns.
+
+  ```jsx
+  export const Route = createFileRoute('/')({
+    component: HomeComponent,
+  })
+
+  function HomeComponent() { ... } // no longer reported as "should be exported"
+  ```
+
+- [#9060](https://github.com/biomejs/biome/pull/9060) [`0e47f5a`](https://github.com/biomejs/biome/commit/0e47f5a6cea7c7c34ec655479377aa0597be9516) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#9057](https://github.com/biomejs/biome/issues/9057): Incorrect diagnostic spans for suppression comments and other raw diagnostics in HTML-ish files (Vue, Svelte, Astro). Previously, diagnostics like "unused suppression" pointed to the wrong location in the document due to the diagnostic offset not being applied.
+
+- [#9028](https://github.com/biomejs/biome/pull/9028) [`5ac2ad6`](https://github.com/biomejs/biome/commit/5ac2ad6c429bae76bde05e5e73f3e3b04c44a45c) Thanks [@LouisLau-art](https://github.com/LouisLau-art)! - Fixed [#9024](https://github.com/biomejs/biome/issues/9024): Biome no longer reports `<hr role="presentation">` under [`noInteractiveElementToNoninteractiveRole`](https://biomejs.dev/linter/rules/no-interactive-element-to-noninteractive-role/).
+
+- [#9072](https://github.com/biomejs/biome/pull/9072) [`8656fc0`](https://github.com/biomejs/biome/commit/8656fc0cd78c46c52fd588e8c03cbf9dc53a51f4) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#9068](https://github.com/biomejs/biome/issues/9068): The `noVueDuplicateKeys` rule now correctly handles `toRefs(props)` patterns and no longer produces false positives when destructuring props, particularly in `<script setup>` blocks.
+
+- [#9049](https://github.com/biomejs/biome/pull/9049) [`c0ab6dd`](https://github.com/biomejs/biome/commit/c0ab6ddb0de1f2477d421c20558227b1b0fd43e5) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#7138](https://github.com/biomejs/biome/issues/7138). Now the Biome language server correctly handles the `configurationPath` setting coming from the editor extension.
+
+- [#8556](https://github.com/biomejs/biome/pull/8556) [`47a79f1`](https://github.com/biomejs/biome/commit/47a79f1b22c0d0577dd23b927a6cf04b17d603e9) Thanks [@mehm8128](https://github.com/mehm8128)! - Fixed the `noSvgWithoutTitle` rule not to recursively traverse `title` elements.
+
+- [#8894](https://github.com/biomejs/biome/pull/8894) [`6bf1b09`](https://github.com/biomejs/biome/commit/6bf1b09bd670d89e6dfd7ac6b2d3a060fb51f185) Thanks [@ematipico](https://github.com/ematipico)! - Added proper parsing for spread attributes `{...props}` in Svelte and Astro files.
+
+- [#8833](https://github.com/biomejs/biome/pull/8833) [`375792e`](https://github.com/biomejs/biome/commit/375792e7c94db6c676222b0b3ecdb7ad89d4ece6) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#4927](https://github.com/biomejs/biome/issues/4927), [#6407](https://github.com/biomejs/biome/issues/6407): The HTML formatter will now correctly break a block-like element if it has more than 2 children, and at least one of them is another block-like element.
+
+  ```diff
+  -<div>a<div>b</div> c</div>
+  +<div>
+  +  a
+  +  <div>b</div>
+  +  c
+  +</div>
+  ```
+
+- [#8854](https://github.com/biomejs/biome/pull/8854) [`1469968`](https://github.com/biomejs/biome/commit/14699685a0689432d663d1555e404efe2a6a1768) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [`#7912`](https://github.com/biomejs/biome/issues/7912), where Biome incorrectly added a leading newline to the code contained inside the Astro frontmatter.
+
+- [#8806](https://github.com/biomejs/biome/pull/8806) [`cb112ce`](https://github.com/biomejs/biome/commit/cb112ce872c8428414d78bc90c6ed26a102ac0e0) Thanks [@dyc3](https://github.com/dyc3)! - **Major Breaking Changes to the HTML formatter only**
+
+  The HTML formatter (which is still experimental) has been completely overhauled from the ground up to more closely resemble Prettier's formatting. If you have opted in to the HTML formatter, you may see large formatting diffs for your HTML, Vue, Svelte, and Astro files.
+
+  This overhaul fixes several issues ([#5150](https://github.com/biomejs/biome/issues/5150), [#6625](https://github.com/biomejs/biome/issues/6623), [#8437](https://github.com/biomejs/biome/issues/8437)) around whitespace sensitivity that were causing incorrect formatting in certain scenarios that were difficult or impossible to fully address before.
+
+- [#8700](https://github.com/biomejs/biome/pull/8700) [`0f5a05b`](https://github.com/biomejs/biome/commit/0f5a05b5f0b2cd526e7d524fe1311c1d46978e97) Thanks [@ematipico](https://github.com/ematipico)! - Improved the rules `useConst`, `noUnusedImports`, `useImportTypes` and `noUnusedVariables` inside
+  Vue, Svelte and Astro files when `experimentalFullSupportEnabled` is set to `true`.
+
+  Now variables and components that are imported or defined inside the files won't trigger false positives.
+
+  Until now, we suggested disabling these rules with an override. _Now the rules are more stable_; however, you might still experience
+  a few false positives. Those are probably issues caused by our parser.
+
+  **If you use `experimentalFullSupportEnabled`, you can remove the following override:**
+
+  ```diff
+  {
+  -  "overrides": [
+  -    {
+  -      "includes": ["**/*.svelte", "**/*.astro", "**/*.vue"],
+  -      "linter": {
+  -        "rules": {
+  -          "style": {
+  -            "useConst": "off",
+  -            "useImportType": "off"
+  -          },
+  -          "correctness": {
+  -            "noUnusedVariables": "off",
+  -            "noUnusedImports": "off"
+  -          }
+  -        }
+  -      }
+  -    }
+  -  ]
+  }
+  ```
+
+- [#8485](https://github.com/biomejs/biome/pull/8485) [`bf02ba6`](https://github.com/biomejs/biome/commit/bf02ba652f9dc69bcd6010c6f57850b73fc33d49) Thanks [@ematipico](https://github.com/ematipico)! - Fixed an issue where some info diagnostics weren't tracked by the final summary.
+
+- [#8846](https://github.com/biomejs/biome/pull/8846) [`5701ead`](https://github.com/biomejs/biome/commit/5701ead5ba5964e5d6eeb4880688790a19d5e2d5) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#8692](https://github.com/biomejs/biome/issues/8692): Biome now accepts Vue's `v-bind()` function in CSS when Vue CSS modules parsing is enabled.
+
+- [#9012](https://github.com/biomejs/biome/pull/9012) [`18cdd45`](https://github.com/biomejs/biome/commit/18cdd455ca6707d357de6500853ec7f4fe602c8d) Thanks [@kiroushi](https://github.com/kiroushi)! - Fixed plugin diagnostics showing incorrect line numbers in Vue, Astro, and Svelte files. Plugin diagnostics now correctly account for the template/frontmatter offset, pointing to the right location in the `<script>` block.
+
+## 2.3.15
+
+### Patch Changes
+
+- [#9019](https://github.com/biomejs/biome/pull/9019) [`043b67c`](https://github.com/biomejs/biome/commit/043b67c608f99a27c775deefb9f00b43839251ae) Thanks [@dyc3](https://github.com/dyc3)! - Added the lint rule [`noNestedPromises`](https://biomejs.dev/linter/rules/no-nested-promises/). This rule detects nested `.then()` or `.catch()` calls that could be refactored into flat promise chains.
+
+  ```js
+  // Invalid: nested promise that can be flattened
+  doThing().then(function () {
+    return doOtherThing().then(console.log);
+  });
+
+  // Valid: flat promise chain
+  doThing()
+    .then(() => doOtherThing())
+    .then(console.log);
+  ```
+
+  The rule intelligently allows nesting when the inner callback references variables from the outer scope, as these cases cannot be safely flattened.
+
+- [#9029](https://github.com/biomejs/biome/pull/9029) [`6ebf6c6`](https://github.com/biomejs/biome/commit/6ebf6c605f20a504aa5f23477f2e9be32437fb90) Thanks [@ff1451](https://github.com/ff1451)! - Added the nursery rule [`noUselessReturn`](https://biomejs.dev/linter/rules/no-useless-return/). The rule reports redundant `return;` statements that don't affect the function's control flow.
+
+  ```js
+  // Invalid: return at end of function is redundant
+  function foo() {
+    doSomething();
+    return;
+  }
+  ```
+
+- [#9017](https://github.com/biomejs/biome/pull/9017) [`8bac2da`](https://github.com/biomejs/biome/commit/8bac2da137bb1b697be1ebf41a11088c0220ce65) Thanks [@mdevils](https://github.com/mdevils)! - Reverted a behavior change in [`useExhaustiveDependencies`](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/) that was accidentally included as part of the [#8802](https://github.com/biomejs/biome/issues/8802) fix. The change made method calls on objects (e.g., `props.data.forEach(...)`) report only the object (`props.data`) as a missing dependency instead of the full member expression. This behavior change will be reconsidered separately.
+
+- [#9005](https://github.com/biomejs/biome/pull/9005) [`c8dbbbe`](https://github.com/biomejs/biome/commit/c8dbbbe9363fb156a29de174ba7735154f6bc783) Thanks [@corvid-agent](https://github.com/corvid-agent)! - Fixed [#8790](https://github.com/biomejs/biome/issues/8790): The [`noAssignInExpressions`](https://biomejs.dev/linter/rules/no-assign-in-expressions/) rule no longer reports a false positive when an assignment is used as the expression body of an arrow function (e.g., `const f = b => a += b`).
+
+- [#8519](https://github.com/biomejs/biome/pull/8519) [`ccdc602`](https://github.com/biomejs/biome/commit/ccdc602d8ab8e7b14b7cbae2b12cdf396edb8301) Thanks [@ruidosujeira](https://github.com/ruidosujeira)! - Fixed [#8518](https://github.com/biomejs/biome/issues/8518), where globally excluded files in a monorepo were still being processed when using `"extends": "//"`.
+
+  When a package-level configuration extends the root configuration with `"extends": "//"`, glob patterns (such as those in `files.includes`) are now correctly resolved relative to the project root directory, instead of the current workspace directory.
+
+- [#9033](https://github.com/biomejs/biome/pull/9033) [`0628e0a`](https://github.com/biomejs/biome/commit/0628e0a238d9c9c750e4f44c460455183a0ff70e) Thanks [@mdevils](https://github.com/mdevils)! - Fixed [#8967](https://github.com/biomejs/biome/issues/8967). [useExhaustiveDependencies](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/) no longer reports false positives for variables destructured from a rest pattern.
+
+- [#9023](https://github.com/biomejs/biome/pull/9023) [`8ef9d1d`](https://github.com/biomejs/biome/commit/8ef9d1d81c416a9f4d42527f4c263bc3f2e423b1) Thanks [@siketyan](https://github.com/siketyan)! - Fixed [#9020](https://github.com/biomejs/biome/issues/9020): When `javascript.jsxRuntime` is set to `reactClassic`, `noUnusedImports` and `useImportType` rules now allow importing the `React` identifier from a package other than `react`. This aligns the behavior with `tsc` (`--jsx=react`), which also allows importing `React` from any package.
+
+- [#8646](https://github.com/biomejs/biome/pull/8646) [`16fd71d`](https://github.com/biomejs/biome/commit/16fd71da5692f863112e302078325d3be4d79b24) Thanks [@siketyan](https://github.com/siketyan)! - Fixed [#8605](https://github.com/biomejs/biome/issues/8605): Text expressions in some template languages (`{{ expr }}` or `{ expr }`) at the top level of an HTML document no longer causes panicking.
+
+- [#8930](https://github.com/biomejs/biome/pull/8930) [`51c158e`](https://github.com/biomejs/biome/commit/51c158e803f9bad561cf5b79365c339e9069d614) Thanks [@ANKANJAGTAP](https://github.com/ANKANJAGTAP)! - Fixed #8917
+  [useExhaustiveDependencies](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/) now correctly detects JSX component identifiers as hook dependencies.
+
+- [#9009](https://github.com/biomejs/biome/pull/9009) [`7d229c7`](https://github.com/biomejs/biome/commit/7d229c7ca3930ff56e3a229a70b994f1d5fd1086) Thanks [@Netail](https://github.com/Netail)! - Fixed typo in [noPositiveTabindex](https://biomejs.dev/linter/rules/no-positive-tabindex/)'s quick fix text.
+
+- [#8758](https://github.com/biomejs/biome/pull/8758) [`8c789f1`](https://github.com/biomejs/biome/commit/8c789f15e2129874450a29a55d376efe17dbcf5b) Thanks [@Pranav2612000](https://github.com/Pranav2612000)! - Updated the useJsxKeyInIterable rule to not run inside Map constructors
+
+- [#8977](https://github.com/biomejs/biome/pull/8977) [`bbe0e0c`](https://github.com/biomejs/biome/commit/bbe0e0c319f78b484d11649cc473ebca92f5e3af) Thanks [@FrankFMY](https://github.com/FrankFMY)! - Fixed [#4888](https://github.com/biomejs/biome/issues/4888).
+  [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports/) now adds `export {}` when removing the last import in a TypeScript file to prevent it from becoming an ambient module. This does not apply to embedded scripts in Vue, Svelte, or Astro files, which are already in a module context.
+
+- [#9016](https://github.com/biomejs/biome/pull/9016) [`9d4cfa3`](https://github.com/biomejs/biome/commit/9d4cfa304268579361639c3d2301f1e38526dd00) Thanks [@dyc3](https://github.com/dyc3)! - Added eslint migration metadata for the rules `@typescript/no-var-requires`, `@typescript/keyword-spacing`, `@typescript/func-call-spacing`, `vue/keyword-spacing`, `vue/func-call-spacing`, and `unicorn/empty-brace-spaces`,
+
+- [#8848](https://github.com/biomejs/biome/pull/8848) [`2cba2b3`](https://github.com/biomejs/biome/commit/2cba2b3996447dab1d653dd8c8ee97eddd0bb63b) Thanks [@LouisLau-art](https://github.com/LouisLau-art)! - Fixed [#8845](https://github.com/biomejs/biome/issues/8845). Now `useGenericFontNames` doesn't trigger when `font` is declared inside the `@supports` at-rule.
+
+- [#8997](https://github.com/biomejs/biome/pull/8997) [`a5f3212`](https://github.com/biomejs/biome/commit/a5f321284249e21b9dda9fdc9130974c47df8a99) Thanks [@mldangelo](https://github.com/mldangelo)! - Fixed [#8476](https://github.com/biomejs/biome/issues/8476).
+  [useAwaitThenable](https://biomejs.dev/linter/rules/use-await-thenable/) no longer reports false positives for `await` on call expressions whose return type cannot be resolved (e.g., cross-module function calls to Node.js builtins or npm packages).
+
+- [#8978](https://github.com/biomejs/biome/pull/8978) [`cc7a478`](https://github.com/biomejs/biome/commit/cc7a4785f47a2c2a5ba3ea4ef90937742a2cd347) Thanks [@FrankFMY](https://github.com/FrankFMY)! - Fixed [#8645](https://github.com/biomejs/biome/issues/8645).
+  [useAwait](https://biomejs.dev/linter/rules/use-await/) no longer reports `async` generator functions that use `yield*`, since `yield*` in an async generator delegates to an `AsyncIterable` and requires the `async` modifier.
+
+## 2.3.14
+
+### Patch Changes
+
+- [#8921](https://github.com/biomejs/biome/pull/8921) [`29e2435`](https://github.com/biomejs/biome/commit/29e24355f0537e34504a14625ef34fa11561435d) Thanks [@siketyan](https://github.com/siketyan)! - Fixed [#8759](https://github.com/biomejs/biome/issues/8759): The [`useConsistentTypeDefinitions`](https://biomejs.dev/linter/rules/use-consistent-type-definitions/) rule no longer converts empty object type declarations into interfaces, as it will conflict with the [`noEmptyInterface`](https://biomejs.dev/linter/rules/no-empty-interface/) rule and can cause an infinite loop when both rules are enabled.
+
+- [#8928](https://github.com/biomejs/biome/pull/8928) [`ccaeac4`](https://github.com/biomejs/biome/commit/ccaeac43f8d4e4e44400b15c8ae4a00dde127729) Thanks [@taga3s](https://github.com/taga3s)! - Added the nursery rule [`useGlobalThis`](https://biomejs.dev/linter/rules/use-global-this/). This rule enforces using `globalThis` over `window`, `self` and `global`.
+
+- [#8602](https://github.com/biomejs/biome/pull/8602) [`9a18daa`](https://github.com/biomejs/biome/commit/9a18daada12f5ef841d4fcd1efd7826a3aa26684) Thanks [@dyc3](https://github.com/dyc3)! - Added the new nursery rule [`noVueArrowFuncInWatch`](https://biomejs.dev/linter/rules/no-vue-arrow-func-in-watch/). This rule forbids using arrow functions in watchers in Vue components, because arrow functions do not give access to the component instance (via `this`), while regular functions do.
+
+- [#8905](https://github.com/biomejs/biome/pull/8905) [`9b1eea8`](https://github.com/biomejs/biome/commit/9b1eea88b9d04d6589dbf4d71b12bc4d46438597) Thanks [@ryan-m-walker](https://github.com/ryan-m-walker)! - Fixed [#8428](https://github.com/biomejs/biome/issues/8428): Improved parsing recovery when encountering qualified rules inside CSS `@page` at-rule blocks.
+
+- [#8900](https://github.com/biomejs/biome/pull/8900) [`f788cff`](https://github.com/biomejs/biome/commit/f788cff2d303261007203124e69fa3836ce9bda2) Thanks [@mdevils](https://github.com/mdevils)! - Fixed [#8802](https://github.com/biomejs/biome/issues/8802): `useExhaustiveDependencies` now correctly suggests dependencies without including callback-scoped variables or method names.
+
+  When accessing object properties with a callback-scoped variable, only the object path is suggested:
+
+  ```js
+  // Now correctly suggests `props.value` instead of `props.value[day]`
+  useMemo(() => {
+    return WeekdayValues.filter((day) => props.value[day]);
+  }, [props.value]);
+  ```
+
+  When calling methods on objects, only the object is suggested as a dependency:
+
+  ```js
+  // Now correctly suggests `props.data` instead of `props.data.forEach`
+  useMemo(() => {
+    props.data.forEach((item) => console.log(item));
+  }, [props.data]);
+  ```
+
+- [#8913](https://github.com/biomejs/biome/pull/8913) [`e1e20ea`](https://github.com/biomejs/biome/commit/e1e20ea2a8fa7f13365feb8ddc5e995d9db8bd02) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#8363](https://github.com/biomejs/biome/issues/8363): HTML parser no longer crashes when encountering a `<` character followed by a digit in text content (e.g., `<12 months`). The parser now correctly emits an "Unescaped `<` bracket character" error instead of treating `<12` as a tag name and crashing.
+
+- [#8910](https://github.com/biomejs/biome/pull/8910) [`2fb63a4`](https://github.com/biomejs/biome/commit/2fb63a47dafc8b05c4b7dc0c526fd1e6bcedd2cd) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#8774](https://github.com/biomejs/biome/issues/8774): Type aliases with generic parameters that have `extends` constraints now properly indent comments after the equals sign.
+
+  Previously, comments after the `=` in type aliases with `extends` constraints were not indented:
+
+  ```diff
+  -type A<B, C extends D> = // Some comment
+  -undefined;
+  +type A<B, C extends D> =
+  +    // Some comment
+  +    undefined;
+  ```
+
+- [#8916](https://github.com/biomejs/biome/pull/8916) [`ea4bd04`](https://github.com/biomejs/biome/commit/ea4bd048c2188f3b5f6a7abb9b1e1462f37895c4) Thanks [@ryan-m-walker](https://github.com/ryan-m-walker)! - Fixed [#4013](https://github.com/biomejs/biome/issues/4013), where comments in member chains caused unnecessary line breaks.
+
+  ```js
+  // Before
+  aFunction.b().c.d();
+
+  // After
+  aFunction.b().c.d();
+  ```
+
+- [#8945](https://github.com/biomejs/biome/pull/8945) [`fa66fe3`](https://github.com/biomejs/biome/commit/fa66fe36a608e1d07d4fa191a89c6cad12747669) Thanks [@fireairforce](https://github.com/fireairforce)! - Fixed [#8354](https://github.com/biomejs/biome/issues/8354): Don't remove quotes when type memeber is new.
+
+  ```ts
+  // Input:
+  type X = {
+    "new"(): string;
+    "foo"(): string;
+  };
+
+  // Format Output:
+  type X = {
+    "new()": string;
+    foo(): string;
+  };
+  ```
+
+- [#8927](https://github.com/biomejs/biome/pull/8927) [`0ef3da5`](https://github.com/biomejs/biome/commit/0ef3da5570c242611456841a2e356432119cbde5) Thanks [@littleKitchen](https://github.com/littleKitchen)! - Fixed #8907: `useExhaustiveDependencies` now correctly recognizes stable hook results (like `useState` setters and `useRef` values) when declared with `let`.
+
+- [#8931](https://github.com/biomejs/biome/pull/8931) [`4561751`](https://github.com/biomejs/biome/commit/4561751f1856e2678bcd3d37fe01f23168ce7fff) Thanks [@koshin01](https://github.com/koshin01)! - Added the new nursery rule [`noRedundantDefaultExport`](https://biomejs.dev/linter/rules/no-redundant-default-export/), which flags redundant default exports where the default export references the same identifier as a named export.
+
+- [#8900](https://github.com/biomejs/biome/pull/8900) [`f788cff`](https://github.com/biomejs/biome/commit/f788cff2d303261007203124e69fa3836ce9bda2) Thanks [@mdevils](https://github.com/mdevils)! - Fixed [#8883](https://github.com/biomejs/biome/issues/8883): `useExhaustiveDependencies` no longer produces false positives when props are destructured in the function body of arrow function components without parentheses around the parameter.
+
+  ```tsx
+  type Props = { msg: string };
+
+  // Arrow function without parentheses around `props`
+  const Component: React.FC<Props> = (props) => {
+    const { msg } = props;
+    // Previously, this incorrectly reported `msg` as unnecessary
+    useEffect(() => console.log(msg), [msg]);
+  };
+  ```
+
+- [#8861](https://github.com/biomejs/biome/pull/8861) [`3531687`](https://github.com/biomejs/biome/commit/35316874d588ec7f202a97e9f7049578793a2b26) Thanks [@dyc3](https://github.com/dyc3)! - Added the `noDeprecatedMediaType` CSS rule to flag deprecated media types like `tv` and `handheld`.
+
+- [#8775](https://github.com/biomejs/biome/pull/8775) [`7ea71cd`](https://github.com/biomejs/biome/commit/7ea71cdf595aae1f7a76460f794941e4b9b6fba3) Thanks [@igas](https://github.com/igas)! - Fixed the `noUnnecessararyConditions` rule to prevent trigger for optional fallback patterns.
+
+- [#8860](https://github.com/biomejs/biome/pull/8860) [`95f1eea`](https://github.com/biomejs/biome/commit/95f1eea852d0e2ab248c8d8dcf7fb89da9d583d4) Thanks [@dyc3](https://github.com/dyc3)! - Added the nursery rule [`noHexColors`](https://biomejs.dev/linter/rules/no-hex-colors/), which flags the use of hexadecimal color codes in CSS and suggests using named colors or RGB/RGBA/HSL/HSLA formats instead.
+
+- [#8786](https://github.com/biomejs/biome/pull/8786) [`d876a38`](https://github.com/biomejs/biome/commit/d876a385ca4270dd3a24d826a0ae266048619bbe) Thanks [@Bertie690](https://github.com/Bertie690)! - Added the nursery rule [`useConsistentMethodSignatures`](https://biomejs.dev/linter/rules/use-consistent-method-signatures/). \
+  Inspired by the similarly named version from [`typescript-eslint`](https://typescript-eslint.io/rules/method-signature-style/), this rule aims to enforce a consistent style for methods used inside object types and interfaces.
+
+  ### Examples
+
+  Invalid code with `style` set to `"property"` (the default):
+
+  ```ts,expect_diagnostic
+  interface Foo {
+    method(a: string): void;
+  }
+  ```
+
+  Invalid code with `style` set to `"method"`:
+
+  ```ts,expect_diagnostic
+  type Bar = {
+    prop: (a: string) => void;
+  }
+  ```
+
+- [#8864](https://github.com/biomejs/biome/pull/8864) [`5e97119`](https://github.com/biomejs/biome/commit/5e97119467f77d2d551fc5dac0d46c318691440a) Thanks [@dyc3](https://github.com/dyc3)! - Improved the summary provided by `biome migrate eslint` to be clearer on why rules were not migrated. Biome now specifies a reason when a rule is not migrated, such as being incompatible with the formatter or not implemented yet. This helps users make more informed decisions when migrating their ESLint configurations to Biome.
+
+- [#8924](https://github.com/biomejs/biome/pull/8924) [`99b4cd1`](https://github.com/biomejs/biome/commit/99b4cd11f93be2e203e89ee002154d080ebd8f2f) Thanks [@tmohammad78](https://github.com/tmohammad78)! - Fixed [#8920](https://github.com/biomejs/biome/issues/8920): `noUnknownFunction` now knows about `sibling-count`, and `sibling-index` css functions
+
+- [#8900](https://github.com/biomejs/biome/pull/8900) [`f788cff`](https://github.com/biomejs/biome/commit/f788cff2d303261007203124e69fa3836ce9bda2) Thanks [@mdevils](https://github.com/mdevils)! - Fixed [#8885](https://github.com/biomejs/biome/issues/8885): `useExhaustiveDependencies` no longer incorrectly reports variables as unnecessary dependencies when they are derived from expressions containing post/pre-increment operators (`++`/`--`) or compound assignment operators (`+=`, `-=`, etc.).
+
+  ```js
+  let renderCount = 0;
+
+  export const MyComponent = () => {
+    // `count` is now correctly recognized as a required dependency
+    // because `renderCount++` can produce different values between renders
+    const count = renderCount++;
+
+    useEffect(() => {
+      console.log(count);
+    }, [count]); // no longer reports `count` as unnecessary
+  };
+  ```
+
+- [#8619](https://github.com/biomejs/biome/pull/8619) [`d78e01d`](https://github.com/biomejs/biome/commit/d78e01dbb60c06208e7abb697ae4e700aa3dd3bd) Thanks [@Netail](https://github.com/Netail)! - Added the nursery rule [`useInputName`](https://biomejs.dev/linter/rules/use-input-name/). Require mutation arguments to be called “input”, and the input type to be called Mutation name + “Input”.
+
+  **Invalid:**
+
+  ```graphql
+  type Mutation {
+    SetMessage(message: String): String
+  }
+  ```
+
+- [#8922](https://github.com/biomejs/biome/pull/8922) [`871b45e`](https://github.com/biomejs/biome/commit/871b45e66824dea905579d5270911cfed0254433) Thanks [@siketyan](https://github.com/siketyan)! - Fixed [#8829](https://github.com/biomejs/biome/issues/8829): Revamped the [`noGlobalDirnameFilename`](https://biomejs.dev/linter/rules/no-global-dirname-filename/) rule to catch many false negatives that have not been reported.
+
+## 2.3.13
+
+### Patch Changes
+
+- [#8815](https://github.com/biomejs/biome/pull/8815) [`f924f23`](https://github.com/biomejs/biome/commit/f924f234607ae62db1511158b36124ec0d5ce074) Thanks [@dyc3](https://github.com/dyc3)! - Improved [`useVueValidVOn`](https://biomejs.dev/linter/rules/use-vue-valid-v-on/) to be more closely aligned with the source rule. It will now properly allow modifiers for all possible keyboard events. It should have better performance when there are no violations of the rule as well.
+
+  Now treated valid:
+
+  ```vue
+  <div @keydown.arrow-down="handler"></div>
+  <div @keydown.a="handler"></div>
+  <div @keydown.b="handler"></div>
+  <div @keydown.27="foo"></div>
+  ```
+
+- [#8856](https://github.com/biomejs/biome/pull/8856) [`85f81f9`](https://github.com/biomejs/biome/commit/85f81f98923770469d09c5d003cfb76c0f3c971f) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#8710](https://github.com/biomejs/biome/issues/8710): Biome now parses Vue dynamic slot shorthand arguments that use template literals in `[]`.
+
+- [#8850](https://github.com/biomejs/biome/pull/8850) [`2a190e0`](https://github.com/biomejs/biome/commit/2a190e0719ac447236afae0df8c915033c08e059) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#8708](https://github.com/biomejs/biome/issues/8708): Tailwind `@utility` directives now parse functional utility names like `px-*` when Tailwind directives are enabled.
+
+- [#8863](https://github.com/biomejs/biome/pull/8863) [`79386e0`](https://github.com/biomejs/biome/commit/79386e08050d498c2cea6cdcaba4b0fa31245209) Thanks [@dyc3](https://github.com/dyc3)! - Fixed an issue with `biome migrate eslint` where it couldn't detect rules for CSS, GraphQL, and HTML.
+
+- [#8771](https://github.com/biomejs/biome/pull/8771) [`6f56b6e`](https://github.com/biomejs/biome/commit/6f56b6eeb961ca63fad601fc35b3b28df08cc247) Thanks [@lghuahua](https://github.com/lghuahua)! - Fix the `--reporter=summary` output incorrectly merging and displaying wrong issue counts for different rules. Fixes [#8730](https://github.com/biomejs/biome/issues/8730)
+
+- [#8714](https://github.com/biomejs/biome/pull/8714) [`ac3a71f`](https://github.com/biomejs/biome/commit/ac3a71f8f856d267159e24ccc75e1913776d92f5) Thanks [@Netail](https://github.com/Netail)! - Added new nursery rule [`use-consistent-enum-value-type`](https://biomejs.dev/linter/rules/use-consistent-enum-value-type). This rule disallows enums from having both number and string members.
+
 ## 2.3.12
 
 ### Patch Changes

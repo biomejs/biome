@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: non-expect-poll.js
+---
+# Input
+```js
+/* should NOT generate diagnostics - poll() on non-expect objects is valid */
+const result = await someObj.poll().getData();
+myService.poll().then(data => process(data));
+
+```

@@ -1,21 +1,27 @@
 #![deny(clippy::use_self)]
 #![warn(clippy::needless_pass_by_value)]
 
+pub use crate::registry::visit_registry;
+pub use crate::services::control_flow::ControlFlowGraph;
+use crate::services::embedded_bindings::EmbeddedBindings;
+use crate::services::embedded_value_references::EmbeddedValueReferences;
 use crate::suppression_action::JsSuppressionAction;
 use biome_analyze::{
     AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerPluginSlice,
-    AnalyzerSignal, AnalyzerSuppression, ControlFlow, InspectMatcher, LanguageRoot,
-    MatchQueryParams, MetadataRegistry, Phases, PluginTargetLanguage, PluginVisitor, RuleAction,
+    AnalyzerSignal, AnalyzerSuppression, BatchPluginVisitor, ControlFlow, InspectMatcher,
+    LanguageRoot, MatchQueryParams, MetadataRegistry, Phases, PluginTargetLanguage, RuleAction,
     RuleRegistry, to_analyzer_suppressions,
 };
 use biome_aria::AriaRoles;
 use biome_diagnostics::Error as DiagnosticError;
-use biome_js_syntax::{JsFileSource, JsLanguage};
+use biome_js_semantic::SemanticModel;
+use biome_js_syntax::{AnyJsRoot, JsFileSource, JsLanguage};
 use biome_module_graph::{ModuleGraph, ModuleResolver};
 use biome_package::TurboJson;
 use biome_project_layout::ProjectLayout;
-use biome_rowan::TextRange;
+use biome_rowan::{TextRange, TokenText};
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
+use rustc_hash::FxHashMap;
 use std::ops::Deref;
 use std::sync::{Arc, LazyLock};
 
@@ -29,12 +35,10 @@ mod nextjs;
 mod react;
 mod registry;
 mod services;
+pub mod shared;
 mod suppression_action;
 mod syntax;
 pub mod utils;
-
-pub use crate::registry::visit_registry;
-pub use crate::services::control_flow::ControlFlowGraph;
 
 pub(crate) type JsRuleAction = RuleAction<JsLanguage>;
 
@@ -49,6 +53,36 @@ pub struct JsAnalyzerServices {
     module_graph: Arc<ModuleGraph>,
     project_layout: Arc<ProjectLayout>,
     source_type: JsFileSource,
+    embedded_bindings: Vec<FxHashMap<TextRange, TokenText>>,
+    embedded_value_references: Vec<FxHashMap<TextRange, TokenText>>,
+    semantic_model: Option<SemanticModel>,
+}
+
+impl
+    From<(
+        Arc<ModuleGraph>,
+        Arc<ProjectLayout>,
+        JsFileSource,
+        Option<SemanticModel>,
+    )> for JsAnalyzerServices
+{
+    fn from(
+        (module_graph, project_layout, source_type, semantic_model): (
+            Arc<ModuleGraph>,
+            Arc<ProjectLayout>,
+            JsFileSource,
+            Option<SemanticModel>,
+        ),
+    ) -> Self {
+        Self {
+            module_graph,
+            project_layout,
+            source_type,
+            embedded_bindings: Default::default(),
+            embedded_value_references: Default::default(),
+            semantic_model,
+        }
+    }
 }
 
 impl From<(Arc<ModuleGraph>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerServices {
@@ -63,7 +97,33 @@ impl From<(Arc<ModuleGraph>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerSe
             module_graph,
             project_layout,
             source_type,
+            embedded_bindings: Default::default(),
+            embedded_value_references: Default::default(),
+            semantic_model: None,
         }
+    }
+}
+
+impl From<&AnyJsRoot> for JsAnalyzerServices {
+    fn from(_value: &AnyJsRoot) -> Self {
+        Self {
+            module_graph: Arc::new(ModuleGraph::default()),
+            project_layout: Arc::new(ProjectLayout::default()),
+            source_type: JsFileSource::default(),
+            embedded_bindings: Default::default(),
+            embedded_value_references: Default::default(),
+            semantic_model: None,
+        }
+    }
+}
+
+impl JsAnalyzerServices {
+    pub fn set_embedded_bindings(&mut self, bindings: Vec<FxHashMap<TextRange, TokenText>>) {
+        self.embedded_bindings = bindings;
+    }
+
+    pub fn set_embedded_value_references(&mut self, refs: Vec<FxHashMap<TextRange, TokenText>>) {
+        self.embedded_value_references = refs;
     }
 }
 
@@ -120,6 +180,9 @@ where
         module_graph,
         project_layout,
         source_type,
+        embedded_bindings,
+        embedded_value_references,
+        semantic_model,
     } = services;
 
     let (registry, mut services, diagnostics, visitors) = registry.build();
@@ -141,15 +204,19 @@ where
         analyzer.add_visitor(phase, visitor);
     }
 
-    for plugin in plugins {
-        // SAFETY: The plugin target language is correctly checked here.
+    let js_plugins: Vec<_> = plugins
+        .iter()
+        .filter(|p| p.language() == PluginTargetLanguage::JavaScript)
+        .cloned()
+        .collect();
+
+    if !js_plugins.is_empty() {
+        // SAFETY: All plugins have been verified to target JavaScript above.
         unsafe {
-            if plugin.language() == PluginTargetLanguage::JavaScript {
-                analyzer.add_visitor(
-                    Phases::Syntax,
-                    Box::new(PluginVisitor::new_unchecked(plugin.clone())),
-                )
-            }
+            analyzer.add_visitor(
+                Phases::Syntax,
+                Box::new(BatchPluginVisitor::new_unchecked(&js_plugins)),
+            );
         }
     }
 
@@ -175,6 +242,14 @@ where
     services.insert_service(file_path);
     services.insert_service(type_resolver);
     services.insert_service(project_layout);
+    services.insert_service(EmbeddedBindings(embedded_bindings));
+    services.insert_service(EmbeddedValueReferences(embedded_value_references));
+    // If a pre-built model is available (workspace open_file/change_file path),
+    // insert it now. Otherwise, SemanticModelBuilderVisitor will build it
+    // interleaved with the analyzer's syntax-phase traversal (single pass).
+    if let Some(semantic_model) = semantic_model {
+        services.insert_service(semantic_model);
+    }
 
     (
         analyzer.run(AnalyzerContext {

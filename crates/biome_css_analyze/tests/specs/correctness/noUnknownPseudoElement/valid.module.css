@@ -1,0 +1,11 @@
+/* should not generate diagnostics */
+
+/* CSS modules specific */
+:global(.foo),
+:local(.foo) {}
+
+/* https://github.com/biomejs/biome/issues/9081 */
+* {
+	&::after,
+	&::before {}
+}

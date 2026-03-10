@@ -1,0 +1,58 @@
+:root {
+	--basic-usage: attr(data-count);
+	--basic-usage: attr(href);
+
+	--with-type: attr(data-width px);
+	--with-type: attr(data-size rem);
+	--with-type: attr(data-name raw-string);
+	--with-type: attr(id type(<custom-ident>));
+	--with-type: attr(data-count type(<number>));
+	--with-type: attr(data-size type(<length> | <percentage>));
+
+	--with-unknown-unit-type: attr(data-test bogus);
+
+	--with-fallback: attr(data-count type(<number>), 0);
+	--with-fallback: attr(data-width px, inherit);
+	--with-fallback: attr(data-something, "default");
+
+	--syntax-type: attr(data-count type(<number>));
+	--multiple-types: attr(data-size type(<length> | <percentage>));
+
+	/* with fallback */
+	--number-fallback: attr(data-count type(<number>), 0);
+	--ident-fallback: attr(data-width px, inherit);
+	--string-fallback: attr(data-something, "default");
+
+	--interpolated: " (source: " attr(cite) ") ";
+
+	--percentage: attr(data-percentage %, 100%);
+
+	--comma-separated-multiplier: attr(data-size type(<length>#));
+	--space-separated-multiplier: attr(data-size type(<length>+));
+	--multiple-separators: attr(data-size type(<length># | <percentage>+));
+
+	/* syntax types */
+	--angle: attr(data-angle type(<angle>));
+	--color: attr(data-color type(<color>));
+	--custom-ident: attr(data-custom-ident type(<custom-ident>));
+	--image: attr(data-image type(<image>));
+	--integer: attr(data-integer type(<integer>));
+	--length: attr(data-length type(<length>));
+	--length-percentage: attr(data-length-percentage type(<length-percentage>));
+	--number: attr(data-number type(<number>));
+	--percentage: attr(data-percentage type(<percentage>));
+	--resolution: attr(data-resolution type(<resolution>));
+	--string: attr(data-string type(<string>));
+	--time: attr(data-time type(<time>));
+	--url: attr(data-url type(<url>));
+	--transform-function: attr(data-transform-function type(<transform-function>));
+
+	--unknown-type: attr(data-unknown-type type(<unknown>));
+
+	a: attr(data-test type(<transform-list>));
+	p: attr(test type(rem));
+	p: attr(test raw-string);
+	p: attr(test number);
+	p: attr(test type(<percentage> | auto));
+	p: attr(test type(red | blue | green));
+}

@@ -1,0 +1,54 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/scss/at-rule/mixin.scss
+---
+
+# Input
+
+```scss
+@mixin button{
+border-radius:4px;
+}
+
+@mixin size(
+$width,
+$height:$width,
+$args...
+){
+width:$width;
+@if $height > 0{
+height:$height;
+}
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+Trailing newline: true
+-----
+
+```scss
+@mixin button {
+	border-radius: 4px;
+}
+
+@mixin size($width, $height: $width, $args...) {
+	width: $width;
+	@if $height > 0 {
+		height: $height;
+	}
+}
+
+```

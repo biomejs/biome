@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/function/parameters/line_width_120/function_parameters.ts
 ---
+
 # Input
 
 ```ts
@@ -64,6 +65,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -102,6 +104,7 @@ export const queryAuditLog = async ({
 	src,
 	type,
 }: Filter): Promise<DBAuditLog[]> => {};
+
 ```
 
 ## Output 1
@@ -122,6 +125,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -151,4 +155,5 @@ export const findByDatefindByDatefindByDatefindByDate = (_, { date }, { req }) =
 	findByDatefindByDatefindByDatefindByDate;
 
 export const queryAuditLog = async ({ startDate, endDate, jobId, src, type }: Filter): Promise<DBAuditLog[]> => {};
+
 ```

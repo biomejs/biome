@@ -49,7 +49,7 @@ biome_parser         = { path = "../biome_parser" }
 biome_service        = { path = "../biome_service" }
 biome_test_utils     = { path = "../biome_test_utils" }
 countme              = { workspace = true, features = ["enable"] }
-criterion            = { package = "codspeed-criterion-compat", version = "=3.0.5" }
+criterion            = { package = "codspeed-criterion-compat", version = "*" }
 quickcheck           = { workspace = true }
 serde                = { workspace = true, features = ["derive"] }
 serde_json           = { workspace = true }

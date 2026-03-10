@@ -1,0 +1,37 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "html": {
+    "experimentalFullSupportEnabled": true,
+    "formatter": { "enabled": true }
+  }
+}
+```
+
+## `file.astro`
+
+```astro
+---
+            const title = "Hello World";
+---
+
+<html>
+  <head>
+            <title>{title}</title>
+  </head>
+  <body>
+            <h1>{title}</h1>
+  </body>
+</html>
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

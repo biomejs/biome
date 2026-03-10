@@ -2,6 +2,7 @@
 source: crates/biome_html_parser/tests/spec_test.rs
 expression: snapshot
 ---
+
 ## Input
 
 ```svelte
@@ -38,14 +39,14 @@ HtmlRoot {
                     html_literal_token: HTML_LITERAL@6..13 " items " [] [],
                 },
                 item: SvelteEachAsKeyedItem {
-                    as_token: AS_KW@13..15 "as" [] [],
-                    name: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@15..20 " item" [] [],
+                    as_token: AS_KW@13..16 "as" [] [Whitespace(" ")],
+                    name: SvelteName {
+                        ident_token: IDENT@16..20 "item" [] [],
                     },
                     index: SvelteEachIndex {
-                        comma_token: COMMA@20..21 "," [] [],
-                        value: HtmlTextExpression {
-                            html_literal_token: HTML_LITERAL@21..24 " i " [] [],
+                        comma_token: COMMA@20..22 "," [] [Whitespace(" ")],
+                        value: SvelteName {
+                            ident_token: IDENT@22..24 "i" [] [Whitespace(" ")],
                         },
                     },
                     key: SvelteEachKey {
@@ -142,9 +143,9 @@ HtmlRoot {
                 },
                 item: SvelteEachKeyedItem {
                     index: SvelteEachIndex {
-                        comma_token: COMMA@118..119 "," [] [],
-                        value: HtmlTextExpression {
-                            html_literal_token: HTML_LITERAL@119..125 " index" [] [],
+                        comma_token: COMMA@118..120 "," [] [Whitespace(" ")],
+                        value: SvelteName {
+                            ident_token: IDENT@120..125 "index" [] [],
                         },
                     },
                 },
@@ -197,9 +198,9 @@ HtmlRoot {
                     html_literal_token: HTML_LITERAL@169..179 " products " [] [],
                 },
                 item: SvelteEachAsKeyedItem {
-                    as_token: AS_KW@179..181 "as" [] [],
-                    name: HtmlTextExpression {
-                        html_literal_token: HTML_LITERAL@181..190 " product " [] [],
+                    as_token: AS_KW@179..182 "as" [] [Whitespace(" ")],
+                    name: SvelteName {
+                        ident_token: IDENT@182..190 "product" [] [Whitespace(" ")],
                     },
                     index: missing (optional),
                     key: SvelteEachKey {
@@ -268,13 +269,13 @@ HtmlRoot {
         2: HTML_TEXT_EXPRESSION@6..13
           0: HTML_LITERAL@6..13 " items " [] []
         3: SVELTE_EACH_AS_KEYED_ITEM@13..33
-          0: AS_KW@13..15 "as" [] []
-          1: HTML_TEXT_EXPRESSION@15..20
-            0: HTML_LITERAL@15..20 " item" [] []
+          0: AS_KW@13..16 "as" [] [Whitespace(" ")]
+          1: SVELTE_NAME@16..20
+            0: IDENT@16..20 "item" [] []
           2: SVELTE_EACH_INDEX@20..24
-            0: COMMA@20..21 "," [] []
-            1: HTML_TEXT_EXPRESSION@21..24
-              0: HTML_LITERAL@21..24 " i " [] []
+            0: COMMA@20..22 "," [] [Whitespace(" ")]
+            1: SVELTE_NAME@22..24
+              0: IDENT@22..24 "i" [] [Whitespace(" ")]
           3: SVELTE_EACH_KEY@24..33
             0: L_PAREN@24..25 "(" [] []
             1: HTML_TEXT_EXPRESSION@25..32
@@ -341,9 +342,9 @@ HtmlRoot {
           0: HTML_LITERAL@112..118 " users" [] []
         3: SVELTE_EACH_KEYED_ITEM@118..125
           0: SVELTE_EACH_INDEX@118..125
-            0: COMMA@118..119 "," [] []
-            1: HTML_TEXT_EXPRESSION@119..125
-              0: HTML_LITERAL@119..125 " index" [] []
+            0: COMMA@118..120 "," [] [Whitespace(" ")]
+            1: SVELTE_NAME@120..125
+              0: IDENT@120..125 "index" [] []
         4: R_CURLY@125..126 "}" [] []
       1: HTML_ELEMENT_LIST@126..153
         0: HTML_ELEMENT@126..153
@@ -379,9 +380,9 @@ HtmlRoot {
         2: HTML_TEXT_EXPRESSION@169..179
           0: HTML_LITERAL@169..179 " products " [] []
         3: SVELTE_EACH_AS_KEYED_ITEM@179..203
-          0: AS_KW@179..181 "as" [] []
-          1: HTML_TEXT_EXPRESSION@181..190
-            0: HTML_LITERAL@181..190 " product " [] []
+          0: AS_KW@179..182 "as" [] [Whitespace(" ")]
+          1: SVELTE_NAME@182..190
+            0: IDENT@182..190 "product" [] [Whitespace(" ")]
           2: (empty)
           3: SVELTE_EACH_KEY@190..203
             0: L_PAREN@190..191 "(" [] []

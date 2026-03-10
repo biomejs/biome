@@ -1,0 +1,169 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+# foo#
+# foo #
+#   foo   #
+#foo
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdHeader {
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@0..1 "#" [] [],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@1..5 " foo" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@5..6 "#" [] [],
+                    },
+                ],
+                hard_line: missing (optional),
+            },
+            after: MdHashList [],
+        },
+        MdNewline {
+            value_token: NEWLINE@6..7 "\n" [] [],
+        },
+        MdHeader {
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@7..8 "#" [] [],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@8..12 " foo" [] [],
+                    },
+                ],
+                hard_line: missing (optional),
+            },
+            after: MdHashList [
+                MdHash {
+                    hash_token: HASH@12..14 "#" [Skipped(" ")] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@14..15 "\n" [] [],
+        },
+        MdHeader {
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@15..16 "#" [] [],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@16..22 "   foo" [] [],
+                    },
+                ],
+                hard_line: missing (optional),
+            },
+            after: MdHashList [
+                MdHash {
+                    hash_token: HASH@22..26 "#" [Skipped(" "), Skipped(" "), Skipped(" ")] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@26..27 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@27..28 "#" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@28..31 "foo" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@31..32 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+    ],
+    eof_token: EOF@32..32 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..32
+  0: (empty)
+  1: MD_BLOCK_LIST@0..32
+    0: MD_HEADER@0..6
+      0: MD_HASH_LIST@0..1
+        0: MD_HASH@0..1
+          0: HASH@0..1 "#" [] []
+      1: MD_PARAGRAPH@1..6
+        0: MD_INLINE_ITEM_LIST@1..6
+          0: MD_TEXTUAL@1..5
+            0: MD_TEXTUAL_LITERAL@1..5 " foo" [] []
+          1: MD_TEXTUAL@5..6
+            0: MD_TEXTUAL_LITERAL@5..6 "#" [] []
+        1: (empty)
+      2: MD_HASH_LIST@6..6
+    1: MD_NEWLINE@6..7
+      0: NEWLINE@6..7 "\n" [] []
+    2: MD_HEADER@7..14
+      0: MD_HASH_LIST@7..8
+        0: MD_HASH@7..8
+          0: HASH@7..8 "#" [] []
+      1: MD_PARAGRAPH@8..12
+        0: MD_INLINE_ITEM_LIST@8..12
+          0: MD_TEXTUAL@8..12
+            0: MD_TEXTUAL_LITERAL@8..12 " foo" [] []
+        1: (empty)
+      2: MD_HASH_LIST@12..14
+        0: MD_HASH@12..14
+          0: HASH@12..14 "#" [Skipped(" ")] []
+    3: MD_NEWLINE@14..15
+      0: NEWLINE@14..15 "\n" [] []
+    4: MD_HEADER@15..26
+      0: MD_HASH_LIST@15..16
+        0: MD_HASH@15..16
+          0: HASH@15..16 "#" [] []
+      1: MD_PARAGRAPH@16..22
+        0: MD_INLINE_ITEM_LIST@16..22
+          0: MD_TEXTUAL@16..22
+            0: MD_TEXTUAL_LITERAL@16..22 "   foo" [] []
+        1: (empty)
+      2: MD_HASH_LIST@22..26
+        0: MD_HASH@22..26
+          0: HASH@22..26 "#" [Skipped(" "), Skipped(" "), Skipped(" ")] []
+    5: MD_NEWLINE@26..27
+      0: NEWLINE@26..27 "\n" [] []
+    6: MD_PARAGRAPH@27..32
+      0: MD_INLINE_ITEM_LIST@27..32
+        0: MD_TEXTUAL@27..28
+          0: MD_TEXTUAL_LITERAL@27..28 "#" [] []
+        1: MD_TEXTUAL@28..31
+          0: MD_TEXTUAL_LITERAL@28..31 "foo" [] []
+        2: MD_TEXTUAL@31..32
+          0: MD_TEXTUAL_LITERAL@31..32 "\n" [] []
+      1: (empty)
+  2: EOF@32..32 "" [] []
+
+```

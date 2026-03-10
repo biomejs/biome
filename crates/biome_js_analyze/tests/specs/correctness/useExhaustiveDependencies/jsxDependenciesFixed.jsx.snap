@@ -1,0 +1,21 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: jsxDependenciesFixed.jsx
+---
+# Input
+```jsx
+// should not generate diagnostics
+
+import { getSubComponent } from "@external";
+import { useCallback } from "react";
+
+export function Component() {
+  const Sub = getSubComponent();
+
+  const render = useCallback(() => <Sub />, [Sub]);
+
+  return render();
+}
+
+
+```

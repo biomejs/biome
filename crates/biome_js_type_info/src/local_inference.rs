@@ -1584,14 +1584,21 @@ impl FunctionParameter {
             .and_then(AnyJsBinding::as_js_identifier_binding)
             .and_then(|identifier| identifier.name_token().ok())
             .map(|token| token.token_text_trimmed().into());
-        let ty = annotation
+        let ty_data = annotation
             .and_then(|annotation| annotation.ty().ok())
             .map(|ty| TypeData::from_any_ts_type(resolver, scope_id, &ty))
             .unwrap_or_default();
+        // Optional parameters can be called without a value, so include `undefined` in the type
+        let ty = if is_optional {
+            let ty_ref = resolver.reference_to_owned_data(ty_data.clone());
+            ResolvedTypeId::new(resolver.level(), resolver.optional(ty_ref)).into()
+        } else {
+            resolver.reference_to_owned_data(ty_data.clone())
+        };
         if let Some(name) = name {
             Self::Named(NamedFunctionParameter {
                 name,
-                ty: resolver.reference_to_owned_data(ty),
+                ty,
                 is_optional,
                 is_rest,
             })
@@ -1600,13 +1607,13 @@ impl FunctionParameter {
                 .ok()
                 .and_then(|binding| {
                     FunctionParameterBinding::bindings_from_any_js_binding_pattern_of_type(
-                        resolver, scope_id, &binding, &ty,
+                        resolver, scope_id, &binding, &ty_data,
                     )
                 })
                 .unwrap_or_default();
             Self::Pattern(PatternFunctionParameter {
                 bindings,
-                ty: resolver.reference_to_owned_data(ty),
+                ty,
                 is_optional,
                 is_rest,
             })

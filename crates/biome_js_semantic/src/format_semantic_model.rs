@@ -1,14 +1,14 @@
 use biome_formatter::prelude::*;
 use biome_formatter::{
     FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth,
-    SourceMapGeneration, TransformSourceMap,
+    SourceMapGeneration, TrailingNewline, TransformSourceMap,
 };
 use biome_formatter::{format_args, write};
 use biome_js_syntax::TextSize;
 
 use crate::{Binding, BindingId, Scope, ScopeId, SemanticModel};
 
-struct FormatSemanticModelOptions;
+pub struct FormatSemanticModelOptions;
 
 impl FormatOptions for FormatSemanticModelOptions {
     fn indent_style(&self) -> IndentStyle {
@@ -27,6 +27,10 @@ impl FormatOptions for FormatSemanticModelOptions {
         LineEnding::Lf
     }
 
+    fn trailing_newline(&self) -> TrailingNewline {
+        TrailingNewline::default()
+    }
+
     fn as_print_options(&self) -> PrinterOptions {
         PrinterOptions {
             indent_width: self.indent_width(),
@@ -38,7 +42,7 @@ impl FormatOptions for FormatSemanticModelOptions {
     }
 }
 
-struct FormatSemanticModelContext;
+pub(crate) struct FormatSemanticModelContext;
 
 impl FormatContext for FormatSemanticModelContext {
     type Options = FormatSemanticModelOptions;

@@ -1,0 +1,1065 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+[example]: https://example.com "Example Title"
+
+Full reference: [click here][example]
+
+Collapsed reference: [example][]
+
+Shortcut reference: [example]
+
+[foo]: https://foo.com
+
+Image full: ![alt text][foo]
+
+Image collapsed: ![foo][]
+
+Image shortcut: ![foo]
+
+Multiple words in text: [click here for more info][example]
+
+Empty label (collapsed): [test][]
+
+[test]: https://test.com
+
+Shortcut that looks like text: [undefined]
+
+Mixed with inline: [inline](https://inline.com) and [ref][example]
+
+Nested in paragraph: This is a paragraph with [a reference][foo] in the middle.
+
+[Case Label]: https://case.example
+
+Case-insensitive: [case label]
+
+Whitespace normalized: [case   label]
+
+[label\]]: https://escaped.example
+
+Escaped bracket in label: [text][label\]]
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdLinkReferenceDefinition {
+            l_brack_token: L_BRACK@0..1 "[" [] [],
+            label: MdLinkLabel {
+                content: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@1..8 "example" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@8..9 "]" [] [],
+            colon_token: COLON@9..10 ":" [] [],
+            destination: MdLinkDestination {
+                content: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@10..11 " " [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@11..30 "https://example.com" [] [],
+                    },
+                ],
+            },
+            title: MdLinkTitle {
+                content: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@30..31 " " [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@31..46 "\"Example Title\"" [] [],
+                    },
+                ],
+            },
+        },
+        MdNewline {
+            value_token: NEWLINE@46..47 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@47..48 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@48..64 "Full reference: " [] [],
+                },
+                MdReferenceLink {
+                    l_brack_token: L_BRACK@64..65 "[" [] [],
+                    text: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@65..75 "click here" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACK@75..76 "]" [] [],
+                    label: MdReferenceLinkLabel {
+                        l_brack_token: L_BRACK@76..77 "[" [] [],
+                        label: MdInlineItemList [
+                            MdTextual {
+                                value_token: MD_TEXTUAL_LITERAL@77..84 "example" [] [],
+                            },
+                        ],
+                        r_brack_token: R_BRACK@84..85 "]" [] [],
+                    },
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@85..86 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@86..87 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@87..108 "Collapsed reference: " [] [],
+                },
+                MdReferenceLink {
+                    l_brack_token: L_BRACK@108..109 "[" [] [],
+                    text: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@109..116 "example" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACK@116..117 "]" [] [],
+                    label: MdReferenceLinkLabel {
+                        l_brack_token: L_BRACK@117..118 "[" [] [],
+                        label: MdInlineItemList [],
+                        r_brack_token: R_BRACK@118..119 "]" [] [],
+                    },
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@119..120 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@120..121 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@121..141 "Shortcut reference: " [] [],
+                },
+                MdReferenceLink {
+                    l_brack_token: L_BRACK@141..142 "[" [] [],
+                    text: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@142..149 "example" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACK@149..150 "]" [] [],
+                    label: missing (optional),
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@150..151 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@151..152 "\n" [] [],
+        },
+        MdLinkReferenceDefinition {
+            l_brack_token: L_BRACK@152..153 "[" [] [],
+            label: MdLinkLabel {
+                content: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@153..156 "foo" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@156..157 "]" [] [],
+            colon_token: COLON@157..158 ":" [] [],
+            destination: MdLinkDestination {
+                content: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@158..159 " " [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@159..174 "https://foo.com" [] [],
+                    },
+                ],
+            },
+            title: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@174..175 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@175..176 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@176..188 "Image full: " [] [],
+                },
+                MdReferenceImage {
+                    excl_token: BANG@188..189 "!" [] [],
+                    l_brack_token: L_BRACK@189..190 "[" [] [],
+                    alt: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@190..198 "alt text" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACK@198..199 "]" [] [],
+                    label: MdReferenceLinkLabel {
+                        l_brack_token: L_BRACK@199..200 "[" [] [],
+                        label: MdInlineItemList [
+                            MdTextual {
+                                value_token: MD_TEXTUAL_LITERAL@200..203 "foo" [] [],
+                            },
+                        ],
+                        r_brack_token: R_BRACK@203..204 "]" [] [],
+                    },
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@204..205 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@205..206 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@206..223 "Image collapsed: " [] [],
+                },
+                MdReferenceImage {
+                    excl_token: BANG@223..224 "!" [] [],
+                    l_brack_token: L_BRACK@224..225 "[" [] [],
+                    alt: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@225..228 "foo" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACK@228..229 "]" [] [],
+                    label: MdReferenceLinkLabel {
+                        l_brack_token: L_BRACK@229..230 "[" [] [],
+                        label: MdInlineItemList [],
+                        r_brack_token: R_BRACK@230..231 "]" [] [],
+                    },
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@231..232 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@232..233 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@233..249 "Image shortcut: " [] [],
+                },
+                MdReferenceImage {
+                    excl_token: BANG@249..250 "!" [] [],
+                    l_brack_token: L_BRACK@250..251 "[" [] [],
+                    alt: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@251..254 "foo" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACK@254..255 "]" [] [],
+                    label: missing (optional),
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@255..256 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@256..257 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@257..281 "Multiple words in text: " [] [],
+                },
+                MdReferenceLink {
+                    l_brack_token: L_BRACK@281..282 "[" [] [],
+                    text: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@282..306 "click here for more info" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACK@306..307 "]" [] [],
+                    label: MdReferenceLinkLabel {
+                        l_brack_token: L_BRACK@307..308 "[" [] [],
+                        label: MdInlineItemList [
+                            MdTextual {
+                                value_token: MD_TEXTUAL_LITERAL@308..315 "example" [] [],
+                            },
+                        ],
+                        r_brack_token: R_BRACK@315..316 "]" [] [],
+                    },
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@316..317 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@317..318 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@318..330 "Empty label " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@330..331 "(" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@331..340 "collapsed" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@340..341 ")" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@341..342 ":" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@342..343 " " [] [],
+                },
+                MdReferenceLink {
+                    l_brack_token: L_BRACK@343..344 "[" [] [],
+                    text: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@344..348 "test" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACK@348..349 "]" [] [],
+                    label: MdReferenceLinkLabel {
+                        l_brack_token: L_BRACK@349..350 "[" [] [],
+                        label: MdInlineItemList [],
+                        r_brack_token: R_BRACK@350..351 "]" [] [],
+                    },
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@351..352 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@352..353 "\n" [] [],
+        },
+        MdLinkReferenceDefinition {
+            l_brack_token: L_BRACK@353..354 "[" [] [],
+            label: MdLinkLabel {
+                content: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@354..358 "test" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@358..359 "]" [] [],
+            colon_token: COLON@359..360 ":" [] [],
+            destination: MdLinkDestination {
+                content: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@360..361 " " [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@361..377 "https://test.com" [] [],
+                    },
+                ],
+            },
+            title: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@377..378 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@378..379 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@379..410 "Shortcut that looks like text: " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@410..411 "[" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@411..420 "undefined" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@420..421 "]" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@421..422 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@422..423 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@423..442 "Mixed with inline: " [] [],
+                },
+                MdInlineLink {
+                    l_brack_token: L_BRACK@442..443 "[" [] [],
+                    text: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@443..449 "inline" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACK@449..450 "]" [] [],
+                    l_paren_token: L_PAREN@450..451 "(" [] [],
+                    destination: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@451..469 "https://inline.com" [] [],
+                        },
+                    ],
+                    title: missing (optional),
+                    r_paren_token: R_PAREN@469..470 ")" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@470..475 " and " [] [],
+                },
+                MdReferenceLink {
+                    l_brack_token: L_BRACK@475..476 "[" [] [],
+                    text: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@476..479 "ref" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACK@479..480 "]" [] [],
+                    label: MdReferenceLinkLabel {
+                        l_brack_token: L_BRACK@480..481 "[" [] [],
+                        label: MdInlineItemList [
+                            MdTextual {
+                                value_token: MD_TEXTUAL_LITERAL@481..488 "example" [] [],
+                            },
+                        ],
+                        r_brack_token: R_BRACK@488..489 "]" [] [],
+                    },
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@489..490 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@490..491 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@491..537 "Nested in paragraph: This is a paragraph with " [] [],
+                },
+                MdReferenceLink {
+                    l_brack_token: L_BRACK@537..538 "[" [] [],
+                    text: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@538..549 "a reference" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACK@549..550 "]" [] [],
+                    label: MdReferenceLinkLabel {
+                        l_brack_token: L_BRACK@550..551 "[" [] [],
+                        label: MdInlineItemList [
+                            MdTextual {
+                                value_token: MD_TEXTUAL_LITERAL@551..554 "foo" [] [],
+                            },
+                        ],
+                        r_brack_token: R_BRACK@554..555 "]" [] [],
+                    },
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@555..570 " in the middle." [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@570..571 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@571..572 "\n" [] [],
+        },
+        MdLinkReferenceDefinition {
+            l_brack_token: L_BRACK@572..573 "[" [] [],
+            label: MdLinkLabel {
+                content: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@573..583 "Case Label" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@583..584 "]" [] [],
+            colon_token: COLON@584..585 ":" [] [],
+            destination: MdLinkDestination {
+                content: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@585..586 " " [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@586..606 "https://case.example" [] [],
+                    },
+                ],
+            },
+            title: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@606..607 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@607..608 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@608..612 "Case" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@612..613 "-" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@613..626 "insensitive: " [] [],
+                },
+                MdReferenceLink {
+                    l_brack_token: L_BRACK@626..627 "[" [] [],
+                    text: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@627..637 "case label" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACK@637..638 "]" [] [],
+                    label: missing (optional),
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@638..639 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@639..640 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@640..663 "Whitespace normalized: " [] [],
+                },
+                MdReferenceLink {
+                    l_brack_token: L_BRACK@663..664 "[" [] [],
+                    text: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@664..676 "case   label" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACK@676..677 "]" [] [],
+                    label: missing (optional),
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@677..678 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@678..679 "\n" [] [],
+        },
+        MdLinkReferenceDefinition {
+            l_brack_token: L_BRACK@679..680 "[" [] [],
+            label: MdLinkLabel {
+                content: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@680..685 "label" [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@685..687 "\\]" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@687..688 "]" [] [],
+            colon_token: COLON@688..689 ":" [] [],
+            destination: MdLinkDestination {
+                content: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@689..690 " " [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@690..713 "https://escaped.example" [] [],
+                    },
+                ],
+            },
+            title: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@713..714 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@714..715 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@715..741 "Escaped bracket in label: " [] [],
+                },
+                MdReferenceLink {
+                    l_brack_token: L_BRACK@741..742 "[" [] [],
+                    text: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@742..746 "text" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACK@746..747 "]" [] [],
+                    label: MdReferenceLinkLabel {
+                        l_brack_token: L_BRACK@747..748 "[" [] [],
+                        label: MdInlineItemList [
+                            MdTextual {
+                                value_token: MD_TEXTUAL_LITERAL@748..753 "label" [] [],
+                            },
+                            MdTextual {
+                                value_token: MD_TEXTUAL_LITERAL@753..755 "\\]" [] [],
+                            },
+                        ],
+                        r_brack_token: R_BRACK@755..756 "]" [] [],
+                    },
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@756..757 "\n" [] [],
+                },
+            ],
+            hard_line: missing (optional),
+        },
+    ],
+    eof_token: EOF@757..757 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..757
+  0: (empty)
+  1: MD_BLOCK_LIST@0..757
+    0: MD_LINK_REFERENCE_DEFINITION@0..46
+      0: L_BRACK@0..1 "[" [] []
+      1: MD_LINK_LABEL@1..8
+        0: MD_INLINE_ITEM_LIST@1..8
+          0: MD_TEXTUAL@1..8
+            0: MD_TEXTUAL_LITERAL@1..8 "example" [] []
+      2: R_BRACK@8..9 "]" [] []
+      3: COLON@9..10 ":" [] []
+      4: MD_LINK_DESTINATION@10..30
+        0: MD_INLINE_ITEM_LIST@10..30
+          0: MD_TEXTUAL@10..11
+            0: MD_TEXTUAL_LITERAL@10..11 " " [] []
+          1: MD_TEXTUAL@11..30
+            0: MD_TEXTUAL_LITERAL@11..30 "https://example.com" [] []
+      5: MD_LINK_TITLE@30..46
+        0: MD_INLINE_ITEM_LIST@30..46
+          0: MD_TEXTUAL@30..31
+            0: MD_TEXTUAL_LITERAL@30..31 " " [] []
+          1: MD_TEXTUAL@31..46
+            0: MD_TEXTUAL_LITERAL@31..46 "\"Example Title\"" [] []
+    1: MD_NEWLINE@46..47
+      0: NEWLINE@46..47 "\n" [] []
+    2: MD_NEWLINE@47..48
+      0: NEWLINE@47..48 "\n" [] []
+    3: MD_PARAGRAPH@48..86
+      0: MD_INLINE_ITEM_LIST@48..86
+        0: MD_TEXTUAL@48..64
+          0: MD_TEXTUAL_LITERAL@48..64 "Full reference: " [] []
+        1: MD_REFERENCE_LINK@64..85
+          0: L_BRACK@64..65 "[" [] []
+          1: MD_INLINE_ITEM_LIST@65..75
+            0: MD_TEXTUAL@65..75
+              0: MD_TEXTUAL_LITERAL@65..75 "click here" [] []
+          2: R_BRACK@75..76 "]" [] []
+          3: MD_REFERENCE_LINK_LABEL@76..85
+            0: L_BRACK@76..77 "[" [] []
+            1: MD_INLINE_ITEM_LIST@77..84
+              0: MD_TEXTUAL@77..84
+                0: MD_TEXTUAL_LITERAL@77..84 "example" [] []
+            2: R_BRACK@84..85 "]" [] []
+        2: MD_TEXTUAL@85..86
+          0: MD_TEXTUAL_LITERAL@85..86 "\n" [] []
+      1: (empty)
+    4: MD_NEWLINE@86..87
+      0: NEWLINE@86..87 "\n" [] []
+    5: MD_PARAGRAPH@87..120
+      0: MD_INLINE_ITEM_LIST@87..120
+        0: MD_TEXTUAL@87..108
+          0: MD_TEXTUAL_LITERAL@87..108 "Collapsed reference: " [] []
+        1: MD_REFERENCE_LINK@108..119
+          0: L_BRACK@108..109 "[" [] []
+          1: MD_INLINE_ITEM_LIST@109..116
+            0: MD_TEXTUAL@109..116
+              0: MD_TEXTUAL_LITERAL@109..116 "example" [] []
+          2: R_BRACK@116..117 "]" [] []
+          3: MD_REFERENCE_LINK_LABEL@117..119
+            0: L_BRACK@117..118 "[" [] []
+            1: MD_INLINE_ITEM_LIST@118..118
+            2: R_BRACK@118..119 "]" [] []
+        2: MD_TEXTUAL@119..120
+          0: MD_TEXTUAL_LITERAL@119..120 "\n" [] []
+      1: (empty)
+    6: MD_NEWLINE@120..121
+      0: NEWLINE@120..121 "\n" [] []
+    7: MD_PARAGRAPH@121..151
+      0: MD_INLINE_ITEM_LIST@121..151
+        0: MD_TEXTUAL@121..141
+          0: MD_TEXTUAL_LITERAL@121..141 "Shortcut reference: " [] []
+        1: MD_REFERENCE_LINK@141..150
+          0: L_BRACK@141..142 "[" [] []
+          1: MD_INLINE_ITEM_LIST@142..149
+            0: MD_TEXTUAL@142..149
+              0: MD_TEXTUAL_LITERAL@142..149 "example" [] []
+          2: R_BRACK@149..150 "]" [] []
+          3: (empty)
+        2: MD_TEXTUAL@150..151
+          0: MD_TEXTUAL_LITERAL@150..151 "\n" [] []
+      1: (empty)
+    8: MD_NEWLINE@151..152
+      0: NEWLINE@151..152 "\n" [] []
+    9: MD_LINK_REFERENCE_DEFINITION@152..174
+      0: L_BRACK@152..153 "[" [] []
+      1: MD_LINK_LABEL@153..156
+        0: MD_INLINE_ITEM_LIST@153..156
+          0: MD_TEXTUAL@153..156
+            0: MD_TEXTUAL_LITERAL@153..156 "foo" [] []
+      2: R_BRACK@156..157 "]" [] []
+      3: COLON@157..158 ":" [] []
+      4: MD_LINK_DESTINATION@158..174
+        0: MD_INLINE_ITEM_LIST@158..174
+          0: MD_TEXTUAL@158..159
+            0: MD_TEXTUAL_LITERAL@158..159 " " [] []
+          1: MD_TEXTUAL@159..174
+            0: MD_TEXTUAL_LITERAL@159..174 "https://foo.com" [] []
+      5: (empty)
+    10: MD_NEWLINE@174..175
+      0: NEWLINE@174..175 "\n" [] []
+    11: MD_NEWLINE@175..176
+      0: NEWLINE@175..176 "\n" [] []
+    12: MD_PARAGRAPH@176..205
+      0: MD_INLINE_ITEM_LIST@176..205
+        0: MD_TEXTUAL@176..188
+          0: MD_TEXTUAL_LITERAL@176..188 "Image full: " [] []
+        1: MD_REFERENCE_IMAGE@188..204
+          0: BANG@188..189 "!" [] []
+          1: L_BRACK@189..190 "[" [] []
+          2: MD_INLINE_ITEM_LIST@190..198
+            0: MD_TEXTUAL@190..198
+              0: MD_TEXTUAL_LITERAL@190..198 "alt text" [] []
+          3: R_BRACK@198..199 "]" [] []
+          4: MD_REFERENCE_LINK_LABEL@199..204
+            0: L_BRACK@199..200 "[" [] []
+            1: MD_INLINE_ITEM_LIST@200..203
+              0: MD_TEXTUAL@200..203
+                0: MD_TEXTUAL_LITERAL@200..203 "foo" [] []
+            2: R_BRACK@203..204 "]" [] []
+        2: MD_TEXTUAL@204..205
+          0: MD_TEXTUAL_LITERAL@204..205 "\n" [] []
+      1: (empty)
+    13: MD_NEWLINE@205..206
+      0: NEWLINE@205..206 "\n" [] []
+    14: MD_PARAGRAPH@206..232
+      0: MD_INLINE_ITEM_LIST@206..232
+        0: MD_TEXTUAL@206..223
+          0: MD_TEXTUAL_LITERAL@206..223 "Image collapsed: " [] []
+        1: MD_REFERENCE_IMAGE@223..231
+          0: BANG@223..224 "!" [] []
+          1: L_BRACK@224..225 "[" [] []
+          2: MD_INLINE_ITEM_LIST@225..228
+            0: MD_TEXTUAL@225..228
+              0: MD_TEXTUAL_LITERAL@225..228 "foo" [] []
+          3: R_BRACK@228..229 "]" [] []
+          4: MD_REFERENCE_LINK_LABEL@229..231
+            0: L_BRACK@229..230 "[" [] []
+            1: MD_INLINE_ITEM_LIST@230..230
+            2: R_BRACK@230..231 "]" [] []
+        2: MD_TEXTUAL@231..232
+          0: MD_TEXTUAL_LITERAL@231..232 "\n" [] []
+      1: (empty)
+    15: MD_NEWLINE@232..233
+      0: NEWLINE@232..233 "\n" [] []
+    16: MD_PARAGRAPH@233..256
+      0: MD_INLINE_ITEM_LIST@233..256
+        0: MD_TEXTUAL@233..249
+          0: MD_TEXTUAL_LITERAL@233..249 "Image shortcut: " [] []
+        1: MD_REFERENCE_IMAGE@249..255
+          0: BANG@249..250 "!" [] []
+          1: L_BRACK@250..251 "[" [] []
+          2: MD_INLINE_ITEM_LIST@251..254
+            0: MD_TEXTUAL@251..254
+              0: MD_TEXTUAL_LITERAL@251..254 "foo" [] []
+          3: R_BRACK@254..255 "]" [] []
+          4: (empty)
+        2: MD_TEXTUAL@255..256
+          0: MD_TEXTUAL_LITERAL@255..256 "\n" [] []
+      1: (empty)
+    17: MD_NEWLINE@256..257
+      0: NEWLINE@256..257 "\n" [] []
+    18: MD_PARAGRAPH@257..317
+      0: MD_INLINE_ITEM_LIST@257..317
+        0: MD_TEXTUAL@257..281
+          0: MD_TEXTUAL_LITERAL@257..281 "Multiple words in text: " [] []
+        1: MD_REFERENCE_LINK@281..316
+          0: L_BRACK@281..282 "[" [] []
+          1: MD_INLINE_ITEM_LIST@282..306
+            0: MD_TEXTUAL@282..306
+              0: MD_TEXTUAL_LITERAL@282..306 "click here for more info" [] []
+          2: R_BRACK@306..307 "]" [] []
+          3: MD_REFERENCE_LINK_LABEL@307..316
+            0: L_BRACK@307..308 "[" [] []
+            1: MD_INLINE_ITEM_LIST@308..315
+              0: MD_TEXTUAL@308..315
+                0: MD_TEXTUAL_LITERAL@308..315 "example" [] []
+            2: R_BRACK@315..316 "]" [] []
+        2: MD_TEXTUAL@316..317
+          0: MD_TEXTUAL_LITERAL@316..317 "\n" [] []
+      1: (empty)
+    19: MD_NEWLINE@317..318
+      0: NEWLINE@317..318 "\n" [] []
+    20: MD_PARAGRAPH@318..352
+      0: MD_INLINE_ITEM_LIST@318..352
+        0: MD_TEXTUAL@318..330
+          0: MD_TEXTUAL_LITERAL@318..330 "Empty label " [] []
+        1: MD_TEXTUAL@330..331
+          0: MD_TEXTUAL_LITERAL@330..331 "(" [] []
+        2: MD_TEXTUAL@331..340
+          0: MD_TEXTUAL_LITERAL@331..340 "collapsed" [] []
+        3: MD_TEXTUAL@340..341
+          0: MD_TEXTUAL_LITERAL@340..341 ")" [] []
+        4: MD_TEXTUAL@341..342
+          0: MD_TEXTUAL_LITERAL@341..342 ":" [] []
+        5: MD_TEXTUAL@342..343
+          0: MD_TEXTUAL_LITERAL@342..343 " " [] []
+        6: MD_REFERENCE_LINK@343..351
+          0: L_BRACK@343..344 "[" [] []
+          1: MD_INLINE_ITEM_LIST@344..348
+            0: MD_TEXTUAL@344..348
+              0: MD_TEXTUAL_LITERAL@344..348 "test" [] []
+          2: R_BRACK@348..349 "]" [] []
+          3: MD_REFERENCE_LINK_LABEL@349..351
+            0: L_BRACK@349..350 "[" [] []
+            1: MD_INLINE_ITEM_LIST@350..350
+            2: R_BRACK@350..351 "]" [] []
+        7: MD_TEXTUAL@351..352
+          0: MD_TEXTUAL_LITERAL@351..352 "\n" [] []
+      1: (empty)
+    21: MD_NEWLINE@352..353
+      0: NEWLINE@352..353 "\n" [] []
+    22: MD_LINK_REFERENCE_DEFINITION@353..377
+      0: L_BRACK@353..354 "[" [] []
+      1: MD_LINK_LABEL@354..358
+        0: MD_INLINE_ITEM_LIST@354..358
+          0: MD_TEXTUAL@354..358
+            0: MD_TEXTUAL_LITERAL@354..358 "test" [] []
+      2: R_BRACK@358..359 "]" [] []
+      3: COLON@359..360 ":" [] []
+      4: MD_LINK_DESTINATION@360..377
+        0: MD_INLINE_ITEM_LIST@360..377
+          0: MD_TEXTUAL@360..361
+            0: MD_TEXTUAL_LITERAL@360..361 " " [] []
+          1: MD_TEXTUAL@361..377
+            0: MD_TEXTUAL_LITERAL@361..377 "https://test.com" [] []
+      5: (empty)
+    23: MD_NEWLINE@377..378
+      0: NEWLINE@377..378 "\n" [] []
+    24: MD_NEWLINE@378..379
+      0: NEWLINE@378..379 "\n" [] []
+    25: MD_PARAGRAPH@379..422
+      0: MD_INLINE_ITEM_LIST@379..422
+        0: MD_TEXTUAL@379..410
+          0: MD_TEXTUAL_LITERAL@379..410 "Shortcut that looks like text: " [] []
+        1: MD_TEXTUAL@410..411
+          0: MD_TEXTUAL_LITERAL@410..411 "[" [] []
+        2: MD_TEXTUAL@411..420
+          0: MD_TEXTUAL_LITERAL@411..420 "undefined" [] []
+        3: MD_TEXTUAL@420..421
+          0: MD_TEXTUAL_LITERAL@420..421 "]" [] []
+        4: MD_TEXTUAL@421..422
+          0: MD_TEXTUAL_LITERAL@421..422 "\n" [] []
+      1: (empty)
+    26: MD_NEWLINE@422..423
+      0: NEWLINE@422..423 "\n" [] []
+    27: MD_PARAGRAPH@423..490
+      0: MD_INLINE_ITEM_LIST@423..490
+        0: MD_TEXTUAL@423..442
+          0: MD_TEXTUAL_LITERAL@423..442 "Mixed with inline: " [] []
+        1: MD_INLINE_LINK@442..470
+          0: L_BRACK@442..443 "[" [] []
+          1: MD_INLINE_ITEM_LIST@443..449
+            0: MD_TEXTUAL@443..449
+              0: MD_TEXTUAL_LITERAL@443..449 "inline" [] []
+          2: R_BRACK@449..450 "]" [] []
+          3: L_PAREN@450..451 "(" [] []
+          4: MD_INLINE_ITEM_LIST@451..469
+            0: MD_TEXTUAL@451..469
+              0: MD_TEXTUAL_LITERAL@451..469 "https://inline.com" [] []
+          5: (empty)
+          6: R_PAREN@469..470 ")" [] []
+        2: MD_TEXTUAL@470..475
+          0: MD_TEXTUAL_LITERAL@470..475 " and " [] []
+        3: MD_REFERENCE_LINK@475..489
+          0: L_BRACK@475..476 "[" [] []
+          1: MD_INLINE_ITEM_LIST@476..479
+            0: MD_TEXTUAL@476..479
+              0: MD_TEXTUAL_LITERAL@476..479 "ref" [] []
+          2: R_BRACK@479..480 "]" [] []
+          3: MD_REFERENCE_LINK_LABEL@480..489
+            0: L_BRACK@480..481 "[" [] []
+            1: MD_INLINE_ITEM_LIST@481..488
+              0: MD_TEXTUAL@481..488
+                0: MD_TEXTUAL_LITERAL@481..488 "example" [] []
+            2: R_BRACK@488..489 "]" [] []
+        4: MD_TEXTUAL@489..490
+          0: MD_TEXTUAL_LITERAL@489..490 "\n" [] []
+      1: (empty)
+    28: MD_NEWLINE@490..491
+      0: NEWLINE@490..491 "\n" [] []
+    29: MD_PARAGRAPH@491..571
+      0: MD_INLINE_ITEM_LIST@491..571
+        0: MD_TEXTUAL@491..537
+          0: MD_TEXTUAL_LITERAL@491..537 "Nested in paragraph: This is a paragraph with " [] []
+        1: MD_REFERENCE_LINK@537..555
+          0: L_BRACK@537..538 "[" [] []
+          1: MD_INLINE_ITEM_LIST@538..549
+            0: MD_TEXTUAL@538..549
+              0: MD_TEXTUAL_LITERAL@538..549 "a reference" [] []
+          2: R_BRACK@549..550 "]" [] []
+          3: MD_REFERENCE_LINK_LABEL@550..555
+            0: L_BRACK@550..551 "[" [] []
+            1: MD_INLINE_ITEM_LIST@551..554
+              0: MD_TEXTUAL@551..554
+                0: MD_TEXTUAL_LITERAL@551..554 "foo" [] []
+            2: R_BRACK@554..555 "]" [] []
+        2: MD_TEXTUAL@555..570
+          0: MD_TEXTUAL_LITERAL@555..570 " in the middle." [] []
+        3: MD_TEXTUAL@570..571
+          0: MD_TEXTUAL_LITERAL@570..571 "\n" [] []
+      1: (empty)
+    30: MD_NEWLINE@571..572
+      0: NEWLINE@571..572 "\n" [] []
+    31: MD_LINK_REFERENCE_DEFINITION@572..606
+      0: L_BRACK@572..573 "[" [] []
+      1: MD_LINK_LABEL@573..583
+        0: MD_INLINE_ITEM_LIST@573..583
+          0: MD_TEXTUAL@573..583
+            0: MD_TEXTUAL_LITERAL@573..583 "Case Label" [] []
+      2: R_BRACK@583..584 "]" [] []
+      3: COLON@584..585 ":" [] []
+      4: MD_LINK_DESTINATION@585..606
+        0: MD_INLINE_ITEM_LIST@585..606
+          0: MD_TEXTUAL@585..586
+            0: MD_TEXTUAL_LITERAL@585..586 " " [] []
+          1: MD_TEXTUAL@586..606
+            0: MD_TEXTUAL_LITERAL@586..606 "https://case.example" [] []
+      5: (empty)
+    32: MD_NEWLINE@606..607
+      0: NEWLINE@606..607 "\n" [] []
+    33: MD_NEWLINE@607..608
+      0: NEWLINE@607..608 "\n" [] []
+    34: MD_PARAGRAPH@608..639
+      0: MD_INLINE_ITEM_LIST@608..639
+        0: MD_TEXTUAL@608..612
+          0: MD_TEXTUAL_LITERAL@608..612 "Case" [] []
+        1: MD_TEXTUAL@612..613
+          0: MD_TEXTUAL_LITERAL@612..613 "-" [] []
+        2: MD_TEXTUAL@613..626
+          0: MD_TEXTUAL_LITERAL@613..626 "insensitive: " [] []
+        3: MD_REFERENCE_LINK@626..638
+          0: L_BRACK@626..627 "[" [] []
+          1: MD_INLINE_ITEM_LIST@627..637
+            0: MD_TEXTUAL@627..637
+              0: MD_TEXTUAL_LITERAL@627..637 "case label" [] []
+          2: R_BRACK@637..638 "]" [] []
+          3: (empty)
+        4: MD_TEXTUAL@638..639
+          0: MD_TEXTUAL_LITERAL@638..639 "\n" [] []
+      1: (empty)
+    35: MD_NEWLINE@639..640
+      0: NEWLINE@639..640 "\n" [] []
+    36: MD_PARAGRAPH@640..678
+      0: MD_INLINE_ITEM_LIST@640..678
+        0: MD_TEXTUAL@640..663
+          0: MD_TEXTUAL_LITERAL@640..663 "Whitespace normalized: " [] []
+        1: MD_REFERENCE_LINK@663..677
+          0: L_BRACK@663..664 "[" [] []
+          1: MD_INLINE_ITEM_LIST@664..676
+            0: MD_TEXTUAL@664..676
+              0: MD_TEXTUAL_LITERAL@664..676 "case   label" [] []
+          2: R_BRACK@676..677 "]" [] []
+          3: (empty)
+        2: MD_TEXTUAL@677..678
+          0: MD_TEXTUAL_LITERAL@677..678 "\n" [] []
+      1: (empty)
+    37: MD_NEWLINE@678..679
+      0: NEWLINE@678..679 "\n" [] []
+    38: MD_LINK_REFERENCE_DEFINITION@679..713
+      0: L_BRACK@679..680 "[" [] []
+      1: MD_LINK_LABEL@680..687
+        0: MD_INLINE_ITEM_LIST@680..687
+          0: MD_TEXTUAL@680..685
+            0: MD_TEXTUAL_LITERAL@680..685 "label" [] []
+          1: MD_TEXTUAL@685..687
+            0: MD_TEXTUAL_LITERAL@685..687 "\\]" [] []
+      2: R_BRACK@687..688 "]" [] []
+      3: COLON@688..689 ":" [] []
+      4: MD_LINK_DESTINATION@689..713
+        0: MD_INLINE_ITEM_LIST@689..713
+          0: MD_TEXTUAL@689..690
+            0: MD_TEXTUAL_LITERAL@689..690 " " [] []
+          1: MD_TEXTUAL@690..713
+            0: MD_TEXTUAL_LITERAL@690..713 "https://escaped.example" [] []
+      5: (empty)
+    39: MD_NEWLINE@713..714
+      0: NEWLINE@713..714 "\n" [] []
+    40: MD_NEWLINE@714..715
+      0: NEWLINE@714..715 "\n" [] []
+    41: MD_PARAGRAPH@715..757
+      0: MD_INLINE_ITEM_LIST@715..757
+        0: MD_TEXTUAL@715..741
+          0: MD_TEXTUAL_LITERAL@715..741 "Escaped bracket in label: " [] []
+        1: MD_REFERENCE_LINK@741..756
+          0: L_BRACK@741..742 "[" [] []
+          1: MD_INLINE_ITEM_LIST@742..746
+            0: MD_TEXTUAL@742..746
+              0: MD_TEXTUAL_LITERAL@742..746 "text" [] []
+          2: R_BRACK@746..747 "]" [] []
+          3: MD_REFERENCE_LINK_LABEL@747..756
+            0: L_BRACK@747..748 "[" [] []
+            1: MD_INLINE_ITEM_LIST@748..755
+              0: MD_TEXTUAL@748..753
+                0: MD_TEXTUAL_LITERAL@748..753 "label" [] []
+              1: MD_TEXTUAL@753..755
+                0: MD_TEXTUAL_LITERAL@753..755 "\\]" [] []
+            2: R_BRACK@755..756 "]" [] []
+        2: MD_TEXTUAL@756..757
+          0: MD_TEXTUAL_LITERAL@756..757 "\n" [] []
+      1: (empty)
+  2: EOF@757..757 "" [] []
+
+```

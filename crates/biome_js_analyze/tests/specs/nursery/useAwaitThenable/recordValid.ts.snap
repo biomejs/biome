@@ -1,0 +1,24 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: recordValid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+// Awaiting a Record value that is a Promise
+const cache: Record<string, Promise<string>> = {};
+await cache["key"];
+
+// Awaiting the result of a Record function value that returns a Promise (optional call)
+// The ?.() on (() => Promise<void>) | undefined resolves to Promise<void> | undefined;
+// the Promise variant means this await is valid.
+const fetchers: Record<string, (() => Promise<void>) | undefined> = {};
+await fetchers["getData"]?.();
+
+// Awaiting a Record value typed as Promise via type alias
+type AsyncHandlers = Record<string, () => Promise<void>>;
+const asyncHandlers: AsyncHandlers = {};
+await asyncHandlers["run"]();
+
+```

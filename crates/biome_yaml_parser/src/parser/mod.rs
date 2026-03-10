@@ -14,6 +14,7 @@ mod block;
 mod document;
 mod flow;
 mod parse_error;
+mod property;
 
 pub(crate) struct YamlParser<'source> {
     context: ParserContext<YamlSyntaxKind>,

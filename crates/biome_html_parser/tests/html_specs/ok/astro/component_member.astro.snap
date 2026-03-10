@@ -1,0 +1,63 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```astro
+<AvatarPrimitive.Fallback />
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@0..1 "<" [] [],
+            name: HtmlMemberName {
+                object: HtmlComponentName {
+                    value_token: HTML_LITERAL@1..16 "AvatarPrimitive" [] [],
+                },
+                dot_token: DOT@16..17 "." [] [],
+                member: HtmlTagName {
+                    value_token: HTML_LITERAL@17..26 "Fallback" [] [Whitespace(" ")],
+                },
+            },
+            attributes: HtmlAttributeList [],
+            slash_token: SLASH@26..27 "/" [] [],
+            r_angle_token: R_ANGLE@27..28 ">" [] [],
+        },
+    ],
+    eof_token: EOF@28..29 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..29
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..28
+    0: HTML_SELF_CLOSING_ELEMENT@0..28
+      0: L_ANGLE@0..1 "<" [] []
+      1: HTML_MEMBER_NAME@1..26
+        0: HTML_COMPONENT_NAME@1..16
+          0: HTML_LITERAL@1..16 "AvatarPrimitive" [] []
+        1: DOT@16..17 "." [] []
+        2: HTML_TAG_NAME@17..26
+          0: HTML_LITERAL@17..26 "Fallback" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@26..26
+      3: SLASH@26..27 "/" [] []
+      4: R_ANGLE@27..28 ">" [] []
+  4: EOF@28..29 "" [Newline("\n")] []
+
+```

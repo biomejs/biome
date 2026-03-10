@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/class/implements_clause.ts
 ---
+
 # Input
 
 ```ts
@@ -33,6 +34,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -40,4 +42,5 @@ class ClassName implements Interface {}
 
 class LongClassName
 	implements Interface1, Interface2, Interface3, Interface4, Interface5 {}
+
 ```

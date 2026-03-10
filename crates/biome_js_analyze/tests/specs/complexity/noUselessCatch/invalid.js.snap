@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -55,7 +54,7 @@ invalid.js:7:3 lint/complexity/noUselessCatch  FIXABLE  ━━━━━━━━
   i Unsafe fix: Remove the try/catch clause.
   
      1  1 │   function foo () {
-     2  2 │   	f();
+     2  2 │     f();
      3    │ - → try·{
      4    │ - → → doSomethingThatMightThrowA();
      5    │ - → → doSomethingThatMightThrowB();
@@ -64,7 +63,7 @@ invalid.js:7:3 lint/complexity/noUselessCatch  FIXABLE  ━━━━━━━━
      8    │ - → }
         3 │ + → → doSomethingThatMightThrowA();
         4 │ + → → doSomethingThatMightThrowB();
-     9  5 │   	g();
+     9  5 │     g();
     10  6 │   }
   
 
@@ -91,8 +90,8 @@ invalid.js:19:3 lint/complexity/noUselessCatch  FIXABLE  ━━━━━━━�
     13    │ - → try·{
     14    │ - → → doSomethingThatMightThrowA();
        13 │ + → → doSomethingThatMightThrowA();
-    15 14 │   		if (true) {
-    16 15 │   			doSomethingThatMightThrowB();
+    15 14 │       if (true) {
+    16 15 │         doSomethingThatMightThrowB();
     17    │ - → → }
     18    │ - → }·catch·(e)·{
     19    │ - → → throw·e;
@@ -121,12 +120,12 @@ invalid.js:26:2 lint/complexity/noUselessCatch  FIXABLE  ━━━━━━━�
   i Unsafe fix: Remove the catch clause.
   
     23 23 │   try {
-    24 24 │   	doSomethingThatMightThrow();
+    24 24 │     doSomethingThatMightThrow();
     25    │ - }·catch·(e)·{
     26    │ - → throw·e;
     27    │ - }·finally·{
        25 │ + }·finally·{
-    28 26 │   	cleanUp();
+    28 26 │     cleanUp();
     29 27 │   }
   
 

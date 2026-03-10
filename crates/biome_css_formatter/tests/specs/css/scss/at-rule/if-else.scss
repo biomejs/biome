@@ -1,0 +1,20 @@
+@if $type==ocean{
+color:red;
+}@else if $type ==matador{
+color:blue;
+}@else{
+color:green;
+}
+
+.card{
+@if
+$compact
+{
+padding:0;
+}@else if $spacious and $touch {
+padding:2rem;
+}@else{
+padding:
+1rem;
+}
+}

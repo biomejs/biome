@@ -249,6 +249,7 @@ impl DeserializationVisitor for PackageJsonVisitor {
         _name: &str,
     ) -> Option<Self::Output> {
         let mut result = Self::Output::default();
+        let mut seen_types_field = false;
         for (key, value) in members.flatten() {
             let Some(key_text) = Text::deserialize(ctx, &key, "") else {
                 continue;
@@ -306,7 +307,16 @@ impl DeserializationVisitor for PackageJsonVisitor {
                     }
                 }
                 "types" => {
-                    if let Some(value) = Deserializable::deserialize(ctx, &value, &key_text) {
+                    seen_types_field = true;
+                    result.types = Deserializable::deserialize(ctx, &value, &key_text);
+                }
+                // "typings" is a legacy alias for "types" used by older packages.
+                // It only takes effect if "types" was not present at all (even
+                // if its value was invalid and failed to deserialize).
+                "typings" => {
+                    if !seen_types_field
+                        && let Some(value) = Deserializable::deserialize(ctx, &value, &key_text)
+                    {
                         result.types = Some(value);
                     }
                 }
@@ -391,5 +401,70 @@ mod tests {
         let result = parse_range("~0.x.0");
 
         assert_eq!(result, Ok(Version::Literal("~0.x.0".to_string())));
+    }
+
+    /// When a `package.json` contains both `"typings"` and `"types"`, the
+    /// canonical `"types"` field must always take precedence regardless of the
+    /// order the keys appear in the JSON object.
+    #[test]
+    fn types_takes_precedence_over_typings() {
+        // `"typings"` appears before `"types"` — the wrong value must not win.
+        let (pkg, errors) = deserialize_from_json_str::<PackageJson>(
+            r#"{
+                "name": "my-pkg",
+                "version": "1.0.0",
+                "typings": "./dist/wrong.d.ts",
+                "types":   "./dist/correct.d.ts"
+            }"#,
+            JsonParserOptions::default(),
+            "package.json",
+        )
+        .consume();
+        assert!(errors.is_empty());
+        let pkg = pkg.expect("must parse");
+        assert_eq!(
+            pkg.types.as_deref(),
+            Some("./dist/correct.d.ts"),
+            "`types` must win over `typings` even when `typings` appears first in JSON"
+        );
+
+        // Even when `"types"` is invalid (fails to deserialize), `"typings"`
+        // must not override it — presence of the key is what matters.
+        let (pkg_invalid, _) = deserialize_from_json_str::<PackageJson>(
+            r#"{
+                "name": "my-pkg",
+                "version": "1.0.0",
+                "types":   123,
+                "typings": "./dist/wrong.d.ts"
+            }"#,
+            JsonParserOptions::default(),
+            "package.json",
+        )
+        .consume();
+        let pkg_invalid = pkg_invalid.expect("must parse");
+        assert_eq!(
+            pkg_invalid.types, None,
+            "`typings` must not override a malformed `types` field"
+        );
+
+        // Reverse order: `"types"` before `"typings"` must be unaffected.
+        let (pkg2, errors2) = deserialize_from_json_str::<PackageJson>(
+            r#"{
+                "name": "my-pkg",
+                "version": "1.0.0",
+                "types":   "./dist/correct.d.ts",
+                "typings": "./dist/wrong.d.ts"
+            }"#,
+            JsonParserOptions::default(),
+            "package.json",
+        )
+        .consume();
+        assert!(errors2.is_empty());
+        let pkg2 = pkg2.expect("must parse");
+        assert_eq!(
+            pkg2.types.as_deref(),
+            Some("./dist/correct.d.ts"),
+            "`types` must be preserved when it appears before `typings`"
+        );
     }
 }

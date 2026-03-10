@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
-snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -139,6 +138,31 @@ function Component10() {
         </HoC>
     );
 }
+
+function Component11() {
+    return (
+        <HoC>
+            {({ things }) => things.map((item, index) => <Component key={`${index}-${item}`} />)}
+        </HoC>
+    );
+}
+
+function Component12() {
+    return (
+        <HoC>
+            {({ things }) => things.map((item, index) => <Component key={`${item.title}-${index}`} />)}
+        </HoC>
+    );
+}
+
+function Component13() {
+    return (
+        <HoC>
+            {({ things }) => things.map((item, index) => <Component key={index + item} />)}
+        </HoC>
+    );
+}
+
 ```
 
 # Diagnostics
@@ -928,6 +952,90 @@ invalid.jsx:131:80 lint/suspicious/noArrayIndexKey ━━━━━━━━━�
         │                                             ^^^^^
     132 │         </HoC>
     133 │     );
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:139:77 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the index of an array as key property in an element.
+  
+    137 │     return (
+    138 │         <HoC>
+  > 139 │             {({ things }) => things.map((item, index) => <Component key={`${index}-${item}`} />)}
+        │                                                                             ^^^^^
+    140 │         </HoC>
+    141 │     );
+  
+  i This is the source of the key value.
+  
+    137 │     return (
+    138 │         <HoC>
+  > 139 │             {({ things }) => things.map((item, index) => <Component key={`${index}-${item}`} />)}
+        │                                                ^^^^^
+    140 │         </HoC>
+    141 │     );
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:147:91 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the index of an array as key property in an element.
+  
+    145 │     return (
+    146 │         <HoC>
+  > 147 │             {({ things }) => things.map((item, index) => <Component key={`${item.title}-${index}`} />)}
+        │                                                                                           ^^^^^
+    148 │         </HoC>
+    149 │     );
+  
+  i This is the source of the key value.
+  
+    145 │     return (
+    146 │         <HoC>
+  > 147 │             {({ things }) => things.map((item, index) => <Component key={`${item.title}-${index}`} />)}
+        │                                                ^^^^^
+    148 │         </HoC>
+    149 │     );
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:155:74 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the index of an array as key property in an element.
+  
+    153 │     return (
+    154 │         <HoC>
+  > 155 │             {({ things }) => things.map((item, index) => <Component key={index + item} />)}
+        │                                                                          ^^^^^
+    156 │         </HoC>
+    157 │     );
+  
+  i This is the source of the key value.
+  
+    153 │     return (
+    154 │         <HoC>
+  > 155 │             {({ things }) => things.map((item, index) => <Component key={index + item} />)}
+        │                                                ^^^^^
+    156 │         </HoC>
+    157 │     );
   
   i The order of the items may change, and this also affects performances and component state.
   

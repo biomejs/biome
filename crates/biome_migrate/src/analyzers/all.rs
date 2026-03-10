@@ -23,7 +23,7 @@ impl Rule for RulesAll {
         let node = ctx.query();
 
         let name = node.name().ok()?;
-        let node_text = name.inner_string_text().ok()?;
+        let node_text = name.inner_string_text()?.ok()?;
         if node_text.text() == "all" {
             return Some(node.clone());
         }

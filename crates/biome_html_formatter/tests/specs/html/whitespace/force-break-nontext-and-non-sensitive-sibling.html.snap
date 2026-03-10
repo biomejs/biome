@@ -1,0 +1,40 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: whitespace/force-break-nontext-and-non-sensitive-sibling.html
+---
+
+# Input
+
+```html
+<div>a<div>b</div> c</div>
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+Bracket same line: false
+Whitespace sensitivity: css
+Indent script and style: false
+Self close void elements: never
+Trailing newline: true
+-----
+
+```html
+<div>
+	a
+	<div>b</div>
+	c
+</div>
+
+```

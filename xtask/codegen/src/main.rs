@@ -33,8 +33,11 @@ fn main() -> Result<()> {
     let result = task_command().fallback_to_usage().run();
 
     match result {
-        TaskCommand::Formatter => {
-            generate_formatters();
+        TaskCommand::Formatter {
+            allow_dirty,
+            allow_staged,
+        } => {
+            generate_formatters(allow_dirty, allow_staged);
         }
         TaskCommand::Analyzer => {
             generate_analyzer()?;
@@ -81,7 +84,7 @@ fn main() -> Result<()> {
         TaskCommand::All => {
             generate_tables()?;
             generate_ast(Overwrite, vec![])?;
-            generate_formatters();
+            generate_formatters(false, false);
             generate_analyzer()?;
             #[cfg(feature = "configuration")]
             generate_rules_configuration(Overwrite)?;

@@ -2,7 +2,7 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_css_syntax::{AnyCssRule, CssRuleList};
+use biome_css_syntax::{AnyCssRootItem, AnyCssRule, CssRootItemList};
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_invalid_position_at_import_rule::NoInvalidPositionAtImportRuleOptions;
@@ -39,7 +39,7 @@ declare_lint_rule! {
 }
 
 impl Rule for NoInvalidPositionAtImportRule {
-    type Query = Ast<CssRuleList>;
+    type Query = Ast<CssRootItemList>;
     type State = TextRange;
     type Signals = Box<[Self::State]>;
     type Options = NoInvalidPositionAtImportRuleOptions;
@@ -49,9 +49,9 @@ impl Rule for NoInvalidPositionAtImportRule {
         let mut is_invalid_position = false;
         let mut invalid_import_list = Vec::new();
 
-        for rule in node {
-            let any_css_at_rule = match rule {
-                AnyCssRule::CssAtRule(item) => item.rule().ok(),
+        for item in node {
+            let any_css_at_rule = match item {
+                AnyCssRootItem::AnyCssRule(AnyCssRule::CssAtRule(at_rule)) => at_rule.rule().ok(),
                 _ => None,
             };
 

@@ -15,7 +15,7 @@ use crate::{
     JsExport, JsModuleInfo, JsOwnExport, ModuleDiagnostic, SerializedJsModuleInfo,
     js_module_info::JsModuleVisitor,
 };
-use biome_css_syntax::CssRoot;
+use biome_css_syntax::AnyCssRoot;
 use biome_fs::BiomePath;
 use biome_js_syntax::AnyJsRoot;
 use biome_js_type_info::ImportSymbol;
@@ -81,11 +81,16 @@ impl ModuleGraph {
         &self,
         fs: &dyn FsWithResolverProxy,
         project_layout: &ProjectLayout,
-        added_or_updated_paths: &[(&BiomePath, AnyJsRoot)],
+        added_or_updated_paths: &[(
+            &BiomePath,
+            AnyJsRoot,
+            std::sync::Arc<biome_js_semantic::SemanticModel>,
+        )],
+        enable_type_inference: bool,
     ) -> (ModuleDependencies, Vec<ModuleDiagnostic>) {
         // Make sure all directories are registered for the added/updated paths.
         let path_info = self.path_info.pin();
-        for (path, _) in added_or_updated_paths {
+        for (path, _, _) in added_or_updated_paths {
             let mut parent = path.parent();
             while let Some(path) = parent {
                 let mut inserted = false;
@@ -107,9 +112,15 @@ impl ModuleGraph {
         // Traverse all the added and updated paths and insert their module
         // info.
         let modules = self.data.pin();
-        for (path, root) in added_or_updated_paths {
+        for (path, root, semantic_model) in added_or_updated_paths {
             let directory = path.parent().unwrap_or(path);
-            let visitor = JsModuleVisitor::new(root.clone(), directory, &fs_proxy);
+            let visitor = JsModuleVisitor::new(
+                root.clone(),
+                directory,
+                &fs_proxy,
+                semantic_model.clone(),
+                enable_type_inference,
+            );
 
             let module_info = visitor.collect_info();
             for import_path in module_info.all_import_paths() {
@@ -132,7 +143,7 @@ impl ModuleGraph {
         &self,
         fs: &dyn FsWithResolverProxy,
         project_layout: &ProjectLayout,
-        added_or_updated_paths: &[(&BiomePath, CssRoot)],
+        added_or_updated_paths: &[(&BiomePath, AnyCssRoot)],
         _semantic_model: Option<&biome_css_semantic::model::SemanticModel>,
     ) -> (ModuleDependencies, Vec<ModuleDiagnostic>) {
         // Make sure all directories are registered for the added/updated paths.
@@ -241,10 +252,11 @@ impl ModuleGraph {
 
         find_exported_symbol_with_seen_paths(&data, module, symbol_name, &mut seen_paths).and_then(
             |(module, export)| match export {
-                JsOwnExport::Binding(binding_id) => {
-                    module.bindings[binding_id.index()].jsdoc.clone()
-                }
+                JsOwnExport::Binding(binding_range) => module
+                    .binding_type_data(*binding_range)
+                    .and_then(|data| data.jsdoc.clone()),
                 JsOwnExport::Type(_) => None,
+                JsOwnExport::Namespace(reexport) => reexport.jsdoc_comment.clone(),
             },
         )
     }
@@ -327,11 +339,31 @@ fn find_exported_symbol_with_seen_paths<'a>(
             Some((module, own_export))
         }
         Some(JsExport::Reexport(reexport) | JsExport::ReexportType(reexport)) => {
-            if reexport.import.symbol == ImportSymbol::All {
-                // TODO: Follow namespace exports.
-                None
-            } else {
-                match reexport.import.resolved_path.as_deref() {
+            match &reexport.import.symbol {
+                ImportSymbol::All => {
+                    // TODO: Follow namespace exports.
+                    None
+                }
+                // The source-side name may differ from the export name when the
+                // reexport uses an alias, e.g. `export { l as beforeEach } from
+                // './tasks'`. In that case we must look up the source-side name
+                // (`l`) in the target module, not the alias (`beforeEach`).
+                ImportSymbol::Named(source_name) => {
+                    let lookup = source_name.text();
+                    match reexport.import.resolved_path.as_deref() {
+                        Ok(path) if seen_paths.insert(path) => data.get(path).and_then(|module| {
+                            if let ModuleInfo::Js(module) = module {
+                                find_exported_symbol_with_seen_paths(
+                                    data, module, lookup, seen_paths,
+                                )
+                            } else {
+                                None
+                            }
+                        }),
+                        _ => None,
+                    }
+                }
+                ImportSymbol::Default => match reexport.import.resolved_path.as_deref() {
                     Ok(path) if seen_paths.insert(path) => data.get(path).and_then(|module| {
                         if let ModuleInfo::Js(module) = module {
                             find_exported_symbol_with_seen_paths(
@@ -345,7 +377,7 @@ fn find_exported_symbol_with_seen_paths<'a>(
                         }
                     }),
                     _ => None,
-                }
+                },
             }
         }
         None => module.blanket_reexports.iter().find_map(|reexport| {

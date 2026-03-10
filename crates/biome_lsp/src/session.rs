@@ -4,7 +4,7 @@ use crate::extension_settings::{CONFIGURATION_SECTION, ExtensionSettings};
 use crate::utils;
 use anyhow::Result;
 use biome_analyze::RuleCategoriesBuilder;
-use biome_configuration::ConfigurationPathHint;
+use biome_configuration::{Configuration, ConfigurationPathHint};
 use biome_console::markup;
 use biome_deserialize::Merge;
 use biome_diagnostics::PrintDescription;
@@ -16,10 +16,15 @@ use biome_service::WorkspaceError;
 use biome_service::configuration::{
     LoadedConfiguration, ProjectScanComputer, load_configuration, load_editorconfig,
 };
+use biome_service::diagnostics::ConfigurationOutsideProject;
+use biome_service::file_handlers::astro::AstroFileHandler;
+use biome_service::file_handlers::svelte::SvelteFileHandler;
+use biome_service::file_handlers::vue::VueFileHandler;
 use biome_service::projects::ProjectKey;
+use biome_service::settings::ModuleGraphResolutionKind;
 use biome_service::workspace::{
-    FeaturesBuilder, OpenProjectParams, OpenProjectResult, PullDiagnosticsParams,
-    SupportsFeatureParams,
+    FeaturesBuilder, GetFileContentParams, OpenProjectParams, OpenProjectResult,
+    PullDiagnosticsParams, SupportsFeatureParams,
 };
 use biome_service::workspace::{FileFeaturesResult, ServiceNotification};
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
@@ -44,10 +49,12 @@ use tokio::sync::watch;
 use tokio::task::spawn_blocking;
 use tower_lsp_server::Client;
 use tower_lsp_server::ls_types::{
-    self as lsp, ClientCapabilities, Diagnostic, MessageType, Registration, Unregistration, Uri,
-    WorkspaceFolder,
+    self as lsp, ClientCapabilities, Diagnostic, MessageType, ProgressToken, Registration,
+    Unregistration, Uri, WorkDoneProgressCreateParams, WorkspaceFolder,
+    request::WorkDoneProgressCreate,
 };
 use tracing::{debug, error, info, instrument, warn};
+use uuid::Uuid;
 
 pub(crate) struct ClientInformation {
     /// The name of the client
@@ -111,7 +118,7 @@ pub(crate) struct Session {
 
 /// The parameters provided by the client in the "initialize" request
 struct InitializeParams {
-    /// The capabilities provided by the client as part of [`lsp_types::InitializeParams`]
+    /// The capabilities provided by the client as part of [`ls_types::InitializeParams`]
     client_capabilities: ClientCapabilities,
     client_information: Option<ClientInformation>,
     root_uri: Option<Uri>,
@@ -422,7 +429,9 @@ impl Session {
             project_key: doc.project_key,
             features: FeaturesBuilder::new().with_linter().with_assist().build(),
             path: biome_path.clone(),
+            inline_config: self.inline_config(),
             skip_ignore_check: false,
+            not_requested_features: FeaturesBuilder::new().with_search().build(),
         })?;
 
         if !file_features.supports_lint() && !file_features.supports_assist() {
@@ -450,7 +459,29 @@ impl Session {
                 skip: Vec::new(),
                 enabled_rules: Vec::new(),
                 pull_code_actions: false,
+                inline_config: self.inline_config(),
             })?;
+
+            let offset = if file_features.supports_full_html_support() {
+                None
+            } else {
+                let get_start: Option<fn(&str) -> Option<u32>> = match biome_path.extension() {
+                    Some("vue") => Some(VueFileHandler::start),
+                    Some("astro") => Some(AstroFileHandler::start),
+                    Some("svelte") => Some(SvelteFileHandler::start),
+                    _ => None,
+                };
+                get_start.and_then(|f| {
+                    let content = self
+                        .workspace
+                        .get_file_content(GetFileContentParams {
+                            project_key: doc.project_key,
+                            path: biome_path.clone(),
+                        })
+                        .ok()?;
+                    f(content.as_str())
+                })
+            };
 
             result
                 .diagnostics
@@ -461,7 +492,7 @@ impl Session {
                         &url,
                         &doc.line_index,
                         self.position_encoding(),
-                        None,
+                        offset,
                     ) {
                         Ok(diag) => Some(diag),
                         Err(err) => {
@@ -642,16 +673,90 @@ impl Session {
         self.initialized.load(Ordering::Relaxed)
     }
 
+    /// Returns the configuration path set by the user in the extension settings
+    pub(crate) fn get_settings_configuration_path(&self) -> Option<Utf8PathBuf> {
+        self.extension_settings
+            .read()
+            .ok()
+            .and_then(|s| s.configuration_path())
+    }
+
+    /// Resolves the user-provided `configurationPath` setting to an absolute path.
+    ///
+    /// If the path is already absolute, it is returned as-is. If it is relative,
+    /// it is resolved against the appropriate workspace root:
+    ///
+    /// - When `file_path` is provided (e.g. from `did_open`), the workspace folder
+    ///   that contains the file is used as the base for resolution. This ensures
+    ///   that in a multi-root workspace, the relative path is resolved against the
+    ///   correct root rather than an arbitrary one.
+    /// - When `file_path` is `None` (e.g. from `load_workspace_settings`), each
+    ///   workspace folder is tried in order. The closest path to the `file_path` is used.
+    /// - If no workspace folders are registered, the session's `base_path()`
+    ///   (derived from the deprecated `root_uri` initialization parameter) is used
+    ///   as a fallback to keep backwards compatibility.
+    ///
+    /// Returns `None` if no `configurationPath` is set in the extension settings.
+    pub(crate) fn resolve_configuration_path(
+        &self,
+        file_path: Option<&Utf8PathBuf>,
+    ) -> Option<Utf8PathBuf> {
+        let config_path = self.get_settings_configuration_path()?;
+
+        if config_path.is_absolute() {
+            return Some(config_path);
+        }
+
+        // Collect workspace folder roots as absolute Utf8PathBufs.
+        let workspace_roots: Vec<Utf8PathBuf> = self
+            .get_workspace_folders()
+            .unwrap_or_default()
+            .into_iter()
+            .filter_map(|folder| {
+                folder
+                    .uri
+                    .to_file_path()
+                    .and_then(|p| Utf8PathBuf::from_path_buf(p.to_path_buf()).ok())
+            })
+            .collect();
+
+        if let Some(file_path) = file_path {
+            // Find the workspace folder that contains this file and resolve
+            // the relative config path against that folder.
+            if let Some(root) = workspace_roots
+                .iter()
+                .filter(|root| file_path.starts_with(*root))
+                .max_by_key(|root| root.as_str().len())
+            {
+                return Some(root.join(&config_path));
+            }
+        }
+
+        // No file context, or the file doesn't belong to any known workspace
+        // folder. Without a file to anchor against, we cannot determine which
+        // folder the relative path belongs to, so we fall back to the first
+        // registered workspace folder. This is a best-effort guess; the
+        // correct per-file resolution happens in `did_open` where the file
+        // path is available.
+        if let Some(root) = workspace_roots.first() {
+            return Some(root.join(&config_path));
+        }
+
+        // Fall back to the (deprecated) root_uri base path.
+        if let Some(base) = self.base_path() {
+            return Some(base.join(&config_path));
+        }
+
+        // Nothing to resolve against; return the path unchanged and let the
+        // downstream loader produce a meaningful error.
+        Some(config_path)
+    }
+
     /// This function attempts to read the `biome.json` configuration file from
     /// the root URI and update the workspace settings accordingly
     #[tracing::instrument(level = "debug", skip(self))]
     pub(crate) async fn load_workspace_settings(self: &Arc<Self>, reload: bool) {
-        if let Some(config_path) = self
-            .extension_settings
-            .read()
-            .ok()
-            .and_then(|s| s.configuration_path())
-        {
+        if let Some(config_path) = self.resolve_configuration_path(None) {
             info!("Detected configuration path in the workspace settings.");
             self.set_configuration_status(ConfigurationStatus::Loading);
 
@@ -704,12 +809,40 @@ impl Session {
         scan_kind: ScanKind,
         force: bool,
     ) {
+        let progress_token = ProgressToken::String(Uuid::new_v4().to_string());
+        let is_work_done_progress_supported = self.initialize_params.get().is_some_and(|params| {
+            params
+                .client_capabilities
+                .window
+                .as_ref()
+                .is_some_and(|window| window.work_done_progress == Some(true))
+        });
+
+        // Let the user know the scanning is taking long time using the $/progress notification.
+        let progress = if is_work_done_progress_supported
+            && self
+                .client
+                .send_request::<WorkDoneProgressCreate>(WorkDoneProgressCreateParams {
+                    token: progress_token.clone(),
+                })
+                .await
+                .is_ok()
+        {
+            let progress = self
+                .client
+                .progress(progress_token.clone(), "Biome is scanning the project");
+
+            Some(progress.begin().await)
+        } else {
+            None
+        };
+
         let session = self.clone();
 
         spawn_blocking(move || {
             let result = session.workspace.scan_project(ScanProjectParams {
                 project_key,
-                watch: scan_kind.is_project(),
+                watch: scan_kind.is_project() || scan_kind.is_type_aware(),
                 force,
                 scan_kind,
                 verbose: false,
@@ -740,6 +873,10 @@ impl Session {
         })
         .await
         .unwrap();
+
+        if let Some(progress) = progress {
+            progress.finish().await;
+        }
     }
 
     #[tracing::instrument(level = "debug", skip(self))]
@@ -822,6 +959,10 @@ impl Session {
                 return ConfigurationStatus::Error;
             }
         };
+        if !loaded_configuration.loaded_location.is_in_project() {
+            let message = PrintDescription(&ConfigurationOutsideProject).to_string();
+            self.client.log_message(MessageType::INFO, message).await;
+        }
 
         if loaded_configuration.has_errors() {
             error!("Couldn't load the configuration file, reasons:");
@@ -872,12 +1013,28 @@ impl Session {
 
         configuration.merge_with(fs_configuration);
 
+        let inline_configuration = self.inline_config();
+        if let Some(inline_configuration) = inline_configuration {
+            configuration.merge_with(inline_configuration);
+        }
+
         // If the configuration from the LSP or the workspace, the directory path is used as
         // the working directory. Otherwise, the base path of the session is used, then the current
         // working directory is used as the last resort.
+        debug!("Configuration path provided {:?}", &base_path);
         let path = match &base_path {
             ConfigurationPathHint::FromLsp(path) | ConfigurationPathHint::FromWorkspace(path) => {
                 path.to_path_buf()
+            }
+            ConfigurationPathHint::FromUser(path) => {
+                if path.is_file() {
+                    path.parent()
+                        .map_or(fs.working_directory().unwrap_or_default(), |p| {
+                            p.to_path_buf()
+                        })
+                } else {
+                    path.to_path_buf()
+                }
             }
             _ => self
                 .base_path()
@@ -919,6 +1076,7 @@ impl Session {
                 .map(BiomePath::from),
             configuration,
             extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::from(&scan_kind),
         });
 
         self.insert_and_scan_project(project_key, path.into(), scan_kind, force)
@@ -942,34 +1100,44 @@ impl Session {
     /// Requests "workspace/configuration" from client and updates Session config.
     /// It must be done before loading workspace settings in [`Self::load_workspace_settings`].
     #[tracing::instrument(level = "debug", skip(self))]
-    pub(crate) async fn load_extension_settings(&self) {
-        let item = lsp::ConfigurationItem {
-            scope_uri: match self.initialize_params.get() {
-                Some(params) => params.root_uri.clone(),
-                None => None,
-            },
-            section: Some(String::from(CONFIGURATION_SECTION)),
-        };
+    pub(crate) async fn load_extension_settings(&self, settings: Option<Value>) {
+        match settings {
+            None => {
+                let item = lsp::ConfigurationItem {
+                    scope_uri: match self.initialize_params.get() {
+                        Some(params) => params.root_uri.clone(),
+                        None => None,
+                    },
+                    section: Some(String::from(CONFIGURATION_SECTION)),
+                };
 
-        let client_configurations = match self.client.configuration(vec![item]).await {
-            Ok(client_configurations) => client_configurations,
-            Err(err) => {
-                error!("Couldn't read configuration from the client: {err}");
-                return;
+                let client_configurations = match self.client.configuration(vec![item]).await {
+                    Ok(client_configurations) => client_configurations,
+                    Err(err) => {
+                        error!("Couldn't read configuration from the client: {err}");
+                        return;
+                    }
+                };
+
+                let client_configuration = client_configurations.into_iter().next();
+
+                if let Some(client_configuration) = client_configuration {
+                    info!("Loaded client configuration: {client_configuration:#?}");
+
+                    let mut config = self.extension_settings.write().unwrap();
+                    if let Err(err) = config.set_workspace_settings(client_configuration) {
+                        error!("Couldn't set client configuration: {}", err);
+                    }
+                } else {
+                    info!("Client did not return any configuration");
+                }
             }
-        };
-
-        let client_configuration = client_configurations.into_iter().next();
-
-        if let Some(client_configuration) = client_configuration {
-            info!("Loaded client configuration: {client_configuration:#?}");
-
-            let mut config = self.extension_settings.write().unwrap();
-            if let Err(err) = config.set_workspace_settings(client_configuration) {
-                error!("Couldn't set client configuration: {}", err);
+            Some(settings) => {
+                let mut config = self.extension_settings.write().unwrap();
+                if let Err(err) = config.set_workspace_settings(settings) {
+                    error!("Couldn't set client configuration: {}", err);
+                }
             }
-        } else {
-            info!("Client did not return any configuration");
         }
     }
 
@@ -1020,6 +1188,10 @@ impl Session {
             .read()
             .unwrap()
             .requires_configuration()
+    }
+
+    pub(crate) fn inline_config(&self) -> Option<Configuration> {
+        self.extension_settings.read().unwrap().inline_config()
     }
 
     pub(crate) fn is_linting_and_formatting_disabled(&self) -> bool {

@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: jsx/attributes.jsx
 ---
+
 # Input
 
 ```jsx
@@ -107,6 +108,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```jsx
@@ -198,6 +200,7 @@ const a = (
 		)
 	}
 />;
+
 ```
 
 

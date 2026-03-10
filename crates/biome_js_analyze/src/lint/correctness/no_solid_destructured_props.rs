@@ -89,6 +89,7 @@ impl Rule for NoSolidDestructuredProps {
         let Some(parameters) = binding_pattern
             .syntax()
             .ancestors()
+            .skip(1)
             .find_map(JsParameters::cast)
         else {
             return vec![];
@@ -186,6 +187,7 @@ fn is_binding_a_jsx_prop(binding: &AnyJsBinding, model: &SemanticModel) -> Optio
             if reference
                 .syntax()
                 .ancestors()
+                .skip(1)
                 .find_map(JsxExpressionAttributeValue::cast)
                 .is_some()
             {

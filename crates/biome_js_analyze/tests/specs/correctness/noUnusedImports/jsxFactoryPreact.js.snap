@@ -1,0 +1,20 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: jsxFactoryPreact.js
+---
+# Input
+```js
+import { h, Fragment } from 'preact';
+
+function App() {
+  return (
+    <>
+      <div>Hello World</div>
+    </>
+  );
+}
+
+
+```
+
+_Note: The parser emitted 5 diagnostics which are not shown here._

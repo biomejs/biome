@@ -1,5 +1,14 @@
 # @biomejs/js-api
 
+## 5.0.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @biomejs/wasm-web@2.4.0
+  - @biomejs/wasm-bundler@2.4.0
+  - @biomejs/wasm-nodejs@2.4.0
+
 ## 4.0.0
 
 ### Patch Changes

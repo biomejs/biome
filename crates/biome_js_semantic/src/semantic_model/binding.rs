@@ -1,5 +1,8 @@
 use super::*;
+use crate::format_semantic_model::FormatSemanticModelContext;
 use biome_js_syntax::{TextRange, TsTypeParameterName, binding_ext::AnyJsIdentifierBinding};
+use std::fmt::{Display, Formatter};
+use std::sync::Arc;
 
 /// Internal type with all the semantic data of a specific binding
 #[derive(Debug)]
@@ -44,13 +47,26 @@ pub type AllBindingWriteReferencesIter =
 
 /// Provides access to all semantic data of a specific binding.
 pub struct Binding {
-    pub(crate) data: Rc<SemanticModelData>,
+    pub(crate) data: Arc<SemanticModelData>,
     pub(crate) id: BindingId,
 }
 
 impl std::fmt::Debug for Binding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Binding").field("id", &self.id).finish()
+    }
+}
+
+impl Display for Binding {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let formatted = biome_formatter::format!(FormatSemanticModelContext, [&self])
+            .expect("Formatting not to throw any FormatErrors");
+        f.write_str(
+            formatted
+                .print()
+                .expect("Expected a valid document")
+                .as_code(),
+        )
     }
 }
 
@@ -65,9 +81,10 @@ impl Binding {
     }
 
     /// Returns the syntax node associated with this binding.
-    pub fn syntax(&self) -> &JsSyntaxNode {
+    pub fn syntax(&self) -> JsSyntaxNode {
         let binding = self.data.binding(self.id);
-        &self.data.binding_node_by_start[&binding.range.start()]
+        self.data.binding_node_by_start[&binding.range.start()]
+            .to_node(self.data.to_root().syntax())
     }
 
     /// Returns the typed AST node associated with this binding.
@@ -125,14 +142,13 @@ impl Binding {
     /// itself an `export` statement) or an identifier usage.
     pub fn exports(&self) -> impl Iterator<Item = JsSyntaxNode> + '_ {
         let binding = self.data.binding(self.id);
-        binding
-            .export_by_start
-            .iter()
-            .map(|export_start| self.data.binding_node_by_start[export_start].clone())
+        binding.export_by_start.iter().map(|export_start| {
+            self.data.binding_node_by_start[export_start].to_node(self.data.to_root().syntax())
+        })
     }
 
     pub fn is_imported(&self) -> bool {
-        super::is_imported(self.syntax())
+        super::is_imported(&self.syntax())
     }
 }
 

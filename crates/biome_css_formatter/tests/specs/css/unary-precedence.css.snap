@@ -1,0 +1,41 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 212
+info: css/unary-precedence.css
+---
+
+# Input
+
+```css
+.unary-precedence{
+  width:calc(-1 +2);
+  width:calc(+var(--x)+1px);
+  width:calc(- var(--y)*2);
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+Trailing newline: true
+-----
+
+```css
+.unary-precedence {
+	width: calc(-1 +2);
+	width: calc(+var(--x) +1px);
+	width: calc(-var(--y) * 2);
+}
+
+```

@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: grit/function_definition.grit
 ---
+
 # Input
 
 ```grit
@@ -46,6 +47,7 @@ Indent width: 2
 Line ending: LF
 Line width: 80
 Attribute Position: Auto
+Trailing newline: true
 -----
 
 ```grit
@@ -70,4 +72,5 @@ function my_todo($target, $message) {
 
 // Use the my_todo function
 `module.exports = $_` as $x => my_todo(target=$x, message=`Fix this\nAnd that`)
+
 ```

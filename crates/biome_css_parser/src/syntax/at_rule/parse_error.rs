@@ -1,5 +1,5 @@
 use crate::parser::CssParser;
-use biome_parser::diagnostic::{ToDiagnostic, expect_one_of, expected_node};
+use biome_parser::diagnostic::{ToDiagnostic, expect_one_of, expected_any, expected_node};
 use biome_parser::prelude::ParseDiagnostic;
 use biome_rowan::TextRange;
 
@@ -85,4 +85,16 @@ pub(crate) fn expected_any_font_feature_value_item(
 
 pub(crate) fn expected_any_font_family_name(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expect_one_of(&["<family-name>", "<string>"], range).into_diagnostic(p)
+}
+
+pub(crate) fn expected_function_parameter(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    expected_node("function parameter", range, p)
+}
+
+pub(crate) fn expected_parameter_default_value(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    expected_node("function parameter default value", range, p)
+}
+
+pub(crate) fn expected_any_type(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    expected_any(&["type function", "syntax single component"], range, p)
 }

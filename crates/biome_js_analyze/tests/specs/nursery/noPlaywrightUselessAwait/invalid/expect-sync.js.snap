@@ -1,0 +1,33 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: expect-sync.js
+---
+# Input
+```js
+/* should generate diagnostics */
+await expect(1).toBe(1);
+
+
+```
+
+# Diagnostics
+```
+expect-sync.js:2:1 lint/nursery/noPlaywrightUselessAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary await expression.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ await expect(1).toBe(1);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i This method does not return a Promise.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove unnecessary await
+  
+    2 │ await·expect(1).toBe(1);
+      │ ------                  
+
+```

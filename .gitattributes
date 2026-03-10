@@ -39,6 +39,7 @@
 /crates/biome_html_analyze/src/{lint,assist,syntax}/*.rs linguist-generated=true text=auto eol=lf
 /crates/biome_html_analyze/src/options.rs linguist-generated=true text=auto eol=lf
 /crates/biome_html_analyze/src/registry.rs linguist-generated=true text=auto eol=lf
+/crates/biome_html_parser/benches/fixtures/** linguist-vendored text=auto eol=lf
 
 # Other
 /crates/biome_unicode_table/src/tables.rs linguist-generated=true text=auto eol=lf

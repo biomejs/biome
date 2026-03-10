@@ -16,6 +16,10 @@ macro_rules! map_syntax_node {
     ($ node : expr , $ pattern : pat => $ body : expr) => {
         match $node {
             node => match $crate::MarkdownSyntaxNode::kind(&node) {
+                $crate::MarkdownSyntaxKind::MD_AUTOLINK => {
+                    let $pattern = unsafe { $crate::MdAutolink::new_unchecked(node) };
+                    $body
+                }
                 $crate::MarkdownSyntaxKind::MD_BULLET => {
                     let $pattern = unsafe { $crate::MdBullet::new_unchecked(node) };
                     $body
@@ -26,6 +30,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::MarkdownSyntaxKind::MD_DOCUMENT => {
                     let $pattern = unsafe { $crate::MdDocument::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MD_ENTITY_REFERENCE => {
+                    let $pattern = unsafe { $crate::MdEntityReference::new_unchecked(node) };
                     $body
                 }
                 $crate::MarkdownSyntaxKind::MD_FENCED_CODE_BLOCK => {
@@ -56,8 +64,8 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::MdIndentCodeBlock::new_unchecked(node) };
                     $body
                 }
-                $crate::MarkdownSyntaxKind::MD_INDENTED_CODE_LINE => {
-                    let $pattern = unsafe { $crate::MdIndentedCodeLine::new_unchecked(node) };
+                $crate::MarkdownSyntaxKind::MD_INDENT_TOKEN => {
+                    let $pattern = unsafe { $crate::MdIndentToken::new_unchecked(node) };
                     $body
                 }
                 $crate::MarkdownSyntaxKind::MD_INLINE_CODE => {
@@ -68,20 +76,12 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::MdInlineEmphasis::new_unchecked(node) };
                     $body
                 }
+                $crate::MarkdownSyntaxKind::MD_INLINE_HTML => {
+                    let $pattern = unsafe { $crate::MdInlineHtml::new_unchecked(node) };
+                    $body
+                }
                 $crate::MarkdownSyntaxKind::MD_INLINE_IMAGE => {
                     let $pattern = unsafe { $crate::MdInlineImage::new_unchecked(node) };
-                    $body
-                }
-                $crate::MarkdownSyntaxKind::MD_INLINE_IMAGE_ALT => {
-                    let $pattern = unsafe { $crate::MdInlineImageAlt::new_unchecked(node) };
-                    $body
-                }
-                $crate::MarkdownSyntaxKind::MD_INLINE_IMAGE_LINK => {
-                    let $pattern = unsafe { $crate::MdInlineImageLink::new_unchecked(node) };
-                    $body
-                }
-                $crate::MarkdownSyntaxKind::MD_INLINE_IMAGE_SOURCE => {
-                    let $pattern = unsafe { $crate::MdInlineImageSource::new_unchecked(node) };
                     $body
                 }
                 $crate::MarkdownSyntaxKind::MD_INLINE_ITALIC => {
@@ -96,8 +96,33 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::MdLinkBlock::new_unchecked(node) };
                     $body
                 }
-                $crate::MarkdownSyntaxKind::MD_ORDER_LIST_ITEM => {
-                    let $pattern = unsafe { $crate::MdOrderListItem::new_unchecked(node) };
+                $crate::MarkdownSyntaxKind::MD_LINK_DESTINATION => {
+                    let $pattern = unsafe { $crate::MdLinkDestination::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MD_LINK_LABEL => {
+                    let $pattern = unsafe { $crate::MdLinkLabel::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MD_LINK_REFERENCE_DEFINITION => {
+                    let $pattern =
+                        unsafe { $crate::MdLinkReferenceDefinition::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MD_LINK_TITLE => {
+                    let $pattern = unsafe { $crate::MdLinkTitle::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MD_LIST_MARKER_PREFIX => {
+                    let $pattern = unsafe { $crate::MdListMarkerPrefix::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MD_NEWLINE => {
+                    let $pattern = unsafe { $crate::MdNewline::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MD_ORDERED_LIST_ITEM => {
+                    let $pattern = unsafe { $crate::MdOrderedListItem::new_unchecked(node) };
                     $body
                 }
                 $crate::MarkdownSyntaxKind::MD_PARAGRAPH => {
@@ -106,6 +131,26 @@ macro_rules! map_syntax_node {
                 }
                 $crate::MarkdownSyntaxKind::MD_QUOTE => {
                     let $pattern = unsafe { $crate::MdQuote::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MD_QUOTE_INDENT => {
+                    let $pattern = unsafe { $crate::MdQuoteIndent::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MD_QUOTE_PREFIX => {
+                    let $pattern = unsafe { $crate::MdQuotePrefix::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MD_REFERENCE_IMAGE => {
+                    let $pattern = unsafe { $crate::MdReferenceImage::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MD_REFERENCE_LINK => {
+                    let $pattern = unsafe { $crate::MdReferenceLink::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MD_REFERENCE_LINK_LABEL => {
+                    let $pattern = unsafe { $crate::MdReferenceLinkLabel::new_unchecked(node) };
                     $body
                 }
                 $crate::MarkdownSyntaxKind::MD_SETEXT_HEADER => {
@@ -122,6 +167,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::MarkdownSyntaxKind::MD_THEMATIC_BREAK_BLOCK => {
                     let $pattern = unsafe { $crate::MdThematicBreakBlock::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MD_THEMATIC_BREAK_CHAR => {
+                    let $pattern = unsafe { $crate::MdThematicBreakChar::new_unchecked(node) };
                     $body
                 }
                 $crate::MarkdownSyntaxKind::MD_BOGUS => {
@@ -144,16 +193,20 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::MdHashList::new_unchecked(node) };
                     $body
                 }
-                $crate::MarkdownSyntaxKind::MD_INDENTED_CODE_LINE_LIST => {
-                    let $pattern = unsafe { $crate::MdIndentedCodeLineList::new_unchecked(node) };
+                $crate::MarkdownSyntaxKind::MD_INDENT_TOKEN_LIST => {
+                    let $pattern = unsafe { $crate::MdIndentTokenList::new_unchecked(node) };
                     $body
                 }
                 $crate::MarkdownSyntaxKind::MD_INLINE_ITEM_LIST => {
                     let $pattern = unsafe { $crate::MdInlineItemList::new_unchecked(node) };
                     $body
                 }
-                $crate::MarkdownSyntaxKind::MD_ORDER_LIST => {
-                    let $pattern = unsafe { $crate::MdOrderList::new_unchecked(node) };
+                $crate::MarkdownSyntaxKind::MD_QUOTE_INDENT_LIST => {
+                    let $pattern = unsafe { $crate::MdQuoteIndentList::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MD_THEMATIC_BREAK_PART_LIST => {
+                    let $pattern = unsafe { $crate::MdThematicBreakPartList::new_unchecked(node) };
                     $body
                 }
                 _ => unreachable!(),

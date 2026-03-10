@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/module/no-semi/issue2006.js
 ---
+
 # Input
 
 ```js
@@ -39,6 +40,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -50,6 +52,7 @@ switch (n) {
 
 var c = a.e;
 (i.a += Ga(c.e)), F(i, c.i, 0);
+
 ```
 
 ## Output 1
@@ -70,6 +73,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -81,4 +85,5 @@ switch (n) {
 
 var c = a.e
 ;(i.a += Ga(c.e)), F(i, c.i, 0)
+
 ```

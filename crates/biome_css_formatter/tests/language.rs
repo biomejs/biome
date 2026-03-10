@@ -10,9 +10,14 @@ use biome_service::{
     workspace::DocumentFileSource,
 };
 
-#[derive(Default)]
 pub struct CssTestFormatLanguage {
-    _source_type: CssFileSource,
+    source_type: CssFileSource,
+}
+
+impl CssTestFormatLanguage {
+    pub fn new(source_type: CssFileSource) -> Self {
+        Self { source_type }
+    }
 }
 
 impl TestFormatLanguage for CssTestFormatLanguage {
@@ -26,7 +31,7 @@ impl TestFormatLanguage for CssTestFormatLanguage {
             .allow_css_modules()
             .allow_tailwind_directives();
 
-        parse_css(text, options).into()
+        parse_css(text, self.source_type, options).into()
     }
 
     fn to_format_language(

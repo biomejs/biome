@@ -6,7 +6,7 @@ use biome_formatter::printer::PrinterOptions;
 use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, CstFormatContext, Expand, FormatContext,
     FormatElement, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle,
-    TransformSourceMap,
+    TrailingNewline, TransformSourceMap,
 };
 use biome_js_syntax::{AnyJsFunctionBody, JsFileSource, JsLanguage};
 use std::fmt;
@@ -45,6 +45,8 @@ pub struct JsFormatContext {
     cached_function_body: Option<(AnyJsFunctionBody, FormatElement)>,
 
     source_map: Option<TransformSourceMap>,
+
+    should_delegate_fmt_embedded_nodes: bool,
 }
 
 impl JsFormatContext {
@@ -54,6 +56,7 @@ impl JsFormatContext {
             comments: Rc::new(comments),
             cached_function_body: None,
             source_map: None,
+            should_delegate_fmt_embedded_nodes: false,
         }
     }
 
@@ -90,6 +93,15 @@ impl JsFormatContext {
     pub fn with_source_map(mut self, source_map: Option<TransformSourceMap>) -> Self {
         self.source_map = source_map;
         self
+    }
+
+    pub fn with_fmt_embedded_nodes(mut self) -> Self {
+        self.should_delegate_fmt_embedded_nodes = true;
+        self
+    }
+
+    pub fn should_delegate_fmt_embedded_nodes(&self) -> bool {
+        self.should_delegate_fmt_embedded_nodes
     }
 }
 
@@ -179,6 +191,9 @@ pub struct JsFormatOptions {
 
     /// When formatting binary expressions, whether to break the line before or after the operator. Defaults to "after".
     operator_linebreak: OperatorLinebreak,
+
+    /// Whether to add a trailing newline at the end of the file. Defaults to true.
+    trailing_newline: TrailingNewline,
 }
 
 impl JsFormatOptions {
@@ -200,6 +215,7 @@ impl JsFormatOptions {
             attribute_position: AttributePosition::default(),
             expand: Expand::default(),
             operator_linebreak: OperatorLinebreak::default(),
+            trailing_newline: TrailingNewline::default(),
         }
     }
 
@@ -278,6 +294,11 @@ impl JsFormatOptions {
         self
     }
 
+    pub fn with_trailing_newline(mut self, trailing_newline: TrailingNewline) -> Self {
+        self.trailing_newline = trailing_newline;
+        self
+    }
+
     pub fn set_arrow_parentheses(&mut self, arrow_parentheses: ArrowParentheses) {
         self.arrow_parentheses = arrow_parentheses;
     }
@@ -338,6 +359,10 @@ impl JsFormatOptions {
         self.operator_linebreak = operator_linebreak;
     }
 
+    pub fn set_trailing_newline(&mut self, trailing_newline: TrailingNewline) {
+        self.trailing_newline = trailing_newline;
+    }
+
     pub fn arrow_parentheses(&self) -> ArrowParentheses {
         self.arrow_parentheses
     }
@@ -389,6 +414,10 @@ impl JsFormatOptions {
     pub fn operator_linebreak(&self) -> OperatorLinebreak {
         self.operator_linebreak
     }
+
+    pub fn trailing_newline(&self) -> TrailingNewline {
+        self.trailing_newline
+    }
 }
 
 impl FormatOptions for JsFormatOptions {
@@ -406,6 +435,10 @@ impl FormatOptions for JsFormatOptions {
 
     fn line_ending(&self) -> LineEnding {
         self.line_ending
+    }
+
+    fn trailing_newline(&self) -> TrailingNewline {
+        self.trailing_newline
     }
 
     fn as_print_options(&self) -> PrinterOptions {
@@ -429,7 +462,8 @@ impl fmt::Display for JsFormatOptions {
         writeln!(f, "Bracket same line: {}", self.bracket_same_line.value())?;
         writeln!(f, "Attribute Position: {}", self.attribute_position)?;
         writeln!(f, "Expand lists: {}", self.expand)?;
-        writeln!(f, "Operator linebreak: {}", self.operator_linebreak)
+        writeln!(f, "Operator linebreak: {}", self.operator_linebreak)?;
+        writeln!(f, "Trailing newline: {}", self.trailing_newline.value())
     }
 }
 

@@ -1,6 +1,8 @@
-use crate::{DiagnosticsPayload, Execution, Reporter, ReporterVisitor, TraversalSummary};
+use crate::reporter::{Reporter, ReporterVisitor, ReporterWriter};
+use crate::runner::execution::Execution;
+use crate::{DiagnosticsPayload, TraversalSummary};
 use biome_console::fmt::{Display, Formatter};
-use biome_console::{Console, ConsoleExt, markup};
+use biome_console::markup;
 use biome_diagnostics::display::SourceFile;
 use biome_diagnostics::{Error, PrintDescription, Resource, Severity};
 use biome_rowan::{TextRange, TextSize};
@@ -14,18 +16,24 @@ use std::{
     path::Path,
 };
 
-pub struct GitLabReporter {
-    pub(crate) execution: Execution,
-    pub(crate) diagnostics: DiagnosticsPayload,
+pub struct GitLabReporter<'a> {
+    pub(crate) execution: &'a dyn Execution,
+    pub(crate) diagnostics_payload: &'a DiagnosticsPayload,
     pub(crate) verbose: bool,
     pub(crate) working_directory: Option<Utf8PathBuf>,
 }
 
-impl Reporter for GitLabReporter {
-    fn write(self, visitor: &mut dyn ReporterVisitor) -> std::io::Result<()> {
+impl Reporter for GitLabReporter<'_> {
+    fn write(
+        self,
+        writer: &mut dyn ReporterWriter,
+
+        visitor: &mut dyn ReporterVisitor,
+    ) -> std::io::Result<()> {
         visitor.report_diagnostics(
-            &self.execution,
-            self.diagnostics,
+            writer,
+            self.execution,
+            self.diagnostics_payload,
             self.verbose,
             self.working_directory.as_deref(),
         )?;
@@ -33,8 +41,7 @@ impl Reporter for GitLabReporter {
     }
 }
 
-pub(crate) struct GitLabReporterVisitor<'a> {
-    console: &'a mut dyn Console,
+pub(crate) struct GitLabReporterVisitor {
     repository_root: Option<Utf8PathBuf>,
 }
 
@@ -57,19 +64,17 @@ impl GitLabHasher {
     }
 }
 
-impl<'a> GitLabReporterVisitor<'a> {
-    pub fn new(console: &'a mut dyn Console, repository_root: Option<Utf8PathBuf>) -> Self {
-        Self {
-            console,
-            repository_root,
-        }
+impl GitLabReporterVisitor {
+    pub fn new(repository_root: Option<Utf8PathBuf>) -> Self {
+        Self { repository_root }
     }
 }
 
-impl ReporterVisitor for GitLabReporterVisitor<'_> {
+impl ReporterVisitor for GitLabReporterVisitor {
     fn report_summary(
         &mut self,
-        _: &Execution,
+        _writer: &mut dyn ReporterWriter,
+        _: &dyn Execution,
         _: TraversalSummary,
         _verbose: bool,
     ) -> std::io::Result<()> {
@@ -78,8 +83,9 @@ impl ReporterVisitor for GitLabReporterVisitor<'_> {
 
     fn report_diagnostics(
         &mut self,
-        _execution: &Execution,
-        payload: DiagnosticsPayload,
+        writer: &mut dyn ReporterWriter,
+        _execution: &dyn Execution,
+        payload: &DiagnosticsPayload,
         verbose: bool,
         _working_directory: Option<&Utf8Path>,
     ) -> std::io::Result<()> {
@@ -90,13 +96,13 @@ impl ReporterVisitor for GitLabReporterVisitor<'_> {
             path: self.repository_root.as_deref(),
             verbose,
         };
-        self.console.log(markup!({ diagnostics }));
+        writer.log(markup!({ diagnostics }));
         Ok(())
     }
 }
 
 struct GitLabDiagnostics<'a> {
-    payload: DiagnosticsPayload,
+    payload: &'a DiagnosticsPayload,
     verbose: bool,
     lock: &'a RwLock<GitLabHasher>,
     path: Option<&'a Utf8Path>,

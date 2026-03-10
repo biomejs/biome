@@ -99,6 +99,7 @@ impl<'a> SnapshotBuilder<'a> {
 
         self.write_extension();
         self.snapshot.push_str(output.content);
+        writeln!(self.snapshot).unwrap();
         writeln!(self.snapshot, "```").unwrap();
         writeln!(self.snapshot).unwrap();
 

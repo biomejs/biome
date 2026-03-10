@@ -49,7 +49,7 @@ JsBogusNamedImportSpecifier = SyntaxElement*
 TsBogusType = SyntaxElement*
 
 AnyJsRoot =
-	JsScript | JsModule | JsExpressionSnipped | TsDeclarationModule
+	JsScript | JsModule | JsExpressionSnippet | TsDeclarationModule | JsExpressionTemplateRoot
 
 JsScript =
 	bom: 'UNICODE_BOM'?
@@ -72,7 +72,11 @@ TsDeclarationModule =
 	items: JsModuleItemList
 	eof: 'EOF'
 
-JsExpressionSnipped =
+JsExpressionSnippet =
+	expression: AnyJsExpression
+	eof: 'EOF'
+
+JsExpressionTemplateRoot =
 	expression: AnyJsExpression
 	eof: 'EOF'
 

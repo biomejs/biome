@@ -1,0 +1,145 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/blockquote/ignore-code.md
+---
+
+# Input
+
+```md
+> ````md
+> <!-- prettier-ignore -->
+> ```js
+> ugly   ( code ) ;
+> ```
+> ````
+
+> ```md
+> <!-- prettier-ignore -->
+> - This is a long long
+>   long long long long
+>   long long paragraph.
+> ```
+
+> - test
+>   ```md
+>   <!-- prettier-ignore -->
+>   - This is a long long
+>     long long long long
+>     long long paragraph.
+>   ```
+
+````md
+> ```md
+> <!-- prettier-ignore -->
+> - This is a long long
+>   long long long long
+>   long long paragraph.
+> ```
+````
+
+> ````md
+> > ```md
+> > <!-- prettier-ignore -->
+> > - This is a long long
+> >   long long long long
+> >   long long paragraph.
+> > ```
+> ````
+
+> 
+> <!-- prettier-ignore -->
+> - This is a long long
+>   long long long long
+>   long long paragraph.
+> 
+
+> ````js
+> // prettier-ignore
+> const x = 1,
+> b = 2
+> ````
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -38,13 +38,15 @@
+ > > ```
+ > ````
+ 
++> 
+ > <!-- prettier-ignore -->
+ > - This is a long long
+ >   long long long long
+ >   long long paragraph.
++> 
+ 
+-> ```js
++> ````js
+ > // prettier-ignore
+ > const x = 1,
+ > b = 2
+-> ```
++> ````
+```
+
+# Output
+
+```md
+> ````md
+> <!-- prettier-ignore -->
+> ```js
+> ugly   ( code ) ;
+> ```
+> ````
+
+> ```md
+> <!-- prettier-ignore -->
+> - This is a long long
+>   long long long long
+>   long long paragraph.
+> ```
+
+> - test
+>   ```md
+>   <!-- prettier-ignore -->
+>   - This is a long long
+>     long long long long
+>     long long paragraph.
+>   ```
+
+````md
+> ```md
+> <!-- prettier-ignore -->
+> - This is a long long
+>   long long long long
+>   long long paragraph.
+> ```
+````
+
+> ````md
+> > ```md
+> > <!-- prettier-ignore -->
+> > - This is a long long
+> >   long long long long
+> >   long long paragraph.
+> > ```
+> ````
+
+> 
+> <!-- prettier-ignore -->
+> - This is a long long
+>   long long long long
+>   long long paragraph.
+> 
+
+> ````js
+> // prettier-ignore
+> const x = 1,
+> b = 2
+> ````
+```

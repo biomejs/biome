@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 152
 expression: issue8427.js
 ---
 # Input
@@ -68,7 +67,7 @@ issue8427.js:6:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━�
     Failing to specify dependencies can result in Effects not updating correctly when state changes.
     These "stale closures" are a common source of surprising bugs.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency fe to the list.
   
     8 │ ····},·[id,·fe]);
       │           ++++   
@@ -100,7 +99,7 @@ issue8427.js:13:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━
     Failing to specify dependencies can result in Effects not updating correctly when state changes.
     These "stale closures" are a common source of surprising bugs.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency fetchEntity to the list.
   
     15 │ ····},·[id,·fetchEntity])
        │           +++++++++++++  

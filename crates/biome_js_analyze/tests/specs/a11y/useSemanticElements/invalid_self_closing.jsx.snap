@@ -504,25 +504,6 @@ invalid_self_closing.jsx:31:10 lint/a11y/useSemanticElements ━━━━━━�
 ```
 
 ```
-invalid_self_closing.jsx:32:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The elements with this role can be changed to the following elements:
-    <div>
-    <span>
-  
-    30 │     <div role="term" />
-    31 │     <div role="textbox" />
-  > 32 │     <div role="generic" />
-       │          ^^^^^^^^^^^^^^
-    33 │     <div role="caption" />
-    34 │     <div role="main" />
-  
-  i For examples and more information, see WAI-ARIA Roles
-  
-
-```
-
-```
 invalid_self_closing.jsx:33:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The elements with this role can be changed to the following elements:

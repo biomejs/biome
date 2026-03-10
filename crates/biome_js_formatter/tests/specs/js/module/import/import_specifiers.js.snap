@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/module/import/import_specifiers.js
 ---
+
 # Input
 
 ```js
@@ -63,6 +64,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```js
@@ -108,6 +110,7 @@ import { a as b } from "looooooooooooooooooooooooooooooooooooooooooooooooooooooo
 import a, {
 	loooooooooooooooooooooong,
 } from "loooooooooooooooooooooooooooooooooooooooooooooooonnoong";
+
 ```
 
 # Lines exceeding max width of 80 characters

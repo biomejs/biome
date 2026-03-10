@@ -1,0 +1,199 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<div style:background-color="blue">Blue background</div>
+<div style:font-size="16px" style:line-height="1.5">Kebab case props</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteStyleDirective {
+                        style_token: STYLE_KW@5..10 "style" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@10..11 ":" [] [],
+                            property: SvelteLiteral {
+                                value_token: HTML_LITERAL@11..27 "background-color" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@27..28 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@28..34 "\"blue\"" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@34..35 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@35..50 "Blue background" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@50..51 "<" [] [],
+                slash_token: SLASH@51..52 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@52..55 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@55..56 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@56..58 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@58..62 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    SvelteStyleDirective {
+                        style_token: STYLE_KW@62..67 "style" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@67..68 ":" [] [],
+                            property: SvelteLiteral {
+                                value_token: HTML_LITERAL@68..77 "font-size" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@77..78 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@78..85 "\"16px\"" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                    },
+                    SvelteStyleDirective {
+                        style_token: STYLE_KW@85..90 "style" [] [],
+                        value: SvelteDirectiveValue {
+                            colon_token: COLON@90..91 ":" [] [],
+                            property: SvelteLiteral {
+                                value_token: HTML_LITERAL@91..102 "line-height" [] [],
+                            },
+                            modifiers: SvelteDirectiveModifierList [],
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@102..103 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@103..108 "\"1.5\"" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@108..109 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@109..125 "Kebab case props" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@125..126 "<" [] [],
+                slash_token: SLASH@126..127 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@127..130 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@130..131 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@131..132 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..132
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..131
+    0: HTML_ELEMENT@0..56
+      0: HTML_OPENING_ELEMENT@0..35
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..34
+          0: SVELTE_STYLE_DIRECTIVE@5..34
+            0: STYLE_KW@5..10 "style" [] []
+            1: SVELTE_DIRECTIVE_VALUE@10..34
+              0: COLON@10..11 ":" [] []
+              1: SVELTE_LITERAL@11..27
+                0: HTML_LITERAL@11..27 "background-color" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@27..27
+              3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@27..34
+                0: EQ@27..28 "=" [] []
+                1: HTML_STRING@28..34
+                  0: HTML_STRING_LITERAL@28..34 "\"blue\"" [] []
+        3: R_ANGLE@34..35 ">" [] []
+      1: HTML_ELEMENT_LIST@35..50
+        0: HTML_CONTENT@35..50
+          0: HTML_LITERAL@35..50 "Blue background" [] []
+      2: HTML_CLOSING_ELEMENT@50..56
+        0: L_ANGLE@50..51 "<" [] []
+        1: SLASH@51..52 "/" [] []
+        2: HTML_TAG_NAME@52..55
+          0: HTML_LITERAL@52..55 "div" [] []
+        3: R_ANGLE@55..56 ">" [] []
+    1: HTML_ELEMENT@56..131
+      0: HTML_OPENING_ELEMENT@56..109
+        0: L_ANGLE@56..58 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@58..62
+          0: HTML_LITERAL@58..62 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@62..108
+          0: SVELTE_STYLE_DIRECTIVE@62..85
+            0: STYLE_KW@62..67 "style" [] []
+            1: SVELTE_DIRECTIVE_VALUE@67..85
+              0: COLON@67..68 ":" [] []
+              1: SVELTE_LITERAL@68..77
+                0: HTML_LITERAL@68..77 "font-size" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@77..77
+              3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@77..85
+                0: EQ@77..78 "=" [] []
+                1: HTML_STRING@78..85
+                  0: HTML_STRING_LITERAL@78..85 "\"16px\"" [] [Whitespace(" ")]
+          1: SVELTE_STYLE_DIRECTIVE@85..108
+            0: STYLE_KW@85..90 "style" [] []
+            1: SVELTE_DIRECTIVE_VALUE@90..108
+              0: COLON@90..91 ":" [] []
+              1: SVELTE_LITERAL@91..102
+                0: HTML_LITERAL@91..102 "line-height" [] []
+              2: SVELTE_DIRECTIVE_MODIFIER_LIST@102..102
+              3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@102..108
+                0: EQ@102..103 "=" [] []
+                1: HTML_STRING@103..108
+                  0: HTML_STRING_LITERAL@103..108 "\"1.5\"" [] []
+        3: R_ANGLE@108..109 ">" [] []
+      1: HTML_ELEMENT_LIST@109..125
+        0: HTML_CONTENT@109..125
+          0: HTML_LITERAL@109..125 "Kebab case props" [] []
+      2: HTML_CLOSING_ELEMENT@125..131
+        0: L_ANGLE@125..126 "<" [] []
+        1: SLASH@126..127 "/" [] []
+        2: HTML_TAG_NAME@127..130
+          0: HTML_LITERAL@127..130 "div" [] []
+        3: R_ANGLE@130..131 ">" [] []
+  4: EOF@131..132 "" [Newline("\n")] []
+
+```

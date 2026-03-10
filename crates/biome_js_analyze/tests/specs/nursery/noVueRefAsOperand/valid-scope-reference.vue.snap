@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-scope-reference.vue
+---
+# Input
+```ts
+import { ref } from 'vue'
+const count = ref(0)
+function foo() {
+  let count = 0
+  count++
+}
+
+```

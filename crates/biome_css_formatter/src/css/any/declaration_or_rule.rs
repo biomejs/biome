@@ -13,6 +13,8 @@ impl FormatRule<AnyCssDeclarationOrRule> for FormatAnyCssDeclarationOrRule {
             AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(node) => node.format().fmt(f),
             AnyCssDeclarationOrRule::CssEmptyDeclaration(node) => node.format().fmt(f),
             AnyCssDeclarationOrRule::CssMetavariable(node) => node.format().fmt(f),
+            AnyCssDeclarationOrRule::ScssDeclaration(node) => node.format().fmt(f),
+            AnyCssDeclarationOrRule::ScssNestingDeclaration(node) => node.format().fmt(f),
         }
     }
 }

@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 152
 expression: issue5914.js
 ---
 # Input
@@ -64,7 +63,7 @@ issue5914.js:14:16 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━�
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency varA to the list.
   
     14 │ ········varB·=·useMemo(()·=>·varA,·[varA])
        │                                     ++++  
@@ -98,7 +97,7 @@ issue5914.js:26:18 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━�
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency varA to the list.
   
     26 │ ····const·varB·=·useMemo(()·=>·varA,·[varA]);
        │                                       ++++   

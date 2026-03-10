@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: svelte/each_complex_combinations.svelte
 ---
+
 # Input
 
 ```svelte
@@ -38,6 +39,7 @@ Bracket same line: false
 Whitespace sensitivity: css
 Indent script and style: false
 Self close void elements: never
+Trailing newline: true
 -----
 
 ```svelte
@@ -54,4 +56,5 @@ Self close void elements: never
 {#each products as product (product.sku)}
 	<div>{product.title}</div>
 {/each}
+
 ```

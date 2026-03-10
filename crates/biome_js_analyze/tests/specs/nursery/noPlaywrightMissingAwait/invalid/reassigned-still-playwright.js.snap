@@ -1,0 +1,40 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: reassigned-still-playwright.js
+---
+# Input
+```js
+/* EC-001 negative: const binding (never reassigned) — should still flag */
+
+test("const playwright locator", async ({ page }) => {
+    const loc = page.locator(".item");
+    expect(loc).toBeVisible();
+});
+
+```
+
+# Diagnostics
+```
+reassigned-still-playwright.js:5:5 lint/nursery/noPlaywrightMissingAwait  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  i Async matcher toBeVisible must be awaited or returned.
+  
+    3 │ test("const playwright locator", async ({ page }) => {
+    4 │     const loc = page.locator(".item");
+  > 5 │     expect(loc).toBeVisible();
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ });
+    7 │ 
+  
+  i Async matchers return a Promise that must be handled.
+  
+  i Add await before the expression or return it from the function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await before the call.
+  
+    5 │ ····await·expect(loc).toBeVisible();
+      │     ++++++                          
+
+```

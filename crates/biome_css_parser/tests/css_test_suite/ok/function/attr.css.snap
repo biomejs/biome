@@ -1,0 +1,3003 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+:root {
+	--basic-usage: attr(data-count);
+	--basic-usage: attr(href);
+
+	--with-type: attr(data-width px);
+	--with-type: attr(data-size rem);
+	--with-type: attr(data-name raw-string);
+	--with-type: attr(id type(<custom-ident>));
+	--with-type: attr(data-count type(<number>));
+	--with-type: attr(data-size type(<length> | <percentage>));
+
+	--with-unknown-unit-type: attr(data-test bogus);
+
+	--with-fallback: attr(data-count type(<number>), 0);
+	--with-fallback: attr(data-width px, inherit);
+	--with-fallback: attr(data-something, "default");
+
+	--syntax-type: attr(data-count type(<number>));
+	--multiple-types: attr(data-size type(<length> | <percentage>));
+
+	/* with fallback */
+	--number-fallback: attr(data-count type(<number>), 0);
+	--ident-fallback: attr(data-width px, inherit);
+	--string-fallback: attr(data-something, "default");
+
+	--interpolated: " (source: " attr(cite) ") ";
+
+	--percentage: attr(data-percentage %, 100%);
+
+	--comma-separated-multiplier: attr(data-size type(<length>#));
+	--space-separated-multiplier: attr(data-size type(<length>+));
+	--multiple-separators: attr(data-size type(<length># | <percentage>+));
+
+	/* syntax types */
+	--angle: attr(data-angle type(<angle>));
+	--color: attr(data-color type(<color>));
+	--custom-ident: attr(data-custom-ident type(<custom-ident>));
+	--image: attr(data-image type(<image>));
+	--integer: attr(data-integer type(<integer>));
+	--length: attr(data-length type(<length>));
+	--length-percentage: attr(data-length-percentage type(<length-percentage>));
+	--number: attr(data-number type(<number>));
+	--percentage: attr(data-percentage type(<percentage>));
+	--resolution: attr(data-resolution type(<resolution>));
+	--string: attr(data-string type(<string>));
+	--time: attr(data-time type(<time>));
+	--url: attr(data-url type(<url>));
+	--transform-function: attr(data-transform-function type(<transform-function>));
+
+	--unknown-type: attr(data-unknown-type type(<unknown>));
+
+	a: attr(data-test type(<transform-list>));
+	p: attr(test type(rem));
+	p: attr(test raw-string);
+	p: attr(test number);
+	p: attr(test type(<percentage> | auto));
+	p: attr(test type(red | blue | green));
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoClassSelector {
+                            colon_token: COLON@0..1 ":" [] [],
+                            class: CssPseudoClassIdentifier {
+                                name: CssIdentifier {
+                                    value_token: IDENT@1..6 "root" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@6..7 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@7..22 "--basic-usage" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@22..24 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@24..28 "attr" [] [],
+                                        l_paren_token: L_PAREN@28..29 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@29..39 "data-count" [] [],
+                                            },
+                                        ],
+                                        attr_type: missing (optional),
+                                        fallback_value: missing (optional),
+                                        r_paren_token: R_PAREN@39..40 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@40..41 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@41..56 "--basic-usage" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@56..58 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@58..62 "attr" [] [],
+                                        l_paren_token: L_PAREN@62..63 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@63..67 "href" [] [],
+                                            },
+                                        ],
+                                        attr_type: missing (optional),
+                                        fallback_value: missing (optional),
+                                        r_paren_token: R_PAREN@67..68 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@68..69 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@69..83 "--with-type" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@83..85 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@85..89 "attr" [] [],
+                                        l_paren_token: L_PAREN@89..90 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@90..101 "data-width" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssRegularAttrUnit {
+                                            unit_token: IDENT@101..103 "px" [] [],
+                                        },
+                                        fallback_value: missing (optional),
+                                        r_paren_token: R_PAREN@103..104 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@104..105 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@105..118 "--with-type" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@118..120 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@120..124 "attr" [] [],
+                                        l_paren_token: L_PAREN@124..125 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@125..135 "data-size" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssRegularAttrUnit {
+                                            unit_token: IDENT@135..138 "rem" [] [],
+                                        },
+                                        fallback_value: missing (optional),
+                                        r_paren_token: R_PAREN@138..139 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@139..140 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@140..153 "--with-type" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@153..155 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@155..159 "attr" [] [],
+                                        l_paren_token: L_PAREN@159..160 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@160..170 "data-name" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssRawStringDeclarator {
+                                            raw_string_token: RAW_STRING_KW@170..180 "raw-string" [] [],
+                                        },
+                                        fallback_value: missing (optional),
+                                        r_paren_token: R_PAREN@180..181 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@181..182 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@182..195 "--with-type" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@195..197 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@197..201 "attr" [] [],
+                                        l_paren_token: L_PAREN@201..202 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@202..205 "id" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssTypeFunction {
+                                            name_token: TYPE_KW@205..209 "type" [] [],
+                                            l_paren_token: L_PAREN@209..210 "(" [] [],
+                                            ty: CssSyntaxComponentList [
+                                                CssSyntaxComponent {
+                                                    component: CssSyntaxType {
+                                                        l_angle_token: L_ANGLE@210..211 "<" [] [],
+                                                        type_name: CssRegularSyntaxTypeName {
+                                                            name_token: IDENT@211..223 "custom-ident" [] [],
+                                                        },
+                                                        r_angle_token: R_ANGLE@223..224 ">" [] [],
+                                                    },
+                                                    multiplier: missing (optional),
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@224..225 ")" [] [],
+                                        },
+                                        fallback_value: missing (optional),
+                                        r_paren_token: R_PAREN@225..226 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@226..227 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@227..240 "--with-type" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@240..242 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@242..246 "attr" [] [],
+                                        l_paren_token: L_PAREN@246..247 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@247..258 "data-count" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssTypeFunction {
+                                            name_token: TYPE_KW@258..262 "type" [] [],
+                                            l_paren_token: L_PAREN@262..263 "(" [] [],
+                                            ty: CssSyntaxComponentList [
+                                                CssSyntaxComponent {
+                                                    component: CssSyntaxType {
+                                                        l_angle_token: L_ANGLE@263..264 "<" [] [],
+                                                        type_name: CssRegularSyntaxTypeName {
+                                                            name_token: IDENT@264..270 "number" [] [],
+                                                        },
+                                                        r_angle_token: R_ANGLE@270..271 ">" [] [],
+                                                    },
+                                                    multiplier: missing (optional),
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@271..272 ")" [] [],
+                                        },
+                                        fallback_value: missing (optional),
+                                        r_paren_token: R_PAREN@272..273 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@273..274 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@274..287 "--with-type" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@287..289 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@289..293 "attr" [] [],
+                                        l_paren_token: L_PAREN@293..294 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@294..304 "data-size" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssTypeFunction {
+                                            name_token: TYPE_KW@304..308 "type" [] [],
+                                            l_paren_token: L_PAREN@308..309 "(" [] [],
+                                            ty: CssSyntaxComponentList [
+                                                CssSyntaxComponent {
+                                                    component: CssSyntaxType {
+                                                        l_angle_token: L_ANGLE@309..310 "<" [] [],
+                                                        type_name: CssRegularSyntaxTypeName {
+                                                            name_token: IDENT@310..316 "length" [] [],
+                                                        },
+                                                        r_angle_token: R_ANGLE@316..318 ">" [] [Whitespace(" ")],
+                                                    },
+                                                    multiplier: missing (optional),
+                                                },
+                                                PIPE@318..320 "|" [] [Whitespace(" ")],
+                                                CssSyntaxComponent {
+                                                    component: CssSyntaxType {
+                                                        l_angle_token: L_ANGLE@320..321 "<" [] [],
+                                                        type_name: CssRegularSyntaxTypeName {
+                                                            name_token: IDENT@321..331 "percentage" [] [],
+                                                        },
+                                                        r_angle_token: R_ANGLE@331..332 ">" [] [],
+                                                    },
+                                                    multiplier: missing (optional),
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@332..333 ")" [] [],
+                                        },
+                                        fallback_value: missing (optional),
+                                        r_paren_token: R_PAREN@333..334 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@334..335 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@335..362 "--with-unknown-unit-type" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@362..364 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@364..368 "attr" [] [],
+                                        l_paren_token: L_PAREN@368..369 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@369..379 "data-test" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssUnknownAttrUnit {
+                                            unit_token: IDENT@379..384 "bogus" [] [],
+                                        },
+                                        fallback_value: missing (optional),
+                                        r_paren_token: R_PAREN@384..385 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@385..386 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@386..404 "--with-fallback" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@404..406 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@406..410 "attr" [] [],
+                                        l_paren_token: L_PAREN@410..411 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@411..422 "data-count" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssTypeFunction {
+                                            name_token: TYPE_KW@422..426 "type" [] [],
+                                            l_paren_token: L_PAREN@426..427 "(" [] [],
+                                            ty: CssSyntaxComponentList [
+                                                CssSyntaxComponent {
+                                                    component: CssSyntaxType {
+                                                        l_angle_token: L_ANGLE@427..428 "<" [] [],
+                                                        type_name: CssRegularSyntaxTypeName {
+                                                            name_token: IDENT@428..434 "number" [] [],
+                                                        },
+                                                        r_angle_token: R_ANGLE@434..435 ">" [] [],
+                                                    },
+                                                    multiplier: missing (optional),
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@435..436 ")" [] [],
+                                        },
+                                        fallback_value: CssAttrFallbackValue {
+                                            comma_token: COMMA@436..438 "," [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssNumber {
+                                                    value_token: CSS_NUMBER_LITERAL@438..439 "0" [] [],
+                                                },
+                                            ],
+                                        },
+                                        r_paren_token: R_PAREN@439..440 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@440..441 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@441..458 "--with-fallback" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@458..460 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@460..464 "attr" [] [],
+                                        l_paren_token: L_PAREN@464..465 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@465..476 "data-width" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssRegularAttrUnit {
+                                            unit_token: IDENT@476..478 "px" [] [],
+                                        },
+                                        fallback_value: CssAttrFallbackValue {
+                                            comma_token: COMMA@478..480 "," [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@480..487 "inherit" [] [],
+                                                },
+                                            ],
+                                        },
+                                        r_paren_token: R_PAREN@487..488 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@488..489 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@489..506 "--with-fallback" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@506..508 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@508..512 "attr" [] [],
+                                        l_paren_token: L_PAREN@512..513 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@513..527 "data-something" [] [],
+                                            },
+                                        ],
+                                        attr_type: missing (optional),
+                                        fallback_value: CssAttrFallbackValue {
+                                            comma_token: COMMA@527..529 "," [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssString {
+                                                    value_token: CSS_STRING_LITERAL@529..538 "\"default\"" [] [],
+                                                },
+                                            ],
+                                        },
+                                        r_paren_token: R_PAREN@538..539 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@539..540 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@540..556 "--syntax-type" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@556..558 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@558..562 "attr" [] [],
+                                        l_paren_token: L_PAREN@562..563 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@563..574 "data-count" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssTypeFunction {
+                                            name_token: TYPE_KW@574..578 "type" [] [],
+                                            l_paren_token: L_PAREN@578..579 "(" [] [],
+                                            ty: CssSyntaxComponentList [
+                                                CssSyntaxComponent {
+                                                    component: CssSyntaxType {
+                                                        l_angle_token: L_ANGLE@579..580 "<" [] [],
+                                                        type_name: CssRegularSyntaxTypeName {
+                                                            name_token: IDENT@580..586 "number" [] [],
+                                                        },
+                                                        r_angle_token: R_ANGLE@586..587 ">" [] [],
+                                                    },
+                                                    multiplier: missing (optional),
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@587..588 ")" [] [],
+                                        },
+                                        fallback_value: missing (optional),
+                                        r_paren_token: R_PAREN@588..589 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@589..590 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@590..608 "--multiple-types" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@608..610 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@610..614 "attr" [] [],
+                                        l_paren_token: L_PAREN@614..615 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@615..625 "data-size" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssTypeFunction {
+                                            name_token: TYPE_KW@625..629 "type" [] [],
+                                            l_paren_token: L_PAREN@629..630 "(" [] [],
+                                            ty: CssSyntaxComponentList [
+                                                CssSyntaxComponent {
+                                                    component: CssSyntaxType {
+                                                        l_angle_token: L_ANGLE@630..631 "<" [] [],
+                                                        type_name: CssRegularSyntaxTypeName {
+                                                            name_token: IDENT@631..637 "length" [] [],
+                                                        },
+                                                        r_angle_token: R_ANGLE@637..639 ">" [] [Whitespace(" ")],
+                                                    },
+                                                    multiplier: missing (optional),
+                                                },
+                                                PIPE@639..641 "|" [] [Whitespace(" ")],
+                                                CssSyntaxComponent {
+                                                    component: CssSyntaxType {
+                                                        l_angle_token: L_ANGLE@641..642 "<" [] [],
+                                                        type_name: CssRegularSyntaxTypeName {
+                                                            name_token: IDENT@642..652 "percentage" [] [],
+                                                        },
+                                                        r_angle_token: R_ANGLE@652..653 ">" [] [],
+                                                    },
+                                                    multiplier: missing (optional),
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@653..654 ")" [] [],
+                                        },
+                                        fallback_value: missing (optional),
+                                        r_paren_token: R_PAREN@654..655 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@655..656 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@656..697 "--number-fallback" [Newline("\n"), Newline("\n"), Whitespace("\t"), Comments("/* with fallback */"), Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@697..699 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@699..703 "attr" [] [],
+                                        l_paren_token: L_PAREN@703..704 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@704..715 "data-count" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssTypeFunction {
+                                            name_token: TYPE_KW@715..719 "type" [] [],
+                                            l_paren_token: L_PAREN@719..720 "(" [] [],
+                                            ty: CssSyntaxComponentList [
+                                                CssSyntaxComponent {
+                                                    component: CssSyntaxType {
+                                                        l_angle_token: L_ANGLE@720..721 "<" [] [],
+                                                        type_name: CssRegularSyntaxTypeName {
+                                                            name_token: IDENT@721..727 "number" [] [],
+                                                        },
+                                                        r_angle_token: R_ANGLE@727..728 ">" [] [],
+                                                    },
+                                                    multiplier: missing (optional),
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@728..729 ")" [] [],
+                                        },
+                                        fallback_value: CssAttrFallbackValue {
+                                            comma_token: COMMA@729..731 "," [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssNumber {
+                                                    value_token: CSS_NUMBER_LITERAL@731..732 "0" [] [],
+                                                },
+                                            ],
+                                        },
+                                        r_paren_token: R_PAREN@732..733 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@733..734 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@734..752 "--ident-fallback" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@752..754 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@754..758 "attr" [] [],
+                                        l_paren_token: L_PAREN@758..759 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@759..770 "data-width" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssRegularAttrUnit {
+                                            unit_token: IDENT@770..772 "px" [] [],
+                                        },
+                                        fallback_value: CssAttrFallbackValue {
+                                            comma_token: COMMA@772..774 "," [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@774..781 "inherit" [] [],
+                                                },
+                                            ],
+                                        },
+                                        r_paren_token: R_PAREN@781..782 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@782..783 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@783..802 "--string-fallback" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@802..804 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@804..808 "attr" [] [],
+                                        l_paren_token: L_PAREN@808..809 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@809..823 "data-something" [] [],
+                                            },
+                                        ],
+                                        attr_type: missing (optional),
+                                        fallback_value: CssAttrFallbackValue {
+                                            comma_token: COMMA@823..825 "," [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssString {
+                                                    value_token: CSS_STRING_LITERAL@825..834 "\"default\"" [] [],
+                                                },
+                                            ],
+                                        },
+                                        r_paren_token: R_PAREN@834..835 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@835..836 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@836..853 "--interpolated" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@853..855 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssString {
+                                        value_token: CSS_STRING_LITERAL@855..868 "\" (source: \"" [] [Whitespace(" ")],
+                                    },
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@868..872 "attr" [] [],
+                                        l_paren_token: L_PAREN@872..873 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@873..877 "cite" [] [],
+                                            },
+                                        ],
+                                        attr_type: missing (optional),
+                                        fallback_value: missing (optional),
+                                        r_paren_token: R_PAREN@877..879 ")" [] [Whitespace(" ")],
+                                    },
+                                    CssString {
+                                        value_token: CSS_STRING_LITERAL@879..883 "\") \"" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@883..884 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@884..899 "--percentage" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@899..901 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@901..905 "attr" [] [],
+                                        l_paren_token: L_PAREN@905..906 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@906..922 "data-percentage" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssRegularAttrUnit {
+                                            unit_token: IDENT@922..923 "%" [] [],
+                                        },
+                                        fallback_value: CssAttrFallbackValue {
+                                            comma_token: COMMA@923..925 "," [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssPercentage {
+                                                    value_token: CSS_NUMBER_LITERAL@925..928 "100" [] [],
+                                                    percent_token: PERCENT@928..929 "%" [] [],
+                                                },
+                                            ],
+                                        },
+                                        r_paren_token: R_PAREN@929..930 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@930..931 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@931..962 "--comma-separated-multiplier" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@962..964 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@964..968 "attr" [] [],
+                                        l_paren_token: L_PAREN@968..969 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@969..979 "data-size" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssTypeFunction {
+                                            name_token: TYPE_KW@979..983 "type" [] [],
+                                            l_paren_token: L_PAREN@983..984 "(" [] [],
+                                            ty: CssSyntaxComponentList [
+                                                CssSyntaxComponent {
+                                                    component: CssSyntaxType {
+                                                        l_angle_token: L_ANGLE@984..985 "<" [] [],
+                                                        type_name: CssRegularSyntaxTypeName {
+                                                            name_token: IDENT@985..991 "length" [] [],
+                                                        },
+                                                        r_angle_token: R_ANGLE@991..992 ">" [] [],
+                                                    },
+                                                    multiplier: CssSyntaxMultiplier {
+                                                        multiplier: HASH@992..993 "#" [] [],
+                                                    },
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@993..994 ")" [] [],
+                                        },
+                                        fallback_value: missing (optional),
+                                        r_paren_token: R_PAREN@994..995 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@995..996 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@996..1026 "--space-separated-multiplier" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@1026..1028 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@1028..1032 "attr" [] [],
+                                        l_paren_token: L_PAREN@1032..1033 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@1033..1043 "data-size" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssTypeFunction {
+                                            name_token: TYPE_KW@1043..1047 "type" [] [],
+                                            l_paren_token: L_PAREN@1047..1048 "(" [] [],
+                                            ty: CssSyntaxComponentList [
+                                                CssSyntaxComponent {
+                                                    component: CssSyntaxType {
+                                                        l_angle_token: L_ANGLE@1048..1049 "<" [] [],
+                                                        type_name: CssRegularSyntaxTypeName {
+                                                            name_token: IDENT@1049..1055 "length" [] [],
+                                                        },
+                                                        r_angle_token: R_ANGLE@1055..1056 ">" [] [],
+                                                    },
+                                                    multiplier: CssSyntaxMultiplier {
+                                                        multiplier: PLUS@1056..1057 "+" [] [],
+                                                    },
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@1057..1058 ")" [] [],
+                                        },
+                                        fallback_value: missing (optional),
+                                        r_paren_token: R_PAREN@1058..1059 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@1059..1060 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@1060..1083 "--multiple-separators" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@1083..1085 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@1085..1089 "attr" [] [],
+                                        l_paren_token: L_PAREN@1089..1090 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@1090..1100 "data-size" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssTypeFunction {
+                                            name_token: TYPE_KW@1100..1104 "type" [] [],
+                                            l_paren_token: L_PAREN@1104..1105 "(" [] [],
+                                            ty: CssSyntaxComponentList [
+                                                CssSyntaxComponent {
+                                                    component: CssSyntaxType {
+                                                        l_angle_token: L_ANGLE@1105..1106 "<" [] [],
+                                                        type_name: CssRegularSyntaxTypeName {
+                                                            name_token: IDENT@1106..1112 "length" [] [],
+                                                        },
+                                                        r_angle_token: R_ANGLE@1112..1113 ">" [] [],
+                                                    },
+                                                    multiplier: CssSyntaxMultiplier {
+                                                        multiplier: HASH@1113..1115 "#" [] [Whitespace(" ")],
+                                                    },
+                                                },
+                                                PIPE@1115..1117 "|" [] [Whitespace(" ")],
+                                                CssSyntaxComponent {
+                                                    component: CssSyntaxType {
+                                                        l_angle_token: L_ANGLE@1117..1118 "<" [] [],
+                                                        type_name: CssRegularSyntaxTypeName {
+                                                            name_token: IDENT@1118..1128 "percentage" [] [],
+                                                        },
+                                                        r_angle_token: R_ANGLE@1128..1129 ">" [] [],
+                                                    },
+                                                    multiplier: CssSyntaxMultiplier {
+                                                        multiplier: PLUS@1129..1130 "+" [] [],
+                                                    },
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@1130..1131 ")" [] [],
+                                        },
+                                        fallback_value: missing (optional),
+                                        r_paren_token: R_PAREN@1131..1132 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@1132..1133 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@1133..1163 "--angle" [Newline("\n"), Newline("\n"), Whitespace("\t"), Comments("/* syntax types */"), Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@1163..1165 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@1165..1169 "attr" [] [],
+                                        l_paren_token: L_PAREN@1169..1170 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@1170..1181 "data-angle" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssTypeFunction {
+                                            name_token: TYPE_KW@1181..1185 "type" [] [],
+                                            l_paren_token: L_PAREN@1185..1186 "(" [] [],
+                                            ty: CssSyntaxComponentList [
+                                                CssSyntaxComponent {
+                                                    component: CssSyntaxType {
+                                                        l_angle_token: L_ANGLE@1186..1187 "<" [] [],
+                                                        type_name: CssRegularSyntaxTypeName {
+                                                            name_token: IDENT@1187..1192 "angle" [] [],
+                                                        },
+                                                        r_angle_token: R_ANGLE@1192..1193 ">" [] [],
+                                                    },
+                                                    multiplier: missing (optional),
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@1193..1194 ")" [] [],
+                                        },
+                                        fallback_value: missing (optional),
+                                        r_paren_token: R_PAREN@1194..1195 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@1195..1196 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@1196..1205 "--color" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@1205..1207 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@1207..1211 "attr" [] [],
+                                        l_paren_token: L_PAREN@1211..1212 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@1212..1223 "data-color" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssTypeFunction {
+                                            name_token: TYPE_KW@1223..1227 "type" [] [],
+                                            l_paren_token: L_PAREN@1227..1228 "(" [] [],
+                                            ty: CssSyntaxComponentList [
+                                                CssSyntaxComponent {
+                                                    component: CssSyntaxType {
+                                                        l_angle_token: L_ANGLE@1228..1229 "<" [] [],
+                                                        type_name: CssRegularSyntaxTypeName {
+                                                            name_token: IDENT@1229..1234 "color" [] [],
+                                                        },
+                                                        r_angle_token: R_ANGLE@1234..1235 ">" [] [],
+                                                    },
+                                                    multiplier: missing (optional),
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@1235..1236 ")" [] [],
+                                        },
+                                        fallback_value: missing (optional),
+                                        r_paren_token: R_PAREN@1236..1237 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@1237..1238 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@1238..1254 "--custom-ident" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@1254..1256 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@1256..1260 "attr" [] [],
+                                        l_paren_token: L_PAREN@1260..1261 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@1261..1279 "data-custom-ident" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssTypeFunction {
+                                            name_token: TYPE_KW@1279..1283 "type" [] [],
+                                            l_paren_token: L_PAREN@1283..1284 "(" [] [],
+                                            ty: CssSyntaxComponentList [
+                                                CssSyntaxComponent {
+                                                    component: CssSyntaxType {
+                                                        l_angle_token: L_ANGLE@1284..1285 "<" [] [],
+                                                        type_name: CssRegularSyntaxTypeName {
+                                                            name_token: IDENT@1285..1297 "custom-ident" [] [],
+                                                        },
+                                                        r_angle_token: R_ANGLE@1297..1298 ">" [] [],
+                                                    },
+                                                    multiplier: missing (optional),
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@1298..1299 ")" [] [],
+                                        },
+                                        fallback_value: missing (optional),
+                                        r_paren_token: R_PAREN@1299..1300 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@1300..1301 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@1301..1310 "--image" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@1310..1312 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@1312..1316 "attr" [] [],
+                                        l_paren_token: L_PAREN@1316..1317 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@1317..1328 "data-image" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssTypeFunction {
+                                            name_token: TYPE_KW@1328..1332 "type" [] [],
+                                            l_paren_token: L_PAREN@1332..1333 "(" [] [],
+                                            ty: CssSyntaxComponentList [
+                                                CssSyntaxComponent {
+                                                    component: CssSyntaxType {
+                                                        l_angle_token: L_ANGLE@1333..1334 "<" [] [],
+                                                        type_name: CssRegularSyntaxTypeName {
+                                                            name_token: IDENT@1334..1339 "image" [] [],
+                                                        },
+                                                        r_angle_token: R_ANGLE@1339..1340 ">" [] [],
+                                                    },
+                                                    multiplier: missing (optional),
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@1340..1341 ")" [] [],
+                                        },
+                                        fallback_value: missing (optional),
+                                        r_paren_token: R_PAREN@1341..1342 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@1342..1343 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@1343..1354 "--integer" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@1354..1356 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@1356..1360 "attr" [] [],
+                                        l_paren_token: L_PAREN@1360..1361 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@1361..1374 "data-integer" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssTypeFunction {
+                                            name_token: TYPE_KW@1374..1378 "type" [] [],
+                                            l_paren_token: L_PAREN@1378..1379 "(" [] [],
+                                            ty: CssSyntaxComponentList [
+                                                CssSyntaxComponent {
+                                                    component: CssSyntaxType {
+                                                        l_angle_token: L_ANGLE@1379..1380 "<" [] [],
+                                                        type_name: CssRegularSyntaxTypeName {
+                                                            name_token: IDENT@1380..1387 "integer" [] [],
+                                                        },
+                                                        r_angle_token: R_ANGLE@1387..1388 ">" [] [],
+                                                    },
+                                                    multiplier: missing (optional),
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@1388..1389 ")" [] [],
+                                        },
+                                        fallback_value: missing (optional),
+                                        r_paren_token: R_PAREN@1389..1390 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@1390..1391 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@1391..1401 "--length" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@1401..1403 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@1403..1407 "attr" [] [],
+                                        l_paren_token: L_PAREN@1407..1408 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@1408..1420 "data-length" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssTypeFunction {
+                                            name_token: TYPE_KW@1420..1424 "type" [] [],
+                                            l_paren_token: L_PAREN@1424..1425 "(" [] [],
+                                            ty: CssSyntaxComponentList [
+                                                CssSyntaxComponent {
+                                                    component: CssSyntaxType {
+                                                        l_angle_token: L_ANGLE@1425..1426 "<" [] [],
+                                                        type_name: CssRegularSyntaxTypeName {
+                                                            name_token: IDENT@1426..1432 "length" [] [],
+                                                        },
+                                                        r_angle_token: R_ANGLE@1432..1433 ">" [] [],
+                                                    },
+                                                    multiplier: missing (optional),
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@1433..1434 ")" [] [],
+                                        },
+                                        fallback_value: missing (optional),
+                                        r_paren_token: R_PAREN@1434..1435 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@1435..1436 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@1436..1457 "--length-percentage" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@1457..1459 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@1459..1463 "attr" [] [],
+                                        l_paren_token: L_PAREN@1463..1464 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@1464..1487 "data-length-percentage" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssTypeFunction {
+                                            name_token: TYPE_KW@1487..1491 "type" [] [],
+                                            l_paren_token: L_PAREN@1491..1492 "(" [] [],
+                                            ty: CssSyntaxComponentList [
+                                                CssSyntaxComponent {
+                                                    component: CssSyntaxType {
+                                                        l_angle_token: L_ANGLE@1492..1493 "<" [] [],
+                                                        type_name: CssRegularSyntaxTypeName {
+                                                            name_token: IDENT@1493..1510 "length-percentage" [] [],
+                                                        },
+                                                        r_angle_token: R_ANGLE@1510..1511 ">" [] [],
+                                                    },
+                                                    multiplier: missing (optional),
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@1511..1512 ")" [] [],
+                                        },
+                                        fallback_value: missing (optional),
+                                        r_paren_token: R_PAREN@1512..1513 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@1513..1514 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@1514..1524 "--number" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@1524..1526 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@1526..1530 "attr" [] [],
+                                        l_paren_token: L_PAREN@1530..1531 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@1531..1543 "data-number" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssTypeFunction {
+                                            name_token: TYPE_KW@1543..1547 "type" [] [],
+                                            l_paren_token: L_PAREN@1547..1548 "(" [] [],
+                                            ty: CssSyntaxComponentList [
+                                                CssSyntaxComponent {
+                                                    component: CssSyntaxType {
+                                                        l_angle_token: L_ANGLE@1548..1549 "<" [] [],
+                                                        type_name: CssRegularSyntaxTypeName {
+                                                            name_token: IDENT@1549..1555 "number" [] [],
+                                                        },
+                                                        r_angle_token: R_ANGLE@1555..1556 ">" [] [],
+                                                    },
+                                                    multiplier: missing (optional),
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@1556..1557 ")" [] [],
+                                        },
+                                        fallback_value: missing (optional),
+                                        r_paren_token: R_PAREN@1557..1558 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@1558..1559 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@1559..1573 "--percentage" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@1573..1575 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@1575..1579 "attr" [] [],
+                                        l_paren_token: L_PAREN@1579..1580 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@1580..1596 "data-percentage" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssTypeFunction {
+                                            name_token: TYPE_KW@1596..1600 "type" [] [],
+                                            l_paren_token: L_PAREN@1600..1601 "(" [] [],
+                                            ty: CssSyntaxComponentList [
+                                                CssSyntaxComponent {
+                                                    component: CssSyntaxType {
+                                                        l_angle_token: L_ANGLE@1601..1602 "<" [] [],
+                                                        type_name: CssRegularSyntaxTypeName {
+                                                            name_token: IDENT@1602..1612 "percentage" [] [],
+                                                        },
+                                                        r_angle_token: R_ANGLE@1612..1613 ">" [] [],
+                                                    },
+                                                    multiplier: missing (optional),
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@1613..1614 ")" [] [],
+                                        },
+                                        fallback_value: missing (optional),
+                                        r_paren_token: R_PAREN@1614..1615 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@1615..1616 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@1616..1630 "--resolution" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@1630..1632 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@1632..1636 "attr" [] [],
+                                        l_paren_token: L_PAREN@1636..1637 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@1637..1653 "data-resolution" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssTypeFunction {
+                                            name_token: TYPE_KW@1653..1657 "type" [] [],
+                                            l_paren_token: L_PAREN@1657..1658 "(" [] [],
+                                            ty: CssSyntaxComponentList [
+                                                CssSyntaxComponent {
+                                                    component: CssSyntaxType {
+                                                        l_angle_token: L_ANGLE@1658..1659 "<" [] [],
+                                                        type_name: CssRegularSyntaxTypeName {
+                                                            name_token: IDENT@1659..1669 "resolution" [] [],
+                                                        },
+                                                        r_angle_token: R_ANGLE@1669..1670 ">" [] [],
+                                                    },
+                                                    multiplier: missing (optional),
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@1670..1671 ")" [] [],
+                                        },
+                                        fallback_value: missing (optional),
+                                        r_paren_token: R_PAREN@1671..1672 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@1672..1673 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@1673..1683 "--string" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@1683..1685 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@1685..1689 "attr" [] [],
+                                        l_paren_token: L_PAREN@1689..1690 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@1690..1702 "data-string" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssTypeFunction {
+                                            name_token: TYPE_KW@1702..1706 "type" [] [],
+                                            l_paren_token: L_PAREN@1706..1707 "(" [] [],
+                                            ty: CssSyntaxComponentList [
+                                                CssSyntaxComponent {
+                                                    component: CssSyntaxType {
+                                                        l_angle_token: L_ANGLE@1707..1708 "<" [] [],
+                                                        type_name: CssRegularSyntaxTypeName {
+                                                            name_token: IDENT@1708..1714 "string" [] [],
+                                                        },
+                                                        r_angle_token: R_ANGLE@1714..1715 ">" [] [],
+                                                    },
+                                                    multiplier: missing (optional),
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@1715..1716 ")" [] [],
+                                        },
+                                        fallback_value: missing (optional),
+                                        r_paren_token: R_PAREN@1716..1717 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@1717..1718 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@1718..1726 "--time" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@1726..1728 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@1728..1732 "attr" [] [],
+                                        l_paren_token: L_PAREN@1732..1733 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@1733..1743 "data-time" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssTypeFunction {
+                                            name_token: TYPE_KW@1743..1747 "type" [] [],
+                                            l_paren_token: L_PAREN@1747..1748 "(" [] [],
+                                            ty: CssSyntaxComponentList [
+                                                CssSyntaxComponent {
+                                                    component: CssSyntaxType {
+                                                        l_angle_token: L_ANGLE@1748..1749 "<" [] [],
+                                                        type_name: CssRegularSyntaxTypeName {
+                                                            name_token: IDENT@1749..1753 "time" [] [],
+                                                        },
+                                                        r_angle_token: R_ANGLE@1753..1754 ">" [] [],
+                                                    },
+                                                    multiplier: missing (optional),
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@1754..1755 ")" [] [],
+                                        },
+                                        fallback_value: missing (optional),
+                                        r_paren_token: R_PAREN@1755..1756 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@1756..1757 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@1757..1764 "--url" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@1764..1766 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@1766..1770 "attr" [] [],
+                                        l_paren_token: L_PAREN@1770..1771 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@1771..1780 "data-url" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssTypeFunction {
+                                            name_token: TYPE_KW@1780..1784 "type" [] [],
+                                            l_paren_token: L_PAREN@1784..1785 "(" [] [],
+                                            ty: CssSyntaxComponentList [
+                                                CssSyntaxComponent {
+                                                    component: CssSyntaxType {
+                                                        l_angle_token: L_ANGLE@1785..1786 "<" [] [],
+                                                        type_name: CssRegularSyntaxTypeName {
+                                                            name_token: IDENT@1786..1789 "url" [] [],
+                                                        },
+                                                        r_angle_token: R_ANGLE@1789..1790 ">" [] [],
+                                                    },
+                                                    multiplier: missing (optional),
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@1790..1791 ")" [] [],
+                                        },
+                                        fallback_value: missing (optional),
+                                        r_paren_token: R_PAREN@1791..1792 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@1792..1793 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@1793..1815 "--transform-function" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@1815..1817 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@1817..1821 "attr" [] [],
+                                        l_paren_token: L_PAREN@1821..1822 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@1822..1846 "data-transform-function" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssTypeFunction {
+                                            name_token: TYPE_KW@1846..1850 "type" [] [],
+                                            l_paren_token: L_PAREN@1850..1851 "(" [] [],
+                                            ty: CssSyntaxComponentList [
+                                                CssSyntaxComponent {
+                                                    component: CssSyntaxType {
+                                                        l_angle_token: L_ANGLE@1851..1852 "<" [] [],
+                                                        type_name: CssRegularSyntaxTypeName {
+                                                            name_token: IDENT@1852..1870 "transform-function" [] [],
+                                                        },
+                                                        r_angle_token: R_ANGLE@1870..1871 ">" [] [],
+                                                    },
+                                                    multiplier: missing (optional),
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@1871..1872 ")" [] [],
+                                        },
+                                        fallback_value: missing (optional),
+                                        r_paren_token: R_PAREN@1872..1873 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@1873..1874 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@1874..1891 "--unknown-type" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@1891..1893 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@1893..1897 "attr" [] [],
+                                        l_paren_token: L_PAREN@1897..1898 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@1898..1916 "data-unknown-type" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssTypeFunction {
+                                            name_token: TYPE_KW@1916..1920 "type" [] [],
+                                            l_paren_token: L_PAREN@1920..1921 "(" [] [],
+                                            ty: CssSyntaxComponentList [
+                                                CssSyntaxComponent {
+                                                    component: CssSyntaxType {
+                                                        l_angle_token: L_ANGLE@1921..1922 "<" [] [],
+                                                        type_name: CssUnknownSyntaxTypeName {
+                                                            name_token: IDENT@1922..1929 "unknown" [] [],
+                                                        },
+                                                        r_angle_token: R_ANGLE@1929..1930 ">" [] [],
+                                                    },
+                                                    multiplier: missing (optional),
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@1930..1931 ")" [] [],
+                                        },
+                                        fallback_value: missing (optional),
+                                        r_paren_token: R_PAREN@1931..1932 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@1932..1933 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@1933..1937 "a" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@1937..1939 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@1939..1943 "attr" [] [],
+                                        l_paren_token: L_PAREN@1943..1944 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@1944..1954 "data-test" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssTypeFunction {
+                                            name_token: TYPE_KW@1954..1958 "type" [] [],
+                                            l_paren_token: L_PAREN@1958..1959 "(" [] [],
+                                            ty: CssSyntaxComponentList [
+                                                CssSyntaxComponentWithoutMultiplier {
+                                                    l_angle_token: L_ANGLE@1959..1960 "<" [] [],
+                                                    type_name_token: IDENT@1960..1974 "transform-list" [] [],
+                                                    r_angle_token: R_ANGLE@1974..1975 ">" [] [],
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@1975..1976 ")" [] [],
+                                        },
+                                        fallback_value: missing (optional),
+                                        r_paren_token: R_PAREN@1976..1977 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@1977..1978 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@1978..1981 "p" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@1981..1983 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@1983..1987 "attr" [] [],
+                                        l_paren_token: L_PAREN@1987..1988 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@1988..1993 "test" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssTypeFunction {
+                                            name_token: TYPE_KW@1993..1997 "type" [] [],
+                                            l_paren_token: L_PAREN@1997..1998 "(" [] [],
+                                            ty: CssSyntaxComponentList [
+                                                CssSyntaxComponent {
+                                                    component: CssIdentifier {
+                                                        value_token: IDENT@1998..2001 "rem" [] [],
+                                                    },
+                                                    multiplier: missing (optional),
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@2001..2002 ")" [] [],
+                                        },
+                                        fallback_value: missing (optional),
+                                        r_paren_token: R_PAREN@2002..2003 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@2003..2004 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@2004..2007 "p" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@2007..2009 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@2009..2013 "attr" [] [],
+                                        l_paren_token: L_PAREN@2013..2014 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@2014..2019 "test" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssRawStringDeclarator {
+                                            raw_string_token: RAW_STRING_KW@2019..2029 "raw-string" [] [],
+                                        },
+                                        fallback_value: missing (optional),
+                                        r_paren_token: R_PAREN@2029..2030 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@2030..2031 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@2031..2034 "p" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@2034..2036 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@2036..2040 "attr" [] [],
+                                        l_paren_token: L_PAREN@2040..2041 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@2041..2046 "test" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssNumberDeclarator {
+                                            number_token: NUMBER_KW@2046..2052 "number" [] [],
+                                        },
+                                        fallback_value: missing (optional),
+                                        r_paren_token: R_PAREN@2052..2053 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@2053..2054 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@2054..2057 "p" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@2057..2059 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@2059..2063 "attr" [] [],
+                                        l_paren_token: L_PAREN@2063..2064 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@2064..2069 "test" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssTypeFunction {
+                                            name_token: TYPE_KW@2069..2073 "type" [] [],
+                                            l_paren_token: L_PAREN@2073..2074 "(" [] [],
+                                            ty: CssSyntaxComponentList [
+                                                CssSyntaxComponent {
+                                                    component: CssSyntaxType {
+                                                        l_angle_token: L_ANGLE@2074..2075 "<" [] [],
+                                                        type_name: CssRegularSyntaxTypeName {
+                                                            name_token: IDENT@2075..2085 "percentage" [] [],
+                                                        },
+                                                        r_angle_token: R_ANGLE@2085..2087 ">" [] [Whitespace(" ")],
+                                                    },
+                                                    multiplier: missing (optional),
+                                                },
+                                                PIPE@2087..2089 "|" [] [Whitespace(" ")],
+                                                CssSyntaxComponent {
+                                                    component: CssIdentifier {
+                                                        value_token: IDENT@2089..2093 "auto" [] [],
+                                                    },
+                                                    multiplier: missing (optional),
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@2093..2094 ")" [] [],
+                                        },
+                                        fallback_value: missing (optional),
+                                        r_paren_token: R_PAREN@2094..2095 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@2095..2096 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@2096..2099 "p" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@2099..2101 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@2101..2105 "attr" [] [],
+                                        l_paren_token: L_PAREN@2105..2106 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@2106..2111 "test" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssTypeFunction {
+                                            name_token: TYPE_KW@2111..2115 "type" [] [],
+                                            l_paren_token: L_PAREN@2115..2116 "(" [] [],
+                                            ty: CssSyntaxComponentList [
+                                                CssSyntaxComponent {
+                                                    component: CssIdentifier {
+                                                        value_token: IDENT@2116..2120 "red" [] [Whitespace(" ")],
+                                                    },
+                                                    multiplier: missing (optional),
+                                                },
+                                                PIPE@2120..2122 "|" [] [Whitespace(" ")],
+                                                CssSyntaxComponent {
+                                                    component: CssIdentifier {
+                                                        value_token: IDENT@2122..2127 "blue" [] [Whitespace(" ")],
+                                                    },
+                                                    multiplier: missing (optional),
+                                                },
+                                                PIPE@2127..2129 "|" [] [Whitespace(" ")],
+                                                CssSyntaxComponent {
+                                                    component: CssIdentifier {
+                                                        value_token: IDENT@2129..2134 "green" [] [],
+                                                    },
+                                                    multiplier: missing (optional),
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@2134..2135 ")" [] [],
+                                        },
+                                        fallback_value: missing (optional),
+                                        r_paren_token: R_PAREN@2135..2136 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@2136..2137 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@2137..2139 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@2139..2140 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..2140
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..2139
+    0: CSS_QUALIFIED_RULE@0..2139
+      0: CSS_SELECTOR_LIST@0..6
+        0: CSS_COMPOUND_SELECTOR@0..6
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..6
+            0: CSS_PSEUDO_CLASS_SELECTOR@0..6
+              0: COLON@0..1 ":" [] []
+              1: CSS_PSEUDO_CLASS_IDENTIFIER@1..6
+                0: CSS_IDENTIFIER@1..6
+                  0: IDENT@1..6 "root" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@6..2139
+        0: L_CURLY@6..7 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@7..2137
+          0: CSS_DECLARATION_WITH_SEMICOLON@7..41
+            0: CSS_DECLARATION@7..40
+              0: CSS_GENERIC_PROPERTY@7..40
+                0: CSS_DASHED_IDENTIFIER@7..22
+                  0: IDENT@7..22 "--basic-usage" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@22..24 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@24..40
+                  0: CSS_ATTR_FUNCTION@24..40
+                    0: ATTR_KW@24..28 "attr" [] []
+                    1: L_PAREN@28..29 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@29..39
+                      0: CSS_IDENTIFIER@29..39
+                        0: IDENT@29..39 "data-count" [] []
+                    3: (empty)
+                    4: (empty)
+                    5: R_PAREN@39..40 ")" [] []
+              1: (empty)
+            1: SEMICOLON@40..41 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@41..69
+            0: CSS_DECLARATION@41..68
+              0: CSS_GENERIC_PROPERTY@41..68
+                0: CSS_DASHED_IDENTIFIER@41..56
+                  0: IDENT@41..56 "--basic-usage" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@56..58 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@58..68
+                  0: CSS_ATTR_FUNCTION@58..68
+                    0: ATTR_KW@58..62 "attr" [] []
+                    1: L_PAREN@62..63 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@63..67
+                      0: CSS_IDENTIFIER@63..67
+                        0: IDENT@63..67 "href" [] []
+                    3: (empty)
+                    4: (empty)
+                    5: R_PAREN@67..68 ")" [] []
+              1: (empty)
+            1: SEMICOLON@68..69 ";" [] []
+          2: CSS_DECLARATION_WITH_SEMICOLON@69..105
+            0: CSS_DECLARATION@69..104
+              0: CSS_GENERIC_PROPERTY@69..104
+                0: CSS_DASHED_IDENTIFIER@69..83
+                  0: IDENT@69..83 "--with-type" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+                1: COLON@83..85 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@85..104
+                  0: CSS_ATTR_FUNCTION@85..104
+                    0: ATTR_KW@85..89 "attr" [] []
+                    1: L_PAREN@89..90 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@90..101
+                      0: CSS_IDENTIFIER@90..101
+                        0: IDENT@90..101 "data-width" [] [Whitespace(" ")]
+                    3: CSS_REGULAR_ATTR_UNIT@101..103
+                      0: IDENT@101..103 "px" [] []
+                    4: (empty)
+                    5: R_PAREN@103..104 ")" [] []
+              1: (empty)
+            1: SEMICOLON@104..105 ";" [] []
+          3: CSS_DECLARATION_WITH_SEMICOLON@105..140
+            0: CSS_DECLARATION@105..139
+              0: CSS_GENERIC_PROPERTY@105..139
+                0: CSS_DASHED_IDENTIFIER@105..118
+                  0: IDENT@105..118 "--with-type" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@118..120 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@120..139
+                  0: CSS_ATTR_FUNCTION@120..139
+                    0: ATTR_KW@120..124 "attr" [] []
+                    1: L_PAREN@124..125 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@125..135
+                      0: CSS_IDENTIFIER@125..135
+                        0: IDENT@125..135 "data-size" [] [Whitespace(" ")]
+                    3: CSS_REGULAR_ATTR_UNIT@135..138
+                      0: IDENT@135..138 "rem" [] []
+                    4: (empty)
+                    5: R_PAREN@138..139 ")" [] []
+              1: (empty)
+            1: SEMICOLON@139..140 ";" [] []
+          4: CSS_DECLARATION_WITH_SEMICOLON@140..182
+            0: CSS_DECLARATION@140..181
+              0: CSS_GENERIC_PROPERTY@140..181
+                0: CSS_DASHED_IDENTIFIER@140..153
+                  0: IDENT@140..153 "--with-type" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@153..155 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@155..181
+                  0: CSS_ATTR_FUNCTION@155..181
+                    0: ATTR_KW@155..159 "attr" [] []
+                    1: L_PAREN@159..160 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@160..170
+                      0: CSS_IDENTIFIER@160..170
+                        0: IDENT@160..170 "data-name" [] [Whitespace(" ")]
+                    3: CSS_RAW_STRING_DECLARATOR@170..180
+                      0: RAW_STRING_KW@170..180 "raw-string" [] []
+                    4: (empty)
+                    5: R_PAREN@180..181 ")" [] []
+              1: (empty)
+            1: SEMICOLON@181..182 ";" [] []
+          5: CSS_DECLARATION_WITH_SEMICOLON@182..227
+            0: CSS_DECLARATION@182..226
+              0: CSS_GENERIC_PROPERTY@182..226
+                0: CSS_DASHED_IDENTIFIER@182..195
+                  0: IDENT@182..195 "--with-type" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@195..197 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@197..226
+                  0: CSS_ATTR_FUNCTION@197..226
+                    0: ATTR_KW@197..201 "attr" [] []
+                    1: L_PAREN@201..202 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@202..205
+                      0: CSS_IDENTIFIER@202..205
+                        0: IDENT@202..205 "id" [] [Whitespace(" ")]
+                    3: CSS_TYPE_FUNCTION@205..225
+                      0: TYPE_KW@205..209 "type" [] []
+                      1: L_PAREN@209..210 "(" [] []
+                      2: CSS_SYNTAX_COMPONENT_LIST@210..224
+                        0: CSS_SYNTAX_COMPONENT@210..224
+                          0: CSS_SYNTAX_TYPE@210..224
+                            0: L_ANGLE@210..211 "<" [] []
+                            1: CSS_REGULAR_SYNTAX_TYPE_NAME@211..223
+                              0: IDENT@211..223 "custom-ident" [] []
+                            2: R_ANGLE@223..224 ">" [] []
+                          1: (empty)
+                      3: R_PAREN@224..225 ")" [] []
+                    4: (empty)
+                    5: R_PAREN@225..226 ")" [] []
+              1: (empty)
+            1: SEMICOLON@226..227 ";" [] []
+          6: CSS_DECLARATION_WITH_SEMICOLON@227..274
+            0: CSS_DECLARATION@227..273
+              0: CSS_GENERIC_PROPERTY@227..273
+                0: CSS_DASHED_IDENTIFIER@227..240
+                  0: IDENT@227..240 "--with-type" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@240..242 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@242..273
+                  0: CSS_ATTR_FUNCTION@242..273
+                    0: ATTR_KW@242..246 "attr" [] []
+                    1: L_PAREN@246..247 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@247..258
+                      0: CSS_IDENTIFIER@247..258
+                        0: IDENT@247..258 "data-count" [] [Whitespace(" ")]
+                    3: CSS_TYPE_FUNCTION@258..272
+                      0: TYPE_KW@258..262 "type" [] []
+                      1: L_PAREN@262..263 "(" [] []
+                      2: CSS_SYNTAX_COMPONENT_LIST@263..271
+                        0: CSS_SYNTAX_COMPONENT@263..271
+                          0: CSS_SYNTAX_TYPE@263..271
+                            0: L_ANGLE@263..264 "<" [] []
+                            1: CSS_REGULAR_SYNTAX_TYPE_NAME@264..270
+                              0: IDENT@264..270 "number" [] []
+                            2: R_ANGLE@270..271 ">" [] []
+                          1: (empty)
+                      3: R_PAREN@271..272 ")" [] []
+                    4: (empty)
+                    5: R_PAREN@272..273 ")" [] []
+              1: (empty)
+            1: SEMICOLON@273..274 ";" [] []
+          7: CSS_DECLARATION_WITH_SEMICOLON@274..335
+            0: CSS_DECLARATION@274..334
+              0: CSS_GENERIC_PROPERTY@274..334
+                0: CSS_DASHED_IDENTIFIER@274..287
+                  0: IDENT@274..287 "--with-type" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@287..289 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@289..334
+                  0: CSS_ATTR_FUNCTION@289..334
+                    0: ATTR_KW@289..293 "attr" [] []
+                    1: L_PAREN@293..294 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@294..304
+                      0: CSS_IDENTIFIER@294..304
+                        0: IDENT@294..304 "data-size" [] [Whitespace(" ")]
+                    3: CSS_TYPE_FUNCTION@304..333
+                      0: TYPE_KW@304..308 "type" [] []
+                      1: L_PAREN@308..309 "(" [] []
+                      2: CSS_SYNTAX_COMPONENT_LIST@309..332
+                        0: CSS_SYNTAX_COMPONENT@309..318
+                          0: CSS_SYNTAX_TYPE@309..318
+                            0: L_ANGLE@309..310 "<" [] []
+                            1: CSS_REGULAR_SYNTAX_TYPE_NAME@310..316
+                              0: IDENT@310..316 "length" [] []
+                            2: R_ANGLE@316..318 ">" [] [Whitespace(" ")]
+                          1: (empty)
+                        1: PIPE@318..320 "|" [] [Whitespace(" ")]
+                        2: CSS_SYNTAX_COMPONENT@320..332
+                          0: CSS_SYNTAX_TYPE@320..332
+                            0: L_ANGLE@320..321 "<" [] []
+                            1: CSS_REGULAR_SYNTAX_TYPE_NAME@321..331
+                              0: IDENT@321..331 "percentage" [] []
+                            2: R_ANGLE@331..332 ">" [] []
+                          1: (empty)
+                      3: R_PAREN@332..333 ")" [] []
+                    4: (empty)
+                    5: R_PAREN@333..334 ")" [] []
+              1: (empty)
+            1: SEMICOLON@334..335 ";" [] []
+          8: CSS_DECLARATION_WITH_SEMICOLON@335..386
+            0: CSS_DECLARATION@335..385
+              0: CSS_GENERIC_PROPERTY@335..385
+                0: CSS_DASHED_IDENTIFIER@335..362
+                  0: IDENT@335..362 "--with-unknown-unit-type" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+                1: COLON@362..364 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@364..385
+                  0: CSS_ATTR_FUNCTION@364..385
+                    0: ATTR_KW@364..368 "attr" [] []
+                    1: L_PAREN@368..369 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@369..379
+                      0: CSS_IDENTIFIER@369..379
+                        0: IDENT@369..379 "data-test" [] [Whitespace(" ")]
+                    3: CSS_UNKNOWN_ATTR_UNIT@379..384
+                      0: IDENT@379..384 "bogus" [] []
+                    4: (empty)
+                    5: R_PAREN@384..385 ")" [] []
+              1: (empty)
+            1: SEMICOLON@385..386 ";" [] []
+          9: CSS_DECLARATION_WITH_SEMICOLON@386..441
+            0: CSS_DECLARATION@386..440
+              0: CSS_GENERIC_PROPERTY@386..440
+                0: CSS_DASHED_IDENTIFIER@386..404
+                  0: IDENT@386..404 "--with-fallback" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+                1: COLON@404..406 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@406..440
+                  0: CSS_ATTR_FUNCTION@406..440
+                    0: ATTR_KW@406..410 "attr" [] []
+                    1: L_PAREN@410..411 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@411..422
+                      0: CSS_IDENTIFIER@411..422
+                        0: IDENT@411..422 "data-count" [] [Whitespace(" ")]
+                    3: CSS_TYPE_FUNCTION@422..436
+                      0: TYPE_KW@422..426 "type" [] []
+                      1: L_PAREN@426..427 "(" [] []
+                      2: CSS_SYNTAX_COMPONENT_LIST@427..435
+                        0: CSS_SYNTAX_COMPONENT@427..435
+                          0: CSS_SYNTAX_TYPE@427..435
+                            0: L_ANGLE@427..428 "<" [] []
+                            1: CSS_REGULAR_SYNTAX_TYPE_NAME@428..434
+                              0: IDENT@428..434 "number" [] []
+                            2: R_ANGLE@434..435 ">" [] []
+                          1: (empty)
+                      3: R_PAREN@435..436 ")" [] []
+                    4: CSS_ATTR_FALLBACK_VALUE@436..439
+                      0: COMMA@436..438 "," [] [Whitespace(" ")]
+                      1: CSS_GENERIC_COMPONENT_VALUE_LIST@438..439
+                        0: CSS_NUMBER@438..439
+                          0: CSS_NUMBER_LITERAL@438..439 "0" [] []
+                    5: R_PAREN@439..440 ")" [] []
+              1: (empty)
+            1: SEMICOLON@440..441 ";" [] []
+          10: CSS_DECLARATION_WITH_SEMICOLON@441..489
+            0: CSS_DECLARATION@441..488
+              0: CSS_GENERIC_PROPERTY@441..488
+                0: CSS_DASHED_IDENTIFIER@441..458
+                  0: IDENT@441..458 "--with-fallback" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@458..460 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@460..488
+                  0: CSS_ATTR_FUNCTION@460..488
+                    0: ATTR_KW@460..464 "attr" [] []
+                    1: L_PAREN@464..465 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@465..476
+                      0: CSS_IDENTIFIER@465..476
+                        0: IDENT@465..476 "data-width" [] [Whitespace(" ")]
+                    3: CSS_REGULAR_ATTR_UNIT@476..478
+                      0: IDENT@476..478 "px" [] []
+                    4: CSS_ATTR_FALLBACK_VALUE@478..487
+                      0: COMMA@478..480 "," [] [Whitespace(" ")]
+                      1: CSS_GENERIC_COMPONENT_VALUE_LIST@480..487
+                        0: CSS_IDENTIFIER@480..487
+                          0: IDENT@480..487 "inherit" [] []
+                    5: R_PAREN@487..488 ")" [] []
+              1: (empty)
+            1: SEMICOLON@488..489 ";" [] []
+          11: CSS_DECLARATION_WITH_SEMICOLON@489..540
+            0: CSS_DECLARATION@489..539
+              0: CSS_GENERIC_PROPERTY@489..539
+                0: CSS_DASHED_IDENTIFIER@489..506
+                  0: IDENT@489..506 "--with-fallback" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@506..508 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@508..539
+                  0: CSS_ATTR_FUNCTION@508..539
+                    0: ATTR_KW@508..512 "attr" [] []
+                    1: L_PAREN@512..513 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@513..527
+                      0: CSS_IDENTIFIER@513..527
+                        0: IDENT@513..527 "data-something" [] []
+                    3: (empty)
+                    4: CSS_ATTR_FALLBACK_VALUE@527..538
+                      0: COMMA@527..529 "," [] [Whitespace(" ")]
+                      1: CSS_GENERIC_COMPONENT_VALUE_LIST@529..538
+                        0: CSS_STRING@529..538
+                          0: CSS_STRING_LITERAL@529..538 "\"default\"" [] []
+                    5: R_PAREN@538..539 ")" [] []
+              1: (empty)
+            1: SEMICOLON@539..540 ";" [] []
+          12: CSS_DECLARATION_WITH_SEMICOLON@540..590
+            0: CSS_DECLARATION@540..589
+              0: CSS_GENERIC_PROPERTY@540..589
+                0: CSS_DASHED_IDENTIFIER@540..556
+                  0: IDENT@540..556 "--syntax-type" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+                1: COLON@556..558 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@558..589
+                  0: CSS_ATTR_FUNCTION@558..589
+                    0: ATTR_KW@558..562 "attr" [] []
+                    1: L_PAREN@562..563 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@563..574
+                      0: CSS_IDENTIFIER@563..574
+                        0: IDENT@563..574 "data-count" [] [Whitespace(" ")]
+                    3: CSS_TYPE_FUNCTION@574..588
+                      0: TYPE_KW@574..578 "type" [] []
+                      1: L_PAREN@578..579 "(" [] []
+                      2: CSS_SYNTAX_COMPONENT_LIST@579..587
+                        0: CSS_SYNTAX_COMPONENT@579..587
+                          0: CSS_SYNTAX_TYPE@579..587
+                            0: L_ANGLE@579..580 "<" [] []
+                            1: CSS_REGULAR_SYNTAX_TYPE_NAME@580..586
+                              0: IDENT@580..586 "number" [] []
+                            2: R_ANGLE@586..587 ">" [] []
+                          1: (empty)
+                      3: R_PAREN@587..588 ")" [] []
+                    4: (empty)
+                    5: R_PAREN@588..589 ")" [] []
+              1: (empty)
+            1: SEMICOLON@589..590 ";" [] []
+          13: CSS_DECLARATION_WITH_SEMICOLON@590..656
+            0: CSS_DECLARATION@590..655
+              0: CSS_GENERIC_PROPERTY@590..655
+                0: CSS_DASHED_IDENTIFIER@590..608
+                  0: IDENT@590..608 "--multiple-types" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@608..610 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@610..655
+                  0: CSS_ATTR_FUNCTION@610..655
+                    0: ATTR_KW@610..614 "attr" [] []
+                    1: L_PAREN@614..615 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@615..625
+                      0: CSS_IDENTIFIER@615..625
+                        0: IDENT@615..625 "data-size" [] [Whitespace(" ")]
+                    3: CSS_TYPE_FUNCTION@625..654
+                      0: TYPE_KW@625..629 "type" [] []
+                      1: L_PAREN@629..630 "(" [] []
+                      2: CSS_SYNTAX_COMPONENT_LIST@630..653
+                        0: CSS_SYNTAX_COMPONENT@630..639
+                          0: CSS_SYNTAX_TYPE@630..639
+                            0: L_ANGLE@630..631 "<" [] []
+                            1: CSS_REGULAR_SYNTAX_TYPE_NAME@631..637
+                              0: IDENT@631..637 "length" [] []
+                            2: R_ANGLE@637..639 ">" [] [Whitespace(" ")]
+                          1: (empty)
+                        1: PIPE@639..641 "|" [] [Whitespace(" ")]
+                        2: CSS_SYNTAX_COMPONENT@641..653
+                          0: CSS_SYNTAX_TYPE@641..653
+                            0: L_ANGLE@641..642 "<" [] []
+                            1: CSS_REGULAR_SYNTAX_TYPE_NAME@642..652
+                              0: IDENT@642..652 "percentage" [] []
+                            2: R_ANGLE@652..653 ">" [] []
+                          1: (empty)
+                      3: R_PAREN@653..654 ")" [] []
+                    4: (empty)
+                    5: R_PAREN@654..655 ")" [] []
+              1: (empty)
+            1: SEMICOLON@655..656 ";" [] []
+          14: CSS_DECLARATION_WITH_SEMICOLON@656..734
+            0: CSS_DECLARATION@656..733
+              0: CSS_GENERIC_PROPERTY@656..733
+                0: CSS_DASHED_IDENTIFIER@656..697
+                  0: IDENT@656..697 "--number-fallback" [Newline("\n"), Newline("\n"), Whitespace("\t"), Comments("/* with fallback */"), Newline("\n"), Whitespace("\t")] []
+                1: COLON@697..699 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@699..733
+                  0: CSS_ATTR_FUNCTION@699..733
+                    0: ATTR_KW@699..703 "attr" [] []
+                    1: L_PAREN@703..704 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@704..715
+                      0: CSS_IDENTIFIER@704..715
+                        0: IDENT@704..715 "data-count" [] [Whitespace(" ")]
+                    3: CSS_TYPE_FUNCTION@715..729
+                      0: TYPE_KW@715..719 "type" [] []
+                      1: L_PAREN@719..720 "(" [] []
+                      2: CSS_SYNTAX_COMPONENT_LIST@720..728
+                        0: CSS_SYNTAX_COMPONENT@720..728
+                          0: CSS_SYNTAX_TYPE@720..728
+                            0: L_ANGLE@720..721 "<" [] []
+                            1: CSS_REGULAR_SYNTAX_TYPE_NAME@721..727
+                              0: IDENT@721..727 "number" [] []
+                            2: R_ANGLE@727..728 ">" [] []
+                          1: (empty)
+                      3: R_PAREN@728..729 ")" [] []
+                    4: CSS_ATTR_FALLBACK_VALUE@729..732
+                      0: COMMA@729..731 "," [] [Whitespace(" ")]
+                      1: CSS_GENERIC_COMPONENT_VALUE_LIST@731..732
+                        0: CSS_NUMBER@731..732
+                          0: CSS_NUMBER_LITERAL@731..732 "0" [] []
+                    5: R_PAREN@732..733 ")" [] []
+              1: (empty)
+            1: SEMICOLON@733..734 ";" [] []
+          15: CSS_DECLARATION_WITH_SEMICOLON@734..783
+            0: CSS_DECLARATION@734..782
+              0: CSS_GENERIC_PROPERTY@734..782
+                0: CSS_DASHED_IDENTIFIER@734..752
+                  0: IDENT@734..752 "--ident-fallback" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@752..754 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@754..782
+                  0: CSS_ATTR_FUNCTION@754..782
+                    0: ATTR_KW@754..758 "attr" [] []
+                    1: L_PAREN@758..759 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@759..770
+                      0: CSS_IDENTIFIER@759..770
+                        0: IDENT@759..770 "data-width" [] [Whitespace(" ")]
+                    3: CSS_REGULAR_ATTR_UNIT@770..772
+                      0: IDENT@770..772 "px" [] []
+                    4: CSS_ATTR_FALLBACK_VALUE@772..781
+                      0: COMMA@772..774 "," [] [Whitespace(" ")]
+                      1: CSS_GENERIC_COMPONENT_VALUE_LIST@774..781
+                        0: CSS_IDENTIFIER@774..781
+                          0: IDENT@774..781 "inherit" [] []
+                    5: R_PAREN@781..782 ")" [] []
+              1: (empty)
+            1: SEMICOLON@782..783 ";" [] []
+          16: CSS_DECLARATION_WITH_SEMICOLON@783..836
+            0: CSS_DECLARATION@783..835
+              0: CSS_GENERIC_PROPERTY@783..835
+                0: CSS_DASHED_IDENTIFIER@783..802
+                  0: IDENT@783..802 "--string-fallback" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@802..804 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@804..835
+                  0: CSS_ATTR_FUNCTION@804..835
+                    0: ATTR_KW@804..808 "attr" [] []
+                    1: L_PAREN@808..809 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@809..823
+                      0: CSS_IDENTIFIER@809..823
+                        0: IDENT@809..823 "data-something" [] []
+                    3: (empty)
+                    4: CSS_ATTR_FALLBACK_VALUE@823..834
+                      0: COMMA@823..825 "," [] [Whitespace(" ")]
+                      1: CSS_GENERIC_COMPONENT_VALUE_LIST@825..834
+                        0: CSS_STRING@825..834
+                          0: CSS_STRING_LITERAL@825..834 "\"default\"" [] []
+                    5: R_PAREN@834..835 ")" [] []
+              1: (empty)
+            1: SEMICOLON@835..836 ";" [] []
+          17: CSS_DECLARATION_WITH_SEMICOLON@836..884
+            0: CSS_DECLARATION@836..883
+              0: CSS_GENERIC_PROPERTY@836..883
+                0: CSS_DASHED_IDENTIFIER@836..853
+                  0: IDENT@836..853 "--interpolated" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+                1: COLON@853..855 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@855..883
+                  0: CSS_STRING@855..868
+                    0: CSS_STRING_LITERAL@855..868 "\" (source: \"" [] [Whitespace(" ")]
+                  1: CSS_ATTR_FUNCTION@868..879
+                    0: ATTR_KW@868..872 "attr" [] []
+                    1: L_PAREN@872..873 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@873..877
+                      0: CSS_IDENTIFIER@873..877
+                        0: IDENT@873..877 "cite" [] []
+                    3: (empty)
+                    4: (empty)
+                    5: R_PAREN@877..879 ")" [] [Whitespace(" ")]
+                  2: CSS_STRING@879..883
+                    0: CSS_STRING_LITERAL@879..883 "\") \"" [] []
+              1: (empty)
+            1: SEMICOLON@883..884 ";" [] []
+          18: CSS_DECLARATION_WITH_SEMICOLON@884..931
+            0: CSS_DECLARATION@884..930
+              0: CSS_GENERIC_PROPERTY@884..930
+                0: CSS_DASHED_IDENTIFIER@884..899
+                  0: IDENT@884..899 "--percentage" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+                1: COLON@899..901 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@901..930
+                  0: CSS_ATTR_FUNCTION@901..930
+                    0: ATTR_KW@901..905 "attr" [] []
+                    1: L_PAREN@905..906 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@906..922
+                      0: CSS_IDENTIFIER@906..922
+                        0: IDENT@906..922 "data-percentage" [] [Whitespace(" ")]
+                    3: CSS_REGULAR_ATTR_UNIT@922..923
+                      0: IDENT@922..923 "%" [] []
+                    4: CSS_ATTR_FALLBACK_VALUE@923..929
+                      0: COMMA@923..925 "," [] [Whitespace(" ")]
+                      1: CSS_GENERIC_COMPONENT_VALUE_LIST@925..929
+                        0: CSS_PERCENTAGE@925..929
+                          0: CSS_NUMBER_LITERAL@925..928 "100" [] []
+                          1: PERCENT@928..929 "%" [] []
+                    5: R_PAREN@929..930 ")" [] []
+              1: (empty)
+            1: SEMICOLON@930..931 ";" [] []
+          19: CSS_DECLARATION_WITH_SEMICOLON@931..996
+            0: CSS_DECLARATION@931..995
+              0: CSS_GENERIC_PROPERTY@931..995
+                0: CSS_DASHED_IDENTIFIER@931..962
+                  0: IDENT@931..962 "--comma-separated-multiplier" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+                1: COLON@962..964 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@964..995
+                  0: CSS_ATTR_FUNCTION@964..995
+                    0: ATTR_KW@964..968 "attr" [] []
+                    1: L_PAREN@968..969 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@969..979
+                      0: CSS_IDENTIFIER@969..979
+                        0: IDENT@969..979 "data-size" [] [Whitespace(" ")]
+                    3: CSS_TYPE_FUNCTION@979..994
+                      0: TYPE_KW@979..983 "type" [] []
+                      1: L_PAREN@983..984 "(" [] []
+                      2: CSS_SYNTAX_COMPONENT_LIST@984..993
+                        0: CSS_SYNTAX_COMPONENT@984..993
+                          0: CSS_SYNTAX_TYPE@984..992
+                            0: L_ANGLE@984..985 "<" [] []
+                            1: CSS_REGULAR_SYNTAX_TYPE_NAME@985..991
+                              0: IDENT@985..991 "length" [] []
+                            2: R_ANGLE@991..992 ">" [] []
+                          1: CSS_SYNTAX_MULTIPLIER@992..993
+                            0: HASH@992..993 "#" [] []
+                      3: R_PAREN@993..994 ")" [] []
+                    4: (empty)
+                    5: R_PAREN@994..995 ")" [] []
+              1: (empty)
+            1: SEMICOLON@995..996 ";" [] []
+          20: CSS_DECLARATION_WITH_SEMICOLON@996..1060
+            0: CSS_DECLARATION@996..1059
+              0: CSS_GENERIC_PROPERTY@996..1059
+                0: CSS_DASHED_IDENTIFIER@996..1026
+                  0: IDENT@996..1026 "--space-separated-multiplier" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@1026..1028 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@1028..1059
+                  0: CSS_ATTR_FUNCTION@1028..1059
+                    0: ATTR_KW@1028..1032 "attr" [] []
+                    1: L_PAREN@1032..1033 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@1033..1043
+                      0: CSS_IDENTIFIER@1033..1043
+                        0: IDENT@1033..1043 "data-size" [] [Whitespace(" ")]
+                    3: CSS_TYPE_FUNCTION@1043..1058
+                      0: TYPE_KW@1043..1047 "type" [] []
+                      1: L_PAREN@1047..1048 "(" [] []
+                      2: CSS_SYNTAX_COMPONENT_LIST@1048..1057
+                        0: CSS_SYNTAX_COMPONENT@1048..1057
+                          0: CSS_SYNTAX_TYPE@1048..1056
+                            0: L_ANGLE@1048..1049 "<" [] []
+                            1: CSS_REGULAR_SYNTAX_TYPE_NAME@1049..1055
+                              0: IDENT@1049..1055 "length" [] []
+                            2: R_ANGLE@1055..1056 ">" [] []
+                          1: CSS_SYNTAX_MULTIPLIER@1056..1057
+                            0: PLUS@1056..1057 "+" [] []
+                      3: R_PAREN@1057..1058 ")" [] []
+                    4: (empty)
+                    5: R_PAREN@1058..1059 ")" [] []
+              1: (empty)
+            1: SEMICOLON@1059..1060 ";" [] []
+          21: CSS_DECLARATION_WITH_SEMICOLON@1060..1133
+            0: CSS_DECLARATION@1060..1132
+              0: CSS_GENERIC_PROPERTY@1060..1132
+                0: CSS_DASHED_IDENTIFIER@1060..1083
+                  0: IDENT@1060..1083 "--multiple-separators" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@1083..1085 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@1085..1132
+                  0: CSS_ATTR_FUNCTION@1085..1132
+                    0: ATTR_KW@1085..1089 "attr" [] []
+                    1: L_PAREN@1089..1090 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@1090..1100
+                      0: CSS_IDENTIFIER@1090..1100
+                        0: IDENT@1090..1100 "data-size" [] [Whitespace(" ")]
+                    3: CSS_TYPE_FUNCTION@1100..1131
+                      0: TYPE_KW@1100..1104 "type" [] []
+                      1: L_PAREN@1104..1105 "(" [] []
+                      2: CSS_SYNTAX_COMPONENT_LIST@1105..1130
+                        0: CSS_SYNTAX_COMPONENT@1105..1115
+                          0: CSS_SYNTAX_TYPE@1105..1113
+                            0: L_ANGLE@1105..1106 "<" [] []
+                            1: CSS_REGULAR_SYNTAX_TYPE_NAME@1106..1112
+                              0: IDENT@1106..1112 "length" [] []
+                            2: R_ANGLE@1112..1113 ">" [] []
+                          1: CSS_SYNTAX_MULTIPLIER@1113..1115
+                            0: HASH@1113..1115 "#" [] [Whitespace(" ")]
+                        1: PIPE@1115..1117 "|" [] [Whitespace(" ")]
+                        2: CSS_SYNTAX_COMPONENT@1117..1130
+                          0: CSS_SYNTAX_TYPE@1117..1129
+                            0: L_ANGLE@1117..1118 "<" [] []
+                            1: CSS_REGULAR_SYNTAX_TYPE_NAME@1118..1128
+                              0: IDENT@1118..1128 "percentage" [] []
+                            2: R_ANGLE@1128..1129 ">" [] []
+                          1: CSS_SYNTAX_MULTIPLIER@1129..1130
+                            0: PLUS@1129..1130 "+" [] []
+                      3: R_PAREN@1130..1131 ")" [] []
+                    4: (empty)
+                    5: R_PAREN@1131..1132 ")" [] []
+              1: (empty)
+            1: SEMICOLON@1132..1133 ";" [] []
+          22: CSS_DECLARATION_WITH_SEMICOLON@1133..1196
+            0: CSS_DECLARATION@1133..1195
+              0: CSS_GENERIC_PROPERTY@1133..1195
+                0: CSS_DASHED_IDENTIFIER@1133..1163
+                  0: IDENT@1133..1163 "--angle" [Newline("\n"), Newline("\n"), Whitespace("\t"), Comments("/* syntax types */"), Newline("\n"), Whitespace("\t")] []
+                1: COLON@1163..1165 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@1165..1195
+                  0: CSS_ATTR_FUNCTION@1165..1195
+                    0: ATTR_KW@1165..1169 "attr" [] []
+                    1: L_PAREN@1169..1170 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@1170..1181
+                      0: CSS_IDENTIFIER@1170..1181
+                        0: IDENT@1170..1181 "data-angle" [] [Whitespace(" ")]
+                    3: CSS_TYPE_FUNCTION@1181..1194
+                      0: TYPE_KW@1181..1185 "type" [] []
+                      1: L_PAREN@1185..1186 "(" [] []
+                      2: CSS_SYNTAX_COMPONENT_LIST@1186..1193
+                        0: CSS_SYNTAX_COMPONENT@1186..1193
+                          0: CSS_SYNTAX_TYPE@1186..1193
+                            0: L_ANGLE@1186..1187 "<" [] []
+                            1: CSS_REGULAR_SYNTAX_TYPE_NAME@1187..1192
+                              0: IDENT@1187..1192 "angle" [] []
+                            2: R_ANGLE@1192..1193 ">" [] []
+                          1: (empty)
+                      3: R_PAREN@1193..1194 ")" [] []
+                    4: (empty)
+                    5: R_PAREN@1194..1195 ")" [] []
+              1: (empty)
+            1: SEMICOLON@1195..1196 ";" [] []
+          23: CSS_DECLARATION_WITH_SEMICOLON@1196..1238
+            0: CSS_DECLARATION@1196..1237
+              0: CSS_GENERIC_PROPERTY@1196..1237
+                0: CSS_DASHED_IDENTIFIER@1196..1205
+                  0: IDENT@1196..1205 "--color" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@1205..1207 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@1207..1237
+                  0: CSS_ATTR_FUNCTION@1207..1237
+                    0: ATTR_KW@1207..1211 "attr" [] []
+                    1: L_PAREN@1211..1212 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@1212..1223
+                      0: CSS_IDENTIFIER@1212..1223
+                        0: IDENT@1212..1223 "data-color" [] [Whitespace(" ")]
+                    3: CSS_TYPE_FUNCTION@1223..1236
+                      0: TYPE_KW@1223..1227 "type" [] []
+                      1: L_PAREN@1227..1228 "(" [] []
+                      2: CSS_SYNTAX_COMPONENT_LIST@1228..1235
+                        0: CSS_SYNTAX_COMPONENT@1228..1235
+                          0: CSS_SYNTAX_TYPE@1228..1235
+                            0: L_ANGLE@1228..1229 "<" [] []
+                            1: CSS_REGULAR_SYNTAX_TYPE_NAME@1229..1234
+                              0: IDENT@1229..1234 "color" [] []
+                            2: R_ANGLE@1234..1235 ">" [] []
+                          1: (empty)
+                      3: R_PAREN@1235..1236 ")" [] []
+                    4: (empty)
+                    5: R_PAREN@1236..1237 ")" [] []
+              1: (empty)
+            1: SEMICOLON@1237..1238 ";" [] []
+          24: CSS_DECLARATION_WITH_SEMICOLON@1238..1301
+            0: CSS_DECLARATION@1238..1300
+              0: CSS_GENERIC_PROPERTY@1238..1300
+                0: CSS_DASHED_IDENTIFIER@1238..1254
+                  0: IDENT@1238..1254 "--custom-ident" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@1254..1256 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@1256..1300
+                  0: CSS_ATTR_FUNCTION@1256..1300
+                    0: ATTR_KW@1256..1260 "attr" [] []
+                    1: L_PAREN@1260..1261 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@1261..1279
+                      0: CSS_IDENTIFIER@1261..1279
+                        0: IDENT@1261..1279 "data-custom-ident" [] [Whitespace(" ")]
+                    3: CSS_TYPE_FUNCTION@1279..1299
+                      0: TYPE_KW@1279..1283 "type" [] []
+                      1: L_PAREN@1283..1284 "(" [] []
+                      2: CSS_SYNTAX_COMPONENT_LIST@1284..1298
+                        0: CSS_SYNTAX_COMPONENT@1284..1298
+                          0: CSS_SYNTAX_TYPE@1284..1298
+                            0: L_ANGLE@1284..1285 "<" [] []
+                            1: CSS_REGULAR_SYNTAX_TYPE_NAME@1285..1297
+                              0: IDENT@1285..1297 "custom-ident" [] []
+                            2: R_ANGLE@1297..1298 ">" [] []
+                          1: (empty)
+                      3: R_PAREN@1298..1299 ")" [] []
+                    4: (empty)
+                    5: R_PAREN@1299..1300 ")" [] []
+              1: (empty)
+            1: SEMICOLON@1300..1301 ";" [] []
+          25: CSS_DECLARATION_WITH_SEMICOLON@1301..1343
+            0: CSS_DECLARATION@1301..1342
+              0: CSS_GENERIC_PROPERTY@1301..1342
+                0: CSS_DASHED_IDENTIFIER@1301..1310
+                  0: IDENT@1301..1310 "--image" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@1310..1312 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@1312..1342
+                  0: CSS_ATTR_FUNCTION@1312..1342
+                    0: ATTR_KW@1312..1316 "attr" [] []
+                    1: L_PAREN@1316..1317 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@1317..1328
+                      0: CSS_IDENTIFIER@1317..1328
+                        0: IDENT@1317..1328 "data-image" [] [Whitespace(" ")]
+                    3: CSS_TYPE_FUNCTION@1328..1341
+                      0: TYPE_KW@1328..1332 "type" [] []
+                      1: L_PAREN@1332..1333 "(" [] []
+                      2: CSS_SYNTAX_COMPONENT_LIST@1333..1340
+                        0: CSS_SYNTAX_COMPONENT@1333..1340
+                          0: CSS_SYNTAX_TYPE@1333..1340
+                            0: L_ANGLE@1333..1334 "<" [] []
+                            1: CSS_REGULAR_SYNTAX_TYPE_NAME@1334..1339
+                              0: IDENT@1334..1339 "image" [] []
+                            2: R_ANGLE@1339..1340 ">" [] []
+                          1: (empty)
+                      3: R_PAREN@1340..1341 ")" [] []
+                    4: (empty)
+                    5: R_PAREN@1341..1342 ")" [] []
+              1: (empty)
+            1: SEMICOLON@1342..1343 ";" [] []
+          26: CSS_DECLARATION_WITH_SEMICOLON@1343..1391
+            0: CSS_DECLARATION@1343..1390
+              0: CSS_GENERIC_PROPERTY@1343..1390
+                0: CSS_DASHED_IDENTIFIER@1343..1354
+                  0: IDENT@1343..1354 "--integer" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@1354..1356 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@1356..1390
+                  0: CSS_ATTR_FUNCTION@1356..1390
+                    0: ATTR_KW@1356..1360 "attr" [] []
+                    1: L_PAREN@1360..1361 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@1361..1374
+                      0: CSS_IDENTIFIER@1361..1374
+                        0: IDENT@1361..1374 "data-integer" [] [Whitespace(" ")]
+                    3: CSS_TYPE_FUNCTION@1374..1389
+                      0: TYPE_KW@1374..1378 "type" [] []
+                      1: L_PAREN@1378..1379 "(" [] []
+                      2: CSS_SYNTAX_COMPONENT_LIST@1379..1388
+                        0: CSS_SYNTAX_COMPONENT@1379..1388
+                          0: CSS_SYNTAX_TYPE@1379..1388
+                            0: L_ANGLE@1379..1380 "<" [] []
+                            1: CSS_REGULAR_SYNTAX_TYPE_NAME@1380..1387
+                              0: IDENT@1380..1387 "integer" [] []
+                            2: R_ANGLE@1387..1388 ">" [] []
+                          1: (empty)
+                      3: R_PAREN@1388..1389 ")" [] []
+                    4: (empty)
+                    5: R_PAREN@1389..1390 ")" [] []
+              1: (empty)
+            1: SEMICOLON@1390..1391 ";" [] []
+          27: CSS_DECLARATION_WITH_SEMICOLON@1391..1436
+            0: CSS_DECLARATION@1391..1435
+              0: CSS_GENERIC_PROPERTY@1391..1435
+                0: CSS_DASHED_IDENTIFIER@1391..1401
+                  0: IDENT@1391..1401 "--length" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@1401..1403 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@1403..1435
+                  0: CSS_ATTR_FUNCTION@1403..1435
+                    0: ATTR_KW@1403..1407 "attr" [] []
+                    1: L_PAREN@1407..1408 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@1408..1420
+                      0: CSS_IDENTIFIER@1408..1420
+                        0: IDENT@1408..1420 "data-length" [] [Whitespace(" ")]
+                    3: CSS_TYPE_FUNCTION@1420..1434
+                      0: TYPE_KW@1420..1424 "type" [] []
+                      1: L_PAREN@1424..1425 "(" [] []
+                      2: CSS_SYNTAX_COMPONENT_LIST@1425..1433
+                        0: CSS_SYNTAX_COMPONENT@1425..1433
+                          0: CSS_SYNTAX_TYPE@1425..1433
+                            0: L_ANGLE@1425..1426 "<" [] []
+                            1: CSS_REGULAR_SYNTAX_TYPE_NAME@1426..1432
+                              0: IDENT@1426..1432 "length" [] []
+                            2: R_ANGLE@1432..1433 ">" [] []
+                          1: (empty)
+                      3: R_PAREN@1433..1434 ")" [] []
+                    4: (empty)
+                    5: R_PAREN@1434..1435 ")" [] []
+              1: (empty)
+            1: SEMICOLON@1435..1436 ";" [] []
+          28: CSS_DECLARATION_WITH_SEMICOLON@1436..1514
+            0: CSS_DECLARATION@1436..1513
+              0: CSS_GENERIC_PROPERTY@1436..1513
+                0: CSS_DASHED_IDENTIFIER@1436..1457
+                  0: IDENT@1436..1457 "--length-percentage" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@1457..1459 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@1459..1513
+                  0: CSS_ATTR_FUNCTION@1459..1513
+                    0: ATTR_KW@1459..1463 "attr" [] []
+                    1: L_PAREN@1463..1464 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@1464..1487
+                      0: CSS_IDENTIFIER@1464..1487
+                        0: IDENT@1464..1487 "data-length-percentage" [] [Whitespace(" ")]
+                    3: CSS_TYPE_FUNCTION@1487..1512
+                      0: TYPE_KW@1487..1491 "type" [] []
+                      1: L_PAREN@1491..1492 "(" [] []
+                      2: CSS_SYNTAX_COMPONENT_LIST@1492..1511
+                        0: CSS_SYNTAX_COMPONENT@1492..1511
+                          0: CSS_SYNTAX_TYPE@1492..1511
+                            0: L_ANGLE@1492..1493 "<" [] []
+                            1: CSS_REGULAR_SYNTAX_TYPE_NAME@1493..1510
+                              0: IDENT@1493..1510 "length-percentage" [] []
+                            2: R_ANGLE@1510..1511 ">" [] []
+                          1: (empty)
+                      3: R_PAREN@1511..1512 ")" [] []
+                    4: (empty)
+                    5: R_PAREN@1512..1513 ")" [] []
+              1: (empty)
+            1: SEMICOLON@1513..1514 ";" [] []
+          29: CSS_DECLARATION_WITH_SEMICOLON@1514..1559
+            0: CSS_DECLARATION@1514..1558
+              0: CSS_GENERIC_PROPERTY@1514..1558
+                0: CSS_DASHED_IDENTIFIER@1514..1524
+                  0: IDENT@1514..1524 "--number" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@1524..1526 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@1526..1558
+                  0: CSS_ATTR_FUNCTION@1526..1558
+                    0: ATTR_KW@1526..1530 "attr" [] []
+                    1: L_PAREN@1530..1531 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@1531..1543
+                      0: CSS_IDENTIFIER@1531..1543
+                        0: IDENT@1531..1543 "data-number" [] [Whitespace(" ")]
+                    3: CSS_TYPE_FUNCTION@1543..1557
+                      0: TYPE_KW@1543..1547 "type" [] []
+                      1: L_PAREN@1547..1548 "(" [] []
+                      2: CSS_SYNTAX_COMPONENT_LIST@1548..1556
+                        0: CSS_SYNTAX_COMPONENT@1548..1556
+                          0: CSS_SYNTAX_TYPE@1548..1556
+                            0: L_ANGLE@1548..1549 "<" [] []
+                            1: CSS_REGULAR_SYNTAX_TYPE_NAME@1549..1555
+                              0: IDENT@1549..1555 "number" [] []
+                            2: R_ANGLE@1555..1556 ">" [] []
+                          1: (empty)
+                      3: R_PAREN@1556..1557 ")" [] []
+                    4: (empty)
+                    5: R_PAREN@1557..1558 ")" [] []
+              1: (empty)
+            1: SEMICOLON@1558..1559 ";" [] []
+          30: CSS_DECLARATION_WITH_SEMICOLON@1559..1616
+            0: CSS_DECLARATION@1559..1615
+              0: CSS_GENERIC_PROPERTY@1559..1615
+                0: CSS_DASHED_IDENTIFIER@1559..1573
+                  0: IDENT@1559..1573 "--percentage" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@1573..1575 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@1575..1615
+                  0: CSS_ATTR_FUNCTION@1575..1615
+                    0: ATTR_KW@1575..1579 "attr" [] []
+                    1: L_PAREN@1579..1580 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@1580..1596
+                      0: CSS_IDENTIFIER@1580..1596
+                        0: IDENT@1580..1596 "data-percentage" [] [Whitespace(" ")]
+                    3: CSS_TYPE_FUNCTION@1596..1614
+                      0: TYPE_KW@1596..1600 "type" [] []
+                      1: L_PAREN@1600..1601 "(" [] []
+                      2: CSS_SYNTAX_COMPONENT_LIST@1601..1613
+                        0: CSS_SYNTAX_COMPONENT@1601..1613
+                          0: CSS_SYNTAX_TYPE@1601..1613
+                            0: L_ANGLE@1601..1602 "<" [] []
+                            1: CSS_REGULAR_SYNTAX_TYPE_NAME@1602..1612
+                              0: IDENT@1602..1612 "percentage" [] []
+                            2: R_ANGLE@1612..1613 ">" [] []
+                          1: (empty)
+                      3: R_PAREN@1613..1614 ")" [] []
+                    4: (empty)
+                    5: R_PAREN@1614..1615 ")" [] []
+              1: (empty)
+            1: SEMICOLON@1615..1616 ";" [] []
+          31: CSS_DECLARATION_WITH_SEMICOLON@1616..1673
+            0: CSS_DECLARATION@1616..1672
+              0: CSS_GENERIC_PROPERTY@1616..1672
+                0: CSS_DASHED_IDENTIFIER@1616..1630
+                  0: IDENT@1616..1630 "--resolution" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@1630..1632 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@1632..1672
+                  0: CSS_ATTR_FUNCTION@1632..1672
+                    0: ATTR_KW@1632..1636 "attr" [] []
+                    1: L_PAREN@1636..1637 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@1637..1653
+                      0: CSS_IDENTIFIER@1637..1653
+                        0: IDENT@1637..1653 "data-resolution" [] [Whitespace(" ")]
+                    3: CSS_TYPE_FUNCTION@1653..1671
+                      0: TYPE_KW@1653..1657 "type" [] []
+                      1: L_PAREN@1657..1658 "(" [] []
+                      2: CSS_SYNTAX_COMPONENT_LIST@1658..1670
+                        0: CSS_SYNTAX_COMPONENT@1658..1670
+                          0: CSS_SYNTAX_TYPE@1658..1670
+                            0: L_ANGLE@1658..1659 "<" [] []
+                            1: CSS_REGULAR_SYNTAX_TYPE_NAME@1659..1669
+                              0: IDENT@1659..1669 "resolution" [] []
+                            2: R_ANGLE@1669..1670 ">" [] []
+                          1: (empty)
+                      3: R_PAREN@1670..1671 ")" [] []
+                    4: (empty)
+                    5: R_PAREN@1671..1672 ")" [] []
+              1: (empty)
+            1: SEMICOLON@1672..1673 ";" [] []
+          32: CSS_DECLARATION_WITH_SEMICOLON@1673..1718
+            0: CSS_DECLARATION@1673..1717
+              0: CSS_GENERIC_PROPERTY@1673..1717
+                0: CSS_DASHED_IDENTIFIER@1673..1683
+                  0: IDENT@1673..1683 "--string" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@1683..1685 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@1685..1717
+                  0: CSS_ATTR_FUNCTION@1685..1717
+                    0: ATTR_KW@1685..1689 "attr" [] []
+                    1: L_PAREN@1689..1690 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@1690..1702
+                      0: CSS_IDENTIFIER@1690..1702
+                        0: IDENT@1690..1702 "data-string" [] [Whitespace(" ")]
+                    3: CSS_TYPE_FUNCTION@1702..1716
+                      0: TYPE_KW@1702..1706 "type" [] []
+                      1: L_PAREN@1706..1707 "(" [] []
+                      2: CSS_SYNTAX_COMPONENT_LIST@1707..1715
+                        0: CSS_SYNTAX_COMPONENT@1707..1715
+                          0: CSS_SYNTAX_TYPE@1707..1715
+                            0: L_ANGLE@1707..1708 "<" [] []
+                            1: CSS_REGULAR_SYNTAX_TYPE_NAME@1708..1714
+                              0: IDENT@1708..1714 "string" [] []
+                            2: R_ANGLE@1714..1715 ">" [] []
+                          1: (empty)
+                      3: R_PAREN@1715..1716 ")" [] []
+                    4: (empty)
+                    5: R_PAREN@1716..1717 ")" [] []
+              1: (empty)
+            1: SEMICOLON@1717..1718 ";" [] []
+          33: CSS_DECLARATION_WITH_SEMICOLON@1718..1757
+            0: CSS_DECLARATION@1718..1756
+              0: CSS_GENERIC_PROPERTY@1718..1756
+                0: CSS_DASHED_IDENTIFIER@1718..1726
+                  0: IDENT@1718..1726 "--time" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@1726..1728 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@1728..1756
+                  0: CSS_ATTR_FUNCTION@1728..1756
+                    0: ATTR_KW@1728..1732 "attr" [] []
+                    1: L_PAREN@1732..1733 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@1733..1743
+                      0: CSS_IDENTIFIER@1733..1743
+                        0: IDENT@1733..1743 "data-time" [] [Whitespace(" ")]
+                    3: CSS_TYPE_FUNCTION@1743..1755
+                      0: TYPE_KW@1743..1747 "type" [] []
+                      1: L_PAREN@1747..1748 "(" [] []
+                      2: CSS_SYNTAX_COMPONENT_LIST@1748..1754
+                        0: CSS_SYNTAX_COMPONENT@1748..1754
+                          0: CSS_SYNTAX_TYPE@1748..1754
+                            0: L_ANGLE@1748..1749 "<" [] []
+                            1: CSS_REGULAR_SYNTAX_TYPE_NAME@1749..1753
+                              0: IDENT@1749..1753 "time" [] []
+                            2: R_ANGLE@1753..1754 ">" [] []
+                          1: (empty)
+                      3: R_PAREN@1754..1755 ")" [] []
+                    4: (empty)
+                    5: R_PAREN@1755..1756 ")" [] []
+              1: (empty)
+            1: SEMICOLON@1756..1757 ";" [] []
+          34: CSS_DECLARATION_WITH_SEMICOLON@1757..1793
+            0: CSS_DECLARATION@1757..1792
+              0: CSS_GENERIC_PROPERTY@1757..1792
+                0: CSS_DASHED_IDENTIFIER@1757..1764
+                  0: IDENT@1757..1764 "--url" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@1764..1766 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@1766..1792
+                  0: CSS_ATTR_FUNCTION@1766..1792
+                    0: ATTR_KW@1766..1770 "attr" [] []
+                    1: L_PAREN@1770..1771 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@1771..1780
+                      0: CSS_IDENTIFIER@1771..1780
+                        0: IDENT@1771..1780 "data-url" [] [Whitespace(" ")]
+                    3: CSS_TYPE_FUNCTION@1780..1791
+                      0: TYPE_KW@1780..1784 "type" [] []
+                      1: L_PAREN@1784..1785 "(" [] []
+                      2: CSS_SYNTAX_COMPONENT_LIST@1785..1790
+                        0: CSS_SYNTAX_COMPONENT@1785..1790
+                          0: CSS_SYNTAX_TYPE@1785..1790
+                            0: L_ANGLE@1785..1786 "<" [] []
+                            1: CSS_REGULAR_SYNTAX_TYPE_NAME@1786..1789
+                              0: IDENT@1786..1789 "url" [] []
+                            2: R_ANGLE@1789..1790 ">" [] []
+                          1: (empty)
+                      3: R_PAREN@1790..1791 ")" [] []
+                    4: (empty)
+                    5: R_PAREN@1791..1792 ")" [] []
+              1: (empty)
+            1: SEMICOLON@1792..1793 ";" [] []
+          35: CSS_DECLARATION_WITH_SEMICOLON@1793..1874
+            0: CSS_DECLARATION@1793..1873
+              0: CSS_GENERIC_PROPERTY@1793..1873
+                0: CSS_DASHED_IDENTIFIER@1793..1815
+                  0: IDENT@1793..1815 "--transform-function" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@1815..1817 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@1817..1873
+                  0: CSS_ATTR_FUNCTION@1817..1873
+                    0: ATTR_KW@1817..1821 "attr" [] []
+                    1: L_PAREN@1821..1822 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@1822..1846
+                      0: CSS_IDENTIFIER@1822..1846
+                        0: IDENT@1822..1846 "data-transform-function" [] [Whitespace(" ")]
+                    3: CSS_TYPE_FUNCTION@1846..1872
+                      0: TYPE_KW@1846..1850 "type" [] []
+                      1: L_PAREN@1850..1851 "(" [] []
+                      2: CSS_SYNTAX_COMPONENT_LIST@1851..1871
+                        0: CSS_SYNTAX_COMPONENT@1851..1871
+                          0: CSS_SYNTAX_TYPE@1851..1871
+                            0: L_ANGLE@1851..1852 "<" [] []
+                            1: CSS_REGULAR_SYNTAX_TYPE_NAME@1852..1870
+                              0: IDENT@1852..1870 "transform-function" [] []
+                            2: R_ANGLE@1870..1871 ">" [] []
+                          1: (empty)
+                      3: R_PAREN@1871..1872 ")" [] []
+                    4: (empty)
+                    5: R_PAREN@1872..1873 ")" [] []
+              1: (empty)
+            1: SEMICOLON@1873..1874 ";" [] []
+          36: CSS_DECLARATION_WITH_SEMICOLON@1874..1933
+            0: CSS_DECLARATION@1874..1932
+              0: CSS_GENERIC_PROPERTY@1874..1932
+                0: CSS_DASHED_IDENTIFIER@1874..1891
+                  0: IDENT@1874..1891 "--unknown-type" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+                1: COLON@1891..1893 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@1893..1932
+                  0: CSS_ATTR_FUNCTION@1893..1932
+                    0: ATTR_KW@1893..1897 "attr" [] []
+                    1: L_PAREN@1897..1898 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@1898..1916
+                      0: CSS_IDENTIFIER@1898..1916
+                        0: IDENT@1898..1916 "data-unknown-type" [] [Whitespace(" ")]
+                    3: CSS_TYPE_FUNCTION@1916..1931
+                      0: TYPE_KW@1916..1920 "type" [] []
+                      1: L_PAREN@1920..1921 "(" [] []
+                      2: CSS_SYNTAX_COMPONENT_LIST@1921..1930
+                        0: CSS_SYNTAX_COMPONENT@1921..1930
+                          0: CSS_SYNTAX_TYPE@1921..1930
+                            0: L_ANGLE@1921..1922 "<" [] []
+                            1: CSS_UNKNOWN_SYNTAX_TYPE_NAME@1922..1929
+                              0: IDENT@1922..1929 "unknown" [] []
+                            2: R_ANGLE@1929..1930 ">" [] []
+                          1: (empty)
+                      3: R_PAREN@1930..1931 ")" [] []
+                    4: (empty)
+                    5: R_PAREN@1931..1932 ")" [] []
+              1: (empty)
+            1: SEMICOLON@1932..1933 ";" [] []
+          37: CSS_DECLARATION_WITH_SEMICOLON@1933..1978
+            0: CSS_DECLARATION@1933..1977
+              0: CSS_GENERIC_PROPERTY@1933..1977
+                0: CSS_IDENTIFIER@1933..1937
+                  0: IDENT@1933..1937 "a" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+                1: COLON@1937..1939 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@1939..1977
+                  0: CSS_ATTR_FUNCTION@1939..1977
+                    0: ATTR_KW@1939..1943 "attr" [] []
+                    1: L_PAREN@1943..1944 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@1944..1954
+                      0: CSS_IDENTIFIER@1944..1954
+                        0: IDENT@1944..1954 "data-test" [] [Whitespace(" ")]
+                    3: CSS_TYPE_FUNCTION@1954..1976
+                      0: TYPE_KW@1954..1958 "type" [] []
+                      1: L_PAREN@1958..1959 "(" [] []
+                      2: CSS_SYNTAX_COMPONENT_LIST@1959..1975
+                        0: CSS_SYNTAX_COMPONENT_WITHOUT_MULTIPLIER@1959..1975
+                          0: L_ANGLE@1959..1960 "<" [] []
+                          1: IDENT@1960..1974 "transform-list" [] []
+                          2: R_ANGLE@1974..1975 ">" [] []
+                      3: R_PAREN@1975..1976 ")" [] []
+                    4: (empty)
+                    5: R_PAREN@1976..1977 ")" [] []
+              1: (empty)
+            1: SEMICOLON@1977..1978 ";" [] []
+          38: CSS_DECLARATION_WITH_SEMICOLON@1978..2004
+            0: CSS_DECLARATION@1978..2003
+              0: CSS_GENERIC_PROPERTY@1978..2003
+                0: CSS_IDENTIFIER@1978..1981
+                  0: IDENT@1978..1981 "p" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@1981..1983 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@1983..2003
+                  0: CSS_ATTR_FUNCTION@1983..2003
+                    0: ATTR_KW@1983..1987 "attr" [] []
+                    1: L_PAREN@1987..1988 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@1988..1993
+                      0: CSS_IDENTIFIER@1988..1993
+                        0: IDENT@1988..1993 "test" [] [Whitespace(" ")]
+                    3: CSS_TYPE_FUNCTION@1993..2002
+                      0: TYPE_KW@1993..1997 "type" [] []
+                      1: L_PAREN@1997..1998 "(" [] []
+                      2: CSS_SYNTAX_COMPONENT_LIST@1998..2001
+                        0: CSS_SYNTAX_COMPONENT@1998..2001
+                          0: CSS_IDENTIFIER@1998..2001
+                            0: IDENT@1998..2001 "rem" [] []
+                          1: (empty)
+                      3: R_PAREN@2001..2002 ")" [] []
+                    4: (empty)
+                    5: R_PAREN@2002..2003 ")" [] []
+              1: (empty)
+            1: SEMICOLON@2003..2004 ";" [] []
+          39: CSS_DECLARATION_WITH_SEMICOLON@2004..2031
+            0: CSS_DECLARATION@2004..2030
+              0: CSS_GENERIC_PROPERTY@2004..2030
+                0: CSS_IDENTIFIER@2004..2007
+                  0: IDENT@2004..2007 "p" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@2007..2009 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@2009..2030
+                  0: CSS_ATTR_FUNCTION@2009..2030
+                    0: ATTR_KW@2009..2013 "attr" [] []
+                    1: L_PAREN@2013..2014 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@2014..2019
+                      0: CSS_IDENTIFIER@2014..2019
+                        0: IDENT@2014..2019 "test" [] [Whitespace(" ")]
+                    3: CSS_RAW_STRING_DECLARATOR@2019..2029
+                      0: RAW_STRING_KW@2019..2029 "raw-string" [] []
+                    4: (empty)
+                    5: R_PAREN@2029..2030 ")" [] []
+              1: (empty)
+            1: SEMICOLON@2030..2031 ";" [] []
+          40: CSS_DECLARATION_WITH_SEMICOLON@2031..2054
+            0: CSS_DECLARATION@2031..2053
+              0: CSS_GENERIC_PROPERTY@2031..2053
+                0: CSS_IDENTIFIER@2031..2034
+                  0: IDENT@2031..2034 "p" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@2034..2036 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@2036..2053
+                  0: CSS_ATTR_FUNCTION@2036..2053
+                    0: ATTR_KW@2036..2040 "attr" [] []
+                    1: L_PAREN@2040..2041 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@2041..2046
+                      0: CSS_IDENTIFIER@2041..2046
+                        0: IDENT@2041..2046 "test" [] [Whitespace(" ")]
+                    3: CSS_NUMBER_DECLARATOR@2046..2052
+                      0: NUMBER_KW@2046..2052 "number" [] []
+                    4: (empty)
+                    5: R_PAREN@2052..2053 ")" [] []
+              1: (empty)
+            1: SEMICOLON@2053..2054 ";" [] []
+          41: CSS_DECLARATION_WITH_SEMICOLON@2054..2096
+            0: CSS_DECLARATION@2054..2095
+              0: CSS_GENERIC_PROPERTY@2054..2095
+                0: CSS_IDENTIFIER@2054..2057
+                  0: IDENT@2054..2057 "p" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@2057..2059 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@2059..2095
+                  0: CSS_ATTR_FUNCTION@2059..2095
+                    0: ATTR_KW@2059..2063 "attr" [] []
+                    1: L_PAREN@2063..2064 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@2064..2069
+                      0: CSS_IDENTIFIER@2064..2069
+                        0: IDENT@2064..2069 "test" [] [Whitespace(" ")]
+                    3: CSS_TYPE_FUNCTION@2069..2094
+                      0: TYPE_KW@2069..2073 "type" [] []
+                      1: L_PAREN@2073..2074 "(" [] []
+                      2: CSS_SYNTAX_COMPONENT_LIST@2074..2093
+                        0: CSS_SYNTAX_COMPONENT@2074..2087
+                          0: CSS_SYNTAX_TYPE@2074..2087
+                            0: L_ANGLE@2074..2075 "<" [] []
+                            1: CSS_REGULAR_SYNTAX_TYPE_NAME@2075..2085
+                              0: IDENT@2075..2085 "percentage" [] []
+                            2: R_ANGLE@2085..2087 ">" [] [Whitespace(" ")]
+                          1: (empty)
+                        1: PIPE@2087..2089 "|" [] [Whitespace(" ")]
+                        2: CSS_SYNTAX_COMPONENT@2089..2093
+                          0: CSS_IDENTIFIER@2089..2093
+                            0: IDENT@2089..2093 "auto" [] []
+                          1: (empty)
+                      3: R_PAREN@2093..2094 ")" [] []
+                    4: (empty)
+                    5: R_PAREN@2094..2095 ")" [] []
+              1: (empty)
+            1: SEMICOLON@2095..2096 ";" [] []
+          42: CSS_DECLARATION_WITH_SEMICOLON@2096..2137
+            0: CSS_DECLARATION@2096..2136
+              0: CSS_GENERIC_PROPERTY@2096..2136
+                0: CSS_IDENTIFIER@2096..2099
+                  0: IDENT@2096..2099 "p" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@2099..2101 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@2101..2136
+                  0: CSS_ATTR_FUNCTION@2101..2136
+                    0: ATTR_KW@2101..2105 "attr" [] []
+                    1: L_PAREN@2105..2106 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@2106..2111
+                      0: CSS_IDENTIFIER@2106..2111
+                        0: IDENT@2106..2111 "test" [] [Whitespace(" ")]
+                    3: CSS_TYPE_FUNCTION@2111..2135
+                      0: TYPE_KW@2111..2115 "type" [] []
+                      1: L_PAREN@2115..2116 "(" [] []
+                      2: CSS_SYNTAX_COMPONENT_LIST@2116..2134
+                        0: CSS_SYNTAX_COMPONENT@2116..2120
+                          0: CSS_IDENTIFIER@2116..2120
+                            0: IDENT@2116..2120 "red" [] [Whitespace(" ")]
+                          1: (empty)
+                        1: PIPE@2120..2122 "|" [] [Whitespace(" ")]
+                        2: CSS_SYNTAX_COMPONENT@2122..2127
+                          0: CSS_IDENTIFIER@2122..2127
+                            0: IDENT@2122..2127 "blue" [] [Whitespace(" ")]
+                          1: (empty)
+                        3: PIPE@2127..2129 "|" [] [Whitespace(" ")]
+                        4: CSS_SYNTAX_COMPONENT@2129..2134
+                          0: CSS_IDENTIFIER@2129..2134
+                            0: IDENT@2129..2134 "green" [] []
+                          1: (empty)
+                      3: R_PAREN@2134..2135 ")" [] []
+                    4: (empty)
+                    5: R_PAREN@2135..2136 ")" [] []
+              1: (empty)
+            1: SEMICOLON@2136..2137 ";" [] []
+        2: R_CURLY@2137..2139 "}" [Newline("\n")] []
+  2: EOF@2139..2140 "" [Newline("\n")] []
+
+```

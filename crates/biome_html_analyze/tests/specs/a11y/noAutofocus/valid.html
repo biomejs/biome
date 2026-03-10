@@ -1,0 +1,24 @@
+<!-- should not generate diagnostics -->
+<input />
+<textarea>content</textarea>
+<button>Submit</button>
+
+<!-- autofocus inside dialog is valid -->
+<dialog><input autofocus /></dialog>
+<dialog><textarea autofocus>content</textarea></dialog>
+
+<!-- autofocus inside element with popover is valid -->
+<div popover><input autofocus /></div>
+<div popover="auto"><button autofocus>Submit</button></div>
+
+<!-- nested cases -->
+<dialog>
+    <div>
+        <input autofocus />
+    </div>
+</dialog>
+<div popover>
+    <div>
+        <input autofocus />
+    </div>
+</div>

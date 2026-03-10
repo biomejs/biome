@@ -12,7 +12,7 @@ var a=3; function b() { var a=10; }; setTimeout(function() { b(); }, 0);
 ```
 invalid-06.js:1:29 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This variable shadows another variable with the same name in the outer scope.
+  ! This variable shadows another variable with the same name in the outer scope.
   
   > 1 │ var a=3; function b() { var a=10; }; setTimeout(function() { b(); }, 0);
       │                             ^

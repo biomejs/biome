@@ -1,0 +1,172 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+```rust
+fn main() {
+    println!("Hello");
+}
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdFencedCodeBlock {
+            l_fence: TRIPLE_BACKTICK@0..3 "```" [] [],
+            code_list: MdCodeNameList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@3..7 "rust" [] [],
+                },
+            ],
+            content: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@7..8 "\n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@8..15 "fn main" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@15..16 "(" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@16..17 ")" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@17..19 " {" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@19..20 "\n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@20..21 " " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@21..22 " " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@22..23 " " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@23..24 " " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@24..31 "println" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@31..32 "!" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@32..33 "(" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@33..40 "\"Hello\"" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@40..41 ")" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@41..42 ";" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@42..43 "\n" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@43..44 "}" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@44..45 "\n" [] [],
+                },
+            ],
+            r_fence: missing (required),
+        },
+    ],
+    eof_token: EOF@45..45 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..45
+  0: (empty)
+  1: MD_BLOCK_LIST@0..45
+    0: MD_FENCED_CODE_BLOCK@0..45
+      0: TRIPLE_BACKTICK@0..3 "```" [] []
+      1: MD_CODE_NAME_LIST@3..7
+        0: MD_TEXTUAL@3..7
+          0: MD_TEXTUAL_LITERAL@3..7 "rust" [] []
+      2: MD_INLINE_ITEM_LIST@7..45
+        0: MD_TEXTUAL@7..8
+          0: MD_TEXTUAL_LITERAL@7..8 "\n" [] []
+        1: MD_TEXTUAL@8..15
+          0: MD_TEXTUAL_LITERAL@8..15 "fn main" [] []
+        2: MD_TEXTUAL@15..16
+          0: MD_TEXTUAL_LITERAL@15..16 "(" [] []
+        3: MD_TEXTUAL@16..17
+          0: MD_TEXTUAL_LITERAL@16..17 ")" [] []
+        4: MD_TEXTUAL@17..19
+          0: MD_TEXTUAL_LITERAL@17..19 " {" [] []
+        5: MD_TEXTUAL@19..20
+          0: MD_TEXTUAL_LITERAL@19..20 "\n" [] []
+        6: MD_TEXTUAL@20..21
+          0: MD_TEXTUAL_LITERAL@20..21 " " [] []
+        7: MD_TEXTUAL@21..22
+          0: MD_TEXTUAL_LITERAL@21..22 " " [] []
+        8: MD_TEXTUAL@22..23
+          0: MD_TEXTUAL_LITERAL@22..23 " " [] []
+        9: MD_TEXTUAL@23..24
+          0: MD_TEXTUAL_LITERAL@23..24 " " [] []
+        10: MD_TEXTUAL@24..31
+          0: MD_TEXTUAL_LITERAL@24..31 "println" [] []
+        11: MD_TEXTUAL@31..32
+          0: MD_TEXTUAL_LITERAL@31..32 "!" [] []
+        12: MD_TEXTUAL@32..33
+          0: MD_TEXTUAL_LITERAL@32..33 "(" [] []
+        13: MD_TEXTUAL@33..40
+          0: MD_TEXTUAL_LITERAL@33..40 "\"Hello\"" [] []
+        14: MD_TEXTUAL@40..41
+          0: MD_TEXTUAL_LITERAL@40..41 ")" [] []
+        15: MD_TEXTUAL@41..42
+          0: MD_TEXTUAL_LITERAL@41..42 ";" [] []
+        16: MD_TEXTUAL@42..43
+          0: MD_TEXTUAL_LITERAL@42..43 "\n" [] []
+        17: MD_TEXTUAL@43..44
+          0: MD_TEXTUAL_LITERAL@43..44 "}" [] []
+        18: MD_TEXTUAL@44..45
+          0: MD_TEXTUAL_LITERAL@44..45 "\n" [] []
+      3: (empty)
+  2: EOF@45..45 "" [] []
+
+```
+
+## Diagnostics
+
+```
+unterminated_code_fence.md:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unterminated fenced code block, expected closing triple backticks (```).
+  
+  > 1 │ ```rust
+      │ ^^^
+    2 │ fn main() {
+    3 │     println!("Hello");
+  
+  i code block started here
+  
+  > 1 │ ```rust
+      │ ^^^
+    2 │ fn main() {
+    3 │     println!("Hello");
+  
+  i Add closing triple backticks (```) at the start of a new line.
+  
+```

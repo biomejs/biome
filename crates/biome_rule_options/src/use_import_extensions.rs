@@ -1,4 +1,5 @@
 use biome_deserialize_macros::{Deserializable, Merge};
+use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 #[derive(Default, Clone, Debug, Deserialize, Deserializable, Merge, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -6,8 +7,13 @@ use serde::{Deserialize, Serialize};
 pub struct UseImportExtensionsOptions {
     /// If `true`, the suggested extension is always `.js` regardless of what
     /// extension the source file has in your project.
-    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub force_js_extensions: Option<bool>,
+
+    /// A map of file extensions to their suggested replacements.
+    /// For example, `{"ts": "js"}` would suggest `.js` extensions for TypeScript imports.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub extension_mappings: Option<FxHashMap<Box<str>, Box<str>>>,
 }
 
 impl UseImportExtensionsOptions {

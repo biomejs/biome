@@ -1,0 +1,466 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+
+<!-- Empty anchor -->
+<a></a>
+
+<!-- Self-closing anchor (void-like usage) -->
+<a />
+
+<!-- Case insensitive - uppercase anchor -->
+<A></A>
+
+<!-- Anchor with only whitespace -->
+<a>    </a>
+
+<!-- Anchor with aria-hidden attribute -->
+<a aria-hidden="true">content</a>
+
+<!-- Anchor with aria-hidden (no value = truthy) -->
+<a aria-hidden>content</a>
+
+<!-- All children hidden with aria-hidden -->
+<a><span aria-hidden="true">content</span></a>
+
+<!-- Nested hidden content -->
+<a><div aria-hidden="true"><span>nested content</span></div></a>
+
+<!-- Empty aria-label should still be invalid -->
+<a aria-label=""></a>
+
+<!-- Whitespace-only aria-label should still be invalid -->
+<a aria-label="   "></a>
+
+<!-- Empty title should still be invalid -->
+<a title=""></a>
+
+<!-- Whitespace-only title should still be invalid -->
+<a title="   "></a>
+
+<!-- Image without alt attribute -->
+<a><img /></a>
+
+<!-- Image with empty alt attribute -->
+<a><img alt="" /></a>
+
+<!-- Image with whitespace-only alt attribute -->
+<a><img alt="   " /></a>
+
+<!-- Void elements that never provide accessible content -->
+<a><br /></a>
+
+<a><hr /></a>
+
+<a><wbr /></a>
+
+<!-- Hidden input is not accessible -->
+<a><input type="hidden" /></a>
+
+```
+
+# Diagnostics
+```
+invalid.html:4:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    3 │ <!-- Empty anchor -->
+  > 4 │ <a></a>
+      │ ^^^^^^^
+    5 │ 
+    6 │ <!-- Self-closing anchor (void-like usage) -->
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.html:7:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    6 │ <!-- Self-closing anchor (void-like usage) -->
+  > 7 │ <a />
+      │ ^^^^^
+    8 │ 
+    9 │ <!-- Case insensitive - uppercase anchor -->
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.html:10:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+     9 │ <!-- Case insensitive - uppercase anchor -->
+  > 10 │ <A></A>
+       │ ^^^^^^^
+    11 │ 
+    12 │ <!-- Anchor with only whitespace -->
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.html:13:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    12 │ <!-- Anchor with only whitespace -->
+  > 13 │ <a>    </a>
+       │ ^^^^^^^^^^^
+    14 │ 
+    15 │ <!-- Anchor with aria-hidden attribute -->
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.html:16:1 lint/a11y/useAnchorContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    15 │ <!-- Anchor with aria-hidden attribute -->
+  > 16 │ <a aria-hidden="true">content</a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ 
+    18 │ <!-- Anchor with aria-hidden (no value = truthy) -->
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+  i Unsafe fix: Remove the aria-hidden attribute to allow the anchor element and its content visible to assistive technologies.
+  
+    16 │ <a·aria-hidden="true">content</a>
+       │    ------------------            
+
+```
+
+```
+invalid.html:22:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    21 │ <!-- All children hidden with aria-hidden -->
+  > 22 │ <a><span aria-hidden="true">content</span></a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ 
+    24 │ <!-- Nested hidden content -->
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.html:25:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    24 │ <!-- Nested hidden content -->
+  > 25 │ <a><div aria-hidden="true"><span>nested content</span></div></a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ 
+    27 │ <!-- Empty aria-label should still be invalid -->
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.html:28:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    27 │ <!-- Empty aria-label should still be invalid -->
+  > 28 │ <a aria-label=""></a>
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    29 │ 
+    30 │ <!-- Whitespace-only aria-label should still be invalid -->
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.html:31:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    30 │ <!-- Whitespace-only aria-label should still be invalid -->
+  > 31 │ <a aria-label="   "></a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    32 │ 
+    33 │ <!-- Empty title should still be invalid -->
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.html:34:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    33 │ <!-- Empty title should still be invalid -->
+  > 34 │ <a title=""></a>
+       │ ^^^^^^^^^^^^^^^^
+    35 │ 
+    36 │ <!-- Whitespace-only title should still be invalid -->
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.html:37:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    36 │ <!-- Whitespace-only title should still be invalid -->
+  > 37 │ <a title="   "></a>
+       │ ^^^^^^^^^^^^^^^^^^^
+    38 │ 
+    39 │ <!-- Image without alt attribute -->
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.html:40:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    39 │ <!-- Image without alt attribute -->
+  > 40 │ <a><img /></a>
+       │ ^^^^^^^^^^^^^^
+    41 │ 
+    42 │ <!-- Image with empty alt attribute -->
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.html:43:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    42 │ <!-- Image with empty alt attribute -->
+  > 43 │ <a><img alt="" /></a>
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    44 │ 
+    45 │ <!-- Image with whitespace-only alt attribute -->
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.html:46:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    45 │ <!-- Image with whitespace-only alt attribute -->
+  > 46 │ <a><img alt="   " /></a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    47 │ 
+    48 │ <!-- Void elements that never provide accessible content -->
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.html:49:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    48 │ <!-- Void elements that never provide accessible content -->
+  > 49 │ <a><br /></a>
+       │ ^^^^^^^^^^^^^
+    50 │ 
+    51 │ <a><hr /></a>
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.html:51:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    49 │ <a><br /></a>
+    50 │ 
+  > 51 │ <a><hr /></a>
+       │ ^^^^^^^^^^^^^
+    52 │ 
+    53 │ <a><wbr /></a>
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.html:53:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    51 │ <a><hr /></a>
+    52 │ 
+  > 53 │ <a><wbr /></a>
+       │ ^^^^^^^^^^^^^^
+    54 │ 
+    55 │ <!-- Hidden input is not accessible -->
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.html:56:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    55 │ <!-- Hidden input is not accessible -->
+  > 56 │ <a><input type="hidden" /></a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    57 │ 
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```

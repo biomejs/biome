@@ -44,6 +44,14 @@ expression: invalid.jsx
     <div role="blockquote" ></div>
     <div role="contentinfo" ></div>
     <div role="region" ></div>
+
+    {/* Constrained elements: tag matches but required attributes are missing */}
+    <input role="checkbox" ></input>
+    <input role="radio" ></input>
+    <input role="searchbox" ></input>
+    <input role="textbox" ></input>
+    <th role="columnheader" ></th>
+    <th role="rowheader" ></th>
 </>
 
 ```
@@ -504,25 +512,6 @@ invalid.jsx:31:10 lint/a11y/useSemanticElements ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:32:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The elements with this role can be changed to the following elements:
-    <div>
-    <span>
-  
-    30 │     <div role="term" ></div>
-    31 │     <div role="textbox" ></div>
-  > 32 │     <div role="generic" ></div>
-       │          ^^^^^^^^^^^^^^
-    33 │     <div role="caption" ></div>
-    34 │     <div role="main" ></div>
-  
-  i For examples and more information, see WAI-ARIA Roles
-  
-
-```
-
-```
 invalid.jsx:33:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The elements with this role can be changed to the following elements:
@@ -643,7 +632,7 @@ invalid.jsx:39:10 lint/a11y/useSemanticElements ━━━━━━━━━━�
   > 39 │     <div role="contentinfo" ></div>
        │          ^^^^^^^^^^^^^^^^^^
     40 │     <div role="region" ></div>
-    41 │ </>
+    41 │ 
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -660,8 +649,116 @@ invalid.jsx:40:10 lint/a11y/useSemanticElements ━━━━━━━━━━�
     39 │     <div role="contentinfo" ></div>
   > 40 │     <div role="region" ></div>
        │          ^^^^^^^^^^^^^
-    41 │ </>
-    42 │ 
+    41 │ 
+    42 │     {/* Constrained elements: tag matches but required attributes are missing */}
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+
+```
+
+```
+invalid.jsx:43:12 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to the following elements:
+    <input type="checkbox">
+  
+    42 │     {/* Constrained elements: tag matches but required attributes are missing */}
+  > 43 │     <input role="checkbox" ></input>
+       │            ^^^^^^^^^^^^^^^
+    44 │     <input role="radio" ></input>
+    45 │     <input role="searchbox" ></input>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+
+```
+
+```
+invalid.jsx:44:12 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to the following elements:
+    <input type="radio">
+  
+    42 │     {/* Constrained elements: tag matches but required attributes are missing */}
+    43 │     <input role="checkbox" ></input>
+  > 44 │     <input role="radio" ></input>
+       │            ^^^^^^^^^^^^
+    45 │     <input role="searchbox" ></input>
+    46 │     <input role="textbox" ></input>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+
+```
+
+```
+invalid.jsx:45:12 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to the following elements:
+    <input type="search">
+  
+    43 │     <input role="checkbox" ></input>
+    44 │     <input role="radio" ></input>
+  > 45 │     <input role="searchbox" ></input>
+       │            ^^^^^^^^^^^^^^^^
+    46 │     <input role="textbox" ></input>
+    47 │     <th role="columnheader" ></th>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+
+```
+
+```
+invalid.jsx:46:12 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to the following elements:
+    <input type="text">
+    <textarea>
+  
+    44 │     <input role="radio" ></input>
+    45 │     <input role="searchbox" ></input>
+  > 46 │     <input role="textbox" ></input>
+       │            ^^^^^^^^^^^^^^
+    47 │     <th role="columnheader" ></th>
+    48 │     <th role="rowheader" ></th>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+
+```
+
+```
+invalid.jsx:47:9 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to the following elements:
+    <th scope="col">
+  
+    45 │     <input role="searchbox" ></input>
+    46 │     <input role="textbox" ></input>
+  > 47 │     <th role="columnheader" ></th>
+       │         ^^^^^^^^^^^^^^^^^^^
+    48 │     <th role="rowheader" ></th>
+    49 │ </>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+
+```
+
+```
+invalid.jsx:48:9 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to the following elements:
+    <th scope="row">
+  
+    46 │     <input role="textbox" ></input>
+    47 │     <th role="columnheader" ></th>
+  > 48 │     <th role="rowheader" ></th>
+       │         ^^^^^^^^^^^^^^^^
+    49 │ </>
+    50 │ 
   
   i For examples and more information, see WAI-ARIA Roles
   

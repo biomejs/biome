@@ -1,0 +1,70 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+# Emitted Messages
+
+```block
+Prints information for debugging.
+
+Usage: rage [--daemon-logs] [--formatter] [--linter]
+
+Global options applied to all commands
+        --colors=<off|force>  Set the formatting mode for markup: "off" prints everything as plain
+                              text, "force" forces the formatting of markup using ANSI even if the
+                              console output is determined to be incompatible
+        --use-server          Connect to a running instance of the Biome daemon server.
+        --verbose             Print additional diagnostics, and some diagnostics show more
+                              information. Also, print out what files were processed and which ones
+                              were modified.
+        --config-path=PATH    Set the file path to the configuration file, or the directory path to
+                              find `biome.json` or `biome.jsonc`. If used, it disables the default
+                              configuration file resolution.
+                              [env:BIOME_CONFIG_PATH: N/A]
+        --max-diagnostics=<none|<NUMBER>>  Cap the amount of diagnostics displayed. When `none` is
+                              provided, the limit is lifted.
+                              [default: 20]
+        --skip-parse-errors   Skip over files containing syntax errors instead of emitting an error
+                              diagnostic.
+        --no-errors-on-unmatched  Silence errors that would be emitted in case no files were
+                              processed during the execution of the command.
+        --error-on-warnings   Tell Biome to exit with an error code if some diagnostics emit
+                              warnings.
+  [--reporter=<default|json|json-pretty|github|junit|summary|gitlab|checkstyle|rdjson|sarif>] [
+  --reporter-file=PATH]
+        --reporter=<default|json|json-pretty|github|junit|summary|gitlab|checkstyle|rdjson|sarif>
+        --reporter-file=PATH
+
+        --diagnostic-level=<info|warn|error>  The level of diagnostics to show. In order, from the
+                              lowest to the most important: info, warn, error. Passing
+                              `--diagnostic-level=error` will cause Biome to print only diagnostics
+                              that contain only errors.
+                              [default: info]
+
+Options to control logging (CLI and Daemon)
+        --log-file=STRING     Optional path/file to redirect log messages to. This option is
+                              applicable only to the CLI.
+                              If omitted, logs are printed to stdout.
+                              [env:BIOME_LOG_FILE: N/A]
+        --log-prefix-name=STRING  [env:BIOME_LOG_PREFIX_NAME: N/A]
+                              [default: server.log]
+        --log-path=PATH       Allows changing the folder where logs are stored. This option is
+                              applicable only to the daemon.
+                              [env:BIOME_LOG_PATH: N/A]
+                              [default: <BIOME_DIR>/biome-logs]
+        --log-level=<none|debug|info|warn|error>  The level of logging. In order, from the most
+                              verbose to the least verbose: debug, info, warn, error.
+                              The value `none` won't show any logging.
+                              [env:BIOME_LOG_LEVEL: N/A]
+                              [default: none]
+        --log-kind=<pretty|compact|json>  What the log should look like.
+                              [env:BIOME_LOG_KIND: N/A]
+                              [default: pretty]
+
+Available options:
+        --daemon-logs         Prints the Biome daemon server logs
+        --formatter           Prints the formatter options applied
+        --linter              Prints the linter options applied
+    -h, --help                Prints help information
+
+```

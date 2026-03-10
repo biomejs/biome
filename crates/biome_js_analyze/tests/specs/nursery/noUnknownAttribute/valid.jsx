@@ -152,7 +152,7 @@
 	<hr align="top" />
 	<applet align="top" />
 	<marker fill="#000" />
-	<dialog onClose={handler} open id="dialog" returnValue="something" onCancel={handler2} />
+	<dialog closedby="any" onClose={handler} open id="dialog" returnValue="something" onCancel={handler2} />
 
 	<table align="top">
 		<caption align="top">Table Caption</caption>

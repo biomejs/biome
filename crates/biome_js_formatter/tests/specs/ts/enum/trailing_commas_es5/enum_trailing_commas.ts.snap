@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/enum/trailing_commas_es5/enum_trailing_commas.ts
 ---
+
 # Input
 
 ```ts
@@ -36,6 +37,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -44,6 +46,7 @@ enum A {
 	dsadsadasdasdasdasdasdasdasd,
 	dsadsadasdasdasdasdasdasdasd,
 }
+
 ```
 
 ## Output 1
@@ -64,6 +67,7 @@ Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
 Operator linebreak: After
+Trailing newline: true
 -----
 
 ```ts
@@ -72,4 +76,5 @@ enum A {
 	dsadsadasdasdasdasdasdasdasd,
 	dsadsadasdasdasdasdasdasdasd,
 }
+
 ```

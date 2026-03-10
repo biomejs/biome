@@ -46,7 +46,7 @@ declare_lint_rule! {
         language: "js",
         recommended: false,
         sources: &[RuleSource::EslintTypeScript("use-await-thenable").inspired()],
-        domains: &[RuleDomain::Project],
+        domains: &[RuleDomain::Types],
     }
 }
 
@@ -64,7 +64,9 @@ impl Rule for UseAwaitThenable {
         // Uncomment the following line for debugging convenience:
         //let printed = format!("type of {expression:?} = {ty:?}");
 
-        (ty.is_inferred() && !ty.is_promise_instance()).then_some(())
+        let is_maybe_promise =
+            ty.is_promise_instance() || ty.has_variant(|ty| ty.is_promise_instance());
+        (ty.is_inferred() && !is_maybe_promise).then_some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
