@@ -29,6 +29,8 @@ expression: invalid.html
 <table role="table"></table>
 <textarea role="textbox"></textarea>
 <input type="text" role="textbox" />
+<button role="button presentation"></button>
+<nav role="navigation link"></nav>
 
 ```
 
@@ -477,7 +479,7 @@ invalid.html:24:11 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━
   > 24 │ <textarea role="textbox"></textarea>
        │           ^^^^^^^^^^^^^^
     25 │ <input type="text" role="textbox" />
-    26 │ 
+    26 │ <button role="button presentation"></button>
   
   i Unsafe fix: Remove the role attribute.
   
@@ -495,11 +497,41 @@ invalid.html:25:20 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━
     24 │ <textarea role="textbox"></textarea>
   > 25 │ <input type="text" role="textbox" />
        │                    ^^^^^^^^^^^^^^
-    26 │ 
+    26 │ <button role="button presentation"></button>
+    27 │ <nav role="navigation link"></nav>
   
   i Unsafe fix: Remove the role attribute.
   
     25 │ <input·type="text"·role="textbox"·/>
        │                    ---------------  
+
+```
+
+```
+invalid.html:26:9 lint/a11y/noRedundantRoles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'button presentation' on the 'button' element is redundant, because it is implied by its semantics.
+  
+    24 │ <textarea role="textbox"></textarea>
+    25 │ <input type="text" role="textbox" />
+  > 26 │ <button role="button presentation"></button>
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ <nav role="navigation link"></nav>
+    28 │ 
+  
+
+```
+
+```
+invalid.html:27:6 lint/a11y/noRedundantRoles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'navigation link' on the 'nav' element is redundant, because it is implied by its semantics.
+  
+    25 │ <input type="text" role="textbox" />
+    26 │ <button role="button presentation"></button>
+  > 27 │ <nav role="navigation link"></nav>
+       │      ^^^^^^^^^^^^^^^^^^^^^^
+    28 │ 
+  
 
 ```
