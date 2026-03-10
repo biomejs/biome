@@ -7470,6 +7470,9 @@ export interface UseErrorCauseOptions {
 }
 export type UseExhaustiveSwitchCasesOptions = {};
 export type UseExpectOptions = {};
+/**
+ * Options for the `useExplicitReturnType` rule.
+ */
 export interface UseExplicitReturnTypeOptions {
 	/**
 	* Whether to ignore function expressions (functions that are not part of a declaration).
