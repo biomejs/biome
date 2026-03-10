@@ -12,6 +12,7 @@ use biome_js_syntax::{
     JsParenthesizedExpression, JsPropertyClassMember, JsPropertyObjectMember, JsReturnStatement,
     JsStatementList, JsSyntaxKind, JsVariableDeclarator,
 };
+use biome_rowan::AstNodeList;
 use biome_rowan::{
     AstNode, SyntaxNode, SyntaxNodeOptionExt, TextRange, TokenText, declare_node_union,
 };
@@ -75,25 +76,14 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// The following example is considered incorrect for a higher-order function because the function body contains multiple statements. We only check whether the first statement is a function return.
+    /// The following example is considered incorrect because not all return statements return a function. A higher-order function is only valid when every return statement returns a function expression:
     ///
     /// ```ts,expect_diagnostic
-    /// // A function has multiple statements in the body
     /// function f() {
     ///   if (x) {
     ///     return 0;
     ///   }
     ///   return (): void => {}
-    /// }
-    /// ```
-    ///
-    /// ```ts,expect_diagnostic
-    /// // A function has multiple statements in the body
-    /// function f() {
-    ///   let str = "test";
-    ///   return (): string => {
-    ///     str;
-    ///   }
     /// }
     /// ```
     ///
@@ -484,18 +474,18 @@ fn ancestor_has_return_type(func: &AnyJsFunction) -> bool {
 
     // Walk up ancestors looking for typed context
     for ancestor in walk_start.ancestors().skip(1) {
-        if let Some(arrow) = JsArrowFunctionExpression::cast_ref(&ancestor) {
-            if arrow.return_type_annotation().is_some() {
-                return true;
-            }
-        } else if let Some(func_expr) = biome_js_syntax::JsFunctionExpression::cast_ref(&ancestor) {
-            if func_expr.return_type_annotation().is_some() {
-                return true;
-            }
-        } else if let Some(func_decl) = JsFunctionDeclaration::cast_ref(&ancestor) {
-            if func_decl.return_type_annotation().is_some() {
-                return true;
-            }
+        if let Some(arrow) = JsArrowFunctionExpression::cast_ref(&ancestor)
+            && arrow.return_type_annotation().is_some()
+        {
+            return true;
+        } else if let Some(func_expr) = biome_js_syntax::JsFunctionExpression::cast_ref(&ancestor)
+            && func_expr.return_type_annotation().is_some()
+        {
+            return true;
+        } else if let Some(func_decl) = JsFunctionDeclaration::cast_ref(&ancestor)
+            && func_decl.return_type_annotation().is_some()
+        {
+            return true;
         } else if let Some(declarator) = JsVariableDeclarator::cast_ref(&ancestor) {
             return declarator.variable_annotation().is_some();
         } else if let Some(prop) = JsPropertyClassMember::cast_ref(&ancestor) {
@@ -531,7 +521,7 @@ fn is_higher_order_function(func: &AnyJsFunction) -> bool {
             )
         }
         Some(AnyJsFunctionBody::JsFunctionBody(func_body)) => {
-            all_returns_are_functions(func_body.statements())
+            all_returns_are_functions(&func_body.statements())
         }
         _ => false,
     }
@@ -539,7 +529,7 @@ fn is_higher_order_function(func: &AnyJsFunction) -> bool {
 
 /// Checks that a function body's return statements ALL return function expressions.
 /// Returns `false` if there are no return statements at all.
-fn all_returns_are_functions(statements: JsStatementList) -> bool {
+fn all_returns_are_functions(statements: &JsStatementList) -> bool {
     let returns = collect_return_statements(statements);
     if returns.is_empty() {
         return false;
@@ -555,52 +545,98 @@ fn all_returns_are_functions(statements: JsStatementList) -> bool {
     })
 }
 
-/// Recursively collects all return statements from a statement list,
-/// descending into if/else blocks but NOT into nested functions.
-fn collect_return_statements(statements: JsStatementList) -> Vec<JsReturnStatement> {
+/// Collects all return statements from a statement list, descending into
+/// control-flow blocks (if/else, switch, block) but NOT into nested functions.
+/// Uses an iterative worklist to avoid recursion.
+fn collect_return_statements(statements: &JsStatementList) -> Vec<JsReturnStatement> {
     let mut returns = Vec::new();
-    collect_returns_from_stmts(statements, &mut returns);
+    let mut queue: Vec<_> = statements.iter().collect();
+
+    while let Some(stmt) = queue.pop() {
+        match stmt {
+            AnyJsStatement::JsReturnStatement(ret) => {
+                returns.push(ret);
+            }
+            AnyJsStatement::JsIfStatement(if_stmt) => {
+                if let Ok(consequence) = if_stmt.consequent() {
+                    queue.push(consequence);
+                }
+                if let Some(else_clause) = if_stmt.else_clause()
+                    && let Ok(alternate) = else_clause.alternate()
+                {
+                    queue.push(alternate);
+                }
+            }
+            AnyJsStatement::JsBlockStatement(block) => {
+                queue.extend(block.statements());
+            }
+            AnyJsStatement::JsSwitchStatement(switch_stmt) => {
+                for case in switch_stmt.cases() {
+                    match case {
+                        biome_js_syntax::AnyJsSwitchClause::JsCaseClause(clause) => {
+                            queue.extend(clause.consequent());
+                        }
+                        biome_js_syntax::AnyJsSwitchClause::JsDefaultClause(clause) => {
+                            queue.extend(clause.consequent());
+                        }
+                    }
+                }
+            }
+            AnyJsStatement::JsTryStatement(try_stmt) => {
+                if let Ok(body) = try_stmt.body() {
+                    queue.extend(body.statements());
+                }
+                if let Ok(catch) = try_stmt.catch_clause()
+                    && let Ok(catch_body) = catch.body()
+                {
+                    queue.extend(catch_body.statements());
+                }
+            }
+            AnyJsStatement::JsTryFinallyStatement(try_stmt) => {
+                if let Ok(body) = try_stmt.body() {
+                    queue.extend(body.statements());
+                }
+                if let Some(catch) = try_stmt.catch_clause()
+                    && let Ok(catch_body) = catch.body()
+                {
+                    queue.extend(catch_body.statements());
+                }
+                if let Ok(finally) = try_stmt.finally_clause()
+                    && let Ok(finally_body) = finally.body()
+                {
+                    queue.extend(finally_body.statements());
+                }
+            }
+            AnyJsStatement::JsForStatement(stmt) => {
+                if let Ok(body) = stmt.body() {
+                    queue.push(body);
+                }
+            }
+            AnyJsStatement::JsForInStatement(stmt) => {
+                if let Ok(body) = stmt.body() {
+                    queue.push(body);
+                }
+            }
+            AnyJsStatement::JsForOfStatement(stmt) => {
+                if let Ok(body) = stmt.body() {
+                    queue.push(body);
+                }
+            }
+            AnyJsStatement::JsWhileStatement(stmt) => {
+                if let Ok(body) = stmt.body() {
+                    queue.push(body);
+                }
+            }
+            AnyJsStatement::JsDoWhileStatement(stmt) => {
+                if let Ok(body) = stmt.body() {
+                    queue.push(body);
+                }
+            }
+            _ => {}
+        }
+    }
+
     returns
-}
-
-fn collect_returns_from_stmts(statements: JsStatementList, returns: &mut Vec<JsReturnStatement>) {
-    for stmt in statements {
-        collect_returns_from_stmt(stmt, returns);
-    }
-}
-
-fn collect_returns_from_stmt(stmt: AnyJsStatement, returns: &mut Vec<JsReturnStatement>) {
-    match stmt {
-        AnyJsStatement::JsReturnStatement(ret) => {
-            returns.push(ret);
-        }
-        AnyJsStatement::JsIfStatement(if_stmt) => {
-            if let Ok(consequence) = if_stmt.consequent() {
-                collect_returns_from_stmt(consequence, returns);
-            }
-            if let Some(else_clause) = if_stmt.else_clause() {
-                if let Ok(alternate) = else_clause.alternate() {
-                    collect_returns_from_stmt(alternate, returns);
-                }
-            }
-        }
-        AnyJsStatement::JsBlockStatement(block) => {
-            collect_returns_from_stmts(block.statements(), returns);
-        }
-        AnyJsStatement::JsSwitchStatement(switch_stmt) => {
-            for case in switch_stmt.cases() {
-                match case {
-                    biome_js_syntax::AnyJsSwitchClause::JsCaseClause(clause) => {
-                        collect_returns_from_stmts(clause.consequent(), returns);
-                    }
-                    biome_js_syntax::AnyJsSwitchClause::JsDefaultClause(clause) => {
-                        collect_returns_from_stmts(clause.consequent(), returns);
-                    }
-                }
-            }
-        }
-        _ => {}
-    }
 }
 
 /// Checks if a given function expression has a type annotation.
