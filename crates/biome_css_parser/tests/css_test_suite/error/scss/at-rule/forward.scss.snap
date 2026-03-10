@@ -12,6 +12,8 @@ expression: snapshot
 
 @forward "theme" hide , $color;
 
+@forward "theme" as theme*;
+
 @forward "theme" as theme-;
 
 @forward "theme" with ($spacing:);
@@ -87,10 +89,10 @@ CssRoot {
                 as_clause: ScssForwardAsClause {
                     as_token: AS_KW@85..88 "as" [] [Whitespace(" ")],
                     prefix: CssIdentifier {
-                        value_token: IDENT@88..94 "theme-" [] [],
+                        value_token: IDENT@88..93 "theme" [] [],
                     },
                     minus_token: missing (optional),
-                    star_token: missing (required),
+                    star_token: STAR@93..94 "*" [] [],
                 },
                 visibility_clause: missing (optional),
                 with_clause: missing (optional),
@@ -104,41 +106,61 @@ CssRoot {
                 url: CssString {
                     value_token: CSS_STRING_LITERAL@106..114 "\"theme\"" [] [Whitespace(" ")],
                 },
+                as_clause: ScssForwardAsClause {
+                    as_token: AS_KW@114..117 "as" [] [Whitespace(" ")],
+                    prefix: CssIdentifier {
+                        value_token: IDENT@117..123 "theme-" [] [],
+                    },
+                    minus_token: missing (optional),
+                    star_token: missing (required),
+                },
+                visibility_clause: missing (optional),
+                with_clause: missing (optional),
+                semicolon_token: SEMICOLON@123..124 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@124..127 "@" [Newline("\n"), Newline("\n")] [],
+            rule: ScssForwardAtRule {
+                forward_token: FORWARD_KW@127..135 "forward" [] [Whitespace(" ")],
+                url: CssString {
+                    value_token: CSS_STRING_LITERAL@135..143 "\"theme\"" [] [Whitespace(" ")],
+                },
                 as_clause: missing (optional),
                 visibility_clause: missing (optional),
                 with_clause: ScssWithClause {
-                    with_token: WITH_KW@114..119 "with" [] [Whitespace(" ")],
+                    with_token: WITH_KW@143..148 "with" [] [Whitespace(" ")],
                     configurations: ScssModuleConfigurationList {
-                        l_paren_token: L_PAREN@119..120 "(" [] [],
+                        l_paren_token: L_PAREN@148..149 "(" [] [],
                         items: ScssModuleConfigurationItemList [
                             ScssModuleConfiguration {
                                 name: ScssIdentifier {
-                                    dollar_token: DOLLAR@120..121 "$" [] [],
+                                    dollar_token: DOLLAR@149..150 "$" [] [],
                                     name: CssIdentifier {
-                                        value_token: IDENT@121..128 "spacing" [] [],
+                                        value_token: IDENT@150..157 "spacing" [] [],
                                     },
                                 },
-                                colon_token: COLON@128..129 ":" [] [],
+                                colon_token: COLON@157..158 ":" [] [],
                                 value: missing (required),
                             },
                         ],
-                        r_paren_token: R_PAREN@129..130 ")" [] [],
+                        r_paren_token: R_PAREN@158..159 ")" [] [],
                     },
                 },
-                semicolon_token: SEMICOLON@130..131 ";" [] [],
+                semicolon_token: SEMICOLON@159..160 ";" [] [],
             },
         },
     ],
-    eof_token: EOF@131..132 "" [Newline("\n")] [],
+    eof_token: EOF@160..161 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..132
+0: CSS_ROOT@0..161
   0: (empty)
-  1: CSS_ROOT_ITEM_LIST@0..131
+  1: CSS_ROOT_ITEM_LIST@0..160
     0: CSS_AT_RULE@0..9
       0: AT@0..1 "@" [] []
       1: SCSS_FORWARD_AT_RULE@1..9
@@ -186,36 +208,51 @@ CssRoot {
           0: CSS_STRING_LITERAL@77..85 "\"theme\"" [] [Whitespace(" ")]
         2: SCSS_FORWARD_AS_CLAUSE@85..94
           0: AS_KW@85..88 "as" [] [Whitespace(" ")]
-          1: CSS_IDENTIFIER@88..94
-            0: IDENT@88..94 "theme-" [] []
+          1: CSS_IDENTIFIER@88..93
+            0: IDENT@88..93 "theme" [] []
+          2: (empty)
+          3: STAR@93..94 "*" [] []
+        3: (empty)
+        4: (empty)
+        5: SEMICOLON@94..95 ";" [] []
+    4: CSS_AT_RULE@95..124
+      0: AT@95..98 "@" [Newline("\n"), Newline("\n")] []
+      1: SCSS_FORWARD_AT_RULE@98..124
+        0: FORWARD_KW@98..106 "forward" [] [Whitespace(" ")]
+        1: CSS_STRING@106..114
+          0: CSS_STRING_LITERAL@106..114 "\"theme\"" [] [Whitespace(" ")]
+        2: SCSS_FORWARD_AS_CLAUSE@114..123
+          0: AS_KW@114..117 "as" [] [Whitespace(" ")]
+          1: CSS_IDENTIFIER@117..123
+            0: IDENT@117..123 "theme-" [] []
           2: (empty)
           3: (empty)
         3: (empty)
         4: (empty)
-        5: SEMICOLON@94..95 ";" [] []
-    4: CSS_AT_RULE@95..131
-      0: AT@95..98 "@" [Newline("\n"), Newline("\n")] []
-      1: SCSS_FORWARD_AT_RULE@98..131
-        0: FORWARD_KW@98..106 "forward" [] [Whitespace(" ")]
-        1: CSS_STRING@106..114
-          0: CSS_STRING_LITERAL@106..114 "\"theme\"" [] [Whitespace(" ")]
+        5: SEMICOLON@123..124 ";" [] []
+    5: CSS_AT_RULE@124..160
+      0: AT@124..127 "@" [Newline("\n"), Newline("\n")] []
+      1: SCSS_FORWARD_AT_RULE@127..160
+        0: FORWARD_KW@127..135 "forward" [] [Whitespace(" ")]
+        1: CSS_STRING@135..143
+          0: CSS_STRING_LITERAL@135..143 "\"theme\"" [] [Whitespace(" ")]
         2: (empty)
         3: (empty)
-        4: SCSS_WITH_CLAUSE@114..130
-          0: WITH_KW@114..119 "with" [] [Whitespace(" ")]
-          1: SCSS_MODULE_CONFIGURATION_LIST@119..130
-            0: L_PAREN@119..120 "(" [] []
-            1: SCSS_MODULE_CONFIGURATION_ITEM_LIST@120..129
-              0: SCSS_MODULE_CONFIGURATION@120..129
-                0: SCSS_IDENTIFIER@120..128
-                  0: DOLLAR@120..121 "$" [] []
-                  1: CSS_IDENTIFIER@121..128
-                    0: IDENT@121..128 "spacing" [] []
-                1: COLON@128..129 ":" [] []
+        4: SCSS_WITH_CLAUSE@143..159
+          0: WITH_KW@143..148 "with" [] [Whitespace(" ")]
+          1: SCSS_MODULE_CONFIGURATION_LIST@148..159
+            0: L_PAREN@148..149 "(" [] []
+            1: SCSS_MODULE_CONFIGURATION_ITEM_LIST@149..158
+              0: SCSS_MODULE_CONFIGURATION@149..158
+                0: SCSS_IDENTIFIER@149..157
+                  0: DOLLAR@149..150 "$" [] []
+                  1: CSS_IDENTIFIER@150..157
+                    0: IDENT@150..157 "spacing" [] []
+                1: COLON@157..158 ":" [] []
                 2: (empty)
-            2: R_PAREN@129..130 ")" [] []
-        5: SEMICOLON@130..131 ";" [] []
-  2: EOF@131..132 "" [Newline("\n")] []
+            2: R_PAREN@158..159 ")" [] []
+        5: SEMICOLON@159..160 ";" [] []
+  2: EOF@160..161 "" [Newline("\n")] []
 
 ```
 
@@ -260,39 +297,52 @@ forward.scss:5:23 parse ━━━━━━━━━━━━━━━━━━�
   > 5 │ @forward "theme" hide , $color;
       │                       ^
     6 │ 
-    7 │ @forward "theme" as theme-;
+    7 │ @forward "theme" as theme*;
   
   i Add a member like `$name` or `mixin-name` here.
   
-forward.scss:7:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+forward.scss:7:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `*` but instead found `;`
+  × expected `-` but instead found `*`
   
     5 │ @forward "theme" hide , $color;
     6 │ 
-  > 7 │ @forward "theme" as theme-;
-      │                           ^
+  > 7 │ @forward "theme" as theme*;
+      │                          ^
     8 │ 
-    9 │ @forward "theme" with ($spacing:);
+    9 │ @forward "theme" as theme-;
+  
+  i Remove *
+  
+forward.scss:9:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `*` but instead found `;`
+  
+     7 │ @forward "theme" as theme*;
+     8 │ 
+   > 9 │ @forward "theme" as theme-;
+       │                           ^
+    10 │ 
+    11 │ @forward "theme" with ($spacing:);
   
   i Remove ;
   
-forward.scss:9:33 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+forward.scss:11:33 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a SCSS expression but instead found ')'.
   
-     7 │ @forward "theme" as theme-;
-     8 │ 
-   > 9 │ @forward "theme" with ($spacing:);
-       │                                 ^
+     9 │ @forward "theme" as theme-;
     10 │ 
+  > 11 │ @forward "theme" with ($spacing:);
+       │                                 ^
+    12 │ 
   
   i Expected a SCSS expression here.
   
-     7 │ @forward "theme" as theme-;
-     8 │ 
-   > 9 │ @forward "theme" with ($spacing:);
-       │                                 ^
+     9 │ @forward "theme" as theme-;
     10 │ 
+  > 11 │ @forward "theme" with ($spacing:);
+       │                                 ^
+    12 │ 
   
 ```

@@ -64,8 +64,10 @@ fn parse_scss_forward_as_clause(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(T![as]);
-    parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
-    p.eat(T![-]);
+    let prefix = parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
+    if prefix.is_none_or(|prefix| !prefix.text(p).ends_with('-')) {
+        p.expect(T![-]);
+    }
     p.expect(T![*]);
 
     Present(m.complete(p, SCSS_FORWARD_AS_CLAUSE))
