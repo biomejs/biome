@@ -80,20 +80,10 @@ impl Rule for UseSemanticElements {
         let role_value = role_attribute.as_static_value()?;
         let role_value = role_value.as_string_constant()?;
 
-        // Allow `role="img"` on any element. For more information, see:
-        // <https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/img_role>
         if role_value == "img" {
             return None;
         }
 
-        // For the following roles, the associated elements are impractical:
-        // - combobox: <select> is not possible to implement many valid comboboxes (see https://www.w3.org/WAI/ARIA/apg/patterns/combobox/)
-        // - option: <option> in browsers have divergent/unexpected behavior, with Safari hiding elements by default.
-        // - listbox: <datalist> isn’t always correct for all listbox uses
-        // See https://www.w3.org/WAI/ARIA/apg/patterns/combobox/. In most examples, roles are explicit
-        // - status: <output> is only a relatedConcept, not a baseConcept of the status role.
-        //   Using <output> for status is misleading (see #9245, eslint-plugin-jsx-a11y#920)
-        // - alert: <output> is only a relatedConcept, same issue as status
         if role_value == "combobox"
             || role_value == "listbox"
             || role_value == "option"
