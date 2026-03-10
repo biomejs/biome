@@ -5,7 +5,7 @@ use crate::syntax::scss::{
 };
 use crate::syntax::{is_at_identifier, parse_regular_identifier};
 use biome_css_syntax::CssSyntaxKind::{
-    self, CSS_BOGUS, SCSS_MODULE_CONFIGURATION, SCSS_MODULE_CONFIGURATION_ITEM_LIST,
+    self, CSS_BOGUS, EOF, SCSS_MODULE_CONFIGURATION, SCSS_MODULE_CONFIGURATION_ITEM_LIST,
     SCSS_MODULE_CONFIGURATION_LIST, SCSS_MODULE_MEMBER_LIST,
 };
 use biome_css_syntax::T;
@@ -20,6 +20,8 @@ const SCSS_MODULE_CONFIGURATION_VALUE_END_SET: TokenSet<CssSyntaxKind> =
     token_set![T![,], T![')']];
 const SCSS_MODULE_CONFIGURATION_RECOVERY_SET: TokenSet<CssSyntaxKind> =
     token_set![T![,], T![')']];
+const SCSS_MODULE_MEMBER_RECOVERY_SET: TokenSet<CssSyntaxKind> =
+    token_set![T![,], T![with], T![;], EOF];
 
 /// Parses the SCSS module configuration list used by `with (...)` clauses.
 ///
@@ -95,17 +97,7 @@ fn parse_scss_module_configuration(p: &mut CssParser) -> ParsedSyntax {
 /// Docs: https://sass-lang.com/documentation/at-rules/forward/
 #[inline]
 pub(super) fn parse_scss_module_member_list(p: &mut CssParser) -> ParsedSyntax {
-    let m = p.start();
-
-    parse_scss_module_member(p)
-        .or_add_diagnostic(p, expected_scss_module_member);
-
-    while p.eat(T![,]) {
-        parse_scss_module_member(p)
-            .or_add_diagnostic(p, expected_scss_module_member);
-    }
-
-    Present(m.complete(p, SCSS_MODULE_MEMBER_LIST))
+    Present(ScssModuleMemberList.parse_list(p))
 }
 
 #[inline]
@@ -133,6 +125,58 @@ pub(super) fn expected_scss_module_configuration(
 pub(super) fn expected_scss_module_member(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     p.err_builder("Expected a module member.", range)
         .with_hint("Add a member like `$name` or `mixin-name` here.")
+}
+
+struct ScssModuleMemberListRecovery;
+
+impl ParseRecovery for ScssModuleMemberListRecovery {
+    type Kind = CssSyntaxKind;
+    type Parser<'source> = CssParser<'source>;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
+
+    fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at_ts(SCSS_MODULE_MEMBER_RECOVERY_SET)
+    }
+}
+
+struct ScssModuleMemberList;
+
+impl ParseSeparatedList for ScssModuleMemberList {
+    type Kind = CssSyntaxKind;
+    type Parser<'source> = CssParser<'source>;
+    const LIST_KIND: Self::Kind = SCSS_MODULE_MEMBER_LIST;
+
+    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        parse_scss_module_member(p)
+    }
+
+    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at(T![with]) || p.at(T![;]) || p.at(EOF)
+    }
+
+    fn recover(
+        &mut self,
+        p: &mut Self::Parser<'_>,
+        parsed_element: ParsedSyntax,
+    ) -> RecoveryResult {
+        parsed_element.or_recover(p, &ScssModuleMemberListRecovery, expected_scss_module_member)
+    }
+
+    fn separating_element_kind(&mut self) -> Self::Kind {
+        T![,]
+    }
+
+    fn diagnose_missing_element(&mut self, p: &mut Self::Parser<'_>) {
+        p.error(expected_scss_module_member(p, p.cur_range()));
+    }
+
+    fn allow_trailing_separating_element(&self) -> bool {
+        false
+    }
+
+    fn allow_empty(&self) -> bool {
+        false
+    }
 }
 
 struct ScssModuleConfigurationItemListRecovery;
