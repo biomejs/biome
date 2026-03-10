@@ -18,9 +18,11 @@ const baz = function () {
 };
 
 // Destructured assignment doesn't match allowedNames
-let [test, test] = function () {
-  return;
-};
+let [unlistedName] = [
+  function () {
+    return;
+  },
+];
 
 // Computed member name doesn't match allowedNames
 class X {
@@ -43,8 +45,6 @@ class Foo {
 }
 
 ```
-
-_Note: The parser emitted 1 diagnostics which are not shown here._
 
 # Diagnostics
 ```
@@ -122,44 +122,19 @@ invalid.ts:10:13 lint/nursery/useExplicitReturnType ━━━━━━━━━�
 ```
 
 ```
-invalid.ts:15:20 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:16:3 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing return type on function.
   
     14 │ // Destructured assignment doesn't match allowedNames
-  > 15 │ let [test, test] = function () {
-       │                    ^^^^^^^^^^^^^
-  > 16 │   return;
-  > 17 │ };
-       │ ^
-    18 │ 
-    19 │ // Computed member name doesn't match allowedNames
-  
-  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
-  
-  i Add a return type to the function.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.ts:21:12 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Missing return type on function.
-  
-    19 │ // Computed member name doesn't match allowedNames
-    20 │ class X {
-  > 21 │   [test] = function () {
-       │            ^^^^^^^^^^^^^
-  > 22 │     return;
-  > 23 │   };
+    15 │ let [unlistedName] = [
+  > 16 │   function () {
+       │   ^^^^^^^^^^^^^
+  > 17 │     return;
+  > 18 │   },
        │   ^
-    24 │ }
-    25 │ 
+    19 │ ];
+    20 │ 
   
   i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
   
@@ -173,16 +148,42 @@ invalid.ts:21:12 lint/nursery/useExplicitReturnType ━━━━━━━━━�
 ```
 
 ```
-invalid.ts:36:3 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:23:12 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing return type on function.
   
-    34 │ const ignoredName = 'notIgnoredName';
-    35 │ class Foo {
-  > 36 │   [ignoredName]() {}
+    21 │ // Computed member name doesn't match allowedNames
+    22 │ class X {
+  > 23 │   [test] = function () {
+       │            ^^^^^^^^^^^^^
+  > 24 │     return;
+  > 25 │   };
+       │   ^
+    26 │ }
+    27 │ 
+  
+  i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
+  
+  i Add a return type to the function.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/2017 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:38:3 lint/nursery/useExplicitReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    36 │ const ignoredName = 'notIgnoredName';
+    37 │ class Foo {
+  > 38 │   [ignoredName]() {}
        │   ^^^^^^^^^^^^^^^^^^
-    37 │ }
-    38 │ 
+    39 │ }
+    40 │ 
   
   i Declaring the return type makes the code self-documented and can speed up TypeScript type checking.
   
