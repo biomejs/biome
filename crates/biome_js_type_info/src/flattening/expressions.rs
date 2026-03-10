@@ -399,17 +399,21 @@ fn flattened_call(
             // resolve the call on each callable variant and collect return types.
             let mut return_types = Vec::new();
             for variant in union.types() {
-                if *variant == GLOBAL_UNDEFINED_ID.into() {
-                    continue;
-                }
                 let Some(resolved) = resolver.resolve_and_get(variant) else {
                     continue;
                 };
-                if matches!(
-                    resolved.as_raw_data(),
-                    TypeData::Unknown | TypeData::TypeofExpression(_)
-                ) {
-                    continue;
+                match resolved.as_raw_data() {
+                    // `undefined` or `null` callee
+                    // short-circuits to `undefined`, so preserve it in the
+                    // result union instead of silently dropping it.
+                    TypeData::Undefined | TypeData::Null => {
+                        return_types.push(TypeData::Undefined);
+                        continue;
+                    }
+                    TypeData::Unknown | TypeData::TypeofExpression(_) => {
+                        continue;
+                    }
+                    _ => {}
                 }
                 if let Some(function) = resolve_callee_to_function(resolved.to_data(), resolver)
                     && let Some(result) = flattened_function_call(expr, &function, resolver)

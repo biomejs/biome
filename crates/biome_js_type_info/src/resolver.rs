@@ -757,9 +757,9 @@ impl Resolvable for TypeReference {
                         // Handle Record<K, V> by synthesizing an object type
                         // with an index signature: { [key: K]: V }
                         if qualifier.is_record() && qualifier.type_parameters.len() == 2 {
-                            // SAFETY: type_parameters checked inside the if
-                            let key_type = qualifier.type_parameters[0].clone();
-                            let value_type = qualifier.type_parameters[1].clone();
+                            let params = self.resolved_params(resolver);
+                            let key_type = params[0].clone();
+                            let value_type = params[1].clone();
                             let resolved_id: ResolvedTypeId =
                                 resolver.register_and_resolve(TypeData::Object(Box::new(Object {
                                     prototype: None,
