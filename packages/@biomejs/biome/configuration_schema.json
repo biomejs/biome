@@ -6266,6 +6266,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useImportsFirst": {
+					"description": "Enforce that all imports appear at the top of the module.\nSee https://biomejs.dev/linter/rules/use-imports-first",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseImportsFirstConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useInlineScriptId": {
 					"description": "Enforce id attribute on next/script components with inline content or dangerouslySetInnerHTML.\nSee https://biomejs.dev/linter/rules/use-inline-script-id",
 					"anyOf": [
@@ -10494,6 +10501,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseImportsFirstOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseImportsFirstOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseIndexOfOptions": {
 			"type": "object",
 			"properties": {
@@ -13729,6 +13745,16 @@
 			"description": "The style to apply when importing types.",
 			"type": "string",
 			"enum": ["auto", "inlineType", "separatedType"]
+		},
+		"UseImportsFirstConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseImportsFirstOptions" }
+			]
+		},
+		"UseImportsFirstOptions": {
+			"type": "object",
+			"additionalProperties": false
 		},
 		"UseIndexOfConfiguration": {
 			"oneOf": [
