@@ -858,6 +858,12 @@ fn is_quote_blank_line_after_newline(p: &mut MarkdownParser, quote_depth: usize)
     })
 }
 
+/// Returns `true` when the quote prefix signals a block break (setext
+/// underline or other block construct), in which case the paragraph must end.
+///
+/// **Side effect**: consumes the quote prefix tokens from the parser when the
+/// line is either a continuation (`None`) or a setext underline, so that
+/// downstream consumers see the content without the leading `>` markers.
 fn break_for_quote_prefix_after_inline_newline(p: &mut MarkdownParser, quote_depth: usize) -> bool {
     if quote_depth == 0 {
         return false;
