@@ -617,11 +617,13 @@ fn at_rule_name(rule: &AnyCssAtRule) -> Option<&'static str> {
         | AnyCssAtRule::ScssEachAtRule(_)
         | AnyCssAtRule::ScssErrorAtRule(_)
         | AnyCssAtRule::ScssForAtRule(_)
+        | AnyCssAtRule::ScssForwardAtRule(_)
         | AnyCssAtRule::ScssFunctionAtRule(_)
         | AnyCssAtRule::ScssIfAtRule(_)
         | AnyCssAtRule::ScssIncludeAtRule(_)
         | AnyCssAtRule::ScssMixinAtRule(_)
         | AnyCssAtRule::ScssReturnAtRule(_)
+        | AnyCssAtRule::ScssUseAtRule(_)
         | AnyCssAtRule::ScssWarnAtRule(_)
         | AnyCssAtRule::ScssWhileAtRule(_)
         | AnyCssAtRule::TwVariantAtRule(_) => None,
