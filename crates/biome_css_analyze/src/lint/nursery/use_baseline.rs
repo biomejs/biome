@@ -612,6 +612,18 @@ fn at_rule_name(rule: &AnyCssAtRule) -> Option<&'static str> {
         | AnyCssAtRule::TwSourceAtRule(_)
         | AnyCssAtRule::TwThemeAtRule(_)
         | AnyCssAtRule::TwUtilityAtRule(_)
+        | AnyCssAtRule::ScssContentAtRule(_)
+        | AnyCssAtRule::ScssDebugAtRule(_)
+        | AnyCssAtRule::ScssEachAtRule(_)
+        | AnyCssAtRule::ScssErrorAtRule(_)
+        | AnyCssAtRule::ScssForAtRule(_)
+        | AnyCssAtRule::ScssFunctionAtRule(_)
+        | AnyCssAtRule::ScssIfAtRule(_)
+        | AnyCssAtRule::ScssIncludeAtRule(_)
+        | AnyCssAtRule::ScssMixinAtRule(_)
+        | AnyCssAtRule::ScssReturnAtRule(_)
+        | AnyCssAtRule::ScssWarnAtRule(_)
+        | AnyCssAtRule::ScssWhileAtRule(_)
         | AnyCssAtRule::TwVariantAtRule(_) => None,
     }
 }
