@@ -121,6 +121,7 @@ pub(crate) async fn did_open(
         .is_path_ignored(PathIsIgnoredParams {
             project_key,
             path: path.clone(),
+            is_dir: false,
             features: FeaturesBuilder::new().build(),
             ignore_kind: IgnoreKind::Ancestors,
         })
@@ -169,6 +170,7 @@ pub(crate) async fn did_change(
     let features = FeaturesBuilder::new().build();
     if session.workspace.is_path_ignored(PathIsIgnoredParams {
         path: path.clone(),
+        is_dir: false,
         project_key: doc.project_key,
         features,
         ignore_kind: IgnoreKind::Ancestors,

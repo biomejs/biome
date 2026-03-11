@@ -35,9 +35,8 @@ pub trait Handler: Default + Send + Sync + Debug + std::panic::RefUnwindSafe {
         let fs = ctx.fs();
         let workspace = ctx.workspace();
         let execution = ctx.execution();
-        let path = biome_path.as_path();
         let project_key = ctx.project_key();
-        if fs.path_is_dir(path) || fs.path_is_symlink(path) {
+        if biome_path.path_kind().is_dir() || biome_path.path_kind().is_symlink() {
             // handle:
             // - directories
             // - symlinks
@@ -48,6 +47,9 @@ pub trait Handler: Default + Send + Sync + Debug + std::panic::RefUnwindSafe {
                 .is_path_ignored(PathIsIgnoredParams {
                     project_key,
                     path: biome_path.clone(),
+                    // Treat symlinks the same as directories for include/ignore matching,
+                    // since symlinks in this branch point to directories.
+                    is_dir: true,
                     features: execution.wanted_features(),
                     ignore_kind: IgnoreKind::Ancestors,
                 })
@@ -60,7 +62,7 @@ pub trait Handler: Default + Send + Sync + Debug + std::panic::RefUnwindSafe {
         }
 
         // bail on fifo and socket files
-        if !fs.path_is_file(path) {
+        if !biome_path.path_kind().is_file() {
             return false;
         }
 

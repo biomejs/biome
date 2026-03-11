@@ -65,6 +65,7 @@ pub(crate) fn code_actions(
 
     if session.workspace.is_path_ignored(PathIsIgnoredParams {
         path: path.clone(),
+        is_dir: false,
         project_key: doc.project_key,
         features,
         ignore_kind: IgnoreKind::Ancestors,
@@ -305,6 +306,7 @@ fn fix_all(
 
     if session.workspace.is_path_ignored(PathIsIgnoredParams {
         path: path.clone(),
+        is_dir: false,
         project_key: doc.project_key,
         features: analyzer_features,
         ignore_kind: IgnoreKind::Ancestors,
@@ -330,6 +332,7 @@ fn fix_all(
 
     if session.workspace.is_path_ignored(PathIsIgnoredParams {
         path: path.clone(),
+        is_dir: false,
         project_key: doc.project_key,
         features: analyzer_features,
         ignore_kind: IgnoreKind::Ancestors,

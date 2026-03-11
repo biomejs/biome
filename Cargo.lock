@@ -218,6 +218,7 @@ dependencies = [
  "insta",
  "libc",
  "mimalloc",
+ "papaya",
  "path-absolutize",
  "quick-junit",
  "rayon",
