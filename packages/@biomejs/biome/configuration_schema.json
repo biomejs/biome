@@ -7029,6 +7029,14 @@
 			},
 			"required": ["level", "options"]
 		},
+		"RuleAssistWithUseSortedTypeFieldsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseSortedTypeFieldsOptions" }
+			},
+			"required": ["level", "options"]
+		},
 		"RuleDomain": {
 			"description": "Rule domains",
 			"oneOf": [
@@ -11722,6 +11730,13 @@
 						{ "$ref": "#/$defs/UseSortedPropertiesConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"useSortedTypeFields": {
+					"description": "Sort fields in GraphQL type definitions alphabetically.\nSee https://biomejs.dev/assist/actions/use-sorted-type-fields",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseSortedTypeFieldsConfiguration" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -14543,6 +14558,16 @@
 			]
 		},
 		"UseSortedPropertiesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseSortedTypeFieldsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				{ "$ref": "#/$defs/RuleAssistWithUseSortedTypeFieldsOptions" }
+			]
+		},
+		"UseSortedTypeFieldsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

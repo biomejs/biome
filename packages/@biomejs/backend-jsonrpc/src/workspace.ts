@@ -1023,6 +1023,11 @@ See https://biomejs.dev/assist/actions/use-sorted-package-json
 See https://biomejs.dev/assist/actions/use-sorted-properties 
 	 */
 	useSortedProperties?: UseSortedPropertiesConfiguration;
+	/**
+	* Sort fields in GraphQL type definitions alphabetically.
+See https://biomejs.dev/assist/actions/use-sorted-type-fields 
+	 */
+	useSortedTypeFields?: UseSortedTypeFieldsConfiguration;
 }
 export type QuoteStyle = "double" | "single";
 /**
@@ -1211,6 +1216,9 @@ export type UseSortedPackageJsonConfiguration =
 export type UseSortedPropertiesConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithUseSortedPropertiesOptions;
+export type UseSortedTypeFieldsConfiguration =
+	| RuleAssistPlainConfiguration
+	| RuleAssistWithUseSortedTypeFieldsOptions;
 export type GroupPlainConfiguration = "off" | "on" | "info" | "warn" | "error";
 /**
  * A list of rules that belong to this group
@@ -3619,6 +3627,10 @@ export interface RuleAssistWithUseSortedPropertiesOptions {
 	level: RuleAssistPlainConfiguration;
 	options: UseSortedPropertiesOptions;
 }
+export interface RuleAssistWithUseSortedTypeFieldsOptions {
+	level: RuleAssistPlainConfiguration;
+	options: UseSortedTypeFieldsOptions;
+}
 export type NoAccessKeyConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAccessKeyOptions;
@@ -5041,6 +5053,7 @@ followed by nested values (multi-line objects, multi-line arrays).
 }
 export type UseSortedPackageJsonOptions = {};
 export type UseSortedPropertiesOptions = {};
+export type UseSortedTypeFieldsOptions = {};
 export type RulePlainConfiguration = "off" | "on" | "info" | "warn" | "error";
 export interface RuleWithNoAccessKeyOptions {
 	fix?: FixKind;
@@ -8827,6 +8840,7 @@ export type Category =
 	| "assist/source/useSortedKeys"
 	| "assist/source/useSortedPackageJson"
 	| "assist/source/useSortedProperties"
+	| "assist/source/useSortedTypeFields"
 	| "syntax/correctness/noTypeOnlyImportAttributes"
 	| "syntax/correctness/noSuperWithoutExtends"
 	| "syntax/correctness/noInitializerWithDefinite"

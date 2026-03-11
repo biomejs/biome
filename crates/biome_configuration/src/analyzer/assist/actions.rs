@@ -72,6 +72,7 @@ pub enum ActionName {
     UseSortedKeys,
     UseSortedPackageJson,
     UseSortedProperties,
+    UseSortedTypeFields,
 }
 impl ActionName {
     pub const fn as_str(self) -> &'static str {
@@ -83,6 +84,7 @@ impl ActionName {
             Self::UseSortedKeys => "useSortedKeys",
             Self::UseSortedPackageJson => "useSortedPackageJson",
             Self::UseSortedProperties => "useSortedProperties",
+            Self::UseSortedTypeFields => "useSortedTypeFields",
         }
     }
     pub const fn group(self) -> RuleGroup {
@@ -94,6 +96,7 @@ impl ActionName {
             Self::UseSortedKeys => RuleGroup::Source,
             Self::UseSortedPackageJson => RuleGroup::Source,
             Self::UseSortedProperties => RuleGroup::Source,
+            Self::UseSortedTypeFields => RuleGroup::Source,
         }
     }
 }
@@ -108,6 +111,7 @@ impl std::str::FromStr for ActionName {
             "useSortedKeys" => Ok(Self::UseSortedKeys),
             "useSortedPackageJson" => Ok(Self::UseSortedPackageJson),
             "useSortedProperties" => Ok(Self::UseSortedProperties),
+            "useSortedTypeFields" => Ok(Self::UseSortedTypeFields),
             _ => Err("This rule name doesn't exist."),
         }
     }
