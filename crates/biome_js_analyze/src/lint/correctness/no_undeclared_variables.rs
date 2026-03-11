@@ -5,7 +5,6 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_semantic::SemanticFlavor;
 use biome_js_syntax::{
     AnyJsFunction, JsFileSource, Language, TextRange, TsAsExpression, TsReferenceType,
 };
@@ -75,7 +74,7 @@ impl Rule for NoUndeclaredVariables {
         let embedded_bindings = ctx
             .get_service::<EmbeddedBindings>()
             .expect("embedded bindings service");
-        let flavor = SemanticFlavor::from(source_type);
+        let flavor = model.flavor();
 
         model
             .all_unresolved_references()

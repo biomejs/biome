@@ -353,6 +353,7 @@ impl SemanticModelBuilder {
     pub fn build(self) -> SemanticModel {
         let data = SemanticModelData {
             root: self.root.syntax().as_send().expect("To be a root node"),
+            flavor: self.flavor,
             scopes: self.scopes,
             scope_by_range: Lapper::new(
                 self.scope_range_by_start

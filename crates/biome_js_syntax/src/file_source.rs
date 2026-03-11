@@ -121,9 +121,15 @@ impl Language {
 )]
 pub enum SvelteFileKind {
     /// A `.svelte` component document where JavaScript is extracted from `<script>` blocks.
+    ///
+    /// Component documents still need Svelte-specific parsing and may re-infer
+    /// their JS/TS source type from `<script ...>` content.
     #[default]
     Component,
     /// A `.svelte.js` / `.svelte.ts` source module parsed as a regular JS/TS module.
+    ///
+    /// Source modules already carry their JS/TS source type and should use the
+    /// normal JS document capabilities directly instead of component extraction.
     SourceModule,
 }
 
@@ -147,9 +153,10 @@ pub enum EmbeddingKind {
     Svelte {
         /// Where the bindings are defined
         is_source: bool,
-        /// `kind` models the document shape (`.svelte` component vs
-        /// `.svelte.ts` / `.svelte.js` source module), while `is_source`
-        /// tracks whether bindings come from source code or template expressions.
+        /// `kind` models whether the Svelte file is a component document or a
+        /// source module. That distinction controls whether downstream code
+        /// extracts `<script>` content or treats the file as a standalone JS/TS
+        /// module, while `is_source` still tracks where bindings come from.
         kind: SvelteFileKind,
     },
     #[default]

@@ -1166,7 +1166,7 @@ fn parse_matched_embed(
             );
 
             let js_services = if is_source_level {
-                JsDocumentServices::for_js_snippet(
+                JsDocumentServices::from_js_snippet(
                     &snippet.tree(),
                     &js_source,
                     ctx.settings.as_ref().is_linter_enabled()
