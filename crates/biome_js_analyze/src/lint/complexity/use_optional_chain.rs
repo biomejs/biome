@@ -632,6 +632,9 @@ impl LogicalAndChain {
     /// `LogicalAndChainOrdering` by comparing their `token_text_trimmed` for
     /// every `JsAnyExpression` node.
     fn cmp_chain(&self, other: &Self) -> SyntaxResult<LogicalAndChainOrdering> {
+        if other.buf.is_empty() {
+            return Ok(LogicalAndChainOrdering::Different);
+        }
         let chain_ordering = match self.buf.len().cmp(&other.buf.len()) {
             Ordering::Less => return Ok(LogicalAndChainOrdering::Different),
             Ordering::Equal => LogicalAndChainOrdering::Equal,

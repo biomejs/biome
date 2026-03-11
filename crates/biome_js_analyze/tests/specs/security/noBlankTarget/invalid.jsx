@@ -10,6 +10,7 @@
     <a target="_blank" href="//example.com/17" rel></a>
     <a target="_blank" href={dynamicLink}></a>
     <a target={'_blank'} href="//example.com/18"></a>
+    <a href={company?.website} target="_blank"></a>
     <area target="_blank" href="https://example.com"></area>
     <form target="_blank" action="https://example.com"></form>
 </>

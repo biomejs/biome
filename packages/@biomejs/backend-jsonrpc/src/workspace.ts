@@ -2345,6 +2345,11 @@ See https://biomejs.dev/linter/rules/use-await-thenable
 	 */
 	useAwaitThenable?: UseAwaitThenableConfiguration;
 	/**
+	* Disallow CSS properties, values, at-rules, functions, and selectors that are not part of the configured Baseline.
+See https://biomejs.dev/linter/rules/use-baseline 
+	 */
+	useBaseline?: UseBaselineConfiguration;
+	/**
 	* Disallow enums from having both number and string members.
 See https://biomejs.dev/linter/rules/use-consistent-enum-value-type 
 	 */
@@ -2394,6 +2399,11 @@ See https://biomejs.dev/linter/rules/use-find
 See https://biomejs.dev/linter/rules/use-global-this 
 	 */
 	useGlobalThis?: UseGlobalThisConfiguration;
+	/**
+	* Enforce that all imports appear at the top of the module.
+See https://biomejs.dev/linter/rules/use-imports-first 
+	 */
+	useImportsFirst?: UseImportsFirstConfiguration;
 	/**
 	* Enforce id attribute on next/script components with inline content or dangerouslySetInnerHTML.
 See https://biomejs.dev/linter/rules/use-inline-script-id 
@@ -4250,6 +4260,9 @@ export type UseArraySortCompareConfiguration =
 export type UseAwaitThenableConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseAwaitThenableOptions;
+export type UseBaselineConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseBaselineOptions;
 export type UseConsistentEnumValueTypeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentEnumValueTypeOptions;
@@ -4280,6 +4293,9 @@ export type UseFindConfiguration =
 export type UseGlobalThisConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseGlobalThisOptions;
+export type UseImportsFirstConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseImportsFirstOptions;
 export type UseInlineScriptIdConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseInlineScriptIdOptions;
@@ -5954,6 +5970,10 @@ export interface RuleWithUseAwaitThenableOptions {
 	level: RulePlainConfiguration;
 	options?: UseAwaitThenableOptions;
 }
+export interface RuleWithUseBaselineOptions {
+	level: RulePlainConfiguration;
+	options?: UseBaselineOptions;
+}
 export interface RuleWithUseConsistentEnumValueTypeOptions {
 	level: RulePlainConfiguration;
 	options?: UseConsistentEnumValueTypeOptions;
@@ -5994,6 +6014,10 @@ export interface RuleWithUseFindOptions {
 export interface RuleWithUseGlobalThisOptions {
 	level: RulePlainConfiguration;
 	options?: UseGlobalThisOptions;
+}
+export interface RuleWithUseImportsFirstOptions {
+	level: RulePlainConfiguration;
+	options?: UseImportsFirstOptions;
 }
 export interface RuleWithUseInlineScriptIdOptions {
 	level: RulePlainConfiguration;
@@ -7428,6 +7452,39 @@ export type NoVueVIfWithVForOptions = {};
 export type UseArraySomeOptions = {};
 export type UseArraySortCompareOptions = {};
 export type UseAwaitThenableOptions = {};
+/**
+ * Options for the `useBaseline` rule.
+ */
+export interface UseBaselineOptions {
+	/**
+	 * CSS at-rules to exclude from checking (without `@`, case-insensitive).
+	 */
+	allowAtRules?: string[];
+	/**
+	 * CSS value functions to exclude from checking (case-insensitive).
+	 */
+	allowFunctions?: string[];
+	/**
+	 * CSS media conditions to exclude from checking (case-insensitive).
+	 */
+	allowMediaConditions?: string[];
+	/**
+	 * CSS properties to exclude from checking (case-insensitive).
+	 */
+	allowProperties?: string[];
+	/**
+	 * CSS property values to exclude from checking (maps property name to allowed values, case-insensitive).
+	 */
+	allowPropertyValues?: Record<string, string[]>;
+	/**
+	 * CSS pseudo-selectors to exclude from checking (without `:` or `::`, case-insensitive).
+	 */
+	allowSelectors?: string[];
+	/**
+	 * The availability level to target. Defaults to `"widely"`.
+	 */
+	available?: AvailabilityTarget;
+}
 export type UseConsistentEnumValueTypeOptions = {};
 export interface UseConsistentGraphqlDescriptionsOptions {
 	/**
@@ -7461,6 +7518,7 @@ export type UseExpectOptions = {};
 export type UseExplicitTypeOptions = {};
 export type UseFindOptions = {};
 export type UseGlobalThisOptions = {};
+export type UseImportsFirstOptions = {};
 export type UseInlineScriptIdOptions = {};
 export interface UseInputNameOptions {
 	/**
@@ -7989,6 +8047,15 @@ while for `useState()` it would be `[1]`.
 }
 export type Regex = string;
 /**
+	* The Baseline availability level to target.
+
+- `"widely"` – warn on anything not Baseline widely available.
+- `"newly"` – warn on anything not at least Baseline newly available.
+- A year (e.g. `2023`) – warn on anything whose `baseline_low_date` is after
+  that year (i.e. became newly available after that year). 
+	 */
+export type AvailabilityTarget = AvailabilityNamed | number;
+/**
  * The GraphQL description style to enforce.
  */
 export type UseConsistentGraphqlDescriptionsStyle = "block" | "inline";
@@ -8030,6 +8097,10 @@ export interface Convention {
 }
 export type GroupMatcher = ImportMatcher | SourceMatcher;
 export type StableHookResult = boolean | number[] | string[];
+/**
+ * Named Baseline availability tiers.
+ */
+export type AvailabilityNamed = "widely" | "newly";
 export interface PathOptions {
 	/**
 	 * Names of the exported members that allowed to be not be used.
@@ -8438,6 +8509,7 @@ export type Category =
 	| "lint/nursery/useArraySome"
 	| "lint/nursery/useArraySortCompare"
 	| "lint/nursery/useAwaitThenable"
+	| "lint/nursery/useBaseline"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentEnumValueType"
 	| "lint/nursery/useConsistentGraphqlDescriptions"
@@ -8452,6 +8524,7 @@ export type Category =
 	| "lint/nursery/useFind"
 	| "lint/nursery/useGlobalThis"
 	| "lint/nursery/useImportRestrictions"
+	| "lint/nursery/useImportsFirst"
 	| "lint/nursery/useInlineScriptId"
 	| "lint/nursery/useInputName"
 	| "lint/nursery/useJsxCurlyBraceConvention"

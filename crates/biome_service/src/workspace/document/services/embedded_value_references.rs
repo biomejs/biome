@@ -3,6 +3,7 @@ use biome_html_syntax::{
 };
 use biome_js_syntax::{
     AnyJsIdentifierUsage, AnyJsRoot, JsReferenceIdentifier, JsStaticMemberExpression,
+    JsxReferenceIdentifier,
 };
 use biome_rowan::{AstNode, TextRange, TokenText, WalkEvent};
 use rustc_hash::FxHashMap;
@@ -41,7 +42,9 @@ impl EmbeddedValueReferencesBuilder {
         for event in preorder {
             match event {
                 WalkEvent::Enter(node) => {
-                    if let Some(reference) = JsReferenceIdentifier::cast_ref(&node) {
+                    if let Some(reference) = JsxReferenceIdentifier::cast_ref(&node) {
+                        self.visit_jsx_reference_identifier(reference);
+                    } else if let Some(reference) = JsReferenceIdentifier::cast_ref(&node) {
                         self.visit_reference_identifier(reference);
                     } else if let Some(member) = JsStaticMemberExpression::cast_ref(&node) {
                         self.visit_static_member_expression(member);
@@ -140,6 +143,15 @@ impl EmbeddedValueReferencesBuilder {
                 }
             }
         }
+    }
+
+    fn visit_jsx_reference_identifier(&mut self, reference: JsxReferenceIdentifier) -> Option<()> {
+        let name_token = reference.value_token().ok()?;
+        self.references.insert(
+            name_token.text_trimmed_range(),
+            name_token.token_text_trimmed(),
+        );
+        Some(())
     }
 
     fn visit_reference_identifier(&mut self, reference: JsReferenceIdentifier) -> Option<()> {
