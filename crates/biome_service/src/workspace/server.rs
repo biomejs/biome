@@ -50,7 +50,7 @@ use biome_formatter::Printed;
 use biome_fs::{BiomePath, ConfigName, PathKind};
 use biome_grit_patterns::{CompilePatternOptions, GritQuery, compile_pattern_with_options};
 use biome_html_syntax::HtmlRoot;
-use biome_js_syntax::{AnyJsRoot, LanguageVariant, ModuleKind};
+use biome_js_syntax::{AnyJsRoot, EmbeddingKind, LanguageVariant, ModuleKind};
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonFileSource;
 use biome_module_graph::{ModuleDependencies, ModuleDiagnostic, ModuleGraph};
@@ -169,6 +169,21 @@ impl WorkspaceServer {
         editor: Option<Configuration>,
     ) -> SettingsWithEditor<'a> {
         SettingsHandle::new(settings, editor)
+    }
+
+    /// LSP language ids cover broad languages (`javascript`, `typescript`) but
+    /// not path-specific framework variants like `.svelte.ts`.
+    fn should_prefer_path_source(
+        document_file_source: DocumentFileSource,
+        path_source: DocumentFileSource,
+    ) -> bool {
+        match (document_file_source, path_source) {
+            (DocumentFileSource::Js(_), DocumentFileSource::Html(_)) => true,
+            (DocumentFileSource::Js(_), DocumentFileSource::Js(path_source)) => {
+                !matches!(path_source.as_embedding_kind(), EmbeddingKind::None)
+            }
+            _ => false,
+        }
     }
 
     /// Starts the watcher.
@@ -334,16 +349,16 @@ impl WorkspaceServer {
             .ok_or_else(WorkspaceError::no_project)?;
 
         let mut source = if let Some(document_file_source) = document_file_source {
-            // TODO: remove once HTML full support is stable
-            // document_file_source is given by the LSP, and we have to change it if full support is enabled.
-            // The workspace knows that, but the LSP doesn't, so we have to do the modification here
-            if let DocumentFileSource::Js(_) = document_file_source
-                && matches!(path.extension(), Some("astro" | "vue" | "svelte" | "html"))
-            {
-                DocumentFileSource::from_path(
-                    &path,
-                    settings.experimental_full_html_support_enabled(),
-                )
+            let path_source = DocumentFileSource::from_path(
+                &path,
+                settings.experimental_full_html_support_enabled(),
+            );
+            // LSP language ids cannot encode path-specific framework variants like
+            // `.svelte.ts` / `.svelte.js`, and HTML full support can also upgrade
+            // JS-like hints to HTML. Prefer the path-derived source only when it
+            // carries richer semantics than the editor-provided JS hint.
+            if Self::should_prefer_path_source(document_file_source, path_source) {
+                path_source
             } else {
                 document_file_source
             }

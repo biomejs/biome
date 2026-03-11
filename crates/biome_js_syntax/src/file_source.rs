@@ -440,10 +440,17 @@ impl JsFileSource {
     /// (for example, `$store` auto-subscriptions), not `.svelte` component
     /// documents with embedded `<script>` content.
     pub fn is_svelte_source_module_path(path: &Utf8Path) -> bool {
-        let Some(file_name) = path.file_name() else {
+        let Some(file_name) = path
+            .file_name()
+            .map(|file_name| file_name.to_ascii_lowercase_cow())
+        else {
             return false;
         };
 
+        Self::is_svelte_source_module_file_name(file_name.as_ref())
+    }
+
+    fn is_svelte_source_module_file_name(file_name: &str) -> bool {
         file_name.ends_with(".svelte.ts")
             || file_name.ends_with(".svelte.test.ts")
             || file_name.ends_with(".svelte.spec.ts")
@@ -456,14 +463,17 @@ impl JsFileSource {
     pub fn try_from_well_known(path: &Utf8Path) -> Result<Self, FileSourceError> {
         // Be careful with definition files, because `Path::extension()` only
         // returns the extension after the _last_ dot:
-        let file_name = path.file_name().ok_or(FileSourceError::MissingFileName)?;
+        let file_name = path
+            .file_name()
+            .map(|file_name| file_name.to_ascii_lowercase_cow())
+            .ok_or(FileSourceError::MissingFileName)?;
         if file_name.ends_with(".d.ts") {
             return Self::try_from_extension("d.ts");
         } else if file_name.ends_with(".d.mts") {
             return Self::try_from_extension("d.mts");
         } else if file_name.ends_with(".d.cts") {
             return Self::try_from_extension("d.cts");
-        } else if Self::is_svelte_source_module_path(path) {
+        } else if Self::is_svelte_source_module_file_name(file_name.as_ref()) {
             let source = if file_name.ends_with(".ts") {
                 Self::ts()
             } else {
@@ -586,5 +596,26 @@ impl From<Language> for JsFileSource {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn detects_svelte_typescript_source_modules_case_insensitively() {
+        let source = JsFileSource::try_from(Utf8Path::new("component.SVELTE.TS")).unwrap();
+
+        assert!(source.is_svelte_source_module());
+        assert!(source.is_typescript());
+    }
+
+    #[test]
+    fn detects_svelte_javascript_source_modules_case_insensitively() {
+        let source = JsFileSource::try_from(Utf8Path::new("component.SVELTE.TEST.JS")).unwrap();
+
+        assert!(source.is_svelte_source_module());
+        assert!(!source.is_typescript());
     }
 }
