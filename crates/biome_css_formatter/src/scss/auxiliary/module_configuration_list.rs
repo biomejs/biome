@@ -1,5 +1,8 @@
 use crate::prelude::*;
-use biome_css_syntax::{ScssModuleConfigurationList, ScssModuleConfigurationListFields};
+use biome_css_syntax::{
+    ScssForwardAtRule, ScssModuleConfigurationList, ScssModuleConfigurationListFields,
+    ScssWithClause,
+};
 use biome_formatter::{format_args, write};
 
 #[derive(Debug, Clone, Default)]
@@ -23,7 +26,24 @@ impl FormatNodeRule<ScssModuleConfigurationList> for FormatScssModuleConfigurati
                 l_paren_token.format(),
                 soft_block_indent(&items.format()),
                 r_paren_token.format()
-            ])]
+            ])
+            .should_expand(should_expand_in_forward_with_clause(node))]
         )
     }
+}
+
+fn should_expand_in_forward_with_clause(node: &ScssModuleConfigurationList) -> bool {
+    if node.items().len() <= 1 {
+        return false;
+    }
+
+    node.syntax()
+        .parent()
+        .and_then(|parent| ScssWithClause::cast_ref(&parent))
+        .and_then(|with_clause| with_clause.syntax().parent())
+        .and_then(|parent| ScssForwardAtRule::cast_ref(&parent))
+        .is_some_and(|forward| {
+            let fields = forward.as_fields();
+            fields.as_clause.is_none() && fields.visibility_clause.is_none()
+        })
 }

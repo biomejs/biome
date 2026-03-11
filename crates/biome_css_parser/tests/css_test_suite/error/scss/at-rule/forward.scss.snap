@@ -114,11 +114,7 @@ CssRoot {
                             CssIdentifier {
                                 value_token: IDENT@117..123 "theme" [] [Whitespace(" ")],
                             },
-                            CssBogus {
-                                items: [
-                                    MINUS@123..125 "-" [] [Whitespace(" ")],
-                                ],
-                            },
+                            MINUS@123..125 "-" [] [Whitespace(" ")],
                             STAR@125..126 "*" [] [],
                         ],
                     },
@@ -250,8 +246,7 @@ CssRoot {
           0: AS_KW@114..117 "as" [] [Whitespace(" ")]
           1: CSS_IDENTIFIER@117..123
             0: IDENT@117..123 "theme" [] [Whitespace(" ")]
-          2: CSS_BOGUS@123..125
-            0: MINUS@123..125 "-" [] [Whitespace(" ")]
+          2: MINUS@123..125 "-" [] [Whitespace(" ")]
           3: STAR@125..126 "*" [] []
         3: SEMICOLON@126..127 ";" [] []
     5: CSS_AT_RULE@127..156
@@ -300,100 +295,100 @@ CssRoot {
 forward.scss:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a string but instead found ';'.
-
+  
   > 1 │ @forward;
       │         ^
-    2 │
+    2 │ 
     3 │ @forward "theme" show;
-
+  
   i Expected a string here.
-
+  
   > 1 │ @forward;
       │         ^
-    2 │
+    2 │ 
     3 │ @forward "theme" show;
-
+  
 forward.scss:3:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a module member.
-
+  
     1 │ @forward;
-    2 │
+    2 │ 
   > 3 │ @forward "theme" show;
       │                      ^
-    4 │
+    4 │ 
     5 │ @forward "theme" hide , $color;
-
+  
   i Add a member like `$name` or `mixin-name` here.
-
+  
 forward.scss:5:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a module member.
-
+  
     3 │ @forward "theme" show;
-    4 │
+    4 │ 
   > 5 │ @forward "theme" hide , $color;
       │                       ^
-    6 │
+    6 │ 
     7 │ @forward "theme" as theme*;
-
+  
   i Add a member like `$name` or `mixin-name` here.
+  
+forward.scss:7:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-forward.scss:7:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `-` but instead found `*`
-
+  × Expected the `@forward` prefix to end with `-` before `*`.
+  
     5 │ @forward "theme" hide , $color;
-    6 │
+    6 │ 
   > 7 │ @forward "theme" as theme*;
-      │                          ^
-    8 │
+      │                     ^^^^^^
+    8 │ 
     9 │ @forward "theme" as theme - *;
-
-  i Remove *
-
+  
+  i Write the clause as `as prefix-*` without spaces.
+  
 forward.scss:9:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected the `@forward` prefix to end with `-` before `*`.
-
+  
      7 │ @forward "theme" as theme*;
-     8 │
+     8 │ 
    > 9 │ @forward "theme" as theme - *;
        │                     ^^^^^^^
-    10 │
+    10 │ 
     11 │ @forward "theme" as theme-;
-
+  
   i Write the clause as `as prefix-*` without spaces.
-
+  
 forward.scss:11:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `*` but instead found `;`
-
+  
      9 │ @forward "theme" as theme - *;
-    10 │
+    10 │ 
   > 11 │ @forward "theme" as theme-;
        │                           ^
-    12 │
+    12 │ 
     13 │ @forward "theme" with ($spacing:);
-
+  
   i Remove ;
-
+  
 forward.scss:13:33 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a SCSS expression but instead found ')'.
-
+  
     11 │ @forward "theme" as theme-;
-    12 │
+    12 │ 
   > 13 │ @forward "theme" with ($spacing:);
        │                                 ^
-    14 │
-
+    14 │ 
+  
   i Expected a SCSS expression here.
-
+  
     11 │ @forward "theme" as theme-;
-    12 │
+    12 │ 
   > 13 │ @forward "theme" with ($spacing:);
        │                                 ^
-    14 │
-
+    14 │ 
+  
 ```

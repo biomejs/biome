@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use biome_css_syntax::{ScssShowClause, ScssShowClauseFields};
-use biome_formatter::write;
+use biome_formatter::{format_args, write};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatScssShowClause;
@@ -12,6 +12,13 @@ impl FormatNodeRule<ScssShowClause> for FormatScssShowClause {
             members,
         } = node.as_fields();
 
-        write!(f, [show_token.format(), space(), members.format()])
+        write!(
+            f,
+            [group(&format_args![
+                show_token.format(),
+                space(),
+                members.format()
+            ])]
+        )
     }
 }
