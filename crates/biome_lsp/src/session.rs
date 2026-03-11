@@ -8,7 +8,7 @@ use biome_configuration::{Configuration, ConfigurationPathHint};
 use biome_console::markup;
 use biome_deserialize::Merge;
 use biome_diagnostics::PrintDescription;
-use biome_fs::BiomePath;
+use biome_fs::{BiomePath, normalize_path};
 use biome_line_index::WideEncoding;
 use biome_lsp_converters::{PositionEncoding, negotiated_encoding};
 use biome_service::Workspace;
@@ -716,14 +716,16 @@ impl Session {
             })
             .collect();
 
+        let hint_for_path = |path: Utf8PathBuf| {
+            Some(if workspace_roots.iter().any(|r| path.starts_with(r)) {
+                ConfigurationPathHint::FromUser(path)
+            } else {
+                ConfigurationPathHint::FromUserExternal(path)
+            })
+        };
+
         if config_path.is_absolute() {
-            return Some(
-                if workspace_roots.iter().any(|root| config_path.starts_with(root)) {
-                    ConfigurationPathHint::FromUser(config_path)
-                } else {
-                    ConfigurationPathHint::FromUserExternal(config_path)
-                },
-            )
+            return hint_for_path(config_path);
         }
 
         if let Some(file_path) = file_path {
@@ -734,12 +736,8 @@ impl Session {
                 .filter(|root| file_path.starts_with(*root))
                 .max_by_key(|root| root.as_str().len())
             {
-                let joined = root.join(config_path);
-                return Some(if workspace_roots.iter().any(|r| joined.starts_with(r)) {
-                  ConfigurationPathHint::FromUser(joined)
-                } else {
-                  ConfigurationPathHint::FromUserExternal(joined)
-                })
+                let joined = normalize_path(&root.join(config_path));
+                return hint_for_path(joined);
             }
         }
 
@@ -750,12 +748,14 @@ impl Session {
         // correct per-file resolution happens in `did_open` where the file
         // path is available.
         if let Some(root) = workspace_roots.first() {
-            return Some(ConfigurationPathHint::FromUserExternal(root.join(&config_path)));
+            let joined = normalize_path(&root.join(&config_path));
+            return hint_for_path(joined);
         }
 
         // Fall back to the (deprecated) root_uri base path.
         if let Some(base) = self.base_path() {
-            return Some(ConfigurationPathHint::FromUserExternal(base.join(&config_path)));
+            let joined = normalize_path(&base.join(&config_path));
+            return hint_for_path(joined);
         }
 
         // Nothing to resolve against; return the path unchanged and let the
@@ -1047,12 +1047,10 @@ impl Session {
                     path.to_path_buf()
                 }
             }
-            ConfigurationPathHint::FromUserExternal(_) | _ => {
-              self
+            _ => self
                 .base_path()
                 .or_else(|| fs.working_directory())
-                .unwrap_or_default()
-            }
+                .unwrap_or_default(),
         };
 
         let project_key = match self.project_for_path(&project_path) {

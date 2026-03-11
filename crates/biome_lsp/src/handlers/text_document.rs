@@ -49,10 +49,7 @@ pub(crate) async fn did_open(
                     &config_path
                 );
                 session
-                    .load_biome_configuration_file(
-                        config_path,
-                        false,
-                    )
+                    .load_biome_configuration_file(config_path, false)
                     .await
             } else {
                 let project_path = path
