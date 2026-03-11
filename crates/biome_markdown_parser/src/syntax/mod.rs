@@ -924,11 +924,11 @@ fn break_for_setext_after_inline_newline(
 
     let is_setext = p.lookahead(|p| {
         p.skip_line_indent(required_indent);
-        p.at(MD_SETEXT_UNDERLINE_LITERAL)
-            || (p.at(MD_THEMATIC_BREAK_LITERAL) && is_dash_only_thematic_break(p))
+        at_setext_underline_after_newline(p).is_some()
     });
     if is_setext {
         p.emit_indent_tokens(required_indent);
+        p.emit_indent_tokens(INDENT_CODE_BLOCK_SPACES);
         return true;
     }
 

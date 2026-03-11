@@ -203,4 +203,10 @@ pub fn quick_test() {
         "- foo\n  - bar\n",
         "<ul>\n<li>foo\n<ul>\n<li>bar</li>\n</ul>\n</li>\n</ul>\n",
     );
+    // Setext underline with optional indent inside a list item
+    test_example(
+        9994,
+        "- foo\n   ---\n",
+        "<ul>\n<li>\n<h2>foo</h2>\n</li>\n</ul>\n",
+    );
 }
