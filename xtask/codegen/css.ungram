@@ -686,7 +686,13 @@ AnyCssAtRule =
 	| CssFunctionAtRule
 	// SCSS at rules
 	| ScssEachAtRule
+	| ScssForAtRule
+	| ScssFunctionAtRule
 	| ScssIfAtRule
+	| ScssContentAtRule
+	| ScssIncludeAtRule
+	| ScssMixinAtRule
+	| ScssReturnAtRule
 	| ScssWhileAtRule
 	| ScssDebugAtRule
 	| ScssWarnAtRule
@@ -2569,6 +2575,83 @@ ScssEachAtRule =
 //       ^^^^^^^^^^^^
 ScssEachBindingList = ScssIdentifier (',' ScssIdentifier)*
 
+// @for $i from 1 through 3 { width: $i * 1px; }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssForAtRule =
+	'for'
+	variable: ScssIdentifier
+	'from'
+	lower_bound: ScssExpression
+	operator: ('to' | 'through')
+	upper_bound: ScssExpression
+	block: CssDeclarationOrRuleBlock
+
+// @mixin button($radius: 4px, $args...) { border-radius: $radius; }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssMixinAtRule =
+	'mixin'
+	name: CssIdentifier
+	parameters: ScssParameterList?
+	block: CssDeclarationOrRuleBlock
+
+// @function double($value: 2) { @return $value * 2; }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssFunctionAtRule =
+	'function'
+	name: CssIdentifier
+	parameters: ScssParameterList?
+	block: CssDeclarationOrRuleBlock
+
+// @include button($radius: 4px);
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+// @include button {
+// ^^^^^^^^^^^^^^^^
+ScssIncludeAtRule =
+	'include'
+	name: AnyScssIncludeTarget
+	arguments: ScssIncludeArgumentList?
+	block: CssDeclarationOrRuleBlock?
+	';'?
+
+AnyScssIncludeTarget =
+	CssIdentifier
+	| ScssQualifiedName
+
+// ($radius: 4px)
+// ^^^^^^^^^^^^^^
+ScssIncludeArgumentList =
+	'('
+	items: CssParameterList
+	')'
+
+// ($radius: 4px, $args...)
+// ^^^^^^^^^^^^^^^^^^^^^^^^
+ScssParameterList =
+	'('
+	items: ScssParameterItemList
+	')'
+
+ScssParameterItemList = AnyScssParameter (',' AnyScssParameter)* ','?
+
+AnyScssParameter =
+	ScssParameter
+	| CssBogusParameter
+
+// $radius: 4px
+// ^^^^^^^^^^^^
+// $args...
+// ^^^^^^^^
+ScssParameter =
+	name: ScssIdentifier
+	default_value: ScssParameterDefaultValue?
+	ellipsis: '...'?
+
+// : 4px
+// ^^^^^
+ScssParameterDefaultValue =
+	':'
+	value: ScssExpression
+
 // @if $theme == dark { color: white; } @else { color: black; }
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ScssIfAtRule =
@@ -2596,6 +2679,22 @@ ScssWhileAtRule =
 	'while'
 	condition: ScssExpression
 	block: CssDeclarationOrRuleBlock
+
+// @content;
+// ^^^^^^^^^
+// @content($value);
+// ^^^^^^^^^^^^^^^^^
+ScssContentAtRule =
+	'content'
+	arguments: ScssIncludeArgumentList?
+	';'
+
+// @return $width * 2;
+// ^^^^^^^^^^^^^^^^^^^
+ScssReturnAtRule =
+	'return'
+	value: ScssExpression
+	';'
 
 // @debug $width * 2;
 // ^^^^^^^^^^^^^^^^^^

@@ -43,6 +43,11 @@ export const Component2 = () => (
 	</Card>
 </>
 
+/* status role should not generate diagnostics (see #9245) */
+<>
+    <div role="status"></div>
+</>
+
 {/* Semantic elements with a matching role should not be flagged (issue #5212) */}
 <>
 	<nav role="navigation"></nav>
@@ -62,4 +67,3 @@ export const Component2 = () => (
 	<th role="columnheader" scope="col"></th>
 	<th role="rowheader" scope="row"></th>
 </>
-

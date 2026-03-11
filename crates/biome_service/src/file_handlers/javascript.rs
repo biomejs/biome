@@ -7,6 +7,10 @@ use super::{
 };
 use crate::configuration::to_analyzer_rules;
 use crate::diagnostics::extension_error;
+use crate::embed::registry::{EmbedDetectorsRegistry, EmbedMatch};
+use crate::embed::types::{
+    EmbedCandidate, EmbedContent, GuestLanguage, HostLanguage, TemplateTagKind,
+};
 use crate::file_handlers::FixAllParams;
 use crate::settings::{
     OverrideSettings, Settings, SettingsWithEditor, check_feature_activity,
@@ -575,7 +579,7 @@ fn parse(
 fn parse_embedded_nodes(
     root: &AnyParse,
     biome_path: &BiomePath,
-    _file_source: &DocumentFileSource,
+    file_source: &DocumentFileSource,
     settings: &SettingsWithEditor,
     cache: &mut NodeCache,
     _builder: &mut EmbeddedBuilder,
@@ -587,31 +591,34 @@ fn parse_embedded_nodes(
         return ParseEmbedResult { nodes: vec![] };
     }
 
-    let mut nodes = Vec::new();
     let js_root: AnyJsRoot = root.tree();
 
-    // Walk through all JS elements looking for template expressions
-    for node in js_root.syntax().descendants() {
-        let Some(expr) = JsTemplateExpression::cast_ref(&node) else {
-            continue;
-        };
-
-        if let Some((content, file_source)) =
-            parse_template_expression(expr, cache, biome_path, settings)
-        {
-            nodes.push((content.into(), file_source))
-        }
-    }
+    let nodes = js_root
+        .syntax()
+        .descendants()
+        .filter_map(JsTemplateExpression::cast)
+        .filter_map(|expr| {
+            let candidate = build_js_template_candidate(&expr)?;
+            let embed_match = EmbedDetectorsRegistry::detect_match(
+                HostLanguage::JavaScript,
+                &candidate,
+                file_source,
+            )?;
+            let (snippet, doc_source) =
+                parse_js_matched_embed(&candidate, &embed_match, cache, biome_path, settings)?;
+            Some((snippet.into(), doc_source))
+        })
+        .collect();
 
     ParseEmbedResult { nodes }
 }
 
-fn parse_template_expression(
-    expr: JsTemplateExpression,
-    cache: &mut NodeCache,
-    biome_path: &BiomePath,
-    settings: &SettingsWithEditor,
-) -> Option<(EmbeddedSnippet<JsLanguage>, DocumentFileSource)> {
+/// Build an `EmbedCandidate::TaggedTemplate` from a `JsTemplateExpression`.
+///
+/// Returns `None` if:
+/// - The template has interpolations (not supported yet)
+/// - The tag can't be classified (unknown pattern)
+fn build_js_template_candidate(expr: &JsTemplateExpression) -> Option<EmbedCandidate> {
     // TODO: Interpolations are not supported yet.
     if expr.elements().len() != 1 {
         return None;
@@ -621,99 +628,142 @@ fn parse_template_expression(
         return None;
     };
 
-    let tag = expr.tag();
-    if is_styled_tag(tag.as_ref()) {
-        let file_source = DocumentFileSource::Css(
-            CssFileSource::css().with_embedding_kind(EmbeddingKind::Styled),
-        );
-        let options = settings.parse_options::<CssLanguage>(biome_path, &file_source);
-        let content = chunk.template_chunk_token().ok()?;
-        let parse = parse_css_with_offset_and_cache(
-            content.text(),
-            file_source.to_css_file_source().unwrap_or_default(),
-            content.text_range().start(),
-            cache,
-            options,
-        );
+    let tag_kind = template_expression_to_template_tag(expr)?;
 
-        let snippet = EmbeddedSnippet::new(
-            parse.into(),
-            chunk.range(),
-            content.text_range(),
-            content.text_range().start(),
-        );
+    let content_token = chunk.template_chunk_token().ok()?;
+    Some(EmbedCandidate::TaggedTemplate {
+        tag: tag_kind,
+        content: EmbedContent {
+            element_range: chunk.range(),
+            content_range: content_token.text_range(),
+            content_offset: content_token.text_range().start(),
+            text: content_token.token_text(),
+        },
+    })
+}
 
-        Some((snippet, file_source))
-    } else if is_graphql_tag(tag.as_ref(), &expr) {
-        let file_source = DocumentFileSource::Graphql(GraphqlFileSource::graphql());
-        let content = chunk.template_chunk_token().ok()?;
-        let parse = parse_graphql_with_offset_and_cache(
-            content.text(),
-            content.text_range().start(),
-            cache,
-        );
-
-        let snippet = EmbeddedSnippet::new(
-            parse.into(),
-            chunk.range(),
-            content.text_range(),
-            content.text_range().start(),
-        );
-
-        Some((snippet, file_source))
+/// Classify a template expression's tag into a `TemplateTagKind`.
+///
+/// Handles:
+/// - `css\`\`` → Identifier("css")
+/// - `gql\`\`` / `graphql\`\`` → Identifier("gql") / Identifier("graphql")
+/// - `styled.div\`\`` → MemberExpression { object: "styled", property: "div" }
+/// - `styled(Comp)\`\`` → CallExpression { callee: "styled" }
+/// - `graphql(\`\`)` → CallExpression { callee: "graphql" } (template as argument)
+fn template_expression_to_template_tag(expr: &JsTemplateExpression) -> Option<TemplateTagKind> {
+    if let Some(tag) = expr.tag() {
+        match tag {
+            // css``, gql``, graphql``
+            AnyJsExpression::JsIdentifierExpression(ident) => {
+                let name = ident.name().ok()?;
+                Some(TemplateTagKind::Identifier(
+                    name.value_token().ok()?.token_text_trimmed(),
+                ))
+            }
+            // styled.div``
+            AnyJsExpression::JsStaticMemberExpression(member) => {
+                let object = match member.object().ok()? {
+                    AnyJsExpression::JsIdentifierExpression(ident) => {
+                        ident.name().ok()?.value_token().ok()?.token_text_trimmed()
+                    }
+                    _ => return None,
+                };
+                let property = member
+                    .member()
+                    .ok()?
+                    .value_token()
+                    .ok()?
+                    .token_text_trimmed();
+                Some(TemplateTagKind::MemberExpression { object, property })
+            }
+            // styled(Component)``
+            AnyJsExpression::JsCallExpression(call) => {
+                let callee = match call.callee().ok()? {
+                    AnyJsExpression::JsIdentifierExpression(ident) => {
+                        ident.name().ok()?.value_token().ok()?.token_text_trimmed()
+                    }
+                    _ => return None,
+                };
+                Some(TemplateTagKind::CallExpression { callee })
+            }
+            _ => None,
+        }
     } else {
-        None
+        // No tag — check if template is an argument to a call expression
+        // e.g. graphql(`query { ... }`)
+        let list = expr.parent::<JsCallArgumentList>()?;
+        let args = list.parent::<JsCallArguments>()?;
+        let call = args.parent::<JsCallExpression>()?;
+        let callee = match call.callee().ok()? {
+            AnyJsExpression::JsIdentifierExpression(ident) => {
+                ident.name().ok()?.value_token().ok()?.token_text_trimmed()
+            }
+            _ => return None,
+        };
+        Some(TemplateTagKind::CallExpression { callee })
     }
 }
 
-fn is_styled_tag(tag: Option<&AnyJsExpression>) -> bool {
-    // css``
-    if let Some(AnyJsExpression::JsIdentifierExpression(ident)) = tag
-        && ident.name().is_ok_and(|name| name.has_name("css"))
-    {
-        return true;
+/// Parse an embed site that the JS registry matched.
+///
+/// Note: The old code returned `EmbeddedSnippet<JsLanguage>` for ALL languages
+/// (CSS, GraphQL), not the actual language type. This is because `AnyEmbeddedSnippet`
+/// erases the language via `AnyParse`, and the JS handler stores everything as
+/// `AnyEmbeddedSnippet::Js`. We preserve this behavior for compatibility.
+fn parse_js_matched_embed(
+    candidate: &EmbedCandidate,
+    embed_match: &EmbedMatch,
+    cache: &mut NodeCache,
+    biome_path: &BiomePath,
+    settings: &SettingsWithEditor,
+) -> Option<(EmbeddedSnippet<JsLanguage>, DocumentFileSource)> {
+    let content = candidate.content();
+
+    match embed_match.guest {
+        GuestLanguage::Css => {
+            let file_source = DocumentFileSource::Css(
+                CssFileSource::css().with_embedding_kind(EmbeddingKind::Styled),
+            );
+            let options = settings.parse_options::<CssLanguage>(biome_path, &file_source);
+            let parse = parse_css_with_offset_and_cache(
+                content.text.text(),
+                file_source.to_css_file_source().unwrap_or_default(),
+                content.content_offset,
+                cache,
+                options,
+            );
+
+            let snippet = EmbeddedSnippet::new(
+                parse.into(),
+                content.element_range,
+                content.content_range,
+                content.content_offset,
+            );
+
+            Some((snippet, file_source))
+        }
+
+        GuestLanguage::GraphQL => {
+            let file_source = DocumentFileSource::Graphql(GraphqlFileSource::graphql());
+            let parse = parse_graphql_with_offset_and_cache(
+                content.text.text(),
+                content.content_offset,
+                cache,
+            );
+
+            let snippet = EmbeddedSnippet::new(
+                parse.into(),
+                content.element_range,
+                content.content_range,
+                content.content_offset,
+            );
+
+            Some((snippet, file_source))
+        }
+
+        // JS embeds inside JS templates are not applicable
+        _ => None,
     }
-
-    // styled.div``
-    if let Some(AnyJsExpression::JsStaticMemberExpression(expr)) = tag
-        && let Ok(AnyJsExpression::JsIdentifierExpression(ident)) = expr.object()
-        && ident.name().is_ok_and(|name| name.has_name("styled"))
-    {
-        return true;
-    }
-
-    // styled(Component)``
-    if let Some(AnyJsExpression::JsCallExpression(expr)) = tag
-        && let Ok(AnyJsExpression::JsIdentifierExpression(ident)) = expr.callee()
-        && ident.name().is_ok_and(|name| name.has_name("styled"))
-    {
-        return true;
-    }
-
-    false
-}
-
-fn is_graphql_tag(tag: Option<&AnyJsExpression>, template: &JsTemplateExpression) -> bool {
-    // gql`` or graphql``
-    if let Some(AnyJsExpression::JsIdentifierExpression(ident)) = tag
-        && ident
-            .name()
-            .is_ok_and(|name| name.has_name("gql") || name.has_name("graphql"))
-    {
-        return true;
-    }
-
-    // graphql(``)
-    if let Some(list) = template.parent::<JsCallArgumentList>()
-        && let Some(args) = list.parent::<JsCallArguments>()
-        && let Some(call) = args.parent::<JsCallExpression>()
-        && let Ok(AnyJsExpression::JsIdentifierExpression(ident)) = call.callee()
-        && ident.name().is_ok_and(|name| name.has_name("graphql"))
-    {
-        return true;
-    }
-
-    false
 }
 
 fn debug_syntax_tree(_rome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeResult {

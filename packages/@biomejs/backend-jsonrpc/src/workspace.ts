@@ -1014,6 +1014,11 @@ See https://biomejs.dev/assist/actions/use-sorted-keys
 	 */
 	useSortedKeys?: UseSortedKeysConfiguration;
 	/**
+	* Organize package.json fields according to established conventions.
+See https://biomejs.dev/assist/actions/use-sorted-package-json 
+	 */
+	useSortedPackageJson?: UseSortedPackageJsonConfiguration;
+	/**
 	* Enforce ordering of CSS properties and nested rules.
 See https://biomejs.dev/assist/actions/use-sorted-properties 
 	 */
@@ -1200,6 +1205,9 @@ export type UseSortedInterfaceMembersConfiguration =
 export type UseSortedKeysConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithUseSortedKeysOptions;
+export type UseSortedPackageJsonConfiguration =
+	| RuleAssistPlainConfiguration
+	| RuleAssistWithUseSortedPackageJsonOptions;
 export type UseSortedPropertiesConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithUseSortedPropertiesOptions;
@@ -2286,6 +2294,11 @@ See https://biomejs.dev/linter/rules/no-top-level-literals
 	 */
 	noTopLevelLiterals?: NoTopLevelLiteralsConfiguration;
 	/**
+	* Reports CSS class names in HTML class attributes that are not defined in any \<style> block or linked stylesheet available to the file.
+See https://biomejs.dev/linter/rules/no-undeclared-classes 
+	 */
+	noUndeclaredClasses?: NoUndeclaredClassesConfiguration;
+	/**
 	* Disallow the use of undeclared environment variables.
 See https://biomejs.dev/linter/rules/no-undeclared-env-vars 
 	 */
@@ -2300,6 +2313,11 @@ See https://biomejs.dev/linter/rules/no-unknown-attribute
 See https://biomejs.dev/linter/rules/no-unnecessary-conditions 
 	 */
 	noUnnecessaryConditions?: NoUnnecessaryConditionsConfiguration;
+	/**
+	* Reports CSS class selectors that are never referenced in any JSX or HTML file.
+See https://biomejs.dev/linter/rules/no-unused-classes 
+	 */
+	noUnusedClasses?: NoUnusedClassesConfiguration;
 	/**
 	* Disallow redundant return statements.
 See https://biomejs.dev/linter/rules/no-useless-return 
@@ -2344,6 +2362,11 @@ See https://biomejs.dev/linter/rules/use-array-sort-compare
 See https://biomejs.dev/linter/rules/use-await-thenable 
 	 */
 	useAwaitThenable?: UseAwaitThenableConfiguration;
+	/**
+	* Disallow CSS properties, values, at-rules, functions, and selectors that are not part of the configured Baseline.
+See https://biomejs.dev/linter/rules/use-baseline 
+	 */
+	useBaseline?: UseBaselineConfiguration;
 	/**
 	* Disallow enums from having both number and string members.
 See https://biomejs.dev/linter/rules/use-consistent-enum-value-type 
@@ -2394,6 +2417,11 @@ See https://biomejs.dev/linter/rules/use-find
 See https://biomejs.dev/linter/rules/use-global-this 
 	 */
 	useGlobalThis?: UseGlobalThisConfiguration;
+	/**
+	* Enforce that all imports appear at the top of the module.
+See https://biomejs.dev/linter/rules/use-imports-first 
+	 */
+	useImportsFirst?: UseImportsFirstConfiguration;
 	/**
 	* Enforce id attribute on next/script components with inline content or dangerouslySetInnerHTML.
 See https://biomejs.dev/linter/rules/use-inline-script-id 
@@ -3583,6 +3611,10 @@ export interface RuleAssistWithUseSortedKeysOptions {
 	level: RuleAssistPlainConfiguration;
 	options: UseSortedKeysOptions;
 }
+export interface RuleAssistWithUseSortedPackageJsonOptions {
+	level: RuleAssistPlainConfiguration;
+	options: UseSortedPackageJsonOptions;
+}
 export interface RuleAssistWithUseSortedPropertiesOptions {
 	level: RuleAssistPlainConfiguration;
 	options: UseSortedPropertiesOptions;
@@ -4217,6 +4249,9 @@ export type NoTernaryConfiguration =
 export type NoTopLevelLiteralsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTopLevelLiteralsOptions;
+export type NoUndeclaredClassesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUndeclaredClassesOptions;
 export type NoUndeclaredEnvVarsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUndeclaredEnvVarsOptions;
@@ -4226,6 +4261,9 @@ export type NoUnknownAttributeConfiguration =
 export type NoUnnecessaryConditionsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnnecessaryConditionsOptions;
+export type NoUnusedClassesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUnusedClassesOptions;
 export type NoUselessReturnConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessReturnOptions;
@@ -4250,6 +4288,9 @@ export type UseArraySortCompareConfiguration =
 export type UseAwaitThenableConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseAwaitThenableOptions;
+export type UseBaselineConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseBaselineOptions;
 export type UseConsistentEnumValueTypeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentEnumValueTypeOptions;
@@ -4280,6 +4321,9 @@ export type UseFindConfiguration =
 export type UseGlobalThisConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseGlobalThisOptions;
+export type UseImportsFirstConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseImportsFirstOptions;
 export type UseInlineScriptIdConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseInlineScriptIdOptions;
@@ -4967,8 +5011,20 @@ export interface NoDuplicateClassesOptions {
 	functions?: string[];
 }
 export interface OrganizeImportsOptions {
+	/**
+	 * Groups to change how imports and exports are sorted.
+	 */
 	groups?: ImportGroups;
+	/**
+	* Order used for sorting identifiers within imports and exports.
+
+Default: `natural`. 
+	 */
 	identifierOrder?: SortOrder;
+	/**
+	 * If `true`, bare imports such as `import "module"` are sorted with other imports.
+	 */
+	sortBareImports?: boolean;
 }
 export interface UseSortedAttributesOptions {
 	sortOrder?: SortOrder;
@@ -4983,6 +5039,7 @@ followed by nested values (multi-line objects, multi-line arrays).
 	groupByNesting?: boolean;
 	sortOrder?: SortOrder;
 }
+export type UseSortedPackageJsonOptions = {};
 export type UseSortedPropertiesOptions = {};
 export type RulePlainConfiguration = "off" | "on" | "info" | "warn" | "error";
 export interface RuleWithNoAccessKeyOptions {
@@ -5907,6 +5964,10 @@ export interface RuleWithNoTopLevelLiteralsOptions {
 	level: RulePlainConfiguration;
 	options?: NoTopLevelLiteralsOptions;
 }
+export interface RuleWithNoUndeclaredClassesOptions {
+	level: RulePlainConfiguration;
+	options?: NoUndeclaredClassesOptions;
+}
 export interface RuleWithNoUndeclaredEnvVarsOptions {
 	level: RulePlainConfiguration;
 	options?: NoUndeclaredEnvVarsOptions;
@@ -5918,6 +5979,10 @@ export interface RuleWithNoUnknownAttributeOptions {
 export interface RuleWithNoUnnecessaryConditionsOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnnecessaryConditionsOptions;
+}
+export interface RuleWithNoUnusedClassesOptions {
+	level: RulePlainConfiguration;
+	options?: NoUnusedClassesOptions;
 }
 export interface RuleWithNoUselessReturnOptions {
 	fix?: FixKind;
@@ -5953,6 +6018,10 @@ export interface RuleWithUseArraySortCompareOptions {
 export interface RuleWithUseAwaitThenableOptions {
 	level: RulePlainConfiguration;
 	options?: UseAwaitThenableOptions;
+}
+export interface RuleWithUseBaselineOptions {
+	level: RulePlainConfiguration;
+	options?: UseBaselineOptions;
 }
 export interface RuleWithUseConsistentEnumValueTypeOptions {
 	level: RulePlainConfiguration;
@@ -5994,6 +6063,10 @@ export interface RuleWithUseFindOptions {
 export interface RuleWithUseGlobalThisOptions {
 	level: RulePlainConfiguration;
 	options?: UseGlobalThisOptions;
+}
+export interface RuleWithUseImportsFirstOptions {
+	level: RulePlainConfiguration;
+	options?: UseImportsFirstOptions;
 }
 export interface RuleWithUseInlineScriptIdOptions {
 	level: RulePlainConfiguration;
@@ -7407,6 +7480,10 @@ export type NoShadowOptions = {};
 export type NoSyncScriptsOptions = {};
 export type NoTernaryOptions = {};
 export type NoTopLevelLiteralsOptions = {};
+/**
+ * Options for the `noUndeclaredClasses` rule.
+ */
+export type NoUndeclaredClassesOptions = {};
 export interface NoUndeclaredEnvVarsOptions {
 	/**
 	* Environment variables that should always be allowed.
@@ -7420,6 +7497,7 @@ export interface NoUnknownAttributeOptions {
 	ignore?: string[];
 }
 export type NoUnnecessaryConditionsOptions = {};
+export type NoUnusedClassesOptions = {};
 export type NoUselessReturnOptions = {};
 export type NoVueArrowFuncInWatchOptions = {};
 export type NoVueOptionsApiOptions = {};
@@ -7428,6 +7506,39 @@ export type NoVueVIfWithVForOptions = {};
 export type UseArraySomeOptions = {};
 export type UseArraySortCompareOptions = {};
 export type UseAwaitThenableOptions = {};
+/**
+ * Options for the `useBaseline` rule.
+ */
+export interface UseBaselineOptions {
+	/**
+	 * CSS at-rules to exclude from checking (without `@`, case-insensitive).
+	 */
+	allowAtRules?: string[];
+	/**
+	 * CSS value functions to exclude from checking (case-insensitive).
+	 */
+	allowFunctions?: string[];
+	/**
+	 * CSS media conditions to exclude from checking (case-insensitive).
+	 */
+	allowMediaConditions?: string[];
+	/**
+	 * CSS properties to exclude from checking (case-insensitive).
+	 */
+	allowProperties?: string[];
+	/**
+	 * CSS property values to exclude from checking (maps property name to allowed values, case-insensitive).
+	 */
+	allowPropertyValues?: Record<string, string[]>;
+	/**
+	 * CSS pseudo-selectors to exclude from checking (without `:` or `::`, case-insensitive).
+	 */
+	allowSelectors?: string[];
+	/**
+	 * The availability level to target. Defaults to `"widely"`.
+	 */
+	available?: AvailabilityTarget;
+}
 export type UseConsistentEnumValueTypeOptions = {};
 export interface UseConsistentGraphqlDescriptionsOptions {
 	/**
@@ -7461,6 +7572,7 @@ export type UseExpectOptions = {};
 export type UseExplicitTypeOptions = {};
 export type UseFindOptions = {};
 export type UseGlobalThisOptions = {};
+export type UseImportsFirstOptions = {};
 export type UseInlineScriptIdOptions = {};
 export interface UseInputNameOptions {
 	/**
@@ -7989,6 +8101,15 @@ while for `useState()` it would be `[1]`.
 }
 export type Regex = string;
 /**
+	* The Baseline availability level to target.
+
+- `"widely"` – warn on anything not Baseline widely available.
+- `"newly"` – warn on anything not at least Baseline newly available.
+- A year (e.g. `2023`) – warn on anything whose `baseline_low_date` is after
+  that year (i.e. became newly available after that year). 
+	 */
+export type AvailabilityTarget = AvailabilityNamed | number;
+/**
  * The GraphQL description style to enforce.
  */
 export type UseConsistentGraphqlDescriptionsStyle = "block" | "inline";
@@ -8030,6 +8151,10 @@ export interface Convention {
 }
 export type GroupMatcher = ImportMatcher | SourceMatcher;
 export type StableHookResult = boolean | number[] | string[];
+/**
+ * Named Baseline availability tiers.
+ */
+export type AvailabilityNamed = "widely" | "newly";
 export interface PathOptions {
 	/**
 	 * Names of the exported members that allowed to be not be used.
@@ -8426,8 +8551,10 @@ export type Category =
 	| "lint/nursery/noSyncScripts"
 	| "lint/nursery/noTernary"
 	| "lint/nursery/noUndeclaredEnvVars"
+	| "lint/nursery/noUndeclaredClasses"
 	| "lint/nursery/noUnknownAttribute"
 	| "lint/nursery/noUnnecessaryConditions"
+	| "lint/nursery/noUnusedClasses"
 	| "lint/nursery/noUnwantedPolyfillio"
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessReturn"
@@ -8438,6 +8565,7 @@ export type Category =
 	| "lint/nursery/useArraySome"
 	| "lint/nursery/useArraySortCompare"
 	| "lint/nursery/useAwaitThenable"
+	| "lint/nursery/useBaseline"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentEnumValueType"
 	| "lint/nursery/useConsistentGraphqlDescriptions"
@@ -8452,6 +8580,7 @@ export type Category =
 	| "lint/nursery/useFind"
 	| "lint/nursery/useGlobalThis"
 	| "lint/nursery/useImportRestrictions"
+	| "lint/nursery/useImportsFirst"
 	| "lint/nursery/useInlineScriptId"
 	| "lint/nursery/useInputName"
 	| "lint/nursery/useJsxCurlyBraceConvention"
@@ -8692,11 +8821,12 @@ export type Category =
 	| "lint/suspicious/useStaticResponseMethods"
 	| "lint/suspicious/useStrictMode"
 	| "assist/source/noDuplicateClasses"
+	| "assist/source/organizeImports"
+	| "assist/source/useSortedAttributes"
 	| "assist/source/useSortedInterfaceMembers"
 	| "assist/source/useSortedKeys"
+	| "assist/source/useSortedPackageJson"
 	| "assist/source/useSortedProperties"
-	| "assist/source/useSortedAttributes"
-	| "assist/source/organizeImports"
 	| "syntax/correctness/noTypeOnlyImportAttributes"
 	| "syntax/correctness/noSuperWithoutExtends"
 	| "syntax/correctness/noInitializerWithDefinite"
@@ -9050,8 +9180,17 @@ export type HtmlVariant =
 	| "Svelte";
 export type GritVariant = "Standard";
 export type MarkdownVariant = "Standard";
-export type EmbeddingHtmlKind = "None" | "Html" | "Vue" | "Astro" | "Svelte";
+export type EmbeddingHtmlKind =
+	| "None"
+	| "Html"
+	| { Vue: { applicability: EmbeddingStyleApplicability } }
+	| { Astro: { applicability: EmbeddingStyleApplicability } }
+	| { Svelte: { applicability: EmbeddingStyleApplicability } };
 export type HtmlTextExpressions = "None" | "Single" | "Double";
+/**
+ * How the CSS is applied inside a snippet
+ */
+export type EmbeddingStyleApplicability = "Local" | "Global" | "Unknown";
 export interface OpenFileResult {
 	diagnostics: Diagnostic[];
 }
@@ -9145,7 +9284,8 @@ export interface GetModuleGraphResult {
 }
 export type SerializedModuleInfo =
 	| { js: SerializedJsModuleInfo }
-	| { css: SerializedCssModuleInfo };
+	| { css: SerializedCssModuleInfo }
+	| { html: SerializedHtmlModuleInfo };
 export interface SerializedJsModuleInfo {
 	/**
 	 * Dynamic imports.
@@ -9155,6 +9295,10 @@ export interface SerializedJsModuleInfo {
 	 * Exported symbols.
 	 */
 	exports: string[];
+	/**
+	 * CSS class names referenced in JSX `className` or `class` attributes.
+	 */
+	referencedClasses: string[];
 	/**
 	* Map of all the paths from static imports in the module.
 
@@ -9181,11 +9325,25 @@ Maps from the local imported name to the absolute path it resolves to.
 }
 export interface SerializedCssModuleInfo {
 	/**
+	 * Set of all CSS class names defined in this file.
+	 */
+	classes: string[];
+	/**
 	* Map of all static imports found in the module.
 
 Maps from the local imported name to the absolute path it resolves to. 
 	 */
 	imports: string[];
+}
+export interface SerializedHtmlModuleInfo {
+	/**
+	 * CSS class names referenced in `class` attributes.
+	 */
+	referencedClasses: string[];
+	/**
+	 * CSS class names defined in `<style>` blocks.
+	 */
+	styleClasses: string[];
 }
 export interface PullDiagnosticsParams {
 	categories: RuleCategories;
