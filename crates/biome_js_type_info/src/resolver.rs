@@ -737,13 +737,14 @@ pub trait TypeResolver {
     // #endregion
 }
 
+#[derive(Default)]
 pub struct UnionCollector {
     types: Vec<TypeReference>,
 }
 
 impl UnionCollector {
     pub fn new() -> Self {
-        Self { types: Vec::new() }
+        Self::default()
     }
 
     pub fn add(&mut self, ty: TypeReference) {
@@ -751,6 +752,9 @@ impl UnionCollector {
     }
 
     pub fn finish(self) -> Cow<'static, TypeData> {
+        if self.types.is_empty() {
+            return Cow::Owned(TypeData::unknown());
+        }
         Cow::Owned(TypeData::Union(Box::new(Union(
             self.types.into_boxed_slice(),
         ))))

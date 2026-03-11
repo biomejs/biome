@@ -718,8 +718,8 @@ impl JsModuleInfoCollector {
         ty: &TypeReference,
     ) -> TypeReference {
         let references = self.get_writable_references(binding);
-        let mut ty = ty.clone();
         let mut union_collector = UnionCollector::new();
+        union_collector.add(ty.clone());
         for reference in references {
             let Some(node) = self.binding_node_by_start.get(&reference.range_start) else {
                 continue;
@@ -745,8 +745,7 @@ impl JsModuleInfoCollector {
         }
 
         let id = self.register_type(union_collector.finish());
-        ty = ResolvedTypeId::new(self.level(), id).into();
-        ty
+        ResolvedTypeId::new(self.level(), id).into()
     }
 
     /// After the first pass of the collector, import references have been
