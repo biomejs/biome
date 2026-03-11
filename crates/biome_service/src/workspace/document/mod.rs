@@ -389,7 +389,7 @@ impl JsDocumentServices {
 
     /// Builds document services for a JS snippet and includes semantic data only
     /// when analyzer-backed features are enabled.
-    pub fn for_js_snippet(
+    pub fn from_js_snippet(
         root: &AnyJsRoot,
         source_type: &JsFileSource,
         is_analyzer_enabled: bool,
