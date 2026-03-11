@@ -198,4 +198,9 @@ pub fn quick_test() {
         "> ```\n> hello\n> ```\n",
         "<blockquote>\n<pre><code>hello\n</code></pre>\n</blockquote>\n",
     );
+    test_example(
+        9993,
+        "- foo\n  - bar\n",
+        "<ul>\n<li>foo\n<ul>\n<li>bar</li>\n</ul>\n</li>\n</ul>\n",
+    );
 }
