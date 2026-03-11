@@ -210,20 +210,20 @@ impl ParseSeparatedList for ScssModuleMemberList {
         )
     }
 
-    fn separating_element_kind(&mut self) -> Self::Kind {
-        T![,]
+    fn allow_empty(&self) -> bool {
+        false
     }
 
-    fn diagnose_missing_element(&mut self, p: &mut Self::Parser<'_>) {
-        p.error(expected_scss_module_member(p, p.cur_range()));
+    fn separating_element_kind(&mut self) -> Self::Kind {
+        T![,]
     }
 
     fn allow_trailing_separating_element(&self) -> bool {
         false
     }
 
-    fn allow_empty(&self) -> bool {
-        false
+    fn diagnose_missing_element(&mut self, p: &mut Self::Parser<'_>) {
+        p.error(expected_scss_module_member(p, p.cur_range()));
     }
 }
 
