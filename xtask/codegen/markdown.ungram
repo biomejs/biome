@@ -124,11 +124,15 @@ MdFencedCodeBlock =
 
 MdCodeNameList = MdTextual*
 
+// <div>
+// ^^^^^
 // html block - content is stored as raw text (multiple textual tokens)
 MdHtmlBlock =
 	indent: MdIndentTokenList
 	content: MdInlineItemList
 
+// [foo]: /url "title"
+// ^^^^^^^^^^^^^^^^^^^
 // Link reference definition per CommonMark §4.7
 // [label]: destination "title" or [label]: destination 'title' or [label]: destination (title)
 // Labels are case-insensitive and whitespace-normalized
@@ -141,16 +145,22 @@ MdLinkReferenceDefinition =
 	destination: MdLinkDestination
 	title: MdLinkTitle?
 
+// foo
+// ^^^
 // Label for link reference definitions (CommonMark §4.7)
 // Up to 999 chars, no unescaped brackets, whitespace-normalized
 // Labels can contain multiple tokens (e.g., "foo-bar" is: foo, -, bar)
 MdLinkLabel = content: MdInlineItemList
 
+// /url
+// ^^^^
 // Destination URL for link reference definitions
 // Can be angle-bracketed <url> or bare url (no whitespace)
 // Destinations can contain multiple tokens
 MdLinkDestination = content: MdInlineItemList
 
+// "title"
+// ^^^^^^^
 // Optional title for link reference definitions
 // Quoted with ", ', or ()
 // Titles can contain multiple tokens
@@ -161,6 +171,8 @@ MdLinkBlock = label: MdTextual
                 url: MdTextual
                 title: MdTextual?
 
+// > Foo
+// ^^^^^
 // Block quote container per CommonMark §5.1
 // The first-line `>` is the `prefix` child. Continuation prefixes are interleaved
 // in source order at the MdBlockList level (between blocks) and within
@@ -169,6 +181,8 @@ MdQuote =
 	prefix: MdQuotePrefix
 	content: MdBlockList
 
+// >
+// ^
 // Per-physical-line quote prefix: [indent?] '>' [space?]
 // Interleaved in source order alongside content nodes.
 // Lazy continuation is represented by the ABSENCE of MdQuotePrefix after a line break.
@@ -212,6 +226,8 @@ MdBullet =
 	prefix: MdListMarkerPrefix
 	content: MdBlockList
 
+// -
+// ^
 // Structural tokens around a list marker: indent, marker, post-space, content indent.
 // Mirrors MdQuotePrefix pattern. Marker is required; all other fields optional/empty.
 MdListMarkerPrefix =
@@ -315,6 +331,8 @@ MdReferenceImage =
 	']'
 	label: MdReferenceLinkLabel?
 
+// [label]
+// ^^^^^^^
 // Label part of a reference link/image
 // Either [label] (full) or [] (collapsed)
 // Absent for shortcut references
@@ -330,11 +348,15 @@ MdAutolink =
 	value: MdInlineItemList
 	'>'
 
+// <em>
+// ^^^^
 // Raw inline HTML per CommonMark §6.8
 // Includes: open tags, closing tags, comments, processing instructions,
 // declarations, and CDATA sections
 MdInlineHtml = value: MdInlineItemList
 
+// &amp;
+// ^^^^^
 // Entity and numeric character references per CommonMark §6.2
 // Named entities: &name; (2-31 alphanumeric chars starting with letter)
 // Decimal numeric: &#digits; (1-7 decimal digits)
