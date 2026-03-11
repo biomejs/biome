@@ -17,7 +17,7 @@ use biome_js_type_info::{
 use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::{AstNode, Text, TextRange, TextSize, TokenText};
 use indexmap::IndexMap;
-use rust_lapper::Interval;
+use rust_lapper::{Interval, Lapper};
 use rustc_hash::FxHashMap;
 
 use super::{
@@ -592,7 +592,7 @@ impl JsModuleInfoCollector {
             let binding = &self.bindings[index];
             if let Some(node) = self.binding_node_by_start.get(&binding.range.start()) {
                 let scope_id = scope_id_for_range(&scope_by_range, binding.range);
-                let ty = self.infer_type(&node.clone(), binding.clone(), scope_id);
+                let ty = self.infer_type(&node.clone(), binding.clone(), scope_id, &scope_by_range);
                 self.bindings[index].ty = ty;
             }
         }
@@ -619,6 +619,7 @@ impl JsModuleInfoCollector {
         node: &JsSyntaxNode,
         binding: JsBindingData,
         scope_id: ScopeId,
+        scope_by_range: &Lapper<u32, ScopeId>,
     ) -> TypeReference {
         let binding_name = &binding.name.clone();
 
@@ -645,7 +646,12 @@ impl JsModuleInfoCollector {
                         .unwrap_or_default();
 
                     if self.has_writable_reference(&binding) {
-                        self.widen_binding_from_writable_references(scope_id, &binding, &ty)
+                        self.widen_binding_from_writable_references(
+                            scope_id,
+                            &binding,
+                            &ty,
+                            scope_by_range,
+                        )
                     } else {
                         ty
                     }
@@ -694,28 +700,13 @@ impl JsModuleInfoCollector {
         TypeReference::unknown()
     }
 
-    fn get_scope_by_range(&self, range: TextRange) -> Option<&ScopeId> {
-        let start: u32 = range.start().into();
-        let end: u32 = range.end().into();
-
-        // Search through all scope intervals to find the one that contains this range
-        self.scope_range_by_start
-            .values()
-            .flat_map(|intervals| intervals.iter())
-            .filter(|interval| {
-                // The interval must fully contain the range
-                interval.start <= start && end <= interval.stop
-            })
-            .max_by_key(|interval| interval.val)
-            .map(|interval| &interval.val)
-    }
-
     /// Widen the type of binding from its writable references.
     fn widen_binding_from_writable_references(
         &mut self,
         scope_id: ScopeId,
         binding: &JsBindingData,
         ty: &TypeReference,
+        scope_by_range: &Lapper<u32, ScopeId>,
     ) -> TypeReference {
         let references = self.get_writable_references(binding);
         let mut union_collector = UnionCollector::new();
@@ -724,12 +715,10 @@ impl JsModuleInfoCollector {
             let Some(node) = self.binding_node_by_start.get(&reference.range_start) else {
                 continue;
             };
-            let Some(reference_scope) = self.get_scope_by_range(node.text_trimmed_range()) else {
-                continue;
-            };
+            let reference_scope = scope_id_for_range(scope_by_range, node.text_trimmed_range());
 
             // We don't want to widen types inside the same scope
-            if binding.scope_id == *reference_scope {
+            if binding.scope_id == reference_scope {
                 continue;
             }
             let assignment = node
