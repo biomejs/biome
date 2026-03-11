@@ -12,12 +12,12 @@ use biome_js_type_info::{
     FunctionParameter, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, GenericTypeParameter, MAX_FLATTEN_DEPTH,
     Module, Namespace, Resolvable, ResolvedTypeData, ResolvedTypeId, TypeData, TypeId,
     TypeImportQualifier, TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier,
-    TypeResolver, TypeResolverLevel, TypeStore,
+    TypeResolver, TypeResolverLevel, TypeStore, UnionCollector,
 };
 use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::{AstNode, Text, TextRange, TextSize, TokenText};
 use indexmap::IndexMap;
-use rust_lapper::Interval;
+use rust_lapper::{Interval, Lapper};
 use rustc_hash::FxHashMap;
 
 use super::{
@@ -592,7 +592,7 @@ impl JsModuleInfoCollector {
             let binding = &self.bindings[index];
             if let Some(node) = self.binding_node_by_start.get(&binding.range.start()) {
                 let scope_id = scope_id_for_range(&scope_by_range, binding.range);
-                let ty = self.infer_type(&node.clone(), binding.clone(), scope_id);
+                let ty = self.infer_type(&node.clone(), binding.clone(), scope_id, &scope_by_range);
                 self.bindings[index].ty = ty;
             }
         }
@@ -619,6 +619,7 @@ impl JsModuleInfoCollector {
         node: &JsSyntaxNode,
         binding: JsBindingData,
         scope_id: ScopeId,
+        scope_by_range: &Lapper<u32, ScopeId>,
     ) -> TypeReference {
         let binding_name = &binding.name.clone();
 
@@ -645,7 +646,12 @@ impl JsModuleInfoCollector {
                         .unwrap_or_default();
 
                     if self.has_writable_reference(&binding) {
-                        self.widen_binding_from_writable_references(scope_id, &binding, &ty)
+                        self.widen_binding_from_writable_references(
+                            scope_id,
+                            &binding,
+                            &ty,
+                            scope_by_range,
+                        )
                     } else {
                         ty
                     }
@@ -700,29 +706,35 @@ impl JsModuleInfoCollector {
         scope_id: ScopeId,
         binding: &JsBindingData,
         ty: &TypeReference,
+        scope_by_range: &Lapper<u32, ScopeId>,
     ) -> TypeReference {
         let references = self.get_writable_references(binding);
-        let mut ty = ty.clone();
+        let mut union_collector = UnionCollector::new();
+        union_collector.add(ty.clone());
         for reference in references {
             let Some(node) = self.binding_node_by_start.get(&reference.range_start) else {
                 continue;
             };
-            for ancestor in node.ancestors().skip(1) {
-                if let Some(assignment) = JsAssignmentExpression::cast_ref(&ancestor)
-                    && let Ok(right) = assignment.right()
-                {
-                    let data = TypeData::from_any_js_expression(self, scope_id, &right);
-                    let assigned_type = self.reference_to_owned_data(data);
-                    ty = ResolvedTypeId::new(
-                        self.level(),
-                        self.union_with(ty.clone(), assigned_type),
-                    )
-                    .into();
-                }
+            let reference_scope = scope_id_for_range(scope_by_range, node.text_trimmed_range());
+
+            // We don't want to widen types inside the same scope
+            if binding.scope_id == reference_scope {
+                continue;
+            }
+            let assignment = node
+                .ancestors()
+                .skip(1)
+                .find_map(|ancestor| JsAssignmentExpression::cast_ref(&ancestor))
+                .and_then(|assignment| assignment.right().ok());
+            if let Some(right) = assignment {
+                let data = TypeData::from_any_js_expression(self, scope_id, &right);
+                let assigned_type = self.reference_to_owned_data(data);
+                union_collector.add(assigned_type);
             }
         }
 
-        ty
+        let id = self.register_type(union_collector.finish());
+        ResolvedTypeId::new(self.level(), id).into()
     }
 
     /// After the first pass of the collector, import references have been
