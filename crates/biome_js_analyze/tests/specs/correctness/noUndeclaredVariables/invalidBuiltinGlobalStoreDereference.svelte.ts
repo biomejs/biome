@@ -1,1 +1,2 @@
+/* should generate diagnostics */
 $location;
