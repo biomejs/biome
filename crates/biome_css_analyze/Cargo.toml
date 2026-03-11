@@ -34,6 +34,7 @@ biome_rule_options       = { workspace = true }
 biome_string_case        = { workspace = true }
 biome_suppression        = { workspace = true }
 camino                   = { workspace = true }
+phf                      = { workspace = true }
 regex                    = { workspace = true }
 rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, optional = true }

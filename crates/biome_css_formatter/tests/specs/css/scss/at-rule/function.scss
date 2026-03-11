@@ -1,0 +1,9 @@
+@function
+double(
+$value:2,
+$ratio: 1.5,
+$rest...
+){
+@return
+$value * $ratio;
+}

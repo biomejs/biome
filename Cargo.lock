@@ -344,6 +344,7 @@ dependencies = [
  "filetime",
  "insta",
  "mimalloc",
+ "phf 0.13.1",
  "regex",
  "rustc-hash 2.1.1",
  "schemars",

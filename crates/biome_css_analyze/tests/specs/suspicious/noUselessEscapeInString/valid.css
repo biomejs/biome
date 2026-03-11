@@ -1,7 +1,12 @@
 /* should not generate diagnostics */
+
 .a::after {
     content: "\""
 }
 .b::after {
     content: "\t"
+}
+
+.icon-file:before {
+	content: "\e7bb";
 }
