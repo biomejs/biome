@@ -1,10 +1,11 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 155
+assertion_line: 154
 expression: invalidTypeOnlyStoreDereference.svelte.ts
 ---
 # Input
 ```ts
+/* should generate diagnostics */
 type store = number;
 $store;
 
@@ -12,14 +13,15 @@ $store;
 
 # Diagnostics
 ```
-invalidTypeOnlyStoreDereference.svelte.ts:2:1 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━
+invalidTypeOnlyStoreDereference.svelte.ts:3:1 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━
 
   × The $store variable is undeclared.
   
-    1 │ type store = number;
-  > 2 │ $store;
+    1 │ /* should generate diagnostics */
+    2 │ type store = number;
+  > 3 │ $store;
       │ ^^^^^^
-    3 │ 
+    4 │ 
   
   i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.
