@@ -186,6 +186,8 @@ pub enum RuleSource<'a> {
     EslintMarkdown(&'a str),
     /// Rules from [Eslint Plugin Yml](https://ota-meshi.github.io/eslint-plugin-yml/)
     EslintYml(&'a str),
+    /// Rules from [Eslint CSS](https://github.com/eslint/css)
+    EslintCss(&'a str),
 }
 
 impl<'a> std::fmt::Display for RuleSource<'a> {
@@ -239,6 +241,7 @@ impl<'a> std::fmt::Display for RuleSource<'a> {
             Self::EslintJson(_) => write!(f, "@eslint/json"),
             Self::EslintMarkdown(_) => write!(f, "@eslint/markdown"),
             Self::EslintYml(_) => write!(f, "eslint-plugin-yml"),
+            Self::EslintCss(_) => write!(f, "@eslint/css"),
         }
     }
 }
@@ -303,6 +306,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintJson(_) => 41,
             Self::EslintMarkdown(_) => 42,
             Self::EslintYml(_) => 43,
+            Self::EslintCss(_) => 44,
         }
     }
 
@@ -362,6 +366,7 @@ impl<'a> RuleSource<'a> {
             | Self::Stylelint(rule_name)
             | Self::EslintTurbo(rule_name)
             | Self::HtmlEslint(rule_name)
+            | Self::EslintCss(rule_name)
             | Self::EslintPlaywright(rule_name)
             | Self::EslintJson(rule_name)
             | Self::EslintMarkdown(rule_name)
@@ -415,6 +420,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintJson(_) => "json",
             Self::EslintMarkdown(_) => "markdown",
             Self::EslintYml(_) => "yml",
+            Self::EslintCss(_) => "css",
         }
     }
 
@@ -472,6 +478,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintJson(rule_name) => format!("https://github.com/eslint/json/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintMarkdown(rule_name) => format!("https://github.com/eslint/markdown/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintYml(rule_name) => format!("https://ota-meshi.github.io/eslint-plugin-yml/rules/{rule_name}.html"),
+            Self::EslintCss(rule_name) => format!("https://github.com/eslint/css/blob/main/docs/rules/{rule_name}.md"),
         }
     }
 

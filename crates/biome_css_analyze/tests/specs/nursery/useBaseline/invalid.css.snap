@@ -1,0 +1,323 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+---
+# Input
+```css
+/* should generate diagnostics */
+
+/* Limited/newly available properties - flagged with default "widely" */
+a { accent-color: bar; backdrop-filter: auto }
+
+/* @supports not (negated) - NOT suppressed */
+@supports not (accent-color: auto) { a { accent-color: auto } }
+
+/* Outer @supports does not protect inner non-matching rule */
+@supports (accent-color: auto) {
+    @supports (backdrop-filter: auto) {
+        a { accent-color: red; }
+    }
+    a { backdrop-filter: auto; }
+}
+
+/* Property value not yet widely available */
+@supports (clip-path: fill-box) { a { clip-path: stroke-box; } }
+
+/* Function not yet widely available */
+a { width: abs(20% - 100px); }
+a { color: light-dark(black, white); }
+
+/* Function inside @supports, but @supports condition uses different feature */
+@supports (accent-color: auto) { a { accent-color: abs(20% - 10px); } }
+
+/* Media conditions not widely available */
+@media (inverted-colors: inverted) { a { color: red; } }
+
+/* Multiple non-baseline media conditions in one rule */
+@media (height: 600px) and (inverted-colors: inverted) and (device-posture: folded) { a { color: red; } }
+
+/* Unknown condition mixed with non-baseline */
+@media (foo) and (inverted-colors: inverted) { a { color: red; } }
+
+/* Pseudo-class not yet widely available */
+h1:has(+ h2) { margin: 0 0 0.25rem 0; }
+
+/* @supports selector() guards only its own block, not a separate rule */
+@supports selector(:has()) { a { color: red; } }
+@supports (color: red) {
+    h1:has(+ h2) {
+        color: red;
+    }
+}
+
+/* Pseudo-element not yet widely available */
+details::details-content { background-color: #a29bfe; }
+
+```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._
+
+# Diagnostics
+```
+invalid.css:4:5 lint/nursery/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i CSS property accent-color isn't part of the chosen Baseline.
+  
+    3 │ /* Limited/newly available properties - flagged with default "widely" */
+  > 4 │ a { accent-color: bar; backdrop-filter: auto }
+      │     ^^^^^^^^^^^^
+    5 │ 
+    6 │ /* @supports not (negated) - NOT suppressed */
+  
+  i Using a feature that isn't part of the Baseline can lead to unexpected behavior in older browsers.
+  
+  i Either remove the feature, or use the @supports at-rule to gate the feature behind a browser-specific support condition.
+  
+  i See MDN Baseline for more information.
+  
+  i Check caniuse.com for more information about the feature accent-color.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:4:24 lint/nursery/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i CSS property backdrop-filter isn't part of the chosen Baseline.
+  
+    3 │ /* Limited/newly available properties - flagged with default "widely" */
+  > 4 │ a { accent-color: bar; backdrop-filter: auto }
+      │                        ^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ /* @supports not (negated) - NOT suppressed */
+  
+  i Using a feature that isn't part of the Baseline can lead to unexpected behavior in older browsers.
+  
+  i Either remove the feature, or use the @supports at-rule to gate the feature behind a browser-specific support condition.
+  
+  i See MDN Baseline for more information.
+  
+  i Check caniuse.com for more information about the feature backdrop-filter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:7:16 lint/nursery/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i CSS property accent-color isn't part of the chosen Baseline.
+  
+    6 │ /* @supports not (negated) - NOT suppressed */
+  > 7 │ @supports not (accent-color: auto) { a { accent-color: auto } }
+      │                ^^^^^^^^^^^^
+    8 │ 
+    9 │ /* Outer @supports does not protect inner non-matching rule */
+  
+  i Using a feature that isn't part of the Baseline can lead to unexpected behavior in older browsers.
+  
+  i Either remove the feature, or use the @supports at-rule to gate the feature behind a browser-specific support condition.
+  
+  i See MDN Baseline for more information.
+  
+  i Check caniuse.com for more information about the feature accent-color.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:21:12 lint/nursery/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i CSS function abs isn't part of the chosen Baseline.
+  
+    20 │ /* Function not yet widely available */
+  > 21 │ a { width: abs(20% - 100px); }
+       │            ^^^
+    22 │ a { color: light-dark(black, white); }
+    23 │ 
+  
+  i Using a feature that isn't part of the Baseline can lead to unexpected behavior in older browsers.
+  
+  i Either remove the feature, or use the @supports at-rule to gate the feature behind a browser-specific support condition.
+  
+  i See MDN Baseline for more information.
+  
+  i Check caniuse.com for more information about the feature abs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:22:12 lint/nursery/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i CSS function light-dark isn't part of the chosen Baseline.
+  
+    20 │ /* Function not yet widely available */
+    21 │ a { width: abs(20% - 100px); }
+  > 22 │ a { color: light-dark(black, white); }
+       │            ^^^^^^^^^^
+    23 │ 
+    24 │ /* Function inside @supports, but @supports condition uses different feature */
+  
+  i Using a feature that isn't part of the Baseline can lead to unexpected behavior in older browsers.
+  
+  i Either remove the feature, or use the @supports at-rule to gate the feature behind a browser-specific support condition.
+  
+  i See MDN Baseline for more information.
+  
+  i Check caniuse.com for more information about the feature light-dark.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:25:52 lint/nursery/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i CSS function abs isn't part of the chosen Baseline.
+  
+    24 │ /* Function inside @supports, but @supports condition uses different feature */
+  > 25 │ @supports (accent-color: auto) { a { accent-color: abs(20% - 10px); } }
+       │                                                    ^^^
+    26 │ 
+    27 │ /* Media conditions not widely available */
+  
+  i Using a feature that isn't part of the Baseline can lead to unexpected behavior in older browsers.
+  
+  i Either remove the feature, or use the @supports at-rule to gate the feature behind a browser-specific support condition.
+  
+  i See MDN Baseline for more information.
+  
+  i Check caniuse.com for more information about the feature abs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:28:9 lint/nursery/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i CSS media condition inverted-colors isn't part of the chosen Baseline.
+  
+    27 │ /* Media conditions not widely available */
+  > 28 │ @media (inverted-colors: inverted) { a { color: red; } }
+       │         ^^^^^^^^^^^^^^^
+    29 │ 
+    30 │ /* Multiple non-baseline media conditions in one rule */
+  
+  i Using a feature that isn't part of the Baseline can lead to unexpected behavior in older browsers.
+  
+  i Either remove the feature, or use the @supports at-rule to gate the feature behind a browser-specific support condition.
+  
+  i See MDN Baseline for more information.
+  
+  i Check caniuse.com for more information about the feature inverted-colors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:31:29 lint/nursery/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i CSS media condition inverted-colors isn't part of the chosen Baseline.
+  
+    30 │ /* Multiple non-baseline media conditions in one rule */
+  > 31 │ @media (height: 600px) and (inverted-colors: inverted) and (device-posture: folded) { a { color: red; } }
+       │                             ^^^^^^^^^^^^^^^
+    32 │ 
+    33 │ /* Unknown condition mixed with non-baseline */
+  
+  i Using a feature that isn't part of the Baseline can lead to unexpected behavior in older browsers.
+  
+  i Either remove the feature, or use the @supports at-rule to gate the feature behind a browser-specific support condition.
+  
+  i See MDN Baseline for more information.
+  
+  i Check caniuse.com for more information about the feature inverted-colors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:31:61 lint/nursery/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i CSS media condition device-posture isn't part of the chosen Baseline.
+  
+    30 │ /* Multiple non-baseline media conditions in one rule */
+  > 31 │ @media (height: 600px) and (inverted-colors: inverted) and (device-posture: folded) { a { color: red; } }
+       │                                                             ^^^^^^^^^^^^^^
+    32 │ 
+    33 │ /* Unknown condition mixed with non-baseline */
+  
+  i Using a feature that isn't part of the Baseline can lead to unexpected behavior in older browsers.
+  
+  i Either remove the feature, or use the @supports at-rule to gate the feature behind a browser-specific support condition.
+  
+  i See MDN Baseline for more information.
+  
+  i Check caniuse.com for more information about the feature device-posture.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:34:19 lint/nursery/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i CSS media condition inverted-colors isn't part of the chosen Baseline.
+  
+    33 │ /* Unknown condition mixed with non-baseline */
+  > 34 │ @media (foo) and (inverted-colors: inverted) { a { color: red; } }
+       │                   ^^^^^^^^^^^^^^^
+    35 │ 
+    36 │ /* Pseudo-class not yet widely available */
+  
+  i Using a feature that isn't part of the Baseline can lead to unexpected behavior in older browsers.
+  
+  i Either remove the feature, or use the @supports at-rule to gate the feature behind a browser-specific support condition.
+  
+  i See MDN Baseline for more information.
+  
+  i Check caniuse.com for more information about the feature inverted-colors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:48:10 lint/nursery/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i CSS pseudo-element details-content isn't part of the chosen Baseline.
+  
+    47 │ /* Pseudo-element not yet widely available */
+  > 48 │ details::details-content { background-color: #a29bfe; }
+       │          ^^^^^^^^^^^^^^^
+    49 │ 
+  
+  i Using a feature that isn't part of the Baseline can lead to unexpected behavior in older browsers.
+  
+  i Either remove the feature, or use the @supports at-rule to gate the feature behind a browser-specific support condition.
+  
+  i See MDN Baseline for more information.
+  
+  i Check caniuse.com for more information about the feature details-content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
