@@ -54,6 +54,7 @@ MdDocument {
     bom_token: missing (optional),
     value: MdBlockList [
         MdLinkReferenceDefinition {
+            indent: MdIndentTokenList [],
             l_brack_token: L_BRACK@0..1 "[" [] [],
             label: MdLinkLabel {
                 content: MdInlineItemList [
@@ -176,6 +177,7 @@ MdDocument {
             value_token: NEWLINE@151..152 "\n" [] [],
         },
         MdLinkReferenceDefinition {
+            indent: MdIndentTokenList [],
             l_brack_token: L_BRACK@152..153 "[" [] [],
             label: MdLinkLabel {
                 content: MdInlineItemList [
@@ -367,6 +369,7 @@ MdDocument {
             value_token: NEWLINE@352..353 "\n" [] [],
         },
         MdLinkReferenceDefinition {
+            indent: MdIndentTokenList [],
             l_brack_token: L_BRACK@353..354 "[" [] [],
             label: MdLinkLabel {
                 content: MdInlineItemList [
@@ -506,6 +509,7 @@ MdDocument {
             value_token: NEWLINE@571..572 "\n" [] [],
         },
         MdLinkReferenceDefinition {
+            indent: MdIndentTokenList [],
             l_brack_token: L_BRACK@572..573 "[" [] [],
             label: MdLinkLabel {
                 content: MdInlineItemList [
@@ -589,6 +593,7 @@ MdDocument {
             value_token: NEWLINE@678..679 "\n" [] [],
         },
         MdLinkReferenceDefinition {
+            indent: MdIndentTokenList [],
             l_brack_token: L_BRACK@679..680 "[" [] [],
             label: MdLinkLabel {
                 content: MdInlineItemList [
@@ -664,20 +669,21 @@ MdDocument {
   0: (empty)
   1: MD_BLOCK_LIST@0..757
     0: MD_LINK_REFERENCE_DEFINITION@0..46
-      0: L_BRACK@0..1 "[" [] []
-      1: MD_LINK_LABEL@1..8
+      0: MD_INDENT_TOKEN_LIST@0..0
+      1: L_BRACK@0..1 "[" [] []
+      2: MD_LINK_LABEL@1..8
         0: MD_INLINE_ITEM_LIST@1..8
           0: MD_TEXTUAL@1..8
             0: MD_TEXTUAL_LITERAL@1..8 "example" [] []
-      2: R_BRACK@8..9 "]" [] []
-      3: COLON@9..10 ":" [] []
-      4: MD_LINK_DESTINATION@10..30
+      3: R_BRACK@8..9 "]" [] []
+      4: COLON@9..10 ":" [] []
+      5: MD_LINK_DESTINATION@10..30
         0: MD_INLINE_ITEM_LIST@10..30
           0: MD_TEXTUAL@10..11
             0: MD_TEXTUAL_LITERAL@10..11 " " [] []
           1: MD_TEXTUAL@11..30
             0: MD_TEXTUAL_LITERAL@11..30 "https://example.com" [] []
-      5: MD_LINK_TITLE@30..46
+      6: MD_LINK_TITLE@30..46
         0: MD_INLINE_ITEM_LIST@30..46
           0: MD_TEXTUAL@30..31
             0: MD_TEXTUAL_LITERAL@30..31 " " [] []
@@ -744,20 +750,21 @@ MdDocument {
     8: MD_NEWLINE@151..152
       0: NEWLINE@151..152 "\n" [] []
     9: MD_LINK_REFERENCE_DEFINITION@152..174
-      0: L_BRACK@152..153 "[" [] []
-      1: MD_LINK_LABEL@153..156
+      0: MD_INDENT_TOKEN_LIST@152..152
+      1: L_BRACK@152..153 "[" [] []
+      2: MD_LINK_LABEL@153..156
         0: MD_INLINE_ITEM_LIST@153..156
           0: MD_TEXTUAL@153..156
             0: MD_TEXTUAL_LITERAL@153..156 "foo" [] []
-      2: R_BRACK@156..157 "]" [] []
-      3: COLON@157..158 ":" [] []
-      4: MD_LINK_DESTINATION@158..174
+      3: R_BRACK@156..157 "]" [] []
+      4: COLON@157..158 ":" [] []
+      5: MD_LINK_DESTINATION@158..174
         0: MD_INLINE_ITEM_LIST@158..174
           0: MD_TEXTUAL@158..159
             0: MD_TEXTUAL_LITERAL@158..159 " " [] []
           1: MD_TEXTUAL@159..174
             0: MD_TEXTUAL_LITERAL@159..174 "https://foo.com" [] []
-      5: (empty)
+      6: (empty)
     10: MD_NEWLINE@174..175
       0: NEWLINE@174..175 "\n" [] []
     11: MD_NEWLINE@175..176
@@ -872,20 +879,21 @@ MdDocument {
     21: MD_NEWLINE@352..353
       0: NEWLINE@352..353 "\n" [] []
     22: MD_LINK_REFERENCE_DEFINITION@353..377
-      0: L_BRACK@353..354 "[" [] []
-      1: MD_LINK_LABEL@354..358
+      0: MD_INDENT_TOKEN_LIST@353..353
+      1: L_BRACK@353..354 "[" [] []
+      2: MD_LINK_LABEL@354..358
         0: MD_INLINE_ITEM_LIST@354..358
           0: MD_TEXTUAL@354..358
             0: MD_TEXTUAL_LITERAL@354..358 "test" [] []
-      2: R_BRACK@358..359 "]" [] []
-      3: COLON@359..360 ":" [] []
-      4: MD_LINK_DESTINATION@360..377
+      3: R_BRACK@358..359 "]" [] []
+      4: COLON@359..360 ":" [] []
+      5: MD_LINK_DESTINATION@360..377
         0: MD_INLINE_ITEM_LIST@360..377
           0: MD_TEXTUAL@360..361
             0: MD_TEXTUAL_LITERAL@360..361 " " [] []
           1: MD_TEXTUAL@361..377
             0: MD_TEXTUAL_LITERAL@361..377 "https://test.com" [] []
-      5: (empty)
+      6: (empty)
     23: MD_NEWLINE@377..378
       0: NEWLINE@377..378 "\n" [] []
     24: MD_NEWLINE@378..379
@@ -964,20 +972,21 @@ MdDocument {
     30: MD_NEWLINE@571..572
       0: NEWLINE@571..572 "\n" [] []
     31: MD_LINK_REFERENCE_DEFINITION@572..606
-      0: L_BRACK@572..573 "[" [] []
-      1: MD_LINK_LABEL@573..583
+      0: MD_INDENT_TOKEN_LIST@572..572
+      1: L_BRACK@572..573 "[" [] []
+      2: MD_LINK_LABEL@573..583
         0: MD_INLINE_ITEM_LIST@573..583
           0: MD_TEXTUAL@573..583
             0: MD_TEXTUAL_LITERAL@573..583 "Case Label" [] []
-      2: R_BRACK@583..584 "]" [] []
-      3: COLON@584..585 ":" [] []
-      4: MD_LINK_DESTINATION@585..606
+      3: R_BRACK@583..584 "]" [] []
+      4: COLON@584..585 ":" [] []
+      5: MD_LINK_DESTINATION@585..606
         0: MD_INLINE_ITEM_LIST@585..606
           0: MD_TEXTUAL@585..586
             0: MD_TEXTUAL_LITERAL@585..586 " " [] []
           1: MD_TEXTUAL@586..606
             0: MD_TEXTUAL_LITERAL@586..606 "https://case.example" [] []
-      5: (empty)
+      6: (empty)
     32: MD_NEWLINE@606..607
       0: NEWLINE@606..607 "\n" [] []
     33: MD_NEWLINE@607..608
@@ -1019,22 +1028,23 @@ MdDocument {
     37: MD_NEWLINE@678..679
       0: NEWLINE@678..679 "\n" [] []
     38: MD_LINK_REFERENCE_DEFINITION@679..713
-      0: L_BRACK@679..680 "[" [] []
-      1: MD_LINK_LABEL@680..687
+      0: MD_INDENT_TOKEN_LIST@679..679
+      1: L_BRACK@679..680 "[" [] []
+      2: MD_LINK_LABEL@680..687
         0: MD_INLINE_ITEM_LIST@680..687
           0: MD_TEXTUAL@680..685
             0: MD_TEXTUAL_LITERAL@680..685 "label" [] []
           1: MD_TEXTUAL@685..687
             0: MD_TEXTUAL_LITERAL@685..687 "\\]" [] []
-      2: R_BRACK@687..688 "]" [] []
-      3: COLON@688..689 ":" [] []
-      4: MD_LINK_DESTINATION@689..713
+      3: R_BRACK@687..688 "]" [] []
+      4: COLON@688..689 ":" [] []
+      5: MD_LINK_DESTINATION@689..713
         0: MD_INLINE_ITEM_LIST@689..713
           0: MD_TEXTUAL@689..690
             0: MD_TEXTUAL_LITERAL@689..690 " " [] []
           1: MD_TEXTUAL@690..713
             0: MD_TEXTUAL_LITERAL@690..713 "https://escaped.example" [] []
-      5: (empty)
+      6: (empty)
     39: MD_NEWLINE@713..714
       0: NEWLINE@713..714 "\n" [] []
     40: MD_NEWLINE@714..715
