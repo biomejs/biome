@@ -1,5 +1,6 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
 expression: snapshot
 ---
 
@@ -13,6 +14,8 @@ expression: snapshot
 @use "theme" with ();
 
 @use "theme" with ($primary:);
+
+@use "theme" with ($primary: blue !global);
 
 ```
 
@@ -89,6 +92,7 @@ CssRoot {
                                 },
                                 colon_token: COLON@75..76 ":" [] [],
                                 value: missing (required),
+                                modifier: missing (optional),
                             },
                         ],
                         r_paren_token: R_PAREN@76..77 ")" [] [],
@@ -97,17 +101,57 @@ CssRoot {
                 semicolon_token: SEMICOLON@77..78 ";" [] [],
             },
         },
+        CssAtRule {
+            at_token: AT@78..81 "@" [Newline("\n"), Newline("\n")] [],
+            rule: ScssUseAtRule {
+                use_token: USE_KW@81..85 "use" [] [Whitespace(" ")],
+                url: CssString {
+                    value_token: CSS_STRING_LITERAL@85..93 "\"theme\"" [] [Whitespace(" ")],
+                },
+                as_clause: missing (optional),
+                with_clause: ScssWithClause {
+                    with_token: WITH_KW@93..98 "with" [] [Whitespace(" ")],
+                    configurations: ScssModuleConfigurationList {
+                        l_paren_token: L_PAREN@98..99 "(" [] [],
+                        items: ScssModuleConfigurationItemList [
+                            ScssModuleConfiguration {
+                                name: ScssIdentifier {
+                                    dollar_token: DOLLAR@99..100 "$" [] [],
+                                    name: CssIdentifier {
+                                        value_token: IDENT@100..107 "primary" [] [],
+                                    },
+                                },
+                                colon_token: COLON@107..109 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssIdentifier {
+                                            value_token: IDENT@109..114 "blue" [] [Whitespace(" ")],
+                                        },
+                                    ],
+                                },
+                                modifier: ScssVariableModifier {
+                                    excl_token: BANG@114..115 "!" [] [],
+                                    value: GLOBAL_KW@115..121 "global" [] [],
+                                },
+                            },
+                        ],
+                        r_paren_token: R_PAREN@121..122 ")" [] [],
+                    },
+                },
+                semicolon_token: SEMICOLON@122..123 ";" [] [],
+            },
+        },
     ],
-    eof_token: EOF@78..79 "" [Newline("\n")] [],
+    eof_token: EOF@123..124 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..79
+0: CSS_ROOT@0..124
   0: (empty)
-  1: CSS_ROOT_ITEM_LIST@0..78
+  1: CSS_ROOT_ITEM_LIST@0..123
     0: CSS_AT_RULE@0..5
       0: AT@0..1 "@" [] []
       1: SCSS_USE_AT_RULE@1..5
@@ -160,9 +204,37 @@ CssRoot {
                     0: IDENT@68..75 "primary" [] []
                 1: COLON@75..76 ":" [] []
                 2: (empty)
+                3: (empty)
             2: R_PAREN@76..77 ")" [] []
         4: SEMICOLON@77..78 ";" [] []
-  2: EOF@78..79 "" [Newline("\n")] []
+    4: CSS_AT_RULE@78..123
+      0: AT@78..81 "@" [Newline("\n"), Newline("\n")] []
+      1: SCSS_USE_AT_RULE@81..123
+        0: USE_KW@81..85 "use" [] [Whitespace(" ")]
+        1: CSS_STRING@85..93
+          0: CSS_STRING_LITERAL@85..93 "\"theme\"" [] [Whitespace(" ")]
+        2: (empty)
+        3: SCSS_WITH_CLAUSE@93..122
+          0: WITH_KW@93..98 "with" [] [Whitespace(" ")]
+          1: SCSS_MODULE_CONFIGURATION_LIST@98..122
+            0: L_PAREN@98..99 "(" [] []
+            1: SCSS_MODULE_CONFIGURATION_ITEM_LIST@99..121
+              0: SCSS_MODULE_CONFIGURATION@99..121
+                0: SCSS_IDENTIFIER@99..107
+                  0: DOLLAR@99..100 "$" [] []
+                  1: CSS_IDENTIFIER@100..107
+                    0: IDENT@100..107 "primary" [] []
+                1: COLON@107..109 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@109..114
+                  0: SCSS_EXPRESSION_ITEM_LIST@109..114
+                    0: CSS_IDENTIFIER@109..114
+                      0: IDENT@109..114 "blue" [] [Whitespace(" ")]
+                3: SCSS_VARIABLE_MODIFIER@114..121
+                  0: BANG@114..115 "!" [] []
+                  1: GLOBAL_KW@115..121 "global" [] []
+            2: R_PAREN@121..122 ")" [] []
+        4: SEMICOLON@122..123 ";" [] []
+  2: EOF@123..124 "" [Newline("\n")] []
 
 ```
 
@@ -227,6 +299,7 @@ use.scss:7:29 parse ━━━━━━━━━━━━━━━━━━━━
   > 7 │ @use "theme" with ($primary:);
       │                             ^
     8 │ 
+    9 │ @use "theme" with ($primary: blue !global);
   
   i Expected a SCSS expression here.
   
@@ -235,5 +308,18 @@ use.scss:7:29 parse ━━━━━━━━━━━━━━━━━━━━
   > 7 │ @use "theme" with ($primary:);
       │                             ^
     8 │ 
+    9 │ @use "theme" with ($primary: blue !global);
+  
+use.scss:9:35 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected `!default` after a module configuration value.
+  
+     7 │ @use "theme" with ($primary:);
+     8 │ 
+   > 9 │ @use "theme" with ($primary: blue !global);
+       │                                   ^^^^^^^
+    10 │ 
+  
+  i Only `!default` is allowed in `@use` and `@forward` configuration clauses.
   
 ```

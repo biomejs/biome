@@ -3557,15 +3557,37 @@ pub fn scss_module_configuration(
     name: ScssIdentifier,
     colon_token: SyntaxToken,
     value: ScssExpression,
-) -> ScssModuleConfiguration {
-    ScssModuleConfiguration::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::SCSS_MODULE_CONFIGURATION,
-        [
-            Some(SyntaxElement::Node(name.into_syntax())),
-            Some(SyntaxElement::Token(colon_token)),
-            Some(SyntaxElement::Node(value.into_syntax())),
-        ],
-    ))
+) -> ScssModuleConfigurationBuilder {
+    ScssModuleConfigurationBuilder {
+        name,
+        colon_token,
+        value,
+        modifier: None,
+    }
+}
+pub struct ScssModuleConfigurationBuilder {
+    name: ScssIdentifier,
+    colon_token: SyntaxToken,
+    value: ScssExpression,
+    modifier: Option<ScssVariableModifier>,
+}
+impl ScssModuleConfigurationBuilder {
+    pub fn with_modifier(mut self, modifier: ScssVariableModifier) -> Self {
+        self.modifier = Some(modifier);
+        self
+    }
+    pub fn build(self) -> ScssModuleConfiguration {
+        ScssModuleConfiguration::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::SCSS_MODULE_CONFIGURATION,
+            [
+                Some(SyntaxElement::Node(self.name.into_syntax())),
+                Some(SyntaxElement::Token(self.colon_token)),
+                Some(SyntaxElement::Node(self.value.into_syntax())),
+                self.modifier
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn scss_module_configuration_list(
     l_paren_token: SyntaxToken,

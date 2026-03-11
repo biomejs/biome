@@ -14,7 +14,7 @@ internal-mixin;
 theme-*;
 
 @forward "theme" with(
-$spacing:4px,
+$spacing:4px !default,
 $radius: 2px
 );
 

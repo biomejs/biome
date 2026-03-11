@@ -1,5 +1,6 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
 expression: snapshot
 ---
 
@@ -164,6 +165,7 @@ CssRoot {
                                 },
                                 colon_token: COLON@189..190 ":" [] [],
                                 value: missing (required),
+                                modifier: missing (optional),
                             },
                         ],
                         r_paren_token: R_PAREN@190..191 ")" [] [],
@@ -283,6 +285,7 @@ CssRoot {
                     0: IDENT@182..189 "spacing" [] []
                 1: COLON@189..190 ":" [] []
                 2: (empty)
+                3: (empty)
             2: R_PAREN@190..191 ")" [] []
         5: SEMICOLON@191..192 ";" [] []
   2: EOF@192..193 "" [Newline("\n")] []

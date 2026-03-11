@@ -11,11 +11,15 @@ impl FormatNodeRule<ScssModuleConfiguration> for FormatScssModuleConfiguration {
             name,
             colon_token,
             value,
+            modifier,
         } = node.as_fields();
 
-        write!(
-            f,
-            [name.format(), colon_token.format(), space(), value.format()]
-        )
+        write!(f, [name.format(), colon_token.format(), space(), value.format()])?;
+
+        if let Some(modifier) = modifier {
+            write!(f, [space(), modifier.format()])?;
+        }
+
+        Ok(())
     }
 }

@@ -1,5 +1,6 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
 expression: snapshot
 ---
 
@@ -12,7 +13,7 @@ expression: snapshot
 
 @use "library/buttons" as buttons;
 
-@use "theme" with ($primary: blue, $spacing: 8px);
+@use "theme" with ($primary: blue !default, $spacing: 8px);
 
 @use "theme" as theme with ($primary: blue);
 
@@ -95,88 +96,94 @@ CssRoot {
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssIdentifier {
-                                            value_token: IDENT@104..108 "blue" [] [],
+                                            value_token: IDENT@104..109 "blue" [] [Whitespace(" ")],
                                         },
                                     ],
                                 },
+                                modifier: ScssVariableModifier {
+                                    excl_token: BANG@109..110 "!" [] [],
+                                    value: DEFAULT_KW@110..117 "default" [] [],
+                                },
                             },
-                            COMMA@108..110 "," [] [Whitespace(" ")],
+                            COMMA@117..119 "," [] [Whitespace(" ")],
                             ScssModuleConfiguration {
                                 name: ScssIdentifier {
-                                    dollar_token: DOLLAR@110..111 "$" [] [],
+                                    dollar_token: DOLLAR@119..120 "$" [] [],
                                     name: CssIdentifier {
-                                        value_token: IDENT@111..118 "spacing" [] [],
+                                        value_token: IDENT@120..127 "spacing" [] [],
                                     },
                                 },
-                                colon_token: COLON@118..120 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@127..129 ":" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssRegularDimension {
-                                            value_token: CSS_NUMBER_LITERAL@120..121 "8" [] [],
-                                            unit_token: IDENT@121..123 "px" [] [],
+                                            value_token: CSS_NUMBER_LITERAL@129..130 "8" [] [],
+                                            unit_token: IDENT@130..132 "px" [] [],
                                         },
                                     ],
                                 },
+                                modifier: missing (optional),
                             },
                         ],
-                        r_paren_token: R_PAREN@123..124 ")" [] [],
+                        r_paren_token: R_PAREN@132..133 ")" [] [],
                     },
                 },
-                semicolon_token: SEMICOLON@124..125 ";" [] [],
+                semicolon_token: SEMICOLON@133..134 ";" [] [],
             },
         },
         CssAtRule {
-            at_token: AT@125..128 "@" [Newline("\n"), Newline("\n")] [],
+            at_token: AT@134..137 "@" [Newline("\n"), Newline("\n")] [],
             rule: ScssUseAtRule {
-                use_token: USE_KW@128..132 "use" [] [Whitespace(" ")],
+                use_token: USE_KW@137..141 "use" [] [Whitespace(" ")],
                 url: CssString {
-                    value_token: CSS_STRING_LITERAL@132..140 "\"theme\"" [] [Whitespace(" ")],
+                    value_token: CSS_STRING_LITERAL@141..149 "\"theme\"" [] [Whitespace(" ")],
                 },
                 as_clause: ScssUseAsClause {
-                    as_token: AS_KW@140..143 "as" [] [Whitespace(" ")],
+                    as_token: AS_KW@149..152 "as" [] [Whitespace(" ")],
                     namespace: CssIdentifier {
-                        value_token: IDENT@143..149 "theme" [] [Whitespace(" ")],
+                        value_token: IDENT@152..158 "theme" [] [Whitespace(" ")],
                     },
                 },
                 with_clause: ScssWithClause {
-                    with_token: WITH_KW@149..154 "with" [] [Whitespace(" ")],
+                    with_token: WITH_KW@158..163 "with" [] [Whitespace(" ")],
                     configurations: ScssModuleConfigurationList {
-                        l_paren_token: L_PAREN@154..155 "(" [] [],
+                        l_paren_token: L_PAREN@163..164 "(" [] [],
                         items: ScssModuleConfigurationItemList [
                             ScssModuleConfiguration {
                                 name: ScssIdentifier {
-                                    dollar_token: DOLLAR@155..156 "$" [] [],
+                                    dollar_token: DOLLAR@164..165 "$" [] [],
                                     name: CssIdentifier {
-                                        value_token: IDENT@156..163 "primary" [] [],
+                                        value_token: IDENT@165..172 "primary" [] [],
                                     },
                                 },
-                                colon_token: COLON@163..165 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@172..174 ":" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
                                         CssIdentifier {
-                                            value_token: IDENT@165..169 "blue" [] [],
+                                            value_token: IDENT@174..178 "blue" [] [],
                                         },
                                     ],
                                 },
+                                modifier: missing (optional),
                             },
                         ],
-                        r_paren_token: R_PAREN@169..170 ")" [] [],
+                        r_paren_token: R_PAREN@178..179 ")" [] [],
                     },
                 },
-                semicolon_token: SEMICOLON@170..171 ";" [] [],
+                semicolon_token: SEMICOLON@179..180 ";" [] [],
             },
         },
     ],
-    eof_token: EOF@171..172 "" [Newline("\n")] [],
+    eof_token: EOF@180..181 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..172
+0: CSS_ROOT@0..181
   0: (empty)
-  1: CSS_ROOT_ITEM_LIST@0..171
+  1: CSS_ROOT_ITEM_LIST@0..180
     0: CSS_AT_RULE@0..17
       0: AT@0..1 "@" [] []
       1: SCSS_USE_AT_RULE@1..17
@@ -210,69 +217,74 @@ CssRoot {
             0: IDENT@65..72 "buttons" [] []
         3: (empty)
         4: SEMICOLON@72..73 ";" [] []
-    3: CSS_AT_RULE@73..125
+    3: CSS_AT_RULE@73..134
       0: AT@73..76 "@" [Newline("\n"), Newline("\n")] []
-      1: SCSS_USE_AT_RULE@76..125
+      1: SCSS_USE_AT_RULE@76..134
         0: USE_KW@76..80 "use" [] [Whitespace(" ")]
         1: CSS_STRING@80..88
           0: CSS_STRING_LITERAL@80..88 "\"theme\"" [] [Whitespace(" ")]
         2: (empty)
-        3: SCSS_WITH_CLAUSE@88..124
+        3: SCSS_WITH_CLAUSE@88..133
           0: WITH_KW@88..93 "with" [] [Whitespace(" ")]
-          1: SCSS_MODULE_CONFIGURATION_LIST@93..124
+          1: SCSS_MODULE_CONFIGURATION_LIST@93..133
             0: L_PAREN@93..94 "(" [] []
-            1: SCSS_MODULE_CONFIGURATION_ITEM_LIST@94..123
-              0: SCSS_MODULE_CONFIGURATION@94..108
+            1: SCSS_MODULE_CONFIGURATION_ITEM_LIST@94..132
+              0: SCSS_MODULE_CONFIGURATION@94..117
                 0: SCSS_IDENTIFIER@94..102
                   0: DOLLAR@94..95 "$" [] []
                   1: CSS_IDENTIFIER@95..102
                     0: IDENT@95..102 "primary" [] []
                 1: COLON@102..104 ":" [] [Whitespace(" ")]
-                2: SCSS_EXPRESSION@104..108
-                  0: SCSS_EXPRESSION_ITEM_LIST@104..108
-                    0: CSS_IDENTIFIER@104..108
-                      0: IDENT@104..108 "blue" [] []
-              1: COMMA@108..110 "," [] [Whitespace(" ")]
-              2: SCSS_MODULE_CONFIGURATION@110..123
-                0: SCSS_IDENTIFIER@110..118
-                  0: DOLLAR@110..111 "$" [] []
-                  1: CSS_IDENTIFIER@111..118
-                    0: IDENT@111..118 "spacing" [] []
-                1: COLON@118..120 ":" [] [Whitespace(" ")]
-                2: SCSS_EXPRESSION@120..123
-                  0: SCSS_EXPRESSION_ITEM_LIST@120..123
-                    0: CSS_REGULAR_DIMENSION@120..123
-                      0: CSS_NUMBER_LITERAL@120..121 "8" [] []
-                      1: IDENT@121..123 "px" [] []
-            2: R_PAREN@123..124 ")" [] []
-        4: SEMICOLON@124..125 ";" [] []
-    4: CSS_AT_RULE@125..171
-      0: AT@125..128 "@" [Newline("\n"), Newline("\n")] []
-      1: SCSS_USE_AT_RULE@128..171
-        0: USE_KW@128..132 "use" [] [Whitespace(" ")]
-        1: CSS_STRING@132..140
-          0: CSS_STRING_LITERAL@132..140 "\"theme\"" [] [Whitespace(" ")]
-        2: SCSS_USE_AS_CLAUSE@140..149
-          0: AS_KW@140..143 "as" [] [Whitespace(" ")]
-          1: CSS_IDENTIFIER@143..149
-            0: IDENT@143..149 "theme" [] [Whitespace(" ")]
-        3: SCSS_WITH_CLAUSE@149..170
-          0: WITH_KW@149..154 "with" [] [Whitespace(" ")]
-          1: SCSS_MODULE_CONFIGURATION_LIST@154..170
-            0: L_PAREN@154..155 "(" [] []
-            1: SCSS_MODULE_CONFIGURATION_ITEM_LIST@155..169
-              0: SCSS_MODULE_CONFIGURATION@155..169
-                0: SCSS_IDENTIFIER@155..163
-                  0: DOLLAR@155..156 "$" [] []
-                  1: CSS_IDENTIFIER@156..163
-                    0: IDENT@156..163 "primary" [] []
-                1: COLON@163..165 ":" [] [Whitespace(" ")]
-                2: SCSS_EXPRESSION@165..169
-                  0: SCSS_EXPRESSION_ITEM_LIST@165..169
-                    0: CSS_IDENTIFIER@165..169
-                      0: IDENT@165..169 "blue" [] []
-            2: R_PAREN@169..170 ")" [] []
-        4: SEMICOLON@170..171 ";" [] []
-  2: EOF@171..172 "" [Newline("\n")] []
+                2: SCSS_EXPRESSION@104..109
+                  0: SCSS_EXPRESSION_ITEM_LIST@104..109
+                    0: CSS_IDENTIFIER@104..109
+                      0: IDENT@104..109 "blue" [] [Whitespace(" ")]
+                3: SCSS_VARIABLE_MODIFIER@109..117
+                  0: BANG@109..110 "!" [] []
+                  1: DEFAULT_KW@110..117 "default" [] []
+              1: COMMA@117..119 "," [] [Whitespace(" ")]
+              2: SCSS_MODULE_CONFIGURATION@119..132
+                0: SCSS_IDENTIFIER@119..127
+                  0: DOLLAR@119..120 "$" [] []
+                  1: CSS_IDENTIFIER@120..127
+                    0: IDENT@120..127 "spacing" [] []
+                1: COLON@127..129 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@129..132
+                  0: SCSS_EXPRESSION_ITEM_LIST@129..132
+                    0: CSS_REGULAR_DIMENSION@129..132
+                      0: CSS_NUMBER_LITERAL@129..130 "8" [] []
+                      1: IDENT@130..132 "px" [] []
+                3: (empty)
+            2: R_PAREN@132..133 ")" [] []
+        4: SEMICOLON@133..134 ";" [] []
+    4: CSS_AT_RULE@134..180
+      0: AT@134..137 "@" [Newline("\n"), Newline("\n")] []
+      1: SCSS_USE_AT_RULE@137..180
+        0: USE_KW@137..141 "use" [] [Whitespace(" ")]
+        1: CSS_STRING@141..149
+          0: CSS_STRING_LITERAL@141..149 "\"theme\"" [] [Whitespace(" ")]
+        2: SCSS_USE_AS_CLAUSE@149..158
+          0: AS_KW@149..152 "as" [] [Whitespace(" ")]
+          1: CSS_IDENTIFIER@152..158
+            0: IDENT@152..158 "theme" [] [Whitespace(" ")]
+        3: SCSS_WITH_CLAUSE@158..179
+          0: WITH_KW@158..163 "with" [] [Whitespace(" ")]
+          1: SCSS_MODULE_CONFIGURATION_LIST@163..179
+            0: L_PAREN@163..164 "(" [] []
+            1: SCSS_MODULE_CONFIGURATION_ITEM_LIST@164..178
+              0: SCSS_MODULE_CONFIGURATION@164..178
+                0: SCSS_IDENTIFIER@164..172
+                  0: DOLLAR@164..165 "$" [] []
+                  1: CSS_IDENTIFIER@165..172
+                    0: IDENT@165..172 "primary" [] []
+                1: COLON@172..174 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@174..178
+                  0: SCSS_EXPRESSION_ITEM_LIST@174..178
+                    0: CSS_IDENTIFIER@174..178
+                      0: IDENT@174..178 "blue" [] []
+                3: (empty)
+            2: R_PAREN@178..179 ")" [] []
+        4: SEMICOLON@179..180 ";" [] []
+  2: EOF@180..181 "" [Newline("\n")] []
 
 ```

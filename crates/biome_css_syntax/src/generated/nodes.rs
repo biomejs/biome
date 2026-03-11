@@ -10126,6 +10126,7 @@ impl ScssModuleConfiguration {
             name: self.name(),
             colon_token: self.colon_token(),
             value: self.value(),
+            modifier: self.modifier(),
         }
     }
     pub fn name(&self) -> SyntaxResult<ScssIdentifier> {
@@ -10136,6 +10137,9 @@ impl ScssModuleConfiguration {
     }
     pub fn value(&self) -> SyntaxResult<ScssExpression> {
         support::required_node(&self.syntax, 2usize)
+    }
+    pub fn modifier(&self) -> Option<ScssVariableModifier> {
+        support::node(&self.syntax, 3usize)
     }
 }
 impl Serialize for ScssModuleConfiguration {
@@ -10151,6 +10155,7 @@ pub struct ScssModuleConfigurationFields {
     pub name: SyntaxResult<ScssIdentifier>,
     pub colon_token: SyntaxResult<SyntaxToken>,
     pub value: SyntaxResult<ScssExpression>,
+    pub modifier: Option<ScssVariableModifier>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssModuleConfigurationList {
@@ -27459,6 +27464,7 @@ impl std::fmt::Debug for ScssModuleConfiguration {
                     &support::DebugSyntaxResult(self.colon_token()),
                 )
                 .field("value", &support::DebugSyntaxResult(self.value()))
+                .field("modifier", &support::DebugOptionalElement(self.modifier()))
                 .finish()
         } else {
             f.debug_struct("ScssModuleConfiguration").finish()

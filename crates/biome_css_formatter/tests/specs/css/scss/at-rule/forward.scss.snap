@@ -23,7 +23,7 @@ internal-mixin;
 theme-*;
 
 @forward "theme" with(
-$spacing:4px,
+$spacing:4px !default,
 $radius: 2px
 );
 
@@ -59,13 +59,19 @@ Trailing newline: true
 
 @forward "theme" hide $private, internal-mixin;
 
-@forward "theme" as theme-*;
+@forward "theme"as
+theme-*;
 
 @forward "theme" with (
-	$spacing: 4px,
+	$spacing: 4px !default,
 	$radius: 2px
 );
 
-@forward "theme" as theme-* show $color, button with($spacing: 4px);
+@forward "theme" as theme-* show
+$color,
+button
+with(
+$spacing:4px
+);
 
 ```

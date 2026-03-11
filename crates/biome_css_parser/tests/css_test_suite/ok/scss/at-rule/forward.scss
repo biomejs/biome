@@ -6,6 +6,6 @@
 
 @forward "theme" as theme-*;
 
-@forward "theme" with ($spacing: 4px);
+@forward "theme" with ($spacing: 4px !default);
 
 @forward "theme" as theme-* show $color, button with ($spacing: 4px);

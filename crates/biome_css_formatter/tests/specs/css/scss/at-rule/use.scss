@@ -8,7 +8,7 @@ as
 buttons;
 
 @use "theme"with(
-$primary:blue,
+$primary:blue !default,
 $spacing: 8px
 );
 

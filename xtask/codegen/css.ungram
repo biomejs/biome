@@ -2680,12 +2680,13 @@ AnyScssModuleConfiguration =
 	ScssModuleConfiguration
 	| CssBogusParameter
 
-// $primary: blue
-// ^^^^^^^^^^^^^^
+// $primary: blue !default
+// ^^^^^^^^^^^^^^^^^^^^^^^
 ScssModuleConfiguration =
 	name: ScssIdentifier
 	':'
 	value: ScssExpression
+	modifier: ScssVariableModifier?
 
 // $color, button
 // ^^^^^^^^^^^^^^

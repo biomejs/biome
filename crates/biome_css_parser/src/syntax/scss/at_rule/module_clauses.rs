@@ -1,12 +1,12 @@
 use crate::parser::CssParser;
 use crate::syntax::scss::{
-    expected_scss_expression, is_at_scss_identifier, parse_scss_expression_until,
-    parse_scss_identifier,
+    expected_scss_expression, is_at_scss_identifier,
+    parse_scss_expression_in_variable_value_until, parse_scss_identifier,
 };
 use crate::syntax::{is_at_identifier, parse_regular_identifier};
 use biome_css_syntax::CssSyntaxKind::{
     self, CSS_BOGUS, EOF, SCSS_MODULE_CONFIGURATION, SCSS_MODULE_CONFIGURATION_ITEM_LIST,
-    SCSS_MODULE_CONFIGURATION_LIST, SCSS_MODULE_MEMBER_LIST,
+    SCSS_MODULE_CONFIGURATION_LIST, SCSS_MODULE_MEMBER_LIST, SCSS_VARIABLE_MODIFIER,
 };
 use biome_css_syntax::T;
 use biome_parser::parse_lists::ParseSeparatedList;
@@ -61,8 +61,8 @@ fn parse_scss_module_configuration_item_list(p: &mut CssParser) {
 /// # Example
 ///
 /// ```scss
-/// @use "theme" with ($spacing: 4px, $radius: 8px);
-///                    ^^^^^^^^^^^^^^
+/// @use "theme" with ($spacing: 4px !default, $radius: 8px);
+///                    ^^^^^^^^^^^^^^^^^^^^^^^
 /// ```
 ///
 /// Docs: https://sass-lang.com/documentation/at-rules/use/#configuration
@@ -77,10 +77,57 @@ fn parse_scss_module_configuration(p: &mut CssParser) -> ParsedSyntax {
     // We only enter this branch after `is_at_scss_identifier`, so `Absent` is impossible here.
     parse_scss_identifier(p).ok();
     p.expect(T![:]);
-    parse_scss_expression_until(p, SCSS_MODULE_CONFIGURATION_VALUE_END_SET)
+    parse_scss_expression_in_variable_value_until(p, SCSS_MODULE_CONFIGURATION_VALUE_END_SET)
         .or_add_diagnostic(p, expected_scss_expression);
+    // Optional by grammar.
+    parse_scss_module_configuration_modifier(p).ok();
 
     Present(m.complete(p, SCSS_MODULE_CONFIGURATION))
+}
+
+/// Parses the optional `!default` modifier after a SCSS module configuration value.
+///
+/// # Example
+///
+/// ```scss
+/// @use "theme" with ($primary: blue !default);
+///                                  ^^^^^^^^^
+/// ```
+///
+/// Docs: https://sass-lang.com/documentation/at-rules/forward/#configuring-modules
+#[inline]
+fn parse_scss_module_configuration_modifier(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_scss_module_configuration_modifier_start(p) {
+        return Absent;
+    }
+
+    let bang_range = p.cur_range();
+    let m = p.start();
+    p.bump(T![!]);
+
+    if p.at(T![default]) {
+        p.bump(T![default]);
+    } else {
+        let range = TextRange::new(bang_range.start(), p.cur_range().end());
+        p.error(
+            p.err_builder(
+                "Expected `!default` after a module configuration value.",
+                range,
+            )
+            .with_hint("Only `!default` is allowed in `@use` and `@forward` configuration clauses."),
+        );
+
+        if !p.at_ts(SCSS_MODULE_CONFIGURATION_VALUE_END_SET) {
+            p.bump_any();
+        }
+    }
+
+    Present(m.complete(p, SCSS_VARIABLE_MODIFIER))
+}
+
+#[inline]
+fn is_at_scss_module_configuration_modifier_start(p: &mut CssParser) -> bool {
+    p.at(T![!])
 }
 
 /// Parses the SCSS module member list used by `show` and `hide` clauses.
@@ -219,15 +266,15 @@ impl ParseSeparatedList for ScssModuleConfigurationItemList {
         )
     }
 
+    fn allow_empty(&self) -> bool {
+        false
+    }
+
     fn separating_element_kind(&mut self) -> Self::Kind {
         T![,]
     }
 
     fn allow_trailing_separating_element(&self) -> bool {
-        false
-    }
-
-    fn allow_empty(&self) -> bool {
         false
     }
 }

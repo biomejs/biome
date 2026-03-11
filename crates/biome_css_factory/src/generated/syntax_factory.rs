@@ -7162,7 +7162,7 @@ impl SyntaxFactory for CssSyntaxFactory {
             }
             SCSS_MODULE_CONFIGURATION => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
                     && ScssIdentifier::can_cast(element.kind())
@@ -7180,6 +7180,13 @@ impl SyntaxFactory for CssSyntaxFactory {
                 slots.next_slot();
                 if let Some(element) = &current_element
                     && ScssExpression::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && ScssVariableModifier::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
