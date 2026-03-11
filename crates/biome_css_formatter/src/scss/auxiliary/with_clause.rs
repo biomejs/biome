@@ -15,12 +15,12 @@ impl FormatNodeRule<ScssWithClause> for FormatScssWithClause {
         if is_trailing_forward_with_clause(node) {
             write!(f, [with_token.format(), configurations.format()])
         } else if is_standalone_forward_with_clause(node) {
-            write!(f, [with_token.format(), hard_space(), configurations.format()])
-        } else {
             write!(
                 f,
-                [with_token.format(), space(), configurations.format()]
+                [with_token.format(), hard_space(), configurations.format()]
             )
+        } else {
+            write!(f, [with_token.format(), space(), configurations.format()])
         }
     }
 }

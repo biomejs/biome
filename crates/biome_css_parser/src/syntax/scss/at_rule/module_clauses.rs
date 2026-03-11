@@ -1,7 +1,7 @@
 use crate::parser::CssParser;
 use crate::syntax::scss::{
-    expected_scss_expression, is_at_scss_identifier,
-    parse_scss_expression_in_variable_value_until, parse_scss_identifier,
+    expected_scss_expression, is_at_scss_identifier, parse_scss_expression_in_variable_value_until,
+    parse_scss_identifier,
 };
 use crate::syntax::{is_at_identifier, parse_regular_identifier};
 use biome_css_syntax::CssSyntaxKind::{
@@ -114,7 +114,9 @@ fn parse_scss_module_configuration_modifier(p: &mut CssParser) -> ParsedSyntax {
                 "Expected `!default` after a module configuration value.",
                 range,
             )
-            .with_hint("Only `!default` is allowed in `@use` and `@forward` configuration clauses."),
+            .with_hint(
+                "Only `!default` is allowed in `@use` and `@forward` configuration clauses.",
+            ),
         );
 
         if !p.at_ts(SCSS_MODULE_CONFIGURATION_VALUE_END_SET) {

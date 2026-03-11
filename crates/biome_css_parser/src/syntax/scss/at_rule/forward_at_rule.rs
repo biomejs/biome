@@ -65,7 +65,9 @@ fn parse_scss_forward_as_clause(p: &mut CssParser) -> ParsedSyntax {
 
     p.bump(T![as]);
     let prefix = parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
-    let invalid_prefix = prefix.as_ref().filter(|prefix| !prefix.text(p).ends_with('-'));
+    let invalid_prefix = prefix
+        .as_ref()
+        .filter(|prefix| !prefix.text(p).ends_with('-'));
 
     if let Some(prefix) = invalid_prefix {
         p.error(
