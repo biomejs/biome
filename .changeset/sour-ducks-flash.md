@@ -2,4 +2,4 @@
 "@biomejs/biome": patch
 ---
 
-Fixed an issue where the HTML formatter mangled the closing `>` of inline elements when followed by self-closing elements like `<br>` or `<img>`.
+Fixed [#9310](https://github.com/biomejs/biome/issues/9310). Now the HTML formatter doesn't mangle elements that are followed by self-closing elements such as  `<br>` or `<img>`.
