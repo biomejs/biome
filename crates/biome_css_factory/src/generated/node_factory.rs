@@ -3220,6 +3220,54 @@ pub fn scss_expression(items: ScssExpressionItemList) -> ScssExpression {
         [Some(SyntaxElement::Node(items.into_syntax()))],
     ))
 }
+pub fn scss_extend_at_rule(
+    extend_token: SyntaxToken,
+    css_selector_list: CssSelectorList,
+    semicolon_token: SyntaxToken,
+) -> ScssExtendAtRuleBuilder {
+    ScssExtendAtRuleBuilder {
+        extend_token,
+        css_selector_list,
+        semicolon_token,
+        optional_modifier: None,
+    }
+}
+pub struct ScssExtendAtRuleBuilder {
+    extend_token: SyntaxToken,
+    css_selector_list: CssSelectorList,
+    semicolon_token: SyntaxToken,
+    optional_modifier: Option<ScssExtendOptionalModifier>,
+}
+impl ScssExtendAtRuleBuilder {
+    pub fn with_optional_modifier(mut self, optional_modifier: ScssExtendOptionalModifier) -> Self {
+        self.optional_modifier = Some(optional_modifier);
+        self
+    }
+    pub fn build(self) -> ScssExtendAtRule {
+        ScssExtendAtRule::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::SCSS_EXTEND_AT_RULE,
+            [
+                Some(SyntaxElement::Token(self.extend_token)),
+                Some(SyntaxElement::Node(self.css_selector_list.into_syntax())),
+                self.optional_modifier
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.semicolon_token)),
+            ],
+        ))
+    }
+}
+pub fn scss_extend_optional_modifier(
+    excl_token: SyntaxToken,
+    optional_token: SyntaxToken,
+) -> ScssExtendOptionalModifier {
+    ScssExtendOptionalModifier::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_EXTEND_OPTIONAL_MODIFIER,
+        [
+            Some(SyntaxElement::Token(excl_token)),
+            Some(SyntaxElement::Token(optional_token)),
+        ],
+    ))
+}
 pub fn scss_for_at_rule(
     for_token: SyntaxToken,
     variable: ScssIdentifier,
@@ -3400,6 +3448,20 @@ impl ScssIfAtRuleBuilder {
             ],
         ))
     }
+}
+pub fn scss_import_at_rule(
+    import_token: SyntaxToken,
+    imports: ScssImportItemList,
+    semicolon_token: SyntaxToken,
+) -> ScssImportAtRule {
+    ScssImportAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_IMPORT_AT_RULE,
+        [
+            Some(SyntaxElement::Token(import_token)),
+            Some(SyntaxElement::Node(imports.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
 }
 pub fn scss_include_argument_list(
     l_paren_token: SyntaxToken,
@@ -3711,6 +3773,55 @@ pub fn scss_parenthesized_expression(
             Some(SyntaxElement::Token(r_paren_token)),
         ],
     ))
+}
+pub fn scss_placeholder_selector(
+    percent_token: SyntaxToken,
+    name: CssCustomIdentifier,
+) -> ScssPlaceholderSelector {
+    ScssPlaceholderSelector::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_PLACEHOLDER_SELECTOR,
+        [
+            Some(SyntaxElement::Token(percent_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+        ],
+    ))
+}
+pub fn scss_plain_import(url: AnyCssImportUrl, media: CssMediaQueryList) -> ScssPlainImportBuilder {
+    ScssPlainImportBuilder {
+        url,
+        media,
+        layer: None,
+        supports: None,
+    }
+}
+pub struct ScssPlainImportBuilder {
+    url: AnyCssImportUrl,
+    media: CssMediaQueryList,
+    layer: Option<AnyCssImportLayer>,
+    supports: Option<CssImportSupports>,
+}
+impl ScssPlainImportBuilder {
+    pub fn with_layer(mut self, layer: AnyCssImportLayer) -> Self {
+        self.layer = Some(layer);
+        self
+    }
+    pub fn with_supports(mut self, supports: CssImportSupports) -> Self {
+        self.supports = Some(supports);
+        self
+    }
+    pub fn build(self) -> ScssPlainImport {
+        ScssPlainImport::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::SCSS_PLAIN_IMPORT,
+            [
+                Some(SyntaxElement::Node(self.url.into_syntax())),
+                self.layer
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.supports
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.media.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn scss_qualified_name(
     module: CssIdentifier,
@@ -4805,6 +4916,27 @@ where
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn scss_import_item_list<I, S>(items: I, separators: S) -> ScssImportItemList
+where
+    I: IntoIterator<Item = AnyScssImportItem>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    ScssImportItemList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_IMPORT_ITEM_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
     ))
 }
 pub fn scss_list_expression_element_list<I, S>(

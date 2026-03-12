@@ -96,7 +96,12 @@ impl ParseSeparatedList for MediaQueryList {
 }
 
 #[inline]
-fn parse_any_media_query(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn is_at_any_media_query(p: &mut CssParser) -> bool {
+    is_at_media_type_query(p) || is_at_metavariable(p) || is_at_any_media_condition(p)
+}
+
+#[inline]
+pub(crate) fn parse_any_media_query(p: &mut CssParser) -> ParsedSyntax {
     if is_at_media_type_query(p) {
         parse_any_media_type_query(p)
     } else if is_at_metavariable(p) {

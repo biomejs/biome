@@ -975,6 +975,15 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::ScssExpression::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::SCSS_EXTEND_AT_RULE => {
+                    let $pattern = unsafe { $crate::ScssExtendAtRule::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_EXTEND_OPTIONAL_MODIFIER => {
+                    let $pattern =
+                        unsafe { $crate::ScssExtendOptionalModifier::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::SCSS_FOR_AT_RULE => {
                     let $pattern = unsafe { $crate::ScssForAtRule::new_unchecked(node) };
                     $body
@@ -1001,6 +1010,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::SCSS_IF_AT_RULE => {
                     let $pattern = unsafe { $crate::ScssIfAtRule::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_IMPORT_AT_RULE => {
+                    let $pattern = unsafe { $crate::ScssImportAtRule::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::SCSS_INCLUDE_ARGUMENT_LIST => {
@@ -1073,6 +1086,14 @@ macro_rules! map_syntax_node {
                 $crate::CssSyntaxKind::SCSS_PARENTHESIZED_EXPRESSION => {
                     let $pattern =
                         unsafe { $crate::ScssParenthesizedExpression::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_PLACEHOLDER_SELECTOR => {
+                    let $pattern = unsafe { $crate::ScssPlaceholderSelector::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_PLAIN_IMPORT => {
+                    let $pattern = unsafe { $crate::ScssPlainImport::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::SCSS_QUALIFIED_NAME => {
@@ -1482,6 +1503,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::SCSS_EXPRESSION_ITEM_LIST => {
                     let $pattern = unsafe { $crate::ScssExpressionItemList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_IMPORT_ITEM_LIST => {
+                    let $pattern = unsafe { $crate::ScssImportItemList::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::SCSS_LIST_EXPRESSION_ELEMENT_LIST => {

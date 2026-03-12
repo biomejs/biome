@@ -1432,7 +1432,6 @@ dependencies = [
  "mimalloc",
  "once_cell",
  "papaya",
- "rust-lapper",
  "rustc-hash 2.1.1",
  "schemars",
  "serde",
