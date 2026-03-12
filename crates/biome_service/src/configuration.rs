@@ -1255,21 +1255,21 @@ mod configuration_harness {
 
         let mut mismatches = Vec::new();
         for (group, rule, config_type_id) in &config_side {
-            if let Some(rule_type_id) = visitor.types.get(&(*group, *rule)) {
-                if config_type_id != rule_type_id {
-                    mismatches.push(format!(
-                        "  {group}/{rule}: rule declares a different Options type than \
+            if let Some(rule_type_id) = visitor.types.get(&(*group, *rule))
+                && config_type_id != rule_type_id
+            {
+                mismatches.push(format!(
+                    "  {group}/{rule}: rule declares a different Options type than \
                          biome_rule_options::{module}::{name}Options",
-                        module = biome_string_case::Case::Snake.convert(rule),
-                        name = {
-                            let mut c = rule.chars();
-                            match c.next() {
-                                None => String::new(),
-                                Some(f) => f.to_uppercase().collect::<String>() + c.as_str(),
-                            }
-                        },
-                    ));
-                }
+                    module = biome_string_case::Case::Snake.convert(rule),
+                    name = {
+                        let mut c = rule.chars();
+                        match c.next() {
+                            None => String::new(),
+                            Some(f) => f.to_uppercase().collect::<String>() + c.as_str(),
+                        }
+                    },
+                ));
             }
         }
 
