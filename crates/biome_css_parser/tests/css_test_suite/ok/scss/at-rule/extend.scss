@@ -18,6 +18,9 @@
 
 @extend .message;
 
+// TODO: enable @extend interpolation coverage when interpolation work resumes.
+// @extend .icon-#{$name};
+
 @include themed-button {
   @extend .message;
 }

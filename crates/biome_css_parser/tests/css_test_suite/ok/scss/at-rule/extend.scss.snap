@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
 
@@ -26,6 +25,9 @@ expression: snapshot
 }
 
 @extend .message;
+
+// TODO: enable @extend interpolation coverage when interpolation work resumes.
+// @extend .icon-#{$name};
 
 @include themed-button {
   @extend .message;
@@ -303,55 +305,55 @@ CssRoot {
             },
         },
         CssAtRule {
-            at_token: AT@217..220 "@" [Newline("\n"), Newline("\n")] [],
+            at_token: AT@217..328 "@" [Newline("\n"), Newline("\n"), Comments("// TODO: enable @exte ..."), Newline("\n"), Comments("// @extend .icon-#{$n ..."), Newline("\n"), Newline("\n")] [],
             rule: ScssIncludeAtRule {
-                include_token: INCLUDE_KW@220..228 "include" [] [Whitespace(" ")],
+                include_token: INCLUDE_KW@328..336 "include" [] [Whitespace(" ")],
                 name: CssIdentifier {
-                    value_token: IDENT@228..242 "themed-button" [] [Whitespace(" ")],
+                    value_token: IDENT@336..350 "themed-button" [] [Whitespace(" ")],
                 },
                 arguments: missing (optional),
                 block: CssDeclarationOrRuleBlock {
-                    l_curly_token: L_CURLY@242..243 "{" [] [],
+                    l_curly_token: L_CURLY@350..351 "{" [] [],
                     items: CssDeclarationOrRuleList [
                         CssAtRule {
-                            at_token: AT@243..247 "@" [Newline("\n"), Whitespace("  ")] [],
+                            at_token: AT@351..355 "@" [Newline("\n"), Whitespace("  ")] [],
                             rule: ScssExtendAtRule {
-                                extend_token: EXTEND_KW@247..254 "extend" [] [Whitespace(" ")],
+                                extend_token: EXTEND_KW@355..362 "extend" [] [Whitespace(" ")],
                                 css_selector_list: CssSelectorList [
                                     CssCompoundSelector {
                                         nesting_selectors: CssNestedSelectorList [],
                                         simple_selector: missing (optional),
                                         sub_selectors: CssSubSelectorList [
                                             CssClassSelector {
-                                                dot_token: DOT@254..255 "." [] [],
+                                                dot_token: DOT@362..363 "." [] [],
                                                 name: CssCustomIdentifier {
-                                                    value_token: IDENT@255..262 "message" [] [],
+                                                    value_token: IDENT@363..370 "message" [] [],
                                                 },
                                             },
                                         ],
                                     },
                                 ],
                                 optional_modifier: missing (optional),
-                                semicolon_token: SEMICOLON@262..263 ";" [] [],
+                                semicolon_token: SEMICOLON@370..371 ";" [] [],
                             },
                         },
                     ],
-                    r_curly_token: R_CURLY@263..265 "}" [Newline("\n")] [],
+                    r_curly_token: R_CURLY@371..373 "}" [Newline("\n")] [],
                 },
                 semicolon_token: missing (optional),
             },
         },
     ],
-    eof_token: EOF@265..266 "" [Newline("\n")] [],
+    eof_token: EOF@373..374 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..266
+0: CSS_ROOT@0..374
   0: (empty)
-  1: CSS_ROOT_ITEM_LIST@0..265
+  1: CSS_ROOT_ITEM_LIST@0..373
     0: CSS_QUALIFIED_RULE@0..40
       0: CSS_SELECTOR_LIST@0..10
         0: CSS_COMPOUND_SELECTOR@0..10
@@ -525,33 +527,33 @@ CssRoot {
                   0: IDENT@209..216 "message" [] []
         2: (empty)
         3: SEMICOLON@216..217 ";" [] []
-    5: CSS_AT_RULE@217..265
-      0: AT@217..220 "@" [Newline("\n"), Newline("\n")] []
-      1: SCSS_INCLUDE_AT_RULE@220..265
-        0: INCLUDE_KW@220..228 "include" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@228..242
-          0: IDENT@228..242 "themed-button" [] [Whitespace(" ")]
+    5: CSS_AT_RULE@217..373
+      0: AT@217..328 "@" [Newline("\n"), Newline("\n"), Comments("// TODO: enable @exte ..."), Newline("\n"), Comments("// @extend .icon-#{$n ..."), Newline("\n"), Newline("\n")] []
+      1: SCSS_INCLUDE_AT_RULE@328..373
+        0: INCLUDE_KW@328..336 "include" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@336..350
+          0: IDENT@336..350 "themed-button" [] [Whitespace(" ")]
         2: (empty)
-        3: CSS_DECLARATION_OR_RULE_BLOCK@242..265
-          0: L_CURLY@242..243 "{" [] []
-          1: CSS_DECLARATION_OR_RULE_LIST@243..263
-            0: CSS_AT_RULE@243..263
-              0: AT@243..247 "@" [Newline("\n"), Whitespace("  ")] []
-              1: SCSS_EXTEND_AT_RULE@247..263
-                0: EXTEND_KW@247..254 "extend" [] [Whitespace(" ")]
-                1: CSS_SELECTOR_LIST@254..262
-                  0: CSS_COMPOUND_SELECTOR@254..262
-                    0: CSS_NESTED_SELECTOR_LIST@254..254
+        3: CSS_DECLARATION_OR_RULE_BLOCK@350..373
+          0: L_CURLY@350..351 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@351..371
+            0: CSS_AT_RULE@351..371
+              0: AT@351..355 "@" [Newline("\n"), Whitespace("  ")] []
+              1: SCSS_EXTEND_AT_RULE@355..371
+                0: EXTEND_KW@355..362 "extend" [] [Whitespace(" ")]
+                1: CSS_SELECTOR_LIST@362..370
+                  0: CSS_COMPOUND_SELECTOR@362..370
+                    0: CSS_NESTED_SELECTOR_LIST@362..362
                     1: (empty)
-                    2: CSS_SUB_SELECTOR_LIST@254..262
-                      0: CSS_CLASS_SELECTOR@254..262
-                        0: DOT@254..255 "." [] []
-                        1: CSS_CUSTOM_IDENTIFIER@255..262
-                          0: IDENT@255..262 "message" [] []
+                    2: CSS_SUB_SELECTOR_LIST@362..370
+                      0: CSS_CLASS_SELECTOR@362..370
+                        0: DOT@362..363 "." [] []
+                        1: CSS_CUSTOM_IDENTIFIER@363..370
+                          0: IDENT@363..370 "message" [] []
                 2: (empty)
-                3: SEMICOLON@262..263 ";" [] []
-          2: R_CURLY@263..265 "}" [Newline("\n")] []
+                3: SEMICOLON@370..371 ";" [] []
+          2: R_CURLY@371..373 "}" [Newline("\n")] []
         4: (empty)
-  2: EOF@265..266 "" [Newline("\n")] []
+  2: EOF@373..374 "" [Newline("\n")] []
 
 ```
