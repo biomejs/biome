@@ -220,9 +220,7 @@ fn parse_html_attribute(bytes: &[u8], mut i: usize) -> Option<usize> {
         }
         i = parse_html_attribute_value(bytes, i)?;
     } else {
-        // Boolean attribute — no value. Restore had_space knowledge by
-        // returning position after name (before any spaces we skipped).
-        // Caller will re-skip spaces at the top of the loop.
+        // Boolean attribute — no value; caller will re-skip spaces.
     }
 
     Some(i)
