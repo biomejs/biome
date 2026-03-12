@@ -62,8 +62,7 @@ mimalloc = { workspace = true }
 [features]
 default    = []
 markdown   = []
-test-utils = []
-schema   = [
+schema     = [
   "biome_analyze/schema",
   "biome_formatter/schema",
   "biome_html_formatter/schema",
@@ -75,6 +74,7 @@ schema   = [
   "biome_rule_options/schema",
   "dep:schemars",
 ]
+test-utils = []
 
 [lints]
 workspace = true
