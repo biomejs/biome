@@ -121,12 +121,12 @@ fn parse_scss_at_root_query_modifier(p: &mut CssParser) {
 ///
 /// Docs: https://sass-lang.com/documentation/at-rules/at-root/
 #[inline]
-fn parse_scss_at_root_selector(p: &mut CssParser) {
+fn parse_scss_at_root_selector(p: &mut CssParser) -> CompletedMarker {
     let m = p.start();
 
     SelectorList::default().parse_list(p);
 
-    m.complete(p, SCSS_AT_ROOT_SELECTOR);
+    m.complete(p, SCSS_AT_ROOT_SELECTOR)
 }
 
 struct ScssAtRootQueryList;
