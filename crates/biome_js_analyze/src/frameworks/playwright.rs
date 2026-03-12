@@ -222,8 +222,9 @@ fn is_expect_expression(expr: &AnyJsExpression) -> bool {
             if let Ok(object) = member.object() {
                 // When the object is a bare `expect` identifier, only allow known
                 // assertion-qualifying members. This prevents asymmetric matchers
-                // like `expect.stringContaining()` and utilities like `expect.extend()`
-                // from being counted as assertions (see issue #9174).
+                // (https://vitest.dev/api/expect.html#expect-stringcontaining)
+                // and utilities like `expect.extend()` from being counted as
+                // assertions.
                 if let AnyJsExpression::JsIdentifierExpression(id) = &object {
                     if let Ok(name) = id.name()
                         && let Ok(token) = name.value_token()
