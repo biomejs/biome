@@ -864,7 +864,7 @@ fn generate_for_groups(
 
         let options_check = format!(
             "\
-#[expect(clippy::vec-init-then-push)]
+#![expect(clippy::vec_init_then_push)]
 use std::any::TypeId;
 
 /// Returns a list of `(group, rule, config_side_type_id)` for every lint rule.
