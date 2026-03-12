@@ -1,5 +1,6 @@
 //! This is a generated file. Don't modify it by hand! Run 'cargo codegen formatter' to re-generate the file.
 
+pub(crate) mod at_root_query_list;
 pub(crate) mod each_binding_list;
 pub(crate) mod expression_item_list;
 pub(crate) mod import_item_list;

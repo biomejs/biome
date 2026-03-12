@@ -390,81 +390,81 @@ CssRoot {
 at-root.scss:1:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `:` but instead found `media`
-
+  
   > 1 │ @at-root (without media) {
       │                   ^^^^^
     2 │   .root-only {
     3 │     color: red;
-
+  
   i Remove media
-
+  
 at-root.scss:7:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found ')'.
-
+  
     5 │ }
-    6 │
+    6 │ 
   > 7 │ @at-root (without:) {
       │                   ^
     8 │   .root-only {
     9 │     color: blue;
-
+  
   i Expected an identifier here.
-
+  
     5 │ }
-    6 │
+    6 │ 
   > 7 │ @at-root (without:) {
       │                   ^
     8 │   .root-only {
     9 │     color: blue;
-
+  
 at-root.scss:13:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `;`
-
+  
     11 │ }
-    12 │
+    12 │ 
   > 13 │ @at-root .root-only;
        │                    ^
-    14 │
+    14 │ 
     15 │ @at-root , {
-
+  
   i Remove ;
-
+  
 at-root.scss:15:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a selector but instead found '{'.
-
+  
     13 │ @at-root .root-only;
-    14 │
+    14 │ 
   > 15 │ @at-root , {
        │            ^
     16 │   color: green;
     17 │ }
-
+  
   i Expected a selector here.
-
+  
     13 │ @at-root .root-only;
-    14 │
+    14 │ 
   > 15 │ @at-root , {
        │            ^
     16 │   color: green;
     17 │ }
-
+  
 at-root.scss:18:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `}` but instead the file ends
-
+  
     16 │   color: green;
     17 │ }
-  > 18 │
-       │
-
+  > 18 │ 
+       │ 
+  
   i the file ends here
-
+  
     16 │   color: green;
     17 │ }
-  > 18 │
-       │
-
+  > 18 │ 
+       │ 
+  
 ```
