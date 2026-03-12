@@ -179,7 +179,7 @@ pub enum UseDestructuringState {
 
 fn supports_array_destructuring(object: &AnyJsExpression, model: &SemanticModel) -> bool {
     !matches!(
-        array_destructuring_support_for_expression(object, model, 0),
+        array_destructuring_support_for_expression(object, model),
         Some(false)
     )
 }
@@ -187,18 +187,13 @@ fn supports_array_destructuring(object: &AnyJsExpression, model: &SemanticModel)
 fn array_destructuring_support_for_expression(
     object: &AnyJsExpression,
     model: &SemanticModel,
-    depth: usize,
 ) -> Option<bool> {
-    if depth >= 8 {
-        return None;
-    }
-
     match object.clone().omit_parentheses() {
         AnyJsExpression::JsArrayExpression(_) => Some(true),
         AnyJsExpression::JsIdentifierExpression(expr) => {
             let reference = expr.name().ok()?;
             let declaration = model.binding(&reference)?.tree().declaration()?;
-            array_destructuring_support_for_declaration(&declaration, model, depth + 1)
+            array_destructuring_support_for_declaration(&declaration, model)
         }
         _ => None,
     }
@@ -207,30 +202,21 @@ fn array_destructuring_support_for_expression(
 fn array_destructuring_support_for_declaration(
     declaration: &AnyJsBindingDeclaration,
     model: &SemanticModel,
-    depth: usize,
 ) -> Option<bool> {
-    if depth >= 8 {
-        return None;
-    }
-
     match declaration {
         AnyJsBindingDeclaration::JsVariableDeclarator(node) => {
             if let Some(annotation) = node.variable_annotation() {
                 if let Some(annotation) = annotation.as_ts_type_annotation() {
-                    return array_destructuring_support_for_type_annotation(
-                        annotation,
-                        model,
-                        depth + 1,
-                    );
+                    return array_destructuring_support_for_type_annotation(annotation, model);
                 }
             }
 
             let initializer = node.initializer()?.expression().ok()?;
-            array_destructuring_support_for_expression(&initializer, model, depth + 1)
+            array_destructuring_support_for_expression(&initializer, model)
         }
         AnyJsBindingDeclaration::JsFormalParameter(node) => {
             let annotation = node.type_annotation()?;
-            array_destructuring_support_for_type_annotation(&annotation, model, depth + 1)
+            array_destructuring_support_for_type_annotation(&annotation, model)
         }
         AnyJsBindingDeclaration::TsPropertyParameter(node) => {
             let annotation = node
@@ -238,11 +224,11 @@ fn array_destructuring_support_for_declaration(
                 .ok()?
                 .as_js_formal_parameter()?
                 .type_annotation()?;
-            array_destructuring_support_for_type_annotation(&annotation, model, depth + 1)
+            array_destructuring_support_for_type_annotation(&annotation, model)
         }
         AnyJsBindingDeclaration::TsTypeAliasDeclaration(node) => {
             let ty = node.ty().ok()?;
-            array_destructuring_support_for_type(&ty, model, depth + 1)
+            array_destructuring_support_for_type(&ty, model)
         }
         AnyJsBindingDeclaration::TsInterfaceDeclaration(_) => Some(false),
         _ => None,
@@ -252,25 +238,15 @@ fn array_destructuring_support_for_declaration(
 fn array_destructuring_support_for_type_annotation(
     annotation: &TsTypeAnnotation,
     model: &SemanticModel,
-    depth: usize,
 ) -> Option<bool> {
-    if depth >= 8 {
-        return None;
-    }
-
     let ty = annotation.ty().ok()?;
-    array_destructuring_support_for_type(&ty, model, depth + 1)
+    array_destructuring_support_for_type(&ty, model)
 }
 
 fn array_destructuring_support_for_type(
     ty: &AnyTsType,
     model: &SemanticModel,
-    depth: usize,
 ) -> Option<bool> {
-    if depth >= 8 {
-        return None;
-    }
-
     match ty {
         AnyTsType::TsArrayType(_)
         | AnyTsType::TsTupleType(_)
@@ -292,11 +268,11 @@ fn array_destructuring_support_for_type(
         | AnyTsType::TsNonPrimitiveType(_) => Some(false),
         AnyTsType::TsParenthesizedType(node) => {
             let ty = node.ty().ok()?;
-            array_destructuring_support_for_type(&ty, model, depth + 1)
+            array_destructuring_support_for_type(&ty, model)
         }
         AnyTsType::TsTypeOperatorType(node) => {
             let ty = node.ty().ok()?;
-            array_destructuring_support_for_type(&ty, model, depth + 1)
+            array_destructuring_support_for_type(&ty, model)
         }
         AnyTsType::TsReferenceType(node) => {
             let name = node.name().ok()?;
@@ -317,7 +293,7 @@ fn array_destructuring_support_for_type(
                 }
 
                 let declaration = model.binding(reference)?.tree().declaration()?;
-                return array_destructuring_support_for_declaration(&declaration, model, depth + 1);
+                return array_destructuring_support_for_declaration(&declaration, model);
             }
 
             None
