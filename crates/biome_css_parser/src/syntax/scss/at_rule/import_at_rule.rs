@@ -1,8 +1,8 @@
 use crate::parser::CssParser;
 use crate::syntax::at_rule::media::{is_at_any_media_query, parse_any_media_query};
 use crate::syntax::at_rule::{
-    expected_media_query, is_at_import_url, is_nth_at_import_url,
-    parse_import_non_media_modifiers, parse_import_url,
+    expected_media_query, is_at_import_url, is_nth_at_import_url, parse_import_non_media_modifiers,
+    parse_import_url,
 };
 use crate::syntax::parse_error::expected_string;
 use crate::syntax::value::url::is_at_url_function;
@@ -14,7 +14,7 @@ use biome_parser::parse_recovery::{ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax::Present;
 use biome_parser::prelude::ParsedSyntax::Absent;
 use biome_parser::prelude::*;
-use biome_parser::{token_set, TokenSet};
+use biome_parser::{TokenSet, token_set};
 
 const SCSS_IMPORT_ITEM_LIST_END_SET: TokenSet<CssSyntaxKind> = token_set![T![;]];
 const SCSS_IMPORT_ITEM_LIST_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![T![,], T![;]];

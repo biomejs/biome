@@ -79,9 +79,8 @@ use crate::syntax::scss::{
     parse_scss_each_at_rule, parse_scss_error_at_rule, parse_scss_extend_at_rule,
     parse_scss_for_at_rule, parse_scss_forward_at_rule, parse_scss_function_at_rule,
     parse_scss_if_at_rule, parse_scss_import_at_rule, parse_scss_include_at_rule,
-    parse_scss_mixin_at_rule,
-    parse_scss_return_at_rule, parse_scss_use_at_rule, parse_scss_warn_at_rule,
-    parse_scss_while_at_rule,
+    parse_scss_mixin_at_rule, parse_scss_return_at_rule, parse_scss_use_at_rule,
+    parse_scss_warn_at_rule, parse_scss_while_at_rule,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;

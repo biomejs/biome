@@ -23,6 +23,14 @@ impl FormatNodeRule<ScssExtendAtRule> for FormatScssExtendAtRule {
             Ok(())
         });
 
-        write!(f, [extend_token.format(), space(), group(&target), semicolon_token.format()])
+        write!(
+            f,
+            [
+                extend_token.format(),
+                space(),
+                group(&target),
+                semicolon_token.format()
+            ]
+        )
     }
 }
