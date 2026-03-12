@@ -685,6 +685,7 @@ AnyCssAtRule =
 	| CssFunctionAtRule
 	// SCSS at rules
 	| ScssEachAtRule
+	| ScssAtRootAtRule
 	| ScssExtendAtRule
 	| ScssForAtRule
 	| ScssFunctionAtRule
@@ -2696,6 +2697,34 @@ ScssExtendAtRule =
 	CssSelectorList
 	optional_modifier: ScssExtendOptionalModifier?
 	';'
+
+// @at-root { .root-only { color: red; } }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+// @at-root .root-only { color: red; }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+// @at-root (without: media supports) { .root-only { color: red; } }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssAtRootAtRule =
+	'at-root'
+	query: ScssAtRootQuery?
+	selector: ScssAtRootSelector?
+	block: CssDeclarationOrRuleBlock
+
+// (without: media supports)
+// ^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssAtRootQuery =
+	'('
+	modifier: ('with' | 'without')
+	':'
+	queries: ScssAtRootQueryList
+	')'
+
+ScssAtRootQueryList = AnyCssCustomIdentifier*
+
+// .root-only, .another-root
+// ^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssAtRootSelector =
+	selector: CssSelectorList
 
 // !optional
 // ^^^^^^^^^

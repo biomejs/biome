@@ -9,12 +9,12 @@ mod token_sets;
 mod value;
 
 pub(crate) use at_rule::{
-    parse_bogus_scss_else_at_rule, parse_scss_content_at_rule, parse_scss_debug_at_rule,
-    parse_scss_each_at_rule, parse_scss_error_at_rule, parse_scss_extend_at_rule,
-    parse_scss_for_at_rule, parse_scss_forward_at_rule, parse_scss_function_at_rule,
-    parse_scss_if_at_rule, parse_scss_import_at_rule, parse_scss_include_at_rule,
-    parse_scss_mixin_at_rule, parse_scss_return_at_rule, parse_scss_use_at_rule,
-    parse_scss_warn_at_rule, parse_scss_while_at_rule,
+    parse_bogus_scss_else_at_rule, parse_scss_at_root_at_rule, parse_scss_content_at_rule,
+    parse_scss_debug_at_rule, parse_scss_each_at_rule, parse_scss_error_at_rule,
+    parse_scss_extend_at_rule, parse_scss_for_at_rule, parse_scss_forward_at_rule,
+    parse_scss_function_at_rule, parse_scss_if_at_rule, parse_scss_import_at_rule,
+    parse_scss_include_at_rule, parse_scss_mixin_at_rule, parse_scss_return_at_rule,
+    parse_scss_use_at_rule, parse_scss_warn_at_rule, parse_scss_while_at_rule,
 };
 pub(crate) use declaration::{
     is_at_scss_declaration, is_at_scss_nesting_declaration, is_at_scss_variable_modifier_start,

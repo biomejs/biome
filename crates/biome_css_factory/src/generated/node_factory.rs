@@ -3068,6 +3068,70 @@ pub fn scss_arbitrary_argument(
         ],
     ))
 }
+pub fn scss_at_root_at_rule(
+    at_root_token: SyntaxToken,
+    block: CssDeclarationOrRuleBlock,
+) -> ScssAtRootAtRuleBuilder {
+    ScssAtRootAtRuleBuilder {
+        at_root_token,
+        block,
+        query: None,
+        selector: None,
+    }
+}
+pub struct ScssAtRootAtRuleBuilder {
+    at_root_token: SyntaxToken,
+    block: CssDeclarationOrRuleBlock,
+    query: Option<ScssAtRootQuery>,
+    selector: Option<ScssAtRootSelector>,
+}
+impl ScssAtRootAtRuleBuilder {
+    pub fn with_query(mut self, query: ScssAtRootQuery) -> Self {
+        self.query = Some(query);
+        self
+    }
+    pub fn with_selector(mut self, selector: ScssAtRootSelector) -> Self {
+        self.selector = Some(selector);
+        self
+    }
+    pub fn build(self) -> ScssAtRootAtRule {
+        ScssAtRootAtRule::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::SCSS_AT_ROOT_AT_RULE,
+            [
+                Some(SyntaxElement::Token(self.at_root_token)),
+                self.query
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.selector
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.block.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn scss_at_root_query(
+    l_paren_token: SyntaxToken,
+    modifier_token: SyntaxToken,
+    colon_token: SyntaxToken,
+    queries: ScssAtRootQueryList,
+    r_paren_token: SyntaxToken,
+) -> ScssAtRootQuery {
+    ScssAtRootQuery::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_AT_ROOT_QUERY,
+        [
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Token(modifier_token)),
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Node(queries.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn scss_at_root_selector(selector: CssSelectorList) -> ScssAtRootSelector {
+    ScssAtRootSelector::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_AT_ROOT_SELECTOR,
+        [Some(SyntaxElement::Node(selector.into_syntax()))],
+    ))
+}
 pub fn scss_binary_expression(
     left: AnyScssExpression,
     operator_token: SyntaxToken,
@@ -4883,6 +4947,18 @@ where
                 Some(separators.next()?.into())
             }
         }),
+    ))
+}
+pub fn scss_at_root_query_list<I>(items: I) -> ScssAtRootQueryList
+where
+    I: IntoIterator<Item = AnyCssCustomIdentifier>,
+    I::IntoIter: ExactSizeIterator,
+{
+    ScssAtRootQueryList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_AT_ROOT_QUERY_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
     ))
 }
 pub fn scss_each_binding_list<I, S>(items: I, separators: S) -> ScssEachBindingList
