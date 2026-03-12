@@ -259,6 +259,7 @@ pub fn read_config(
         ConfigurationPathHint::FromLsp(path) => path.clone(),
         ConfigurationPathHint::FromWorkspace(path) => path.clone(),
         ConfigurationPathHint::FromUser(path) => path.clone(),
+        ConfigurationPathHint::FromUserExternal(path) => path.clone(),
         ConfigurationPathHint::None => fs.working_directory().unwrap_or_default(),
     };
 
@@ -267,7 +268,8 @@ pub fn read_config(
     let configuration_directory = match path_hint {
         ConfigurationPathHint::FromLsp(path) => path,
         ConfigurationPathHint::FromWorkspace(path) => path,
-        ConfigurationPathHint::FromUser(ref config_file_path) => {
+        ConfigurationPathHint::FromUser(ref config_file_path)
+        | ConfigurationPathHint::FromUserExternal(ref config_file_path) => {
             // If the configuration path hint is from the user, we'll load it
             // directly.
             return load_user_config(fs, config_file_path, external_resolution_base_path);
