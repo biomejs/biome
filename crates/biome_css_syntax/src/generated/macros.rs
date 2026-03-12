@@ -943,6 +943,18 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::ScssArbitraryArgument::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::SCSS_AT_ROOT_AT_RULE => {
+                    let $pattern = unsafe { $crate::ScssAtRootAtRule::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_AT_ROOT_QUERY => {
+                    let $pattern = unsafe { $crate::ScssAtRootQuery::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_AT_ROOT_SELECTOR => {
+                    let $pattern = unsafe { $crate::ScssAtRootSelector::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::SCSS_BINARY_EXPRESSION => {
                     let $pattern = unsafe { $crate::ScssBinaryExpression::new_unchecked(node) };
                     $body
@@ -1495,6 +1507,10 @@ macro_rules! map_syntax_node {
                 $crate::CssSyntaxKind::CSS_VALUE_AT_RULE_PROPERTY_LIST => {
                     let $pattern =
                         unsafe { $crate::CssValueAtRulePropertyList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_AT_ROOT_QUERY_LIST => {
+                    let $pattern = unsafe { $crate::ScssAtRootQueryList::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::SCSS_EACH_BINDING_LIST => {

@@ -33,6 +33,7 @@ impl FormatRule<AnyCssAtRule> for FormatAnyCssAtRule {
             AnyCssAtRule::CssUnknownValueAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssValueAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssViewTransitionAtRule(node) => node.format().fmt(f),
+            AnyCssAtRule::ScssAtRootAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::ScssContentAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::ScssDebugAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::ScssEachAtRule(node) => node.format().fmt(f),

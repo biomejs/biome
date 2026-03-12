@@ -613,6 +613,7 @@ fn at_rule_name(rule: &AnyCssAtRule) -> Option<&'static str> {
         | AnyCssAtRule::TwThemeAtRule(_)
         | AnyCssAtRule::TwUtilityAtRule(_)
         | AnyCssAtRule::ScssContentAtRule(_)
+        | AnyCssAtRule::ScssAtRootAtRule(_)
         | AnyCssAtRule::ScssDebugAtRule(_)
         | AnyCssAtRule::ScssEachAtRule(_)
         | AnyCssAtRule::ScssErrorAtRule(_)
