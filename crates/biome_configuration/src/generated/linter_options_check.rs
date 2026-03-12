@@ -1,5 +1,6 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
+#[expect(clippy::vec-init-then-push)]
 use std::any::TypeId;
 
 /// Returns a list of `(group, rule, config_side_type_id)` for every lint rule.
