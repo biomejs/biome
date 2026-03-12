@@ -3,12 +3,10 @@ use crate::parser::CssParser;
 use crate::syntax::block::parse_declaration_or_rule_list_block;
 use crate::syntax::parse_error::expected_identifier;
 use crate::syntax::selector::SelectorList;
-use crate::syntax::{
-    is_at_identifier, parse_custom_identifier, parse_regular_identifier,
-};
+use crate::syntax::{is_at_identifier, parse_custom_identifier, parse_regular_identifier};
 use biome_css_syntax::CssSyntaxKind::{
-    CSS_BOGUS_CUSTOM_IDENTIFIER, SCSS_AT_ROOT_AT_RULE, SCSS_AT_ROOT_QUERY,
-    SCSS_AT_ROOT_QUERY_LIST, SCSS_AT_ROOT_SELECTOR,
+    CSS_BOGUS_CUSTOM_IDENTIFIER, SCSS_AT_ROOT_AT_RULE, SCSS_AT_ROOT_QUERY, SCSS_AT_ROOT_QUERY_LIST,
+    SCSS_AT_ROOT_SELECTOR,
 };
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::diagnostic::expected_any;
