@@ -3,9 +3,6 @@
 	var foo = array[0];
 }
 {
-	foo = array[0];
-}
-{
 	var foo = object.foo;
 }
 {
@@ -28,12 +25,6 @@
 }
 {
 	var foo = object['foo'];
-}
-{
-	foo = object.foo;
-}
-{
-	foo = object['foo'];
 }
 {
 	class Foo extends Bar {

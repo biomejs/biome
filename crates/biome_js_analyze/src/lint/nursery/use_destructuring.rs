@@ -1,13 +1,13 @@
-use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
-};
+use crate::services::semantic::Semantic;
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
+use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsAssignment, AnyJsAssignmentPattern, AnyJsBinding, AnyJsBindingPattern, AnyJsExpression,
-    AnyJsLiteralExpression, AnyJsName, JsAssignmentExpression, JsAssignmentOperator,
-    JsVariableDeclaration, JsVariableDeclarator,
+    AnyJsBinding, AnyJsBindingPattern, AnyJsExpression, AnyJsLiteralExpression, AnyJsName,
+    AnyTsType, JsVariableDeclaration, JsVariableDeclarator, TsTypeAnnotation,
+    binding_ext::AnyJsBindingDeclaration,
 };
-use biome_rowan::{AstNode, declare_node_union};
+use biome_rowan::AstNode;
 use biome_rule_options::use_destructuring::UseDestructuringOptions;
 
 declare_lint_rule! {
@@ -54,58 +54,33 @@ declare_lint_rule! {
 }
 
 impl Rule for UseDestructuring {
-    type Query = Ast<UseDestructuringQuery>;
+    type Query = Semantic<JsVariableDeclarator>;
     type State = UseDestructuringState;
     type Signals = Option<Self::State>;
     type Options = UseDestructuringOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let query = ctx.query();
-
-        match query {
-            UseDestructuringQuery::JsAssignmentExpression(node) => {
-                let op = node.operator().ok()?;
-                if op != JsAssignmentOperator::Assign {
-                    return None;
-                }
-                let left = node.left().ok()?;
-                let right = node.right().ok()?;
-
-                if let AnyJsAssignmentPattern::AnyJsAssignment(
-                    AnyJsAssignment::JsIdentifierAssignment(expr),
-                ) = left
-                {
-                    let ident = expr.name_token().ok()?;
-                    return should_suggest_destructuring(ident.text_trimmed(), &right);
-                }
-
-                None
-            }
-            UseDestructuringQuery::JsVariableDeclarator(node) => {
-                let initializer = node.initializer()?;
-                let declaration = JsVariableDeclaration::cast(node.syntax().parent()?.parent()?)?;
-                let has_await_using = declaration.await_token().is_some();
-                if declaration.kind().ok()?.text_trimmed() == "using" || has_await_using {
-                    return None;
-                }
-
-                if node.variable_annotation().is_some() {
-                    return None;
-                }
-
-                let left = node.id().ok()?;
-                let right = initializer.expression().ok()?;
-
-                if let AnyJsBindingPattern::AnyJsBinding(AnyJsBinding::JsIdentifierBinding(expr)) =
-                    left
-                {
-                    let ident = expr.name_token().ok()?;
-                    return should_suggest_destructuring(ident.text_trimmed(), &right);
-                }
-
-                None
-            }
+        let node = ctx.query();
+        let initializer = node.initializer()?;
+        let declaration = JsVariableDeclaration::cast(node.syntax().parent()?.parent()?)?;
+        let has_await_using = declaration.await_token().is_some();
+        if declaration.kind().ok()?.text_trimmed() == "using" || has_await_using {
+            return None;
         }
+
+        if node.variable_annotation().is_some() {
+            return None;
+        }
+
+        let left = node.id().ok()?;
+        let right = initializer.expression().ok()?;
+
+        if let AnyJsBindingPattern::AnyJsBinding(AnyJsBinding::JsIdentifierBinding(expr)) = left {
+            let ident = expr.name_token().ok()?;
+            return should_suggest_destructuring(ident.text_trimmed(), &right, ctx.model());
+        }
+
+        None
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -149,13 +124,10 @@ impl Rule for UseDestructuring {
     }
 }
 
-declare_node_union! {
-    pub UseDestructuringQuery = JsVariableDeclarator |  JsAssignmentExpression
-}
-
 fn should_suggest_destructuring(
     left: &str,
     right: &AnyJsExpression,
+    model: &SemanticModel,
 ) -> Option<UseDestructuringState> {
     match right {
         AnyJsExpression::JsComputedMemberExpression(expr) => {
@@ -164,12 +136,14 @@ fn should_suggest_destructuring(
             }
 
             let member = expr.member().ok()?;
-            if let AnyJsExpression::AnyJsLiteralExpression(expr) = member {
-                if matches!(expr, AnyJsLiteralExpression::JsNumberLiteralExpression(_)) {
-                    return Some(UseDestructuringState::Array);
+            if let AnyJsExpression::AnyJsLiteralExpression(lit) = member {
+                if matches!(lit, AnyJsLiteralExpression::JsNumberLiteralExpression(_)) {
+                    let object = expr.object().ok()?;
+                    return supports_array_destructuring(&object, model)
+                        .then_some(UseDestructuringState::Array);
                 }
 
-                let value = expr.value_token().ok()?;
+                let value = lit.value_token().ok()?;
 
                 if left == value.text_trimmed() {
                     return Some(UseDestructuringState::Object);
@@ -201,4 +175,153 @@ fn should_suggest_destructuring(
 pub enum UseDestructuringState {
     Object,
     Array,
+}
+
+fn supports_array_destructuring(object: &AnyJsExpression, model: &SemanticModel) -> bool {
+    !matches!(
+        array_destructuring_support_for_expression(object, model, 0),
+        Some(false)
+    )
+}
+
+fn array_destructuring_support_for_expression(
+    object: &AnyJsExpression,
+    model: &SemanticModel,
+    depth: usize,
+) -> Option<bool> {
+    if depth >= 8 {
+        return None;
+    }
+
+    match object.clone().omit_parentheses() {
+        AnyJsExpression::JsArrayExpression(_) => Some(true),
+        AnyJsExpression::JsIdentifierExpression(expr) => {
+            let reference = expr.name().ok()?;
+            let declaration = model.binding(&reference)?.tree().declaration()?;
+            array_destructuring_support_for_declaration(&declaration, model, depth + 1)
+        }
+        _ => None,
+    }
+}
+
+fn array_destructuring_support_for_declaration(
+    declaration: &AnyJsBindingDeclaration,
+    model: &SemanticModel,
+    depth: usize,
+) -> Option<bool> {
+    if depth >= 8 {
+        return None;
+    }
+
+    match declaration {
+        AnyJsBindingDeclaration::JsVariableDeclarator(node) => {
+            if let Some(annotation) = node.variable_annotation() {
+                if let Some(annotation) = annotation.as_ts_type_annotation() {
+                    return array_destructuring_support_for_type_annotation(
+                        annotation,
+                        model,
+                        depth + 1,
+                    );
+                }
+            }
+
+            let initializer = node.initializer()?.expression().ok()?;
+            array_destructuring_support_for_expression(&initializer, model, depth + 1)
+        }
+        AnyJsBindingDeclaration::JsFormalParameter(node) => {
+            let annotation = node.type_annotation()?;
+            array_destructuring_support_for_type_annotation(&annotation, model, depth + 1)
+        }
+        AnyJsBindingDeclaration::TsPropertyParameter(node) => {
+            let annotation = node
+                .formal_parameter()
+                .ok()?
+                .as_js_formal_parameter()?
+                .type_annotation()?;
+            array_destructuring_support_for_type_annotation(&annotation, model, depth + 1)
+        }
+        AnyJsBindingDeclaration::TsTypeAliasDeclaration(node) => {
+            let ty = node.ty().ok()?;
+            array_destructuring_support_for_type(&ty, model, depth + 1)
+        }
+        AnyJsBindingDeclaration::TsInterfaceDeclaration(_) => Some(false),
+        _ => None,
+    }
+}
+
+fn array_destructuring_support_for_type_annotation(
+    annotation: &TsTypeAnnotation,
+    model: &SemanticModel,
+    depth: usize,
+) -> Option<bool> {
+    if depth >= 8 {
+        return None;
+    }
+
+    let ty = annotation.ty().ok()?;
+    array_destructuring_support_for_type(&ty, model, depth + 1)
+}
+
+fn array_destructuring_support_for_type(
+    ty: &AnyTsType,
+    model: &SemanticModel,
+    depth: usize,
+) -> Option<bool> {
+    if depth >= 8 {
+        return None;
+    }
+
+    match ty {
+        AnyTsType::TsArrayType(_)
+        | AnyTsType::TsTupleType(_)
+        | AnyTsType::TsStringType(_)
+        | AnyTsType::TsStringLiteralType(_) => Some(true),
+        AnyTsType::TsObjectType(_)
+        | AnyTsType::TsBigintType(_)
+        | AnyTsType::TsBigintLiteralType(_)
+        | AnyTsType::TsBooleanType(_)
+        | AnyTsType::TsBooleanLiteralType(_)
+        | AnyTsType::TsNullLiteralType(_)
+        | AnyTsType::TsNumberType(_)
+        | AnyTsType::TsNumberLiteralType(_)
+        | AnyTsType::TsSymbolType(_)
+        | AnyTsType::TsUndefinedType(_)
+        | AnyTsType::TsUnknownType(_)
+        | AnyTsType::TsVoidType(_)
+        | AnyTsType::TsNeverType(_)
+        | AnyTsType::TsNonPrimitiveType(_) => Some(false),
+        AnyTsType::TsParenthesizedType(node) => {
+            let ty = node.ty().ok()?;
+            array_destructuring_support_for_type(&ty, model, depth + 1)
+        }
+        AnyTsType::TsTypeOperatorType(node) => {
+            let ty = node.ty().ok()?;
+            array_destructuring_support_for_type(&ty, model, depth + 1)
+        }
+        AnyTsType::TsReferenceType(node) => {
+            let name = node.name().ok()?;
+            if let Some(reference) = name.as_js_reference_identifier() {
+                let token = reference.value_token().ok()?;
+                let name = token.text_trimmed();
+                if matches!(
+                    name,
+                    "Array"
+                        | "ReadonlyArray"
+                        | "Iterable"
+                        | "IterableIterator"
+                        | "Iterator"
+                        | "Generator"
+                        | "String"
+                ) {
+                    return Some(true);
+                }
+
+                let declaration = model.binding(reference)?.tree().declaration()?;
+                return array_destructuring_support_for_declaration(&declaration, model, depth + 1);
+            }
+
+            None
+        }
+        _ => None,
+    }
 }

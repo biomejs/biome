@@ -23,3 +23,21 @@
 {
 	const y: number = x.y;
 }
+
+// Plain assignments are not valid destructuring refactors
+{
+	type SomeObj = { thing: number };
+
+	let thing: SomeObj;
+	const someObj: SomeObj = { thing: 5 };
+
+	thing = someObj.thing;
+}
+
+// Numeric index access should only suggest array destructuring for array-like values
+{
+	type NotArray = { [x: string]: string };
+
+	const first: NotArray = { "0": "string" };
+	const second = first[0];
+}

@@ -43,6 +43,15 @@
 	foo = bar[foo];
 }
 {
+	foo = array[0];
+}
+{
+	foo = object.foo;
+}
+{
+	foo = object['foo'];
+}
+{
 	var foo = bar[foo];
 }
 {
