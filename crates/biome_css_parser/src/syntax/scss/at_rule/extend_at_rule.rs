@@ -30,7 +30,7 @@ pub(crate) fn parse_scss_extend_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     p.bump(T![extend]);
 
-    let _ = parse_scss_extend_selector_list(p);
+    parse_scss_extend_selector_list(p).ok();
 
     // The `!optional` modifier is optional in the grammar, so `Absent` is valid here.
     parse_scss_extend_optional_modifier(p).ok();
