@@ -151,6 +151,7 @@ CssSubSelectorList = AnyCssSubSelector*
 AnyCssSimpleSelector =
 	CssUniversalSelector
 	| CssTypeSelector
+	| ScssPlaceholderSelector
 
 AnyCssSubSelector =
 	CssIdSelector
@@ -684,11 +685,13 @@ AnyCssAtRule =
 	| CssFunctionAtRule
 	// SCSS at rules
 	| ScssEachAtRule
+	| ScssExtendAtRule
 	| ScssForAtRule
 	| ScssFunctionAtRule
 	| ScssIfAtRule
 	| ScssContentAtRule
 	| ScssForwardAtRule
+	| ScssImportAtRule
 	| ScssIncludeAtRule
 	| ScssMixinAtRule
 	| ScssReturnAtRule
@@ -2660,6 +2663,46 @@ ScssHideClause =
 	'hide'
 	members: ScssModuleMemberList
 
+// @import "theme";
+// ^^^^^^^^^^^^^^^^
+// @import "rounded-corners", "text-shadow";
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssImportAtRule =
+	'import'
+	imports: ScssImportItemList
+	';'
+
+ScssImportItemList =
+	AnyScssImportItem (',' AnyScssImportItem)*
+
+AnyScssImportItem =
+	CssString
+	| ScssPlainImport
+
+// "theme.css" print
+// ^^^^^^^^^^^^^^^^^^
+ScssPlainImport =
+	url: AnyCssImportUrl
+	layer: AnyCssImportLayer?
+	supports: CssImportSupports?
+	media: CssMediaQueryList
+
+// @extend .message;
+// ^^^^^^^^^^^^^^^^^
+// @extend %toolbelt !optional;
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ScssExtendAtRule =
+	'extend'
+	CssSelectorList
+	optional_modifier: ScssExtendOptionalModifier?
+	';'
+
+// !optional
+// ^^^^^^^^^
+ScssExtendOptionalModifier =
+	'!'
+	'optional'
+
 // with ($primary: blue, $spacing: 4px)
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ScssWithClause =
@@ -2744,6 +2787,12 @@ ScssParameter =
 ScssParameterDefaultValue =
 	':'
 	value: ScssExpression
+
+// %toolbelt
+// ^^^^^^^^^
+ScssPlaceholderSelector =
+	'%'
+	name: CssCustomIdentifier
 
 // @if $theme == dark { color: white; } @else { color: black; }
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

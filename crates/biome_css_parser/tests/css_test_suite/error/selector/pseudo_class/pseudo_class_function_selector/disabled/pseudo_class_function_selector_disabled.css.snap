@@ -1,5 +1,6 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
 expression: snapshot
 ---
 
@@ -423,35 +424,31 @@ CssRoot {
                                     },
                                     L_PAREN@183..184 "(" [] [],
                                     CssComplexSelector {
-                                        left: CssComplexSelector {
-                                            left: CssCompoundSelector {
-                                                nesting_selectors: CssNestedSelectorList [],
-                                                simple_selector: missing (optional),
-                                                sub_selectors: CssSubSelectorList [
-                                                    CssClassSelector {
-                                                        dot_token: DOT@184..185 "." [] [],
-                                                        name: CssCustomIdentifier {
-                                                            value_token: IDENT@185..188 "div" [] [],
-                                                        },
+                                        left: CssCompoundSelector {
+                                            nesting_selectors: CssNestedSelectorList [],
+                                            simple_selector: missing (optional),
+                                            sub_selectors: CssSubSelectorList [
+                                                CssClassSelector {
+                                                    dot_token: DOT@184..185 "." [] [],
+                                                    name: CssCustomIdentifier {
+                                                        value_token: IDENT@185..188 "div" [] [],
                                                     },
-                                                ],
-                                            },
-                                            combinator: CSS_SPACE_LITERAL@188..189 " " [] [],
-                                            right: CssCompoundSelector {
-                                                nesting_selectors: CssNestedSelectorList [],
-                                                simple_selector: missing (optional),
-                                                sub_selectors: CssSubSelectorList [
-                                                    CssClassSelector {
-                                                        dot_token: DOT@189..190 "." [] [],
-                                                        name: CssCustomIdentifier {
-                                                            value_token: IDENT@190..195 "class" [] [],
-                                                        },
-                                                    },
-                                                ],
-                                            },
+                                                },
+                                            ],
                                         },
-                                        combinator: CSS_SPACE_LITERAL@195..196 "\n" [] [],
-                                        right: missing (required),
+                                        combinator: CSS_SPACE_LITERAL@188..189 " " [] [],
+                                        right: CssCompoundSelector {
+                                            nesting_selectors: CssNestedSelectorList [],
+                                            simple_selector: missing (optional),
+                                            sub_selectors: CssSubSelectorList [
+                                                CssClassSelector {
+                                                    dot_token: DOT@189..190 "." [] [],
+                                                    name: CssCustomIdentifier {
+                                                        value_token: IDENT@190..195 "class" [] [],
+                                                    },
+                                                },
+                                            ],
+                                        },
                                     },
                                 ],
                             },
@@ -464,7 +461,7 @@ CssRoot {
             },
         },
     ],
-    eof_token: EOF@196..196 "" [] [],
+    eof_token: EOF@195..196 "" [Newline("\n")] [],
 }
 ```
 
@@ -473,7 +470,7 @@ CssRoot {
 ```
 0: CSS_ROOT@0..196
   0: (empty)
-  1: CSS_ROOT_ITEM_LIST@0..196
+  1: CSS_ROOT_ITEM_LIST@0..195
     0: CSS_QUALIFIED_RULE@0..22
       0: CSS_SELECTOR_LIST@0..20
         0: CSS_COMPOUND_SELECTOR@0..20
@@ -720,41 +717,38 @@ CssRoot {
         0: L_CURLY@173..174 "{" [] []
         1: CSS_DECLARATION_OR_RULE_LIST@174..174
         2: R_CURLY@174..175 "}" [] []
-    8: CSS_QUALIFIED_RULE@175..196
-      0: CSS_SELECTOR_LIST@175..196
-        0: CSS_COMPOUND_SELECTOR@175..196
+    8: CSS_QUALIFIED_RULE@175..195
+      0: CSS_SELECTOR_LIST@175..195
+        0: CSS_COMPOUND_SELECTOR@175..195
           0: CSS_NESTED_SELECTOR_LIST@175..175
           1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@175..196
-            0: CSS_PSEUDO_CLASS_SELECTOR@175..196
+          2: CSS_SUB_SELECTOR_LIST@175..195
+            0: CSS_PSEUDO_CLASS_SELECTOR@175..195
               0: COLON@175..177 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@177..196
+              1: CSS_BOGUS_PSEUDO_CLASS@177..195
                 0: CSS_IDENTIFIER@177..183
                   0: IDENT@177..183 "global" [] []
                 1: L_PAREN@183..184 "(" [] []
-                2: CSS_COMPLEX_SELECTOR@184..196
-                  0: CSS_COMPLEX_SELECTOR@184..195
-                    0: CSS_COMPOUND_SELECTOR@184..188
-                      0: CSS_NESTED_SELECTOR_LIST@184..184
-                      1: (empty)
-                      2: CSS_SUB_SELECTOR_LIST@184..188
-                        0: CSS_CLASS_SELECTOR@184..188
-                          0: DOT@184..185 "." [] []
-                          1: CSS_CUSTOM_IDENTIFIER@185..188
-                            0: IDENT@185..188 "div" [] []
-                    1: CSS_SPACE_LITERAL@188..189 " " [] []
-                    2: CSS_COMPOUND_SELECTOR@189..195
-                      0: CSS_NESTED_SELECTOR_LIST@189..189
-                      1: (empty)
-                      2: CSS_SUB_SELECTOR_LIST@189..195
-                        0: CSS_CLASS_SELECTOR@189..195
-                          0: DOT@189..190 "." [] []
-                          1: CSS_CUSTOM_IDENTIFIER@190..195
-                            0: IDENT@190..195 "class" [] []
-                  1: CSS_SPACE_LITERAL@195..196 "\n" [] []
-                  2: (empty)
-      1: CSS_BOGUS_BLOCK@196..196
-  2: EOF@196..196 "" [] []
+                2: CSS_COMPLEX_SELECTOR@184..195
+                  0: CSS_COMPOUND_SELECTOR@184..188
+                    0: CSS_NESTED_SELECTOR_LIST@184..184
+                    1: (empty)
+                    2: CSS_SUB_SELECTOR_LIST@184..188
+                      0: CSS_CLASS_SELECTOR@184..188
+                        0: DOT@184..185 "." [] []
+                        1: CSS_CUSTOM_IDENTIFIER@185..188
+                          0: IDENT@185..188 "div" [] []
+                  1: CSS_SPACE_LITERAL@188..189 " " [] []
+                  2: CSS_COMPOUND_SELECTOR@189..195
+                    0: CSS_NESTED_SELECTOR_LIST@189..189
+                    1: (empty)
+                    2: CSS_SUB_SELECTOR_LIST@189..195
+                      0: CSS_CLASS_SELECTOR@189..195
+                        0: DOT@189..190 "." [] []
+                        1: CSS_CUSTOM_IDENTIFIER@190..195
+                          0: IDENT@190..195 "class" [] []
+      1: CSS_BOGUS_BLOCK@195..195
+  2: EOF@195..196 "" [Newline("\n")] []
 
 ```
 
@@ -870,8 +864,7 @@ pseudo_class_function_selector_disabled.css:9:2 parse ━━━━━━━━�
      8 │ :global(.div .class {}
    > 9 │ :global(.div .class
        │  ^^^^^^^^^^^^^^^^^^
-  > 10 │ 
-       │ 
+    10 │ 
   
   i You can enable `:local` and `:global` pseudo-class parsing by setting the `css.parser.cssModules` option to `true` in your configuration file.
   
