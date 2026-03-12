@@ -28,7 +28,7 @@
 {
 	type SomeObj = { thing: number };
 
-	let thing: SomeObj;
+	let thing: number;
 	const someObj: SomeObj = { thing: 5 };
 
 	thing = someObj.thing;
