@@ -41,3 +41,12 @@
 	const first: NotArray = { "0": "string" };
 	const second = first[0];
 }
+
+// Cyclic aliases should not recurse indefinitely while checking array-like support
+{
+	type CyclicA = CyclicB;
+	type CyclicB = CyclicA;
+
+	const arr: CyclicA = [];
+	const first = arr[0];
+}

@@ -7,8 +7,9 @@ use biome_js_syntax::{
     AnyTsType, JsVariableDeclaration, JsVariableDeclarator, TsTypeAnnotation,
     binding_ext::AnyJsBindingDeclaration,
 };
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::use_destructuring::UseDestructuringOptions;
+use std::collections::HashSet;
 
 declare_lint_rule! {
     /// Require destructuring from arrays and/or objects
@@ -178,8 +179,9 @@ pub enum UseDestructuringState {
 }
 
 fn supports_array_destructuring(object: &AnyJsExpression, model: &SemanticModel) -> bool {
+    let mut visited = HashSet::<TextRange>::new();
     !matches!(
-        array_destructuring_support_for_expression(object, model),
+        array_destructuring_support_for_expression(object, model, &mut visited),
         Some(false)
     )
 }
@@ -187,13 +189,14 @@ fn supports_array_destructuring(object: &AnyJsExpression, model: &SemanticModel)
 fn array_destructuring_support_for_expression(
     object: &AnyJsExpression,
     model: &SemanticModel,
+    visited: &mut HashSet<TextRange>,
 ) -> Option<bool> {
     match object.clone().omit_parentheses() {
         AnyJsExpression::JsArrayExpression(_) => Some(true),
         AnyJsExpression::JsIdentifierExpression(expr) => {
             let reference = expr.name().ok()?;
             let declaration = model.binding(&reference)?.tree().declaration()?;
-            array_destructuring_support_for_declaration(&declaration, model)
+            array_destructuring_support_for_declaration(&declaration, model, visited)
         }
         _ => None,
     }
@@ -202,21 +205,24 @@ fn array_destructuring_support_for_expression(
 fn array_destructuring_support_for_declaration(
     declaration: &AnyJsBindingDeclaration,
     model: &SemanticModel,
+    visited: &mut HashSet<TextRange>,
 ) -> Option<bool> {
     match declaration {
         AnyJsBindingDeclaration::JsVariableDeclarator(node) => {
             if let Some(annotation) = node.variable_annotation() {
                 if let Some(annotation) = annotation.as_ts_type_annotation() {
-                    return array_destructuring_support_for_type_annotation(annotation, model);
+                    return array_destructuring_support_for_type_annotation(
+                        annotation, model, visited,
+                    );
                 }
             }
 
             let initializer = node.initializer()?.expression().ok()?;
-            array_destructuring_support_for_expression(&initializer, model)
+            array_destructuring_support_for_expression(&initializer, model, visited)
         }
         AnyJsBindingDeclaration::JsFormalParameter(node) => {
             let annotation = node.type_annotation()?;
-            array_destructuring_support_for_type_annotation(&annotation, model)
+            array_destructuring_support_for_type_annotation(&annotation, model, visited)
         }
         AnyJsBindingDeclaration::TsPropertyParameter(node) => {
             let annotation = node
@@ -224,11 +230,15 @@ fn array_destructuring_support_for_declaration(
                 .ok()?
                 .as_js_formal_parameter()?
                 .type_annotation()?;
-            array_destructuring_support_for_type_annotation(&annotation, model)
+            array_destructuring_support_for_type_annotation(&annotation, model, visited)
         }
         AnyJsBindingDeclaration::TsTypeAliasDeclaration(node) => {
+            let range = node.range();
+            if !visited.insert(range) {
+                return Some(false);
+            }
             let ty = node.ty().ok()?;
-            array_destructuring_support_for_type(&ty, model)
+            array_destructuring_support_for_type(&ty, model, visited)
         }
         AnyJsBindingDeclaration::TsInterfaceDeclaration(_) => Some(false),
         _ => None,
@@ -238,14 +248,16 @@ fn array_destructuring_support_for_declaration(
 fn array_destructuring_support_for_type_annotation(
     annotation: &TsTypeAnnotation,
     model: &SemanticModel,
+    visited: &mut HashSet<TextRange>,
 ) -> Option<bool> {
     let ty = annotation.ty().ok()?;
-    array_destructuring_support_for_type(&ty, model)
+    array_destructuring_support_for_type(&ty, model, visited)
 }
 
 fn array_destructuring_support_for_type(
     ty: &AnyTsType,
     model: &SemanticModel,
+    visited: &mut HashSet<TextRange>,
 ) -> Option<bool> {
     match ty {
         AnyTsType::TsArrayType(_)
@@ -268,13 +280,17 @@ fn array_destructuring_support_for_type(
         | AnyTsType::TsNonPrimitiveType(_) => Some(false),
         AnyTsType::TsParenthesizedType(node) => {
             let ty = node.ty().ok()?;
-            array_destructuring_support_for_type(&ty, model)
+            array_destructuring_support_for_type(&ty, model, visited)
         }
         AnyTsType::TsTypeOperatorType(node) => {
             let ty = node.ty().ok()?;
-            array_destructuring_support_for_type(&ty, model)
+            array_destructuring_support_for_type(&ty, model, visited)
         }
         AnyTsType::TsReferenceType(node) => {
+            let range = node.range();
+            if !visited.insert(range) {
+                return Some(false);
+            }
             let name = node.name().ok()?;
             if let Some(reference) = name.as_js_reference_identifier() {
                 let token = reference.value_token().ok()?;
@@ -293,7 +309,7 @@ fn array_destructuring_support_for_type(
                 }
 
                 let declaration = model.binding(reference)?.tree().declaration()?;
-                return array_destructuring_support_for_declaration(&declaration, model);
+                return array_destructuring_support_for_declaration(&declaration, model, visited);
             }
 
             None
