@@ -3589,6 +3589,22 @@ impl ScssIncludeAtRuleBuilder {
         ))
     }
 }
+pub fn scss_interpolation(
+    hash_token: SyntaxToken,
+    l_curly_token: SyntaxToken,
+    value: AnyScssExpression,
+    r_curly_token: SyntaxToken,
+) -> ScssInterpolation {
+    ScssInterpolation::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_INTERPOLATION,
+        [
+            Some(SyntaxElement::Token(hash_token)),
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
 pub fn scss_keyword_argument(
     name: ScssIdentifier,
     colon_token: SyntaxToken,

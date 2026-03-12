@@ -7979,6 +7979,44 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssIncludeAtRule {
         )
     }
 }
+impl FormatRule<biome_css_syntax::ScssInterpolation>
+    for crate::scss::auxiliary::interpolation::FormatScssInterpolation
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssInterpolation,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssInterpolation>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssInterpolation {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssInterpolation,
+        crate::scss::auxiliary::interpolation::FormatScssInterpolation,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::auxiliary::interpolation::FormatScssInterpolation::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssInterpolation {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssInterpolation,
+        crate::scss::auxiliary::interpolation::FormatScssInterpolation,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::auxiliary::interpolation::FormatScssInterpolation::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::ScssKeywordArgument>
     for crate::scss::auxiliary::keyword_argument::FormatScssKeywordArgument
 {
