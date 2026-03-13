@@ -1,9 +1,13 @@
 use crate::services::module_graph::ResolvedImports;
 use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_js_syntax::{AnyJsxAttributeValue, JsxAttribute, JsxString};
+use biome_js_semantic::SemanticModel;
+use biome_js_syntax::{
+    AnyJsArrayElement, AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression,
+    AnyJsObjectMember, AnyJsxAttributeValue, JsxAttribute, binding_ext::AnyJsBindingDeclaration,
+};
 use biome_module_graph::{ImportTreeDisplay, ImportTreeNode};
-use biome_rowan::{TextRange, TextSize, TokenText};
+use biome_rowan::{AstNode, AstSeparatedList, TextRange, TextSize};
 use biome_rule_options::no_undeclared_classes::NoUndeclaredClassesOptions;
 
 declare_lint_rule! {
@@ -14,8 +18,10 @@ declare_lint_rule! {
     /// attributes is checked against the available class definitions. Classes that are not
     /// defined are reported.
     ///
-    /// This rule only applies to string literals. Dynamic class names (template strings,
-    /// expressions, computed values) are not checked.
+    /// This rule checks string literals, variable references (resolved through the semantic
+    /// model), call expressions like `clsx(...)` / `classnames(...)`, object expression keys,
+    /// and array expressions. Dynamic class names that cannot be statically resolved are
+    /// silently skipped.
     ///
     /// ## Examples
     ///
@@ -51,50 +57,42 @@ impl Rule for NoUndeclaredClasses {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let attr = ctx.query();
+        let semantic_model = ctx
+            .get_service::<SemanticModel>()
+            .expect("Semantic service not available");
 
-        let Some(class_data) = extract_class_attribute(attr) else {
+        let class_entries = extract_class_entries(attr, &semantic_model);
+        if class_entries.is_empty() {
             return Vec::new();
-        };
+        }
 
         let module_graph = ctx.module_graph();
         let file_path = ctx.file_path();
 
-        // Check each class name in the attribute value
         let mut signals = Vec::new();
-        let mut offset: u32 = 0;
 
-        for class_name in class_data.inner_text.split_ascii_whitespace() {
-            // Find where this class name starts within the inner text
-            let class_offset = class_data.inner_text[offset as usize..]
-                .find(class_name)
-                .map_or(offset, |o| offset + o as u32);
-
-            // Lazily check if this class exists in any CSS file using the minimal iterator
+        for entry in &class_entries {
+            // Lazily check if this class exists in any CSS file
             let mut found_class = false;
             for step in module_graph.traverse_import_tree_for_classes(file_path) {
                 if step
                     .css_classes
                     .iter()
-                    .any(|token| token.text() == class_name)
+                    .any(|token| token.text() == entry.name.as_ref())
                 {
                     found_class = true;
-                    break; // Early termination - found the class!
+                    break;
                 }
             }
 
-            // Only if class NOT found, build diagnostic with import tree
             if !found_class {
                 let import_tree = module_graph.build_import_tree(file_path);
-                let start = TextSize::from(class_data.inner_file_start + class_offset);
-                let end = start + TextSize::from(class_name.len() as u32);
                 signals.push(UndeclaredClass {
-                    range: TextRange::new(start, end),
-                    name: class_name.to_string(),
+                    range: entry.range,
+                    name: entry.name.clone(),
                     import_tree,
                 });
             }
-
-            offset = class_offset + class_name.len() as u32;
         }
 
         signals
@@ -132,19 +130,31 @@ pub struct UndeclaredClass {
     /// Range of this class name token within the source file.
     pub range: TextRange,
     /// The class name that was not found.
-    pub name: String,
+    pub name: Box<str>,
     /// The import tree structure for displaying which files/CSS were checked.
     pub import_tree: Option<ImportTreeNode>,
 }
 
-/// Helper to extract class attribute data needed for analysis.
-struct ClassAttributeData {
-    inner_text: TokenText,
-    inner_file_start: u32,
+/// A single class name occurrence found in the source code, with its range.
+struct ClassNameEntry {
+    /// Range pointing to this class name in the source file.
+    range: TextRange,
+    /// The class name text.
+    name: Box<str>,
 }
 
-/// Extracts className or class attribute value and position if this is a valid class attribute.
-fn extract_class_attribute(attr: &JsxAttribute) -> Option<ClassAttributeData> {
+/// Extracts all statically-resolvable class names from a JSX `className` or `class` attribute.
+fn extract_class_entries(attr: &JsxAttribute, model: &SemanticModel) -> Vec<ClassNameEntry> {
+    let mut entries = Vec::new();
+    extract_class_entries_impl(attr, model, &mut entries);
+    entries
+}
+
+fn extract_class_entries_impl(
+    attr: &JsxAttribute,
+    model: &SemanticModel,
+    out: &mut Vec<ClassNameEntry>,
+) -> Option<()> {
     let name_token = attr.name_value_token().ok()?;
     let name_text = name_token.text_trimmed();
 
@@ -153,27 +163,210 @@ fn extract_class_attribute(attr: &JsxAttribute) -> Option<ClassAttributeData> {
         return None;
     }
 
-    let initializer = attr.initializer()?;
-    let value = initializer.value().ok()?;
+    let value = attr.initializer()?.value().ok()?;
 
-    // We only check string literals (not template strings or expressions)
-    let string_literal: JsxString = match value {
-        AnyJsxAttributeValue::JsxString(s) => s,
-        // Skip expression values for now (they could be template strings, variables, etc.)
-        AnyJsxAttributeValue::JsxExpressionAttributeValue(_)
-        | AnyJsxAttributeValue::AnyJsxTag(_) => {
-            return None;
+    match value {
+        AnyJsxAttributeValue::JsxString(s) => {
+            let token = s.value_token().ok()?;
+            let inner_text = s.inner_string_text().ok()?;
+            // +1 to skip the opening quote
+            let inner_start = u32::from(token.text_trimmed_range().start()) + 1;
+            collect_class_names_from_string(&inner_text, inner_start, out);
         }
-    };
+        AnyJsxAttributeValue::JsxExpressionAttributeValue(expr_attr) => {
+            let expression = expr_attr.expression().ok()?.omit_parentheses();
+            collect_class_names_from_expression(&expression, model, out);
+        }
+        // JSX tags as attribute values cannot contain class names
+        AnyJsxAttributeValue::AnyJsxTag(_) => return None,
+    }
 
-    let value_token = string_literal.value_token().ok()?;
-    let inner_text = string_literal.inner_string_text().ok()?;
+    Some(())
+}
 
-    // The inner content starts one byte into the token (after the opening quote).
-    let inner_file_start = u32::from(value_token.text_trimmed_range().start()) + 1;
+/// Splits a string by whitespace and creates a `ClassNameEntry` for each class name,
+/// computing the correct source range for each.
+fn collect_class_names_from_string(text: &str, base_offset: u32, out: &mut Vec<ClassNameEntry>) {
+    let mut search_from: u32 = 0;
+    for class_name in text.split_ascii_whitespace() {
+        let pos_in_text = text[search_from as usize..]
+            .find(class_name)
+            .map_or(search_from, |o| search_from + o as u32);
 
-    Some(ClassAttributeData {
-        inner_text,
-        inner_file_start,
-    })
+        let start = TextSize::from(base_offset + pos_in_text);
+        let end = start + TextSize::from(class_name.len() as u32);
+        out.push(ClassNameEntry {
+            range: TextRange::new(start, end),
+            name: class_name.into(),
+        });
+
+        search_from = pos_in_text + class_name.len() as u32;
+    }
+}
+
+/// Recursively collects class names from a JS expression.
+///
+/// Handles:
+/// - String literals: `"foo bar"` → split by whitespace
+/// - Identifier references: `cls` → follow binding to declaration initializer
+/// - Call expressions: `clsx("foo", { bar: true })` → recurse into each argument
+/// - Object expressions: `{ foo: true, bar: false }` → extract keys as class names
+/// - Array expressions: `["foo", "bar"]` → recurse into each element
+///
+/// Returns `None` for unresolvable expressions (template literals, conditionals, etc.),
+/// but always appends any successfully extracted entries to `out` before returning.
+fn collect_class_names_from_expression(
+    expr: &AnyJsExpression,
+    model: &SemanticModel,
+    out: &mut Vec<ClassNameEntry>,
+) -> Option<()> {
+    match expr {
+        // String literal: "foo bar" → split by whitespace
+        AnyJsExpression::AnyJsLiteralExpression(lit) => match lit {
+            AnyJsLiteralExpression::JsStringLiteralExpression(string_lit) => {
+                let token = string_lit.value_token().ok()?;
+                let inner_text = string_lit.inner_string_text().ok()?;
+                // +1 to skip the opening quote
+                let inner_start = u32::from(token.text_trimmed_range().start()) + 1;
+                collect_class_names_from_string(&inner_text, inner_start, out);
+            }
+            // Non-string literals (numbers, booleans, null, etc.) are not class names
+            AnyJsLiteralExpression::JsBigintLiteralExpression(_)
+            | AnyJsLiteralExpression::JsBooleanLiteralExpression(_)
+            | AnyJsLiteralExpression::JsNullLiteralExpression(_)
+            | AnyJsLiteralExpression::JsNumberLiteralExpression(_)
+            | AnyJsLiteralExpression::JsRegexLiteralExpression(_) => return None,
+        },
+
+        // Identifier: follow binding → declaration → initializer
+        AnyJsExpression::JsIdentifierExpression(ident_expr) => {
+            let name = ident_expr.name().ok()?;
+            let binding = model.binding(&name)?;
+            let decl = binding.tree().declaration()?;
+            let AnyJsBindingDeclaration::JsVariableDeclarator(declarator) = decl else {
+                return None;
+            };
+            let init_expr = declarator
+                .initializer()?
+                .expression()
+                .ok()?
+                .omit_parentheses();
+            collect_class_names_from_expression(&init_expr, model, out);
+        }
+
+        // Call expression: clsx("foo", { bar: true }, ["baz"]) → recurse into each argument
+        AnyJsExpression::JsCallExpression(call_expr) => {
+            for arg in call_expr.arguments().ok()?.args() {
+                match arg.ok()? {
+                    AnyJsCallArgument::AnyJsExpression(arg_expr) => {
+                        collect_class_names_from_expression(
+                            &arg_expr.omit_parentheses(),
+                            model,
+                            out,
+                        );
+                    }
+                    // Spread arguments cannot be statically resolved
+                    AnyJsCallArgument::JsSpread(_) => continue,
+                }
+            }
+        }
+
+        // Object expression: { "foo": true, bar: cond } → keys are class names
+        AnyJsExpression::JsObjectExpression(obj_expr) => {
+            for member in obj_expr.members() {
+                match member.ok()? {
+                    AnyJsObjectMember::JsPropertyObjectMember(prop) => {
+                        let member_name = prop.name().ok()?;
+                        let key_text = member_name.name()?;
+                        let range = member_name.range();
+                        let key_len = u32::from(key_text.len());
+                        // For quoted string keys like "btn-invalid", trim the quotes from range
+                        let adjusted_range = if range.len() > TextSize::from(key_len) {
+                            let start = range.start() + TextSize::from(1);
+                            let end = range.end() - TextSize::from(1);
+                            TextRange::new(start, end)
+                        } else {
+                            range
+                        };
+                        out.push(ClassNameEntry {
+                            range: adjusted_range,
+                            name: key_text.text().into(),
+                        });
+                    }
+                    // Shorthand properties: { foo } — the identifier is the class name
+                    AnyJsObjectMember::JsShorthandPropertyObjectMember(shorthand) => {
+                        let ident = shorthand.name().ok()?;
+                        let token = ident.value_token().ok()?;
+                        out.push(ClassNameEntry {
+                            range: token.text_trimmed_range(),
+                            name: token.text_trimmed().into(),
+                        });
+                    }
+                    // Spread, getters, setters, methods, bogus, metavariable — skip
+                    AnyJsObjectMember::JsSpread(_)
+                    | AnyJsObjectMember::JsGetterObjectMember(_)
+                    | AnyJsObjectMember::JsSetterObjectMember(_)
+                    | AnyJsObjectMember::JsMethodObjectMember(_)
+                    | AnyJsObjectMember::JsBogusMember(_)
+                    | AnyJsObjectMember::JsMetavariable(_) => continue,
+                }
+            }
+        }
+
+        // Array expression: ["foo", "bar", { baz: true }] → recurse into each element
+        AnyJsExpression::JsArrayExpression(array_expr) => {
+            for element in array_expr.elements().iter() {
+                match element.ok()? {
+                    AnyJsArrayElement::AnyJsExpression(elem_expr) => {
+                        collect_class_names_from_expression(
+                            &elem_expr.omit_parentheses(),
+                            model,
+                            out,
+                        );
+                    }
+                    // Holes and spreads cannot be statically resolved
+                    AnyJsArrayElement::JsArrayHole(_) | AnyJsArrayElement::JsSpread(_) => {
+                        continue;
+                    }
+                }
+            }
+        }
+
+        // Expressions that cannot produce static class name strings
+        AnyJsExpression::JsTemplateExpression(_)
+        | AnyJsExpression::JsConditionalExpression(_)
+        | AnyJsExpression::JsBinaryExpression(_)
+        | AnyJsExpression::JsLogicalExpression(_)
+        | AnyJsExpression::JsArrowFunctionExpression(_)
+        | AnyJsExpression::JsFunctionExpression(_)
+        | AnyJsExpression::JsClassExpression(_)
+        | AnyJsExpression::JsAssignmentExpression(_)
+        | AnyJsExpression::JsAwaitExpression(_)
+        | AnyJsExpression::JsComputedMemberExpression(_)
+        | AnyJsExpression::JsImportCallExpression(_)
+        | AnyJsExpression::JsImportMetaExpression(_)
+        | AnyJsExpression::JsInExpression(_)
+        | AnyJsExpression::JsInstanceofExpression(_)
+        | AnyJsExpression::JsNewExpression(_)
+        | AnyJsExpression::JsNewTargetExpression(_)
+        | AnyJsExpression::JsParenthesizedExpression(_)
+        | AnyJsExpression::JsPostUpdateExpression(_)
+        | AnyJsExpression::JsPreUpdateExpression(_)
+        | AnyJsExpression::JsSequenceExpression(_)
+        | AnyJsExpression::JsStaticMemberExpression(_)
+        | AnyJsExpression::JsSuperExpression(_)
+        | AnyJsExpression::JsThisExpression(_)
+        | AnyJsExpression::JsUnaryExpression(_)
+        | AnyJsExpression::JsYieldExpression(_)
+        | AnyJsExpression::JsxTagExpression(_)
+        | AnyJsExpression::JsBogusExpression(_)
+        | AnyJsExpression::JsMetavariable(_)
+        | AnyJsExpression::TsAsExpression(_)
+        | AnyJsExpression::TsInstantiationExpression(_)
+        | AnyJsExpression::TsNonNullAssertionExpression(_)
+        | AnyJsExpression::TsSatisfiesExpression(_)
+        | AnyJsExpression::TsTypeAssertionExpression(_) => return None,
+    }
+
+    Some(())
 }
