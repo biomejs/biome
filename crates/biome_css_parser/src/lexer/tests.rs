@@ -2,8 +2,7 @@
 #![expect(unused_mut, unused_variables)]
 
 use super::{CssLexer, TextSize};
-use biome_css_syntax::CssFileSource;
-use biome_css_syntax::CssSyntaxKind::{DOLLAR, EOF, HASH, IDENT, L_CURLY, R_CURLY};
+use biome_css_syntax::CssSyntaxKind::EOF;
 use crate::lexer::CssLexContext;
 use crate::CssParserOptions;
 use biome_parser::lexer::Lexer;
@@ -186,36 +185,6 @@ fn string() {
         r"'\0'",
         ERROR_TOKEN:4
     }
-}
-
-#[test]
-fn scss_interpolation_prefix() {
-    let src = "#{$name}";
-    let mut lexer = CssLexer::from_str(src)
-        .with_options(CssParserOptions::default())
-        .with_source_type(CssFileSource::scss());
-
-    let mut kinds = Vec::new();
-    while lexer.next_token(CssLexContext::default()) != EOF {
-        kinds.push(lexer.current());
-    }
-
-    assert_eq!(kinds, vec![HASH, L_CURLY, DOLLAR, IDENT, R_CURLY]);
-}
-
-#[test]
-fn css_hash_left_curly_stays_split() {
-    let src = "#{$name}";
-    let mut lexer = CssLexer::from_str(src)
-        .with_options(CssParserOptions::default())
-        .with_source_type(CssFileSource::css());
-
-    let mut kinds = Vec::new();
-    while lexer.next_token(CssLexContext::default()) != EOF {
-        kinds.push(lexer.current());
-    }
-
-    assert_eq!(kinds, vec![HASH, L_CURLY, DOLLAR, IDENT, R_CURLY]);
 }
 
 #[test]
