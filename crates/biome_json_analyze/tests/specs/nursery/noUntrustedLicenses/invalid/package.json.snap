@@ -1,0 +1,57 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: package.json
+---
+# Input
+```json
+{
+    "dependencies": {
+        "trusted-pkg": "^1.0.0",
+        "untrusted-pkg": "^1.0.0"
+    },
+    "devDependencies": {
+        "no-license-pkg": "^1.0.0",
+        "spdx-expression-pkg": "^1.0.0"
+    }
+}
+
+```
+
+# Diagnostics
+```
+package.json:4:9 lint/nursery/noUntrustedLicenses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The dependency untrusted-pkg in dependencies has an untrusted license: custom-proprietary.
+  
+    2 │     "dependencies": {
+    3 │         "trusted-pkg": "^1.0.0",
+  > 4 │         "untrusted-pkg": "^1.0.0"
+      │         ^^^^^^^^^^^^^^^
+    5 │     },
+    6 │     "devDependencies": {
+  
+  i Ensure the license is acceptable for your project, or add it to the allow list.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+package.json:7:9 lint/nursery/noUntrustedLicenses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The dependency no-license-pkg in devDependencies has no license specified.
+  
+    5 │     },
+    6 │     "devDependencies": {
+  > 7 │         "no-license-pkg": "^1.0.0",
+      │         ^^^^^^^^^^^^^^^^
+    8 │         "spdx-expression-pkg": "^1.0.0"
+    9 │     }
+  
+  i Dependencies without a license field may have unknown legal restrictions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

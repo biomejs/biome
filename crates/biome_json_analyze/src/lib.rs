@@ -19,6 +19,7 @@ use biome_analyze::{
 };
 use biome_diagnostics::Error;
 use biome_json_syntax::{JsonFileSource, JsonLanguage, TextRange};
+use biome_project_layout::ProjectLayout;
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
 use std::ops::Deref;
 use std::sync::{Arc, LazyLock};
@@ -37,6 +38,9 @@ pub struct JsonAnalyzeServices {
 
     /// The source file
     pub file_source: JsonFileSource,
+
+    /// The project layout, providing access to package manifests.
+    pub project_layout: Option<Arc<ProjectLayout>>,
 }
 
 /// Run the analyzer on the provided `root`: this process will use the given `filter`
@@ -150,6 +154,7 @@ where
 
     services.insert_service(json_services.configuration_provider);
     services.insert_service(json_services.file_source);
+    services.insert_service(json_services.project_layout);
 
     (
         analyzer.run(biome_analyze::AnalyzerContext {
@@ -202,6 +207,7 @@ mod tests {
         let services = JsonAnalyzeServices {
             file_source: JsonFileSource::json(),
             configuration_provider: None,
+            project_layout: None,
         };
         analyze(
             &parsed.tree(),

@@ -1,0 +1,6 @@
+{
+    "dependencies": {
+        "valid-pkg": "^1.0.0",
+        "deprecated-pkg": "^1.0.0"
+    }
+}
