@@ -108,7 +108,7 @@ issue3512.js:18:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━
     Failing to specify dependencies can result in Effects not updating correctly when state changes.
     These "stale closures" are a common source of surprising bugs.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency y to the list.
   
     20 │ ····},·[x,·y]);
        │          +++   

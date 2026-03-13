@@ -1,0 +1,67 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/scss/at-rule/if-else.scss
+---
+
+# Input
+
+```scss
+@if $type==ocean{
+color:red;
+}@else if $type ==matador{
+color:blue;
+}@else{
+color:green;
+}
+
+.card{
+@if
+$compact
+{
+padding:0;
+}@else if $spacious and $touch {
+padding:2rem;
+}@else{
+padding:
+1rem;
+}
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+Trailing newline: true
+-----
+
+```scss
+@if $type == ocean {
+	color: red;
+} @else if $type == matador {
+	color: blue;
+} @else {
+	color: green;
+}
+
+.card {
+	@if $compact {
+		padding: 0;
+	} @else if $spacious and $touch {
+		padding: 2rem;
+	} @else {
+		padding: 1rem;
+	}
+}
+
+```

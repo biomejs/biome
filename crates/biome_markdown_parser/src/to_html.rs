@@ -43,13 +43,13 @@
 //! be decided with full context.
 
 use biome_markdown_syntax::{
-    AnyMdBlock, AnyMdCodeBlock, AnyMdInline, AnyMdLeafBlock, MarkdownLanguage, MdAutolink,
-    MdBlockList, MdBullet, MdBulletListItem, MdDocument, MdEntityReference, MdFencedCodeBlock,
-    MdHardLine, MdHeader, MdHtmlBlock, MdIndentCodeBlock, MdInlineCode, MdInlineEmphasis,
-    MdInlineHtml, MdInlineImage, MdInlineItalic, MdInlineItemList, MdInlineLink, MdLinkBlock,
-    MdLinkDestination, MdLinkLabel, MdLinkReferenceDefinition, MdLinkTitle, MdOrderedListItem,
-    MdParagraph, MdQuote, MdReferenceImage, MdReferenceLink, MdReferenceLinkLabel, MdSetextHeader,
-    MdSoftBreak, MdTextual, MdThematicBreakBlock,
+    AnyMdBlock, AnyMdBulletListMember, AnyMdCodeBlock, AnyMdInline, AnyMdLeafBlock,
+    MarkdownLanguage, MdAutolink, MdBlockList, MdBullet, MdBulletListItem, MdDocument,
+    MdEntityReference, MdFencedCodeBlock, MdHardLine, MdHeader, MdHtmlBlock, MdIndentCodeBlock,
+    MdInlineCode, MdInlineEmphasis, MdInlineHtml, MdInlineImage, MdInlineItalic, MdInlineItemList,
+    MdInlineLink, MdLinkBlock, MdLinkDestination, MdLinkLabel, MdLinkReferenceDefinition,
+    MdLinkTitle, MdOrderedListItem, MdParagraph, MdQuote, MdReferenceImage, MdReferenceLink,
+    MdReferenceLinkLabel, MdSetextHeader, MdSoftBreak, MdTextual, MdThematicBreakBlock,
 };
 use biome_rowan::{AstNode, AstNodeList, Direction, SyntaxNode, TextRange, WalkEvent};
 use percent_encoding::{AsciiSet, CONTROLS, utf8_percent_encode};
@@ -57,6 +57,7 @@ use std::collections::HashMap;
 
 use crate::parser::{ListItemIndent, ListTightness, QuoteIndent};
 use crate::syntax::reference::normalize_reference_label;
+use crate::syntax::{INDENT_CODE_BLOCK_SPACES, MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES};
 
 // ============================================================================
 // Line Handling Utilities
@@ -102,8 +103,8 @@ fn expand_tabs(text: &str) -> String {
     for c in text.chars() {
         match c {
             '\t' => {
-                // Expand to next 4-space tab stop
-                let spaces = 4 - (column % 4);
+                // Expand to next tab stop
+                let spaces = TAB_STOP_SPACES - (column % TAB_STOP_SPACES);
                 for _ in 0..spaces {
                     result.push(' ');
                 }
@@ -153,7 +154,7 @@ fn strip_indent_preserve_tabs_with_offset(
             }
             match c {
                 '\t' => {
-                    let next_col = col + (4 - (col % 4));
+                    let next_col = col + (TAB_STOP_SPACES - (col % TAB_STOP_SPACES));
                     if next_col > strip_cols {
                         // Tab crosses the strip boundary - add remaining spaces
                         let spaces = next_col - strip_cols;
@@ -198,13 +199,13 @@ fn strip_quote_prefixes(text: &str, quote_indent: usize) -> String {
                         idx += 1;
                     }
                     b'\t' => {
-                        col += 4 - (col % 4);
+                        col += TAB_STOP_SPACES - (col % TAB_STOP_SPACES);
                         idx += 1;
                     }
                     _ => break,
                 }
 
-                if col > 3 {
+                if col > MAX_BLOCK_PREFIX_INDENT {
                     idx = 0;
                     break;
                 }
@@ -564,8 +565,13 @@ impl<'a> HtmlRenderer<'a> {
 
             let start = list
                 .md_bullet_list()
-                .first()
-                .and_then(|bullet| bullet.bullet().ok())
+                .iter()
+                .find_map(|member| match member {
+                    AnyMdBulletListMember::MdBullet(bullet) => Some(bullet),
+                    _ => None,
+                })
+                .and_then(|bullet| bullet.prefix().ok())
+                .and_then(|prefix| prefix.marker().ok())
                 .map_or(1, |marker| {
                     let text = marker.text();
                     text.trim_start()
@@ -595,7 +601,10 @@ impl<'a> HtmlRenderer<'a> {
             let is_tight = list_is_tight && !item_has_blank_line;
             let is_empty = is_empty_content(&blocks);
 
-            let first_is_paragraph = blocks.first().is_some_and(is_paragraph_block);
+            let first_is_paragraph = blocks
+                .iter()
+                .find(|b| !is_newline_block(b))
+                .is_some_and(is_paragraph_block);
             let last_is_paragraph = blocks
                 .iter()
                 .rev()
@@ -968,8 +977,18 @@ impl<'a> HtmlRenderer<'a> {
                 }
 
                 let mut content = buffer.content;
+                if state.leading_newline && content.starts_with('\n') {
+                    content.remove(0);
+                }
                 if state.trim_trailing_newline && content.ends_with('\n') {
                     content.pop();
+                }
+                if state.leading_newline
+                    && content.starts_with('<')
+                    && !content.contains('\n')
+                    && !content.ends_with('\n')
+                {
+                    content.push('\n');
                 }
                 self.push_str(&content);
                 self.push_str("</li>\n");
@@ -1138,7 +1157,7 @@ fn render_fenced_code_block(
             for c in text.chars() {
                 match c {
                     ' ' => indent += 1,
-                    '\t' => indent += 4 - (indent % 4),
+                    '\t' => indent += TAB_STOP_SPACES - (indent % TAB_STOP_SPACES),
                     '\n' | '\r' => indent = 0, // Reset at newlines
                     _ => {}
                 }
@@ -1147,7 +1166,9 @@ fn render_fenced_code_block(
         indent
     });
     let container_indent = list_indent + quote_indent;
-    let fence_indent = fence_leading_indent.saturating_sub(container_indent).min(3);
+    let fence_indent = fence_leading_indent
+        .saturating_sub(container_indent)
+        .min(MAX_BLOCK_PREFIX_INDENT);
     let content_indent = container_indent + fence_indent;
 
     // Get info string (language) - process escapes
@@ -1675,6 +1696,12 @@ fn extract_alt_text_inline(inline: &AnyMdInline, ctx: &HtmlRenderContext, out: &
         AnyMdInline::MdInlineHtml(_) | AnyMdInline::MdHtmlBlock(_) => {
             // HTML tags are stripped in alt text
         }
+        AnyMdInline::MdQuotePrefix(_) => {
+            // Quote prefixes don't contribute text to alt attributes
+        }
+        AnyMdInline::MdIndentToken(_) => {
+            // Indent tokens don't contribute text to alt attributes
+        }
     }
 }
 
@@ -1722,8 +1749,6 @@ fn is_newline_block(block: &AnyMdBlock) -> bool {
 fn is_empty_content(blocks: &[AnyMdBlock]) -> bool {
     blocks.is_empty() || blocks.iter().all(is_newline_block)
 }
-
-const INDENT_CODE_BLOCK_SPACES: usize = 4;
 
 fn list_item_required_indent(entry: &ListItemIndent) -> usize {
     if entry.spaces_after_marker > INDENT_CODE_BLOCK_SPACES {

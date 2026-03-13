@@ -1,3 +1,5 @@
+use core::cmp::Ordering;
+
 use super::specifiers_attributes::JsNamedSpecifiers;
 use biome_js_syntax::{
     AnyJsCombinedSpecifier, AnyJsExportClause, AnyJsImportClause, AnyJsModuleItem,
@@ -11,10 +13,10 @@ use biome_rule_options::organize_imports::import_source::ImportSource;
 use biome_string_case::comparable_token::ComparableToken;
 
 /// Type used to determine the order between imports
-#[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Debug, Eq, PartialEq)]
 pub struct ImportKey {
     pub group: u16,
-    pub source: ImportSource<ComparableToken>,
+    pub source: Option<ImportSource<ComparableToken>>,
     pub has_no_attributes: bool,
     pub kind: ImportStatementKind,
     /// Slot index of the import in the module.
@@ -39,19 +41,51 @@ impl ImportKey {
             && other.has_no_attributes
     }
 }
+impl Ord for ImportKey {
+    fn cmp(&self, other: &Self) -> Ordering {
+        match self.group.cmp(&other.group) {
+            Ordering::Equal => {}
+            ord => return ord,
+        }
+        match (&self.source, &other.source) {
+            (None, None) => {}
+            (Some(_), None) => return Ordering::Less,
+            (None, Some(_)) => return Ordering::Greater,
+            (Some(self_source), Some(other_source)) => match self_source.cmp(other_source) {
+                Ordering::Equal => {}
+                ord => return ord,
+            },
+        }
+        match self.has_no_attributes.cmp(&other.has_no_attributes) {
+            Ordering::Equal => {}
+            ord => return ord,
+        }
+        match self.kind.cmp(&other.kind) {
+            Ordering::Equal => {}
+            ord => return ord,
+        }
+        self.slot_index.cmp(&other.slot_index)
+    }
+}
+impl PartialOrd for ImportKey {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[enumflags2::bitflags]
-#[repr(u8)]
+#[repr(u16)]
 pub enum ImportStatementKind {
-    NamespaceType = 1 << 0,
-    DefaultType = 1 << 1,
-    NamedType = 1 << 2,
-    Namespace = 1 << 3,
-    DefaultNamespace = 1 << 4,
-    Default = 1 << 5,
-    DefaultNamed = 1 << 6,
-    Named = 1 << 7,
+    Bare = 1 << 0,
+    NamespaceType = 1 << 1,
+    DefaultType = 1 << 2,
+    NamedType = 1 << 3,
+    Namespace = 1 << 4,
+    DefaultNamespace = 1 << 5,
+    Default = 1 << 6,
+    DefaultNamed = 1 << 7,
+    Named = 1 << 8,
 }
 impl ImportStatementKind {
     pub fn has_type_token(self) -> bool {
@@ -76,7 +110,7 @@ pub struct ImportInfo {
     /// Slot index of the import in the module.
     pub slot_index: u32,
     pub kind: ImportStatementKind,
-    pub source: ImportSource<ComparableToken>,
+    pub source: Option<ImportSource<ComparableToken>>,
     pub has_no_attributes: bool,
 }
 impl ImportInfo {
@@ -94,9 +128,12 @@ impl ImportInfo {
         value: &JsImport,
     ) -> Option<(Self, Option<JsNamedSpecifiers>, Option<JsImportAssertion>)> {
         let (kind, named_specifiers, source, attributes) = match value.import_clause().ok()? {
-            AnyJsImportClause::JsImportBareClause(_) => {
-                return None;
-            }
+            AnyJsImportClause::JsImportBareClause(clause) => (
+                ImportStatementKind::Bare,
+                None,
+                clause.source(),
+                clause.assertion(),
+            ),
             AnyJsImportClause::JsImportCombinedClause(clause) => {
                 let (kind, named_specifiers) = match clause.specifier().ok()? {
                     AnyJsCombinedSpecifier::JsNamedImportSpecifiers(specifiers) => {
@@ -147,7 +184,7 @@ impl ImportInfo {
         };
         Some((
             Self {
-                source: ComparableToken::new(source.inner_string_text().ok()?).into(),
+                source: Some(ComparableToken::new(source.inner_string_text().ok()?).into()),
                 has_no_attributes: attributes.is_none(),
                 kind,
                 slot_index: value.syntax().index() as u32,
@@ -160,53 +197,61 @@ impl ImportInfo {
     fn from_export(
         value: &JsExport,
     ) -> Option<(Self, Option<JsNamedSpecifiers>, Option<JsImportAssertion>)> {
-        let (kind, _first_local_name, named_specifiers, source, attributes) =
-            match value.export_clause().ok()? {
-                AnyJsExportClause::JsExportFromClause(clause) => (
-                    if clause.type_token().is_some() {
-                        ImportStatementKind::NamespaceType
-                    } else {
-                        ImportStatementKind::Namespace
-                    },
-                    clause
-                        .export_as()
-                        .and_then(|export_as| export_as.exported_name().ok()),
-                    None,
-                    clause.source(),
-                    clause.assertion(),
-                ),
-                AnyJsExportClause::JsExportNamedFromClause(clause) => (
-                    if clause.type_token().is_some() {
-                        ImportStatementKind::NamedType
-                    } else {
-                        ImportStatementKind::Named
-                    },
-                    clause
-                        .specifiers()
-                        .into_iter()
-                        .flatten()
-                        .next()
-                        .and_then(|x| x.source_name().ok()),
-                    Some(clause.specifiers()),
-                    clause.source(),
-                    clause.assertion(),
-                ),
-                _ => {
-                    return None;
-                }
-            };
-        let Ok(AnyJsModuleSource::JsModuleSource(source)) = source else {
-            return None;
+        let (kind, named_specifiers, source, attributes) = match value.export_clause().ok()? {
+            AnyJsExportClause::JsExportNamedClause(clause) => (
+                if clause.type_token().is_some() {
+                    ImportStatementKind::NamedType
+                } else {
+                    ImportStatementKind::Named
+                },
+                Some(JsNamedSpecifiers::JsExportNamedSpecifierList(
+                    clause.specifiers(),
+                )),
+                None,
+                None,
+            ),
+            AnyJsExportClause::JsExportFromClause(clause) => (
+                if clause.type_token().is_some() {
+                    ImportStatementKind::NamespaceType
+                } else {
+                    ImportStatementKind::Namespace
+                },
+                None,
+                Some(clause.source()),
+                clause.assertion(),
+            ),
+            AnyJsExportClause::JsExportNamedFromClause(clause) => (
+                if clause.type_token().is_some() {
+                    ImportStatementKind::NamedType
+                } else {
+                    ImportStatementKind::Named
+                },
+                Some(JsNamedSpecifiers::JsExportNamedFromSpecifierList(
+                    clause.specifiers(),
+                )),
+                Some(clause.source()),
+                clause.assertion(),
+            ),
+            _ => {
+                return None;
+            }
         };
-        let source = source.inner_string_text().ok()?;
+        let source = if let Some(source) = source {
+            let Ok(AnyJsModuleSource::JsModuleSource(source)) = source else {
+                return None;
+            };
+            Some(source.inner_string_text().ok()?)
+        } else {
+            None
+        };
         Some((
             Self {
-                source: ComparableToken::new(source).into(),
+                source: source.map(|src| ComparableToken::new(src).into()),
                 has_no_attributes: attributes.is_none(),
                 kind,
                 slot_index: value.syntax().index() as u32,
             },
-            named_specifiers.map(JsNamedSpecifiers::JsExportNamedFromSpecifierList),
+            named_specifiers,
             attributes,
         ))
     }
@@ -215,7 +260,7 @@ impl<'a> From<&'a ImportInfo> for ImportCandidate<'a> {
     fn from(value: &'a ImportInfo) -> Self {
         Self {
             has_type_token: value.kind.has_type_token(),
-            source: ImportSourceCandidate::new(&value.source),
+            source: value.source.as_ref().map(ImportSourceCandidate::new),
         }
     }
 }

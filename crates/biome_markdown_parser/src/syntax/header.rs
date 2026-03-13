@@ -32,6 +32,7 @@ use biome_parser::{
     prelude::ParsedSyntax::{self, *},
 };
 
+use crate::syntax::MAX_BLOCK_PREFIX_INDENT;
 use crate::syntax::parse_any_inline;
 
 /// Maximum number of `#` characters allowed in an ATX heading (CommonMark §4.2).
@@ -44,7 +45,7 @@ pub(crate) fn at_header(p: &mut MarkdownParser) -> bool {
         if !p.at_line_start() && !p.at_start_of_input() {
             return false;
         }
-        p.skip_line_indent(3);
+        p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
         p.at(T![#])
     })
 }
@@ -66,7 +67,7 @@ pub(crate) fn parse_header(p: &mut MarkdownParser) -> ParsedSyntax {
     // The lexer emits all consecutive `#` chars as a single HASH token,
     // so we need to verify the token length doesn't exceed 6 before consuming it.
     let hash_count = p.lookahead(|p| {
-        p.skip_line_indent(3);
+        p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
         if p.at(T![#]) { p.cur_text().len() } else { 0 }
     });
 
@@ -79,7 +80,7 @@ pub(crate) fn parse_header(p: &mut MarkdownParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    p.skip_line_indent(3);
+    p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
 
     // Parse opening hashes (MdHashList containing MdHash nodes)
     parse_hash_list(p);

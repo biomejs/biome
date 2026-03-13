@@ -114,6 +114,7 @@ const ATTRIBUTE_TAGS_MAP: &[(&str, &[&str])] = &[
     ("autoPictureInPicture", &["video"]),
     ("charset", &["meta"]),
     ("checked", &["input"]),
+    ("closedby", &["dialog"]),
     ("controls", &["audio", "video"]),
     ("controlsList", &["audio", "video"]),
     (

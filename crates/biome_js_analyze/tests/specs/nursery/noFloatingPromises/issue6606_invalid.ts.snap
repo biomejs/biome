@@ -1,0 +1,124 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue6606_invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+// Optional chaining on a method that returns Promise — the call itself is not optional
+type AsyncApi = {
+	fetchData: () => Promise<string>;
+};
+async function callAsyncApi(api: AsyncApi) {
+	api.fetchData();
+}
+
+// Non-optional call on async method with optional chaining elsewhere
+type Service = {
+	client?: {
+		request: () => Promise<void>;
+	};
+};
+async function callService(svc: Service) {
+	// The request() call is NOT optional — if client exists, this is a floating Promise
+	svc.client?.request();
+}
+
+// Record with promise-returning values — optional chaining doesn't suppress the diagnostic
+type PromiseHandlers = Record<string, (() => Promise<void>) | undefined>;
+const promiseHandlers: PromiseHandlers = {};
+promiseHandlers?.["someHandler"]?.();
+
+// Record with unknown-returning values combined with Promise.reject — unknown could be a Promise
+const optionalObject: Record<string, (() => unknown) | undefined> = {};
+optionalObject?.nonExistentMethod?.() ||
+	Promise.reject("optional chaining bypass");
+
+```
+
+# Diagnostics
+```
+issue6606_invalid.ts:8:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+     6 │ };
+     7 │ async function callAsyncApi(api: AsyncApi) {
+   > 8 │ 	api.fetchData();
+       │ 	^^^^^^^^^^^^^^^^
+     9 │ }
+    10 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await operator.
+  
+    8 │ → await·api.fetchData();
+      │   ++++++                
+
+```
+
+```
+issue6606_invalid.ts:19:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    17 │ async function callService(svc: Service) {
+    18 │ 	// The request() call is NOT optional — if client exists, this is a floating Promise
+  > 19 │ 	svc.client?.request();
+       │ 	^^^^^^^^^^^^^^^^^^^^^^
+    20 │ }
+    21 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await operator.
+  
+    19 │ → await·svc.client?.request();
+       │   ++++++                      
+
+```
+
+```
+issue6606_invalid.ts:25:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    23 │ type PromiseHandlers = Record<string, (() => Promise<void>) | undefined>;
+    24 │ const promiseHandlers: PromiseHandlers = {};
+  > 25 │ promiseHandlers?.["someHandler"]?.();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ 
+    27 │ // Record with unknown-returning values combined with Promise.reject — unknown could be a Promise
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+issue6606_invalid.ts:29:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    27 │ // Record with unknown-returning values combined with Promise.reject — unknown could be a Promise
+    28 │ const optionalObject: Record<string, (() => unknown) | undefined> = {};
+  > 29 │ optionalObject?.nonExistentMethod?.() ||
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 30 │ 	Promise.reject("optional chaining bypass");
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

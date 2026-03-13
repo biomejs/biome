@@ -102,14 +102,12 @@ CssRoot {
                                         },
                                         l_paren_token: L_PAREN@77..78 "(" [] [],
                                         items: CssParameterList [
-                                            CssParameter {
-                                                any_css_expression: CssListOfComponentValuesExpression {
-                                                    css_component_value_list: CssComponentValueList [
-                                                        CssDashedIdentifier {
-                                                            value_token: IDENT@78..90 "--🥔-color" [] [],
-                                                        },
-                                                    ],
-                                                },
+                                            CssListOfComponentValuesExpression {
+                                                css_component_value_list: CssComponentValueList [
+                                                    CssDashedIdentifier {
+                                                        value_token: IDENT@78..90 "--🥔-color" [] [],
+                                                    },
+                                                ],
                                             },
                                         ],
                                         r_paren_token: R_PAREN@90..91 ")" [] [],
@@ -192,11 +190,10 @@ CssRoot {
                       0: IDENT@74..77 "var" [] []
                     1: L_PAREN@77..78 "(" [] []
                     2: CSS_PARAMETER_LIST@78..90
-                      0: CSS_PARAMETER@78..90
-                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@78..90
-                          0: CSS_COMPONENT_VALUE_LIST@78..90
-                            0: CSS_DASHED_IDENTIFIER@78..90
-                              0: IDENT@78..90 "--🥔-color" [] []
+                      0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@78..90
+                        0: CSS_COMPONENT_VALUE_LIST@78..90
+                          0: CSS_DASHED_IDENTIFIER@78..90
+                            0: IDENT@78..90 "--🥔-color" [] []
                     3: R_PAREN@90..91 ")" [] []
               1: (empty)
             1: SEMICOLON@91..92 ";" [] []

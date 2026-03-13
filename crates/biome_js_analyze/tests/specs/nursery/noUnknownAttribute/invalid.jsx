@@ -42,6 +42,7 @@
 	<div data-xml-anything="invalid" />
 	<div data-testID="bar" data-under_sCoRe="bar" dataNotAnDataAttribute="yes" />
 	<div abbr="abbr" />
+	<div closedby="any" />
 	<div webkitDirectory="" />
 	<div webkitdirectory="" />
 	<div

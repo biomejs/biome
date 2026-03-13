@@ -1,0 +1,99 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@return;
+@return
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: ScssReturnAtRule {
+                return_token: RETURN_KW@1..7 "return" [] [],
+                value: missing (required),
+                semicolon_token: SEMICOLON@7..8 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@8..10 "@" [Newline("\n")] [],
+            rule: ScssReturnAtRule {
+                return_token: RETURN_KW@10..16 "return" [] [],
+                value: missing (required),
+                semicolon_token: missing (required),
+            },
+        },
+    ],
+    eof_token: EOF@16..17 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..17
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..16
+    0: CSS_AT_RULE@0..8
+      0: AT@0..1 "@" [] []
+      1: SCSS_RETURN_AT_RULE@1..8
+        0: RETURN_KW@1..7 "return" [] []
+        1: (empty)
+        2: SEMICOLON@7..8 ";" [] []
+    1: CSS_AT_RULE@8..16
+      0: AT@8..10 "@" [Newline("\n")] []
+      1: SCSS_RETURN_AT_RULE@10..16
+        0: RETURN_KW@10..16 "return" [] []
+        1: (empty)
+        2: (empty)
+  2: EOF@16..17 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+return.scss:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found ';'.
+  
+  > 1 │ @return;
+      │        ^
+    2 │ @return
+    3 │ 
+  
+  i Expected a SCSS expression here.
+  
+  > 1 │ @return;
+      │        ^
+    2 │ @return
+    3 │ 
+  
+return.scss:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found the end of the file.
+  
+    1 │ @return;
+    2 │ @return
+  > 3 │ 
+      │ 
+  
+  i Expected a SCSS expression here.
+  
+    1 │ @return;
+    2 │ @return
+  > 3 │ 
+      │ 
+  
+```

@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use biome_css_syntax::{CssRatio, CssRatioFields};
-use biome_formatter::{format_args, write};
+use biome_formatter::write;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatCssRatio;
@@ -12,15 +12,15 @@ impl FormatNodeRule<CssRatio> for FormatCssRatio {
             denominator,
         } = node.as_fields();
 
-        write!(
-            f,
-            [group(&format_args![
-                numerator.format(),
-                space(),
-                slash_token.format(),
-                soft_line_break_or_space(),
-                denominator.format()
-            ])]
-        )
+        let numbers = format_with(|f| {
+            let separator = soft_line_break_or_space();
+            let mut filler = f.fill();
+
+            filler.entry(&separator, &numerator.format());
+            filler.entry(&separator, &slash_token.format());
+            filler.entry(&separator, &denominator.format());
+            filler.finish()
+        });
+        write!(f, [group(&numbers)])
     }
 }

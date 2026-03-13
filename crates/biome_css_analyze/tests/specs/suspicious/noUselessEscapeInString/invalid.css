@@ -1,5 +1,7 @@
+/* should generate diagnostics */
+
 .a::after {
-    content: /*before*/ "useless \a" /*after*/
+    content: /*before*/ "useless \z" /*after*/
 }
 .b::after {
     content: "useless \'"

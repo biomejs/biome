@@ -1,0 +1,66 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/comments-in-component-tags.svelte
+---
+
+# Input
+
+```svelte
+<Component
+/* block comment */
+prop="value"
+/>
+<Component
+// line comment
+prop="value"
+/>
+<Component /* inline block comment */ prop="value" />
+<Component // inline line comment
+prop="value" />
+<Component.Member
+/* block comment */
+prop="value"
+/>
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+Bracket same line: false
+Whitespace sensitivity: css
+Indent script and style: false
+Self close void elements: never
+Trailing newline: true
+-----
+
+```svelte
+<Component
+	/* block comment */
+	prop="value"
+/>
+<Component
+	// line comment
+	prop="value"
+/>
+<Component /* inline block comment */ prop="value" />
+<Component
+	// inline line comment
+	prop="value"
+/>
+<Component.Member
+	/* block comment */
+	prop="value"
+/>
+
+```

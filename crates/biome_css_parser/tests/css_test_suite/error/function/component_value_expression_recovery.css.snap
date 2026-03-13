@@ -1,0 +1,319 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+.comma-recovery {
+	color: fn(1px ? 2px, 3px);
+}
+
+.operator-recovery {
+	color: fn(1px ? 2px + 3px);
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..1 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@1..16 "comma-recovery" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@16..17 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssBogusProperty {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@17..24 "color" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    COLON@24..26 ":" [] [Whitespace(" ")],
+                                    CssBogus {
+                                        items: [
+                                            CssBogusSupportsCondition {
+                                                items: [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@26..28 "fn" [] [],
+                                                    },
+                                                    L_PAREN@28..29 "(" [] [],
+                                                    CssBogus {
+                                                        items: [
+                                                            CssBogus {
+                                                                items: [
+                                                                    CssBogus {
+                                                                        items: [
+                                                                            CssRegularDimension {
+                                                                                value_token: CSS_NUMBER_LITERAL@29..30 "1" [] [],
+                                                                                unit_token: IDENT@30..33 "px" [] [Whitespace(" ")],
+                                                                            },
+                                                                            CssBogus {
+                                                                                items: [
+                                                                                    ERROR_TOKEN@33..35 "?" [] [Whitespace(" ")],
+                                                                                    CSS_DIMENSION_VALUE@35..36 "2" [] [],
+                                                                                    PX_KW@36..38 "px" [] [],
+                                                                                ],
+                                                                            },
+                                                                        ],
+                                                                    },
+                                                                ],
+                                                            },
+                                                            COMMA@38..40 "," [] [Whitespace(" ")],
+                                                            CssListOfComponentValuesExpression {
+                                                                css_component_value_list: CssComponentValueList [
+                                                                    CssRegularDimension {
+                                                                        value_token: CSS_NUMBER_LITERAL@40..41 "3" [] [],
+                                                                        unit_token: IDENT@41..43 "px" [] [],
+                                                                    },
+                                                                ],
+                                                            },
+                                                        ],
+                                                    },
+                                                    R_PAREN@43..44 ")" [] [],
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@44..45 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@45..47 "}" [Newline("\n")] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@47..50 "." [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@50..68 "operator-recovery" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@68..69 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssBogusProperty {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@69..76 "color" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    COLON@76..78 ":" [] [Whitespace(" ")],
+                                    CssBogus {
+                                        items: [
+                                            CssBogusSupportsCondition {
+                                                items: [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@78..80 "fn" [] [],
+                                                    },
+                                                    L_PAREN@80..81 "(" [] [],
+                                                    CssBogus {
+                                                        items: [
+                                                            CssBogus {
+                                                                items: [
+                                                                    CssBogus {
+                                                                        items: [
+                                                                            CssBogus {
+                                                                                items: [
+                                                                                    CssRegularDimension {
+                                                                                        value_token: CSS_NUMBER_LITERAL@81..82 "1" [] [],
+                                                                                        unit_token: IDENT@82..85 "px" [] [Whitespace(" ")],
+                                                                                    },
+                                                                                    CssBogus {
+                                                                                        items: [
+                                                                                            ERROR_TOKEN@85..87 "?" [] [Whitespace(" ")],
+                                                                                            CSS_DIMENSION_VALUE@87..88 "2" [] [],
+                                                                                            PX_KW@88..91 "px" [] [Whitespace(" ")],
+                                                                                        ],
+                                                                                    },
+                                                                                ],
+                                                                            },
+                                                                        ],
+                                                                    },
+                                                                    PLUS@91..93 "+" [] [Whitespace(" ")],
+                                                                    CssListOfComponentValuesExpression {
+                                                                        css_component_value_list: CssComponentValueList [
+                                                                            CssRegularDimension {
+                                                                                value_token: CSS_NUMBER_LITERAL@93..94 "3" [] [],
+                                                                                unit_token: IDENT@94..96 "px" [] [],
+                                                                            },
+                                                                        ],
+                                                                    },
+                                                                ],
+                                                            },
+                                                        ],
+                                                    },
+                                                    R_PAREN@96..97 ")" [] [],
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@97..98 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@98..100 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@100..101 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..101
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..100
+    0: CSS_QUALIFIED_RULE@0..47
+      0: CSS_SELECTOR_LIST@0..16
+        0: CSS_COMPOUND_SELECTOR@0..16
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..16
+            0: CSS_CLASS_SELECTOR@0..16
+              0: DOT@0..1 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@1..16
+                0: IDENT@1..16 "comma-recovery" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@16..47
+        0: L_CURLY@16..17 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@17..45
+          0: CSS_DECLARATION_WITH_SEMICOLON@17..45
+            0: CSS_DECLARATION@17..44
+              0: CSS_BOGUS_PROPERTY@17..44
+                0: CSS_IDENTIFIER@17..24
+                  0: IDENT@17..24 "color" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@24..26 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@26..44
+                  0: CSS_BOGUS_SUPPORTS_CONDITION@26..44
+                    0: CSS_IDENTIFIER@26..28
+                      0: IDENT@26..28 "fn" [] []
+                    1: L_PAREN@28..29 "(" [] []
+                    2: CSS_BOGUS@29..43
+                      0: CSS_BOGUS@29..38
+                        0: CSS_BOGUS@29..38
+                          0: CSS_REGULAR_DIMENSION@29..33
+                            0: CSS_NUMBER_LITERAL@29..30 "1" [] []
+                            1: IDENT@30..33 "px" [] [Whitespace(" ")]
+                          1: CSS_BOGUS@33..38
+                            0: ERROR_TOKEN@33..35 "?" [] [Whitespace(" ")]
+                            1: CSS_DIMENSION_VALUE@35..36 "2" [] []
+                            2: PX_KW@36..38 "px" [] []
+                      1: COMMA@38..40 "," [] [Whitespace(" ")]
+                      2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@40..43
+                        0: CSS_COMPONENT_VALUE_LIST@40..43
+                          0: CSS_REGULAR_DIMENSION@40..43
+                            0: CSS_NUMBER_LITERAL@40..41 "3" [] []
+                            1: IDENT@41..43 "px" [] []
+                    3: R_PAREN@43..44 ")" [] []
+              1: (empty)
+            1: SEMICOLON@44..45 ";" [] []
+        2: R_CURLY@45..47 "}" [Newline("\n")] []
+    1: CSS_QUALIFIED_RULE@47..100
+      0: CSS_SELECTOR_LIST@47..68
+        0: CSS_COMPOUND_SELECTOR@47..68
+          0: CSS_NESTED_SELECTOR_LIST@47..47
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@47..68
+            0: CSS_CLASS_SELECTOR@47..68
+              0: DOT@47..50 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@50..68
+                0: IDENT@50..68 "operator-recovery" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@68..100
+        0: L_CURLY@68..69 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@69..98
+          0: CSS_DECLARATION_WITH_SEMICOLON@69..98
+            0: CSS_DECLARATION@69..97
+              0: CSS_BOGUS_PROPERTY@69..97
+                0: CSS_IDENTIFIER@69..76
+                  0: IDENT@69..76 "color" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@76..78 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@78..97
+                  0: CSS_BOGUS_SUPPORTS_CONDITION@78..97
+                    0: CSS_IDENTIFIER@78..80
+                      0: IDENT@78..80 "fn" [] []
+                    1: L_PAREN@80..81 "(" [] []
+                    2: CSS_BOGUS@81..96
+                      0: CSS_BOGUS@81..96
+                        0: CSS_BOGUS@81..91
+                          0: CSS_BOGUS@81..91
+                            0: CSS_REGULAR_DIMENSION@81..85
+                              0: CSS_NUMBER_LITERAL@81..82 "1" [] []
+                              1: IDENT@82..85 "px" [] [Whitespace(" ")]
+                            1: CSS_BOGUS@85..91
+                              0: ERROR_TOKEN@85..87 "?" [] [Whitespace(" ")]
+                              1: CSS_DIMENSION_VALUE@87..88 "2" [] []
+                              2: PX_KW@88..91 "px" [] [Whitespace(" ")]
+                        1: PLUS@91..93 "+" [] [Whitespace(" ")]
+                        2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@93..96
+                          0: CSS_COMPONENT_VALUE_LIST@93..96
+                            0: CSS_REGULAR_DIMENSION@93..96
+                              0: CSS_NUMBER_LITERAL@93..94 "3" [] []
+                              1: IDENT@94..96 "px" [] []
+                    3: R_PAREN@96..97 ")" [] []
+              1: (empty)
+            1: SEMICOLON@97..98 ";" [] []
+        2: R_CURLY@98..100 "}" [Newline("\n")] []
+  2: EOF@100..101 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+component_value_expression_recovery.css:2:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `?`
+  
+    1 │ .comma-recovery {
+  > 2 │ 	color: fn(1px ? 2px, 3px);
+      │ 	              ^
+    3 │ }
+    4 │ 
+  
+component_value_expression_recovery.css:6:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `?`
+  
+    5 │ .operator-recovery {
+  > 6 │ 	color: fn(1px ? 2px + 3px);
+      │ 	              ^
+    7 │ }
+    8 │ 
+  
+```

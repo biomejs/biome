@@ -54,10 +54,16 @@ impl CommentStyle for HtmlCommentStyle {
             .any(|(key, ..)| key == category!("format"))
     }
 
-    fn get_comment_kind(_comment: &SyntaxTriviaPieceComments<HtmlLanguage>) -> CommentKind {
-        // HTML comments are block comments (<!-- ... -->), not line comments
-        // They don't extend to the end of the line like // comments do
-        CommentKind::Block
+    fn get_comment_kind(comment: &SyntaxTriviaPieceComments<HtmlLanguage>) -> CommentKind {
+        // Svelte/Vue files can have JS-style `//` line comments inside tags.
+        // These must be treated as line comments so the formatter uses `line_suffix`,
+        // which forces a newline after them — preventing `>` from being swallowed.
+        // HTML `<!-- -->` comments and `/* */` block comments are both block-style.
+        if comment.text().starts_with("//") {
+            CommentKind::Line
+        } else {
+            CommentKind::Block
+        }
     }
 
     /// This allows us to override which comments are associated with which nodes.
@@ -109,6 +115,36 @@ impl CommentStyle for HtmlCommentStyle {
                         comment.preceding_node().unwrap().clone(),
                         comment,
                     );
+                }
+            }
+
+            // Attach comments between attributes to the following attribute as leading comments.
+            // This is required for suppression comments (e.g. `// biome-ignore format: reason`)
+            // to work on attributes:
+            //
+            // ```svelte
+            // <div
+            //   // biome-ignore format: reason
+            //   class="foo"
+            // >
+            // ```
+            //
+            // Without this rule, the comment would be a trailing comment of the preceding attribute
+            // (or a dangling comment of the opening element if it's the first attribute), and
+            // `is_suppressed(class_attr)` would return false.
+            //
+            // NOTE: Do NOT use `comment.kind().is_line()` here to detect `//` comments — the
+            // comment kind is determined after `place_comment()` runs in the pipeline, so
+            // `kind()` always returns `Block` at this point. Instead, inspect the text directly.
+            if matches!(
+                comment.enclosing_node().kind(),
+                HtmlSyntaxKind::HTML_OPENING_ELEMENT | HtmlSyntaxKind::HTML_SELF_CLOSING_ELEMENT
+            ) && let Some(following_node) = comment.following_node()
+            {
+                // Only re-attach for attribute-level following nodes.
+                // The closing tag case is already handled by the check above.
+                if !HtmlClosingElement::can_cast(following_node.kind()) {
+                    return CommentPlacement::leading(following_node.clone(), comment);
                 }
             }
 

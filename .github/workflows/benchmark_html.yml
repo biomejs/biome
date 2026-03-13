@@ -9,6 +9,7 @@ on:
       - next
     paths:
       - 'Cargo.lock'
+      - 'crates/biome_analyze/**/*.rs'
       - 'crates/biome_html_analyze/**/*.rs'
       - 'crates/biome_html_formatter/**/*.rs'
       - 'crates/biome_html_parser/**/*.rs'
@@ -22,6 +23,7 @@ on:
       - next
     paths:
       - 'Cargo.lock'
+      - 'crates/biome_analyze/**/*.rs'
       - 'crates/biome_html_analyze/**/*.rs'
       - 'crates/biome_html_formatter/**/*.rs'
       - 'crates/biome_html_parser/**/*.rs'

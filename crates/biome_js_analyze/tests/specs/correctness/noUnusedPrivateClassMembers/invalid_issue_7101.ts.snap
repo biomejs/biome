@@ -35,7 +35,7 @@ invalid_issue_7101.ts:2:22 lint/correctness/noUnusedPrivateClassMembers  FIXABLE
      1  1 │   class TSDoubleUnusedPrivateConstructor {
      2    │ - → constructor(private·unusedProperty·=·3,·private·anotherUnusedProperty·=·4)·{
         2 │ + → constructor(_unusedProperty·=·3,·private·anotherUnusedProperty·=·4)·{
-     3  3 │   		// This constructor has two unused private properties
+     3  3 │       // This constructor has two unused private properties
      4  4 │   
   
 
@@ -57,7 +57,7 @@ invalid_issue_7101.ts:2:50 lint/correctness/noUnusedPrivateClassMembers  FIXABLE
      1  1 │   class TSDoubleUnusedPrivateConstructor {
      2    │ - → constructor(private·unusedProperty·=·3,·private·anotherUnusedProperty·=·4)·{
         2 │ + → constructor(private·unusedProperty·=·3,·_anotherUnusedProperty·=·4)·{
-     3  3 │   		// This constructor has two unused private properties
+     3  3 │       // This constructor has two unused private properties
      4  4 │   
   
 

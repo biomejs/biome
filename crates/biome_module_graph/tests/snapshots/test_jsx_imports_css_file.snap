@@ -46,7 +46,7 @@ export function App() {
 ```
 Exports {
   "App" => {
-    ExportOwnExport => JsOwnExport::Binding(0)
+    ExportOwnExport => JsOwnExport::Binding(41..44)
   }
 }
 Imports {
@@ -64,10 +64,9 @@ Referenced classes: [
 ## Exported Bindings
 
 ```
-BindingId(0) => JsBindingData {
-  Name: App,
-  Type: unknown,
-  Declaration kind: HoistedValue
+App => BindingTypeData {
+  Types unknown,
+  Exported Ranges: (41..44)
 }
 ```
 

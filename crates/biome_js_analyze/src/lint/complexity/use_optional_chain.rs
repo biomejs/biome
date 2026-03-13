@@ -85,8 +85,19 @@ declare_lint_rule! {
     }
 }
 
+/// Result of analyzing a logical AND chain for optional chain conversion.
+pub struct LogicalAndChainNodes {
+    /// The expression nodes that need `?.` conversion.
+    nodes: VecDeque<AnyJsExpression>,
+    /// When the chain doesn't start at the beginning of the `&&` expression,
+    /// this holds the prefix expression that should be preserved.
+    /// E.g. in `bar && foo && foo.length`, the prefix is `bar` and the chain
+    /// produces `foo?.length`, so the final result is `bar && foo?.length`.
+    prefix: Option<AnyJsExpression>,
+}
+
 pub enum UseOptionalChainState {
-    LogicalAnd(VecDeque<AnyJsExpression>),
+    LogicalAnd(LogicalAndChainNodes),
     LogicalOrLike(LogicalOrLikeChain),
 }
 
@@ -141,13 +152,13 @@ impl Rule for UseOptionalChain {
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         match state {
-            UseOptionalChainState::LogicalAnd(optional_chain_expression_nodes) => {
+            UseOptionalChainState::LogicalAnd(chain_nodes) => {
                 let mut chain_with_replacement = None;
                 // We process the expression nodes in order to find the
                 // outermost expression node that needs replacement
                 // (the subject), while iteratively constructing the replacement
                 // for the chain as a whole.
-                for subject in optional_chain_expression_nodes {
+                for subject in &chain_nodes.nodes {
                     // For longer chains, we need to update the subject to take
                     // previous replacements into account. Otherwise, the new
                     // replacement would discard the previous ones.
@@ -201,6 +212,23 @@ impl Rule for UseOptionalChain {
                         .ok()?
                         .replace_node(chain, chain_replacement.clone())
                         .unwrap_or(chain_replacement)
+                };
+
+                // If there's a prefix (the chain doesn't start at the beginning
+                // of the `&&` expression), wrap the replacement in a new `&&`
+                // with the prefix on the left.
+                // E.g. `bar && foo && foo.length` → `bar && foo?.length`
+                let replacement = if let Some(prefix) = &chain_nodes.prefix {
+                    let and_token = logical.operator_token().ok()?;
+                    AnyJsExpression::from(make::js_logical_expression(
+                        prefix.clone(),
+                        make::token(T![&&])
+                            .with_leading_trivia_pieces(and_token.leading_trivia().pieces())
+                            .with_trailing_trivia_pieces(and_token.trailing_trivia().pieces()),
+                        replacement,
+                    ))
+                } else {
+                    replacement
                 };
 
                 let mut mutation = ctx.root().begin();
@@ -604,6 +632,9 @@ impl LogicalAndChain {
     /// `LogicalAndChainOrdering` by comparing their `token_text_trimmed` for
     /// every `JsAnyExpression` node.
     fn cmp_chain(&self, other: &Self) -> SyntaxResult<LogicalAndChainOrdering> {
+        if other.buf.is_empty() {
+            return Ok(LogicalAndChainOrdering::Different);
+        }
         let chain_ordering = match self.buf.len().cmp(&other.buf.len()) {
             Ordering::Less => return Ok(LogicalAndChainOrdering::Different),
             Ordering::Equal => LogicalAndChainOrdering::Equal,
@@ -697,11 +728,12 @@ impl LogicalAndChain {
     }
 
     /// This function returns a list of `JsAnyExpression` which we need to
-    /// transform into an optional chain expression.
+    /// transform into an optional chain expression, along with an optional
+    /// prefix expression that precedes the chain.
     fn optional_chain_expression_nodes(
         mut self,
         model: &SemanticModel,
-    ) -> Option<VecDeque<AnyJsExpression>> {
+    ) -> Option<LogicalAndChainNodes> {
         let mut optional_chain_expression_nodes = VecDeque::with_capacity(self.buf.len());
         // Take a head of a next sub-chain
         // E.g. `foo && foo.bar && foo.bar.baz`
@@ -712,6 +744,11 @@ impl LogicalAndChain {
         // Keep track of previous branches, so we can inspect them for optional
         // chains that were already present in said branches.
         let mut prev_branch: Option<Self> = None;
+        // Track the prefix expression for chains that don't start at the
+        // beginning of the `&&` expression. When we encounter a `Different`
+        // branch, we store the original expression (before destructuring) as
+        // the prefix.
+        let mut prefix = None;
         while let Some(expression) = next_chain_head.take() {
             let expression = match expression {
                 // Extract a left `JsAnyExpression` from `JsBinaryExpression` if
@@ -728,6 +765,10 @@ impl LogicalAndChain {
                 }
                 expression => expression,
             };
+            // Save the original expression before destructuring. If this branch
+            // turns out to be `Different`, this is the prefix we need to
+            // preserve.
+            let original_expression = expression.clone();
             let head = match expression {
                 AnyJsExpression::JsLogicalExpression(logical) => {
                     if matches!(logical.operator().ok()?, JsLogicalOperator::LogicalAnd) {
@@ -797,7 +838,13 @@ impl LogicalAndChain {
                     prev_branch = Some(branch);
                 }
                 LogicalAndChainOrdering::Equal => {}
-                LogicalAndChainOrdering::Different => return None,
+                LogicalAndChainOrdering::Different => {
+                    // The chain doesn't span the entire `&&` expression.
+                    // Store the unmatched expression as the prefix and stop
+                    // the leftward traversal.
+                    prefix = Some(original_expression);
+                    break;
+                }
             }
         }
 
@@ -833,7 +880,10 @@ impl LogicalAndChain {
         if optional_chain_expression_nodes.is_empty() {
             return None;
         }
-        Some(optional_chain_expression_nodes)
+        Some(LogicalAndChainNodes {
+            nodes: optional_chain_expression_nodes,
+            prefix,
+        })
     }
 }
 

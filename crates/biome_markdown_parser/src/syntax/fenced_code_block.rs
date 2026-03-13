@@ -33,6 +33,8 @@ use biome_parser::{
 };
 
 use crate::syntax::parse_error::unterminated_fenced_code;
+use crate::syntax::quote::try_bump_quote_marker;
+use crate::syntax::{MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES};
 
 /// Minimum number of fence characters required per CommonMark §4.5.
 const MIN_FENCE_LENGTH: usize = 3;
@@ -50,7 +52,7 @@ fn consume_indent(source: &[u8], mut idx: usize, limit: usize, required: bool) -
                 idx += 1;
             }
             Some(b'\t') => {
-                let tab_width = 4 - (column % 4);
+                let tab_width = TAB_STOP_SPACES - (column % TAB_STOP_SPACES);
                 // For optional indent, don't exceed limit with tab
                 if !required && column + tab_width > limit {
                     break;
@@ -153,10 +155,10 @@ pub(crate) fn detect_fence(s: &str) -> Option<(char, usize)> {
 /// Check if we're at a fenced code block (``` or ~~~).
 pub(crate) fn at_fenced_code_block(p: &mut MarkdownParser) -> bool {
     p.lookahead(|p| {
-        if !p.at_start_of_input() && !is_line_start_within_indent(p, 3) {
+        if !p.at_start_of_input() && !is_line_start_within_indent(p, MAX_BLOCK_PREFIX_INDENT) {
             return false;
         }
-        p.skip_line_indent(3);
+        p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
 
         let rest = p.source_after_current();
         let Some((fence_char, _)) = detect_fence(rest) else {
@@ -198,7 +200,7 @@ fn parse_fenced_code_block_impl(p: &mut MarkdownParser, force: bool) -> ParsedSy
     {
         fence_indent += p.state().list_item_required_indent;
     }
-    p.skip_line_indent(3);
+    p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
 
     // Detect fence type and length (must close with same type and >= length per CommonMark §4.5)
     let text = p.cur_text();
@@ -226,7 +228,7 @@ fn parse_fenced_code_block_impl(p: &mut MarkdownParser, force: bool) -> ParsedSy
         if p.state().list_item_required_indent > 0 && p.at_line_start() {
             p.skip_line_indent(p.state().list_item_required_indent);
         }
-        p.skip_line_indent(3);
+        p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
         bump_fence(p, is_tilde_fence);
     } else {
         // Emit diagnostic for unterminated code block
@@ -275,70 +277,190 @@ fn parse_code_content(
 
     // Consume all tokens until we see the matching closing fence or EOF
     while !p.at(T![EOF]) {
-        if at_line_start && quote_depth > 0 {
-            let prev_virtual = p.state().virtual_line_start;
-            p.state_mut().virtual_line_start = Some(p.cur_range().start());
-            p.skip_line_indent(3);
-            p.state_mut().virtual_line_start = prev_virtual;
-
-            let mut ok = true;
-            for _ in 0..quote_depth {
-                if p.at(MD_TEXTUAL_LITERAL) && p.cur_text().starts_with('>') {
-                    p.force_relex_regular();
-                }
-
-                if p.at(T![>]) {
-                    p.parse_as_skipped_trivia_tokens(|p| p.bump(T![>]));
-                } else if p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == ">" {
-                    p.parse_as_skipped_trivia_tokens(|p| p.bump_remap(T![>]));
-                } else {
-                    ok = false;
-                    break;
-                }
-
-                if p.at(MD_TEXTUAL_LITERAL) {
-                    let text = p.cur_text();
-                    if text == " " || text == "\t" {
-                        p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_TEXTUAL_LITERAL));
-                    }
-                }
-            }
-
-            if !ok {
-                break;
-            }
-            at_line_start = false;
-        }
-
-        if p.at(NEWLINE) {
-            // Preserve newlines as code content and reset virtual line start.
-            let text_m = p.start();
-            p.bump_remap(MD_TEXTUAL_LITERAL);
-            text_m.complete(p, MD_TEXTUAL);
-            p.set_virtual_line_start();
-            at_line_start = true;
-            continue;
-        }
-
-        if at_closing_fence(p, is_tilde_fence, fence_len) {
-            break;
-        }
-
-        if at_line_start && fence_indent > 0 {
-            skip_fenced_content_indent(p, fence_indent);
-            if at_closing_fence(p, is_tilde_fence, fence_len) {
-                break;
+        match prepare_next_code_content_token(
+            p,
+            is_tilde_fence,
+            fence_len,
+            fence_indent,
+            quote_depth,
+            &mut at_line_start,
+        ) {
+            CodeContentTokenAction::Break => break,
+            CodeContentTokenAction::Skip => {}
+            CodeContentTokenAction::Consume => {
+                bump_code_textual(p);
+                at_line_start = false;
             }
         }
-
-        // Consume the token as code content (including NEWLINE tokens)
-        let text_m = p.start();
-        p.bump_remap(MD_TEXTUAL_LITERAL);
-        text_m.complete(p, MD_TEXTUAL);
-        at_line_start = false;
     }
 
     m.complete(p, MD_INLINE_ITEM_LIST);
+}
+
+enum CodeContentTokenAction {
+    Break,
+    Skip,
+    Consume,
+}
+
+/// Prepare the next token inside fenced code block content.
+///
+/// Handles quote prefix consumption, newlines, closing fence detection,
+/// and indent stripping. Returns an action telling the caller how to
+/// proceed in the content loop.
+fn prepare_next_code_content_token(
+    p: &mut MarkdownParser,
+    is_tilde_fence: bool,
+    fence_len: usize,
+    fence_indent: usize,
+    quote_depth: usize,
+    at_line_start: &mut bool,
+) -> CodeContentTokenAction {
+    if *at_line_start && quote_depth > 0 && !consume_quote_prefixes_in_code_content(p, quote_depth)
+    {
+        return CodeContentTokenAction::Break;
+    }
+
+    if consume_code_newline(p) {
+        *at_line_start = true;
+        return CodeContentTokenAction::Skip;
+    }
+
+    if at_closing_fence(p, is_tilde_fence, fence_len) {
+        return CodeContentTokenAction::Break;
+    }
+
+    if *at_line_start && fence_indent > 0 {
+        skip_fenced_content_indent(p, fence_indent);
+        if at_closing_fence(p, is_tilde_fence, fence_len) {
+            return CodeContentTokenAction::Break;
+        }
+    }
+
+    // Prefix/indent consumption above can advance directly to EOF.
+    if p.at(T![EOF]) {
+        return CodeContentTokenAction::Break;
+    }
+
+    CodeContentTokenAction::Consume
+}
+
+/// Consume all expected `>` quote prefixes for the current line inside a
+/// fenced code block.
+///
+/// Uses a lookahead preflight to verify all `quote_depth` prefixes are
+/// present before consuming any. This prevents partial consumption from
+/// stealing outer blockquote markers when an inner prefix is missing
+/// (e.g., `> hello` inside a depth-2 blockquote would consume the outer
+/// `>` but fail on the missing inner `>`, corrupting outer parsing).
+///
+/// Returns `true` if all prefixes were consumed successfully, `false` if
+/// any prefix is missing — the caller should break out of the content loop.
+fn consume_quote_prefixes_in_code_content(p: &mut MarkdownParser, quote_depth: usize) -> bool {
+    // Preflight: verify all prefixes exist before consuming any.
+    let all_present = p.lookahead(|p| {
+        p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
+        for _ in 0..quote_depth {
+            if p.at(MD_TEXTUAL_LITERAL) && p.cur_text().starts_with('>') {
+                p.force_relex_regular();
+            }
+            if p.at(T![>]) {
+                p.bump(T![>]);
+            } else if p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == ">" {
+                p.bump(MD_TEXTUAL_LITERAL);
+            } else {
+                return false;
+            }
+            // Skip optional post-marker space
+            if p.at(MD_TEXTUAL_LITERAL) {
+                let text = p.cur_text();
+                if text == " " || text == "\t" {
+                    p.bump(MD_TEXTUAL_LITERAL);
+                }
+            }
+        }
+        true
+    });
+
+    if !all_present {
+        return false;
+    }
+
+    let prev_virtual = p.state().virtual_line_start;
+    p.state_mut().virtual_line_start = Some(p.cur_range().start());
+    p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
+    p.state_mut().virtual_line_start = prev_virtual;
+
+    for _ in 0..quote_depth {
+        let consumed = consume_quote_prefix_in_code_content(p);
+        debug_assert!(consumed, "preflight verified all prefixes present");
+    }
+
+    p.set_virtual_line_start();
+    true
+}
+
+/// Consume a single `> ` quote prefix (marker + optional trailing space)
+/// inside fenced code block content, emitting it as an `MdQuotePrefix` CST node.
+///
+/// Returns `true` if the prefix was consumed, `false` if the current token
+/// is not a quote marker.
+fn consume_quote_prefix_in_code_content(p: &mut MarkdownParser) -> bool {
+    if p.at(MD_TEXTUAL_LITERAL) && p.cur_text().starts_with('>') {
+        p.force_relex_regular();
+    }
+
+    if !(p.at(T![>]) || (p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == ">")) {
+        return false;
+    }
+
+    let prefix_m = p.start();
+
+    // Empty pre-marker indent list (initial indent handled by skip_line_indent).
+    let indent_list_m = p.start();
+    indent_list_m.complete(p, MD_QUOTE_INDENT_LIST);
+
+    let marker_bumped = try_bump_quote_marker(p);
+    debug_assert!(
+        marker_bumped,
+        "consume_quote_prefix_in_code_content: quote marker not found after guard confirmed `>` \
+         token — check that force_relex_regular and the guard condition are in sync"
+    );
+    if !marker_bumped {
+        prefix_m.abandon(p);
+        return false;
+    }
+
+    // Optional post-marker space
+    if p.at(MD_TEXTUAL_LITERAL) {
+        let text = p.cur_text();
+        if text == " " || text == "\t" {
+            p.bump_remap(MD_QUOTE_POST_MARKER_SPACE);
+        }
+    }
+
+    prefix_m.complete(p, MD_QUOTE_PREFIX);
+    true
+}
+
+fn consume_code_newline(p: &mut MarkdownParser) -> bool {
+    if !p.at(NEWLINE) {
+        return false;
+    }
+
+    // Preserve newlines as code content and reset virtual line start.
+    let text_m = p.start();
+    p.bump_remap(MD_TEXTUAL_LITERAL);
+    text_m.complete(p, MD_TEXTUAL);
+    p.set_virtual_line_start();
+    true
+}
+
+/// Bump the current token as code textual content (`MdTextual` node).
+fn bump_code_textual(p: &mut MarkdownParser) {
+    let text_m = p.start();
+    p.bump_remap(MD_TEXTUAL_LITERAL);
+    text_m.complete(p, MD_TEXTUAL);
 }
 
 pub(crate) fn info_string_has_backtick(p: &mut MarkdownParser) -> bool {
@@ -381,7 +503,7 @@ fn skip_fenced_content_indent(p: &mut MarkdownParser, indent: usize) {
 
         let width = text
             .chars()
-            .map(|c| if c == '\t' { 4 } else { 1 })
+            .map(|c| if c == '\t' { TAB_STOP_SPACES } else { 1 })
             .sum::<usize>();
 
         if consumed + width > indent {
@@ -389,7 +511,9 @@ fn skip_fenced_content_indent(p: &mut MarkdownParser, indent: usize) {
         }
 
         consumed += width;
-        p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_TEXTUAL_LITERAL));
+        let char_m = p.start();
+        p.bump_remap(MD_INDENT_CHAR);
+        char_m.complete(p, MD_INDENT_TOKEN);
     }
 }
 
@@ -398,9 +522,12 @@ fn line_has_closing_fence(p: &MarkdownParser, is_tilde_fence: bool, fence_len: u
         return false;
     };
 
-    let line_start = find_line_start(&source[..start]);
+    let line_start: usize = match p.state().virtual_line_start {
+        Some(virtual_start) => virtual_start.into(),
+        None => find_line_start(&source[..start]),
+    };
 
-    if !is_whitespace_prefix(source, start, line_start) {
+    if line_start != start && !is_whitespace_prefix(source, start, line_start) {
         return false;
     }
 
@@ -413,7 +540,7 @@ fn line_has_closing_fence(p: &MarkdownParser, is_tilde_fence: bool, fence_len: u
 
     // Skip optional extra indent (up to 3 spaces per CommonMark)
     // This always succeeds since required=false
-    let idx = consume_indent(source.as_bytes(), idx, 3, false).unwrap();
+    let idx = consume_indent(source.as_bytes(), idx, MAX_BLOCK_PREFIX_INDENT, false).unwrap();
 
     let fence_char = if is_tilde_fence { b'~' } else { b'`' };
     let mut fence_count = 0usize;
@@ -453,7 +580,9 @@ fn is_line_start_within_indent(p: &MarkdownParser, max_indent: usize) -> bool {
 
     let mut indent = source[virtual_start..start]
         .chars()
-        .fold(0usize, |count, c| count + if c == '\t' { 4 } else { 1 });
+        .fold(0usize, |count, c| {
+            count + if c == '\t' { TAB_STOP_SPACES } else { 1 }
+        });
 
     if p.state().virtual_line_start.is_none() && p.state().list_item_required_indent > 0 {
         indent = indent.saturating_sub(p.state().list_item_required_indent);

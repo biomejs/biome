@@ -1,0 +1,4 @@
+.test {
+  color: if(not style(--foo: bar): black ??? else: white);
+  background: if((style(--bar: baz)): red ??? else: blue);
+}

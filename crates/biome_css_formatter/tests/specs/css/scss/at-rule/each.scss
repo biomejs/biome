@@ -1,0 +1,22 @@
+.a{
+@each $item in$list{
+color:$item;
+}
+}
+
+.b{
+@each
+$key,$value
+in(
+  primary: 16px,
+secondary:24px
+){
+font-size:$value;
+}
+}
+
+.c{
+@each $animal in puma,sea-slug,egret,salamander{
+color:red;
+}
+}

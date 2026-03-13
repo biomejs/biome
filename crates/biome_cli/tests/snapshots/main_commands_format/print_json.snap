@@ -26,5 +26,5 @@ The --json option is unstable/experimental and its output might change between p
 ```
 
 ```block
-{"summary":{"changed":0,"unchanged":1,"matches":0,"errors":1,"warnings":0,"infos":0,"skipped":0,"suggestedFixesSkipped":0,"diagnosticsNotPrinted":0},"diagnostics":[{"severity":"error","message":"Formatter would have printed the following content:","category":"format","location":{"path":"format.js","start":{"line":0,"column":0},"end":{"line":0,"column":0}},"advices":[]}],"command":"format"}
+{"summary":{"changed":0,"unchanged":1,"matches":0,"duration":"<TIME>","errors":1,"warnings":0,"infos":0,"skipped":0,"suggestedFixesSkipped":0,"diagnosticsNotPrinted":0,"scannerDuration":"<TIME>"},"diagnostics":[{"severity":"error","message":"Formatter would have printed the following content:","category":"format","location":{"path":"format.js","start":{"line":0,"column":0},"end":{"line":0,"column":0}},"advices":[]}],"command":"format"}
 ```

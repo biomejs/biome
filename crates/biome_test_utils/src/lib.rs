@@ -15,7 +15,7 @@ use biome_diagnostics::termcolor::Buffer;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
 use biome_fs::MemoryFileSystem;
 use biome_fs::{BiomePath, FileSystem, OsFileSystem};
-use biome_html_parser::HtmlParseOptions;
+use biome_html_parser::HtmlParserOptions;
 use biome_html_syntax::HtmlRoot;
 use biome_js_parser::{AnyJsRoot, JsParserOptions};
 use biome_js_type_info::{TypeData, TypeResolver};
@@ -409,7 +409,11 @@ fn get_css_like_paths_in_dir(dir: &Utf8Path) -> Vec<BiomePath> {
 pub fn get_added_js_paths<'a>(
     fs: &dyn FileSystem,
     paths: &'a [BiomePath],
-) -> Vec<(&'a BiomePath, AnyJsRoot)> {
+) -> Vec<(
+    &'a BiomePath,
+    AnyJsRoot,
+    std::sync::Arc<biome_js_semantic::SemanticModel>,
+)> {
     paths
         .iter()
         .filter_map(|path| {
@@ -429,7 +433,14 @@ pub fn get_added_js_paths<'a>(
                 );
                 parsed.try_tree()
             })?;
-            Some((path, root))
+
+            // Build semantic model for the parsed root
+            let semantic_model = biome_js_semantic::semantic_model(
+                &root,
+                biome_js_semantic::SemanticModelOptions::default(),
+            );
+
+            Some((path, root, std::sync::Arc::new(semantic_model)))
         })
         .collect()
 }
@@ -481,7 +492,7 @@ pub fn get_html_added_paths<'a>(
             };
             let root = fs.read_file_from_path(path).ok().map(|content| {
                 let parsed =
-                    biome_html_parser::parse_html(&content, HtmlParseOptions::from(&file_source));
+                    biome_html_parser::parse_html(&content, HtmlParserOptions::from(&file_source));
                 let diagnostics = parsed.diagnostics();
                 assert!(
                     diagnostics.is_empty(),

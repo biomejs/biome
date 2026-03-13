@@ -1,6 +1,6 @@
 use super::*;
 use biome_js_syntax::JsSyntaxNode;
-use std::rc::Rc;
+use std::sync::Arc;
 
 #[derive(Debug)]
 pub struct SemanticModelGlobalBindingData {
@@ -14,15 +14,16 @@ pub struct SemanticModelGlobalReferenceData {
 }
 
 pub struct GlobalReference {
-    pub(crate) data: Rc<SemanticModelData>,
+    pub(crate) data: Arc<SemanticModelData>,
     pub(crate) global_id: u32,
     pub(crate) id: u32,
 }
 
 impl GlobalReference {
-    pub fn syntax(&self) -> &JsSyntaxNode {
+    pub fn syntax(&self) -> JsSyntaxNode {
         let reference = &self.data.global(self.global_id).references[self.id as usize];
-        &self.data.binding_node_by_start[&reference.range_start]
+        self.data.binding_node_by_start[&reference.range_start]
+            .to_node(self.data.to_root().syntax())
     }
 
     /// Returns if this reference is just reading its binding

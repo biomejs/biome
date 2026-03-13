@@ -114,8 +114,8 @@ impl WorkspaceError {
         })
     }
 
-    pub fn not_found() -> Self {
-        Self::NotFound(NotFound)
+    pub fn not_found(path: impl Into<String>) -> Self {
+        Self::NotFound(NotFound { path: path.into() })
     }
 
     #[inline]
@@ -257,10 +257,16 @@ pub struct NonUtf8Path {
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
 #[diagnostic(
     category = "internalError/fs",
-    message = "The file does not exist in the workspace.",
+    message(
+        message("The file "{self.path}" does not exist in the workspace."),
+        description = "The file {path} does not exist in the workspace."
+    ),
     tags(INTERNAL)
 )]
-pub struct NotFound;
+pub struct NotFound {
+    #[location(resource)]
+    path: String,
+}
 
 #[derive(Debug, Diagnostic, Deserialize, Serialize)]
 #[diagnostic(category = "internalError/panic", severity = Fatal, tags(INTERNAL))]
@@ -700,7 +706,7 @@ pub struct ConfigurationOutsideProject;
 
 #[cfg(test)]
 mod test {
-    use crate::diagnostics::{CantReadFile, FileIgnored, NotFound, SourceFileNotSupported};
+    use crate::diagnostics::{CantReadFile, FileIgnored, SourceFileNotSupported};
     use crate::file_handlers::DocumentFileSource;
     use crate::{TransportError, WorkspaceError};
     use biome_diagnostics::{DiagnosticExt, Error, print_diagnostic_to_string};
@@ -751,7 +757,7 @@ mod test {
     fn not_found() {
         snap_diagnostic(
             "not_found",
-            WorkspaceError::NotFound(NotFound).with_file_path("not_found.js"),
+            WorkspaceError::not_found("not_found.js").into(),
         )
     }
 

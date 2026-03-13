@@ -1031,7 +1031,6 @@ let {
 
 <!-- used as value here -->
 <AvatarPrimitive.Fallback
-	bind:ref
 	class="something nice"
 />
 "#
@@ -1049,6 +1048,54 @@ let {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "use_import_type_not_triggered_for_enum_in_template_v2",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn use_import_type_not_triggered_for_components_in_template() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.astro");
+    fs.insert(
+        file.into(),
+        r#"---
+import type { ComponentProps } from "astro/types";
+
+import Badge from "@/components/mdx-components/Badge.astro";
+
+interface Props {
+	badge?: ComponentProps<typeof Badge>;
+}
+
+const { badge } = Astro.props;
+---
+
+{badge && <Badge text={badge.text} variant={badge.variant} />}
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=useImportType", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "use_import_type_not_triggered_for_components_in_template",
         fs,
         console,
         result,

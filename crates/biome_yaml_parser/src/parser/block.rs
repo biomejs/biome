@@ -12,7 +12,9 @@ use biome_yaml_syntax::{
     YamlSyntaxKind::{self, *},
 };
 
-use crate::parser::{flow::parse_any_flow_node, parse_error::expected_header};
+use crate::parser::{
+    flow::parse_any_flow_node, parse_error::expected_header, property::PropertyList,
+};
 
 use super::{
     YamlParser,
@@ -23,19 +25,28 @@ use super::{
 };
 
 pub(crate) fn parse_any_block_node(p: &mut YamlParser) -> ParsedSyntax {
-    if p.at(MAPPING_START) {
-        Present(parse_block_mapping(p))
-    } else if p.at(SEQUENCE_START) {
-        Present(parse_block_sequence(p))
-    } else if p.at(FLOW_START) {
+    if p.at(FLOW_START) {
         Present(parse_flow_in_block_node(p))
-    } else if p.at(T![|]) {
-        Present(parse_literal_scalar(p))
-    } else if p.at(T![>]) {
-        Present(parse_folded_scalar(p))
+    } else if is_at_block_in_block_node(p) {
+        Present(parse_block_in_block_node(p))
     } else {
         Absent
     }
+}
+fn parse_block_in_block_node(p: &mut YamlParser) -> CompletedMarker {
+    let m = p.start();
+    PropertyList.parse_list(p);
+    if p.at(MAPPING_START) {
+        parse_block_mapping(p);
+    } else if p.at(SEQUENCE_START) {
+        parse_block_sequence(p);
+    } else if p.at(T![|]) {
+        parse_literal_scalar(p);
+    } else if p.at(T![>]) {
+        parse_folded_scalar(p);
+    }
+    // TODO: provide diagnostic when block content is empty but property list is not
+    m.complete(p, YAML_BLOCK_IN_BLOCK_NODE)
 }
 
 fn parse_block_mapping(p: &mut YamlParser) -> CompletedMarker {
@@ -331,8 +342,12 @@ fn parse_block_content(p: &mut YamlParser) -> CompletedMarker {
     m.complete(p, YAML_BLOCK_CONTENT)
 }
 
+fn is_at_block_in_block_node(p: &YamlParser) -> bool {
+    p.at(MAPPING_START) || p.at(SEQUENCE_START) || p.at(T![|]) || p.at(T![>])
+}
+
 pub(crate) fn is_at_any_block_node(p: &YamlParser) -> bool {
-    p.at(MAPPING_START) || p.at(SEQUENCE_START) || p.at(FLOW_START) || p.at(T![|]) || p.at(T![>])
+    is_at_block_in_block_node(p) || p.at(FLOW_START)
 }
 
 fn is_at_explicit_mapping_key(p: &YamlParser) -> bool {

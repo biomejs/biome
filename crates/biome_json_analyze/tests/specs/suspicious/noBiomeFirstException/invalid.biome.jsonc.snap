@@ -32,13 +32,13 @@ invalid.biome.jsonc:5:4 lint/suspicious/noBiomeFirstException  FIXABLE  ━━�
   
   i Safe fix: Add the pattern ** at the beginning of the list.
   
-    3  3 │   	"files": {
-    4  4 │   		"includes": [
+    3  3 │     "files": {
+    4  4 │       "includes": [
     5    │ - → → → "!dist/**"
        5 │ + → → → "**",
        6 │ + → → → "!dist/**"
-    6  7 │   		]
-    7  8 │   	}
+    6  7 │       ]
+    7  8 │     }
   
 
 ```
