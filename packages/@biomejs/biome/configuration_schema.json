@@ -5382,6 +5382,40 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUntrustedLicensesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUntrustedLicensesOptions" }
+			]
+		},
+		"NoUntrustedLicensesOptions": {
+			"type": "object",
+			"properties": {
+				"allow": {
+					"description": "Additional license identifiers to trust, beyond valid SPDX identifiers.\n\nUseful for custom or proprietary licenses that are not part of the SPDX\nstandard but are acceptable in your project.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"deny": {
+					"description": "License identifiers to explicitly deny, even if they are valid SPDX identifiers.\n\nUse this to block specific licenses that your project or organization can't use (e.g.,\ncopyleft licenses in a proprietary project).",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"ignoreDeprecated": {
+					"description": "When `true`, deprecated SPDX license identifiers are accepted.\nWhen `false`, deprecated licenses are flagged as untrusted.\nDefaults to `false`.",
+					"type": ["boolean", "null"]
+				},
+				"requireFsfLibre": {
+					"description": "When `true`, only licenses recognized as free/libre by the Free Software\nFoundation (FSF) are trusted. Licenses in the `allow` list bypass this check.\nDefaults to `false`.",
+					"type": ["boolean", "null"]
+				},
+				"requireOsiApproved": {
+					"description": "When `true`, only licenses approved by the Open Source Initiative (OSI)\nare trusted. Licenses in the `allow` list bypass this check.\nDefaults to `false`.",
+					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoUnusedExpressionsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6246,6 +6280,13 @@
 					"description": "Disallow unnecessary type-based conditions that can be statically determined as redundant.\nSee https://biomejs.dev/linter/rules/no-unnecessary-conditions",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnnecessaryConditionsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUntrustedLicenses": {
+					"description": "Disallow dependencies with untrusted licenses.\nSee https://biomejs.dev/linter/rules/no-untrusted-licenses",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUntrustedLicensesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9539,6 +9580,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUnsafeOptionalChainingOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUntrustedLicensesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUntrustedLicensesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
