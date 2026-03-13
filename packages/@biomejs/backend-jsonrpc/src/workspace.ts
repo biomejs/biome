@@ -2301,6 +2301,11 @@ See https://biomejs.dev/linter/rules/no-unnecessary-conditions
 	 */
 	noUnnecessaryConditions?: NoUnnecessaryConditionsConfiguration;
 	/**
+	* Disallow dependencies with untrusted licenses.
+See https://biomejs.dev/linter/rules/no-untrusted-licenses 
+	 */
+	noUntrustedLicenses?: NoUntrustedLicensesConfiguration;
+	/**
 	* Disallow redundant return statements.
 See https://biomejs.dev/linter/rules/no-useless-return 
 	 */
@@ -4236,6 +4241,9 @@ export type NoUnknownAttributeConfiguration =
 export type NoUnnecessaryConditionsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnnecessaryConditionsOptions;
+export type NoUntrustedLicensesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUntrustedLicensesOptions;
 export type NoUselessReturnConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessReturnOptions;
@@ -5935,6 +5943,10 @@ export interface RuleWithNoUnnecessaryConditionsOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnnecessaryConditionsOptions;
 }
+export interface RuleWithNoUntrustedLicensesOptions {
+	level: RulePlainConfiguration;
+	options?: NoUntrustedLicensesOptions;
+}
 export interface RuleWithNoUselessReturnOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -7444,6 +7456,40 @@ export interface NoUnknownAttributeOptions {
 	ignore?: string[];
 }
 export type NoUnnecessaryConditionsOptions = {};
+export interface NoUntrustedLicensesOptions {
+	/**
+	* Additional license identifiers to trust, beyond valid SPDX identifiers.
+
+Useful for custom or proprietary licenses that are not part of the SPDX
+standard but are acceptable in your project. 
+	 */
+	allow?: string[];
+	/**
+	* License identifiers to explicitly deny, even if they are valid SPDX identifiers.
+
+Use this to block specific licenses that your project or organization can't use (e.g.,
+copyleft licenses in a proprietary project). 
+	 */
+	deny?: string[];
+	/**
+	* When `true`, deprecated SPDX license identifiers are accepted.
+When `false`, deprecated licenses are flagged as untrusted.
+Defaults to `false`. 
+	 */
+	ignoreDeprecated?: boolean;
+	/**
+	* When `true`, only licenses recognized as free/libre by the Free Software
+Foundation (FSF) are trusted. Licenses in the `allow` list bypass this check.
+Defaults to `false`. 
+	 */
+	requireFsfLibre?: boolean;
+	/**
+	* When `true`, only licenses approved by the Open Source Initiative (OSI)
+are trusted. Licenses in the `allow` list bypass this check.
+Defaults to `false`. 
+	 */
+	requireOsiApproved?: boolean;
+}
 export type NoUselessReturnOptions = {};
 export type NoVueArrowFuncInWatchOptions = {};
 export type NoVueOptionsApiOptions = {};
@@ -8499,6 +8545,7 @@ export type Category =
 	| "lint/nursery/noUndeclaredEnvVars"
 	| "lint/nursery/noUnknownAttribute"
 	| "lint/nursery/noUnnecessaryConditions"
+	| "lint/nursery/noUntrustedLicenses"
 	| "lint/nursery/noUnwantedPolyfillio"
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessReturn"
