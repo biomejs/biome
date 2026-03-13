@@ -471,9 +471,15 @@ fn is_email_autolink(text: &str) -> bool {
         return false;
     }
 
-    for c in domain.chars() {
-        if !c.is_ascii_alphanumeric() && c != '-' && c != '.' {
+    for label in domain.split('.') {
+        if label.is_empty() || label.len() > 63 || label.starts_with('-') || label.ends_with('-') {
             return false;
+        }
+
+        for c in label.chars() {
+            if !c.is_ascii_alphanumeric() && c != '-' {
+                return false;
+            }
         }
     }
 
