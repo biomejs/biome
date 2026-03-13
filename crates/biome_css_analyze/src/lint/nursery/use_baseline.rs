@@ -214,7 +214,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseBaseline {
-        version: "next",
+        version: "2.4.7",
         name: "useBaseline",
         language: "css",
         recommended: false,
