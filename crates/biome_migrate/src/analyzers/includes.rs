@@ -33,7 +33,6 @@ impl Rule for Includes {
                 .name()
                 .ok()
                 .and_then(|name| name.inner_string_text())
-                .and_then(|r| r.ok())
             else {
                 continue;
             };
@@ -194,7 +193,7 @@ impl State {
                 globs.push(AnyJsonValue::JsonStringValue(new_glob));
             }
         }
-        let separator_count = globs.len().checked_sub(1).unwrap_or_default();
+        let separator_count = globs.len().saturating_sub(1);
         let separators = (0..separator_count)
             .map(|_| make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]));
         make::json_array_value(
@@ -211,11 +210,7 @@ impl TryFrom<JsonObjectValue> for State {
     fn try_from(value: JsonObjectValue) -> Result<Self, Self::Error> {
         let mut result = Self::default();
         for member in value.json_member_list().into_iter().flatten() {
-            let member_name = member
-                .name()
-                .ok()
-                .and_then(|name| name.inner_string_text())
-                .and_then(|r| r.ok());
+            let member_name = member.name().ok().and_then(|name| name.inner_string_text());
             if member_name.as_ref().is_some_and(|name| name == &"include") {
                 result.include = Some(member);
             } else if member_name.as_ref().is_some_and(|name| name == &"ignore") {

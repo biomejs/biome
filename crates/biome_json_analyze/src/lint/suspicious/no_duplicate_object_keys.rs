@@ -1,4 +1,4 @@
-use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
+use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule, RuleSource};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_json_syntax::{JsonMemberName, JsonObjectValue, TextRange};
@@ -34,6 +34,7 @@ declare_lint_rule! {
         language: "json",
         recommended: true,
         severity: Severity::Error,
+        sources: &[RuleSource::EslintJson("no-duplicate-keys").same()],
     }
 }
 

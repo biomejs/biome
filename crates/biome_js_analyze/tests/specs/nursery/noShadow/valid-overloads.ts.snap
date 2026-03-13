@@ -1,0 +1,86 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-overloads.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+// Constructor overloads: same parameter name in overloads and implementation
+class Foo {
+    prop: number | boolean;
+
+    constructor(param1: number);
+    constructor(otherName: boolean);
+    constructor(dodo: boolean);
+    constructor(param1: boolean | number) {
+        this.prop = param1;
+        const otherName = 5;
+    }
+
+    param1 = 5;
+
+    // Method using same names as constructor overload parameters
+    method(param1: string): void;
+    method(otherName: boolean): void;
+    method(param1: string | boolean): void {
+        let dodo: number;
+    }
+}
+
+// Constructor overloads with different parameter names in implementation
+class Bar {
+    constructor(a: number);
+    constructor(b: number) {}
+
+    // Method using same name as constructor overload parameter
+    doThing(a: number) {}
+}
+
+// Class without overloads: parameter names can be reused in methods
+class Baz {
+    private apple: null;
+    constructor(apple: null) {}
+    bakeAPie(apple: null) {}
+}
+
+// Regular overloaded functions
+function overloaded(prop: string): void;
+function overloaded(prop: number): void;
+function overloaded(prop: string | number) {}
+
+// Method overloads
+class MethodOverloads {
+    method(x: string): void;
+    method(x: number): void;
+    method(x: string | number): void {}
+}
+
+// Rest parameters in function overload signatures
+function withRest(...args: string[]): void;
+function withRest(...args: number[]): void;
+function withRest(...args: (string | number)[]) {}
+
+// Rest parameters in constructor overload signatures
+class RestConstructor {
+    constructor(...items: string[]);
+    constructor(...items: number[]);
+    constructor(...items: (string | number)[]) {}
+
+    doStuff(...items: boolean[]) {}
+}
+
+// Rest parameters in method overload signatures
+class RestMethod {
+    method(...vals: string[]): void;
+    method(...vals: number[]): void;
+    method(...vals: (string | number)[]): void {}
+}
+
+// Overload signature parameters should not shadow outer-scope variables
+// (only the overload signatures, the implementation is a real parameter)
+const outerVar = 10;
+function overloaded2(outerVar: string): void;
+function overloaded2(outerVar: number): void;
+
+```

@@ -10,8 +10,7 @@ When you do your job, refer to the @../../crates/biome_analyze/CONTRIBUTING.md t
 
 **Available Skills:**
 Reference these skills from @../../.claude/skills/ for step-by-step workflows:
-- **lint-rule-development** - Scaffolding, implementation patterns, semantic model usage, testing
-- **rule-options** - Implementing configurable rule options
+- **lint-rule-development** - Scaffolding, implementation patterns, semantic model usage, testing, configurable options
 - **type-inference** - Working with module graph and type system for type-aware rules
 - **testing-codegen** - Testing workflows, snapshot management, code generation
 - **diagnostics-development** - Creating clear, actionable error messages

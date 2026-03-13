@@ -1,0 +1,20 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `styles.css`
+
+```css
+:global(.reset) {
+  margin: 0;
+}
+:global(.base) {
+  padding: 0;
+}
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

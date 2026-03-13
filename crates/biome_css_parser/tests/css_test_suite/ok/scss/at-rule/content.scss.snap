@@ -1,0 +1,151 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@mixin hoverable {
+  @content;
+  @content($value, $fallback: 10px);
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: ScssMixinAtRule {
+                mixin_token: MIXIN_KW@1..7 "mixin" [] [Whitespace(" ")],
+                name: CssIdentifier {
+                    value_token: IDENT@7..17 "hoverable" [] [Whitespace(" ")],
+                },
+                parameters: missing (optional),
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@17..18 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssAtRule {
+                            at_token: AT@18..22 "@" [Newline("\n"), Whitespace("  ")] [],
+                            rule: ScssContentAtRule {
+                                content_token: CONTENT_KW@22..29 "content" [] [],
+                                arguments: missing (optional),
+                                semicolon_token: SEMICOLON@29..30 ";" [] [],
+                            },
+                        },
+                        CssAtRule {
+                            at_token: AT@30..34 "@" [Newline("\n"), Whitespace("  ")] [],
+                            rule: ScssContentAtRule {
+                                content_token: CONTENT_KW@34..41 "content" [] [],
+                                arguments: ScssIncludeArgumentList {
+                                    l_paren_token: L_PAREN@41..42 "(" [] [],
+                                    items: CssParameterList [
+                                        ScssExpression {
+                                            items: ScssExpressionItemList [
+                                                ScssIdentifier {
+                                                    dollar_token: DOLLAR@42..43 "$" [] [],
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@43..48 "value" [] [],
+                                                    },
+                                                },
+                                            ],
+                                        },
+                                        COMMA@48..50 "," [] [Whitespace(" ")],
+                                        ScssExpression {
+                                            items: ScssExpressionItemList [
+                                                ScssKeywordArgument {
+                                                    name: ScssIdentifier {
+                                                        dollar_token: DOLLAR@50..51 "$" [] [],
+                                                        name: CssIdentifier {
+                                                            value_token: IDENT@51..59 "fallback" [] [],
+                                                        },
+                                                    },
+                                                    colon_token: COLON@59..61 ":" [] [Whitespace(" ")],
+                                                    value: ScssExpression {
+                                                        items: ScssExpressionItemList [
+                                                            CssRegularDimension {
+                                                                value_token: CSS_NUMBER_LITERAL@61..63 "10" [] [],
+                                                                unit_token: IDENT@63..65 "px" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                    r_paren_token: R_PAREN@65..66 ")" [] [],
+                                },
+                                semicolon_token: SEMICOLON@66..67 ";" [] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@67..69 "}" [Newline("\n")] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@69..70 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..70
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..69
+    0: CSS_AT_RULE@0..69
+      0: AT@0..1 "@" [] []
+      1: SCSS_MIXIN_AT_RULE@1..69
+        0: MIXIN_KW@1..7 "mixin" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@7..17
+          0: IDENT@7..17 "hoverable" [] [Whitespace(" ")]
+        2: (empty)
+        3: CSS_DECLARATION_OR_RULE_BLOCK@17..69
+          0: L_CURLY@17..18 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@18..67
+            0: CSS_AT_RULE@18..30
+              0: AT@18..22 "@" [Newline("\n"), Whitespace("  ")] []
+              1: SCSS_CONTENT_AT_RULE@22..30
+                0: CONTENT_KW@22..29 "content" [] []
+                1: (empty)
+                2: SEMICOLON@29..30 ";" [] []
+            1: CSS_AT_RULE@30..67
+              0: AT@30..34 "@" [Newline("\n"), Whitespace("  ")] []
+              1: SCSS_CONTENT_AT_RULE@34..67
+                0: CONTENT_KW@34..41 "content" [] []
+                1: SCSS_INCLUDE_ARGUMENT_LIST@41..66
+                  0: L_PAREN@41..42 "(" [] []
+                  1: CSS_PARAMETER_LIST@42..65
+                    0: SCSS_EXPRESSION@42..48
+                      0: SCSS_EXPRESSION_ITEM_LIST@42..48
+                        0: SCSS_IDENTIFIER@42..48
+                          0: DOLLAR@42..43 "$" [] []
+                          1: CSS_IDENTIFIER@43..48
+                            0: IDENT@43..48 "value" [] []
+                    1: COMMA@48..50 "," [] [Whitespace(" ")]
+                    2: SCSS_EXPRESSION@50..65
+                      0: SCSS_EXPRESSION_ITEM_LIST@50..65
+                        0: SCSS_KEYWORD_ARGUMENT@50..65
+                          0: SCSS_IDENTIFIER@50..59
+                            0: DOLLAR@50..51 "$" [] []
+                            1: CSS_IDENTIFIER@51..59
+                              0: IDENT@51..59 "fallback" [] []
+                          1: COLON@59..61 ":" [] [Whitespace(" ")]
+                          2: SCSS_EXPRESSION@61..65
+                            0: SCSS_EXPRESSION_ITEM_LIST@61..65
+                              0: CSS_REGULAR_DIMENSION@61..65
+                                0: CSS_NUMBER_LITERAL@61..63 "10" [] []
+                                1: IDENT@63..65 "px" [] []
+                  2: R_PAREN@65..66 ")" [] []
+                2: SEMICOLON@66..67 ";" [] []
+          2: R_CURLY@67..69 "}" [Newline("\n")] []
+  2: EOF@69..70 "" [Newline("\n")] []
+
+```

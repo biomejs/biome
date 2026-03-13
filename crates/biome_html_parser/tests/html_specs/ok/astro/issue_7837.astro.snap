@@ -79,17 +79,15 @@ HtmlRoot {
                                     value_token: HTML_LITERAL@452..460 "Counter" [] [Whitespace(" ")],
                                 },
                                 attributes: HtmlAttributeList [
-                                    HtmlAttribute {
-                                        name: HtmlAttributeName {
-                                            value_token: HTML_LITERAL@460..466 "client" [] [],
+                                    AstroClientDirective {
+                                        client_token: CLIENT_KW@460..466 "client" [] [],
+                                        value: AstroDirectiveValue {
+                                            colon_token_token: COLON@466..467 ":" [] [],
+                                            name: HtmlAttributeName {
+                                                value_token: HTML_LITERAL@467..471 "load" [] [],
+                                            },
+                                            initializer: missing (optional),
                                         },
-                                        initializer: missing (optional),
-                                    },
-                                    HtmlAttribute {
-                                        name: HtmlAttributeName {
-                                            value_token: HTML_LITERAL@466..471 ":load" [] [],
-                                        },
-                                        initializer: missing (optional),
                                     },
                                 ],
                                 r_angle_token: R_ANGLE@471..472 ">" [] [],
@@ -194,14 +192,13 @@ HtmlRoot {
                 1: HTML_COMPONENT_NAME@452..460
                   0: HTML_LITERAL@452..460 "Counter" [] [Whitespace(" ")]
                 2: HTML_ATTRIBUTE_LIST@460..471
-                  0: HTML_ATTRIBUTE@460..466
-                    0: HTML_ATTRIBUTE_NAME@460..466
-                      0: HTML_LITERAL@460..466 "client" [] []
-                    1: (empty)
-                  1: HTML_ATTRIBUTE@466..471
-                    0: HTML_ATTRIBUTE_NAME@466..471
-                      0: HTML_LITERAL@466..471 ":load" [] []
-                    1: (empty)
+                  0: ASTRO_CLIENT_DIRECTIVE@460..471
+                    0: CLIENT_KW@460..466 "client" [] []
+                    1: ASTRO_DIRECTIVE_VALUE@466..471
+                      0: COLON@466..467 ":" [] []
+                      1: HTML_ATTRIBUTE_NAME@467..471
+                        0: HTML_LITERAL@467..471 "load" [] []
+                      2: (empty)
                 3: R_ANGLE@471..472 ">" [] []
               1: HTML_ELEMENT_LIST@472..493
                 0: HTML_ELEMENT@472..493

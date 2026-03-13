@@ -51,7 +51,7 @@ issue6278.js:4:8 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━�
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency myFn to the list.
   
     7 │ → },·[myFn]);
       │       ++++   

@@ -2,7 +2,7 @@
 
 use biome_markdown_factory::MarkdownSyntaxFactory;
 use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode, MdDocument};
-use biome_parser::{prelude::ParseDiagnostic, tree_sink::LosslessTreeSink};
+use biome_parser::{AnyParse, NodeParse, prelude::ParseDiagnostic, tree_sink::LosslessTreeSink};
 use biome_rowan::{AstNode, NodeCache};
 use parser::MarkdownParser;
 use syntax::parse_document;
@@ -18,7 +18,7 @@ mod token_source;
 #[cfg(feature = "test_utils")]
 mod to_html;
 
-pub use parser::MarkdownParseOptions;
+pub use parser::MarkdownParserOptions;
 
 #[cfg(feature = "test_utils")]
 pub use to_html::document_to_html;
@@ -29,14 +29,14 @@ pub(crate) type MarkdownLosslessTreeSink<'source> =
 /// Parse markdown source code with default options.
 pub fn parse_markdown(source: &str) -> MarkdownParse {
     let mut cache = NodeCache::default();
-    parse_markdown_with_cache(source, &mut cache, MarkdownParseOptions::default())
+    parse_markdown_with_cache(source, &mut cache, MarkdownParserOptions::default())
 }
 
 /// Parse markdown source code with custom options and a node cache.
 pub fn parse_markdown_with_cache(
     source: &str,
     cache: &mut NodeCache,
-    options: MarkdownParseOptions,
+    options: MarkdownParserOptions,
 ) -> MarkdownParse {
     let link_definitions =
         link_reference::collect_link_reference_definitions(source, options.clone());
@@ -128,5 +128,13 @@ impl MarkdownParse {
     /// Panics if the node represented by this parse result mismatches.
     pub fn tree(&self) -> MdDocument {
         MdDocument::unwrap_cast(self.syntax())
+    }
+}
+
+impl From<MarkdownParse> for AnyParse {
+    fn from(parse: MarkdownParse) -> Self {
+        let root = parse.syntax();
+        let diagnostics = parse.into_diagnostics();
+        NodeParse::new(root.as_send().unwrap(), diagnostics).into()
     }
 }

@@ -22,6 +22,8 @@ mod grit_tree;
 mod linearization;
 mod pattern_compiler;
 mod source_location_ext;
+#[doc(hidden)]
+pub mod testing;
 mod util;
 mod variables;
 

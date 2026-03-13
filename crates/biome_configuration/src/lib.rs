@@ -18,6 +18,7 @@ pub mod grit;
 pub mod html;
 pub mod javascript;
 pub mod json;
+pub mod markdown;
 pub mod max_size;
 mod overrides;
 pub mod vcs;
@@ -34,6 +35,7 @@ use crate::graphql::{GraphqlFormatterConfiguration, GraphqlLinterConfiguration};
 pub use crate::grit::{GritConfiguration, grit_configuration};
 use crate::javascript::{JsFormatterConfiguration, JsLinterConfiguration};
 use crate::json::{JsonFormatterConfiguration, JsonLinterConfiguration};
+pub use crate::markdown::{MarkdownConfiguration, markdown_configuration};
 use crate::max_size::MaxSize;
 use crate::vcs::{VcsConfiguration, vcs_configuration};
 pub use analyzer::{
@@ -152,6 +154,12 @@ pub struct Configuration {
     #[bpaf(external(css_configuration), optional)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub css: Option<CssConfiguration>,
+
+    /// Specific configuration for the Markdown language
+    #[bpaf(external(markdown_configuration), optional, hide)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "markdown")]
+    pub markdown: Option<MarkdownConfiguration>,
 
     /// Specific configuration for the GraphQL language
     #[bpaf(external(graphql_configuration), optional)]

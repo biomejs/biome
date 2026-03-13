@@ -170,8 +170,8 @@ invalidJsdoc.ts:32:2 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━�
   
   i Unsafe fix: Combine overloads using a type union.
   
-    29 29 │   	// a b c d e f g...
-    30 30 │   	(a: string, b: number, c: number): string;
+    29 29 │     // a b c d e f g...
+    30 30 │     (a: string, b: number, c: number): string;
     31    │ - → /***************************·HIJKLMNOPQRS·*/
     32    │ - → (a:·number,·b:·number,·c:·string):·string;
     33    │ - → /*·t·u·v·w·x·y·z·*/
@@ -203,12 +203,12 @@ invalidJsdoc.ts:40:2 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━�
     38 38 │   class banana {
     39    │ - → /**·bake·a·cake·*/
     40    │ - → public·bake(cakeType:·string):·void;
-    41 39 │   	/** bake a cake */
+    41 39 │     /** bake a cake */
     42    │ - → public·bake(flourAmt:·number):·void;
        40 │ + → → /**·bake·a·cake·*/
        41 │ + → public·bake(flourAmt:·number·|·string):·void;
-    43 42 │   	/** bake a cake */
-    44 43 │   	public bake(ingredients: object): void;
+    43 42 │     /** bake a cake */
+    44 43 │     public bake(ingredients: object): void;
   
 
 ```

@@ -1,6 +1,7 @@
 ---
 name: lint-rule-development
-description: Step-by-step guide for creating and implementing lint rules in Biome's analyzer. Use when implementing rules like noVar, useConst, or any custom lint/assist rule. Examples:<example>User wants to create a rule that detects unused variables</example><example>User needs to add code actions to fix diagnostic issues</example><example>User is implementing semantic analysis for binding references</example>
+description: Step-by-step guide for creating and implementing lint rules in Biome's analyzer. Use when implementing rules like noVar, useConst, or any custom lint/assist rule, adding code actions to fix diagnostics, implementing semantic analysis for binding references, or adding configurable options to rules.
+compatibility: Designed for coding agents working on the Biome codebase (github.com/biomejs/biome).
 ---
 
 ## Purpose
@@ -12,6 +13,19 @@ Use this skill when creating new lint rules or assist actions for Biome. It prov
 1. Install required tools: `just install-tools`
 2. Ensure `cargo`, `just`, and `pnpm` are available
 3. Read `crates/biome_analyze/CONTRIBUTING.md` for in-depth concepts
+
+## Code Standards
+
+**CRITICAL: No Emojis**
+
+Emojis are BANNED in all lint rule code:
+- NO emojis in rustdoc comments
+- NO emojis in diagnostic messages
+- NO emojis in code action descriptions
+- NO emojis in test files or test comments
+- NO emojis anywhere in the rule implementation
+
+Keep all code and documentation professional and emoji-free.
 
 ## Common Workflows
 
@@ -59,12 +73,12 @@ impl Rule for UseMyRuleName {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let binding = ctx.query();
-        
+
         // Check if identifier matches your rule logic
         if binding.name_token().ok()?.text() == "prohibited_name" {
             return Some(());
         }
-        
+
         None
     }
 
@@ -74,44 +88,84 @@ impl Rule for UseMyRuleName {
             RuleDiagnostic::new(
                 rule_category!(),
                 node.range(),
+                // Pillar 1 — WHAT the error is.
                 markup! {
-                    "Avoid using this identifier."
+                    "This identifier "<Emphasis>"prohibited_name"</Emphasis>" is not allowed."
                 },
             )
+            // Pillar 2 — WHY it is triggered / why it is a problem.
             .note(markup! {
-                "This identifier is prohibited because..."
+                "Using this identifier leads to [specific problem]."
+            })
+            // Pillar 3 — WHAT the user should do to fix it.
+            // Use a code action instead when an automated fix is possible.
+            .note(markup! {
+                "Replace it with [alternative] or remove it entirely."
             }),
         )
     }
 }
 ```
 
+### The Three Diagnostic Pillars (REQUIRED)
+
+Every diagnostic **must** follow the three pillars defined in `crates/biome_analyze/CONTRIBUTING.md`:
+
+| Pillar | Question answered | Implemented as |
+| --- | --- | --- |
+| 1 | **What** is the error? | The `RuleDiagnostic` message (first argument to `markup!`) |
+| 2 | **Why** is it a problem? | A `.note()` explaining the consequence or rationale |
+| 3 | **What should the user do?** | A code action (`action` fn), or a second `.note()` if no fix is available |
+
+**Example from `noUnusedVariables`:**
+```rust
+RuleDiagnostic::new(
+    rule_category!(),
+    range,
+    // Pillar 1: what
+    markup! { "This variable "<Emphasis>{name}</Emphasis>" is unused." },
+)
+// Pillar 2: why
+.note(markup! {
+    "Unused variables are often the result of typos, incomplete refactors, or other sources of bugs."
+})
+// Pillar 3: what to do (here as a note; ideally a code action)
+.note(markup! {
+    "Remove the variable or use it."
+})
+```
+
+**Common mistakes to avoid:**
+- Combining pillars 2 and 3 into a single note — keep them separate.
+- Writing pillar 3 as the only note, skipping pillar 2.
+- Writing a pillar 1 message that already contains "why" — the message should stay short and factual; move the rationale to pillar 2.
+
 ### Using Semantic Model
 
 For rules that need binding analysis:
 
 ```rust
-use biome_analyze::Semantic;
+use crate::services::semantic::Semantic;
 
 impl Rule for MySemanticRule {
     type Query = Semantic<JsReferenceIdentifier>;
-    
+
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let model = ctx.model();
-        
+
         // Check if binding is declared
         let binding = node.binding(model)?;
-        
+
         // Get all references to this binding
         let all_refs = binding.all_references(model);
-        
+
         // Get only read references
         let read_refs = binding.all_reads(model);
-        
+
         // Get only write references
         let write_refs = binding.all_writes(model);
-        
+
         Some(())
     }
 }
@@ -138,15 +192,15 @@ impl Rule for UseMyRuleName {
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
-        
+
         // Example: Replace the node
         mutation.replace_node(
             node.clone(),
             make::js_identifier_binding(make::ident("replacement"))
         );
-        
+
         Some(JsRuleAction::new(
-            ctx.action_category(ctx.category(), ctx.group()),
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Use 'replacement' instead" }.to_owned(),
             mutation,
@@ -187,10 +241,61 @@ tests/specs/nursery/useMyRuleName/
 └── options.json        # Optional rule configuration
 ```
 
-Example `invalid.js`:
+**IMPORTANT: Magic Comments for Test Expectations**
+
+All test files MUST include magic comments at the top to set expectations:
+
+- **Valid tests** (should not generate diagnostics):
 ```javascript
+/* should not generate diagnostics */
+const allowed_name = 1;
+```
+
+- **Invalid tests** (should generate diagnostics):
+```javascript
+// should generate diagnostics
 const prohibited_name = 1;
 const another_prohibited = 2;
+```
+
+For HTML files:
+```html
+<!-- should not generate diagnostics -->
+<!doctype html>
+<html>...</html>
+```
+
+For languages that support both comment styles, use `/* */` or `//` as appropriate. The comment should be the very first line of the file.
+
+These magic comments:
+- Document the intent of the test file
+- Help reviewers understand what's expected
+- Serve as a quick reference when debugging test failures
+
+Example `invalid.js`:
+```javascript
+// should generate diagnostics
+**Every test file must start with a top-level comment** declaring whether it expects diagnostics. The test runner enforces this — see the `testing-codegen` skill for full rules. The short version:
+
+`valid.js` — comment is **mandatory** (test panics without it):
+```js
+/* should not generate diagnostics */
+const x = 1;
+const y = 2;
+```
+
+`invalid.js` — comment is strongly recommended (also enforced when present):
+```js
+/* should generate diagnostics */
+const prohibited_name = 1;
+const another_prohibited = 2;
+```
+
+Example `valid.js`:
+```javascript
+/* should not generate diagnostics */
+const allowed_name = 1;
+const another_allowed = 2;
 ```
 
 Run snapshot tests:
@@ -205,17 +310,22 @@ cargo insta review
 
 ### Generate Analyzer Code
 
-After modifying rules, generate updated boilerplate:
+During development, use the lightweight codegen commands:
+
+```shell
+just gen-rules          # Updates rule registrations in *_analyze crates
+just gen-configuration  # Updates configuration schemas
+```
+
+These generate enough code to compile and test your rule without errors.
+
+For full codegen (migrations, schema, bindings, formatting), run:
 
 ```shell
 just gen-analyzer
 ```
 
-This updates:
-- Rule registrations
-- Configuration schemas
-- Documentation exports
-- Type bindings
+**Note:** The CI autofix job runs `gen-analyzer` automatically when you open a PR, so running it locally is optional.
 
 ### Format and Lint
 
@@ -224,6 +334,55 @@ Before committing:
 just f  # Format code
 just l  # Lint code
 ```
+
+### Adding Configurable Options
+
+When a rule needs user-configurable behavior, add options via the `biome_rule_options` crate.
+For the full reference (merge strategies, design guidelines, common patterns), see
+[references/OPTIONS.md](references/OPTIONS.md).
+
+**Quick workflow:**
+
+**Step 1.** Define the options type in `biome_rule_options/src/<snake_case_rule_name>.rs`:
+
+```rust
+use biome_deserialize_macros::{Deserializable, Merge};
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Default, Clone, Serialize, Deserialize, Deserializable, Merge)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
+pub struct UseMyRuleNameOptions {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub behavior: Option<MyBehavior>,
+}
+```
+
+**Step 2.** Wire it into the rule:
+
+```rust
+use biome_rule_options::use_my_rule_name::UseMyRuleNameOptions;
+
+impl Rule for UseMyRuleName {
+    type Options = UseMyRuleNameOptions;
+
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let options = ctx.options();
+        let behavior = options.behavior.unwrap_or_default();
+        // ...
+    }
+}
+```
+
+**Step 3.** Test with `options.json` in the test directory (see [references/OPTIONS.md](references/OPTIONS.md) for examples).
+
+**Step 4.** Run codegen: `just gen-rules && just gen-configuration`
+
+**Key rules:**
+- All fields must be `Option<T>` for config merging to work
+- Use `Box<[Box<str>]>` instead of `Vec<String>` for collection fields
+- Use `#[derive(Merge)]` for simple cases, implement `Merge` manually for collections
+- Only add options when truly needed (conflicting community preferences, multiple valid interpretations)
 
 ## Tips
 

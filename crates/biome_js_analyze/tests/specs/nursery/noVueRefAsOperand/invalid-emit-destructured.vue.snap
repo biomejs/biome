@@ -1,0 +1,44 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-emit-destructured.vue
+---
+# Input
+```ts
+import { ref, defineComponent } from 'vue'
+
+export default defineComponent({
+  emits: ['incremented'],
+  setup(_, { emit }) {
+    const counter = ref(0)
+
+    emit('incremented', counter)
+
+    return {
+      counter
+    }
+  }
+})
+
+```
+
+# Diagnostics
+```
+invalid-emit-destructured.vue:8:25 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Ref value is accessed without `.value`.
+  
+     6 │     const counter = ref(0)
+     7 │ 
+   > 8 │     emit('incremented', counter)
+       │                         ^^^^^^^
+     9 │ 
+    10 │     return {
+  
+  i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
+  
+  i Use `.value` to access ref value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

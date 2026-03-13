@@ -78,7 +78,7 @@ invalid.js:2:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━�
      1  1 │   class Bioo {
      2    │ - → #unusedProperty·=·5;
      3  2 │   
-     4  3 │   	#unusedMethod() {
+     4  3 │     #unusedMethod() {
   
 
 ```
@@ -127,7 +127,7 @@ invalid.js:10:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
      9  9 │   class OnlyWrite {
     10    │ - → #usedOnlyInWrite·=·5;
     11 10 │   
-    12 11 │   	method() {
+    12 11 │     method() {
   
 
 ```
@@ -149,7 +149,7 @@ invalid.js:18:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
     17 17 │   class SelfUpdate {
     18    │ - → #usedOnlyToUpdateItself·=·5;
     19 18 │   
-    20 19 │   	method() {
+    20 19 │     method() {
   
 
 ```
@@ -170,7 +170,7 @@ invalid.js:26:6 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
     24 24 │   
     25 25 │   class Accessor {
     26    │ - → get·#unusedAccessor()·{}
-    27 26 │   	set #unusedAccessor(value) {}
+    27 26 │     set #unusedAccessor(value) {}
     28 27 │   }
   
 
@@ -191,7 +191,7 @@ invalid.js:27:6 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
   i Unsafe fix: Remove unused declaration.
   
     25 25 │   class Accessor {
-    26 26 │   	get #unusedAccessor() {}
+    26 26 │     get #unusedAccessor() {}
     27    │ - → set·#unusedAccessor(value)·{}
     28 27 │   }
     29 28 │   
@@ -237,8 +237,8 @@ invalid.js:35:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
     33 33 │   
     34 34 │   class Foo {
     35    │ - → #usedOnlyInWrite·=·5;
-    36 35 │   	method() {
-    37 36 │   			this.#usedOnlyInWrite = 42;
+    36 35 │     method() {
+    37 36 │         this.#usedOnlyInWrite = 42;
   
 
 ```
@@ -259,8 +259,8 @@ invalid.js:42:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
     40 40 │   
     41 41 │   class Foo {
     42    │ - → #usedOnlyInWriteStatement·=·5;
-    43 42 │   	method() {
-    44 43 │   			this.#usedOnlyInWriteStatement += 42;
+    43 42 │     method() {
+    44 43 │         this.#usedOnlyInWriteStatement += 42;
   
 
 ```
@@ -282,7 +282,7 @@ invalid.js:49:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
     48 48 │   class C {
     49    │ - → #usedOnlyInIncrement;
     50 49 │   
-    51 50 │   	foo() {
+    51 50 │     foo() {
   
 
 ```

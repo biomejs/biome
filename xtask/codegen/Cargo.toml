@@ -61,7 +61,7 @@ configuration = [
   "biome_rowan",
   "pulldown-cmark",
 ]
-license       = ["serde", "serde_json", "ureq/default", "ureq/json"]
+external_data = ["serde", "serde_json", "ureq/default", "ureq/json"]
 schema        = [
   "biome_analyze",
   "biome_configuration",

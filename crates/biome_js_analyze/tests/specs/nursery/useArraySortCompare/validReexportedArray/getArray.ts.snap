@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: getArray.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+export function getArray(): string[] {
+    return ["a", "b", "c"];
+}
+
+```

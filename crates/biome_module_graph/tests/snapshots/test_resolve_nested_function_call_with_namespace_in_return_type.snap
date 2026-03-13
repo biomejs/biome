@@ -53,7 +53,7 @@ export function foo(): Type {}
 ```
 Exports {
   "foo" => {
-    ExportOwnExport => JsOwnExport::Binding(0)
+    ExportOwnExport => JsOwnExport::Binding(25..28)
   }
 }
 Imports {
@@ -64,10 +64,9 @@ Imports {
 ## Exported Bindings
 
 ```
-BindingId(0) => JsBindingData {
-  Name: foo,
-  Type: Module(0) TypeId(1),
-  Declaration kind: HoistedValue
+foo => BindingTypeData {
+  Types Module(0) TypeId(1),
+  Exported Ranges: (25..28)
 }
 ```
 

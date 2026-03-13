@@ -1,0 +1,77 @@
+// Built-in SCSS modules
+// TODO(scss at-rules): @use "sass:math";
+// TODO(scss at-rules): @use "sass:color";
+// TODO(scss at-rules): @use "sass:string";
+// TODO(scss at-rules): @use "sass:list";
+// TODO(scss at-rules): @use "sass:map";
+// TODO(scss at-rules): @use "sass:selector";
+// TODO(scss at-rules): @use "sass:meta";
+
+// Math module
+.math-test {
+  width: math.div(100px, 2);
+  height: math.ceil(10.3px);
+  padding: math.floor(15.9px);
+  margin: math.round(12.5px);
+  max: math.max(10px, 20px, 30px);
+  min: math.min(10px, 20px, 30px);
+  power: math.pow(2, 3);
+}
+
+// Color module
+.color-test {
+  color: color.adjust(#036, $lightness: 20%);
+  background: color.scale(#036, $lightness: 50%);
+  border-color: color.change(#036, $alpha: 0.5);
+  mix: color.mix(#036, #f00, 50%);
+  invert: color.invert(#036);
+  complement: color.complement(#036);
+}
+
+// String module
+.string-test {
+  content: string.quote("hello");
+  unquote: string.unquote('"hello"');
+  length: string.length("hello");
+  insert: string.insert("hello", "X", 3);
+  index: string.index("hello", "ll");
+  slice: string.slice("hello", 2, 4);
+}
+
+// List module
+$my-list: (a, b, c);
+.list-test {
+  length: list.length($my-list);
+  nth: list.nth($my-list, 2);
+  index: list.index($my-list, b);
+  append: list.append($my-list, d);
+  join: list.join($my-list, (x, y));
+}
+
+// Map module
+$my-map: (key1: value1, key2: value2);
+.map-test {
+  get: map.get($my-map, key1);
+  has-key: map.has-key($my-map, key1);
+  keys: map.keys($my-map);
+  values: map.values($my-map);
+  merge: map.merge($my-map, (key3: value3));
+}
+
+// Selector module
+.selector-test {
+  is-superselector: selector.is-superselector(".foo", ".foo.bar");
+  append: selector.append(".foo", ".bar");
+  extend: selector.extend(".a", ".b", ".c");
+}
+
+// Meta module
+.meta-test {
+  type: meta.type-of(10px);
+  unit: meta.unit(10px);
+  unitless: meta.unitless(10);
+  comparable: meta.comparable(10px, 10em);
+}
+
+
+

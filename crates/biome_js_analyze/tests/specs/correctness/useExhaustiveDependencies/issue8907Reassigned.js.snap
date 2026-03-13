@@ -55,7 +55,7 @@ issue8907Reassigned.js:8:3 lint/correctness/useExhaustiveDependencies  FIXABLE  
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency setA to the list.
   
     10 │ ··},·[setA]);
        │       ++++   
@@ -88,7 +88,7 @@ issue8907Reassigned.js:18:3 lint/correctness/useExhaustiveDependencies  FIXABLE 
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency b.current to the list.
   
     20 │ ··},·[b.current]);
        │       +++++++++   

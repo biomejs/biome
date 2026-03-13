@@ -1,17 +1,19 @@
 use super::*;
-use biome_js_syntax::{AnyJsFunction, AnyJsRoot};
+use biome_js_syntax::{AnyJsFunction, AnyJsRoot, JsSyntaxNodePtr};
+use biome_rowan::SendNode;
+use std::sync::Arc;
 
 #[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
 pub struct BindingId(pub(crate) u32);
 
 impl BindingId {
-    pub fn new(index: usize) -> Self {
+    pub const fn new(index: usize) -> Self {
         // SAFETY: We didn't handle files exceeding `u32::MAX` bytes.
         // Thus, it isn't possible to exceed `u32::MAX` bindings.
         Self(index as u32)
     }
 
-    pub fn index(self) -> usize {
+    pub const fn index(self) -> usize {
         self.0 as usize
     }
 }
@@ -43,7 +45,9 @@ pub struct ScopeId(pub(crate) std::num::NonZeroU32);
 // We don't implement `From<usize> for ScopeId` and `From<ScopeId> for usize`
 // to ensure that the API consumers don't create `ScopeId`.
 impl ScopeId {
-    pub fn new(index: usize) -> Self {
+    pub const GLOBAL: Self = Self::new(0);
+
+    pub const fn new(index: usize) -> Self {
         // SAFETY: We didn't handle files exceeding `u32::MAX` bytes.
         // Thus, it isn't possible to exceed `u32::MAX` scopes.
         //
@@ -55,7 +59,7 @@ impl ScopeId {
         Self(unsafe { std::num::NonZeroU32::new_unchecked(index.unchecked_add(1) as u32) })
     }
 
-    pub fn index(self) -> usize {
+    pub const fn index(self) -> usize {
         // SAFETY: The internal representation ensures that the value is never equal to 0.
         // Thus, it is safe to subtract 1.
         (unsafe { self.0.get().unchecked_sub(1) }) as usize
@@ -68,15 +72,15 @@ impl ScopeId {
 /// to outlive the [SemanticModel], and to not include lifetimes.
 #[derive(Debug)]
 pub(crate) struct SemanticModelData {
-    pub(crate) root: AnyJsRoot,
+    pub(crate) root: SendNode,
     // All scopes of this model
     pub(crate) scopes: Vec<SemanticModelScopeData>,
     pub(crate) scope_by_range: rust_lapper::Lapper<u32, ScopeId>,
     // Maps the start of a node range to its scope id
     pub(crate) scope_hoisted_to_by_range: FxHashMap<TextSize, ScopeId>,
     /// Binding and reference nodes indexed by their range start
-    pub(crate) binding_node_by_start: FxHashMap<TextSize, JsSyntaxNode>,
-    pub(crate) scope_node_by_range: FxHashMap<TextRange, JsSyntaxNode>,
+    pub(crate) binding_node_by_start: FxHashMap<TextSize, JsSyntaxNodePtr>,
+    pub(crate) scope_node_by_range: FxHashMap<TextRange, JsSyntaxNodePtr>,
     // Maps any range start in the code to its bindings
     pub(crate) declared_at_by_start: FxHashMap<TextSize, BindingId>,
     // List of all the declarations
@@ -98,6 +102,10 @@ impl SemanticModelData {
 
     pub(crate) fn global(&self, global_id: u32) -> &SemanticModelGlobalBindingData {
         &self.globals[global_id as usize]
+    }
+
+    pub(crate) fn to_root(&self) -> AnyJsRoot {
+        self.root.to_language_root::<AnyJsRoot>()
     }
 
     pub(crate) fn unresolved_reference(
@@ -171,14 +179,18 @@ impl Eq for SemanticModelData {}
 /// See `SemanticModelData` for more information about the internals.
 #[derive(Clone, Debug)]
 pub struct SemanticModel {
-    pub(crate) data: Rc<SemanticModelData>,
+    pub(crate) data: Arc<SemanticModelData>,
 }
 
 impl SemanticModel {
     pub(crate) fn new(data: SemanticModelData) -> Self {
         Self {
-            data: Rc::new(data),
+            data: Arc::new(data),
         }
+    }
+
+    pub fn root(&self) -> AnyJsRoot {
+        self.data.root.to_language_root::<AnyJsRoot>()
     }
 
     /// Iterate all scopes
@@ -226,6 +238,40 @@ impl SemanticModel {
         Scope {
             data: self.data.clone(),
             id,
+        }
+    }
+
+    /// Returns the most specific [Scope] that covers the given range.
+    ///
+    /// This is useful when you have a text range but not a syntax node.
+    /// If you have a syntax node, prefer using [SemanticModel::scope] instead.
+    ///
+    /// # Panics
+    /// Panics if the range is empty (has zero length).
+    pub fn scope_for_range(&self, range: TextRange) -> Scope {
+        let id = self.data.scope(range);
+        Scope {
+            data: self.data.clone(),
+            id,
+        }
+    }
+
+    /// Creates a [Scope] from a [ScopeId].
+    ///
+    /// This is useful when you have a scope ID and need to access its data.
+    ///
+    /// # Panics
+    /// Panics in debug mode if the scope_id is invalid.
+    pub fn scope_from_id(&self, scope_id: ScopeId) -> Scope {
+        debug_assert!(
+            scope_id.index() < self.data.scopes.len(),
+            "Invalid scope_id: index {} is out of bounds (max: {})",
+            scope_id.index(),
+            self.data.scopes.len()
+        );
+        Scope {
+            data: self.data.clone(),
+            id: scope_id,
         }
     }
 

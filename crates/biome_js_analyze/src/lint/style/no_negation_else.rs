@@ -5,7 +5,8 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsStatement, JsConditionalExpression, JsIfStatement, JsUnaryOperator, T,
+    AnyJsExpression, AnyJsStatement, JsBinaryOperator, JsConditionalExpression, JsIfStatement,
+    JsUnaryOperator, T,
 };
 use biome_rowan::{AstNode, BatchMutationExt, declare_node_union};
 use biome_rule_options::no_negation_else::NoNegationElseOptions;
@@ -96,7 +97,9 @@ impl Rule for NoNegationElse {
         match node.clone() {
             AnyJsCondition::JsConditionalExpression(node) => {
                 let test = node.test().ok()?;
-                let negated_test = test.as_js_unary_expression()?.argument().ok()?;
+
+                let negated_test = replace_negation(&test)?;
+
                 let new_node = node
                     .clone()
                     .with_test(negated_test)
@@ -107,7 +110,9 @@ impl Rule for NoNegationElse {
             }
             AnyJsCondition::JsIfStatement(node) => {
                 let test = node.test().ok()?;
-                let negated_test = test.as_js_unary_expression()?.argument().ok()?;
+
+                let negated_test = replace_negation(&test)?;
+
                 let else_clause = node.else_clause()?;
                 let new_node = node
                     .clone()
@@ -146,5 +151,46 @@ fn is_negation(node: &AnyJsExpression) -> bool {
         }
         return true;
     }
+    if let AnyJsExpression::JsBinaryExpression(node) = node
+        && (node.operator() == Ok(JsBinaryOperator::Inequality)
+            || node.operator() == Ok(JsBinaryOperator::StrictInequality))
+    {
+        return true;
+    }
     false
+}
+
+fn replace_negation(node: &AnyJsExpression) -> Option<AnyJsExpression> {
+    match node {
+        AnyJsExpression::JsUnaryExpression(unary_expr) => unary_expr.argument().ok(),
+        AnyJsExpression::JsBinaryExpression(binary_expr) => {
+            let operator = binary_expr.operator().ok()?;
+
+            let token_leading_trivia = binary_expr.operator_token().ok()?.leading_trivia().pieces();
+            let token_trailing_trivia = binary_expr
+                .operator_token()
+                .ok()?
+                .trailing_trivia()
+                .pieces();
+
+            match operator {
+                JsBinaryOperator::Inequality => Some(AnyJsExpression::JsBinaryExpression(
+                    binary_expr.clone().with_operator_token_token(
+                        make::token(T![==])
+                            .with_leading_trivia_pieces(token_leading_trivia)
+                            .with_trailing_trivia_pieces(token_trailing_trivia),
+                    ),
+                )),
+                JsBinaryOperator::StrictInequality => Some(AnyJsExpression::JsBinaryExpression(
+                    binary_expr.clone().with_operator_token_token(
+                        make::token(T![===])
+                            .with_leading_trivia_pieces(token_leading_trivia)
+                            .with_trailing_trivia_pieces(token_trailing_trivia),
+                    ),
+                )),
+                _ => None,
+            }
+        }
+        _ => None,
+    }
 }

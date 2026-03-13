@@ -1,0 +1,27 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-watch.vue
+---
+# Input
+```ts
+	export default {
+		name: 'QFormContainer',
+		props: {
+			formData: {
+				type: Object,
+				default: () => ({}),
+				validator: (val) => true
+			},
+		},
+		watch: {
+			formData: {
+				handler(newValue)
+				{
+					//do things
+				},
+				deep: true
+			}
+		}
+	}
+
+```

@@ -1,0 +1,17 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-issue-7516-nested.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+// Issue #7516: nested function scope with variable shadowing import type namespace
+import type * as vfile from "vfile"
+const _f = () => {
+    const inner = () => {
+        let vfile: vfile.Value
+    }
+}
+
+```

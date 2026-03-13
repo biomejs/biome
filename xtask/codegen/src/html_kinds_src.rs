@@ -62,6 +62,12 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "out",
         "style",
         "class",
+        // Astro keywords
+        "client",
+        "set",
+        "server",
+        "is",
+        "define",
     ],
     literals: &["HTML_STRING_LITERAL", "HTML_LITERAL"],
     tokens: &["ERROR_TOKEN", "NEWLINE", "WHITESPACE", "IDENT"],
@@ -95,6 +101,13 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         // Astro nodes
         "ASTRO_FRONTMATTER_ELEMENT",
         "ASTRO_EMBEDDED_CONTENT",
+        "ASTRO_CLIENT_DIRECTIVE",
+        "ASTRO_SET_DIRECTIVE",
+        "ASTRO_CLASS_DIRECTIVE",
+        "ASTRO_IS_DIRECTIVE",
+        "ASTRO_SERVER_DIRECTIVE",
+        "ASTRO_DEFINE_DIRECTIVE",
+        "ASTRO_DIRECTIVE_VALUE",
         // Svelte nodes
         "SVELTE_DEBUG_BLOCK",
         "SVELTE_KEY_BLOCK",

@@ -1,0 +1,10 @@
+/* should generate diagnostics */
+
+/* accent-color is limited (not even newly available) */
+a { accent-color: bar; }
+
+/* view-transition at-rule is not yet newly available */
+@view-transition { navigation: auto; }
+
+/* device-posture media condition is not newly available */
+@media (device-posture: folded) { a { color: red; } }

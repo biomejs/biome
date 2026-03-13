@@ -922,7 +922,7 @@ CssRoot {
                                                                 },
                                                                 CssBogus {
                                                                     items: [
-                                                                        IDENT@1383..1390 "return" [] [Whitespace(" ")],
+                                                                        RETURN_KW@1383..1390 "return" [] [Whitespace(" ")],
                                                                         L_ANGLE@1390..1391 "<" [] [],
                                                                         NUMBER_KW@1391..1397 "number" [] [],
                                                                         R_ANGLE@1397..1399 ">" [] [Whitespace(" ")],
@@ -1725,7 +1725,7 @@ CssRoot {
                           5: (empty)
                         1: CSS_BOGUS_BLOCK@1383..1383
                     17: CSS_BOGUS@1383..1400
-                      0: IDENT@1383..1390 "return" [] [Whitespace(" ")]
+                      0: RETURN_KW@1383..1390 "return" [] [Whitespace(" ")]
                       1: L_ANGLE@1390..1391 "<" [] []
                       2: NUMBER_KW@1391..1397 "number" [] []
                       3: R_ANGLE@1397..1399 ">" [] [Whitespace(" ")]

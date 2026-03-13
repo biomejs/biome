@@ -2089,7 +2089,8 @@ async fn pull_code_actions_with_import_sorting() -> Result<()> {
 import z from "zod";
 import { test } from "./test";
 import { describe } from "node:test";
-export { z, test, describe };
+
+export { describe, test, z };
 
 if(a === -0) {}
 "#,
@@ -4729,6 +4730,206 @@ const foo = 'bad'
     }
 
     server.close_document().await?;
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+// #region CONFIGURATION PATH RESOLUTION
+
+/// Verifies that a relative `configurationPath` in the extension settings is
+/// resolved against the workspace root URI.
+///
+/// Regression test for <https://github.com/biomejs/biome/issues/9217>
+#[tokio::test]
+async fn relative_configuration_path_resolves_against_root_uri() -> Result<()> {
+    let fs = MemoryFileSystem::default();
+
+    // Place the config in a sub-directory so the path must be relative.
+    let config = r#"{
+        "formatter": {
+            "enabled": false
+        }
+    }"#;
+    fs.insert(to_utf8_file_path_buf(uri!("configs/biome.json")), config);
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    // Set configurationPath to a relative path (the bug: this used to be
+    // resolved against the daemon's cwd instead of the workspace root).
+    server
+        .load_configuration_with_settings(WorkspaceSettings {
+            configuration_path: Some("configs/biome.json".to_string()),
+            ..Default::default()
+        })
+        .await?;
+
+    server.open_document(r#"statement(   );"#).await?;
+
+    // The config disables the formatter, so formatting should return no edits.
+    let res: Option<Vec<TextEdit>> = server
+        .request(
+            "textDocument/formatting",
+            "formatting",
+            DocumentFormattingParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("document.js"),
+                },
+                options: FormattingOptions {
+                    tab_size: 4,
+                    insert_spaces: false,
+                    properties: HashMap::default(),
+                    trim_trailing_whitespace: None,
+                    insert_final_newline: None,
+                    trim_final_newlines: None,
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+            },
+        )
+        .await?
+        .context("formatting returned None")?;
+
+    assert!(
+        res.is_none(),
+        "Expected no formatting edits because the config at configs/biome.json disables the formatter. \
+         If this fails, the relative configurationPath was not resolved against the workspace root."
+    );
+
+    server.close_document().await?;
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+/// Verifies that a relative `configurationPath` is resolved against the
+/// workspace folder that **contains the file being opened**, not always the
+/// first workspace folder.
+///
+/// Regression test for <https://github.com/biomejs/biome/issues/9217>
+#[tokio::test]
+#[expect(deprecated)]
+async fn relative_configuration_path_resolves_against_correct_workspace_folder() -> Result<()> {
+    let fs = MemoryFileSystem::default();
+
+    // test_one has formatting enabled (default), test_two disables it.
+    // Both configs live at `<folder>/configs/biome.json`.
+    let config_one = r#"{}"#;
+    let config_two = r#"{
+        "formatter": {
+            "enabled": false
+        }
+    }"#;
+
+    fs.insert(
+        to_utf8_file_path_buf(uri!("test_one/configs/biome.json")),
+        config_one,
+    );
+    fs.insert(
+        to_utf8_file_path_buf(uri!("test_two/configs/biome.json")),
+        config_two,
+    );
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    // Initialize with two workspace folders (test_one, test_two).
+    let _res: InitializeResult = server
+        .request(
+            "initialize",
+            "_init",
+            InitializeParams {
+                process_id: None,
+                root_path: None,
+                root_uri: Some(uri!("/")),
+                initialization_options: None,
+                capabilities: ClientCapabilities::default(),
+                trace: None,
+                workspace_folders: Some(vec![
+                    WorkspaceFolder {
+                        name: "test_one".to_string(),
+                        uri: uri!("test_one"),
+                    },
+                    WorkspaceFolder {
+                        name: "test_two".to_string(),
+                        uri: uri!("test_two"),
+                    },
+                ]),
+                client_info: None,
+                locale: None,
+                work_done_progress_params: Default::default(),
+            },
+        )
+        .await?
+        .context("initialize returned None")?;
+
+    server.initialized().await?;
+
+    // Set a relative configurationPath. Each workspace folder has its own
+    // `configs/biome.json`; the correct one must be picked per file.
+    server
+        .load_configuration_with_settings(WorkspaceSettings {
+            configuration_path: Some("configs/biome.json".to_string()),
+            ..Default::default()
+        })
+        .await?;
+
+    // Open a file in test_two — its config disables the formatter.
+    server
+        .open_named_document(
+            r#"statement(   );"#,
+            uri!("test_two/document.js"),
+            "javascript",
+        )
+        .await?;
+
+    let res: Option<Vec<TextEdit>> = server
+        .request(
+            "textDocument/formatting",
+            "formatting",
+            DocumentFormattingParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("test_two/document.js"),
+                },
+                options: FormattingOptions {
+                    tab_size: 4,
+                    insert_spaces: false,
+                    properties: HashMap::default(),
+                    trim_trailing_whitespace: None,
+                    insert_final_newline: None,
+                    trim_final_newlines: None,
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+            },
+        )
+        .await?
+        .context("formatting returned None")?;
+
+    assert!(
+        res.is_none(),
+        "Expected no formatting edits because test_two/configs/biome.json disables the formatter. \
+         If this fails, the relative configurationPath was resolved against the wrong workspace folder."
+    );
+
     server.shutdown().await?;
     reader.abort();
 

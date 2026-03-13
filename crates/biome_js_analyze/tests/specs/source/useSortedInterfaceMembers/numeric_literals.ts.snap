@@ -32,7 +32,7 @@ numeric_literals.ts:1:1 assist/source/useSortedInterfaceMembers  FIXABLE  ━━
     1 1 │   interface _NumericKeys {
     2   │ - → 99:·string;
       2 │ + → 5:·number;
-    3 3 │   	11: string;
+    3 3 │     11: string;
     4   │ - → 5:·number;
       4 │ + → 99:·string;
     5 5 │   }

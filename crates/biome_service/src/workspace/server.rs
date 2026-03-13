@@ -1,3 +1,5 @@
+use super::{document::Document, *};
+use crate::Watcher;
 use crate::configuration::{LoadedConfiguration, ProjectScanComputer, read_config};
 use crate::diagnostics::{FileTooLarge, NoIgnoreFileFound, VcsDiagnostic};
 use crate::file_handlers::{
@@ -14,8 +16,7 @@ use crate::workspace::document::services::embedded_bindings::{
     EmbeddedBuilder, EmbeddedExportedBindings,
 };
 use crate::workspace::document::services::embedded_value_references::EmbeddedValueReferences;
-use crate::workspace::document::*;
-use crate::workspace::document::{AnyEmbeddedSnippet, DocumentServices};
+use crate::workspace::document::{AnyEmbeddedSnippet, DocumentServices, JsDocumentServices};
 use crate::workspace::{
     ChangeFileParams, ChangeFileResult, CheckFileSizeParams, CheckFileSizeResult, CloseFileParams,
     CloseProjectParams, CssDocumentServices, DropPatternParams, FeaturesBuilder, FileContent,
@@ -31,7 +32,7 @@ use crate::workspace::{
     SearchResults, ServerInfo, ServiceNotification, Settings, SupportsFeatureParams,
     UpdateModuleGraphParams, UpdateSettingsParams, UpdateSettingsResult,
 };
-use crate::{Watcher, Workspace, WorkspaceError};
+use crate::{Workspace, WorkspaceError};
 use biome_analyze::{AnalyzerPluginVec, RuleCategory};
 use biome_configuration::bool::Bool;
 use biome_configuration::max_size::MaxSize;
@@ -51,7 +52,7 @@ use biome_html_syntax::HtmlRoot;
 use biome_js_syntax::{AnyJsRoot, LanguageVariant, ModuleKind};
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonFileSource;
-use biome_module_graph::{ModuleDependencies, ModuleDiagnostic, ModuleGraph};
+use biome_module_graph::{HtmlEmbeddedContent, ModuleDependencies, ModuleDiagnostic, ModuleGraph};
 use biome_package::PackageType;
 use biome_parser::AnyParse;
 use biome_plugin_loader::{BiomePlugin, PluginCache, PluginDiagnostic};
@@ -161,6 +162,40 @@ impl WorkspaceServer {
         }
     }
 
+    /// Returns the module graph, for use in tests.
+    pub fn module_graph(&self) -> Arc<ModuleGraph> {
+        self.module_graph.clone()
+    }
+
+    /// Indexes a list of files into the module graph for test purposes.
+    ///
+    /// Unlike [`open_file`], this method uses the internal indexing path
+    /// (`OpenFileReason::Index`) so that `update_service_data` is triggered,
+    /// causing the module graph to be populated. It also accepts an explicit
+    /// `document_file_source` per file so that framework files (`.vue`, `.astro`,
+    /// `.svelte`) are correctly parsed as HTML-like regardless of the workspace
+    /// settings.
+    #[cfg(feature = "testing")]
+    pub fn index_files_for_test(
+        &self,
+        project_key: ProjectKey,
+        files: impl IntoIterator<Item = (BiomePath, DocumentFileSource)>,
+    ) {
+        for (path, document_file_source) in files {
+            let _ = self.open_file_internal(
+                OpenFileReason::Index(IndexTrigger::InitialScan),
+                OpenFileParams {
+                    project_key,
+                    path,
+                    content: FileContent::FromServer,
+                    document_file_source: Some(document_file_source),
+                    persist_node_cache: false,
+                    inline_config: None,
+                },
+            );
+        }
+    }
+
     fn settings_handle<'a>(
         &self,
         settings: &'a Settings,
@@ -221,7 +256,7 @@ impl WorkspaceServer {
             }
         }
 
-        Err(WorkspaceError::not_found())
+        Err(WorkspaceError::not_found(path.to_string()))
     }
 
     /// Checks whether the directory identified by the given `path` contains a
@@ -437,12 +472,16 @@ impl WorkspaceServer {
             if let Some(language) = language {
                 file_source_index = self.insert_source(language);
 
-                if language.is_css_like()
-                    && (settings.is_linter_enabled() || settings.is_assist_enabled())
-                {
-                    services = CssDocumentServices::default()
-                        .with_css_semantic_model(&any_parse.tree())
-                        .into();
+                if settings.is_linter_enabled() || settings.is_assist_enabled() {
+                    if language.is_css_like() {
+                        services = CssDocumentServices::default()
+                            .with_css_semantic_model(&any_parse.tree())
+                            .into();
+                    } else if language.is_javascript_like() {
+                        services = JsDocumentServices::default()
+                            .with_js_semantic_model(&any_parse.tree())
+                            .into();
+                    }
                 }
             }
 
@@ -619,7 +658,7 @@ impl WorkspaceServer {
 
         match syntax {
             Ok(syntax) => match syntax {
-                None => Err(WorkspaceError::not_found()),
+                None => Err(WorkspaceError::not_found(path.to_string())),
                 Some(syntax) => Ok(syntax),
             },
             Err(FileTooLarge { .. }) => Err(WorkspaceError::file_ignored(path.to_string())),
@@ -637,11 +676,11 @@ impl WorkspaceServer {
             .pin()
             .get(path)
             .cloned()
-            .ok_or_else(WorkspaceError::not_found)?;
+            .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
 
         match syntax.transpose() {
             Ok(syntax) => match syntax {
-                None => Err(WorkspaceError::not_found()),
+                None => Err(WorkspaceError::not_found(path.to_string())),
                 Some(syntax) => Ok((syntax.clone(), services.clone())),
             },
             Err(FileTooLarge { .. }) => Err(WorkspaceError::file_ignored(path.to_string())),
@@ -655,7 +694,7 @@ impl WorkspaceServer {
         self.documents
             .pin()
             .get(path)
-            .ok_or_else(WorkspaceError::not_found)
+            .ok_or_else(|| WorkspaceError::not_found(path.to_string()))
             .and_then(|doc| match &doc.syntax {
                 Some(syntax) => match syntax {
                     Ok(syntax) => Ok((
@@ -665,7 +704,7 @@ impl WorkspaceServer {
                     )),
                     Err(FileTooLarge { .. }) => Err(WorkspaceError::file_ignored(path.to_string())),
                 },
-                None => Err(WorkspaceError::not_found()),
+                None => Err(WorkspaceError::not_found(path.to_string())),
             })
     }
 
@@ -676,7 +715,7 @@ impl WorkspaceServer {
         self.documents
             .pin()
             .get(path)
-            .ok_or_else(WorkspaceError::not_found)
+            .ok_or_else(|| WorkspaceError::not_found(path.to_string()))
             .and_then(|doc| match &doc.syntax {
                 Some(syntax) => match syntax {
                     Ok(syntax) => Ok((
@@ -688,7 +727,7 @@ impl WorkspaceServer {
                     )),
                     Err(FileTooLarge { .. }) => Err(WorkspaceError::file_ignored(path.to_string())),
                 },
-                None => Err(WorkspaceError::not_found()),
+                None => Err(WorkspaceError::not_found(path.to_string())),
             })
     }
 
@@ -731,7 +770,7 @@ impl WorkspaceServer {
     ) -> Result<ParseResult, WorkspaceError> {
         let file_source = self
             .get_source(file_source_index)
-            .ok_or_else(WorkspaceError::not_found)?;
+            .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
         let capabilities = self.features.get_capabilities(file_source);
 
         let parse = capabilities
@@ -940,7 +979,7 @@ impl WorkspaceServer {
             let package_path = path
                 .parent()
                 .map(|parent| parent.to_path_buf())
-                .ok_or_else(WorkspaceError::not_found)?;
+                .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
 
             match update_kind {
                 UpdateKind::AddedOrChanged(_, root, _) => {
@@ -955,7 +994,7 @@ impl WorkspaceServer {
             let package_path = path
                 .parent()
                 .map(|parent| parent.to_path_buf())
-                .ok_or_else(WorkspaceError::not_found)?;
+                .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
 
             match update_kind {
                 UpdateKind::AddedOrChanged(_, root, _) => {
@@ -973,7 +1012,7 @@ impl WorkspaceServer {
             let package_path = path
                 .parent()
                 .map(|parent| parent.to_path_buf())
-                .ok_or_else(WorkspaceError::not_found)?;
+                .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
 
             match update_kind {
                 UpdateKind::AddedOrChanged(_, root, _) => {
@@ -1008,22 +1047,67 @@ impl WorkspaceServer {
         match update_kind {
             UpdateKind::AddedOrChanged(_, root, services) => {
                 // NOTE: add a new else if branch to handle other language roots
-                if let Some(js_root) = SendNode::into_language_root::<AnyJsRoot>(root.clone()) {
-                    self.module_graph.update_graph_for_js_paths(
-                        self.fs.as_ref(),
-                        &self.project_layout,
-                        &[(path, js_root)],
-                        infer_types,
-                    )
-                } else if let (Some(css_root), Some(services)) = (
-                    SendNode::into_language_root::<AnyCssRoot>(root.clone()),
-                    services.as_css_services(),
+                if let (Some(js_root), Some(services)) = (
+                    SendNode::into_language_root::<AnyJsRoot>(root.clone()),
+                    services.as_js_services(),
                 ) {
+                    // Module graph requires a semantic model to operate.
+                    // If the semantic model is not available (e.g., due to parse errors),
+                    // we skip module graph updates for this file.
+                    if let Some(semantic_model) = services.semantic_model.clone() {
+                        self.module_graph.update_graph_for_js_paths(
+                            self.fs.as_ref(),
+                            &self.project_layout,
+                            &[(path, js_root, Arc::new(semantic_model))],
+                            infer_types,
+                        )
+                    } else {
+                        // No semantic model available - return empty result
+                        Default::default()
+                    }
+                } else if let Some(css_root) =
+                    SendNode::into_language_root::<AnyCssRoot>(root.clone())
+                {
+                    let semantic_model = services
+                        .as_css_services()
+                        .and_then(|s| s.semantic_model.as_ref());
                     self.module_graph.update_graph_for_css_paths(
                         self.fs.as_ref(),
                         &self.project_layout,
                         &[(path, css_root)],
-                        services.semantic_model.as_ref(),
+                        semantic_model,
+                    )
+                } else if let Some(html_root) =
+                    SendNode::into_language_root::<HtmlRoot>(root.clone())
+                {
+                    // Map embedded snippets to HtmlEmbeddedContent variants.
+                    // CSS blocks carry EmbeddingApplicability (resolved via file_source_index).
+                    // JS blocks carry static import specifiers for upward traversal.
+                    let embedded_content: Vec<HtmlEmbeddedContent> = self
+                        .documents
+                        .pin()
+                        .get(path.as_path())
+                        .map(|doc| {
+                            doc.embedded_snippets
+                                .iter()
+                                .filter_map(|s| {
+                                    if let Some(css) = s.as_css_embedded_snippet() {
+                                        let css_source = self
+                                            .get_source(css.file_source_index)
+                                            .and_then(|src| src.to_css_file_source())?;
+                                        Some(HtmlEmbeddedContent::Css(css.parse.tree(), css_source))
+                                    } else {
+                                        s.as_js_embedded_snippet()
+                                            .map(|js| HtmlEmbeddedContent::Js(js.parse.tree()))
+                                    }
+                                })
+                                .collect()
+                        })
+                        .unwrap_or_default();
+                    self.module_graph.update_graph_for_html_paths(
+                        self.fs.as_ref(),
+                        &self.project_layout,
+                        &[(path, html_root, embedded_content)],
                     )
                 } else {
                     Default::default()
@@ -1490,7 +1574,7 @@ impl Workspace for WorkspaceServer {
             .pin()
             .get(params.path.as_path())
             .map(|document| document.content.clone())
-            .ok_or_else(WorkspaceError::not_found)
+            .ok_or_else(|| WorkspaceError::not_found(params.path.to_string()))
     }
 
     fn check_file_size(
@@ -1499,7 +1583,7 @@ impl Workspace for WorkspaceServer {
     ) -> Result<CheckFileSizeResult, WorkspaceError> {
         let documents = self.documents.pin();
         let Some(document) = documents.get(params.path.as_path()) else {
-            return Err(WorkspaceError::not_found());
+            return Err(WorkspaceError::not_found(params.path.to_string()));
         };
         let file_size = document.content.len();
         let limit = self
@@ -1527,7 +1611,7 @@ impl Workspace for WorkspaceServer {
         let (index, existing_version) = documents
             .get(path.as_path())
             .map(|document| (document.file_source_index, document.version))
-            .ok_or_else(WorkspaceError::not_found)?;
+            .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
 
         if existing_version.is_some_and(|existing_version| existing_version >= version) {
             warn!(%version, %path, "outdated_file_change");
@@ -1556,7 +1640,6 @@ impl Workspace for WorkspaceServer {
         let mut node_cache = node_cache.unwrap_or_default();
 
         let parsed = self.parse(&path, &content, &settings_handle, index, &mut node_cache)?;
-        let mut services = DocumentServices::none();
         let root = parsed.any_parse.unwrap_as_send_node();
         let document_source =
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
@@ -1583,12 +1666,17 @@ impl Workspace for WorkspaceServer {
             vec![]
         };
 
-        if document_source.is_css_like()
-            && (settings.is_linter_enabled() || settings.is_assist_enabled())
-        {
-            services = CssDocumentServices::default()
-                .with_css_semantic_model(&parsed.any_parse.tree())
-                .into();
+        let mut services = DocumentServices::none();
+        if settings.is_linter_enabled() || settings.is_assist_enabled() {
+            if document_source.is_css_like() {
+                services = CssDocumentServices::default()
+                    .with_css_semantic_model(&parsed.any_parse.tree())
+                    .into();
+            } else if document_source.is_javascript_like() {
+                services = JsDocumentServices::default()
+                    .with_js_semantic_model(&parsed.any_parse.tree())
+                    .into();
+            }
         }
 
         exported_bindings.finish(builder);
@@ -1643,7 +1731,7 @@ impl Workspace for WorkspaceServer {
 
         documents
             .insert(path.clone().into(), document)
-            .ok_or_else(WorkspaceError::not_found)?;
+            .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
 
         let mut final_diagnostics = vec![];
 
@@ -1704,9 +1792,9 @@ impl Workspace for WorkspaceServer {
             pull_code_actions,
             inline_config,
         } = params;
-        let settings = self
+        let (working_directory, settings) = self
             .projects
-            .get_settings_based_on_path(project_key, &path)
+            .get_settings_and_wd_based_on_path(project_key, &path)
             .ok_or_else(WorkspaceError::no_project)?;
         let (parse, embedded_snippets, services) =
             self.get_parse_with_snippets_and_services(&path)?;
@@ -1745,6 +1833,7 @@ impl Workspace for WorkspaceServer {
                 diagnostic_offset: None,
                 document_services: &services,
                 snippet_services: None,
+                working_directory: Some(working_directory.as_path()),
             });
 
             let LintResults {
@@ -1779,6 +1868,7 @@ impl Workspace for WorkspaceServer {
                     diagnostic_offset: Some(embedded_node.content_offset()),
                     document_services: &services,
                     snippet_services: Some(snippet_services),
+                    working_directory: Some(working_directory.as_path()),
                 });
 
                 diagnostics.extend(results.diagnostics);
@@ -1838,9 +1928,9 @@ impl Workspace for WorkspaceServer {
             enabled_rules,
             inline_config,
         } = params;
-        let settings = self
+        let (working_directory, settings) = self
             .projects
-            .get_settings_based_on_path(project_key, &path)
+            .get_settings_and_wd_based_on_path(project_key, &path)
             .ok_or_else(WorkspaceError::no_project)?;
         let (parse, embedded_snippets, services) =
             self.get_parse_with_snippets_and_services(&path)?;
@@ -1876,6 +1966,7 @@ impl Workspace for WorkspaceServer {
                 plugins: plugins.clone(),
                 diagnostic_offset: None,
                 document_services: &services,
+                working_directory: Some(working_directory.as_path()),
             });
 
             for embedded_node in embedded_snippets {
@@ -1904,6 +1995,7 @@ impl Workspace for WorkspaceServer {
                     plugins: plugins.clone(),
                     diagnostic_offset: Some(embedded_node.content_offset()),
                     document_services: &services,
+                    working_directory: Some(working_directory.as_path()),
                 });
 
                 final_result.diagnostics.extend(snippet_result.diagnostics);
@@ -1943,9 +2035,9 @@ impl Workspace for WorkspaceServer {
             categories,
             inline_config,
         } = params;
-        let settings = self
+        let (working_directory, settings) = self
             .projects
-            .get_settings_based_on_path(project_key, &path)
+            .get_settings_and_wd_based_on_path(project_key, &path)
             .ok_or_else(WorkspaceError::no_project)?;
         let capabilities =
             self.get_file_capabilities(&path, settings.experimental_full_html_support_enabled());
@@ -1976,6 +2068,7 @@ impl Workspace for WorkspaceServer {
             categories,
             action_offset: None,
             document_services: &services,
+            working_directory: Some(working_directory.as_path()),
         });
 
         for embedded_snippet in embedded_snippets {
@@ -2003,6 +2096,7 @@ impl Workspace for WorkspaceServer {
                 categories,
                 action_offset: Some(embedded_snippet.content_offset()),
                 document_services: &services,
+                working_directory: Some(working_directory.as_path()),
             });
 
             result.actions.extend(embedded_actions_result.actions);
@@ -2159,9 +2253,9 @@ impl Workspace for WorkspaceServer {
             inline_config,
         } = params;
 
-        let settings = self
+        let (working_directory, settings) = self
             .projects
-            .get_settings_based_on_path(project_key, &path)
+            .get_settings_and_wd_based_on_path(project_key, &path)
             .ok_or_else(WorkspaceError::no_project)?;
         let capabilities =
             self.get_file_capabilities(&path, settings.experimental_full_html_support_enabled());
@@ -2222,6 +2316,7 @@ impl Workspace for WorkspaceServer {
                     enabled_rules: &enabled_rules,
                     plugins: plugins.clone(),
                     document_services: &services,
+                    working_directory: Some(working_directory.as_path()),
                 })?;
 
                 actions.extend(results.actions);
@@ -2254,6 +2349,7 @@ impl Workspace for WorkspaceServer {
             enabled_rules: &enabled_rules,
             plugins: plugins.clone(),
             document_services: &services,
+            working_directory: Some(working_directory.as_path()),
         })?;
 
         actions.extend(fix_result.actions);

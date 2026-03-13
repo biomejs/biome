@@ -6,7 +6,7 @@ use biome_formatter::format_element::tag::VerbatimKind;
 use biome_formatter::formatter::Formatter;
 use biome_formatter::prelude::{
     Tag, empty_line, expand_parent, format_with, hard_line_break, line_suffix,
-    should_nestle_adjacent_doc_comments, soft_line_break_or_space, space, text,
+    should_nestle_adjacent_doc_comments, space, text,
 };
 
 use biome_formatter::{
@@ -274,17 +274,15 @@ fn format_leading_comments_impl(
             }
 
             CommentKind::Line => {
-                // TODO: review logic here
+                // `//` line comments always require a hard line break after them because
+                // everything after `//` to end-of-line is part of the comment. Using
+                // `soft_line_break_or_space` would collapse the comment with the next
+                // attribute onto a single line, turning the `>` into part of the comment.
                 match comment.lines_after() {
                     0 => {}
-                    1 => {
-                        if comment.lines_before() == 0 {
-                            biome_formatter::write!(f, [soft_line_break_or_space()])?;
-                        } else {
-                            biome_formatter::write!(f, [hard_line_break()])?;
-                        }
+                    _ => {
+                        biome_formatter::write!(f, [hard_line_break()])?;
                     }
-                    _ => biome_formatter::write!(f, [empty_line()])?,
                 }
             }
         }

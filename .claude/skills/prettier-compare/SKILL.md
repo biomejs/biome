@@ -1,6 +1,7 @@
 ---
 name: prettier-compare
-description: Compares code formatting and formatting IR between Biome and Prettier to ensure that Biome's formatting is consistent and correct.
+description: Compares code formatting and formatting IR between Biome and Prettier to ensure that Biome's formatting is consistent and correct. Use when validating formatter changes, debugging formatting differences, or comparing output for JavaScript, TypeScript, CSS, or other languages.
+compatibility: Designed for coding agents working on the Biome codebase (github.com/biomejs/biome). Requires bun and wasm-bindgen-cli.
 ---
 
 ## Purpose
@@ -12,6 +13,17 @@ Use `packages/prettier-compare/` to inspect any differences between Biome and Pr
 1. Run every command from the repository root so relative paths resolve correctly.
 2. Use `bun` (the CLI is a Bun script) and ensure dependencies have been installed.
 3. Always pass `--rebuild` so the Biome WASM bundle matches your current Rust changes.
+
+## Code Standards
+
+**CRITICAL: No Emojis**
+
+Emojis are BANNED in all Prettier comparison code and output:
+- NO emojis in comparison scripts
+- NO emojis in test files
+- NO emojis in output or diagnostic messages
+
+Keep all code professional and emoji-free.
 
 ## Common workflows
 

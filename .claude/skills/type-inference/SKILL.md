@@ -1,6 +1,7 @@
 ---
 name: type-inference
-description: Guide for working with Biome's module graph and type inference system. Use when implementing type-aware lint rules or working on TypeScript support. Examples:<example>User needs to understand type resolution for a lint rule</example><example>User is working on the module graph infrastructure</example><example>User wants to implement type inference for a new feature</example>
+description: Guide for working with Biome's module graph and type inference system. Use when implementing type-aware lint rules, understanding type resolution, working on the module graph infrastructure, or implementing type inference for new features.
+compatibility: Designed for coding agents working on the Biome codebase (github.com/biomejs/biome).
 ---
 
 ## Purpose
@@ -12,6 +13,18 @@ Use this skill when working with Biome's type inference system and module graph.
 1. Read `crates/biome_js_type_info/CONTRIBUTING.md` for architecture details
 2. Understand Biome's focus on IDE support and instant updates
 3. Familiarity with TypeScript type system concepts
+
+## Code Standards
+
+**CRITICAL: No Emojis**
+
+Emojis are BANNED in all type inference code:
+- NO emojis in code comments
+- NO emojis in rustdoc documentation
+- NO emojis in test files
+- NO emojis in debug output or error messages
+
+Keep all code professional and emoji-free.
 
 ## Key Concepts
 
@@ -28,15 +41,24 @@ Use this skill when working with Biome's type inference system and module graph.
 Types are stored in `TypeData` enum with many variants:
 
 ```rust
+// Simplified — see crates/biome_js_type_info/src/type_data.rs for the full enum
 enum TypeData {
-    Unknown,              // Inference not implemented
-    UnknownKeyword,       // Explicit 'unknown' keyword
-    String,               // String type
-    Number,               // Number type
-    Function(FunctionType), // Function with parameters
-    Object(ObjectType),   // Object with properties
-    Reference,            // Reference to another type
-    // ... many more variants
+    Unknown,                            // Inference not implemented
+    Global,                             // Global type reference
+    BigInt, Boolean, Null, Number,      // Primitive types
+    String, Symbol, Undefined,
+    Function(Box<Function>),            // Function with parameters
+    Object(Box<Object>),                // Object with properties
+    Class(Box<Class>),                  // Class definition
+    Interface(Box<Interface>),          // Interface definition
+    Union(Box<Union>),                  // Union type (A | B)
+    Intersection(Box<Intersection>),    // Intersection type (A & B)
+    Tuple(Box<Tuple>),                  // Tuple type
+    Literal(Box<Literal>),              // Literal type ("foo", 42)
+    Reference(TypeReference),           // Reference to another type
+    TypeofExpression(Box<TypeofExpression>), // typeof an expression
+    // ... plus Conditional, Generic, TypeOperator, InstanceOf,
+    //     keyword variants (AnyKeyword, NeverKeyword, VoidKeyword, etc.)
 }
 ```
 
@@ -46,12 +68,13 @@ Instead of direct type references, use `TypeReference`:
 
 ```rust
 enum TypeReference {
-    Qualifier(TypeReferenceQualifier),  // Name-based reference
-    Resolved(ResolvedTypeId),            // Resolved to type ID
-    Import(TypeImportQualifier),         // Import reference
-    Unknown,                             // Could not resolve
+    Qualifier(Box<TypeReferenceQualifier>),  // Name-based reference
+    Resolved(ResolvedTypeId),                 // Resolved to type ID
+    Import(Box<TypeImportQualifier>),         // Import reference
 }
 ```
+
+**Note:** There is no `Unknown` variant. Unknown types are represented as `TypeReference::Resolved(GLOBAL_UNKNOWN_ID)`. Use `TypeReference::unknown()` to create one.
 
 ## Type Resolution Phases
 
@@ -96,7 +119,7 @@ TypeData::TypeofExpression(TypeofExpression::Addition {
 2. Resolves `TypeReference::Import` by following imports
 3. Converts to `TypeReference::Resolved` after following imports
 
-**Where**: Implemented in `js_module_info/scoped_resolver.rs`
+**Where**: Implemented in `js_module_info/module_resolver.rs`
 
 **Limitation**: Results cannot be cached (would become stale on file changes)
 
@@ -126,7 +149,7 @@ use biome_js_type_info::{TypeResolver, ResolvedTypeData};
 fn analyze_type(resolver: &impl TypeResolver, type_ref: TypeReference) {
     // Resolve the reference
     let resolved_data: ResolvedTypeData = resolver.resolve_type(type_ref);
-    
+
     // Get raw data for pattern matching
     match resolved_data.as_raw_data() {
         TypeData::String => { /* handle string */ },
@@ -134,7 +157,7 @@ fn analyze_type(resolver: &impl TypeResolver, type_ref: TypeReference) {
         TypeData::Function(func) => { /* handle function */ },
         _ => { /* handle others */ }
     }
-    
+
     // Resolve nested references
     if let TypeData::Reference(inner_ref) = resolved_data.as_raw_data() {
         let inner_data = resolver.resolve_type(*inner_ref);
@@ -163,24 +186,24 @@ use biome_js_type_info::{TypeResolver, TypeData};
 
 impl Rule for MyTypeRule {
     type Query = Semantic<JsCallExpression>;
-    
+
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let model = ctx.model();
-        
+
         // Get type resolver from model
         let resolver = model.type_resolver();
-        
+
         // Get type of expression
         let expr_type = node.callee().ok()?.infer_type(resolver);
-        
+
         // Check the type
         match expr_type.as_raw_data() {
             TypeData::Function(_) => { /* valid */ },
             TypeData::Unknown => { /* might be valid, can't tell */ },
             _ => { return Some(()); /* not callable */ }
         }
-        
+
         None
     }
 }
@@ -189,17 +212,17 @@ impl Rule for MyTypeRule {
 ### Navigate Type References
 
 ```rust
-fn is_array_type(resolver: &impl TypeResolver, type_ref: TypeReference) -> bool {
+fn is_string_type(resolver: &impl TypeResolver, type_ref: TypeReference) -> bool {
     let resolved = resolver.resolve_type(type_ref);
-    
+
     // Follow references
     let data = match resolved.as_raw_data() {
         TypeData::Reference(ref_to) => resolver.resolve_type(*ref_to),
-        other => resolved,
+        _other => resolved,
     };
-    
-    // Check if it's an Array
-    matches!(data.as_raw_data(), TypeData::Array(_))
+
+    // Check the resolved type
+    matches!(data.as_raw_data(), TypeData::String)
 }
 ```
 
@@ -208,14 +231,14 @@ fn is_array_type(resolver: &impl TypeResolver, type_ref: TypeReference) -> bool 
 ```rust
 fn analyze_function(resolver: &impl TypeResolver, type_ref: TypeReference) {
     let resolved = resolver.resolve_type(type_ref);
-    
+
     if let TypeData::Function(func_type) = resolved.as_raw_data() {
         // Access parameters
         for param in func_type.parameters() {
             let param_type = resolver.resolve_type(param.type_ref());
             // Analyze parameter type
         }
-        
+
         // Access return type
         let return_type = resolver.resolve_type(func_type.return_type());
     }
@@ -290,6 +313,100 @@ match resolved.as_raw_data() {
     _ => { /* handle */ }
 }
 ```
+
+## CSS and HTML Module Graph
+
+The module graph tracks not only JS imports/exports but also CSS class names and HTML class references, used by cross-file lint rules like `noUnusedStyles` and `noUndeclaredStyles`.
+
+### Key Types
+
+```
+CssModuleInfo   — classes: IndexSet<CssClass>
+HtmlModuleInfo  — style_classes: IndexSet<CssClass>   (from <style> blocks)
+                — referenced_classes: IndexSet<CssClass> (from class="..." attrs)
+                — imported_stylesheets: Vec<ResolvedPath>
+JsModuleInfo    — referenced_classes: IndexSet<CssClass> (from className="...")
+```
+
+### `CssClass` Design
+
+`CssClass` stores a class name **without allocating a `String` per word**:
+
+```rust
+pub struct CssClass {
+    pub(crate) token: TokenText,  // the full token (or its inner text) — refcount only
+    pub range: TextRange,         // byte range relative to token.text()
+}
+
+impl CssClass {
+    pub fn text(&self) -> &str {
+        let start = usize::from(self.range.start());
+        let end = usize::from(self.range.end());
+        &self.token.text()[start..end]
+    }
+}
+```
+
+- `Borrow<str>`, `Hash`, and `Eq` all delegate to `self.text()`, so `IndexSet::contains("foo")` works with a plain `&str`.
+- For CSS selectors (`.foo`), the token is the whole selector token and the range covers it entirely.
+- For HTML/JSX string attributes (`class="foo bar"`), the token is the **inner** (quote-stripped) `TokenText` from `inner_string_text()`, and each word has its own offset range within that inner text.
+
+### Populating `CssClass` from a CSS selector
+
+```rust
+let token_text = token.token_text_trimmed();
+let len = u32::from(token_text.len());
+classes.insert(CssClass {
+    token: token_text,
+    range: TextRange::new(TextSize::from(0), TextSize::from(len)),
+});
+```
+
+### Populating `CssClass` from a `class="foo bar"` attribute
+
+```rust
+// Use inner_string_text() — strips quotes, no allocation.
+let inner: TokenText = html_string.inner_string_text()?;
+let content = inner.text();
+let mut offset: u32 = 0;
+for word in content.split_ascii_whitespace() {
+    let word_offset = content[offset as usize..]
+        .find(word)
+        .map_or(offset, |pos| offset + pos as u32);
+    let start = TextSize::from(word_offset);
+    let end = start + TextSize::from(word.len() as u32);
+    classes.insert(CssClass {
+        token: inner.clone(), // refcount bump only
+        range: TextRange::new(start, end),
+    });
+    offset = word_offset + word.len() as u32;
+}
+```
+
+### Cross-file class lookup
+
+```rust
+// In a CSS lint rule:
+module_graph.is_class_referenced_by_importers(css_file_path, class_name_str)
+
+// In an HTML lint rule:
+let html_info = module_graph.html_module_info_for_path(file_path)?;
+let css_info  = module_graph.css_module_info_for_path(stylesheet_path)?;
+
+// Zero-alloc lookup (Borrow<str> impl):
+html_info.style_classes.contains("foo")
+css_info.classes.contains("bar")
+```
+
+### Public Function Audit Rules
+
+When adding or removing functions from the module graph, always verify each **public** function has a real production call site (not just test code).
+
+**Rules:**
+- A function used only in tests is not justified — remove it
+- Tests calling a function do not count as "production use"
+- Check with `grep` across all crates before removing anything
+- `data()` is used from `biome_service/workspace/server.rs` — do not remove it even if it looks test-only
 
 ## References
 

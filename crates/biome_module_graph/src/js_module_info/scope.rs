@@ -1,7 +1,8 @@
-use std::{collections::VecDeque, iter::FusedIterator, sync::Arc};
+use std::{iter::FusedIterator, sync::Arc};
 
+use biome_js_semantic::{BindingId, ScopeId};
 use biome_js_syntax::TextRange;
-use biome_js_type_info::{BindingId, ScopeId, TypeReferenceQualifier};
+use biome_js_type_info::TypeReferenceQualifier;
 use biome_rowan::TokenText;
 use rustc_hash::FxHashMap;
 
@@ -13,6 +14,7 @@ use super::{
 #[derive(Debug)]
 pub struct JsScopeData {
     // The scope range
+    #[expect(dead_code, reason = "May be used in future for scope analysis")]
     pub range: TextRange,
     // The parent scope of this scope
     pub parent: Option<ScopeId>,
@@ -301,17 +303,6 @@ impl TsBindingReference {
         }
     }
 
-    /// Returns the value type binding.
-    pub fn value_ty(self) -> Option<BindingId> {
-        match self {
-            Self::ValueType(binding_id)
-            | Self::TypeAndValueType(binding_id)
-            | Self::NamespaceAndValueType(binding_id) => Some(binding_id),
-            Self::Merged { value_ty, .. } => value_ty,
-            Self::Type(_) => None,
-        }
-    }
-
     /// Returns the value type binding, or the type binding if the value type
     /// binding is unknown.
     pub fn value_ty_or_ty(self) -> BindingId {
@@ -337,12 +328,12 @@ impl TsBindingReference {
 #[derive(Clone, Debug)]
 pub struct JsScope {
     pub(crate) info: Arc<JsModuleInfoInner>,
-    pub(crate) id: ScopeId,
+    pub(crate) scope: biome_js_semantic::Scope,
 }
 
 impl PartialEq for JsScope {
     fn eq(&self, other: &Self) -> bool {
-        self.id == other.id && Arc::ptr_eq(&self.info, &other.info)
+        self.scope == other.scope && Arc::ptr_eq(&self.info, &other.info)
     }
 }
 
@@ -350,35 +341,34 @@ impl Eq for JsScope {}
 
 impl JsScope {
     pub fn is_global_scope(&self) -> bool {
-        self.id.index() == 0
+        self.scope.is_global_scope()
     }
 
     /// Returns all parents of this scope. Starting with the current
     /// [JsScope].
     pub fn ancestors(&self) -> impl Iterator<Item = Self> + use<> {
-        std::iter::successors(Some(self.clone()), |scope| scope.parent())
+        let info = self.info.clone();
+        self.scope.ancestors().map(move |scope| Self {
+            info: info.clone(),
+            scope,
+        })
     }
 
     /// Returns all descendents of this scope in breadth-first order. Starting
     /// with the current [JsScope].
     pub fn descendents(&self) -> impl Iterator<Item = Self> + use<> {
-        let mut q = VecDeque::new();
-        q.push_back(self.id);
-
-        ScopeDescendentsIter {
-            info: self.info.clone(),
-            q,
-        }
+        let info = self.info.clone();
+        self.scope.descendents().map(move |scope| Self {
+            info: info.clone(),
+            scope,
+        })
     }
 
     /// Returns this scope parent.
     pub fn parent(&self) -> Option<Self> {
-        debug_assert!((self.id.index()) < self.info.scopes.len());
-
-        let parent = self.info.scopes[self.id.index()].parent?;
-        Some(Self {
+        self.scope.parent().map(|scope| Self {
             info: self.info.clone(),
-            id: parent,
+            scope,
         })
     }
 
@@ -388,8 +378,7 @@ impl JsScope {
     pub fn bindings(&self) -> ScopeBindingsIter {
         ScopeBindingsIter {
             info: self.info.clone(),
-            scope_id: self.id,
-            binding_index: 0,
+            semantic_bindings: self.scope.bindings(),
         }
     }
 
@@ -402,74 +391,37 @@ impl JsScope {
     /// assert!(scope.is_ancestor_of(scope));
     /// ```
     pub fn is_ancestor_of(&self, other: &Self) -> bool {
-        other.ancestors().any(|s| s == *self)
+        self.scope.is_ancestor_of(&other.scope)
     }
 
     pub fn range(&self) -> TextRange {
-        self.info.scopes[self.id.index()].range
+        self.scope.range()
     }
 }
-
-/// Iterates all descendent scopes of the specified scope in breadth-first
-/// order.
-pub struct ScopeDescendentsIter {
-    info: Arc<JsModuleInfoInner>,
-    q: VecDeque<ScopeId>,
-}
-
-impl Iterator for ScopeDescendentsIter {
-    type Item = JsScope;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if let Some(id) = self.q.pop_front() {
-            let scope = &self.info.scopes[id.index()];
-            self.q.extend(scope.children.iter());
-            Some(JsScope {
-                info: self.info.clone(),
-                id,
-            })
-        } else {
-            None
-        }
-    }
-}
-
-impl FusedIterator for ScopeDescendentsIter {}
 
 /// Iterates all bindings that were bound in a given scope.
 ///
 /// It **does not** return bindings of parent scopes.
-#[derive(Debug)]
 pub struct ScopeBindingsIter {
     info: Arc<JsModuleInfoInner>,
-    scope_id: ScopeId,
-    binding_index: u32,
+    semantic_bindings: biome_js_semantic::ScopeBindingsIter,
 }
 
 impl Iterator for ScopeBindingsIter {
     type Item = JsBinding;
 
     fn next(&mut self) -> Option<Self::Item> {
-        debug_assert!(self.scope_id.index() < self.info.scopes.len());
-
-        let id = *self.info.scopes[self.scope_id.index()]
-            .bindings
-            .get(self.binding_index as usize)?;
-
-        self.binding_index += 1;
-
-        Some(JsBinding {
-            data: self.info.clone(),
-            id,
-        })
+        let semantic_binding = self.semantic_bindings.next()?;
+        Some(JsBinding::from_semantic_binding(
+            self.info.clone(),
+            semantic_binding,
+        ))
     }
 }
 
 impl ExactSizeIterator for ScopeBindingsIter {
     fn len(&self) -> usize {
-        debug_assert!(self.scope_id.index() < self.info.scopes.len());
-
-        self.info.scopes[self.scope_id.index()].bindings.len()
+        self.semantic_bindings.len()
     }
 }
 

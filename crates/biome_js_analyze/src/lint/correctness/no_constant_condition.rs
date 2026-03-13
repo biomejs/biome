@@ -160,7 +160,7 @@ impl ConditionalStatement {
     }
     // Checks if the self statement is in a generator function
     fn is_in_generator_function(&self) -> bool {
-        self.syntax().ancestors().any(|node| {
+        self.syntax().ancestors().skip(1).any(|node| {
             match JsFunctionDeclaration::try_cast(node) {
                 Ok(func_decl) => func_decl.star_token(),
                 Err(node) => {

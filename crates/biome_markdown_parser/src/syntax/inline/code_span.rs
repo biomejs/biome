@@ -5,7 +5,7 @@ use biome_parser::prelude::ParsedSyntax::{self, *};
 
 use crate::MarkdownParser;
 use crate::lexer::MarkdownLexContext;
-use crate::syntax::{at_block_interrupt, at_setext_underline_after_newline};
+use crate::syntax::{TAB_STOP_SPACES, at_block_interrupt, at_setext_underline_after_newline};
 
 /// Parse a hard line break.
 ///
@@ -103,7 +103,7 @@ fn is_at_list_marker_after_newline(p: &mut MarkdownParser) -> bool {
         for c in p.cur_text().chars() {
             match c {
                 ' ' => columns += 1,
-                '\t' => columns += 4 - (columns % 4),
+                '\t' => columns += TAB_STOP_SPACES - (columns % TAB_STOP_SPACES),
                 _ => {}
             }
         }

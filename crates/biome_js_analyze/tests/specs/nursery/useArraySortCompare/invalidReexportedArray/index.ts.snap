@@ -1,0 +1,38 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: index.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+import { getArray } from "./reexport";
+
+function test() {
+    // Invalid: Number array sorted without compare function
+    getArray().sort();
+}
+
+```
+
+# Diagnostics
+```
+index.ts:7:5 lint/nursery/useArraySortCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Compare function missing.
+  
+    5 │ function test() {
+    6 │     // Invalid: Number array sorted without compare function
+  > 7 │     getArray().sort();
+      │     ^^^^^^^^^^^^^^^^^
+    8 │ }
+    9 │ 
+  
+  i When called without a compare function, Array#sort() and Array#toSorted() converts all non-undefined array elements into strings and then compares said strings based off their UTF-16 code units.
+  
+  i Add a compare function to prevent unexpected sorting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

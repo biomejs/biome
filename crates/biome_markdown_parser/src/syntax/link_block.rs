@@ -28,8 +28,9 @@ use crate::MarkdownParser;
 use crate::lexer::MarkdownLexContext;
 use crate::syntax::reference::normalize_reference_label;
 use crate::syntax::{
-    LinkDestinationKind, MAX_LINK_DESTINATION_PAREN_DEPTH, ParenDepthResult,
-    ends_with_unescaped_close, try_update_paren_depth, validate_link_destination_text,
+    LinkDestinationKind, MAX_BLOCK_PREFIX_INDENT, MAX_LINK_DESTINATION_PAREN_DEPTH,
+    ParenDepthResult, ends_with_unescaped_close, try_update_paren_depth,
+    validate_link_destination_text,
 };
 
 /// Maximum label length per CommonMark spec (999 characters).
@@ -50,11 +51,11 @@ pub(crate) fn at_link_block(p: &mut MarkdownParser) -> bool {
         }
 
         // Check for up to 3 spaces of indentation (more means indented code block)
-        if p.line_start_leading_indent() > 3 {
+        if p.line_start_leading_indent() > MAX_BLOCK_PREFIX_INDENT {
             return false;
         }
 
-        p.skip_line_indent(3);
+        p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
 
         // Must start with `[`
         if !p.at(L_BRACK) {
@@ -395,7 +396,7 @@ pub(crate) fn parse_link_block(p: &mut MarkdownParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    p.skip_line_indent(3);
+    p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
 
     // [ - opening bracket
     p.expect(L_BRACK);

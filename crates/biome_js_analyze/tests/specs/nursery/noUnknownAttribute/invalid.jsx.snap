@@ -48,6 +48,7 @@ expression: invalid.jsx
 	<div data-xml-anything="invalid" />
 	<div data-testID="bar" data-under_sCoRe="bar" dataNotAnDataAttribute="yes" />
 	<div abbr="abbr" />
+	<div closedby="any" />
 	<div webkitDirectory="" />
 	<div webkitdirectory="" />
 	<div
@@ -847,7 +848,7 @@ invalid.jsx:43:48 lint/nursery/noUnknownAttribute ━━━━━━━━━━
   > 43 │ 	<div data-testID="bar" data-under_sCoRe="bar" dataNotAnDataAttribute="yes" />
        │ 	                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     44 │ 	<div abbr="abbr" />
-    45 │ 	<div webkitDirectory="" />
+    45 │ 	<div closedby="any" />
   
   i This property is not recognized as a valid HTML/DOM attribute or React prop.
   
@@ -867,8 +868,8 @@ invalid.jsx:44:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
     43 │ 	<div data-testID="bar" data-under_sCoRe="bar" dataNotAnDataAttribute="yes" />
   > 44 │ 	<div abbr="abbr" />
        │ 	     ^^^^^^^^^^^
-    45 │ 	<div webkitDirectory="" />
-    46 │ 	<div webkitdirectory="" />
+    45 │ 	<div closedby="any" />
+    46 │ 	<div webkitDirectory="" />
   
   i This attribute is restricted and cannot be used on this HTML element
   
@@ -882,18 +883,18 @@ invalid.jsx:44:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
 ```
 invalid.jsx:45:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Property 'webkitDirectory' is not valid on a <div> element.
+  i Property 'closedby' is not valid on a <div> element.
   
     43 │ 	<div data-testID="bar" data-under_sCoRe="bar" dataNotAnDataAttribute="yes" />
     44 │ 	<div abbr="abbr" />
-  > 45 │ 	<div webkitDirectory="" />
-       │ 	     ^^^^^^^^^^^^^^^^^^
-    46 │ 	<div webkitdirectory="" />
-    47 │ 	<div
+  > 45 │ 	<div closedby="any" />
+       │ 	     ^^^^^^^^^^^^^^
+    46 │ 	<div webkitDirectory="" />
+    47 │ 	<div webkitdirectory="" />
   
   i This attribute is restricted and cannot be used on this HTML element
   
-  i This attribute is only allowed on: input
+  i This attribute is only allowed on: dialog
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -906,11 +907,11 @@ invalid.jsx:46:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
   i Property 'webkitDirectory' is not valid on a <div> element.
   
     44 │ 	<div abbr="abbr" />
-    45 │ 	<div webkitDirectory="" />
-  > 46 │ 	<div webkitdirectory="" />
+    45 │ 	<div closedby="any" />
+  > 46 │ 	<div webkitDirectory="" />
        │ 	     ^^^^^^^^^^^^^^^^^^
-    47 │ 	<div
-    48 │ 		className="App"
+    47 │ 	<div webkitdirectory="" />
+    48 │ 	<div
   
   i This attribute is restricted and cannot be used on this HTML element
   
@@ -922,16 +923,37 @@ invalid.jsx:46:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:49:3 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:47:7 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Property 'webkitDirectory' is not valid on a <div> element.
+  
+    45 │ 	<div closedby="any" />
+    46 │ 	<div webkitDirectory="" />
+  > 47 │ 	<div webkitdirectory="" />
+       │ 	     ^^^^^^^^^^^^^^^^^^
+    48 │ 	<div
+    49 │ 		className="App"
+  
+  i This attribute is restricted and cannot be used on this HTML element
+  
+  i This attribute is only allowed on: input
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:50:3 lint/nursery/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The property 'data-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash:c' is not a valid DOM attribute.
   
-    47 │ 	<div
-    48 │ 		className="App"
-  > 49 │ 		data-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash:c="customValue"
+    48 │ 	<div
+    49 │ 		className="App"
+  > 50 │ 		data-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash:c="customValue"
        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    50 │ 	>
-    51 │ 		Hello, world!
+    51 │ 	>
+    52 │ 		Hello, world!
   
   i This property is not recognized as a valid HTML/DOM attribute or React prop.
   

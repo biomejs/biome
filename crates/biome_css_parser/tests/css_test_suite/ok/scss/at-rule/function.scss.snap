@@ -1,0 +1,290 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@function double($value: 2) {
+  @return $value * 2;
+}
+
+@function scale($value, $ratio: 1.5, $rest...) {
+  @return $value * $ratio;
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: ScssFunctionAtRule {
+                function_token: FUNCTION_KW@1..10 "function" [] [Whitespace(" ")],
+                name: CssIdentifier {
+                    value_token: IDENT@10..16 "double" [] [],
+                },
+                parameters: ScssParameterList {
+                    l_paren_token: L_PAREN@16..17 "(" [] [],
+                    items: ScssParameterItemList [
+                        ScssParameter {
+                            name: ScssIdentifier {
+                                dollar_token: DOLLAR@17..18 "$" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@18..23 "value" [] [],
+                                },
+                            },
+                            default_value: ScssParameterDefaultValue {
+                                colon_token: COLON@23..25 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssNumber {
+                                            value_token: CSS_NUMBER_LITERAL@25..26 "2" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            ellipsis_token: missing (optional),
+                        },
+                    ],
+                    r_paren_token: R_PAREN@26..28 ")" [] [Whitespace(" ")],
+                },
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@28..29 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssAtRule {
+                            at_token: AT@29..33 "@" [Newline("\n"), Whitespace("  ")] [],
+                            rule: ScssReturnAtRule {
+                                return_token: RETURN_KW@33..40 "return" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        ScssBinaryExpression {
+                                            left: ScssIdentifier {
+                                                dollar_token: DOLLAR@40..41 "$" [] [],
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@41..47 "value" [] [Whitespace(" ")],
+                                                },
+                                            },
+                                            operator: STAR@47..49 "*" [] [Whitespace(" ")],
+                                            right: CssNumber {
+                                                value_token: CSS_NUMBER_LITERAL@49..50 "2" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                                semicolon_token: SEMICOLON@50..51 ";" [] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@51..53 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@53..56 "@" [Newline("\n"), Newline("\n")] [],
+            rule: ScssFunctionAtRule {
+                function_token: FUNCTION_KW@56..65 "function" [] [Whitespace(" ")],
+                name: CssIdentifier {
+                    value_token: IDENT@65..70 "scale" [] [],
+                },
+                parameters: ScssParameterList {
+                    l_paren_token: L_PAREN@70..71 "(" [] [],
+                    items: ScssParameterItemList [
+                        ScssParameter {
+                            name: ScssIdentifier {
+                                dollar_token: DOLLAR@71..72 "$" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@72..77 "value" [] [],
+                                },
+                            },
+                            default_value: missing (optional),
+                            ellipsis_token: missing (optional),
+                        },
+                        COMMA@77..79 "," [] [Whitespace(" ")],
+                        ScssParameter {
+                            name: ScssIdentifier {
+                                dollar_token: DOLLAR@79..80 "$" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@80..85 "ratio" [] [],
+                                },
+                            },
+                            default_value: ScssParameterDefaultValue {
+                                colon_token: COLON@85..87 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssNumber {
+                                            value_token: CSS_NUMBER_LITERAL@87..90 "1.5" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            ellipsis_token: missing (optional),
+                        },
+                        COMMA@90..92 "," [] [Whitespace(" ")],
+                        ScssParameter {
+                            name: ScssIdentifier {
+                                dollar_token: DOLLAR@92..93 "$" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@93..97 "rest" [] [],
+                                },
+                            },
+                            default_value: missing (optional),
+                            ellipsis_token: DOT3@97..100 "..." [] [],
+                        },
+                    ],
+                    r_paren_token: R_PAREN@100..102 ")" [] [Whitespace(" ")],
+                },
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@102..103 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssAtRule {
+                            at_token: AT@103..107 "@" [Newline("\n"), Whitespace("  ")] [],
+                            rule: ScssReturnAtRule {
+                                return_token: RETURN_KW@107..114 "return" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        ScssBinaryExpression {
+                                            left: ScssIdentifier {
+                                                dollar_token: DOLLAR@114..115 "$" [] [],
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@115..121 "value" [] [Whitespace(" ")],
+                                                },
+                                            },
+                                            operator: STAR@121..123 "*" [] [Whitespace(" ")],
+                                            right: ScssIdentifier {
+                                                dollar_token: DOLLAR@123..124 "$" [] [],
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@124..129 "ratio" [] [],
+                                                },
+                                            },
+                                        },
+                                    ],
+                                },
+                                semicolon_token: SEMICOLON@129..130 ";" [] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@130..132 "}" [Newline("\n")] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@132..133 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..133
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..132
+    0: CSS_AT_RULE@0..53
+      0: AT@0..1 "@" [] []
+      1: SCSS_FUNCTION_AT_RULE@1..53
+        0: FUNCTION_KW@1..10 "function" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@10..16
+          0: IDENT@10..16 "double" [] []
+        2: SCSS_PARAMETER_LIST@16..28
+          0: L_PAREN@16..17 "(" [] []
+          1: SCSS_PARAMETER_ITEM_LIST@17..26
+            0: SCSS_PARAMETER@17..26
+              0: SCSS_IDENTIFIER@17..23
+                0: DOLLAR@17..18 "$" [] []
+                1: CSS_IDENTIFIER@18..23
+                  0: IDENT@18..23 "value" [] []
+              1: SCSS_PARAMETER_DEFAULT_VALUE@23..26
+                0: COLON@23..25 ":" [] [Whitespace(" ")]
+                1: SCSS_EXPRESSION@25..26
+                  0: SCSS_EXPRESSION_ITEM_LIST@25..26
+                    0: CSS_NUMBER@25..26
+                      0: CSS_NUMBER_LITERAL@25..26 "2" [] []
+              2: (empty)
+          2: R_PAREN@26..28 ")" [] [Whitespace(" ")]
+        3: CSS_DECLARATION_OR_RULE_BLOCK@28..53
+          0: L_CURLY@28..29 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@29..51
+            0: CSS_AT_RULE@29..51
+              0: AT@29..33 "@" [Newline("\n"), Whitespace("  ")] []
+              1: SCSS_RETURN_AT_RULE@33..51
+                0: RETURN_KW@33..40 "return" [] [Whitespace(" ")]
+                1: SCSS_EXPRESSION@40..50
+                  0: SCSS_EXPRESSION_ITEM_LIST@40..50
+                    0: SCSS_BINARY_EXPRESSION@40..50
+                      0: SCSS_IDENTIFIER@40..47
+                        0: DOLLAR@40..41 "$" [] []
+                        1: CSS_IDENTIFIER@41..47
+                          0: IDENT@41..47 "value" [] [Whitespace(" ")]
+                      1: STAR@47..49 "*" [] [Whitespace(" ")]
+                      2: CSS_NUMBER@49..50
+                        0: CSS_NUMBER_LITERAL@49..50 "2" [] []
+                2: SEMICOLON@50..51 ";" [] []
+          2: R_CURLY@51..53 "}" [Newline("\n")] []
+    1: CSS_AT_RULE@53..132
+      0: AT@53..56 "@" [Newline("\n"), Newline("\n")] []
+      1: SCSS_FUNCTION_AT_RULE@56..132
+        0: FUNCTION_KW@56..65 "function" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@65..70
+          0: IDENT@65..70 "scale" [] []
+        2: SCSS_PARAMETER_LIST@70..102
+          0: L_PAREN@70..71 "(" [] []
+          1: SCSS_PARAMETER_ITEM_LIST@71..100
+            0: SCSS_PARAMETER@71..77
+              0: SCSS_IDENTIFIER@71..77
+                0: DOLLAR@71..72 "$" [] []
+                1: CSS_IDENTIFIER@72..77
+                  0: IDENT@72..77 "value" [] []
+              1: (empty)
+              2: (empty)
+            1: COMMA@77..79 "," [] [Whitespace(" ")]
+            2: SCSS_PARAMETER@79..90
+              0: SCSS_IDENTIFIER@79..85
+                0: DOLLAR@79..80 "$" [] []
+                1: CSS_IDENTIFIER@80..85
+                  0: IDENT@80..85 "ratio" [] []
+              1: SCSS_PARAMETER_DEFAULT_VALUE@85..90
+                0: COLON@85..87 ":" [] [Whitespace(" ")]
+                1: SCSS_EXPRESSION@87..90
+                  0: SCSS_EXPRESSION_ITEM_LIST@87..90
+                    0: CSS_NUMBER@87..90
+                      0: CSS_NUMBER_LITERAL@87..90 "1.5" [] []
+              2: (empty)
+            3: COMMA@90..92 "," [] [Whitespace(" ")]
+            4: SCSS_PARAMETER@92..100
+              0: SCSS_IDENTIFIER@92..97
+                0: DOLLAR@92..93 "$" [] []
+                1: CSS_IDENTIFIER@93..97
+                  0: IDENT@93..97 "rest" [] []
+              1: (empty)
+              2: DOT3@97..100 "..." [] []
+          2: R_PAREN@100..102 ")" [] [Whitespace(" ")]
+        3: CSS_DECLARATION_OR_RULE_BLOCK@102..132
+          0: L_CURLY@102..103 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@103..130
+            0: CSS_AT_RULE@103..130
+              0: AT@103..107 "@" [Newline("\n"), Whitespace("  ")] []
+              1: SCSS_RETURN_AT_RULE@107..130
+                0: RETURN_KW@107..114 "return" [] [Whitespace(" ")]
+                1: SCSS_EXPRESSION@114..129
+                  0: SCSS_EXPRESSION_ITEM_LIST@114..129
+                    0: SCSS_BINARY_EXPRESSION@114..129
+                      0: SCSS_IDENTIFIER@114..121
+                        0: DOLLAR@114..115 "$" [] []
+                        1: CSS_IDENTIFIER@115..121
+                          0: IDENT@115..121 "value" [] [Whitespace(" ")]
+                      1: STAR@121..123 "*" [] [Whitespace(" ")]
+                      2: SCSS_IDENTIFIER@123..129
+                        0: DOLLAR@123..124 "$" [] []
+                        1: CSS_IDENTIFIER@124..129
+                          0: IDENT@124..129 "ratio" [] []
+                2: SEMICOLON@129..130 ";" [] []
+          2: R_CURLY@130..132 "}" [Newline("\n")] []
+  2: EOF@132..133 "" [Newline("\n")] []
+
+```

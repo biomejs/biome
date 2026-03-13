@@ -50,6 +50,7 @@ MdBlockList = AnyMdBlock*
 AnyMdBlock =
 	AnyMdLeafBlock
 	| AnyMdContainerBlock
+	| MdQuotePrefix
 
 AnyMdLeafBlock =
 	MdThematicBreakBlock
@@ -154,22 +155,64 @@ MdLinkBlock = label: MdTextual
                 url: MdTextual
                 title: MdTextual?
 
+// Block quote container per CommonMark §5.1
+// The first-line `>` is the `prefix` child. Continuation prefixes are interleaved
+// in source order at the MdBlockList level (between blocks) and within
+// MdInlineItemList (within paragraphs).
 MdQuote =
-	marker: '>'
+	prefix: MdQuotePrefix
 	content: MdBlockList
+
+// Per-physical-line quote prefix: [indent?] '>' [space?]
+// Interleaved in source order alongside content nodes.
+// Lazy continuation is represented by the ABSENCE of MdQuotePrefix after a line break.
+// Pre-marker indent captures 0-3 spaces before '>' per CommonMark §5.1.
+// Post-marker space captures exactly 0 or 1 space after '>';
+// additional spaces are content indentation, not part of the prefix.
+MdQuotePrefix =
+	pre_marker_indent: MdQuoteIndentList
+	marker: '>'
+	post_marker_space: 'md_quote_post_marker_space'?
+
+// Single pre-marker indent token (MdHash/MdHashList pattern).
+MdQuoteIndent = 'md_quote_pre_marker_indent'
+MdQuoteIndentList = MdQuoteIndent*
+
+// Generic indent character for list pre-marker and content indent.
+// Reusable across phases (lists, fenced code, thematic breaks).
+MdIndentToken = 'md_indent_char'
+MdIndentTokenList = MdIndentToken*
+
+// Individual thematic break character (*, -, or _).
+MdThematicBreakChar = value: ('*' | '-' | '_')
+
+// A thematic break component: either a break character or inter-marker whitespace.
+AnyMdThematicBreakPart = MdThematicBreakChar | MdIndentToken
+
+// List of thematic break parts.
+MdThematicBreakPartList = AnyMdThematicBreakPart*
 
 MdBulletListItem = MdBulletList
 MdOrderedListItem = MdBulletList
 
 
-MdBulletList = MdBullet*
+AnyMdBulletListMember = MdBullet | MdNewline
+MdBulletList = AnyMdBulletListMember*
 // - Hey!
 // ^^^^^^
 // 1. Hey!
 // ^^^^^^^
 MdBullet =
-	bullet: ('-' | '*' | '+' | 'md_ordered_list_marker')
+	prefix: MdListMarkerPrefix
 	content: MdBlockList
+
+// Structural tokens around a list marker: indent, marker, post-space, content indent.
+// Mirrors MdQuotePrefix pattern. Marker is required; all other fields optional/empty.
+MdListMarkerPrefix =
+	pre_marker_indent: MdIndentTokenList
+	marker: ('-' | '*' | '+' | 'md_ordered_list_marker')
+	post_marker_space: 'md_list_post_marker_space'?
+	content_indent: MdIndentTokenList
 
 // Any block paragraph
 //
@@ -196,6 +239,8 @@ AnyMdInline =
 	| MdHardLine
 	| MdSoftBreak
 	| MdTextual
+	| MdQuotePrefix
+	| MdIndentToken
 
 
 // *italic*
@@ -294,7 +339,7 @@ MdEntityReference = value: 'md_entity_literal'
 // ---
 // ___
 // https://spec.commonmark.org/0.31.2/#container-blocks-and-leaf-blocks
-MdThematicBreakBlock = value: 'md_thematic_break_literal'
+MdThematicBreakBlock = parts: MdThematicBreakPartList
 
 // Explicit newline node for inter-block newlines.
 // This preserves NEWLINEs in the CST without creating "newline-only paragraphs".

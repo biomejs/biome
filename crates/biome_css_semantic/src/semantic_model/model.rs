@@ -2,7 +2,7 @@ use biome_css_syntax::{
     AnyCssRoot, CssComplexSelector, CssComposesPropertyValue, CssCompoundSelector,
     CssContainerAtRule, CssDashedIdentifier, CssDeclaration, CssGenericComponentValueList,
     CssIdentifier, CssMediaAtRule, CssNestedQualifiedRule, CssQualifiedRule,
-    CssStartingStyleAtRule, CssSupportsAtRule,
+    CssStartingStyleAtRule, CssSupportsAtRule, ScssExpression,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstPtr, SendNode, SyntaxNodeText, SyntaxResult, TextRange, TextSize,
@@ -35,7 +35,7 @@ impl SemanticModel {
         self.root.to_language_root::<AnyCssRoot>()
     }
 
-    /// Returns a slice of all rules in the CSS document.
+    /// Returns a slice of all top-level rules in the CSS document.
     pub fn rules(&self) -> &[Rule] {
         &self.data.rules
     }
@@ -339,6 +339,7 @@ impl CssProperty {
 pub enum CssPropertyInitialValue {
     GenericComponent(AstPtr<CssGenericComponentValueList>),
     Composes(AstPtr<CssComposesPropertyValue>),
+    ScssExpression(AstPtr<ScssExpression>),
 }
 
 impl From<CssGenericComponentValueList> for CssPropertyInitialValue {
@@ -350,6 +351,12 @@ impl From<CssGenericComponentValueList> for CssPropertyInitialValue {
 impl From<CssComposesPropertyValue> for CssPropertyInitialValue {
     fn from(value: CssComposesPropertyValue) -> Self {
         Self::Composes(AstPtr::new(&value))
+    }
+}
+
+impl From<ScssExpression> for CssPropertyInitialValue {
+    fn from(value: ScssExpression) -> Self {
+        Self::ScssExpression(AstPtr::new(&value))
     }
 }
 
