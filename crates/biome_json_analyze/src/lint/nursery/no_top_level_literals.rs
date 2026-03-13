@@ -57,7 +57,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoTopLevelLiterals {
-        version: "next",
+        version: "2.4.7",
         name: "noTopLevelLiterals",
         language: "json",
         recommended: false,
