@@ -11,8 +11,8 @@ use proc_macro2::{Ident, Literal, Span};
 use quote::{format_ident, quote};
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
-use xtask_codegen::update;
 use xtask_codegen::{generate_analyzer_rule_options, get_analyzer_rule_options_path};
+use xtask_codegen::{to_capitalized, update};
 use xtask_glue::*;
 
 // ======= LINT ======
@@ -846,6 +846,50 @@ fn generate_for_groups(
     };
     update(path, &xtask_glue::reformat(configuration)?, mode)?;
     update(file_name, &xtask_glue::reformat(push_rules)?, mode)?;
+
+    // Generate the options type-check test file for lint rules
+    if kind == RuleCategory::Lint {
+        let mut push_statements = String::new();
+        for rg in &rule_group_names {
+            let snake_name = Case::Snake.convert(rg.rule_name);
+            let options_type_name = format!("{}Options", to_capitalized(rg.rule_name));
+            push_statements.push_str(&format!(
+                "result.push((\"{group}\", \"{rule}\", TypeId::of::<biome_rule_options::{module}::{options}>()));\n",
+                group = rg.group_name,
+                rule = rg.rule_name,
+                module = snake_name,
+                options = options_type_name,
+            ));
+        }
+
+        let options_check = format!(
+            "\
+#![expect(clippy::vec_init_then_push)]
+use std::any::TypeId;
+
+/// Returns a list of `(group, rule, config_side_type_id)` for every lint rule.
+///
+/// The `TypeId` is derived from the rule name convention:
+/// `biome_rule_options::{{snake_case_name}}::{{PascalCaseName}}Options`
+///
+/// This is the type that the configuration layer uses when constructing
+/// [`RuleOptions`](biome_analyze::options::RuleOptions). If the rule's
+/// `type Options` doesn't match, the `debug_assert_eq!` inside
+/// `RuleOptions::value()` will fire at runtime.
+pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, TypeId)> {{
+    let mut result = Vec::new();
+{push_statements}    result
+}}
+"
+        );
+
+        let options_check_file = push_directory.join("linter_options_check.rs");
+        update(
+            &options_check_file,
+            &xtask_glue::reformat(options_check)?,
+            mode,
+        )?;
+    }
 
     Ok(())
 }

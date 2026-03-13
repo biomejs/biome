@@ -86,7 +86,8 @@ tracing                  = { workspace = true, features = ["attributes", "log"] 
 web-time                 = { workspace = true }
 
 [dev-dependencies]
-insta = { workspace = true }
+biome_configuration = { workspace = true, features = ["test-utils"] }
+insta               = { workspace = true }
 
 [features]
 js_plugin = ["biome_plugin_loader/js_plugin"]
