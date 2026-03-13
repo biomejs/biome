@@ -807,6 +807,8 @@ import { Component } from "./component.svelte";
 let hello = "Hello World";
 let array = [];
 let props = [];
+let dynamicId = "main";
+let dynamicClass = "container";
 ---
 
 <html>
@@ -815,6 +817,7 @@ let props = [];
     { array.map(item => (<span>{item}</span>)) }
     <Component />
     <input {...props}>
+    <div id={dynamicId} class={dynamicClass}></div>
 </html>
 "#
         .as_bytes(),
@@ -1174,6 +1177,125 @@ fn return_in_template_expression_should_error() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "return_in_template_expression_should_error",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn no_unused_variables_in_astro_attribute_expressions() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.astro");
+    fs.insert(
+        file.into(),
+        // Variables used in plain HTML attribute expressions, body text expressions,
+        // and Astro directives together — verifies all extraction paths work for
+        // cross-snippet binding tracking.
+        r#"---
+const handler = () => {};
+const dynamicId = "foo";
+const dynamicClass = "bar";
+const label = "Click me";
+const pageTitle = "Home";
+const sectionId = "main";
+const dataTheme = "dark";
+const items = ["a", "b", "c"];
+const showList = true;
+---
+
+<html>
+    <head><title>{pageTitle}</title></head>
+    <body>
+        <button onclick={handler} id={dynamicId} class={dynamicClass} aria-label={label}>Click</button>
+        <section id={sectionId} data-theme={dataTheme}>
+            <div set:html={items.map(i => `<li>${i}</li>`).join("")} />
+            <span set:text={showList ? label : "hidden"} />
+        </section>
+    </body>
+</html>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noUnusedVariables", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_unused_variables_in_astro_attribute_expressions",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn no_unused_variables_in_astro_directive_expressions() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.astro");
+    fs.insert(
+        file.into(),
+        // Covers every Astro directive type that accepts an expression value:
+        // - class:list={expr}     (AstroClassDirective)
+        // - set:text={expr}       (AstroSetDirective)
+        // - set:html={expr}       (AstroSetDirective)
+        // - define:vars={expr}    (AstroDefineDirective)
+        // - client:visible={expr} (AstroClientDirective with options)
+        // - client:idle={expr}    (AstroClientDirective with options)
+        r#"---
+const classes = ["a", "b"];
+const greeting = "hello";
+const rawHtml = "<strong>bold</strong>";
+const textColor = "red";
+const visibilityOpts = { rootMargin: "200px" };
+const idleOpts = { timeout: 500 };
+---
+
+<div class:list={classes}>Content</div>
+<p set:text={greeting} />
+<article set:html={rawHtml} />
+<style define:vars={{ textColor }}>
+  h1 { color: var(--textColor); }
+</style>
+<Component client:visible={visibilityOpts} />
+<Component client:idle={idleOpts} />
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noUnusedVariables", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_unused_variables_in_astro_directive_expressions",
         fs,
         console,
         result,
