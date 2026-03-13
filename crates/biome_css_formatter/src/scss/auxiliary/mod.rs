@@ -10,6 +10,7 @@ pub(crate) mod extend_optional_modifier;
 pub(crate) mod forward_as_clause;
 pub(crate) mod hide_clause;
 pub(crate) mod include_argument_list;
+pub(crate) mod interpolation;
 pub(crate) mod keyword_argument;
 pub(crate) mod list_expression;
 pub(crate) mod list_expression_element;

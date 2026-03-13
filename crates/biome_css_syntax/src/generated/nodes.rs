@@ -10128,6 +10128,56 @@ pub struct ScssIncludeAtRuleFields {
     pub semicolon_token: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssInterpolation {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssInterpolation {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssInterpolationFields {
+        ScssInterpolationFields {
+            hash_token: self.hash_token(),
+            l_curly_token: self.l_curly_token(),
+            value: self.value(),
+            r_curly_token: self.r_curly_token(),
+        }
+    }
+    pub fn hash_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn value(&self) -> SyntaxResult<AnyScssExpression> {
+        support::required_node(&self.syntax, 2usize)
+    }
+    pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+impl Serialize for ScssInterpolation {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssInterpolationFields {
+    pub hash_token: SyntaxResult<SyntaxToken>,
+    pub l_curly_token: SyntaxResult<SyntaxToken>,
+    pub value: SyntaxResult<AnyScssExpression>,
+    pub r_curly_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssKeywordArgument {
     pub(crate) syntax: SyntaxNode,
 }
@@ -15335,6 +15385,7 @@ pub enum AnyScssExpression {
     AnyCssValue(AnyCssValue),
     ScssBinaryExpression(ScssBinaryExpression),
     ScssExpression(ScssExpression),
+    ScssInterpolation(ScssInterpolation),
     ScssListExpression(ScssListExpression),
     ScssMapExpression(ScssMapExpression),
     ScssParenthesizedExpression(ScssParenthesizedExpression),
@@ -15356,6 +15407,12 @@ impl AnyScssExpression {
     pub fn as_scss_expression(&self) -> Option<&ScssExpression> {
         match &self {
             Self::ScssExpression(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_interpolation(&self) -> Option<&ScssInterpolation> {
+        match &self {
+            Self::ScssInterpolation(item) => Some(item),
             _ => None,
         }
     }
@@ -15391,6 +15448,7 @@ pub enum AnyScssExpressionItem {
     CssGenericDelimiter(CssGenericDelimiter),
     ScssArbitraryArgument(ScssArbitraryArgument),
     ScssBinaryExpression(ScssBinaryExpression),
+    ScssInterpolation(ScssInterpolation),
     ScssKeywordArgument(ScssKeywordArgument),
     ScssListExpression(ScssListExpression),
     ScssMapExpression(ScssMapExpression),
@@ -15425,6 +15483,12 @@ impl AnyScssExpressionItem {
     pub fn as_scss_binary_expression(&self) -> Option<&ScssBinaryExpression> {
         match &self {
             Self::ScssBinaryExpression(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_interpolation(&self) -> Option<&ScssInterpolation> {
+        match &self {
+            Self::ScssInterpolation(item) => Some(item),
             _ => None,
         }
     }
@@ -27858,6 +27922,62 @@ impl From<ScssIncludeAtRule> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for ScssInterpolation {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_INTERPOLATION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_INTERPOLATION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssInterpolation {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssInterpolation")
+                .field("hash_token", &support::DebugSyntaxResult(self.hash_token()))
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("ScssInterpolation").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssInterpolation> for SyntaxNode {
+    fn from(n: ScssInterpolation) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssInterpolation> for SyntaxElement {
+    fn from(n: ScssInterpolation) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for ScssKeywordArgument {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -39242,6 +39362,11 @@ impl From<ScssExpression> for AnyScssExpression {
         Self::ScssExpression(node)
     }
 }
+impl From<ScssInterpolation> for AnyScssExpression {
+    fn from(node: ScssInterpolation) -> Self {
+        Self::ScssInterpolation(node)
+    }
+}
 impl From<ScssListExpression> for AnyScssExpression {
     fn from(node: ScssListExpression) -> Self {
         Self::ScssListExpression(node)
@@ -39267,6 +39392,7 @@ impl AstNode for AnyScssExpression {
     const KIND_SET: SyntaxKindSet<Language> = AnyCssValue::KIND_SET
         .union(ScssBinaryExpression::KIND_SET)
         .union(ScssExpression::KIND_SET)
+        .union(ScssInterpolation::KIND_SET)
         .union(ScssListExpression::KIND_SET)
         .union(ScssMapExpression::KIND_SET)
         .union(ScssParenthesizedExpression::KIND_SET)
@@ -39275,6 +39401,7 @@ impl AstNode for AnyScssExpression {
         match kind {
             SCSS_BINARY_EXPRESSION
             | SCSS_EXPRESSION
+            | SCSS_INTERPOLATION
             | SCSS_LIST_EXPRESSION
             | SCSS_MAP_EXPRESSION
             | SCSS_PARENTHESIZED_EXPRESSION
@@ -39287,6 +39414,7 @@ impl AstNode for AnyScssExpression {
         let res = match syntax.kind() {
             SCSS_BINARY_EXPRESSION => Self::ScssBinaryExpression(ScssBinaryExpression { syntax }),
             SCSS_EXPRESSION => Self::ScssExpression(ScssExpression { syntax }),
+            SCSS_INTERPOLATION => Self::ScssInterpolation(ScssInterpolation { syntax }),
             SCSS_LIST_EXPRESSION => Self::ScssListExpression(ScssListExpression { syntax }),
             SCSS_MAP_EXPRESSION => Self::ScssMapExpression(ScssMapExpression { syntax }),
             SCSS_PARENTHESIZED_EXPRESSION => {
@@ -39306,6 +39434,7 @@ impl AstNode for AnyScssExpression {
         match self {
             Self::ScssBinaryExpression(it) => it.syntax(),
             Self::ScssExpression(it) => it.syntax(),
+            Self::ScssInterpolation(it) => it.syntax(),
             Self::ScssListExpression(it) => it.syntax(),
             Self::ScssMapExpression(it) => it.syntax(),
             Self::ScssParenthesizedExpression(it) => it.syntax(),
@@ -39317,6 +39446,7 @@ impl AstNode for AnyScssExpression {
         match self {
             Self::ScssBinaryExpression(it) => it.into_syntax(),
             Self::ScssExpression(it) => it.into_syntax(),
+            Self::ScssInterpolation(it) => it.into_syntax(),
             Self::ScssListExpression(it) => it.into_syntax(),
             Self::ScssMapExpression(it) => it.into_syntax(),
             Self::ScssParenthesizedExpression(it) => it.into_syntax(),
@@ -39331,6 +39461,7 @@ impl std::fmt::Debug for AnyScssExpression {
             Self::AnyCssValue(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssBinaryExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssInterpolation(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssListExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssMapExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssParenthesizedExpression(it) => std::fmt::Debug::fmt(it, f),
@@ -39344,6 +39475,7 @@ impl From<AnyScssExpression> for SyntaxNode {
             AnyScssExpression::AnyCssValue(it) => it.into_syntax(),
             AnyScssExpression::ScssBinaryExpression(it) => it.into_syntax(),
             AnyScssExpression::ScssExpression(it) => it.into_syntax(),
+            AnyScssExpression::ScssInterpolation(it) => it.into_syntax(),
             AnyScssExpression::ScssListExpression(it) => it.into_syntax(),
             AnyScssExpression::ScssMapExpression(it) => it.into_syntax(),
             AnyScssExpression::ScssParenthesizedExpression(it) => it.into_syntax(),
@@ -39375,6 +39507,11 @@ impl From<ScssArbitraryArgument> for AnyScssExpressionItem {
 impl From<ScssBinaryExpression> for AnyScssExpressionItem {
     fn from(node: ScssBinaryExpression) -> Self {
         Self::ScssBinaryExpression(node)
+    }
+}
+impl From<ScssInterpolation> for AnyScssExpressionItem {
+    fn from(node: ScssInterpolation) -> Self {
+        Self::ScssInterpolation(node)
     }
 }
 impl From<ScssKeywordArgument> for AnyScssExpressionItem {
@@ -39409,6 +39546,7 @@ impl AstNode for AnyScssExpressionItem {
         .union(CssGenericDelimiter::KIND_SET)
         .union(ScssArbitraryArgument::KIND_SET)
         .union(ScssBinaryExpression::KIND_SET)
+        .union(ScssInterpolation::KIND_SET)
         .union(ScssKeywordArgument::KIND_SET)
         .union(ScssListExpression::KIND_SET)
         .union(ScssMapExpression::KIND_SET)
@@ -39420,6 +39558,7 @@ impl AstNode for AnyScssExpressionItem {
             | CSS_GENERIC_DELIMITER
             | SCSS_ARBITRARY_ARGUMENT
             | SCSS_BINARY_EXPRESSION
+            | SCSS_INTERPOLATION
             | SCSS_KEYWORD_ARGUMENT
             | SCSS_LIST_EXPRESSION
             | SCSS_MAP_EXPRESSION
@@ -39439,6 +39578,7 @@ impl AstNode for AnyScssExpressionItem {
                 Self::ScssArbitraryArgument(ScssArbitraryArgument { syntax })
             }
             SCSS_BINARY_EXPRESSION => Self::ScssBinaryExpression(ScssBinaryExpression { syntax }),
+            SCSS_INTERPOLATION => Self::ScssInterpolation(ScssInterpolation { syntax }),
             SCSS_KEYWORD_ARGUMENT => Self::ScssKeywordArgument(ScssKeywordArgument { syntax }),
             SCSS_LIST_EXPRESSION => Self::ScssListExpression(ScssListExpression { syntax }),
             SCSS_MAP_EXPRESSION => Self::ScssMapExpression(ScssMapExpression { syntax }),
@@ -39461,6 +39601,7 @@ impl AstNode for AnyScssExpressionItem {
             Self::CssGenericDelimiter(it) => it.syntax(),
             Self::ScssArbitraryArgument(it) => it.syntax(),
             Self::ScssBinaryExpression(it) => it.syntax(),
+            Self::ScssInterpolation(it) => it.syntax(),
             Self::ScssKeywordArgument(it) => it.syntax(),
             Self::ScssListExpression(it) => it.syntax(),
             Self::ScssMapExpression(it) => it.syntax(),
@@ -39475,6 +39616,7 @@ impl AstNode for AnyScssExpressionItem {
             Self::CssGenericDelimiter(it) => it.into_syntax(),
             Self::ScssArbitraryArgument(it) => it.into_syntax(),
             Self::ScssBinaryExpression(it) => it.into_syntax(),
+            Self::ScssInterpolation(it) => it.into_syntax(),
             Self::ScssKeywordArgument(it) => it.into_syntax(),
             Self::ScssListExpression(it) => it.into_syntax(),
             Self::ScssMapExpression(it) => it.into_syntax(),
@@ -39492,6 +39634,7 @@ impl std::fmt::Debug for AnyScssExpressionItem {
             Self::CssGenericDelimiter(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssArbitraryArgument(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssBinaryExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssInterpolation(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssKeywordArgument(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssListExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssMapExpression(it) => std::fmt::Debug::fmt(it, f),
@@ -39508,6 +39651,7 @@ impl From<AnyScssExpressionItem> for SyntaxNode {
             AnyScssExpressionItem::CssGenericDelimiter(it) => it.into_syntax(),
             AnyScssExpressionItem::ScssArbitraryArgument(it) => it.into_syntax(),
             AnyScssExpressionItem::ScssBinaryExpression(it) => it.into_syntax(),
+            AnyScssExpressionItem::ScssInterpolation(it) => it.into_syntax(),
             AnyScssExpressionItem::ScssKeywordArgument(it) => it.into_syntax(),
             AnyScssExpressionItem::ScssListExpression(it) => it.into_syntax(),
             AnyScssExpressionItem::ScssMapExpression(it) => it.into_syntax(),
@@ -41975,6 +42119,11 @@ impl std::fmt::Display for ScssIncludeArgumentList {
     }
 }
 impl std::fmt::Display for ScssIncludeAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for ScssInterpolation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

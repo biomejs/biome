@@ -1,0 +1,5 @@
+$direct: #{$name};
+$binary: #{1 + 2};
+$nested: #{($a + 1) * 2};
+$call: #{map-get($map, key)};
+$list: #{1, 2, 3};

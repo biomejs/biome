@@ -2936,6 +2936,7 @@ AnyScssExpressionItem =
 	| ScssKeywordArgument
 	| ScssArbitraryArgument
 	| ScssBinaryExpression
+	| ScssInterpolation
 	| ScssUnaryExpression
 	| ScssParenthesizedExpression
 	| ScssListExpression
@@ -2982,6 +2983,14 @@ ScssParenthesizedExpression =
 	expression: AnyScssExpression
 	')'
 
+// width: #{$a + 1};
+//        ^^^^^^^^^
+ScssInterpolation =
+	'#'
+	'{'
+	value: AnyScssExpression
+	'}'
+
 // box-shadow: 1px, 2px, 3px;
 //             ^^^^^^^^^^^^^
 ScssListExpression =
@@ -3019,6 +3028,7 @@ ScssMapExpressionPair =
 AnyScssExpression =
 	ScssExpression
 	| ScssBinaryExpression
+	| ScssInterpolation
 	| ScssUnaryExpression
 	| ScssParenthesizedExpression
 	| ScssListExpression
