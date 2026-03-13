@@ -113,6 +113,7 @@ pub const NODE: &[&str] = &[
     "Request",
     "Response",
     "SubtleCrypto",
+    "Temporal",
     "TextDecoder",
     "TextDecoderStream",
     "TextEncoder",
