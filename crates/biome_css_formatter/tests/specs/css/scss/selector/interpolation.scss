@@ -1,0 +1,22 @@
+.#{$name}{
+color:red;
+}
+
+.#{$name}-bar,
+.foo-#{$i},
+.foo-#{$name}-bar,
+.foo-#{$name}#{$state},
+.foo-#{$name} #{$second},
+#app-#{$slot},
+##{$id},
+#{$type},
+|#{$type},
+*|#{$type},
+ns|#{$type},
+ns|foo-#{$name},
+#{$type}#{$state},
+#{$type}.class,
+%#{$placeholder},
+%placeholder-#{$name}{
+color:red;
+}

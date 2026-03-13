@@ -228,7 +228,10 @@ pub fn css_charset_at_rule(
         ],
     ))
 }
-pub fn css_class_selector(dot_token: SyntaxToken, name: CssCustomIdentifier) -> CssClassSelector {
+pub fn css_class_selector(
+    dot_token: SyntaxToken,
+    name: AnyCssSelectorCustomIdentifier,
+) -> CssClassSelector {
     CssClassSelector::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_CLASS_SELECTOR,
         [
@@ -1072,7 +1075,10 @@ pub fn css_generic_property(
         ],
     ))
 }
-pub fn css_id_selector(hash_token: SyntaxToken, name: CssCustomIdentifier) -> CssIdSelector {
+pub fn css_id_selector(
+    hash_token: SyntaxToken,
+    name: AnyCssSelectorCustomIdentifier,
+) -> CssIdSelector {
     CssIdSelector::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_ID_SELECTOR,
         [
@@ -2757,14 +2763,14 @@ pub fn css_type_function(
         ],
     ))
 }
-pub fn css_type_selector(ident: CssIdentifier) -> CssTypeSelectorBuilder {
+pub fn css_type_selector(ident: AnyCssSelectorIdentifier) -> CssTypeSelectorBuilder {
     CssTypeSelectorBuilder {
         ident,
         namespace: None,
     }
 }
 pub struct CssTypeSelectorBuilder {
-    ident: CssIdentifier,
+    ident: AnyCssSelectorIdentifier,
     namespace: Option<CssNamespace>,
 }
 impl CssTypeSelectorBuilder {
@@ -3589,6 +3595,14 @@ impl ScssIncludeAtRuleBuilder {
         ))
     }
 }
+pub fn scss_interpolated_identifier(
+    items: ScssInterpolatedIdentifierPartList,
+) -> ScssInterpolatedIdentifier {
+    ScssInterpolatedIdentifier::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_INTERPOLATED_IDENTIFIER,
+        [Some(SyntaxElement::Node(items.into_syntax()))],
+    ))
+}
 pub fn scss_interpolation(
     hash_token: SyntaxToken,
     l_curly_token: SyntaxToken,
@@ -3856,7 +3870,7 @@ pub fn scss_parenthesized_expression(
 }
 pub fn scss_placeholder_selector(
     percent_token: SyntaxToken,
-    name: CssCustomIdentifier,
+    name: AnyCssSelectorCustomIdentifier,
 ) -> ScssPlaceholderSelector {
     ScssPlaceholderSelector::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_PLACEHOLDER_SELECTOR,
@@ -5029,6 +5043,18 @@ where
                 Some(separators.next()?.into())
             }
         }),
+    ))
+}
+pub fn scss_interpolated_identifier_part_list<I>(items: I) -> ScssInterpolatedIdentifierPartList
+where
+    I: IntoIterator<Item = AnyScssInterpolatedIdentifierPart>,
+    I::IntoIter: ExactSizeIterator,
+{
+    ScssInterpolatedIdentifierPartList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_INTERPOLATED_IDENTIFIER_PART_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
     ))
 }
 pub fn scss_list_expression_element_list<I, S>(
