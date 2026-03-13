@@ -546,6 +546,7 @@ fn lint(params: LintParams) -> LintResults {
             .settings
             .full_source()
             .map(|s| s as std::sync::Arc<dyn ExtendedConfigurationProvider>),
+        project_layout: Some(params.project_layout.clone()),
     };
     let (_, analyze_diagnostics) = analyze(
         &root,
@@ -604,6 +605,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         suppression_reason.as_deref(),
     );
     let mut actions = Vec::new();
+    let project_layout_for_services = project_layout.clone();
     let (enabled_rules, disabled_rules, analyzer_options) =
         AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
             .with_only(only)
@@ -629,6 +631,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         configuration_provider: workspace
             .full_source()
             .map(|s| s as std::sync::Arc<dyn ExtendedConfigurationProvider>),
+        project_layout: Some(project_layout_for_services),
     };
     analyze(
         &tree,
@@ -705,6 +708,7 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
                 .settings
                 .full_source()
                 .map(|s| s as std::sync::Arc<dyn ExtendedConfigurationProvider>),
+            project_layout: Some(params.project_layout.clone()),
         };
         let (action, _) = analyze(
             &tree,

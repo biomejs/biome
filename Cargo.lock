@@ -1157,6 +1157,8 @@ dependencies = [
  "biome_json_factory",
  "biome_json_parser",
  "biome_json_syntax",
+ "biome_package",
+ "biome_project_layout",
  "biome_rowan",
  "biome_rule_options",
  "biome_string_case",
