@@ -46,11 +46,12 @@ use biome_html_formatter::{
 use biome_html_parser::{HtmlParserOptions, parse_html_with_cache};
 use biome_html_syntax::element_ext::AnyEmbeddedContent;
 use biome_html_syntax::{
-    AnySvelteDirective, AstroEmbeddedContent, HtmlAttributeInitializerClause,
-    HtmlDoubleTextExpression, HtmlElement, HtmlFileSource, HtmlLanguage, HtmlRoot,
-    HtmlSingleTextExpression, HtmlSyntaxNode, HtmlTextExpression, HtmlTextExpressions, HtmlVariant,
-    SvelteAwaitBlock, SvelteEachBlock, SvelteIfBlock, SvelteKeyBlock, VueDirective,
-    VueVBindShorthandDirective, VueVOnShorthandDirective, VueVSlotShorthandDirective,
+    AnyAstroDirective, AnySvelteDirective, AstroEmbeddedContent, HtmlAttribute,
+    HtmlAttributeInitializerClause, HtmlDoubleTextExpression, HtmlElement, HtmlFileSource,
+    HtmlLanguage, HtmlRoot, HtmlSingleTextExpression, HtmlSyntaxNode, HtmlTextExpression,
+    HtmlTextExpressions, HtmlVariant, SvelteAwaitBlock, SvelteEachBlock, SvelteIfBlock,
+    SvelteKeyBlock, VueDirective, VueVBindShorthandDirective, VueVOnShorthandDirective,
+    VueVSlotShorthandDirective,
 };
 use biome_js_parser::parse_js_with_offset_and_cache;
 use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage};
@@ -527,6 +528,36 @@ fn parse_embedded_nodes(
                 {
                     nodes.push(parsed.node);
                 }
+
+                // Astro directives: class:list={...}, define:vars={...}, etc.
+                if let Some(directive) = AnyAstroDirective::cast_ref(&element)
+                    && let Some(initializer) = directive.initializer()
+                    && let Some(candidate) = build_attribute_expression_candidate(&initializer)
+                    && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
+                        HostLanguage::Html,
+                        &candidate,
+                        &doc_file_source,
+                    )
+                    && let Some(parsed) =
+                        parse_matched_embed(&candidate, &embed_match, &mut ctx, None)
+                {
+                    nodes.push(parsed.node);
+                }
+
+                // Plain HTML attributes with expression values: class={expr}, id={expr}, etc.
+                if let Some(attr) = HtmlAttribute::cast_ref(&element)
+                    && let Some(initializer) = attr.initializer()
+                    && let Some(candidate) = build_attribute_expression_candidate(&initializer)
+                    && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
+                        HostLanguage::Html,
+                        &candidate,
+                        &doc_file_source,
+                    )
+                    && let Some(parsed) =
+                        parse_matched_embed(&candidate, &embed_match, &mut ctx, None)
+                {
+                    nodes.push(parsed.node);
+                }
             }
         }
         HtmlVariant::Vue => {
@@ -991,6 +1022,17 @@ fn build_vue_directive_candidate(
 /// Svelte directives use curly brace text expressions (`on:click={handler}`).
 /// The JS content is the literal token inside the expression node.
 fn build_svelte_directive_candidate(
+    initializer: &HtmlAttributeInitializerClause,
+) -> Option<EmbedCandidate> {
+    build_attribute_expression_candidate(initializer)
+}
+
+/// Build an `EmbedCandidate::Directive` from an initializer clause containing
+/// a curly brace text expression (`attr={expr}`).
+///
+/// Used by both Astro and Svelte attribute expression extraction.
+/// Returns `None` if the initializer does not contain a text expression.
+fn build_attribute_expression_candidate(
     initializer: &HtmlAttributeInitializerClause,
 ) -> Option<EmbedCandidate> {
     let value_node = initializer.value().ok()?;
