@@ -708,3 +708,53 @@ const highlight = foo`some tagged template` // unknown tagged template
 
     insta::assert_snapshot!(result.as_code());
 }
+
+#[test]
+fn lsp_language_hints_keep_svelte_source_module_path_semantics() {
+    const SVELTE_TS_FILE_PATH: &str = "/project/component.svelte.ts";
+    const SVELTE_JS_FILE_PATH: &str = "/project/component.svelte.js";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8PathBuf::from(SVELTE_TS_FILE_PATH),
+        b"export const count = 1;",
+    );
+    fs.insert(
+        Utf8PathBuf::from(SVELTE_JS_FILE_PATH),
+        b"export const count = 1;",
+    );
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(SVELTE_TS_FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: Some(DocumentFileSource::from_language_id("typescript")),
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(SVELTE_JS_FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: Some(DocumentFileSource::from_language_id("javascript")),
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let ts_file_source = workspace.get_file_source(SVELTE_TS_FILE_PATH.into(), false);
+    let ts = ts_file_source.to_js_file_source().expect("JS file source");
+    assert!(ts.is_svelte_source_module());
+    assert!(ts.is_typescript());
+
+    let js_file_source = workspace.get_file_source(SVELTE_JS_FILE_PATH.into(), false);
+    let js = js_file_source.to_js_file_source().expect("JS file source");
+    assert!(js.is_svelte_source_module());
+    assert!(!js.is_typescript());
+}

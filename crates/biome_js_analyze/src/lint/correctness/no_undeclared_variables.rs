@@ -69,7 +69,14 @@ impl Rule for NoUndeclaredVariables {
     type Options = NoUndeclaredVariablesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        ctx.query()
+        let model = ctx.query();
+        let source_type = ctx.source_type::<JsFileSource>();
+        let embedded_bindings = ctx
+            .get_service::<EmbeddedBindings>()
+            .expect("embedded bindings service");
+        let flavor = model.flavor();
+
+        model
             .all_unresolved_references()
             .filter_map(|reference| {
                 let identifier = reference.tree();
@@ -80,17 +87,19 @@ impl Rule for NoUndeclaredVariables {
 
                 let token = identifier.value_token().ok()?;
                 let text = token.text_trimmed();
+                // Semantic resolution handles declared `$store` bindings; this fallback keeps
+                // configured globals and embedded bindings aligned on `store`.
+                let store_name = flavor.store_reference_name(text);
 
-                let source_type = ctx.source_type::<JsFileSource>();
-
-                if ctx.is_global(text) {
+                if ctx.is_global(text) || store_name.is_some_and(|store_name| ctx.is_global(store_name))
+                {
                     return None;
                 }
 
-                let embedded_bindings = ctx
-                    .get_service::<EmbeddedBindings>()
-                    .expect("embedded bindings service");
-                if embedded_bindings.contains_binding(text) {
+                if embedded_bindings.contains_binding(text)
+                    || store_name
+                        .is_some_and(|store_name| embedded_bindings.contains_binding(store_name))
+                {
                     return None;
                 }
 

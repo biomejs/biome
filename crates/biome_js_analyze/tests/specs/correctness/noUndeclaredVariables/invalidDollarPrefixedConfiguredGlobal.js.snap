@@ -1,0 +1,25 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidDollarPrefixedConfiguredGlobal.js
+---
+# Input
+```js
+$foo;
+
+```
+
+# Diagnostics
+```
+invalidDollarPrefixedConfiguredGlobal.js:1:1 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━
+
+  × The $foo variable is undeclared.
+  
+  > 1 │ $foo;
+      │ ^^^^
+    2 │ 
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
