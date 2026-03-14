@@ -19,7 +19,9 @@ impl FormatNodeRule<MdHardLine> for FormatMdHardLine {
                 ]
             )
         } else {
-            // Normalize spaces to 2 spaces
+            // Given two or more spaces in MdHardLine, only two spaces has semantic meaning
+            // so we are adding back two spaces as required by the spec
+            // https://spec.commonmark.org/0.31.2/#hard-line-break
             write!(
                 f,
                 [
