@@ -244,6 +244,7 @@ define_categories! {
     "lint/nursery/useConsistentGraphqlDescriptions": "https://biomejs.dev/linter/rules/use-consistent-graphql-descriptions",
     "lint/nursery/useConsistentMethodSignatures": "https://biomejs.dev/linter/rules/use-consistent-method-signatures",
     "lint/nursery/useConsistentObjectDefinition": "https://biomejs.dev/linter/rules/use-consistent-object-definition",
+    "lint/nursery/useConsistentTestIt": "https://biomejs.dev/linter/rules/use-consistent-test-it",
     "lint/nursery/useDestructuring": "https://biomejs.dev/linter/rules/use-destructuring",
     "lint/nursery/useErrorCause": "https://biomejs.dev/linter/rules/use-error-cause",
     "lint/nursery/useExhaustiveSwitchCases": "https://biomejs.dev/linter/rules/use-exhaustive-switch-cases",

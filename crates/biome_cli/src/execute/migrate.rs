@@ -29,6 +29,7 @@ use std::fmt::Debug;
 mod eslint;
 mod eslint_any_rule_to_biome;
 mod eslint_eslint;
+mod eslint_jest;
 mod eslint_jsxa11y;
 mod eslint_to_biome;
 mod eslint_typescript;
