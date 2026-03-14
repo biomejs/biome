@@ -38,8 +38,11 @@ pub enum HtmlSyntaxKind {
     HASH,
     L_PAREN,
     R_PAREN,
+    L_BRACKET_PAREN,
+    R_BRACKET_PAREN,
     DOT3,
     PIPE,
+    STAR,
     NULL_KW,
     TRUE_KW,
     FALSE_KW,
@@ -171,6 +174,12 @@ pub enum HtmlSyntaxKind {
     VUE_DYNAMIC_ARGUMENT,
     VUE_MODIFIER_LIST,
     VUE_MODIFIER,
+    ANGULAR_BINDING_NAME,
+    ANGULAR_EVENT_BINDING,
+    ANGULAR_PROPERTY_BINDING,
+    ANGULAR_TWO_WAY_BINDING,
+    ANGULAR_STRUCTURAL_DIRECTIVE,
+    ANGULAR_TEMPLATE_REF_VARIABLE,
     HTML_BOGUS,
     HTML_BOGUS_ELEMENT,
     HTML_BOGUS_ATTRIBUTE,
@@ -213,8 +222,11 @@ impl HtmlSyntaxKind {
                 | HASH
                 | L_PAREN
                 | R_PAREN
+                | L_BRACKET_PAREN
+                | R_BRACKET_PAREN
                 | DOT3
                 | PIPE
+                | STAR
         )
     }
     pub const fn is_literal(self) -> bool {
@@ -298,8 +310,11 @@ impl HtmlSyntaxKind {
             HASH => "#",
             L_PAREN => "(",
             R_PAREN => ")",
+            L_BRACKET_PAREN => "[(",
+            R_BRACKET_PAREN => ")]",
             DOT3 => "...",
             PIPE => "|",
+            STAR => "*",
             NULL_KW => "null",
             TRUE_KW => "true",
             FALSE_KW => "false",
@@ -340,4 +355,4 @@ impl HtmlSyntaxKind {
 }
 #[doc = r" Utility macro for creating a SyntaxKind through simple macro syntax"]
 #[macro_export]
-macro_rules ! T { [<] => { $ crate :: HtmlSyntaxKind :: L_ANGLE } ; [>] => { $ crate :: HtmlSyntaxKind :: R_ANGLE } ; [/] => { $ crate :: HtmlSyntaxKind :: SLASH } ; [=] => { $ crate :: HtmlSyntaxKind :: EQ } ; [!] => { $ crate :: HtmlSyntaxKind :: BANG } ; [-] => { $ crate :: HtmlSyntaxKind :: MINUS } ; ["<![CDATA["] => { $ crate :: HtmlSyntaxKind :: CDATA_START } ; ["]]>"] => { $ crate :: HtmlSyntaxKind :: CDATA_END } ; [---] => { $ crate :: HtmlSyntaxKind :: FENCE } ; ['{'] => { $ crate :: HtmlSyntaxKind :: L_CURLY } ; ['}'] => { $ crate :: HtmlSyntaxKind :: R_CURLY } ; ["{{"] => { $ crate :: HtmlSyntaxKind :: L_DOUBLE_CURLY } ; ["}}"] => { $ crate :: HtmlSyntaxKind :: R_DOUBLE_CURLY } ; ["{@"] => { $ crate :: HtmlSyntaxKind :: SV_CURLY_AT } ; ["{#"] => { $ crate :: HtmlSyntaxKind :: SV_CURLY_HASH } ; ["{/"] => { $ crate :: HtmlSyntaxKind :: SV_CURLY_SLASH } ; ["{:"] => { $ crate :: HtmlSyntaxKind :: SV_CURLY_COLON } ; [,] => { $ crate :: HtmlSyntaxKind :: COMMA } ; [:] => { $ crate :: HtmlSyntaxKind :: COLON } ; [@] => { $ crate :: HtmlSyntaxKind :: AT } ; [.] => { $ crate :: HtmlSyntaxKind :: DOT } ; ['['] => { $ crate :: HtmlSyntaxKind :: L_BRACKET } ; [']'] => { $ crate :: HtmlSyntaxKind :: R_BRACKET } ; [#] => { $ crate :: HtmlSyntaxKind :: HASH } ; ['('] => { $ crate :: HtmlSyntaxKind :: L_PAREN } ; [')'] => { $ crate :: HtmlSyntaxKind :: R_PAREN } ; [...] => { $ crate :: HtmlSyntaxKind :: DOT3 } ; [|] => { $ crate :: HtmlSyntaxKind :: PIPE } ; [null] => { $ crate :: HtmlSyntaxKind :: NULL_KW } ; [true] => { $ crate :: HtmlSyntaxKind :: TRUE_KW } ; [false] => { $ crate :: HtmlSyntaxKind :: FALSE_KW } ; [doctype] => { $ crate :: HtmlSyntaxKind :: DOCTYPE_KW } ; [html] => { $ crate :: HtmlSyntaxKind :: HTML_KW } ; [debug] => { $ crate :: HtmlSyntaxKind :: DEBUG_KW } ; [key] => { $ crate :: HtmlSyntaxKind :: KEY_KW } ; [render] => { $ crate :: HtmlSyntaxKind :: RENDER_KW } ; [const] => { $ crate :: HtmlSyntaxKind :: CONST_KW } ; [attach] => { $ crate :: HtmlSyntaxKind :: ATTACH_KW } ; [else] => { $ crate :: HtmlSyntaxKind :: ELSE_KW } ; [if] => { $ crate :: HtmlSyntaxKind :: IF_KW } ; [as] => { $ crate :: HtmlSyntaxKind :: AS_KW } ; [each] => { $ crate :: HtmlSyntaxKind :: EACH_KW } ; [then] => { $ crate :: HtmlSyntaxKind :: THEN_KW } ; [await] => { $ crate :: HtmlSyntaxKind :: AWAIT_KW } ; [catch] => { $ crate :: HtmlSyntaxKind :: CATCH_KW } ; [snippet] => { $ crate :: HtmlSyntaxKind :: SNIPPET_KW } ; [bind] => { $ crate :: HtmlSyntaxKind :: BIND_KW } ; [transition] => { $ crate :: HtmlSyntaxKind :: TRANSITION_KW } ; [use] => { $ crate :: HtmlSyntaxKind :: USE_KW } ; [animate] => { $ crate :: HtmlSyntaxKind :: ANIMATE_KW } ; [in] => { $ crate :: HtmlSyntaxKind :: IN_KW } ; [out] => { $ crate :: HtmlSyntaxKind :: OUT_KW } ; [style] => { $ crate :: HtmlSyntaxKind :: STYLE_KW } ; [class] => { $ crate :: HtmlSyntaxKind :: CLASS_KW } ; [client] => { $ crate :: HtmlSyntaxKind :: CLIENT_KW } ; [set] => { $ crate :: HtmlSyntaxKind :: SET_KW } ; [server] => { $ crate :: HtmlSyntaxKind :: SERVER_KW } ; [is] => { $ crate :: HtmlSyntaxKind :: IS_KW } ; [define] => { $ crate :: HtmlSyntaxKind :: DEFINE_KW } ; [ident] => { $ crate :: HtmlSyntaxKind :: IDENT } ; [EOF] => { $ crate :: HtmlSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: HtmlSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: HtmlSyntaxKind :: HASH } ; }
+macro_rules ! T { [<] => { $ crate :: HtmlSyntaxKind :: L_ANGLE } ; [>] => { $ crate :: HtmlSyntaxKind :: R_ANGLE } ; [/] => { $ crate :: HtmlSyntaxKind :: SLASH } ; [=] => { $ crate :: HtmlSyntaxKind :: EQ } ; [!] => { $ crate :: HtmlSyntaxKind :: BANG } ; [-] => { $ crate :: HtmlSyntaxKind :: MINUS } ; ["<![CDATA["] => { $ crate :: HtmlSyntaxKind :: CDATA_START } ; ["]]>"] => { $ crate :: HtmlSyntaxKind :: CDATA_END } ; [---] => { $ crate :: HtmlSyntaxKind :: FENCE } ; ['{'] => { $ crate :: HtmlSyntaxKind :: L_CURLY } ; ['}'] => { $ crate :: HtmlSyntaxKind :: R_CURLY } ; ["{{"] => { $ crate :: HtmlSyntaxKind :: L_DOUBLE_CURLY } ; ["}}"] => { $ crate :: HtmlSyntaxKind :: R_DOUBLE_CURLY } ; ["{@"] => { $ crate :: HtmlSyntaxKind :: SV_CURLY_AT } ; ["{#"] => { $ crate :: HtmlSyntaxKind :: SV_CURLY_HASH } ; ["{/"] => { $ crate :: HtmlSyntaxKind :: SV_CURLY_SLASH } ; ["{:"] => { $ crate :: HtmlSyntaxKind :: SV_CURLY_COLON } ; [,] => { $ crate :: HtmlSyntaxKind :: COMMA } ; [:] => { $ crate :: HtmlSyntaxKind :: COLON } ; [@] => { $ crate :: HtmlSyntaxKind :: AT } ; [.] => { $ crate :: HtmlSyntaxKind :: DOT } ; ['['] => { $ crate :: HtmlSyntaxKind :: L_BRACKET } ; [']'] => { $ crate :: HtmlSyntaxKind :: R_BRACKET } ; [#] => { $ crate :: HtmlSyntaxKind :: HASH } ; ['('] => { $ crate :: HtmlSyntaxKind :: L_PAREN } ; [')'] => { $ crate :: HtmlSyntaxKind :: R_PAREN } ; ["[("] => { $ crate :: HtmlSyntaxKind :: L_BRACKET_PAREN } ; [")]"] => { $ crate :: HtmlSyntaxKind :: R_BRACKET_PAREN } ; [...] => { $ crate :: HtmlSyntaxKind :: DOT3 } ; [|] => { $ crate :: HtmlSyntaxKind :: PIPE } ; [*] => { $ crate :: HtmlSyntaxKind :: STAR } ; [null] => { $ crate :: HtmlSyntaxKind :: NULL_KW } ; [true] => { $ crate :: HtmlSyntaxKind :: TRUE_KW } ; [false] => { $ crate :: HtmlSyntaxKind :: FALSE_KW } ; [doctype] => { $ crate :: HtmlSyntaxKind :: DOCTYPE_KW } ; [html] => { $ crate :: HtmlSyntaxKind :: HTML_KW } ; [debug] => { $ crate :: HtmlSyntaxKind :: DEBUG_KW } ; [key] => { $ crate :: HtmlSyntaxKind :: KEY_KW } ; [render] => { $ crate :: HtmlSyntaxKind :: RENDER_KW } ; [const] => { $ crate :: HtmlSyntaxKind :: CONST_KW } ; [attach] => { $ crate :: HtmlSyntaxKind :: ATTACH_KW } ; [else] => { $ crate :: HtmlSyntaxKind :: ELSE_KW } ; [if] => { $ crate :: HtmlSyntaxKind :: IF_KW } ; [as] => { $ crate :: HtmlSyntaxKind :: AS_KW } ; [each] => { $ crate :: HtmlSyntaxKind :: EACH_KW } ; [then] => { $ crate :: HtmlSyntaxKind :: THEN_KW } ; [await] => { $ crate :: HtmlSyntaxKind :: AWAIT_KW } ; [catch] => { $ crate :: HtmlSyntaxKind :: CATCH_KW } ; [snippet] => { $ crate :: HtmlSyntaxKind :: SNIPPET_KW } ; [bind] => { $ crate :: HtmlSyntaxKind :: BIND_KW } ; [transition] => { $ crate :: HtmlSyntaxKind :: TRANSITION_KW } ; [use] => { $ crate :: HtmlSyntaxKind :: USE_KW } ; [animate] => { $ crate :: HtmlSyntaxKind :: ANIMATE_KW } ; [in] => { $ crate :: HtmlSyntaxKind :: IN_KW } ; [out] => { $ crate :: HtmlSyntaxKind :: OUT_KW } ; [style] => { $ crate :: HtmlSyntaxKind :: STYLE_KW } ; [class] => { $ crate :: HtmlSyntaxKind :: CLASS_KW } ; [client] => { $ crate :: HtmlSyntaxKind :: CLIENT_KW } ; [set] => { $ crate :: HtmlSyntaxKind :: SET_KW } ; [server] => { $ crate :: HtmlSyntaxKind :: SERVER_KW } ; [is] => { $ crate :: HtmlSyntaxKind :: IS_KW } ; [define] => { $ crate :: HtmlSyntaxKind :: DEFINE_KW } ; [ident] => { $ crate :: HtmlSyntaxKind :: IDENT } ; [EOF] => { $ crate :: HtmlSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: HtmlSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: HtmlSyntaxKind :: HASH } ; }

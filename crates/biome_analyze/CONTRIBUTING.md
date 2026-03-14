@@ -38,9 +38,9 @@ The analyzer allows implementors to create **three different** types of rules:
       - [Navigating the CST (Concrete Syntax Tree)](#navigating-the-cst-concrete-syntax-tree)
       - [Querying multiple node types via `declare_node_union!`](#querying-multiple-node-types-via-declare_node_union)
       - [Services](#services)
-        - [Semantic Model](#semantic-model)
-          * [How to use the query `Semantic<>` in a lint rule](#how-to-use-the-query-semantic-in-a-lint-rule)
-        - [Using Multiple Services in a Rule](#using-multiple-services-in-a-rule)
+        * [Semantic Model](#semantic-model)
+          + [How to use the query `Semantic<>` in a lint rule](#how-to-use-the-query-semantic-in-a-lint-rule)
+        * [Using Multiple Services in a Rule](#using-multiple-services-in-a-rule)
       - [Multiple Signals](#multiple-signals)
       - [Code Actions](#code-actions)
       - [Custom Syntax Tree Visitors](#custom-syntax-tree-visitors)
@@ -359,7 +359,7 @@ Let's say we want to create a new **lint** rule called `useMyRuleName`, follow t
    Please also keep [Biome's technical principles](https://biomejs.dev/internals/philosophy/#technical) in mind when writing those messages and implementing your diagnostic rule.
 
    ```rust
-   fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic>
+   fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
        let node = ctx.query();
        Some(
            RuleDiagnostic::new(

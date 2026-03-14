@@ -2080,6 +2080,10 @@
 			"description": "Options that changes how the HTML parser behaves",
 			"type": "object",
 			"properties": {
+				"angular": {
+					"description": "Enables parsing of Angular syntax",
+					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
+				},
 				"interpolation": {
 					"description": "Enables the parsing of double text expressions such as `{{ expression }}` inside `.html` files",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
@@ -7008,6 +7012,11 @@
 					"description": "Vue.js framework rules",
 					"type": "string",
 					"const": "vue"
+				},
+				{
+					"description": "Angular framework rules",
+					"type": "string",
+					"const": "angular"
 				},
 				{
 					"description": "For rules that require querying multiple files inside a project",

@@ -694,6 +694,10 @@ export interface HtmlLinterConfiguration {
  */
 export interface HtmlParserConfiguration {
 	/**
+	 * Enables parsing of Angular syntax
+	 */
+	angular?: Bool;
+	/**
 	 * Enables the parsing of double text expressions such as `{{ expression }}` inside `.html` files
 	 */
 	interpolation?: Bool;
@@ -1078,6 +1082,7 @@ export type RuleDomain =
 	| "next"
 	| "qwik"
 	| "vue"
+	| "angular"
 	| "project"
 	| "tailwind"
 	| "turborepo"
@@ -9120,7 +9125,8 @@ export type HtmlVariant =
 	| { Standard: HtmlTextExpressions }
 	| "Astro"
 	| "Vue"
-	| "Svelte";
+	| "Svelte"
+	| "Angular";
 export type GritVariant = "Standard";
 export type MarkdownVariant = "Standard";
 export type EmbeddingHtmlKind = "None" | "Html" | "Vue" | "Astro" | "Svelte";

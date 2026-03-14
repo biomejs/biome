@@ -23,8 +23,9 @@ use crate::{
 };
 use biome_analyze::{AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never};
 use biome_configuration::html::{
-    HtmlAssistConfiguration, HtmlAssistEnabled, HtmlFormatterConfiguration, HtmlFormatterEnabled,
-    HtmlLinterConfiguration, HtmlLinterEnabled, HtmlParseInterpolation, HtmlParserConfiguration,
+    HtmlAngularEnabled, HtmlAssistConfiguration, HtmlAssistEnabled, HtmlFormatterConfiguration,
+    HtmlFormatterEnabled, HtmlLinterConfiguration, HtmlLinterEnabled, HtmlParseInterpolation,
+    HtmlParserConfiguration,
 };
 use biome_css_parser::{CssModulesKind, parse_css_with_offset_and_cache};
 use biome_css_syntax::{CssFileSource, CssLanguage};
@@ -69,12 +70,14 @@ use tracing::{debug_span, error, instrument, trace_span};
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct HtmlParserSettings {
     pub interpolation: Option<HtmlParseInterpolation>,
+    pub angular: Option<HtmlAngularEnabled>,
 }
 
 impl From<HtmlParserConfiguration> for HtmlParserSettings {
     fn from(configuration: HtmlParserConfiguration) -> Self {
         Self {
             interpolation: configuration.interpolation,
+            angular: configuration.angular,
         }
     }
 }
@@ -899,6 +902,9 @@ fn parse_embedded_nodes(
                     nodes.push(parsed.node);
                 }
             }
+        }
+        HtmlVariant::Angular => {
+            // TODO
         }
     }
 

@@ -48,6 +48,7 @@ pub type HtmlFormatterEnabled = Bool<false>; // Keep it disabled by default whil
 pub type HtmlLinterEnabled = Bool<true>;
 pub type HtmlAssistEnabled = Bool<true>;
 pub type HtmlParseInterpolation = Bool<false>;
+pub type HtmlAngularEnabled = Bool<false>;
 
 /// Options that changes how the HTML parser behaves
 #[derive(
@@ -58,6 +59,10 @@ pub type HtmlParseInterpolation = Bool<false>;
 pub struct HtmlParserConfiguration {
     /// Enables the parsing of double text expressions such as `{{ expression }}` inside `.html` files
     pub interpolation: Option<HtmlParseInterpolation>,
+
+    /// Enables parsing of Angular syntax
+    #[bpaf(long("html-parse-angular"), argument("true|false"))]
+    pub angular: Option<HtmlAngularEnabled>,
 }
 
 /// Options that changes how the HTML formatter behaves
