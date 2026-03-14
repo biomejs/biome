@@ -219,12 +219,29 @@ fn is_expect_expression(expr: &AnyJsExpression) -> bool {
             false
         }
         AnyJsExpression::JsStaticMemberExpression(member) => {
-            // expect.soft(), expect.poll(), expect(...).method(), expect(...).not.method()
             if let Ok(object) = member.object() {
-                // Recursively check the object - this handles chained member expressions
-                // like expect(page).not where the object is itself a member expression
-                // NB: This is overly permissive for certain Vitest constructs (ex: `expect.stringContaining()`)
-                // that do not assert anything in and of themselves (see issue #9174)
+                // When the object is a bare `expect` identifier, only allow known
+                // assertion-qualifying members. This prevents asymmetric matchers
+                // (https://vitest.dev/api/expect.html#expect-stringcontaining)
+                // and utilities like `expect.extend()` from being counted as
+                // assertions.
+                if let AnyJsExpression::JsIdentifierExpression(id) = &object {
+                    if let Ok(name) = id.name()
+                        && let Ok(token) = name.value_token()
+                        && token.text_trimmed() == "expect"
+                    {
+                        if let Ok(member_name) = member.member()
+                            && let Some(js_name) = member_name.as_js_name()
+                            && let Ok(member_token) = js_name.value_token()
+                        {
+                            return matches!(
+                                member_token.text_trimmed(),
+                                "soft" | "poll" | "assertions" | "hasAssertions"
+                            );
+                        }
+                        return false;
+                    }
+                }
                 return is_expect_expression(&object);
             }
             false
