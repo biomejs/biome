@@ -2101,6 +2101,11 @@ See https://biomejs.dev/linter/rules/no-duplicate-input-field-names
 	 */
 	noDuplicateInputFieldNames?: NoDuplicateInputFieldNamesConfiguration;
 	/**
+	* Disallow duplicate selectors.
+See https://biomejs.dev/linter/rules/no-duplicate-selectors 
+	 */
+	noDuplicateSelectors?: NoDuplicateSelectorsConfiguration;
+	/**
 	* Require all variable definitions to be unique.
 See https://biomejs.dev/linter/rules/no-duplicate-variable-names 
 	 */
@@ -4116,6 +4121,9 @@ export type NoDuplicateGraphqlOperationNameConfiguration =
 export type NoDuplicateInputFieldNamesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateInputFieldNamesOptions;
+export type NoDuplicateSelectorsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDuplicateSelectorsOptions;
 export type NoDuplicateVariableNamesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateVariableNamesOptions;
@@ -5767,6 +5775,10 @@ export interface RuleWithNoDuplicateInputFieldNamesOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicateInputFieldNamesOptions;
 }
+export interface RuleWithNoDuplicateSelectorsOptions {
+	level: RulePlainConfiguration;
+	options?: NoDuplicateSelectorsOptions;
+}
 export interface RuleWithNoDuplicateVariableNamesOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicateVariableNamesOptions;
@@ -7369,6 +7381,7 @@ export type NoDuplicateEnumValuesOptions = {};
 export type NoDuplicateFieldDefinitionNamesOptions = {};
 export type NoDuplicateGraphqlOperationNameOptions = {};
 export type NoDuplicateInputFieldNamesOptions = {};
+export type NoDuplicateSelectorsOptions = {};
 export type NoDuplicateVariableNamesOptions = {};
 export type NoDuplicatedSpreadPropsOptions = {};
 export type NoEmptyObjectKeysOptions = {};
@@ -8458,6 +8471,7 @@ export type Category =
 	| "lint/nursery/noDuplicateFieldDefinitionNames"
 	| "lint/nursery/noDuplicateGraphqlOperationName"
 	| "lint/nursery/noDuplicateInputFieldNames"
+	| "lint/nursery/noDuplicateSelectors"
 	| "lint/nursery/noDuplicateVariableNames"
 	| "lint/nursery/noDuplicatedSpreadProps"
 	| "lint/nursery/noEmptyObjectKeys"

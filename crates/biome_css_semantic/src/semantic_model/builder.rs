@@ -1,11 +1,11 @@
-use biome_css_syntax::AnyCssRoot;
-use biome_rowan::{AstNode, AstPtr, TextRange};
+use biome_css_syntax::{AnyCssRoot, CssSyntaxKind, CssSyntaxToken};
+use biome_rowan::{AstNode, AstPtr, TextRange, TokenText};
 use rustc_hash::FxHashMap;
 use std::collections::BTreeMap;
 
 use super::model::{
-    CssGlobalCustomVariable, CssModelDeclaration, Rule, RuleId, Selector, SemanticModel,
-    SemanticModelData, Specificity,
+    CssGlobalCustomVariable, CssModelDeclaration, ResolvedSelector, Rule, RuleId, Selector,
+    SemanticModel, SemanticModelData, Specificity, selector_tokens,
 };
 use crate::events::SemanticEvent;
 use crate::model::AnyRuleStart;
@@ -193,12 +193,37 @@ impl SemanticModelBuilder {
                             .unwrap_or_default()
                     };
 
+                    // Collect non-trivia tokens for the current selector node.
+                    // We keep CssSyntaxToken (not TokenText) so we can inspect .kind()
+                    // to detect AMP tokens during resolution.
+                    let current_tokens = selector_tokens(&node);
+
+                    // Resolve against parent selectors (one ResolvedSelector per parent).
+                    let parent_rule = self.get_last_parent_selector_rule();
+                    let resolved_selectors: Vec<ResolvedSelector> =
+                        if let Some(parent_rule) = parent_rule {
+                            resolve_selector(&current_tokens, &parent_rule.selectors)
+                        } else {
+                            // Top-level selector: convert directly to (kind, TokenText) pairs.
+                            vec![ResolvedSelector(
+                                current_tokens
+                                    .iter()
+                                    .map(|t| (t.kind(), t.token_text_trimmed()))
+                                    .collect(),
+                            )]
+                        };
+
                     let current_rule = self.rules_by_id.get_mut(current_rule).unwrap();
                     let combined = parent_specificity + specificity;
-                    current_rule.selectors.push(Selector {
-                        node: AstPtr::new(&node),
-                        specificity: combined,
-                    });
+
+                    for resolved in resolved_selectors {
+                        current_rule.selectors.push(Selector {
+                            node: AstPtr::new(&node),
+                            resolved,
+                            specificity: combined,
+                        });
+                    }
+
                     if combined > current_rule.specificity {
                         current_rule.specificity = combined;
                     }
@@ -259,4 +284,57 @@ impl SemanticModelBuilder {
             }
         }
     }
+}
+
+/// Synthetic space-literal `(kind, TokenText)` pair used as the implicit descendant
+/// combinator when a nested selector contains no `&` reference.
+fn space_combinator() -> (CssSyntaxKind, TokenText) {
+    use biome_rowan::SyntaxKind;
+    (
+        CssSyntaxKind::CSS_SPACE_LITERAL,
+        TokenText::new_raw(CssSyntaxKind::CSS_SPACE_LITERAL.to_raw(), " "),
+    )
+}
+
+/// Resolves the `current` token sequence against each parent [`Selector`],
+/// producing one [`ResolvedSelector`] per parent selector.
+///
+/// Resolution rules (per the CSS nesting spec):
+/// - If any token in `current` is an `AMP` (`&`), every such occurrence is
+///   replaced in-place by the full token sequence of the parent selector.
+/// - If there is no `&`, the parent token sequence is prepended and a
+///   synthetic space-literal token is inserted as the descendant combinator.
+///
+/// Tokens are stored as `(CssSyntaxKind, TokenText)` pairs so that the
+/// `Display` impl can reconstruct canonical whitespace around combinators.
+fn resolve_selector(current: &[CssSyntaxToken], parents: &[Selector]) -> Vec<ResolvedSelector> {
+    let has_amp = current.iter().any(|t| t.kind() == CssSyntaxKind::AMP);
+
+    parents
+        .iter()
+        .map(|parent| {
+            let parent_tokens = &parent.resolved.0;
+            if has_amp {
+                // Replace every AMP token with the full parent token sequence.
+                let tokens = current
+                    .iter()
+                    .flat_map(|t| -> Vec<(CssSyntaxKind, TokenText)> {
+                        if t.kind() == CssSyntaxKind::AMP {
+                            parent_tokens.clone()
+                        } else {
+                            vec![(t.kind(), t.token_text_trimmed())]
+                        }
+                    })
+                    .collect();
+                ResolvedSelector(tokens)
+            } else {
+                // Prepend parent tokens + implicit descendant combinator.
+                let mut tokens = Vec::with_capacity(parent_tokens.len() + 1 + current.len());
+                tokens.extend(parent_tokens.iter().cloned());
+                tokens.push(space_combinator());
+                tokens.extend(current.iter().map(|t| (t.kind(), t.token_text_trimmed())));
+                ResolvedSelector(tokens)
+            }
+        })
+        .collect()
 }

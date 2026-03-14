@@ -1,0 +1,54 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+
+/* 1. Different selectors: no duplicate */
+.foo {}
+.bar {}
+
+/* 2. Same selector inside @media is NOT a duplicate of the one outside:
+   they have different at-rule contexts. */
+@media (min-width: 600px) {
+  .foo {}
+}
+
+/* 3. Selector nested inside itself resolves to a different selector: no duplicate.
+   `.baz { .baz {} }` produces resolved selectors `.baz` (outer) and `.baz .baz` (inner).
+   These are distinct, so no duplicate. */
+.baz {
+  .baz {}
+}
+
+/* 4. Partial overlap in selector list: not a duplicate (different lists).
+   `.a` is NOT a duplicate of `.a, .b` because the selector *lists* differ. */
+.a {}
+.a, .b {}
+
+/* 5. Same selector in different @media blocks: each block is its own context.
+   They are not compared against each other. */
+@media (min-width: 600px) {
+  .card {}
+}
+@media (max-width: 599px) {
+  .card {}
+}
+
+/* 6. Descendant vs child combinator: semantically different selectors */
+.x .y {}
+.x > .y {}
+
+/* 7. Class vs id: different selectors */
+.qux {}
+#qux {}
+
+/* 8. Resolved forms differ: .parent .child vs .other .child */
+.parent {
+  .child {}
+}
+.other .child {}
+
+```
