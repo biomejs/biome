@@ -1,4 +1,3 @@
-use regex::Regex;
 use biome_deserialize_macros::{Deserializable, Merge};
 use serde::{Deserialize, Serialize};
 #[derive(Default, Clone, Debug, Deserialize, Deserializable, Merge, Eq, PartialEq, Serialize)]
@@ -9,14 +8,13 @@ pub struct NoUnusedVariablesOptions {
     #[serde(skip_serializing_if = "Option::<_>::is_none")]
     pub ignore_rest_siblings: Option<bool>,
 
-    /// A Regex pattern to ignore matching variables from this rule with.
+    /// An object defining ignored identifiers for different language constructs.
     #[serde(skip_serializing_if = "Option::<_>::is_none")]
-    pub ignore_pattern: Option<Box<str>>,
+    pub ignore: Option<NoUnusedVariablesOptionsIgnore>,
 }
 
 impl NoUnusedVariablesOptions {
     pub const DEFAULT_IGNORE_REST_SIBLINGS: bool = true;
-    pub const DEFAULT_IGNORE_PATTERN: &'static str = "$-";
 
     /// Returns [`Self::ignore_rest_siblings`] if it is set.
     /// Otherwise, returns [`Self::DEFAULT_IGNORE_REST_SIBLINGS`].
@@ -27,8 +25,48 @@ impl NoUnusedVariablesOptions {
 
     /// Returns [`Self::ignore_pattern`] compiled as a regex if it is set.
     /// Otherwise, returns a regex that doesn't match anything.
-    pub fn ignore_pattern(&self) -> Regex {
-        let pattern = self.ignore_pattern.clone().unwrap_or(Box::from(Self::DEFAULT_IGNORE_PATTERN));
-        Regex::new(&pattern).unwrap()
+    pub fn ignore(&self) -> NoUnusedVariablesOptionsIgnore {
+        self.ignore.clone().unwrap_or(NoUnusedVariablesOptionsIgnore::default())
     }
+}
+
+#[derive(Default, Clone, Debug, Deserialize, Deserializable, Merge, Eq, PartialEq, Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
+pub struct NoUnusedVariablesOptionsIgnore {
+    /// An array of identifiers to ignore. Use "*" to ignore all identifiers.
+    #[serde(skip_serializing_if = "Option::<_>::is_none", rename = "*")]
+    pub all: Option<Box<[Box<str>]>>,
+
+    /// An array of class names to ignore. Use "*" to ignore all identifiers.
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub class: Option<Box<[Box<str>]>>,
+
+    /// An array of function names to ignore. Use "*" to ignore all identifiers.
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub function: Option<Box<[Box<str>]>>,
+
+    /// An array of interface names to ignore. Use "*" to ignore all identifiers.
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub interface: Option<Box<[Box<str>]>>,
+
+    /// An array of parameter names to ignore. Use "*" to ignore all identifiers.
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub parameter: Option<Box<[Box<str>]>>,
+
+    /// An array of type aliases to ignore. Use "*" to ignore all identifiers.
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub type_alias: Option<Box<[Box<str>]>>,
+
+    /// An array of type parameters to ignore. Use "*" to ignore all identifiers.
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub type_parameter: Option<Box<[Box<str>]>>,
+
+    /// An array of variable names to ignore. Use "*" to ignore all identifiers.
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub variable: Option<Box<[Box<str>]>>,
+}
+
+impl NoUnusedVariablesOptionsIgnore {
+    pub const IGNORE_ALL: &'static str = "*";
 }

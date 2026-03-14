@@ -9,14 +9,9 @@ use biome_diagnostics::Severity;
 use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
 use biome_js_syntax::declaration_ext::is_in_ambient_context;
-use biome_js_syntax::{
-    AnyJsExpression, EmbeddingKind, JsClassExpression, JsFileSource, JsForStatement,
-    JsFunctionExpression, JsIdentifierExpression, JsModuleItemList, JsSequenceExpression,
-    JsSyntaxKind, JsSyntaxNode, TsConditionalType, TsDeclarationModule, TsInferType,
-    TsInterfaceDeclaration, TsTypeAliasDeclaration,
-};
+use biome_js_syntax::{AnyJsExpression, EmbeddingKind, JsClassExpression, JsFileSource, JsForStatement, JsFunctionExpression, JsIdentifierExpression, JsModuleItemList, JsSequenceExpression, JsSyntaxKind, JsSyntaxNode, TsConditionalType, TsDeclarationModule, TsInferType, TsInterfaceDeclaration, TsTypeAliasDeclaration};
 use biome_rowan::{AstNode, BatchMutationExt, Direction, SyntaxResult};
-use biome_rule_options::no_unused_variables::NoUnusedVariablesOptions;
+use biome_rule_options::no_unused_variables::{NoUnusedVariablesOptions, NoUnusedVariablesOptionsIgnore};
 
 declare_lint_rule! {
     /// Disallow unused variables.
@@ -139,28 +134,49 @@ declare_lint_rule! {
     /// console.log(other);
     /// ```
     ///
-    /// ### `ignorePattern`
+    /// ### `ignore`
     ///
-    /// A pattern that allows excluding matching variables from this rule with.
+    /// An object that allows excluding matching identifiers from this rule.
     ///
-    /// Default: `null` (no variables are excluded)
+    /// Each key may specify an array of identifiers to ignore which are case-sensitive matches.
+    /// The special identifier `"*"` can be used to match all identifiers in the respective group.
+    ///
+    /// Allowed keys:
+    ///
+    /// - "*": Applies to all identifiers
+    /// - "class": Applies to class names
+    /// - "function": Applies to function names
+    /// - "interface": Applies to interface names
+    /// - "parameter": Applies to parameter names
+    /// - "typeAlias": Applies to type aliases
+    /// - "typeParameter": Applies to type parameters
+    /// - "variable": Applies to variable names
+    ///
+    /// Default: `{}` (no variables are excluded)
     ///
     /// #### Examples
     ///
     /// ```json,options
     /// {
     ///   "options": {
-    ///     "ignorePattern": "Ignored"
+    ///     "ignore": {
+    ///       "*": ["ignored"],
+    ///       "class": ["IgnoredClass"],
+    ///       "function": ["*"],
+    ///     }
     ///   }
     /// }
     /// ```
     ///
     /// ```js,expect_diagnostic,use_options
     /// const unusedVariable = 0;
+    /// class UnusedClass {}
     /// ```
     ///
     /// ```js,use_options
-    /// const unusedVariableIgnored = 0;
+    /// const ignored = 0;
+    /// class IgnoredClass {}
+    /// function unusedFunction() {}
     /// ```
     ///
     pub NoUnusedVariables {
@@ -359,6 +375,10 @@ impl Rule for NoUnusedVariables {
             }
         }
 
+        if is_ignored(binding, ctx.options()).unwrap_or(false) {
+            return None;
+        }
+
         let binding_name = binding.name_token().ok()?;
         let binding_name = binding_name.text_trimmed();
 
@@ -384,9 +404,8 @@ impl Rule for NoUnusedVariables {
                     )
                 });
         let is_used_as_reference = embedded_references.is_used_as_value(binding_name);
-        let is_ignored = ctx.options().ignore_pattern().is_match(binding_name);
 
-        if is_underscore_prefixed || is_defined_in_embedded_binding || is_used_as_reference || is_ignored {
+        if is_underscore_prefixed || is_defined_in_embedded_binding || is_used_as_reference {
             return None;
         }
 
@@ -495,6 +514,33 @@ impl Rule for NoUnusedVariables {
             }
         }
     }
+}
+
+/// Returns `true` if `binding` is considered as ignored.
+pub fn is_ignored(binding: &AnyJsIdentifierBinding, options: &NoUnusedVariablesOptions) -> Option<bool> {
+    let binding_name = binding.name_token().ok()?;
+    let binding_name = binding_name.text_trimmed();
+
+    let ignore_options = options.ignore();
+    let is_all_ignored = ignore_options.all.unwrap_or_default().iter().any(|ignore| &**ignore == NoUnusedVariablesOptionsIgnore::IGNORE_ALL || &**ignore == binding_name);
+
+    if is_all_ignored {
+        return Some(true);
+    }
+
+    let specific_ignores = match binding.syntax().parent()?.kind() {
+        JsSyntaxKind::JS_FORMAL_PARAMETER => &ignore_options.parameter.unwrap_or_default(),
+        JsSyntaxKind::JS_FUNCTION_DECLARATION => &ignore_options.function.unwrap_or_default(),
+        JsSyntaxKind::JS_CLASS_DECLARATION => &ignore_options.class.unwrap_or_default(),
+        JsSyntaxKind::TS_INTERFACE_DECLARATION => &ignore_options.interface.unwrap_or_default(),
+        JsSyntaxKind::TS_TYPE_ALIAS_DECLARATION => &ignore_options.type_alias.unwrap_or_default(),
+        JsSyntaxKind::TS_TYPE_PARAMETER => &ignore_options.type_parameter.unwrap_or_default(),
+        _ => &ignore_options.variable.unwrap_or_default(),
+    };
+
+    let is_specific_ignored = specific_ignores.iter().any(|ignore| &**ignore == NoUnusedVariablesOptionsIgnore::IGNORE_ALL || &**ignore == binding_name);
+
+    Some(is_specific_ignored)
 }
 
 /// Returns `true` if `binding` is considered as unused.
