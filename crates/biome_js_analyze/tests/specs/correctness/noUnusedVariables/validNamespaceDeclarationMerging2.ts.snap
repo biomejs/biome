@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validNamespaceDeclarationMerging2.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+export function MyFunction() {}
+namespace MyFunction {
+    export type Config = { timeout: number };
+}
+
+```
