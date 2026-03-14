@@ -2151,6 +2151,11 @@ See https://biomejs.dev/linter/rules/no-hex-colors
 	 */
 	noHexColors?: NoHexColorsConfiguration;
 	/**
+	* Disallow the use of eval()-like methods.
+See https://biomejs.dev/linter/rules/no-implied-eval 
+	 */
+	noImpliedEval?: NoImpliedEvalConfiguration;
+	/**
 	* Disallows the usage of the unary operators ++ and --.
 See https://biomejs.dev/linter/rules/no-increment-decrement 
 	 */
@@ -4146,6 +4151,9 @@ export type NoForInConfiguration =
 export type NoHexColorsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoHexColorsOptions;
+export type NoImpliedEvalConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoImpliedEvalOptions;
 export type NoIncrementDecrementConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoIncrementDecrementOptions;
@@ -5809,6 +5817,10 @@ export interface RuleWithNoHexColorsOptions {
 	level: RulePlainConfiguration;
 	options?: NoHexColorsOptions;
 }
+export interface RuleWithNoImpliedEvalOptions {
+	level: RulePlainConfiguration;
+	options?: NoImpliedEvalOptions;
+}
 export interface RuleWithNoIncrementDecrementOptions {
 	level: RulePlainConfiguration;
 	options?: NoIncrementDecrementOptions;
@@ -7393,6 +7405,7 @@ export type NoFloatingClassesOptions = {};
 export type NoFloatingPromisesOptions = {};
 export type NoForInOptions = {};
 export type NoHexColorsOptions = {};
+export type NoImpliedEvalOptions = {};
 export interface NoIncrementDecrementOptions {
 	/**
 	 * Allows unary operators ++ and -- in the afterthought (final expression) of a for loop.
@@ -8469,6 +8482,7 @@ export type Category =
 	| "lint/nursery/noForIn"
 	| "lint/nursery/noHexColors"
 	| "lint/nursery/noImplicitCoercion"
+	| "lint/nursery/noImpliedEval"
 	| "lint/nursery/noIncrementDecrement"
 	| "lint/nursery/noJsxPropsBind"
 	| "lint/nursery/noLeakedRender"
