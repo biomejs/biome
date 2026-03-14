@@ -1,7 +1,6 @@
 use crate::diagnostics::CompilerDiagnostic;
 use crate::grit_built_in_functions::BuiltIns;
 use crate::grit_context::{GritExecContext, GritQueryContext, GritTargetFile, new_file_owner};
-use crate::linearization::apply_effects;
 use crate::grit_definitions::{
     Definitions, ScannedDefinitionInfo, compile_definitions, scan_definitions,
 };
@@ -10,6 +9,7 @@ use crate::grit_resolved_pattern::GritResolvedPattern;
 use crate::grit_target_language::GritTargetLanguage;
 use crate::grit_target_node::GritTargetSyntaxKind;
 use crate::grit_tree::GritTargetTree;
+use crate::linearization::apply_effects;
 use crate::pattern_compiler::{PatternCompiler, auto_wrap_pattern};
 use crate::pattern_compiler::{
     compilation_context::CompilationContext, compilation_context::NodeCompilationContext,
@@ -237,8 +237,13 @@ impl GritQuery {
             let file_owner = state.files.get_file_owner(file_ptr);
             let source = file_owner.tree.text();
 
-            let new_src =
-                apply_effects(source, &state.effects, &state.files, &context.lang, &mut logs)?;
+            let new_src = apply_effects(
+                source,
+                &state.effects,
+                &state.files,
+                &context.lang,
+                &mut logs,
+            )?;
 
             if new_src != source {
                 let file_name = file_owner.name.clone();
