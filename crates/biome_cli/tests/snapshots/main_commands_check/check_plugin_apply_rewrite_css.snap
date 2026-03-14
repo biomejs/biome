@@ -34,8 +34,9 @@ language css
 ## `file.css`
 
 ```css
-a { color: blue; }
-
+a {
+  color: blue;
+}
 ```
 
 # Emitted Messages
