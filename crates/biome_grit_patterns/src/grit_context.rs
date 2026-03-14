@@ -330,7 +330,7 @@ fn file_owner_from_matches(
     }))
 }
 
-fn new_file_owner(
+pub(crate) fn new_file_owner(
     name: impl Into<PathBuf>,
     source: &str,
     language: &GritTargetLanguage,
