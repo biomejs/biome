@@ -3,6 +3,7 @@
 mod block;
 mod document;
 mod flow;
+mod property;
 
 use super::TextSize;
 use crate::lexer::YamlLexer;
