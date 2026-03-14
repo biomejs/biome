@@ -13,10 +13,20 @@ pub struct UseNullishCoalescingOptions {
     ///
     /// Default: `true`
     pub ignore_conditional_tests: Option<bool>,
+
+    /// Whether to ignore ternary expressions that could be simplified
+    /// using the nullish coalescing operator.
+    ///
+    /// Default: `false`
+    pub ignore_ternary_tests: Option<bool>,
 }
 
 impl UseNullishCoalescingOptions {
     pub fn ignore_conditional_tests(&self) -> bool {
         self.ignore_conditional_tests.unwrap_or(true)
+    }
+
+    pub fn ignore_ternary_tests(&self) -> bool {
+        self.ignore_ternary_tests.unwrap_or(false)
     }
 }
