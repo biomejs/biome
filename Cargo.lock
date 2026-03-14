@@ -1541,6 +1541,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_resolver_wasm"
+version = "0.1.0"
+dependencies = [
+ "biome_deserialize",
+ "biome_fs",
+ "biome_json_parser",
+ "biome_package",
+ "biome_resolver",
+ "camino",
+ "console_error_panic_hook",
+ "js-sys",
+ "serde",
+ "serde-wasm-bindgen",
+ "wasm-bindgen",
+]
+
+[[package]]
 name = "biome_rowan"
 version = "0.5.7"
 dependencies = [
