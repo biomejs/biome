@@ -2385,6 +2385,11 @@ See https://biomejs.dev/linter/rules/use-expect
 	 */
 	useExpect?: UseExpectConfiguration;
 	/**
+	* Require explicit return types on functions and class methods.
+See https://biomejs.dev/linter/rules/use-explicit-return-type 
+	 */
+	useExplicitReturnType?: UseExplicitReturnTypeConfiguration;
+	/**
 	* Enforce types in functions, methods, variables, and parameters.
 See https://biomejs.dev/linter/rules/use-explicit-type 
 	 */
@@ -4284,6 +4289,9 @@ export type UseExhaustiveSwitchCasesConfiguration =
 export type UseExpectConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseExpectOptions;
+export type UseExplicitReturnTypeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseExplicitReturnTypeOptions;
 export type UseExplicitTypeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseExplicitTypeOptions;
@@ -6003,6 +6011,10 @@ export interface RuleWithUseExpectOptions {
 	level: RulePlainConfiguration;
 	options?: UseExpectOptions;
 }
+export interface RuleWithUseExplicitReturnTypeOptions {
+	level: RulePlainConfiguration;
+	options?: UseExplicitReturnTypeOptions;
+}
 export interface RuleWithUseExplicitTypeOptions {
 	level: RulePlainConfiguration;
 	options?: UseExplicitTypeOptions;
@@ -7515,6 +7527,24 @@ export interface UseErrorCauseOptions {
 }
 export type UseExhaustiveSwitchCasesOptions = {};
 export type UseExpectOptions = {};
+/**
+ * Options for the `useExplicitReturnType` rule.
+ */
+export interface UseExplicitReturnTypeOptions {
+	/**
+	* Whether to ignore function expressions (functions that are not part of a declaration).
+When `true`, only declarations (function statements and class methods) are checked. 
+	 */
+	allowExpressions?: boolean;
+	/**
+	 * Whether to allow IIFEs (Immediately Invoked Function Expressions) without explicit return types.
+	 */
+	allowIifes?: boolean;
+	/**
+	 * A list of function names that are allowed to not have explicit return types.
+	 */
+	allowedNames?: string[];
+}
 export type UseExplicitTypeOptions = {};
 export type UseFindOptions = {};
 export type UseGlobalThisOptions = {};
@@ -8496,6 +8526,7 @@ export type Category =
 	| "lint/nursery/noShadow"
 	| "lint/nursery/noSyncScripts"
 	| "lint/nursery/noTernary"
+	| "lint/nursery/noTopLevelLiterals"
 	| "lint/nursery/noUndeclaredEnvVars"
 	| "lint/nursery/noUnknownAttribute"
 	| "lint/nursery/noUnnecessaryConditions"
@@ -8520,6 +8551,7 @@ export type Category =
 	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExpect"
 	| "lint/nursery/useExplicitFunctionReturnType"
+	| "lint/nursery/useExplicitReturnType"
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useFind"
 	| "lint/nursery/useGlobalThis"
@@ -8541,7 +8573,6 @@ export type Category =
 	| "lint/nursery/useScopedStyles"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSpread"
-	| "lint/nursery/noTopLevelLiterals"
 	| "lint/nursery/useUnicodeRegex"
 	| "lint/nursery/useUniqueArgumentNames"
 	| "lint/nursery/useUniqueFieldDefinitionNames"

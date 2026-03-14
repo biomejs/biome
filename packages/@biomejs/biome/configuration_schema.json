@@ -6283,6 +6283,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useExplicitReturnType": {
+					"description": "Require explicit return types on functions and class methods.\nSee https://biomejs.dev/linter/rules/use-explicit-return-type",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseExplicitReturnTypeConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useExplicitType": {
 					"description": "Enforce types in functions, methods, variables, and parameters.\nSee https://biomejs.dev/linter/rules/use-explicit-type",
 					"anyOf": [
@@ -10306,6 +10313,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseExplicitReturnTypeOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseExplicitReturnTypeOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseExplicitTypeOptions": {
 			"type": "object",
 			"properties": {
@@ -13554,6 +13570,32 @@
 		},
 		"UseExplicitLengthCheckOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseExplicitReturnTypeConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseExplicitReturnTypeOptions" }
+			]
+		},
+		"UseExplicitReturnTypeOptions": {
+			"description": "Options for the `useExplicitReturnType` rule.",
+			"type": "object",
+			"properties": {
+				"allowExpressions": {
+					"description": "Whether to ignore function expressions (functions that are not part of a declaration).\nWhen `true`, only declarations (function statements and class methods) are checked.",
+					"type": ["boolean", "null"]
+				},
+				"allowIifes": {
+					"description": "Whether to allow IIFEs (Immediately Invoked Function Expressions) without explicit return types.",
+					"type": ["boolean", "null"]
+				},
+				"allowedNames": {
+					"description": "A list of function names that are allowed to not have explicit return types.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseExplicitTypeConfiguration": {
