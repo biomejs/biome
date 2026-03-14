@@ -445,7 +445,10 @@ impl LanguageServer for LSPServer {
 
         self.session
             .update_workspace_folders(params.event.added, params.event.removed);
+        self.session.clear_configuration_cache().await;
         self.session.load_workspace_settings(true).await;
+        self.setup_capabilities().await;
+        self.session.update_all_diagnostics().await;
     }
 
     async fn code_action(&self, params: CodeActionParams) -> LspResult<Option<CodeActionResponse>> {
