@@ -26,7 +26,7 @@ impl NoUnusedVariablesOptions {
     /// Returns [`Self::ignore`] if it is set.
     /// Otherwise, returns an empty ignore object not matching anything.
     pub fn ignore(&self) -> NoUnusedVariablesOptionsIgnore {
-        self.ignore.clone().unwrap_or(NoUnusedVariablesOptionsIgnore::default())
+        self.ignore.clone().unwrap_or_default()
     }
 }
 
