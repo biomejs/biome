@@ -227,7 +227,10 @@ impl GritQuery {
                 suppressed,
             };
             let file_owner = state.files.get_file_owner(file_ptr);
-            file_owner.matches.borrow_mut().input_matches = Some(input_ranges);
+            let mut match_log = file_owner.matches.borrow_mut();
+            if match_log.input_matches.is_none() {
+                match_log.input_matches = Some(input_ranges);
+            }
         }
 
         // Apply effects: if there are accumulated effects, linearize
@@ -256,6 +259,7 @@ impl GritQuery {
                         .push_revision(&file_ptr, file_owners.last().unwrap());
                 }
             }
+            state.effects = vec![];
         }
 
         // Collect effects.
@@ -647,13 +651,13 @@ fn extract_anchor_kinds_from_predicate(
 /// Returns None if the pattern structure doesn't match the expected
 /// auto-wrap chain.
 ///
-/// Note: only inspects the first step of Sequential, matching the
-/// auto-wrap structure where Contains is always in the first step.
+/// Note: only extracts from single-step Sequential patterns, matching
+/// the auto-wrap structure. Multi-step Sequential falls back to `execute()`.
 fn extract_contains_inner(
     pattern: &Pattern<GritQueryContext>,
 ) -> Option<&Pattern<GritQueryContext>> {
     match pattern {
-        Pattern::Sequential(seq) => seq
+        Pattern::Sequential(seq) if seq.len() == 1 => seq
             .first()
             .and_then(|step| extract_contains_inner(&step.pattern)),
         Pattern::File(file) => extract_contains_inner(&file.body),
@@ -667,7 +671,6 @@ fn extract_contains_inner(
         // collects from ALL And branches, so there may be an asymmetry when
         // multiple Contains exist. See the matching NOTE there.
         Pattern::And(and) => and.patterns.iter().find_map(extract_contains_inner),
-        Pattern::Limit(limit) => extract_contains_inner(&limit.pattern),
         _ => None,
     }
 }
