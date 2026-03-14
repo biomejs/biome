@@ -1,0 +1,170 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+// Invalid cases - should trigger the rule
+
+<div style={{ color: "red" }}>Error</div>;
+
+<button style={{ background: "blue", color: "white" }}>Click</button>;
+
+<p style={{ margin: 0, padding: "10px" }}>Paragraph</p>;
+
+<span style={styles}>Styled</span>;
+
+<img style={{ width: "100px" }} src="image.png" alt="Image" />;
+
+React.createElement("div", { style: { color: "red" } });
+
+React.createElement("button", { style: { background: "blue" } }, "Click");
+
+```
+
+# Diagnostics
+```
+invalid.jsx:3:6 lint/nursery/noInlineStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using the style prop.
+  
+    1 │ // Invalid cases - should trigger the rule
+    2 │ 
+  > 3 │ <div style={{ color: "red" }}>Error</div>;
+      │      ^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ <button style={{ background: "blue", color: "white" }}>Click</button>;
+  
+  i Inline styles make code harder to maintain, override, and can interfere with Content Security Policy.
+  
+  i Use a CSS class or a styling library instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:5:9 lint/nursery/noInlineStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using the style prop.
+  
+    3 │ <div style={{ color: "red" }}>Error</div>;
+    4 │ 
+  > 5 │ <button style={{ background: "blue", color: "white" }}>Click</button>;
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ <p style={{ margin: 0, padding: "10px" }}>Paragraph</p>;
+  
+  i Inline styles make code harder to maintain, override, and can interfere with Content Security Policy.
+  
+  i Use a CSS class or a styling library instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:7:4 lint/nursery/noInlineStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using the style prop.
+  
+    5 │ <button style={{ background: "blue", color: "white" }}>Click</button>;
+    6 │ 
+  > 7 │ <p style={{ margin: 0, padding: "10px" }}>Paragraph</p>;
+      │    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ <span style={styles}>Styled</span>;
+  
+  i Inline styles make code harder to maintain, override, and can interfere with Content Security Policy.
+  
+  i Use a CSS class or a styling library instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:9:7 lint/nursery/noInlineStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using the style prop.
+  
+     7 │ <p style={{ margin: 0, padding: "10px" }}>Paragraph</p>;
+     8 │ 
+   > 9 │ <span style={styles}>Styled</span>;
+       │       ^^^^^^^^^^^^^^
+    10 │ 
+    11 │ <img style={{ width: "100px" }} src="image.png" alt="Image" />;
+  
+  i Inline styles make code harder to maintain, override, and can interfere with Content Security Policy.
+  
+  i Use a CSS class or a styling library instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:11:6 lint/nursery/noInlineStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using the style prop.
+  
+     9 │ <span style={styles}>Styled</span>;
+    10 │ 
+  > 11 │ <img style={{ width: "100px" }} src="image.png" alt="Image" />;
+       │      ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+    13 │ React.createElement("div", { style: { color: "red" } });
+  
+  i Inline styles make code harder to maintain, override, and can interfere with Content Security Policy.
+  
+  i Use a CSS class or a styling library instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:13:30 lint/nursery/noInlineStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using the style prop.
+  
+    11 │ <img style={{ width: "100px" }} src="image.png" alt="Image" />;
+    12 │ 
+  > 13 │ React.createElement("div", { style: { color: "red" } });
+       │                              ^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 
+    15 │ React.createElement("button", { style: { background: "blue" } }, "Click");
+  
+  i Inline styles make code harder to maintain, override, and can interfere with Content Security Policy.
+  
+  i Use a CSS class or a styling library instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:15:33 lint/nursery/noInlineStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using the style prop.
+  
+    13 │ React.createElement("div", { style: { color: "red" } });
+    14 │ 
+  > 15 │ React.createElement("button", { style: { background: "blue" } }, "Click");
+       │                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 
+  
+  i Inline styles make code harder to maintain, override, and can interfere with Content Security Policy.
+  
+  i Use a CSS class or a styling library instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

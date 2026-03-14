@@ -199,6 +199,7 @@ define_categories! {
     "lint/nursery/noHexColors": "https://biomejs.dev/linter/rules/no-hex-colors",
     "lint/nursery/noImplicitCoercion": "https://biomejs.dev/linter/rules/no-implicit-coercion",
     "lint/nursery/noIncrementDecrement": "https://biomejs.dev/linter/rules/no-increment-decrement",
+    "lint/nursery/noInlineStyles": "https://biomejs.dev/linter/rules/no-inline-styles",
     "lint/nursery/noJsxPropsBind": "https://biomejs.dev/linter/rules/no-jsx-props-bind",
     "lint/nursery/noLeakedRender": "https://biomejs.dev/linter/rules/no-leaked-render",
     "lint/nursery/noMissingGenericFamilyKeyword": "https://biomejs.dev/linter/rules/no-missing-generic-family-keyword",

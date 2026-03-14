@@ -67,6 +67,7 @@ static REACT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("correctness", "useJsxKeyInIterable"),
         RuleFilter::Rule("correctness", "useUniqueElementIds"),
         RuleFilter::Rule("nursery", "noDuplicatedSpreadProps"),
+        RuleFilter::Rule("nursery", "noInlineStyles"),
         RuleFilter::Rule("nursery", "noJsxPropsBind"),
         RuleFilter::Rule("nursery", "noLeakedRender"),
         RuleFilter::Rule("nursery", "noSyncScripts"),
