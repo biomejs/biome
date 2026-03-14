@@ -5,6 +5,29 @@ use biome_markdown_syntax::MdHardLine;
 pub(crate) struct FormatMdHardLine;
 impl FormatNodeRule<MdHardLine> for FormatMdHardLine {
     fn fmt_fields(&self, node: &MdHardLine, f: &mut MarkdownFormatter) -> FormatResult<()> {
-        write!(f, [format_removed(&node.value_token()?), hard_line_break()])
+        let token = node.value_token()?;
+        let text_content = token.text();
+
+        if text_content.trim_end().ends_with('\\') {
+            // Preserve backslash form
+            write!(
+                f,
+                [
+                    format_removed(&token),
+                    text("\\", token.text_range().start()),
+                    hard_line_break()
+                ]
+            )
+        } else {
+            // Normalize spaces to 2 spaces
+            write!(
+                f,
+                [
+                    format_removed(&token),
+                    text("  ", token.text_range().start()),
+                    hard_line_break(),
+                ]
+            )
+        }
     }
 }
