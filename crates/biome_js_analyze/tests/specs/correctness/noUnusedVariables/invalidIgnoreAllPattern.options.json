@@ -5,7 +5,7 @@
       "correctness": {
         "noUnusedVariables": {
           "level": "error",
-          "options": {"ignorePattern": "Ignored"}
+          "options": {"ignore": {"*": ["Ignored"]}}
         }
       }
     }

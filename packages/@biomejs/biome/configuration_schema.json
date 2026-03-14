@@ -5373,11 +5373,46 @@
 		"NoUnusedVariablesOptions": {
 			"type": "object",
 			"properties": {
-				"ignorePattern": { "type": ["string", "null"] },
+				"ignore": {
+					"description": "An object defining ignored identifiers for different language constructs.",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUnusedVariablesOptionsIgnore" },
+						{ "type": "null" }
+					]
+				},
 				"ignoreRestSiblings": {
 					"description": "Whether to ignore unused variables from an object destructuring with a spread.",
 					"type": ["boolean", "null"]
 				}
+			},
+			"additionalProperties": false
+		},
+		"NoUnusedVariablesOptionsIgnore": {
+			"type": "object",
+			"properties": {
+				"*": { "type": ["array", "null"], "items": { "type": "string" } },
+				"class": { "type": ["array", "null"], "items": { "type": "string" } },
+				"function": {
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"interface": {
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"parameter": {
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"typeAlias": {
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"typeParameter": {
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"variable": { "type": ["array", "null"], "items": { "type": "string" } }
 			},
 			"additionalProperties": false
 		},

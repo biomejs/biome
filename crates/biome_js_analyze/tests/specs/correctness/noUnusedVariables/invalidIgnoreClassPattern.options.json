@@ -5,13 +5,7 @@
       "correctness": {
         "noUnusedVariables": {
           "level": "error",
-          "options": {
-            "ignore": {
-              "*": ["ignored"],
-              "class": ["IgnoredClass"],
-              "function": ["*"]
-            }
-          }
+          "options": {"ignore": {"class": ["ignored"]}}
         }
       }
     }
