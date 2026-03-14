@@ -23,8 +23,8 @@ impl NoUnusedVariablesOptions {
             .unwrap_or(Self::DEFAULT_IGNORE_REST_SIBLINGS)
     }
 
-    /// Returns [`Self::ignore_pattern`] compiled as a regex if it is set.
-    /// Otherwise, returns a regex that doesn't match anything.
+    /// Returns [`Self::ignore`] if it is set.
+    /// Otherwise, returns an empty ignore object not matching anything.
     pub fn ignore(&self) -> NoUnusedVariablesOptionsIgnore {
         self.ignore.clone().unwrap_or(NoUnusedVariablesOptionsIgnore::default())
     }
