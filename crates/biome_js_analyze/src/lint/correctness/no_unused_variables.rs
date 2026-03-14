@@ -143,14 +143,14 @@ declare_lint_rule! {
     ///
     /// Allowed keys:
     ///
-    /// - "*": Applies to all identifiers
-    /// - "class": Applies to class names
-    /// - "function": Applies to function names
-    /// - "interface": Applies to interface names
-    /// - "parameter": Applies to parameter names
-    /// - "typeAlias": Applies to type aliases
-    /// - "typeParameter": Applies to type parameters
-    /// - "variable": Applies to variable names
+    /// - `"*"`: Applies to all identifiers
+    /// - `"class"`: Applies to class names
+    /// - `"function"`: Applies to function names
+    /// - `"interface"`: Applies to interface names
+    /// - `"parameter"`: Applies to parameter names
+    /// - `"typeAlias"`: Applies to type aliases
+    /// - `"typeParameter"`: Applies to type parameters
+    /// - `"variable"`: Applies to variable names
     ///
     /// Default: `{}` (no variables are excluded)
     ///
@@ -529,16 +529,16 @@ pub fn is_ignored(binding: &AnyJsIdentifierBinding, options: &NoUnusedVariablesO
     }
 
     let specific_ignores = match binding.syntax().parent()?.kind() {
-        JsSyntaxKind::JS_FORMAL_PARAMETER => &ignore_options.parameter.unwrap_or_default(),
-        JsSyntaxKind::JS_FUNCTION_DECLARATION => &ignore_options.function.unwrap_or_default(),
-        JsSyntaxKind::JS_CLASS_DECLARATION => &ignore_options.class.unwrap_or_default(),
-        JsSyntaxKind::TS_INTERFACE_DECLARATION => &ignore_options.interface.unwrap_or_default(),
-        JsSyntaxKind::TS_TYPE_ALIAS_DECLARATION => &ignore_options.type_alias.unwrap_or_default(),
-        JsSyntaxKind::TS_TYPE_PARAMETER => &ignore_options.type_parameter.unwrap_or_default(),
-        _ => &ignore_options.variable.unwrap_or_default(),
+        JsSyntaxKind::JS_FORMAL_PARAMETER => ignore_options.parameter,
+        JsSyntaxKind::JS_FUNCTION_DECLARATION => ignore_options.function,
+        JsSyntaxKind::JS_CLASS_DECLARATION => ignore_options.class,
+        JsSyntaxKind::TS_INTERFACE_DECLARATION => ignore_options.interface,
+        JsSyntaxKind::TS_TYPE_ALIAS_DECLARATION => ignore_options.type_alias,
+        JsSyntaxKind::TS_TYPE_PARAMETER => ignore_options.type_parameter,
+        _ => ignore_options.variable,
     };
 
-    let is_specific_ignored = specific_ignores.iter().any(|ignore| &**ignore == NoUnusedVariablesOptionsIgnore::IGNORE_ALL || &**ignore == binding_name);
+    let is_specific_ignored = specific_ignores.unwrap_or_default().iter().any(|ignore| &**ignore == NoUnusedVariablesOptionsIgnore::IGNORE_ALL || &**ignore == binding_name);
 
     Some(is_specific_ignored)
 }
