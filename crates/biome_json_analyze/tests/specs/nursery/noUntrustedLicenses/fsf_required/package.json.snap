@@ -1,0 +1,34 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: package.json
+---
+# Input
+```json
+{
+    "dependencies": {
+        "fsf-pkg": "^1.0.0",
+        "non-fsf-pkg": "^1.0.0"
+    }
+}
+
+```
+
+# Diagnostics
+```
+package.json:4:9 lint/nursery/noUntrustedLicenses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The dependency non-fsf-pkg in dependencies has a license that is not FSF libre: 0BSD.
+  
+    2 │     "dependencies": {
+    3 │         "fsf-pkg": "^1.0.0",
+  > 4 │         "non-fsf-pkg": "^1.0.0"
+      │         ^^^^^^^^^^^^^
+    5 │     }
+    6 │ }
+  
+  i Add the license to the allow list or remove it from from the project.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

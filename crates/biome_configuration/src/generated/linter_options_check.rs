@@ -1193,6 +1193,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         >(),
     ));
     result.push((
+        "nursery",
+        "noUntrustedLicenses",
+        TypeId::of::<biome_rule_options::no_untrusted_licenses::NoUntrustedLicensesOptions>(),
+    ));
+    result.push((
         "suspicious",
         "noUnusedExpressions",
         TypeId::of::<biome_rule_options::no_unused_expressions::NoUnusedExpressionsOptions>(),
