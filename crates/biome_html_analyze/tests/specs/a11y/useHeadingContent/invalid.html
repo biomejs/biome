@@ -1,0 +1,63 @@
+<!-- should generate diagnostics -->
+
+<!-- Empty heading -->
+<h1></h1>
+
+<!-- Self-closing heading -->
+<h1 />
+
+<!-- All heading levels (h2-h6) -->
+<h2></h2>
+<h3 />
+<h4></h4>
+<h5 />
+<h6></h6>
+
+<!-- Case insensitive - uppercase heading -->
+<H1></H1>
+
+<!-- Heading with only whitespace -->
+<h1>    </h1>
+
+<!-- Heading with aria-hidden attribute -->
+<h1 aria-hidden="true">content</h1>
+
+<!-- Heading with aria-hidden (no value = truthy) -->
+<h2 aria-hidden>content</h2>
+
+<!-- All children hidden with aria-hidden -->
+<h1><span aria-hidden="true">content</span></h1>
+
+<!-- Nested hidden content -->
+<h1><div aria-hidden="true"><span>nested content</span></div></h1>
+
+<!-- Empty aria-label should still be invalid -->
+<h1 aria-label=""></h1>
+
+<!-- Whitespace-only aria-label should still be invalid -->
+<h1 aria-label="   "></h1>
+
+<!-- Empty title should still be invalid -->
+<h2 title=""></h2>
+
+<!-- Whitespace-only title should still be invalid -->
+<h2 title="   "></h2>
+
+<!-- Image without alt attribute -->
+<h1><img /></h1>
+
+<!-- Image with empty alt attribute -->
+<h1><img alt="" /></h1>
+
+<!-- Image with whitespace-only alt attribute -->
+<h1><img alt="   " /></h1>
+
+<!-- Void elements that never provide accessible content -->
+<h1><br /></h1>
+
+<h1><hr /></h1>
+
+<h1><wbr /></h1>
+
+<!-- Hidden input is not accessible -->
+<h1><input type="hidden" /></h1>

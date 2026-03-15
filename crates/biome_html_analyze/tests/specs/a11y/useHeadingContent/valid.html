@@ -1,0 +1,53 @@
+<!-- should not generate diagnostics -->
+
+<!-- Simple text content -->
+<h1>heading</h1>
+
+<!-- All heading levels with content -->
+<h2>Subheading</h2>
+<h3>Section</h3>
+<h4>Subsection</h4>
+<h5>Minor heading</h5>
+<h6>Least important</h6>
+
+<!-- Nested text content -->
+<h1><span>heading</span></h1>
+
+<!-- Mixed content with some hidden -->
+<h1><span aria-hidden="true"></span>visible content</h1>
+
+<!-- Text content with nested elements -->
+<h1><div aria-hidden="true"></div>visible content</h1>
+
+<!-- aria-hidden="false" should not hide content -->
+<h1 aria-hidden="false">content</h1>
+
+<!-- Nested content with aria-hidden="false" -->
+<h1><span aria-hidden="false">content</span></h1>
+
+<!-- Image with alt text (self-closing provides content) -->
+<h1><img alt="description" /></h1>
+
+<!-- Heading with title attribute and content -->
+<h1 title="Section heading">Section</h1>
+
+<!-- Heading with aria-label attribute (no visible content needed) -->
+<h1 aria-label="Screen reader content"></h1>
+
+<!-- Heading with aria-labelledby attribute -->
+<h1 aria-labelledby="heading-id"></h1>
+
+<!-- Heading with title attribute only (no visible content needed) -->
+<h2 title="Section title"></h2>
+
+<!-- Heading with both aria-label and title -->
+<h1 aria-label="Main heading" title="Primary heading"></h1>
+
+<!-- Text expression (template syntax) -->
+<h1>{{ title }}</h1>
+
+<!-- Mixed visible and hidden content -->
+<h1>
+  <span aria-hidden="true">Icon</span>
+  Main Heading
+</h1>
