@@ -215,13 +215,18 @@ impl Rule for UseIterableCallbackReturn {
         let member_range = member_expression.member().ok()?.range();
         if method_config.return_value_required {
             if allow_implicit {
-                // When allowImplicit is true, `return;` is accepted.
-                // Only report if there are paths that fall through without any return at all.
-                if returns_info.has_paths_without_returns
-                    && returns_info.returns_with_value.is_empty()
-                    && returns_info.returns_without_value.is_empty()
-                {
-                    problems.push(RuleProblemKind::MissingReturnWithValue);
+                // When allowImplicit is true, `return;` (empty return) is accepted.
+                if returns_info.has_paths_without_returns {
+                    if !returns_info.returns_with_value.is_empty() {
+                        // Some paths return a value but others fall through:
+                        // likely a bug where the author forgot to return on some paths.
+                        problems.push(RuleProblemKind::NotAllPathsReturnValue);
+                    } else if returns_info.returns_without_value.is_empty() {
+                        // No returns at all on any path.
+                        problems.push(RuleProblemKind::MissingReturnWithValue);
+                    }
+                    // If only `return;` exists (no return-with-value), that's fine
+                    // under allowImplicit - don't report.
                 }
             } else {
                 if returns_info.has_paths_without_returns {

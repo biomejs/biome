@@ -1,0 +1,73 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 154
+expression: allowImplicit.js
+---
+# Input
+```js
+// Valid: empty return is accepted with allowImplicit
+[1, 2, 3].map((x) => {
+    if (x > 2) return x;
+    return;
+});
+
+// Valid: all paths return values
+[1, 2, 3].map((x) => {
+    if (x > 2) return x;
+    return 0;
+});
+
+// Valid: implicit return (arrow expression)
+[1, 2, 3].map((x) => x * 2);
+
+// Invalid: some paths return values, others fall through without any return
+[1, 2, 3].map((x) => {
+    if (x > 2) return x;
+    // falls through - likely a bug
+});
+
+// Invalid: no returns at all
+[1, 2, 3].map((x) => {
+    console.log(x);
+});
+
+// Valid: only empty returns (all paths covered)
+[1, 2, 3].forEach((x) => {
+    if (x > 2) return;
+    console.log(x);
+});
+
+```
+
+# Diagnostics
+```
+allowImplicit.js:17:11 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to map() iterable method should always return a value.
+  
+    16 │ // Invalid: some paths return values, others fall through without any return
+  > 17 │ [1, 2, 3].map((x) => {
+       │           ^^^
+    18 │     if (x > 2) return x;
+    19 │     // falls through - likely a bug
+  
+  i Add missing return statements so that this callback returns a value on all execution paths.
+  
+
+```
+
+```
+allowImplicit.js:23:11 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to map() iterable method should always return a value.
+  
+    22 │ // Invalid: no returns at all
+  > 23 │ [1, 2, 3].map((x) => {
+       │           ^^^
+    24 │     console.log(x);
+    25 │ });
+  
+  i Add a return with a value to this callback.
+  
+
+```
