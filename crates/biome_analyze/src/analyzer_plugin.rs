@@ -25,9 +25,6 @@ pub trait AnalyzerPlugin: Debug + Send + Sync {
     fn evaluate(&self, node: AnySyntaxNode, path: Arc<Utf8PathBuf>) -> Vec<RuleDiagnostic>;
 
     /// Returns true if this plugin should run on the given file path.
-    ///
-    /// Stub that always returns `true` — file-scoping will be implemented
-    /// in a companion PR (#9171) via the `includes` plugin option.
     fn applies_to_file(&self, _path: &Utf8Path) -> bool {
         true
     }
@@ -40,6 +37,17 @@ pub enum PluginTargetLanguage {
     Json,
 }
 
+/// Cached result of checking whether a plugin applies to the current file.
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+enum FileApplicability {
+    /// Not yet checked for this file.
+    Unknown,
+    /// Plugin applies to the current file.
+    Applicable,
+    /// Plugin does not apply to the current file.
+    NotApplicable,
+}
+
 /// A syntax visitor that queries nodes and evaluates in a plugin.
 /// Based on [`crate::SyntaxVisitor`].
 pub struct PluginVisitor<L: Language> {
@@ -50,6 +58,8 @@ pub struct PluginVisitor<L: Language> {
     /// Used to skip subtrees that fall entirely outside the analysis range
     /// (see the `ctx.range` check in `visit`).
     skip_subtree: Option<SyntaxNode<L>>,
+    /// Cached result of `applies_to_file` for the current file path.
+    applies_to_file: FileApplicability,
 }
 
 impl<L> PluginVisitor<L>
@@ -68,6 +78,7 @@ where
             query,
             plugin,
             skip_subtree: None,
+            applies_to_file: FileApplicability::Unknown,
         }
     }
 }
@@ -114,7 +125,15 @@ where
             return;
         }
 
-        if !self.plugin.applies_to_file(&ctx.options.file_path) {
+        if self.applies_to_file == FileApplicability::Unknown {
+            self.applies_to_file = if self.plugin.applies_to_file(&ctx.options.file_path) {
+                FileApplicability::Applicable
+            } else {
+                FileApplicability::NotApplicable
+            };
+        }
+
+        if self.applies_to_file == FileApplicability::NotApplicable {
             return;
         }
 
