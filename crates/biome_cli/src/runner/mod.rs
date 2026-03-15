@@ -387,8 +387,15 @@ pub(crate) trait CommandRunner {
             &root_configuration_dir
         };
         if !loaded_location.is_in_project() {
+            let config_path_str = directory_path
+                .as_ref()
+                .map(|p| p.to_string())
+                .unwrap_or_else(|| "<unknown>".to_string());
             console.log(markup! {
-                {PrintDiagnostic::simple(&ConfigurationOutsideProject)}
+                {PrintDiagnostic::simple(&ConfigurationOutsideProject {
+                    config_path: config_path_str,
+                    working_directory: working_dir.to_string(),
+                })}
             })
         }
 
