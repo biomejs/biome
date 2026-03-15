@@ -17,9 +17,11 @@ impl FormatNodeRule<JsxExpressionChild> for FormatJsxExpressionChild {
             r_curly_token,
         } = node.as_fields();
 
+        let comments = f.context().comments();
+        let delimiter_spacing = f.options().delimiter_spacing().value();
+
         match expression {
             Some(expression) => {
-                let comments = f.context().comments();
                 let is_conditional_or_binary =
                     matches!(expression, AnyJsExpression::JsConditionalExpression(_))
                         || AnyJsBinaryLikeExpression::can_cast(expression.syntax().kind());
@@ -29,21 +31,38 @@ impl FormatNodeRule<JsxExpressionChild> for FormatJsxExpressionChild {
                         || should_inline_jsx_expression(&expression, comments));
 
                 if should_inline {
-                    write!(
-                        f,
-                        [
-                            l_curly_token.format(),
-                            expression.format(),
-                            line_suffix_boundary(),
-                            r_curly_token.format()
-                        ]
-                    )
+                    if delimiter_spacing {
+                        write!(
+                            f,
+                            [
+                                l_curly_token.format(),
+                                space(),
+                                expression.format(),
+                                space(),
+                                line_suffix_boundary(),
+                                r_curly_token.format()
+                            ]
+                        )
+                    } else {
+                        write!(
+                            f,
+                            [
+                                l_curly_token.format(),
+                                expression.format(),
+                                line_suffix_boundary(),
+                                r_curly_token.format()
+                            ]
+                        )
+                    }
                 } else {
                     write!(
                         f,
                         [group(&format_args![
                             l_curly_token.format(),
-                            soft_block_indent(&expression.format()),
+                            soft_block_indent_with_maybe_space(
+                                &expression.format(),
+                                delimiter_spacing
+                            ),
                             line_suffix_boundary(),
                             r_curly_token.format()
                         ])]
@@ -51,8 +70,7 @@ impl FormatNodeRule<JsxExpressionChild> for FormatJsxExpressionChild {
                 }
             }
             None => {
-                let has_line_comment = f
-                    .comments()
+                let has_line_comment = comments
                     .leading_dangling_trailing_comments(node.syntax())
                     .any(|comment| comment.kind().is_line());
 
@@ -65,6 +83,11 @@ impl FormatNodeRule<JsxExpressionChild> for FormatJsxExpressionChild {
                             format_dangling_comments(node.syntax()).with_block_indent(),
                             hard_line_break()
                         ]
+                    )?;
+                } else if delimiter_spacing {
+                    write!(
+                        f,
+                        [space(), format_dangling_comments(node.syntax()), space()]
                     )?;
                 } else {
                     write!(f, [format_dangling_comments(node.syntax())])?;

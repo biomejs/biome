@@ -47,6 +47,9 @@ The configuration that is contained inside the file `biome.json`
                               apply to self closing elements).
         --bracket-spacing=<true|false>  Whether to insert spaces around brackets in object literals.
                               Defaults to true.
+        --delimiter-spacing=<true|false>  Whether to insert spaces inside delimiters.  Affects
+                              parentheses `()`, square brackets `[]`, TypeScript angle brackets
+                              `<>`, and JSX curly braces `{}`.  Defaults to false.
         --expand=<auto|always|never>  Whether to expand arrays and objects on multiple lines. When
                               set to `auto`, object literals are formatted on multiple lines if the
                               first property has a newline, and array literals are formatted on a
@@ -100,6 +103,9 @@ The configuration that is contained inside the file `biome.json`
                               JSX elements. Defaults to auto.
         --javascript-formatter-bracket-spacing=<true|false>  Whether to insert spaces around
                               brackets in object literals. Defaults to true.
+        --javascript-formatter-delimiter-spacing=<true|false>  Whether to insert spaces inside
+                              delimiters. Affects parentheses `()`, square brackets `[]`, TypeScript
+                              angle brackets `<>`, and JSX curly braces `{}`. Defaults to false.
         --javascript-formatter-expand=<auto|always|never>  Whether to expand arrays and objects on
                               multiple lines. When set to `auto`, object literals are formatted on
                               multiple lines if the first property has a newline, and array literals
@@ -153,6 +159,8 @@ The configuration that is contained inside the file `biome.json`
                               Defaults to "auto".
         --json-formatter-bracket-spacing=<true|false>  Whether to insert spaces around brackets in
                               object literals. Defaults to true.
+        --json-formatter-delimiter-spacing=<true|false>  Whether to insert spaces inside square
+                              brackets `[]`. Defaults to false.
         --json-formatter-trailing-newline=<true|false>  Whether to add a trailing newline at the end
                               of the file.
                               Setting this option to `false` is **highly discouraged** because it
@@ -184,6 +192,8 @@ The configuration that is contained inside the file `biome.json`
                               super languages) files. Defaults to 80.
         --css-formatter-quote-style=<double|single>  The type of quotes used in CSS code. Defaults
                               to double.
+        --css-formatter-delimiter-spacing=<true|false>  Whether to insert spaces inside delimiters.
+                              Affects parentheses `()` and square brackets `[]`. Defaults to false.
         --css-formatter-trailing-newline=<true|false>  Whether to add a trailing newline at the end
                               of the file.
                               Setting this option to `false` is **highly discouraged** because it

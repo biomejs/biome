@@ -1,0 +1,80 @@
+/* Empty parentheses - some functions allow this */
+.empty {
+    animation-name: fade();
+}
+
+/* Single character content */
+.single-char {
+    width: calc(1);
+    content: attr(x);
+}
+
+/* Deeply nested constructs */
+.deep-nesting {
+    width: calc(calc(calc(100%)));
+    width: calc(100% - calc(50px + calc(10px * 2)));
+}
+
+/* Pseudo-class containing brackets */
+:is([data-active]) {
+    color: green;
+}
+
+:has([data-visible="true"]) {
+    opacity: 1;
+}
+
+:not([hidden]) {
+    display: block;
+}
+
+/* Complex mixed */
+:is([type="button"], [type="submit"]):not([disabled]) {
+    cursor: pointer;
+}
+
+/* Comments inside delimiters */
+.comments {
+    width: calc(/* full width */ 100%);
+    width: calc(100% /* minus padding */ - 20px);
+}
+
+/* Very long content */
+.long-content {
+    background: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet, red, orange, yellow);
+}
+
+/* Whitespace variations - leading/trailing */
+.whitespace {
+    color: rgba(  255  ,  255  ,  255  ,  1  );
+    width: calc(  100% - 20px  );
+}
+
+/* Nested pseudo-classes with brackets */
+:has(:is([data-a], [data-b]) > .child) {
+    margin: 0;
+}
+
+/* Attribute selector with complex value */
+[data-formula="calc(100% - 20px)"] {
+    width: 100%;
+}
+
+/* Multi-line with brackets and parentheses */
+:is(
+    [data-type="primary"],
+    [data-type="secondary"]
+) {
+    font-weight: bold;
+}
+
+/* Escaped content */
+[data-content="(test)"] {
+    content: "(test)";
+}
+
+/* Numbers at boundaries */
+.numbers {
+    width: calc(0);
+    width: calc(999999999px);
+}

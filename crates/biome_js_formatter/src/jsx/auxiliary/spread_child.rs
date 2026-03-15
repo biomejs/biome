@@ -17,6 +17,7 @@ impl FormatNodeRule<JsxSpreadChild> for FormatJsxSpreadChild {
         } = node.as_fields();
 
         let expression = expression?;
+        let delimiter_spacing = f.options().delimiter_spacing().value();
 
         let format_inner = format_with(|f| {
             if f.comments().is_suppressed(expression.syntax()) {
@@ -51,7 +52,21 @@ impl FormatNodeRule<JsxSpreadChild> for FormatJsxSpreadChild {
         write!(f, [l_curly_token.format()])?;
 
         if f.comments().has_comments(expression.syntax()) {
-            write!(f, [soft_block_indent(&format_inner)])?;
+            if delimiter_spacing {
+                // With delimiter spacing, try to fit on one line with spaces
+                write!(
+                    f,
+                    [group(&soft_block_indent_with_maybe_space(
+                        &format_inner,
+                        true
+                    ))]
+                )?;
+            } else {
+                // Without delimiter spacing, always break to multiple lines
+                write!(f, [soft_block_indent(&format_inner)])?;
+            }
+        } else if delimiter_spacing {
+            write!(f, [space(), format_inner, space()])?;
         } else {
             write!(f, [format_inner])?;
         }

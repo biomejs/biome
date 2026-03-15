@@ -14,13 +14,18 @@ impl FormatNodeRule<CssIfFunction> for FormatCssIfFunction {
             r_paren_token,
         } = node.as_fields();
 
+        let should_insert_space = f.options().delimiter_spacing().value();
+
         write!(
             f,
             [
                 if_token.format(),
                 group(&format_args![
                     l_paren_token.format(),
-                    soft_block_indent(&css_if_branch_list.format()),
+                    soft_block_indent_with_maybe_space(
+                        &css_if_branch_list.format(),
+                        should_insert_space
+                    ),
                     r_paren_token.format()
                 ])
             ]

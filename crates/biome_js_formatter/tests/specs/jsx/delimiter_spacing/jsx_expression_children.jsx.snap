@@ -1,0 +1,721 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: jsx/delimiter_spacing/jsx_expression_children.jsx
+---
+# Input
+
+```jsx
+// =====================
+// Expression children (single line - inlined)
+// =====================
+
+// Test 1: Binary expression - gets spaces
+<Foo>{a + b}</Foo>;
+
+// Test 2: Conditional expression - gets spaces
+<Foo>{a ? b : c}</Foo>;
+
+// Test 3: Array expression - gets spaces
+<Foo>{[a, b]}</Foo>;
+
+// Test 4: Object expression - gets spaces
+<Foo>{{ a: 1 }}</Foo>;
+
+// Test 5: Arrow function - gets spaces
+<Foo>{() => a}</Foo>;
+
+// Test 6: Call expression - gets spaces
+<Foo>{foo(a)}</Foo>;
+
+// Test 7: Template expression - gets spaces
+<Foo>{`${a}`}</Foo>;
+
+// Test 8: Multiple expressions - each gets spaces independently
+<Foo>{a + b}{c + d}</Foo>;
+
+// Test 9: Boundary test - 78 chars + 2 spaces = 80, fits on one line
+<Foo>{aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa + b}</Foo>;
+
+// Test 10: Boundary test - 79 chars + 2 spaces = 81, breaks
+<Foo>{aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa + b}</Foo>;
+
+// =====================
+// Expression children (multi-line)
+// =====================
+
+// Test 1: Simple identifier - uses multi-line branch, gets spaces
+<Foo>{a}</Foo>;
+
+// Test 2: Member expression - uses multi-line branch, gets spaces
+<Foo>{a.b.c.d}</Foo>;
+
+// Test 3: Expression with comment - forces multi-line branch
+<Foo>{/* comment */ a}</Foo>;
+
+// Test 4: JSX element child - uses multi-line branch
+<Foo>{<Bar />}</Foo>;
+
+// Test 5: String literal - uses multi-line branch
+<Foo>{"foo"}</Foo>;
+
+// Test 6: Numeric literal - uses multi-line branch
+<Foo>{123}</Foo>;
+
+// Test 7: Boolean literal - uses multi-line branch
+<Foo>{true}</Foo>;
+
+// Test 8: Multiple expressions - each uses multi-line branch
+<Foo>{a}{b}</Foo>;
+
+// Test 9: Boundary test - 64 a's + 16 wrapper chars = 80, fits
+<Foo>{aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}</Foo>;
+
+// Test 10: Boundary test - 65 a's + 16 wrapper chars = 81, breaks
+<Foo>{aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}</Foo>;
+
+// =====================
+// Dangling comments (empty expression children)
+// =====================
+
+// Test 1: Empty with block comment
+<Foo>{/* a */}</Foo>;
+
+// Test 2: Empty with multiple block comments (breaks to multi-line)
+<Foo>{/* a */ /* b */}</Foo>;
+
+// Test 3: Empty with block comment in nested element
+<Foo>
+	<Bar>{/* a */}</Bar>
+</Foo>;
+
+// Test 4: Empty with block comment between siblings
+<Foo>
+	{/* a */}
+	<Bar />
+</Foo>;
+
+// Test 5: Empty with block comment after sibling
+<Foo>
+	<Bar />
+	{/* a */}
+</Foo>;
+
+// Test 6: Multiple empty with block comments
+<Foo>
+	{/* a */}
+	{/* b */}
+</Foo>;
+
+// Test 7: Boundary - 78 chars input + 2 spaces = 80 chars (fits on one line)
+<Foo>{/* looooooooooooooooooooooooooooooooooooooooooooooooooooooong */}</Foo>;
+
+// Test 8: Boundary - 79 chars input + 2 spaces = 81 chars (breaks to multi-line)
+<Foo>{/* loooooooooooooooooooooooooooooooooooooooooooooooooooooooong */}</Foo>;
+
+// =====================
+// Spread children (with comments)
+// =====================
+
+// Test 1: with trailing block comment (fits on line)
+<Foo>{...a /* b */}</Foo>;
+
+// Test 2: with leading block comment (fits on line)
+<Foo>{/* a */ ...b}</Foo>;
+
+// Test 3: with multiple block comments (fits on line)
+<Foo>{/* a */ ...b /* c */}</Foo>;
+
+// Test 4: with trailing line comment (always breaks)
+<Foo>{...a // b
+}</Foo>;
+
+// Test 5: with leading line comment (always breaks)
+<Foo>{// a
+...b}</Foo>;
+
+// Test 6: Boundary - 78 chars input + 2 spaces = 80 chars (fits)
+<Foo>{...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa /* b */}</Foo>;
+
+// Test 7: Boundary - 79 chars input + 2 spaces = 81 chars (breaks)
+<Foo>{...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa /* b */}</Foo>;
+
+// Test 8: Multiple spread children with comments
+<Foo>{/* a */ ...b}{...c /* d */}</Foo>;
+
+// =====================
+// Spread children (complex expressions)
+// =====================
+
+// Spread array literal
+<Foo>{...[a, b, c]}</Foo>;
+
+// Spread map result
+<Foo>{...items.map(x => x)}</Foo>;
+
+// Spread with conditional
+<Foo>{...(condition ? a : b)}</Foo>;
+
+// Multiple comments around spread
+<Foo>{/* a */ /* b */ ...c}</Foo>;
+<Foo>{...a /* b */ /* c */}</Foo>;
+
+// Complex member expression chain
+<Foo>{...a.b.c.d.e}</Foo>;
+
+// Call chain spread
+<Foo>{...foo().bar().baz()}</Foo>;
+
+// Boundary with array - 80 chars fits
+<Foo>{...[aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa]}</Foo>;
+
+// Boundary with array - 81 chars breaks
+<Foo>{...[aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa]}</Foo>;
+
+// =====================
+// Raw spaces
+// =====================
+
+// Test 1: trailing whitespace - converted to raw space
+<Foo><Bar /> </Foo>;
+
+// Test 2: leading whitespace - converted to raw space
+<Foo> <Bar /></Foo>;
+
+// Test 3: explicit {' '} expressions collapse to single raw space
+<Foo>{' '}{' '}{' '}<Bar /></Foo>;
+
+// Test 4: text with element and trailing raw space
+<Foo>a<Bar />b{' '}</Foo>;
+
+// Test 5: multiline with raw spaces
+<Foo>
+	a <a data-loooooooooooooooooooooooooooooooooooooooooooooong data-b>
+	b
+</a>{' '}
+	| c,{' '}
+</Foo>;
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing commas: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Delimiter spacing: false
+Bracket same line: false
+Attribute Position: Auto
+Expand lists: Auto
+Operator linebreak: After
+Trailing newline: true
+-----
+
+```jsx
+// =====================
+// Expression children (single line - inlined)
+// =====================
+
+// Test 1: Binary expression - gets spaces
+<Foo>{a + b}</Foo>;
+
+// Test 2: Conditional expression - gets spaces
+<Foo>{a ? b : c}</Foo>;
+
+// Test 3: Array expression - gets spaces
+<Foo>{[a, b]}</Foo>;
+
+// Test 4: Object expression - gets spaces
+<Foo>{{ a: 1 }}</Foo>;
+
+// Test 5: Arrow function - gets spaces
+<Foo>{() => a}</Foo>;
+
+// Test 6: Call expression - gets spaces
+<Foo>{foo(a)}</Foo>;
+
+// Test 7: Template expression - gets spaces
+<Foo>{`${a}`}</Foo>;
+
+// Test 8: Multiple expressions - each gets spaces independently
+<Foo>
+	{a + b}
+	{c + d}
+</Foo>;
+
+// Test 9: Boundary test - 78 chars + 2 spaces = 80, fits on one line
+<Foo>{aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa + b}</Foo>;
+
+// Test 10: Boundary test - 79 chars + 2 spaces = 81, breaks
+<Foo>{aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa + b}</Foo>;
+
+// =====================
+// Expression children (multi-line)
+// =====================
+
+// Test 1: Simple identifier - uses multi-line branch, gets spaces
+<Foo>{a}</Foo>;
+
+// Test 2: Member expression - uses multi-line branch, gets spaces
+<Foo>{a.b.c.d}</Foo>;
+
+// Test 3: Expression with comment - forces multi-line branch
+<Foo>{/* comment */ a}</Foo>;
+
+// Test 4: JSX element child - uses multi-line branch
+<Foo>{<Bar />}</Foo>;
+
+// Test 5: String literal - uses multi-line branch
+<Foo>{"foo"}</Foo>;
+
+// Test 6: Numeric literal - uses multi-line branch
+<Foo>{123}</Foo>;
+
+// Test 7: Boolean literal - uses multi-line branch
+<Foo>{true}</Foo>;
+
+// Test 8: Multiple expressions - each uses multi-line branch
+<Foo>
+	{a}
+	{b}
+</Foo>;
+
+// Test 9: Boundary test - 64 a's + 16 wrapper chars = 80, fits
+<Foo>{aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}</Foo>;
+
+// Test 10: Boundary test - 65 a's + 16 wrapper chars = 81, breaks
+<Foo>{aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}</Foo>;
+
+// =====================
+// Dangling comments (empty expression children)
+// =====================
+
+// Test 1: Empty with block comment
+<Foo>{/* a */}</Foo>;
+
+// Test 2: Empty with multiple block comments (breaks to multi-line)
+<Foo>
+	{/* a */
+	/* b */}
+</Foo>;
+
+// Test 3: Empty with block comment in nested element
+<Foo>
+	<Bar>{/* a */}</Bar>
+</Foo>;
+
+// Test 4: Empty with block comment between siblings
+<Foo>
+	{/* a */}
+	<Bar />
+</Foo>;
+
+// Test 5: Empty with block comment after sibling
+<Foo>
+	<Bar />
+	{/* a */}
+</Foo>;
+
+// Test 6: Multiple empty with block comments
+<Foo>
+	{/* a */}
+	{/* b */}
+</Foo>;
+
+// Test 7: Boundary - 78 chars input + 2 spaces = 80 chars (fits on one line)
+<Foo>{/* looooooooooooooooooooooooooooooooooooooooooooooooooooooong */}</Foo>;
+
+// Test 8: Boundary - 79 chars input + 2 spaces = 81 chars (breaks to multi-line)
+<Foo>{/* loooooooooooooooooooooooooooooooooooooooooooooooooooooooong */}</Foo>;
+
+// =====================
+// Spread children (with comments)
+// =====================
+
+// Test 1: with trailing block comment (fits on line)
+<Foo>{...a /* b */}</Foo>;
+
+// Test 2: with leading block comment (fits on line)
+<Foo>{/* a */ ...b}</Foo>;
+
+// Test 3: with multiple block comments (fits on line)
+<Foo>{/* a */ ...b /* c */}</Foo>;
+
+// Test 4: with trailing line comment (always breaks)
+<Foo>
+	{
+		...a // b
+	}
+</Foo>;
+
+// Test 5: with leading line comment (always breaks)
+<Foo>
+	{
+		// a
+		...b
+	}
+</Foo>;
+
+// Test 6: Boundary - 78 chars input + 2 spaces = 80 chars (fits)
+<Foo>{...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa /* b */}</Foo>;
+
+// Test 7: Boundary - 79 chars input + 2 spaces = 81 chars (breaks)
+<Foo>{...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa /* b */}</Foo>;
+
+// Test 8: Multiple spread children with comments
+<Foo>
+	{
+		/* a */ ...b
+	}
+	{
+		...c /* d */
+	}
+</Foo>;
+
+// =====================
+// Spread children (complex expressions)
+// =====================
+
+// Spread array literal
+<Foo>{...[a, b, c]}</Foo>;
+
+// Spread map result
+<Foo>{...items.map((x) => x)}</Foo>;
+
+// Spread with conditional
+<Foo>{...(condition ? a : b)}</Foo>;
+
+// Multiple comments around spread
+<Foo>{/* a */ /* b */ ...c}</Foo>;
+<Foo>{...a /* b */ /* c */}</Foo>;
+
+// Complex member expression chain
+<Foo>{...a.b.c.d.e}</Foo>;
+
+// Call chain spread
+<Foo>{...foo().bar().baz()}</Foo>;
+
+// Boundary with array - 80 chars fits
+<Foo>{...[aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa]}</Foo>;
+
+// Boundary with array - 81 chars breaks
+<Foo>
+	{...[aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa]}
+</Foo>;
+
+// =====================
+// Raw spaces
+// =====================
+
+// Test 1: trailing whitespace - converted to raw space
+<Foo>
+	<Bar />{" "}
+</Foo>;
+
+// Test 2: leading whitespace - converted to raw space
+<Foo>
+	{" "}
+	<Bar />
+</Foo>;
+
+// Test 3: explicit {' '} expressions collapse to single raw space
+<Foo>
+	{" "}
+	<Bar />
+</Foo>;
+
+// Test 4: text with element and trailing raw space
+<Foo>
+	a<Bar />b{" "}
+</Foo>;
+
+// Test 5: multiline with raw spaces
+<Foo>
+	a{" "}
+	<a data-loooooooooooooooooooooooooooooooooooooooooooooong data-b>
+		b
+	</a>{" "}
+	| c,{" "}
+</Foo>;
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+  114: // Test 8: Boundary - 79 chars input + 2 spaces = 81 chars (breaks to multi-line)
+```
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing commas: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Delimiter spacing: true
+Bracket same line: false
+Attribute Position: Auto
+Expand lists: Auto
+Operator linebreak: After
+Trailing newline: true
+-----
+
+```jsx
+// =====================
+// Expression children (single line - inlined)
+// =====================
+
+// Test 1: Binary expression - gets spaces
+<Foo>{ a + b }</Foo>;
+
+// Test 2: Conditional expression - gets spaces
+<Foo>{ a ? b : c }</Foo>;
+
+// Test 3: Array expression - gets spaces
+<Foo>{ [ a, b ] }</Foo>;
+
+// Test 4: Object expression - gets spaces
+<Foo>{ { a: 1 } }</Foo>;
+
+// Test 5: Arrow function - gets spaces
+<Foo>{ () => a }</Foo>;
+
+// Test 6: Call expression - gets spaces
+<Foo>{ foo( a ) }</Foo>;
+
+// Test 7: Template expression - gets spaces
+<Foo>{ `${ a }` }</Foo>;
+
+// Test 8: Multiple expressions - each gets spaces independently
+<Foo>
+	{ a + b }
+	{ c + d }
+</Foo>;
+
+// Test 9: Boundary test - 78 chars + 2 spaces = 80, fits on one line
+<Foo>{ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa + b }</Foo>;
+
+// Test 10: Boundary test - 79 chars + 2 spaces = 81, breaks
+<Foo>
+	{ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa + b }
+</Foo>;
+
+// =====================
+// Expression children (multi-line)
+// =====================
+
+// Test 1: Simple identifier - uses multi-line branch, gets spaces
+<Foo>{ a }</Foo>;
+
+// Test 2: Member expression - uses multi-line branch, gets spaces
+<Foo>{ a.b.c.d }</Foo>;
+
+// Test 3: Expression with comment - forces multi-line branch
+<Foo>{ /* comment */ a }</Foo>;
+
+// Test 4: JSX element child - uses multi-line branch
+<Foo>{ <Bar /> }</Foo>;
+
+// Test 5: String literal - uses multi-line branch
+<Foo>{ "foo" }</Foo>;
+
+// Test 6: Numeric literal - uses multi-line branch
+<Foo>{ 123 }</Foo>;
+
+// Test 7: Boolean literal - uses multi-line branch
+<Foo>{ true }</Foo>;
+
+// Test 8: Multiple expressions - each uses multi-line branch
+<Foo>
+	{ a }
+	{ b }
+</Foo>;
+
+// Test 9: Boundary test - 64 a's + 16 wrapper chars = 80, fits
+<Foo>{ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa }</Foo>;
+
+// Test 10: Boundary test - 65 a's + 16 wrapper chars = 81, breaks
+<Foo>
+	{ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa }
+</Foo>;
+
+// =====================
+// Dangling comments (empty expression children)
+// =====================
+
+// Test 1: Empty with block comment
+<Foo>{ /* a */ }</Foo>;
+
+// Test 2: Empty with multiple block comments (breaks to multi-line)
+<Foo>
+	{ /* a */
+	/* b */ }
+</Foo>;
+
+// Test 3: Empty with block comment in nested element
+<Foo>
+	<Bar>{ /* a */ }</Bar>
+</Foo>;
+
+// Test 4: Empty with block comment between siblings
+<Foo>
+	{ /* a */ }
+	<Bar />
+</Foo>;
+
+// Test 5: Empty with block comment after sibling
+<Foo>
+	<Bar />
+	{ /* a */ }
+</Foo>;
+
+// Test 6: Multiple empty with block comments
+<Foo>
+	{ /* a */ }
+	{ /* b */ }
+</Foo>;
+
+// Test 7: Boundary - 78 chars input + 2 spaces = 80 chars (fits on one line)
+<Foo>{ /* looooooooooooooooooooooooooooooooooooooooooooooooooooooong */ }</Foo>;
+
+// Test 8: Boundary - 79 chars input + 2 spaces = 81 chars (breaks to multi-line)
+<Foo>
+	{ /* loooooooooooooooooooooooooooooooooooooooooooooooooooooooong */ }
+</Foo>;
+
+// =====================
+// Spread children (with comments)
+// =====================
+
+// Test 1: with trailing block comment (fits on line)
+<Foo>{ ...a /* b */ }</Foo>;
+
+// Test 2: with leading block comment (fits on line)
+<Foo>{ /* a */ ...b }</Foo>;
+
+// Test 3: with multiple block comments (fits on line)
+<Foo>{ /* a */ ...b /* c */ }</Foo>;
+
+// Test 4: with trailing line comment (always breaks)
+<Foo>
+	{
+		...a // b
+	}
+</Foo>;
+
+// Test 5: with leading line comment (always breaks)
+<Foo>
+	{
+		// a
+		...b
+	}
+</Foo>;
+
+// Test 6: Boundary - 78 chars input + 2 spaces = 80 chars (fits)
+<Foo>{ ...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa /* b */ }</Foo>;
+
+// Test 7: Boundary - 79 chars input + 2 spaces = 81 chars (breaks)
+<Foo>
+	{ ...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa /* b */ }
+</Foo>;
+
+// Test 8: Multiple spread children with comments
+<Foo>
+	{ /* a */ ...b }
+	{ ...c /* d */ }
+</Foo>;
+
+// =====================
+// Spread children (complex expressions)
+// =====================
+
+// Spread array literal
+<Foo>{ ...[ a, b, c ] }</Foo>;
+
+// Spread map result
+<Foo>{ ...items.map( ( x ) => x ) }</Foo>;
+
+// Spread with conditional
+<Foo>{ ...( condition ? a : b ) }</Foo>;
+
+// Multiple comments around spread
+<Foo>{ /* a */ /* b */ ...c }</Foo>;
+<Foo>{ ...a /* b */ /* c */ }</Foo>;
+
+// Complex member expression chain
+<Foo>{ ...a.b.c.d.e }</Foo>;
+
+// Call chain spread
+<Foo>{ ...foo().bar().baz() }</Foo>;
+
+// Boundary with array - 80 chars fits
+<Foo>
+	{ ...[ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ] }
+</Foo>;
+
+// Boundary with array - 81 chars breaks
+<Foo>
+	{ ...[ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ] }
+</Foo>;
+
+// =====================
+// Raw spaces
+// =====================
+
+// Test 1: trailing whitespace - converted to raw space
+<Foo>
+	<Bar />{ " " }
+</Foo>;
+
+// Test 2: leading whitespace - converted to raw space
+<Foo>
+	{ " " }
+	<Bar />
+</Foo>;
+
+// Test 3: explicit {' '} expressions collapse to single raw space
+<Foo>
+	{ " " }
+	<Bar />
+</Foo>;
+
+// Test 4: text with element and trailing raw space
+<Foo>
+	a<Bar />b{ " " }
+</Foo>;
+
+// Test 5: multiline with raw spaces
+<Foo>
+	a{ " " }
+	<a data-loooooooooooooooooooooooooooooooooooooooooooooong data-b>
+		b
+	</a>{ " " }
+	| c,{ " " }
+</Foo>;
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+  118: // Test 8: Boundary - 79 chars input + 2 spaces = 81 chars (breaks to multi-line)
+```

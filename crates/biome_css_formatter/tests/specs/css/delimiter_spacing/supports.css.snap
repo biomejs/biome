@@ -1,0 +1,271 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/delimiter_spacing/supports.css
+---
+# Input
+
+```css
+/* Feature declarations */
+@supports (display: grid) {
+    .grid-container {
+        display: grid;
+    }
+}
+
+@supports (display: flex) {
+    .flex-container {
+        display: flex;
+    }
+}
+
+/* Feature functions */
+@supports selector(:focus-visible) {
+    :focus-visible {
+        outline: 2px solid blue;
+    }
+}
+
+@supports selector(:has(*)) {
+    .has-support {
+        display: block;
+    }
+}
+
+/* Logical operators - or */
+@supports (display: flex) or (display: grid) {
+    .modern-layout {
+        gap: 10px;
+    }
+}
+
+/* Logical operators - and */
+@supports (display: grid) and (gap: 10px) {
+    .grid-with-gap {
+        display: grid;
+        gap: 10px;
+    }
+}
+
+/* Logical operators - not */
+@supports not (display: grid) {
+    .fallback {
+        display: block;
+    }
+}
+
+@supports not (display: table-cell) {
+    .no-table-cell {
+        display: inline-block;
+    }
+}
+
+/* Nested conditions */
+@supports ((display: grid) and (gap: 10px)) {
+    .nested-support {
+        padding: 20px;
+    }
+}
+
+@supports ((display: flex) or (display: grid)) and (gap: 1rem) {
+    .complex-support {
+        margin: 0;
+    }
+}
+
+/* Deep nesting */
+@supports (((display: grid) and (gap: 10px)) or ((display: flex) and (flex-wrap: wrap))) {
+    .deep-nesting {
+        width: 100%;
+    }
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+Delimiter spacing: false
+Trailing newline: true
+-----
+
+```css
+/* Feature declarations */
+@supports (display: grid) {
+	.grid-container {
+		display: grid;
+	}
+}
+
+@supports (display: flex) {
+	.flex-container {
+		display: flex;
+	}
+}
+
+/* Feature functions */
+@supports selector(:focus-visible) {
+	:focus-visible {
+		outline: 2px solid blue;
+	}
+}
+
+@supports selector(:has(*)) {
+	.has-support {
+		display: block;
+	}
+}
+
+/* Logical operators - or */
+@supports (display: flex) or (display: grid) {
+	.modern-layout {
+		gap: 10px;
+	}
+}
+
+/* Logical operators - and */
+@supports (display: grid) and (gap: 10px) {
+	.grid-with-gap {
+		display: grid;
+		gap: 10px;
+	}
+}
+
+/* Logical operators - not */
+@supports not (display: grid) {
+	.fallback {
+		display: block;
+	}
+}
+
+@supports not (display: table-cell) {
+	.no-table-cell {
+		display: inline-block;
+	}
+}
+
+/* Nested conditions */
+@supports ((display: grid) and (gap: 10px)) {
+	.nested-support {
+		padding: 20px;
+	}
+}
+
+@supports ((display: flex) or (display: grid)) and (gap: 1rem) {
+	.complex-support {
+		margin: 0;
+	}
+}
+
+/* Deep nesting */
+@supports (
+		((display: grid) and (gap: 10px)) or
+		((display: flex) and (flex-wrap: wrap))
+	) {
+	.deep-nesting {
+		width: 100%;
+	}
+}
+
+```
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+Delimiter spacing: true
+Trailing newline: true
+-----
+
+```css
+/* Feature declarations */
+@supports ( display: grid ) {
+	.grid-container {
+		display: grid;
+	}
+}
+
+@supports ( display: flex ) {
+	.flex-container {
+		display: flex;
+	}
+}
+
+/* Feature functions */
+@supports selector( :focus-visible ) {
+	:focus-visible {
+		outline: 2px solid blue;
+	}
+}
+
+@supports selector( :has( * ) ) {
+	.has-support {
+		display: block;
+	}
+}
+
+/* Logical operators - or */
+@supports ( display: flex ) or ( display: grid ) {
+	.modern-layout {
+		gap: 10px;
+	}
+}
+
+/* Logical operators - and */
+@supports ( display: grid ) and ( gap: 10px ) {
+	.grid-with-gap {
+		display: grid;
+		gap: 10px;
+	}
+}
+
+/* Logical operators - not */
+@supports not ( display: grid ) {
+	.fallback {
+		display: block;
+	}
+}
+
+@supports not ( display: table-cell ) {
+	.no-table-cell {
+		display: inline-block;
+	}
+}
+
+/* Nested conditions */
+@supports ( ( display: grid ) and ( gap: 10px ) ) {
+	.nested-support {
+		padding: 20px;
+	}
+}
+
+@supports ( ( display: flex ) or ( display: grid ) ) and ( gap: 1rem ) {
+	.complex-support {
+		margin: 0;
+	}
+}
+
+/* Deep nesting */
+@supports (
+		( ( display: grid ) and ( gap: 10px ) ) or
+		( ( display: flex ) and ( flex-wrap: wrap ) )
+	) {
+	.deep-nesting {
+		width: 100%;
+	}
+}
+
+```
