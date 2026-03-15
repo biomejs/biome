@@ -1,5 +1,6 @@
 ---
 source: crates/biome_grit_patterns/tests/spec_tests.rs
+assertion_line: 94
 expression: log
 ---
 SnapshotResult {
@@ -7,7 +8,15 @@ SnapshotResult {
     matched_ranges: [
         "1:1-1:21",
     ],
-    rewritten_files: [],
+    rewritten_files: [
+        OutputFile {
+            messages: [],
+            variables: [],
+            source_file: "tests/specs/ts/log.ts",
+            content: ";\n",
+            byte_ranges: None,
+        },
+    ],
     created_files: [],
 }
 

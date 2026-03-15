@@ -127,6 +127,7 @@ dependencies = [
  "biome_parser",
  "biome_rowan",
  "biome_suppression",
+ "biome_text_edit",
  "camino",
  "enumflags2",
  "indexmap",

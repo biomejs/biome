@@ -6,7 +6,9 @@ use boa_engine::object::builtins::JsFunction;
 use boa_engine::{JsNativeError, JsResult, JsString, JsValue};
 use camino::{Utf8Path, Utf8PathBuf};
 
-use biome_analyze::{AnalyzerPlugin, PluginTargetLanguage, RuleDiagnostic};
+use biome_analyze::{
+    AnalyzerPlugin, PluginDiagnosticEntry, PluginEvalResult, PluginTargetLanguage, RuleDiagnostic,
+};
 use biome_console::markup;
 use biome_diagnostics::category;
 use biome_js_runtime::JsExecContext;
@@ -85,25 +87,30 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
             .collect()
     }
 
-    fn evaluate(&self, _node: AnySyntaxNode, path: Arc<Utf8PathBuf>) -> Vec<RuleDiagnostic> {
+    fn evaluate(&self, _node: AnySyntaxNode, path: Arc<Utf8PathBuf>) -> PluginEvalResult {
         let mut plugin = match self
             .loaded
             .get_mut_or_try_init(|| load_plugin(self.fs.clone(), &self.path))
         {
             Ok(plugin) => plugin,
             Err(err) => {
-                return vec![RuleDiagnostic::new(
-                    category!("plugin"),
-                    None::<TextRange>,
-                    markup!("Could not load the plugin: "<Error>{err.to_string()}</Error>),
-                )];
+                return PluginEvalResult {
+                    entries: vec![PluginDiagnosticEntry {
+                        diagnostic: RuleDiagnostic::new(
+                            category!("plugin"),
+                            None::<TextRange>,
+                            markup!("Could not load the plugin: "<Error>{err.to_string()}</Error>),
+                        ),
+                        action: None,
+                    }],
+                };
             }
         };
 
         let plugin = plugin.deref_mut();
 
         // TODO: pass the AST to the plugin
-        plugin
+        let diagnostics = plugin
             .ctx
             .call_function(
                 &plugin.entrypoint,
@@ -119,7 +126,17 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
                     )]
                 },
                 |_| plugin.ctx.pull_diagnostics(),
-            )
+            );
+
+        let entries = diagnostics
+            .into_iter()
+            .map(|diagnostic| PluginDiagnosticEntry {
+                diagnostic,
+                action: None,
+            })
+            .collect();
+
+        PluginEvalResult { entries }
     }
 }
 
@@ -190,8 +207,10 @@ mod tests {
             })
         };
 
-        let mut diagnostics = worker1.join().unwrap();
-        diagnostics.extend(worker2.join().unwrap());
+        let result1 = worker1.join().unwrap();
+        let result2 = worker2.join().unwrap();
+        let mut diagnostics: Vec<_> = result1.entries.into_iter().map(|e| e.diagnostic).collect();
+        diagnostics.extend(result2.entries.into_iter().map(|e| e.diagnostic));
 
         assert_eq!(diagnostics.len(), 2);
         snap_diagnostics(
