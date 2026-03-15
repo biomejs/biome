@@ -21,6 +21,8 @@ border:1px solid black;
 .message,.info;
   @extend
 a:hover;
+  @extend
+.icon-#{$name};
 }
 
 ```
@@ -53,6 +55,7 @@ Trailing newline: true
 .alert {
 	@extend .message, .info;
 	@extend a:hover;
+	@extend .icon-#{$name};
 }
 
 ```

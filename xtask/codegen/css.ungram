@@ -179,7 +179,7 @@ CssUniversalSelector =
 // ^^^
 CssTypeSelector =
 	namespace: CssNamespace?
-	ident: CssIdentifier
+	ident: AnyCssSelectorIdentifier
 
 CssNamespace =
 	prefix: AnyCssNamespacePrefix?
@@ -199,13 +199,21 @@ CssUniversalNamespacePrefix =
 // ^^^^
 CssIdSelector =
 	'#'
-	name: CssCustomIdentifier
+	name: AnyCssSelectorCustomIdentifier
 
 // .app {}
 // ^^^^
 CssClassSelector =
 	'.'
-	name: CssCustomIdentifier
+	name: AnyCssSelectorCustomIdentifier
+
+AnyCssSelectorIdentifier =
+	CssIdentifier
+	| ScssInterpolatedIdentifier
+
+AnyCssSelectorCustomIdentifier =
+	CssCustomIdentifier
+	| ScssInterpolatedIdentifier
 
 // [title = "title" i] {}
 // ^^^^^^^^^^^^^^^^^^^
@@ -2821,7 +2829,17 @@ ScssParameterDefaultValue =
 // ^^^^^^^^^
 ScssPlaceholderSelector =
 	'%'
-	name: CssCustomIdentifier
+	name: AnyCssSelectorCustomIdentifier
+
+ScssInterpolatedIdentifier =
+	items: ScssInterpolatedIdentifierPartList
+
+ScssInterpolatedIdentifierPartList = AnyScssInterpolatedIdentifierPart*
+
+AnyScssInterpolatedIdentifierPart =
+	CssIdentifier
+	| CssCustomIdentifier
+	| ScssInterpolation
 
 // @if $theme == dark { color: white; } @else { color: black; }
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
