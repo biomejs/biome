@@ -6,6 +6,8 @@ color:red;
 .foo-#{$i},
 .foo-#{$name}-bar,
 .foo-#{$name}#{$state},
+.foo-#{$name}:hover,
+.foo-#{$name}::after,
 .foo-#{$name} #{$second},
 #app-#{$slot},
 ##{$id},
@@ -16,6 +18,8 @@ ns|#{$type},
 ns|foo-#{$name},
 #{$type}#{$state},
 #{$type}.class,
+#{$type}:hover,
+#{$type}::after,
 %#{$placeholder},
 %placeholder-#{$name}{
 color:red;

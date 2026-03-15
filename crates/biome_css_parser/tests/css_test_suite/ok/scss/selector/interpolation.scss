@@ -18,6 +18,14 @@
   color: red;
 }
 
+.foo-#{$name}:hover {
+  color: red;
+}
+
+.foo-#{$name}::after {
+  color: red;
+}
+
 .foo #{$name} {
   color: red;
 }
@@ -68,6 +76,14 @@ ns|foo-#{$name} {
 }
 
 #{$type}.class {
+  color: red;
+}
+
+#{$type}:hover {
+  color: red;
+}
+
+#{$type}::after {
   color: red;
 }
 
