@@ -1081,6 +1081,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noUnassignedVariables",
         TypeId::of::<biome_rule_options::no_unassigned_variables::NoUnassignedVariablesOptions>(),
     ));
+    result.push((
+        "nursery",
+        "noUndeclaredClasses",
+        TypeId::of::<biome_rule_options::no_undeclared_classes::NoUndeclaredClassesOptions>(),
+    ));
     result.push(("correctness", "noUndeclaredDependencies", TypeId::of::<biome_rule_options::no_undeclared_dependencies::NoUndeclaredDependenciesOptions>()));
     result.push((
         "nursery",
@@ -1191,6 +1196,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<
             biome_rule_options::no_unsafe_optional_chaining::NoUnsafeOptionalChainingOptions,
         >(),
+    ));
+    result.push((
+        "nursery",
+        "noUnusedClasses",
+        TypeId::of::<biome_rule_options::no_unused_classes::NoUnusedClassesOptions>(),
     ));
     result.push((
         "suspicious",
