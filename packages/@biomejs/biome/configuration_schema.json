@@ -5424,9 +5424,62 @@
 		"NoUnusedVariablesOptions": {
 			"type": "object",
 			"properties": {
+				"ignore": {
+					"description": "An object defining ignored identifiers for different language constructs.",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUnusedVariablesOptionsIgnore" },
+						{ "type": "null" }
+					]
+				},
 				"ignoreRestSiblings": {
 					"description": "Whether to ignore unused variables from an object destructuring with a spread.",
 					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
+		"NoUnusedVariablesOptionsIgnore": {
+			"type": "object",
+			"properties": {
+				"*": {
+					"description": "An array of identifiers to ignore. Use \"*\" to ignore all identifiers.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"class": {
+					"description": "An array of class names to ignore. Use \"*\" to ignore all identifiers.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"function": {
+					"description": "An array of function names to ignore. Use \"*\" to ignore all identifiers.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"interface": {
+					"description": "An array of interface names to ignore. Use \"*\" to ignore all identifiers.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"parameter": {
+					"description": "An array of parameter names to ignore. Use \"*\" to ignore all identifiers.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"typeAlias": {
+					"description": "An array of type aliases to ignore. Use \"*\" to ignore all identifiers.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"typeParameter": {
+					"description": "An array of type parameters to ignore. Use \"*\" to ignore all identifiers.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"variable": {
+					"description": "An array of variable names to ignore. Use \"*\" to ignore all identifiers.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
 				}
 			},
 			"additionalProperties": false
