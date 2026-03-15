@@ -35,7 +35,7 @@ impl SemanticModel {
         self.root.to_language_root::<AnyCssRoot>()
     }
 
-    /// Returns a slice of all rules in the CSS document.
+    /// Returns a slice of all top-level rules in the CSS document.
     pub fn rules(&self) -> &[Rule] {
         &self.data.rules
     }

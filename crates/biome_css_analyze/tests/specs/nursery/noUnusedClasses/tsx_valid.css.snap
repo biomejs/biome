@@ -1,0 +1,14 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: tsx_valid.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+
+/* .container is referenced in tsx_valid.tsx via className */
+.container {
+	display: flex;
+}
+
+```

@@ -14,6 +14,18 @@ Use this skill when implementing or modifying Biome's formatters. It covers the 
 2. Language-specific crates must exist: `biome_{lang}_syntax`, `biome_{lang}_formatter`
 3. For Prettier comparison: Install `bun` and run `pnpm install` in repo root
 
+## Code Standards
+
+**CRITICAL: No Emojis**
+
+Emojis are BANNED in all formatter code:
+- NO emojis in code comments
+- NO emojis in rustdoc documentation
+- NO emojis in test files
+- NO emojis in debug output or error messages
+
+Keep all code professional and emoji-free.
+
 ## Common Workflows
 
 ### Generate Formatter Boilerplate

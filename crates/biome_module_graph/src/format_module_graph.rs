@@ -1,5 +1,10 @@
+use crate::css_module_info::{CssClassDefinition, CssClassReference, CssImport, CssImports};
+use crate::html_module_info::HtmlModuleInfoInner;
 use crate::js_module_info::{Exports, Imports, JsBindingData};
-use crate::{BindingTypeData, JsExport, JsImport, JsModuleInfo, JsOwnExport, JsReexport};
+use crate::{
+    BindingTypeData, CssModuleInfo, HtmlModuleInfo, JsExport, JsImport, JsImportPath,
+    JsImportPhase, JsModuleInfo, JsOwnExport, JsReexport, ModuleInfo,
+};
 use biome_formatter::prelude::*;
 use biome_formatter::{format_args, write};
 use biome_js_type_info::FormatTypeContext;
@@ -467,3 +472,467 @@ impl Format<FormatTypeContext> for TypedRange {
         )
     }
 }
+
+// #region JsImportPhase
+
+impl Format<FormatTypeContext> for JsImportPhase {
+    fn fmt(
+        &self,
+        f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
+    ) -> FormatResult<()> {
+        let label = match self {
+            Self::Default => "Default",
+            Self::Defer => "Defer",
+            Self::Source => "Source",
+            Self::Type => "Type",
+        };
+        write!(f, [token(label)])
+    }
+}
+
+// #endregion
+
+// #region JsImportPath
+
+impl Format<FormatTypeContext> for JsImportPath {
+    fn fmt(
+        &self,
+        f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
+    ) -> FormatResult<()> {
+        let content = format_with(|f| {
+            write!(
+                f,
+                [&format_args![
+                    token("resolved_path:"),
+                    space(),
+                    self.resolved_path,
+                    token(","),
+                    hard_line_break(),
+                    token("phase:"),
+                    space(),
+                    &self.phase,
+                ]]
+            )
+        });
+        write!(
+            f,
+            [&format_args![
+                token("JsImportPath {"),
+                block_indent(&content),
+                token("}")
+            ]]
+        )
+    }
+}
+
+// #endregion
+
+// #region CssImport
+
+impl Format<FormatTypeContext> for CssImport {
+    fn fmt(
+        &self,
+        f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
+    ) -> FormatResult<()> {
+        let content = format_with(|f| {
+            write!(
+                f,
+                [&format_args![
+                    token("specifier:"),
+                    space(),
+                    text(
+                        &std::format!("{:?}", self.specifier.text()),
+                        TextSize::default()
+                    ),
+                    token(","),
+                    hard_line_break(),
+                    token("resolved_path:"),
+                    space(),
+                    self.resolved_path,
+                ]]
+            )
+        });
+        write!(
+            f,
+            [&format_args![
+                token("CssImport {"),
+                block_indent(&content),
+                token("}")
+            ]]
+        )
+    }
+}
+
+// #endregion
+
+// #region CssImports
+
+impl Format<FormatTypeContext> for CssImports {
+    fn fmt(
+        &self,
+        f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
+    ) -> FormatResult<()> {
+        if self.0.is_empty() {
+            return write!(f, [token("No imports")]);
+        }
+        let mut joiner = f.join();
+        for (specifier, import) in &self.0 {
+            let entry = format_with(|f| {
+                write!(
+                    f,
+                    [&format_args![
+                        text(&std::format!("{:?}", specifier.text()), TextSize::default()),
+                        space(),
+                        token("=>"),
+                        space(),
+                        token("{"),
+                        &group(&block_indent(&format_args![import])),
+                        token("}"),
+                        soft_line_break()
+                    ]]
+                )
+            });
+            joiner.entry(&group(&format_args![entry, soft_line_break_or_space()]));
+        }
+        joiner.finish()
+    }
+}
+
+// #endregion
+
+// #region CssClassDefinition
+
+impl Format<FormatTypeContext> for CssClassDefinition {
+    fn fmt(
+        &self,
+        f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
+    ) -> FormatResult<()> {
+        write!(
+            f,
+            [&format_args![
+                text(self.name.text(), TextSize::default()),
+                space(),
+                token("("),
+                text(
+                    &std::format!("{:?}", self.applicability),
+                    TextSize::default()
+                ),
+                token(")"),
+            ]]
+        )
+    }
+}
+
+// #endregion
+
+// #region CssClassReference
+
+impl Format<FormatTypeContext> for CssClassReference {
+    fn fmt(
+        &self,
+        f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
+    ) -> FormatResult<()> {
+        write!(
+            f,
+            [&format_args![
+                text(
+                    &std::format!("{:?}", self.token.text()),
+                    TextSize::default()
+                ),
+                space(),
+                token("in"),
+                space(),
+                text(self.file_path.as_str(), TextSize::default()),
+            ]]
+        )
+    }
+}
+
+// #endregion
+
+// #region CssModuleInfo
+
+impl std::fmt::Display for CssModuleInfo {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let formatted = biome_formatter::format!(FormatTypeContext, [&**self])
+            .expect("Formatting not to throw any FormatErrors");
+        f.write_str(
+            formatted
+                .print()
+                .expect("Expected a valid document")
+                .as_code(),
+        )
+    }
+}
+
+impl Format<FormatTypeContext> for CssModuleInfo {
+    fn fmt(
+        &self,
+        f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
+    ) -> FormatResult<()> {
+        write!(f, [&**self])
+    }
+}
+
+impl Format<FormatTypeContext> for crate::css_module_info::CssModuleInfoInner {
+    fn fmt(
+        &self,
+        f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
+    ) -> FormatResult<()> {
+        let classes_section = format_with(|f| {
+            let mut sorted: Vec<_> = self.classes.iter().map(|t| t.text().to_string()).collect();
+            sorted.sort();
+            if sorted.is_empty() {
+                write!(f, [token("No classes")])
+            } else {
+                let separator = hard_line_break();
+                let mut joiner = f.join_with(&separator);
+                for class in &sorted {
+                    let entry =
+                        format_with(|f| write!(f, [text(class, TextSize::default()), token(",")]));
+                    joiner.entry(&entry);
+                }
+                joiner.finish()
+            }
+        });
+
+        let imports_section = format_with(|f| write!(f, [&self.imports]));
+
+        write!(
+            f,
+            [&format_args![
+                token("Classes"),
+                space(),
+                token("{"),
+                &group(&block_indent(&classes_section)),
+                token("}"),
+                hard_line_break(),
+                token("Imports"),
+                space(),
+                token("{"),
+                &group(&block_indent(&imports_section)),
+                token("}"),
+            ]]
+        )
+    }
+}
+
+// #endregion
+
+// #region HtmlModuleInfo
+
+impl std::fmt::Display for HtmlModuleInfo {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let formatted = biome_formatter::format!(FormatTypeContext, [&**self])
+            .expect("Formatting not to throw any FormatErrors");
+        f.write_str(
+            formatted
+                .print()
+                .expect("Expected a valid document")
+                .as_code(),
+        )
+    }
+}
+
+impl Format<FormatTypeContext> for HtmlModuleInfo {
+    fn fmt(
+        &self,
+        f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
+    ) -> FormatResult<()> {
+        write!(f, [&**self])
+    }
+}
+
+impl Format<FormatTypeContext> for HtmlModuleInfoInner {
+    fn fmt(
+        &self,
+        f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
+    ) -> FormatResult<()> {
+        let style_classes_section = format_with(|f| {
+            let mut sorted: Vec<_> = self
+                .style_classes
+                .iter()
+                .map(|c| (c.name.text().to_string(), c.applicability))
+                .collect();
+            sorted.sort_by(|a, b| a.0.cmp(&b.0));
+            if sorted.is_empty() {
+                write!(f, [token("No style classes")])
+            } else {
+                let separator = hard_line_break();
+                let mut joiner = f.join_with(&separator);
+                for (name, applicability) in &sorted {
+                    let entry = format_with(|f| {
+                        write!(
+                            f,
+                            [&format_args![
+                                text(name, TextSize::default()),
+                                space(),
+                                token("("),
+                                text(&std::format!("{applicability:?}"), TextSize::default()),
+                                token(")"),
+                                token(","),
+                            ]]
+                        )
+                    });
+                    joiner.entry(&entry);
+                }
+                joiner.finish()
+            }
+        });
+
+        let ref_classes_section = format_with(|f| {
+            let mut sorted: Vec<_> = self
+                .referenced_classes
+                .iter()
+                .flat_map(|r| {
+                    r.token
+                        .text()
+                        .split_ascii_whitespace()
+                        .map(|s| s.to_string())
+                })
+                .collect();
+            sorted.sort();
+            if sorted.is_empty() {
+                write!(f, [token("No referenced classes")])
+            } else {
+                let separator = hard_line_break();
+                let mut joiner = f.join_with(&separator);
+                for class in &sorted {
+                    let entry =
+                        format_with(|f| write!(f, [text(class, TextSize::default()), token(",")]));
+                    joiner.entry(&entry);
+                }
+                joiner.finish()
+            }
+        });
+
+        let stylesheets_section = format_with(|f| {
+            let mut sorted: Vec<_> = self
+                .imported_stylesheets
+                .iter()
+                .map(|p| {
+                    p.as_path().map_or("<unresolved>".to_string(), |p| {
+                        p.as_str().replace('\\', "/")
+                    })
+                })
+                .collect();
+            sorted.sort();
+            if sorted.is_empty() {
+                write!(f, [token("No linked stylesheets")])
+            } else {
+                let separator = hard_line_break();
+                let mut joiner = f.join_with(&separator);
+                for path in &sorted {
+                    let entry =
+                        format_with(|f| write!(f, [text(path, TextSize::default()), token(",")]));
+                    joiner.entry(&entry);
+                }
+                joiner.finish()
+            }
+        });
+
+        let script_imports_section = format_with(|f| {
+            let mut sorted: Vec<_> = self
+                .static_import_paths
+                .iter()
+                .map(|(specifier, resolved)| {
+                    let resolved_str = resolved.as_path().map_or("<unresolved>".to_string(), |p| {
+                        p.as_str().replace('\\', "/")
+                    });
+                    (specifier.text().to_string(), resolved_str)
+                })
+                .collect();
+            sorted.sort_by(|a, b| a.0.cmp(&b.0));
+            if sorted.is_empty() {
+                write!(f, [token("No script imports")])
+            } else {
+                let separator = hard_line_break();
+                let mut joiner = f.join_with(&separator);
+                for (specifier, resolved) in &sorted {
+                    let entry = format_with(|f| {
+                        write!(
+                            f,
+                            [&format_args![
+                                text(&std::format!("{specifier:?}"), TextSize::default()),
+                                space(),
+                                token("=>"),
+                                space(),
+                                text(resolved, TextSize::default()),
+                                token(","),
+                            ]]
+                        )
+                    });
+                    joiner.entry(&entry);
+                }
+                joiner.finish()
+            }
+        });
+
+        write!(
+            f,
+            [&format_args![
+                token("StyleClasses"),
+                space(),
+                token("{"),
+                &group(&block_indent(&style_classes_section)),
+                token("}"),
+                hard_line_break(),
+                token("ReferencedClasses"),
+                space(),
+                token("{"),
+                &group(&block_indent(&ref_classes_section)),
+                token("}"),
+                hard_line_break(),
+                token("LinkedStylesheets"),
+                space(),
+                token("{"),
+                &group(&block_indent(&stylesheets_section)),
+                token("}"),
+                hard_line_break(),
+                token("ScriptImports"),
+                space(),
+                token("{"),
+                &group(&block_indent(&script_imports_section)),
+                token("}"),
+            ]]
+        )
+    }
+}
+
+// #endregion
+
+// #region ModuleInfo
+
+impl std::fmt::Display for ModuleInfo {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let formatted = biome_formatter::format!(FormatTypeContext, [self])
+            .expect("Formatting not to throw any FormatErrors");
+        f.write_str(
+            formatted
+                .print()
+                .expect("Expected a valid document")
+                .as_code(),
+        )
+    }
+}
+
+impl Format<FormatTypeContext> for ModuleInfo {
+    fn fmt(
+        &self,
+        f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
+    ) -> FormatResult<()> {
+        match self {
+            Self::Js(js) => write!(f, [&format_args![token("Js"), token("("), js, token(")")]]),
+            Self::Css(css) => write!(
+                f,
+                [&format_args![token("Css"), token("("), css, token(")")]]
+            ),
+            Self::Html(html) => write!(
+                f,
+                [&format_args![token("Html"), token("("), html, token(")")]]
+            ),
+        }
+    }
+}
+
+// #endregion

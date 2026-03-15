@@ -110,6 +110,7 @@ schema    = [
   "biome_text_edit/schema",
   "dep:schemars",
 ]
+testing   = []
 
 [lints]
 workspace = true

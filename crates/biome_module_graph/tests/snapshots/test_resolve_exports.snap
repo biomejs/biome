@@ -353,4 +353,7 @@ Exports {
 Imports {
   No imports
 }
+Side-effect imports: [
+  "./renamed-reexports" => /src/renamed-reexports.ts,
+]
 ```
