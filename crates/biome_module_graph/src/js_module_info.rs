@@ -18,7 +18,6 @@ use biome_resolver::ResolvedPath;
 use biome_rowan::{Text, TextRange};
 use camino::Utf8Path;
 use indexmap::IndexMap;
-use rust_lapper::Lapper;
 use rustc_hash::FxHashMap;
 use std::collections::BTreeSet;
 use std::fmt::{Display, Formatter};
@@ -518,18 +517,6 @@ impl Iterator for ImportPathIterator {
 
         Some(resolved_path.clone())
     }
-}
-
-fn scope_id_for_range(scope_by_range: &Lapper<u32, ScopeId>, range: TextRange) -> ScopeId {
-    let start = range.start().into();
-    let end = range.end().into();
-    scope_by_range
-        .find(start, end)
-        .filter(|interval| !(start < interval.start || end > interval.stop))
-        .max_by_key(|interval| interval.val)
-        .map_or(ScopeId::GLOBAL, |interval| {
-            ScopeId::new(interval.val.index())
-        })
 }
 
 #[derive(Debug)]

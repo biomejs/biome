@@ -1,0 +1,17 @@
+@use"sass:math";
+
+@use "theme"as *;
+
+@use
+"library/buttons"
+as
+buttons;
+
+@use "theme"with(
+$primary:blue !default,
+$spacing: 8px
+);
+
+@use "theme" as theme with(
+$primary:blue
+);

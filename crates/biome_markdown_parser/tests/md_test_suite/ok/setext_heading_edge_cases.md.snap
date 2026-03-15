@@ -39,8 +39,17 @@ MdDocument {
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@3..4 "\n" [] [],
                 },
+                MdIndentToken {
+                    md_indent_char_token: MD_INDENT_CHAR@4..5 " " [] [],
+                },
+                MdIndentToken {
+                    md_indent_char_token: MD_INDENT_CHAR@5..6 " " [] [],
+                },
+                MdIndentToken {
+                    md_indent_char_token: MD_INDENT_CHAR@6..7 " " [] [],
+                },
             ],
-            underline_token: MD_SETEXT_UNDERLINE_LITERAL@4..11 "----" [Skipped(" "), Skipped(" "), Skipped(" ")] [],
+            underline_token: MD_SETEXT_UNDERLINE_LITERAL@7..11 "----" [] [],
         },
         MdNewline {
             value_token: NEWLINE@11..12 "\n" [] [],
@@ -140,8 +149,14 @@ MdDocument {
                                 MdTextual {
                                     value_token: MD_TEXTUAL_LITERAL@53..54 "\n" [] [],
                                 },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@54..55 " " [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@55..56 " " [] [],
+                                },
                             ],
-                            underline_token: MD_SETEXT_UNDERLINE_LITERAL@54..59 "---" [Skipped(" "), Skipped(" ")] [],
+                            underline_token: MD_SETEXT_UNDERLINE_LITERAL@56..59 "---" [] [],
                         },
                         MdNewline {
                             value_token: NEWLINE@59..60 "\n" [] [],
@@ -173,12 +188,18 @@ MdDocument {
   0: (empty)
   1: MD_BLOCK_LIST@0..66
     0: MD_SETEXT_HEADER@0..11
-      0: MD_INLINE_ITEM_LIST@0..4
+      0: MD_INLINE_ITEM_LIST@0..7
         0: MD_TEXTUAL@0..3
           0: MD_TEXTUAL_LITERAL@0..3 "Foo" [] []
         1: MD_TEXTUAL@3..4
           0: MD_TEXTUAL_LITERAL@3..4 "\n" [] []
-      1: MD_SETEXT_UNDERLINE_LITERAL@4..11 "----" [Skipped(" "), Skipped(" "), Skipped(" ")] []
+        2: MD_INDENT_TOKEN@4..5
+          0: MD_INDENT_CHAR@4..5 " " [] []
+        3: MD_INDENT_TOKEN@5..6
+          0: MD_INDENT_CHAR@5..6 " " [] []
+        4: MD_INDENT_TOKEN@6..7
+          0: MD_INDENT_CHAR@6..7 " " [] []
+      1: MD_SETEXT_UNDERLINE_LITERAL@7..11 "----" [] []
     1: MD_NEWLINE@11..12
       0: NEWLINE@11..12 "\n" [] []
     2: MD_NEWLINE@12..13
@@ -242,12 +263,16 @@ MdDocument {
             3: MD_INDENT_TOKEN_LIST@49..49
           1: MD_BLOCK_LIST@49..66
             0: MD_SETEXT_HEADER@49..59
-              0: MD_INLINE_ITEM_LIST@49..54
+              0: MD_INLINE_ITEM_LIST@49..56
                 0: MD_TEXTUAL@49..53
                   0: MD_TEXTUAL_LITERAL@49..53 " Foo" [] []
                 1: MD_TEXTUAL@53..54
                   0: MD_TEXTUAL_LITERAL@53..54 "\n" [] []
-              1: MD_SETEXT_UNDERLINE_LITERAL@54..59 "---" [Skipped(" "), Skipped(" ")] []
+                2: MD_INDENT_TOKEN@54..55
+                  0: MD_INDENT_CHAR@54..55 " " [] []
+                3: MD_INDENT_TOKEN@55..56
+                  0: MD_INDENT_CHAR@55..56 " " [] []
+              1: MD_SETEXT_UNDERLINE_LITERAL@56..59 "---" [] []
             1: MD_NEWLINE@59..60
               0: NEWLINE@59..60 "\n" [] []
             2: MD_PARAGRAPH@60..66

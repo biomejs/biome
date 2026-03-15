@@ -312,6 +312,68 @@ impl<'source> MarkdownParser<'source> {
         self.state.virtual_line_start = Some(self.cur_range().start());
     }
 
+    /// Emit an MdIndentTokenList for optional block prefix indentation at line start.
+    ///
+    /// Like `skip_line_indent()` but emits real CST nodes (`MdIndentToken` /
+    /// `MdIndentTokenList`) instead of skipped trivia. Use this for non-lookahead,
+    /// non-error-recovery paths where the indent tokens should be visible in the tree.
+    pub fn emit_line_indent(&mut self, max_indent: usize) -> bool {
+        if !self.at_line_start() {
+            let list_m = self.start();
+            list_m.complete(self, MarkdownSyntaxKind::MD_INDENT_TOKEN_LIST);
+            return false;
+        }
+
+        let list_m = self.start();
+        let did_emit = self.emit_indent_tokens_core(max_indent);
+        list_m.complete(self, MarkdownSyntaxKind::MD_INDENT_TOKEN_LIST);
+        did_emit
+    }
+
+    /// Emit individual `MdIndentToken` nodes (no list wrapper) for indentation.
+    ///
+    /// Use this inside inline item lists or content lists where `MdIndentToken`
+    /// is already a valid child (via `AnyMdInline`). Unlike `emit_line_indent()`,
+    /// this does NOT wrap tokens in an `MdIndentTokenList`.
+    pub fn emit_indent_tokens(&mut self, max_indent: usize) -> bool {
+        if !self.at_line_start() {
+            return false;
+        }
+
+        self.emit_indent_tokens_core(max_indent)
+    }
+
+    /// Shared core loop: emit `MdIndentToken` nodes for whitespace-only tokens
+    /// up to `max_indent` columns.
+    fn emit_indent_tokens_core(&mut self, max_indent: usize) -> bool {
+        let mut consumed = 0usize;
+        let mut did_emit = false;
+
+        while self.at(MarkdownSyntaxKind::MD_TEXTUAL_LITERAL) {
+            let text = self.cur_text();
+            if text.is_empty() || !text.chars().all(|c| c == ' ' || c == '\t') {
+                break;
+            }
+
+            let indent = text
+                .chars()
+                .map(|c| if c == '\t' { TAB_STOP_SPACES } else { 1 })
+                .sum::<usize>();
+
+            if consumed + indent > max_indent {
+                break;
+            }
+
+            consumed += indent;
+            did_emit = true;
+            let token_m = self.start();
+            self.bump_remap(MarkdownSyntaxKind::MD_INDENT_CHAR);
+            token_m.complete(self, MarkdownSyntaxKind::MD_INDENT_TOKEN);
+        }
+
+        did_emit
+    }
+
     /// Skip an optional indentation token at line start if it is whitespace-only
     /// and does not exceed `max_indent` columns.
     pub fn skip_line_indent(&mut self, max_indent: usize) -> bool {

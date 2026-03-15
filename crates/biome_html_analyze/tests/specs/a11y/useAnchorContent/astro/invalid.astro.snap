@@ -1,5 +1,6 @@
 ---
 source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 83
 expression: invalid.astro
 ---
 # Input
@@ -21,6 +22,12 @@ expression: invalid.astro
 
 <!-- Image with empty alt attribute -->
 <a><img alt="" /></a>
+
+<!-- Image component without alt attribute -->
+<a><Image /></a>
+
+<!-- Image component with empty alt attribute -->
+<a><Image alt="" /></a>
 
 <!-- Void elements that never provide accessible content -->
 <a><br /></a>
@@ -181,7 +188,7 @@ invalid.astro:17:1 lint/a11y/useAnchorContent ━━━━━━━━━━━�
   > 17 │ <a><img alt="" /></a>
        │ ^^^^^^^^^^^^^^^^^^^^^
     18 │ 
-    19 │ <!-- Void elements that never provide accessible content -->
+    19 │ <!-- Image component without alt attribute -->
   
   i All links on a page should have content that is accessible to screen readers.
   
@@ -199,11 +206,11 @@ invalid.astro:20:1 lint/a11y/useAnchorContent ━━━━━━━━━━━�
 
   × Provide screen reader accessible content when using a elements.
   
-    19 │ <!-- Void elements that never provide accessible content -->
-  > 20 │ <a><br /></a>
-       │ ^^^^^^^^^^^^^
-    21 │ <a><hr /></a>
-    22 │ 
+    19 │ <!-- Image component without alt attribute -->
+  > 20 │ <a><Image /></a>
+       │ ^^^^^^^^^^^^^^^^
+    21 │ 
+    22 │ <!-- Image component with empty alt attribute -->
   
   i All links on a page should have content that is accessible to screen readers.
   
@@ -217,16 +224,15 @@ invalid.astro:20:1 lint/a11y/useAnchorContent ━━━━━━━━━━━�
 ```
 
 ```
-invalid.astro:21:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.astro:23:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide screen reader accessible content when using a elements.
   
-    19 │ <!-- Void elements that never provide accessible content -->
-    20 │ <a><br /></a>
-  > 21 │ <a><hr /></a>
-       │ ^^^^^^^^^^^^^
-    22 │ 
-    23 │ <!-- Hidden input is not accessible -->
+    22 │ <!-- Image component with empty alt attribute -->
+  > 23 │ <a><Image alt="" /></a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ 
+    25 │ <!-- Void elements that never provide accessible content -->
   
   i All links on a page should have content that is accessible to screen readers.
   
@@ -240,14 +246,59 @@ invalid.astro:21:1 lint/a11y/useAnchorContent ━━━━━━━━━━━�
 ```
 
 ```
-invalid.astro:24:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.astro:26:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide screen reader accessible content when using a elements.
   
-    23 │ <!-- Hidden input is not accessible -->
-  > 24 │ <a><input type="hidden" /></a>
+    25 │ <!-- Void elements that never provide accessible content -->
+  > 26 │ <a><br /></a>
+       │ ^^^^^^^^^^^^^
+    27 │ <a><hr /></a>
+    28 │ 
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.astro:27:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    25 │ <!-- Void elements that never provide accessible content -->
+    26 │ <a><br /></a>
+  > 27 │ <a><hr /></a>
+       │ ^^^^^^^^^^^^^
+    28 │ 
+    29 │ <!-- Hidden input is not accessible -->
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.astro:30:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    29 │ <!-- Hidden input is not accessible -->
+  > 30 │ <a><input type="hidden" /></a>
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    25 │ 
+    31 │ 
   
   i All links on a page should have content that is accessible to screen readers.
   
