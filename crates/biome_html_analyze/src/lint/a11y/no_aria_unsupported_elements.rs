@@ -50,6 +50,7 @@ declare_lint_rule! {
 
 const ARIA_UNSUPPORTED_ELEMENTS: [&str; 4] = ["meta", "html", "script", "style"];
 
+#[derive(Debug)]
 enum AttributeKind {
     Role,
     Aria,
@@ -62,6 +63,11 @@ impl AttributeKind {
             Self::Aria => "aria-*",
         }
     }
+}
+
+#[derive(Debug)]
+pub struct RuleState {
+    attribute_kind: AttributeKind,
 }
 
 impl Rule for NoAriaUnsupportedElements {
@@ -151,6 +157,3 @@ impl Rule for NoAriaUnsupportedElements {
     }
 }
 
-pub struct RuleState {
-    attribute_kind: AttributeKind,
-}
