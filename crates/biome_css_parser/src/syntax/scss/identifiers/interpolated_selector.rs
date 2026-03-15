@@ -1,7 +1,5 @@
 use crate::parser::CssParser;
-use crate::syntax::scss::expression::{
-    ScssInterpolationMode, parse_scss_interpolation_with_mode,
-};
+use crate::syntax::scss::expression::{ScssInterpolationMode, parse_scss_interpolation_with_mode};
 use crate::syntax::scss::identifiers::interpolated_identifier::parse_scss_regular_interpolated_identifier;
 use crate::syntax::scss::is_at_scss_interpolation;
 use crate::syntax::selector::{

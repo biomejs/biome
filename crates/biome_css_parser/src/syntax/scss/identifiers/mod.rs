@@ -11,8 +11,7 @@ pub(crate) use interpolated_identifier::{
     is_at_scss_interpolated_identifier, is_nth_at_scss_interpolated_identifier,
 };
 pub(crate) use interpolated_selector::{
-    parse_scss_selector_custom_interpolated_identifier,
-    parse_scss_selector_interpolated_identifier,
+    parse_scss_selector_custom_interpolated_identifier, parse_scss_selector_interpolated_identifier,
 };
 pub(crate) use qualified_name::{
     is_at_scss_qualified_name, is_nth_at_scss_qualified_name, parse_scss_qualified_name,

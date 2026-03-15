@@ -1,7 +1,7 @@
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
-use crate::syntax::selector::selector_lex_context;
 use crate::syntax::CssSyntaxFeatures;
+use crate::syntax::selector::selector_lex_context;
 use biome_css_syntax::CssSyntaxKind::SCSS_INTERPOLATION;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};

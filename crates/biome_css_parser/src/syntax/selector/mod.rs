@@ -12,8 +12,8 @@ use crate::syntax::parse_error::{
 };
 use crate::syntax::scss::{
     is_at_scss_interpolated_identifier, is_nth_at_scss_interpolated_identifier,
-    is_nth_at_scss_placeholder_selector,
-    parse_scss_placeholder_selector, parse_scss_selector_custom_interpolated_identifier,
+    is_nth_at_scss_placeholder_selector, parse_scss_placeholder_selector,
+    parse_scss_selector_custom_interpolated_identifier,
     parse_scss_selector_interpolated_identifier,
 };
 use crate::syntax::selector::attribute::parse_attribute_selector;
@@ -22,8 +22,7 @@ use crate::syntax::selector::pseudo_class::parse_pseudo_class_selector;
 use crate::syntax::selector::pseudo_element::parse_pseudo_element_selector;
 use crate::syntax::{
     CssSyntaxFeatures, is_at_identifier, is_nth_at_identifier,
-    parse_custom_identifier_with_keywords,
-    parse_identifier, parse_regular_identifier,
+    parse_custom_identifier_with_keywords, parse_identifier, parse_regular_identifier,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T, TextRange};
