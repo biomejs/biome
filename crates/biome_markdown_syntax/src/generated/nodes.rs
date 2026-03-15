@@ -236,23 +236,31 @@ impl MdFencedCodeBlock {
     }
     pub fn as_fields(&self) -> MdFencedCodeBlockFields {
         MdFencedCodeBlockFields {
+            indent: self.indent(),
             l_fence: self.l_fence(),
             code_list: self.code_list(),
             content: self.content(),
+            r_fence_indent: self.r_fence_indent(),
             r_fence: self.r_fence(),
         }
     }
+    pub fn indent(&self) -> MdIndentTokenList {
+        support::list(&self.syntax, 0usize)
+    }
     pub fn l_fence(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
+        support::required_token(&self.syntax, 1usize)
     }
     pub fn code_list(&self) -> MdCodeNameList {
-        support::list(&self.syntax, 1usize)
-    }
-    pub fn content(&self) -> MdInlineItemList {
         support::list(&self.syntax, 2usize)
     }
+    pub fn content(&self) -> MdInlineItemList {
+        support::list(&self.syntax, 3usize)
+    }
+    pub fn r_fence_indent(&self) -> MdIndentTokenList {
+        support::list(&self.syntax, 4usize)
+    }
     pub fn r_fence(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 3usize)
+        support::required_token(&self.syntax, 5usize)
     }
 }
 impl Serialize for MdFencedCodeBlock {
@@ -265,9 +273,11 @@ impl Serialize for MdFencedCodeBlock {
 }
 #[derive(Serialize)]
 pub struct MdFencedCodeBlockFields {
+    pub indent: MdIndentTokenList,
     pub l_fence: SyntaxResult<SyntaxToken>,
     pub code_list: MdCodeNameList,
     pub content: MdInlineItemList,
+    pub r_fence_indent: MdIndentTokenList,
     pub r_fence: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -356,19 +366,23 @@ impl MdHeader {
     }
     pub fn as_fields(&self) -> MdHeaderFields {
         MdHeaderFields {
+            indent: self.indent(),
             before: self.before(),
             content: self.content(),
             after: self.after(),
         }
     }
-    pub fn before(&self) -> MdHashList {
+    pub fn indent(&self) -> MdIndentTokenList {
         support::list(&self.syntax, 0usize)
     }
+    pub fn before(&self) -> MdHashList {
+        support::list(&self.syntax, 1usize)
+    }
     pub fn content(&self) -> Option<MdParagraph> {
-        support::node(&self.syntax, 1usize)
+        support::node(&self.syntax, 2usize)
     }
     pub fn after(&self) -> MdHashList {
-        support::list(&self.syntax, 2usize)
+        support::list(&self.syntax, 3usize)
     }
 }
 impl Serialize for MdHeader {
@@ -381,6 +395,7 @@ impl Serialize for MdHeader {
 }
 #[derive(Serialize)]
 pub struct MdHeaderFields {
+    pub indent: MdIndentTokenList,
     pub before: MdHashList,
     pub content: Option<MdParagraph>,
     pub after: MdHashList,
@@ -401,11 +416,15 @@ impl MdHtmlBlock {
     }
     pub fn as_fields(&self) -> MdHtmlBlockFields {
         MdHtmlBlockFields {
+            indent: self.indent(),
             content: self.content(),
         }
     }
-    pub fn content(&self) -> MdInlineItemList {
+    pub fn indent(&self) -> MdIndentTokenList {
         support::list(&self.syntax, 0usize)
+    }
+    pub fn content(&self) -> MdInlineItemList {
+        support::list(&self.syntax, 1usize)
     }
 }
 impl Serialize for MdHtmlBlock {
@@ -418,6 +437,7 @@ impl Serialize for MdHtmlBlock {
 }
 #[derive(Serialize)]
 pub struct MdHtmlBlockFields {
+    pub indent: MdIndentTokenList,
     pub content: MdInlineItemList,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -961,6 +981,7 @@ impl MdLinkReferenceDefinition {
     }
     pub fn as_fields(&self) -> MdLinkReferenceDefinitionFields {
         MdLinkReferenceDefinitionFields {
+            indent: self.indent(),
             l_brack_token: self.l_brack_token(),
             label: self.label(),
             r_brack_token: self.r_brack_token(),
@@ -969,23 +990,26 @@ impl MdLinkReferenceDefinition {
             title: self.title(),
         }
     }
+    pub fn indent(&self) -> MdIndentTokenList {
+        support::list(&self.syntax, 0usize)
+    }
     pub fn l_brack_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
+        support::required_token(&self.syntax, 1usize)
     }
     pub fn label(&self) -> SyntaxResult<MdLinkLabel> {
-        support::required_node(&self.syntax, 1usize)
+        support::required_node(&self.syntax, 2usize)
     }
     pub fn r_brack_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
-    }
-    pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 3usize)
     }
+    pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 4usize)
+    }
     pub fn destination(&self) -> SyntaxResult<MdLinkDestination> {
-        support::required_node(&self.syntax, 4usize)
+        support::required_node(&self.syntax, 5usize)
     }
     pub fn title(&self) -> Option<MdLinkTitle> {
-        support::node(&self.syntax, 5usize)
+        support::node(&self.syntax, 6usize)
     }
 }
 impl Serialize for MdLinkReferenceDefinition {
@@ -998,6 +1022,7 @@ impl Serialize for MdLinkReferenceDefinition {
 }
 #[derive(Serialize)]
 pub struct MdLinkReferenceDefinitionFields {
+    pub indent: MdIndentTokenList,
     pub l_brack_token: SyntaxResult<SyntaxToken>,
     pub label: SyntaxResult<MdLinkLabel>,
     pub r_brack_token: SyntaxResult<SyntaxToken>,
@@ -1596,11 +1621,11 @@ impl MdThematicBreakBlock {
     }
     pub fn as_fields(&self) -> MdThematicBreakBlockFields {
         MdThematicBreakBlockFields {
-            value_token: self.value_token(),
+            parts: self.parts(),
         }
     }
-    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
+    pub fn parts(&self) -> MdThematicBreakPartList {
+        support::list(&self.syntax, 0usize)
     }
 }
 impl Serialize for MdThematicBreakBlock {
@@ -1613,7 +1638,42 @@ impl Serialize for MdThematicBreakBlock {
 }
 #[derive(Serialize)]
 pub struct MdThematicBreakBlockFields {
-    pub value_token: SyntaxResult<SyntaxToken>,
+    pub parts: MdThematicBreakPartList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct MdThematicBreakChar {
+    pub(crate) syntax: SyntaxNode,
+}
+impl MdThematicBreakChar {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> MdThematicBreakCharFields {
+        MdThematicBreakCharFields {
+            value: self.value(),
+        }
+    }
+    pub fn value(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for MdThematicBreakChar {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct MdThematicBreakCharFields {
+    pub value: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyMdBlock {
@@ -1886,6 +1946,25 @@ impl AnyMdLeafBlock {
     pub fn as_md_thematic_break_block(&self) -> Option<&MdThematicBreakBlock> {
         match &self {
             Self::MdThematicBreakBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyMdThematicBreakPart {
+    MdIndentToken(MdIndentToken),
+    MdThematicBreakChar(MdThematicBreakChar),
+}
+impl AnyMdThematicBreakPart {
+    pub fn as_md_indent_token(&self) -> Option<&MdIndentToken> {
+        match &self {
+            Self::MdIndentToken(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_md_thematic_break_char(&self) -> Option<&MdThematicBreakChar> {
+        match &self {
+            Self::MdThematicBreakChar(item) => Some(item),
             _ => None,
         }
     }
@@ -2170,9 +2249,11 @@ impl std::fmt::Debug for MdFencedCodeBlock {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("MdFencedCodeBlock")
+                .field("indent", &self.indent())
                 .field("l_fence", &support::DebugSyntaxResult(self.l_fence()))
                 .field("code_list", &self.code_list())
                 .field("content", &self.content())
+                .field("r_fence_indent", &self.r_fence_indent())
                 .field("r_fence", &support::DebugSyntaxResult(self.r_fence()))
                 .finish()
         } else {
@@ -2317,6 +2398,7 @@ impl std::fmt::Debug for MdHeader {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("MdHeader")
+                .field("indent", &self.indent())
                 .field("before", &self.before())
                 .field("content", &support::DebugOptionalElement(self.content()))
                 .field("after", &self.after())
@@ -2366,6 +2448,7 @@ impl std::fmt::Debug for MdHtmlBlock {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("MdHtmlBlock")
+                .field("indent", &self.indent())
                 .field("content", &self.content())
                 .finish()
         } else {
@@ -3034,6 +3117,7 @@ impl std::fmt::Debug for MdLinkReferenceDefinition {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("MdLinkReferenceDefinition")
+                .field("indent", &self.indent())
                 .field(
                     "l_brack_token",
                     &support::DebugSyntaxResult(self.l_brack_token()),
@@ -3818,10 +3902,7 @@ impl std::fmt::Debug for MdThematicBreakBlock {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("MdThematicBreakBlock")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
+                .field("parts", &self.parts())
                 .finish()
         } else {
             f.debug_struct("MdThematicBreakBlock").finish()
@@ -3837,6 +3918,53 @@ impl From<MdThematicBreakBlock> for SyntaxNode {
 }
 impl From<MdThematicBreakBlock> for SyntaxElement {
     fn from(n: MdThematicBreakBlock) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for MdThematicBreakChar {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MD_THEMATIC_BREAK_CHAR as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MD_THEMATIC_BREAK_CHAR
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for MdThematicBreakChar {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdThematicBreakChar")
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("MdThematicBreakChar").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<MdThematicBreakChar> for SyntaxNode {
+    fn from(n: MdThematicBreakChar) -> Self {
+        n.syntax
+    }
+}
+impl From<MdThematicBreakChar> for SyntaxElement {
+    fn from(n: MdThematicBreakChar) -> Self {
         n.syntax.into()
     }
 }
@@ -4486,6 +4614,66 @@ impl From<AnyMdLeafBlock> for SyntaxElement {
         node.into()
     }
 }
+impl From<MdIndentToken> for AnyMdThematicBreakPart {
+    fn from(node: MdIndentToken) -> Self {
+        Self::MdIndentToken(node)
+    }
+}
+impl From<MdThematicBreakChar> for AnyMdThematicBreakPart {
+    fn from(node: MdThematicBreakChar) -> Self {
+        Self::MdThematicBreakChar(node)
+    }
+}
+impl AstNode for AnyMdThematicBreakPart {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        MdIndentToken::KIND_SET.union(MdThematicBreakChar::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, MD_INDENT_TOKEN | MD_THEMATIC_BREAK_CHAR)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            MD_INDENT_TOKEN => Self::MdIndentToken(MdIndentToken { syntax }),
+            MD_THEMATIC_BREAK_CHAR => Self::MdThematicBreakChar(MdThematicBreakChar { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::MdIndentToken(it) => it.syntax(),
+            Self::MdThematicBreakChar(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::MdIndentToken(it) => it.into_syntax(),
+            Self::MdThematicBreakChar(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyMdThematicBreakPart {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::MdIndentToken(it) => std::fmt::Debug::fmt(it, f),
+            Self::MdThematicBreakChar(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyMdThematicBreakPart> for SyntaxNode {
+    fn from(n: AnyMdThematicBreakPart) -> Self {
+        match n {
+            AnyMdThematicBreakPart::MdIndentToken(it) => it.into_syntax(),
+            AnyMdThematicBreakPart::MdThematicBreakChar(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyMdThematicBreakPart> for SyntaxElement {
+    fn from(n: AnyMdThematicBreakPart) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl std::fmt::Display for AnyMdBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -4512,6 +4700,11 @@ impl std::fmt::Display for AnyMdInline {
     }
 }
 impl std::fmt::Display for AnyMdLeafBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyMdThematicBreakPart {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -4702,6 +4895,11 @@ impl std::fmt::Display for MdTextual {
     }
 }
 impl std::fmt::Display for MdThematicBreakBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for MdThematicBreakChar {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -5333,6 +5531,88 @@ impl IntoIterator for &MdQuoteIndentList {
 impl IntoIterator for MdQuoteIndentList {
     type Item = MdQuoteIndent;
     type IntoIter = AstNodeListIterator<Language, MdQuoteIndent>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct MdThematicBreakPartList {
+    syntax_list: SyntaxList,
+}
+impl MdThematicBreakPartList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for MdThematicBreakPartList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MD_THEMATIC_BREAK_PART_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MD_THEMATIC_BREAK_PART_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for MdThematicBreakPartList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstNodeList for MdThematicBreakPartList {
+    type Language = Language;
+    type Node = AnyMdThematicBreakPart;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for MdThematicBreakPartList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("MdThematicBreakPartList ")?;
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+impl IntoIterator for &MdThematicBreakPartList {
+    type Item = AnyMdThematicBreakPart;
+    type IntoIter = AstNodeListIterator<Language, AnyMdThematicBreakPart>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for MdThematicBreakPartList {
+    type Item = AnyMdThematicBreakPart;
+    type IntoIter = AstNodeListIterator<Language, AnyMdThematicBreakPart>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

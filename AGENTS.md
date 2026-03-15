@@ -40,7 +40,7 @@ If user requests unnecessary verbosity, agent MUST:
 2. **Brief description** (1-3 sentences if needed):
    ```
    Fixes #1234
-   
+
    The parser now correctly handles edge case X.
    ```
 
@@ -211,7 +211,6 @@ Located in `.claude/skills/`, these provide step-by-step workflows:
 - **testing-codegen** - Testing and code generation commands
 - **type-inference** - Working with module graph and types
 - **diagnostics-development** - Creating user-facing diagnostics
-- **rule-options** - Implementing configurable rule options
 - **prettier-compare** - Comparing with Prettier
 
 See [`.claude/skills/README.md`](./.claude/skills/README.md) for the full catalog.

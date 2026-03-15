@@ -31,6 +31,7 @@ MdDocument {
             },
             content: MdBlockList [
                 MdFencedCodeBlock {
+                    indent: MdIndentTokenList [],
                     l_fence: TRIPLE_BACKTICK@2..5 "```" [] [],
                     code_list: MdCodeNameList [
                         MdTextual {
@@ -67,6 +68,7 @@ MdDocument {
                             post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@26..27 " " [] [],
                         },
                     ],
+                    r_fence_indent: MdIndentTokenList [],
                     r_fence: TRIPLE_BACKTICK@27..30 "```" [] [],
                 },
                 MdNewline {
@@ -92,6 +94,7 @@ MdDocument {
                     },
                     content: MdBlockList [
                         MdFencedCodeBlock {
+                            indent: MdIndentTokenList [],
                             l_fence: TRIPLE_BACKTICK@36..39 "```" [] [],
                             code_list: MdCodeNameList [],
                             content: MdInlineItemList [
@@ -125,6 +128,7 @@ MdDocument {
                                     post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@54..55 " " [] [],
                                 },
                             ],
+                            r_fence_indent: MdIndentTokenList [],
                             r_fence: TRIPLE_BACKTICK@55..58 "```" [] [],
                         },
                         MdNewline {
@@ -152,11 +156,12 @@ MdDocument {
         2: MD_QUOTE_POST_MARKER_SPACE@1..2 " " [] []
       1: MD_BLOCK_LIST@2..31
         0: MD_FENCED_CODE_BLOCK@2..30
-          0: TRIPLE_BACKTICK@2..5 "```" [] []
-          1: MD_CODE_NAME_LIST@5..9
+          0: MD_INDENT_TOKEN_LIST@2..2
+          1: TRIPLE_BACKTICK@2..5 "```" [] []
+          2: MD_CODE_NAME_LIST@5..9
             0: MD_TEXTUAL@5..9
               0: MD_TEXTUAL_LITERAL@5..9 "rust" [] []
-          2: MD_INLINE_ITEM_LIST@9..27
+          3: MD_INLINE_ITEM_LIST@9..27
             0: MD_TEXTUAL@9..10
               0: MD_TEXTUAL_LITERAL@9..10 "\n" [] []
             1: MD_QUOTE_PREFIX@10..12
@@ -177,7 +182,8 @@ MdDocument {
               0: MD_QUOTE_INDENT_LIST@25..25
               1: R_ANGLE@25..26 ">" [] []
               2: MD_QUOTE_POST_MARKER_SPACE@26..27 " " [] []
-          3: TRIPLE_BACKTICK@27..30 "```" [] []
+          4: MD_INDENT_TOKEN_LIST@27..27
+          5: TRIPLE_BACKTICK@27..30 "```" [] []
         1: MD_NEWLINE@30..31
           0: NEWLINE@30..31 "\n" [] []
     1: MD_NEWLINE@31..32
@@ -195,9 +201,10 @@ MdDocument {
             2: MD_QUOTE_POST_MARKER_SPACE@35..36 " " [] []
           1: MD_BLOCK_LIST@36..59
             0: MD_FENCED_CODE_BLOCK@36..58
-              0: TRIPLE_BACKTICK@36..39 "```" [] []
-              1: MD_CODE_NAME_LIST@39..39
-              2: MD_INLINE_ITEM_LIST@39..55
+              0: MD_INDENT_TOKEN_LIST@36..36
+              1: TRIPLE_BACKTICK@36..39 "```" [] []
+              2: MD_CODE_NAME_LIST@39..39
+              3: MD_INLINE_ITEM_LIST@39..55
                 0: MD_TEXTUAL@39..40
                   0: MD_TEXTUAL_LITERAL@39..40 "\n" [] []
                 1: MD_QUOTE_PREFIX@40..42
@@ -220,7 +227,8 @@ MdDocument {
                   0: MD_QUOTE_INDENT_LIST@53..53
                   1: R_ANGLE@53..54 ">" [] []
                   2: MD_QUOTE_POST_MARKER_SPACE@54..55 " " [] []
-              3: TRIPLE_BACKTICK@55..58 "```" [] []
+              4: MD_INDENT_TOKEN_LIST@55..55
+              5: TRIPLE_BACKTICK@55..58 "```" [] []
             1: MD_NEWLINE@58..59
               0: NEWLINE@58..59 "\n" [] []
   2: EOF@59..59 "" [] []

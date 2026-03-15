@@ -36,7 +36,7 @@ pub(crate) struct ParameterList {
 
 impl ParameterList {
     #[inline]
-    pub(super) fn new(context: ValueParsingContext) -> Self {
+    pub(crate) fn new(context: ValueParsingContext) -> Self {
         Self { context }
     }
 }

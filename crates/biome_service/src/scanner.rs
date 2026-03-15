@@ -19,12 +19,12 @@ use biome_fs::{BiomePath, PathInterner, PathKind, TraversalContext, TraversalSco
 use biome_module_graph::ModuleDependencies;
 use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::{Receiver, Sender, unbounded};
-use papaya::{HashMap, HashSet};
+use papaya::{HashMap, HashSet, HashSetRef, LocalGuard};
 use rayon::Scope;
 use rustc_hash::FxHashSet;
-use std::collections::BTreeSet;
+use std::hash::RandomState;
 use std::panic::catch_unwind;
-use std::sync::{Mutex, RwLock};
+use std::sync::Mutex;
 use std::time::Duration;
 use std::{mem, thread};
 use tracing::instrument;
@@ -427,12 +427,18 @@ impl Scanner {
             scope.evaluate(ctx, folder.to_path_buf());
         }));
 
-        let evaluated_paths = ctx.evaluated_paths();
+        let mut evaluated_paths: Vec<_> = ctx
+            .evaluated_paths()
+            .iter()
+            .map(|p| BiomePath::new(p.as_path()))
+            .collect();
         let mut configs = Vec::new();
         let mut manifests = Vec::new();
         let mut handleable_paths = Vec::with_capacity(evaluated_paths.len());
         let mut ignore_paths = Vec::new();
         let mut folders_to_watch = FxHashSet::<Utf8PathBuf>::default();
+
+        evaluated_paths.sort_unstable();
 
         // We want to process files that closest to the project root first. For
         // example, we must process first the `.gitignore` at the root of the
@@ -576,6 +582,7 @@ fn scan_dependencies<W: WorkspaceScannerBridge>(
                         &ctx.scan_kind,
                         &dependency_path,
                         IndexRequestKind::Dependency(ctx.trigger),
+                        None,
                     )
                     .unwrap_or(true);
                 if !is_ignored {
@@ -592,6 +599,7 @@ fn scan_dependencies<W: WorkspaceScannerBridge>(
                     &ctx.scan_kind,
                     &dependency_path,
                     IndexRequestKind::Dependency(ctx.trigger),
+                    None,
                 )
                 .unwrap_or(true);
             if !is_ignored {
@@ -669,7 +677,7 @@ pub(crate) struct ScanContext<'app, W: WorkspaceScannerBridge> {
     pub(crate) diagnostics_sender: Sender<Diagnostic>,
 
     /// List of paths that should be processed.
-    pub(crate) evaluated_paths: RwLock<BTreeSet<BiomePath>>,
+    pub(crate) evaluated_paths: HashSet<BiomePath>,
 
     /// What the scanner should target.
     scan_kind: ScanKind,
@@ -759,8 +767,8 @@ impl<W: WorkspaceScannerBridge> TraversalContext for ScanContext<'_, W> {
         &self.interner
     }
 
-    fn evaluated_paths(&self) -> BTreeSet<BiomePath> {
-        self.evaluated_paths.read().unwrap().clone()
+    fn evaluated_paths(&self) -> HashSetRef<'_, BiomePath, RandomState, LocalGuard<'_>> {
+        self.evaluated_paths.pin()
     }
 
     fn push_diagnostic(&self, error: Error) {
@@ -780,6 +788,7 @@ impl<W: WorkspaceScannerBridge> TraversalContext for ScanContext<'_, W> {
             &self.scan_kind,
             path,
             IndexRequestKind::Explicit(self.trigger),
+            Some(path.path_kind()),
         ) {
             Ok(is_ignored) => !is_ignored,
             Err(_) => {
@@ -796,7 +805,7 @@ impl<W: WorkspaceScannerBridge> TraversalContext for ScanContext<'_, W> {
     }
 
     fn store_path(&self, path: BiomePath) {
-        self.evaluated_paths.write().unwrap().insert(path);
+        self.evaluated_paths.pin().insert(path);
     }
 
     fn should_store_dirs(&self) -> bool {

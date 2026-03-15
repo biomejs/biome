@@ -17,21 +17,21 @@ Skills complement the specialized **agents** in `.claude/agents/` - agents are p
 
 ### Core Development Skills
 
-| Skill | Purpose | Best Used With | Lines |
-| ------- | --------- | ---------------- | ------- |
-| **[lint-rule-development](./lint-rule-development/SKILL.md)** | Create and implement lint rules with semantic analysis | `biome-lint-engineer` | ~250 |
-| **[formatter-development](./formatter-development/SKILL.md)** | Implement formatting rules using IR-based formatter | `ir-formatter-engineer` | ~180 |
-| **[parser-development](./parser-development/SKILL.md)** | Write parsers with error recovery and grammar authoring | `cst-parser-engineer` | ~220 |
+| Skill | Purpose | Best Used With |
+| ------- | --------- | ---------------- |
+| **[lint-rule-development](./lint-rule-development/SKILL.md)** | Create and implement lint rules with semantic analysis | `biome-lint-engineer` |
+| **[formatter-development](./formatter-development/SKILL.md)** | Implement formatting rules using IR-based formatter | `ir-formatter-engineer` |
+| **[parser-development](./parser-development/SKILL.md)** | Write parsers with error recovery and grammar authoring | `cst-parser-engineer` |
 
 ### Supporting Skills
 
-| Skill | Purpose | Best Used With | Lines |
-| ------- | --------- | ---------------- | ------- |
-| **[biome-developer](./biome-developer/SKILL.md)** | General development best practices, common gotchas, Biome-specific patterns | Any agent | ~320 |
-| **[testing-codegen](./testing-codegen/SKILL.md)** | Run tests, manage snapshots, create changesets, generate code | Any agent | ~200 |
-| **[type-inference](./type-inference/SKILL.md)** | Work with module graph and type inference system | `biome-lint-engineer` | ~180 |
-| **[diagnostics-development](./diagnostics-development/SKILL.md)** | Create user-friendly error messages and diagnostics | Any agent | ~170 |
-| **[rule-options](./rule-options/SKILL.md)** | Implement configurable rule options | `biome-lint-engineer` | ~180 |
+| Skill | Purpose | Best Used With |
+| ------- | --------- | ---------------- |
+| **[biome-developer](./biome-developer/SKILL.md)** | General development best practices, common gotchas, Biome-specific patterns | Any agent |
+| **[testing-codegen](./testing-codegen/SKILL.md)** | Run tests, manage snapshots, create changesets, generate code | Any agent |
+| **[type-inference](./type-inference/SKILL.md)** | Work with module graph and type inference system | `biome-lint-engineer` |
+| **[diagnostics-development](./diagnostics-development/SKILL.md)** | Create user-friendly error messages and diagnostics | Any agent |
+| **[prettier-compare](./prettier-compare/SKILL.md)** | Compare Biome and Prettier formatting output and IR | `ir-formatter-engineer` |
 
 ## Quick Workflow Guide
 
@@ -101,36 +101,36 @@ cargo test
 
 ### "I'm adding rule options"
 
-1. Load the `rule-options` skill
-2. Define options type in `biome_rule_options` crate
-3. Implement `Merge` trait
+1. Load the `lint-rule-development` skill
+2. Follow the "Adding Configurable Options" section
+3. See `lint-rule-development/references/OPTIONS.md` for detailed patterns
 4. Test with `options.json` files
 
 ## Agent + Skill Combinations
 
 ### Lint Rule Development
-**Agent:** `biome-lint-engineer`  
-**Skills:** `lint-rule-development` + `testing-codegen` + `rule-options` (if needed)  
-**Use for:** Implementing new lint rules, adding semantic analysis, creating code actions
+**Agent:** `biome-lint-engineer`
+**Skills:** `lint-rule-development` + `testing-codegen`
+**Use for:** Implementing new lint rules, adding semantic analysis, creating code actions, adding rule options
 
 ### Formatter Development
-**Agent:** `ir-formatter-engineer`  
-**Skills:** `formatter-development` + `testing-codegen`  
+**Agent:** `ir-formatter-engineer`
+**Skills:** `formatter-development` + `testing-codegen`
 **Use for:** Implementing formatting rules, handling comments, comparing with Prettier
 
 ### Parser Development
-**Agent:** `cst-parser-engineer`  
-**Skills:** `parser-development` + `testing-codegen`  
+**Agent:** `cst-parser-engineer`
+**Skills:** `parser-development` + `testing-codegen`
 **Use for:** Creating parsers, writing grammars, implementing error recovery
 
 ### Type-Aware Rules
-**Agent:** `biome-lint-engineer`  
-**Skills:** `lint-rule-development` + `type-inference` + `testing-codegen`  
+**Agent:** `biome-lint-engineer`
+**Skills:** `lint-rule-development` + `type-inference` + `testing-codegen`
 **Use for:** Rules that need type information, semantic analysis across modules
 
 ### Quality Diagnostics
-**Agent:** Any  
-**Skills:** `diagnostics-development` + `testing-codegen`  
+**Agent:** Any
+**Skills:** `diagnostics-development` + `testing-codegen`
 **Use for:** Improving error messages, adding helpful advice, creating code frames
 
 ## Skill Format
@@ -141,6 +141,7 @@ Each skill follows this structure:
 ---
 name: skill-name
 description: Brief description with use case examples
+compatibility: Designed for coding agents working on the Biome codebase (github.com/biomejs/biome).
 ---
 
 ## Purpose
@@ -170,7 +171,9 @@ Skills are designed to be **quick reference cards** - scan in 30 seconds and kno
 ├── biome-developer/
 │   └── SKILL.md
 ├── lint-rule-development/
-│   └── SKILL.md
+│   ├── SKILL.md
+│   └── references/
+│       └── OPTIONS.md
 ├── formatter-development/
 │   └── SKILL.md
 ├── parser-development/
@@ -181,7 +184,7 @@ Skills are designed to be **quick reference cards** - scan in 30 seconds and kno
 │   └── SKILL.md
 ├── diagnostics-development/
 │   └── SKILL.md
-└── rule-options/
+└── prettier-compare/
     └── SKILL.md
 ```
 
@@ -191,12 +194,13 @@ When adding a new skill:
 
 1. Create directory: `.claude/skills/skill-name/`
 2. Create `SKILL.md` with standard structure
-3. Include frontmatter with `name` and `description`
+3. Include frontmatter with `name`, `description`, and `compatibility`
 4. Provide exact, copy-pasteable commands
 5. Use real examples from Biome codebase
-6. Keep it concise (50-250 lines)
-7. Link to detailed CONTRIBUTING.md docs
-8. Update this README with the new skill
+6. Keep `SKILL.md` concise (under 500 lines)
+7. For detailed reference material, use a `references/` subdirectory
+8. Link to detailed CONTRIBUTING.md docs
+9. Update this README with the new skill
 
 ## Additional Resources
 

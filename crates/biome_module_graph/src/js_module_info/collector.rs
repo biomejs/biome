@@ -1,6 +1,8 @@
-use std::{borrow::Cow, collections::BTreeSet, sync::Arc};
+use std::{borrow::Cow, sync::Arc};
 
-use biome_js_semantic::{BindingId, ScopeId, SemanticEvent, SemanticEventExtractor};
+use biome_js_semantic::{
+    BindingId, ScopeId, SemanticEvent, SemanticEventExtractor, TsBindingReference,
+};
 use biome_js_syntax::{
     AnyJsCombinedSpecifier, AnyJsDeclaration, AnyJsExportDefaultDeclaration, AnyJsExpression,
     AnyJsImportClause, JsAssignmentExpression, JsForVariableDeclaration, JsFormalParameter,
@@ -12,12 +14,11 @@ use biome_js_type_info::{
     FunctionParameter, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, GenericTypeParameter, MAX_FLATTEN_DEPTH,
     Module, Namespace, Resolvable, ResolvedTypeData, ResolvedTypeId, TypeData, TypeId,
     TypeImportQualifier, TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier,
-    TypeResolver, TypeResolverLevel, TypeStore,
+    TypeResolver, TypeResolverLevel, TypeStore, UnionCollector,
 };
 use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::{AstNode, Text, TextRange, TextSize, TokenText};
 use indexmap::IndexMap;
-use rust_lapper::Interval;
 use rustc_hash::FxHashMap;
 
 use super::{
@@ -26,9 +27,8 @@ use super::{
     scope::JsScopeData,
 };
 use crate::js_module_info::{
-    binding::{JsBindingReference, JsBindingReferenceKind, JsDeclarationKind},
-    scope::TsBindingReference,
-    scope_id_for_range,
+    binding::{JsBindingReference, JsBindingReferenceKind},
+    scope::TsBindingReferenceExt,
     utils::reached_too_many_types,
 };
 use crate::{JsImportPath, JsImportPhase};
@@ -68,9 +68,6 @@ pub(super) struct JsModuleInfoCollector {
     ///
     /// The first entry is always the module's global scope.
     pub(super) scopes: Vec<JsScopeData>,
-
-    /// Used to build the Lapper lookup tree for finding scopes by text range.
-    scope_range_by_start: FxHashMap<TextSize, BTreeSet<Interval<u32, ScopeId>>>,
 
     /// Used for tracking the scope we are currently in.
     scope_stack: Vec<ScopeId>,
@@ -406,16 +403,6 @@ impl JsModuleInfoCollector {
                     self.scopes[parent_scope_id.index()].children.push(scope_id);
                 }
 
-                let start = range.start();
-                self.scope_range_by_start
-                    .entry(start)
-                    .or_default()
-                    .insert(Interval {
-                        start: start.into(),
-                        stop: range.end().into(),
-                        val: scope_id,
-                    });
-
                 self.scope_stack.push(scope_id);
             }
             ScopeEnded { .. } => {
@@ -425,6 +412,7 @@ impl JsModuleInfoCollector {
                 range,
                 scope_id,
                 hoisted_scope_id,
+                declaration_kind,
             } => {
                 let binding_scope_id = hoisted_scope_id.unwrap_or(scope_id);
 
@@ -451,10 +439,6 @@ impl JsModuleInfoCollector {
                 });
 
                 let name = name_token.as_ref().map(JsSyntaxToken::token_text_trimmed);
-                let declaration_kind = node
-                    .as_ref()
-                    .map(JsDeclarationKind::from_node)
-                    .unwrap_or_default();
                 let scope_id = *self.scope_stack.last().expect("scope must be present");
 
                 self.bindings.push(JsBindingData {
@@ -574,25 +558,12 @@ impl JsModuleInfoCollector {
         (exports, binding_type_data)
     }
 
-    fn infer_all_types(&mut self, _semantic_model: &biome_js_semantic::SemanticModel) {
-        // NOTE: We still use the collector's temporary scopes here for type inference.
-        // The semantic_model is passed for future use, but currently we rely on the
-        // collector's scope_by_range that was built from semantic events.
-        //
-        // TODO: Refactor type inference to use semantic_model's scopes directly.
-        let scope_by_range = rust_lapper::Lapper::new(
-            self.scope_range_by_start
-                .iter()
-                .flat_map(|(_, scopes)| scopes.iter())
-                .cloned()
-                .collect(),
-        );
-
+    fn infer_all_types(&mut self, semantic_model: &biome_js_semantic::SemanticModel) {
         for index in 0..self.bindings.len() {
             let binding = &self.bindings[index];
             if let Some(node) = self.binding_node_by_start.get(&binding.range.start()) {
-                let scope_id = scope_id_for_range(&scope_by_range, binding.range);
-                let ty = self.infer_type(&node.clone(), binding.clone(), scope_id);
+                let scope_id = semantic_model.scope_for_range(binding.range).id();
+                let ty = self.infer_type(&node.clone(), binding.clone(), scope_id, semantic_model);
                 self.bindings[index].ty = ty;
             }
         }
@@ -619,6 +590,7 @@ impl JsModuleInfoCollector {
         node: &JsSyntaxNode,
         binding: JsBindingData,
         scope_id: ScopeId,
+        semantic_model: &biome_js_semantic::SemanticModel,
     ) -> TypeReference {
         let binding_name = &binding.name.clone();
 
@@ -645,7 +617,12 @@ impl JsModuleInfoCollector {
                         .unwrap_or_default();
 
                     if self.has_writable_reference(&binding) {
-                        self.widen_binding_from_writable_references(scope_id, &binding, &ty)
+                        self.widen_binding_from_writable_references(
+                            scope_id,
+                            &binding,
+                            &ty,
+                            semantic_model,
+                        )
                     } else {
                         ty
                     }
@@ -700,29 +677,37 @@ impl JsModuleInfoCollector {
         scope_id: ScopeId,
         binding: &JsBindingData,
         ty: &TypeReference,
+        semantic_model: &biome_js_semantic::SemanticModel,
     ) -> TypeReference {
         let references = self.get_writable_references(binding);
-        let mut ty = ty.clone();
+        let mut union_collector = UnionCollector::new();
+        union_collector.add(ty.clone());
         for reference in references {
             let Some(node) = self.binding_node_by_start.get(&reference.range_start) else {
                 continue;
             };
-            for ancestor in node.ancestors().skip(1) {
-                if let Some(assignment) = JsAssignmentExpression::cast_ref(&ancestor)
-                    && let Ok(right) = assignment.right()
-                {
-                    let data = TypeData::from_any_js_expression(self, scope_id, &right);
-                    let assigned_type = self.reference_to_owned_data(data);
-                    ty = ResolvedTypeId::new(
-                        self.level(),
-                        self.union_with(ty.clone(), assigned_type),
-                    )
-                    .into();
-                }
+            let reference_scope = semantic_model
+                .scope_for_range(node.text_trimmed_range())
+                .id();
+
+            // We don't want to widen types inside the same scope
+            if binding.scope_id == reference_scope {
+                continue;
+            }
+            let assignment = node
+                .ancestors()
+                .skip(1)
+                .find_map(|ancestor| JsAssignmentExpression::cast_ref(&ancestor))
+                .and_then(|assignment| assignment.right().ok());
+            if let Some(right) = assignment {
+                let data = TypeData::from_any_js_expression(self, scope_id, &right);
+                let assigned_type = self.reference_to_owned_data(data);
+                union_collector.add(assigned_type);
             }
         }
 
-        ty
+        let id = self.register_type(union_collector.finish());
+        ResolvedTypeId::new(self.level(), id).into()
     }
 
     /// After the first pass of the collector, import references have been

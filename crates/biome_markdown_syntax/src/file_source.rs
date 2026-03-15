@@ -33,7 +33,6 @@ impl MdFileSource {
 
     pub fn try_from_extension(extension: &str) -> Result<Self, FileSourceError> {
         match extension {
-            #[cfg(feature = "experimental-markdown")]
             "md" | "markdown" => Ok(Self::markdown()),
             _ => Err(FileSourceError::UnknownExtension),
         }
@@ -41,7 +40,6 @@ impl MdFileSource {
 
     pub fn try_from_language_id(language_id: &str) -> Result<Self, FileSourceError> {
         match language_id {
-            #[cfg(feature = "experimental-markdown")]
             "markdown" => Ok(Self::markdown()),
             _ => Err(FileSourceError::UnknownLanguageId),
         }

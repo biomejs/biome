@@ -10,7 +10,7 @@ use crate::syntax::{is_at_identifier, parse_identifier, parse_regular_identifier
 use biome_css_syntax::CssSyntaxKind::{self, *};
 use biome_css_syntax::T;
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
-use biome_parser::parse_recovery::ParseRecoveryTokenSet;
+use biome_parser::parse_recovery::{ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
@@ -38,7 +38,7 @@ pub(crate) fn parse_utility_at_rule(p: &mut CssParser) -> ParsedSyntax {
     }
 
     let m = p.start();
-    p.bump(T![utility]);
+    p.bump_with_context(T![utility], CssLexContext::TailwindUtilityName);
 
     // Parse utility name - can be simple or functional
     if !is_at_utility_identifier(p) {
@@ -207,7 +207,7 @@ impl ParseNodeList for ApplyClassList {
         &mut self,
         p: &mut Self::Parser<'_>,
         parsed_element: ParsedSyntax,
-    ) -> biome_parser::parse_recovery::RecoveryResult {
+    ) -> RecoveryResult {
         parsed_element.or_recover_with_token_set(
             p,
             &ParseRecoveryTokenSet::new(CSS_BOGUS_CUSTOM_IDENTIFIER, TW_APPLY_CLASS_LIST_END)

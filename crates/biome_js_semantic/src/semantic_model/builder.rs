@@ -169,6 +169,7 @@ impl SemanticModelBuilder {
                 range,
                 scope_id,
                 hoisted_scope_id,
+                declaration_kind,
             } => {
                 let binding_scope_id = hoisted_scope_id.unwrap_or(scope_id);
 
@@ -181,6 +182,7 @@ impl SemanticModelBuilder {
                     range,
                     references: Vec::new(),
                     export_by_start: smallvec::SmallVec::new(),
+                    declaration_kind,
                 });
                 self.bindings_by_start.insert(range.start(), binding_id);
 
@@ -189,21 +191,30 @@ impl SemanticModelBuilder {
                 scope.bindings.push(binding_id);
                 // Handle bindings with a bogus name
                 if let Some(node) = self.binding_node_by_start.get(&range.start()) {
-                    if let Some(node) = JsIdentifierBinding::cast_ref(node) {
-                        if let Ok(name_token) = node.name_token() {
-                            let name = name_token.token_text_trimmed();
-                            scope.bindings_by_name.insert(name, binding_id);
-                        }
+                    let name = if let Some(node) = JsIdentifierBinding::cast_ref(node) {
+                        node.name_token().ok().map(|t| t.token_text_trimmed())
                     } else if let Some(node) = TsIdentifierBinding::cast_ref(node) {
-                        if let Ok(name_token) = node.name_token() {
-                            let name = name_token.token_text_trimmed();
-                            scope.bindings_by_name.insert(name, binding_id);
-                        }
-                    } else if let Some(node) = TsTypeParameterName::cast_ref(node)
-                        && let Ok(ident_token) = node.ident_token()
-                    {
-                        let name = ident_token.token_text_trimmed();
-                        scope.bindings_by_name.insert(name, binding_id);
+                        node.name_token().ok().map(|t| t.token_text_trimmed())
+                    } else if let Some(node) = TsTypeParameterName::cast_ref(node) {
+                        node.ident_token().ok().map(|t| t.token_text_trimmed())
+                    } else {
+                        None
+                    };
+
+                    if let Some(name) = name {
+                        let binding_reference =
+                            TsBindingReference::from_binding_and_declaration_kind(
+                                binding_id,
+                                declaration_kind,
+                            );
+
+                        scope
+                            .bindings_by_name
+                            .entry(name)
+                            .and_modify(|existing| {
+                                *existing = existing.union_with(binding_reference);
+                            })
+                            .or_insert(binding_reference);
                     }
                 }
 

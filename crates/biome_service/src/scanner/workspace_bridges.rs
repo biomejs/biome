@@ -24,12 +24,15 @@ pub(crate) trait WorkspaceScannerBridge: Send + Sync + RefUnwindSafe {
     /// Asks the workspace whether the given `path` that falls under the project
     /// with the given `project_key` is ignored, assuming the given `scan_kind`
     /// and `request_kind`.
+    ///
+    /// Then `path_kind` is `None`, the underling code fallbacks to a sys call.
     fn is_ignored(
         &self,
         project_key: ProjectKey,
         scan_kind: &ScanKind,
         path: &Utf8Path,
         request_kind: IndexRequestKind,
+        path_kind: Option<PathKind>,
     ) -> Result<bool, WorkspaceError>;
 
     /// Returns whether the given `path` has been indexed.
@@ -130,6 +133,7 @@ pub trait WorkspaceWatcherBridge {
         project_key: ProjectKey,
         scan_kind: &ScanKind,
         path: &Utf8Path,
+        path_kind: Option<PathKind>,
     ) -> Result<bool, WorkspaceError>;
 
     /// Indexes the file with the given `path` within the project with the given
@@ -242,12 +246,14 @@ where
         project_key: ProjectKey,
         scan_kind: &ScanKind,
         path: &Utf8Path,
+        path_kind: Option<PathKind>,
     ) -> Result<bool, WorkspaceError> {
         self.workspace.is_ignored(
             project_key,
             scan_kind,
             path,
             IndexRequestKind::Explicit(IndexTrigger::Update),
+            path_kind,
         )
     }
 

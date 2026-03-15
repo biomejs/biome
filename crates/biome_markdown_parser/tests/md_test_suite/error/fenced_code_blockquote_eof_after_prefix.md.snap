@@ -25,6 +25,7 @@ MdDocument {
             },
             content: MdBlockList [
                 MdFencedCodeBlock {
+                    indent: MdIndentTokenList [],
                     l_fence: TRIPLE_BACKTICK@2..5 "```" [] [],
                     code_list: MdCodeNameList [],
                     content: MdInlineItemList [
@@ -37,6 +38,7 @@ MdDocument {
                             post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@7..8 " " [] [],
                         },
                     ],
+                    r_fence_indent: MdIndentTokenList [],
                     r_fence: missing (required),
                 },
             ],
@@ -59,16 +61,18 @@ MdDocument {
         2: MD_QUOTE_POST_MARKER_SPACE@1..2 " " [] []
       1: MD_BLOCK_LIST@2..8
         0: MD_FENCED_CODE_BLOCK@2..8
-          0: TRIPLE_BACKTICK@2..5 "```" [] []
-          1: MD_CODE_NAME_LIST@5..5
-          2: MD_INLINE_ITEM_LIST@5..8
+          0: MD_INDENT_TOKEN_LIST@2..2
+          1: TRIPLE_BACKTICK@2..5 "```" [] []
+          2: MD_CODE_NAME_LIST@5..5
+          3: MD_INLINE_ITEM_LIST@5..8
             0: MD_TEXTUAL@5..6
               0: MD_TEXTUAL_LITERAL@5..6 "\n" [] []
             1: MD_QUOTE_PREFIX@6..8
               0: MD_QUOTE_INDENT_LIST@6..6
               1: R_ANGLE@6..7 ">" [] []
               2: MD_QUOTE_POST_MARKER_SPACE@7..8 " " [] []
-          3: (empty)
+          4: MD_INDENT_TOKEN_LIST@8..8
+          5: (empty)
   2: EOF@8..8 "" [] []
 
 ```

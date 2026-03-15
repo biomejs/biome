@@ -46,8 +46,14 @@ MdDocument {
                                 MdTextual {
                                     value_token: MD_TEXTUAL_LITERAL@12..13 "\n" [] [],
                                 },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@13..14 " " [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@14..15 " " [] [],
+                                },
                                 MdTextual {
-                                    value_token: MD_TEXTUAL_LITERAL@13..32 "with continuation" [Skipped(" "), Skipped(" ")] [],
+                                    value_token: MD_TEXTUAL_LITERAL@15..32 "with continuation" [] [],
                                 },
                                 MdTextual {
                                     value_token: MD_TEXTUAL_LITERAL@32..33 "\n" [] [],
@@ -101,8 +107,17 @@ MdDocument {
                                 MdTextual {
                                     value_token: MD_TEXTUAL_LITERAL@63..64 "\n" [] [],
                                 },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@64..65 " " [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@65..66 " " [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@66..67 " " [] [],
+                                },
                                 MdTextual {
-                                    value_token: MD_TEXTUAL_LITERAL@64..81 "continues here" [Skipped(" "), Skipped(" "), Skipped(" ")] [],
+                                    value_token: MD_TEXTUAL_LITERAL@67..81 "continues here" [] [],
                                 },
                                 MdTextual {
                                     value_token: MD_TEXTUAL_LITERAL@81..82 "\n" [] [],
@@ -263,9 +278,13 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@1..12 " First item" [] []
                 1: MD_TEXTUAL@12..13
                   0: MD_TEXTUAL_LITERAL@12..13 "\n" [] []
-                2: MD_TEXTUAL@13..32
-                  0: MD_TEXTUAL_LITERAL@13..32 "with continuation" [Skipped(" "), Skipped(" ")] []
-                3: MD_TEXTUAL@32..33
+                2: MD_INDENT_TOKEN@13..14
+                  0: MD_INDENT_CHAR@13..14 " " [] []
+                3: MD_INDENT_TOKEN@14..15
+                  0: MD_INDENT_CHAR@14..15 " " [] []
+                4: MD_TEXTUAL@15..32
+                  0: MD_TEXTUAL_LITERAL@15..32 "with continuation" [] []
+                5: MD_TEXTUAL@32..33
                   0: MD_TEXTUAL_LITERAL@32..33 "\n" [] []
               1: (empty)
         1: MD_BULLET@33..48
@@ -299,9 +318,15 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@50..63 " Ordered item" [] []
                 1: MD_TEXTUAL@63..64
                   0: MD_TEXTUAL_LITERAL@63..64 "\n" [] []
-                2: MD_TEXTUAL@64..81
-                  0: MD_TEXTUAL_LITERAL@64..81 "continues here" [Skipped(" "), Skipped(" "), Skipped(" ")] []
-                3: MD_TEXTUAL@81..82
+                2: MD_INDENT_TOKEN@64..65
+                  0: MD_INDENT_CHAR@64..65 " " [] []
+                3: MD_INDENT_TOKEN@65..66
+                  0: MD_INDENT_CHAR@65..66 " " [] []
+                4: MD_INDENT_TOKEN@66..67
+                  0: MD_INDENT_CHAR@66..67 " " [] []
+                5: MD_TEXTUAL@67..81
+                  0: MD_TEXTUAL_LITERAL@67..81 "continues here" [] []
+                6: MD_TEXTUAL@81..82
                   0: MD_TEXTUAL_LITERAL@81..82 "\n" [] []
               1: (empty)
         1: MD_BULLET@82..99

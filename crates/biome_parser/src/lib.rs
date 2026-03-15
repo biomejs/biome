@@ -659,6 +659,24 @@ pub trait SyntaxFeature: Sized {
         }
     }
 
+    /// Parses a syntax only if this feature is supported.
+    ///
+    /// Returns [ParsedSyntax::Absent] if the feature isn't supported.
+    fn parse_supported_syntax<'source, P>(
+        &self,
+        p: &mut Self::Parser<'source>,
+        parse: P,
+    ) -> ParsedSyntax
+    where
+        P: FnOnce(&mut Self::Parser<'source>) -> ParsedSyntax,
+    {
+        if self.is_supported(p) {
+            parse(p)
+        } else {
+            Absent
+        }
+    }
+
     /// Adds a diagnostic and changes the kind of the node to [SyntaxKind::to_bogus] if this feature is
     /// supported.
     ///
