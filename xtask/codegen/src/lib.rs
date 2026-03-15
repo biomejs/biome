@@ -120,6 +120,9 @@ pub enum TaskCommand {
     /// Generates unicode table inside lexer
     #[bpaf(command)]
     Unicode,
+    /// Generates Baseline data for CSS features from web-features
+    #[bpaf(command, long("css-baseline"))]
+    CssBaseline,
     /// Creates a new lint rule
     #[bpaf(command, long("new-lintrule"))]
     NewRule {

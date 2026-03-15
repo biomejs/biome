@@ -1,0 +1,166 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
+expression: snapshot
+---
+
+## Input
+
+```css
+@import;
+
+@import "theme",;
+
+@import "theme", "spacing",;
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: ScssImportAtRule {
+                import_token: IMPORT_KW@1..7 "import" [] [],
+                imports: ScssImportItemList [],
+                semicolon_token: SEMICOLON@7..8 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@8..11 "@" [Newline("\n"), Newline("\n")] [],
+            rule: ScssImportAtRule {
+                import_token: IMPORT_KW@11..18 "import" [] [Whitespace(" ")],
+                imports: ScssImportItemList [
+                    CssString {
+                        value_token: CSS_STRING_LITERAL@18..25 "\"theme\"" [] [],
+                    },
+                    COMMA@25..26 "," [] [],
+                    missing element,
+                ],
+                semicolon_token: SEMICOLON@26..27 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@27..30 "@" [Newline("\n"), Newline("\n")] [],
+            rule: ScssImportAtRule {
+                import_token: IMPORT_KW@30..37 "import" [] [Whitespace(" ")],
+                imports: ScssImportItemList [
+                    CssString {
+                        value_token: CSS_STRING_LITERAL@37..44 "\"theme\"" [] [],
+                    },
+                    COMMA@44..46 "," [] [Whitespace(" ")],
+                    CssString {
+                        value_token: CSS_STRING_LITERAL@46..55 "\"spacing\"" [] [],
+                    },
+                    COMMA@55..56 "," [] [],
+                    missing element,
+                ],
+                semicolon_token: SEMICOLON@56..57 ";" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@57..58 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..58
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..57
+    0: CSS_AT_RULE@0..8
+      0: AT@0..1 "@" [] []
+      1: SCSS_IMPORT_AT_RULE@1..8
+        0: IMPORT_KW@1..7 "import" [] []
+        1: SCSS_IMPORT_ITEM_LIST@7..7
+        2: SEMICOLON@7..8 ";" [] []
+    1: CSS_AT_RULE@8..27
+      0: AT@8..11 "@" [Newline("\n"), Newline("\n")] []
+      1: SCSS_IMPORT_AT_RULE@11..27
+        0: IMPORT_KW@11..18 "import" [] [Whitespace(" ")]
+        1: SCSS_IMPORT_ITEM_LIST@18..26
+          0: CSS_STRING@18..25
+            0: CSS_STRING_LITERAL@18..25 "\"theme\"" [] []
+          1: COMMA@25..26 "," [] []
+          2: (empty)
+        2: SEMICOLON@26..27 ";" [] []
+    2: CSS_AT_RULE@27..57
+      0: AT@27..30 "@" [Newline("\n"), Newline("\n")] []
+      1: SCSS_IMPORT_AT_RULE@30..57
+        0: IMPORT_KW@30..37 "import" [] [Whitespace(" ")]
+        1: SCSS_IMPORT_ITEM_LIST@37..56
+          0: CSS_STRING@37..44
+            0: CSS_STRING_LITERAL@37..44 "\"theme\"" [] []
+          1: COMMA@44..46 "," [] [Whitespace(" ")]
+          2: CSS_STRING@46..55
+            0: CSS_STRING_LITERAL@46..55 "\"spacing\"" [] []
+          3: COMMA@55..56 "," [] []
+          4: (empty)
+        2: SEMICOLON@56..57 ";" [] []
+  2: EOF@57..58 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+import.scss:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a string but instead found ';'.
+  
+  > 1 │ @import;
+      │        ^
+    2 │ 
+    3 │ @import "theme",;
+  
+  i Expected a string here.
+  
+  > 1 │ @import;
+      │        ^
+    2 │ 
+    3 │ @import "theme",;
+  
+import.scss:3:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a string but instead found ';'.
+  
+    1 │ @import;
+    2 │ 
+  > 3 │ @import "theme",;
+      │                 ^
+    4 │ 
+    5 │ @import "theme", "spacing",;
+  
+  i Expected a string here.
+  
+    1 │ @import;
+    2 │ 
+  > 3 │ @import "theme",;
+      │                 ^
+    4 │ 
+    5 │ @import "theme", "spacing",;
+  
+import.scss:5:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a string but instead found ';'.
+  
+    3 │ @import "theme",;
+    4 │ 
+  > 5 │ @import "theme", "spacing",;
+      │                            ^
+    6 │ 
+  
+  i Expected a string here.
+  
+    3 │ @import "theme",;
+    4 │ 
+  > 5 │ @import "theme", "spacing",;
+      │                            ^
+    6 │ 
+  
+```

@@ -380,7 +380,7 @@ pub(crate) fn parse_generic_component_value(p: &mut CssParser) -> ParsedSyntax {
 
 const GENERIC_DELIMITER_SET: TokenSet<CssSyntaxKind> = token_set![T![,], T![/]];
 #[inline]
-fn is_at_generic_delimiter(p: &mut CssParser) -> bool {
+pub(crate) fn is_at_generic_delimiter(p: &mut CssParser) -> bool {
     p.at_ts(GENERIC_DELIMITER_SET)
 }
 

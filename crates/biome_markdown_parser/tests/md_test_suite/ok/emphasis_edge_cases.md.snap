@@ -342,6 +342,7 @@ MdDocument {
             value_token: NEWLINE@358..359 "\n" [] [],
         },
         MdLinkReferenceDefinition {
+            indent: MdIndentTokenList [],
             l_brack_token: L_BRACK@359..360 "[" [] [],
             label: MdLinkLabel {
                 content: MdInlineItemList [
@@ -580,20 +581,21 @@ MdDocument {
     15: MD_NEWLINE@358..359
       0: NEWLINE@358..359 "\n" [] []
     16: MD_LINK_REFERENCE_DEFINITION@359..387
-      0: L_BRACK@359..360 "[" [] []
-      1: MD_LINK_LABEL@360..365
+      0: MD_INDENT_TOKEN_LIST@359..359
+      1: L_BRACK@359..360 "[" [] []
+      2: MD_LINK_LABEL@360..365
         0: MD_INLINE_ITEM_LIST@360..365
           0: MD_TEXTUAL@360..365
             0: MD_TEXTUAL_LITERAL@360..365 "label" [] []
-      2: R_BRACK@365..366 "]" [] []
-      3: COLON@366..367 ":" [] []
-      4: MD_LINK_DESTINATION@367..387
+      3: R_BRACK@365..366 "]" [] []
+      4: COLON@366..367 ":" [] []
+      5: MD_LINK_DESTINATION@367..387
         0: MD_INLINE_ITEM_LIST@367..387
           0: MD_TEXTUAL@367..368
             0: MD_TEXTUAL_LITERAL@367..368 " " [] []
           1: MD_TEXTUAL@368..387
             0: MD_TEXTUAL_LITERAL@368..387 "https://example.com" [] []
-      5: (empty)
+      6: (empty)
     17: MD_NEWLINE@387..388
       0: NEWLINE@387..388 "\n" [] []
   2: EOF@388..388 "" [] []

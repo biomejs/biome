@@ -44,6 +44,7 @@ MdDocument {
             hard_line: missing (optional),
         },
         MdHeader {
+            indent: MdIndentTokenList [],
             before: MdHashList [
                 MdHash {
                     hash_token: HASH@15..16 "#" [] [],
@@ -150,6 +151,7 @@ MdDocument {
             hard_line: missing (optional),
         },
         MdFencedCodeBlock {
+            indent: MdIndentTokenList [],
             l_fence: TRIPLE_BACKTICK@114..117 "```" [] [],
             code_list: MdCodeNameList [],
             content: MdInlineItemList [
@@ -163,6 +165,7 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@134..135 "\n" [] [],
                 },
             ],
+            r_fence_indent: MdIndentTokenList [],
             r_fence: TRIPLE_BACKTICK@135..138 "```" [] [],
         },
         MdNewline {
@@ -183,7 +186,17 @@ MdDocument {
             hard_line: missing (optional),
         },
         MdThematicBreakBlock {
-            value_token: MD_THEMATIC_BREAK_LITERAL@151..154 "***" [] [],
+            parts: MdThematicBreakPartList [
+                MdThematicBreakChar {
+                    value: STAR@151..152 "*" [] [],
+                },
+                MdThematicBreakChar {
+                    value: STAR@152..153 "*" [] [],
+                },
+                MdThematicBreakChar {
+                    value: STAR@153..154 "*" [] [],
+                },
+            ],
         },
         MdNewline {
             value_token: NEWLINE@154..155 "\n" [] [],
@@ -207,15 +220,16 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@14..15 "\n" [] []
       1: (empty)
     1: MD_HEADER@15..35
-      0: MD_HASH_LIST@15..16
+      0: MD_INDENT_TOKEN_LIST@15..15
+      1: MD_HASH_LIST@15..16
         0: MD_HASH@15..16
           0: HASH@15..16 "#" [] []
-      1: MD_PARAGRAPH@16..35
+      2: MD_PARAGRAPH@16..35
         0: MD_INLINE_ITEM_LIST@16..35
           0: MD_TEXTUAL@16..35
             0: MD_TEXTUAL_LITERAL@16..35 " Heading interrupts" [] []
         1: (empty)
-      2: MD_HASH_LIST@35..35
+      3: MD_HASH_LIST@35..35
     2: MD_NEWLINE@35..36
       0: NEWLINE@35..36 "\n" [] []
     3: MD_NEWLINE@36..37
@@ -275,16 +289,18 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@113..114 "\n" [] []
       1: (empty)
     11: MD_FENCED_CODE_BLOCK@114..138
-      0: TRIPLE_BACKTICK@114..117 "```" [] []
-      1: MD_CODE_NAME_LIST@117..117
-      2: MD_INLINE_ITEM_LIST@117..135
+      0: MD_INDENT_TOKEN_LIST@114..114
+      1: TRIPLE_BACKTICK@114..117 "```" [] []
+      2: MD_CODE_NAME_LIST@117..117
+      3: MD_INLINE_ITEM_LIST@117..135
         0: MD_TEXTUAL@117..118
           0: MD_TEXTUAL_LITERAL@117..118 "\n" [] []
         1: MD_TEXTUAL@118..134
           0: MD_TEXTUAL_LITERAL@118..134 "Fence interrupts" [] []
         2: MD_TEXTUAL@134..135
           0: MD_TEXTUAL_LITERAL@134..135 "\n" [] []
-      3: TRIPLE_BACKTICK@135..138 "```" [] []
+      4: MD_INDENT_TOKEN_LIST@135..135
+      5: TRIPLE_BACKTICK@135..138 "```" [] []
     12: MD_NEWLINE@138..139
       0: NEWLINE@138..139 "\n" [] []
     13: MD_NEWLINE@139..140
@@ -297,7 +313,13 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@150..151 "\n" [] []
       1: (empty)
     15: MD_THEMATIC_BREAK_BLOCK@151..154
-      0: MD_THEMATIC_BREAK_LITERAL@151..154 "***" [] []
+      0: MD_THEMATIC_BREAK_PART_LIST@151..154
+        0: MD_THEMATIC_BREAK_CHAR@151..152
+          0: STAR@151..152 "*" [] []
+        1: MD_THEMATIC_BREAK_CHAR@152..153
+          0: STAR@152..153 "*" [] []
+        2: MD_THEMATIC_BREAK_CHAR@153..154
+          0: STAR@153..154 "*" [] []
     16: MD_NEWLINE@154..155
       0: NEWLINE@154..155 "\n" [] []
   2: EOF@155..155 "" [] []

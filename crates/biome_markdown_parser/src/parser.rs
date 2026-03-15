@@ -238,6 +238,27 @@ impl<'source> MarkdownParser<'source> {
         self.source.bump_link_definition();
     }
 
+    /// Force re-lex the current token in ThematicBreakParts context.
+    /// Decomposes MD_THEMATIC_BREAK_LITERAL into individual marker/space tokens.
+    /// Must NOT be called inside lookahead.
+    pub(crate) fn force_relex_thematic_break_parts(&mut self) {
+        self.source
+            .force_relex_in_context(MarkdownLexContext::ThematicBreakParts);
+    }
+
+    /// Bump the current token and lex the next in ThematicBreakParts context,
+    /// ensuring sustained parts-mode tokenization across the loop.
+    ///
+    /// Unlike `source.bump_thematic_break_parts()` (which only advances the lexer),
+    /// this method also registers the token with the tree builder via `push_token`,
+    /// so the token appears in the CST.
+    pub(crate) fn bump_thematic_break_parts(&mut self) {
+        let kind = self.cur();
+        let end = self.cur_range().end();
+        self.context_mut().push_token(kind, end);
+        self.source.bump_thematic_break_parts();
+    }
+
     pub fn checkpoint(&self) -> MarkdownParserCheckpoint {
         MarkdownParserCheckpoint {
             context: self.context.checkpoint(),
@@ -289,6 +310,68 @@ impl<'source> MarkdownParser<'source> {
 
     pub(crate) fn set_virtual_line_start(&mut self) {
         self.state.virtual_line_start = Some(self.cur_range().start());
+    }
+
+    /// Emit an MdIndentTokenList for optional block prefix indentation at line start.
+    ///
+    /// Like `skip_line_indent()` but emits real CST nodes (`MdIndentToken` /
+    /// `MdIndentTokenList`) instead of skipped trivia. Use this for non-lookahead,
+    /// non-error-recovery paths where the indent tokens should be visible in the tree.
+    pub fn emit_line_indent(&mut self, max_indent: usize) -> bool {
+        if !self.at_line_start() {
+            let list_m = self.start();
+            list_m.complete(self, MarkdownSyntaxKind::MD_INDENT_TOKEN_LIST);
+            return false;
+        }
+
+        let list_m = self.start();
+        let did_emit = self.emit_indent_tokens_core(max_indent);
+        list_m.complete(self, MarkdownSyntaxKind::MD_INDENT_TOKEN_LIST);
+        did_emit
+    }
+
+    /// Emit individual `MdIndentToken` nodes (no list wrapper) for indentation.
+    ///
+    /// Use this inside inline item lists or content lists where `MdIndentToken`
+    /// is already a valid child (via `AnyMdInline`). Unlike `emit_line_indent()`,
+    /// this does NOT wrap tokens in an `MdIndentTokenList`.
+    pub fn emit_indent_tokens(&mut self, max_indent: usize) -> bool {
+        if !self.at_line_start() {
+            return false;
+        }
+
+        self.emit_indent_tokens_core(max_indent)
+    }
+
+    /// Shared core loop: emit `MdIndentToken` nodes for whitespace-only tokens
+    /// up to `max_indent` columns.
+    fn emit_indent_tokens_core(&mut self, max_indent: usize) -> bool {
+        let mut consumed = 0usize;
+        let mut did_emit = false;
+
+        while self.at(MarkdownSyntaxKind::MD_TEXTUAL_LITERAL) {
+            let text = self.cur_text();
+            if text.is_empty() || !text.chars().all(|c| c == ' ' || c == '\t') {
+                break;
+            }
+
+            let indent = text
+                .chars()
+                .map(|c| if c == '\t' { TAB_STOP_SPACES } else { 1 })
+                .sum::<usize>();
+
+            if consumed + indent > max_indent {
+                break;
+            }
+
+            consumed += indent;
+            did_emit = true;
+            let token_m = self.start();
+            self.bump_remap(MarkdownSyntaxKind::MD_INDENT_CHAR);
+            token_m.complete(self, MarkdownSyntaxKind::MD_INDENT_TOKEN);
+        }
+
+        did_emit
     }
 
     /// Skip an optional indentation token at line start if it is whitespace-only

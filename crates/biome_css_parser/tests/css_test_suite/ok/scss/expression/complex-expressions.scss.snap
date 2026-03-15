@@ -1,5 +1,6 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
 expression: snapshot
 ---
 
@@ -2213,20 +2214,38 @@ CssRoot {
             colon_token: COLON@2324..2326 ":" [] [Whitespace(" ")],
             value: ScssExpression {
                 items: ScssExpressionItemList [
-                    CssNumber {
-                        value_token: CSS_NUMBER_LITERAL@2326..2327 "1" [] [],
-                    },
-                    CssGenericDelimiter {
-                        value: COMMA@2327..2329 "," [] [Whitespace(" ")],
-                    },
-                    CssNumber {
-                        value_token: CSS_NUMBER_LITERAL@2329..2330 "2" [] [],
-                    },
-                    CssGenericDelimiter {
-                        value: COMMA@2330..2332 "," [] [Whitespace(" ")],
-                    },
-                    CssNumber {
-                        value_token: CSS_NUMBER_LITERAL@2332..2333 "3" [] [],
+                    ScssListExpression {
+                        elements: ScssListExpressionElementList [
+                            ScssListExpressionElement {
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssNumber {
+                                            value_token: CSS_NUMBER_LITERAL@2326..2327 "1" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            COMMA@2327..2329 "," [] [Whitespace(" ")],
+                            ScssListExpressionElement {
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssNumber {
+                                            value_token: CSS_NUMBER_LITERAL@2329..2330 "2" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            COMMA@2330..2332 "," [] [Whitespace(" ")],
+                            ScssListExpressionElement {
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssNumber {
+                                            value_token: CSS_NUMBER_LITERAL@2332..2333 "3" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                        ],
                     },
                 ],
             },
@@ -3129,11 +3148,14 @@ CssRoot {
             colon_token: COLON@3339..3341 ":" [] [Whitespace(" ")],
             value: ScssExpression {
                 items: ScssExpressionItemList [
-                    CssNumber {
-                        value_token: CSS_NUMBER_LITERAL@3341..3342 "1" [] [],
-                    },
-                    CssNumber {
-                        value_token: CSS_NUMBER_LITERAL@3342..3344 "+2" [] [],
+                    ScssBinaryExpression {
+                        left: CssNumber {
+                            value_token: CSS_NUMBER_LITERAL@3341..3342 "1" [] [],
+                        },
+                        operator: PLUS@3342..3343 "+" [] [],
+                        right: CssNumber {
+                            value_token: CSS_NUMBER_LITERAL@3343..3344 "2" [] [],
+                        },
                     },
                 ],
             },
@@ -4532,16 +4554,25 @@ CssRoot {
       1: COLON@2324..2326 ":" [] [Whitespace(" ")]
       2: SCSS_EXPRESSION@2326..2333
         0: SCSS_EXPRESSION_ITEM_LIST@2326..2333
-          0: CSS_NUMBER@2326..2327
-            0: CSS_NUMBER_LITERAL@2326..2327 "1" [] []
-          1: CSS_GENERIC_DELIMITER@2327..2329
-            0: COMMA@2327..2329 "," [] [Whitespace(" ")]
-          2: CSS_NUMBER@2329..2330
-            0: CSS_NUMBER_LITERAL@2329..2330 "2" [] []
-          3: CSS_GENERIC_DELIMITER@2330..2332
-            0: COMMA@2330..2332 "," [] [Whitespace(" ")]
-          4: CSS_NUMBER@2332..2333
-            0: CSS_NUMBER_LITERAL@2332..2333 "3" [] []
+          0: SCSS_LIST_EXPRESSION@2326..2333
+            0: SCSS_LIST_EXPRESSION_ELEMENT_LIST@2326..2333
+              0: SCSS_LIST_EXPRESSION_ELEMENT@2326..2327
+                0: SCSS_EXPRESSION@2326..2327
+                  0: SCSS_EXPRESSION_ITEM_LIST@2326..2327
+                    0: CSS_NUMBER@2326..2327
+                      0: CSS_NUMBER_LITERAL@2326..2327 "1" [] []
+              1: COMMA@2327..2329 "," [] [Whitespace(" ")]
+              2: SCSS_LIST_EXPRESSION_ELEMENT@2329..2330
+                0: SCSS_EXPRESSION@2329..2330
+                  0: SCSS_EXPRESSION_ITEM_LIST@2329..2330
+                    0: CSS_NUMBER@2329..2330
+                      0: CSS_NUMBER_LITERAL@2329..2330 "2" [] []
+              3: COMMA@2330..2332 "," [] [Whitespace(" ")]
+              4: SCSS_LIST_EXPRESSION_ELEMENT@2332..2333
+                0: SCSS_EXPRESSION@2332..2333
+                  0: SCSS_EXPRESSION_ITEM_LIST@2332..2333
+                    0: CSS_NUMBER@2332..2333
+                      0: CSS_NUMBER_LITERAL@2332..2333 "3" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@2333..2333
       4: SEMICOLON@2333..2334 ";" [] []
     58: SCSS_DECLARATION@2334..2389
@@ -5132,10 +5163,12 @@ CssRoot {
       1: COLON@3339..3341 ":" [] [Whitespace(" ")]
       2: SCSS_EXPRESSION@3341..3344
         0: SCSS_EXPRESSION_ITEM_LIST@3341..3344
-          0: CSS_NUMBER@3341..3342
-            0: CSS_NUMBER_LITERAL@3341..3342 "1" [] []
-          1: CSS_NUMBER@3342..3344
-            0: CSS_NUMBER_LITERAL@3342..3344 "+2" [] []
+          0: SCSS_BINARY_EXPRESSION@3341..3344
+            0: CSS_NUMBER@3341..3342
+              0: CSS_NUMBER_LITERAL@3341..3342 "1" [] []
+            1: PLUS@3342..3343 "+" [] []
+            2: CSS_NUMBER@3343..3344
+              0: CSS_NUMBER_LITERAL@3343..3344 "2" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@3344..3344
       4: SEMICOLON@3344..3345 ";" [] []
     80: SCSS_DECLARATION@3345..3365

@@ -5,9 +5,9 @@ use biome_js_type_info_macros::Resolvable;
 use biome_rowan::Text;
 
 use crate::{
-    GLOBAL_UNKNOWN_ID, NUM_PREDEFINED_TYPES, ScopeId, TypeData, TypeId, TypeImportQualifier,
-    TypeInstance, TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier, TypeofValue,
-    Union,
+    GLOBAL_UNKNOWN_ID, NUM_PREDEFINED_TYPES, Object, ScopeId, TypeData, TypeId,
+    TypeImportQualifier, TypeInstance, TypeMember, TypeMemberKind, TypeReference,
+    TypeReferenceQualifier, TypeofValue, Union,
     globals::{GLOBAL_RESOLVER_ID, GLOBAL_UNDEFINED_ID, UNKNOWN_ID, global_type_name},
 };
 
@@ -737,6 +737,30 @@ pub trait TypeResolver {
     // #endregion
 }
 
+#[derive(Default)]
+pub struct UnionCollector {
+    types: Vec<TypeReference>,
+}
+
+impl UnionCollector {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn add(&mut self, ty: TypeReference) {
+        self.types.push(ty);
+    }
+
+    pub fn finish(self) -> Cow<'static, TypeData> {
+        if self.types.is_empty() {
+            return Cow::Owned(TypeData::unknown());
+        }
+        Cow::Owned(TypeData::Union(Box::new(Union(
+            self.types.into_boxed_slice(),
+        ))))
+    }
+}
+
 /// Trait to be implemented by `TypeData` and its subtypes to aid the resolver.
 pub trait Resolvable: Sized {
     /// Returns the resolved version of this type.
@@ -754,38 +778,59 @@ impl Resolvable for TypeReference {
                 match resolved_id {
                     Some(resolved_id) => Some(Self::Resolved(resolved_id)),
                     None if qualifier.has_known_type_parameters() => Some({
-                        // If we can't resolve the qualifier as is, attempt to
-                        // resolve it without type parameters. If it can be
-                        // resolved that way, we create an instantiation for it
-                        // and resolve to there.
-                        resolver
-                            .resolve_qualifier(&qualifier.without_type_parameters())
-                            .and_then(|resolved_id| {
-                                let resolved = resolver
-                                    .get_by_resolved_id(resolved_id)
-                                    .map(|data| data.to_data());
-                                let parameters =
-                                    resolved.as_ref().and_then(|data| data.type_parameters())?;
-                                let resolved_id: ResolvedTypeId = resolver.register_and_resolve(
-                                    TypeData::instance_of(TypeInstance {
-                                        ty: resolved_id.into(),
-                                        type_parameters: Self::merge_parameters(
-                                            parameters,
-                                            &qualifier.type_parameters,
-                                        ),
-                                    }),
-                                );
-                                Some(resolved_id.into())
-                            })
-                            .unwrap_or_else(|| {
-                                Self::from(TypeReferenceQualifier {
-                                    path: qualifier.path.clone(),
-                                    type_parameters: self.resolved_params(resolver),
-                                    scope_id: qualifier.scope_id,
-                                    type_only: qualifier.type_only,
-                                    excluded_binding_id: qualifier.excluded_binding_id,
+                        // Handle Record<K, V> by synthesizing an object type
+                        // with an index signature: { [key: K]: V }
+                        if qualifier.is_record() && qualifier.type_parameters.len() == 2 {
+                            let params = self.resolved_params(resolver);
+                            let key_type = params[0].clone();
+                            let value_type = params[1].clone();
+                            let resolved_id: ResolvedTypeId =
+                                resolver.register_and_resolve(TypeData::Object(Box::new(Object {
+                                    prototype: None,
+                                    members: [TypeMember {
+                                        kind: TypeMemberKind::IndexSignature(key_type),
+                                        ty: value_type,
+                                    }]
+                                    .into(),
+                                })));
+                            Self::Resolved(resolved_id)
+                        } else {
+                            // If we can't resolve the qualifier as is, attempt to
+                            // resolve it without type parameters. If it can be
+                            // resolved that way, we create an instantiation for it
+                            // and resolve to there.
+                            resolver
+                                .resolve_qualifier(&qualifier.without_type_parameters())
+                                .and_then(|resolved_id| {
+                                    let resolved = resolver
+                                        .get_by_resolved_id(resolved_id)
+                                        .map(|data| data.to_data());
+                                    let parameters = resolved
+                                        .as_ref()
+                                        .and_then(|data| data.type_parameters())?;
+                                    let resolved_params = self.resolved_params(resolver);
+                                    let resolved_id: ResolvedTypeId = resolver
+                                        .register_and_resolve(TypeData::instance_of(
+                                            TypeInstance {
+                                                ty: resolved_id.into(),
+                                                type_parameters: Self::merge_parameters(
+                                                    parameters,
+                                                    &resolved_params,
+                                                ),
+                                            },
+                                        ));
+                                    Some(resolved_id.into())
                                 })
-                            })
+                                .unwrap_or_else(|| {
+                                    Self::from(TypeReferenceQualifier {
+                                        path: qualifier.path.clone(),
+                                        type_parameters: self.resolved_params(resolver),
+                                        scope_id: qualifier.scope_id,
+                                        type_only: qualifier.type_only,
+                                        excluded_binding_id: qualifier.excluded_binding_id,
+                                    })
+                                })
+                        }
                     }),
                     None => None,
                 }

@@ -1,0 +1,85 @@
+/* should not generate diagnostics */
+
+/* Widely available properties - not flagged */
+a { color: red; }
+a { color: red; background-color: blue; }
+a { color: red; transition: none; }
+body { padding: 0; }
+
+/* Custom properties - always allowed */
+body { --custom-property: red; }
+
+/* Vendor-prefixed properties - not in baseline data, skipped */
+a { color: red; -moz-transition: bar }
+
+/* Pseudo-elements that are widely available */
+::before { content: attr(foo); }
+
+/* At-rules that are widely available */
+@font-face { font-weight: 100 400 }
+@media (min-width: 800px) { a { color: red; } }
+@container (min-width: 800px) { a { color: red; } }
+
+/* Media conditions that are widely available */
+@media (prefers-color-scheme: dark) { a { color: red; } }
+@media (color-gamut: srgb) { a { color: red; } }
+
+/* Unknown media conditions - not in data, not flagged */
+@media (foo) { a { color: red; } }
+
+/* Case-insensitive at-rules */
+@MEDIA (min-width: 800px) { a { color: red; } }
+@Media (foo) { a { color: red; } }
+@MeDia (prefers-color-scheme: dark) { a { color: red; } }
+@MEDIA (color-gamut: srgb) { a { color: red; } }
+
+/* @supports suppression: property inside @supports is not flagged */
+@supports (accent-color: auto) { a { accent-color: auto; } }
+@supports (accent-color: red) { a { accent-color: red; } }
+@supports (accent-color: auto) { a { accent-color: red; } }
+@supports (clip-path: fill-box) { a { clip-path: fill-box; } }
+
+/* @supports with compound conditions */
+@supports (accent-color: auto) and (backdrop-filter: auto) {
+    a { accent-color: auto; background-filter: auto }
+}
+
+/* Nested @supports */
+@supports (accent-color: auto) {
+    @supports (backdrop-filter: auto) {
+        a { accent-color: auto; background-filter: auto }
+    }
+}
+
+/* Case-insensitive @supports */
+@SUPPORTS (clip-path: fill-box) { a { clip-path: fill-box; } }
+
+@Supports (accent-color: auto) and (backdrop-filter: auto) {
+    a { accent-color: auto; backdrop-filter: auto }
+}
+
+@SUPPORTS (accent-color: auto) {
+    @SuPpOrTs (backdrop-filter: auto) {
+        a { accent-color: auto; backdrop-filter: auto }
+    }
+}
+
+/* Doubly nested @supports with same condition */
+@supports (accent-color: auto) {
+    @supports (accent-color: auto) {
+        a { accent-color: auto; }
+    }
+    a { accent-color: auto; }
+}
+
+/* @supports selector() suppresses the :has check inside the block */
+@supports selector(:has()) {
+    h1:has(+ h2) { color: red; }
+}
+
+/* Properties with wide browser support not tracked in web-features */
+div { cursor: pointer; }
+pre { overflow: auto; }
+
+/* Multiple selectors */
+.highlight, #highlight, highlight { color: red }

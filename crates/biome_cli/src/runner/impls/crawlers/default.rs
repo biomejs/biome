@@ -6,7 +6,6 @@ use crate::runner::impls::commands::traversal::TraverseResult;
 use crate::runner::impls::handlers::default::DefaultHandler;
 use crate::runner::process_file::ProcessFile;
 use biome_fs::BiomePath;
-use std::collections::BTreeSet;
 use std::time::Duration;
 
 pub(crate) struct DefaultCrawler<P>(P);
@@ -21,7 +20,7 @@ where
 
     fn output(
         collector_result: CollectorSummary,
-        evaluated_paths: BTreeSet<BiomePath>,
+        evaluated_paths: Vec<BiomePath>,
         _duration: Duration,
     ) -> TraverseResult {
         let CollectorSummary {
@@ -64,5 +63,5 @@ impl Crawler<()> for () {
     type ProcessFile = ();
     type Collector = ();
 
-    fn output(_: <Self::Collector as Collector>::Result, _: BTreeSet<BiomePath>, _: Duration) {}
+    fn output(_: <Self::Collector as Collector>::Result, _: Vec<BiomePath>, _: Duration) {}
 }

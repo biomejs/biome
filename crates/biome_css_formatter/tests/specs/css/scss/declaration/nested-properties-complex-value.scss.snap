@@ -37,7 +37,7 @@ Trailing newline: true
 
 ```scss
 .theme {
-	spacing: (1px +2px) * 3 {
+	spacing: (1px + 2px) * 3 {
 		size: 1px;
 	}
 

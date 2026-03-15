@@ -396,7 +396,7 @@ pub(crate) fn parse_link_block(p: &mut MarkdownParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
+    p.emit_line_indent(MAX_BLOCK_PREFIX_INDENT);
 
     // [ - opening bracket
     p.expect(L_BRACK);

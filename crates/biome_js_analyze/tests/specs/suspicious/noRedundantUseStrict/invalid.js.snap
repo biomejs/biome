@@ -94,8 +94,8 @@ invalid.js:11:3 lint/suspicious/noRedundantUseStrict  FIXABLE  ━━━━━�
   
   i Safe fix: Remove the redundant use strict directive.
   
-     9  9 │   	// All code here is evaluated in strict mode
-    10 10 │   	test() {
+     9  9 │     // All code here is evaluated in strict mode
+    10 10 │     test() {
     11    │ - → → "use·strict";
     12    │ - → }
        11 │ + → → 
@@ -122,8 +122,8 @@ invalid.js:18:3 lint/suspicious/noRedundantUseStrict  FIXABLE  ━━━━━�
   
   i Safe fix: Remove the redundant use strict directive.
   
-    16 16 │   	// All code here is evaluated in strict mode
-    17 17 │   	test() {
+    16 16 │     // All code here is evaluated in strict mode
+    17 17 │     test() {
     18    │ - → → "use·strict";
     19    │ - → }
        18 │ + → → 

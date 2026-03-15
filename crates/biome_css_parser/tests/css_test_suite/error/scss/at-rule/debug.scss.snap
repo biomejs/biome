@@ -1,0 +1,177 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@debug;
+
+.box {
+  @debug $value
+  color: red;
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: ScssDebugAtRule {
+                debug_token: DEBUG_KW@1..6 "debug" [] [],
+                value: missing (required),
+                semicolon_token: SEMICOLON@6..7 ";" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@7..10 "." [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@10..14 "box" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@14..15 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssAtRule {
+                        at_token: AT@15..19 "@" [Newline("\n"), Whitespace("  ")] [],
+                        rule: CssBogusAtRule {
+                            items: [
+                                DEBUG_KW@19..25 "debug" [] [Whitespace(" ")],
+                                CssBogus {
+                                    items: [
+                                        CssBogus {
+                                            items: [
+                                                ScssIdentifier {
+                                                    dollar_token: DOLLAR@25..26 "$" [] [],
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@26..31 "value" [] [],
+                                                    },
+                                                },
+                                                CssIdentifier {
+                                                    value_token: IDENT@31..39 "color" [Newline("\n"), Whitespace("  ")] [],
+                                                },
+                                                CssBogusPropertyValue {
+                                                    items: [
+                                                        COLON@39..41 ":" [] [Whitespace(" ")],
+                                                        IDENT@41..44 "red" [] [],
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                                SEMICOLON@44..45 ";" [] [],
+                            ],
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@45..47 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@47..48 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..48
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..47
+    0: CSS_AT_RULE@0..7
+      0: AT@0..1 "@" [] []
+      1: SCSS_DEBUG_AT_RULE@1..7
+        0: DEBUG_KW@1..6 "debug" [] []
+        1: (empty)
+        2: SEMICOLON@6..7 ";" [] []
+    1: CSS_QUALIFIED_RULE@7..47
+      0: CSS_SELECTOR_LIST@7..14
+        0: CSS_COMPOUND_SELECTOR@7..14
+          0: CSS_NESTED_SELECTOR_LIST@7..7
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@7..14
+            0: CSS_CLASS_SELECTOR@7..14
+              0: DOT@7..10 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@10..14
+                0: IDENT@10..14 "box" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@14..47
+        0: L_CURLY@14..15 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@15..45
+          0: CSS_AT_RULE@15..45
+            0: AT@15..19 "@" [Newline("\n"), Whitespace("  ")] []
+            1: CSS_BOGUS_AT_RULE@19..45
+              0: DEBUG_KW@19..25 "debug" [] [Whitespace(" ")]
+              1: CSS_BOGUS@25..44
+                0: CSS_BOGUS@25..44
+                  0: SCSS_IDENTIFIER@25..31
+                    0: DOLLAR@25..26 "$" [] []
+                    1: CSS_IDENTIFIER@26..31
+                      0: IDENT@26..31 "value" [] []
+                  1: CSS_IDENTIFIER@31..39
+                    0: IDENT@31..39 "color" [Newline("\n"), Whitespace("  ")] []
+                  2: CSS_BOGUS_PROPERTY_VALUE@39..44
+                    0: COLON@39..41 ":" [] [Whitespace(" ")]
+                    1: IDENT@41..44 "red" [] []
+              2: SEMICOLON@44..45 ";" [] []
+        2: R_CURLY@45..47 "}" [Newline("\n")] []
+  2: EOF@47..48 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+debug.scss:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found ';'.
+  
+  > 1 │ @debug;
+      │       ^
+    2 │ 
+    3 │ .box {
+  
+  i Expected a SCSS expression here.
+  
+  > 1 │ @debug;
+      │       ^
+    2 │ 
+    3 │ .box {
+  
+debug.scss:5:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found ': red'.
+  
+    3 │ .box {
+    4 │   @debug $value
+  > 5 │   color: red;
+      │        ^^^^^
+    6 │ }
+    7 │ 
+  
+  i Expected a SCSS expression here.
+  
+    3 │ .box {
+    4 │   @debug $value
+  > 5 │   color: red;
+      │        ^^^^^
+    6 │ }
+    7 │ 
+  
+```

@@ -4,8 +4,9 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_semantic::{Binding, SemanticModel};
 use biome_js_syntax::{
-    export_ext::{AnyIdentifier, AnyJsExported}, AnyJsBinding, AnyJsBindingPattern, AnyJsExportClause,
-    AnyJsExpression, AnyJsModuleItem, JsModule,
+    AnyJsBinding, AnyJsBindingPattern, AnyJsExportClause, AnyJsExpression, AnyJsModuleItem,
+    JsModule,
+    export_ext::{AnyIdentifier, AnyJsExported},
 };
 use biome_rowan::TextRange;
 use biome_rule_options::no_redundant_default_export::NoRedundantDefaultExportOptions;
@@ -14,7 +15,7 @@ use rustc_hash::FxHashSet;
 declare_lint_rule! {
     /// Checks if a default export exports the same symbol as a named export.
     ///
-    /// This rule warns when a `default` export references the same identifier as a named export.
+    /// This rule reports when a `default` export references the same identifier as a named export.
     /// Re-exports are out of scope.
     ///
     /// ## Examples
@@ -53,13 +54,13 @@ impl Rule for NoRedundantDefaultExport {
         let module = ctx.query();
         let model = ctx.model();
         let (named_export_bindings, default_export) = collect_exports(module, model);
-        
+
         if let Some((binding, range)) = default_export
             && named_export_bindings.contains(&binding)
         {
             return Some(range);
         }
-        
+
         None
     }
 
@@ -96,15 +97,14 @@ fn get_binding_from_identifier(
             };
             Some(model.as_binding(id_binding))
         }
-        AnyIdentifier::AnyTsIdentifierBinding(ts_binding) => {
-            ts_binding
-                .as_ts_identifier_binding()
-                .map(|binding| model.as_binding(binding))
-        }
+        AnyIdentifier::AnyTsIdentifierBinding(ts_binding) => ts_binding
+            .as_ts_identifier_binding()
+            .map(|binding| model.as_binding(binding)),
         AnyIdentifier::JsReferenceIdentifier(ref_id) => model.binding(ref_id),
-        AnyIdentifier::JsIdentifierExpression(id_expr) => {
-            id_expr.name().ok().and_then(|ref_id| model.binding(&ref_id))
-        }
+        AnyIdentifier::JsIdentifierExpression(id_expr) => id_expr
+            .name()
+            .ok()
+            .and_then(|ref_id| model.binding(&ref_id)),
         AnyIdentifier::JsLiteralExportName(_) => None,
     }
 }
@@ -121,8 +121,10 @@ fn resolve_binding_and_range_from_exported_item(
     model: &SemanticModel,
 ) -> Option<(Binding, Option<TextRange>)> {
     if exported_item.is_default
-        && let Some(AnyJsExported::JsFunctionExportDefaultDeclaration(_) | AnyJsExported::JsClassExportDefaultDeclaration(_)) =
-            exported_item.exported.as_ref()
+        && let Some(
+            AnyJsExported::JsFunctionExportDefaultDeclaration(_)
+            | AnyJsExported::JsClassExportDefaultDeclaration(_),
+        ) = exported_item.exported.as_ref()
     {
         return None;
     }

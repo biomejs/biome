@@ -21,6 +21,8 @@ import { Component } from "./component.svelte";
 let hello = "Hello World";
 let array = [];
 let props = [];
+let dynamicId = "main";
+let dynamicClass = "container";
 ---
 
 <html>
@@ -29,6 +31,7 @@ let props = [];
     { array.map(item => (<span>{item}</span>)) }
     <Component />
     <input {...props}>
+    <div id={dynamicId} class={dynamicClass}></div>
 </html>
 
 ```

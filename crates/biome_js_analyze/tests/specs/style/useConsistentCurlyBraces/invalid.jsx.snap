@@ -217,14 +217,14 @@ invalid.jsx:22:15 lint/style/useConsistentCurlyBraces  FIXABLE  ━━━━━�
   
   i Unsafe fix: Remove curly braces around the expression.
   
-    20 20 │   	description1=
-    21 21 │   		'Upload a CSV file containing an "email" column, and optional "first_name" and "last_name" columns'
+    20 20 │     description1=
+    21 21 │       'Upload a CSV file containing an "email" column, and optional "first_name" and "last_name" columns'
     22    │ - → description2={
        22 │ + → description2=
-    23 23 │   		'Upload a CSV file containing an "email" column, and optional "first_name" and "last_name" columns'
+    23 23 │       'Upload a CSV file containing an "email" column, and optional "first_name" and "last_name" columns'
     24    │ - → }
-    25 24 │   	className={
-    26 25 │   		"d-block"
+    25 24 │     className={
+    26 25 │       "d-block"
   
 
 ```
@@ -248,11 +248,11 @@ invalid.jsx:25:12 lint/style/useConsistentCurlyBraces  FIXABLE  ━━━━━�
   
   i Unsafe fix: Remove curly braces around the expression.
   
-    23 23 │   		'Upload a CSV file containing an "email" column, and optional "first_name" and "last_name" columns'
-    24 24 │   	}
+    23 23 │       'Upload a CSV file containing an "email" column, and optional "first_name" and "last_name" columns'
+    24 24 │     }
     25    │ - → className={
        25 │ + → className=
-    26 26 │   		"d-block"
+    26 26 │       "d-block"
     27    │ - → }
     28 27 │   />
     29 28 │   </>

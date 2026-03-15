@@ -1,99 +1,44 @@
+mod at_rule;
 mod declaration;
 mod expression;
+mod function_name;
+mod identifiers;
+mod parse_error;
+mod selector;
+mod token_sets;
+mod value;
 
-use crate::parser::CssParser;
-use crate::syntax::{CssSyntaxFeatures, is_nth_at_identifier, parse_regular_identifier};
-use biome_css_syntax::CssSyntaxKind::{
-    SCSS_IDENTIFIER, SCSS_PARENT_SELECTOR_VALUE, SCSS_QUALIFIED_NAME,
+pub(crate) use at_rule::{
+    parse_bogus_scss_else_at_rule, parse_scss_at_root_at_rule, parse_scss_content_at_rule,
+    parse_scss_debug_at_rule, parse_scss_each_at_rule, parse_scss_error_at_rule,
+    parse_scss_extend_at_rule, parse_scss_for_at_rule, parse_scss_forward_at_rule,
+    parse_scss_function_at_rule, parse_scss_if_at_rule, parse_scss_import_at_rule,
+    parse_scss_include_at_rule, parse_scss_mixin_at_rule, parse_scss_return_at_rule,
+    parse_scss_use_at_rule, parse_scss_warn_at_rule, parse_scss_while_at_rule,
 };
-use biome_css_syntax::T;
-use biome_parser::Parser;
-use biome_parser::SyntaxFeature;
-use biome_parser::prelude::ParsedSyntax;
-use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-
 pub(crate) use declaration::{
-    is_at_scss_declaration, is_at_scss_nesting_declaration, parse_scss_declaration,
-    parse_scss_nesting_declaration,
+    is_at_scss_declaration, is_at_scss_nesting_declaration, is_at_scss_variable_modifier_start,
+    parse_scss_declaration, parse_scss_nesting_declaration,
 };
 pub(crate) use expression::{
     SCSS_UNARY_OPERATOR_TOKEN_SET, parse_scss_expression,
     parse_scss_expression_allow_empty_value_until, parse_scss_expression_in_args_until,
-    parse_scss_expression_until,
+    parse_scss_expression_in_variable_value_until, parse_scss_expression_until,
 };
-
-#[inline]
-pub(crate) fn is_at_scss_identifier(p: &mut CssParser) -> bool {
-    p.at(T![$]) && is_nth_at_identifier(p, 1)
-}
-
-#[inline]
-pub(crate) fn parse_scss_identifier(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_scss_identifier(p) {
-        return Absent;
-    }
-
-    let m = p.start();
-    p.bump(T![$]);
-    parse_regular_identifier(p).ok();
-    Present(m.complete(p, SCSS_IDENTIFIER))
-}
-
-#[inline]
-pub(crate) fn is_at_scss_qualified_name(p: &mut CssParser) -> bool {
-    is_nth_at_scss_qualified_name(p, 0)
-}
-
-#[inline]
-pub(crate) fn is_nth_at_scss_qualified_name(p: &mut CssParser, n: usize) -> bool {
-    is_nth_at_identifier(p, n)
-        && p.nth_at(n + 1, T![.])
-        && ((p.nth_at(n + 2, T![$]) && is_nth_at_identifier(p, n + 3))
-            || is_nth_at_identifier(p, n + 2))
-}
-
-#[inline]
-pub(crate) fn parse_scss_qualified_name(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_scss_qualified_name(p) {
-        return Absent;
-    }
-
-    let m = p.start();
-    parse_regular_identifier(p).ok();
-    p.expect(T![.]);
-
-    if is_at_scss_identifier(p) {
-        parse_scss_identifier(p).ok();
-    } else {
-        parse_regular_identifier(p).ok();
-    }
-
-    Present(m.complete(p, SCSS_QUALIFIED_NAME))
-}
-
-#[inline]
-pub(crate) fn parse_scss_function_name(p: &mut CssParser) -> ParsedSyntax {
-    if is_at_scss_qualified_name(p) {
-        parse_scss_qualified_name(p)
-    } else {
-        parse_regular_identifier(p)
-    }
-}
-
-#[inline]
-pub(crate) fn is_at_scss_parent_selector_value(p: &mut CssParser) -> bool {
-    // `&` is a generic token in CSS parsing/recovery. Keep the SCSS gate here so
-    // plain CSS doesn't accidentally route through SCSS-only diagnostics.
-    CssSyntaxFeatures::Scss.is_supported(p) && p.at(T![&])
-}
-
-#[inline]
-pub(crate) fn parse_scss_parent_selector_value(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_scss_parent_selector_value(p) {
-        return Absent;
-    }
-
-    let m = p.start();
-    p.bump(T![&]);
-    Present(m.complete(p, SCSS_PARENT_SELECTOR_VALUE))
-}
+pub(crate) use function_name::parse_scss_function_name;
+pub(crate) use identifiers::{
+    is_at_scss_identifier, is_at_scss_namespaced_identifier, is_at_scss_qualified_name,
+    is_nth_at_scss_qualified_name, parse_scss_identifier, parse_scss_namespaced_identifier,
+    parse_scss_qualified_name,
+};
+pub(crate) use parse_error::{
+    expected_scss_expression, expected_scss_variable_modifier, scss_ellipsis_not_allowed,
+};
+pub(crate) use selector::{is_nth_at_scss_placeholder_selector, parse_scss_placeholder_selector};
+pub(crate) use token_sets::{
+    END_OF_SCSS_EXPRESSION_TOKEN_SET, SCSS_IDENT_CONTINUATION_SET, SCSS_NESTING_VALUE_END_SET,
+    SCSS_STATEMENT_START_SET, SCSS_VARIABLE_MODIFIER_LIST_END_SET,
+};
+pub(crate) use value::{
+    is_at_scss_parent_selector_value, parse_scss_fallback_value, parse_scss_parent_selector_value,
+};
