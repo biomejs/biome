@@ -1267,7 +1267,7 @@ See https://biomejs.dev/linter/rules/no-noninteractive-element-to-interactive-ro
 	 */
 	noNoninteractiveElementToInteractiveRole?: NoNoninteractiveElementToInteractiveRoleConfiguration;
 	/**
-	* Enforce that tabIndex is not assigned to non-interactive HTML elements.
+	* Enforce that tabindex is not assigned to non-interactive HTML elements.
 See https://biomejs.dev/linter/rules/no-noninteractive-tabindex 
 	 */
 	noNoninteractiveTabindex?: NoNoninteractiveTabindexConfiguration;
