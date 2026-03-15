@@ -112,7 +112,7 @@ declare_lint_rule! {
     ///
     /// Default: `true`
     ///
-    /// #### Examples
+    /// If this option is set to `false`, unused rest siblings either have to be renamed or removed.
     ///
     /// ```json,options
     /// {
@@ -154,7 +154,12 @@ declare_lint_rule! {
     ///
     /// Default: `{}` (no variables are excluded)
     ///
-    /// #### Examples
+    /// For example, we can exclude all unused identifiers named `ignored` regardless of their kind,
+    /// all unused classes named `IgnoredClass`, and all unused functions with the following
+    /// configuration.
+    ///
+    /// A variable named `unusedVariable` is still flagged as unused, and so is a class named
+    /// `UnusedClass` since they don't fall under the exceptions.
     ///
     /// ```json,options
     /// {
@@ -169,14 +174,12 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```js,expect_diagnostic,use_options
-    /// const unusedVariable = 0;
-    /// class UnusedClass {}
-    /// ```
-    ///
-    /// ```js,use_options
     /// const ignored = 0;
     /// class IgnoredClass {}
-    /// function unusedFunction() {}
+    /// function ignoredFunction() {}
+    ///
+    /// const unusedVariable = 0;
+    /// class UnusedClass {}
     /// ```
     ///
     pub NoUnusedVariables {
@@ -367,7 +370,7 @@ impl Rule for NoUnusedVariables {
                 .find_map(JsModuleItemList::cast)
         {
             // A declaration file without top-level exports and imports is a global declaration file.
-            // All top-level types and variables are available in every files of the project.
+            // All top-level types and variables are available in every file of the project.
             // Thus, it is ok if top-level types are not used locally.
             let is_top_level = items.parent::<TsDeclarationModule>().is_some();
             if is_top_level && items.into_iter().all(|x| x.as_any_js_statement().is_some()) {
@@ -375,7 +378,7 @@ impl Rule for NoUnusedVariables {
             }
         }
 
-        if is_ignored(binding, ctx.options()).unwrap_or(false) {
+        if is_ignored(binding, ctx.options()).unwrap_or_default() {
             return None;
         }
 
@@ -516,7 +519,7 @@ impl Rule for NoUnusedVariables {
     }
 }
 
-/// Returns `true` if `binding` is considered as ignored.
+/// Returns `true` if `binding` is considered as ignored by the user.
 pub fn is_ignored(binding: &AnyJsIdentifierBinding, options: &NoUnusedVariablesOptions) -> Option<bool> {
     let binding_name = binding.name_token().ok()?;
     let binding_name = binding_name.text_trimmed();
