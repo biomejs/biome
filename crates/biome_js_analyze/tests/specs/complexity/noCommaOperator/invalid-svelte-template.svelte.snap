@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-svelte-template.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script>
+  let x = 1;
+</script>
+
+<!-- Comma operator in template expression - should be flagged -->
+<p>{(console.log("side effect"), x)}</p>
+
+```
+
+# Diagnostics
+```
+invalid-svelte-template.svelte:7:32 lint/complexity/noCommaOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The comma operator is disallowed.
+  
+    6 │ <!-- Comma operator in template expression - should be flagged -->
+  > 7 │ <p>{(console.log("side effect"), x)}</p>
+      │                                ^
+    8 │ 
+  
+  i Its use is often confusing and obscures side effects.
+  
+
+```

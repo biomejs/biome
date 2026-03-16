@@ -1,0 +1,14 @@
+<!-- should not generate diagnostics -->
+---
+import type { ComponentProps } from "astro/types";
+
+import Badge from "@/components/mdx-components/Badge.astro";
+
+interface Props {
+	badge?: ComponentProps<typeof Badge>;
+}
+
+const { badge } = Astro.props;
+---
+
+{badge && <Badge text={badge.text} variant={badge.variant} />}
