@@ -1,4 +1,4 @@
-// should not generate diagnostics
+/* should not generate diagnostics */
 
 // empty return is accepted with allowImplicit
 [1, 2, 3].map((x) => {

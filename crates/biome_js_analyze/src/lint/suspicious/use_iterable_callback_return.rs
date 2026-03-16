@@ -135,8 +135,6 @@ declare_lint_rule! {
     /// }).filter(Boolean);
     /// ```
     ///
-    /// When `allowImplicit` is `true`, the above code will not trigger any diagnostic.
-    ///
     pub UseIterableCallbackReturn {
         version: "2.0.0",
         name: "useIterableCallbackReturn",

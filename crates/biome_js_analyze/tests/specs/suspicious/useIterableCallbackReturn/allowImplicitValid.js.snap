@@ -1,11 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 154
 expression: allowImplicitValid.js
 ---
 # Input
 ```js
-// should not generate diagnostics
+/* should not generate diagnostics */
 
 // empty return is accepted with allowImplicit
 [1, 2, 3].map((x) => {
