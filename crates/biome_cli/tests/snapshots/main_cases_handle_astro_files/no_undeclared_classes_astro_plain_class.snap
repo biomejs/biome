@@ -1,0 +1,68 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "linter": { "enabled": true },
+  "html": {
+    "linter": { "enabled": true },
+    "experimentalFullSupportEnabled": true
+  }
+}
+```
+
+## `file.astro`
+
+```astro
+---
+import "./styles.css";
+---
+
+<div class="container unknown">Content</div>
+
+```
+
+## `styles.css`
+
+```css
+.container {
+  max-width: 1200px;
+}
+```
+
+# Emitted Messages
+
+```block
+file.astro:5:23 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class unknown is not defined in any available stylesheet.
+  
+    3 │ ---
+    4 │ 
+  > 5 │ <div class="container unknown">Content</div>
+      │                       ^^^^^^^
+    6 │ 
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    file.astro (this file) -> which imports styles.css
+  
+  
+  i Either define this class in a `<style>` block, import a CSS file that contains it, or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
+Checked 3 files in <TIME>. No fixes applied.
+Found 1 info.
+```

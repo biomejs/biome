@@ -123,6 +123,9 @@ pub enum EmbeddingKind {
     Astro {
         /// Whether the script is inside Astro frontmatter
         frontmatter: bool,
+        /// Whether this snippet is from a class-related attribute
+        /// (e.g., `class:list={...}` or `class={...}`)
+        is_class_attribute: bool,
     },
     Vue {
         /// Whether the script is inside script tag with setup attribute
@@ -145,7 +148,13 @@ impl EmbeddingKind {
         matches!(self, Self::Astro { .. })
     }
     pub const fn is_astro_frontmatter(&self) -> bool {
-        matches!(self, Self::Astro { frontmatter: true })
+        matches!(
+            self,
+            Self::Astro {
+                frontmatter: true,
+                ..
+            }
+        )
     }
     pub const fn is_vue(&self) -> bool {
         matches!(self, Self::Vue { .. })
@@ -164,6 +173,15 @@ impl EmbeddingKind {
     }
     pub const fn is_svelte(&self) -> bool {
         matches!(self, Self::Svelte { .. })
+    }
+    pub const fn is_class_attribute(&self) -> bool {
+        matches!(
+            self,
+            Self::Astro {
+                is_class_attribute: true,
+                ..
+            }
+        )
     }
 }
 
@@ -229,7 +247,10 @@ impl JsFileSource {
     }
 
     pub fn astro() -> Self {
-        Self::ts().with_embedding_kind(EmbeddingKind::Astro { frontmatter: true })
+        Self::ts().with_embedding_kind(EmbeddingKind::Astro {
+            frontmatter: true,
+            is_class_attribute: false,
+        })
     }
 
     /// Vue file definition
@@ -331,7 +352,10 @@ impl JsFileSource {
                     is_source: true,
                     ..
                 }
-                | EmbeddingKind::Astro { frontmatter: true }
+                | EmbeddingKind::Astro {
+                    frontmatter: true,
+                    ..
+                }
         )
     }
 
@@ -347,7 +371,10 @@ impl JsFileSource {
                     is_source: false,
                     ..
                 }
-                | EmbeddingKind::Astro { frontmatter: false }
+                | EmbeddingKind::Astro {
+                    frontmatter: false,
+                    ..
+                }
         )
     }
 
