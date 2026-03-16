@@ -3,7 +3,10 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid-export-default-setup.vue
 ---
 # Input
-```ts
+```vue
+/* should not generate diagnostics */
+
+<script>
 import { ref } from 'vue'
 export default {
 	setup() {
@@ -17,5 +20,6 @@ export default {
 		}
 	}
 }
+</script>
 
 ```

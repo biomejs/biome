@@ -3,28 +3,32 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid-logical-operators.vue
 ---
 # Input
-```ts
+```vue
+/* should generate diagnostics */
+
+<script>
 import { ref } from 'vue'
 const foo = ref(true)
 const other = true
 
 var a = foo || other
 var b = foo && other
+</script>
 
 ```
 
 # Diagnostics
 ```
-invalid-logical-operators.vue:5:9 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-logical-operators.vue:8:9 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Ref value is accessed without `.value`.
   
-    3 │ const other = true
-    4 │ 
-  > 5 │ var a = foo || other
-      │         ^^^
-    6 │ var b = foo && other
-    7 │ 
+     6 │ const other = true
+     7 │ 
+   > 8 │ var a = foo || other
+       │         ^^^
+     9 │ var b = foo && other
+    10 │ </script>
   
   i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
   
@@ -36,14 +40,15 @@ invalid-logical-operators.vue:5:9 lint/nursery/noVueRefAsOperand ━━━━━
 ```
 
 ```
-invalid-logical-operators.vue:6:9 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-logical-operators.vue:9:9 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Ref value is accessed without `.value`.
   
-    5 │ var a = foo || other
-  > 6 │ var b = foo && other
-      │         ^^^
-    7 │ 
+     8 │ var a = foo || other
+   > 9 │ var b = foo && other
+       │         ^^^
+    10 │ </script>
+    11 │ 
   
   i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
   

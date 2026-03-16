@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-svelte-snippet-source.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+<script>
+let hello = "Hello World";
+</script>
+
+<html>
+    <span>{hello}</span>
+</html>
+
+```

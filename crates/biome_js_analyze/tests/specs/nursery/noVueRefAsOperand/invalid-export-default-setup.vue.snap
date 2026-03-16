@@ -3,7 +3,10 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid-export-default-setup.vue
 ---
 # Input
-```ts
+```vue
+/* should generate diagnostics */
+
+<script>
 import { ref } from 'vue'
 export default {
   setup() {
@@ -14,21 +17,22 @@ export default {
     return { count }
   }
 }
+</script>
 
 ```
 
 # Diagnostics
 ```
-invalid-export-default-setup.vue:5:5 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-export-default-setup.vue:8:5 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Ref value is accessed without `.value`.
   
-    3 │   setup() {
-    4 │     let count = ref(0)
-  > 5 │     count++ // error
-      │     ^^^^^
-    6 │     console.log(count + 1) // error
-    7 │     console.log(1 + count) // error
+     6 │   setup() {
+     7 │     let count = ref(0)
+   > 8 │     count++ // error
+       │     ^^^^^
+     9 │     console.log(count + 1) // error
+    10 │     console.log(1 + count) // error
   
   i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
   
@@ -40,16 +44,16 @@ invalid-export-default-setup.vue:5:5 lint/nursery/noVueRefAsOperand ━━━━
 ```
 
 ```
-invalid-export-default-setup.vue:6:17 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-export-default-setup.vue:9:17 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Ref value is accessed without `.value`.
   
-    4 │     let count = ref(0)
-    5 │     count++ // error
-  > 6 │     console.log(count + 1) // error
-      │                 ^^^^^
-    7 │     console.log(1 + count) // error
-    8 │     return { count }
+     7 │     let count = ref(0)
+     8 │     count++ // error
+   > 9 │     console.log(count + 1) // error
+       │                 ^^^^^
+    10 │     console.log(1 + count) // error
+    11 │     return { count }
   
   i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
   
@@ -61,16 +65,16 @@ invalid-export-default-setup.vue:6:17 lint/nursery/noVueRefAsOperand ━━━�
 ```
 
 ```
-invalid-export-default-setup.vue:7:21 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-export-default-setup.vue:10:21 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Ref value is accessed without `.value`.
   
-    5 │     count++ // error
-    6 │     console.log(count + 1) // error
-  > 7 │     console.log(1 + count) // error
-      │                     ^^^^^
-    8 │     return { count }
-    9 │   }
+     8 │     count++ // error
+     9 │     console.log(count + 1) // error
+  > 10 │     console.log(1 + count) // error
+       │                     ^^^^^
+    11 │     return { count }
+    12 │   }
   
   i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
   

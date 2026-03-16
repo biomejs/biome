@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-vue-snippet.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+{
+	const x = 1;
+}
+</script>
+
+<template>
+	<div>{{ x }}</div>
+</template>
+
+```

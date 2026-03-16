@@ -3,7 +3,9 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid-data-arrow-function.vue
 ---
 # Input
-```ts
+```vue
+<!-- should not generate diagnostics -->
+<script>
 export default {
     props: ['foo'],
     computed: {
@@ -21,5 +23,6 @@ export default {
         }
     }
 };
+</script>
 
 ```
