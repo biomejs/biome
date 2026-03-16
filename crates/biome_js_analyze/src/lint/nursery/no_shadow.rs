@@ -182,7 +182,9 @@ fn evaluate_shadowing(model: &SemanticModel, binding: &Binding, upper_binding: &
             return false;
         }
     } else if is_inside_function_parameters(binding)
-        && (is_inside_type_parameter(binding) || is_inside_type_member(binding))
+        && (is_inside_type_parameter(binding)
+            || is_inside_type_member(binding)
+            || is_inside_function_type(binding))
     {
         return false;
     }
@@ -289,6 +291,24 @@ fn is_inside_function_parameters(binding: &Binding) -> bool {
         .ancestors()
         .skip(1)
         .any(|ancestor| ancestor.cast::<JsParameterList>().is_some())
+}
+
+/// Whether the binding is a parameter inside a function type signature.
+///
+/// Function type parameters are type-only and don't create actual bindings at
+/// runtime, so they should not be flagged for shadowing.
+///
+/// ```ts
+/// function fn(options: unknown, cb: (options: unknown) => void) {}
+/// //                                     ^^^^^^^^ type-only parameter
+/// ```
+fn is_inside_function_type(binding: &Binding) -> bool {
+    use biome_js_syntax::TsFunctionType;
+    binding
+        .syntax()
+        .ancestors()
+        .skip(1)
+        .any(|ancestor| ancestor.cast::<TsFunctionType>().is_some())
 }
 
 /// Returns true if the binding is a parameter inside a TypeScript overload
