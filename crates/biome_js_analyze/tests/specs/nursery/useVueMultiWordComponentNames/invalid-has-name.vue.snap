@@ -3,24 +3,27 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid-has-name.vue
 ---
 # Input
-```ts
+```vue
+<script>
 export default {
 	name: "invalid",
 }
+</script>
 
 ```
 
 # Diagnostics
 ```
-invalid-has-name.vue:2:8 lint/nursery/useVueMultiWordComponentNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-has-name.vue:3:8 lint/nursery/useVueMultiWordComponentNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This Component's name "invalid" only contains one word.
   
-    1 │ export default {
-  > 2 │ 	name: "invalid",
+    1 │ <script>
+    2 │ export default {
+  > 3 │ 	name: "invalid",
       │ 	      ^^^^^^^^^
-    3 │ }
-    4 │ 
+    4 │ }
+    5 │ </script>
   
   i Single-word component names can collide with HTML elements and are less descriptive.
   

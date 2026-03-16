@@ -3,24 +3,27 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid-props-array.vue
 ---
 # Input
-```ts
+```vue
+<script>
 export default {
     props: ['$el'],
 };
+</script>
 
 ```
 
 # Diagnostics
 ```
-invalid-props-array.vue:2:13 lint/correctness/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-props-array.vue:3:13 lint/correctness/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Key $el is reserved in Vue.
   
-    1 │ export default {
-  > 2 │     props: ['$el'],
+    1 │ <script>
+    2 │ export default {
+  > 3 │     props: ['$el'],
       │             ^^^^^
-    3 │ };
-    4 │ 
+    4 │ };
+    5 │ </script>
   
   i Rename the key to avoid conflicts with Vue reserved keys.
   

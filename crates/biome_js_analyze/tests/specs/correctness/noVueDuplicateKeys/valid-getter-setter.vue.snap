@@ -3,7 +3,9 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid-getter-setter.vue
 ---
 # Input
-```ts
+```vue
+<!-- should not generate diagnostics -->
+<script>
 export default {
   computed: {
     foo: {
@@ -12,5 +14,5 @@ export default {
     }
   }
 }
-
+</script>
 ```

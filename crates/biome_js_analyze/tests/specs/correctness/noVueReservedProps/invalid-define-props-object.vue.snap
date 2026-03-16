@@ -3,26 +3,29 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid-define-props-object.vue
 ---
 # Input
-```ts
+```vue
+<script setup>
 defineProps({
     ref: String,
     key: String,
     foo: String,
 });
+</script>
 
 ```
 
 # Diagnostics
 ```
-invalid-define-props-object.vue:2:5 lint/correctness/noVueReservedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-define-props-object.vue:3:5 lint/correctness/noVueReservedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × ref is a reserved attribute and cannot be used as props.
   
-    1 │ defineProps({
-  > 2 │     ref: String,
+    1 │ <script setup>
+    2 │ defineProps({
+  > 3 │     ref: String,
       │     ^^^
-    3 │     key: String,
-    4 │     foo: String,
+    4 │     key: String,
+    5 │     foo: String,
   
   i Rename the prop to avoid possible conflicts.
   
@@ -30,16 +33,16 @@ invalid-define-props-object.vue:2:5 lint/correctness/noVueReservedProps ━━�
 ```
 
 ```
-invalid-define-props-object.vue:3:5 lint/correctness/noVueReservedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-define-props-object.vue:4:5 lint/correctness/noVueReservedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × key is a reserved attribute and cannot be used as props.
   
-    1 │ defineProps({
-    2 │     ref: String,
-  > 3 │     key: String,
+    2 │ defineProps({
+    3 │     ref: String,
+  > 4 │     key: String,
       │     ^^^
-    4 │     foo: String,
-    5 │ });
+    5 │     foo: String,
+    6 │ });
   
   i Rename the prop to avoid possible conflicts.
   
