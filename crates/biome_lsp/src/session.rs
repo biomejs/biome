@@ -978,9 +978,19 @@ impl Session {
                 .unwrap_or_else(|| "<unknown>".to_string());
             let working_directory = match &base_path {
                 ConfigurationPathHint::FromLsp(path)
-                | ConfigurationPathHint::FromWorkspace(path)
-                | ConfigurationPathHint::FromUser(path)
-                | ConfigurationPathHint::FromUserExternal(path) => path.to_string(),
+                | ConfigurationPathHint::FromWorkspace(path) => path.to_string(),
+                ConfigurationPathHint::FromUser(path) => {
+                    let fs = self.workspace.fs();
+                    if fs.path_is_file(path) {
+                        path.parent()
+                            .map_or("<unknown>".to_string(), |p| p.to_string())
+                    } else {
+                        path.to_string()
+                    }
+                }
+                ConfigurationPathHint::FromUserExternal(_) => self
+                    .base_path()
+                    .map_or("<unknown>".to_string(), |p| p.to_string()),
                 ConfigurationPathHint::None => "<unknown>".to_string(),
             };
             let message = PrintDescription(&ConfigurationOutsideProject {
