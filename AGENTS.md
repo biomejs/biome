@@ -363,6 +363,7 @@ Before opening a PR, verify:
 - Claim patterns are "widely used" or "common" without evidence
 - Implement legacy/deprecated syntax without checking with the user first
 - Make assumptions about API design - inspect actual code structure first
+- Use `workspace = true` for `biome_*` crates in `[dev-dependencies]` — use `path = "../biome_*"` instead
 
 ✅ **Do:**
 - Ask the user if unsure about changesets

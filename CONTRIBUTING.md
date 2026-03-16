@@ -341,7 +341,21 @@ To know the technical details of how our formatter works and how to write test, 
 
 [Workspace dependencies](https://doc.rust-lang.org/cargo/reference/workspaces.html#the-dependencies-table) are used, and many dependencies are defined in Cargo.toml in the root.
 
-Internal crates are loaded with `workspace = true` for each crate. About `dev-dependencies`, we use [path dependencies](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#specifying-path-dependencies) to avoid requiring the published version of these crates.
+Internal crates (`biome_*`) are loaded with `workspace = true` under `[dependencies]`.
+
+However, for `[dev-dependencies]`, internal `biome_*` crates **must** use [path dependencies](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#specifying-path-dependencies) instead of `workspace = true`. This avoids resolving these crates from the registry when they are only needed for testing.
+
+```toml
+[dependencies]
+biome_parser = { workspace = true }  # OK: workspace = true for regular deps
+
+[dev-dependencies]
+biome_test_utils = { path = "../biome_test_utils" }              # CORRECT
+biome_formatter  = { path = "../biome_formatter", features = ["countme"] } # CORRECT with features
+# biome_test_utils = { workspace = true }                        # WRONG: do not use workspace for dev-deps
+```
+
+All internal crates live as siblings under `crates/`, so the relative path is always `../biome_<name>`.
 
 ## Node.js development
 

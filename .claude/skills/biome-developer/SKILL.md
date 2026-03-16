@@ -138,6 +138,34 @@ if let Some(directive) = VueDirective::cast_ref(&element)
 }
 ```
 
+### Cargo Dependencies: `workspace = true` vs `path = "..."`
+
+Internal `biome_*` crates listed under `[dev-dependencies]` **MUST** use `path = "../<crate_name>"`, not `workspace = true`. Using `workspace = true` for dev-dependencies can cause Cargo to resolve the crate from the registry instead of the local workspace, which is incorrect.
+
+Regular `[dependencies]` still use `workspace = true` as normal — this rule only applies to `[dev-dependencies]`.
+
+**DO:**
+- Use `path = "../biome_foo"` for all `biome_*` dev-dependencies
+- Preserve any extra attributes like `features` when converting
+
+**DON'T:**
+- Do NOT use `workspace = true` for `biome_*` crates in `[dev-dependencies]`
+
+**Example:**
+```toml
+# WRONG: may resolve from registry
+[dev-dependencies]
+biome_js_parser = { workspace = true }
+biome_formatter = { workspace = true, features = ["countme"] }
+
+# CORRECT: always resolves locally
+[dev-dependencies]
+biome_js_parser = { path = "../biome_js_parser" }
+biome_formatter = { path = "../biome_formatter", features = ["countme"] }
+```
+
+All crates live as siblings under `crates/`, so the relative path is always `../biome_<name>`.
+
 ### Legacy and Deprecated Syntax
 
 **DO:**
