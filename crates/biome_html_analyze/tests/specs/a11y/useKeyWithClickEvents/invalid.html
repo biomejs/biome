@@ -1,0 +1,26 @@
+<!-- should generate diagnostics -->
+
+<!-- div with onclick but no keyboard handler -->
+<div onclick="handleClick()" />
+<div onclick="handleClick()">content</div>
+
+<!-- span with onclick but no keyboard handler -->
+<span onclick="handleClick()">text</span>
+
+<!-- section with onclick but no keyboard handler -->
+<section onclick="handleClick()">content</section>
+
+<!-- main with onclick but no keyboard handler -->
+<main onclick="handleClick()">content</main>
+
+<!-- article with onclick but no keyboard handler -->
+<article onclick="handleClick()">content</article>
+
+<!-- header with onclick but no keyboard handler -->
+<header onclick="handleClick()">content</header>
+
+<!-- footer with onclick but no keyboard handler -->
+<footer onclick="handleClick()">content</footer>
+
+<!-- aria-hidden="false" should still flag -->
+<div onclick="handleClick()" aria-hidden="false">content</div>
