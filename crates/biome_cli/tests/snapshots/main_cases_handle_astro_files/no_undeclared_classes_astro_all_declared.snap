@@ -1,0 +1,48 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "linter": { "enabled": true },
+  "html": {
+    "linter": { "enabled": true },
+    "experimentalFullSupportEnabled": true
+  }
+}
+```
+
+## `file.astro`
+
+```astro
+---
+import "./styles.css";
+---
+
+<div class:list={["card", "hero"]}>List</div>
+<div class={"container"}>Expr</div>
+<div class="card">Plain</div>
+
+```
+
+## `styles.css`
+
+```css
+.card {
+  border: 1px;
+}
+.hero {
+  font-size: 2rem;
+}
+.container {
+  max-width: 1200px;
+}
+```
+
+# Emitted Messages
+
+```block
+Checked 3 files in <TIME>. No fixes applied.
+```

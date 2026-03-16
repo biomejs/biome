@@ -58,12 +58,14 @@ impl HtmlModuleInfo {
         referenced_classes: Vec<CssClassReference>,
         imported_stylesheets: Vec<ResolvedPath>,
         static_import_paths: IndexMap<Text, ResolvedPath>,
+        dynamic_import_paths: IndexMap<Text, ResolvedPath>,
     ) -> Self {
         let info = HtmlModuleInfoInner {
             style_classes,
             referenced_classes,
             imported_stylesheets,
             static_import_paths,
+            dynamic_import_paths,
         };
         Self(Arc::new(info))
     }
@@ -117,6 +119,9 @@ pub struct HtmlModuleInfoInner {
     /// their resolved absolute paths. Only static imports (`import … from "…"`)
     /// are tracked here — dynamic imports are ignored for upward-traversal.
     pub static_import_paths: IndexMap<Text, ResolvedPath>,
+
+    /// Resolved paths of JS/TS modules imported from dynamic imports.
+    pub dynamic_import_paths: IndexMap<Text, ResolvedPath>,
 }
 
 #[derive(Debug)]
