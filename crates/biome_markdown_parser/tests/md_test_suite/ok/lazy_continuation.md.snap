@@ -178,6 +178,7 @@ MdDocument {
             ],
         },
         MdHeader {
+            indent: MdIndentTokenList [],
             before: MdHashList [
                 MdHash {
                     hash_token: HASH@205..206 "#" [] [],
@@ -313,6 +314,7 @@ MdDocument {
             ],
         },
         MdFencedCodeBlock {
+            indent: MdIndentTokenList [],
             l_fence: TRIPLE_BACKTICK@410..413 "```" [] [],
             code_list: MdCodeNameList [],
             content: MdInlineItemList [
@@ -326,6 +328,7 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@424..425 "\n" [] [],
                 },
             ],
+            r_fence_indent: MdIndentTokenList [],
             r_fence: TRIPLE_BACKTICK@425..428 "```" [] [],
         },
         MdNewline {
@@ -388,8 +391,20 @@ MdDocument {
                         MdTextual {
                             value_token: MD_TEXTUAL_LITERAL@509..510 "\n" [] [],
                         },
+                        MdIndentToken {
+                            md_indent_char_token: MD_INDENT_CHAR@510..511 " " [] [],
+                        },
+                        MdIndentToken {
+                            md_indent_char_token: MD_INDENT_CHAR@511..512 " " [] [],
+                        },
+                        MdIndentToken {
+                            md_indent_char_token: MD_INDENT_CHAR@512..513 " " [] [],
+                        },
+                        MdIndentToken {
+                            md_indent_char_token: MD_INDENT_CHAR@513..514 " " [] [],
+                        },
                         MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@510..544 "This is an indented code block" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] [],
+                            value_token: MD_TEXTUAL_LITERAL@514..544 "This is an indented code block" [] [],
                         },
                         MdTextual {
                             value_token: MD_TEXTUAL_LITERAL@544..545 "\n" [] [],
@@ -497,15 +512,16 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@204..205 "\n" [] []
           1: (empty)
     7: MD_HEADER@205..246
-      0: MD_HASH_LIST@205..206
+      0: MD_INDENT_TOKEN_LIST@205..205
+      1: MD_HASH_LIST@205..206
         0: MD_HASH@205..206
           0: HASH@205..206 "#" [] []
-      1: MD_PARAGRAPH@206..246
+      2: MD_PARAGRAPH@206..246
         0: MD_INLINE_ITEM_LIST@206..246
           0: MD_TEXTUAL@206..246
             0: MD_TEXTUAL_LITERAL@206..246 " This heading ends the lazy continuation" [] []
         1: (empty)
-      2: MD_HASH_LIST@246..246
+      3: MD_HASH_LIST@246..246
     8: MD_NEWLINE@246..247
       0: NEWLINE@246..247 "\n" [] []
     9: MD_NEWLINE@247..248
@@ -584,16 +600,18 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@409..410 "\n" [] []
           1: (empty)
     18: MD_FENCED_CODE_BLOCK@410..428
-      0: TRIPLE_BACKTICK@410..413 "```" [] []
-      1: MD_CODE_NAME_LIST@413..413
-      2: MD_INLINE_ITEM_LIST@413..425
+      0: MD_INDENT_TOKEN_LIST@410..410
+      1: TRIPLE_BACKTICK@410..413 "```" [] []
+      2: MD_CODE_NAME_LIST@413..413
+      3: MD_INLINE_ITEM_LIST@413..425
         0: MD_TEXTUAL@413..414
           0: MD_TEXTUAL_LITERAL@413..414 "\n" [] []
         1: MD_TEXTUAL@414..424
           0: MD_TEXTUAL_LITERAL@414..424 "code block" [] []
         2: MD_TEXTUAL@424..425
           0: MD_TEXTUAL_LITERAL@424..425 "\n" [] []
-      3: TRIPLE_BACKTICK@425..428 "```" [] []
+      4: MD_INDENT_TOKEN_LIST@425..425
+      5: TRIPLE_BACKTICK@425..428 "```" [] []
     19: MD_NEWLINE@428..429
       0: NEWLINE@428..429 "\n" [] []
     20: MD_NEWLINE@429..430
@@ -635,9 +653,17 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@475..509 "Quote interrupted by indented code" [] []
             1: MD_TEXTUAL@509..510
               0: MD_TEXTUAL_LITERAL@509..510 "\n" [] []
-            2: MD_TEXTUAL@510..544
-              0: MD_TEXTUAL_LITERAL@510..544 "This is an indented code block" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] []
-            3: MD_TEXTUAL@544..545
+            2: MD_INDENT_TOKEN@510..511
+              0: MD_INDENT_CHAR@510..511 " " [] []
+            3: MD_INDENT_TOKEN@511..512
+              0: MD_INDENT_CHAR@511..512 " " [] []
+            4: MD_INDENT_TOKEN@512..513
+              0: MD_INDENT_CHAR@512..513 " " [] []
+            5: MD_INDENT_TOKEN@513..514
+              0: MD_INDENT_CHAR@513..514 " " [] []
+            6: MD_TEXTUAL@514..544
+              0: MD_TEXTUAL_LITERAL@514..544 "This is an indented code block" [] []
+            7: MD_TEXTUAL@544..545
               0: MD_TEXTUAL_LITERAL@544..545 "\n" [] []
           1: (empty)
   2: EOF@545..545 "" [] []

@@ -46,6 +46,7 @@ MdDocument {
     bom_token: missing (optional),
     value: MdBlockList [
         MdHeader {
+            indent: MdIndentTokenList [],
             before: MdHashList [
                 MdHash {
                     hash_token: HASH@0..1 "#" [] [],
@@ -144,6 +145,7 @@ MdDocument {
             value_token: NEWLINE@56..57 "\n" [] [],
         },
         MdHeader {
+            indent: MdIndentTokenList [],
             before: MdHashList [
                 MdHash {
                     hash_token: HASH@57..58 "#" [] [],
@@ -242,6 +244,7 @@ MdDocument {
             value_token: NEWLINE@124..125 "\n" [] [],
         },
         MdHeader {
+            indent: MdIndentTokenList [],
             before: MdHashList [
                 MdHash {
                     hash_token: HASH@125..126 "#" [] [],
@@ -319,6 +322,7 @@ MdDocument {
             value_token: NEWLINE@180..181 "\n" [] [],
         },
         MdHeader {
+            indent: MdIndentTokenList [],
             before: MdHashList [
                 MdHash {
                     hash_token: HASH@181..182 "#" [] [],
@@ -422,15 +426,16 @@ MdDocument {
   0: (empty)
   1: MD_BLOCK_LIST@0..243
     0: MD_HEADER@0..34
-      0: MD_HASH_LIST@0..1
+      0: MD_INDENT_TOKEN_LIST@0..0
+      1: MD_HASH_LIST@0..1
         0: MD_HASH@0..1
           0: HASH@0..1 "#" [] []
-      1: MD_PARAGRAPH@1..34
+      2: MD_PARAGRAPH@1..34
         0: MD_INLINE_ITEM_LIST@1..34
           0: MD_TEXTUAL@1..34
             0: MD_TEXTUAL_LITERAL@1..34 " Blank lines between bullet items" [] []
         1: (empty)
-      2: MD_HASH_LIST@34..34
+      3: MD_HASH_LIST@34..34
     1: MD_NEWLINE@34..35
       0: NEWLINE@34..35 "\n" [] []
     2: MD_NEWLINE@35..36
@@ -486,15 +491,16 @@ MdDocument {
     4: MD_NEWLINE@56..57
       0: NEWLINE@56..57 "\n" [] []
     5: MD_HEADER@57..92
-      0: MD_HASH_LIST@57..58
+      0: MD_INDENT_TOKEN_LIST@57..57
+      1: MD_HASH_LIST@57..58
         0: MD_HASH@57..58
           0: HASH@57..58 "#" [] []
-      1: MD_PARAGRAPH@58..92
+      2: MD_PARAGRAPH@58..92
         0: MD_INLINE_ITEM_LIST@58..92
           0: MD_TEXTUAL@58..92
             0: MD_TEXTUAL_LITERAL@58..92 " Blank lines between ordered items" [] []
         1: (empty)
-      2: MD_HASH_LIST@92..92
+      3: MD_HASH_LIST@92..92
     6: MD_NEWLINE@92..93
       0: NEWLINE@92..93 "\n" [] []
     7: MD_NEWLINE@93..94
@@ -550,15 +556,16 @@ MdDocument {
     9: MD_NEWLINE@124..125
       0: NEWLINE@124..125 "\n" [] []
     10: MD_HEADER@125..161
-      0: MD_HASH_LIST@125..126
+      0: MD_INDENT_TOKEN_LIST@125..125
+      1: MD_HASH_LIST@125..126
         0: MD_HASH@125..126
           0: HASH@125..126 "#" [] []
-      1: MD_PARAGRAPH@126..161
+      2: MD_PARAGRAPH@126..161
         0: MD_INLINE_ITEM_LIST@126..161
           0: MD_TEXTUAL@126..161
             0: MD_TEXTUAL_LITERAL@126..161 " Multiple blank lines between items" [] []
         1: (empty)
-      2: MD_HASH_LIST@161..161
+      3: MD_HASH_LIST@161..161
     11: MD_NEWLINE@161..162
       0: NEWLINE@161..162 "\n" [] []
     12: MD_NEWLINE@162..163
@@ -600,15 +607,16 @@ MdDocument {
     14: MD_NEWLINE@180..181
       0: NEWLINE@180..181 "\n" [] []
     15: MD_HEADER@181..220
-      0: MD_HASH_LIST@181..182
+      0: MD_INDENT_TOKEN_LIST@181..181
+      1: MD_HASH_LIST@181..182
         0: MD_HASH@181..182
           0: HASH@181..182 "#" [] []
-      1: MD_PARAGRAPH@182..220
+      2: MD_PARAGRAPH@182..220
         0: MD_INLINE_ITEM_LIST@182..220
           0: MD_TEXTUAL@182..220
             0: MD_TEXTUAL_LITERAL@182..220 " Mixed: some items separated, some not" [] []
         1: (empty)
-      2: MD_HASH_LIST@220..220
+      3: MD_HASH_LIST@220..220
     16: MD_NEWLINE@220..221
       0: NEWLINE@220..221 "\n" [] []
     17: MD_NEWLINE@221..222

@@ -1,0 +1,20 @@
+@at-root(without:media   supports){
+.root-only{
+color:red;
+}
+}
+
+@at-root
+.root-only,
+.another-root
+{
+color:blue;
+}
+
+@mixin card{
+@at-root(with:rule){
+.card{
+display:block;
+}
+}
+}

@@ -48,6 +48,16 @@ fn is_at_scss_include_at_rule(p: &mut CssParser) -> bool {
     p.at(T![include])
 }
 
+/// Parses the optional SCSS argument list used by `@include` and `@content`.
+///
+/// # Example
+///
+/// ```scss
+/// @include button($radius: 4px, $args...);
+///                ^^^^^^^^^^^^^^^^^^^^^^^^^
+/// ```
+///
+/// Docs: https://sass-lang.com/documentation/at-rules/mixin/
 #[inline]
 pub(crate) fn parse_scss_include_argument_list(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_scss_include_argument_list(p) {

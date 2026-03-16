@@ -75,17 +75,23 @@ use crate::syntax::at_rule::view_transition::{
 use crate::syntax::CssSyntaxFeatures;
 use crate::syntax::parse_error::{expected_any_at_rule, tailwind_disabled};
 use crate::syntax::scss::{
-    parse_bogus_scss_else_at_rule, parse_scss_content_at_rule, parse_scss_debug_at_rule,
-    parse_scss_each_at_rule, parse_scss_error_at_rule, parse_scss_for_at_rule,
-    parse_scss_function_at_rule, parse_scss_if_at_rule, parse_scss_include_at_rule,
-    parse_scss_mixin_at_rule, parse_scss_return_at_rule, parse_scss_warn_at_rule,
-    parse_scss_while_at_rule,
+    parse_bogus_scss_else_at_rule, parse_scss_at_root_at_rule, parse_scss_content_at_rule,
+    parse_scss_debug_at_rule, parse_scss_each_at_rule, parse_scss_error_at_rule,
+    parse_scss_extend_at_rule, parse_scss_for_at_rule, parse_scss_forward_at_rule,
+    parse_scss_function_at_rule, parse_scss_if_at_rule, parse_scss_import_at_rule,
+    parse_scss_include_at_rule, parse_scss_mixin_at_rule, parse_scss_return_at_rule,
+    parse_scss_use_at_rule, parse_scss_warn_at_rule, parse_scss_while_at_rule,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
 
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
+
+pub(crate) use import::{
+    is_at_import_url, is_nth_at_import_url, parse_import_non_media_modifiers, parse_import_url,
+};
+pub(crate) use parse_error::expected_media_query;
 
 #[inline]
 pub(crate) fn is_at_at_rule(p: &mut CssParser) -> bool {
@@ -139,7 +145,9 @@ pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
         T![layer] => parse_layer_at_rule(p),
         T![scope] => parse_scope_at_rule(p),
         T![supports] => parse_supports_at_rule(p),
-        T![import] => parse_import_at_rule(p),
+        T![import] => CssSyntaxFeatures::Scss
+            .parse_supported_syntax(p, parse_scss_import_at_rule)
+            .or_else(|| parse_import_at_rule(p)),
         T![namespace] => parse_namespace_at_rule(p),
         T![starting_style] => parse_starting_style_at_rule(p),
         T![document] => parse_document_at_rule(p),
@@ -150,11 +158,23 @@ pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
         T![each] => CssSyntaxFeatures::Scss
             .parse_supported_syntax(p, parse_scss_each_at_rule)
             .or_else(|| parse_unknown_at_rule(p)),
+        T![extend] => CssSyntaxFeatures::Scss
+            .parse_supported_syntax(p, parse_scss_extend_at_rule)
+            .or_else(|| parse_unknown_at_rule(p)),
+        T![at_root] => CssSyntaxFeatures::Scss
+            .parse_supported_syntax(p, parse_scss_at_root_at_rule)
+            .or_else(|| parse_unknown_at_rule(p)),
         T![for] => CssSyntaxFeatures::Scss
             .parse_supported_syntax(p, parse_scss_for_at_rule)
             .or_else(|| parse_unknown_at_rule(p)),
-        T![ident] if p.cur_text() == "content" => CssSyntaxFeatures::Scss
+        T![content] => CssSyntaxFeatures::Scss
             .parse_supported_syntax(p, parse_scss_content_at_rule)
+            .or_else(|| parse_unknown_at_rule(p)),
+        T![forward] => CssSyntaxFeatures::Scss
+            .parse_supported_syntax(p, parse_scss_forward_at_rule)
+            .or_else(|| parse_unknown_at_rule(p)),
+        T![use] => CssSyntaxFeatures::Scss
+            .parse_supported_syntax(p, parse_scss_use_at_rule)
             .or_else(|| parse_unknown_at_rule(p)),
         T![return] => CssSyntaxFeatures::Scss
             .parse_supported_syntax(p, parse_scss_return_at_rule)

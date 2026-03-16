@@ -1,5 +1,6 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
 expression: snapshot
 ---
 
@@ -45,43 +46,47 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@10..13 "@" [Newline("\n"), Newline("\n")] [],
-            rule: CssImportAtRule {
+            rule: ScssImportAtRule {
                 import_token: IMPORT_KW@13..20 "import" [] [Whitespace(" ")],
-                url: CssString {
-                    value_token: CSS_STRING_LITERAL@20..32 "\"theme.css\"" [] [Whitespace(" ")],
-                },
-                layer: missing (optional),
-                supports: CssImportSupports {
-                    supports_token: SUPPORTS_KW@32..40 "supports" [] [],
-                    l_paren_token: L_PAREN@40..41 "(" [] [],
-                    condition: CssDeclaration {
-                        property: CssGenericProperty {
-                            name: CssIdentifier {
-                                value_token: IDENT@41..46 "width" [] [],
-                            },
-                            colon_token: COLON@46..48 ":" [] [Whitespace(" ")],
-                            value: ScssExpression {
-                                items: ScssExpressionItemList [
-                                    ScssBinaryExpression {
-                                        left: ScssIdentifier {
-                                            dollar_token: DOLLAR@48..49 "$" [] [],
-                                            name: CssIdentifier {
-                                                value_token: IDENT@49..54 "base" [] [Whitespace(" ")],
-                                            },
-                                        },
-                                        operator: PLUS@54..56 "+" [] [Whitespace(" ")],
-                                        right: CssNumber {
-                                            value_token: CSS_NUMBER_LITERAL@56..57 "1" [] [],
-                                        },
-                                    },
-                                ],
-                            },
+                imports: ScssImportItemList [
+                    ScssPlainImport {
+                        url: CssString {
+                            value_token: CSS_STRING_LITERAL@20..32 "\"theme.css\"" [] [Whitespace(" ")],
                         },
-                        important: missing (optional),
+                        layer: missing (optional),
+                        supports: CssImportSupports {
+                            supports_token: SUPPORTS_KW@32..40 "supports" [] [],
+                            l_paren_token: L_PAREN@40..41 "(" [] [],
+                            condition: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@41..46 "width" [] [],
+                                    },
+                                    colon_token: COLON@46..48 ":" [] [Whitespace(" ")],
+                                    value: ScssExpression {
+                                        items: ScssExpressionItemList [
+                                            ScssBinaryExpression {
+                                                left: ScssIdentifier {
+                                                    dollar_token: DOLLAR@48..49 "$" [] [],
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@49..54 "base" [] [Whitespace(" ")],
+                                                    },
+                                                },
+                                                operator: PLUS@54..56 "+" [] [Whitespace(" ")],
+                                                right: CssNumber {
+                                                    value_token: CSS_NUMBER_LITERAL@56..57 "1" [] [],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                                important: missing (optional),
+                            },
+                            r_paren_token: R_PAREN@57..58 ")" [] [],
+                        },
+                        media: CssMediaQueryList [],
                     },
-                    r_paren_token: R_PAREN@57..58 ")" [] [],
-                },
-                media: CssMediaQueryList [],
+                ],
                 semicolon_token: SEMICOLON@58..59 ";" [] [],
             },
         },
@@ -203,33 +208,35 @@ CssRoot {
       4: SEMICOLON@9..10 ";" [] []
     1: CSS_AT_RULE@10..59
       0: AT@10..13 "@" [Newline("\n"), Newline("\n")] []
-      1: CSS_IMPORT_AT_RULE@13..59
+      1: SCSS_IMPORT_AT_RULE@13..59
         0: IMPORT_KW@13..20 "import" [] [Whitespace(" ")]
-        1: CSS_STRING@20..32
-          0: CSS_STRING_LITERAL@20..32 "\"theme.css\"" [] [Whitespace(" ")]
-        2: (empty)
-        3: CSS_IMPORT_SUPPORTS@32..58
-          0: SUPPORTS_KW@32..40 "supports" [] []
-          1: L_PAREN@40..41 "(" [] []
-          2: CSS_DECLARATION@41..57
-            0: CSS_GENERIC_PROPERTY@41..57
-              0: CSS_IDENTIFIER@41..46
-                0: IDENT@41..46 "width" [] []
-              1: COLON@46..48 ":" [] [Whitespace(" ")]
-              2: SCSS_EXPRESSION@48..57
-                0: SCSS_EXPRESSION_ITEM_LIST@48..57
-                  0: SCSS_BINARY_EXPRESSION@48..57
-                    0: SCSS_IDENTIFIER@48..54
-                      0: DOLLAR@48..49 "$" [] []
-                      1: CSS_IDENTIFIER@49..54
-                        0: IDENT@49..54 "base" [] [Whitespace(" ")]
-                    1: PLUS@54..56 "+" [] [Whitespace(" ")]
-                    2: CSS_NUMBER@56..57
-                      0: CSS_NUMBER_LITERAL@56..57 "1" [] []
+        1: SCSS_IMPORT_ITEM_LIST@20..58
+          0: SCSS_PLAIN_IMPORT@20..58
+            0: CSS_STRING@20..32
+              0: CSS_STRING_LITERAL@20..32 "\"theme.css\"" [] [Whitespace(" ")]
             1: (empty)
-          3: R_PAREN@57..58 ")" [] []
-        4: CSS_MEDIA_QUERY_LIST@58..58
-        5: SEMICOLON@58..59 ";" [] []
+            2: CSS_IMPORT_SUPPORTS@32..58
+              0: SUPPORTS_KW@32..40 "supports" [] []
+              1: L_PAREN@40..41 "(" [] []
+              2: CSS_DECLARATION@41..57
+                0: CSS_GENERIC_PROPERTY@41..57
+                  0: CSS_IDENTIFIER@41..46
+                    0: IDENT@41..46 "width" [] []
+                  1: COLON@46..48 ":" [] [Whitespace(" ")]
+                  2: SCSS_EXPRESSION@48..57
+                    0: SCSS_EXPRESSION_ITEM_LIST@48..57
+                      0: SCSS_BINARY_EXPRESSION@48..57
+                        0: SCSS_IDENTIFIER@48..54
+                          0: DOLLAR@48..49 "$" [] []
+                          1: CSS_IDENTIFIER@49..54
+                            0: IDENT@49..54 "base" [] [Whitespace(" ")]
+                        1: PLUS@54..56 "+" [] [Whitespace(" ")]
+                        2: CSS_NUMBER@56..57
+                          0: CSS_NUMBER_LITERAL@56..57 "1" [] []
+                1: (empty)
+              3: R_PAREN@57..58 ")" [] []
+            3: CSS_MEDIA_QUERY_LIST@58..58
+        2: SEMICOLON@58..59 ";" [] []
     2: CSS_QUALIFIED_RULE@59..128
       0: CSS_SELECTOR_LIST@59..66
         0: CSS_COMPOUND_SELECTOR@59..66

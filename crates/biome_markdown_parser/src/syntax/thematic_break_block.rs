@@ -157,9 +157,6 @@ pub(crate) fn parse_thematic_break_block(p: &mut MarkdownParser) -> ParsedSyntax
     }
     let m = p.start();
 
-    // skip_line_indent unchanged — deferred to Phase 5
-    p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
-
     parse_thematic_break_parts(p);
 
     Present(m.complete(p, MD_THEMATIC_BREAK_BLOCK))
@@ -174,6 +171,10 @@ pub(crate) fn parse_thematic_break_block(p: &mut MarkdownParser) -> ParsedSyntax
 /// - Fallback path: individual tokens already available (e.g., after list marker)
 fn parse_thematic_break_parts(p: &mut MarkdownParser) {
     let list_m = p.start();
+
+    // Emit block prefix indent (0-3 spaces) as MdIndentToken nodes inside the
+    // parts list. MdIndentToken is a valid AnyMdThematicBreakPart variant.
+    p.emit_indent_tokens(MAX_BLOCK_PREFIX_INDENT);
 
     // If lexer produced a single literal, decompose it via re-lex.
     // Track this so all subsequent bumps use parts-mode context.

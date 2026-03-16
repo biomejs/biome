@@ -115,3 +115,13 @@ L-Tailwind:
 - changed-files:
   - any-glob-to-any-file:
     - crates/biome_tailwind_*/**
+
+L-Yaml:
+- changed-files:
+  - any-glob-to-any-file:
+    - crates/biome_yaml_*/**
+
+L-Markdown:
+- changed-files:
+  - any-glob-to-any-file:
+    - crates/biome_markdown_*/**
