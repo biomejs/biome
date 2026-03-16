@@ -6,6 +6,7 @@ use biome_css_syntax::T;
 use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax;
 
+use super::interpolation::{is_at_scss_interpolation, parse_scss_interpolation};
 use super::map::parse_scss_parenthesized_or_map_expression;
 
 /// Parses SCSS primaries such as parenthesized values, maps, `!important`, and
@@ -19,7 +20,9 @@ use super::map::parse_scss_parenthesized_or_map_expression;
 /// Docs: https://sass-lang.com/documentation/at-rules/function
 #[inline]
 pub(super) fn parse_scss_primary_expression(p: &mut CssParser) -> ParsedSyntax {
-    if p.at(T!['(']) {
+    if is_at_scss_interpolation(p) {
+        parse_scss_interpolation(p)
+    } else if p.at(T!['(']) {
         parse_scss_parenthesized_or_map_expression(p)
     } else if is_at_declaration_important(p) {
         parse_declaration_important(p)

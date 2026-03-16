@@ -10,6 +10,9 @@ on:
       - 'crates/biome_js_factory/**'
       - 'crates/biome_js_semantic/**'
       - 'crates/biome_js_parser/**'
+      - 'crates/biome_markdown_factory/**'
+      - 'crates/biome_markdown_parser/**'
+      - 'crates/biome_markdown_syntax/**'
       - 'crates/biome_rowan/**'
       - 'xtask/**'
 

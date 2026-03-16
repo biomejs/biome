@@ -58,7 +58,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoEmptyObjectKeys {
-        version: "next",
+        version: "2.4.7",
         name: "noEmptyObjectKeys",
         language: "json",
         recommended: false,

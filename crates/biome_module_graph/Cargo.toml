@@ -36,7 +36,6 @@ cfg-if               = { workspace = true }
 indexmap             = { workspace = true }
 once_cell            = "1.21.3"  # Use `std::sync::OnceLock::get_or_try_init` when it is stable.
 papaya               = { workspace = true }
-rust-lapper          = { workspace = true }
 rustc-hash           = { workspace = true }
 schemars             = { workspace = true, optional = true }
 serde                = { workspace = true, optional = true }

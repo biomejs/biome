@@ -4,11 +4,13 @@ mod pseudo_class;
 mod pseudo_element;
 pub(crate) mod relative_selector;
 
+use super::{is_nth_at_metavariable, parse_metavariable};
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::parse_error::{
     expected_any_sub_selector, expected_compound_selector, expected_identifier, expected_selector,
 };
+use crate::syntax::scss::{is_nth_at_scss_placeholder_selector, parse_scss_placeholder_selector};
 use crate::syntax::selector::attribute::parse_attribute_selector;
 use crate::syntax::selector::nested_selector::NestedSelectorList;
 use crate::syntax::selector::pseudo_class::parse_pseudo_class_selector;
@@ -28,8 +30,6 @@ use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{CompletedMarker, Parser, ParserProgress, TokenSet, token_set};
 
-use super::{is_nth_at_metavariable, parse_metavariable};
-
 /// Determines the lexical context for parsing CSS selectors.
 ///
 /// This function is applied when lexing CSS selectors. It decides whether the
@@ -37,7 +37,7 @@ use super::{is_nth_at_metavariable, parse_metavariable};
 /// context. The distinction is important for handling whitespaces, especially
 /// around combinators in CSS selectors.
 const SELECTOR_LEX_SET: TokenSet<CssSyntaxKind> =
-    COMPLEX_SELECTOR_COMBINATOR_SET.union(token_set![T!['{'], T![,], T![')']]);
+    COMPLEX_SELECTOR_COMBINATOR_SET.union(token_set![T!['{'], T![,], T![')'], T![!], T![;], EOF]);
 #[inline]
 fn selector_lex_context(p: &mut CssParser) -> CssLexContext {
     // It's an inverted logic for `is_nth_at_selector(p, 1)`.
@@ -107,7 +107,7 @@ impl ParseSeparatedList for SelectorList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at_ts(self.end_kind_ts)
+        p.at_ts(self.end_kind_ts) || p.at(CSS_SPACE_LITERAL) && p.nth_at_ts(1, self.end_kind_ts)
     }
 
     fn recover(
@@ -306,7 +306,10 @@ fn parse_compound_selector(p: &mut CssParser) -> ParsedSyntax {
 /// including type selectors, universal selectors, and attribute selectors.
 #[inline]
 fn is_nth_at_simple_selector(p: &mut CssParser, n: usize) -> bool {
-    is_nth_at_namespace(p, n) || p.nth_at(n, T![*]) || is_nth_at_identifier(p, n)
+    is_nth_at_namespace(p, n)
+        || p.nth_at(n, T![*])
+        || is_nth_at_identifier(p, n)
+        || is_nth_at_scss_placeholder_selector(p, n)
 }
 
 /// Parses a simple selector in CSS.
@@ -318,6 +321,10 @@ fn is_nth_at_simple_selector(p: &mut CssParser, n: usize) -> bool {
 fn parse_simple_selector(p: &mut CssParser) -> ParsedSyntax {
     if !is_nth_at_simple_selector(p, 0) {
         return Absent;
+    }
+
+    if is_nth_at_scss_placeholder_selector(p, 0) {
+        return parse_scss_placeholder_selector(p);
     }
 
     let namespace = parse_namespace(p);
@@ -528,7 +535,7 @@ fn parse_selector_identifier(p: &mut CssParser) -> ParsedSyntax {
 /// case-sensitive. These are distinguished from regular identifiers in
 /// selectors that are case-insensitive for safety in preserving the casing.
 #[inline]
-fn parse_selector_custom_identifier(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_selector_custom_identifier(p: &mut CssParser) -> ParsedSyntax {
     let context = selector_lex_context(p);
     // Class and ID selectors are technically `<ident>` _and_ case-sensitive.
     // To handle this, we use `<custom-ident>` instead, but also have to allow

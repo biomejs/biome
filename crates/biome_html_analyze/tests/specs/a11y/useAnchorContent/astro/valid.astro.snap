@@ -1,5 +1,6 @@
 ---
 source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 83
 expression: valid.astro
 ---
 # Input
@@ -21,6 +22,7 @@ expression: valid.astro
 <a aria-hidden="false">content</a>
 <a><span aria-hidden="false">content</span></a>
 <a><img alt="description" /></a>
+<a><Image alt="description" /></a>
 <a title="Home">Home</a>
 
 <!-- Accessible via aria-label or title alone -->

@@ -1,22 +1,34 @@
 //! This is a generated file. Don't modify it by hand! Run 'cargo codegen formatter' to re-generate the file.
 
 pub(crate) mod arbitrary_argument;
+pub(crate) mod at_root_query;
 pub(crate) mod binary_expression;
 pub(crate) mod declaration;
 pub(crate) mod else_clause;
 pub(crate) mod expression;
+pub(crate) mod extend_optional_modifier;
+pub(crate) mod forward_as_clause;
+pub(crate) mod hide_clause;
 pub(crate) mod include_argument_list;
+pub(crate) mod interpolation;
 pub(crate) mod keyword_argument;
 pub(crate) mod list_expression;
 pub(crate) mod list_expression_element;
 pub(crate) mod map_expression;
 pub(crate) mod map_expression_pair;
+pub(crate) mod module_configuration;
+pub(crate) mod module_configuration_list;
 pub(crate) mod nesting_declaration;
 pub(crate) mod parameter;
 pub(crate) mod parameter_default_value;
 pub(crate) mod parameter_list;
 pub(crate) mod parent_selector_value;
 pub(crate) mod parenthesized_expression;
+pub(crate) mod plain_import;
 pub(crate) mod qualified_name;
+pub(crate) mod show_clause;
 pub(crate) mod unary_expression;
+pub(crate) mod use_all_namespace;
+pub(crate) mod use_as_clause;
 pub(crate) mod variable_modifier;
+pub(crate) mod with_clause;

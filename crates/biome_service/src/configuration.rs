@@ -259,6 +259,7 @@ pub fn read_config(
         ConfigurationPathHint::FromLsp(path) => path.clone(),
         ConfigurationPathHint::FromWorkspace(path) => path.clone(),
         ConfigurationPathHint::FromUser(path) => path.clone(),
+        ConfigurationPathHint::FromUserExternal(path) => path.clone(),
         ConfigurationPathHint::None => fs.working_directory().unwrap_or_default(),
     };
 
@@ -267,7 +268,8 @@ pub fn read_config(
     let configuration_directory = match path_hint {
         ConfigurationPathHint::FromLsp(path) => path,
         ConfigurationPathHint::FromWorkspace(path) => path,
-        ConfigurationPathHint::FromUser(ref config_file_path) => {
+        ConfigurationPathHint::FromUser(ref config_file_path)
+        | ConfigurationPathHint::FromUserExternal(ref config_file_path) => {
             // If the configuration path hint is from the user, we'll load it
             // directly.
             return load_user_config(fs, config_file_path, external_resolution_base_path);
@@ -1144,5 +1146,140 @@ mod tests {
                 .compute(),
             ScanKind::NoScanner
         );
+    }
+}
+
+#[cfg(test)]
+mod configuration_harness {
+    use biome_analyze::{GroupCategory, Queryable, RegistryVisitor, Rule, RuleCategory, RuleGroup};
+    use biome_configuration::generated::linter_options_check::config_side_rule_options_types;
+    use biome_css_syntax::CssLanguage;
+    use biome_graphql_syntax::GraphqlLanguage;
+    use biome_html_syntax::HtmlLanguage;
+    use biome_js_syntax::JsLanguage;
+    use biome_json_syntax::JsonLanguage;
+    use std::any::TypeId;
+    use std::collections::HashMap;
+
+    /// Collects `TypeId::of::<R::Options>()` for every rule via the registry visitor.
+    /// This is the "rule side" type — what the rule declares as `type Options`.
+    struct RuleSideOptionsVisitor {
+        types: HashMap<(&'static str, &'static str), TypeId>,
+    }
+
+    impl RuleSideOptionsVisitor {
+        fn collect_rule<R, L>(&mut self)
+        where
+            R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
+        {
+            let category = <R::Group as RuleGroup>::Category::CATEGORY;
+            if !matches!(category, RuleCategory::Lint) {
+                return;
+            }
+            self.types.insert(
+                (<R::Group as RuleGroup>::NAME, R::METADATA.name),
+                TypeId::of::<R::Options>(),
+            );
+        }
+    }
+
+    impl RegistryVisitor<JsLanguage> for RuleSideOptionsVisitor {
+        fn record_rule<R>(&mut self)
+        where
+            R: Rule<Options: Default, Query: Queryable<Language = JsLanguage, Output: Clone>>
+                + 'static,
+        {
+            self.collect_rule::<R, JsLanguage>();
+        }
+    }
+
+    impl RegistryVisitor<JsonLanguage> for RuleSideOptionsVisitor {
+        fn record_rule<R>(&mut self)
+        where
+            R: Rule<Options: Default, Query: Queryable<Language = JsonLanguage, Output: Clone>>
+                + 'static,
+        {
+            self.collect_rule::<R, JsonLanguage>();
+        }
+    }
+
+    impl RegistryVisitor<CssLanguage> for RuleSideOptionsVisitor {
+        fn record_rule<R>(&mut self)
+        where
+            R: Rule<Options: Default, Query: Queryable<Language = CssLanguage, Output: Clone>>
+                + 'static,
+        {
+            self.collect_rule::<R, CssLanguage>();
+        }
+    }
+
+    impl RegistryVisitor<GraphqlLanguage> for RuleSideOptionsVisitor {
+        fn record_rule<R>(&mut self)
+        where
+            R: Rule<Options: Default, Query: Queryable<Language = GraphqlLanguage, Output: Clone>>
+                + 'static,
+        {
+            self.collect_rule::<R, GraphqlLanguage>();
+        }
+    }
+
+    impl RegistryVisitor<HtmlLanguage> for RuleSideOptionsVisitor {
+        fn record_rule<R>(&mut self)
+        where
+            R: Rule<Options: Default, Query: Queryable<Language = HtmlLanguage, Output: Clone>>
+                + 'static,
+        {
+            self.collect_rule::<R, HtmlLanguage>();
+        }
+    }
+
+    /// Verifies that every lint rule's `type Options` matches the canonical options
+    /// type derived from the rule name (`biome_rule_options::{snake_name}::{Name}Options`).
+    ///
+    /// This catches copy-paste bugs where a rule accidentally uses another rule's
+    /// options type (e.g. `type Options = SomeOtherRuleOptions`). The configuration
+    /// layer always constructs `RuleOptions` using the canonical type, so a mismatch
+    /// causes a `TypeId` divergence that triggers a panic at runtime.
+    #[test]
+    fn rule_options_match_config_types() {
+        let config_side = config_side_rule_options_types();
+
+        let mut visitor = RuleSideOptionsVisitor {
+            types: HashMap::new(),
+        };
+        biome_js_analyze::visit_registry(&mut visitor);
+        biome_json_analyze::visit_registry(&mut visitor);
+        biome_css_analyze::visit_registry(&mut visitor);
+        biome_graphql_analyze::visit_registry(&mut visitor);
+        biome_html_analyze::visit_registry(&mut visitor);
+
+        let mut mismatches = Vec::new();
+        for (group, rule, config_type_id) in &config_side {
+            if let Some(rule_type_id) = visitor.types.get(&(*group, *rule))
+                && config_type_id != rule_type_id
+            {
+                mismatches.push(format!(
+                    "  {group}/{rule}: rule declares a different Options type than \
+                         biome_rule_options::{module}::{name}Options",
+                    module = biome_string_case::Case::Snake.convert(rule),
+                    name = {
+                        let mut c = rule.chars();
+                        match c.next() {
+                            None => String::new(),
+                            Some(f) => f.to_uppercase().collect::<String>() + c.as_str(),
+                        }
+                    },
+                ));
+            }
+        }
+
+        if !mismatches.is_empty() {
+            panic!(
+                "Rule options type mismatches detected:\n{}\n\n\
+                 Each rule's `type Options` must match the canonical options type \
+                 generated from its name. Check for copy-paste errors.",
+                mismatches.join("\n")
+            );
+        }
     }
 }

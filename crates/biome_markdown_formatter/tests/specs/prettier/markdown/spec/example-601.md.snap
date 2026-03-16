@@ -18,15 +18,14 @@ foo\
 --- Prettier
 +++ Biome
 @@ -1,2 +1,2 @@
--foo\
+ foo\
 - bar
-+foo
 +bar
 ```
 
 # Output
 
 ```md
-foo
+foo\
 bar
 ```

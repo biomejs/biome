@@ -22,7 +22,7 @@ pub(crate) fn parse_scss_content_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    p.bump_remap(T![content]);
+    p.bump(T![content]);
     // The argument list is optional in the grammar, so a missing `(` is valid.
     parse_scss_include_argument_list(p).ok();
     p.expect(T![;]);
@@ -32,5 +32,5 @@ pub(crate) fn parse_scss_content_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 fn is_at_scss_content_at_rule(p: &mut CssParser) -> bool {
-    p.at(T![ident]) && p.cur_text() == "content"
+    p.at(T![content])
 }

@@ -43,7 +43,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseImportsFirst {
-        version: "next",
+        version: "2.4.7",
         name: "useImportsFirst",
         language: "js",
         recommended: false,
