@@ -362,6 +362,9 @@ pub(crate) trait CommandRunner {
             mut loaded_location,
         } = loaded_configuration;
 
+        // Save the config file path for diagnostics before merge_configuration consumes it
+        let config_file_path = file_path.clone();
+
         // Merge the FS configuration with the CLI arguments
         let configuration = self.merge_configuration(
             configuration,
@@ -387,7 +390,7 @@ pub(crate) trait CommandRunner {
             &root_configuration_dir
         };
         if !loaded_location.is_in_project() {
-            let config_path_str = directory_path
+            let config_path_str = config_file_path
                 .as_ref()
                 .map(|p| p.to_string())
                 .unwrap_or_else(|| "<unknown>".to_string());
