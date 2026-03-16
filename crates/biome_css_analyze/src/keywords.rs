@@ -851,8 +851,10 @@ pub const VENDOR_SPECIFIC_PSEUDO_ELEMENTS: [&str; 66] = [
 
 pub const SHADOW_TREE_PSEUDO_ELEMENTS: [&str; 1] = ["part"];
 
-pub const OTHER_PSEUDO_ELEMENTS: [&str; 22] = [
+pub const OTHER_PSEUDO_ELEMENTS: [&str; 29] = [
     "backdrop",
+    "checkmark",
+    "column",
     "content",
     "cue",
     "details-content",
@@ -860,8 +862,13 @@ pub const OTHER_PSEUDO_ELEMENTS: [&str; 22] = [
     "grammar-error",
     "highlight",
     "marker",
+    "picker",
+    "picker-icon",
     "placeholder",
     "prefix",
+    "scroll-button",
+    "scroll-marker",
+    "scroll-marker-group",
     "search-text",
     "selection",
     "shadow",
@@ -930,9 +937,10 @@ pub const RESOURCE_STATE_PSEUDO_CLASSES: [&str; 7] = [
     "volume-locked",
 ];
 
-pub const OTHER_PSEUDO_CLASSES: [&str; 52] = [
+pub const OTHER_PSEUDO_CLASSES: [&str; 57] = [
     "active",
     "active-view-transition",
+    "active-view-transition-type",
     "any-link",
     "autofill",
     "blank",
@@ -951,6 +959,7 @@ pub const OTHER_PSEUDO_CLASSES: [&str; 52] = [
     "fullscreen",
     "fullscreen-ancestor",
     "future",
+    "has-slotted",
     "host",
     "host-context",
     "hover",
@@ -977,6 +986,9 @@ pub const OTHER_PSEUDO_CLASSES: [&str; 52] = [
     "scope",
     "state",
     "target",
+    "target-after",
+    "target-before",
+    "target-current",
     "unresolved",
     "user-invalid",
     "user-valid",
@@ -1156,6 +1168,7 @@ pub const KNOWN_PROPERTIES: &[&str] = &[
     "direction",
     "display",
     "dominant-baseline",
+    "dynamic-range-limit",
     "elevation",
     "empty-cells",
     "field-sizing",
@@ -1374,6 +1387,7 @@ pub const KNOWN_PROPERTIES: &[&str] = &[
     "overflow-wrap",
     "overflow-x",
     "overflow-y",
+    "overlay",
     "overscroll-behavior",
     "overscroll-behavior-block",
     "overscroll-behavior-inline",
@@ -1416,6 +1430,8 @@ pub const KNOWN_PROPERTIES: &[&str] = &[
     "print-color-adjust",
     "property-name",
     "quotes",
+    "reading-flow",
+    "reading-order",
     "region-fragment",
     "resize",
     "rest",
@@ -1443,6 +1459,7 @@ pub const KNOWN_PROPERTIES: &[&str] = &[
     "scroll-margin-left",
     "scroll-margin-right",
     "scroll-margin-top",
+    "scroll-marker-group",
     "scroll-padding",
     "scroll-padding-block",
     "scroll-padding-block-end",
@@ -1458,6 +1475,7 @@ pub const KNOWN_PROPERTIES: &[&str] = &[
     "scroll-snap-stop",
     "scroll-snap-type",
     "scroll-start-target",
+    "scroll-target-group",
     "scroll-timeline",
     "scroll-timeline-axis",
     "scroll-timeline-name",
