@@ -4,8 +4,8 @@ use crate::syntax::parse_error::{
     expected_any_pseudo_element, expected_identifier, expected_selector,
 };
 use crate::syntax::selector::{
-    eat_or_recover_selector_function_close_token, parse_selector, parse_selector_identifier,
-    recover_selector_function_parameter,
+    eat_or_recover_selector_function_close_token, parse_selector,
+    parse_selector_identifier_fragment, recover_selector_function_parameter,
 };
 use crate::syntax::{is_at_identifier, parse_custom_identifier, parse_regular_identifier};
 use biome_css_syntax::CssSyntaxKind::*;
@@ -189,6 +189,6 @@ pub(crate) fn parse_pseudo_element_identifier(p: &mut CssParser) -> ParsedSyntax
     }
 
     let m = p.start();
-    parse_selector_identifier(p).or_add_diagnostic(p, expected_identifier);
+    parse_selector_identifier_fragment(p).or_add_diagnostic(p, expected_identifier);
     Present(m.complete(p, CSS_PSEUDO_ELEMENT_IDENTIFIER))
 }
