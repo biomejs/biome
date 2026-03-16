@@ -21,7 +21,7 @@ rustc-hash               = { workspace = true }
 static_assertions        = { workspace = true }
 
 [dev-dependencies]
-biome_json_parser = { workspace = true }
+biome_json_parser = { path = "../biome_json_parser" }
 
 [lints]
 workspace = true
