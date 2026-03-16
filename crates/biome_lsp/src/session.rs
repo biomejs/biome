@@ -971,7 +971,18 @@ impl Session {
             }
         };
         if !loaded_configuration.loaded_location.is_in_project() {
-            let message = PrintDescription(&ConfigurationOutsideProject).to_string();
+            let config_path = loaded_configuration.directory_path
+                .as_ref()
+                .map(|p| p.as_str().to_string())
+                .unwrap_or_else(|| "unknown".to_string());
+            let working_dir = self.workspace.fs()
+                .working_directory()
+                .map(|p| p.display().to_string())
+                .unwrap_or_else(|| "unknown".to_string());
+            let message = PrintDescription(&ConfigurationOutsideProject {
+                config_path,
+                working_dir,
+            }).to_string();
             self.client.log_message(MessageType::INFO, message).await;
         }
 
