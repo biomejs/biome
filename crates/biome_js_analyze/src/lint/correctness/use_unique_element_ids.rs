@@ -12,6 +12,85 @@ use biome_rule_options::use_unique_element_ids::UseUniqueElementIdsOptions;
 use crate::react::{ReactApiCall, ReactCreateElementCall};
 use crate::services::semantic::Semantic;
 
+/// SVG element names that should be excluded from static `id` checks.
+/// SVG `id` attributes are scoped to the SVG document fragment and don't
+/// need to be globally unique in the HTML DOM.
+const SVG_ELEMENTS: &[&str] = &[
+    "svg",
+    "g",
+    "path",
+    "circle",
+    "ellipse",
+    "rect",
+    "line",
+    "polyline",
+    "polygon",
+    "text",
+    "tspan",
+    "textpath",
+    "defs",
+    "symbol",
+    "use",
+    "image",
+    "switch",
+    "foreignobject",
+    "clippath",
+    "mask",
+    "pattern",
+    "lineargradient",
+    "radialgradient",
+    "stop",
+    "filter",
+    "feblend",
+    "fecolormatrix",
+    "fecomponenttransfer",
+    "fecomposite",
+    "feconvolvematrix",
+    "fediffuselighting",
+    "fedisplacementmap",
+    "fedistantlight",
+    "feflood",
+    "fefunca",
+    "fefuncb",
+    "fefuncg",
+    "fefuncr",
+    "fegaussianblur",
+    "feimage",
+    "femerge",
+    "femergenode",
+    "femorphology",
+    "feoffset",
+    "fepointlight",
+    "fespecularlighting",
+    "fespotlight",
+    "fetile",
+    "feturbulence",
+    "animate",
+    "animatecolor",
+    "animatemotion",
+    "animatetransform",
+    "set",
+    "marker",
+    "view",
+    "desc",
+    "title",
+    "metadata",
+    "cursor",
+    "a",
+    "altglyph",
+    "altglyphdef",
+    "altglyphitem",
+    "color-profile",
+    "font",
+    "font-face",
+    "font-face-format",
+    "font-face-name",
+    "font-face-src",
+    "font-face-uri",
+    "hkern",
+    "vkern",
+];
+
 declare_lint_rule! {
     /// Prevent the usage of static string literal `id` attribute on elements.
     ///
@@ -139,11 +218,19 @@ impl Rule for UseUniqueElementIds {
         let node = ctx.query();
         let model = ctx.model();
         let options = ctx.options();
-        if let Some(name) = node.element_name(model)
-            && let Some(excluded_components) = &options.excluded_components
-            && excluded_components.contains(name.text())
-        {
-            return None;
+        if let Some(name) = node.element_name(model) {
+            // Skip SVG elements — their `id` attributes are scoped to the SVG
+            // and don't need to be globally unique.
+            // See: https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/id
+            let name_lower = name.text().to_lowercase();
+            if SVG_ELEMENTS.contains(&name_lower.as_str()) {
+                return None;
+            }
+            if let Some(excluded_components) = &options.excluded_components
+                && excluded_components.contains(name.text())
+            {
+                return None;
+            }
         }
         let id_attribute = node.find_id_attribute(model)?;
 
