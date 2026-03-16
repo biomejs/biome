@@ -54,7 +54,7 @@ use biome_html_syntax::{
     VueVSlotShorthandDirective,
 };
 use biome_js_parser::parse_js_with_offset_and_cache;
-use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage};
+use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, SvelteFileKind};
 use biome_json_parser::parse_json_with_offset_and_cache;
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_parser::AnyParse;
@@ -1123,8 +1123,10 @@ fn parse_matched_embed(
                 }
                 EmbedCandidate::Element { .. } => {
                     if ctx.host_file_source.is_svelte() {
-                        js_source = js_source
-                            .with_embedding_kind(EmbeddingKind::Svelte { is_source: true });
+                        js_source = js_source.with_embedding_kind(EmbeddingKind::Svelte {
+                            is_source: true,
+                            kind: SvelteFileKind::Component,
+                        });
                     } else if ctx.host_file_source.is_vue() {
                         js_source = js_source.with_embedding_kind(EmbeddingKind::Vue {
                             setup: candidate.has_attribute("setup"),
@@ -1144,8 +1146,10 @@ fn parse_matched_embed(
                         js_source = js_source
                             .with_embedding_kind(EmbeddingKind::Astro { frontmatter: false });
                     } else if ctx.host_file_source.is_svelte() {
-                        js_source = js_source
-                            .with_embedding_kind(EmbeddingKind::Svelte { is_source: false });
+                        js_source = js_source.with_embedding_kind(EmbeddingKind::Svelte {
+                            is_source: false,
+                            kind: SvelteFileKind::Component,
+                        });
                     } else if ctx.host_file_source.is_vue() {
                         js_source = js_source.with_embedding_kind(EmbeddingKind::Vue {
                             setup: false,
@@ -1163,8 +1167,10 @@ fn parse_matched_embed(
                         js_source = efs;
                     }
                     if ctx.host_file_source.is_svelte() {
-                        js_source = js_source
-                            .with_embedding_kind(EmbeddingKind::Svelte { is_source: false });
+                        js_source = js_source.with_embedding_kind(EmbeddingKind::Svelte {
+                            is_source: false,
+                            kind: SvelteFileKind::Component,
+                        });
                     } else if ctx.host_file_source.is_vue() {
                         js_source = js_source.with_embedding_kind(EmbeddingKind::Vue {
                             setup: false,
@@ -1201,14 +1207,13 @@ fn parse_matched_embed(
                 content.content_offset,
             );
 
-            // Source-level embeds get full services; expression-level don't
-            let js_services = if is_source_level
-                && (ctx.settings.as_ref().is_linter_enabled()
-                    || ctx.settings.as_ref().is_assist_enabled())
-            {
-                JsDocumentServices::default()
-                    .with_js_semantic_model(&snippet.tree())
-                    .into()
+            let js_services = if is_source_level {
+                JsDocumentServices::from_js_snippet(
+                    &snippet.tree(),
+                    &js_source,
+                    ctx.settings.as_ref().is_linter_enabled()
+                        || ctx.settings.as_ref().is_assist_enabled(),
+                )
             } else {
                 DocumentServices::none()
             };
@@ -1477,6 +1482,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         categories,
         action_offset,
         document_services: _,
+        snippet_services: _,
     } = params;
     let _ = debug_span!("Code actions HTML", range =? range, path =? path).entered();
     let tree = parse.tree();

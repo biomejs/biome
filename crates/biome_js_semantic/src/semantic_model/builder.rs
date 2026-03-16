@@ -1,8 +1,10 @@
 use super::*;
-use biome_js_syntax::{AnyJsRoot, JsSyntaxNode, TextRange, TsConditionalType, TsTypeParameterName};
+use biome_js_syntax::{
+    AnyJsRoot, JsIdentifierAssignment, JsSyntaxNode, TextRange, TsConditionalType,
+    TsTypeParameterName,
+};
 use biome_rowan::SyntaxNodePtr;
 use rustc_hash::{FxHashMap, FxHashSet};
-use std::collections::hash_map::Entry;
 
 /// Builds the [SemanticModel] consuming [SemanticEvent] and [JsSyntaxNode].
 /// For a good example on how to use it see [semantic_model].
@@ -27,6 +29,7 @@ pub struct SemanticModelBuilder {
     declared_at_by_start: FxHashMap<TextSize, BindingId>,
     exported: FxHashSet<TextSize>,
     unresolved_references: Vec<SemanticModelUnresolvedReference>,
+    flavor: SemanticFlavor,
 }
 
 impl SemanticModelBuilder {
@@ -45,7 +48,13 @@ impl SemanticModelBuilder {
             declared_at_by_start: FxHashMap::default(),
             exported: FxHashSet::default(),
             unresolved_references: Vec::new(),
+            flavor: SemanticFlavor::default(),
         }
+    }
+
+    #[inline]
+    pub fn set_flavor(&mut self, flavor: SemanticFlavor) {
+        self.flavor = flavor;
     }
 
     #[inline]
@@ -239,7 +248,11 @@ impl SemanticModelBuilder {
                 let scope = &mut self.scopes[scope_id.index()];
                 scope.read_references.push(reference_id);
 
-                self.declared_at_by_start.insert(range.start(), binding_id);
+                // `$store = ...` in Svelte is not a write to the `store` binding itself.
+                // Skipping this index keeps write-sensitive rules from reporting false positives.
+                if !self.is_svelte_store_assignment(range) {
+                    self.declared_at_by_start.insert(range.start(), binding_id);
+                }
             }
             HoistedRead {
                 range,
@@ -257,7 +270,9 @@ impl SemanticModelBuilder {
                 let scope = &mut self.scopes[scope_id.index()];
                 scope.read_references.push(reference_id);
 
-                self.declared_at_by_start.insert(range.start(), binding_id);
+                if !self.is_svelte_store_assignment(range) {
+                    self.declared_at_by_start.insert(range.start(), binding_id);
+                }
             }
             Write {
                 range,
@@ -303,35 +318,33 @@ impl SemanticModelBuilder {
                 };
 
                 let node = &self.binding_node_by_start[&range.start()];
-                let name = node.text_trimmed().to_string();
+                let unresolved_name = node.text_trimmed().to_string();
 
-                match self.globals_by_name.entry(name) {
-                    Entry::Occupied(mut entry) => {
-                        let entry = entry.get_mut();
-                        match entry {
-                            Some(index) => {
-                                self.globals[(*index) as usize].references.push(
-                                    SemanticModelGlobalReferenceData {
-                                        range_start: range.start(),
-                                        ty,
-                                    },
-                                );
-                            }
-                            None => {
-                                let id = self.globals.len() as u32;
-                                self.globals.push(SemanticModelGlobalBindingData {
-                                    references: vec![SemanticModelGlobalReferenceData {
-                                        range_start: range.start(),
-                                        ty,
-                                    }],
-                                });
-                                *entry = Some(id);
-                            }
-                        }
+                if let Some(global_name) = self.resolve_global_name(&unresolved_name) {
+                    if let Some(index) = self.globals_by_name[global_name] {
+                        self.globals[index as usize].references.push(
+                            SemanticModelGlobalReferenceData {
+                                range_start: range.start(),
+                                ty,
+                            },
+                        );
+                    } else {
+                        let id = self.globals.len() as u32;
+                        self.globals.push(SemanticModelGlobalBindingData {
+                            references: vec![SemanticModelGlobalReferenceData {
+                                range_start: range.start(),
+                                ty,
+                            }],
+                        });
+                        *self
+                            .globals_by_name
+                            .get_mut(global_name)
+                            .expect("resolved global name must exist in globals_by_name") =
+                            Some(id);
                     }
-                    Entry::Vacant(_) => self
-                        .unresolved_references
-                        .push(SemanticModelUnresolvedReference { range }),
+                } else {
+                    self.unresolved_references
+                        .push(SemanticModelUnresolvedReference { range });
                 }
             }
             Export {
@@ -351,6 +364,7 @@ impl SemanticModelBuilder {
     pub fn build(self) -> SemanticModel {
         let data = SemanticModelData {
             root: self.root.syntax().as_send().expect("To be a root node"),
+            flavor: self.flavor,
             scopes: self.scopes,
             scope_by_range: Lapper::new(
                 self.scope_range_by_start
@@ -378,5 +392,44 @@ impl SemanticModelBuilder {
             globals: self.globals,
         };
         SemanticModel::new(data)
+    }
+
+    fn resolve_global_name<'a>(&self, unresolved_name: &'a str) -> Option<&'a str> {
+        if self.globals_by_name.contains_key(unresolved_name) {
+            return Some(unresolved_name);
+        }
+
+        if self.flavor == SemanticFlavor::Svelte
+            && let Some(store_name) = self.flavor.store_reference_name(unresolved_name)
+            && self.globals_by_name.contains_key(store_name)
+        {
+            return Some(store_name);
+        }
+
+        None
+    }
+
+    /// Returns true for references that come from Svelte `$store = ...` updates.
+    /// Those updates should not be treated like writes to the backing `store` binding.
+    fn is_svelte_store_assignment(&self, range: TextRange) -> bool {
+        if self.flavor != SemanticFlavor::Svelte {
+            return false;
+        }
+        let Some(node) = self.binding_node_by_start.get(&range.start()) else {
+            return false;
+        };
+        if node.kind() != JsSyntaxKind::JS_IDENTIFIER_ASSIGNMENT {
+            return false;
+        }
+
+        let Some(identifier_assignment) = JsIdentifierAssignment::cast_ref(node) else {
+            return false;
+        };
+        let Ok(reference_name) = identifier_assignment.name_token() else {
+            return false;
+        };
+        self.flavor
+            .store_reference_name(reference_name.text_trimmed())
+            .is_some()
     }
 }

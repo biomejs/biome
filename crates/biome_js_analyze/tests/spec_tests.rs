@@ -214,7 +214,7 @@ pub(crate) fn analyze_and_snap(
     } else {
         Default::default()
     };
-    let semantic_model = semantic_model(&root, SemanticModelOptions::default());
+    let semantic_model = semantic_model(&root, SemanticModelOptions::from(&source_type));
 
     let services = JsAnalyzerServices::from((
         module_graph,
