@@ -109,7 +109,7 @@ pub struct JsFormatterConfiguration {
     pub bracket_spacing: Option<BracketSpacing>,
 
     // it's also a top-level configurable property.
-    /// Whether to insert spaces inside delimiters. Affects parentheses `()`, square brackets `[]`, TypeScript angle brackets `<>`, and JSX curly braces `{}`. Defaults to false.
+    /// Whether to insert spaces inside delimiters. For JavaScript and TypeScript, affects parentheses `()`, square brackets `[]`, template literal interpolations `${}`, TypeScript angle brackets `<>`, JSX expression braces `{}`, and the logical NOT operator `!`. Defaults to false.
     #[bpaf(long("javascript-formatter-delimiter-spacing"), argument("true|false"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub delimiter_spacing: Option<DelimiterSpacing>,

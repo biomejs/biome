@@ -1407,7 +1407,7 @@
 			"type": "object",
 			"properties": {
 				"delimiterSpacing": {
-					"description": "Whether to insert spaces inside delimiters. Affects parentheses `()` and square brackets `[]`. Defaults to false.",
+					"description": "Whether to insert spaces inside delimiters. For CSS, affects parentheses `()` and square brackets `[]`. Defaults to false.",
 					"anyOf": [{ "$ref": "#/$defs/DelimiterSpacing" }, { "type": "null" }]
 				},
 				"enabled": {
@@ -1507,7 +1507,7 @@
 			]
 		},
 		"DelimiterSpacing": {
-			"description": "Whether to insert spaces inside delimiters. Affects parentheses `()`, square brackets `[]`, TypeScript angle brackets `<>`, and JSX curly braces `{}`.",
+			"description": "Whether to insert spaces inside delimiters such as parentheses, brackets, braces, angle brackets, and template literal interpolations. The specific delimiters affected depend on the language.",
 			"type": "boolean"
 		},
 		"DependencyAvailability": {
@@ -1648,7 +1648,7 @@
 					"anyOf": [{ "$ref": "#/$defs/BracketSpacing" }, { "type": "null" }]
 				},
 				"delimiterSpacing": {
-					"description": "Whether to insert spaces inside delimiters.  Affects parentheses `()`,\nsquare brackets `[]`, TypeScript angle brackets `<>`, and JSX curly\nbraces `{}`.  Defaults to false.",
+					"description": "Whether to insert spaces inside delimiters such as parentheses, brackets,\nbraces, angle brackets, and template literal interpolations. The specific\ndelimiters affected depend on the language. Defaults to false.",
 					"anyOf": [{ "$ref": "#/$defs/DelimiterSpacing" }, { "type": "null" }]
 				},
 				"enabled": {
@@ -2193,7 +2193,7 @@
 					"anyOf": [{ "$ref": "#/$defs/BracketSpacing" }, { "type": "null" }]
 				},
 				"delimiterSpacing": {
-					"description": "Whether to insert spaces inside delimiters. Affects parentheses `()`, square brackets `[]`, TypeScript angle brackets `<>`, and JSX curly braces `{}`. Defaults to false.",
+					"description": "Whether to insert spaces inside delimiters. For JavaScript and TypeScript, affects parentheses `()`, square brackets `[]`, template literal interpolations `${}`, TypeScript angle brackets `<>`, JSX expression braces `{}`, and the logical NOT operator `!`. Defaults to false.",
 					"anyOf": [{ "$ref": "#/$defs/DelimiterSpacing" }, { "type": "null" }]
 				},
 				"enabled": {
@@ -2340,7 +2340,7 @@
 					"anyOf": [{ "$ref": "#/$defs/BracketSpacing" }, { "type": "null" }]
 				},
 				"delimiterSpacing": {
-					"description": "Whether to insert spaces inside square brackets `[]`. Defaults to false.",
+					"description": "Whether to insert spaces inside delimiters. For JSON, affects square brackets `[]`. Defaults to false.",
 					"anyOf": [{ "$ref": "#/$defs/DelimiterSpacing" }, { "type": "null" }]
 				},
 				"enabled": {
@@ -6513,7 +6513,7 @@
 					"anyOf": [{ "$ref": "#/$defs/BracketSpacing" }, { "type": "null" }]
 				},
 				"delimiterSpacing": {
-					"description": "Whether to insert spaces inside delimiters.  Affects parentheses `()`,\nsquare brackets `[]`, TypeScript angle brackets `<>`, and JSX curly\nbraces `{}`.  Defaults to false.",
+					"description": "Whether to insert spaces inside delimiters such as parentheses, brackets,\nbraces, angle brackets, and template literal interpolations. The specific\ndelimiters affected depend on the language. Defaults to false.",
 					"anyOf": [{ "$ref": "#/$defs/DelimiterSpacing" }, { "type": "null" }]
 				},
 				"enabled": {

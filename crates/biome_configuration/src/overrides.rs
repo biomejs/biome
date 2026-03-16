@@ -165,9 +165,9 @@ pub struct OverrideFormatterConfiguration {
     #[bpaf(long("bracket-spacing"), argument("true|false"))]
     pub bracket_spacing: Option<BracketSpacing>,
 
-    /// Whether to insert spaces inside delimiters.  Affects parentheses `()`,
-    /// square brackets `[]`, TypeScript angle brackets `<>`, and JSX curly
-    /// braces `{}`.  Defaults to false.
+    /// Whether to insert spaces inside delimiters such as parentheses, brackets,
+    /// braces, angle brackets, and template literal interpolations. The specific
+    /// delimiters affected depend on the language. Defaults to false.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(long("delimiter-spacing"), argument("true|false"))]
     pub delimiter_spacing: Option<DelimiterSpacing>,

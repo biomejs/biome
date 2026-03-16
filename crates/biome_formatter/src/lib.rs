@@ -711,7 +711,7 @@ impl FromStr for BracketSpacing {
     }
 }
 
-/// Whether to insert spaces inside delimiters. Affects parentheses `()`, square brackets `[]`, TypeScript angle brackets `<>`, and JSX curly braces `{}`.
+/// Whether to insert spaces inside delimiters such as parentheses, brackets, braces, angle brackets, and template literal interpolations. The specific delimiters affected depend on the language.
 #[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",

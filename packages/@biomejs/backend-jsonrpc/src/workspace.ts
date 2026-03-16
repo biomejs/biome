@@ -177,9 +177,9 @@ export interface FormatterConfiguration {
 	 */
 	bracketSpacing?: BracketSpacing;
 	/**
-	* Whether to insert spaces inside delimiters.  Affects parentheses `()`,
-square brackets `[]`, TypeScript angle brackets `<>`, and JSX curly
-braces `{}`.  Defaults to false. 
+	* Whether to insert spaces inside delimiters such as parentheses, brackets,
+braces, angle brackets, and template literal interpolations. The specific
+delimiters affected depend on the language. Defaults to false. 
 	 */
 	delimiterSpacing?: DelimiterSpacing;
 	enabled?: Bool;
@@ -426,7 +426,7 @@ export interface CssAssistConfiguration {
  */
 export interface CssFormatterConfiguration {
 	/**
-	 * Whether to insert spaces inside delimiters. Affects parentheses `()` and square brackets `[]`. Defaults to false.
+	 * Whether to insert spaces inside delimiters. For CSS, affects parentheses `()` and square brackets `[]`. Defaults to false.
 	 */
 	delimiterSpacing?: DelimiterSpacing;
 	/**
@@ -502,7 +502,7 @@ export type AttributePosition = "auto" | "multiline";
 export type BracketSameLine = boolean;
 export type BracketSpacing = boolean;
 /**
- * Whether to insert spaces inside delimiters. Affects parentheses `()`, square brackets `[]`, TypeScript angle brackets `<>`, and JSX curly braces `{}`.
+ * Whether to insert spaces inside delimiters such as parentheses, brackets, braces, angle brackets, and template literal interpolations. The specific delimiters affected depend on the language.
  */
 export type DelimiterSpacing = boolean;
 export type Expand = "auto" | "always" | "never";
@@ -742,7 +742,7 @@ export interface JsFormatterConfiguration {
 	 */
 	bracketSpacing?: BracketSpacing;
 	/**
-	 * Whether to insert spaces inside delimiters. Affects parentheses `()`, square brackets `[]`, TypeScript angle brackets `<>`, and JSX curly braces `{}`. Defaults to false.
+	 * Whether to insert spaces inside delimiters. For JavaScript and TypeScript, affects parentheses `()`, square brackets `[]`, template literal interpolations `${}`, TypeScript angle brackets `<>`, JSX expression braces `{}`, and the logical NOT operator `!`. Defaults to false.
 	 */
 	delimiterSpacing?: DelimiterSpacing;
 	/**
@@ -862,7 +862,7 @@ export interface JsonFormatterConfiguration {
 	 */
 	bracketSpacing?: BracketSpacing;
 	/**
-	 * Whether to insert spaces inside square brackets `[]`. Defaults to false.
+	 * Whether to insert spaces inside delimiters. For JSON, affects square brackets `[]`. Defaults to false.
 	 */
 	delimiterSpacing?: DelimiterSpacing;
 	/**
@@ -1144,9 +1144,9 @@ export interface OverrideFormatterConfiguration {
 	 */
 	bracketSpacing?: BracketSpacing;
 	/**
-	* Whether to insert spaces inside delimiters.  Affects parentheses `()`,
-square brackets `[]`, TypeScript angle brackets `<>`, and JSX curly
-braces `{}`.  Defaults to false. 
+	* Whether to insert spaces inside delimiters such as parentheses, brackets,
+braces, angle brackets, and template literal interpolations. The specific
+delimiters affected depend on the language. Defaults to false. 
 	 */
 	delimiterSpacing?: DelimiterSpacing;
 	enabled?: Bool;

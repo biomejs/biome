@@ -101,7 +101,7 @@ pub struct CssFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub quote_style: Option<QuoteStyle>,
 
-    /// Whether to insert spaces inside delimiters. Affects parentheses `()` and square brackets `[]`. Defaults to false.
+    /// Whether to insert spaces inside delimiters. For CSS, affects parentheses `()` and square brackets `[]`. Defaults to false.
     #[bpaf(long("css-formatter-delimiter-spacing"), argument("true|false"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub delimiter_spacing: Option<DelimiterSpacing>,
