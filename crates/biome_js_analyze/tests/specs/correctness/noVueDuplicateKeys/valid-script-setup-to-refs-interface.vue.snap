@@ -5,7 +5,6 @@ expression: valid-script-setup-to-refs-interface.vue
 # Input
 ```vue
 <!-- should not generate diagnostics -->
-<!-- should not emit diagnostics -->
 
 <script setup lang="ts">
 import { toRefs } from 'vue';
