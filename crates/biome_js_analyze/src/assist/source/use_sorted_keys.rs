@@ -161,7 +161,7 @@ declare_source_rule! {
         name: "useSortedKeys",
         language: "js",
         recommended: false,
-        sources: &[RuleSource::EslintPerfectionist("sort-objects").inspired()],
+        sources: &[RuleSource::Eslint("sort-keys").inspired() , RuleSource::EslintPerfectionist("sort-objects").inspired()],
         fix_kind: FixKind::Safe,
     }
 }
