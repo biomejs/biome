@@ -9109,6 +9109,11 @@ export type EmbeddingKind =
 				 * Whether the script is inside Astro frontmatter
 				 */
 				frontmatter: boolean;
+				/**
+	* Whether this snippet is from a class-related attribute
+(e.g., `class:list={...}` or `class={...}`) 
+	 */
+				is_class_attribute: boolean;
 			};
 	  }
 	| {
