@@ -46,7 +46,7 @@ use biome_diagnostics::{
     Diagnostic, DiagnosticExt, Severity, serde::Diagnostic as SerdeDiagnostic,
 };
 use biome_formatter::Printed;
-use biome_fs::{BiomePath, ConfigName, PathKind};
+use biome_fs::{BiomePath, ConfigName, PathKind, normalize_path};
 use biome_grit_patterns::{CompilePatternOptions, GritQuery, compile_pattern_with_options};
 use biome_html_syntax::HtmlRoot;
 use biome_js_syntax::{AnyJsRoot, LanguageVariant, ModuleKind};
@@ -1240,7 +1240,11 @@ impl Workspace for WorkspaceServer {
         } else {
             // If the configuration is a root one, we also load the ignore files
             if settings.is_vcs_enabled() && settings.vcs_settings.should_use_ignore_file() {
-                let directory = workspace_directory.unwrap_or_default();
+                let directory = settings
+                    .vcs_settings
+                    .to_base_path(workspace_directory.as_deref())
+                    .map(|p| normalize_path(&p))
+                    .unwrap_or_default();
                 match settings.vcs_settings.client_kind {
                     None => {}
                     Some(VcsClientKind::Git) => {
