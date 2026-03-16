@@ -1,0 +1,184 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<button aria-hidden="true">Click me</button>
+<a href="/" aria-hidden="true">link</a>
+<input aria-hidden="true" />
+<div tabindex="0" aria-hidden="true"></div>
+<select aria-hidden="true"><option>opt</option></select>
+<textarea aria-hidden="true">text</textarea>
+<div contenteditable="true" aria-hidden="true">editable</div>
+<p tabindex="0" aria-hidden="true">text</p>
+
+```
+
+# Diagnostics
+```
+invalid.html:2:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Disallow aria-hidden="true" from being set on focusable elements.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <button aria-hidden="true">Click me</button>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <a href="/" aria-hidden="true">link</a>
+    4 │ <input aria-hidden="true" />
+  
+  i aria-hidden should not be set to true on focusable elements because this can lead to confusing behavior for screen reader users.
+  
+  i Unsafe fix: Remove the aria-hidden attribute from the element.
+  
+    2 │ <button·aria-hidden="true">Click·me</button>␍
+      │         ------------------                  
+
+```
+
+```
+invalid.html:3:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Disallow aria-hidden="true" from being set on focusable elements.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <button aria-hidden="true">Click me</button>
+  > 3 │ <a href="/" aria-hidden="true">link</a>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ <input aria-hidden="true" />
+    5 │ <div tabindex="0" aria-hidden="true"></div>
+  
+  i aria-hidden should not be set to true on focusable elements because this can lead to confusing behavior for screen reader users.
+  
+  i Unsafe fix: Remove the aria-hidden attribute from the element.
+  
+    3 │ <a·href="/"·aria-hidden="true">link</a>␍
+      │             ------------------         
+
+```
+
+```
+invalid.html:4:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Disallow aria-hidden="true" from being set on focusable elements.
+  
+    2 │ <button aria-hidden="true">Click me</button>
+    3 │ <a href="/" aria-hidden="true">link</a>
+  > 4 │ <input aria-hidden="true" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ <div tabindex="0" aria-hidden="true"></div>
+    6 │ <select aria-hidden="true"><option>opt</option></select>
+  
+  i aria-hidden should not be set to true on focusable elements because this can lead to confusing behavior for screen reader users.
+  
+  i Unsafe fix: Remove the aria-hidden attribute from the element.
+  
+    4 │ <input·aria-hidden="true"·/>␍
+      │        -------------------  
+
+```
+
+```
+invalid.html:5:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Disallow aria-hidden="true" from being set on focusable elements.
+  
+    3 │ <a href="/" aria-hidden="true">link</a>
+    4 │ <input aria-hidden="true" />
+  > 5 │ <div tabindex="0" aria-hidden="true"></div>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ <select aria-hidden="true"><option>opt</option></select>
+    7 │ <textarea aria-hidden="true">text</textarea>
+  
+  i aria-hidden should not be set to true on focusable elements because this can lead to confusing behavior for screen reader users.
+  
+  i Unsafe fix: Remove the aria-hidden attribute from the element.
+  
+    5 │ <div·tabindex="0"·aria-hidden="true"></div>␍
+      │                   ------------------       
+
+```
+
+```
+invalid.html:6:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Disallow aria-hidden="true" from being set on focusable elements.
+  
+    4 │ <input aria-hidden="true" />
+    5 │ <div tabindex="0" aria-hidden="true"></div>
+  > 6 │ <select aria-hidden="true"><option>opt</option></select>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ <textarea aria-hidden="true">text</textarea>
+    8 │ <div contenteditable="true" aria-hidden="true">editable</div>
+  
+  i aria-hidden should not be set to true on focusable elements because this can lead to confusing behavior for screen reader users.
+  
+  i Unsafe fix: Remove the aria-hidden attribute from the element.
+  
+    6 │ <select·aria-hidden="true"><option>opt</option></select>␍
+      │         ------------------                              
+
+```
+
+```
+invalid.html:7:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Disallow aria-hidden="true" from being set on focusable elements.
+  
+    5 │ <div tabindex="0" aria-hidden="true"></div>
+    6 │ <select aria-hidden="true"><option>opt</option></select>
+  > 7 │ <textarea aria-hidden="true">text</textarea>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ <div contenteditable="true" aria-hidden="true">editable</div>
+    9 │ <p tabindex="0" aria-hidden="true">text</p>
+  
+  i aria-hidden should not be set to true on focusable elements because this can lead to confusing behavior for screen reader users.
+  
+  i Unsafe fix: Remove the aria-hidden attribute from the element.
+  
+    7 │ <textarea·aria-hidden="true">text</textarea>␍
+      │           ------------------                
+
+```
+
+```
+invalid.html:8:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Disallow aria-hidden="true" from being set on focusable elements.
+  
+     6 │ <select aria-hidden="true"><option>opt</option></select>
+     7 │ <textarea aria-hidden="true">text</textarea>
+   > 8 │ <div contenteditable="true" aria-hidden="true">editable</div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ <p tabindex="0" aria-hidden="true">text</p>
+    10 │ 
+  
+  i aria-hidden should not be set to true on focusable elements because this can lead to confusing behavior for screen reader users.
+  
+  i Unsafe fix: Remove the aria-hidden attribute from the element.
+  
+    8 │ <div·contenteditable="true"·aria-hidden="true">editable</div>␍
+      │                             ------------------               
+
+```
+
+```
+invalid.html:9:1 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Disallow aria-hidden="true" from being set on focusable elements.
+  
+     7 │ <textarea aria-hidden="true">text</textarea>
+     8 │ <div contenteditable="true" aria-hidden="true">editable</div>
+   > 9 │ <p tabindex="0" aria-hidden="true">text</p>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+  
+  i aria-hidden should not be set to true on focusable elements because this can lead to confusing behavior for screen reader users.
+  
+  i Unsafe fix: Remove the aria-hidden attribute from the element.
+  
+    9 │ <p·tabindex="0"·aria-hidden="true">text</p>␍
+      │                 ------------------         
+
+```
