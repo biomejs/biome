@@ -82,10 +82,10 @@ tracing-subscriber       = { workspace = true, features = ["env-filter", "json"]
 tracing-tree             = "0.4.1"
 
 [dev-dependencies]
-biome_css_formatter  = { workspace = true }
-biome_js_formatter   = { workspace = true }
-biome_json_formatter = { workspace = true }
-biome_json_parser    = { workspace = true }
+biome_css_formatter  = { path = "../biome_css_formatter" }
+biome_js_formatter   = { path = "../biome_js_formatter" }
+biome_json_formatter = { path = "../biome_json_formatter" }
+biome_json_parser    = { path = "../biome_json_parser" }
 directories          = { workspace = true }
 insta                = { workspace = true }
 regex                = { workspace = true }
