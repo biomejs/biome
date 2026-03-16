@@ -1,0 +1,52 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 154
+expression: allowImplicitInvalid.js
+---
+# Input
+```js
+// some paths return values, others fall through without any return
+[1, 2, 3].map((x) => {
+    if (x > 2) return x;
+    // falls through - likely a bug
+});
+
+// no returns at all
+[1, 2, 3].map((x) => {
+    console.log(x);
+});
+
+```
+
+# Diagnostics
+```
+allowImplicitInvalid.js:2:11 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to map() iterable method should always return a value.
+  
+    1 │ // some paths return values, others fall through without any return
+  > 2 │ [1, 2, 3].map((x) => {
+      │           ^^^
+    3 │     if (x > 2) return x;
+    4 │     // falls through - likely a bug
+  
+  i Add missing return statements so that this callback returns a value on all execution paths.
+  
+
+```
+
+```
+allowImplicitInvalid.js:8:11 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to map() iterable method should always return a value.
+  
+     7 │ // no returns at all
+   > 8 │ [1, 2, 3].map((x) => {
+       │           ^^^
+     9 │     console.log(x);
+    10 │ });
+  
+  i Add a return with a value to this callback.
+  
+
+```
