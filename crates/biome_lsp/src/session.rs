@@ -974,8 +974,7 @@ impl Session {
             let config_path = loaded_configuration
                 .file_path
                 .as_ref()
-                .map(|p| p.to_string())
-                .unwrap_or_else(|| "<unknown>".to_string());
+                .map_or_else(|| "<unknown>".to_string(), |p| p.to_string());
             let working_directory = match &base_path {
                 ConfigurationPathHint::FromLsp(path)
                 | ConfigurationPathHint::FromWorkspace(path) => path.to_string(),
