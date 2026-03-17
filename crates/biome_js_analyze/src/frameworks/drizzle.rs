@@ -1,4 +1,4 @@
-use biome_js_syntax::{AnyJsExpression, JsStaticMemberExpression, JsSyntaxKind};
+use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsStaticMemberExpression, JsSyntaxKind};
 use biome_rowan::{AstNode, SyntaxNode};
 
 pub(crate) fn get_identifier_name(expr: &AnyJsExpression) -> Option<biome_rowan::TokenText> {
@@ -24,7 +24,13 @@ pub(crate) fn has_where_in_chain(node: &SyntaxNode<biome_js_syntax::JsLanguage>)
                         .map(|t| t.token_text_trimmed() == "where")
                         .unwrap_or(false)
                     {
-                        return true;
+                        // Only count `.where(...)` as a where clause, not bare `.where` property access.
+                        let is_called = parent
+                            .parent()
+                            .is_some_and(|p| JsCallExpression::cast_ref(&p).is_some());
+                        if is_called {
+                            return true;
+                        }
                     }
                 }
             }

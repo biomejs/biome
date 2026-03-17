@@ -8,3 +8,6 @@ db.update(users).set({ name: "John" });
 
 // update assigned to variable without where
 const result = db.update(users).set({ active: false });
+
+// .where as property access (not called) should still trigger
+db.update(users).set({ name: "John" }).where;
