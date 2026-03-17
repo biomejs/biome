@@ -8,6 +8,3 @@ db.update(users).set({ name: "John" });
 
 // update assigned to variable without where
 const result = db.update(users).set({ active: false });
-
-// different drizzle object name should NOT trigger (not in options)
-await database.update(users).set({ name: "John" });

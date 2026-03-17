@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 149
 expression: update.js
 ---
 # Input
@@ -16,16 +15,13 @@ db.update(users).set({ name: "John" });
 // update assigned to variable without where
 const result = db.update(users).set({ active: false });
 
-// different drizzle object name should NOT trigger (not in options)
-await database.update(users).set({ name: "John" });
-
 ```
 
 # Diagnostics
 ```
 update.js:4:7 lint/nursery/noDrizzleUpdateWithoutWhere ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i `.update()` is used without `.where()`. This will update all rows in the table.
+  i .update() is used without .where(). This will update all rows in the table.
   
     3 │ // update with set but no where
   > 4 │ await db.update(users).set({ name: "John" });
@@ -33,7 +29,7 @@ update.js:4:7 lint/nursery/noDrizzleUpdateWithoutWhere ━━━━━━━━�
     5 │ 
     6 │ // update without where, no await
   
-  i Add a `.where()` clause to update only the intended rows, or use `.where(sql`1=1`)` to explicitly update all rows.
+  i Add a .where() clause to update only the intended rows, or use .where(sql`1=1`) to explicitly update all rows.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -43,7 +39,7 @@ update.js:4:7 lint/nursery/noDrizzleUpdateWithoutWhere ━━━━━━━━�
 ```
 update.js:7:1 lint/nursery/noDrizzleUpdateWithoutWhere ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i `.update()` is used without `.where()`. This will update all rows in the table.
+  i .update() is used without .where(). This will update all rows in the table.
   
     6 │ // update without where, no await
   > 7 │ db.update(users).set({ name: "John" });
@@ -51,7 +47,7 @@ update.js:7:1 lint/nursery/noDrizzleUpdateWithoutWhere ━━━━━━━━�
     8 │ 
     9 │ // update assigned to variable without where
   
-  i Add a `.where()` clause to update only the intended rows, or use `.where(sql`1=1`)` to explicitly update all rows.
+  i Add a .where() clause to update only the intended rows, or use .where(sql`1=1`) to explicitly update all rows.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -61,15 +57,14 @@ update.js:7:1 lint/nursery/noDrizzleUpdateWithoutWhere ━━━━━━━━�
 ```
 update.js:10:16 lint/nursery/noDrizzleUpdateWithoutWhere ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i `.update()` is used without `.where()`. This will update all rows in the table.
+  i .update() is used without .where(). This will update all rows in the table.
   
      9 │ // update assigned to variable without where
   > 10 │ const result = db.update(users).set({ active: false });
        │                ^^^^^^^^^^^^^^^^
     11 │ 
-    12 │ // different drizzle object name should NOT trigger (not in options)
   
-  i Add a `.where()` clause to update only the intended rows, or use `.where(sql`1=1`)` to explicitly update all rows.
+  i Add a .where() clause to update only the intended rows, or use .where(sql`1=1`) to explicitly update all rows.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

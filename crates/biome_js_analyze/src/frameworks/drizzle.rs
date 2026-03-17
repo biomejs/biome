@@ -1,0 +1,43 @@
+use biome_js_syntax::{AnyJsExpression, JsStaticMemberExpression, JsSyntaxKind};
+use biome_rowan::{AstNode, SyntaxNode};
+
+pub(crate) fn get_identifier_name(expr: &AnyJsExpression) -> Option<biome_rowan::TokenText> {
+    match expr {
+        AnyJsExpression::JsIdentifierExpression(id) => {
+            Some(id.name().ok()?.value_token().ok()?.token_text_trimmed())
+        }
+        _ => None,
+    }
+}
+
+pub(crate) fn has_where_in_chain(node: &SyntaxNode<biome_js_syntax::JsLanguage>) -> bool {
+    let mut current = node.parent();
+    loop {
+        let Some(parent) = current else { break };
+
+        if let Some(member_expr) = JsStaticMemberExpression::cast_ref(&parent) {
+            if let Ok(member) = member_expr.member() {
+                if let Some(name) = member.as_js_name() {
+                    if name
+                        .value_token()
+                        .ok()
+                        .map(|t| t.token_text_trimmed() == "where")
+                        .unwrap_or(false)
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        if matches!(
+            parent.kind(),
+            JsSyntaxKind::JS_EXPRESSION_STATEMENT | JsSyntaxKind::JS_RETURN_STATEMENT
+        ) {
+            break;
+        }
+
+        current = parent.parent();
+    }
+    false
+}

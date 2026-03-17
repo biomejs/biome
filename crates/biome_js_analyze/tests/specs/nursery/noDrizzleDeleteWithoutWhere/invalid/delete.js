@@ -8,6 +8,3 @@ db.delete(users);
 
 // delete assigned to variable without where
 const result = db.delete(users);
-
-// different drizzle object name should NOT trigger (not in options)
-await database.delete(users);

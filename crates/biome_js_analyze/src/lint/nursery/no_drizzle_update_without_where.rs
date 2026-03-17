@@ -2,11 +2,11 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_js_syntax::{
-    AnyJsExpression, JsCallExpression, JsStaticMemberExpression, JsSyntaxKind,
-};
-use biome_rowan::{AstNode, SyntaxNode};
+use biome_js_syntax::{JsCallExpression, JsStaticMemberExpression};
+use biome_rowan::AstNode;
 use biome_rule_options::no_drizzle_update_without_where::NoDrizzleUpdateWithoutWhereOptions;
+
+use crate::frameworks::drizzle::{get_identifier_name, has_where_in_chain};
 
 declare_lint_rule! {
     /// Require `.where()` to be called when using `.update()` with Drizzle ORM.
@@ -105,53 +105,12 @@ impl Rule for NoDrizzleUpdateWithoutWhere {
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "`.update()` is used without `.where()`. This will update all rows in the table."
+                    <Emphasis>".update()"</Emphasis>" is used without "<Emphasis>".where()"</Emphasis>". This will update all rows in the table."
                 },
             )
             .note(markup! {
-                "Add a `.where()` clause to update only the intended rows, or use `.where(sql`1=1`)` to explicitly update all rows."
+                "Add a "<Emphasis>".where()"</Emphasis>" clause to update only the intended rows, or use "<Emphasis>".where(sql`1=1`)"</Emphasis>" to explicitly update all rows."
             }),
         )
     }
-}
-
-fn get_identifier_name(expr: &AnyJsExpression) -> Option<biome_rowan::TokenText> {
-    match expr {
-        AnyJsExpression::JsIdentifierExpression(id) => {
-            Some(id.name().ok()?.value_token().ok()?.token_text_trimmed())
-        }
-        _ => None,
-    }
-}
-
-fn has_where_in_chain(node: &SyntaxNode<biome_js_syntax::JsLanguage>) -> bool {
-    let mut current = node.parent();
-    loop {
-        let Some(parent) = current else { break };
-
-        if let Some(member_expr) = JsStaticMemberExpression::cast_ref(&parent) {
-            if let Ok(member) = member_expr.member() {
-                if let Some(name) = member.as_js_name() {
-                    if name
-                        .value_token()
-                        .ok()
-                        .map(|t| t.token_text_trimmed() == "where")
-                        .unwrap_or(false)
-                    {
-                        return true;
-                    }
-                }
-            }
-        }
-
-        if matches!(
-            parent.kind(),
-            JsSyntaxKind::JS_EXPRESSION_STATEMENT | JsSyntaxKind::JS_RETURN_STATEMENT
-        ) {
-            break;
-        }
-
-        current = parent.parent();
-    }
-    false
 }
