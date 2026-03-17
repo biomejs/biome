@@ -18,10 +18,9 @@ pub(crate) use at_rule::{
     parse_scss_use_at_rule, parse_scss_warn_at_rule, parse_scss_while_at_rule,
 };
 pub(crate) use declaration::{
-    is_at_scss_declaration, is_at_scss_nesting_declaration,
-    is_at_scss_variable_modifier_start, parse_scss_declaration,
-    parse_scss_interpolated_property_declaration, parse_scss_nesting_declaration,
-    try_parse_scss_nesting_declaration,
+    is_at_scss_declaration, is_at_scss_nesting_declaration, is_at_scss_variable_modifier_start,
+    parse_scss_declaration, parse_scss_interpolated_property_declaration,
+    parse_scss_nesting_declaration, try_parse_scss_nesting_declaration,
 };
 pub(crate) use expression::{
     SCSS_UNARY_OPERATOR_TOKEN_SET, complete_empty_scss_expression, is_at_scss_interpolation,

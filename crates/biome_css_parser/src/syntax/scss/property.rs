@@ -1,8 +1,8 @@
 use crate::parser::CssParser;
 use crate::syntax::{CssSyntaxFeatures, is_nth_at_identifier};
+use biome_parser::SyntaxFeature;
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::Absent;
-use biome_parser::SyntaxFeature;
 
 use super::{is_nth_at_scss_interpolation, parse_scss_interpolated_identifier};
 

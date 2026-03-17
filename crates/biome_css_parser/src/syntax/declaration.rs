@@ -5,9 +5,8 @@ use crate::syntax::property::{
     is_at_any_property, parse_any_property, parse_any_property_with_value_end_set,
 };
 use crate::syntax::scss::{
-    is_at_scss_declaration, is_at_scss_interpolated_property,
-    is_at_scss_nesting_declaration, parse_scss_declaration,
-    parse_scss_interpolated_property_declaration,
+    is_at_scss_declaration, is_at_scss_interpolated_property, is_at_scss_nesting_declaration,
+    parse_scss_declaration, parse_scss_interpolated_property_declaration,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};

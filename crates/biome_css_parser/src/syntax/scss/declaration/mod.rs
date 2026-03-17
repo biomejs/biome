@@ -8,7 +8,8 @@ use biome_css_syntax::T;
 use biome_parser::prelude::ParsedSyntax;
 
 pub(crate) use nesting::{
-    is_at_scss_nesting_declaration, parse_scss_nesting_declaration, try_parse_scss_nesting_declaration,
+    is_at_scss_nesting_declaration, parse_scss_nesting_declaration,
+    try_parse_scss_nesting_declaration,
 };
 pub(crate) use variable::{is_at_scss_declaration, parse_scss_declaration};
 pub(crate) use variable_modifier::is_at_scss_variable_modifier_start;

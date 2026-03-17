@@ -3,9 +3,8 @@ use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::block::ParseBlockBody;
 use crate::syntax::parse_error::{expected_any_declaration_or_at_rule, scss_only_syntax_error};
 use crate::syntax::scss::{
-    is_at_scss_declaration, is_at_scss_interpolated_property,
-    is_at_scss_nesting_declaration, parse_scss_declaration,
-    parse_scss_interpolated_property_declaration,
+    is_at_scss_declaration, is_at_scss_interpolated_property, is_at_scss_nesting_declaration,
+    parse_scss_declaration, parse_scss_interpolated_property_declaration,
 };
 use crate::syntax::{
     CssSyntaxFeatures, is_at_any_declaration_with_semicolon, parse_any_declaration_with_semicolon,

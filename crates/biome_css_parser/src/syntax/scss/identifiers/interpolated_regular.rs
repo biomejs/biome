@@ -1,8 +1,8 @@
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
+use crate::syntax::parse_identifier;
 use crate::syntax::scss::identifiers::interpolated_identifier::parse_scss_interpolated_identifier_with;
 use crate::syntax::scss::{is_at_scss_interpolation, parse_scss_interpolation};
-use crate::syntax::parse_identifier;
 use biome_parser::prelude::ParsedSyntax;
 
 /// Parses an identifier that may be formed by adjacent identifier and

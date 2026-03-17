@@ -24,8 +24,8 @@ use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{
     ParseRecovery, ParseRecoveryTokenSet, RecoveryError, RecoveryResult,
 };
-use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::ParsedSyntax;
+use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{Parser, SyntaxFeature, TokenSet, token_set};
 
 #[inline]

@@ -8,18 +8,14 @@ use crate::syntax::scss::{
     SCSS_NESTING_VALUE_END_SET, complete_empty_scss_expression, is_at_scss_interpolated_property,
     parse_scss_interpolated_identifier, parse_scss_optional_value_until,
 };
-use crate::syntax::{
-    CssSyntaxFeatures, is_at_dashed_identifier, is_at_identifier, try_parse,
-};
+use crate::syntax::{CssSyntaxFeatures, is_at_dashed_identifier, is_at_identifier, try_parse};
 use biome_css_syntax::CssSyntaxKind::{
-    CSS_DECLARATION, CSS_DECLARATION_WITH_SEMICOLON, CSS_GENERIC_PROPERTY,
-    SCSS_NESTING_DECLARATION,
+    CSS_DECLARATION, CSS_DECLARATION_WITH_SEMICOLON, CSS_GENERIC_PROPERTY, SCSS_NESTING_DECLARATION,
 };
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{Marker, Parser, SyntaxFeature};
-
 
 /// Parses a SCSS nested property declaration block, or falls back to a regular
 /// declaration when no block follows.
@@ -64,9 +60,7 @@ struct ScssNestingMarkers {
 /// This keeps the real parsing shared between the committed and speculative
 /// nesting entrypoints.
 #[inline]
-fn parse_scss_nesting_declaration_candidate(
-    p: &mut CssParser,
-) -> Option<(ParsedSyntax, bool)> {
+fn parse_scss_nesting_declaration_candidate(p: &mut CssParser) -> Option<(ParsedSyntax, bool)> {
     let (markers, could_be_selector) = parse_scss_nesting_declaration_prefix(p)?;
     let syntax = parse_scss_nesting_declaration_after_prefix(p, markers);
 
@@ -108,9 +102,7 @@ fn parse_scss_nesting_declaration_after_prefix(
 /// CssDeclaration`, and returns `None` only when an interpolation-bearing start
 /// is not actually followed by `:`.
 #[inline]
-fn parse_scss_nesting_declaration_prefix(
-    p: &mut CssParser,
-) -> Option<(ScssNestingMarkers, bool)> {
+fn parse_scss_nesting_declaration_prefix(p: &mut CssParser) -> Option<(ScssNestingMarkers, bool)> {
     let declaration = p.start();
     let property = p.start();
 
@@ -126,8 +118,7 @@ fn parse_scss_nesting_declaration_prefix(
 
     p.expect(T![:]);
 
-    let could_be_selector =
-        !p.has_preceding_whitespace() && (is_at_identifier(p) || p.at(T![:]));
+    let could_be_selector = !p.has_preceding_whitespace() && (is_at_identifier(p) || p.at(T![:]));
 
     Some((
         ScssNestingMarkers {
