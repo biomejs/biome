@@ -394,7 +394,7 @@ pub(crate) fn apply_document_changes(
     // Some clients (e.g. Code) sort the ranges in reverse. As an optimization, we
     // remember the last valid line in the index and only rebuild it if needed.
     let mut index_valid = u32::MAX;
-    for change in content_changes {
+    for change in content_changes.into_iter().skip(start) {
         // The None case can't happen as we have handled it above already
         if let Some(range) = change.range {
             if index_valid <= range.end.line {
@@ -544,6 +544,47 @@ line 7 new";
         let output = apply_document_changes(encoding, input, vec![change]);
         let expected = "(\"Jan 1, 2018\u{2009}–\u{2009}Jan 1, 2019\");(\"Jan 1, 2018\u{2009}–\u{2009}Jan 1, 2019\");\nisSpreadAssignment;\n";
 
+        assert_eq!(output, expected);
+    }
+
+    /// Regression test for https://github.com/biomejs/biome/issues/9341
+    ///
+    /// When content_changes contains incremental changes before a full document
+    /// change, the loop incorrectly applies those stale changes to the new
+    /// document text. This can cause byte offsets to land on non-char-boundaries
+    /// in multi-byte UTF-8 text, triggering a panic in `replace_range`.
+    #[test]
+    fn test_apply_changes_skips_changes_before_full_doc_replacement() {
+        let encoding = PositionEncoding::Wide(WideEncoding::Utf16);
+
+        let input = "old content\nwith\u{2009}multibyte\n".to_string();
+
+        let changes = vec![
+            // Change 0: incremental change referencing the OLD document
+            TextDocumentContentChangeEvent {
+                range: Some(Range::new(Position::new(0, 0), Position::new(0, 3))),
+                range_length: None,
+                text: String::from("new"),
+            },
+            // Change 1: full document replacement (invalidates all previous)
+            TextDocumentContentChangeEvent {
+                range: None,
+                range_length: None,
+                text: String::from("completely\u{2009}different\ntext\n"),
+            },
+            // Change 2: incremental change referencing the NEW document
+            TextDocumentContentChangeEvent {
+                range: Some(Range::new(Position::new(0, 11), Position::new(0, 20))),
+                range_length: None,
+                text: String::from("replaced"),
+            },
+        ];
+
+        let output = apply_document_changes(encoding, input, changes);
+
+        // Only the full doc change + subsequent incremental changes should apply.
+        // Change 0 must be skipped since it references the old document.
+        let expected = "completely\u{2009}replaced\ntext\n";
         assert_eq!(output, expected);
     }
 }
