@@ -3184,7 +3184,7 @@
 			"properties": {
 				"drizzleObjectName": {
 					"description": "List of variable names to consider as Drizzle ORM instances.",
-					"type": "array",
+					"type": ["array", "null"],
 					"items": { "type": "string" }
 				}
 			},
@@ -3201,7 +3201,7 @@
 			"properties": {
 				"drizzleObjectName": {
 					"description": "List of variable names to consider as Drizzle ORM instances.",
-					"type": "array",
+					"type": ["array", "null"],
 					"items": { "type": "string" }
 				}
 			},
