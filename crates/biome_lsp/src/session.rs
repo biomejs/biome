@@ -971,7 +971,32 @@ impl Session {
             }
         };
         if !loaded_configuration.loaded_location.is_in_project() {
-            let message = PrintDescription(&ConfigurationOutsideProject).to_string();
+            let config_path = loaded_configuration
+                .file_path
+                .as_ref()
+                .map_or_else(|| "<unknown>".to_string(), |p| p.to_string());
+            let working_directory = match &base_path {
+                ConfigurationPathHint::FromLsp(path)
+                | ConfigurationPathHint::FromWorkspace(path) => path.to_string(),
+                ConfigurationPathHint::FromUser(path) => {
+                    let fs = self.workspace.fs();
+                    if fs.path_is_file(path) {
+                        path.parent()
+                            .map_or("<unknown>".to_string(), |p| p.to_string())
+                    } else {
+                        path.to_string()
+                    }
+                }
+                ConfigurationPathHint::FromUserExternal(_) => self
+                    .base_path()
+                    .map_or("<unknown>".to_string(), |p| p.to_string()),
+                ConfigurationPathHint::None => "<unknown>".to_string(),
+            };
+            let message = PrintDescription(&ConfigurationOutsideProject {
+                config_path,
+                working_directory,
+            })
+            .to_string();
             self.client.log_message(MessageType::INFO, message).await;
         }
 
