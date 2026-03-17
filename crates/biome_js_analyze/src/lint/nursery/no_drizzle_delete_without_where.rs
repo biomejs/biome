@@ -46,7 +46,7 @@ declare_lint_rule! {
         name: "noDrizzleDeleteWithoutWhere",
         language: "js",
         sources: &[RuleSource::EslintDrizzle("enforce-delete-with-where").same()],
-        recommended: false,
+        recommended: true,
         domains: &[RuleDomain::Drizzle],
     }
 }
@@ -61,9 +61,7 @@ impl Rule for NoDrizzleDeleteWithoutWhere {
         let call_expr = ctx.query();
         let options = ctx.options();
 
-        if options.drizzle_object_name.is_empty() {
-            return None;
-        }
+        let drizzle_object_name = options.drizzle_object_name.as_deref()?;
 
         let callee = call_expr.callee().ok()?;
         let member_expr = JsStaticMemberExpression::cast_ref(callee.syntax())?;
@@ -83,10 +81,9 @@ impl Rule for NoDrizzleDeleteWithoutWhere {
         let object = member_expr.object().ok()?;
         let object_name = get_identifier_name(&object)?;
 
-        if !options
-            .drizzle_object_name
+        if !drizzle_object_name
             .iter()
-            .any(|n| n.as_str() == object_name.text())
+            .any(|n| n.as_ref() == object_name.text())
         {
             return None;
         }

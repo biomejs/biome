@@ -485,7 +485,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintMarkdown(rule_name) => format!("https://github.com/eslint/markdown/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintYml(rule_name) => format!("https://ota-meshi.github.io/eslint-plugin-yml/rules/{rule_name}.html"),
             Self::EslintCss(rule_name) => format!("https://github.com/eslint/css/blob/main/docs/rules/{rule_name}.md"),
-            Self::EslintDrizzle(_) => "https://orm.drizzle.team/docs/eslint-plugin".to_string(),
+            Self::EslintDrizzle(rule_name) => format!("https://orm.drizzle.team/docs/eslint-plugin#{rule_name}"),
         }
     }
 
@@ -657,7 +657,7 @@ impl RuleDomain {
             Self::Turborepo => &[&("turbo", ">=1.0.0")],
             Self::Playwright => &[&("@playwright/test", ">=1.0.0")],
             Self::Types => &[],
-            Self::Drizzle => &[&("drizzle-orm", ">=0.29.0")],
+            Self::Drizzle => &[&("drizzle-orm", ">=0.9.0")],
         }
     }
 
