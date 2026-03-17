@@ -15,7 +15,7 @@ use biome_js_syntax::{
     JsBlockStatement, JsCallArguments, JsCatchClause, JsEmptyStatement, JsFinallyClause,
     JsFormalParameter, JsFunctionBody, JsIdentifierBinding, JsIdentifierExpression, JsIfStatement,
     JsLanguage, JsNamedImportSpecifiers, JsParameters, JsSyntaxKind, JsSyntaxNode,
-    JsVariableDeclarator, JsWhileStatement, TsInterfaceDeclaration, TsMappedType,
+    JsVariableDeclarator, JsWhileStatement, TsFunctionType, TsInterfaceDeclaration, TsMappedType,
 };
 use biome_rowan::{AstNode, SyntaxNodeOptionExt, SyntaxTriviaPieceComments, TextLen};
 use biome_suppression::{SuppressionKind, parse_suppression_comment};
@@ -180,6 +180,12 @@ fn handle_typecast_comment(comment: DecoratedComment<JsLanguage>) -> CommentPlac
 fn handle_after_arrow_fat_arrow_comment(
     comment: DecoratedComment<JsLanguage>,
 ) -> CommentPlacement<JsLanguage> {
+    if TsFunctionType::can_cast(comment.enclosing_node().kind()) {
+        if let Some(following_node) = comment.following_node() {
+            return CommentPlacement::leading(following_node.clone(), comment);
+        }
+        return CommentPlacement::Default(comment);
+    }
     if JsArrowFunctionExpression::can_cast(comment.enclosing_node().kind()) {
         // input
         // ```javascript
