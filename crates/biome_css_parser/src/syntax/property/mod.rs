@@ -10,8 +10,8 @@ use crate::syntax::parse_error::{
     expected_component_value, expected_identifier, tailwind_disabled,
 };
 use crate::syntax::scss::{
-    is_at_scss_interpolated_property, parse_scss_interpolated_property_name,
-    parse_scss_optional_value_until,
+    is_at_scss_interpolated_property, parse_required_scss_value_until,
+    parse_scss_interpolated_property_name,
 };
 use crate::syntax::{
     CssSyntaxFeatures, is_at_any_value, is_at_dashed_identifier, is_at_identifier, is_at_string,
@@ -329,8 +329,7 @@ pub(crate) fn parse_property_value_with_end_set(
     recovery_end_set: TokenSet<CssSyntaxKind>,
 ) {
     if CssSyntaxFeatures::Scss.is_supported(p) {
-        parse_scss_optional_value_until(p, value_end_set)
-            .or_add_diagnostic(p, expected_component_value);
+        parse_required_scss_value_until(p, value_end_set);
     } else {
         GenericComponentValueList::new(value_end_set, recovery_end_set).parse_list(p);
     }

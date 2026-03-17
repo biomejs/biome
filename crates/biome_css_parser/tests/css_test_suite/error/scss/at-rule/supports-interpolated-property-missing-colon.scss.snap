@@ -56,7 +56,9 @@ CssRoot {
                                     ],
                                 },
                                 colon_token: missing (required),
-                                value: missing (required),
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [],
+                                },
                             },
                             important: missing (optional),
                         },
@@ -144,7 +146,9 @@ CssRoot {
                                     ],
                                 },
                                 colon_token: missing (required),
-                                value: missing (required),
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [],
+                                },
                             },
                             important: missing (optional),
                         },
@@ -233,7 +237,8 @@ CssRoot {
                               0: IDENT@14..18 "name" [] []
                       3: R_CURLY@18..19 "}" [] []
                 1: (empty)
-                2: (empty)
+                2: SCSS_EXPRESSION@19..19
+                  0: SCSS_EXPRESSION_ITEM_LIST@19..19
               1: (empty)
             2: R_PAREN@19..21 ")" [] [Whitespace(" ")]
         1: CSS_RULE_BLOCK@21..51
@@ -290,7 +295,8 @@ CssRoot {
                               0: IDENT@74..78 "side" [] []
                       3: R_CURLY@78..79 "}" [] []
                 1: (empty)
-                2: (empty)
+                2: SCSS_EXPRESSION@79..79
+                  0: SCSS_EXPRESSION_ITEM_LIST@79..79
               1: (empty)
             2: R_PAREN@79..81 ")" [] [Whitespace(" ")]
         1: CSS_RULE_BLOCK@81..112

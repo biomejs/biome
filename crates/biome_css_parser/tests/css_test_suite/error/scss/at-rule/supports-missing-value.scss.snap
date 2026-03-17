@@ -40,7 +40,9 @@ CssRoot {
                                     value_token: IDENT@11..16 "color" [] [],
                                 },
                                 colon_token: COLON@16..17 ":" [] [],
-                                value: missing (required),
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [],
+                                },
                             },
                             important: missing (optional),
                         },
@@ -131,7 +133,9 @@ CssRoot {
                                         value_token: IDENT@82..87 "color" [] [],
                                     },
                                     colon_token: COLON@87..88 ":" [] [],
-                                    value: missing (required),
+                                    value: ScssExpression {
+                                        items: ScssExpressionItemList [],
+                                    },
                                 },
                                 important: missing (optional),
                             },
@@ -211,7 +215,8 @@ CssRoot {
                 0: CSS_IDENTIFIER@11..16
                   0: IDENT@11..16 "color" [] []
                 1: COLON@16..17 ":" [] []
-                2: (empty)
+                2: SCSS_EXPRESSION@17..17
+                  0: SCSS_EXPRESSION_ITEM_LIST@17..17
               1: (empty)
             2: R_PAREN@17..19 ")" [] [Whitespace(" ")]
         1: CSS_RULE_BLOCK@19..49
@@ -271,7 +276,8 @@ CssRoot {
                   0: CSS_IDENTIFIER@82..87
                     0: IDENT@82..87 "color" [] []
                   1: COLON@87..88 ":" [] []
-                  2: (empty)
+                  2: SCSS_EXPRESSION@88..88
+                    0: SCSS_EXPRESSION_ITEM_LIST@88..88
                 1: (empty)
               2: R_PAREN@88..90 ")" [] [Whitespace(" ")]
         1: CSS_RULE_BLOCK@90..121

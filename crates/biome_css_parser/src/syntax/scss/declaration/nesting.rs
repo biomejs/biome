@@ -146,6 +146,7 @@ fn complete_scss_nesting_regular_declaration(
     missing_value: bool,
 ) -> ParsedSyntax {
     if missing_value {
+        complete_empty_scss_expression(p);
         p.error(expected_component_value(p, p.cur_range()));
     }
 

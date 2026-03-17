@@ -52,6 +52,28 @@ pub(crate) fn parse_scss_optional_value_until(
     parse_scss_expression_with_options(p, options)
 }
 
+/// Parses a required SCSS value and recovers missing content as an empty
+/// `ScssExpression` node plus a diagnostic.
+///
+/// Example:
+/// ```scss
+/// color: ;
+/// ```
+#[inline]
+pub(crate) fn parse_required_scss_value_until(
+    p: &mut CssParser,
+    end_ts: TokenSet<CssSyntaxKind>,
+) -> CompletedMarker {
+    match parse_scss_optional_value_until(p, end_ts) {
+        Present(value) => value,
+        Absent => {
+            let empty_expression = complete_empty_scss_expression(p);
+            p.error(expected_component_value(p, p.cur_range()));
+            empty_expression
+        }
+    }
+}
+
 /// Parses a SCSS expression until a caller-provided terminator, used by map
 /// pairs and other contexts that embed expressions in larger constructs.
 ///
