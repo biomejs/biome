@@ -2249,6 +2249,7 @@ impl Workspace for WorkspaceServer {
                     enabled_rules: &enabled_rules,
                     plugins: plugins.clone(),
                     document_services: &services,
+                    embeds_initial_indent: 0,
                 })?;
 
                 actions.extend(results.actions);
@@ -2281,6 +2282,7 @@ impl Workspace for WorkspaceServer {
             enabled_rules: &enabled_rules,
             plugins: plugins.clone(),
             document_services: &services,
+            embeds_initial_indent: 0,
         })?;
 
         actions.extend(fix_result.actions);
