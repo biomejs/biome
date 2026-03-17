@@ -1,0 +1,29 @@
+@supports (#{$name}:) {
+  .a {
+    color: red;
+  }
+}
+
+@supports not (#{$name}:) {
+  .a {
+    color: red;
+  }
+}
+
+@supports (margin-#{$side}:) {
+  .b {
+    color: blue;
+  }
+}
+
+@supports (#{$name}:) or (display: grid) {
+  .b {
+    color: blue;
+  }
+}
+
+@supports (--theme-#{$slot}:) {
+  .c {
+    color: green;
+  }
+}

@@ -1,16 +1,15 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: css/scss/declaration/nested-properties-empty-value.scss
+info: css/scss/at-rule/declaration-block-interpolation.scss
 ---
 
 # Input
 
 ```scss
-.font{
-  color:red;
-  font:{
-    size:12px;
-  }
+@font-face{
+#{$name}:1px;
+margin-#{$side}:1px;
+--theme-#{$slot}:red;
 }
 
 ```
@@ -32,11 +31,10 @@ Trailing newline: true
 -----
 
 ```scss
-.font {
-	color: red;
-	font: {
-		size: 12px;
-	}
+@font-face {
+	#{$name}: 1px;
+	margin-#{$side}: 1px;
+	--theme-#{$slot}: red;
 }
 
 ```

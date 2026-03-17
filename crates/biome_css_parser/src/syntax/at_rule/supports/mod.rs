@@ -7,23 +7,21 @@ use crate::syntax::at_rule::supports::error::{
 };
 use crate::syntax::block::parse_conditional_block;
 use crate::syntax::declaration::parse_declaration_important;
-use crate::syntax::parse_error::{
-    expected_component_value, expected_declaration, expected_selector,
-};
+use crate::syntax::parse_error::{expected_declaration, expected_selector};
 use crate::syntax::property::{
-    GenericComponentValueList, is_at_generic_property, parse_generic_property_name,
+    END_OF_PROPERTY_VALUE_TOKEN_SET, is_at_generic_property, is_nth_at_direct_generic_property,
+    parse_generic_property_name, parse_property_value_with_end_set,
 };
-use crate::syntax::scss::parse_scss_expression_allow_empty_value_until;
+use crate::syntax::scss::is_nth_at_scss_interpolated_property;
 use crate::syntax::selector::parse_selector;
-use crate::syntax::{CssSyntaxFeatures, is_nth_at_identifier, parse_any_css_value};
+use crate::syntax::parse_any_css_value;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
-use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::ParseRecovery;
 use biome_parser::parsed_syntax::ParsedSyntax::Present;
 use biome_parser::prelude::ParsedSyntax::Absent;
 use biome_parser::prelude::*;
-use biome_parser::{SyntaxFeature, TokenSet, token_set};
+use biome_parser::{TokenSet, token_set};
 
 /// Checks if the current token in the parser is an `@supports` at-rule.
 #[inline]
@@ -294,7 +292,9 @@ fn parse_supports_feature_selector(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 fn is_at_supports_feature_declaration(p: &mut CssParser) -> bool {
-    p.at(T!['(']) && is_nth_at_identifier(p, 1) && p.nth_at(2, T![:])
+    p.at(T!['('])
+        && (is_nth_at_direct_generic_property(p, 1)
+            || is_nth_at_scss_interpolated_property(p, 1))
 }
 
 #[inline]
@@ -335,7 +335,7 @@ pub(crate) fn parse_supports_declaration(p: &mut CssParser) -> ParsedSyntax {
 fn parse_supports_generic_property(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
-    parse_generic_property_name(p);
+    parse_generic_property_name(p).ok();
 
     p.expect(T![:]);
     parse_supports_property_value(p);
@@ -348,21 +348,9 @@ const END_OF_SUPPORTS_PROPERTY_VALUE_TOKEN_SET: TokenSet<CssSyntaxKind> =
 
 #[inline]
 fn parse_supports_property_value(p: &mut CssParser) {
-    if CssSyntaxFeatures::Scss.is_supported(p) {
-        let missing_value = parse_scss_expression_allow_empty_value_until(
-            p,
-            END_OF_SUPPORTS_PROPERTY_VALUE_TOKEN_SET,
-        )
-        .ok()
-        .is_none_or(|value| value.range(p).is_empty());
-        if missing_value {
-            p.error(expected_component_value(p, p.cur_range()));
-        }
-    } else {
-        GenericComponentValueList::new(
-            END_OF_SUPPORTS_PROPERTY_VALUE_TOKEN_SET,
-            END_OF_SUPPORTS_PROPERTY_VALUE_TOKEN_SET,
-        )
-        .parse_list(p);
-    }
+    parse_property_value_with_end_set(
+        p,
+        END_OF_SUPPORTS_PROPERTY_VALUE_TOKEN_SET,
+        END_OF_PROPERTY_VALUE_TOKEN_SET,
+    );
 }

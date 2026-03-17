@@ -9,11 +9,14 @@ use crate::syntax::css_modules::{
 use crate::syntax::parse_error::{
     expected_component_value, expected_identifier, tailwind_disabled,
 };
-use crate::syntax::scss::parse_scss_expression_allow_empty_value_until;
+use crate::syntax::scss::{
+    is_at_scss_interpolated_property, parse_scss_interpolated_property_name,
+    parse_scss_optional_value_until,
+};
 use crate::syntax::{
     CssSyntaxFeatures, is_at_any_value, is_at_dashed_identifier, is_at_identifier, is_at_string,
-    parse_any_value, parse_custom_identifier_with_keywords, parse_dashed_identifier,
-    parse_regular_identifier, parse_string,
+    is_nth_at_identifier, parse_any_value, parse_custom_identifier_with_keywords,
+    parse_dashed_identifier, parse_regular_identifier, parse_string,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -21,8 +24,8 @@ use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{
     ParseRecovery, ParseRecoveryTokenSet, RecoveryError, RecoveryResult,
 };
-use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
+use biome_parser::prelude::ParsedSyntax;
 use biome_parser::{Parser, SyntaxFeature, TokenSet, token_set};
 
 #[inline]
@@ -207,40 +210,88 @@ impl ParseRecovery for ComposesClassListParseRecovery {
     }
 }
 
+/// Detects the start of a generic property name.
+///
+/// This covers both direct property names and SCSS interpolation-bearing names:
+///
+/// ```scss
+/// color: red;
+/// --color-*: initial;
+/// #{$name}: 1px;
+/// margin-#{$side}: 1px;
+/// ```
 #[inline]
 pub(crate) fn is_at_generic_property(p: &mut CssParser) -> bool {
-    is_at_identifier(p)
-        && (p.nth_at(1, T![:])
-        // handle --*:
-        || (p.nth_at(1, T![*]) && p.nth_at(2, T![:]))
-        // handle --color-*:
-        || (p.nth_at(1, T![-]) && p.nth_at(2, T![*]) && p.nth_at(3, T![:])))
+    is_at_direct_generic_property(p) || is_at_scss_interpolated_property(p)
+}
+
+/// Detects the direct, non-interpolated property-name forms handled by the
+/// generic property parser.
+///
+/// This includes plain identifiers followed by `:` as well as the Tailwind
+/// `--*:` and `--name-*:` theme-reference forms.
+#[inline]
+fn is_at_direct_generic_property(p: &mut CssParser) -> bool {
+    is_nth_at_direct_generic_property(p, 0)
 }
 
 #[inline]
-pub(crate) fn parse_generic_property_name(p: &mut CssParser) {
+fn is_at_tailwind_theme_reference_property(p: &mut CssParser) -> bool {
+    is_nth_at_tailwind_theme_reference_property(p, 0)
+}
+
+#[inline]
+pub(crate) fn is_nth_at_direct_generic_property(p: &mut CssParser, n: usize) -> bool {
+    is_nth_at_identifier(p, n)
+        && (p.nth_at(n + 1, T![:]) || is_nth_at_tailwind_theme_reference_property(p, n))
+}
+
+#[inline]
+fn is_nth_at_tailwind_theme_reference_property(p: &mut CssParser, n: usize) -> bool {
+    // handle --*:
+    (p.nth_at(n + 1, T![*]) && p.nth_at(n + 2, T![:]))
+        // handle --color-*:
+        || (p.nth_at(n + 1, T![-]) && p.nth_at(n + 2, T![*]) && p.nth_at(n + 3, T![:]))
+}
+
+#[inline]
+pub(crate) fn parse_generic_property_name(p: &mut CssParser) -> ParsedSyntax {
+    if is_at_dashed_identifier(p) && is_at_tailwind_theme_reference_property(p) {
+        let Present(ident) = parse_dashed_identifier(p) else {
+            return Absent;
+        };
+
+        return if p.at_ts(token_set![T![-], T![*]]) {
+            CssSyntaxFeatures::Tailwind.parse_exclusive_syntax(
+                p,
+                |p| {
+                    let m = ident.precede(p);
+                    if p.at(T![-]) {
+                        p.expect(T![-]);
+                    }
+                    p.expect(T![*]);
+                    Present(m.complete(p, TW_VALUE_THEME_REFERENCE))
+                },
+                |p, m| tailwind_disabled(p, m.range(p)),
+            )
+        } else {
+            Present(ident)
+        };
+    }
+
+    if CssSyntaxFeatures::Scss.is_supported(p) {
+        return parse_scss_interpolated_property_name(p).or_else(|| parse_plain_property_name(p));
+    }
+
+    parse_plain_property_name(p)
+}
+
+#[inline]
+fn parse_plain_property_name(p: &mut CssParser) -> ParsedSyntax {
     if is_at_dashed_identifier(p) {
-        let ident = parse_dashed_identifier(p).ok();
-        if let Some(ident) = ident
-            && p.at_ts(token_set![T![-], T![*]])
-        {
-            CssSyntaxFeatures::Tailwind
-                .parse_exclusive_syntax(
-                    p,
-                    |p| {
-                        let m = ident.precede(p);
-                        if p.at(T![-]) {
-                            p.expect(T![-]);
-                        }
-                        p.expect(T![*]);
-                        Present(m.complete(p, TW_VALUE_THEME_REFERENCE))
-                    },
-                    |p, m| tailwind_disabled(p, m.range(p)),
-                )
-                .ok();
-        }
+        parse_dashed_identifier(p)
     } else {
-        parse_regular_identifier(p).ok();
+        parse_regular_identifier(p)
     }
 }
 
@@ -259,29 +310,30 @@ fn parse_generic_property_with_value_end_set(
     value_end_set: TokenSet<CssSyntaxKind>,
     recovery_end_set: TokenSet<CssSyntaxKind>,
 ) -> ParsedSyntax {
-    if !is_at_generic_property(p) {
+    let m = p.start();
+    if parse_generic_property_name(p).is_absent() {
+        m.abandon(p);
         return Absent;
     }
 
-    let m = p.start();
-
-    parse_generic_property_name(p);
-
     p.expect(T![:]);
+    parse_property_value_with_end_set(p, value_end_set, recovery_end_set);
 
+    Present(m.complete(p, CSS_GENERIC_PROPERTY))
+}
+
+#[inline]
+pub(crate) fn parse_property_value_with_end_set(
+    p: &mut CssParser,
+    value_end_set: TokenSet<CssSyntaxKind>,
+    recovery_end_set: TokenSet<CssSyntaxKind>,
+) {
     if CssSyntaxFeatures::Scss.is_supported(p) {
-        let missing_value = parse_scss_expression_allow_empty_value_until(p, value_end_set)
-            .ok()
-            .is_none_or(|value| value.range(p).is_empty());
-
-        if missing_value {
-            p.error(expected_component_value(p, p.cur_range()));
-        }
+        parse_scss_optional_value_until(p, value_end_set)
+            .or_add_diagnostic(p, expected_component_value);
     } else {
         GenericComponentValueList::new(value_end_set, recovery_end_set).parse_list(p);
     }
-
-    Present(m.complete(p, CSS_GENERIC_PROPERTY))
 }
 
 pub(crate) const END_OF_PROPERTY_VALUE_TOKEN_SET: TokenSet<CssSyntaxKind> =

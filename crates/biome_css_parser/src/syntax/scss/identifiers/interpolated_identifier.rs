@@ -22,14 +22,9 @@ pub(crate) fn is_nth_at_scss_interpolated_identifier(p: &mut CssParser, n: usize
 /// Parses an identifier that may be formed by adjacent identifier and
 /// interpolation fragments with no intervening trivia.
 ///
-/// Examples:
-/// ```scss
-/// .icon-#{$name}
-/// .foo-#{$name}-bar
-/// ```
-///
-/// Docs: https://sass-lang.com/documentation/interpolation
-pub(super) fn parse_scss_regular_interpolated_identifier(
+/// This lower-level helper is reused by selector-specific wrappers that need
+/// different fragment parsing behavior.
+pub(super) fn parse_scss_interpolated_identifier_with(
     p: &mut CssParser,
     parse_fragment: fn(&mut CssParser) -> ParsedSyntax,
 ) -> ParsedSyntax {

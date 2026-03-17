@@ -146,6 +146,9 @@ impl SemanticEventExtractor {
                                     };
                                     CssProperty::from(ident)
                                 }
+                                AnyCssDeclarationName::ScssInterpolatedIdentifier(_) => {
+                                    return;
+                                }
                             };
 
                             self.stash.push_back(SemanticEvent::PropertyDeclaration {

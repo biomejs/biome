@@ -1,0 +1,7 @@
+@import "tailwindcss/theme.css" supports( --color-*:initial);
+
+@supports( --color-*:initial){
+.box{
+color:red;
+}
+}

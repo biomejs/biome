@@ -1,5 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 212
 info: css/scss/declaration/ambiguous-selector-vs-nesting.scss
 ---
 
@@ -11,6 +12,9 @@ info: css/scss/declaration/ambiguous-selector-vs-nesting.scss
   font:bold{color:blue;}
   font:12px{family:sans-serif;}
   font: bold{family:serif;}
+  #{$name}:hover{color:green;}
+  font-#{$weight}:bold{color:purple;}
+  font-#{$weight}::before{color:orange;}
 }
 
 ```
@@ -44,6 +48,15 @@ Trailing newline: true
 	}
 	font: bold {
 		family: serif;
+	}
+	#{$name}:hover {
+		color: green;
+	}
+	font-#{$weight}:bold {
+		color: purple;
+	}
+	font-#{$weight}::before {
+		color: orange;
 	}
 }
 

@@ -5,6 +5,7 @@ use super::super::{
 };
 use super::variable_modifier::parse_scss_variable_modifiers;
 use crate::parser::CssParser;
+use crate::syntax::declaration::parse_optional_declaration_semicolon;
 use crate::syntax::scss::expected_scss_expression;
 use biome_css_syntax::CssSyntaxKind::{EOF, SCSS_DECLARATION};
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -58,12 +59,7 @@ pub(crate) fn parse_scss_declaration(p: &mut CssParser) -> ParsedSyntax {
     parse_scss_variable_modifiers(p);
 
     if !p.at(T!['}']) && !p.at(EOF) {
-        if p.nth_at(1, T!['}']) {
-            // Allow a trailing `;` before `}` but don't require it.
-            p.eat(T![;]);
-        } else {
-            p.expect(T![;]);
-        }
+        parse_optional_declaration_semicolon(p);
     }
 
     Present(m.complete(p, SCSS_DECLARATION))
