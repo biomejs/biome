@@ -50,10 +50,6 @@ pub struct NoUnusedVariablesOptionsIgnore {
     #[serde(skip_serializing_if = "Option::<_>::is_none")]
     pub interface: Option<Box<[Box<str>]>>,
 
-    /// An array of parameter names to ignore. Use "*" to ignore all identifiers.
-    #[serde(skip_serializing_if = "Option::<_>::is_none")]
-    pub parameter: Option<Box<[Box<str>]>>,
-
     /// An array of type aliases to ignore. Use "*" to ignore all identifiers.
     #[serde(skip_serializing_if = "Option::<_>::is_none")]
     pub type_alias: Option<Box<[Box<str>]>>,

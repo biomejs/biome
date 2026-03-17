@@ -5461,11 +5461,6 @@
 					"type": ["array", "null"],
 					"items": { "type": "string" }
 				},
-				"parameter": {
-					"description": "An array of parameter names to ignore. Use \"*\" to ignore all identifiers.",
-					"type": ["array", "null"],
-					"items": { "type": "string" }
-				},
 				"typeAlias": {
 					"description": "An array of type aliases to ignore. Use \"*\" to ignore all identifiers.",
 					"type": ["array", "null"],

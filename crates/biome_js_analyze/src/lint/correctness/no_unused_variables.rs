@@ -147,7 +147,6 @@ declare_lint_rule! {
     /// - `"class"`: Applies to class names
     /// - `"function"`: Applies to function names
     /// - `"interface"`: Applies to interface names
-    /// - `"parameter"`: Applies to parameter names
     /// - `"typeAlias"`: Applies to type aliases
     /// - `"typeParameter"`: Applies to type parameters
     /// - `"variable"`: Applies to variable names
@@ -532,7 +531,6 @@ pub fn is_ignored(binding: &AnyJsIdentifierBinding, options: &NoUnusedVariablesO
     }
 
     let specific_ignores = match binding.syntax().parent()?.kind() {
-        JsSyntaxKind::JS_FORMAL_PARAMETER => ignore_options.parameter,
         JsSyntaxKind::JS_FUNCTION_DECLARATION => ignore_options.function,
         JsSyntaxKind::JS_CLASS_DECLARATION => ignore_options.class,
         JsSyntaxKind::TS_INTERFACE_DECLARATION => ignore_options.interface,
