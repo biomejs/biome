@@ -392,8 +392,7 @@ pub(crate) trait CommandRunner {
         if !loaded_location.is_in_project() {
             let config_file_path = config_file_path
                 .as_ref()
-                .map(|p| p.to_string())
-                .unwrap_or("<unknown>".to_string());
+                .map_or_else(|| "<unknown>".to_string(), |p| p.to_string());
             console.log(markup! {
                 {PrintDiagnostic::simple(&ConfigurationOutsideProject {
                     config_path: config_file_path,
