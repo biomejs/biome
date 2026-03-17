@@ -1,0 +1,132 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<div style="color: red;"></div>
+
+<p style="font-size: 14px;">Hello</p>
+
+<span style="display: none;">Hidden</span>
+
+<input type="text" style="border: 1px solid black;" />
+
+<a href="#" style="text-decoration: none;">Link</a>
+
+```
+
+# Diagnostics
+```
+invalid.html:2:6 lint/nursery/noInlineStyles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using the style attribute. Prefer external CSS classes instead of inline styles.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <div style="color: red;"></div>
+      │      ^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ <p style="font-size: 14px;">Hello</p>
+  
+  i Inline styles make code harder to maintain, reduce reusability, and can prevent effective use of a strict Content Security Policy.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the style attribute.
+  
+    2 │ <div·style="color:·red;"></div>
+      │      -------------------       
+
+```
+
+```
+invalid.html:4:4 lint/nursery/noInlineStyles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using the style attribute. Prefer external CSS classes instead of inline styles.
+  
+    2 │ <div style="color: red;"></div>
+    3 │ 
+  > 4 │ <p style="font-size: 14px;">Hello</p>
+      │    ^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ <span style="display: none;">Hidden</span>
+  
+  i Inline styles make code harder to maintain, reduce reusability, and can prevent effective use of a strict Content Security Policy.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the style attribute.
+  
+    4 │ <p·style="font-size:·14px;">Hello</p>
+      │    ------------------------          
+
+```
+
+```
+invalid.html:6:7 lint/nursery/noInlineStyles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using the style attribute. Prefer external CSS classes instead of inline styles.
+  
+    4 │ <p style="font-size: 14px;">Hello</p>
+    5 │ 
+  > 6 │ <span style="display: none;">Hidden</span>
+      │       ^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ <input type="text" style="border: 1px solid black;" />
+  
+  i Inline styles make code harder to maintain, reduce reusability, and can prevent effective use of a strict Content Security Policy.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the style attribute.
+  
+    6 │ <span·style="display:·none;">Hidden</span>
+      │       ----------------------              
+
+```
+
+```
+invalid.html:8:20 lint/nursery/noInlineStyles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using the style attribute. Prefer external CSS classes instead of inline styles.
+  
+     6 │ <span style="display: none;">Hidden</span>
+     7 │ 
+   > 8 │ <input type="text" style="border: 1px solid black;" />
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ <a href="#" style="text-decoration: none;">Link</a>
+  
+  i Inline styles make code harder to maintain, reduce reusability, and can prevent effective use of a strict Content Security Policy.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the style attribute.
+  
+    8 │ <input·type="text"·style="border:·1px·solid·black;"·/>
+      │                    ---------------------------------  
+
+```
+
+```
+invalid.html:10:13 lint/nursery/noInlineStyles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using the style attribute. Prefer external CSS classes instead of inline styles.
+  
+     8 │ <input type="text" style="border: 1px solid black;" />
+     9 │ 
+  > 10 │ <a href="#" style="text-decoration: none;">Link</a>
+       │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+  
+  i Inline styles make code harder to maintain, reduce reusability, and can prevent effective use of a strict Content Security Policy.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the style attribute.
+  
+    10 │ <a·href="#"·style="text-decoration:·none;">Link</a>
+       │             ------------------------------         
+
+```

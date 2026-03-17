@@ -2156,6 +2156,11 @@ See https://biomejs.dev/linter/rules/no-increment-decrement
 	 */
 	noIncrementDecrement?: NoIncrementDecrementConfiguration;
 	/**
+	* Disallow the use of inline styles.
+See https://biomejs.dev/linter/rules/no-inline-styles 
+	 */
+	noInlineStyles?: NoInlineStylesConfiguration;
+	/**
 	* Disallow .bind(), arrow functions, or function expressions in JSX props.
 See https://biomejs.dev/linter/rules/no-jsx-props-bind 
 	 */
@@ -4149,6 +4154,9 @@ export type NoHexColorsConfiguration =
 export type NoIncrementDecrementConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoIncrementDecrementOptions;
+export type NoInlineStylesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoInlineStylesOptions;
 export type NoJsxPropsBindConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoJsxPropsBindOptions;
@@ -5813,6 +5821,11 @@ export interface RuleWithNoIncrementDecrementOptions {
 	level: RulePlainConfiguration;
 	options?: NoIncrementDecrementOptions;
 }
+export interface RuleWithNoInlineStylesOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoInlineStylesOptions;
+}
 export interface RuleWithNoJsxPropsBindOptions {
 	level: RulePlainConfiguration;
 	options?: NoJsxPropsBindOptions;
@@ -7399,6 +7412,7 @@ export interface NoIncrementDecrementOptions {
 	 */
 	allowForLoopAfterthoughts?: boolean;
 }
+export type NoInlineStylesOptions = {};
 export type NoJsxPropsBindOptions = {};
 export type NoLeakedRenderOptions = {};
 export type NoMisusedPromisesOptions = {};
@@ -8470,6 +8484,7 @@ export type Category =
 	| "lint/nursery/noHexColors"
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noIncrementDecrement"
+	| "lint/nursery/noInlineStyles"
 	| "lint/nursery/noJsxPropsBind"
 	| "lint/nursery/noLeakedRender"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
@@ -8496,6 +8511,7 @@ export type Category =
 	| "lint/nursery/noShadow"
 	| "lint/nursery/noSyncScripts"
 	| "lint/nursery/noTernary"
+	| "lint/nursery/noTopLevelLiterals"
 	| "lint/nursery/noUndeclaredEnvVars"
 	| "lint/nursery/noUnknownAttribute"
 	| "lint/nursery/noUnnecessaryConditions"
@@ -8541,7 +8557,6 @@ export type Category =
 	| "lint/nursery/useScopedStyles"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSpread"
-	| "lint/nursery/noTopLevelLiterals"
 	| "lint/nursery/useUnicodeRegex"
 	| "lint/nursery/useUniqueArgumentNames"
 	| "lint/nursery/useUniqueFieldDefinitionNames"
