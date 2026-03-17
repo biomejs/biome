@@ -5,8 +5,9 @@ use crate::syntax::declaration::{
 };
 use crate::syntax::parse_error::expected_component_value;
 use crate::syntax::scss::{
-    SCSS_NESTING_VALUE_END_SET, complete_empty_scss_expression, is_at_scss_interpolated_property,
-    parse_scss_interpolated_identifier, parse_scss_optional_value_until,
+    SCSS_NESTING_VALUE_END_SET, complete_empty_scss_expression, is_at_scss_interpolated_identifier,
+    is_at_scss_interpolated_property, parse_scss_interpolated_identifier,
+    parse_scss_optional_value_until,
 };
 use crate::syntax::{CssSyntaxFeatures, is_at_dashed_identifier, is_at_identifier, try_parse};
 use biome_css_syntax::CssSyntaxKind::{
@@ -118,7 +119,8 @@ fn parse_scss_nesting_declaration_prefix(p: &mut CssParser) -> Option<(ScssNesti
 
     p.expect(T![:]);
 
-    let could_be_selector = !p.has_preceding_whitespace() && (is_at_identifier(p) || p.at(T![:]));
+    let could_be_selector = !p.has_preceding_whitespace()
+        && (is_at_identifier(p) || is_at_scss_interpolated_identifier(p) || p.at(T![:]));
 
     Some((
         ScssNestingMarkers {
@@ -229,6 +231,16 @@ mod tests {
         assert!(try_parse_scss_nesting_declaration(&mut p, T!['}']).is_err());
         assert_eq!(p.cur_range(), start);
         assert_eq!(p.cur_text(), "font");
+    }
+
+    #[test]
+    fn try_parse_rejects_selector_like_interpolated_pseudo_without_whitespace() {
+        let mut p = scss_parser("a:#{$pseudo} { color: red; }");
+        let start = p.cur_range();
+
+        assert!(try_parse_scss_nesting_declaration(&mut p, T!['}']).is_err());
+        assert_eq!(p.cur_range(), start);
+        assert_eq!(p.cur_text(), "a");
     }
 
     #[test]

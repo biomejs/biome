@@ -19,6 +19,10 @@
     color: green;
   }
 
+  a:#{$pseudo} {
+    color: teal;
+  }
+
   font-#{$weight}:bold {
     color: purple;
   }
