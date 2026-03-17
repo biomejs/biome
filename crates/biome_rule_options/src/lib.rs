@@ -46,6 +46,8 @@ pub mod no_dangerously_set_inner_html_with_children;
 pub mod no_debugger;
 pub mod no_default_export;
 pub mod no_delete;
+pub mod no_drizzle_delete_without_where;
+pub mod no_drizzle_update_without_where;
 pub mod no_deprecated_imports;
 pub mod no_deprecated_media_type;
 pub mod no_descending_specificity;
