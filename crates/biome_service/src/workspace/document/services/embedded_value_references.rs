@@ -53,7 +53,6 @@ impl EmbeddedValueReferencesBuilder {
                 WalkEvent::Leave(_) => {}
             }
         }
-        dbg!(&self.references);
     }
 
     /// Visit an HTML root to track component element names as value references.

@@ -93,7 +93,6 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     let is_html_ish = matches!(extension, "vue" | "svelte" | "astro" | "html");
 
     let snapshot = if is_html_ish {
-        dbg!("Running HTML-ish test {input_file:?}");
         analyze_with_workspace(input_file, group, rule)
     } else {
         let rule_filter = RuleFilter::Rule(group, rule);
