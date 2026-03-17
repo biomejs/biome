@@ -41,9 +41,7 @@ pub(crate) fn parse_scss_nesting_declaration(p: &mut CssParser) -> ParsedSyntax 
         return Absent;
     }
 
-    parse_scss_nesting_declaration_candidate(p)
-        .map(|(syntax, _)| syntax)
-        .unwrap_or(Absent)
+    parse_scss_nesting_declaration_candidate(p).map_or(Absent, |(syntax, _)| syntax)
 }
 
 #[inline]

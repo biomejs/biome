@@ -227,13 +227,13 @@ impl ParseNodeList for PageAtRuleItemList {
                 return declaration;
             }
 
-            if is_at_qualified_rule(p) {
-                if let Present(mut syntax) = parse_qualified_rule(p) {
-                    let range = syntax.range(p);
-                    p.error(expected_any_page_at_rule_item(p, range));
-                    syntax.change_kind(p, CSS_BOGUS);
-                    return Present(syntax);
-                }
+            if is_at_qualified_rule(p)
+                && let Present(mut syntax) = parse_qualified_rule(p)
+            {
+                let range = syntax.range(p);
+                p.error(expected_any_page_at_rule_item(p, range));
+                syntax.change_kind(p, CSS_BOGUS);
+                return Present(syntax);
             }
 
             parse_declaration_with_semicolon(p)
