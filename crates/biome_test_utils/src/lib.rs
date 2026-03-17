@@ -898,7 +898,7 @@ pub fn analyze_with_workspace(input_file: &Utf8Path, group: &str, rule: &str) ->
             configuration: config,
             workspace_directory: Some(BiomePath::new(&project_root)),
             extended_configurations: vec![],
-            module_graph_resolution_kind: ModuleGraphResolutionKind::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
         })
         .expect("failed to update settings");
 
@@ -908,7 +908,7 @@ pub fn analyze_with_workspace(input_file: &Utf8Path, group: &str, rule: &str) ->
             project_key,
             watch: false,
             force: false,
-            scan_kind: ScanKind::Project,
+            scan_kind: ScanKind::NoScanner,
             verbose: false,
         })
         .expect("failed to scan project");
@@ -918,7 +918,10 @@ pub fn analyze_with_workspace(input_file: &Utf8Path, group: &str, rule: &str) ->
         .open_file(OpenFileParams {
             project_key,
             path: BiomePath::new(&virtual_file_path),
-            content: FileContent::FromServer,
+            content: FileContent::FromClient {
+                content: input_code.clone(),
+                version: 0,
+            },
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
