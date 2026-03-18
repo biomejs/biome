@@ -1,5 +1,51 @@
 # @biomejs/biome
 
+## 2.4.8
+
+### Patch Changes
+
+- [#9488](https://github.com/biomejs/biome/pull/9488) [`bc709f6`](https://github.com/biomejs/biome/commit/bc709f6e45a4cafb81636a41f9fb547ea2ead6b7) Thanks [@mvanhorn](https://github.com/mvanhorn)! - Fixed [#9463](https://github.com/biomejs/biome/issues/9463): the "Biome found a configuration file outside of the current working directory" diagnostic now includes the configuration file path and the working directory, giving users actionable information to debug the issue.
+
+- [#9527](https://github.com/biomejs/biome/pull/9527) [`2f8bf80`](https://github.com/biomejs/biome/commit/2f8bf80d7f5736d34660123ba51bddca72a3849d) Thanks [@mdm317](https://github.com/mdm317)! - Fixed [#8959](https://github.com/biomejs/biome/issues/8959): Fixed TypeScript arrow function formatting when a comment appears after `=>`.
+
+- [#9525](https://github.com/biomejs/biome/pull/9525) [`e7b3b10`](https://github.com/biomejs/biome/commit/e7b3b104590fd13b38a2ab044a297fecbcb49e8c) Thanks [@ViniciusDev26](https://github.com/ViniciusDev26)! - Added the rule [`noDrizzleUpdateWithoutWhere`](https://biomejs.dev/linter/rules/no-drizzle-update-without-where/) to prevent accidental full-table updates when using Drizzle ORM without a `.where()` clause.
+
+- [#9531](https://github.com/biomejs/biome/pull/9531) [`1302740`](https://github.com/biomejs/biome/commit/13027406436ae24022bedfff3fddec264d3f985c) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#9187](https://github.com/biomejs/biome/issues/9187): Astro frontmatter containing regex literals with quotes (`/'/`, `/"/`) or dashes (`/---/`) no longer causes parse errors.
+
+- [#9535](https://github.com/biomejs/biome/pull/9535) [`b630d93`](https://github.com/biomejs/biome/commit/b630d9369037caeecd0f5bc25c69831a0674422f) Thanks [@leno23](https://github.com/leno23)! - Fixed [#9524](https://github.com/biomejs/biome/issues/9524): remove extra space before `>` when `bracketSameLine` is true and the self-closing slash is absent in HTML formatter.
+
+- [#9537](https://github.com/biomejs/biome/pull/9537) [`81e6306`](https://github.com/biomejs/biome/commit/81e630683c899f5fa147e839aa8559365ae0ac75) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#9238](https://github.com/biomejs/biome/issues/9238): The HTML parser no longer incorrectly reports `---` inside element content (e.g. `<td>---</td>`) as an "Unexpected value or character" error.
+
+- [#9532](https://github.com/biomejs/biome/pull/9532) [`4b64145`](https://github.com/biomejs/biome/commit/4b641457bb4555dbc25d081effec28a66b0f1272) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#9117](https://github.com/biomejs/biome/issues/9117): `biome check --write` no longer falsely reports Svelte and Vue files as changed when `html.formatter.indentScriptAndStyle` is enabled and the files are already correctly formatted.
+
+- [#9528](https://github.com/biomejs/biome/pull/9528) [`61451ef`](https://github.com/biomejs/biome/commit/61451ef11e466dd22cf8815d8a4165c00f847ef2) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#9341](https://github.com/biomejs/biome/issues/9341): Fixed an LSP crash that could corrupt file content when saving with format-on-save enabled.
+
+- [#9538](https://github.com/biomejs/biome/pull/9538) [`794f79c`](https://github.com/biomejs/biome/commit/794f79c3d61d0010549f8f34b05c0aaa5eb2b1c3) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#9279](https://github.com/biomejs/biome/issues/9279): The rule [`noSubstr`](https://biomejs.dev/linter/rules/no-substr/) now detects `.substr()` and `.substring()` calls in all expression contexts, including variable declarations, function arguments, return statements, and arrow function bodies.
+
+- [#9462](https://github.com/biomejs/biome/pull/9462) [`c23272c`](https://github.com/biomejs/biome/commit/c23272c9bef588b4fdccc4be05ce3549b5f2407c) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#9370](https://github.com/biomejs/biome/issues/9370): The resolver now correctly prioritizes more specific `exports` patterns over less specific ones. Previously, a pattern like `"./*"` could match before `"./features/*"`, causing resolution failures for packages with overlapping subpath patterns.
+
+- [#9515](https://github.com/biomejs/biome/pull/9515) [`f85c069`](https://github.com/biomejs/biome/commit/f85c069acd182382832dbbc116ff28b1dca9d9be) Thanks [@shivamtiwari3](https://github.com/shivamtiwari3)! - Fixed [#9506](https://github.com/biomejs/biome/issues/9506) and [#9479](https://github.com/biomejs/biome/issues/9479): Biome no longer reports false parse errors on `<script type="speculationrules">` and `<script type="application/ld+json">` tags. These script types contain non-JavaScript content and are now correctly skipped by the embedded language detector.
+
+- [#9514](https://github.com/biomejs/biome/pull/9514) [`7fe43c8`](https://github.com/biomejs/biome/commit/7fe43c8e89b45a89f4b059133b17cf41771c51ba) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#6964](https://github.com/biomejs/biome/issues/6964): Biome now correctly resolves the `.gitignore` file relative to `vcs.root` when configured. Previously, the `vcs.root` setting was ignored and Biome always looked for the ignore file in the workspace directory.
+
+- [#9521](https://github.com/biomejs/biome/pull/9521) [`af39936`](https://github.com/biomejs/biome/commit/af3993681b91a8434da0974833249d20ff844bab) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#9483](https://github.com/biomejs/biome/issues/9483). Now the rule `noRedeclare` doesn't panic when it encounters constructor overloads.
+
+- [#9490](https://github.com/biomejs/biome/pull/9490) [`60cf024`](https://github.com/biomejs/biome/commit/60cf0248221f5e3e4eacbbfa29a8b25f2b3c1a79) Thanks [@willfarrell](https://github.com/willfarrell)! - Added support for modern CSS properties, pseudo-classes, and pseudo-elements.
+
+  New known properties: `dynamic-range-limit`, `overlay`, `reading-flow`, `reading-order`, `scroll-marker-group`, `scroll-target-group`.
+
+  New pseudo-elements: `::checkmark`, `::column`, `::picker`, `::picker-icon`, `::scroll-button`, `::scroll-marker`, `::scroll-marker-group`.
+
+  New pseudo-classes: `:active-view-transition-type`, `:has-slotted`, `:target-after`, `:target-before`, `:target-current`.
+
+- [#9526](https://github.com/biomejs/biome/pull/9526) [`4d42823`](https://github.com/biomejs/biome/commit/4d42823aa6d71908cd5b52ebae460c8a77388980) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#9358](https://github.com/biomejs/biome/issues/9358) and [#9375](https://github.com/biomejs/biome/issues/9375). Now attributes that have text expressions such as `class={buttonClass()}` are correctly tracked in Svelte files.
+
+- [#9520](https://github.com/biomejs/biome/pull/9520) [`61f53ee`](https://github.com/biomejs/biome/commit/61f53ee073310879d095239312e31628841efb3d) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#9519](https://github.com/biomejs/biome/issues/9519). Now `noUnusedVariables` doesn't flag variables that are used as `typeof` type.
+
+- [#9487](https://github.com/biomejs/biome/pull/9487) [`331dc0d`](https://github.com/biomejs/biome/commit/331dc0d53b9cdde93c3d56956428631ef07df984) Thanks [@mvanhorn](https://github.com/mvanhorn)! - Fixed [#9477](https://github.com/biomejs/biome/issues/9477): `source.fixAll.biome` no longer sorts imports when `source.organizeImports.biome` is disabled in editor settings. The organize imports action is now excluded from the fix-all pass unless explicitly requested.
+
+- [#9525](https://github.com/biomejs/biome/pull/9525) [`e7b3b10`](https://github.com/biomejs/biome/commit/e7b3b104590fd13b38a2ab044a297fecbcb49e8c) Thanks [@ViniciusDev26](https://github.com/ViniciusDev26)! - Added the rule [`noDrizzleDeleteWithoutWhere`](https://biomejs.dev/linter/rules/no-drizzle-delete-without-where/) to prevent accidental full-table deletes when using Drizzle ORM without a `.where()` clause.
+
 ## 2.4.7
 
 ### Patch Changes

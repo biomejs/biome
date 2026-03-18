@@ -42,7 +42,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoDrizzleDeleteWithoutWhere {
-        version: "next",
+        version: "2.4.8",
         name: "noDrizzleDeleteWithoutWhere",
         language: "js",
         sources: &[RuleSource::EslintDrizzle("enforce-delete-with-where").same()],
