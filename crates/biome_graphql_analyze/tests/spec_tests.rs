@@ -98,7 +98,10 @@ pub(crate) fn analyze_and_snap(
     let root = parsed.tree();
 
     let mut code_fixes = Vec::new();
-    let options = create_analyzer_options::<GraphqlLanguage>(input_file, &mut diagnostics);
+    // Use the parent directory as a working directory for relative paths in diagnostics
+    let working_directory = input_file.parent().unwrap_or(Utf8Path::new("."));
+    let options =
+        create_analyzer_options::<GraphqlLanguage>(input_file, working_directory, &mut diagnostics);
 
     let (_, errors) = biome_graphql_analyze::analyze(&root, filter, &options, |event| {
         if let Some(mut diag) = event.diagnostic() {

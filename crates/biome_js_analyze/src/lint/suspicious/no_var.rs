@@ -59,6 +59,7 @@ impl Rule for NoVar {
             let ts_global_declaratio = &declaration
                 .syntax()
                 .ancestors()
+                .skip(1)
                 .find_map(TsGlobalDeclaration::cast);
 
             if ts_global_declaratio.is_some() {

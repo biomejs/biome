@@ -43,11 +43,13 @@ CssRoot {
                 },
             },
             colon_token: COLON@32..34 ":" [] [Whitespace(" ")],
-            value: CssGenericComponentValueList [
-                CssIdentifier {
-                    value_token: IDENT@34..41 "initial" [] [],
-                },
-            ],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    CssIdentifier {
+                        value_token: IDENT@34..41 "initial" [] [],
+                    },
+                ],
+            },
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@41..42 ";" [] [],
         },
@@ -77,11 +79,13 @@ CssRoot {
                             },
                         },
                         colon_token: COLON@100..102 ":" [] [Whitespace(" ")],
-                        value: CssGenericComponentValueList [
-                            CssIdentifier {
-                                value_token: IDENT@102..111 "modified" [] [Whitespace(" ")],
-                            },
-                        ],
+                        value: ScssExpression {
+                            items: ScssExpressionItemList [
+                                CssIdentifier {
+                                    value_token: IDENT@102..111 "modified" [] [Whitespace(" ")],
+                                },
+                            ],
+                        },
                         modifiers: ScssVariableModifierList [
                             ScssVariableModifier {
                                 excl_token: BANG@111..112 "!" [] [],
@@ -98,11 +102,13 @@ CssRoot {
                             },
                         },
                         colon_token: COLON@155..157 ":" [] [Whitespace(" ")],
-                        value: CssGenericComponentValueList [
-                            CssIdentifier {
-                                value_token: IDENT@157..163 "value" [] [Whitespace(" ")],
-                            },
-                        ],
+                        value: ScssExpression {
+                            items: ScssExpressionItemList [
+                                CssIdentifier {
+                                    value_token: IDENT@157..163 "value" [] [Whitespace(" ")],
+                                },
+                            ],
+                        },
                         modifiers: ScssVariableModifierList [
                             ScssVariableModifier {
                                 excl_token: BANG@163..164 "!" [] [],
@@ -123,11 +129,13 @@ CssRoot {
                             },
                         },
                         colon_token: COLON@193..195 ":" [] [Whitespace(" ")],
-                        value: CssGenericComponentValueList [
-                            CssIdentifier {
-                                value_token: IDENT@195..201 "value" [] [Whitespace(" ")],
-                            },
-                        ],
+                        value: ScssExpression {
+                            items: ScssExpressionItemList [
+                                CssIdentifier {
+                                    value_token: IDENT@195..201 "value" [] [Whitespace(" ")],
+                                },
+                            ],
+                        },
                         modifiers: ScssVariableModifierList [
                             ScssVariableModifier {
                                 excl_token: BANG@201..202 "!" [] [],
@@ -147,14 +155,16 @@ CssRoot {
                                     value_token: IDENT@218..227 "color" [Newline("\n"), Newline("\n"), Whitespace("  ")] [],
                                 },
                                 colon_token: COLON@227..229 ":" [] [Whitespace(" ")],
-                                value: CssGenericComponentValueList [
-                                    ScssIdentifier {
-                                        dollar_token: DOLLAR@229..230 "$" [] [],
-                                        name: CssIdentifier {
-                                            value_token: IDENT@230..240 "global-var" [] [],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        ScssIdentifier {
+                                            dollar_token: DOLLAR@229..230 "$" [] [],
+                                            name: CssIdentifier {
+                                                value_token: IDENT@230..240 "global-var" [] [],
+                                            },
                                         },
-                                    },
-                                ],
+                                    ],
+                                },
                             },
                             important: missing (optional),
                         },
@@ -190,11 +200,13 @@ CssRoot {
                             },
                         },
                         colon_token: COLON@328..330 ":" [] [Whitespace(" ")],
-                        value: CssGenericComponentValueList [
-                            CssIdentifier {
-                                value_token: IDENT@330..334 "red" [] [Whitespace(" ")],
-                            },
-                        ],
+                        value: ScssExpression {
+                            items: ScssExpressionItemList [
+                                CssIdentifier {
+                                    value_token: IDENT@330..334 "red" [] [Whitespace(" ")],
+                                },
+                            ],
+                        },
                         modifiers: ScssVariableModifierList [
                             ScssVariableModifier {
                                 excl_token: BANG@334..335 "!" [] [],
@@ -210,14 +222,16 @@ CssRoot {
                                     value_token: IDENT@342..350 "color" [Newline("\n"), Whitespace("  ")] [],
                                 },
                                 colon_token: COLON@350..352 ":" [] [Whitespace(" ")],
-                                value: CssGenericComponentValueList [
-                                    ScssIdentifier {
-                                        dollar_token: DOLLAR@352..353 "$" [] [],
-                                        name: CssIdentifier {
-                                            value_token: IDENT@353..367 "important-var" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        ScssIdentifier {
+                                            dollar_token: DOLLAR@352..353 "$" [] [],
+                                            name: CssIdentifier {
+                                                value_token: IDENT@353..367 "important-var" [] [Whitespace(" ")],
+                                            },
                                         },
-                                    },
-                                ],
+                                    ],
+                                },
                             },
                             important: CssDeclarationImportant {
                                 excl_token: BANG@367..368 "!" [] [],
@@ -247,9 +261,10 @@ CssRoot {
         1: CSS_IDENTIFIER@22..32
           0: IDENT@22..32 "global-var" [] []
       1: COLON@32..34 ":" [] [Whitespace(" ")]
-      2: CSS_GENERIC_COMPONENT_VALUE_LIST@34..41
-        0: CSS_IDENTIFIER@34..41
-          0: IDENT@34..41 "initial" [] []
+      2: SCSS_EXPRESSION@34..41
+        0: SCSS_EXPRESSION_ITEM_LIST@34..41
+          0: CSS_IDENTIFIER@34..41
+            0: IDENT@34..41 "initial" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@41..41
       4: SEMICOLON@41..42 ";" [] []
     1: CSS_QUALIFIED_RULE@42..243
@@ -271,9 +286,10 @@ CssRoot {
               1: CSS_IDENTIFIER@90..100
                 0: IDENT@90..100 "global-var" [] []
             1: COLON@100..102 ":" [] [Whitespace(" ")]
-            2: CSS_GENERIC_COMPONENT_VALUE_LIST@102..111
-              0: CSS_IDENTIFIER@102..111
-                0: IDENT@102..111 "modified" [] [Whitespace(" ")]
+            2: SCSS_EXPRESSION@102..111
+              0: SCSS_EXPRESSION_ITEM_LIST@102..111
+                0: CSS_IDENTIFIER@102..111
+                  0: IDENT@102..111 "modified" [] [Whitespace(" ")]
             3: SCSS_VARIABLE_MODIFIER_LIST@111..118
               0: SCSS_VARIABLE_MODIFIER@111..118
                 0: BANG@111..112 "!" [] []
@@ -285,9 +301,10 @@ CssRoot {
               1: CSS_IDENTIFIER@144..155
                 0: IDENT@144..155 "another-var" [] []
             1: COLON@155..157 ":" [] [Whitespace(" ")]
-            2: CSS_GENERIC_COMPONENT_VALUE_LIST@157..163
-              0: CSS_IDENTIFIER@157..163
-                0: IDENT@157..163 "value" [] [Whitespace(" ")]
+            2: SCSS_EXPRESSION@157..163
+              0: SCSS_EXPRESSION_ITEM_LIST@157..163
+                0: CSS_IDENTIFIER@157..163
+                  0: IDENT@157..163 "value" [] [Whitespace(" ")]
             3: SCSS_VARIABLE_MODIFIER_LIST@163..179
               0: SCSS_VARIABLE_MODIFIER@163..172
                 0: BANG@163..164 "!" [] []
@@ -302,9 +319,10 @@ CssRoot {
               1: CSS_IDENTIFIER@184..193
                 0: IDENT@184..193 "third-var" [] []
             1: COLON@193..195 ":" [] [Whitespace(" ")]
-            2: CSS_GENERIC_COMPONENT_VALUE_LIST@195..201
-              0: CSS_IDENTIFIER@195..201
-                0: IDENT@195..201 "value" [] [Whitespace(" ")]
+            2: SCSS_EXPRESSION@195..201
+              0: SCSS_EXPRESSION_ITEM_LIST@195..201
+                0: CSS_IDENTIFIER@195..201
+                  0: IDENT@195..201 "value" [] [Whitespace(" ")]
             3: SCSS_VARIABLE_MODIFIER_LIST@201..217
               0: SCSS_VARIABLE_MODIFIER@201..209
                 0: BANG@201..202 "!" [] []
@@ -319,11 +337,12 @@ CssRoot {
                 0: CSS_IDENTIFIER@218..227
                   0: IDENT@218..227 "color" [Newline("\n"), Newline("\n"), Whitespace("  ")] []
                 1: COLON@227..229 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@229..240
-                  0: SCSS_IDENTIFIER@229..240
-                    0: DOLLAR@229..230 "$" [] []
-                    1: CSS_IDENTIFIER@230..240
-                      0: IDENT@230..240 "global-var" [] []
+                2: SCSS_EXPRESSION@229..240
+                  0: SCSS_EXPRESSION_ITEM_LIST@229..240
+                    0: SCSS_IDENTIFIER@229..240
+                      0: DOLLAR@229..230 "$" [] []
+                      1: CSS_IDENTIFIER@230..240
+                        0: IDENT@230..240 "global-var" [] []
               1: (empty)
             1: SEMICOLON@240..241 ";" [] []
         2: R_CURLY@241..243 "}" [Newline("\n")] []
@@ -346,9 +365,10 @@ CssRoot {
               1: CSS_IDENTIFIER@315..328
                 0: IDENT@315..328 "important-var" [] []
             1: COLON@328..330 ":" [] [Whitespace(" ")]
-            2: CSS_GENERIC_COMPONENT_VALUE_LIST@330..334
-              0: CSS_IDENTIFIER@330..334
-                0: IDENT@330..334 "red" [] [Whitespace(" ")]
+            2: SCSS_EXPRESSION@330..334
+              0: SCSS_EXPRESSION_ITEM_LIST@330..334
+                0: CSS_IDENTIFIER@330..334
+                  0: IDENT@330..334 "red" [] [Whitespace(" ")]
             3: SCSS_VARIABLE_MODIFIER_LIST@334..341
               0: SCSS_VARIABLE_MODIFIER@334..341
                 0: BANG@334..335 "!" [] []
@@ -360,11 +380,12 @@ CssRoot {
                 0: CSS_IDENTIFIER@342..350
                   0: IDENT@342..350 "color" [Newline("\n"), Whitespace("  ")] []
                 1: COLON@350..352 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@352..367
-                  0: SCSS_IDENTIFIER@352..367
-                    0: DOLLAR@352..353 "$" [] []
-                    1: CSS_IDENTIFIER@353..367
-                      0: IDENT@353..367 "important-var" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@352..367
+                  0: SCSS_EXPRESSION_ITEM_LIST@352..367
+                    0: SCSS_IDENTIFIER@352..367
+                      0: DOLLAR@352..353 "$" [] []
+                      1: CSS_IDENTIFIER@353..367
+                        0: IDENT@353..367 "important-var" [] [Whitespace(" ")]
               1: CSS_DECLARATION_IMPORTANT@367..377
                 0: BANG@367..368 "!" [] []
                 1: IMPORTANT_KW@368..377 "important" [] []

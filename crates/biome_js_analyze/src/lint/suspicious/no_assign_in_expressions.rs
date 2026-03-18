@@ -4,7 +4,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsFunctionBody, JsArrowFunctionExpression, JsAssignmentExpression, JsExpressionStatement,
-    JsForStatement, JsParenthesizedExpression, JsSequenceExpression,
+    JsFileSource, JsForStatement, JsParenthesizedExpression, JsSequenceExpression,
 };
 use biome_rowan::AstNode;
 use biome_rule_options::no_assign_in_expressions::NoAssignInExpressionsOptions;
@@ -65,6 +65,13 @@ impl Rule for NoAssignInExpressions {
     type Options = NoAssignInExpressionsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        // Skip assignments in Vue event handlers (v-on directives)
+        // These are idiomatic Vue patterns, not accidental assignments
+        let file_source = ctx.source_type::<JsFileSource>();
+        if file_source.is_vue_event_handler() {
+            return None;
+        }
+
         let assign = ctx.query();
         let mut ancestor = assign
             .syntax()

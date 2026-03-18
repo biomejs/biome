@@ -1,0 +1,44 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: level4.jsx
+---
+# Input
+```jsx
+// should generate diagnostics
+
+import "./level4.css";
+import { Level3 } from "./level3.jsx";
+
+export function Level4() {
+	return <div className="level4 undefined-at-level4"><Level3 /></div>;
+}
+
+```
+
+# Diagnostics
+```
+level4.jsx:7:32 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class undefined-at-level4 is not defined in any imported stylesheet.
+  
+    6 │ export function Level4() {
+  > 7 │ 	return <div className="level4 undefined-at-level4"><Level3 /></div>;
+      │ 	                              ^^^^^^^^^^^^^^^^^^^
+    8 │ }
+    9 │ 
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    level4.jsx (this file) -> which imports level4.css
+  
+  
+  i Either import a CSS file that defines this class or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

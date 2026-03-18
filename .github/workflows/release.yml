@@ -148,7 +148,7 @@ jobs:
           sudo apt-get install -y musl-tools
 
       - name: Install cargo-audit
-        uses: taiki-e/install-action@288875dd3d64326724fa6d9593062d9f8ba0b131 # v2.67.30
+        uses: taiki-e/install-action@cfdb446e391c69574ebc316dfb7d7849ec12b940 # v2.68.8
         if: matrix.code-target == 'linux-x64-musl'
         with:
           tool: cargo-audit
@@ -210,7 +210,7 @@ jobs:
     name: Package ${{ matrix.code-target }}
     runs-on: ${{ matrix.os }}
     container:
-      image: rust:1.93.1-bullseye@sha256:70a5d01614c818b1d5ec069c96d58517cdfa84d8aa314b4c859503c43424a984
+      image: rust:1.94.0-bullseye@sha256:6adac06a75c5a854b47e01e44bc1554dbc32be0861760e4b23922e967b1bbe40
 
     steps:
       - name: Checkout repository
@@ -268,7 +268,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Install just
-        uses: extractions/setup-just@e33e0265a09d6d736e2ee1e0eb685ef1de4669ff # v3.0.0
+        uses: extractions/setup-just@f8a3cce218d9f83db3a2ecd90e41ac3de6cdfd9b # v3.1.0
 
       - name: Install toolchain
         uses: moonrepo/setup-rust@ede6de059f8046a5e236c94046823e2af11ca670 # v1.2.2
@@ -309,7 +309,7 @@ jobs:
           node-version: 24.13.1
 
       - name: Install just
-        uses: extractions/setup-just@e33e0265a09d6d736e2ee1e0eb685ef1de4669ff # v3.0.0
+        uses: extractions/setup-just@f8a3cce218d9f83db3a2ecd90e41ac3de6cdfd9b # v3.1.0
 
       - name: Install toolchain
         uses: moonrepo/setup-rust@ede6de059f8046a5e236c94046823e2af11ca670 # v1.2.2
@@ -346,7 +346,6 @@ jobs:
           path: |
             ./packages/@biomejs/js-api/dist
           if-no-files-found: error
-
   # Publishing jobs
 
   publish-cli:
@@ -357,6 +356,8 @@ jobs:
       - build-binaries-gnu
       - build-wasm
     if: needs.build-binaries.outputs.version
+    outputs:
+      version: ${{ needs.build-binaries.outputs.version }}
     environment: npm-publish
     permissions:
       contents: write
@@ -416,20 +417,62 @@ jobs:
           fail_on_unmatched_files: true
           generate_release_notes: true
 
-      - name: Codegen website schema
-        uses: peter-evans/repository-dispatch@28959ce8df70de7be546dd1250a005dd32156697 # v4.0.1
-        with:
-          token: ${{ secrets.BIOME_REPOSITORY_DISPATCH }}
-          repository: ${{ env.BIOME_WEBSITE_REPO }}
-          event-type: ${{ env.BIOME_RELEASE_CLI_EVENT }}
-          client-payload: |
-            { "sha": "${{ github.sha }}", "tag": "@biomejs/biome@${{ needs.build-binaries.outputs.version }}", "version": "${{ needs.build-binaries.outputs.version }}" }
       - name: Generate docker images
         uses: peter-evans/repository-dispatch@28959ce8df70de7be546dd1250a005dd32156697 # v4.0.1
         with:
           token: ${{ secrets.BIOME_REPOSITORY_DISPATCH }}
           repository: ${{ env.BIOME_DOCKER_REPO }}
           event-type: ${{ env.BIOME_RELEASE_CLI_EVENT }}
+
+
+  # Publish wasm-web on pkg-pr-new and dispatch event to website repo.
+  # This job is intentionally not required by any other job so it cannot block the release.
+  publish-wasm-web:
+    name: Publish wasm-web preview
+    runs-on: depot-ubuntu-24.04-arm-small
+    needs:
+      - build-wasm
+      - publish-cli
+    # Run after the release is published; never block the release pipeline.
+    if: always() && needs.build-wasm.result == 'success' && needs.publish-cli.result == 'success'
+    continue-on-error: true
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Download wasm-web artifact
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: wasm-web-artefact
+          path: packages/@biomejs
+
+      - name: Install pnpm
+        run: npm i -g --force corepack && corepack enable
+
+      - name: Setup node
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version: 24.13.1
+          cache: pnpm
+
+      - name: Update package.json
+        working-directory: packages/@biomejs/wasm-web
+        run: |
+          npm pkg set name='@biomejs/wasm-web'
+          npm pkg set version='0.0.0-rev.${{ github.sha }}'
+
+      - name: Publish on pkg-pr-new
+        working-directory: packages/@biomejs/wasm-web
+        run: pnpx pkg-pr-new publish
+
+      - name: Dispatch event to website repo
+        uses: peter-evans/repository-dispatch@28959ce8df70de7be546dd1250a005dd32156697 # v4.0.1
+        with:
+          token: ${{ secrets.BIOME_REPOSITORY_DISPATCH }}
+          repository: ${{ env.BIOME_WEBSITE_REPO }}
+          event-type: ${{ env.BIOME_RELEASE_CLI_EVENT }}
+          client-payload: |
+            { "sha": "${{ github.sha }}", "tag": "@biomejs/biome@${{ needs.publish-cli.outputs.version }}", "version": "${{ needs.publish-cli.outputs.version }}" }
 
   publish-js-api:
     name: Publish JS API

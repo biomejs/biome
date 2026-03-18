@@ -2,7 +2,7 @@ use super::*;
 use biome_js_syntax::TextRange;
 use biome_rowan::TokenText;
 use rustc_hash::FxHashMap;
-use std::rc::Rc;
+use std::sync::Arc;
 
 #[derive(Debug)]
 pub(crate) struct SemanticModelScopeData {
@@ -14,8 +14,9 @@ pub(crate) struct SemanticModelScopeData {
     pub(crate) children: Vec<ScopeId>,
     // All bindings of this scope (points to SemanticModelData::bindings)
     pub(crate) bindings: Vec<BindingId>,
-    // Map pointing to the [bindings] vec of each bindings by its name
-    pub(crate) bindings_by_name: FxHashMap<TokenText, BindingId>,
+    // Map pointing to the [bindings] vec of each bindings by its name,
+    // tracking the Type/Value/Namespace distinction for TypeScript declaration merging
+    pub(crate) bindings_by_name: FxHashMap<TokenText, TsBindingReference>,
     // All read references of a scope
     pub(crate) read_references: Vec<ReferenceId>,
     // All write references of a scope
@@ -28,7 +29,7 @@ pub(crate) struct SemanticModelScopeData {
 /// Allows navigation to parent and children scope and binding information.
 #[derive(Clone, Debug)]
 pub struct Scope {
-    pub(crate) data: Rc<SemanticModelData>,
+    pub(crate) data: Arc<SemanticModelData>,
     pub(crate) id: ScopeId,
 }
 
@@ -41,6 +42,11 @@ impl PartialEq for Scope {
 impl Eq for Scope {}
 
 impl Scope {
+    /// Returns the unique identifier for this scope.
+    pub fn id(&self) -> ScopeId {
+        self.id
+    }
+
     pub fn is_global_scope(&self) -> bool {
         self.id.index() == 0
     }
@@ -98,16 +104,31 @@ impl Scope {
 
     /// Returns a [Binding] by its name, like it appears on code.  It **does
     /// not** returns bindings of parent scopes.
+    ///
+    /// When a name has both a type and value binding (e.g., a class), this
+    /// returns the value binding (or the type binding if only a type exists).
     pub fn get_binding(&self, name: impl AsRef<str>) -> Option<Binding> {
         let data = &self.data.scopes[self.id.index()];
 
         let name = name.as_ref();
-        let id = *data.bindings_by_name.get(name)?;
+        let binding_ref = data.bindings_by_name.get(name)?;
+        let id = binding_ref.value_ty_or_ty();
 
         Some(Binding {
             data: self.data.clone(),
             id,
         })
+    }
+
+    /// Returns the [TsBindingReference] for a name in this scope, which
+    /// tracks whether the name refers to a type, value, namespace, or a
+    /// merged combination thereof.
+    ///
+    /// It **does not** return bindings of parent scopes.
+    pub fn get_binding_reference(&self, name: impl AsRef<str>) -> Option<TsBindingReference> {
+        let data = &self.data.scopes[self.id.index()];
+        let name = name.as_ref();
+        data.bindings_by_name.get(name).copied()
     }
 
     /// Checks if the current scope is one of the ancestor of "other". Given
@@ -125,8 +146,8 @@ impl Scope {
         self.data.scopes[self.id.index()].range
     }
 
-    pub fn syntax(&self) -> &JsSyntaxNode {
-        &self.data.scope_node_by_range[&self.range()]
+    pub fn syntax(&self) -> JsSyntaxNode {
+        self.data.scope_node_by_range[&self.range()].to_node(self.data.to_root().syntax())
     }
 
     /// Return the [Closure] associated with this scope if
@@ -139,7 +160,7 @@ impl Scope {
 
 /// Iterate all descendents scopes of the specified scope in breadth-first order.
 pub struct ScopeDescendentsIter {
-    data: Rc<SemanticModelData>,
+    data: Arc<SemanticModelData>,
     q: VecDeque<ScopeId>,
 }
 
@@ -163,7 +184,7 @@ impl Iterator for ScopeDescendentsIter {
 impl FusedIterator for ScopeDescendentsIter {}
 
 pub struct ScopeChildrenIter {
-    data: Rc<SemanticModelData>,
+    data: Arc<SemanticModelData>,
     scope_id: ScopeId,
     child_index: u32,
 }
@@ -195,7 +216,7 @@ impl FusedIterator for ScopeChildrenIter {}
 /// not** Returns bindings of parent scopes.
 #[derive(Debug)]
 pub struct ScopeBindingsIter {
-    data: Rc<SemanticModelData>,
+    data: Arc<SemanticModelData>,
     scope_id: ScopeId,
     binding_index: u32,
 }

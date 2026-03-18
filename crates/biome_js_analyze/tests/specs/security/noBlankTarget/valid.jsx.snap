@@ -38,6 +38,7 @@ expression: valid.jsx
     <a target={'targetValue'} href="/absolute/path"></a>
     <a target={"targetValue"} href="/absolute/path"></a>
     <a target={null} href="//example.com"></a>
+    <a href={company?.website} target="_blank" rel="noreferrer"></a>
     <area target="_blank" rel="noopener" href="https://example.com"></area>
     <form target="_blank" rel="noopener" action="https://example.com"></form>
     <Link href="foobar" target="_blank" />

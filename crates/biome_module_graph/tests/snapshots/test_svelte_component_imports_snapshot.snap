@@ -1,0 +1,95 @@
+---
+source: crates/biome_module_graph/tests/snap/mod.rs
+expression: content
+---
+
+# `/src/theme.css`
+
+## Source
+
+```css
+.wrapper {
+	max-width: 1200px;
+}
+.title {
+	font-weight: bold;
+}
+```
+
+## Module Info
+
+```
+Classes {
+  title,
+  wrapper,
+}
+Imports {
+  No imports
+}
+```
+
+
+# `/src/Card.svelte`
+
+## Source
+
+```svelte
+<script>
+</script>
+
+<div class="card">Content</div>
+
+<style>
+  .card { border: 1px solid; }
+</style>
+```
+
+## Module Info
+
+```
+StyleClasses {
+  card (Local),
+}
+ReferencedClasses {
+  card,
+}
+LinkedStylesheets {
+  No linked stylesheets
+}
+ScriptImports {
+  No script imports
+}
+```
+
+
+# `/src/App.svelte`
+
+## Source
+
+```svelte
+<script>
+import "./theme.css";
+import Card from "./Card.svelte";
+</script>
+
+<div class="wrapper title"><Card /></div>
+```
+
+## Module Info
+
+```
+StyleClasses {
+  No style classes
+}
+ReferencedClasses {
+  title,
+  wrapper,
+}
+LinkedStylesheets {
+  No linked stylesheets
+}
+ScriptImports {
+  "./Card.svelte" => /src/Card.svelte,
+  "./theme.css" => /src/theme.css,
+}
+```

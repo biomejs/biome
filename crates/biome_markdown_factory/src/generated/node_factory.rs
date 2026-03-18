@@ -20,11 +20,11 @@ pub fn md_autolink(
         ],
     ))
 }
-pub fn md_bullet(bullet_token: SyntaxToken, content: MdBlockList) -> MdBullet {
+pub fn md_bullet(prefix: MdListMarkerPrefix, content: MdBlockList) -> MdBullet {
     MdBullet::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_BULLET,
         [
-            Some(SyntaxElement::Token(bullet_token)),
+            Some(SyntaxElement::Node(prefix.into_syntax())),
             Some(SyntaxElement::Node(content.into_syntax())),
         ],
     ))
@@ -70,17 +70,21 @@ pub fn md_entity_reference(value_token: SyntaxToken) -> MdEntityReference {
     ))
 }
 pub fn md_fenced_code_block(
+    indent: MdIndentTokenList,
     l_fence_token: SyntaxToken,
     code_list: MdCodeNameList,
     content: MdInlineItemList,
+    r_fence_indent: MdIndentTokenList,
     r_fence_token: SyntaxToken,
 ) -> MdFencedCodeBlock {
     MdFencedCodeBlock::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_FENCED_CODE_BLOCK,
         [
+            Some(SyntaxElement::Node(indent.into_syntax())),
             Some(SyntaxElement::Token(l_fence_token)),
             Some(SyntaxElement::Node(code_list.into_syntax())),
             Some(SyntaxElement::Node(content.into_syntax())),
+            Some(SyntaxElement::Node(r_fence_indent.into_syntax())),
             Some(SyntaxElement::Token(r_fence_token)),
         ],
     ))
@@ -97,14 +101,20 @@ pub fn md_hash(hash_token: SyntaxToken) -> MdHash {
         [Some(SyntaxElement::Token(hash_token))],
     ))
 }
-pub fn md_header(before: MdHashList, after: MdHashList) -> MdHeaderBuilder {
+pub fn md_header(
+    indent: MdIndentTokenList,
+    before: MdHashList,
+    after: MdHashList,
+) -> MdHeaderBuilder {
     MdHeaderBuilder {
+        indent,
         before,
         after,
         content: None,
     }
 }
 pub struct MdHeaderBuilder {
+    indent: MdIndentTokenList,
     before: MdHashList,
     after: MdHashList,
     content: Option<MdParagraph>,
@@ -118,6 +128,7 @@ impl MdHeaderBuilder {
         MdHeader::unwrap_cast(SyntaxNode::new_detached(
             MarkdownSyntaxKind::MD_HEADER,
             [
+                Some(SyntaxElement::Node(self.indent.into_syntax())),
                 Some(SyntaxElement::Node(self.before.into_syntax())),
                 self.content
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
@@ -126,10 +137,13 @@ impl MdHeaderBuilder {
         ))
     }
 }
-pub fn md_html_block(content: MdInlineItemList) -> MdHtmlBlock {
+pub fn md_html_block(indent: MdIndentTokenList, content: MdInlineItemList) -> MdHtmlBlock {
     MdHtmlBlock::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_HTML_BLOCK,
-        [Some(SyntaxElement::Node(content.into_syntax()))],
+        [
+            Some(SyntaxElement::Node(indent.into_syntax())),
+            Some(SyntaxElement::Node(content.into_syntax())),
+        ],
     ))
 }
 pub fn md_indent(value_token: SyntaxToken) -> MdIndent {
@@ -142,6 +156,12 @@ pub fn md_indent_code_block(content: MdInlineItemList) -> MdIndentCodeBlock {
     MdIndentCodeBlock::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_INDENT_CODE_BLOCK,
         [Some(SyntaxElement::Node(content.into_syntax()))],
+    ))
+}
+pub fn md_indent_token(md_indent_char_token: SyntaxToken) -> MdIndentToken {
+    MdIndentToken::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_INDENT_TOKEN,
+        [Some(SyntaxElement::Token(md_indent_char_token))],
     ))
 }
 pub fn md_inline_code(
@@ -334,6 +354,7 @@ pub fn md_link_label(content: MdInlineItemList) -> MdLinkLabel {
     ))
 }
 pub fn md_link_reference_definition(
+    indent: MdIndentTokenList,
     l_brack_token: SyntaxToken,
     label: MdLinkLabel,
     r_brack_token: SyntaxToken,
@@ -341,6 +362,7 @@ pub fn md_link_reference_definition(
     destination: MdLinkDestination,
 ) -> MdLinkReferenceDefinitionBuilder {
     MdLinkReferenceDefinitionBuilder {
+        indent,
         l_brack_token,
         label,
         r_brack_token,
@@ -350,6 +372,7 @@ pub fn md_link_reference_definition(
     }
 }
 pub struct MdLinkReferenceDefinitionBuilder {
+    indent: MdIndentTokenList,
     l_brack_token: SyntaxToken,
     label: MdLinkLabel,
     r_brack_token: SyntaxToken,
@@ -366,6 +389,7 @@ impl MdLinkReferenceDefinitionBuilder {
         MdLinkReferenceDefinition::unwrap_cast(SyntaxNode::new_detached(
             MarkdownSyntaxKind::MD_LINK_REFERENCE_DEFINITION,
             [
+                Some(SyntaxElement::Node(self.indent.into_syntax())),
                 Some(SyntaxElement::Token(self.l_brack_token)),
                 Some(SyntaxElement::Node(self.label.into_syntax())),
                 Some(SyntaxElement::Token(self.r_brack_token)),
@@ -382,6 +406,42 @@ pub fn md_link_title(content: MdInlineItemList) -> MdLinkTitle {
         MarkdownSyntaxKind::MD_LINK_TITLE,
         [Some(SyntaxElement::Node(content.into_syntax()))],
     ))
+}
+pub fn md_list_marker_prefix(
+    pre_marker_indent: MdIndentTokenList,
+    marker_token: SyntaxToken,
+    content_indent: MdIndentTokenList,
+) -> MdListMarkerPrefixBuilder {
+    MdListMarkerPrefixBuilder {
+        pre_marker_indent,
+        marker_token,
+        content_indent,
+        post_marker_space_token: None,
+    }
+}
+pub struct MdListMarkerPrefixBuilder {
+    pre_marker_indent: MdIndentTokenList,
+    marker_token: SyntaxToken,
+    content_indent: MdIndentTokenList,
+    post_marker_space_token: Option<SyntaxToken>,
+}
+impl MdListMarkerPrefixBuilder {
+    pub fn with_post_marker_space_token(mut self, post_marker_space_token: SyntaxToken) -> Self {
+        self.post_marker_space_token = Some(post_marker_space_token);
+        self
+    }
+    pub fn build(self) -> MdListMarkerPrefix {
+        MdListMarkerPrefix::unwrap_cast(SyntaxNode::new_detached(
+            MarkdownSyntaxKind::MD_LIST_MARKER_PREFIX,
+            [
+                Some(SyntaxElement::Node(self.pre_marker_indent.into_syntax())),
+                Some(SyntaxElement::Token(self.marker_token)),
+                self.post_marker_space_token
+                    .map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Node(self.content_indent.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn md_newline(value_token: SyntaxToken) -> MdNewline {
     MdNewline::unwrap_cast(SyntaxNode::new_detached(
@@ -421,14 +481,52 @@ impl MdParagraphBuilder {
         ))
     }
 }
-pub fn md_quote(marker_token: SyntaxToken, content: MdBlockList) -> MdQuote {
+pub fn md_quote(prefix: MdQuotePrefix, content: MdBlockList) -> MdQuote {
     MdQuote::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_QUOTE,
         [
-            Some(SyntaxElement::Token(marker_token)),
+            Some(SyntaxElement::Node(prefix.into_syntax())),
             Some(SyntaxElement::Node(content.into_syntax())),
         ],
     ))
+}
+pub fn md_quote_indent(md_quote_pre_marker_indent_token: SyntaxToken) -> MdQuoteIndent {
+    MdQuoteIndent::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_QUOTE_INDENT,
+        [Some(SyntaxElement::Token(md_quote_pre_marker_indent_token))],
+    ))
+}
+pub fn md_quote_prefix(
+    pre_marker_indent: MdQuoteIndentList,
+    marker_token: SyntaxToken,
+) -> MdQuotePrefixBuilder {
+    MdQuotePrefixBuilder {
+        pre_marker_indent,
+        marker_token,
+        post_marker_space_token: None,
+    }
+}
+pub struct MdQuotePrefixBuilder {
+    pre_marker_indent: MdQuoteIndentList,
+    marker_token: SyntaxToken,
+    post_marker_space_token: Option<SyntaxToken>,
+}
+impl MdQuotePrefixBuilder {
+    pub fn with_post_marker_space_token(mut self, post_marker_space_token: SyntaxToken) -> Self {
+        self.post_marker_space_token = Some(post_marker_space_token);
+        self
+    }
+    pub fn build(self) -> MdQuotePrefix {
+        MdQuotePrefix::unwrap_cast(SyntaxNode::new_detached(
+            MarkdownSyntaxKind::MD_QUOTE_PREFIX,
+            [
+                Some(SyntaxElement::Node(self.pre_marker_indent.into_syntax())),
+                Some(SyntaxElement::Token(self.marker_token)),
+                self.post_marker_space_token
+                    .map(|token| SyntaxElement::Token(token)),
+            ],
+        ))
+    }
 }
 pub fn md_reference_image(
     excl_token: SyntaxToken,
@@ -541,9 +639,15 @@ pub fn md_textual(value_token: SyntaxToken) -> MdTextual {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
-pub fn md_thematic_break_block(value_token: SyntaxToken) -> MdThematicBreakBlock {
+pub fn md_thematic_break_block(parts: MdThematicBreakPartList) -> MdThematicBreakBlock {
     MdThematicBreakBlock::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_THEMATIC_BREAK_BLOCK,
+        [Some(SyntaxElement::Node(parts.into_syntax()))],
+    ))
+}
+pub fn md_thematic_break_char(value_token: SyntaxToken) -> MdThematicBreakChar {
+    MdThematicBreakChar::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_THEMATIC_BREAK_CHAR,
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
@@ -561,7 +665,7 @@ where
 }
 pub fn md_bullet_list<I>(items: I) -> MdBulletList
 where
-    I: IntoIterator<Item = MdBullet>,
+    I: IntoIterator<Item = AnyMdBulletListMember>,
     I::IntoIter: ExactSizeIterator,
 {
     MdBulletList::unwrap_cast(SyntaxNode::new_detached(
@@ -595,6 +699,18 @@ where
             .map(|item| Some(item.into_syntax().into())),
     ))
 }
+pub fn md_indent_token_list<I>(items: I) -> MdIndentTokenList
+where
+    I: IntoIterator<Item = MdIndentToken>,
+    I::IntoIter: ExactSizeIterator,
+{
+    MdIndentTokenList::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_INDENT_TOKEN_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
 pub fn md_inline_item_list<I>(items: I) -> MdInlineItemList
 where
     I: IntoIterator<Item = AnyMdInline>,
@@ -602,6 +718,30 @@ where
 {
     MdInlineItemList::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_INLINE_ITEM_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn md_quote_indent_list<I>(items: I) -> MdQuoteIndentList
+where
+    I: IntoIterator<Item = MdQuoteIndent>,
+    I::IntoIter: ExactSizeIterator,
+{
+    MdQuoteIndentList::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_QUOTE_INDENT_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn md_thematic_break_part_list<I>(items: I) -> MdThematicBreakPartList
+where
+    I: IntoIterator<Item = AnyMdThematicBreakPart>,
+    I::IntoIter: ExactSizeIterator,
+{
+    MdThematicBreakPartList::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_THEMATIC_BREAK_PART_LIST,
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),

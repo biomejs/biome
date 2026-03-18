@@ -288,6 +288,7 @@ impl Rule for UseSortedKeys {
         ctx.query()
             .syntax()
             .ancestors()
+            .skip(1)
             .find_map(JsObjectExpression::cast)
             .map(|object| object.range())
     }

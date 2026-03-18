@@ -527,6 +527,7 @@ fn lint(params: LintParams) -> LintResults {
 
     let analyzer_options = params.settings.analyzer_options::<JsonLanguage>(
         params.path,
+        params.working_directory,
         &params.language,
         params.suppression_reason.as_deref(),
     );
@@ -602,12 +603,14 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         categories,
         action_offset,
         document_services: _,
+        working_directory,
     } = params;
 
     let _ = debug_span!("Code actions JSON",  range =? range, path =? path).entered();
     let tree: JsonRoot = parse.tree();
     let analyzer_options = workspace.analyzer_options::<JsonLanguage>(
         params.path,
+        working_directory,
         &params.language,
         suppression_reason.as_deref(),
     );
@@ -674,6 +677,7 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
         .as_linter_rules(params.biome_path.as_path());
     let analyzer_options = params.settings.analyzer_options::<JsonLanguage>(
         params.biome_path,
+        params.working_directory,
         &params.document_file_source,
         params.suppression_reason.as_deref(),
     );

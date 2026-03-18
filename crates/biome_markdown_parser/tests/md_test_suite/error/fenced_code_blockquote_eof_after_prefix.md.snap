@@ -1,0 +1,99 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+> ```
+> 
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdQuote {
+            prefix: MdQuotePrefix {
+                pre_marker_indent: MdQuoteIndentList [],
+                marker_token: R_ANGLE@0..1 ">" [] [],
+                post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@1..2 " " [] [],
+            },
+            content: MdBlockList [
+                MdFencedCodeBlock {
+                    indent: MdIndentTokenList [],
+                    l_fence: TRIPLE_BACKTICK@2..5 "```" [] [],
+                    code_list: MdCodeNameList [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@5..6 "\n" [] [],
+                        },
+                        MdQuotePrefix {
+                            pre_marker_indent: MdQuoteIndentList [],
+                            marker_token: R_ANGLE@6..7 ">" [] [],
+                            post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@7..8 " " [] [],
+                        },
+                    ],
+                    r_fence_indent: MdIndentTokenList [],
+                    r_fence: missing (required),
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@8..8 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..8
+  0: (empty)
+  1: MD_BLOCK_LIST@0..8
+    0: MD_QUOTE@0..8
+      0: MD_QUOTE_PREFIX@0..2
+        0: MD_QUOTE_INDENT_LIST@0..0
+        1: R_ANGLE@0..1 ">" [] []
+        2: MD_QUOTE_POST_MARKER_SPACE@1..2 " " [] []
+      1: MD_BLOCK_LIST@2..8
+        0: MD_FENCED_CODE_BLOCK@2..8
+          0: MD_INDENT_TOKEN_LIST@2..2
+          1: TRIPLE_BACKTICK@2..5 "```" [] []
+          2: MD_CODE_NAME_LIST@5..5
+          3: MD_INLINE_ITEM_LIST@5..8
+            0: MD_TEXTUAL@5..6
+              0: MD_TEXTUAL_LITERAL@5..6 "\n" [] []
+            1: MD_QUOTE_PREFIX@6..8
+              0: MD_QUOTE_INDENT_LIST@6..6
+              1: R_ANGLE@6..7 ">" [] []
+              2: MD_QUOTE_POST_MARKER_SPACE@7..8 " " [] []
+          4: MD_INDENT_TOKEN_LIST@8..8
+          5: (empty)
+  2: EOF@8..8 "" [] []
+
+```
+
+## Diagnostics
+
+```
+fenced_code_blockquote_eof_after_prefix.md:1:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unterminated fenced code block, expected closing triple backticks (```).
+  
+  > 1 │ > ```
+      │   ^^^
+    2 │ >·
+  
+  i code block started here
+  
+  > 1 │ > ```
+      │   ^^^
+    2 │ >·
+  
+  i Add closing triple backticks (```) at the start of a new line.
+  
+```

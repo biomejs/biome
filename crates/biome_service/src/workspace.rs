@@ -68,7 +68,9 @@ use biome_resolver::FsWithResolverProxy;
 use biome_text_edit::TextEdit;
 use camino::Utf8Path;
 use crossbeam::channel::bounded;
-pub use document::{AnyEmbeddedSnippet, CssDocumentServices, DocumentServices, EmbeddedSnippet};
+pub use document::{
+    AnyEmbeddedSnippet, CssDocumentServices, DocumentServices, EmbeddedSnippet, JsDocumentServices,
+};
 use enumflags2::{BitFlags, bitflags};
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
@@ -1357,6 +1359,10 @@ pub struct PathIsIgnoredParams {
     pub project_key: ProjectKey,
     /// The path to inspect
     pub path: BiomePath,
+    /// Whether the path is a directory. Used to skip stat calls when the caller
+    /// already knows the file type from the filesystem traversal.
+    #[serde(default)]
+    pub is_dir: bool,
     /// Whether the path is ignored for specific features e.g. `formatter.includes`.
     /// When this field is empty, Biome checks only `files.includes`.
     pub features: FeatureName,

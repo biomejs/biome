@@ -1,3 +1,4 @@
+use std::fmt::Formatter;
 use {
     crate::TextLen,
     std::{
@@ -28,6 +29,12 @@ pub struct TextSize {
 impl fmt::Debug for TextSize {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.raw)
+    }
+}
+
+impl fmt::Display for TextSize {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        fmt::Debug::fmt(self, f)
     }
 }
 

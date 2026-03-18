@@ -1,0 +1,672 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+# Blank lines between bullet items
+
+- foo
+
+- bar
+
+- baz
+
+# Blank lines between ordered items
+
+1. first
+
+2. second
+
+3. third
+
+# Multiple blank lines between items
+
+- alpha
+
+
+- beta
+
+# Mixed: some items separated, some not
+
+- one
+- two
+
+- three
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdHeader {
+            indent: MdIndentTokenList [],
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@0..1 "#" [] [],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@1..34 " Blank lines between bullet items" [] [],
+                    },
+                ],
+                hard_line: missing (optional),
+            },
+            after: MdHashList [],
+        },
+        MdNewline {
+            value_token: NEWLINE@34..35 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@35..36 "\n" [] [],
+        },
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@36..37 "-" [] [],
+                        post_marker_space_token: missing (optional),
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@37..41 " foo" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@41..42 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                        MdNewline {
+                            value_token: NEWLINE@42..43 "\n" [] [],
+                        },
+                    ],
+                },
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@43..44 "-" [] [],
+                        post_marker_space_token: missing (optional),
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@44..48 " bar" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@48..49 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                        MdNewline {
+                            value_token: NEWLINE@49..50 "\n" [] [],
+                        },
+                    ],
+                },
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@50..51 "-" [] [],
+                        post_marker_space_token: missing (optional),
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@51..55 " baz" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@55..56 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@56..57 "\n" [] [],
+        },
+        MdHeader {
+            indent: MdIndentTokenList [],
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@57..58 "#" [] [],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@58..92 " Blank lines between ordered items" [] [],
+                    },
+                ],
+                hard_line: missing (optional),
+            },
+            after: MdHashList [],
+        },
+        MdNewline {
+            value_token: NEWLINE@92..93 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@93..94 "\n" [] [],
+        },
+        MdOrderedListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MD_ORDERED_LIST_MARKER@94..96 "1." [] [],
+                        post_marker_space_token: missing (optional),
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@96..102 " first" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@102..103 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                        MdNewline {
+                            value_token: NEWLINE@103..104 "\n" [] [],
+                        },
+                    ],
+                },
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MD_ORDERED_LIST_MARKER@104..106 "2." [] [],
+                        post_marker_space_token: missing (optional),
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@106..113 " second" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@113..114 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                        MdNewline {
+                            value_token: NEWLINE@114..115 "\n" [] [],
+                        },
+                    ],
+                },
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MD_ORDERED_LIST_MARKER@115..117 "3." [] [],
+                        post_marker_space_token: missing (optional),
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@117..123 " third" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@123..124 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@124..125 "\n" [] [],
+        },
+        MdHeader {
+            indent: MdIndentTokenList [],
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@125..126 "#" [] [],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@126..161 " Multiple blank lines between items" [] [],
+                    },
+                ],
+                hard_line: missing (optional),
+            },
+            after: MdHashList [],
+        },
+        MdNewline {
+            value_token: NEWLINE@161..162 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@162..163 "\n" [] [],
+        },
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@163..164 "-" [] [],
+                        post_marker_space_token: missing (optional),
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@164..170 " alpha" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@170..171 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                        MdNewline {
+                            value_token: NEWLINE@171..172 "\n" [] [],
+                        },
+                    ],
+                },
+                MdNewline {
+                    value_token: NEWLINE@172..173 "\n" [] [],
+                },
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@173..174 "-" [] [],
+                        post_marker_space_token: missing (optional),
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@174..179 " beta" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@179..180 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@180..181 "\n" [] [],
+        },
+        MdHeader {
+            indent: MdIndentTokenList [],
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@181..182 "#" [] [],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@182..220 " Mixed: some items separated, some not" [] [],
+                    },
+                ],
+                hard_line: missing (optional),
+            },
+            after: MdHashList [],
+        },
+        MdNewline {
+            value_token: NEWLINE@220..221 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@221..222 "\n" [] [],
+        },
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@222..223 "-" [] [],
+                        post_marker_space_token: missing (optional),
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@223..227 " one" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@227..228 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@228..229 "-" [] [],
+                        post_marker_space_token: missing (optional),
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@229..233 " two" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@233..234 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                        MdNewline {
+                            value_token: NEWLINE@234..235 "\n" [] [],
+                        },
+                    ],
+                },
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@235..236 "-" [] [],
+                        post_marker_space_token: missing (optional),
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@236..242 " three" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@242..243 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@243..243 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..243
+  0: (empty)
+  1: MD_BLOCK_LIST@0..243
+    0: MD_HEADER@0..34
+      0: MD_INDENT_TOKEN_LIST@0..0
+      1: MD_HASH_LIST@0..1
+        0: MD_HASH@0..1
+          0: HASH@0..1 "#" [] []
+      2: MD_PARAGRAPH@1..34
+        0: MD_INLINE_ITEM_LIST@1..34
+          0: MD_TEXTUAL@1..34
+            0: MD_TEXTUAL_LITERAL@1..34 " Blank lines between bullet items" [] []
+        1: (empty)
+      3: MD_HASH_LIST@34..34
+    1: MD_NEWLINE@34..35
+      0: NEWLINE@34..35 "\n" [] []
+    2: MD_NEWLINE@35..36
+      0: NEWLINE@35..36 "\n" [] []
+    3: MD_BULLET_LIST_ITEM@36..56
+      0: MD_BULLET_LIST@36..56
+        0: MD_BULLET@36..43
+          0: MD_LIST_MARKER_PREFIX@36..37
+            0: MD_INDENT_TOKEN_LIST@36..36
+            1: MINUS@36..37 "-" [] []
+            2: (empty)
+            3: MD_INDENT_TOKEN_LIST@37..37
+          1: MD_BLOCK_LIST@37..43
+            0: MD_PARAGRAPH@37..42
+              0: MD_INLINE_ITEM_LIST@37..42
+                0: MD_TEXTUAL@37..41
+                  0: MD_TEXTUAL_LITERAL@37..41 " foo" [] []
+                1: MD_TEXTUAL@41..42
+                  0: MD_TEXTUAL_LITERAL@41..42 "\n" [] []
+              1: (empty)
+            1: MD_NEWLINE@42..43
+              0: NEWLINE@42..43 "\n" [] []
+        1: MD_BULLET@43..50
+          0: MD_LIST_MARKER_PREFIX@43..44
+            0: MD_INDENT_TOKEN_LIST@43..43
+            1: MINUS@43..44 "-" [] []
+            2: (empty)
+            3: MD_INDENT_TOKEN_LIST@44..44
+          1: MD_BLOCK_LIST@44..50
+            0: MD_PARAGRAPH@44..49
+              0: MD_INLINE_ITEM_LIST@44..49
+                0: MD_TEXTUAL@44..48
+                  0: MD_TEXTUAL_LITERAL@44..48 " bar" [] []
+                1: MD_TEXTUAL@48..49
+                  0: MD_TEXTUAL_LITERAL@48..49 "\n" [] []
+              1: (empty)
+            1: MD_NEWLINE@49..50
+              0: NEWLINE@49..50 "\n" [] []
+        2: MD_BULLET@50..56
+          0: MD_LIST_MARKER_PREFIX@50..51
+            0: MD_INDENT_TOKEN_LIST@50..50
+            1: MINUS@50..51 "-" [] []
+            2: (empty)
+            3: MD_INDENT_TOKEN_LIST@51..51
+          1: MD_BLOCK_LIST@51..56
+            0: MD_PARAGRAPH@51..56
+              0: MD_INLINE_ITEM_LIST@51..56
+                0: MD_TEXTUAL@51..55
+                  0: MD_TEXTUAL_LITERAL@51..55 " baz" [] []
+                1: MD_TEXTUAL@55..56
+                  0: MD_TEXTUAL_LITERAL@55..56 "\n" [] []
+              1: (empty)
+    4: MD_NEWLINE@56..57
+      0: NEWLINE@56..57 "\n" [] []
+    5: MD_HEADER@57..92
+      0: MD_INDENT_TOKEN_LIST@57..57
+      1: MD_HASH_LIST@57..58
+        0: MD_HASH@57..58
+          0: HASH@57..58 "#" [] []
+      2: MD_PARAGRAPH@58..92
+        0: MD_INLINE_ITEM_LIST@58..92
+          0: MD_TEXTUAL@58..92
+            0: MD_TEXTUAL_LITERAL@58..92 " Blank lines between ordered items" [] []
+        1: (empty)
+      3: MD_HASH_LIST@92..92
+    6: MD_NEWLINE@92..93
+      0: NEWLINE@92..93 "\n" [] []
+    7: MD_NEWLINE@93..94
+      0: NEWLINE@93..94 "\n" [] []
+    8: MD_ORDERED_LIST_ITEM@94..124
+      0: MD_BULLET_LIST@94..124
+        0: MD_BULLET@94..104
+          0: MD_LIST_MARKER_PREFIX@94..96
+            0: MD_INDENT_TOKEN_LIST@94..94
+            1: MD_ORDERED_LIST_MARKER@94..96 "1." [] []
+            2: (empty)
+            3: MD_INDENT_TOKEN_LIST@96..96
+          1: MD_BLOCK_LIST@96..104
+            0: MD_PARAGRAPH@96..103
+              0: MD_INLINE_ITEM_LIST@96..103
+                0: MD_TEXTUAL@96..102
+                  0: MD_TEXTUAL_LITERAL@96..102 " first" [] []
+                1: MD_TEXTUAL@102..103
+                  0: MD_TEXTUAL_LITERAL@102..103 "\n" [] []
+              1: (empty)
+            1: MD_NEWLINE@103..104
+              0: NEWLINE@103..104 "\n" [] []
+        1: MD_BULLET@104..115
+          0: MD_LIST_MARKER_PREFIX@104..106
+            0: MD_INDENT_TOKEN_LIST@104..104
+            1: MD_ORDERED_LIST_MARKER@104..106 "2." [] []
+            2: (empty)
+            3: MD_INDENT_TOKEN_LIST@106..106
+          1: MD_BLOCK_LIST@106..115
+            0: MD_PARAGRAPH@106..114
+              0: MD_INLINE_ITEM_LIST@106..114
+                0: MD_TEXTUAL@106..113
+                  0: MD_TEXTUAL_LITERAL@106..113 " second" [] []
+                1: MD_TEXTUAL@113..114
+                  0: MD_TEXTUAL_LITERAL@113..114 "\n" [] []
+              1: (empty)
+            1: MD_NEWLINE@114..115
+              0: NEWLINE@114..115 "\n" [] []
+        2: MD_BULLET@115..124
+          0: MD_LIST_MARKER_PREFIX@115..117
+            0: MD_INDENT_TOKEN_LIST@115..115
+            1: MD_ORDERED_LIST_MARKER@115..117 "3." [] []
+            2: (empty)
+            3: MD_INDENT_TOKEN_LIST@117..117
+          1: MD_BLOCK_LIST@117..124
+            0: MD_PARAGRAPH@117..124
+              0: MD_INLINE_ITEM_LIST@117..124
+                0: MD_TEXTUAL@117..123
+                  0: MD_TEXTUAL_LITERAL@117..123 " third" [] []
+                1: MD_TEXTUAL@123..124
+                  0: MD_TEXTUAL_LITERAL@123..124 "\n" [] []
+              1: (empty)
+    9: MD_NEWLINE@124..125
+      0: NEWLINE@124..125 "\n" [] []
+    10: MD_HEADER@125..161
+      0: MD_INDENT_TOKEN_LIST@125..125
+      1: MD_HASH_LIST@125..126
+        0: MD_HASH@125..126
+          0: HASH@125..126 "#" [] []
+      2: MD_PARAGRAPH@126..161
+        0: MD_INLINE_ITEM_LIST@126..161
+          0: MD_TEXTUAL@126..161
+            0: MD_TEXTUAL_LITERAL@126..161 " Multiple blank lines between items" [] []
+        1: (empty)
+      3: MD_HASH_LIST@161..161
+    11: MD_NEWLINE@161..162
+      0: NEWLINE@161..162 "\n" [] []
+    12: MD_NEWLINE@162..163
+      0: NEWLINE@162..163 "\n" [] []
+    13: MD_BULLET_LIST_ITEM@163..180
+      0: MD_BULLET_LIST@163..180
+        0: MD_BULLET@163..172
+          0: MD_LIST_MARKER_PREFIX@163..164
+            0: MD_INDENT_TOKEN_LIST@163..163
+            1: MINUS@163..164 "-" [] []
+            2: (empty)
+            3: MD_INDENT_TOKEN_LIST@164..164
+          1: MD_BLOCK_LIST@164..172
+            0: MD_PARAGRAPH@164..171
+              0: MD_INLINE_ITEM_LIST@164..171
+                0: MD_TEXTUAL@164..170
+                  0: MD_TEXTUAL_LITERAL@164..170 " alpha" [] []
+                1: MD_TEXTUAL@170..171
+                  0: MD_TEXTUAL_LITERAL@170..171 "\n" [] []
+              1: (empty)
+            1: MD_NEWLINE@171..172
+              0: NEWLINE@171..172 "\n" [] []
+        1: MD_NEWLINE@172..173
+          0: NEWLINE@172..173 "\n" [] []
+        2: MD_BULLET@173..180
+          0: MD_LIST_MARKER_PREFIX@173..174
+            0: MD_INDENT_TOKEN_LIST@173..173
+            1: MINUS@173..174 "-" [] []
+            2: (empty)
+            3: MD_INDENT_TOKEN_LIST@174..174
+          1: MD_BLOCK_LIST@174..180
+            0: MD_PARAGRAPH@174..180
+              0: MD_INLINE_ITEM_LIST@174..180
+                0: MD_TEXTUAL@174..179
+                  0: MD_TEXTUAL_LITERAL@174..179 " beta" [] []
+                1: MD_TEXTUAL@179..180
+                  0: MD_TEXTUAL_LITERAL@179..180 "\n" [] []
+              1: (empty)
+    14: MD_NEWLINE@180..181
+      0: NEWLINE@180..181 "\n" [] []
+    15: MD_HEADER@181..220
+      0: MD_INDENT_TOKEN_LIST@181..181
+      1: MD_HASH_LIST@181..182
+        0: MD_HASH@181..182
+          0: HASH@181..182 "#" [] []
+      2: MD_PARAGRAPH@182..220
+        0: MD_INLINE_ITEM_LIST@182..220
+          0: MD_TEXTUAL@182..220
+            0: MD_TEXTUAL_LITERAL@182..220 " Mixed: some items separated, some not" [] []
+        1: (empty)
+      3: MD_HASH_LIST@220..220
+    16: MD_NEWLINE@220..221
+      0: NEWLINE@220..221 "\n" [] []
+    17: MD_NEWLINE@221..222
+      0: NEWLINE@221..222 "\n" [] []
+    18: MD_BULLET_LIST_ITEM@222..243
+      0: MD_BULLET_LIST@222..243
+        0: MD_BULLET@222..228
+          0: MD_LIST_MARKER_PREFIX@222..223
+            0: MD_INDENT_TOKEN_LIST@222..222
+            1: MINUS@222..223 "-" [] []
+            2: (empty)
+            3: MD_INDENT_TOKEN_LIST@223..223
+          1: MD_BLOCK_LIST@223..228
+            0: MD_PARAGRAPH@223..228
+              0: MD_INLINE_ITEM_LIST@223..228
+                0: MD_TEXTUAL@223..227
+                  0: MD_TEXTUAL_LITERAL@223..227 " one" [] []
+                1: MD_TEXTUAL@227..228
+                  0: MD_TEXTUAL_LITERAL@227..228 "\n" [] []
+              1: (empty)
+        1: MD_BULLET@228..235
+          0: MD_LIST_MARKER_PREFIX@228..229
+            0: MD_INDENT_TOKEN_LIST@228..228
+            1: MINUS@228..229 "-" [] []
+            2: (empty)
+            3: MD_INDENT_TOKEN_LIST@229..229
+          1: MD_BLOCK_LIST@229..235
+            0: MD_PARAGRAPH@229..234
+              0: MD_INLINE_ITEM_LIST@229..234
+                0: MD_TEXTUAL@229..233
+                  0: MD_TEXTUAL_LITERAL@229..233 " two" [] []
+                1: MD_TEXTUAL@233..234
+                  0: MD_TEXTUAL_LITERAL@233..234 "\n" [] []
+              1: (empty)
+            1: MD_NEWLINE@234..235
+              0: NEWLINE@234..235 "\n" [] []
+        2: MD_BULLET@235..243
+          0: MD_LIST_MARKER_PREFIX@235..236
+            0: MD_INDENT_TOKEN_LIST@235..235
+            1: MINUS@235..236 "-" [] []
+            2: (empty)
+            3: MD_INDENT_TOKEN_LIST@236..236
+          1: MD_BLOCK_LIST@236..243
+            0: MD_PARAGRAPH@236..243
+              0: MD_INLINE_ITEM_LIST@236..243
+                0: MD_TEXTUAL@236..242
+                  0: MD_TEXTUAL_LITERAL@236..242 " three" [] []
+                1: MD_TEXTUAL@242..243
+                  0: MD_TEXTUAL_LITERAL@242..243 "\n" [] []
+              1: (empty)
+  2: EOF@243..243 "" [] []
+
+```

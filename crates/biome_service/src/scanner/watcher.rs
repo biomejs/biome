@@ -324,7 +324,7 @@ impl Watcher {
                 workspace
                     .find_project_with_scan_kind_for_path(&path)
                     .and_then(|(project_key, scan_kind)| {
-                        match workspace.is_ignored(project_key, &scan_kind, &path) {
+                        match workspace.is_ignored(project_key, &scan_kind, &path, None) {
                             Ok(is_ignored) => (!is_ignored).then_some(path),
                             Err(_) => None,
                         }

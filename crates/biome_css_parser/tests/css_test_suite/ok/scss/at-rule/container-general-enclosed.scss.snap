@@ -1,0 +1,235 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
+expression: snapshot
+---
+
+## Input
+
+```css
+@container main-layout and(test) { }
+
+@container main-layout or(test) { }
+
+@container main-layout foo(url("a.svg" fn(test))) { }
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssContainerAtRule {
+                declarator: CssContainerAtRuleDeclarator {
+                    container_token: CONTAINER_KW@1..11 "container" [] [Whitespace(" ")],
+                    name: CssCustomIdentifier {
+                        value_token: IDENT@11..23 "main-layout" [] [Whitespace(" ")],
+                    },
+                    query: CssFunction {
+                        name: CssIdentifier {
+                            value_token: IDENT@23..26 "and" [] [],
+                        },
+                        l_paren_token: L_PAREN@26..27 "(" [] [],
+                        items: CssParameterList [
+                            CssListOfComponentValuesExpression {
+                                css_component_value_list: CssComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@27..31 "test" [] [],
+                                    },
+                                ],
+                            },
+                        ],
+                        r_paren_token: R_PAREN@31..33 ")" [] [Whitespace(" ")],
+                    },
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@33..35 "{" [] [Whitespace(" ")],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@35..36 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@36..39 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssContainerAtRule {
+                declarator: CssContainerAtRuleDeclarator {
+                    container_token: CONTAINER_KW@39..49 "container" [] [Whitespace(" ")],
+                    name: CssCustomIdentifier {
+                        value_token: IDENT@49..61 "main-layout" [] [Whitespace(" ")],
+                    },
+                    query: CssFunction {
+                        name: CssIdentifier {
+                            value_token: IDENT@61..63 "or" [] [],
+                        },
+                        l_paren_token: L_PAREN@63..64 "(" [] [],
+                        items: CssParameterList [
+                            CssListOfComponentValuesExpression {
+                                css_component_value_list: CssComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@64..68 "test" [] [],
+                                    },
+                                ],
+                            },
+                        ],
+                        r_paren_token: R_PAREN@68..70 ")" [] [Whitespace(" ")],
+                    },
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@70..72 "{" [] [Whitespace(" ")],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@72..73 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@73..76 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssContainerAtRule {
+                declarator: CssContainerAtRuleDeclarator {
+                    container_token: CONTAINER_KW@76..86 "container" [] [Whitespace(" ")],
+                    name: CssCustomIdentifier {
+                        value_token: IDENT@86..98 "main-layout" [] [Whitespace(" ")],
+                    },
+                    query: CssFunction {
+                        name: CssIdentifier {
+                            value_token: IDENT@98..101 "foo" [] [],
+                        },
+                        l_paren_token: L_PAREN@101..102 "(" [] [],
+                        items: CssParameterList [
+                            CssListOfComponentValuesExpression {
+                                css_component_value_list: CssComponentValueList [
+                                    CssUrlFunction {
+                                        name: URL_KW@102..105 "url" [] [],
+                                        l_paren_token: L_PAREN@105..106 "(" [] [],
+                                        value: CssString {
+                                            value_token: CSS_STRING_LITERAL@106..114 "\"a.svg\"" [] [Whitespace(" ")],
+                                        },
+                                        modifiers: CssUrlModifierList [
+                                            CssFunction {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@114..116 "fn" [] [],
+                                                },
+                                                l_paren_token: L_PAREN@116..117 "(" [] [],
+                                                items: CssParameterList [
+                                                    CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssIdentifier {
+                                                                value_token: IDENT@117..121 "test" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                ],
+                                                r_paren_token: R_PAREN@121..122 ")" [] [],
+                                            },
+                                        ],
+                                        r_paren_token: R_PAREN@122..123 ")" [] [],
+                                    },
+                                ],
+                            },
+                        ],
+                        r_paren_token: R_PAREN@123..125 ")" [] [Whitespace(" ")],
+                    },
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@125..127 "{" [] [Whitespace(" ")],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@127..128 "}" [] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@128..129 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..129
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..128
+    0: CSS_AT_RULE@0..36
+      0: AT@0..1 "@" [] []
+      1: CSS_CONTAINER_AT_RULE@1..36
+        0: CSS_CONTAINER_AT_RULE_DECLARATOR@1..33
+          0: CONTAINER_KW@1..11 "container" [] [Whitespace(" ")]
+          1: CSS_CUSTOM_IDENTIFIER@11..23
+            0: IDENT@11..23 "main-layout" [] [Whitespace(" ")]
+          2: CSS_FUNCTION@23..33
+            0: CSS_IDENTIFIER@23..26
+              0: IDENT@23..26 "and" [] []
+            1: L_PAREN@26..27 "(" [] []
+            2: CSS_PARAMETER_LIST@27..31
+              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@27..31
+                0: CSS_COMPONENT_VALUE_LIST@27..31
+                  0: CSS_IDENTIFIER@27..31
+                    0: IDENT@27..31 "test" [] []
+            3: R_PAREN@31..33 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@33..36
+          0: L_CURLY@33..35 "{" [] [Whitespace(" ")]
+          1: CSS_RULE_LIST@35..35
+          2: R_CURLY@35..36 "}" [] []
+    1: CSS_AT_RULE@36..73
+      0: AT@36..39 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_CONTAINER_AT_RULE@39..73
+        0: CSS_CONTAINER_AT_RULE_DECLARATOR@39..70
+          0: CONTAINER_KW@39..49 "container" [] [Whitespace(" ")]
+          1: CSS_CUSTOM_IDENTIFIER@49..61
+            0: IDENT@49..61 "main-layout" [] [Whitespace(" ")]
+          2: CSS_FUNCTION@61..70
+            0: CSS_IDENTIFIER@61..63
+              0: IDENT@61..63 "or" [] []
+            1: L_PAREN@63..64 "(" [] []
+            2: CSS_PARAMETER_LIST@64..68
+              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@64..68
+                0: CSS_COMPONENT_VALUE_LIST@64..68
+                  0: CSS_IDENTIFIER@64..68
+                    0: IDENT@64..68 "test" [] []
+            3: R_PAREN@68..70 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@70..73
+          0: L_CURLY@70..72 "{" [] [Whitespace(" ")]
+          1: CSS_RULE_LIST@72..72
+          2: R_CURLY@72..73 "}" [] []
+    2: CSS_AT_RULE@73..128
+      0: AT@73..76 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_CONTAINER_AT_RULE@76..128
+        0: CSS_CONTAINER_AT_RULE_DECLARATOR@76..125
+          0: CONTAINER_KW@76..86 "container" [] [Whitespace(" ")]
+          1: CSS_CUSTOM_IDENTIFIER@86..98
+            0: IDENT@86..98 "main-layout" [] [Whitespace(" ")]
+          2: CSS_FUNCTION@98..125
+            0: CSS_IDENTIFIER@98..101
+              0: IDENT@98..101 "foo" [] []
+            1: L_PAREN@101..102 "(" [] []
+            2: CSS_PARAMETER_LIST@102..123
+              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@102..123
+                0: CSS_COMPONENT_VALUE_LIST@102..123
+                  0: CSS_URL_FUNCTION@102..123
+                    0: URL_KW@102..105 "url" [] []
+                    1: L_PAREN@105..106 "(" [] []
+                    2: CSS_STRING@106..114
+                      0: CSS_STRING_LITERAL@106..114 "\"a.svg\"" [] [Whitespace(" ")]
+                    3: CSS_URL_MODIFIER_LIST@114..122
+                      0: CSS_FUNCTION@114..122
+                        0: CSS_IDENTIFIER@114..116
+                          0: IDENT@114..116 "fn" [] []
+                        1: L_PAREN@116..117 "(" [] []
+                        2: CSS_PARAMETER_LIST@117..121
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@117..121
+                            0: CSS_COMPONENT_VALUE_LIST@117..121
+                              0: CSS_IDENTIFIER@117..121
+                                0: IDENT@117..121 "test" [] []
+                        3: R_PAREN@121..122 ")" [] []
+                    4: R_PAREN@122..123 ")" [] []
+            3: R_PAREN@123..125 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@125..128
+          0: L_CURLY@125..127 "{" [] [Whitespace(" ")]
+          1: CSS_RULE_LIST@127..127
+          2: R_CURLY@127..128 "}" [] []
+  2: EOF@128..129 "" [Newline("\n")] []
+
+```

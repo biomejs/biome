@@ -14,9 +14,9 @@ use biome_configuration::{
     BiomeDiagnostic, Configuration, ConfigurationSource, CssConfiguration,
     DEFAULT_SCANNER_IGNORE_ENTRIES, ExtendedConfigurations, FilesConfiguration,
     FilesIgnoreUnknownEnabled, FormatterConfiguration, GraphqlConfiguration, GritConfiguration,
-    JsConfiguration, JsonConfiguration, LinterConfiguration, OverrideAssistConfiguration,
-    OverrideFormatterConfiguration, OverrideGlobs, OverrideLinterConfiguration, Overrides, Rules,
-    push_to_analyzer_assist, push_to_analyzer_rules,
+    JsConfiguration, JsonConfiguration, LinterConfiguration, MarkdownConfiguration,
+    OverrideAssistConfiguration, OverrideFormatterConfiguration, OverrideGlobs,
+    OverrideLinterConfiguration, Overrides, Rules, push_to_analyzer_assist, push_to_analyzer_rules,
 };
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::{CssModulesKind, CssParserOptions};
@@ -32,7 +32,7 @@ use biome_graphql_syntax::GraphqlLanguage;
 use biome_grit_formatter::context::GritFormatOptions;
 use biome_grit_syntax::GritLanguage;
 use biome_html_formatter::HtmlFormatOptions;
-use biome_html_parser::HtmlParseOptions;
+use biome_html_parser::HtmlParserOptions;
 use biome_html_syntax::HtmlLanguage;
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_parser::JsParserOptions;
@@ -40,6 +40,7 @@ use biome_js_syntax::JsLanguage;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
+use biome_markdown_syntax::MarkdownLanguage;
 use biome_plugin_loader::Plugins;
 use camino::{Utf8Path, Utf8PathBuf};
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
@@ -186,6 +187,13 @@ impl Settings {
         if let Some(html) = configuration.html {
             self.experimental_full_html_support = html.experimental_full_support_enabled;
             self.languages.html = html.into();
+        }
+
+        #[cfg(feature = "markdown")]
+        {
+            if let Some(markdown) = configuration.markdown {
+                self.languages.markdown = markdown.into();
+            }
         }
 
         // plugin settings
@@ -479,6 +487,7 @@ impl<'a> SettingsHandle<'a, Option<Configuration>> {
     pub fn analyzer_options<L>(
         &self,
         path: &BiomePath,
+        working_directory: Option<&Utf8Path>,
         file_source: &DocumentFileSource,
         suppression_reason: Option<&str>,
     ) -> AnalyzerOptions
@@ -488,14 +497,18 @@ impl<'a> SettingsHandle<'a, Option<Configuration>> {
         let settings = self.as_merged_settings();
         let linter_settings = &L::lookup_settings(&settings.languages).linter;
         let environment = L::resolve_environment(&settings);
-        L::resolve_analyzer_options(
+        let mut options = L::resolve_analyzer_options(
             &settings,
             linter_settings,
             environment,
             path,
             file_source,
             suppression_reason,
-        )
+        );
+        if let Some(wd) = working_directory {
+            options = options.with_working_directory(wd);
+        }
+        options
     }
 
     /// Whether the linter is enabled for this file path
@@ -680,6 +693,7 @@ pub struct LanguageListSettings {
     pub graphql: LanguageSettings<GraphqlLanguage>,
     pub html: LanguageSettings<HtmlLanguage>,
     pub grit: LanguageSettings<GritLanguage>,
+    pub markdown: LanguageSettings<MarkdownLanguage>,
 }
 
 impl From<JsConfiguration> for LanguageSettings<JsLanguage> {
@@ -823,6 +837,17 @@ impl From<HtmlConfiguration> for LanguageSettings<HtmlLanguage> {
     }
 }
 
+impl From<MarkdownConfiguration> for LanguageSettings<MarkdownLanguage> {
+    fn from(markdown: MarkdownConfiguration) -> Self {
+        let mut language_setting: Self = Self::default();
+        if let Some(formatter) = markdown.formatter {
+            language_setting.formatter = formatter.into();
+        }
+
+        language_setting
+    }
+}
+
 pub trait ServiceLanguage: biome_rowan::Language {
     /// Formatter settings type for this language
     type FormatterSettings: Default;
@@ -944,11 +969,12 @@ impl VcsSettings {
 
     /// Returns whether the given `path` should be ignored per the VCS settings.
     #[inline]
-    pub fn is_ignored(&self, path: &Utf8Path, root_path: Option<&Utf8Path>) -> bool {
+    pub fn is_ignored(&self, path: &Utf8Path, is_dir: bool, root_path: Option<&Utf8Path>) -> bool {
         self.should_use_ignore_file()
-            && self.ignore_matches.as_ref().is_some_and(|ignored_matches| {
-                ignored_matches.is_ignored(path, is_dir(path), root_path)
-            })
+            && self
+                .ignore_matches
+                .as_ref()
+                .is_some_and(|ignored_matches| ignored_matches.is_ignored(path, is_dir, root_path))
     }
 
     #[inline]
@@ -1427,7 +1453,7 @@ impl OverrideSettings {
     pub(crate) fn apply_override_html_parser_options(
         &self,
         path: &Utf8Path,
-        options: &mut HtmlParseOptions,
+        options: &mut HtmlParserOptions,
     ) {
         for pattern in self.patterns.iter() {
             if pattern.is_file_included(path) {
@@ -1868,7 +1894,7 @@ impl OverrideSettingPattern {
         }
     }
 
-    fn apply_overrides_to_html_parser_options(&self, options: &mut HtmlParseOptions) {
+    fn apply_overrides_to_html_parser_options(&self, options: &mut HtmlParserOptions) {
         let html_parser = &self.languages.html.parser;
 
         if let Some(interpolation) = html_parser.interpolation {

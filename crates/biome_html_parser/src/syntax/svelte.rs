@@ -1,5 +1,5 @@
 use crate::parser::HtmlParser;
-use crate::syntax::HtmlSyntaxFeatures::Svelte;
+use crate::syntax::HtmlSyntaxFeatures::{SingleTextExpressions, Svelte};
 use crate::syntax::parse_error::{
     expected_child_or_block, expected_expression, expected_name, expected_svelte_closing_block,
     expected_svelte_property, expected_text_expression, expected_valid_directive,
@@ -9,24 +9,7 @@ use crate::syntax::{
     parse_single_text_expression_content,
 };
 use crate::token_source::{HtmlLexContext, HtmlReLexContext, RestrictedExpressionStopAt};
-use biome_html_syntax::HtmlSyntaxKind::{
-    EOF, HTML_BOGUS_ELEMENT, HTML_ELEMENT_LIST, HTML_LITERAL, HTML_SPREAD_ATTRIBUTE, IDENT,
-    SVELTE_ANIMATE_DIRECTIVE, SVELTE_ATTACH_ATTRIBUTE, SVELTE_AWAIT_BLOCK,
-    SVELTE_AWAIT_CATCH_BLOCK, SVELTE_AWAIT_CATCH_CLAUSE, SVELTE_AWAIT_CLAUSES_LIST,
-    SVELTE_AWAIT_CLOSING_BLOCK, SVELTE_AWAIT_OPENING_BLOCK, SVELTE_AWAIT_THEN_BLOCK,
-    SVELTE_AWAIT_THEN_CLAUSE, SVELTE_BIND_DIRECTIVE, SVELTE_BINDING_ASSIGNMENT_BINDING_LIST,
-    SVELTE_BINDING_LIST, SVELTE_BOGUS_BLOCK, SVELTE_CLASS_DIRECTIVE, SVELTE_CONST_BLOCK,
-    SVELTE_CURLY_DESTRUCTURED_NAME, SVELTE_DEBUG_BLOCK, SVELTE_DIRECTIVE_MODIFIER,
-    SVELTE_DIRECTIVE_MODIFIER_LIST, SVELTE_DIRECTIVE_VALUE, SVELTE_EACH_AS_KEYED_ITEM,
-    SVELTE_EACH_BLOCK, SVELTE_EACH_CLOSING_BLOCK, SVELTE_EACH_INDEX, SVELTE_EACH_KEY,
-    SVELTE_EACH_KEYED_ITEM, SVELTE_EACH_OPENING_BLOCK, SVELTE_ELSE_CLAUSE, SVELTE_ELSE_IF_CLAUSE,
-    SVELTE_ELSE_IF_CLAUSE_LIST, SVELTE_HTML_BLOCK, SVELTE_IF_BLOCK, SVELTE_IF_CLOSING_BLOCK,
-    SVELTE_IF_OPENING_BLOCK, SVELTE_IN_DIRECTIVE, SVELTE_KEY_BLOCK, SVELTE_KEY_CLOSING_BLOCK,
-    SVELTE_KEY_OPENING_BLOCK, SVELTE_LITERAL, SVELTE_NAME, SVELTE_OUT_DIRECTIVE,
-    SVELTE_RENDER_BLOCK, SVELTE_REST_BINDING, SVELTE_SNIPPET_BLOCK, SVELTE_SNIPPET_CLOSING_BLOCK,
-    SVELTE_SNIPPET_OPENING_BLOCK, SVELTE_SQUARE_DESTRUCTURED_NAME, SVELTE_STYLE_DIRECTIVE,
-    SVELTE_TRANSITION_DIRECTIVE, SVELTE_USE_DIRECTIVE,
-};
+use biome_html_syntax::HtmlSyntaxKind::*;
 use biome_html_syntax::{HtmlSyntaxKind, T};
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::parse_recovery::{ParseRecoveryTokenSet, RecoveryResult};
@@ -358,7 +341,7 @@ fn parse_each_opening_block(p: &mut HtmlParser, parent_marker: Marker) -> (Parse
 
 /// Parses a spread attribute or a single text expression.
 pub(crate) fn parse_svelte_spread_or_expression(p: &mut HtmlParser) -> ParsedSyntax {
-    if !Svelte.is_supported(p) {
+    if !SingleTextExpressions.is_supported(p) {
         return Absent;
     }
 
@@ -380,12 +363,12 @@ pub(crate) fn parse_svelte_spread_or_expression(p: &mut HtmlParser) -> ParsedSyn
             .parse_element(p)
             .or_add_diagnostic(p, expected_expression);
 
-        p.expect_with_context(T!['}'], HtmlLexContext::InsideTag);
+        p.expect_with_context(T!['}'], HtmlLexContext::InsideTagSvelte);
         Present(m.complete(p, HTML_SPREAD_ATTRIBUTE))
     } else {
         p.rewind(checkpoint);
         m.abandon(p);
-        parse_single_text_expression(p, HtmlLexContext::InsideTag)
+        parse_single_text_expression(p, HtmlLexContext::InsideTagSvelte)
     }
 }
 
@@ -897,7 +880,7 @@ pub(crate) fn parse_attach_attribute(p: &mut HtmlParser) -> ParsedSyntax {
 
     parse_single_text_expression_content(p).or_add_diagnostic(p, expected_text_expression);
 
-    p.expect_with_context(T!['}'], HtmlLexContext::InsideTag);
+    p.expect_with_context(T!['}'], HtmlLexContext::InsideTagSvelte);
 
     Present(m.complete(p, SVELTE_ATTACH_ATTRIBUTE))
 }
@@ -975,7 +958,7 @@ fn parse_svelte_name(p: &mut HtmlParser) -> ParsedSyntax {
 
 fn parse_binding_literal(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
-    p.bump_with_context(HTML_LITERAL, HtmlLexContext::InsideTag);
+    p.bump_with_context(HTML_LITERAL, HtmlLexContext::InsideTagSvelte);
     Present(m.complete(p, SVELTE_LITERAL))
 }
 
@@ -1244,43 +1227,40 @@ impl ParseNodeList for ModifiersList {
 
 // #region Check functions
 
+const SVELTE_KEYWORDS: TokenSet<HtmlSyntaxKind> = token_set!(
+    T![if],
+    T![else],
+    T![each],
+    T![debug],
+    T![const],
+    T![attach],
+    T![render],
+    T![key],
+    T![as],
+    T![await],
+    T![catch],
+    T![then],
+    T![snippet],
+)
+.union(SVELTE_DIRECTIVE_KEYWORDS);
+
+const SVELTE_DIRECTIVE_KEYWORDS: TokenSet<HtmlSyntaxKind> = token_set!(
+    T![bind],
+    T![transition],
+    T![in],
+    T![out],
+    T![class],
+    T![style],
+    T![use],
+    T![animate]
+);
+
 pub(crate) fn is_at_svelte_keyword(p: &HtmlParser) -> bool {
-    matches!(
-        p.cur(),
-        T![if]
-            | T![else]
-            | T![each]
-            | T![debug]
-            | T![const]
-            | T![attach]
-            | T![render]
-            | T![key]
-            | T![as]
-            | T![await]
-            | T![catch]
-            | T![then]
-            | T![snippet]
-            | T![class]
-            | T![in]
-            | T![out]
-            | T![transition]
-            | T![animate]
-            | T![bind]
-    )
+    p.at_ts(SVELTE_KEYWORDS)
 }
 
 fn is_at_svelte_directive_keyword(token: HtmlSyntaxKind) -> bool {
-    matches!(
-        token,
-        T![bind]
-            | T![transition]
-            | T![in]
-            | T![out]
-            | T![class]
-            | T![style]
-            | T![use]
-            | T![animate]
-    )
+    SVELTE_DIRECTIVE_KEYWORDS.contains(token)
 }
 
 fn is_at_else_opening_block(p: &mut HtmlParser) -> bool {

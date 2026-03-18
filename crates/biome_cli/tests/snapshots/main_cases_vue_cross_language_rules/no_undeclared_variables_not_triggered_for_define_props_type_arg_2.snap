@@ -1,0 +1,62 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "html": {
+    "linter": { "enabled": true },
+    "experimentalFullSupportEnabled": true
+  }
+}
+```
+
+## `file.vue`
+
+```vue
+
+<template>
+	<div
+		:class="{
+			'video-controls': true,
+			'in-video': mode === 'in-video',
+			'outside-video': mode === 'outside-video',
+			'hide': !controlsVisible,
+		}"
+	>
+		<VideoProgressSlider :current-position="sliderPosition" />
+		<div class="controls-row2">
+			<BasicControls :current-position="truePosition" />
+			<TimestampDisplay :current-position="truePosition" />
+		</div>
+	</div>
+</template>
+
+<script lang="ts" setup>
+import BasicControls from "./BasicControls.vue";
+import TimestampDisplay from "./TimestampDisplay.vue";
+import VideoProgressSlider from "./VideoProgressSlider.vue";
+
+withDefaults(
+	defineProps<{
+		sliderPosition: number;
+		truePosition: number;
+		controlsVisible: boolean;
+		mode: "in-video" | "outside-video";
+	}>(),
+	{
+		controlsVisible: false,
+		mode: "in-video",
+	}
+);
+</script>
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

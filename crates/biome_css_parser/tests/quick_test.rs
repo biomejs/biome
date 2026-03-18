@@ -6,18 +6,16 @@ use biome_test_utils::has_bogus_nodes_or_empty_slots;
 #[test]
 pub fn quick_test() {
     let code = r#"
-@utility border-overlay-* {
-    position: relative;
-
-    &::after {
-        border-width: 1px;
+  .card {
+    label:hover {
+      color: red;
     }
-}
+  }
 "#;
 
     let root = parse_css(
         code,
-        CssFileSource::css(),
+        CssFileSource::scss(),
         CssParserOptions::default()
             .allow_wrong_line_comments()
             .allow_css_modules()

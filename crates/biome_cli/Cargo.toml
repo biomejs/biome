@@ -56,6 +56,7 @@ bpaf                     = { workspace = true, features = ["bright-color"] }
 camino                   = { workspace = true }
 crossbeam                = { workspace = true }
 dashmap                  = { workspace = true }
+papaya                   = { workspace = true }
 path-absolutize          = { workspace = true }
 quick-junit              = "0.5.2"
 rayon                    = { workspace = true }
@@ -82,6 +83,7 @@ tracing-tree             = "0.4.1"
 
 [dev-dependencies]
 biome_css_formatter  = { workspace = true }
+biome_css_parser     = { workspace = true }
 biome_js_formatter   = { workspace = true }
 biome_json_formatter = { workspace = true }
 biome_json_parser    = { workspace = true }

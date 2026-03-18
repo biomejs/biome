@@ -8,13 +8,14 @@ use biome_rowan::{TextRange, TextSize};
 use std::collections::HashSet;
 
 use crate::lexer::{MarkdownLexContext, MarkdownReLexContext};
+use crate::syntax::TAB_STOP_SPACES;
 use crate::syntax::inline::EmphasisContext;
 use crate::syntax::parse_error::DEFAULT_MAX_NESTING_DEPTH;
 use crate::token_source::{MarkdownTokenSource, MarkdownTokenSourceCheckpoint};
 
 /// Options for configuring the markdown parser.
 #[derive(Debug, Clone)]
-pub struct MarkdownParseOptions {
+pub struct MarkdownParserOptions {
     /// Maximum nesting depth for block quotes and lists.
     ///
     /// This limits recursion on pathological input to avoid stack overflow.
@@ -22,7 +23,7 @@ pub struct MarkdownParseOptions {
     // Reserved for future GFM options
 }
 
-impl Default for MarkdownParseOptions {
+impl Default for MarkdownParserOptions {
     fn default() -> Self {
         Self {
             max_nesting_depth: DEFAULT_MAX_NESTING_DEPTH,
@@ -111,12 +112,12 @@ pub struct QuoteIndent {
 pub(crate) struct MarkdownParser<'source> {
     context: ParserContext<MarkdownSyntaxKind>,
     source: MarkdownTokenSource<'source>,
-    options: MarkdownParseOptions,
+    options: MarkdownParserOptions,
     state: MarkdownParserState,
 }
 
 impl<'source> MarkdownParser<'source> {
-    pub fn new(source: &'source str, options: MarkdownParseOptions) -> Self {
+    pub fn new(source: &'source str, options: MarkdownParserOptions) -> Self {
         Self {
             context: ParserContext::default(),
             source: MarkdownTokenSource::from_str(source),
@@ -126,7 +127,7 @@ impl<'source> MarkdownParser<'source> {
     }
 
     /// Returns parser options. Reserved for GFM extensions.
-    pub(crate) fn options(&self) -> &MarkdownParseOptions {
+    pub(crate) fn options(&self) -> &MarkdownParserOptions {
         &self.options
     }
 
@@ -165,7 +166,6 @@ impl<'source> MarkdownParser<'source> {
 
     /// Record tight/loose information for a parsed list node.
     pub(crate) fn record_list_tightness(&mut self, range: TextRange, is_tight: bool) {
-        let range = self.trim_range(range);
         self.state
             .list_tightness
             .push(ListTightness { range, is_tight });
@@ -179,7 +179,6 @@ impl<'source> MarkdownParser<'source> {
         marker_width: usize,
         spaces_after_marker: usize,
     ) {
-        let range = self.trim_range(range);
         self.state.list_item_indents.push(ListItemIndent {
             range,
             indent,
@@ -190,7 +189,6 @@ impl<'source> MarkdownParser<'source> {
     }
 
     pub(crate) fn record_quote_indent(&mut self, range: TextRange, indent: usize) {
-        let range = self.trim_range(range);
         self.state.quote_indents.push(QuoteIndent { range, indent });
     }
 
@@ -238,6 +236,27 @@ impl<'source> MarkdownParser<'source> {
     /// The next token will be lexed with whitespace as separate tokens.
     pub(crate) fn bump_link_definition(&mut self) {
         self.source.bump_link_definition();
+    }
+
+    /// Force re-lex the current token in ThematicBreakParts context.
+    /// Decomposes MD_THEMATIC_BREAK_LITERAL into individual marker/space tokens.
+    /// Must NOT be called inside lookahead.
+    pub(crate) fn force_relex_thematic_break_parts(&mut self) {
+        self.source
+            .force_relex_in_context(MarkdownLexContext::ThematicBreakParts);
+    }
+
+    /// Bump the current token and lex the next in ThematicBreakParts context,
+    /// ensuring sustained parts-mode tokenization across the loop.
+    ///
+    /// Unlike `source.bump_thematic_break_parts()` (which only advances the lexer),
+    /// this method also registers the token with the tree builder via `push_token`,
+    /// so the token appears in the CST.
+    pub(crate) fn bump_thematic_break_parts(&mut self) {
+        let kind = self.cur();
+        let end = self.cur_range().end();
+        self.context_mut().push_token(kind, end);
+        self.source.bump_thematic_break_parts();
     }
 
     pub fn checkpoint(&self) -> MarkdownParserCheckpoint {
@@ -293,31 +312,66 @@ impl<'source> MarkdownParser<'source> {
         self.state.virtual_line_start = Some(self.cur_range().start());
     }
 
-    pub(crate) fn trim_range(&self, range: TextRange) -> TextRange {
-        let start: usize = range.start().into();
-        let end: usize = range.end().into();
-        if start >= end {
-            return range;
+    /// Emit an MdIndentTokenList for optional block prefix indentation at line start.
+    ///
+    /// Like `skip_line_indent()` but emits real CST nodes (`MdIndentToken` /
+    /// `MdIndentTokenList`) instead of skipped trivia. Use this for non-lookahead,
+    /// non-error-recovery paths where the indent tokens should be visible in the tree.
+    pub fn emit_line_indent(&mut self, max_indent: usize) -> bool {
+        if !self.at_line_start() {
+            let list_m = self.start();
+            list_m.complete(self, MarkdownSyntaxKind::MD_INDENT_TOKEN_LIST);
+            return false;
         }
 
-        let source = self.source.source_text();
-        let slice = &source[start..end];
-        if slice
-            .trim_matches(|c: char| matches!(c, ' ' | '\t' | '\r'))
-            .is_empty()
-        {
-            return TextRange::new(range.start(), range.start());
-        }
-        let leading = slice
-            .len()
-            .saturating_sub(slice.trim_start_matches([' ', '\t', '\r']).len());
-        let trailing = slice
-            .len()
-            .saturating_sub(slice.trim_end_matches([' ', '\t', '\r']).len());
-        let new_start = start + leading;
-        let new_end = end.saturating_sub(trailing);
+        let list_m = self.start();
+        let did_emit = self.emit_indent_tokens_core(max_indent);
+        list_m.complete(self, MarkdownSyntaxKind::MD_INDENT_TOKEN_LIST);
+        did_emit
+    }
 
-        TextRange::new((new_start as u32).into(), (new_end as u32).into())
+    /// Emit individual `MdIndentToken` nodes (no list wrapper) for indentation.
+    ///
+    /// Use this inside inline item lists or content lists where `MdIndentToken`
+    /// is already a valid child (via `AnyMdInline`). Unlike `emit_line_indent()`,
+    /// this does NOT wrap tokens in an `MdIndentTokenList`.
+    pub fn emit_indent_tokens(&mut self, max_indent: usize) -> bool {
+        if !self.at_line_start() {
+            return false;
+        }
+
+        self.emit_indent_tokens_core(max_indent)
+    }
+
+    /// Shared core loop: emit `MdIndentToken` nodes for whitespace-only tokens
+    /// up to `max_indent` columns.
+    fn emit_indent_tokens_core(&mut self, max_indent: usize) -> bool {
+        let mut consumed = 0usize;
+        let mut did_emit = false;
+
+        while self.at(MarkdownSyntaxKind::MD_TEXTUAL_LITERAL) {
+            let text = self.cur_text();
+            if text.is_empty() || !text.chars().all(|c| c == ' ' || c == '\t') {
+                break;
+            }
+
+            let indent = text
+                .chars()
+                .map(|c| if c == '\t' { TAB_STOP_SPACES } else { 1 })
+                .sum::<usize>();
+
+            if consumed + indent > max_indent {
+                break;
+            }
+
+            consumed += indent;
+            did_emit = true;
+            let token_m = self.start();
+            self.bump_remap(MarkdownSyntaxKind::MD_INDENT_CHAR);
+            token_m.complete(self, MarkdownSyntaxKind::MD_INDENT_TOKEN);
+        }
+
+        did_emit
     }
 
     /// Skip an optional indentation token at line start if it is whitespace-only
@@ -338,7 +392,7 @@ impl<'source> MarkdownParser<'source> {
 
             let indent = text
                 .chars()
-                .map(|c| if c == '\t' { 4 } else { 1 })
+                .map(|c| if c == '\t' { TAB_STOP_SPACES } else { 1 })
                 .sum::<usize>();
 
             if consumed + indent > max_indent {
@@ -469,7 +523,7 @@ fn count_leading_indent(text: &str) -> usize {
     for c in text.chars() {
         match c {
             ' ' => count += 1,
-            '\t' => count += 4,
+            '\t' => count += TAB_STOP_SPACES,
             _ => break,
         }
     }

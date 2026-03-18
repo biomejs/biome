@@ -8,7 +8,6 @@ expression: snapshot
 ```vue
 <template>
   <AvatarPrimitive.Fallback
-    bind:ref
     class="something nice"
   />
 </template>
@@ -48,67 +47,51 @@ HtmlRoot {
                     attributes: HtmlAttributeList [
                         HtmlAttribute {
                             name: HtmlAttributeName {
-                                value_token: HTML_LITERAL@38..47 "bind" [Newline("\n"), Whitespace("    ")] [],
-                            },
-                            initializer: missing (optional),
-                        },
-                        VueVBindShorthandDirective {
-                            arg: VueDirectiveArgument {
-                                colon_token: COLON@47..48 ":" [] [],
-                                arg: VueStaticArgument {
-                                    name_token: HTML_LITERAL@48..51 "ref" [] [],
-                                },
-                            },
-                            modifiers: VueModifierList [],
-                            initializer: missing (optional),
-                        },
-                        HtmlAttribute {
-                            name: HtmlAttributeName {
-                                value_token: HTML_LITERAL@51..61 "class" [Newline("\n"), Whitespace("    ")] [],
+                                value_token: HTML_LITERAL@38..48 "class" [Newline("\n"), Whitespace("    ")] [],
                             },
                             initializer: HtmlAttributeInitializerClause {
-                                eq_token: EQ@61..62 "=" [] [],
+                                eq_token: EQ@48..49 "=" [] [],
                                 value: HtmlString {
-                                    value_token: HTML_STRING_LITERAL@62..78 "\"something nice\"" [] [],
+                                    value_token: HTML_STRING_LITERAL@49..65 "\"something nice\"" [] [],
                                 },
                             },
                         },
                     ],
-                    slash_token: SLASH@78..82 "/" [Newline("\n"), Whitespace("  ")] [],
-                    r_angle_token: R_ANGLE@82..83 ">" [] [],
+                    slash_token: SLASH@65..69 "/" [Newline("\n"), Whitespace("  ")] [],
+                    r_angle_token: R_ANGLE@69..70 ">" [] [],
                 },
             ],
             closing_element: HtmlClosingElement {
-                l_angle_token: L_ANGLE@83..85 "<" [Newline("\n")] [],
-                slash_token: SLASH@85..86 "/" [] [],
+                l_angle_token: L_ANGLE@70..72 "<" [Newline("\n")] [],
+                slash_token: SLASH@72..73 "/" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@86..94 "template" [] [],
+                    value_token: HTML_LITERAL@73..81 "template" [] [],
                 },
-                r_angle_token: R_ANGLE@94..95 ">" [] [],
+                r_angle_token: R_ANGLE@81..82 ">" [] [],
             },
         },
     ],
-    eof_token: EOF@95..96 "" [Newline("\n")] [],
+    eof_token: EOF@82..83 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: HTML_ROOT@0..96
+0: HTML_ROOT@0..83
   0: (empty)
   1: (empty)
   2: (empty)
-  3: HTML_ELEMENT_LIST@0..95
-    0: HTML_ELEMENT@0..95
+  3: HTML_ELEMENT_LIST@0..82
+    0: HTML_ELEMENT@0..82
       0: HTML_OPENING_ELEMENT@0..10
         0: L_ANGLE@0..1 "<" [] []
         1: HTML_TAG_NAME@1..9
           0: HTML_LITERAL@1..9 "template" [] []
         2: HTML_ATTRIBUTE_LIST@9..9
         3: R_ANGLE@9..10 ">" [] []
-      1: HTML_ELEMENT_LIST@10..83
-        0: HTML_SELF_CLOSING_ELEMENT@10..83
+      1: HTML_ELEMENT_LIST@10..70
+        0: HTML_SELF_CLOSING_ELEMENT@10..70
           0: L_ANGLE@10..14 "<" [Newline("\n"), Whitespace("  ")] []
           1: HTML_MEMBER_NAME@14..38
             0: HTML_COMPONENT_NAME@14..29
@@ -116,33 +99,22 @@ HtmlRoot {
             1: DOT@29..30 "." [] []
             2: HTML_TAG_NAME@30..38
               0: HTML_LITERAL@30..38 "Fallback" [] []
-          2: HTML_ATTRIBUTE_LIST@38..78
-            0: HTML_ATTRIBUTE@38..47
-              0: HTML_ATTRIBUTE_NAME@38..47
-                0: HTML_LITERAL@38..47 "bind" [Newline("\n"), Whitespace("    ")] []
-              1: (empty)
-            1: VUE_V_BIND_SHORTHAND_DIRECTIVE@47..51
-              0: VUE_DIRECTIVE_ARGUMENT@47..51
-                0: COLON@47..48 ":" [] []
-                1: VUE_STATIC_ARGUMENT@48..51
-                  0: HTML_LITERAL@48..51 "ref" [] []
-              1: VUE_MODIFIER_LIST@51..51
-              2: (empty)
-            2: HTML_ATTRIBUTE@51..78
-              0: HTML_ATTRIBUTE_NAME@51..61
-                0: HTML_LITERAL@51..61 "class" [Newline("\n"), Whitespace("    ")] []
-              1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@61..78
-                0: EQ@61..62 "=" [] []
-                1: HTML_STRING@62..78
-                  0: HTML_STRING_LITERAL@62..78 "\"something nice\"" [] []
-          3: SLASH@78..82 "/" [Newline("\n"), Whitespace("  ")] []
-          4: R_ANGLE@82..83 ">" [] []
-      2: HTML_CLOSING_ELEMENT@83..95
-        0: L_ANGLE@83..85 "<" [Newline("\n")] []
-        1: SLASH@85..86 "/" [] []
-        2: HTML_TAG_NAME@86..94
-          0: HTML_LITERAL@86..94 "template" [] []
-        3: R_ANGLE@94..95 ">" [] []
-  4: EOF@95..96 "" [Newline("\n")] []
+          2: HTML_ATTRIBUTE_LIST@38..65
+            0: HTML_ATTRIBUTE@38..65
+              0: HTML_ATTRIBUTE_NAME@38..48
+                0: HTML_LITERAL@38..48 "class" [Newline("\n"), Whitespace("    ")] []
+              1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@48..65
+                0: EQ@48..49 "=" [] []
+                1: HTML_STRING@49..65
+                  0: HTML_STRING_LITERAL@49..65 "\"something nice\"" [] []
+          3: SLASH@65..69 "/" [Newline("\n"), Whitespace("  ")] []
+          4: R_ANGLE@69..70 ">" [] []
+      2: HTML_CLOSING_ELEMENT@70..82
+        0: L_ANGLE@70..72 "<" [Newline("\n")] []
+        1: SLASH@72..73 "/" [] []
+        2: HTML_TAG_NAME@73..81
+          0: HTML_LITERAL@73..81 "template" [] []
+        3: R_ANGLE@81..82 ">" [] []
+  4: EOF@82..83 "" [Newline("\n")] []
 
 ```

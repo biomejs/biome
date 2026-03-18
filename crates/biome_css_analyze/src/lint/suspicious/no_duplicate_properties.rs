@@ -74,6 +74,7 @@ impl Rule for NoDuplicateProperties {
             if prop
                 .syntax()
                 .ancestors()
+                .skip(1)
                 .any(|node| CssKeyframesAtRule::can_cast(node.kind()))
             {
                 continue;

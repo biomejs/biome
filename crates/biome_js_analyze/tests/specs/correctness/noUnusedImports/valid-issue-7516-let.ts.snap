@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-issue-7516-let.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+// Issue #7516: let variable shadows import type namespace
+import type * as hast from "hast"
+const _f = () => {
+    let hast: hast.Root
+}
+
+```

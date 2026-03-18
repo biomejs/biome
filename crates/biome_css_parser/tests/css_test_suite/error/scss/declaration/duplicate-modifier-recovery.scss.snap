@@ -1,0 +1,225 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
+expression: snapshot
+---
+
+## Input
+
+```css
+// Duplicate modifiers with junk in between should still recover
+// without targeted duplicate-modifier parser diagnostics
+$dup-default-junk: 1 !default ??? !default;
+$dup-global-junk: 1 !global ??? !global;
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssBogus {
+            items: [
+                ScssIdentifier {
+                    dollar_token: DOLLAR@0..124 "$" [Comments("// Duplicate modifier ..."), Newline("\n"), Comments("// without targeted d ..."), Newline("\n")] [],
+                    name: CssIdentifier {
+                        value_token: IDENT@124..140 "dup-default-junk" [] [],
+                    },
+                },
+                COLON@140..142 ":" [] [Whitespace(" ")],
+                ScssExpression {
+                    items: ScssExpressionItemList [
+                        CssNumber {
+                            value_token: CSS_NUMBER_LITERAL@142..144 "1" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
+                CssBogus {
+                    items: [
+                        ScssVariableModifier {
+                            excl_token: BANG@144..145 "!" [] [],
+                            value: DEFAULT_KW@145..153 "default" [] [Whitespace(" ")],
+                        },
+                        CssBogus {
+                            items: [
+                                ERROR_TOKEN@153..154 "?" [] [],
+                                ERROR_TOKEN@154..155 "?" [] [],
+                                ERROR_TOKEN@155..157 "?" [] [Whitespace(" ")],
+                            ],
+                        },
+                        ScssVariableModifier {
+                            excl_token: BANG@157..158 "!" [] [],
+                            value: DEFAULT_KW@158..165 "default" [] [],
+                        },
+                    ],
+                },
+                SEMICOLON@165..166 ";" [] [],
+            ],
+        },
+        CssBogus {
+            items: [
+                ScssIdentifier {
+                    dollar_token: DOLLAR@166..168 "$" [Newline("\n")] [],
+                    name: CssIdentifier {
+                        value_token: IDENT@168..183 "dup-global-junk" [] [],
+                    },
+                },
+                COLON@183..185 ":" [] [Whitespace(" ")],
+                ScssExpression {
+                    items: ScssExpressionItemList [
+                        CssNumber {
+                            value_token: CSS_NUMBER_LITERAL@185..187 "1" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
+                CssBogus {
+                    items: [
+                        ScssVariableModifier {
+                            excl_token: BANG@187..188 "!" [] [],
+                            value: GLOBAL_KW@188..195 "global" [] [Whitespace(" ")],
+                        },
+                        CssBogus {
+                            items: [
+                                ERROR_TOKEN@195..196 "?" [] [],
+                                ERROR_TOKEN@196..197 "?" [] [],
+                                ERROR_TOKEN@197..199 "?" [] [Whitespace(" ")],
+                            ],
+                        },
+                        ScssVariableModifier {
+                            excl_token: BANG@199..200 "!" [] [],
+                            value: GLOBAL_KW@200..206 "global" [] [],
+                        },
+                    ],
+                },
+                SEMICOLON@206..207 ";" [] [],
+            ],
+        },
+    ],
+    eof_token: EOF@207..208 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..208
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..207
+    0: CSS_BOGUS@0..166
+      0: SCSS_IDENTIFIER@0..140
+        0: DOLLAR@0..124 "$" [Comments("// Duplicate modifier ..."), Newline("\n"), Comments("// without targeted d ..."), Newline("\n")] []
+        1: CSS_IDENTIFIER@124..140
+          0: IDENT@124..140 "dup-default-junk" [] []
+      1: COLON@140..142 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@142..144
+        0: SCSS_EXPRESSION_ITEM_LIST@142..144
+          0: CSS_NUMBER@142..144
+            0: CSS_NUMBER_LITERAL@142..144 "1" [] [Whitespace(" ")]
+      3: CSS_BOGUS@144..165
+        0: SCSS_VARIABLE_MODIFIER@144..153
+          0: BANG@144..145 "!" [] []
+          1: DEFAULT_KW@145..153 "default" [] [Whitespace(" ")]
+        1: CSS_BOGUS@153..157
+          0: ERROR_TOKEN@153..154 "?" [] []
+          1: ERROR_TOKEN@154..155 "?" [] []
+          2: ERROR_TOKEN@155..157 "?" [] [Whitespace(" ")]
+        2: SCSS_VARIABLE_MODIFIER@157..165
+          0: BANG@157..158 "!" [] []
+          1: DEFAULT_KW@158..165 "default" [] []
+      4: SEMICOLON@165..166 ";" [] []
+    1: CSS_BOGUS@166..207
+      0: SCSS_IDENTIFIER@166..183
+        0: DOLLAR@166..168 "$" [Newline("\n")] []
+        1: CSS_IDENTIFIER@168..183
+          0: IDENT@168..183 "dup-global-junk" [] []
+      1: COLON@183..185 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@185..187
+        0: SCSS_EXPRESSION_ITEM_LIST@185..187
+          0: CSS_NUMBER@185..187
+            0: CSS_NUMBER_LITERAL@185..187 "1" [] [Whitespace(" ")]
+      3: CSS_BOGUS@187..206
+        0: SCSS_VARIABLE_MODIFIER@187..195
+          0: BANG@187..188 "!" [] []
+          1: GLOBAL_KW@188..195 "global" [] [Whitespace(" ")]
+        1: CSS_BOGUS@195..199
+          0: ERROR_TOKEN@195..196 "?" [] []
+          1: ERROR_TOKEN@196..197 "?" [] []
+          2: ERROR_TOKEN@197..199 "?" [] [Whitespace(" ")]
+        2: SCSS_VARIABLE_MODIFIER@199..206
+          0: BANG@199..200 "!" [] []
+          1: GLOBAL_KW@200..206 "global" [] []
+      4: SEMICOLON@206..207 ";" [] []
+  2: EOF@207..208 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+duplicate-modifier-recovery.scss:3:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `?`
+  
+    1 │ // Duplicate modifiers with junk in between should still recover
+    2 │ // without targeted duplicate-modifier parser diagnostics
+  > 3 │ $dup-default-junk: 1 !default ??? !default;
+      │                               ^
+    4 │ $dup-global-junk: 1 !global ??? !global;
+    5 │ 
+  
+duplicate-modifier-recovery.scss:3:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `?`
+  
+    1 │ // Duplicate modifiers with junk in between should still recover
+    2 │ // without targeted duplicate-modifier parser diagnostics
+  > 3 │ $dup-default-junk: 1 !default ??? !default;
+      │                                ^
+    4 │ $dup-global-junk: 1 !global ??? !global;
+    5 │ 
+  
+duplicate-modifier-recovery.scss:3:33 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `?`
+  
+    1 │ // Duplicate modifiers with junk in between should still recover
+    2 │ // without targeted duplicate-modifier parser diagnostics
+  > 3 │ $dup-default-junk: 1 !default ??? !default;
+      │                                 ^
+    4 │ $dup-global-junk: 1 !global ??? !global;
+    5 │ 
+  
+duplicate-modifier-recovery.scss:4:29 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `?`
+  
+    2 │ // without targeted duplicate-modifier parser diagnostics
+    3 │ $dup-default-junk: 1 !default ??? !default;
+  > 4 │ $dup-global-junk: 1 !global ??? !global;
+      │                             ^
+    5 │ 
+  
+duplicate-modifier-recovery.scss:4:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `?`
+  
+    2 │ // without targeted duplicate-modifier parser diagnostics
+    3 │ $dup-default-junk: 1 !default ??? !default;
+  > 4 │ $dup-global-junk: 1 !global ??? !global;
+      │                              ^
+    5 │ 
+  
+duplicate-modifier-recovery.scss:4:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `?`
+  
+    2 │ // without targeted duplicate-modifier parser diagnostics
+    3 │ $dup-default-junk: 1 !default ??? !default;
+  > 4 │ $dup-global-junk: 1 !global ??? !global;
+      │                               ^
+    5 │ 
+  
+```

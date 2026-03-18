@@ -1,0 +1,141 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
+expression: snapshot
+---
+
+## Input
+
+```css
+.bad {
+  value: 1 2, 3,;
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..1 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@1..5 "bad" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@5..6 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@6..14 "value" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@14..16 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        ScssListExpression {
+                                            elements: ScssListExpressionElementList [
+                                                ScssListExpressionElement {
+                                                    value: ScssExpression {
+                                                        items: ScssExpressionItemList [
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@16..18 "1" [] [Whitespace(" ")],
+                                                            },
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@18..19 "2" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                                COMMA@19..21 "," [] [Whitespace(" ")],
+                                                ScssListExpressionElement {
+                                                    value: ScssExpression {
+                                                        items: ScssExpressionItemList [
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@21..22 "3" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                                COMMA@22..23 "," [] [],
+                                            ],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@23..24 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@24..26 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@26..27 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..27
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..26
+    0: CSS_QUALIFIED_RULE@0..26
+      0: CSS_SELECTOR_LIST@0..5
+        0: CSS_COMPOUND_SELECTOR@0..5
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..5
+            0: CSS_CLASS_SELECTOR@0..5
+              0: DOT@0..1 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@1..5
+                0: IDENT@1..5 "bad" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@5..26
+        0: L_CURLY@5..6 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@6..24
+          0: CSS_DECLARATION_WITH_SEMICOLON@6..24
+            0: CSS_DECLARATION@6..23
+              0: CSS_GENERIC_PROPERTY@6..23
+                0: CSS_IDENTIFIER@6..14
+                  0: IDENT@6..14 "value" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@14..16 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@16..23
+                  0: SCSS_EXPRESSION_ITEM_LIST@16..23
+                    0: SCSS_LIST_EXPRESSION@16..23
+                      0: SCSS_LIST_EXPRESSION_ELEMENT_LIST@16..23
+                        0: SCSS_LIST_EXPRESSION_ELEMENT@16..19
+                          0: SCSS_EXPRESSION@16..19
+                            0: SCSS_EXPRESSION_ITEM_LIST@16..19
+                              0: CSS_NUMBER@16..18
+                                0: CSS_NUMBER_LITERAL@16..18 "1" [] [Whitespace(" ")]
+                              1: CSS_NUMBER@18..19
+                                0: CSS_NUMBER_LITERAL@18..19 "2" [] []
+                        1: COMMA@19..21 "," [] [Whitespace(" ")]
+                        2: SCSS_LIST_EXPRESSION_ELEMENT@21..22
+                          0: SCSS_EXPRESSION@21..22
+                            0: SCSS_EXPRESSION_ITEM_LIST@21..22
+                              0: CSS_NUMBER@21..22
+                                0: CSS_NUMBER_LITERAL@21..22 "3" [] []
+                        3: COMMA@22..23 "," [] []
+              1: (empty)
+            1: SEMICOLON@23..24 ";" [] []
+        2: R_CURLY@24..26 "}" [Newline("\n")] []
+  2: EOF@26..27 "" [Newline("\n")] []
+
+```

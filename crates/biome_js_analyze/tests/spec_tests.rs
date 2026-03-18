@@ -1,4 +1,3 @@
-#![expect(clippy::large_stack_arrays)]
 use biome_analyze::{
     AnalysisFilter, AnalyzerAction, AnalyzerPluginSlice, ControlFlow, Never, Queryable,
     RegistryVisitor, Rule, RuleDomain, RuleFilter, RuleGroup,
@@ -7,6 +6,7 @@ use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_fs::OsFileSystem;
 use biome_js_analyze::JsAnalyzerServices;
 use biome_js_parser::{JsParserOptions, parse};
+use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_js_syntax::{AnyJsRoot, JsFileSource, JsLanguage, ModuleKind};
 use biome_package::PackageType;
 use biome_plugin_loader::AnalyzerGritPlugin;
@@ -182,7 +182,10 @@ pub(crate) fn analyze_and_snap(
     let parsed = parse(input_code, source_type, parser_options);
     let root = parsed.tree();
 
-    let mut options = create_analyzer_options::<JsLanguage>(input_file, &mut diagnostics);
+    // Use the parent directory as working directory for relative paths in diagnostics
+    let working_directory = input_file.parent().unwrap_or(Utf8Path::new("."));
+    let mut options =
+        create_analyzer_options::<JsLanguage>(input_file, working_directory, &mut diagnostics);
 
     // Query tsconfig.json for JSX factory settings if jsx_runtime is ReactClassic
     // and the factory settings are not already set
@@ -214,8 +217,14 @@ pub(crate) fn analyze_and_snap(
     } else {
         Default::default()
     };
+    let semantic_model = semantic_model(&root, SemanticModelOptions::default());
 
-    let services = JsAnalyzerServices::from((module_graph, project_layout, source_type));
+    let services = JsAnalyzerServices::from((
+        module_graph,
+        project_layout,
+        source_type,
+        Some(semantic_model),
+    ));
 
     let (_, errors) =
         biome_js_analyze::analyze(&root, filter, &options, plugins, services, |event| {
@@ -483,6 +492,7 @@ fn run_plugin_test(input: &'static str, _: &str, _: &str, _: &str) {
     let plugin = match AnalyzerGritPlugin::load(
         &OsFileSystem::new(plugin_path.to_owned()),
         Utf8Path::new(plugin_path),
+        None,
     ) {
         Ok(plugin) => plugin,
         Err(err) => panic!("Cannot load plugin: {err:?}"),

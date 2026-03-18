@@ -64,6 +64,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::MdIndentCodeBlock::new_unchecked(node) };
                     $body
                 }
+                $crate::MarkdownSyntaxKind::MD_INDENT_TOKEN => {
+                    let $pattern = unsafe { $crate::MdIndentToken::new_unchecked(node) };
+                    $body
+                }
                 $crate::MarkdownSyntaxKind::MD_INLINE_CODE => {
                     let $pattern = unsafe { $crate::MdInlineCode::new_unchecked(node) };
                     $body
@@ -109,6 +113,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::MdLinkTitle::new_unchecked(node) };
                     $body
                 }
+                $crate::MarkdownSyntaxKind::MD_LIST_MARKER_PREFIX => {
+                    let $pattern = unsafe { $crate::MdListMarkerPrefix::new_unchecked(node) };
+                    $body
+                }
                 $crate::MarkdownSyntaxKind::MD_NEWLINE => {
                     let $pattern = unsafe { $crate::MdNewline::new_unchecked(node) };
                     $body
@@ -123,6 +131,14 @@ macro_rules! map_syntax_node {
                 }
                 $crate::MarkdownSyntaxKind::MD_QUOTE => {
                     let $pattern = unsafe { $crate::MdQuote::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MD_QUOTE_INDENT => {
+                    let $pattern = unsafe { $crate::MdQuoteIndent::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MD_QUOTE_PREFIX => {
+                    let $pattern = unsafe { $crate::MdQuotePrefix::new_unchecked(node) };
                     $body
                 }
                 $crate::MarkdownSyntaxKind::MD_REFERENCE_IMAGE => {
@@ -153,6 +169,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::MdThematicBreakBlock::new_unchecked(node) };
                     $body
                 }
+                $crate::MarkdownSyntaxKind::MD_THEMATIC_BREAK_CHAR => {
+                    let $pattern = unsafe { $crate::MdThematicBreakChar::new_unchecked(node) };
+                    $body
+                }
                 $crate::MarkdownSyntaxKind::MD_BOGUS => {
                     let $pattern = unsafe { $crate::MdBogus::new_unchecked(node) };
                     $body
@@ -173,8 +193,20 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::MdHashList::new_unchecked(node) };
                     $body
                 }
+                $crate::MarkdownSyntaxKind::MD_INDENT_TOKEN_LIST => {
+                    let $pattern = unsafe { $crate::MdIndentTokenList::new_unchecked(node) };
+                    $body
+                }
                 $crate::MarkdownSyntaxKind::MD_INLINE_ITEM_LIST => {
                     let $pattern = unsafe { $crate::MdInlineItemList::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MD_QUOTE_INDENT_LIST => {
+                    let $pattern = unsafe { $crate::MdQuoteIndentList::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MD_THEMATIC_BREAK_PART_LIST => {
+                    let $pattern = unsafe { $crate::MdThematicBreakPartList::new_unchecked(node) };
                     $body
                 }
                 _ => unreachable!(),

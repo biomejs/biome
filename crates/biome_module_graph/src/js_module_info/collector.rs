@@ -1,6 +1,9 @@
-use std::{borrow::Cow, collections::BTreeSet, sync::Arc};
+use crate::css_module_info::CssClassReference;
+use std::{borrow::Cow, sync::Arc};
 
-use biome_js_semantic::{SemanticEvent, SemanticEventExtractor};
+use biome_js_semantic::{
+    BindingId, ScopeId, SemanticEvent, SemanticEventExtractor, TsBindingReference,
+};
 use biome_js_syntax::{
     AnyJsCombinedSpecifier, AnyJsDeclaration, AnyJsExportDefaultDeclaration, AnyJsExpression,
     AnyJsImportClause, JsAssignmentExpression, JsForVariableDeclaration, JsFormalParameter,
@@ -9,15 +12,14 @@ use biome_js_syntax::{
     inner_string_text,
 };
 use biome_js_type_info::{
-    BindingId, FunctionParameter, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, GenericTypeParameter,
-    MAX_FLATTEN_DEPTH, Module, Namespace, Resolvable, ResolvedTypeData, ResolvedTypeId, ScopeId,
-    TypeData, TypeId, TypeImportQualifier, TypeMember, TypeMemberKind, TypeReference,
-    TypeReferenceQualifier, TypeResolver, TypeResolverLevel, TypeStore,
+    FunctionParameter, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, GenericTypeParameter, MAX_FLATTEN_DEPTH,
+    Module, Namespace, Resolvable, ResolvedTypeData, ResolvedTypeId, TypeData, TypeId,
+    TypeImportQualifier, TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier,
+    TypeResolver, TypeResolverLevel, TypeStore, UnionCollector,
 };
 use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::{AstNode, Text, TextRange, TextSize, TokenText};
 use indexmap::IndexMap;
-use rust_lapper::{Interval, Lapper};
 use rustc_hash::FxHashMap;
 
 use super::{
@@ -26,9 +28,8 @@ use super::{
     scope::JsScopeData,
 };
 use crate::js_module_info::{
-    binding::{JsBindingReference, JsBindingReferenceKind, JsDeclarationKind},
-    scope::TsBindingReference,
-    scope_id_for_range,
+    binding::{JsBindingReference, JsBindingReferenceKind},
+    scope::TsBindingReferenceExt,
     utils::reached_too_many_types,
 };
 use crate::{JsImportPath, JsImportPhase};
@@ -69,9 +70,6 @@ pub(super) struct JsModuleInfoCollector {
     /// The first entry is always the module's global scope.
     pub(super) scopes: Vec<JsScopeData>,
 
-    /// Used to build the Lapper lookup tree for finding scopes by text range.
-    scope_range_by_start: FxHashMap<TextSize, BTreeSet<Interval<u32, ScopeId>>>,
-
     /// Used for tracking the scope we are currently in.
     scope_stack: Vec<ScopeId>,
 
@@ -103,6 +101,10 @@ pub(super) struct JsModuleInfoCollector {
 
     /// Whether to enable type inference when finalizing the module info
     infer_types: bool,
+
+    /// CSS class references from JSX `className` or `class` attributes
+    /// (static string literals only).
+    pub(super) referenced_classes: Vec<CssClassReference>,
 }
 
 /// Intermediary representation for an exported symbol.
@@ -396,7 +398,7 @@ impl JsModuleInfoCollector {
 
                 self.scopes.push(JsScopeData {
                     range,
-                    parent: parent_scope_id.map(|id| ScopeId::new(id.index())),
+                    parent: parent_scope_id,
                     children: Vec::new(),
                     bindings: Vec::new(),
                     bindings_by_name: FxHashMap::default(),
@@ -405,16 +407,6 @@ impl JsModuleInfoCollector {
                 if let Some(parent_scope_id) = parent_scope_id {
                     self.scopes[parent_scope_id.index()].children.push(scope_id);
                 }
-
-                let start = range.start();
-                self.scope_range_by_start
-                    .entry(start)
-                    .or_default()
-                    .insert(Interval {
-                        start: start.into(),
-                        stop: range.end().into(),
-                        val: scope_id,
-                    });
 
                 self.scope_stack.push(scope_id);
             }
@@ -425,6 +417,7 @@ impl JsModuleInfoCollector {
                 range,
                 scope_id,
                 hoisted_scope_id,
+                declaration_kind,
             } => {
                 let binding_scope_id = hoisted_scope_id.unwrap_or(scope_id);
 
@@ -451,10 +444,6 @@ impl JsModuleInfoCollector {
                 });
 
                 let name = name_token.as_ref().map(JsSyntaxToken::token_text_trimmed);
-                let declaration_kind = node
-                    .as_ref()
-                    .map(JsDeclarationKind::from_node)
-                    .unwrap_or_default();
                 let scope_id = *self.scope_stack.last().expect("scope must be present");
 
                 self.bindings.push(JsBindingData {
@@ -550,17 +539,15 @@ impl JsModuleInfoCollector {
         }
     }
 
-    fn finalise(&mut self) -> (IndexMap<Text, JsExport>, Lapper<u32, ScopeId>) {
-        let scope_by_range = Lapper::new(
-            self.scope_range_by_start
-                .iter()
-                .flat_map(|(_, scopes)| scopes.iter())
-                .cloned()
-                .collect(),
-        );
-
+    fn finalise(
+        &mut self,
+        semantic_model: &biome_js_semantic::SemanticModel,
+    ) -> (
+        IndexMap<Text, JsExport>,
+        FxHashMap<TextRange, super::BindingTypeData>,
+    ) {
         if self.infer_types {
-            self.infer_all_types(&scope_by_range);
+            self.infer_all_types(semantic_model);
             self.resolve_all_and_downgrade_project_references();
 
             // Purging before flattening will save us from duplicate work during
@@ -571,16 +558,17 @@ impl JsModuleInfoCollector {
         }
 
         let exports = self.collect_exports();
+        let binding_type_data = self.build_binding_type_data(semantic_model);
 
-        (exports, scope_by_range)
+        (exports, binding_type_data)
     }
 
-    fn infer_all_types(&mut self, scope_by_range: &Lapper<u32, ScopeId>) {
+    fn infer_all_types(&mut self, semantic_model: &biome_js_semantic::SemanticModel) {
         for index in 0..self.bindings.len() {
             let binding = &self.bindings[index];
             if let Some(node) = self.binding_node_by_start.get(&binding.range.start()) {
-                let scope_id = scope_id_for_range(scope_by_range, binding.range);
-                let ty = self.infer_type(&node.clone(), binding.clone(), scope_id);
+                let scope_id = semantic_model.scope_for_range(binding.range).id();
+                let ty = self.infer_type(&node.clone(), binding.clone(), scope_id, semantic_model);
                 self.bindings[index].ty = ty;
             }
         }
@@ -607,8 +595,21 @@ impl JsModuleInfoCollector {
         node: &JsSyntaxNode,
         binding: JsBindingData,
         scope_id: ScopeId,
+        semantic_model: &biome_js_semantic::SemanticModel,
     ) -> TypeReference {
         let binding_name = &binding.name.clone();
+
+        // If this binding is an import, create a TypeReference::Import directly
+        if binding.declaration_kind.is_import_declaration()
+            && let Some(import) = self.static_imports.get(binding_name)
+        {
+            return TypeReference::from(TypeImportQualifier {
+                symbol: import.symbol.clone(),
+                resolved_path: import.resolved_path.clone(),
+                type_only: binding.declaration_kind.is_import_type_declaration(),
+            });
+        }
+
         for ancestor in node.ancestors() {
             if let Some(decl) = AnyJsDeclaration::cast_ref(&ancestor) {
                 let ty = if let Some(typed_bindings) = decl
@@ -621,7 +622,12 @@ impl JsModuleInfoCollector {
                         .unwrap_or_default();
 
                     if self.has_writable_reference(&binding) {
-                        self.widen_binding_from_writable_references(scope_id, &binding, &ty)
+                        self.widen_binding_from_writable_references(
+                            scope_id,
+                            &binding,
+                            &ty,
+                            semantic_model,
+                        )
                     } else {
                         ty
                     }
@@ -676,29 +682,37 @@ impl JsModuleInfoCollector {
         scope_id: ScopeId,
         binding: &JsBindingData,
         ty: &TypeReference,
+        semantic_model: &biome_js_semantic::SemanticModel,
     ) -> TypeReference {
         let references = self.get_writable_references(binding);
-        let mut ty = ty.clone();
+        let mut union_collector = UnionCollector::new();
+        union_collector.add(ty.clone());
         for reference in references {
             let Some(node) = self.binding_node_by_start.get(&reference.range_start) else {
                 continue;
             };
-            for ancestor in node.ancestors().skip(1) {
-                if let Some(assignment) = JsAssignmentExpression::cast_ref(&ancestor)
-                    && let Ok(right) = assignment.right()
-                {
-                    let data = TypeData::from_any_js_expression(self, scope_id, &right);
-                    let assigned_type = self.reference_to_owned_data(data);
-                    ty = ResolvedTypeId::new(
-                        self.level(),
-                        self.union_with(ty.clone(), assigned_type),
-                    )
-                    .into();
-                }
+            let reference_scope = semantic_model
+                .scope_for_range(node.text_trimmed_range())
+                .id();
+
+            // We don't want to widen types inside the same scope
+            if binding.scope_id == reference_scope {
+                continue;
+            }
+            let assignment = node
+                .ancestors()
+                .skip(1)
+                .find_map(|ancestor| JsAssignmentExpression::cast_ref(&ancestor))
+                .and_then(|assignment| assignment.right().ok());
+            if let Some(right) = assignment {
+                let data = TypeData::from_any_js_expression(self, scope_id, &right);
+                let assigned_type = self.reference_to_owned_data(data);
+                union_collector.add(assigned_type);
             }
         }
 
-        ty
+        let id = self.register_type(union_collector.finish());
+        ResolvedTypeId::new(self.level(), id).into()
     }
 
     /// After the first pass of the collector, import references have been
@@ -925,7 +939,18 @@ impl JsModuleInfoCollector {
                     export_name,
                     reexport,
                 } => {
-                    finalised_exports.insert(export_name, JsExport::Reexport(reexport));
+                    // `export * as Foo from "..."` creates a namespace export:
+                    // `Foo` is an own symbol of this module (a namespace object),
+                    // not a forwarded individual symbol from the target.
+                    // We store the full `JsReexport` so that the JSDoc comment
+                    // and resolved target path are preserved for documentation
+                    // tooling and type inference.
+                    if reexport.import.symbol == ImportSymbol::All {
+                        finalised_exports
+                            .insert(export_name, JsExport::Own(JsOwnExport::Namespace(reexport)));
+                    } else {
+                        finalised_exports.insert(export_name, JsExport::Reexport(reexport));
+                    }
                 }
             }
         }
@@ -972,7 +997,9 @@ impl JsModuleInfoCollector {
             | TsBindingReference::ValueType(binding_id)
             | TsBindingReference::TypeAndValueType(binding_id)
             | TsBindingReference::NamespaceAndValueType(binding_id) => {
-                JsOwnExport::Binding(*binding_id)
+                // Get the binding range instead of storing the BindingId
+                let binding_range = self.bindings[binding_id.index()].range;
+                JsOwnExport::Binding(binding_range)
             }
         };
 
@@ -1118,10 +1145,39 @@ impl TypeResolver for JsModuleInfoCollector {
     }
 }
 
+impl JsModuleInfoCollector {
+    /// Build type augmentation data from the temporary bindings collected during traversal.
+    ///
+    /// Maps binding ranges to their type information and JSDoc comments.
+    fn build_binding_type_data(
+        &self,
+        _semantic_model: &biome_js_semantic::SemanticModel,
+    ) -> FxHashMap<TextRange, super::BindingTypeData> {
+        let mut binding_type_data = FxHashMap::default();
+
+        for binding in &self.bindings {
+            binding_type_data.insert(
+                binding.range,
+                super::BindingTypeData {
+                    ty: binding.ty.clone(),
+                    jsdoc: binding.jsdoc.clone(),
+                    export_ranges: binding.export_ranges.clone(),
+                },
+            );
+        }
+
+        binding_type_data
+    }
+}
+
 impl JsModuleInfo {
-    pub(super) fn new(mut collector: JsModuleInfoCollector, infer_types: bool) -> Self {
+    pub(super) fn new(
+        mut collector: JsModuleInfoCollector,
+        semantic_model: std::sync::Arc<biome_js_semantic::SemanticModel>,
+        infer_types: bool,
+    ) -> Self {
         collector.infer_types = infer_types;
-        let (exports, scope_by_range) = collector.finalise();
+        let (exports, binding_type_data) = collector.finalise(&semantic_model);
 
         Self(Arc::new(JsModuleInfoInner {
             static_imports: Imports(collector.static_imports),
@@ -1129,13 +1185,13 @@ impl JsModuleInfo {
             dynamic_import_paths: collector.dynamic_import_paths,
             exports: Exports(exports),
             blanket_reexports: collector.blanket_reexports,
-            bindings: collector.bindings,
+            semantic_model,
+            binding_type_data,
             expressions: collector.parsed_expressions,
-            scopes: collector.scopes,
-            scope_by_range,
             types: collector.types.into(),
             diagnostics: collector.diagnostics.into_iter().map(Into::into).collect(),
             infer_types: collector.infer_types,
+            referenced_classes: collector.referenced_classes,
         }))
     }
 }

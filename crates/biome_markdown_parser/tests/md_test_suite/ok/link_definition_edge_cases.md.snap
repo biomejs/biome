@@ -63,7 +63,15 @@ MdDocument {
             value_token: NEWLINE@31..32 "\n" [] [],
         },
         MdLinkReferenceDefinition {
-            l_brack_token: L_BRACK@32..35 "[" [Skipped(" "), Skipped(" ")] [],
+            indent: MdIndentTokenList [
+                MdIndentToken {
+                    md_indent_char_token: MD_INDENT_CHAR@32..33 " " [] [],
+                },
+                MdIndentToken {
+                    md_indent_char_token: MD_INDENT_CHAR@33..34 " " [] [],
+                },
+            ],
+            l_brack_token: L_BRACK@34..35 "[" [] [],
             label: MdLinkLabel {
                 content: MdInlineItemList [
                     MdTextual {
@@ -112,7 +120,15 @@ MdDocument {
             value_token: NEWLINE@76..77 "\n" [] [],
         },
         MdLinkReferenceDefinition {
-            l_brack_token: L_BRACK@77..80 "[" [Skipped(" "), Skipped(" ")] [],
+            indent: MdIndentTokenList [
+                MdIndentToken {
+                    md_indent_char_token: MD_INDENT_CHAR@77..78 " " [] [],
+                },
+                MdIndentToken {
+                    md_indent_char_token: MD_INDENT_CHAR@78..79 " " [] [],
+                },
+            ],
+            l_brack_token: L_BRACK@79..80 "[" [] [],
             label: MdLinkLabel {
                 content: MdInlineItemList [
                     MdTextual {
@@ -147,6 +163,7 @@ MdDocument {
             value_token: NEWLINE@101..102 "\n" [] [],
         },
         MdLinkReferenceDefinition {
+            indent: MdIndentTokenList [],
             l_brack_token: L_BRACK@102..103 "[" [] [],
             label: MdLinkLabel {
                 content: MdInlineItemList [
@@ -176,6 +193,7 @@ MdDocument {
             value_token: NEWLINE@117..118 "\n" [] [],
         },
         MdLinkReferenceDefinition {
+            indent: MdIndentTokenList [],
             l_brack_token: L_BRACK@118..119 "[" [] [],
             label: MdLinkLabel {
                 content: MdInlineItemList [
@@ -214,6 +232,7 @@ MdDocument {
             value_token: NEWLINE@151..152 "\n" [] [],
         },
         MdLinkReferenceDefinition {
+            indent: MdIndentTokenList [],
             l_brack_token: L_BRACK@152..153 "[" [] [],
             label: MdLinkLabel {
                 content: MdInlineItemList [
@@ -267,6 +286,7 @@ MdDocument {
             value_token: NEWLINE@199..200 "\n" [] [],
         },
         MdLinkReferenceDefinition {
+            indent: MdIndentTokenList [],
             l_brack_token: L_BRACK@200..201 "[" [] [],
             label: MdLinkLabel {
                 content: MdInlineItemList [
@@ -320,6 +340,7 @@ MdDocument {
             value_token: NEWLINE@244..245 "\n" [] [],
         },
         MdLinkReferenceDefinition {
+            indent: MdIndentTokenList [],
             l_brack_token: L_BRACK@245..246 "[" [] [],
             label: MdLinkLabel {
                 content: MdInlineItemList [
@@ -373,6 +394,7 @@ MdDocument {
             value_token: NEWLINE@282..283 "\n" [] [],
         },
         MdLinkReferenceDefinition {
+            indent: MdIndentTokenList [],
             l_brack_token: L_BRACK@283..284 "[" [] [],
             label: MdLinkLabel {
                 content: MdInlineItemList [
@@ -420,6 +442,7 @@ MdDocument {
             value_token: NEWLINE@338..339 "\n" [] [],
         },
         MdLinkReferenceDefinition {
+            indent: MdIndentTokenList [],
             l_brack_token: L_BRACK@339..340 "[" [] [],
             label: MdLinkLabel {
                 content: MdInlineItemList [
@@ -479,6 +502,7 @@ MdDocument {
             value_token: NEWLINE@385..386 "\n" [] [],
         },
         MdLinkReferenceDefinition {
+            indent: MdIndentTokenList [],
             l_brack_token: L_BRACK@386..387 "[" [] [],
             label: MdLinkLabel {
                 content: MdInlineItemList [
@@ -514,6 +538,7 @@ MdDocument {
             value_token: NEWLINE@411..412 "\n" [] [],
         },
         MdLinkReferenceDefinition {
+            indent: MdIndentTokenList [],
             l_brack_token: L_BRACK@412..413 "[" [] [],
             label: MdLinkLabel {
                 content: MdInlineItemList [
@@ -557,6 +582,7 @@ MdDocument {
             value_token: NEWLINE@439..440 "\n" [] [],
         },
         MdLinkReferenceDefinition {
+            indent: MdIndentTokenList [],
             l_brack_token: L_BRACK@440..441 "[" [] [],
             label: MdLinkLabel {
                 content: MdInlineItemList [
@@ -668,8 +694,13 @@ MdDocument {
     1: MD_NEWLINE@31..32
       0: NEWLINE@31..32 "\n" [] []
     2: MD_LINK_REFERENCE_DEFINITION@32..56
-      0: L_BRACK@32..35 "[" [Skipped(" "), Skipped(" ")] []
-      1: MD_LINK_LABEL@35..49
+      0: MD_INDENT_TOKEN_LIST@32..34
+        0: MD_INDENT_TOKEN@32..33
+          0: MD_INDENT_CHAR@32..33 " " [] []
+        1: MD_INDENT_TOKEN@33..34
+          0: MD_INDENT_CHAR@33..34 " " [] []
+      1: L_BRACK@34..35 "[" [] []
+      2: MD_LINK_LABEL@35..49
         0: MD_INLINE_ITEM_LIST@35..49
           0: MD_TEXTUAL@35..40
             0: MD_TEXTUAL_LITERAL@35..40 "after" [] []
@@ -677,15 +708,15 @@ MdDocument {
             0: MD_TEXTUAL_LITERAL@40..41 "-" [] []
           2: MD_TEXTUAL@41..49
             0: MD_TEXTUAL_LITERAL@41..49 "trailing" [] []
-      2: R_BRACK@49..50 "]" [] []
-      3: COLON@50..51 ":" [] []
-      4: MD_LINK_DESTINATION@51..56
+      3: R_BRACK@49..50 "]" [] []
+      4: COLON@50..51 ":" [] []
+      5: MD_LINK_DESTINATION@51..56
         0: MD_INLINE_ITEM_LIST@51..56
           0: MD_TEXTUAL@51..52
             0: MD_TEXTUAL_LITERAL@51..52 " " [] []
           1: MD_TEXTUAL@52..56
             0: MD_TEXTUAL_LITERAL@52..56 "/url" [] []
-      5: (empty)
+      6: (empty)
     3: MD_NEWLINE@56..57
       0: NEWLINE@56..57 "\n" [] []
     4: MD_NEWLINE@57..58
@@ -700,8 +731,13 @@ MdDocument {
     6: MD_NEWLINE@76..77
       0: NEWLINE@76..77 "\n" [] []
     7: MD_LINK_REFERENCE_DEFINITION@77..100
-      0: L_BRACK@77..80 "[" [Skipped(" "), Skipped(" ")] []
-      1: MD_LINK_LABEL@80..93
+      0: MD_INDENT_TOKEN_LIST@77..79
+        0: MD_INDENT_TOKEN@77..78
+          0: MD_INDENT_CHAR@77..78 " " [] []
+        1: MD_INDENT_TOKEN@78..79
+          0: MD_INDENT_CHAR@78..79 " " [] []
+      1: L_BRACK@79..80 "[" [] []
+      2: MD_LINK_LABEL@80..93
         0: MD_INLINE_ITEM_LIST@80..93
           0: MD_TEXTUAL@80..86
             0: MD_TEXTUAL_LITERAL@80..86 "normal" [] []
@@ -709,53 +745,55 @@ MdDocument {
             0: MD_TEXTUAL_LITERAL@86..87 "-" [] []
           2: MD_TEXTUAL@87..93
             0: MD_TEXTUAL_LITERAL@87..93 "indent" [] []
-      2: R_BRACK@93..94 "]" [] []
-      3: COLON@94..95 ":" [] []
-      4: MD_LINK_DESTINATION@95..100
+      3: R_BRACK@93..94 "]" [] []
+      4: COLON@94..95 ":" [] []
+      5: MD_LINK_DESTINATION@95..100
         0: MD_INLINE_ITEM_LIST@95..100
           0: MD_TEXTUAL@95..96
             0: MD_TEXTUAL_LITERAL@95..96 " " [] []
           1: MD_TEXTUAL@96..100
             0: MD_TEXTUAL_LITERAL@96..100 "/url" [] []
-      5: (empty)
+      6: (empty)
     8: MD_NEWLINE@100..101
       0: NEWLINE@100..101 "\n" [] []
     9: MD_NEWLINE@101..102
       0: NEWLINE@101..102 "\n" [] []
     10: MD_LINK_REFERENCE_DEFINITION@102..116
-      0: L_BRACK@102..103 "[" [] []
-      1: MD_LINK_LABEL@103..109
+      0: MD_INDENT_TOKEN_LIST@102..102
+      1: L_BRACK@102..103 "[" [] []
+      2: MD_LINK_LABEL@103..109
         0: MD_INLINE_ITEM_LIST@103..109
           0: MD_TEXTUAL@103..109
             0: MD_TEXTUAL_LITERAL@103..109 "lambda" [] []
-      2: R_BRACK@109..110 "]" [] []
-      3: COLON@110..111 ":" [] []
-      4: MD_LINK_DESTINATION@111..116
+      3: R_BRACK@109..110 "]" [] []
+      4: COLON@110..111 ":" [] []
+      5: MD_LINK_DESTINATION@111..116
         0: MD_INLINE_ITEM_LIST@111..116
           0: MD_TEXTUAL@111..112
             0: MD_TEXTUAL_LITERAL@111..112 " " [] []
           1: MD_TEXTUAL@112..116
             0: MD_TEXTUAL_LITERAL@112..116 "/url" [] []
-      5: (empty)
+      6: (empty)
     11: MD_NEWLINE@116..117
       0: NEWLINE@116..117 "\n" [] []
     12: MD_NEWLINE@117..118
       0: NEWLINE@117..118 "\n" [] []
     13: MD_LINK_REFERENCE_DEFINITION@118..150
-      0: L_BRACK@118..119 "[" [] []
-      1: MD_LINK_LABEL@119..126
+      0: MD_INDENT_TOKEN_LIST@118..118
+      1: L_BRACK@118..119 "[" [] []
+      2: MD_LINK_LABEL@119..126
         0: MD_INLINE_ITEM_LIST@119..126
           0: MD_TEXTUAL@119..126
             0: MD_TEXTUAL_LITERAL@119..126 "nihongo" [] []
-      2: R_BRACK@126..127 "]" [] []
-      3: COLON@127..128 ":" [] []
-      4: MD_LINK_DESTINATION@128..133
+      3: R_BRACK@126..127 "]" [] []
+      4: COLON@127..128 ":" [] []
+      5: MD_LINK_DESTINATION@128..133
         0: MD_INLINE_ITEM_LIST@128..133
           0: MD_TEXTUAL@128..129
             0: MD_TEXTUAL_LITERAL@128..129 " " [] []
           1: MD_TEXTUAL@129..133
             0: MD_TEXTUAL_LITERAL@129..133 "/url" [] []
-      5: MD_LINK_TITLE@133..150
+      6: MD_LINK_TITLE@133..150
         0: MD_INLINE_ITEM_LIST@133..150
           0: MD_TEXTUAL@133..134
             0: MD_TEXTUAL_LITERAL@133..134 " " [] []
@@ -766,8 +804,9 @@ MdDocument {
     15: MD_NEWLINE@151..152
       0: NEWLINE@151..152 "\n" [] []
     16: MD_LINK_REFERENCE_DEFINITION@152..198
-      0: L_BRACK@152..153 "[" [] []
-      1: MD_LINK_LABEL@153..168
+      0: MD_INDENT_TOKEN_LIST@152..152
+      1: L_BRACK@152..153 "[" [] []
+      2: MD_LINK_LABEL@153..168
         0: MD_INLINE_ITEM_LIST@153..168
           0: MD_TEXTUAL@153..158
             0: MD_TEXTUAL_LITERAL@153..158 "title" [] []
@@ -779,15 +818,15 @@ MdDocument {
             0: MD_TEXTUAL_LITERAL@163..164 "-" [] []
           4: MD_TEXTUAL@164..168
             0: MD_TEXTUAL_LITERAL@164..168 "line" [] []
-      2: R_BRACK@168..169 "]" [] []
-      3: COLON@169..170 ":" [] []
-      4: MD_LINK_DESTINATION@170..175
+      3: R_BRACK@168..169 "]" [] []
+      4: COLON@169..170 ":" [] []
+      5: MD_LINK_DESTINATION@170..175
         0: MD_INLINE_ITEM_LIST@170..175
           0: MD_TEXTUAL@170..171
             0: MD_TEXTUAL_LITERAL@170..171 " " [] []
           1: MD_TEXTUAL@171..175
             0: MD_TEXTUAL_LITERAL@171..175 "/url" [] []
-      5: MD_LINK_TITLE@175..198
+      6: MD_LINK_TITLE@175..198
         0: MD_INLINE_ITEM_LIST@175..198
           0: MD_TEXTUAL@175..176
             0: MD_TEXTUAL_LITERAL@175..176 "\n" [] []
@@ -800,8 +839,9 @@ MdDocument {
     18: MD_NEWLINE@199..200
       0: NEWLINE@199..200 "\n" [] []
     19: MD_LINK_REFERENCE_DEFINITION@200..243
-      0: L_BRACK@200..201 "[" [] []
-      1: MD_LINK_LABEL@201..218
+      0: MD_INDENT_TOKEN_LIST@200..200
+      1: L_BRACK@200..201 "[" [] []
+      2: MD_LINK_LABEL@201..218
         0: MD_INLINE_ITEM_LIST@201..218
           0: MD_TEXTUAL@201..207
             0: MD_TEXTUAL_LITERAL@201..207 "single" [] []
@@ -813,15 +853,15 @@ MdDocument {
             0: MD_TEXTUAL_LITERAL@213..214 "-" [] []
           4: MD_TEXTUAL@214..218
             0: MD_TEXTUAL_LITERAL@214..218 "next" [] []
-      2: R_BRACK@218..219 "]" [] []
-      3: COLON@219..220 ":" [] []
-      4: MD_LINK_DESTINATION@220..225
+      3: R_BRACK@218..219 "]" [] []
+      4: COLON@219..220 ":" [] []
+      5: MD_LINK_DESTINATION@220..225
         0: MD_INLINE_ITEM_LIST@220..225
           0: MD_TEXTUAL@220..221
             0: MD_TEXTUAL_LITERAL@220..221 " " [] []
           1: MD_TEXTUAL@221..225
             0: MD_TEXTUAL_LITERAL@221..225 "/url" [] []
-      5: MD_LINK_TITLE@225..243
+      6: MD_LINK_TITLE@225..243
         0: MD_INLINE_ITEM_LIST@225..243
           0: MD_TEXTUAL@225..226
             0: MD_TEXTUAL_LITERAL@225..226 "\n" [] []
@@ -834,8 +874,9 @@ MdDocument {
     21: MD_NEWLINE@244..245
       0: NEWLINE@244..245 "\n" [] []
     22: MD_LINK_REFERENCE_DEFINITION@245..281
-      0: L_BRACK@245..246 "[" [] []
-      1: MD_LINK_LABEL@246..256
+      0: MD_INDENT_TOKEN_LIST@245..245
+      1: L_BRACK@245..246 "[" [] []
+      2: MD_LINK_LABEL@246..256
         0: MD_INLINE_ITEM_LIST@246..256
           0: MD_TEXTUAL@246..251
             0: MD_TEXTUAL_LITERAL@246..251 "paren" [] []
@@ -843,15 +884,15 @@ MdDocument {
             0: MD_TEXTUAL_LITERAL@251..252 "-" [] []
           2: MD_TEXTUAL@252..256
             0: MD_TEXTUAL_LITERAL@252..256 "next" [] []
-      2: R_BRACK@256..257 "]" [] []
-      3: COLON@257..258 ":" [] []
-      4: MD_LINK_DESTINATION@258..263
+      3: R_BRACK@256..257 "]" [] []
+      4: COLON@257..258 ":" [] []
+      5: MD_LINK_DESTINATION@258..263
         0: MD_INLINE_ITEM_LIST@258..263
           0: MD_TEXTUAL@258..259
             0: MD_TEXTUAL_LITERAL@258..259 " " [] []
           1: MD_TEXTUAL@259..263
             0: MD_TEXTUAL_LITERAL@259..263 "/url" [] []
-      5: MD_LINK_TITLE@263..281
+      6: MD_LINK_TITLE@263..281
         0: MD_INLINE_ITEM_LIST@263..281
           0: MD_TEXTUAL@263..264
             0: MD_TEXTUAL_LITERAL@263..264 "\n" [] []
@@ -868,8 +909,9 @@ MdDocument {
     24: MD_NEWLINE@282..283
       0: NEWLINE@282..283 "\n" [] []
     25: MD_LINK_REFERENCE_DEFINITION@283..337
-      0: L_BRACK@283..284 "[" [] []
-      1: MD_LINK_LABEL@284..299
+      0: MD_INDENT_TOKEN_LIST@283..283
+      1: L_BRACK@283..284 "[" [] []
+      2: MD_LINK_LABEL@284..299
         0: MD_INLINE_ITEM_LIST@284..299
           0: MD_TEXTUAL@284..292
             0: MD_TEXTUAL_LITERAL@284..292 "balanced" [] []
@@ -877,9 +919,9 @@ MdDocument {
             0: MD_TEXTUAL_LITERAL@292..293 "-" [] []
           2: MD_TEXTUAL@293..299
             0: MD_TEXTUAL_LITERAL@293..299 "parens" [] []
-      2: R_BRACK@299..300 "]" [] []
-      3: COLON@300..301 ":" [] []
-      4: MD_LINK_DESTINATION@301..337
+      3: R_BRACK@299..300 "]" [] []
+      4: COLON@300..301 ":" [] []
+      5: MD_LINK_DESTINATION@301..337
         0: MD_INLINE_ITEM_LIST@301..337
           0: MD_TEXTUAL@301..302
             0: MD_TEXTUAL_LITERAL@301..302 " " [] []
@@ -893,14 +935,15 @@ MdDocument {
             0: MD_TEXTUAL_LITERAL@330..331 ")" [] []
           5: MD_TEXTUAL@331..337
             0: MD_TEXTUAL_LITERAL@331..337 "parens" [] []
-      5: (empty)
+      6: (empty)
     26: MD_NEWLINE@337..338
       0: NEWLINE@337..338 "\n" [] []
     27: MD_NEWLINE@338..339
       0: NEWLINE@338..339 "\n" [] []
     28: MD_LINK_REFERENCE_DEFINITION@339..384
-      0: L_BRACK@339..340 "[" [] []
-      1: MD_LINK_LABEL@340..353
+      0: MD_INDENT_TOKEN_LIST@339..339
+      1: L_BRACK@339..340 "[" [] []
+      2: MD_LINK_LABEL@340..353
         0: MD_INLINE_ITEM_LIST@340..353
           0: MD_TEXTUAL@340..346
             0: MD_TEXTUAL_LITERAL@340..346 "nested" [] []
@@ -908,9 +951,9 @@ MdDocument {
             0: MD_TEXTUAL_LITERAL@346..347 "-" [] []
           2: MD_TEXTUAL@347..353
             0: MD_TEXTUAL_LITERAL@347..353 "parens" [] []
-      2: R_BRACK@353..354 "]" [] []
-      3: COLON@354..355 ":" [] []
-      4: MD_LINK_DESTINATION@355..384
+      3: R_BRACK@353..354 "]" [] []
+      4: COLON@354..355 ":" [] []
+      5: MD_LINK_DESTINATION@355..384
         0: MD_INLINE_ITEM_LIST@355..384
           0: MD_TEXTUAL@355..356
             0: MD_TEXTUAL_LITERAL@355..356 " " [] []
@@ -932,14 +975,15 @@ MdDocument {
             0: MD_TEXTUAL_LITERAL@382..383 ")" [] []
           9: MD_TEXTUAL@383..384
             0: MD_TEXTUAL_LITERAL@383..384 "e" [] []
-      5: (empty)
+      6: (empty)
     29: MD_NEWLINE@384..385
       0: NEWLINE@384..385 "\n" [] []
     30: MD_NEWLINE@385..386
       0: NEWLINE@385..386 "\n" [] []
     31: MD_LINK_REFERENCE_DEFINITION@386..410
-      0: L_BRACK@386..387 "[" [] []
-      1: MD_LINK_LABEL@387..403
+      0: MD_INDENT_TOKEN_LIST@386..386
+      1: L_BRACK@386..387 "[" [] []
+      2: MD_LINK_LABEL@387..403
         0: MD_INLINE_ITEM_LIST@387..403
           0: MD_TEXTUAL@387..394
             0: MD_TEXTUAL_LITERAL@387..394 "escaped" [] []
@@ -947,22 +991,23 @@ MdDocument {
             0: MD_TEXTUAL_LITERAL@394..396 "\\]" [] []
           2: MD_TEXTUAL@396..403
             0: MD_TEXTUAL_LITERAL@396..403 "bracket" [] []
-      2: R_BRACK@403..404 "]" [] []
-      3: COLON@404..405 ":" [] []
-      4: MD_LINK_DESTINATION@405..410
+      3: R_BRACK@403..404 "]" [] []
+      4: COLON@404..405 ":" [] []
+      5: MD_LINK_DESTINATION@405..410
         0: MD_INLINE_ITEM_LIST@405..410
           0: MD_TEXTUAL@405..406
             0: MD_TEXTUAL_LITERAL@405..406 " " [] []
           1: MD_TEXTUAL@406..410
             0: MD_TEXTUAL_LITERAL@406..410 "/url" [] []
-      5: (empty)
+      6: (empty)
     32: MD_NEWLINE@410..411
       0: NEWLINE@410..411 "\n" [] []
     33: MD_NEWLINE@411..412
       0: NEWLINE@411..412 "\n" [] []
     34: MD_LINK_REFERENCE_DEFINITION@412..435
-      0: L_BRACK@412..413 "[" [] []
-      1: MD_LINK_LABEL@413..428
+      0: MD_INDENT_TOKEN_LIST@412..412
+      1: L_BRACK@412..413 "[" [] []
+      2: MD_LINK_LABEL@413..428
         0: MD_INLINE_ITEM_LIST@413..428
           0: MD_TEXTUAL@413..421
             0: MD_TEXTUAL_LITERAL@413..421 "trailing" [] []
@@ -970,15 +1015,15 @@ MdDocument {
             0: MD_TEXTUAL_LITERAL@421..422 "-" [] []
           2: MD_TEXTUAL@422..428
             0: MD_TEXTUAL_LITERAL@422..428 "spaces" [] []
-      2: R_BRACK@428..429 "]" [] []
-      3: COLON@429..430 ":" [] []
-      4: MD_LINK_DESTINATION@430..435
+      3: R_BRACK@428..429 "]" [] []
+      4: COLON@429..430 ":" [] []
+      5: MD_LINK_DESTINATION@430..435
         0: MD_INLINE_ITEM_LIST@430..435
           0: MD_TEXTUAL@430..431
             0: MD_TEXTUAL_LITERAL@430..431 " " [] []
           1: MD_TEXTUAL@431..435
             0: MD_TEXTUAL_LITERAL@431..435 "/url" [] []
-      5: (empty)
+      6: (empty)
     35: MD_PARAGRAPH@435..439
       0: MD_INLINE_ITEM_LIST@435..439
         0: MD_TEXTUAL@435..438
@@ -989,8 +1034,9 @@ MdDocument {
     36: MD_NEWLINE@439..440
       0: NEWLINE@439..440 "\n" [] []
     37: MD_LINK_REFERENCE_DEFINITION@440..464
-      0: L_BRACK@440..441 "[" [] []
-      1: MD_LINK_LABEL@441..457
+      0: MD_INDENT_TOKEN_LIST@440..440
+      1: L_BRACK@440..441 "[" [] []
+      2: MD_LINK_LABEL@441..457
         0: MD_INLINE_ITEM_LIST@441..457
           0: MD_TEXTUAL@441..448
             0: MD_TEXTUAL_LITERAL@441..448 "invalid" [] []
@@ -998,15 +1044,15 @@ MdDocument {
             0: MD_TEXTUAL_LITERAL@448..449 "-" [] []
           2: MD_TEXTUAL@449..457
             0: MD_TEXTUAL_LITERAL@449..457 "trailing" [] []
-      2: R_BRACK@457..458 "]" [] []
-      3: COLON@458..459 ":" [] []
-      4: MD_LINK_DESTINATION@459..464
+      3: R_BRACK@457..458 "]" [] []
+      4: COLON@458..459 ":" [] []
+      5: MD_LINK_DESTINATION@459..464
         0: MD_INLINE_ITEM_LIST@459..464
           0: MD_TEXTUAL@459..460
             0: MD_TEXTUAL_LITERAL@459..460 " " [] []
           1: MD_TEXTUAL@460..464
             0: MD_TEXTUAL_LITERAL@460..464 "/url" [] []
-      5: (empty)
+      6: (empty)
     38: MD_PARAGRAPH@464..473
       0: MD_INLINE_ITEM_LIST@464..473
         0: MD_TEXTUAL@464..465
