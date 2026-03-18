@@ -1,0 +1,86 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```astro
+---
+const test1 = /'/
+const test2 = /"/
+const test3 = /---/
+---
+
+<div></div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: AstroFrontmatterElement {
+        l_fence_token: FENCE@0..3 "---" [] [],
+        content: AstroEmbeddedContent {
+            content_token: HTML_LITERAL@3..60 "const test1 = /'/\nconst test2 = /\"/\nconst test3 = /---/\n" [Newline("\n")] [],
+        },
+        r_fence_token: FENCE@60..63 "---" [] [],
+    },
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@63..66 "<" [Newline("\n"), Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@66..69 "div" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@69..70 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@70..71 "<" [] [],
+                slash_token: SLASH@71..72 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@72..75 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@75..76 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@76..77 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..77
+  0: (empty)
+  1: ASTRO_FRONTMATTER_ELEMENT@0..63
+    0: FENCE@0..3 "---" [] []
+    1: ASTRO_EMBEDDED_CONTENT@3..60
+      0: HTML_LITERAL@3..60 "const test1 = /'/\nconst test2 = /\"/\nconst test3 = /---/\n" [Newline("\n")] []
+    2: FENCE@60..63 "---" [] []
+  2: (empty)
+  3: HTML_ELEMENT_LIST@63..76
+    0: HTML_ELEMENT@63..76
+      0: HTML_OPENING_ELEMENT@63..70
+        0: L_ANGLE@63..66 "<" [Newline("\n"), Newline("\n")] []
+        1: HTML_TAG_NAME@66..69
+          0: HTML_LITERAL@66..69 "div" [] []
+        2: HTML_ATTRIBUTE_LIST@69..69
+        3: R_ANGLE@69..70 ">" [] []
+      1: HTML_ELEMENT_LIST@70..70
+      2: HTML_CLOSING_ELEMENT@70..76
+        0: L_ANGLE@70..71 "<" [] []
+        1: SLASH@71..72 "/" [] []
+        2: HTML_TAG_NAME@72..75
+          0: HTML_LITERAL@72..75 "div" [] []
+        3: R_ANGLE@75..76 ">" [] []
+  4: EOF@76..77 "" [Newline("\n")] []
+
+```
