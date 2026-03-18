@@ -711,7 +711,11 @@ impl FromStr for BracketSpacing {
     }
 }
 
-/// Whether to insert spaces inside delimiters such as parentheses, brackets, braces, angle brackets, and template literal interpolations. The specific delimiters affected depend on the language.
+/// Whether to insert spaces inside delimiters (after the opening delimiter and before the closing
+/// delimiter), such as parentheses, brackets, angle brackets, and template literal interpolations.
+/// Spaces are not added before the opening delimiter, and empty delimiters are not affected.
+/// Only applies when the content fits on a single line; when content breaks across multiple lines,
+/// no extra spaces are added. The specific delimiters affected depend on the language.
 #[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",

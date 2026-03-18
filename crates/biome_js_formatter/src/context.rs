@@ -177,7 +177,14 @@ pub struct JsFormatOptions {
     /// Whether to insert spaces around brackets in object literals. Defaults to true.
     bracket_spacing: BracketSpacing,
 
-    /// Whether to insert spaces inside delimiters. Affects parentheses `()`, square brackets `[]`, template literal interpolations `${}`, TypeScript angle brackets `<>`, JSX expression braces `{}`, and the logical NOT operator `!`. Defaults to false.
+    /// Whether to insert spaces inside delimiters (after the opening delimiter and before the
+    /// closing delimiter). Only applies when the content fits on a single line. Spaces are not
+    /// added before the opening delimiter (e.g., `function f()` stays `function f()`, not
+    /// `function f ()`), and empty delimiters are not affected (e.g., `fn()` stays `fn()`).
+    /// Affects parentheses (e.g., `foo( a, b )`), square brackets (e.g., `[ a, b ]`), template
+    /// literal interpolations (e.g., `${ expr }`), TypeScript angle brackets (e.g.,
+    /// `foo< T >()`), JSX expression braces (e.g., `{ value }`), and the logical NOT operator
+    /// (e.g., `! x`, but in chains only after the last one: `!! x`). Defaults to false.
     delimiter_spacing: DelimiterSpacing,
 
     /// Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.
