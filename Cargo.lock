@@ -235,6 +235,7 @@ dependencies = [
  "regex",
  "rustc-hash 2.1.1",
  "self_update",
+ "semver 1.0.27",
  "serde",
  "serde_json",
  "serial_test",
@@ -246,6 +247,7 @@ dependencies = [
  "tracing-appender",
  "tracing-subscriber",
  "tracing-tree",
+ "ureq",
 ]
 
 [[package]]
