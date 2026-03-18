@@ -11,7 +11,7 @@ use super::is_at_scss_variable_modifier_start;
 
 pub(crate) use interpolation::{
     ScssInterpolationMode, is_at_scss_interpolation, is_nth_at_scss_interpolation,
-    parse_scss_interpolation, parse_scss_interpolation_with_mode,
+    parse_scss_interpolation_with_mode,
 };
 pub(crate) use list::{
     complete_empty_scss_expression, parse_required_scss_value_until, parse_scss_expression,
