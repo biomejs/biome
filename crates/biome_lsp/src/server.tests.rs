@@ -2571,6 +2571,92 @@ async fn pull_fix_all() -> Result<()> {
 }
 
 #[tokio::test]
+async fn fix_all_does_not_sort_imports_unless_requested() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    // Document with unsorted imports AND a lint error (comparing to -0).
+    // If fix-all respects the filter, it should fix the lint error but
+    // leave the import order unchanged.
+    server
+        .open_document("import { b } from \"b\";\nimport { a } from \"a\";\nif(a === -0) {}")
+        .await?;
+
+    // Request source.fixAll WITHOUT source.organizeImports
+    let res: CodeActionResponse = server
+        .request(
+            "textDocument/codeAction",
+            "pull_code_actions",
+            CodeActionParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("document.js"),
+                },
+                range: Range {
+                    start: Position {
+                        line: 0,
+                        character: 0,
+                    },
+                    end: Position {
+                        line: 2,
+                        character: 15,
+                    },
+                },
+                context: CodeActionContext {
+                    diagnostics: vec![fixable_diagnostic(2)?],
+                    only: Some(vec![CodeActionKind::new("source.fixAll")]),
+                    ..Default::default()
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+                partial_result_params: PartialResultParams {
+                    partial_result_token: None,
+                },
+            },
+        )
+        .await?
+        .context("codeAction returned None")?;
+
+    // The fix-all action should exist
+    assert_eq!(res.len(), 1);
+
+    let CodeActionOrCommand::CodeAction(action) = &res[0] else {
+        panic!("expected CodeAction");
+    };
+    assert_eq!(
+        action.kind,
+        Some(CodeActionKind::new("source.fixAll.biome"))
+    );
+
+    // The edit should fix the -0 comparison but NOT reorder imports.
+    // If imports were sorted, "a" would come before "b".
+    let edit = action.edit.as_ref().context("expected edit")?;
+    let changes = edit.changes.as_ref().context("expected changes")?;
+    let edits = changes
+        .get(&uri!("document.js"))
+        .context("expected edits for document.js")?;
+    let new_text = &edits[0].new_text;
+    assert!(
+        new_text.starts_with("import { b }"),
+        "imports should NOT be reordered when organizeImports is not requested, got: {new_text}"
+    );
+
+    server.close_document().await?;
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
 async fn change_document_remove_line() -> Result<()> {
     let factory = ServerFactory::default();
     let (service, client) = factory.create().into_inner();
