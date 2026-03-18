@@ -192,7 +192,7 @@ impl<D: Diagnostic + ?Sized> fmt::Display for PrintHeader<'_, D> {
         // Print the diagnostic location if it has a file path
         print_file_location(&mut fmt, diagnostic)?;
 
-        let has_file = diagnostic.location().resource.is_some();
+        let has_file = matches!(diagnostic.location().resource, Some(Resource::File(_)));
         if has_file {
             fmt.write_str(" ")?;
         }
@@ -276,15 +276,17 @@ fn print_concise<D: Diagnostic + ?Sized>(
 
     fmt.write_str(" ")?;
 
-    // Print file location with hyperlink
-    print_file_location(fmt, diagnostic)?;
+    // Print file location with hyperlink (only if the diagnostic has a file resource)
+    if matches!(diagnostic.location().resource, Some(Resource::File(_))) {
+        print_file_location(fmt, diagnostic)?;
+        fmt.write_str(": ")?;
+    }
 
-    fmt.write_str(": ")?;
-
-    // Print category with hyperlink
-    print_category(fmt, diagnostic)?;
-
-    fmt.write_str(": ")?;
+    // Print category with hyperlink (only if the diagnostic has a category)
+    if diagnostic.category().is_some() {
+        print_category(fmt, diagnostic)?;
+        fmt.write_str(": ")?;
+    }
 
     // Print the diagnostic message
     diagnostic.message(fmt)
@@ -1221,7 +1223,7 @@ mod tests {
         let diag = markup!({ PrintDiagnostic::concise(&diag) }).to_owned();
 
         let expected = markup! {
-            <Emphasis><Error>"✖"</Error></Emphasis>" : internalError/io: diagnostic message"
+            <Emphasis><Error>"✖"</Error></Emphasis>" internalError/io: diagnostic message"
         }
         .to_owned();
 
