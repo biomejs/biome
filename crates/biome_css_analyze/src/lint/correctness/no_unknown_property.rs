@@ -119,12 +119,8 @@ impl Rule for NoUnknownProperty {
         }
 
         let property_name = node.name().ok()?;
-        if matches!(property_name, AnyCssDeclarationName::ScssInterpolatedIdentifier(_)) {
-            return None;
-        }
-
-        let property_name_text = property_name.to_trimmed_text();
-        let property_name_lower = property_name_text.to_ascii_lowercase_cow();
+        let property_name_token = declaration_name_value_token(&property_name)?;
+        let property_name_lower = property_name_token.text_trimmed().to_ascii_lowercase_cow();
 
         let in_function_at_rule = node.syntax().ancestors().skip(1).any(|ancestor| {
             if CssFunctionAtRule::can_cast(ancestor.kind()) {
@@ -187,4 +183,15 @@ fn should_ignore(name: &str, options: &NoUnknownPropertyOptions) -> bool {
         }
     }
     false
+}
+
+fn declaration_name_value_token(
+    name: &AnyCssDeclarationName,
+) -> Option<biome_css_syntax::CssSyntaxToken> {
+    match name {
+        AnyCssDeclarationName::CssDashedIdentifier(name) => name.value_token().ok(),
+        AnyCssDeclarationName::CssIdentifier(name) => name.value_token().ok(),
+        AnyCssDeclarationName::ScssInterpolatedIdentifier(_)
+        | AnyCssDeclarationName::TwValueThemeReference(_) => None,
+    }
 }
