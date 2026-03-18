@@ -42,7 +42,14 @@ impl FormatNodeRule<HtmlSelfClosingElement> for FormatHtmlSelfClosingElement {
                 // in the same group as the attributes, unless the token is being borrowed.
                 // When these tokens are borrowed, they are managed by the sibling `HtmlElementList` formatter.
                 if bracket_same_line {
-                    write!(f, [hard_space()])?;
+                    let is_void = node.is_void_element().unwrap_or_default();
+                    let will_have_slash = self_close_void_elements.is_always()
+                        || (slash_token.is_some()
+                            && !(is_void && self_close_void_elements.is_never()));
+
+                    if will_have_slash {
+                        write!(f, [hard_space()])?;
+                    }
                 } else if attributes.len() >= 1 {
                     if self_close_void_elements.is_always() {
                         write!(f, [soft_line_break_or_space()])?;
