@@ -65,6 +65,7 @@ impl<'app> CliSession<'app> {
     pub fn run(self, command: BiomeCommand) -> Result<(), CliDiagnostic> {
         match command {
             BiomeCommand::Version(_) => commands::version::full_version(self),
+            BiomeCommand::Upgrade(_) => commands::upgrade::upgrade(self),
             BiomeCommand::Rage(_, _, daemon_logs, formatter, linter) => {
                 commands::rage::rage(self, daemon_logs, formatter, linter)
             }

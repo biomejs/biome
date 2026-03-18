@@ -64,6 +64,7 @@ regex                    = { workspace = true }
 rustc-hash               = { workspace = true }
 serde                    = { workspace = true, features = ["derive"] }
 serde_json               = { workspace = true }
+self_update              = { version = "0.42.0", default-features = false, features = ["rustls"] }
 smallvec                 = { workspace = true }
 terminal_size            = { workspace = true }
 tokio                    = { workspace = true, features = [

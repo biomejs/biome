@@ -53,6 +53,7 @@ pub(crate) mod lint;
 pub(crate) mod migrate;
 pub(crate) mod rage;
 pub(crate) mod search;
+pub(crate) mod upgrade;
 pub(crate) mod version;
 
 #[derive(Debug, Clone, Bpaf)]
@@ -62,6 +63,10 @@ pub enum BiomeCommand {
     /// Shows the Biome version information and quit.
     #[bpaf(command)]
     Version(#[bpaf(external(cli_options), hide_usage)] CliOptions),
+
+    /// Upgrade Biome to the latest version.
+    #[bpaf(command)]
+    Upgrade(#[bpaf(external(cli_options), hide_usage)] CliOptions),
 
     #[bpaf(command)]
     /// Prints information for debugging.
@@ -667,6 +672,7 @@ impl BiomeCommand {
     const fn cli_options(&self) -> Option<&CliOptions> {
         match self {
             Self::Version(cli_options)
+            | Self::Upgrade(cli_options)
             | Self::Rage(cli_options, ..)
             | Self::Check { cli_options, .. }
             | Self::Lint { cli_options, .. }
@@ -696,6 +702,7 @@ impl BiomeCommand {
             | Self::Rage(_, log_options, ..)
             | Self::Search { log_options, .. } => Some(log_options),
             Self::Version(_)
+            | Self::Upgrade(_)
             | Self::LspProxy { .. }
             | Self::Start { .. }
             | Self::Stop
