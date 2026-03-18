@@ -9060,8 +9060,7 @@ export type DocumentFileSource =
 	| { Graphql: GraphqlFileSource }
 	| { Html: HtmlFileSource }
 	| { Grit: GritFileSource }
-	| { Markdown: MdFileSource }
-	| "Tailwind";
+	| { Markdown: MdFileSource };
 export interface JsFileSource {
 	/**
 	* Used to mark if the JavaScript is embedded inside some particular files. This affects the parsing.
