@@ -1033,13 +1033,27 @@ impl<Context> Formatted<Context> {
     where
         F: FnMut(TextRange) -> Option<Document>,
     {
+        // Track whether the last `StartEmbedded` was successfully resolved.
+        // `EndEmbedded` must only be replaced when its matching `StartEmbedded` was,
+        // otherwise the document ends up with unmatched tags and the printer panics.
+        let mut last_start_resolved = false;
         self.document.transform(move |element| match element {
-            FormatElement::Tag(Tag::StartEmbedded(range)) => fn_format_embedded(*range)
-                .map(|document| FormatElement::Interned(Interned::new(document.into_elements()))),
+            FormatElement::Tag(Tag::StartEmbedded(range)) => {
+                let result = fn_format_embedded(*range).map(|document| {
+                    FormatElement::Interned(Interned::new(document.into_elements()))
+                });
+                last_start_resolved = result.is_some();
+                result
+            }
             FormatElement::Tag(Tag::EndEmbedded) => {
-                // FIXME: this might not play well for all cases, so we need to figure out
-                // a nicer way to replace the tag
-                Some(FormatElement::Line(LineMode::Hard))
+                if last_start_resolved {
+                    last_start_resolved = false;
+                    Some(FormatElement::Line(LineMode::Hard))
+                } else {
+                    // StartEmbedded was not resolved — keep EndEmbedded so the
+                    // tag pair stays balanced and the printer doesn't crash.
+                    None
+                }
             }
             _ => None,
         });

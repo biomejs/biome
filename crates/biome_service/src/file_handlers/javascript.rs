@@ -37,8 +37,9 @@ use biome_css_parser::parse_css_with_offset_and_cache;
 use biome_css_syntax::{CssFileSource, CssLanguage, EmbeddingKind};
 use biome_formatter::prelude::{Document, Interned, LineMode, Tag};
 use biome_formatter::{
-    AttributePosition, BracketSameLine, BracketSpacing, Expand, FormatElement, FormatError,
-    IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle, TrailingNewline,
+    AttributePosition, BracketSameLine, BracketSpacing, Expand, FormatContext, FormatElement,
+    FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
+    TrailingNewline,
 };
 use biome_fs::BiomePath;
 use biome_graphql_parser::parse_graphql_with_offset_and_cache;
@@ -1275,9 +1276,18 @@ fn format_embedded(
     let options = settings.format_options::<JsLanguage>(biome_path, document_file_source);
     let mut formatted = format_node(options, &tree, true)?;
 
+    // The JS formatter applies syntax transforms (e.g. removing unnecessary parentheses)
+    // which can shift text positions. The `range` passed to the closure comes from the
+    // transformed tree, while `FormatEmbedNode.range` uses original-tree positions.
+    // We must map the transformed range back to source coordinates before matching.
+    let source_map = formatted.context().source_map().cloned();
     formatted.format_embedded(move |range| {
+        let original_range = match source_map.as_ref() {
+            Some(sm) => sm.source_range(range),
+            None => range,
+        };
         let mut iter = embedded_nodes.iter();
-        let node = iter.find(|node| node.range == range)?;
+        let node = iter.find(|node| node.range == original_range)?;
 
         let wrap_document = |document: Document| {
             // TODO: Option to disable indent here?

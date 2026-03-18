@@ -1,0 +1,35 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "javascript": {
+    "experimentalEmbeddedSnippetsEnabled": true,
+    "formatter": {
+      "enabled": true
+    }
+  }
+}
+```
+
+## `file.tsx`
+
+```tsx
+const a = {};
+console.log(a);
+const query = graphql`
+	query Q {
+		field
+	}
+`;
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```

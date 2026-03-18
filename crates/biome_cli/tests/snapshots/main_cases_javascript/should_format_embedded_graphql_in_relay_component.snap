@@ -1,0 +1,38 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "javascript": {
+    "experimentalEmbeddedSnippetsEnabled": true,
+    "formatter": {
+      "enabled": true
+    }
+  }
+}
+```
+
+## `file.tsx`
+
+```tsx
+import { graphql, useLazyLoadQuery } from "react-relay";
+
+const Table = () => {
+	const query = useLazyLoadQuery(graphql`
+			query Q {
+				field
+			}
+		`, {});
+	return <div></div>;
+};
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```
