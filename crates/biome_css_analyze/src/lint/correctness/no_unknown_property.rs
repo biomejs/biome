@@ -191,7 +191,9 @@ fn declaration_name_value_token(
     match name {
         AnyCssDeclarationName::CssDashedIdentifier(name) => name.value_token().ok(),
         AnyCssDeclarationName::CssIdentifier(name) => name.value_token().ok(),
-        AnyCssDeclarationName::ScssInterpolatedIdentifier(_)
-        | AnyCssDeclarationName::TwValueThemeReference(_) => None,
+        AnyCssDeclarationName::TwValueThemeReference(name) => {
+            name.reference().ok()?.value_token().ok()
+        }
+        AnyCssDeclarationName::ScssInterpolatedIdentifier(_) => None,
     }
 }
