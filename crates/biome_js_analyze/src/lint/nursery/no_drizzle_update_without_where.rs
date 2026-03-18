@@ -42,7 +42,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoDrizzleUpdateWithoutWhere {
-        version: "next",
+        version: "2.4.8",
         name: "noDrizzleUpdateWithoutWhere",
         language: "js",
         sources: &[RuleSource::EslintDrizzle("enforce-update-with-where").same()],
