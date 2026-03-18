@@ -1,0 +1,40 @@
+---
+source: crates/biome_tailwind_analyze/tests/spec_tests.rs
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<div class="ml-2 mr-2"></div>
+
+```
+
+# Diagnostics
+```
+invalid.svelte:2:13 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer Tailwind shorthand utilities over multiple longhand utilities.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <div class="ml-2 mr-2"></div>
+      │             ^^^^
+    3 │ 
+  
+  i Compressable utility used here.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <div class="ml-2 mr-2"></div>
+      │                  ^^^^
+    3 │ 
+  
+  i You can use less classes to reduce duplication and improve readability.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use this simplified class instead.
+  
+  - ml-2·mr-2
+  + mx-2
+  
+
+```

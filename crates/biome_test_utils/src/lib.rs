@@ -939,9 +939,9 @@ pub fn analyze_with_workspace(input_file: &Utf8Path, group: &str, rule: &str) ->
             project_key,
             path: BiomePath::new(&virtual_file_path),
             categories: RuleCategories::default(),
-            only: vec![rule_selector],
+            only: vec![rule_selector.clone()],
             skip: vec![],
-            enabled_rules: vec![],
+            enabled_rules: vec![rule_selector],
             pull_code_actions: true,
             inline_config: None,
         })

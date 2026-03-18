@@ -9,16 +9,16 @@ use biome_rowan::{AstNode, SyntaxNode};
 use biome_tailwind_parser::parse_tailwind;
 use biome_tailwind_syntax::TailwindLanguage;
 use biome_test_utils::{
-    CheckActionType, assert_diagnostics_expectation_comment, diagnostic_to_string,
-    has_bogus_nodes_or_empty_slots, parse_test_path, register_leak_checker, scripts_from_json,
-    write_analyzer_snapshot,
+    CheckActionType, analyze_with_workspace, assert_diagnostics_expectation_comment,
+    diagnostic_to_string, has_bogus_nodes_or_empty_slots, parse_test_path, register_leak_checker,
+    scripts_from_json, write_analyzer_snapshot,
 };
 use camino::Utf8Path;
 use similar::TextDiff;
 use std::ops::Deref;
 use std::{fs::read_to_string, slice};
 
-tests_macros::gen_tests! {"tests/specs/**/*.{tw,json,jsonc}", crate::run_test, "module"}
+tests_macros::gen_tests! {"tests/specs/**/*.{tw,json,jsonc,html,vue,svelte,astro}", crate::run_test, "module"}
 
 fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     register_leak_checker();
@@ -41,38 +41,45 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
         panic!("could not find rule {group}/{rule}");
     }
 
-    let rule_filter = RuleFilter::Rule(group, rule);
-    let filter = AnalysisFilter {
-        enabled_rules: Some(slice::from_ref(&rule_filter)),
-        ..AnalysisFilter::default()
-    };
-
-    let mut snapshot = String::new();
     let extension = input_file.extension().unwrap_or_default();
+    let is_html_ish = matches!(extension, "html" | "vue" | "svelte" | "astro");
 
-    let input_code = read_to_string(input_file)
-        .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
+    let snapshot = if is_html_ish {
+        analyze_with_workspace(input_file, group, rule)
+    } else {
+        let rule_filter = RuleFilter::Rule(group, rule);
+        let filter = AnalysisFilter {
+            enabled_rules: Some(slice::from_ref(&rule_filter)),
+            ..AnalysisFilter::default()
+        };
 
-    if let Some(scripts) = scripts_from_json(extension, &input_code) {
-        for script in scripts {
+        let mut snapshot = String::new();
+        let input_code = read_to_string(input_file)
+            .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
+
+        if let Some(scripts) = scripts_from_json(extension, &input_code) {
+            for script in scripts {
+                analyze_and_snap(
+                    &mut snapshot,
+                    &script,
+                    filter,
+                    file_name,
+                    input_file,
+                    CheckActionType::Lint,
+                );
+            }
+        } else {
             analyze_and_snap(
                 &mut snapshot,
-                &script,
+                &input_code,
                 filter,
                 file_name,
                 input_file,
                 CheckActionType::Lint,
             );
-        }
-    } else {
-        analyze_and_snap(
-            &mut snapshot,
-            &input_code,
-            filter,
-            file_name,
-            input_file,
-            CheckActionType::Lint,
-        );
+        };
+
+        snapshot
     };
 
     insta::with_settings!({
