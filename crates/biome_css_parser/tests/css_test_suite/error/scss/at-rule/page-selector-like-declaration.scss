@@ -1,0 +1,13 @@
+@page :left {
+  font:bold {
+    color: red;
+  }
+
+  #{$name}:hover {
+    color: blue;
+  }
+
+  font-#{$weight}:bold {
+    color: green;
+  }
+}

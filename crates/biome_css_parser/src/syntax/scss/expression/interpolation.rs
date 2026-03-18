@@ -27,19 +27,6 @@ pub(crate) enum ScssInterpolationMode {
     Selector,
 }
 
-/// Parses a standalone SCSS interpolation expression such as `#{$value}`.
-///
-/// Example:
-/// ```scss
-/// $value: #{$name};
-/// ```
-///
-/// Docs: https://sass-lang.com/documentation/interpolation/
-#[inline]
-pub(crate) fn parse_scss_interpolation(p: &mut CssParser) -> ParsedSyntax {
-    parse_scss_interpolation_with_mode(p, ScssInterpolationMode::Regular)
-}
-
 /// Parses an SCSS interpolation, lexing the closing `}` with the caller-provided
 /// mode.
 #[inline]

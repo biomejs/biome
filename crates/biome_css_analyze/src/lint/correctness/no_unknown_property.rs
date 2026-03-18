@@ -3,8 +3,9 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_css_syntax::{
-    AnyCssAtRule, CssContainerAtRule, CssFunctionAtRule, CssGenericProperty, CssLayerAtRule,
-    CssMediaAtRule, CssScopeAtRule, CssStartingStyleAtRule, CssSupportsAtRule, TwApplyAtRule,
+    AnyCssAtRule, AnyCssDeclarationName, CssContainerAtRule, CssFunctionAtRule,
+    CssGenericProperty, CssLayerAtRule, CssMediaAtRule, CssScopeAtRule,
+    CssStartingStyleAtRule, CssSupportsAtRule, TwApplyAtRule,
 };
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, TextRange, declare_node_union};
@@ -117,8 +118,9 @@ impl Rule for NoUnknownProperty {
             return None;
         }
 
-        let property_name = node.name().ok()?.to_trimmed_text();
-        let property_name_lower = property_name.to_ascii_lowercase_cow();
+        let property_name = node.name().ok()?;
+        let property_name_token = declaration_name_value_token(&property_name)?;
+        let property_name_lower = property_name_token.text_trimmed().to_ascii_lowercase_cow();
 
         let in_function_at_rule = node.syntax().ancestors().skip(1).any(|ancestor| {
             if CssFunctionAtRule::can_cast(ancestor.kind()) {
@@ -140,7 +142,7 @@ impl Rule for NoUnknownProperty {
             && !vendor_prefixed(&property_name_lower)
             && !should_ignore(&property_name_lower, ctx.options())
         {
-            return Some(node.name().ok()?.range());
+            return Some(property_name.range());
         }
         None
     }
@@ -181,4 +183,17 @@ fn should_ignore(name: &str, options: &NoUnknownPropertyOptions) -> bool {
         }
     }
     false
+}
+
+fn declaration_name_value_token(
+    name: &AnyCssDeclarationName,
+) -> Option<biome_css_syntax::CssSyntaxToken> {
+    match name {
+        AnyCssDeclarationName::CssDashedIdentifier(name) => name.value_token().ok(),
+        AnyCssDeclarationName::CssIdentifier(name) => name.value_token().ok(),
+        AnyCssDeclarationName::TwValueThemeReference(name) => {
+            name.reference().ok()?.value_token().ok()
+        }
+        AnyCssDeclarationName::ScssInterpolatedIdentifier(_) => None,
+    }
 }

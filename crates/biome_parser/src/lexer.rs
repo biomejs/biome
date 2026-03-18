@@ -44,6 +44,11 @@ pub trait Lexer<'src> {
     /// Returns `true` if the current kind is preceded by a line break.
     fn has_preceding_line_break(&self) -> bool;
 
+    /// Returns `true` if the current kind is preceded by whitespace trivia.
+    fn has_preceding_whitespace(&self) -> bool {
+        false
+    }
+
     /// Returns if the current kind is an identifier that includes a unicode escape sequence (`\u...`).
     fn has_unicode_escape(&self) -> bool;
 
@@ -565,6 +570,16 @@ impl<'l, Lex: Lexer<'l>> BufferedLexer<Lex::Kind, Lex> {
         }
     }
 
+    /// Tests if there's whitespace before the current token.
+    #[inline(always)]
+    pub fn has_preceding_whitespace(&self) -> bool {
+        if let Some(current) = &self.current {
+            current.has_preceding_whitespace()
+        } else {
+            self.inner.has_preceding_whitespace()
+        }
+    }
+
     /// Returns true if the current token is an identifier, and it contains any unicode escape sequences
     #[inline]
     pub fn has_unicode_escape(&self) -> bool {
@@ -821,6 +836,10 @@ impl<Kind: SyntaxKind> LexerCheckpoint<Kind> {
 
     pub(crate) fn has_preceding_line_break(&self) -> bool {
         self.current_flags.has_preceding_line_break()
+    }
+
+    pub(crate) fn has_preceding_whitespace(&self) -> bool {
+        self.current_flags.has_preceding_whitespace()
     }
 
     pub(crate) fn has_unicode_escape(&self) -> bool {

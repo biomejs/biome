@@ -1,6 +1,5 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: css/scss/declaration/page-at-rule.scss
 ---
 
@@ -11,6 +10,9 @@ info: css/scss/declaration/page-at-rule.scss
 $padding:12px !default;
 $scale:1+2*3;
 padding:$padding*$scale;
+#{$name}:1px;
+margin-#{$side}:1px;
+--theme-#{$slot}:red;
 
 font:{
 size:12px;
@@ -34,6 +36,9 @@ color:$color;
 @top-right{
 theme.$gutter:8px;
 padding:theme.$gutter;
+#{$inner}:2px;
+margin-#{$inner-side}:2px;
+--theme-#{$inner-slot}:blue;
 }
 }
 
@@ -60,6 +65,9 @@ Trailing newline: true
 	$padding: 12px !default;
 	$scale: 1 + 2 * 3;
 	padding: $padding * $scale;
+	#{$name}: 1px;
+	margin-#{$side}: 1px;
+	--theme-#{$slot}: red;
 
 	font: {
 		size: 12px;
@@ -83,6 +91,9 @@ Trailing newline: true
 	@top-right {
 		theme.$gutter: 8px;
 		padding: theme.$gutter;
+		#{$inner}: 2px;
+		margin-#{$inner-side}: 2px;
+		--theme-#{$inner-slot}: blue;
 	}
 }
 

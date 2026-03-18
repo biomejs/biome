@@ -653,7 +653,7 @@ CssGenericDelimiter =
 
 CssComponentValueList = AnyCssValue*
 
-AnyCssDeclarationName = CssIdentifier | CssDashedIdentifier | TwValueThemeReference
+AnyCssDeclarationName = CssIdentifier | CssDashedIdentifier | ScssInterpolatedIdentifier | TwValueThemeReference
 
 CssDeclarationImportant =
 	'!'

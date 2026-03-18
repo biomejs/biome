@@ -1,6 +1,6 @@
 use crate::parser::CssParser;
 use crate::syntax::scss::expression::{ScssInterpolationMode, parse_scss_interpolation_with_mode};
-use crate::syntax::scss::identifiers::interpolated_identifier::parse_scss_regular_interpolated_identifier;
+use crate::syntax::scss::identifiers::interpolated_identifier::parse_scss_interpolated_identifier_with;
 use crate::syntax::scss::is_at_scss_interpolation;
 use crate::syntax::selector::{
     parse_selector_custom_identifier_fragment, parse_selector_identifier_fragment,
@@ -22,7 +22,7 @@ use biome_parser::prelude::ParsedSyntax;
 /// Docs: https://sass-lang.com/documentation/interpolation/
 #[inline]
 pub(crate) fn parse_scss_selector_interpolated_identifier(p: &mut CssParser) -> ParsedSyntax {
-    parse_scss_regular_interpolated_identifier(p, parse_scss_selector_identifier_any_fragment)
+    parse_scss_interpolated_identifier_with(p, parse_scss_selector_identifier_any_fragment)
 }
 
 /// Parses selector custom identifiers such as `.foo-#{$name}` and preserves the
@@ -42,10 +42,7 @@ pub(crate) fn parse_scss_selector_interpolated_identifier(p: &mut CssParser) -> 
 pub(crate) fn parse_scss_selector_custom_interpolated_identifier(
     p: &mut CssParser,
 ) -> ParsedSyntax {
-    parse_scss_regular_interpolated_identifier(
-        p,
-        parse_scss_selector_custom_identifier_any_fragment,
-    )
+    parse_scss_interpolated_identifier_with(p, parse_scss_selector_custom_identifier_any_fragment)
 }
 
 #[inline]

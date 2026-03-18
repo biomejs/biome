@@ -1,0 +1,40 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/scss/at-rule/declaration-block-interpolation.scss
+---
+
+# Input
+
+```scss
+@font-face{
+#{$name}:1px;
+margin-#{$side}:1px;
+--theme-#{$slot}:red;
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+Trailing newline: true
+-----
+
+```scss
+@font-face {
+	#{$name}: 1px;
+	margin-#{$side}: 1px;
+	--theme-#{$slot}: red;
+}
+
+```

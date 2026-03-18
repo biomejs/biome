@@ -5,10 +5,11 @@ use crate::syntax::at_rule::parse_error::{
 };
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::block::{ParseBlockBody, parse_declaration_or_at_rule_list_block};
+use crate::syntax::declaration::parse_declaration_with_semicolon;
 use crate::syntax::parse_error::scss_only_syntax_error;
 use crate::syntax::scss::{
     is_at_scss_declaration, is_at_scss_nesting_declaration, parse_scss_declaration,
-    parse_scss_nesting_declaration,
+    try_parse_scss_nesting_declaration,
 };
 use crate::syntax::{
     CssSyntaxFeatures, is_at_any_declaration_with_semicolon, is_at_identifier,
@@ -189,7 +190,8 @@ impl ParseBlockBody for PageBlock {
             || is_at_at_rule(p)
            // SCSS allows variable declarations and nested properties inside any block.
             || is_at_scss_declaration(p)
-            || is_at_scss_nesting_declaration(p) || is_at_any_declaration_with_semicolon(p)
+            || is_at_scss_nesting_declaration(p)
+            || is_at_any_declaration_with_semicolon(p)
             || is_at_qualified_rule(p)
     }
 
@@ -221,12 +223,20 @@ impl ParseNodeList for PageAtRuleItemList {
                 },
             )
         } else if is_at_scss_nesting_declaration(p) {
-            // Keep nested property blocks intact inside @page.
-            CssSyntaxFeatures::Scss.parse_exclusive_syntax(
-                p,
-                parse_scss_nesting_declaration,
-                |p, marker| scss_only_syntax_error(p, "SCSS nesting declarations", marker.range(p)),
-            )
+            if let Ok(declaration) = try_parse_scss_nesting_declaration(p, T!['}']) {
+                return declaration;
+            }
+
+            if is_at_qualified_rule(p)
+                && let Present(mut syntax) = parse_qualified_rule(p)
+            {
+                let range = syntax.range(p);
+                p.error(expected_any_page_at_rule_item(p, range));
+                syntax.change_kind(p, CSS_BOGUS);
+                return Present(syntax);
+            }
+
+            parse_declaration_with_semicolon(p)
         } else if is_at_any_declaration_with_semicolon(p) {
             parse_any_declaration_with_semicolon(p)
         } else if is_at_qualified_rule(p) {
