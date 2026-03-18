@@ -9055,6 +9055,7 @@ export type Category =
 	| "configuration"
 	| "assist"
 	| "migrate"
+	| "upgrade"
 	| "deserialize"
 	| "plugin"
 	| "project"
