@@ -271,7 +271,7 @@ impl RecessOrderMember {
                             }
                             AnyCssDeclarationName::CssIdentifier(_) => NodeKindOrder::Declaration,
                             AnyCssDeclarationName::ScssInterpolatedIdentifier(name) => {
-                                if name.to_trimmed_text().starts_with("--") {
+                                if name.syntax().text_trimmed().starts_with("--") {
                                     NodeKindOrder::CustomProperty
                                 } else {
                                     NodeKindOrder::Declaration
