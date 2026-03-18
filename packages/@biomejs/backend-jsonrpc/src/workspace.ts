@@ -7354,6 +7354,10 @@ export type NoUnusedLabelsOptions = {};
 export type NoUnusedPrivateClassMembersOptions = {};
 export interface NoUnusedVariablesOptions {
 	/**
+	 * An object defining ignored identifiers for different language constructs.
+	 */
+	ignore?: NoUnusedVariablesOptionsIgnore;
+	/**
 	 * Whether to ignore unused variables from an object destructuring with a spread.
 	 */
 	ignoreRestSiblings?: boolean;
@@ -8098,6 +8102,36 @@ export type Visibility = "public" | "package" | "private";
  */
 export type CustomRestrictedElements = Record<string, string>;
 export type DependencyAvailability = boolean | string[];
+export interface NoUnusedVariablesOptionsIgnore {
+	/**
+	 * An array of identifiers to ignore. Use "*" to ignore all identifiers.
+	 */
+	*?: string[];
+	/**
+	 * An array of class names to ignore. Use "*" to ignore all identifiers.
+	 */
+	class?: string[];
+	/**
+	 * An array of function names to ignore. Use "*" to ignore all identifiers.
+	 */
+	function?: string[];
+	/**
+	 * An array of interface names to ignore. Use "*" to ignore all identifiers.
+	 */
+	interface?: string[];
+	/**
+	 * An array of type aliases to ignore. Use "*" to ignore all identifiers.
+	 */
+	typeAlias?: string[];
+	/**
+	 * An array of type parameters to ignore. Use "*" to ignore all identifiers.
+	 */
+	typeParameter?: string[];
+	/**
+	 * An array of variable names to ignore. Use "*" to ignore all identifiers.
+	 */
+	variable?: string[];
+}
 export interface Hook {
 	/**
 	* The "position" of the closure function, starting from zero.
