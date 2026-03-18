@@ -1,5 +1,6 @@
 use crate::{CliDiagnostic, CliSession, VERSION};
 use biome_console::{ConsoleExt, markup};
+use semver::Version;
 use std::env;
 use std::ffi::OsStr;
 use std::fmt;
@@ -9,6 +10,7 @@ use std::process::{Command, Stdio};
 const BREW_BINARY_NAME: &str = "biome";
 const GITHUB_REPO_OWNER: &str = "biomejs";
 const GITHUB_REPO_NAME: &str = "biome";
+const LATEST_VERSION_URL: &str = "https://biomejs.dev/api/versions/latest.txt";
 
 /// Upgrade Biome to the latest version.
 pub(crate) fn upgrade(session: CliSession) -> Result<(), CliDiagnostic> {
@@ -61,6 +63,15 @@ fn upgrade_with_homebrew(session: CliSession) -> Result<(), CliDiagnostic> {
 /// Upgrade the standalone Biome binary by downloading the latest release from GitHub and replacing
 /// the current executable.
 fn upgrade_standalone(session: CliSession) -> Result<(), CliDiagnostic> {
+    let latest_version = latest_available_version()?;
+
+    if !is_version_newer(VERSION, &latest_version)? {
+        session.app.console.log(markup! {
+            "Biome is already up to date at version "{VERSION}"."
+        });
+        return Ok(());
+    }
+
     session.app.console.log(markup! {
         "Downloading the latest standalone Biome release..."
     });
@@ -72,6 +83,7 @@ fn upgrade_standalone(session: CliSession) -> Result<(), CliDiagnostic> {
         .target(&release_target())
         .identifier(&release_asset_identifier())
         .current_version(VERSION)
+        .target_version_tag(&release_tag_for_version(&latest_version))
         .show_download_progress(true)
         .no_confirm(true)
         .build()
@@ -93,6 +105,39 @@ fn upgrade_standalone(session: CliSession) -> Result<(), CliDiagnostic> {
     }
 
     Ok(())
+}
+
+fn latest_available_version() -> Result<String, CliDiagnostic> {
+    let response = ureq::get(LATEST_VERSION_URL)
+        .call()
+        .map_err(|err| CliDiagnostic::upgrade_error(err.to_string()))?;
+
+    let version = response
+        .into_body()
+        .read_to_string()
+        .map_err(|err| CliDiagnostic::upgrade_error(err.to_string()))?;
+
+    let version = version.trim();
+    parse_version(version)?;
+    Ok(version.to_string())
+}
+
+fn release_tag_for_version(version: &str) -> String {
+    format!("@biomejs/biome@{version}")
+}
+
+fn is_version_newer(current: &str, latest: &str) -> Result<bool, CliDiagnostic> {
+    let current = parse_version(current)?;
+    let latest = parse_version(latest)?;
+    Ok(latest > current)
+}
+
+fn parse_version(version: &str) -> Result<Version, CliDiagnostic> {
+    Version::parse(version).map_err(|err| {
+        CliDiagnostic::upgrade_error(format!(
+            "Failed to parse the latest Biome version `{version}`: {err}"
+        ))
+    })
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
@@ -266,5 +311,23 @@ mod tests {
         if cfg!(windows) {
             assert!(identifier.ends_with(".exe"));
         }
+    }
+
+    #[test]
+    fn builds_release_tag_for_version() {
+        assert_eq!(release_tag_for_version("2.4.8"), "@biomejs/biome@2.4.8");
+    }
+
+    #[test]
+    fn compares_versions() {
+        assert!(is_version_newer("2.4.7", "2.4.8").unwrap());
+        assert!(!is_version_newer("2.4.8", "2.4.8").unwrap());
+        assert!(!is_version_newer("2.4.9", "2.4.8").unwrap());
+    }
+
+    #[test]
+    fn rejects_invalid_versions() {
+        assert!(parse_version("2.4").is_err());
+        assert!(parse_version("not-a-version").is_err());
     }
 }
