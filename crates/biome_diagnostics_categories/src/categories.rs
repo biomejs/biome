@@ -528,6 +528,7 @@ define_categories! {
     "configuration",
     "assist",
     "migrate",
+    "upgrade",
     "deserialize",
     "plugin",
     "project",
