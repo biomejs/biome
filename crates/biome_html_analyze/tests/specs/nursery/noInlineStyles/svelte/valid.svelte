@@ -1,9 +1,3 @@
----
-source: crates/biome_html_analyze/tests/spec_tests.rs
-expression: valid.html
----
-# Input
-```html
 <!-- should not generate diagnostics -->
 
 <div class="text-red"></div>
@@ -16,12 +10,6 @@ expression: valid.html
 
 <a href="#" class="link-unstyled">Link</a>
 
-<style>
-	.text-red {
-		color: red;
-	}
-</style>
-
 <span data-style="not-inline">Not inline style</span>
 
-```
+<Card style="primary" />

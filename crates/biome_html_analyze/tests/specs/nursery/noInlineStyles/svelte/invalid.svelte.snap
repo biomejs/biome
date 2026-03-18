@@ -1,6 +1,6 @@
 ---
 source: crates/biome_html_analyze/tests/spec_tests.rs
-expression: invalid.html
+expression: invalid.svelte
 ---
 # Input
 ```html
@@ -20,7 +20,7 @@ expression: invalid.html
 
 # Diagnostics
 ```
-invalid.html:3:6 lint/nursery/noInlineStyles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.svelte:3:6 lint/nursery/noInlineStyles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected style attribute.
   
@@ -43,7 +43,7 @@ invalid.html:3:6 lint/nursery/noInlineStyles  FIXABLE  ━━━━━━━━�
 ```
 
 ```
-invalid.html:5:4 lint/nursery/noInlineStyles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.svelte:5:4 lint/nursery/noInlineStyles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected style attribute.
   
@@ -66,7 +66,7 @@ invalid.html:5:4 lint/nursery/noInlineStyles  FIXABLE  ━━━━━━━━�
 ```
 
 ```
-invalid.html:7:7 lint/nursery/noInlineStyles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.svelte:7:7 lint/nursery/noInlineStyles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected style attribute.
   
@@ -89,7 +89,7 @@ invalid.html:7:7 lint/nursery/noInlineStyles  FIXABLE  ━━━━━━━━�
 ```
 
 ```
-invalid.html:9:20 lint/nursery/noInlineStyles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.svelte:9:20 lint/nursery/noInlineStyles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected style attribute.
   
@@ -112,7 +112,7 @@ invalid.html:9:20 lint/nursery/noInlineStyles  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.html:11:13 lint/nursery/noInlineStyles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.svelte:11:13 lint/nursery/noInlineStyles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected style attribute.
   

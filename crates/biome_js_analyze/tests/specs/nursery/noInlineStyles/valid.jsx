@@ -12,3 +12,7 @@
 React.createElement("div", { className: "container" });
 
 React.createElement("button", { onClick: () => { } }, "Click");
+
+<Card style="primary">Not inline style</Card>;
+
+React.createElement(Card, { style: "primary" }, "Not inline style");

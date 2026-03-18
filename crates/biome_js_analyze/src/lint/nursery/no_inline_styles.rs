@@ -6,6 +6,7 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{FixKind, Rule, RuleDiagnostic, declare_lint_rule};
 use biome_console::markup;
 use biome_js_semantic::SemanticModel;
+use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_js_syntax::{
     AnyJsObjectMember, JsCallExpression, JsPropertyObjectMember, JsSyntaxToken, JsxAttribute,
 };
@@ -46,7 +47,6 @@ declare_lint_rule! {
     ///
     /// ## Resources
     ///
-    /// - [html-eslint: no-inline-styles](https://html-eslint.org/docs/rules/no-inline-styles)
     /// - [Content Security Policy: Allowing inline styles](https://content-security-policy.com/examples/allow-inline-style)
     ///
     pub NoInlineStyles {
@@ -68,22 +68,16 @@ impl Rule for NoInlineStyles {
         let node = ctx.query();
 
         match node {
-            NoInlineStylesQuery::JsxAttribute(jsx_attribute) => {
-                let name = jsx_attribute.name().ok()?;
-                let name = name.as_jsx_name()?;
-                let value_token = name.value_token().ok()?;
-                if is_style_value(&value_token) {
-                    return Some(jsx_attribute.range());
-                }
+            NoInlineStylesQuery::AnyJsxElement(element) => {
+                let attribute = find_style_attribute(element)?;
+                Some(attribute.range())
             }
             NoInlineStylesQuery::JsCallExpression(call_expression) => {
                 let model = ctx.model();
-                let property_member = find_style_attribute(call_expression, model)?;
-                return Some(property_member.range());
+                let object_member = find_style_object_member(call_expression, model)?;
+                Some(object_member.range())
             }
         }
-
-        None
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -92,11 +86,11 @@ impl Rule for NoInlineStyles {
                 rule_category!(),
                 state,
                 markup! {
-                    "Avoid using the "<Emphasis>"style"</Emphasis>" attribute. Prefer external CSS classes instead of inline styles."
+                    "Unexpected "<Emphasis>"style"</Emphasis>" attribute."
                 },
             )
             .note(markup! {
-                "Inline styles make code harder to maintain, reduce reusability, and can prevent effective use of a strict Content Security Policy."
+                "Inline styles make code harder to maintain, reduce reusability, and can prevent effective use of a strict Content Security Policy. Use external CSS classes or stylesheets instead."
             }),
         )
     }
@@ -105,58 +99,78 @@ impl Rule for NoInlineStyles {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
         match node {
-            NoInlineStylesQuery::JsxAttribute(jsx_attribute) => {
-                mutation.remove_node(jsx_attribute.clone());
-                Some(JsRuleAction::new(
-                    ctx.metadata().action_category(ctx.category(), ctx.group()),
-                    ctx.metadata().applicability(),
-                    markup! { "Remove the "<Emphasis>"style"</Emphasis>" attribute." }.to_owned(),
-                    mutation,
-                ))
+            NoInlineStylesQuery::AnyJsxElement(element) => {
+                let attribute = find_style_attribute(element)?;
+                mutation.remove_node(attribute);
             }
             NoInlineStylesQuery::JsCallExpression(call_expression) => {
                 let model = ctx.model();
-                let property_member = find_style_attribute(call_expression, model)?;
-
+                let object_member = find_style_object_member(call_expression, model)?;
                 mutation.remove_js_object_member(AnyJsObjectMember::JsPropertyObjectMember(
-                    property_member,
+                    object_member,
                 ));
-                Some(JsRuleAction::new(
-                    ctx.metadata().action_category(ctx.category(), ctx.group()),
-                    ctx.metadata().applicability(),
-                    markup! { "Remove the "<Emphasis>"style"</Emphasis>" attribute." }.to_owned(),
-                    mutation,
-                ))
             }
         }
+
+        Some(JsRuleAction::new(
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
+            ctx.metadata().applicability(),
+            markup! { "Remove the "<Emphasis>"style"</Emphasis>" attribute." }.to_owned(),
+            mutation,
+        ))
     }
 }
 
 declare_node_union! {
-    pub NoInlineStylesQuery = JsxAttribute | JsCallExpression
+    pub NoInlineStylesQuery = AnyJsxElement | JsCallExpression
 }
 
 fn is_style_value(value_token: &JsSyntaxToken) -> bool {
     value_token.text_trimmed().to_lowercase_cow() == "style"
 }
 
-fn find_style_attribute(
+fn find_style_object_member(
     call_expression: &JsCallExpression,
     model: &SemanticModel,
 ) -> Option<JsPropertyObjectMember> {
     let react_create_element =
         ReactCreateElementCall::from_call_expression(call_expression, model)?;
-    let ReactCreateElementCall { props, .. } = react_create_element;
 
+    if react_create_element.is_custom_component() {
+        return None;
+    }
+
+    let ReactCreateElementCall { props, .. } = react_create_element;
     let props = props?;
+
     for member in props.members() {
-        let member = member.ok()?;
-        let property_member = member.as_js_property_object_member()?;
-        let name = property_member.name().ok()?;
-        let name = name.as_js_literal_member_name()?;
-        let value = name.value().ok()?;
-        if is_style_value(&value) {
-            return Some(property_member.clone());
+        if let Some(member) = member.ok()
+            && let Some(member) = member.as_js_property_object_member()
+            && let Some(name) = member.name().ok()
+            && let Some(name) = name.as_js_literal_member_name()
+            && let Some(value) = name.value().ok()
+            && is_style_value(&value)
+        {
+            return Some(member.clone());
+        }
+    }
+
+    None
+}
+
+fn find_style_attribute(any_opening: &AnyJsxElement) -> Option<JsxAttribute> {
+    if any_opening.is_custom_component() {
+        return None;
+    }
+
+    for attribute in any_opening.attributes() {
+        if let Some(attribute) = attribute.as_jsx_attribute()
+            && let Some(name) = attribute.name().ok()
+            && let Some(name) = name.as_jsx_name()
+            && let Some(value_token) = name.value_token().ok()
+            && is_style_value(&value_token)
+        {
+            return Some(attribute.clone());
         }
     }
 
