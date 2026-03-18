@@ -139,7 +139,10 @@ declare_lint_rule! {
     /// An object that allows excluding matching identifiers from this rule.
     ///
     /// Each key may specify an array of identifiers to ignore which are case-sensitive matches.
-    /// The special identifier `"*"` can be used to match all identifiers in the respective group.
+    ///
+    /// The special string `"*"` can serve two purposes:
+    /// - As a **key** it refers to every kind of identifier.
+    /// - As a **value** it may be used to match all identifiers in the respective group, effectively disabling this rule for that group.
     ///
     /// Allowed keys:
     ///
@@ -153,7 +156,7 @@ declare_lint_rule! {
     ///
     /// Default: `{}` (no variables are excluded)
     ///
-    /// For example, we can exclude all unused identifiers named `ignored` regardless of their kind,
+    /// For example, you can exclude all unused identifiers named `ignored` regardless of their kind,
     /// all unused classes named `IgnoredClass`, and all unused functions with the following
     /// configuration.
     ///
@@ -166,7 +169,7 @@ declare_lint_rule! {
     ///     "ignore": {
     ///       "*": ["ignored"],
     ///       "class": ["IgnoredClass"],
-    ///       "function": ["*"],
+    ///       "function": ["*"]
     ///     }
     ///   }
     /// }
