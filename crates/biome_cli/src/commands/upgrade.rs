@@ -1,5 +1,6 @@
 use crate::{CliDiagnostic, CliSession, VERSION};
 use biome_console::{ConsoleExt, markup};
+use biome_diagnostics::{Error, StdError};
 use biome_fs::normalize_path;
 use biome_package::node_semver::Version;
 use camino::{Utf8Path, Utf8PathBuf};
@@ -19,16 +20,20 @@ pub(crate) fn upgrade(session: CliSession) -> Result<(), CliDiagnostic> {
 
     let current_exe = Utf8PathBuf::from_path_buf(env::current_exe().map_err(CliDiagnostic::from)?)
         .map_err(|path| {
-            CliDiagnostic::upgrade_error(format!(
-                "The current Biome executable path is not valid UTF-8: {}",
-                path.display()
-            ))
+            CliDiagnostic::upgrade_error(
+                format!(
+                    "The current Biome executable path is not valid UTF-8: {}",
+                    path.display()
+                ),
+                None,
+            )
         })?;
     let install_source = detect_install_source(&current_exe);
 
     match install_source {
         InstallSource::Npm => Err(CliDiagnostic::upgrade_error(
             "`biome upgrade` is not available for binaries distributed through npm-compatible package managers. Upgrade Biome with the same package manager you used to install `@biomejs/biome`.",
+            None,
         )),
         InstallSource::Homebrew => upgrade_with_homebrew(session),
         InstallSource::Standalone => upgrade_standalone(session),
@@ -39,6 +44,7 @@ fn ensure_upgrade_supported() -> Result<(), CliDiagnostic> {
     if env::var_os("BIOME_BINARY").is_some() {
         return Err(CliDiagnostic::upgrade_error(
             "`biome upgrade` is not available when `BIOME_BINARY` is set. Unset `BIOME_BINARY` or upgrade the overridden binary directly.",
+            None,
         ));
     }
 
@@ -63,6 +69,7 @@ fn upgrade_with_homebrew(session: CliSession) -> Result<(), CliDiagnostic> {
             if err.kind() == std::io::ErrorKind::NotFound {
                 CliDiagnostic::upgrade_error(
                     "Biome appears to be installed via Homebrew, but the `brew` executable could not be found in PATH.",
+                    None,
                 )
             } else {
                 CliDiagnostic::from(err)
@@ -72,10 +79,13 @@ fn upgrade_with_homebrew(session: CliSession) -> Result<(), CliDiagnostic> {
     if status.success() {
         Ok(())
     } else {
-        Err(CliDiagnostic::upgrade_error(format!(
-            "`brew upgrade biome` exited with {}.",
-            ExitStatusDisplay(status)
-        )))
+        Err(CliDiagnostic::upgrade_error(
+            format!(
+                "`brew upgrade biome` exited with {}.",
+                ExitStatusDisplay(status)
+            ),
+            None,
+        ))
     }
 }
 
@@ -107,9 +117,19 @@ fn upgrade_standalone(session: CliSession) -> Result<(), CliDiagnostic> {
         .show_download_progress(true)
         .no_confirm(true)
         .build()
-        .map_err(|err| CliDiagnostic::upgrade_error(err.to_string()))?
+        .map_err(|err| {
+            CliDiagnostic::upgrade_error(
+                "Failed to prepare the standalone upgrade.",
+                Some(Error::from(StdError::from(err))),
+            )
+        })?
         .update()
-        .map_err(|err| CliDiagnostic::upgrade_error(err.to_string()))?;
+        .map_err(|err| {
+            CliDiagnostic::upgrade_error(
+                "Failed to apply the standalone upgrade.",
+                Some(Error::from(StdError::from(err))),
+            )
+        })?;
 
     match status {
         self_update::Status::UpToDate(version) => {
@@ -130,16 +150,34 @@ fn upgrade_standalone(session: CliSession) -> Result<(), CliDiagnostic> {
 fn latest_available_version() -> Result<String, CliDiagnostic> {
     let version = reqwest::blocking::Client::builder()
         .build()
-        .map_err(|err| CliDiagnostic::upgrade_error(err.to_string()))?
+        .map_err(|err| {
+            CliDiagnostic::upgrade_error(
+                "Failed to create the HTTP client used to check the latest Biome version.",
+                Some(Error::from(StdError::from(err))),
+            )
+        })?
         .get(LATEST_VERSION_URL)
         .send()
-        .map_err(|err| CliDiagnostic::upgrade_error(err.to_string()))?
+        .map_err(|err| {
+            CliDiagnostic::upgrade_error(
+                "Failed to request the latest Biome version.",
+                Some(Error::from(StdError::from(err))),
+            )
+        })?
         .error_for_status()
-        .map_err(|err| CliDiagnostic::upgrade_error(err.to_string()))?;
+        .map_err(|err| {
+            CliDiagnostic::upgrade_error(
+                "Failed to fetch the latest Biome version.",
+                Some(Error::from(StdError::from(err))),
+            )
+        })?;
 
-    let version = version
-        .text()
-        .map_err(|err| CliDiagnostic::upgrade_error(err.to_string()))?;
+    let version = version.text().map_err(|err| {
+        CliDiagnostic::upgrade_error(
+            "Failed to read the latest Biome version response.",
+            Some(Error::from(StdError::from(err))),
+        )
+    })?;
 
     let version = version.trim();
     parse_version(version)?;
@@ -158,9 +196,10 @@ fn is_version_newer(current: &str, latest: &str) -> Result<bool, CliDiagnostic> 
 
 fn parse_version(version: &str) -> Result<Version, CliDiagnostic> {
     version.parse::<Version>().map_err(|err| {
-        CliDiagnostic::upgrade_error(format!(
-            "Failed to parse the latest Biome version `{version}`: {err}"
-        ))
+        CliDiagnostic::upgrade_error(
+            format!("Failed to parse the Biome version `{version}`."),
+            Some(Error::from(StdError::from(err))),
+        )
     })
 }
 
@@ -281,6 +320,7 @@ impl fmt::Display for ExitStatusDisplay {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use biome_diagnostics::PrintDescription;
     use std::sync::{Mutex, OnceLock};
 
     fn env_lock() -> &'static Mutex<()> {
@@ -343,9 +383,10 @@ mod tests {
         match result {
             Err(CliDiagnostic::UpgradeError(diagnostic)) => {
                 assert_eq!(
-                    diagnostic.reason,
-                    "`biome upgrade` is not available when `BIOME_BINARY` is set. Unset `BIOME_BINARY` or upgrade the overridden binary directly.",
+                    PrintDescription(&diagnostic).to_string(),
+                    "Upgrade has encountered an error: `biome upgrade` is not available when `BIOME_BINARY` is set. Unset `BIOME_BINARY` or upgrade the overridden binary directly.",
                 );
+                assert!(diagnostic.source.is_none());
             }
             other => panic!("expected BIOME_BINARY upgrade error, got {other:?}"),
         }
@@ -368,9 +409,10 @@ mod tests {
         match result {
             Err(CliDiagnostic::UpgradeError(diagnostic)) => {
                 assert_eq!(
-                    diagnostic.reason,
-                    "`biome upgrade` is not available when `BIOME_BINARY` is set. Unset `BIOME_BINARY` or upgrade the overridden binary directly.",
+                    PrintDescription(&diagnostic).to_string(),
+                    "Upgrade has encountered an error: `biome upgrade` is not available when `BIOME_BINARY` is set. Unset `BIOME_BINARY` or upgrade the overridden binary directly.",
                 );
+                assert!(diagnostic.source.is_none());
             }
             other => panic!("expected BIOME_BINARY upgrade error, got {other:?}"),
         }
