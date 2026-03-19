@@ -8,6 +8,8 @@ use self_update::backends::github::Update;
 use std::env;
 use std::fmt;
 use std::process::{Command, Stdio};
+use std::time::Duration;
+use reqwest::blocking::Client;
 
 const BREW_BINARY_NAME: &str = "biome";
 const GITHUB_REPO_OWNER: &str = "biomejs";
@@ -148,7 +150,9 @@ fn upgrade_standalone(session: CliSession) -> Result<(), CliDiagnostic> {
 }
 
 fn latest_available_version() -> Result<String, CliDiagnostic> {
-    let version = reqwest::blocking::Client::builder()
+    let version = Client::builder()
+        .connect_timeout(Duration::from_secs(10))
+        .timeout(Duration::from_secs(30))
         .build()
         .map_err(|err| {
             CliDiagnostic::upgrade_error(
