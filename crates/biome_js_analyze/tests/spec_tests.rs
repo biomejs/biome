@@ -492,6 +492,7 @@ fn run_plugin_test(input: &'static str, _: &str, _: &str, _: &str) {
     let plugin = match AnalyzerGritPlugin::load(
         &OsFileSystem::new(plugin_path.to_owned()),
         Utf8Path::new(plugin_path),
+        None,
     ) {
         Ok(plugin) => plugin,
         Err(err) => panic!("Cannot load plugin: {err:?}"),
