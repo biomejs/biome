@@ -1,11 +1,10 @@
 use crate::{CliDiagnostic, CliSession, VERSION};
 use biome_console::{ConsoleExt, markup};
+use camino::{Utf8Path, Utf8PathBuf};
 use self_update::backends::github::Update;
 use semver::Version;
 use std::env;
-use std::ffi::OsStr;
 use std::fmt;
-use std::path::Path;
 use std::process::{Command, Stdio};
 
 const BREW_BINARY_NAME: &str = "biome";
@@ -15,7 +14,13 @@ const LATEST_VERSION_URL: &str = "https://biomejs.dev/api/versions/latest.txt";
 
 /// Upgrade Biome to the latest version.
 pub(crate) fn upgrade(session: CliSession) -> Result<(), CliDiagnostic> {
-    let current_exe = env::current_exe().map_err(CliDiagnostic::from)?;
+    let current_exe = Utf8PathBuf::from_path_buf(env::current_exe().map_err(CliDiagnostic::from)?)
+        .map_err(|path| {
+            CliDiagnostic::upgrade_error(format!(
+                "The current Biome executable path is not valid UTF-8: {}",
+                path.display()
+            ))
+        })?;
     let install_source = detect_install_source(&current_exe);
 
     match install_source {
@@ -159,13 +164,13 @@ enum InstallSource {
 /// If the `BIOME_DISTRIBUTION` environment variable is set, it will be used to determine the
 /// installation source instead of path-based detection. This allows users to override the
 /// detected installation source if necessary.
-fn detect_install_source(current_exe: &Path) -> InstallSource {
+fn detect_install_source(current_exe: &Utf8Path) -> InstallSource {
     if let Some(install_source) = install_source_from_env() {
         return install_source;
     }
 
     let canonical = current_exe
-        .canonicalize()
+        .canonicalize_utf8()
         .unwrap_or_else(|_| current_exe.to_path_buf());
 
     if is_npm_install(&canonical) {
@@ -188,10 +193,10 @@ fn install_source_from_env() -> Option<InstallSource> {
 }
 
 /// Determines whether Biome was installed using a npm-compatible package manager
-fn is_npm_install(executable: &Path) -> bool {
+fn is_npm_install(executable: &Utf8Path) -> bool {
     executable
         .components()
-        .any(|component| component.as_os_str() == OsStr::new("node_modules"))
+        .any(|component| component.as_str() == "node_modules")
 }
 
 /// Determines if Biome was installed with Homebrew
@@ -202,7 +207,7 @@ fn is_npm_install(executable: &Path) -> bool {
 /// - /usr/local/Cellar covers macOS on Intel
 /// - /home/linuxbrew/.linuxbrew/ covers Linux installations
 /// - /Cellar/biome/ covers custom prefixes if users have set one
-fn is_homebrew_install(executable: &Path) -> bool {
+fn is_homebrew_install(executable: &Utf8Path) -> bool {
     let executable = normalize_path_string(executable);
     executable.starts_with("/opt/homebrew/")
         || executable.starts_with("/usr/local/Cellar/")
@@ -248,8 +253,8 @@ fn is_musl() -> bool {
     false
 }
 
-fn normalize_path_string(path: &Path) -> String {
-    path.to_string_lossy().replace('\\', "/")
+fn normalize_path_string(path: &Utf8Path) -> String {
+    path.as_str().replace('\\', "/")
 }
 
 struct ExitStatusDisplay(std::process::ExitStatus);
@@ -276,7 +281,7 @@ mod tests {
     #[test]
     fn detects_npm_install_from_path() {
         assert_eq!(
-            detect_install_source(Path::new(
+            detect_install_source(Utf8Path::new(
                 "/tmp/project/node_modules/@biomejs/cli-darwin-arm64/biome"
             )),
             InstallSource::Npm
@@ -286,7 +291,7 @@ mod tests {
     #[test]
     fn detects_homebrew_install_from_path() {
         assert_eq!(
-            detect_install_source(Path::new("/opt/homebrew/Cellar/biome/2.4.8/bin/biome")),
+            detect_install_source(Utf8Path::new("/opt/homebrew/Cellar/biome/2.4.8/bin/biome")),
             InstallSource::Homebrew
         );
     }
@@ -294,7 +299,7 @@ mod tests {
     #[test]
     fn defaults_to_standalone_install() {
         assert_eq!(
-            detect_install_source(Path::new("/usr/local/bin/biome")),
+            detect_install_source(Utf8Path::new("/usr/local/bin/biome")),
             InstallSource::Standalone
         );
     }
@@ -307,7 +312,7 @@ mod tests {
         }
 
         assert_eq!(
-            detect_install_source(Path::new("/opt/homebrew/Cellar/biome/2.4.8/bin/biome")),
+            detect_install_source(Utf8Path::new("/opt/homebrew/Cellar/biome/2.4.8/bin/biome")),
             InstallSource::Npm
         );
 
