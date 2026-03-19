@@ -1,12 +1,12 @@
 use crate::{CliDiagnostic, CliSession, VERSION};
 use biome_console::{ConsoleExt, markup};
+use self_update::backends::github::Update;
 use semver::Version;
 use std::env;
 use std::ffi::OsStr;
 use std::fmt;
 use std::path::Path;
 use std::process::{Command, Stdio};
-use self_update::backends::github::Update;
 
 const BREW_BINARY_NAME: &str = "biome";
 const GITHUB_REPO_OWNER: &str = "biomejs";
