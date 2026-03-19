@@ -175,7 +175,7 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```js,expect_diagnostic,use_options
+    /// ```js,expect_diagnostic,ignore,use_options
     /// const ignored = 0;
     /// class IgnoredClass {}
     /// function ignoredFunction() {}
