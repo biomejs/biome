@@ -1,6 +1,5 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: css/scss/at-rule/use.scss
 ---
 
@@ -40,6 +39,7 @@ Indent width: 2
 Line ending: LF
 Line width: 80
 Quote style: Double Quotes
+Delimiter spacing: false
 Trailing newline: true
 -----
 
