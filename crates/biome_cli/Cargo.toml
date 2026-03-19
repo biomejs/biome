@@ -61,6 +61,7 @@ path-absolutize          = { workspace = true }
 quick-junit              = "0.5.2"
 rayon                    = { workspace = true }
 regex                    = { workspace = true }
+reqwest                  = { workspace = true, features = ["blocking", "rustls-tls"] }
 rustc-hash               = { workspace = true }
 self_update              = { version = "0.42.0", default-features = false, features = ["rustls"] }
 semver                   = "1.0.27"
@@ -82,7 +83,6 @@ tracing                  = { workspace = true }
 tracing-appender         = "0.2.4"
 tracing-subscriber       = { workspace = true, features = ["env-filter", "json"] }
 tracing-tree             = "0.4.1"
-ureq                     = { workspace = true }
 
 [dev-dependencies]
 biome_css_formatter  = { path = "../biome_css_formatter" }

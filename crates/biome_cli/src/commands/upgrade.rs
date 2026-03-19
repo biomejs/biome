@@ -109,13 +109,17 @@ fn upgrade_standalone(session: CliSession) -> Result<(), CliDiagnostic> {
 }
 
 fn latest_available_version() -> Result<String, CliDiagnostic> {
-    let response = ureq::get(LATEST_VERSION_URL)
-        .call()
+    let version = reqwest::blocking::Client::builder()
+        .build()
+        .map_err(|err| CliDiagnostic::upgrade_error(err.to_string()))?
+        .get(LATEST_VERSION_URL)
+        .send()
+        .map_err(|err| CliDiagnostic::upgrade_error(err.to_string()))?
+        .error_for_status()
         .map_err(|err| CliDiagnostic::upgrade_error(err.to_string()))?;
 
-    let version = response
-        .into_body()
-        .read_to_string()
+    let version = version
+        .text()
         .map_err(|err| CliDiagnostic::upgrade_error(err.to_string()))?;
 
     let version = version.trim();
