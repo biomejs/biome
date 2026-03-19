@@ -109,6 +109,21 @@ pub fn biome_env() -> &'static BiomeEnv {
 impl Display for BiomeEnv {
     fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
         let padding = 35usize;
+        match self.biome_distribution.value() {
+            None => {
+                KeyValuePair::new(self.biome_distribution.name, markup! { <Dim>"unset"</Dim> })
+                    .with_padding(padding)
+                    .fmt(fmt)?;
+            }
+            Some(value) => {
+                KeyValuePair::new(
+                    self.biome_distribution.name,
+                    markup! {{DebugDisplay(value)}},
+                )
+                .with_padding(padding)
+                .fmt(fmt)?;
+            }
+        };
         match self.biome_log_path.value() {
             None => {
                 KeyValuePair::new(self.biome_log_path.name, markup! { <Dim>"unset"</Dim> })
