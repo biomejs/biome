@@ -47,6 +47,7 @@ biome_json_parser        = { workspace = true }
 biome_json_syntax        = { workspace = true }
 biome_lsp                = { workspace = true }
 biome_migrate            = { workspace = true }
+biome_package            = { workspace = true }
 biome_resolver           = { workspace = true }
 biome_rowan              = { workspace = true }
 biome_rule_options       = { workspace = true }
@@ -64,7 +65,6 @@ regex                    = { workspace = true }
 reqwest                  = { workspace = true, features = ["blocking", "rustls-tls"] }
 rustc-hash               = { workspace = true }
 self_update              = { version = "0.42.0", default-features = false, features = ["rustls"] }
-semver                   = "1.0.27"
 serde                    = { workspace = true, features = ["derive"] }
 serde_json               = { workspace = true }
 smallvec                 = { workspace = true }
