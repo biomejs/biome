@@ -102,6 +102,9 @@ fn upgrade_with_homebrew(session: CliSession) -> Result<(), CliDiagnostic> {
 /// Upgrade the standalone Biome binary by downloading the latest release from GitHub and replacing
 /// the current executable.
 fn upgrade_standalone(session: CliSession) -> Result<(), CliDiagnostic> {
+    let target =
+        release_target().map_err(|err| CliDiagnostic::upgrade_error(err.to_string(), None))?;
+    let identifier = release_asset_identifier(&target);
     let latest_version = latest_available_version()?;
 
     if !is_version_newer(VERSION, &latest_version)? {
@@ -119,8 +122,8 @@ fn upgrade_standalone(session: CliSession) -> Result<(), CliDiagnostic> {
         .repo_owner(GITHUB_REPO_OWNER)
         .repo_name(GITHUB_REPO_NAME)
         .bin_name(binary_name_for_self_update())
-        .target(&release_target())
-        .identifier(&release_asset_identifier())
+        .target(&target)
+        .identifier(&identifier)
         .current_version(VERSION)
         .target_version_tag(&release_tag_for_version(&latest_version))
         .show_output(false)
@@ -289,29 +292,58 @@ fn binary_name_for_self_update() -> &'static str {
     if cfg!(windows) { "biome.exe" } else { "biome" }
 }
 
-fn release_target() -> String {
-    match (env::consts::OS, env::consts::ARCH, is_musl()) {
-        ("macos", "x86_64", _) => String::from("darwin-x64"),
-        ("macos", "aarch64", _) => String::from("darwin-arm64"),
-        ("linux", "x86_64", true) => String::from("linux-x64-musl"),
-        ("linux", "x86_64", false) => String::from("linux-x64"),
-        ("linux", "aarch64", true) => String::from("linux-arm64-musl"),
-        ("linux", "aarch64", false) => String::from("linux-arm64"),
-        ("windows", "x86_64", _) => String::from("win32-x64"),
-        ("windows", "aarch64", _) => String::from("win32-arm64"),
-        (os, arch, _) => format!("{os}-{arch}"),
+fn release_target() -> Result<String, UnsupportedPlatformError> {
+    release_target_for_platform(env::consts::OS, env::consts::ARCH, is_musl()).map(String::from)
+}
+
+fn release_target_for_platform(
+    os: &str,
+    arch: &str,
+    is_musl: bool,
+) -> Result<&'static str, UnsupportedPlatformError> {
+    match (os, arch, is_musl) {
+        ("macos", "x86_64", _) => Ok("darwin-x64"),
+        ("macos", "aarch64", _) => Ok("darwin-arm64"),
+        ("linux", "x86_64", true) => Ok("linux-x64-musl"),
+        ("linux", "x86_64", false) => Ok("linux-x64"),
+        ("linux", "aarch64", true) => Ok("linux-arm64-musl"),
+        ("linux", "aarch64", false) => Ok("linux-arm64"),
+        ("windows", "x86_64", _) => Ok("win32-x64"),
+        ("windows", "aarch64", _) => Ok("win32-arm64"),
+        (os, arch, _) => Err(UnsupportedPlatformError::new(os, arch)),
     }
 }
 
-fn release_asset_identifier() -> String {
-    let target = release_target();
-
-    if cfg!(windows) {
+fn release_asset_identifier(target: &str) -> String {
+    if target.starts_with("win32-") {
         format!("biome-{target}.exe")
     } else {
         format!("biome-{target}")
     }
 }
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+struct UnsupportedPlatformError {
+    os: String,
+    arch: String,
+}
+
+impl UnsupportedPlatformError {
+    fn new(os: &str, arch: &str) -> Self {
+        Self {
+            os: os.to_string(),
+            arch: arch.to_string(),
+        }
+    }
+}
+
+impl fmt::Display for UnsupportedPlatformError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "unsupported platform: {}-{}", self.os, self.arch)
+    }
+}
+
+impl std::error::Error for UnsupportedPlatformError {}
 
 #[cfg(target_os = "linux")]
 fn is_musl() -> bool {
@@ -507,12 +539,36 @@ mod tests {
     }
 
     #[test]
+    fn resolves_supported_release_targets() {
+        assert_eq!(
+            release_target_for_platform("macos", "x86_64", false).unwrap(),
+            "darwin-x64"
+        );
+        assert_eq!(
+            release_target_for_platform("linux", "x86_64", true).unwrap(),
+            "linux-x64-musl"
+        );
+        assert_eq!(
+            release_target_for_platform("linux", "aarch64", false).unwrap(),
+            "linux-arm64"
+        );
+        assert_eq!(
+            release_target_for_platform("windows", "aarch64", false).unwrap(),
+            "win32-arm64"
+        );
+    }
+
+    #[test]
+    fn rejects_unsupported_release_targets() {
+        let err = release_target_for_platform("freebsd", "x86_64", false).unwrap_err();
+
+        assert_eq!(err.to_string(), "unsupported platform: freebsd-x86_64");
+    }
+
+    #[test]
     fn computes_release_asset_identifier() {
-        let identifier = release_asset_identifier();
-        assert!(identifier.starts_with("biome-"));
-        if cfg!(windows) {
-            assert!(identifier.ends_with(".exe"));
-        }
+        assert_eq!(release_asset_identifier("linux-x64"), "biome-linux-x64");
+        assert_eq!(release_asset_identifier("win32-x64"), "biome-win32-x64.exe");
     }
 
     #[test]
