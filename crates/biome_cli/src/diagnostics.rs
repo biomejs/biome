@@ -263,13 +263,13 @@ pub struct MigrationDiagnostic {
 #[diagnostic(
 	category = "upgrade",
 	severity = Error,
-	message(
-		message("Upgrade has encountered an error: "{{&self.reason}}),
-		description = "Upgrade has encountered an error: {reason}"
-	)
 )]
 pub struct UpgradeDiagnostic {
-    pub reason: String,
+    #[message]
+    #[description]
+    pub message: MessageAndDescription,
+    #[source]
+    pub source: Option<Error>,
 }
 
 #[derive(Debug, Diagnostic)]
@@ -465,9 +465,14 @@ impl CliDiagnostic {
     }
 
     /// Errors thrown when running the `biome upgrade` command
-    pub fn upgrade_error(reason: impl Into<String>) -> Self {
+    pub fn upgrade_error(message: impl Into<String>, source: Option<Error>) -> Self {
+        let message = message.into();
+
         Self::UpgradeError(UpgradeDiagnostic {
-            reason: reason.into(),
+            message: MessageAndDescription::from(format!(
+                "Upgrade has encountered an error: {message}"
+            )),
+            source,
         })
     }
 
