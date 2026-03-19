@@ -4,12 +4,12 @@ use biome_diagnostics::{Error, StdError};
 use biome_fs::normalize_path;
 use biome_package::node_semver::Version;
 use camino::{Utf8Path, Utf8PathBuf};
+use reqwest::blocking::Client;
 use self_update::backends::github::Update;
 use std::env;
 use std::fmt;
 use std::process::{Command, Stdio};
 use std::time::Duration;
-use reqwest::blocking::Client;
 
 const BREW_BINARY_NAME: &str = "biome";
 const GITHUB_REPO_OWNER: &str = "biomejs";
@@ -39,7 +39,15 @@ pub(crate) fn upgrade(session: CliSession) -> Result<(), CliDiagnostic> {
         )),
         InstallSource::Homebrew => upgrade_with_homebrew(session),
         InstallSource::Standalone => upgrade_standalone(session),
+        InstallSource::Unknown => Err(unknown_install_source_upgrade_error()),
     }
+}
+
+fn unknown_install_source_upgrade_error() -> CliDiagnostic {
+    CliDiagnostic::upgrade_error(
+        "`biome upgrade` couldn't determine how this binary was installed. Upgrade Biome with the same installer or package manager you originally used.",
+        None,
+    )
 }
 
 fn ensure_upgrade_supported() -> Result<(), CliDiagnostic> {
@@ -60,6 +68,7 @@ fn upgrade_with_homebrew(session: CliSession) -> Result<(), CliDiagnostic> {
     });
 
     let status = Command::new("brew")
+        .env("HOMEBREW_NO_AUTO_UPDATE", "1")
         .arg("upgrade")
         .arg(BREW_BINARY_NAME)
         .stdin(Stdio::inherit())
@@ -211,6 +220,7 @@ enum InstallSource {
     Homebrew,
     Npm,
     Standalone,
+    Unknown,
 }
 
 /// Detect the installation source
@@ -219,7 +229,8 @@ enum InstallSource {
 ///
 /// If the `BIOME_DISTRIBUTION` environment variable is set, it will be used to determine the
 /// installation source instead of path-based detection. This allows users to override the
-/// detected installation source if necessary.
+/// detected installation source if necessary. Any unrecognized installation source is treated as
+/// unknown so `biome upgrade` does not attempt a cross-channel self-update.
 fn detect_install_source(current_exe: &Utf8Path) -> InstallSource {
     if let Some(install_source) = install_source_from_env() {
         return install_source;
@@ -234,18 +245,21 @@ fn detect_install_source(current_exe: &Utf8Path) -> InstallSource {
     } else if is_homebrew_install(&canonical) {
         InstallSource::Homebrew
     } else {
-        InstallSource::Standalone
+        InstallSource::Unknown
     }
 }
 
 /// Detect the installation source from the environment
 fn install_source_from_env() -> Option<InstallSource> {
-    match env::var_os("BIOME_DISTRIBUTION")?.to_str()? {
-        "npm" => Some(InstallSource::Npm),
-        "homebrew" => Some(InstallSource::Homebrew),
-        "standalone" => Some(InstallSource::Standalone),
-        _ => None,
-    }
+    let install_source = env::var_os("BIOME_DISTRIBUTION")?;
+    let install_source = match install_source.to_str() {
+        Some("npm") => InstallSource::Npm,
+        Some("homebrew") => InstallSource::Homebrew,
+        Some("standalone") => InstallSource::Standalone,
+        Some(_) | None => InstallSource::Unknown,
+    };
+
+    Some(install_source)
 }
 
 /// Determines whether Biome was installed using a npm-compatible package manager
@@ -394,13 +408,13 @@ mod tests {
     }
 
     #[test]
-    fn defaults_to_standalone_install() {
+    fn defaults_to_unknown_install_source() {
         let _guard = env_lock().lock().unwrap();
         let _distribution = ScopedEnvVar::unset("BIOME_DISTRIBUTION");
 
         assert_eq!(
             detect_install_source(Utf8Path::new("/usr/local/bin/biome")),
-            InstallSource::Standalone
+            InstallSource::Unknown
         );
     }
 
@@ -413,6 +427,44 @@ mod tests {
             detect_install_source(Utf8Path::new("/opt/homebrew/Cellar/biome/2.4.8/bin/biome")),
             InstallSource::Npm
         );
+    }
+
+    #[test]
+    fn standalone_distribution_env_marks_install_as_standalone() {
+        let _guard = env_lock().lock().unwrap();
+        let _distribution = ScopedEnvVar::set("BIOME_DISTRIBUTION", "standalone");
+
+        assert_eq!(
+            detect_install_source(Utf8Path::new("/usr/local/bin/biome")),
+            InstallSource::Standalone
+        );
+    }
+
+    #[test]
+    fn invalid_distribution_env_marks_install_as_unknown() {
+        let _guard = env_lock().lock().unwrap();
+        let _distribution = ScopedEnvVar::set("BIOME_DISTRIBUTION", "custom-installer");
+
+        assert_eq!(
+            detect_install_source(Utf8Path::new("/opt/homebrew/Cellar/biome/2.4.8/bin/biome")),
+            InstallSource::Unknown
+        );
+    }
+
+    #[test]
+    fn reports_unknown_install_source_upgrade_error() {
+        let diagnostic = unknown_install_source_upgrade_error();
+
+        match diagnostic {
+            CliDiagnostic::UpgradeError(diagnostic) => {
+                assert_eq!(
+                    PrintDescription(&diagnostic).to_string(),
+                    "Upgrade has encountered an error: `biome upgrade` couldn't determine how this binary was installed. Upgrade Biome with the same installer or package manager you originally used.",
+                );
+                assert!(diagnostic.source.is_none());
+            }
+            other => panic!("expected unknown install source upgrade error, got {other:?}"),
+        }
     }
 
     #[test]
