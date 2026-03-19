@@ -1,12 +1,12 @@
 use crate::{CliDiagnostic, CliSession, VERSION};
 use biome_console::{ConsoleExt, markup};
+use biome_fs::normalize_path;
 use camino::{Utf8Path, Utf8PathBuf};
 use self_update::backends::github::Update;
 use semver::Version;
 use std::env;
 use std::fmt;
 use std::process::{Command, Stdio};
-use biome_fs::normalize_path;
 
 const BREW_BINARY_NAME: &str = "biome";
 const GITHUB_REPO_OWNER: &str = "biomejs";
