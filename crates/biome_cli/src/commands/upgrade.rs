@@ -195,6 +195,13 @@ fn is_npm_install(executable: &Path) -> bool {
 }
 
 /// Determines if Biome was installed with Homebrew
+///
+/// See https://docs.brew.sh/Installation for common Homebrew installation paths
+///
+/// - /opt/homebrew covers macOS on Apple Silicon
+/// - /usr/local/Cellar covers macOS on Intel
+/// - /home/linuxbrew/.linuxbrew/ covers Linux installations
+/// - /Cellar/biome/ covers custom prefixes if users have set one
 fn is_homebrew_install(executable: &Path) -> bool {
     let executable = normalize_path_string(executable);
     executable.starts_with("/opt/homebrew/")
