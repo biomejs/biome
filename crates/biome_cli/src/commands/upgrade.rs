@@ -91,6 +91,7 @@ fn upgrade_standalone(session: CliSession) -> Result<(), CliDiagnostic> {
         .identifier(&release_asset_identifier())
         .current_version(VERSION)
         .target_version_tag(&release_tag_for_version(&latest_version))
+        .show_output(false)
         .show_download_progress(true)
         .no_confirm(true)
         .build()
