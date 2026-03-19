@@ -66,7 +66,7 @@ pub enum BiomeCommand {
 
     /// Upgrade Biome to the latest version.
     #[bpaf(command)]
-    Upgrade(#[bpaf(external(cli_options), hide_usage)] CliOptions),
+    Upgrade,
 
     #[bpaf(command)]
     /// Prints information for debugging.
@@ -672,7 +672,6 @@ impl BiomeCommand {
     const fn cli_options(&self) -> Option<&CliOptions> {
         match self {
             Self::Version(cli_options)
-            | Self::Upgrade(cli_options)
             | Self::Rage(cli_options, ..)
             | Self::Check { cli_options, .. }
             | Self::Lint { cli_options, .. }
@@ -681,6 +680,7 @@ impl BiomeCommand {
             | Self::Migrate { cli_options, .. }
             | Self::Search { cli_options, .. } => Some(cli_options),
             Self::LspProxy { .. }
+            | Self::Upgrade
             | Self::Start { .. }
             | Self::Stop
             | Self::Init(_)
@@ -702,7 +702,7 @@ impl BiomeCommand {
             | Self::Rage(_, log_options, ..)
             | Self::Search { log_options, .. } => Some(log_options),
             Self::Version(_)
-            | Self::Upgrade(_)
+            | Self::Upgrade
             | Self::LspProxy { .. }
             | Self::Start { .. }
             | Self::Stop
