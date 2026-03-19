@@ -6,6 +6,7 @@ use semver::Version;
 use std::env;
 use std::fmt;
 use std::process::{Command, Stdio};
+use biome_fs::normalize_path;
 
 const BREW_BINARY_NAME: &str = "biome";
 const GITHUB_REPO_OWNER: &str = "biomejs";
@@ -208,11 +209,11 @@ fn is_npm_install(executable: &Utf8Path) -> bool {
 /// - /home/linuxbrew/.linuxbrew/ covers Linux installations
 /// - /Cellar/biome/ covers custom prefixes if users have set one
 fn is_homebrew_install(executable: &Utf8Path) -> bool {
-    let executable = normalize_path_string(executable);
+    let executable = normalize_path(executable);
     executable.starts_with("/opt/homebrew/")
         || executable.starts_with("/usr/local/Cellar/")
         || executable.starts_with("/home/linuxbrew/.linuxbrew/")
-        || executable.contains("/Cellar/biome/")
+        || executable.as_str().contains("/Cellar/biome/")
 }
 
 fn binary_name_for_self_update() -> &'static str {
@@ -251,10 +252,6 @@ fn is_musl() -> bool {
 #[cfg(not(target_os = "linux"))]
 fn is_musl() -> bool {
     false
-}
-
-fn normalize_path_string(path: &Utf8Path) -> String {
-    path.as_str().replace('\\', "/")
 }
 
 struct ExitStatusDisplay(std::process::ExitStatus);
