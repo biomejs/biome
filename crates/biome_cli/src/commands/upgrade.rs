@@ -60,7 +60,6 @@ fn upgrade_with_homebrew(session: CliSession) -> Result<(), CliDiagnostic> {
     });
 
     let status = Command::new("brew")
-        .env("HOMEBREW_NO_AUTO_UPDATE", "1")
         .arg("upgrade")
         .arg(BREW_BINARY_NAME)
         .stdin(Stdio::inherit())
