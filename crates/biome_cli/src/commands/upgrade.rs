@@ -15,6 +15,8 @@ const LATEST_VERSION_URL: &str = "https://biomejs.dev/api/versions/latest.txt";
 
 /// Upgrade Biome to the latest version.
 pub(crate) fn upgrade(session: CliSession) -> Result<(), CliDiagnostic> {
+    ensure_upgrade_supported()?;
+
     let current_exe = Utf8PathBuf::from_path_buf(env::current_exe().map_err(CliDiagnostic::from)?)
         .map_err(|path| {
             CliDiagnostic::upgrade_error(format!(
@@ -31,6 +33,16 @@ pub(crate) fn upgrade(session: CliSession) -> Result<(), CliDiagnostic> {
         InstallSource::Homebrew => upgrade_with_homebrew(session),
         InstallSource::Standalone => upgrade_standalone(session),
     }
+}
+
+fn ensure_upgrade_supported() -> Result<(), CliDiagnostic> {
+    if env::var_os("BIOME_BINARY").is_some() {
+        return Err(CliDiagnostic::upgrade_error(
+            "`biome upgrade` is not available when `BIOME_BINARY` is set. Unset `BIOME_BINARY` or upgrade the overridden binary directly.",
+        ));
+    }
+
+    Ok(())
 }
 
 /// Delegate the upgrade process to Homebrew when Biome was with Homebrew
@@ -315,6 +327,56 @@ mod tests {
         );
 
         unsafe {
+            env::remove_var("BIOME_DISTRIBUTION");
+        }
+    }
+
+    #[test]
+    fn rejects_upgrade_when_biome_binary_is_set() {
+        let _guard = env_lock().lock().unwrap();
+        unsafe {
+            env::set_var("BIOME_BINARY", "/tmp/biome");
+        }
+
+        let result = ensure_upgrade_supported();
+
+        match result {
+            Err(CliDiagnostic::UpgradeError(diagnostic)) => {
+                assert_eq!(
+                    diagnostic.reason,
+                    "`biome upgrade` is not available when `BIOME_BINARY` is set. Unset `BIOME_BINARY` or upgrade the overridden binary directly.",
+                );
+            }
+            other => panic!("expected BIOME_BINARY upgrade error, got {other:?}"),
+        }
+
+        unsafe {
+            env::remove_var("BIOME_BINARY");
+        }
+    }
+
+    #[test]
+    fn rejects_upgrade_when_biome_binary_is_set_even_with_distribution_override() {
+        let _guard = env_lock().lock().unwrap();
+        unsafe {
+            env::set_var("BIOME_BINARY", "/tmp/biome");
+            env::set_var("BIOME_DISTRIBUTION", "standalone");
+        }
+
+        let result = ensure_upgrade_supported();
+
+        match result {
+            Err(CliDiagnostic::UpgradeError(diagnostic)) => {
+                assert_eq!(
+                    diagnostic.reason,
+                    "`biome upgrade` is not available when `BIOME_BINARY` is set. Unset `BIOME_BINARY` or upgrade the overridden binary directly.",
+                );
+            }
+            other => panic!("expected BIOME_BINARY upgrade error, got {other:?}"),
+        }
+
+        unsafe {
+            env::remove_var("BIOME_BINARY");
             env::remove_var("BIOME_DISTRIBUTION");
         }
     }
