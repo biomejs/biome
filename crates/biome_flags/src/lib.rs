@@ -17,6 +17,7 @@ pub fn is_unstable() -> bool {
 pub static BIOME_VERSION: LazyLock<Option<&str>> = LazyLock::new(|| option_env!("BIOME_VERSION"));
 
 pub struct BiomeEnv {
+    pub biome_distribution: BiomeEnvVariable,
     pub biome_log_path: BiomeEnvVariable,
     pub biome_log_prefix_name: BiomeEnvVariable,
     pub biome_config_path: BiomeEnvVariable,
@@ -32,6 +33,10 @@ pub static BIOME_ENV: OnceLock<BiomeEnv> = OnceLock::new();
 impl BiomeEnv {
     fn new() -> Self {
         Self {
+            biome_distribution: BiomeEnvVariable::new(
+                "BIOME_DISTRIBUTION",
+                "Override the detected distribution channel of Biome: npm, homebrew, standalone"
+            ),
             biome_log_path: BiomeEnvVariable::new(
                 "BIOME_LOG_PATH",
                 "The directory where the Daemon logs will be saved.",
