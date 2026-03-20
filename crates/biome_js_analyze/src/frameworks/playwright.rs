@@ -225,8 +225,8 @@ fn is_expect_expression(expr: &AnyJsExpression) -> bool {
                 // (https://vitest.dev/api/expect.html#expect-stringcontaining)
                 // and utilities like `expect.extend()` from being counted as
                 // assertions.
-                if let AnyJsExpression::JsIdentifierExpression(id) = &object {
-                    if let Ok(name) = id.name()
+                if let AnyJsExpression::JsIdentifierExpression(id) = &object
+                    && let Ok(name) = id.name()
                         && let Ok(token) = name.value_token()
                         && token.text_trimmed() == "expect"
                     {
@@ -241,7 +241,6 @@ fn is_expect_expression(expr: &AnyJsExpression) -> bool {
                         }
                         return false;
                     }
-                }
                 return is_expect_expression(&object);
             }
             false
