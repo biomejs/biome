@@ -109,7 +109,7 @@ fn upgrade_standalone(session: CliSession) -> Result<(), CliDiagnostic> {
 
     if !is_version_newer(VERSION, &latest_version)? {
         session.app.console.log(markup! {
-            "Biome is already up to date at version "{VERSION}"."
+            "Biome is already up to date at version "<Emphasis>{VERSION}</Emphasis>"."
         });
         return Ok(());
     }
