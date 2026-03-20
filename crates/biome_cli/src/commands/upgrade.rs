@@ -248,7 +248,7 @@ fn detect_install_source(current_exe: &Utf8Path) -> InstallSource {
     } else if is_homebrew_install(&canonical) {
         InstallSource::Homebrew
     } else {
-        InstallSource::Unknown
+        InstallSource::Standalone
     }
 }
 
