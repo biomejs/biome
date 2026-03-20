@@ -90,7 +90,10 @@ mod tests {
         };
 
         let result = text_range(&line_index, range, position_encoding);
-        assert!(result.is_err(), "inverted range should return Err, not panic");
+        assert!(
+            result.is_err(),
+            "inverted range should return Err, not panic"
+        );
     }
 
     #[test]
