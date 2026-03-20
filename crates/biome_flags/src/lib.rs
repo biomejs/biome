@@ -35,7 +35,7 @@ impl BiomeEnv {
         Self {
             biome_distribution: BiomeEnvVariable::new(
                 "BIOME_DISTRIBUTION",
-                "Override the detected distribution channel of Biome: npm, homebrew, standalone",
+                "Override the detected distribution channel of Biom. Acceptable values: npm, homebrew or standalone",
             ),
             biome_log_path: BiomeEnvVariable::new(
                 "BIOME_LOG_PATH",
