@@ -186,7 +186,6 @@ declare_lint_rule! {
         name: "useConsistentMethodSignatures",
         language: "ts",
         recommended: false,
-        issue_number: Some("8780"),
         sources: &[RuleSource::EslintTypeScript("method-signature-style").same()],
         fix_kind: FixKind::Unsafe,
     }
@@ -387,10 +386,10 @@ fn property_to_method(
 /// Returns `true` if `node` is one of multiple overloads — i.e. the parent type member list
 /// contains more than one method signature with the same name.
 fn has_method_overloads(node: &TsMethodSignatureTypeMember) -> bool {
-    inner(node).unwrap_or(false)
+    check_method_overloads(node).unwrap_or(false)
 }
 
-fn inner(node: &TsMethodSignatureTypeMember) -> Option<bool> {
+fn check_method_overloads(node: &TsMethodSignatureTypeMember) -> Option<bool> {
     let name_text = node.name().ok()?.name()?;
     let member_list = node.parent::<TsTypeMemberList>()?;
 
