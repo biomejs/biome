@@ -43,14 +43,6 @@ const binPath = env.BIOME_BINARY ||
 	);
 
 if (binPath) {
-	if (process.argv[2] === "upgrade") {
-		console.error(
-			"The `biome upgrade` command is not available in the npm distribution. " +
-				"Upgrade `@biomejs/biome` with the package manager you used to install it.",
-		);
-		process.exit(1);
-	}
-
 	const packageManager = detectPackageManager();
 	const result = require("child_process").spawnSync(
 		require.resolve(binPath),
