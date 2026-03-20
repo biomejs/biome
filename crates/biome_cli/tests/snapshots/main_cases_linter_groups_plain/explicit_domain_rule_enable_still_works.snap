@@ -1,0 +1,86 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "recommended": false,
+      "correctness": {
+        "useExhaustiveDependencies": "error"
+      }
+    }
+  }
+}
+```
+
+## `test1.jsx`
+
+```jsx
+import { useEffect, useState } from "react";
+
+export function Component() {
+    const [local, setLocal] = useState(0);
+
+    useEffect(() => {
+        console.log(local);
+    }, []);
+
+    return <button onClick={() => setLocal(1)}>increment</button>;
+}
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+test1.jsx:6:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook does not specify its dependency on local.
+  
+    4 │     const [local, setLocal] = useState(0);
+    5 │ 
+  > 6 │     useEffect(() => {
+      │     ^^^^^^^^^
+    7 │         console.log(local);
+    8 │     }, []);
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    6 │     useEffect(() => {
+  > 7 │         console.log(local);
+      │                     ^^^^^
+    8 │     }, []);
+    9 │ 
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
+  i Either include it or remove the dependency array.
+  
+  i Unsafe fix: Add the missing dependency local to the list.
+  
+    8 │ ····},·[local]);
+      │         +++++   
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 error.
+```

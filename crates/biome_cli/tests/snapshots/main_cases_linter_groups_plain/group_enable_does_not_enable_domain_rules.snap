@@ -1,0 +1,39 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "recommended": false,
+      "correctness": "error"
+    }
+  }
+}
+```
+
+## `test1.jsx`
+
+```jsx
+import { useEffect, useState } from "react";
+
+export function Component() {
+    const [local, setLocal] = useState(0);
+
+    useEffect(() => {
+        console.log(local);
+    }, []);
+
+    return <button onClick={() => setLocal(1)}>increment</button>;
+}
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```
