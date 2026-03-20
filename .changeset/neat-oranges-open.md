@@ -2,4 +2,4 @@
 "@biomejs/biome": patch
 ---
 
-Fixed a bug where the Biome Langauge Server would suddenly panic when open files suddenly changes. That's usually triggered when checking out different git branches.
+Fixed [`#188`](https://github.com/biomejs/biome-zed/issues/188): the Biome Language Server no longer panics when open files change abruptly, such as during git branch checkouts.
