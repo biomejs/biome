@@ -227,20 +227,20 @@ fn is_expect_expression(expr: &AnyJsExpression) -> bool {
                 // assertions.
                 if let AnyJsExpression::JsIdentifierExpression(id) = &object
                     && let Ok(name) = id.name()
-                        && let Ok(token) = name.value_token()
-                        && token.text_trimmed() == "expect"
+                    && let Ok(token) = name.value_token()
+                    && token.text_trimmed() == "expect"
+                {
+                    if let Ok(member_name) = member.member()
+                        && let Some(js_name) = member_name.as_js_name()
+                        && let Ok(member_token) = js_name.value_token()
                     {
-                        if let Ok(member_name) = member.member()
-                            && let Some(js_name) = member_name.as_js_name()
-                            && let Ok(member_token) = js_name.value_token()
-                        {
-                            return matches!(
-                                member_token.text_trimmed(),
-                                "soft" | "poll" | "assertions" | "hasAssertions"
-                            );
-                        }
-                        return false;
+                        return matches!(
+                            member_token.text_trimmed(),
+                            "soft" | "poll" | "assertions" | "hasAssertions"
+                        );
                     }
+                    return false;
+                }
                 return is_expect_expression(&object);
             }
             false
