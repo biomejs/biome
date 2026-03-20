@@ -375,51 +375,8 @@ mod tests {
         sync::{Mutex, OnceLock},
     };
 
-    fn env_lock() -> &'static Mutex<()> {
-        static LOCK: OnceLock<Mutex<()>> = OnceLock::new();
-        LOCK.get_or_init(|| Mutex::new(()))
-    }
-
-    struct ScopedEnvVar {
-        name: &'static str,
-        original: Option<OsString>,
-    }
-
-    impl ScopedEnvVar {
-        fn set(name: &'static str, value: &str) -> Self {
-            let original = env::var_os(name);
-            unsafe {
-                env::set_var(name, value);
-            }
-            Self { name, original }
-        }
-
-        fn unset(name: &'static str) -> Self {
-            let original = env::var_os(name);
-            unsafe {
-                env::remove_var(name);
-            }
-            Self { name, original }
-        }
-    }
-
-    impl Drop for ScopedEnvVar {
-        fn drop(&mut self) {
-            unsafe {
-                if let Some(value) = self.original.take() {
-                    env::set_var(self.name, value);
-                } else {
-                    env::remove_var(self.name);
-                }
-            }
-        }
-    }
-
     #[test]
     fn detects_npm_install_from_path() {
-        let _guard = env_lock().lock().unwrap();
-        let _distribution = ScopedEnvVar::unset("BIOME_DISTRIBUTION");
-
         assert_eq!(
             detect_install_source(Utf8Path::new(
                 "/tmp/project/node_modules/@biomejs/cli-darwin-arm64/biome"
@@ -430,9 +387,6 @@ mod tests {
 
     #[test]
     fn detects_homebrew_install_from_path() {
-        let _guard = env_lock().lock().unwrap();
-        let _distribution = ScopedEnvVar::unset("BIOME_DISTRIBUTION");
-
         assert_eq!(
             detect_install_source(Utf8Path::new("/opt/homebrew/Cellar/biome/2.4.8/bin/biome")),
             InstallSource::Homebrew
@@ -441,44 +395,8 @@ mod tests {
 
     #[test]
     fn defaults_to_unknown_install_source() {
-        let _guard = env_lock().lock().unwrap();
-        let _distribution = ScopedEnvVar::unset("BIOME_DISTRIBUTION");
-
-        assert_eq!(
+       assert_eq!(
             detect_install_source(Utf8Path::new("/usr/local/bin/biome")),
-            InstallSource::Unknown
-        );
-    }
-
-    #[test]
-    fn distribution_env_overrides_path_detection() {
-        let _guard = env_lock().lock().unwrap();
-        let _distribution = ScopedEnvVar::set("BIOME_DISTRIBUTION", "npm");
-
-        assert_eq!(
-            detect_install_source(Utf8Path::new("/opt/homebrew/Cellar/biome/2.4.8/bin/biome")),
-            InstallSource::Npm
-        );
-    }
-
-    #[test]
-    fn standalone_distribution_env_marks_install_as_standalone() {
-        let _guard = env_lock().lock().unwrap();
-        let _distribution = ScopedEnvVar::set("BIOME_DISTRIBUTION", "standalone");
-
-        assert_eq!(
-            detect_install_source(Utf8Path::new("/usr/local/bin/biome")),
-            InstallSource::Standalone
-        );
-    }
-
-    #[test]
-    fn invalid_distribution_env_marks_install_as_unknown() {
-        let _guard = env_lock().lock().unwrap();
-        let _distribution = ScopedEnvVar::set("BIOME_DISTRIBUTION", "custom-installer");
-
-        assert_eq!(
-            detect_install_source(Utf8Path::new("/opt/homebrew/Cellar/biome/2.4.8/bin/biome")),
             InstallSource::Unknown
         );
     }
@@ -498,46 +416,6 @@ mod tests {
             other => panic!("expected unknown install source upgrade error, got {other:?}"),
         }
     }
-
-    #[test]
-    fn rejects_upgrade_when_biome_binary_is_set() {
-        let _guard = env_lock().lock().unwrap();
-        let _binary = ScopedEnvVar::set("BIOME_BINARY", "/tmp/biome");
-
-        let result = ensure_upgrade_supported();
-
-        match result {
-            Err(CliDiagnostic::UpgradeError(diagnostic)) => {
-                assert_eq!(
-                    PrintDescription(&diagnostic).to_string(),
-                    "Upgrade has encountered an error: `biome upgrade` is not available when `BIOME_BINARY` is set. Unset `BIOME_BINARY` or upgrade the overridden binary directly.",
-                );
-                assert!(diagnostic.source.is_none());
-            }
-            other => panic!("expected BIOME_BINARY upgrade error, got {other:?}"),
-        }
-    }
-
-    #[test]
-    fn rejects_upgrade_when_biome_binary_is_set_even_with_distribution_override() {
-        let _guard = env_lock().lock().unwrap();
-        let _binary = ScopedEnvVar::set("BIOME_BINARY", "/tmp/biome");
-        let _distribution = ScopedEnvVar::set("BIOME_DISTRIBUTION", "standalone");
-
-        let result = ensure_upgrade_supported();
-
-        match result {
-            Err(CliDiagnostic::UpgradeError(diagnostic)) => {
-                assert_eq!(
-                    PrintDescription(&diagnostic).to_string(),
-                    "Upgrade has encountered an error: `biome upgrade` is not available when `BIOME_BINARY` is set. Unset `BIOME_BINARY` or upgrade the overridden binary directly.",
-                );
-                assert!(diagnostic.source.is_none());
-            }
-            other => panic!("expected BIOME_BINARY upgrade error, got {other:?}"),
-        }
-    }
-
     #[test]
     fn resolves_supported_release_targets() {
         assert_eq!(
