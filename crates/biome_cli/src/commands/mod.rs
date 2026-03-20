@@ -65,6 +65,18 @@ pub enum BiomeCommand {
     Version(#[bpaf(external(cli_options), hide_usage)] CliOptions),
 
     /// Upgrade Biome to the latest version.
+    ///
+    /// This command upgrades the running Biome binary using different strategies depending
+    /// on the way Biome was installed:
+    ///
+    /// - **Standalone**: If Biome was installed manually as a standalone binary, this command will
+    ///   upgrade it in-place to the latest stable version.
+    /// - **Homebrew**: If Biome was installed with Homebrew, this command will shell out to `brew upgrade biome` to perform the upgrade.
+    ///
+    /// You can override the automatic detection by setting BIOME_DISTRIBUTION to either one of: npm, homebrew, or standalone
+    ///
+    /// This command doesn't work for Biome binaries distributed through NPM. Use
+    /// your package manager to upgrade the `@biomejs/biome ` package instead.
     #[bpaf(command)]
     Upgrade,
 
