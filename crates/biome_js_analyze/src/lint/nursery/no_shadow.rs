@@ -300,7 +300,7 @@ fn is_inside_function_parameters(binding: &Binding) -> bool {
 ///
 /// ```ts
 /// function fn(options: unknown, cb: (options: unknown) => void) {}
-/// //                                     ^^^^^^^^ type-only parameter
+/// //                                 ^^^^^^^ type-only parameter
 /// ```
 fn is_inside_function_type(binding: &Binding) -> bool {
     use biome_js_syntax::TsFunctionType;
