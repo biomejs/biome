@@ -395,7 +395,7 @@ mod tests {
 
     #[test]
     fn defaults_to_unknown_install_source() {
-       assert_eq!(
+        assert_eq!(
             detect_install_source(Utf8Path::new("/usr/local/bin/biome")),
             InstallSource::Unknown
         );
