@@ -184,12 +184,10 @@ impl LSPServer {
                             kind: Some(WatchKind::all()),
                         },
                         FileSystemWatcher {
-                            glob_pattern: GlobPattern::String(
-                                base_path.map_or_else(
-                                    || "**/.editorconfig".to_string(),
-                                    |p| format!("{}/.editorconfig", p.as_path().as_str()),
-                                ),
-                            ),
+                            glob_pattern: GlobPattern::String(base_path.map_or_else(
+                                || "**/.editorconfig".to_string(),
+                                |p| format!("{}/.editorconfig", p.as_path().as_str()),
+                            )),
                             kind: Some(WatchKind::all()),
                         },
                         FileSystemWatcher {
