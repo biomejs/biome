@@ -79,7 +79,7 @@ fn upgrade_with_homebrew(session: CliSession) -> Result<(), CliDiagnostic> {
             if err.kind() == std::io::ErrorKind::NotFound {
                 CliDiagnostic::upgrade_error(
                     "Biome appears to be installed via Homebrew, but the `brew` executable could not be found in PATH.",
-                    None,
+                    Some(Error::from(StdError::from(err))),
                 )
             } else {
                 CliDiagnostic::from(err)
