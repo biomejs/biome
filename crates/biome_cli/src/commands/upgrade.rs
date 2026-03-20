@@ -229,10 +229,10 @@ enum InstallSource {
 impl From<&str> for InstallSource {
     fn from(source: &str) -> Self {
         match source {
-            "homebrew" => InstallSource::Homebrew,
-            "npm" => InstallSource::Npm,
-            "standalone" => InstallSource::Standalone,
-            _ => InstallSource::Unknown,
+            "homebrew" => Self::Homebrew,
+            "npm" => Self::Npm,
+            "standalone" => Self::Standalone,
+            _ => Self::Unknown,
         }
     }
 }
@@ -376,10 +376,6 @@ impl fmt::Display for ExitStatusDisplay {
 mod tests {
     use super::*;
     use biome_diagnostics::PrintDescription;
-    use std::{
-        ffi::OsString,
-        sync::{Mutex, OnceLock},
-    };
 
     #[test]
     fn detects_npm_install_from_path() {
