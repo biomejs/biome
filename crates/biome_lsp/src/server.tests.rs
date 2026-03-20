@@ -5195,4 +5195,78 @@ fn assert_diagnostics_count(server_notification: &ServerNotification, expected_c
     }
 }
 
+/// Regression test: an inverted LSP range in a `textDocument/didChange` event
+/// must not panic inside `TextRange::new`. The invalid change should be
+/// silently skipped and the document content must remain unchanged.
+#[tokio::test]
+async fn change_document_inverted_range_does_not_panic() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    let original = "abc\ndef\nghi";
+    server.open_document(original).await?;
+
+    // Send a change with an inverted range (start is after end)
+    server
+        .change_document(
+            1,
+            vec![TextDocumentContentChangeEvent {
+                range: Some(Range {
+                    start: Position {
+                        line: 1,
+                        character: 3,
+                    },
+                    end: Position {
+                        line: 0,
+                        character: 0,
+                    },
+                }),
+                range_length: None,
+                text: String::from("replaced"),
+            }],
+        )
+        .await?;
+
+    let OpenProjectResult { project_key } = server
+        .request(
+            "biome/open_project",
+            "open_project",
+            OpenProjectParams {
+                path: BiomePath::new(""),
+                open_uninitialized: true,
+            },
+        )
+        .await?
+        .expect("open_project returned an error");
+
+    let actual: String = server
+        .request(
+            "biome/get_file_content",
+            "get_file_content",
+            GetFileContentParams {
+                project_key,
+                path: BiomePath::try_from(uri!("document.js").to_file_path().unwrap()).unwrap(),
+            },
+        )
+        .await?
+        .context("get file content error")?;
+
+    // The inverted range should be skipped; document content stays the same
+    assert_eq!(&actual, original);
+
+    server.close_document().await?;
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
 // #endregion
