@@ -37,5 +37,9 @@ pub fn text_range(
 ) -> Result<TextRange> {
     let start = offset(line_index, range.start, position_encoding)?;
     let end = offset(line_index, range.end, position_encoding)?;
+    anyhow::ensure!(
+        start <= end,
+        "invalid range: start offset ({start:?}) > end offset ({end:?}) for {range:?}"
+    );
     Ok(TextRange::new(start, end))
 }
