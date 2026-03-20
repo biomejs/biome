@@ -226,6 +226,17 @@ enum InstallSource {
     Unknown,
 }
 
+impl From<&str> for InstallSource {
+    fn from(source: &str) -> Self {
+        match source {
+            "homebrew" => InstallSource::Homebrew,
+            "npm" => InstallSource::Npm,
+            "standalone" => InstallSource::Standalone,
+            _ => InstallSource::Unknown,
+        }
+    }
+}
+
 /// Detect the installation source
 ///
 /// This method detects the installation source based on the path to the binary.
@@ -255,12 +266,7 @@ fn detect_install_source(current_exe: &Utf8Path) -> InstallSource {
 /// Detect the installation source from the environment
 fn install_source_from_env() -> Option<InstallSource> {
     let install_source = env::var_os("BIOME_DISTRIBUTION")?;
-    let install_source = match install_source.to_str() {
-        Some("npm") => InstallSource::Npm,
-        Some("homebrew") => InstallSource::Homebrew,
-        Some("standalone") => InstallSource::Standalone,
-        Some(_) | None => InstallSource::Unknown,
-    };
+    let install_source = InstallSource::from(install_source.to_str()?);
 
     Some(install_source)
 }
