@@ -466,12 +466,8 @@ impl CliDiagnostic {
 
     /// Errors thrown when running the `biome upgrade` command
     pub fn upgrade_error(message: impl Into<String>, source: Option<Error>) -> Self {
-        let message = message.into();
-
         Self::UpgradeError(UpgradeDiagnostic {
-            message: MessageAndDescription::from(format!(
-                "Upgrade has encountered an error: {message}"
-            )),
+            message: MessageAndDescription::from(message.into()),
             source,
         })
     }
