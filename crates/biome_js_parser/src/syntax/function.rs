@@ -9,6 +9,7 @@ use crate::syntax::class::{
 };
 use crate::syntax::expr::{
     ExpressionContext, is_nth_at_identifier, parse_assignment_expression_or_higher,
+    parse_assignment_expression_or_higher_no_arrow,
 };
 use crate::syntax::js_parse_error;
 use crate::syntax::js_parse_error::{
@@ -523,9 +524,12 @@ impl Ambiguity {
     }
 }
 
-pub(crate) fn parse_arrow_function_expression(p: &mut JsParser) -> ParsedSyntax {
-    parse_parenthesized_arrow_function_expression(p)
-        .or_else(|| parse_arrow_function_with_single_parameter(p))
+pub(crate) fn parse_arrow_function_expression(
+    p: &mut JsParser,
+    context: ExpressionContext,
+) -> ParsedSyntax {
+    parse_parenthesized_arrow_function_expression(p, context)
+        .or_else(|| parse_arrow_function_with_single_parameter(p, context))
 }
 
 /// Tries to parse the header of a parenthesized arrow function expression.
@@ -608,7 +612,10 @@ fn try_parse_parenthesized_arrow_function_head(
 // test ts ts_arrow_function_type_parameters
 // let a = <A, B extends A, C = string>(a: A, b: B, c: C) => "hello";
 // let b = async <A, B>(a: A, b: B): Promise<string> => "hello";
-fn parse_possible_parenthesized_arrow_function_expression(p: &mut JsParser) -> ParsedSyntax {
+fn parse_possible_parenthesized_arrow_function_expression(
+    p: &mut JsParser,
+    context: ExpressionContext,
+) -> ParsedSyntax {
     let start_pos = p.cur_range().start();
 
     // Test if we already tried to parse this position as an arrow function and failed.
@@ -621,7 +628,8 @@ fn parse_possible_parenthesized_arrow_function_expression(p: &mut JsParser) -> P
         try_parse_parenthesized_arrow_function_head(p, Ambiguity::Disallowed)
     }) {
         Ok((m, flags)) => {
-            parse_arrow_body(p, flags).or_add_diagnostic(p, js_parse_error::expected_arrow_body);
+            parse_arrow_body(p, flags, context)
+                .or_add_diagnostic(p, js_parse_error::expected_arrow_body);
 
             Present(m.complete(p, JS_ARROW_FUNCTION_EXPRESSION))
         }
@@ -636,16 +644,22 @@ fn parse_possible_parenthesized_arrow_function_expression(p: &mut JsParser) -> P
     }
 }
 
-fn parse_parenthesized_arrow_function_expression(p: &mut JsParser) -> ParsedSyntax {
+fn parse_parenthesized_arrow_function_expression(
+    p: &mut JsParser,
+    context: ExpressionContext,
+) -> ParsedSyntax {
     let is_parenthesized = is_parenthesized_arrow_function_expression(p);
     match is_parenthesized {
         IsParenthesizedArrowFunctionExpression::True => {
-            let (m, flags) = try_parse_parenthesized_arrow_function_head(p, Ambiguity::Allowed).expect("'CompletedMarker' because function should never return 'Err' if called with 'Ambiguity::Allowed'.");
-            parse_arrow_body(p, flags).or_add_diagnostic(p, js_parse_error::expected_arrow_body);
+            let (m, flags) =
+                try_parse_parenthesized_arrow_function_head(p, Ambiguity::Allowed)
+                    .expect("'CompletedMarker' because function should never return 'Err' if called with 'Ambiguity::Allowed'.");
+            parse_arrow_body(p, flags, context)
+                .or_add_diagnostic(p, js_parse_error::expected_arrow_body);
             Present(m.complete(p, JS_ARROW_FUNCTION_EXPRESSION))
         }
         IsParenthesizedArrowFunctionExpression::Unknown => {
-            parse_possible_parenthesized_arrow_function_expression(p)
+            parse_possible_parenthesized_arrow_function_expression(p, context)
         }
         IsParenthesizedArrowFunctionExpression::False => Absent,
     }
@@ -840,7 +854,10 @@ fn arrow_function_parameter_flags(p: &JsParser, mut flags: SignatureFlags) -> Si
 // await => {}
 // baz =>
 // {}
-fn parse_arrow_function_with_single_parameter(p: &mut JsParser) -> ParsedSyntax {
+fn parse_arrow_function_with_single_parameter(
+    p: &mut JsParser,
+    context: ExpressionContext,
+) -> ParsedSyntax {
     if !is_arrow_function_with_single_parameter(p) {
         return Absent;
     }
@@ -863,7 +880,7 @@ fn parse_arrow_function_with_single_parameter(p: &mut JsParser) -> ParsedSyntax 
         .expect("Expected function parameter to be present as guaranteed by is_arrow_function_with_simple_parameter");
 
     p.bump(T![=>]);
-    parse_arrow_body(p, flags).or_add_diagnostic(p, js_parse_error::expected_arrow_body);
+    parse_arrow_body(p, flags, context).or_add_diagnostic(p, js_parse_error::expected_arrow_body);
 
     Present(m.complete(p, JS_ARROW_FUNCTION_EXPRESSION))
 }
@@ -885,7 +902,11 @@ fn is_arrow_function_with_single_parameter(p: &mut JsParser) -> bool {
     }
 }
 
-fn parse_arrow_body(p: &mut JsParser, mut flags: SignatureFlags) -> ParsedSyntax {
+fn parse_arrow_body(
+    p: &mut JsParser,
+    mut flags: SignatureFlags,
+    context: ExpressionContext,
+) -> ParsedSyntax {
     // test js arrow_in_constructor
     // class A {
     //   constructor() {
@@ -901,7 +922,14 @@ fn parse_arrow_body(p: &mut JsParser, mut flags: SignatureFlags) -> ParsedSyntax
         parse_function_body(p, flags)
     } else {
         p.with_state(EnterFunction(flags), |p| {
-            parse_assignment_expression_or_higher(p, ExpressionContext::default())
+            if context.is_in_conditional_consequent()
+                && matches!(p.cur(), T!['('])
+                && matches!(p.nth(1), T!['{'] | T!['['])
+            {
+                parse_assignment_expression_or_higher_no_arrow(p, context)
+            } else {
+                parse_assignment_expression_or_higher(p, context)
+            }
         })
     }
 }
