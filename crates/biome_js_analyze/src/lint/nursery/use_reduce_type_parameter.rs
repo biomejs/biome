@@ -71,12 +71,10 @@ declare_lint_rule! {
     }
 }
 
-/// Extracted assertion info from the second argument.
 pub struct UseReduceTypeParameterState {
-    /// The asserted type to move into the type parameter.
     asserted_type: AnyTsType,
-    /// The inner expression without the assertion wrapper.
     inner_expression: AnyJsExpression,
+    is_reduce_right: bool,
 }
 
 impl Rule for UseReduceTypeParameter {
@@ -96,7 +94,13 @@ impl Rule for UseReduceTypeParameter {
         let callee = call.callee().ok()?.omit_parentheses();
         let member_expr = callee.as_js_static_member_expression()?;
 
-        let method_name = member_expr.member().ok()?.as_js_name()?.to_trimmed_text();
+        let method_name = member_expr
+            .member()
+            .ok()?
+            .as_js_name()?
+            .value_token()
+            .ok()?
+            .token_text_trimmed();
         if method_name != "reduce" && method_name != "reduceRight" {
             return None;
         }
@@ -121,24 +125,28 @@ impl Rule for UseReduceTypeParameter {
             return None;
         };
 
-        extract_assertion(second_expr)
+        let mut state = extract_assertion(second_expr)?;
+        state.is_reduce_right = method_name == "reduceRight";
+        Some(state)
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let call = ctx.query();
+        let method = if state.is_reduce_right {
+            "reduceRight"
+        } else {
+            "reduce"
+        };
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 call.syntax().text_trimmed_range(),
                 markup! {
-                    "Use a type parameter on "<Emphasis>"Array#reduce"</Emphasis>" instead of casting the initial value."
+                    "The initial value of "<Emphasis>{method}</Emphasis>" uses a type assertion instead of a type parameter."
                 },
             )
             .note(markup! {
-                "Type assertions on the initial value can mask type errors in the reducer callback."
-            })
-            .note(markup! {
-                "Pass the type as a generic parameter to the reduce call for better type safety."
+                "Type assertions can mask type errors in the reducer callback. A type parameter is checked against the callback's return type."
             }),
         )
     }
@@ -197,6 +205,7 @@ fn extract_assertion(expr: AnyJsExpression) -> Option<UseReduceTypeParameterStat
         return Some(UseReduceTypeParameterState {
             asserted_type: as_expr.ty().ok()?,
             inner_expression: as_expr.expression().ok()?,
+            is_reduce_right: false,
         });
     }
 
@@ -204,6 +213,7 @@ fn extract_assertion(expr: AnyJsExpression) -> Option<UseReduceTypeParameterStat
         return Some(UseReduceTypeParameterState {
             asserted_type: angle_expr.ty().ok()?,
             inner_expression: angle_expr.expression().ok()?,
+            is_reduce_right: false,
         });
     }
 

@@ -51,7 +51,7 @@ tuple1.reduce((sum, n) => sum + n, 0 as number);
 ```
 invalid.ts:3:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use a type parameter on Array#reduce instead of casting the initial value.
+  i The initial value of reduce uses a type assertion instead of a type parameter.
   
     1 │ // basic reduce with as assertion
     2 │ const arr1: number[] = [1, 2, 3];
@@ -60,9 +60,7 @@ invalid.ts:3:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━�
     4 │ 
     5 │ // object accumulator
   
-  i Type assertions on the initial value can mask type errors in the reducer callback.
-  
-  i Pass the type as a generic parameter to the reduce call for better type safety.
+  i Type assertions can mask type errors in the reducer callback. A type parameter is checked against the callback's return type.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -81,7 +79,7 @@ invalid.ts:3:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━�
 ```
 invalid.ts:7:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use a type parameter on Array#reduce instead of casting the initial value.
+  i The initial value of reduce uses a type assertion instead of a type parameter.
   
     5 │ // object accumulator
     6 │ const arr2: string[] = ['a', 'b'];
@@ -90,9 +88,7 @@ invalid.ts:7:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━�
     8 │ 
     9 │ // reduceRight
   
-  i Type assertions on the initial value can mask type errors in the reducer callback.
-  
-  i Pass the type as a generic parameter to the reduce call for better type safety.
+  i Type assertions can mask type errors in the reducer callback. A type parameter is checked against the callback's return type.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -111,7 +107,7 @@ invalid.ts:7:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━�
 ```
 invalid.ts:11:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use a type parameter on Array#reduce instead of casting the initial value.
+  i The initial value of reduceRight uses a type assertion instead of a type parameter.
   
      9 │ // reduceRight
     10 │ const arr3: number[] = [1, 2, 3];
@@ -120,9 +116,7 @@ invalid.ts:11:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━
     12 │ 
     13 │ // tuple type
   
-  i Type assertions on the initial value can mask type errors in the reducer callback.
-  
-  i Pass the type as a generic parameter to the reduce call for better type safety.
+  i Type assertions can mask type errors in the reducer callback. A type parameter is checked against the callback's return type.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -141,7 +135,7 @@ invalid.ts:11:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━
 ```
 invalid.ts:15:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use a type parameter on Array#reduce instead of casting the initial value.
+  i The initial value of reduce uses a type assertion instead of a type parameter.
   
     13 │ // tuple type
     14 │ const arr4: string[] = ['x'];
@@ -150,9 +144,7 @@ invalid.ts:15:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━
     16 │ 
     17 │ // union type
   
-  i Type assertions on the initial value can mask type errors in the reducer callback.
-  
-  i Pass the type as a generic parameter to the reduce call for better type safety.
+  i Type assertions can mask type errors in the reducer callback. A type parameter is checked against the callback's return type.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -171,7 +163,7 @@ invalid.ts:15:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━
 ```
 invalid.ts:19:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use a type parameter on Array#reduce instead of casting the initial value.
+  i The initial value of reduce uses a type assertion instead of a type parameter.
   
     17 │ // union type
     18 │ const arr5: number[] = [1, 2];
@@ -180,9 +172,7 @@ invalid.ts:19:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━
     20 │ 
     21 │ // intersection type
   
-  i Type assertions on the initial value can mask type errors in the reducer callback.
-  
-  i Pass the type as a generic parameter to the reduce call for better type safety.
+  i Type assertions can mask type errors in the reducer callback. A type parameter is checked against the callback's return type.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -201,7 +191,7 @@ invalid.ts:19:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━
 ```
 invalid.ts:23:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use a type parameter on Array#reduce instead of casting the initial value.
+  i The initial value of reduce uses a type assertion instead of a type parameter.
   
     21 │ // intersection type
     22 │ const arr6: object[] = [];
@@ -210,9 +200,7 @@ invalid.ts:23:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━
     24 │ 
     25 │ // angle bracket assertion (<Type>expr syntax)
   
-  i Type assertions on the initial value can mask type errors in the reducer callback.
-  
-  i Pass the type as a generic parameter to the reduce call for better type safety.
+  i Type assertions can mask type errors in the reducer callback. A type parameter is checked against the callback's return type.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -231,7 +219,7 @@ invalid.ts:23:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━
 ```
 invalid.ts:27:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use a type parameter on Array#reduce instead of casting the initial value.
+  i The initial value of reduce uses a type assertion instead of a type parameter.
   
     25 │ // angle bracket assertion (<Type>expr syntax)
     26 │ const arr7: number[] = [1, 2, 3];
@@ -240,9 +228,7 @@ invalid.ts:27:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━
     28 │ 
     29 │ // parenthesized as assertion
   
-  i Type assertions on the initial value can mask type errors in the reducer callback.
-  
-  i Pass the type as a generic parameter to the reduce call for better type safety.
+  i Type assertions can mask type errors in the reducer callback. A type parameter is checked against the callback's return type.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -261,7 +247,7 @@ invalid.ts:27:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━
 ```
 invalid.ts:31:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use a type parameter on Array#reduce instead of casting the initial value.
+  i The initial value of reduce uses a type assertion instead of a type parameter.
   
     29 │ // parenthesized as assertion
     30 │ const arr8: number[] = [1, 2, 3];
@@ -270,9 +256,7 @@ invalid.ts:31:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━
     32 │ 
     33 │ // parenthesized angle bracket assertion
   
-  i Type assertions on the initial value can mask type errors in the reducer callback.
-  
-  i Pass the type as a generic parameter to the reduce call for better type safety.
+  i Type assertions can mask type errors in the reducer callback. A type parameter is checked against the callback's return type.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -291,7 +275,7 @@ invalid.ts:31:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━
 ```
 invalid.ts:35:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use a type parameter on Array#reduce instead of casting the initial value.
+  i The initial value of reduce uses a type assertion instead of a type parameter.
   
     33 │ // parenthesized angle bracket assertion
     34 │ const arr9: number[] = [1, 2, 3];
@@ -300,9 +284,7 @@ invalid.ts:35:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━
     36 │ 
     37 │ // tuple receiver
   
-  i Type assertions on the initial value can mask type errors in the reducer callback.
-  
-  i Pass the type as a generic parameter to the reduce call for better type safety.
+  i Type assertions can mask type errors in the reducer callback. A type parameter is checked against the callback's return type.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -321,7 +303,7 @@ invalid.ts:35:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━
 ```
 invalid.ts:39:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Use a type parameter on Array#reduce instead of casting the initial value.
+  i The initial value of reduce uses a type assertion instead of a type parameter.
   
     37 │ // tuple receiver
     38 │ const tuple1: [number, number, number] = [1, 2, 3];
@@ -329,9 +311,7 @@ invalid.ts:39:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     40 │ 
   
-  i Type assertions on the initial value can mask type errors in the reducer callback.
-  
-  i Pass the type as a generic parameter to the reduce call for better type safety.
+  i Type assertions can mask type errors in the reducer callback. A type parameter is checked against the callback's return type.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
