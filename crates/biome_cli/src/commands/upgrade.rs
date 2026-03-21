@@ -147,12 +147,17 @@ fn upgrade_standalone(session: CliSession) -> Result<(), CliDiagnostic> {
     match status {
         self_update::Status::UpToDate(version) => {
             session.app.console.log(markup! {
-                "Biome is already up to date at version "{version}"."
+                "Biome is already up to date at version "<Emphasis>{version}</Emphasis>"."
             });
         }
         self_update::Status::Updated(version) => {
             session.app.console.log(markup! {
-                "Biome upgraded successfully to version "{version}"."
+                "Biome upgraded successfully to version "<Emphasis>{version}</Emphasis>"."
+            });
+            session.app.console.log(markup! {
+                <Info>
+                    "Your editor may still be using the previous Biome version. Reload it to pick up the updated binary."
+                </Info>
             });
         }
     }
