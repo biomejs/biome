@@ -216,10 +216,10 @@ fn is_array_or_tuple(ty: &biome_js_type_info::Type) -> bool {
         return true;
     }
     // Check for tuple types via resolved data
-    if let Some(data) = ty.resolved_data() {
-        if matches!(data.as_raw_data(), biome_js_type_info::TypeData::Tuple(_)) {
-            return true;
-        }
+    if let Some(data) = ty.resolved_data()
+        && matches!(data.as_raw_data(), biome_js_type_info::TypeData::Tuple(_))
+    {
+        return true;
     }
     false
 }
