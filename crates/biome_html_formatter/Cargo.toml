@@ -41,8 +41,11 @@ countme              = { workspace = true, features = ["enable"] }
 criterion            = { package = "codspeed-criterion-compat", version = "*" }
 tests_macros         = { workspace = true }
 
-[target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
+[target.'cfg(all(target_family="unix", not(target_env = "musl")))'.dev-dependencies]
 tikv-jemallocator = { workspace = true }
+
+[target.'cfg(all(target_os = "linux", target_env = "musl"))'.dev-dependencies]
+mimalloc = { workspace = true }
 
 [target.'cfg(target_os = "windows")'.dev-dependencies]
 mimalloc = { workspace = true }

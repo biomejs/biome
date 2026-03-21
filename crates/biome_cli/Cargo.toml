@@ -92,8 +92,11 @@ regex                = { workspace = true }
 serial_test          = "3.3.1"
 tokio                = { workspace = true, features = ["io-util"] }
 
-[target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dependencies]
+[target.'cfg(all(target_family="unix", not(target_env = "musl")))'.dependencies]
 tikv-jemallocator = { workspace = true }
+
+[target.'cfg(all(target_os = "linux", target_env = "musl"))'.dependencies]
+mimalloc = { workspace = true }
 
 [target.'cfg(unix)'.dependencies]
 libc  = "0.2.180"
