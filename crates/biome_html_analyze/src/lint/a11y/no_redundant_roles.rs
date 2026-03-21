@@ -4,8 +4,8 @@ use biome_analyze::{
 use biome_aria_metadata::AriaRole;
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlElement, HtmlAttribute};
-use biome_rowan::{AstNode, BatchMutationExt};
+use biome_html_syntax::AnyHtmlElement;
+use biome_rowan::{AstNode, BatchMutationExt, TextRange};
 use biome_rule_options::no_redundant_roles::NoRedundantRolesOptions;
 
 use crate::HtmlRuleAction;
@@ -47,7 +47,10 @@ declare_lint_rule! {
         version: "2.4.0",
         name: "noRedundantRoles",
         language: "html",
-        sources: &[RuleSource::EslintJsxA11y("no-redundant-roles").same()],
+        sources: &[
+            RuleSource::EslintJsxA11y("no-redundant-roles").same(),
+            RuleSource::HtmlEslint("no-redundant-role").same(),
+        ],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
@@ -55,7 +58,7 @@ declare_lint_rule! {
 }
 
 pub struct RuleState {
-    redundant_attribute: HtmlAttribute,
+    attribute_range: TextRange,
     role_value: String,
     element_name: String,
 }
@@ -70,20 +73,32 @@ impl Rule for NoRedundantRoles {
         let node = ctx.query();
 
         let element_name = node.name()?;
-        let element_name_str = element_name.text().to_lowercase();
+
+        // Skip component elements (uppercase first char) in non-HTML files like
+        // Vue, Svelte, Astro. Components don't have implicit ARIA roles.
+        if element_name
+            .text()
+            .chars()
+            .next()
+            .is_some_and(|c| c.is_uppercase())
+        {
+            return None;
+        }
+
+        let element_name_lower = element_name.text().to_lowercase();
 
         let role_attribute = node.find_attribute_by_name("role")?;
         let role_attribute_value = role_attribute.initializer()?.value().ok()?.string_value()?;
-        let role_value = role_attribute_value.trim().to_lowercase();
+        let role_lower = role_attribute_value.trim().to_lowercase();
 
-        let explicit_role = AriaRole::from_roles(&role_value)?;
-        let implicit_role = get_implicit_role_for_element(&element_name_str, node)?;
+        let explicit_role = AriaRole::from_roles(&role_lower)?;
+        let implicit_role = get_implicit_role_for_element(&element_name_lower, node)?;
 
         if explicit_role == implicit_role {
             return Some(RuleState {
-                redundant_attribute: role_attribute,
-                role_value: role_value.to_string(),
-                element_name: element_name_str.to_string(),
+                attribute_range: role_attribute.range(),
+                role_value: role_lower,
+                element_name: element_name_lower.clone(),
             });
         }
         None
@@ -92,16 +107,18 @@ impl Rule for NoRedundantRoles {
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         Some(RuleDiagnostic::new(
             rule_category!(),
-            state.redundant_attribute.range(),
+            state.attribute_range,
             markup! {
                 "Using the role attribute '"{&state.role_value}"' on the '"{&state.element_name}"' element is redundant, because it is implied by its semantic."
             },
         ))
     }
 
-    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<HtmlRuleAction> {
+    fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<HtmlRuleAction> {
+        let node = ctx.query();
+        let role_attribute = node.find_attribute_by_name("role")?;
         let mut mutation = ctx.root().begin();
-        mutation.remove_node(state.redundant_attribute.clone());
+        mutation.remove_node(role_attribute);
         Some(HtmlRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
@@ -113,16 +130,11 @@ impl Rule for NoRedundantRoles {
 
 /// Returns the implicit ARIA role for a given HTML element name.
 ///
-/// This is a simplified version of the implicit role mappings from the
-/// WAI-ARIA spec (https://www.w3.org/TR/html-aria/) that handles the
-/// common cases where the implicit role depends only on the tag name.
+/// Based on the WAI-ARIA spec: <https://www.w3.org/TR/html-aria/>
 ///
 /// For elements whose implicit role depends on attributes (e.g. `<input type="...">`),
 /// we also inspect the element's attributes.
-fn get_implicit_role_for_element(
-    element_name: &str,
-    node: &AnyHtmlElement,
-) -> Option<AriaRole> {
+fn get_implicit_role_for_element(element_name: &str, node: &AnyHtmlElement) -> Option<AriaRole> {
     Some(match element_name {
         "article" => AriaRole::Article,
         "aside" => AriaRole::Complementary,
@@ -251,9 +263,8 @@ fn get_implicit_role_for_element(
     })
 }
 
-/// Helper to extract a string attribute value from an HTML element.
 fn get_attribute_value(node: &AnyHtmlElement, name: &str) -> Option<String> {
     let attr = node.find_attribute_by_name(name)?;
     let value = attr.initializer()?.value().ok()?.string_value()?;
-    Some(value)
+    Some(value.to_string())
 }

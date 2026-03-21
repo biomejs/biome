@@ -1,21 +1,13 @@
-<!-- Different role than implicit -->
+<!-- should not generate diagnostics -->
 <article role="presentation"></article>
 <button role="link"></button>
 <div role="button"></div>
 <span role="alert"></span>
-
-<!-- No role attribute -->
 <article></article>
 <button></button>
 <h1>title</h1>
 <nav></nav>
-
-<!-- Elements without implicit roles -->
 <div role="alert"></div>
 <span role="status"></span>
-
-<!-- a without href has generic implicit role, so role="link" is not redundant -->
 <a role="link">link</a>
-
-<!-- img with empty alt and no accessible name has presentation role -->
 <img alt="" role="img" />

@@ -1,0 +1,4 @@
+<!-- should not generate diagnostics -->
+<article role="presentation"></article>
+<div role="button"></div>
+<MyComponent role="button"></MyComponent>
