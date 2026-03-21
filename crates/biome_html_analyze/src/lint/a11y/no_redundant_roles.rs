@@ -72,33 +72,32 @@ impl Rule for NoRedundantRoles {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        let element_name = node.name()?;
+        let element_name_token = node.name()?;
+        let element_name = element_name_token.text();
 
         // Skip component elements (uppercase first char) in non-HTML files like
         // Vue, Svelte, Astro. Components don't have implicit ARIA roles.
         if element_name
-            .text()
-            .chars()
-            .next()
-            .is_some_and(|c| c.is_uppercase())
+            .as_bytes()
+            .first()
+            .is_some_and(u8::is_ascii_uppercase)
         {
             return None;
         }
 
-        let element_name_lower = element_name.text().to_lowercase();
-
         let role_attribute = node.find_attribute_by_name("role")?;
         let role_attribute_value = role_attribute.initializer()?.value().ok()?.string_value()?;
-        let role_lower = role_attribute_value.trim().to_lowercase();
+        let role_text = role_attribute_value.text();
+        let role_trimmed = role_text.trim();
 
-        let explicit_role = AriaRole::from_roles(&role_lower)?;
-        let implicit_role = get_implicit_role_for_element(&element_name_lower, node)?;
+        let explicit_role = AriaRole::from_roles(role_trimmed)?;
+        let implicit_role = get_implicit_role_for_element(element_name, node)?;
 
         if explicit_role == implicit_role {
             return Some(RuleState {
                 attribute_range: role_attribute.range(),
-                role_value: role_lower,
-                element_name: element_name_lower.clone(),
+                role_value: role_trimmed.to_string(),
+                element_name: element_name.to_string(),
             });
         }
         None
@@ -266,5 +265,5 @@ fn get_implicit_role_for_element(element_name: &str, node: &AnyHtmlElement) -> O
 fn get_attribute_value(node: &AnyHtmlElement, name: &str) -> Option<String> {
     let attr = node.find_attribute_by_name(name)?;
     let value = attr.initializer()?.value().ok()?.string_value()?;
-    Some(value.to_string())
+    Some(value.text().to_string())
 }

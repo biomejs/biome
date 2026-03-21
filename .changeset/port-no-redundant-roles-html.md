@@ -2,4 +2,4 @@
 "@biomejs/biome": minor
 ---
 
-Port `noRedundantRoles` a11y lint rule to HTML, Vue, Svelte, and Astro files.
+Ported [`noRedundantRoles`](https://biomejs.dev/linter/rules/no-redundant-roles/) a11y lint rule to HTML, Vue, Svelte, and Astro files.
