@@ -74,17 +74,6 @@ impl Rule for NoRedundantRoles {
 
         let element_name = node.name()?;
 
-        // Skip component elements (uppercase first char) in non-HTML files like
-        // Vue, Svelte, Astro. Components don't have implicit ARIA roles.
-        if element_name
-            .text()
-            .as_bytes()
-            .first()
-            .is_some_and(u8::is_ascii_uppercase)
-        {
-            return None;
-        }
-
         let role_attribute = node.find_attribute_by_name("role")?;
         let role_value = role_attribute.initializer()?.value().ok()?.string_value()?;
         let role_trimmed = role_value.text().trim();
@@ -282,6 +271,7 @@ fn get_implicit_role_for_element(element_name: &str, node: &AnyHtmlElement) -> O
             }
         } else if element_name.eq_ignore_ascii_case("a")
             || element_name.eq_ignore_ascii_case("area")
+            || element_name.eq_ignore_ascii_case("link")
         {
             if node.find_attribute_by_name("href").is_some() {
                 AriaRole::Link
