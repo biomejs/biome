@@ -91,8 +91,9 @@ impl Rule for NoAriaUnsupportedElements {
                 let attribute_name = attribute.name().ok()?.value_token().ok()?;
                 let attribute_name_text = attribute_name.text_trimmed();
 
-                if attribute_name_text.starts_with("aria-")
-                    && AriaAttribute::from_str(attribute_name_text).is_ok()
+                let attribute_name_lower = attribute_name_text.to_lowercase();
+                if attribute_name_lower.starts_with("aria-")
+                    && AriaAttribute::from_str(&attribute_name_lower).is_ok()
                 {
                     return Some(RuleState {
                         attribute_kind: AttributeKind::Aria,
@@ -139,9 +140,10 @@ impl Rule for NoAriaUnsupportedElements {
             let html_attribute = attribute.as_html_attribute()?;
             let attribute_name = html_attribute.name().ok()?.value_token().ok()?;
             let attribute_name_text = attribute_name.text_trimmed();
+            let attribute_name_lower = attribute_name_text.to_lowercase();
             (attribute_name_text.eq_ignore_ascii_case("role")
-                || (attribute_name_text.starts_with("aria-")
-                    && AriaAttribute::from_str(attribute_name_text).is_ok()))
+                || (attribute_name_lower.starts_with("aria-")
+                    && AriaAttribute::from_str(&attribute_name_lower).is_ok()))
             .then_some(attribute)
         })?;
 

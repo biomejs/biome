@@ -1,0 +1,4 @@
+<meta charset="UTF-8" />
+<div role="button"></div>
+<input aria-label="name" />
+<meta charset="UTF-8" aria-foo="bar" />
