@@ -78,12 +78,17 @@ pub(crate) enum EmbedCandidate {
     /// A directive attribute value containing JS.
     /// Vue: `@click="handler()"`, `:prop="value"`, `v-if="cond"`
     /// Svelte: `on:click={handler}`, `bind:value={x}`
+    /// Astro: `class:list={[...]}`, `set:text={expr}`
     /// Built from `HtmlAttributeInitializerClause` by the HTML handler.
     Directive {
         content: EmbedContent,
         /// True for Vue `v-on:` / `@` event handler directives.
         /// Affects `EmbeddingKind::Vue { event_handler }`.
         is_event_handler: bool,
+        /// True when the directive is a class-related attribute
+        /// (e.g., `class:list={...}` in Astro, `class={...}` in plain HTML).
+        /// Affects `EmbeddingKind::Astro { is_class_attribute }`.
+        is_class_attribute: bool,
     },
 }
 

@@ -10,7 +10,7 @@ use biome_html_syntax::{
 };
 use biome_js_syntax::{AnyJsImportLike, AnyJsRoot};
 use biome_resolver::{ResolveOptions, ResolvedPath, resolve};
-use biome_rowan::{AstNode, Text, TokenText, WalkEvent};
+use biome_rowan::{AstNode, AstSeparatedList, Text, TokenText, WalkEvent};
 use camino::{Utf8Path, Utf8PathBuf};
 use indexmap::{IndexMap, IndexSet};
 
@@ -60,7 +60,8 @@ impl<'a> HtmlModuleVisitor<'a> {
         let mut style_classes = IndexSet::default();
         let mut referenced_classes = Vec::new();
         let mut imported_stylesheets = Vec::new();
-        let mut static_import_paths: IndexMap<Text, ResolvedPath> = IndexMap::default();
+        let mut static_import_paths = IndexMap::default();
+        let mut dynamic_import_paths = IndexMap::default();
 
         // Walk the HTML CST to collect class= references and <link> stylesheets.
         // Void elements like <link> and <meta> parse as HtmlSelfClosingElement;
@@ -93,7 +94,11 @@ impl<'a> HtmlModuleVisitor<'a> {
                 }
                 // JS block: collect static import paths for upward traversal.
                 HtmlEmbeddedContent::Js(js_root) => {
-                    self.collect_js_imports(js_root, &mut static_import_paths);
+                    self.collect_js_imports(
+                        js_root,
+                        &mut static_import_paths,
+                        &mut dynamic_import_paths,
+                    );
                 }
             }
         }
@@ -103,6 +108,7 @@ impl<'a> HtmlModuleVisitor<'a> {
             referenced_classes,
             imported_stylesheets,
             static_import_paths,
+            dynamic_import_paths,
         )
     }
 
@@ -112,6 +118,7 @@ impl<'a> HtmlModuleVisitor<'a> {
         &self,
         js_root: &AnyJsRoot,
         static_import_paths: &mut IndexMap<Text, ResolvedPath>,
+        dynamic_import_paths: &mut IndexMap<Text, ResolvedPath>,
     ) {
         for event in js_root.syntax().preorder() {
             let WalkEvent::Enter(node) = event else {
@@ -119,15 +126,44 @@ impl<'a> HtmlModuleVisitor<'a> {
             };
             // Only handle static module sources (import … from "…").
             // Skip dynamic imports (import("…") / require("…")).
-            if let Some(AnyJsImportLike::JsModuleSource(source)) = AnyJsImportLike::cast_ref(&node)
-            {
-                let Some(specifier) = source.inner_string_text().ok() else {
-                    continue;
-                };
-                let resolved = self.resolved_js_path_from_specifier(specifier.text());
-                static_import_paths
-                    .entry(Text::from(specifier))
-                    .or_insert(resolved);
+            if let Some(any_source) = AnyJsImportLike::cast_ref(&node) {
+                match any_source {
+                    AnyJsImportLike::JsModuleSource(source) => {
+                        let Some(specifier) = source.inner_string_text().ok() else {
+                            continue;
+                        };
+                        let resolved = self.resolved_js_path_from_specifier(specifier.text());
+                        static_import_paths
+                            .entry(Text::from(specifier))
+                            .or_insert(resolved);
+                    }
+                    // require("") isn't actually supported in the environments we're interested in. For example require() shouldn't be
+                    // supported in HTML-ish languages.
+                    // So, it's ignored by design.
+                    AnyJsImportLike::JsCallExpression(_) => {}
+                    AnyJsImportLike::JsImportCallExpression(source) => {
+                        let Some(arguments) = source.arguments().ok() else {
+                            continue;
+                        };
+                        let Some(argument) = arguments
+                            .args()
+                            .iter()
+                            .flatten()
+                            .next()
+                            .and_then(|argument| argument.as_any_js_expression().cloned())
+                            .and_then(|expr| expr.as_any_js_literal_expression().cloned())
+                            .and_then(|expr| expr.as_js_string_literal_expression().cloned())
+                            .and_then(|str| str.inner_string_text().ok())
+                        else {
+                            continue;
+                        };
+
+                        let resolved = self.resolved_js_path_from_specifier(argument.text());
+                        dynamic_import_paths
+                            .entry(Text::from(argument))
+                            .or_insert(resolved);
+                    }
+                }
             }
         }
     }

@@ -91,16 +91,12 @@ impl<'a> Iterator for ImportTreeTraversal<'a> {
                         .values()
                         .chain(js_info.dynamic_import_paths.values())
                         .any(|p| p.as_path() == Some(current_path.as_path())),
-                    ModuleInfo::Html(html_info) => {
-                        html_info
-                            .imported_stylesheets
-                            .iter()
-                            .any(|p| p.as_path() == Some(current_path.as_path()))
-                            || html_info
-                                .static_import_paths
-                                .values()
-                                .any(|p| p.as_path() == Some(current_path.as_path()))
-                    }
+                    ModuleInfo::Html(html_info) => html_info
+                        .imported_stylesheets
+                        .iter()
+                        .chain(html_info.static_import_paths.values())
+                        .chain(html_info.dynamic_import_paths.values())
+                        .any(|p| p.as_path() == Some(current_path.as_path())),
                     ModuleInfo::Css(_) => false,
                 };
 
@@ -129,6 +125,7 @@ impl<'a> Iterator for ImportTreeTraversal<'a> {
                             .imported_stylesheets
                             .iter()
                             .chain(html_info.static_import_paths.values())
+                            .chain(html_info.dynamic_import_paths.values())
                             .filter_map(|stylesheet_path| {
                                 let path = stylesheet_path.as_path()?;
                                 let css_info = self.module_graph.css_module_info_for_path(path)?;

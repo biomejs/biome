@@ -1,7 +1,7 @@
-use crate::run_cli;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot, markup_to_string};
+use crate::{run_cli, run_cli_with_dyn_fs};
 use biome_console::{BufferConsole, markup};
-use biome_fs::MemoryFileSystem;
+use biome_fs::{MemoryFileSystem, TemporaryFs};
 use bpaf::Args;
 use camino::Utf8Path;
 
@@ -970,6 +970,188 @@ fn issue_7912() {
         module_path!(),
         "issue_7912",
         fs,
+        console,
+        result,
+    ));
+}
+
+// noUndeclaredClasses
+
+const BIOME_JSON_ASTRO_LINTER: &str = r#"{ "linter": { "enabled": true }, "html": { "linter": { "enabled": true }, "experimentalFullSupportEnabled": true } }"#;
+
+#[test]
+fn no_undeclared_classes_astro_class_list() {
+    let mut console = BufferConsole::default();
+    let mut fs = TemporaryFs::new("no_undeclared_classes_astro_class_list");
+
+    fs.create_file("biome.json", BIOME_JSON_ASTRO_LINTER);
+    fs.create_file("styles.css", ".card { border: 1px solid; }");
+    fs.create_file(
+        "file.astro",
+        r#"---
+import "./styles.css";
+---
+
+<div class:list={["card", "missing"]}>Content</div>
+"#,
+    );
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["lint", "--only=noUndeclaredClasses", fs.cli_path()].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_undeclared_classes_astro_class_list",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+/// Undeclared classes are flagged in `class={expr}` attribute expressions.
+/// String literals inside expressions are split by whitespace; defined classes
+/// pass while missing ones are reported.
+#[test]
+fn no_undeclared_classes_astro_class_expr() {
+    let mut console = BufferConsole::default();
+    let mut fs = TemporaryFs::new("no_undeclared_classes_astro_class_expr");
+
+    fs.create_file("biome.json", BIOME_JSON_ASTRO_LINTER);
+    fs.create_file("styles.css", ".hero { font-size: 2rem; }");
+    fs.create_file(
+        "file.astro",
+        r#"---
+import "./styles.css";
+---
+
+<div class={"hero missing"}>Content</div>
+"#,
+    );
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["lint", "--only=noUndeclaredClasses", fs.cli_path()].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_undeclared_classes_astro_class_expr",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+/// Undeclared classes in plain `class="..."` attributes (handled by the HTML
+/// rule) are also flagged when CSS is imported in the frontmatter. This tests
+/// the module graph fix that includes `static_import_paths` in HTML class
+/// traversal.
+#[test]
+fn no_undeclared_classes_astro_plain_class() {
+    let mut console = BufferConsole::default();
+    let mut fs = TemporaryFs::new("no_undeclared_classes_astro_plain_class");
+
+    fs.create_file("biome.json", BIOME_JSON_ASTRO_LINTER);
+    fs.create_file("styles.css", ".container { max-width: 1200px; }");
+    fs.create_file(
+        "file.astro",
+        r#"---
+import "./styles.css";
+---
+
+<div class="container unknown">Content</div>
+"#,
+    );
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["lint", "--only=noUndeclaredClasses", fs.cli_path()].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_undeclared_classes_astro_plain_class",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+/// All classes are declared — no diagnostics should be emitted. Tests that
+/// `class:list`, `class={expr}`, and `class="..."` all pass cleanly when every
+/// referenced class is present in the imported stylesheet.
+#[test]
+fn no_undeclared_classes_astro_all_declared() {
+    let mut console = BufferConsole::default();
+    let mut fs = TemporaryFs::new("no_undeclared_classes_astro_all_declared");
+
+    fs.create_file("biome.json", BIOME_JSON_ASTRO_LINTER);
+    fs.create_file(
+        "styles.css",
+        ".card { border: 1px; } .hero { font-size: 2rem; } .container { max-width: 1200px; }",
+    );
+    fs.create_file(
+        "file.astro",
+        r#"---
+import "./styles.css";
+---
+
+<div class:list={["card", "hero"]}>List</div>
+<div class={"container"}>Expr</div>
+<div class="card">Plain</div>
+"#,
+    );
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["lint", "--only=nursery/noUndeclaredClasses", fs.cli_path()].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_undeclared_classes_astro_all_declared",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+/// Without any CSS imported in the frontmatter, the rule must stay silent to
+/// avoid false positives — even if class attributes reference class names.
+#[test]
+fn no_undeclared_classes_astro_silent_without_css() {
+    let mut console = BufferConsole::default();
+    let mut fs = TemporaryFs::new("no_undeclared_classes_astro_silent_without_css");
+
+    fs.create_file("biome.json", BIOME_JSON_ASTRO_LINTER);
+    fs.create_file(
+        "file.astro",
+        r#"---
+const title = "Hello";
+---
+
+<div class:list={["whatever"]}>Content</div>
+<div class={"anything"}>Content</div>
+<div class="something">Content</div>
+"#,
+    );
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["lint", "--only=nursery/noUndeclaredClasses", fs.cli_path()].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_undeclared_classes_astro_silent_without_css",
+        fs.create_mem(),
         console,
         result,
     ));
