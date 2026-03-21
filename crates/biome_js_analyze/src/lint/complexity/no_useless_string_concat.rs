@@ -227,7 +227,7 @@ fn is_string_expression(expression: &Option<AnyJsExpression>) -> bool {
             (Some(literal_expression), _) => literal_expression
                 .as_js_string_literal_expression()
                 .is_some(),
-            (_, Some(_template_expression)) => true,
+            (_, Some(template_expression)) => template_expression.tag().is_none(),
             _ => false,
         }
     })
@@ -373,6 +373,12 @@ fn extract_string_value(expression: &Option<AnyJsExpression>) -> Option<String> 
         }
 
         Some(AnyJsExpression::JsTemplateExpression(template_expression)) => {
+            // Tagged templates (e.g. sql`query`) have different semantics and
+            // their string value cannot be extracted.
+            if template_expression.tag().is_some() {
+                return None;
+            }
+
             let is_useless_template_literal = template_expression
                 .elements()
                 .into_iter()
