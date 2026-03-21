@@ -396,10 +396,10 @@ mod tests {
     }
 
     #[test]
-    fn defaults_to_unknown_install_source() {
+    fn defaults_to_standalone_install_source() {
         assert_eq!(
             detect_install_source(Utf8Path::new("/usr/local/bin/biome")),
-            InstallSource::Unknown
+            InstallSource::Standalone
         );
     }
 
@@ -411,7 +411,7 @@ mod tests {
             CliDiagnostic::UpgradeError(diagnostic) => {
                 assert_eq!(
                     PrintDescription(&diagnostic).to_string(),
-                    "Upgrade has encountered an error: `biome upgrade` couldn't determine how this binary was installed. Upgrade Biome with the same installer or package manager you originally used.",
+                    "`biome upgrade` couldn't determine how this binary was installed. Upgrade Biome with the same installer or package manager you originally used.",
                 );
                 assert!(diagnostic.source.is_none());
             }
