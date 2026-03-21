@@ -2,21 +2,6 @@
 const { platform, arch, env, version, release } = process;
 const { execSync } = require("child_process");
 
-function isMusl() {
-	let stderr;
-	try {
-		stderr = execSync("ldd --version", {
-			stdio: ['pipe', 'pipe', 'pipe']
-		});
-	} catch (err) {
-		stderr = err.stderr;
-	}
-	if (stderr.indexOf("musl") > -1) {
-		return true;
-	}
-	return false;
-}
-
 const PLATFORMS = {
 	win32: {
 		x64: "@biomejs/cli-win32-x64/biome.exe",
@@ -37,7 +22,7 @@ const PLATFORMS = {
 };
 
 const binPath = env.BIOME_BINARY ||
-	(platform === "linux" && isMusl()
+	(platform === "linux"
 		? PLATFORMS?.["linux-musl"]?.[arch]
 		: PLATFORMS?.[platform]?.[arch]
 	);
