@@ -7909,7 +7909,24 @@ This does not affect other [Case].
 export type UseNodeAssertStrictOptions = {};
 export type UseNodejsImportProtocolOptions = {};
 export type UseNumberNamespaceOptions = {};
-export type UseNumericSeparatorsOptions = {};
+export interface UseNumericSeparatorsOptions {
+	/**
+	 * Options for binary literals (e.g., `0b1010_0001`).
+	 */
+	binary?: NumericLiteralSeparatorOptions;
+	/**
+	 * Options for decimal literals (e.g., `1_234_567`).
+	 */
+	decimal?: NumericLiteralSeparatorOptions;
+	/**
+	 * Options for hexadecimal literals (e.g., `0xAB_CD`).
+	 */
+	hexadecimal?: NumericLiteralSeparatorOptions;
+	/**
+	 * Options for octal literals (e.g., `0o1234_5670`).
+	 */
+	octal?: NumericLiteralSeparatorOptions;
+}
 export type UseObjectSpreadOptions = {};
 export type UseReactFunctionComponentsOptions = {};
 export interface UseReadonlyClassPropertiesOptions {
@@ -8210,6 +8227,16 @@ export interface Convention {
 	 * Declarations concerned by this convention
 	 */
 	selector?: Selector;
+}
+export interface NumericLiteralSeparatorOptions {
+	/**
+	 * Number of digits between separators.
+	 */
+	groupLength?: number;
+	/**
+	 * Minimum number of digits required before adding separators.
+	 */
+	minimumDigits?: number;
 }
 export type GroupMatcher = ImportMatcher | SourceMatcher;
 export type StableHookResult = boolean | number[] | string[];
