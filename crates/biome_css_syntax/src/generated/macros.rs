@@ -1036,6 +1036,11 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::ScssIncludeAtRule::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::SCSS_INTERPOLATED_IDENTIFIER => {
+                    let $pattern =
+                        unsafe { $crate::ScssInterpolatedIdentifier::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::SCSS_INTERPOLATION => {
                     let $pattern = unsafe { $crate::ScssInterpolation::new_unchecked(node) };
                     $body
@@ -1527,6 +1532,11 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::SCSS_IMPORT_ITEM_LIST => {
                     let $pattern = unsafe { $crate::ScssImportItemList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::SCSS_INTERPOLATED_IDENTIFIER_PART_LIST => {
+                    let $pattern =
+                        unsafe { $crate::ScssInterpolatedIdentifierPartList::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::SCSS_LIST_EXPRESSION_ELEMENT_LIST => {

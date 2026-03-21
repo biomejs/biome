@@ -3,7 +3,8 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid-export-default-function-data.vue
 ---
 # Input
-```ts
+```vue
+<script>
 /* should not generate diagnostics */
 // export default with function `data`
 export default {
@@ -13,5 +14,6 @@ export default {
 		};
 	}
 };
+</script>
 
 ```

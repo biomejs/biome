@@ -12,4 +12,8 @@ expression: valid.tailwind.css
 	in: here;
 }
 
+.button {
+	--color-*: initial;
+}
+
 ```

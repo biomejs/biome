@@ -1,0 +1,23 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-astro-value-in-template.astro
+---
+# Input
+```astro
+<!-- should not generate diagnostics -->
+---
+import { Avatar as AvatarPrimitive } from "bits-ui";
+import { cn } from "$lib/utils.js";
+
+let {
+	ref = $bindable(null),
+	class: className,
+}: AvatarPrimitive.FallbackProps = $props();
+---
+
+<!-- used as value here -->
+<AvatarPrimitive.Fallback
+	class="something nice"
+/>
+
+```

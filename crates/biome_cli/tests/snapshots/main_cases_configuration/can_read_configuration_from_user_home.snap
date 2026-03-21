@@ -36,7 +36,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 ```block
 project ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Biome found a configuration file outside of the current working directory. If the configuration enables the scanner, Biome might scan the whole file system. This behaviour will be fixed in the next major version.
+  i Biome found the configuration file <CONFIG_DIR>/biome.json outside of the current working directory . If the configuration enables the scanner, Biome might scan the whole file system. This behaviour will be fixed in the next major version.
   
 
 ```

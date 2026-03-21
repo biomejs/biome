@@ -53,6 +53,7 @@ enum ExpressionContextFlag {
     AllowObjectExpression = 1 << 1,
     InDecorator = 1 << 2,
     AllowTSTypeAssertion = 1 << 3,
+    InConditionalConsequent = 1 << 4,
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
@@ -79,6 +80,10 @@ impl ExpressionContextFlags {
     /// Currently disabled on "new" expressions.
     const ALLOW_TS_TYPE_ASSERTION: Self =
         Self(make_bitflags!(ExpressionContextFlag::{AllowTSTypeAssertion}));
+
+    /// If `true`, the parser is inside the consequent of a conditional expression.
+    const IN_CONDITIONAL_CONSEQUENT: Self =
+        Self(make_bitflags!(ExpressionContextFlag::{InConditionalConsequent}));
 
     pub fn contains(&self, other: impl Into<Self>) -> bool {
         self.0.contains(other.into().0)
@@ -124,6 +129,13 @@ impl ExpressionContext {
         self.and(ExpressionContextFlags::ALLOW_TS_TYPE_ASSERTION, allowed)
     }
 
+    pub(crate) fn and_in_conditional_consequent(self, in_conditional_consequent: bool) -> Self {
+        self.and(
+            ExpressionContextFlags::IN_CONDITIONAL_CONSEQUENT,
+            in_conditional_consequent,
+        )
+    }
+
     /// Returns true if object expressions or object patterns are valid in this context
     pub(crate) fn is_object_expression_allowed(&self) -> bool {
         self.0
@@ -138,6 +150,11 @@ impl ExpressionContext {
     /// Returns `true` if currently parsing a decorator expression `@<expr>`.
     pub(crate) fn is_in_decorator(&self) -> bool {
         self.0.contains(ExpressionContextFlags::IN_DECORATOR)
+    }
+
+    pub(crate) fn is_in_conditional_consequent(&self) -> bool {
+        self.0
+            .contains(ExpressionContextFlags::IN_CONDITIONAL_CONSEQUENT)
     }
 
     /// Adds the `flag` if `set` is `true`, otherwise removes the `flag`
@@ -275,7 +292,7 @@ pub(crate) fn parse_assignment_expression_or_higher(
     p: &mut JsParser,
     context: ExpressionContext,
 ) -> ParsedSyntax {
-    let arrow_expression = parse_arrow_function_expression(p);
+    let arrow_expression = parse_arrow_function_expression(p, context);
 
     if arrow_expression.is_present() {
         return arrow_expression;
@@ -300,6 +317,13 @@ fn parse_assignment_expression_or_higher_base(
     let checkpoint = p.checkpoint();
     parse_conditional_expr(p, context)
         .and_then(|target| parse_assign_expr_recursive(p, target, checkpoint, context))
+}
+
+pub(crate) fn parse_assignment_expression_or_higher_no_arrow(
+    p: &mut JsParser,
+    context: ExpressionContext,
+) -> ParsedSyntax {
+    parse_assignment_expression_or_higher_base(p, context)
 }
 
 // test js assign_expr
@@ -463,8 +487,11 @@ pub(super) fn parse_conditional_expr(p: &mut JsParser, context: ExpressionContex
         let m = marker.precede(p);
         p.bump(T![?]);
 
-        parse_conditional_expr_consequent(p, ExpressionContext::default())
-            .or_add_diagnostic(p, js_parse_error::expected_expression_assignment);
+        parse_conditional_expr_consequent(
+            p,
+            ExpressionContext::default().and_in_conditional_consequent(true),
+        )
+        .or_add_diagnostic(p, js_parse_error::expected_expression_assignment);
 
         p.expect(T![:]);
 
@@ -486,7 +513,7 @@ pub(super) fn parse_conditional_expr(p: &mut JsParser, context: ExpressionContex
 fn parse_conditional_expr_consequent(p: &mut JsParser, context: ExpressionContext) -> ParsedSyntax {
     let checkpoint = p.checkpoint();
 
-    let arrow_expression = parse_arrow_function_expression(p);
+    let arrow_expression = parse_arrow_function_expression(p, context);
     if arrow_expression.is_present() && p.at(T![:]) {
         return arrow_expression;
     }

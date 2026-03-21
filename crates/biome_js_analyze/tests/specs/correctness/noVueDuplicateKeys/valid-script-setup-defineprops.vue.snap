@@ -3,7 +3,9 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid-script-setup-defineprops.vue
 ---
 # Input
-```ts
+```vue
+<!-- should not generate diagnostics -->
+<script setup>
 defineProps({
   foo: String,
   bar: Number
@@ -15,5 +17,5 @@ const qux = computed(() => 'world')
 function handleClick() {
   console.log('clicked')
 }
-
+</script>
 ```

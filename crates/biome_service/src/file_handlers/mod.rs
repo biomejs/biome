@@ -28,7 +28,7 @@ use biome_console::fmt::Formatter;
 use biome_css_analyze::METADATA as css_metadata;
 use biome_css_syntax::{CssFileSource, CssLanguage};
 use biome_diagnostics::{Applicability, Diagnostic, DiagnosticExt, Error, Severity, category};
-use biome_formatter::{FormatContext, FormatResult, Formatted, Printed};
+use biome_formatter::{FormatContext, FormatResult, Formatted, Printed, SourceMapGeneration};
 use biome_fs::BiomePath;
 use biome_graphql_analyze::METADATA as graphql_metadata;
 use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
@@ -505,6 +505,10 @@ pub struct FixAllParams<'a> {
     pub(crate) enabled_rules: &'a [AnalyzerSelector],
     pub(crate) plugins: AnalyzerPluginVec,
     pub(crate) document_services: &'a DocumentServices,
+    /// The initial indentation level to apply when printing formatted code.
+    /// Used by embedded language handlers (Svelte, Vue) to preserve
+    /// `indentScriptAndStyle` indentation during fix-all operations.
+    pub(crate) embeds_initial_indent: u16,
 }
 
 #[derive(Default)]
@@ -872,13 +876,29 @@ impl<'a> ProcessFixAll<'a> {
 
     /// Finish processing the fix all actions. Returns the result of the fix-all actions. The `format_tree`
     /// is a closure that must return the new code (formatted, if needed).
-    pub(crate) fn finish<F, C>(self, format_tree: F) -> Result<FixFileResult, WorkspaceError>
+    ///
+    /// `initial_indent` specifies the base indentation level for printing. This is used by
+    /// embedded language handlers (e.g. Svelte, Vue) to preserve `indentScriptAndStyle`
+    /// indentation when formatting during fix-all operations.
+    pub(crate) fn finish<F, C>(
+        self,
+        format_tree: F,
+        initial_indent: u16,
+    ) -> Result<FixFileResult, WorkspaceError>
     where
         F: FnOnce() -> Result<Either<FormatResult<Formatted<C>>, String>, WorkspaceError>,
         C: FormatContext,
     {
         let code = match format_tree()? {
-            Either::Left(printed) => printed?.print()?.into_code(),
+            Either::Left(printed) => {
+                if initial_indent > 0 {
+                    printed?
+                        .print_with_indent(initial_indent, SourceMapGeneration::Disabled)?
+                        .into_code()
+                } else {
+                    printed?.print()?.into_code()
+                }
+            }
             Either::Right(string) => string,
         };
         Ok(FixFileResult {
@@ -1537,14 +1557,15 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
         L: biome_rowan::Language,
     {
-        if let Some(rule_filter) = rule_filter
-            && rule_filter.match_rule::<R>()
-        {
-            // first we want to register rules via "magic default"
-            self.record_rule_from_manifest::<R, L>(rule_filter);
-            // then we want to register rules
-            self.record_rule_from_domains::<R, L>(rule_filter);
+        let Some(rule_filter) = rule_filter.filter(|rule_filter| rule_filter.match_rule::<R>())
+        else {
+            return;
         };
+
+        // first we want to register rules via "magic default"
+        self.record_rule_from_manifest::<R, L>(rule_filter);
+        // then we want to register rules
+        self.record_rule_from_domains::<R, L>(rule_filter);
 
         // Do not report unused suppression comment diagnostics if:
         // - it is a syntax-only analyzer pass, or

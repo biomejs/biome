@@ -3,7 +3,8 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid-createapp-component-function-data.vue
 ---
 # Input
-```ts
+```vue
+<script>
 /* should not generate diagnostics */
 // const app = createApp + app.component with function `data` (dot access)
 import { createApp } from 'vue';
@@ -16,5 +17,6 @@ app.component('some-comp', {
 		};
 	}
 });
+</script>
 
 ```

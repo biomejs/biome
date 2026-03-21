@@ -1,0 +1,26 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-astro-directive-expressions.astro
+---
+# Input
+```astro
+<!-- should not generate diagnostics -->
+---
+const classes = ["a", "b"];
+const greeting = "hello";
+const rawHtml = "<strong>bold</strong>";
+const textColor = "red";
+const visibilityOpts = { rootMargin: "200px" };
+const idleOpts = { timeout: 500 };
+---
+
+<div class:list={classes}>Content</div>
+<p set:text={greeting} />
+<article set:html={rawHtml} />
+<style define:vars={{ textColor }}>
+  h1 { color: var(--textColor); }
+</style>
+<Component client:visible={visibilityOpts} />
+<Component client:idle={idleOpts} />
+
+```

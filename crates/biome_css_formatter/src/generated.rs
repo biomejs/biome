@@ -7979,6 +7979,46 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssIncludeAtRule {
         )
     }
 }
+impl FormatRule<biome_css_syntax::ScssInterpolatedIdentifier>
+    for crate::scss::value::interpolated_identifier::FormatScssInterpolatedIdentifier
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssInterpolatedIdentifier,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssInterpolatedIdentifier>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssInterpolatedIdentifier {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssInterpolatedIdentifier,
+        crate::scss::value::interpolated_identifier::FormatScssInterpolatedIdentifier,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::value::interpolated_identifier::FormatScssInterpolatedIdentifier::default(
+            ),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssInterpolatedIdentifier {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssInterpolatedIdentifier,
+        crate::scss::value::interpolated_identifier::FormatScssInterpolatedIdentifier,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::value::interpolated_identifier::FormatScssInterpolatedIdentifier::default(
+            ),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::ScssInterpolation>
     for crate::scss::auxiliary::interpolation::FormatScssInterpolation
 {
@@ -10518,6 +10558,18 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssImportItemList {
             self,
             crate::scss::lists::import_item_list::FormatScssImportItemList::default(),
         )
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssInterpolatedIdentifierPartList {
+    type Format < 'a > = FormatRefWithRule < 'a , biome_css_syntax :: ScssInterpolatedIdentifierPartList , crate :: scss :: lists :: interpolated_identifier_part_list :: FormatScssInterpolatedIdentifierPartList > ;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: scss :: lists :: interpolated_identifier_part_list :: FormatScssInterpolatedIdentifierPartList :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssInterpolatedIdentifierPartList {
+    type Format = FormatOwnedWithRule < biome_css_syntax :: ScssInterpolatedIdentifierPartList , crate :: scss :: lists :: interpolated_identifier_part_list :: FormatScssInterpolatedIdentifierPartList > ;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: scss :: lists :: interpolated_identifier_part_list :: FormatScssInterpolatedIdentifierPartList :: default ())
     }
 }
 impl AsFormat<CssFormatContext> for biome_css_syntax::ScssListExpressionElementList {
@@ -13933,6 +13985,50 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssSelector {
         )
     }
 }
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssSelectorCustomIdentifier {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyCssSelectorCustomIdentifier,
+        crate::css::any::selector_custom_identifier::FormatAnyCssSelectorCustomIdentifier,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: any :: selector_custom_identifier :: FormatAnyCssSelectorCustomIdentifier :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssSelectorCustomIdentifier {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyCssSelectorCustomIdentifier,
+        crate::css::any::selector_custom_identifier::FormatAnyCssSelectorCustomIdentifier,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: any :: selector_custom_identifier :: FormatAnyCssSelectorCustomIdentifier :: default ())
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssSelectorIdentifier {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyCssSelectorIdentifier,
+        crate::css::any::selector_identifier::FormatAnyCssSelectorIdentifier,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::css::any::selector_identifier::FormatAnyCssSelectorIdentifier::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssSelectorIdentifier {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyCssSelectorIdentifier,
+        crate::css::any::selector_identifier::FormatAnyCssSelectorIdentifier,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::any::selector_identifier::FormatAnyCssSelectorIdentifier::default(),
+        )
+    }
+}
 impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssSimpleSelector {
     type Format<'a> = FormatRefWithRule<
         'a,
@@ -14519,6 +14615,25 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyScssIncludeTarget {
             self,
             crate::scss::any::include_target::FormatAnyScssIncludeTarget::default(),
         )
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyScssInterpolatedIdentifierPart {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyScssInterpolatedIdentifierPart,
+        crate::scss::any::interpolated_identifier_part::FormatAnyScssInterpolatedIdentifierPart,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: scss :: any :: interpolated_identifier_part :: FormatAnyScssInterpolatedIdentifierPart :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyScssInterpolatedIdentifierPart {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyScssInterpolatedIdentifierPart,
+        crate::scss::any::interpolated_identifier_part::FormatAnyScssInterpolatedIdentifierPart,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: scss :: any :: interpolated_identifier_part :: FormatAnyScssInterpolatedIdentifierPart :: default ())
     }
 }
 impl AsFormat<CssFormatContext> for biome_css_syntax::AnyScssModuleConfiguration {

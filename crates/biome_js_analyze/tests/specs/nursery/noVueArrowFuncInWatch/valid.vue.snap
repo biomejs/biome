@@ -3,7 +3,8 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.vue
 ---
 # Input
-```ts
+```vue
+<script>
 /* should not generate diagnostics */
 export default {
   watch: {
@@ -30,5 +31,6 @@ export default {
     'e.f': function (val, oldVal) { /* ... */ }
   }
 }
+</script>
 
 ```

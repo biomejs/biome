@@ -225,7 +225,7 @@ _touch file:
 test:
 	cargo test --no-fail-fast
 
-# Run tests for the crate passed as argument e.g. just test-create biome_cli
+# Run tests for the crate passed as argument e.g. just test-crate biome_cli
 test-crate name:
 	cargo test -p {{name}} --no-fail-fast
 

@@ -98,9 +98,7 @@ pub(crate) fn parse_root(p: &mut HtmlParser) {
     // Whether or not frontmatter was present, once we're past the frontmatter
     // position `---` can no longer start a fence. This prevents `---` in HTML
     // content from being incorrectly lexed as a FENCE token.
-    if p.options().frontmatter {
-        p.set_after_frontmatter(true);
-    }
+    p.set_after_frontmatter(true);
 
     parse_doc_type(p).ok();
     ElementList.parse_list(p);

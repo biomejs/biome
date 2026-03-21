@@ -132,3 +132,111 @@ fn disable_all_rules_when_group_is_off() {
         result,
     ));
 }
+
+/// Verifies that enabling the whole `correctness` group does not implicitly
+/// enable React-domain rules such as `useExhaustiveDependencies`.
+#[test]
+fn group_enable_does_not_enable_domain_rules() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+    let config = Utf8Path::new("biome.json");
+    fs.insert(
+        config.into(),
+        br#"{
+    "linter": {
+        "rules": {
+            "recommended": false,
+            "correctness": "error"
+        }
+    }
+}
+"#,
+    );
+    let test1 = Utf8Path::new("test1.jsx");
+    fs.insert(
+        test1.into(),
+        br#"import { useEffect, useState } from "react";
+
+export function Component() {
+    const [local, setLocal] = useState(0);
+
+    useEffect(() => {
+        console.log(local);
+    }, []);
+
+    return <button onClick={() => setLocal(1)}>increment</button>;
+}
+"#,
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", test1.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "group_enable_does_not_enable_domain_rules",
+        fs,
+        console,
+        result,
+    ));
+}
+
+/// Verifies that a domain-tagged rule can still be enabled explicitly by name
+/// even though plain group enables skip domain rules.
+#[test]
+fn explicit_domain_rule_enable_still_works() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+    let config = Utf8Path::new("biome.json");
+    fs.insert(
+        config.into(),
+        br#"{
+    "linter": {
+        "rules": {
+            "recommended": false,
+            "correctness": {
+                "useExhaustiveDependencies": "error"
+            }
+        }
+    }
+}
+"#,
+    );
+    let test1 = Utf8Path::new("test1.jsx");
+    fs.insert(
+        test1.into(),
+        br#"import { useEffect, useState } from "react";
+
+export function Component() {
+    const [local, setLocal] = useState(0);
+
+    useEffect(() => {
+        console.log(local);
+    }, []);
+
+    return <button onClick={() => setLocal(1)}>increment</button>;
+}
+"#,
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", test1.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "explicit_domain_rule_enable_still_works",
+        fs,
+        console,
+        result,
+    ));
+}
