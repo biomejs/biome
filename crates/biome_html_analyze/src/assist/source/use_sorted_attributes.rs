@@ -99,10 +99,7 @@ impl Rule for UseSortedAttributes {
         let mut attr_groups = Vec::new();
         let sort_by = options.sort_order.unwrap_or_default();
 
-        let comparator = match sort_by {
-            SortOrder::Natural => SortableHtmlAttribute::ascii_nat_cmp,
-            SortOrder::Lexicographic => SortableHtmlAttribute::lexicographic_cmp,
-        };
+        let comparator = get_comparator(sort_by);
 
         // Convert to boolean-based comparator for is_sorted_by
         let boolean_comparator = |a: &SortableHtmlAttribute, b: &SortableHtmlAttribute| {
@@ -158,10 +155,7 @@ impl Rule for UseSortedAttributes {
         let options = ctx.options();
         let sort_by = options.sort_order.unwrap_or_default();
 
-        let comparator = match sort_by {
-            SortOrder::Natural => SortableHtmlAttribute::ascii_nat_cmp,
-            SortOrder::Lexicographic => SortableHtmlAttribute::lexicographic_cmp,
-        };
+        let comparator = get_comparator(sort_by);
 
         for (SortableHtmlAttribute { attr }, SortableHtmlAttribute { attr: sorted_attr }) in
             zip(state.attrs.iter(), state.get_sorted_attributes(comparator))
@@ -188,5 +182,14 @@ impl SortableAttribute for SortableHtmlAttribute {
 
     fn name(&self) -> SyntaxResult<SyntaxToken<Self::Language>> {
         self.attr.name()?.value_token()
+    }
+}
+
+fn get_comparator(
+    sort_order: SortOrder,
+) -> fn(&SortableHtmlAttribute, &SortableHtmlAttribute) -> Ordering {
+    match sort_order {
+        SortOrder::Natural => SortableHtmlAttribute::ascii_nat_cmp,
+        SortOrder::Lexicographic => SortableHtmlAttribute::lexicographic_cmp,
     }
 }
