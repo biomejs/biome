@@ -14,14 +14,26 @@ import { A } from "a";
 
 # Diagnostics
 ```
-chunk_newline.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+chunk_newline.js assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Some imports or exports are not organized.
   
-  > 1 │ import { C } from "c";
-      │ ^^^^^^^^^^^^^^^^^^^^^^
+  i This statement ends a chunk of imports or exports and thus must be preceded by a blank line. Add a newline before this statement.
+  
     2 │ import "a";
     3 │ import { B } from "b";
+  > 4 │ f();
+      │ ^^^^
+    5 │ import { A } from "a";
+    6 │ 
+  
+  i Sort the imported or exported names.
+  
+    3 │ import { B } from "b";
+    4 │ f();
+  > 5 │ import { A } from "a";
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
   
   i Safe fix: Organize Imports (Biome)
   

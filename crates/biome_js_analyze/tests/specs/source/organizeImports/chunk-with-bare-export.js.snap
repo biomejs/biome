@@ -11,13 +11,15 @@ export { A };
 
 # Diagnostics
 ```
-chunk-with-bare-export.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+chunk-with-bare-export.js assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Some imports or exports are not organized.
   
-  > 1 │ import { A } from "package";
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    2 │ export { A };
+  i Sort the imported or exported names.
+  
+    1 │ import { A } from "package";
+  > 2 │ export { A };
+      │ ^^^^^^^^^^^^^
     3 │ 
   
   i Safe fix: Organize Imports (Biome)

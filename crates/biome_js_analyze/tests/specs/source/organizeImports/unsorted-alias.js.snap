@@ -18,9 +18,11 @@ import { e } from '$e'
 
 # Diagnostics
 ```
-unsorted-alias.js:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted-alias.js assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Some imports or exports are not organized.
+  
+  i Sort this chunk of imports or exports.
   
     1 │ /* should generate diagnostics */
   > 2 │ import { aa } from './aa'

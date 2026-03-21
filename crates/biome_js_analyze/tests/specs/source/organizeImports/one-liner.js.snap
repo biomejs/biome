@@ -9,12 +9,14 @@ import { B } from "b"; import { A } from "a"; function f() {}
 
 # Diagnostics
 ```
-one-liner.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+one-liner.js assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Some imports or exports are not organized.
+  
+  i Sort this chunk of imports or exports.
   
   > 1 │ import { B } from "b"; import { A } from "a"; function f() {}
-      │ ^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
   i Safe fix: Organize Imports (Biome)
   
