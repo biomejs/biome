@@ -12,6 +12,7 @@ expression: invalid.html
 <style aria-labelledby="id"></style>
 <style role="style"></style>
 <meta charset="UTF-8" role="meta" aria-hidden="true" />
+<meta charset="UTF-8" aria-foo="bar" aria-hidden="true" />
 
 ```
 
@@ -149,7 +150,7 @@ invalid.html:7:1 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━�
   > 7 │ <style role="style"></style>
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     8 │ <meta charset="UTF-8" role="meta" aria-hidden="true" />
-    9 │ 
+    9 │ <meta charset="UTF-8" aria-foo="bar" aria-hidden="true" />
   
   i Using role on elements that do not support them can cause issues with screen readers.
   
@@ -165,11 +166,12 @@ invalid.html:8:1 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━�
 
   × Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
   
-    6 │ <style aria-labelledby="id"></style>
-    7 │ <style role="style"></style>
-  > 8 │ <meta charset="UTF-8" role="meta" aria-hidden="true" />
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    9 │ 
+     6 │ <style aria-labelledby="id"></style>
+     7 │ <style role="style"></style>
+   > 8 │ <meta charset="UTF-8" role="meta" aria-hidden="true" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ <meta charset="UTF-8" aria-foo="bar" aria-hidden="true" />
+    10 │ 
   
   i Using role on elements that do not support them can cause issues with screen readers.
   
@@ -177,5 +179,25 @@ invalid.html:8:1 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━�
   
     8 │ <meta·charset="UTF-8"·role="meta"·aria-hidden="true"·/>
       │                       ------------                     
+
+```
+
+```
+invalid.html:9:1 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
+  
+     7 │ <style role="style"></style>
+     8 │ <meta charset="UTF-8" role="meta" aria-hidden="true" />
+   > 9 │ <meta charset="UTF-8" aria-foo="bar" aria-hidden="true" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+  
+  i Using aria-* on elements that do not support them can cause issues with screen readers.
+  
+  i Unsafe fix: Remove the aria-hidden="true"  attribute.
+  
+    9 │ <meta·charset="UTF-8"·aria-foo="bar"·aria-hidden="true"·/>
+      │                                      -------------------  
 
 ```

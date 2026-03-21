@@ -139,8 +139,9 @@ impl Rule for NoAriaUnsupportedElements {
             let html_attribute = attribute.as_html_attribute()?;
             let attribute_name = html_attribute.name().ok()?.value_token().ok()?;
             let attribute_name_text = attribute_name.text_trimmed();
-            (attribute_name_text.starts_with("aria-")
-                || attribute_name_text.eq_ignore_ascii_case("role"))
+            (attribute_name_text.eq_ignore_ascii_case("role")
+                || (attribute_name_text.starts_with("aria-")
+                    && AriaAttribute::from_str(attribute_name_text).is_ok()))
             .then_some(attribute)
         })?;
 
