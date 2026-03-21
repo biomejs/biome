@@ -5,7 +5,7 @@ use biome_aria_metadata::AriaRole;
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_html_syntax::{AnyHtmlElement, HtmlFileSource};
-use biome_rowan::{AstNode, BatchMutationExt, Text, TextRange, TokenText};
+use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, Text, TextRange, TokenText};
 use biome_rule_options::no_redundant_roles::NoRedundantRolesOptions;
 use biome_string_case::StrLikeExtension;
 
@@ -73,6 +73,11 @@ impl Rule for NoRedundantRoles {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
+        // Fast path: elements with no attributes can't have a role attribute.
+        if node.attributes().is_none_or(|a| a.is_empty()) {
+            return None;
+        }
+
         let element_name = node.name()?;
 
         // In non-HTML files (Vue, Svelte, Astro), PascalCase elements like
@@ -88,16 +93,31 @@ impl Rule for NoRedundantRoles {
             return None;
         }
 
+        // Bail early if this element can't possibly have an implicit role.
+        // This avoids a DOM traversal to find the "role" attribute on elements
+        // like <head>, <meta>, <script>, <br>, etc.
+        //
+        // Try the original casing first (almost always lowercase in practice)
+        // to avoid the cost of lowercasing for the common case.
+        let name_text = element_name.text();
+        let name_lower;
+        let name_str = if has_implicit_role(name_text) {
+            name_text
+        } else {
+            name_lower = name_text.to_ascii_lowercase_cow();
+            if !has_implicit_role(&name_lower) {
+                return None;
+            }
+            &name_lower
+        };
+
         let role_attribute = node.find_attribute_by_name("role")?;
         let role_value = role_attribute.initializer()?.value().ok()?.string_value()?;
         let role_trimmed = role_value.text().trim();
 
         let explicit_role = AriaRole::from_roles(role_trimmed)?;
 
-        // Lowercase the element name once for the match table.
-        // HTML tag names are case-insensitive but the parser preserves source casing.
-        let name_lower = element_name.text().to_ascii_lowercase_cow();
-        let implicit_role = get_implicit_role_for_element(&name_lower, node)?;
+        let implicit_role = get_implicit_role_for_element(name_str, node)?;
 
         if explicit_role == implicit_role {
             return Some(RuleState {
@@ -135,55 +155,112 @@ impl Rule for NoRedundantRoles {
     }
 }
 
+/// Static map from HTML element names to their implicit ARIA roles.
+///
+/// Only includes elements with a fixed role that does not depend on attributes.
+/// Elements like `input`, `img`, `section`, etc. require attribute inspection
+/// and are handled separately in [`get_implicit_role_for_element`].
+static SIMPLE_IMPLICIT_ROLES: phf::Map<&str, AriaRole> = phf::phf_map! {
+    "article" => AriaRole::Article,
+    "aside" => AriaRole::Complementary,
+    "blockquote" => AriaRole::Blockquote,
+    "button" => AriaRole::Button,
+    "caption" => AriaRole::Caption,
+    "figcaption" => AriaRole::Caption,
+    "legend" => AriaRole::Caption,
+    "code" => AriaRole::Code,
+    "datalist" => AriaRole::Listbox,
+    "del" => AriaRole::Deletion,
+    "s" => AriaRole::Deletion,
+    "dd" => AriaRole::Definition,
+    "dt" => AriaRole::Term,
+    "dfn" => AriaRole::Term,
+    "mark" => AriaRole::Mark,
+    "dialog" => AriaRole::Dialog,
+    "em" => AriaRole::Emphasis,
+    "figure" => AriaRole::Figure,
+    "form" => AriaRole::Form,
+    "hr" => AriaRole::Separator,
+    "html" => AriaRole::Document,
+    "ins" => AriaRole::Insertion,
+    "main" => AriaRole::Main,
+    "marquee" => AriaRole::Marquee,
+    "math" => AriaRole::Math,
+    "menu" => AriaRole::List,
+    "ul" => AriaRole::List,
+    "ol" => AriaRole::List,
+    "meter" => AriaRole::Meter,
+    "nav" => AriaRole::Navigation,
+    "li" => AriaRole::Listitem,
+    "option" => AriaRole::Option,
+    "hgroup" => AriaRole::Group,
+    "optgroup" => AriaRole::Group,
+    "address" => AriaRole::Group,
+    "details" => AriaRole::Group,
+    "fieldset" => AriaRole::Group,
+    "output" => AriaRole::Status,
+    "p" => AriaRole::Paragraph,
+    "progress" => AriaRole::Progressbar,
+    "search" => AriaRole::Search,
+    "strong" => AriaRole::Strong,
+    "sub" => AriaRole::Subscript,
+    "sup" => AriaRole::Superscript,
+    "svg" => AriaRole::GraphicsDocument,
+    "table" => AriaRole::Table,
+    "textarea" => AriaRole::Textbox,
+    "tr" => AriaRole::Row,
+    "td" => AriaRole::Cell,
+    "time" => AriaRole::Time,
+    "h1" => AriaRole::Heading,
+    "h2" => AriaRole::Heading,
+    "h3" => AriaRole::Heading,
+    "h4" => AriaRole::Heading,
+    "h5" => AriaRole::Heading,
+    "h6" => AriaRole::Heading,
+    "tbody" => AriaRole::Rowgroup,
+    "tfoot" => AriaRole::Rowgroup,
+    "thead" => AriaRole::Rowgroup,
+    "b" => AriaRole::Generic,
+    "bdi" => AriaRole::Generic,
+    "bdo" => AriaRole::Generic,
+    "body" => AriaRole::Generic,
+    "data" => AriaRole::Generic,
+    "div" => AriaRole::Generic,
+    "i" => AriaRole::Generic,
+    "q" => AriaRole::Generic,
+    "samp" => AriaRole::Generic,
+    "small" => AriaRole::Generic,
+    "span" => AriaRole::Generic,
+    "u" => AriaRole::Generic,
+    "pre" => AriaRole::Generic,
+    "header" => AriaRole::Generic,
+    "footer" => AriaRole::Generic,
+};
+
+/// Elements whose implicit role depends on attributes (not in the simple map).
+static COMPLEX_ROLE_ELEMENTS: phf::Set<&str> = phf::phf_set! {
+    "th", "input", "a", "area", "link", "img", "section", "select",
+};
+
+/// Returns `true` if the element has any possible implicit ARIA role.
+fn has_implicit_role(element_name: &str) -> bool {
+    SIMPLE_IMPLICIT_ROLES.contains_key(element_name)
+        || COMPLEX_ROLE_ELEMENTS.contains(element_name)
+}
+
 /// Returns the implicit ARIA role for a given HTML element name.
 ///
 /// Based on the WAI-ARIA spec: <https://www.w3.org/TR/html-aria/>
 ///
 /// Expects `element_name` to already be lowercased.
 fn get_implicit_role_for_element(element_name: &str, node: &AnyHtmlElement) -> Option<AriaRole> {
+    // Fast path: elements with a fixed role (no attribute inspection needed).
+    if let Some(&role) = SIMPLE_IMPLICIT_ROLES.get(element_name) {
+        return Some(role);
+    }
+
+    // Slow path: elements whose implicit role depends on attributes.
     Some(match element_name {
-        "article" => AriaRole::Article,
-        "aside" => AriaRole::Complementary,
-        "blockquote" => AriaRole::Blockquote,
-        "button" => AriaRole::Button,
-        "caption" | "figcaption" | "legend" => AriaRole::Caption,
-        "code" => AriaRole::Code,
-        "datalist" => AriaRole::Listbox,
-        "del" | "s" => AriaRole::Deletion,
-        "dd" => AriaRole::Definition,
-        "dt" | "dfn" => AriaRole::Term,
-        "mark" => AriaRole::Mark,
-        "dialog" => AriaRole::Dialog,
-        "em" => AriaRole::Emphasis,
-        "figure" => AriaRole::Figure,
-        "form" => AriaRole::Form,
-        "hr" => AriaRole::Separator,
-        "html" => AriaRole::Document,
-        "ins" => AriaRole::Insertion,
-        "main" => AriaRole::Main,
-        "marquee" => AriaRole::Marquee,
-        "math" => AriaRole::Math,
-        "menu" | "ul" | "ol" => AriaRole::List,
-        "meter" => AriaRole::Meter,
-        "nav" => AriaRole::Navigation,
-        "li" => AriaRole::Listitem,
-        "option" => AriaRole::Option,
-        "hgroup" | "optgroup" | "address" | "details" | "fieldset" => AriaRole::Group,
-        "output" => AriaRole::Status,
-        "p" => AriaRole::Paragraph,
-        "progress" => AriaRole::Progressbar,
-        "search" => AriaRole::Search,
-        "strong" => AriaRole::Strong,
-        "sub" => AriaRole::Subscript,
-        "sup" => AriaRole::Superscript,
-        "svg" => AriaRole::GraphicsDocument,
-        "table" => AriaRole::Table,
-        "textarea" => AriaRole::Textbox,
-        "tr" => AriaRole::Row,
-        "td" => AriaRole::Cell,
-        "time" => AriaRole::Time,
-        "h1" | "h2" | "h3" | "h4" | "h5" | "h6" => AriaRole::Heading,
-        "tbody" | "tfoot" | "thead" => AriaRole::Rowgroup,
         "th" => {
             let scope_lower = get_attribute_lowercase(node, "scope");
             match scope_lower.as_deref() {
@@ -263,8 +340,6 @@ fn get_implicit_role_for_element(element_name: &str, node: &AnyHtmlElement) -> O
                 AriaRole::Listbox
             }
         }
-        "b" | "bdi" | "bdo" | "body" | "data" | "div" | "i" | "q" | "samp" | "small"
-        | "span" | "u" | "pre" | "header" | "footer" => AriaRole::Generic,
         _ => return None,
     })
 }
