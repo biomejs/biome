@@ -55,6 +55,8 @@ pub mod no_document_cookie;
 pub mod no_document_import_in_page;
 pub mod no_done_callback;
 pub mod no_double_equals;
+pub mod no_drizzle_delete_without_where;
+pub mod no_drizzle_update_without_where;
 pub mod no_duplicate_argument_names;
 pub mod no_duplicate_at_import_rules;
 pub mod no_duplicate_attributes;

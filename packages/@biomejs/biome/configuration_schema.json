@@ -3173,6 +3173,40 @@
 			},
 			"additionalProperties": false
 		},
+		"NoDrizzleDeleteWithoutWhereConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoDrizzleDeleteWithoutWhereOptions" }
+			]
+		},
+		"NoDrizzleDeleteWithoutWhereOptions": {
+			"type": "object",
+			"properties": {
+				"drizzleObjectName": {
+					"description": "List of variable names to consider as Drizzle ORM instances.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
+		"NoDrizzleUpdateWithoutWhereConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoDrizzleUpdateWithoutWhereOptions" }
+			]
+		},
+		"NoDrizzleUpdateWithoutWhereOptions": {
+			"type": "object",
+			"properties": {
+				"drizzleObjectName": {
+					"description": "List of variable names to consider as Drizzle ORM instances.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoDuplicateArgumentNamesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5848,6 +5882,20 @@
 						{ "type": "null" }
 					]
 				},
+				"noDrizzleDeleteWithoutWhere": {
+					"description": "Require .where() to be called when using .delete() with Drizzle ORM.\nSee https://biomejs.dev/linter/rules/no-drizzle-delete-without-where",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoDrizzleDeleteWithoutWhereConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noDrizzleUpdateWithoutWhere": {
+					"description": "Require .where() to be called when using .update() with Drizzle ORM.\nSee https://biomejs.dev/linter/rules/no-drizzle-update-without-where",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoDrizzleUpdateWithoutWhereConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateArgumentNames": {
 					"description": "Require all argument names for fields & directives to be unique.\nSee https://biomejs.dev/linter/rules/no-duplicate-argument-names",
 					"anyOf": [
@@ -7001,6 +7049,11 @@
 			"description": "Rule domains",
 			"oneOf": [
 				{
+					"description": "Drizzle ORM rules",
+					"type": "string",
+					"const": "drizzle"
+				},
+				{
 					"description": "React library rules",
 					"type": "string",
 					"const": "react"
@@ -7600,6 +7653,24 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoDoubleEqualsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoDrizzleDeleteWithoutWhereOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoDrizzleDeleteWithoutWhereOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoDrizzleUpdateWithoutWhereOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoDrizzleUpdateWithoutWhereOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

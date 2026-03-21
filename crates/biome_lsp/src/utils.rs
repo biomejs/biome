@@ -587,4 +587,28 @@ line 7 new";
         let expected = "completely\u{2009}replaced\ntext\n";
         assert_eq!(output, expected);
     }
+
+    /// Regression test: an inverted LSP range (start after end) must not panic.
+    ///
+    /// Some editors may emit ranges where start > end due to encoding or
+    /// batching issues. `apply_document_changes` should skip the invalid change
+    /// gracefully instead of panicking inside `TextRange::new`.
+    #[test]
+    fn test_apply_changes_inverted_range_does_not_panic() {
+        let encoding = PositionEncoding::Wide(WideEncoding::Utf16);
+        let input = "abc\ndef\nghi".to_string();
+
+        let changes = vec![
+            // Inverted range: start (line 1) is after end (line 0)
+            TextDocumentContentChangeEvent {
+                range: Some(Range::new(Position::new(1, 3), Position::new(0, 0))),
+                range_length: None,
+                text: String::from("replaced"),
+            },
+        ];
+
+        // Must not panic — the invalid change is skipped, text is unchanged
+        let output = apply_document_changes(encoding, input, changes);
+        assert_eq!(output, "abc\ndef\nghi");
+    }
 }

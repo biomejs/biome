@@ -4,6 +4,8 @@ expression: invalid.js
 ---
 # Input
 ```js
+// should generate diagnostics
+
 const f = foo.substr;
 foo.substr()
 foo?.substr()
@@ -24,19 +26,34 @@ foo.substring(start, end)
 "foo".substring(1, 3)
 // Extra arguments
 foo.substring(1, 2, 3)
+// Variable declaration with call expression (issue #9279)
+const y = x.substring(0);
+const z = x.substr(1, 2);
+// Nested in another call
+console.log(foo.substr(1));
+// Return statement
+function test() { return foo.substring(1); }
+// Arrow function body
+const fn = (x) => x.substring(1);
+// Inside array literal
+const arr = [foo.substr(0), bar.substring(1)];
+// Ternary expression
+const val = cond ? foo.substr(0) : bar.substring(1);
 
 ```
 
 # Diagnostics
 ```
-invalid.js:1:15 lint/style/noSubstr ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:15 lint/style/noSubstr ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Avoid using substr and consider using slice instead.
   
-  > 1 │ const f = foo.substr;
+    1 │ // should generate diagnostics
+    2 │ 
+  > 3 │ const f = foo.substr;
       │               ^^^^^^
-    2 │ foo.substr()
-    3 │ foo?.substr()
+    4 │ foo.substr()
+    5 │ foo?.substr()
   
   i slice is more commonly used and has a less surprising behavior.
   
@@ -46,15 +63,15 @@ invalid.js:1:15 lint/style/noSubstr ━━━━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:2:5 lint/style/noSubstr  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:4:5 lint/style/noSubstr  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Avoid using substr and consider using slice instead.
   
-    1 │ const f = foo.substr;
-  > 2 │ foo.substr()
+    3 │ const f = foo.substr;
+  > 4 │ foo.substr()
       │     ^^^^^^
-    3 │ foo?.substr()
-    4 │ foo.bar?.substring()
+    5 │ foo?.substr()
+    6 │ foo.bar?.substring()
   
   i slice is more commonly used and has a less surprising behavior.
   
@@ -62,26 +79,27 @@ invalid.js:2:5 lint/style/noSubstr  FIXABLE  ━━━━━━━━━━━�
   
   i Unsafe fix: Use .slice() instead.
   
-     1  1 │   const f = foo.substr;
-     2    │ - foo.substr()
-        2 │ + foo.slice()
-     3  3 │   foo?.substr()
-     4  4 │   foo.bar?.substring()
+     2  2 │   
+     3  3 │   const f = foo.substr;
+     4    │ - foo.substr()
+        4 │ + foo.slice()
+     5  5 │   foo?.substr()
+     6  6 │   foo.bar?.substring()
   
 
 ```
 
 ```
-invalid.js:3:6 lint/style/noSubstr  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:6 lint/style/noSubstr  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Avoid using substr and consider using slice instead.
   
-    1 │ const f = foo.substr;
-    2 │ foo.substr()
-  > 3 │ foo?.substr()
+    3 │ const f = foo.substr;
+    4 │ foo.substr()
+  > 5 │ foo?.substr()
       │      ^^^^^^
-    4 │ foo.bar?.substring()
-    5 │ foo?.[0]?.substring()
+    6 │ foo.bar?.substring()
+    7 │ foo?.[0]?.substring()
   
   i slice is more commonly used and has a less surprising behavior.
   
@@ -89,27 +107,27 @@ invalid.js:3:6 lint/style/noSubstr  FIXABLE  ━━━━━━━━━━━�
   
   i Unsafe fix: Use .slice() instead.
   
-     1  1 │   const f = foo.substr;
-     2  2 │   foo.substr()
-     3    │ - foo?.substr()
-        3 │ + foo?.slice()
-     4  4 │   foo.bar?.substring()
-     5  5 │   foo?.[0]?.substring()
+     3  3 │   const f = foo.substr;
+     4  4 │   foo.substr()
+     5    │ - foo?.substr()
+        5 │ + foo?.slice()
+     6  6 │   foo.bar?.substring()
+     7  7 │   foo?.[0]?.substring()
   
 
 ```
 
 ```
-invalid.js:4:10 lint/style/noSubstr  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:10 lint/style/noSubstr  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Avoid using substring and consider using slice instead.
   
-    2 │ foo.substr()
-    3 │ foo?.substr()
-  > 4 │ foo.bar?.substring()
+    4 │ foo.substr()
+    5 │ foo?.substr()
+  > 6 │ foo.bar?.substring()
       │          ^^^^^^^^^
-    5 │ foo?.[0]?.substring()
-    6 │ foo.bar.substr?.()
+    7 │ foo?.[0]?.substring()
+    8 │ foo.bar.substr?.()
   
   i slice is more commonly used and has a less surprising behavior.
   
@@ -117,27 +135,27 @@ invalid.js:4:10 lint/style/noSubstr  FIXABLE  ━━━━━━━━━━━�
   
   i Unsafe fix: Use .slice() instead.
   
-     2  2 │   foo.substr()
-     3  3 │   foo?.substr()
-     4    │ - foo.bar?.substring()
-        4 │ + foo.bar?.slice()
-     5  5 │   foo?.[0]?.substring()
-     6  6 │   foo.bar.substr?.()
+     4  4 │   foo.substr()
+     5  5 │   foo?.substr()
+     6    │ - foo.bar?.substring()
+        6 │ + foo.bar?.slice()
+     7  7 │   foo?.[0]?.substring()
+     8  8 │   foo.bar.substr?.()
   
 
 ```
 
 ```
-invalid.js:5:11 lint/style/noSubstr  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:7:11 lint/style/noSubstr  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Avoid using substring and consider using slice instead.
   
-    3 │ foo?.substr()
-    4 │ foo.bar?.substring()
-  > 5 │ foo?.[0]?.substring()
+    5 │ foo?.substr()
+    6 │ foo.bar?.substring()
+  > 7 │ foo?.[0]?.substring()
       │           ^^^^^^^^^
-    6 │ foo.bar.substr?.()
-    7 │ foo.bar?.substring?.()
+    8 │ foo.bar.substr?.()
+    9 │ foo.bar?.substring?.()
   
   i slice is more commonly used and has a less surprising behavior.
   
@@ -145,27 +163,27 @@ invalid.js:5:11 lint/style/noSubstr  FIXABLE  ━━━━━━━━━━━�
   
   i Unsafe fix: Use .slice() instead.
   
-     3  3 │   foo?.substr()
-     4  4 │   foo.bar?.substring()
-     5    │ - foo?.[0]?.substring()
-        5 │ + foo?.[0]?.slice()
-     6  6 │   foo.bar.substr?.()
-     7  7 │   foo.bar?.substring?.()
+     5  5 │   foo?.substr()
+     6  6 │   foo.bar?.substring()
+     7    │ - foo?.[0]?.substring()
+        7 │ + foo?.[0]?.slice()
+     8  8 │   foo.bar.substr?.()
+     9  9 │   foo.bar?.substring?.()
   
 
 ```
 
 ```
-invalid.js:6:9 lint/style/noSubstr  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:8:9 lint/style/noSubstr  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Avoid using substr and consider using slice instead.
   
-    4 │ foo.bar?.substring()
-    5 │ foo?.[0]?.substring()
-  > 6 │ foo.bar.substr?.()
-      │         ^^^^^^
-    7 │ foo.bar?.substring?.()
-    8 │ foo.bar?.baz?.substr()
+     6 │ foo.bar?.substring()
+     7 │ foo?.[0]?.substring()
+   > 8 │ foo.bar.substr?.()
+       │         ^^^^^^
+     9 │ foo.bar?.substring?.()
+    10 │ foo.bar?.baz?.substr()
   
   i slice is more commonly used and has a less surprising behavior.
   
@@ -173,27 +191,27 @@ invalid.js:6:9 lint/style/noSubstr  FIXABLE  ━━━━━━━━━━━�
   
   i Unsafe fix: Use .slice() instead.
   
-     4  4 │   foo.bar?.substring()
-     5  5 │   foo?.[0]?.substring()
-     6    │ - foo.bar.substr?.()
-        6 │ + foo.bar.slice?.()
-     7  7 │   foo.bar?.substring?.()
-     8  8 │   foo.bar?.baz?.substr()
+     6  6 │   foo.bar?.substring()
+     7  7 │   foo?.[0]?.substring()
+     8    │ - foo.bar.substr?.()
+        8 │ + foo.bar.slice?.()
+     9  9 │   foo.bar?.substring?.()
+    10 10 │   foo.bar?.baz?.substr()
   
 
 ```
 
 ```
-invalid.js:7:10 lint/style/noSubstr  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:9:10 lint/style/noSubstr  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Avoid using substring and consider using slice instead.
   
-    5 │ foo?.[0]?.substring()
-    6 │ foo.bar.substr?.()
-  > 7 │ foo.bar?.substring?.()
-      │          ^^^^^^^^^
-    8 │ foo.bar?.baz?.substr()
-    9 │ foo.bar?.baz.substring()
+     7 │ foo?.[0]?.substring()
+     8 │ foo.bar.substr?.()
+   > 9 │ foo.bar?.substring?.()
+       │          ^^^^^^^^^
+    10 │ foo.bar?.baz?.substr()
+    11 │ foo.bar?.baz.substring()
   
   i slice is more commonly used and has a less surprising behavior.
   
@@ -201,27 +219,27 @@ invalid.js:7:10 lint/style/noSubstr  FIXABLE  ━━━━━━━━━━━�
   
   i Unsafe fix: Use .slice() instead.
   
-     5  5 │   foo?.[0]?.substring()
-     6  6 │   foo.bar.substr?.()
-     7    │ - foo.bar?.substring?.()
-        7 │ + foo.bar?.slice?.()
-     8  8 │   foo.bar?.baz?.substr()
-     9  9 │   foo.bar?.baz.substring()
+     7  7 │   foo?.[0]?.substring()
+     8  8 │   foo.bar.substr?.()
+     9    │ - foo.bar?.substring?.()
+        9 │ + foo.bar?.slice?.()
+    10 10 │   foo.bar?.baz?.substr()
+    11 11 │   foo.bar?.baz.substring()
   
 
 ```
 
 ```
-invalid.js:8:15 lint/style/noSubstr  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:10:15 lint/style/noSubstr  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Avoid using substr and consider using slice instead.
   
-     6 │ foo.bar.substr?.()
-     7 │ foo.bar?.substring?.()
-   > 8 │ foo.bar?.baz?.substr()
+     8 │ foo.bar.substr?.()
+     9 │ foo.bar?.substring?.()
+  > 10 │ foo.bar?.baz?.substr()
        │               ^^^^^^
-     9 │ foo.bar?.baz.substring()
-    10 │ foo.bar.baz?.substr()
+    11 │ foo.bar?.baz.substring()
+    12 │ foo.bar.baz?.substr()
   
   i slice is more commonly used and has a less surprising behavior.
   
@@ -229,27 +247,27 @@ invalid.js:8:15 lint/style/noSubstr  FIXABLE  ━━━━━━━━━━━�
   
   i Unsafe fix: Use .slice() instead.
   
-     6  6 │   foo.bar.substr?.()
-     7  7 │   foo.bar?.substring?.()
-     8    │ - foo.bar?.baz?.substr()
-        8 │ + foo.bar?.baz?.slice()
-     9  9 │   foo.bar?.baz.substring()
-    10 10 │   foo.bar.baz?.substr()
+     8  8 │   foo.bar.substr?.()
+     9  9 │   foo.bar?.substring?.()
+    10    │ - foo.bar?.baz?.substr()
+       10 │ + foo.bar?.baz?.slice()
+    11 11 │   foo.bar?.baz.substring()
+    12 12 │   foo.bar.baz?.substr()
   
 
 ```
 
 ```
-invalid.js:9:14 lint/style/noSubstr  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:11:14 lint/style/noSubstr  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Avoid using substring and consider using slice instead.
   
-     7 │ foo.bar?.substring?.()
-     8 │ foo.bar?.baz?.substr()
-   > 9 │ foo.bar?.baz.substring()
+     9 │ foo.bar?.substring?.()
+    10 │ foo.bar?.baz?.substr()
+  > 11 │ foo.bar?.baz.substring()
        │              ^^^^^^^^^
-    10 │ foo.bar.baz?.substr()
-    11 │ "foo".substr()
+    12 │ foo.bar.baz?.substr()
+    13 │ "foo".substr()
   
   i slice is more commonly used and has a less surprising behavior.
   
@@ -257,27 +275,27 @@ invalid.js:9:14 lint/style/noSubstr  FIXABLE  ━━━━━━━━━━━�
   
   i Unsafe fix: Use .slice() instead.
   
-     7  7 │   foo.bar?.substring?.()
-     8  8 │   foo.bar?.baz?.substr()
-     9    │ - foo.bar?.baz.substring()
-        9 │ + foo.bar?.baz.slice()
-    10 10 │   foo.bar.baz?.substr()
-    11 11 │   "foo".substr()
+     9  9 │   foo.bar?.substring?.()
+    10 10 │   foo.bar?.baz?.substr()
+    11    │ - foo.bar?.baz.substring()
+       11 │ + foo.bar?.baz.slice()
+    12 12 │   foo.bar.baz?.substr()
+    13 13 │   "foo".substr()
   
 
 ```
 
 ```
-invalid.js:10:14 lint/style/noSubstr  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:12:14 lint/style/noSubstr  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Avoid using substr and consider using slice instead.
   
-     8 │ foo.bar?.baz?.substr()
-     9 │ foo.bar?.baz.substring()
-  > 10 │ foo.bar.baz?.substr()
+    10 │ foo.bar?.baz?.substr()
+    11 │ foo.bar?.baz.substring()
+  > 12 │ foo.bar.baz?.substr()
        │              ^^^^^^
-    11 │ "foo".substr()
-    12 │ "foo".substr(bar.length, Math.min(baz, 100)) // "foo".slice(bar.length, bar.length + Math.min(baz, 100))
+    13 │ "foo".substr()
+    14 │ "foo".substr(bar.length, Math.min(baz, 100)) // "foo".slice(bar.length, bar.length + Math.min(baz, 100))
   
   i slice is more commonly used and has a less surprising behavior.
   
@@ -285,27 +303,27 @@ invalid.js:10:14 lint/style/noSubstr  FIXABLE  ━━━━━━━━━━━
   
   i Unsafe fix: Use .slice() instead.
   
-     8  8 │   foo.bar?.baz?.substr()
-     9  9 │   foo.bar?.baz.substring()
-    10    │ - foo.bar.baz?.substr()
-       10 │ + foo.bar.baz?.slice()
-    11 11 │   "foo".substr()
-    12 12 │   "foo".substr(bar.length, Math.min(baz, 100)) // "foo".slice(bar.length, bar.length + Math.min(baz, 100))
+    10 10 │   foo.bar?.baz?.substr()
+    11 11 │   foo.bar?.baz.substring()
+    12    │ - foo.bar.baz?.substr()
+       12 │ + foo.bar.baz?.slice()
+    13 13 │   "foo".substr()
+    14 14 │   "foo".substr(bar.length, Math.min(baz, 100)) // "foo".slice(bar.length, bar.length + Math.min(baz, 100))
   
 
 ```
 
 ```
-invalid.js:11:7 lint/style/noSubstr  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:13:7 lint/style/noSubstr  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Avoid using substr and consider using slice instead.
   
-     9 │ foo.bar?.baz.substring()
-    10 │ foo.bar.baz?.substr()
-  > 11 │ "foo".substr()
+    11 │ foo.bar?.baz.substring()
+    12 │ foo.bar.baz?.substr()
+  > 13 │ "foo".substr()
        │       ^^^^^^
-    12 │ "foo".substr(bar.length, Math.min(baz, 100)) // "foo".slice(bar.length, bar.length + Math.min(baz, 100))
-    13 │ "foo".substr(1, "abc".length) // "foo".slice(1, 1 + "abc".length)
+    14 │ "foo".substr(bar.length, Math.min(baz, 100)) // "foo".slice(bar.length, bar.length + Math.min(baz, 100))
+    15 │ "foo".substr(1, "abc".length) // "foo".slice(1, 1 + "abc".length)
   
   i slice is more commonly used and has a less surprising behavior.
   
@@ -313,50 +331,12 @@ invalid.js:11:7 lint/style/noSubstr  FIXABLE  ━━━━━━━━━━━�
   
   i Unsafe fix: Use .slice() instead.
   
-     9  9 │   foo.bar?.baz.substring()
-    10 10 │   foo.bar.baz?.substr()
-    11    │ - "foo".substr()
-       11 │ + "foo".slice()
-    12 12 │   "foo".substr(bar.length, Math.min(baz, 100)) // "foo".slice(bar.length, bar.length + Math.min(baz, 100))
-    13 13 │   "foo".substr(1, "abc".length) // "foo".slice(1, 1 + "abc".length)
-  
-
-```
-
-```
-invalid.js:12:7 lint/style/noSubstr ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Avoid using substr and consider using slice instead.
-  
-    10 │ foo.bar.baz?.substr()
-    11 │ "foo".substr()
-  > 12 │ "foo".substr(bar.length, Math.min(baz, 100)) // "foo".slice(bar.length, bar.length + Math.min(baz, 100))
-       │       ^^^^^^
-    13 │ "foo".substr(1, "abc".length) // "foo".slice(1, 1 + "abc".length)
-    14 │ "foo".substr("1", 2)
-  
-  i slice is more commonly used and has a less surprising behavior.
-  
-  i See MDN web docs for more details.
-  
-
-```
-
-```
-invalid.js:13:7 lint/style/noSubstr ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Avoid using substr and consider using slice instead.
-  
-    11 │ "foo".substr()
-    12 │ "foo".substr(bar.length, Math.min(baz, 100)) // "foo".slice(bar.length, bar.length + Math.min(baz, 100))
-  > 13 │ "foo".substr(1, "abc".length) // "foo".slice(1, 1 + "abc".length)
-       │       ^^^^^^
-    14 │ "foo".substr("1", 2)
-    15 │ "foo".substring(length, 0) // "foo".slice(0, Math.max(0, length))
-  
-  i slice is more commonly used and has a less surprising behavior.
-  
-  i See MDN web docs for more details.
+    11 11 │   foo.bar?.baz.substring()
+    12 12 │   foo.bar.baz?.substr()
+    13    │ - "foo".substr()
+       13 │ + "foo".slice()
+    14 14 │   "foo".substr(bar.length, Math.min(baz, 100)) // "foo".slice(bar.length, bar.length + Math.min(baz, 100))
+    15 15 │   "foo".substr(1, "abc".length) // "foo".slice(1, 1 + "abc".length)
   
 
 ```
@@ -366,12 +346,12 @@ invalid.js:14:7 lint/style/noSubstr ━━━━━━━━━━━━━━�
 
   i Avoid using substr and consider using slice instead.
   
-    12 │ "foo".substr(bar.length, Math.min(baz, 100)) // "foo".slice(bar.length, bar.length + Math.min(baz, 100))
-    13 │ "foo".substr(1, "abc".length) // "foo".slice(1, 1 + "abc".length)
-  > 14 │ "foo".substr("1", 2)
+    12 │ foo.bar.baz?.substr()
+    13 │ "foo".substr()
+  > 14 │ "foo".substr(bar.length, Math.min(baz, 100)) // "foo".slice(bar.length, bar.length + Math.min(baz, 100))
        │       ^^^^^^
-    15 │ "foo".substring(length, 0) // "foo".slice(0, Math.max(0, length))
-    16 │ foo.substring(start) // foo.slice(Math.max(0, start))
+    15 │ "foo".substr(1, "abc".length) // "foo".slice(1, 1 + "abc".length)
+    16 │ "foo".substr("1", 2)
   
   i slice is more commonly used and has a less surprising behavior.
   
@@ -383,14 +363,52 @@ invalid.js:14:7 lint/style/noSubstr ━━━━━━━━━━━━━━�
 ```
 invalid.js:15:7 lint/style/noSubstr ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  i Avoid using substr and consider using slice instead.
+  
+    13 │ "foo".substr()
+    14 │ "foo".substr(bar.length, Math.min(baz, 100)) // "foo".slice(bar.length, bar.length + Math.min(baz, 100))
+  > 15 │ "foo".substr(1, "abc".length) // "foo".slice(1, 1 + "abc".length)
+       │       ^^^^^^
+    16 │ "foo".substr("1", 2)
+    17 │ "foo".substring(length, 0) // "foo".slice(0, Math.max(0, length))
+  
+  i slice is more commonly used and has a less surprising behavior.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.js:16:7 lint/style/noSubstr ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using substr and consider using slice instead.
+  
+    14 │ "foo".substr(bar.length, Math.min(baz, 100)) // "foo".slice(bar.length, bar.length + Math.min(baz, 100))
+    15 │ "foo".substr(1, "abc".length) // "foo".slice(1, 1 + "abc".length)
+  > 16 │ "foo".substr("1", 2)
+       │       ^^^^^^
+    17 │ "foo".substring(length, 0) // "foo".slice(0, Math.max(0, length))
+    18 │ foo.substring(start) // foo.slice(Math.max(0, start))
+  
+  i slice is more commonly used and has a less surprising behavior.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.js:17:7 lint/style/noSubstr ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
   i Avoid using substring and consider using slice instead.
   
-    13 │ "foo".substr(1, "abc".length) // "foo".slice(1, 1 + "abc".length)
-    14 │ "foo".substr("1", 2)
-  > 15 │ "foo".substring(length, 0) // "foo".slice(0, Math.max(0, length))
+    15 │ "foo".substr(1, "abc".length) // "foo".slice(1, 1 + "abc".length)
+    16 │ "foo".substr("1", 2)
+  > 17 │ "foo".substring(length, 0) // "foo".slice(0, Math.max(0, length))
        │       ^^^^^^^^^
-    16 │ foo.substring(start) // foo.slice(Math.max(0, start))
-    17 │ foo.substring(start, end)
+    18 │ foo.substring(start) // foo.slice(Math.max(0, start))
+    19 │ foo.substring(start, end)
   
   i slice is more commonly used and has a less surprising behavior.
   
@@ -400,16 +418,16 @@ invalid.js:15:7 lint/style/noSubstr ━━━━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:16:5 lint/style/noSubstr ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:18:5 lint/style/noSubstr ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Avoid using substring and consider using slice instead.
   
-    14 │ "foo".substr("1", 2)
-    15 │ "foo".substring(length, 0) // "foo".slice(0, Math.max(0, length))
-  > 16 │ foo.substring(start) // foo.slice(Math.max(0, start))
+    16 │ "foo".substr("1", 2)
+    17 │ "foo".substring(length, 0) // "foo".slice(0, Math.max(0, length))
+  > 18 │ foo.substring(start) // foo.slice(Math.max(0, start))
        │     ^^^^^^^^^
-    17 │ foo.substring(start, end)
-    18 │ "foo".substring(1, 3)
+    19 │ foo.substring(start, end)
+    20 │ "foo".substring(1, 3)
   
   i slice is more commonly used and has a less surprising behavior.
   
@@ -419,16 +437,16 @@ invalid.js:16:5 lint/style/noSubstr ━━━━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:17:5 lint/style/noSubstr ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:19:5 lint/style/noSubstr ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Avoid using substring and consider using slice instead.
   
-    15 │ "foo".substring(length, 0) // "foo".slice(0, Math.max(0, length))
-    16 │ foo.substring(start) // foo.slice(Math.max(0, start))
-  > 17 │ foo.substring(start, end)
+    17 │ "foo".substring(length, 0) // "foo".slice(0, Math.max(0, length))
+    18 │ foo.substring(start) // foo.slice(Math.max(0, start))
+  > 19 │ foo.substring(start, end)
        │     ^^^^^^^^^
-    18 │ "foo".substring(1, 3)
-    19 │ // Extra arguments
+    20 │ "foo".substring(1, 3)
+    21 │ // Extra arguments
   
   i slice is more commonly used and has a less surprising behavior.
   
@@ -438,16 +456,16 @@ invalid.js:17:5 lint/style/noSubstr ━━━━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:18:7 lint/style/noSubstr ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:20:7 lint/style/noSubstr ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Avoid using substring and consider using slice instead.
   
-    16 │ foo.substring(start) // foo.slice(Math.max(0, start))
-    17 │ foo.substring(start, end)
-  > 18 │ "foo".substring(1, 3)
+    18 │ foo.substring(start) // foo.slice(Math.max(0, start))
+    19 │ foo.substring(start, end)
+  > 20 │ "foo".substring(1, 3)
        │       ^^^^^^^^^
-    19 │ // Extra arguments
-    20 │ foo.substring(1, 2, 3)
+    21 │ // Extra arguments
+    22 │ foo.substring(1, 2, 3)
   
   i slice is more commonly used and has a less surprising behavior.
   
@@ -457,15 +475,185 @@ invalid.js:18:7 lint/style/noSubstr ━━━━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:20:5 lint/style/noSubstr ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:22:5 lint/style/noSubstr ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Avoid using substring and consider using slice instead.
   
-    18 │ "foo".substring(1, 3)
-    19 │ // Extra arguments
-  > 20 │ foo.substring(1, 2, 3)
+    20 │ "foo".substring(1, 3)
+    21 │ // Extra arguments
+  > 22 │ foo.substring(1, 2, 3)
        │     ^^^^^^^^^
-    21 │ 
+    23 │ // Variable declaration with call expression (issue #9279)
+    24 │ const y = x.substring(0);
+  
+  i slice is more commonly used and has a less surprising behavior.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.js:24:13 lint/style/noSubstr ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using substring and consider using slice instead.
+  
+    22 │ foo.substring(1, 2, 3)
+    23 │ // Variable declaration with call expression (issue #9279)
+  > 24 │ const y = x.substring(0);
+       │             ^^^^^^^^^
+    25 │ const z = x.substr(1, 2);
+    26 │ // Nested in another call
+  
+  i slice is more commonly used and has a less surprising behavior.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.js:25:13 lint/style/noSubstr ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using substr and consider using slice instead.
+  
+    23 │ // Variable declaration with call expression (issue #9279)
+    24 │ const y = x.substring(0);
+  > 25 │ const z = x.substr(1, 2);
+       │             ^^^^^^
+    26 │ // Nested in another call
+    27 │ console.log(foo.substr(1));
+  
+  i slice is more commonly used and has a less surprising behavior.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.js:27:17 lint/style/noSubstr ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using substr and consider using slice instead.
+  
+    25 │ const z = x.substr(1, 2);
+    26 │ // Nested in another call
+  > 27 │ console.log(foo.substr(1));
+       │                 ^^^^^^
+    28 │ // Return statement
+    29 │ function test() { return foo.substring(1); }
+  
+  i slice is more commonly used and has a less surprising behavior.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.js:29:30 lint/style/noSubstr ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using substring and consider using slice instead.
+  
+    27 │ console.log(foo.substr(1));
+    28 │ // Return statement
+  > 29 │ function test() { return foo.substring(1); }
+       │                              ^^^^^^^^^
+    30 │ // Arrow function body
+    31 │ const fn = (x) => x.substring(1);
+  
+  i slice is more commonly used and has a less surprising behavior.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.js:31:21 lint/style/noSubstr ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using substring and consider using slice instead.
+  
+    29 │ function test() { return foo.substring(1); }
+    30 │ // Arrow function body
+  > 31 │ const fn = (x) => x.substring(1);
+       │                     ^^^^^^^^^
+    32 │ // Inside array literal
+    33 │ const arr = [foo.substr(0), bar.substring(1)];
+  
+  i slice is more commonly used and has a less surprising behavior.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.js:33:18 lint/style/noSubstr ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using substr and consider using slice instead.
+  
+    31 │ const fn = (x) => x.substring(1);
+    32 │ // Inside array literal
+  > 33 │ const arr = [foo.substr(0), bar.substring(1)];
+       │                  ^^^^^^
+    34 │ // Ternary expression
+    35 │ const val = cond ? foo.substr(0) : bar.substring(1);
+  
+  i slice is more commonly used and has a less surprising behavior.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.js:33:33 lint/style/noSubstr ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using substring and consider using slice instead.
+  
+    31 │ const fn = (x) => x.substring(1);
+    32 │ // Inside array literal
+  > 33 │ const arr = [foo.substr(0), bar.substring(1)];
+       │                                 ^^^^^^^^^
+    34 │ // Ternary expression
+    35 │ const val = cond ? foo.substr(0) : bar.substring(1);
+  
+  i slice is more commonly used and has a less surprising behavior.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.js:35:24 lint/style/noSubstr ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using substr and consider using slice instead.
+  
+    33 │ const arr = [foo.substr(0), bar.substring(1)];
+    34 │ // Ternary expression
+  > 35 │ const val = cond ? foo.substr(0) : bar.substring(1);
+       │                        ^^^^^^
+    36 │ 
+  
+  i slice is more commonly used and has a less surprising behavior.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.js:35:40 lint/style/noSubstr ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using substring and consider using slice instead.
+  
+    33 │ const arr = [foo.substr(0), bar.substring(1)];
+    34 │ // Ternary expression
+  > 35 │ const val = cond ? foo.substr(0) : bar.substring(1);
+       │                                        ^^^^^^^^^
+    36 │ 
   
   i slice is more commonly used and has a less surprising behavior.
   

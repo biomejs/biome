@@ -5,9 +5,11 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsName, JsCallArguments, JsExpressionStatement, JsSyntaxToken, JsVariableStatement,
+    AnyJsName, JsCallArguments, JsCallExpression, JsStaticMemberExpression, JsSyntaxToken,
 };
-use biome_rowan::{AstSeparatedList, BatchMutationExt, TextRange, TokenText, declare_node_union};
+use biome_rowan::{
+    AstNode, AstSeparatedList, BatchMutationExt, TextRange, TokenText, declare_node_union,
+};
 use biome_rule_options::no_substr::NoSubstrOptions;
 
 use crate::JsRuleAction;
@@ -53,7 +55,7 @@ declare_lint_rule! {
 }
 
 impl Rule for NoSubstr {
-    type Query = Ast<AnyJsStatement>;
+    type Query = Ast<AnyJsSubstrExpression>;
     type State = NoSubstrState;
     type Signals = Option<Self::State>;
     type Options = NoSubstrOptions;
@@ -130,79 +132,54 @@ impl NoSubstrState {
     }
 }
 
-// Helper union type to handle both JsExpressionStatement and JsVariableStatement.
-// To handle arguments, we need to know the type of the statement.
+// Helper union type to handle both JsCallExpression and JsStaticMemberExpression.
+// JsCallExpression handles calls like `foo.substr()` in any context.
+// JsStaticMemberExpression handles bare member references like `const f = foo.substr`.
 declare_node_union! {
-    pub AnyJsStatement = JsExpressionStatement | JsVariableStatement
+    pub AnyJsSubstrExpression = JsCallExpression | JsStaticMemberExpression
 }
 
-impl AnyJsStatement {
+impl AnyJsSubstrExpression {
+    /// Extract the member name token (`substr` or `substring`) from the expression.
     pub fn value_token(&self) -> Option<JsSyntaxToken> {
         match self {
-            Self::JsExpressionStatement(node) => {
-                let callee = node
-                    .expression()
-                    .ok()?
-                    .as_js_call_expression()?
-                    .callee()
-                    .ok()?;
-                callee
-                    .as_js_static_member_expression()?
+            Self::JsCallExpression(node) => {
+                let callee = node.callee().ok()?;
+                JsStaticMemberExpression::cast_ref(callee.syntax())?
                     .member()
                     .ok()?
                     .value_token()
                     .ok()
             }
-            Self::JsVariableStatement(node) => {
-                let declaration = node.declaration().ok()?;
-                let declarators = declaration.declarators();
-                declarators.into_iter().find_map(|declarator| {
-                    let init = declarator.ok()?.initializer()?;
-                    init.expression()
-                        .ok()?
-                        .as_js_static_member_expression()?
-                        .member()
-                        .ok()?
-                        .value_token()
-                        .ok()
-                })
+            Self::JsStaticMemberExpression(node) => {
+                // Skip if this member expression is the callee of a call expression,
+                // because the JsCallExpression arm will handle that case.
+                if node.parent::<JsCallExpression>().is_some() {
+                    return None;
+                }
+                node.member().ok()?.value_token().ok()
             }
         }
     }
+
+    /// Get the member name node for mutation.
     pub fn member(&self) -> Option<AnyJsName> {
         match self {
-            Self::JsExpressionStatement(node) => {
-                let callee = node
-                    .expression()
-                    .ok()?
-                    .as_js_call_expression()?
-                    .callee()
-                    .ok()?;
-                callee.as_js_static_member_expression()?.member().ok()
+            Self::JsCallExpression(node) => {
+                let callee = node.callee().ok()?;
+                JsStaticMemberExpression::cast_ref(callee.syntax())?
+                    .member()
+                    .ok()
             }
-            Self::JsVariableStatement(node) => {
-                let declaration = node.declaration().ok()?;
-                let declarators = declaration.declarators();
-                declarators.into_iter().find_map(|declarator| {
-                    let init = declarator.ok()?.initializer()?;
-                    init.expression()
-                        .ok()?
-                        .as_js_static_member_expression()?
-                        .member()
-                        .ok()
-                })
-            }
+            Self::JsStaticMemberExpression(node) => node.member().ok(),
         }
     }
+
+    /// Get the call arguments, if this is a call expression.
     pub fn arguments(&self) -> Option<JsCallArguments> {
         match self {
-            Self::JsExpressionStatement(node) => node
-                .expression()
-                .ok()?
-                .as_js_call_expression()?
-                .arguments()
-                .ok(),
-            _ => None,
+            Self::JsCallExpression(node) => node.arguments().ok(),
+            Self::JsStaticMemberExpression(_) => None,
         }
     }
 }

@@ -1202,6 +1202,8 @@ fn set_inline_emphasis_context(p: &mut MarkdownParser) -> Option<EmphasisContext
     p.set_emphasis_context(Some(context))
 }
 
+// #region inline list length scanning
+
 /// Compute the byte length of the inline list starting at the current token.
 fn inline_list_source_len(p: &mut MarkdownParser) -> usize {
     p.lookahead(|p| {
@@ -1214,83 +1216,9 @@ fn inline_list_source_len(p: &mut MarkdownParser) -> usize {
             }
 
             if p.at(NEWLINE) {
-                if p.at_blank_line() {
-                    len += p.cur_text().len();
-                    p.bump(NEWLINE);
+                if scan_newline_in_inline_list(p, has_content, &mut len) {
                     break;
                 }
-
-                len += p.cur_text().len();
-                p.bump(NEWLINE);
-
-                let quote_depth = p.state().block_quote_depth;
-                if quote_depth > 0 && has_quote_prefix(p, quote_depth) {
-                    let break_kind = classify_quote_break_after_newline(p, quote_depth);
-                    if !matches!(break_kind, QuoteBreakKind::None) {
-                        break;
-                    }
-                    consume_quote_prefix_without_virtual(p, quote_depth);
-                }
-
-                if has_content && p.at(MD_SETEXT_UNDERLINE_LITERAL) && allow_setext_heading(p) {
-                    break;
-                }
-
-                if has_content && p.at(MD_THEMATIC_BREAK_LITERAL) && is_dash_only_thematic_break(p)
-                {
-                    break;
-                }
-                if quote_depth > 0 && p.at(R_ANGLE) && !has_quote_prefix(p, quote_depth) {
-                    consume_partial_quote_prefix_lookahead(p, quote_depth, &mut len);
-                }
-
-                if at_paragraph_break(p, has_content) {
-                    break;
-                }
-
-                let required_indent = p.state().list_item_required_indent;
-                if required_indent > 0 {
-                    let indent = p.line_start_leading_indent();
-                    if indent < required_indent {
-                        break;
-                    }
-
-                    let mut consumed = 0usize;
-                    while consumed < required_indent && p.at(MD_TEXTUAL_LITERAL) {
-                        let text = p.cur_text();
-                        if text.is_empty() || !text.chars().all(|c| c == ' ' || c == '\t') {
-                            break;
-                        }
-
-                        let indent = text
-                            .chars()
-                            .map(|c| if c == '\t' { TAB_STOP_SPACES } else { 1 })
-                            .sum::<usize>();
-
-                        if consumed + indent > required_indent {
-                            break;
-                        }
-
-                        consumed += indent;
-                        len += text.len();
-                        p.bump(MD_TEXTUAL_LITERAL);
-                    }
-
-                    // After stripping list indent, re-check setext/thematic markers
-                    // to mirror newline handling in the parse path. Without this,
-                    // prescan would include indent bytes and stop one iteration later.
-                    // We intentionally skip the heavier post-indent block-interrupt
-                    // check here; the following non-NEWLINE pass still catches
-                    // interrupts for emphasis-context length calculation.
-                    if has_content
-                        && (p.at(MD_SETEXT_UNDERLINE_LITERAL)
-                            || (p.at(MD_THEMATIC_BREAK_LITERAL)
-                                && is_dash_only_thematic_break_text(p.cur_text())))
-                    {
-                        break;
-                    }
-                }
-
                 continue;
             }
 
@@ -1317,6 +1245,103 @@ fn inline_list_source_len(p: &mut MarkdownParser) -> usize {
         len
     })
 }
+
+/// Handle a NEWLINE token during inline list length scanning.
+///
+/// Returns `true` if the scan should stop (paragraph boundary reached),
+/// `false` if scanning should continue to the next line.
+fn scan_newline_in_inline_list(p: &mut MarkdownParser, has_content: bool, len: &mut usize) -> bool {
+    if p.at_blank_line() {
+        *len += p.cur_text().len();
+        p.bump(NEWLINE);
+        return true;
+    }
+
+    *len += p.cur_text().len();
+    p.bump(NEWLINE);
+
+    let quote_depth = p.state().block_quote_depth;
+    if quote_depth > 0 && has_quote_prefix(p, quote_depth) {
+        let break_kind = classify_quote_break_after_newline(p, quote_depth);
+        if !matches!(break_kind, QuoteBreakKind::None) {
+            return true;
+        }
+        consume_quote_prefix_without_virtual(p, quote_depth);
+    }
+
+    if has_content && p.at(MD_SETEXT_UNDERLINE_LITERAL) && allow_setext_heading(p) {
+        return true;
+    }
+
+    if has_content && p.at(MD_THEMATIC_BREAK_LITERAL) && is_dash_only_thematic_break(p) {
+        return true;
+    }
+
+    if quote_depth > 0 && p.at(R_ANGLE) && !has_quote_prefix(p, quote_depth) {
+        consume_partial_quote_prefix_lookahead(p, quote_depth, len);
+    }
+
+    if at_paragraph_break(p, has_content) {
+        return true;
+    }
+
+    let required_indent = p.state().list_item_required_indent;
+    if required_indent > 0 {
+        let indent = p.line_start_leading_indent();
+        if indent < required_indent {
+            return true;
+        }
+
+        scan_list_indent(p, required_indent, len);
+
+        // After stripping list indent, re-check setext/thematic markers
+        // to mirror newline handling in the parse path. Without this,
+        // prescan would include indent bytes and stop one iteration later.
+        // We intentionally skip the heavier post-indent block-interrupt
+        // check here; the following non-NEWLINE pass still catches
+        // interrupts for emphasis-context length calculation.
+        if has_content
+            && (p.at(MD_SETEXT_UNDERLINE_LITERAL)
+                || (p.at(MD_THEMATIC_BREAK_LITERAL)
+                    && is_dash_only_thematic_break_text(p.cur_text())))
+        {
+            return true;
+        }
+    }
+
+    false
+}
+
+/// Strip list-item indent tokens during inline list length scanning.
+///
+/// Consumes whitespace tokens up to `required_indent` columns, adding their
+/// byte lengths to `len`. Stops when the required indent is reached, a
+/// non-whitespace token is encountered, or consuming the next token would
+/// exceed the indent budget.
+fn scan_list_indent(p: &mut MarkdownParser, required_indent: usize, len: &mut usize) {
+    let mut consumed = 0usize;
+    while consumed < required_indent && p.at(MD_TEXTUAL_LITERAL) {
+        let text = p.cur_text();
+        if text.is_empty() || !text.chars().all(|c| c == ' ' || c == '\t') {
+            break;
+        }
+
+        let indent: usize = text
+            .chars()
+            .map(|c| if c == '\t' { TAB_STOP_SPACES } else { 1 })
+            .sum();
+
+        if consumed + indent > required_indent {
+            break;
+        }
+
+        consumed += indent;
+        *len += text.len();
+        p.bump(MD_TEXTUAL_LITERAL);
+    }
+}
+
+// #endregion
 
 fn line_starts_with_fence(p: &mut MarkdownParser) -> bool {
     if !p.at_line_start() {

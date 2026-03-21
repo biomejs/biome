@@ -7,171 +7,166 @@ use crate::MarkdownParser;
 use crate::lexer::MarkdownLexContext;
 use crate::syntax::inline_span_crosses_setext;
 
+// #region is_inline_html — top-level dispatcher and HTML construct predicates
+
 /// Check if text starting with `<` is valid inline HTML per CommonMark §6.8.
-/// Returns the length of the HTML element if valid, None otherwise.
+/// Returns the byte length of the HTML element if valid, None otherwise.
 ///
-/// Valid patterns:
-/// - Open tags: `<tagname>`, `<tagname attr="value">`, `<tagname />`
-/// - Close tags: `</tagname>`
-/// - Comments: `<!-- ... -->`
-/// - Processing instructions: `<? ... ?>`
-/// - Declarations: `<! ... >`
-/// - CDATA: `<![CDATA[ ... ]]>`
+/// Dispatches to construct-specific predicates in precedence order:
+/// comment → processing instruction → CDATA → declaration → close tag → open tag.
 pub(crate) fn is_inline_html(text: &str) -> Option<usize> {
     let bytes = text.as_bytes();
     if bytes.len() < 2 || bytes[0] != b'<' {
         return None;
     }
 
-    // HTML comment: <!-- ... -->
-    // Per CommonMark 0.31.2 §6.8, an HTML comment consists of `<!--` + text + `-->`,
-    // where text does not start with `>` or `->`, and does not end with `-`.
-    // Additionally, `<!-->` and `<!--->` are valid (degenerate) comments.
-    if bytes.starts_with(b"<!--") {
-        let rest = &bytes[4..];
-        // Handle degenerate comments: <!-->  and  <!--->
-        if rest.starts_with(b">") {
-            return Some(5); // <!-->
-        }
-        if rest.starts_with(b"->") {
-            return Some(6); // <!--->
-        }
-        // Find closing --> after <!--
-        if let Some(pos) = text[4..].find("-->") {
-            let body = &text[4..4 + pos];
-            // Body must not end with '-'
-            if body.ends_with('-') {
-                return None;
-            }
-            return Some(4 + pos + 3);
-        }
+    None.or_else(|| is_html_comment(bytes, text))
+        .or_else(|| is_html_processing_instruction(bytes, text))
+        .or_else(|| is_html_cdata(bytes, text))
+        .or_else(|| is_html_declaration(bytes, text))
+        .or_else(|| is_html_close_tag(bytes))
+        .or_else(|| is_html_open_tag(bytes))
+}
+
+/// HTML comment: `<!-- ... -->` per CommonMark §6.8.
+///
+/// Special cases: `<!-->` and `<!--->` are valid degenerate comments per spec.
+/// The body must not end with `-`, and `<!--` must not be immediately followed
+/// by `>` or `->` (those are the degenerate forms, handled explicitly).
+fn is_html_comment(bytes: &[u8], text: &str) -> Option<usize> {
+    if !bytes.starts_with(b"<!--") {
         return None;
     }
 
-    // Processing instruction: <? ... ?>
-    if bytes.len() >= 2 && bytes[1] == b'?' {
-        // Find closing ?>
-        if let Some(pos) = text[2..].find("?>") {
-            return Some(2 + pos + 2);
-        }
+    let rest = &bytes[4..];
+
+    // Degenerate comments: <!-->  and  <!--->
+    if rest.starts_with(b">") {
+        return Some(5);
+    }
+    if rest.starts_with(b"->") {
+        return Some(6);
+    }
+
+    // Find closing --> after <!--
+    let pos = text[4..].find("-->")?;
+    let body = &text[4..4 + pos];
+    // Body must not end with '-'
+    if body.ends_with('-') {
+        return None;
+    }
+    Some(4 + pos + 3)
+}
+
+/// Processing instruction: `<? ... ?>` per CommonMark §6.8.
+fn is_html_processing_instruction(bytes: &[u8], text: &str) -> Option<usize> {
+    if bytes.len() < 2 || bytes[1] != b'?' {
+        return None;
+    }
+    let pos = text[2..].find("?>")?;
+    Some(2 + pos + 2)
+}
+
+/// CDATA section: `<![CDATA[ ... ]]>` per CommonMark §6.8.
+fn is_html_cdata(bytes: &[u8], text: &str) -> Option<usize> {
+    if !bytes.starts_with(b"<![CDATA[") {
+        return None;
+    }
+    let pos = text[9..].find("]]>")?;
+    Some(9 + pos + 3)
+}
+
+/// Declaration: `<!` followed by an ASCII letter, then content until `>`.
+/// e.g., `<!DOCTYPE html>`.
+///
+/// Note: the spec says "uppercase ASCII letter" but this implementation accepts
+/// any ASCII letter (upper or lower) to match existing behavior.
+fn is_html_declaration(bytes: &[u8], text: &str) -> Option<usize> {
+    if bytes.len() < 3 || bytes[1] != b'!' || !bytes[2].is_ascii_alphabetic() {
+        return None;
+    }
+    let pos = text[2..].find('>')?;
+    Some(2 + pos + 1)
+}
+
+/// Close tag: `</tagname>` with optional trailing whitespace before `>`.
+fn is_html_close_tag(bytes: &[u8]) -> Option<usize> {
+    if bytes.len() < 4 || bytes[1] != b'/' {
+        return None;
+    }
+    if !bytes[2].is_ascii_alphabetic() {
         return None;
     }
 
-    // CDATA section: <![CDATA[ ... ]]>
-    if bytes.starts_with(b"<![CDATA[") {
-        // Find closing ]]>
-        if let Some(pos) = text[9..].find("]]>") {
-            return Some(9 + pos + 3);
-        }
-        return None;
+    // Tag name: [A-Za-z][A-Za-z0-9-]*
+    let mut i = 3;
+    while i < bytes.len() && (bytes[i].is_ascii_alphanumeric() || bytes[i] == b'-') {
+        i += 1;
     }
 
-    // Declaration: <! followed by uppercase letter, then content until >
-    // e.g., <!DOCTYPE html>
-    if bytes.len() >= 3 && bytes[1] == b'!' && bytes[2].is_ascii_alphabetic() {
-        // Find closing >
-        if let Some(pos) = text[2..].find('>') {
-            return Some(2 + pos + 1);
-        }
-        return None;
-    }
+    // Skip optional whitespace
+    i = skip_html_spaces(bytes, i);
 
-    // Close tag: </tagname>
-    if bytes.len() >= 4 && bytes[1] == b'/' {
-        if !bytes[2].is_ascii_alphabetic() {
-            return None;
-        }
-        // Tag name: [A-Za-z][A-Za-z0-9-]*
-        let mut i = 3;
-        while i < bytes.len() && (bytes[i].is_ascii_alphanumeric() || bytes[i] == b'-') {
-            i += 1;
-        }
-        // Skip optional whitespace
-        while i < bytes.len()
-            && (bytes[i] == b' '
-                || bytes[i] == b'\t'
-                || bytes[i] == b'\n'
-                || bytes[i] == b'\r'
-                || bytes[i] == b'\x0c')
-        {
-            i += 1;
-        }
-        // Must end with >
-        if i < bytes.len() && bytes[i] == b'>' {
-            return Some(i + 1);
-        }
-        return None;
+    // Must end with >
+    if i < bytes.len() && bytes[i] == b'>' {
+        return Some(i + 1);
     }
+    None
+}
 
-    // Open tag: <tagname ...> or <tagname ... />
-    // Defensive bounds check - should be guaranteed by earlier len check but be explicit
+// #endregion
+
+// #region Open tag predicate and attribute parsing
+
+/// Open tag: `<tagname ...>` or `<tagname ... />` per CommonMark §6.8.
+///
+/// The boundary check after the tag name rejects patterns like `<example.com>`
+/// — only whitespace, `>`, or `/` are valid after a tag name.
+fn is_html_open_tag(bytes: &[u8]) -> Option<usize> {
     if bytes.len() < 2 || !bytes[1].is_ascii_alphabetic() {
         return None;
     }
 
     // Tag name: [A-Za-z][A-Za-z0-9-]*
-    // Note: tag names cannot contain `.` (so <example.com> is NOT a valid tag)
     let mut i = 2;
     while i < bytes.len() && (bytes[i].is_ascii_alphanumeric() || bytes[i] == b'-') {
         i += 1;
     }
 
     // After tag name, must have valid boundary: whitespace, >, or /
-    // This prevents <example.com> from being treated as HTML
+    // This prevents <example.com> from being treated as HTML.
     if i >= bytes.len() {
         return None;
     }
     let boundary = bytes[i];
-    if boundary != b' '
-        && boundary != b'\t'
-        && boundary != b'\n'
-        && boundary != b'\r'
-        && boundary != b'\x0c'
-        && boundary != b'>'
-        && boundary != b'/'
-    {
+    if !is_html_space(boundary) && boundary != b'>' && boundary != b'/' {
         return None;
     }
 
-    // Handle immediate close or self-close
+    // Immediate close or self-close (no attributes)
     if boundary == b'>' {
         return Some(i + 1);
     }
     if boundary == b'/' {
-        if i + 1 < bytes.len() && bytes[i + 1] == b'>' {
-            return Some(i + 2);
-        }
-        return None;
+        return parse_self_close(bytes, i);
     }
 
-    // Has attributes - validate per CommonMark §6.8
+    // Has attributes — parse the tail
+    parse_html_open_tag_tail(bytes, i)
+}
 
-    let skip_spaces = |i: &mut usize| -> Option<bool> {
-        let mut skipped = false;
-        while *i < bytes.len() {
-            match bytes[*i] {
-                b' ' | b'\t' | b'\n' | b'\r' | b'\x0c' => {
-                    skipped = true;
-                    *i += 1;
-                }
-                _ => break,
-            }
-        }
-        Some(skipped)
-    };
-
-    let is_attr_name_start = |b: u8| b.is_ascii_alphabetic() || b == b'_' || b == b':';
-    let is_attr_name_continue =
-        |b: u8| b.is_ascii_alphanumeric() || b == b'_' || b == b':' || b == b'.' || b == b'-';
-
+/// Parse attributes and closing delimiter of an open tag.
+/// `i` points at the whitespace after the tag name.
+fn parse_html_open_tag_tail(bytes: &[u8], mut i: usize) -> Option<usize> {
     let mut need_space = true;
     // We already know the boundary char was whitespace, so first iteration has space.
     let mut had_space = true;
 
     loop {
         if need_space {
-            let s = skip_spaces(&mut i)?;
-            had_space = had_space || s;
+            let new_i = skip_html_spaces(bytes, i);
+            had_space = had_space || new_i > i;
+            i = new_i;
         }
         need_space = true;
 
@@ -184,10 +179,7 @@ pub(crate) fn is_inline_html(text: &str) -> Option<usize> {
             return Some(i + 1);
         }
         if bytes[i] == b'/' {
-            if i + 1 < bytes.len() && bytes[i + 1] == b'>' {
-                return Some(i + 2);
-            }
-            return None;
+            return parse_self_close(bytes, i);
         }
 
         // Attributes must be separated by whitespace
@@ -195,73 +187,134 @@ pub(crate) fn is_inline_html(text: &str) -> Option<usize> {
             return None;
         }
 
-        // Parse attribute name
-        if !is_attr_name_start(bytes[i]) {
+        // Parse one attribute
+        i = parse_html_attribute(bytes, i)?;
+
+        // After an attribute with a value, we consumed past the value and
+        // need to find whitespace at the top of the loop.
+        // After a boolean attribute (no value), had_space carries over
+        // from skip_spaces above.
+        had_space = false;
+    }
+}
+
+/// Parse a single HTML attribute (name, optional `=value`).
+/// Returns the position after the attribute, or None if invalid.
+fn parse_html_attribute(bytes: &[u8], mut i: usize) -> Option<usize> {
+    // Attribute name
+    if !is_html_attr_name_start(bytes[i]) {
+        return None;
+    }
+    i += 1;
+    while i < bytes.len() && is_html_attr_name_continue(bytes[i]) {
+        i += 1;
+    }
+
+    // Optional value specification
+    let after_name = skip_html_spaces(bytes, i);
+    if after_name < bytes.len() && bytes[after_name] == b'=' {
+        i = after_name + 1;
+        i = skip_html_spaces(bytes, i);
+        if i >= bytes.len() {
             return None;
         }
-        i += 1;
-        while i < bytes.len() && is_attr_name_continue(bytes[i]) {
-            i += 1;
-        }
+        i = parse_html_attribute_value(bytes, i)?;
+    } else {
+        // Boolean attribute — no value; caller will re-skip spaces.
+    }
 
-        // Optional whitespace and value
-        had_space = skip_spaces(&mut i)?;
-        if i < bytes.len() && bytes[i] == b'=' {
+    Some(i)
+}
+
+/// Parse an HTML attribute value (quoted or unquoted).
+/// Returns the position after the value, or None if invalid.
+///
+/// Unquoted values are terminated by whitespace or any of: `"`, `'`, `=`, `<`, `>`, `` ` ``.
+/// An empty unquoted value is invalid.
+fn parse_html_attribute_value(bytes: &[u8], mut i: usize) -> Option<usize> {
+    match bytes[i] {
+        b'"' => {
             i += 1;
-            skip_spaces(&mut i)?;
+            while i < bytes.len() && bytes[i] != b'"' {
+                i += 1;
+            }
             if i >= bytes.len() {
                 return None;
             }
-
-            match bytes[i] {
-                b'"' => {
-                    i += 1;
-                    while i < bytes.len() && bytes[i] != b'"' {
-                        i += 1;
-                    }
-                    if i >= bytes.len() {
-                        return None;
-                    }
-                    i += 1;
-                }
-                b'\'' => {
-                    i += 1;
-                    while i < bytes.len() && bytes[i] != b'\'' {
-                        i += 1;
-                    }
-                    if i >= bytes.len() {
-                        return None;
-                    }
-                    i += 1;
-                }
-                _ => {
-                    let start = i;
-                    while i < bytes.len() {
-                        let b = bytes[i];
-                        if b <= b' '
-                            || b == b'"'
-                            || b == b'\''
-                            || b == b'='
-                            || b == b'<'
-                            || b == b'>'
-                            || b == b'`'
-                        {
-                            break;
-                        }
-                        i += 1;
-                    }
-                    if i == start {
-                        return None;
-                    }
-                }
-            }
-            // After value, need to find whitespace at top of loop
-            had_space = false;
+            Some(i + 1) // skip closing quote
         }
-        // If no '=' was found, `had_space` from skip_spaces above carries over
-        // as the separator for the next attribute (boolean attribute case).
+        b'\'' => {
+            i += 1;
+            while i < bytes.len() && bytes[i] != b'\'' {
+                i += 1;
+            }
+            if i >= bytes.len() {
+                return None;
+            }
+            Some(i + 1) // skip closing quote
+        }
+        _ => {
+            // Unquoted value
+            let start = i;
+            while i < bytes.len() {
+                let b = bytes[i];
+                if b <= b' '
+                    || b == b'"'
+                    || b == b'\''
+                    || b == b'='
+                    || b == b'<'
+                    || b == b'>'
+                    || b == b'`'
+                {
+                    break;
+                }
+                i += 1;
+            }
+            if i == start {
+                return None; // empty unquoted value
+            }
+            Some(i)
+        }
     }
 }
+
+/// Check `/>` self-close at position `i` (pointing at `/`).
+fn parse_self_close(bytes: &[u8], i: usize) -> Option<usize> {
+    if i + 1 < bytes.len() && bytes[i + 1] == b'>' {
+        Some(i + 2)
+    } else {
+        None
+    }
+}
+
+// #endregion
+
+// #region Shared helpers
+
+fn is_html_space(b: u8) -> bool {
+    matches!(b, b' ' | b'\t' | b'\n' | b'\r' | b'\x0c')
+}
+
+/// Skip whitespace (space, tab, newline, carriage return, form feed).
+/// Returns the new position.
+fn skip_html_spaces(bytes: &[u8], mut i: usize) -> usize {
+    while i < bytes.len() && is_html_space(bytes[i]) {
+        i += 1;
+    }
+    i
+}
+
+fn is_html_attr_name_start(b: u8) -> bool {
+    b.is_ascii_alphabetic() || b == b'_' || b == b':'
+}
+
+fn is_html_attr_name_continue(b: u8) -> bool {
+    b.is_ascii_alphanumeric() || b == b'_' || b == b':' || b == b'.' || b == b'-'
+}
+
+// #endregion
+
+// #region parse_inline_html — CST node construction
 
 /// Parse raw inline HTML per CommonMark §6.8.
 ///
@@ -321,6 +374,10 @@ pub(crate) fn parse_inline_html(p: &mut MarkdownParser) -> ParsedSyntax {
 
     Present(m.complete(p, MD_INLINE_HTML))
 }
+
+// #endregion
+
+// #region Autolink parsing
 
 /// Check if the text after `<` looks like a URI autolink.
 /// Per CommonMark §6.4: scheme must be 2-32 chars, start with letter,
@@ -414,9 +471,15 @@ fn is_email_autolink(text: &str) -> bool {
         return false;
     }
 
-    for c in domain.chars() {
-        if !c.is_ascii_alphanumeric() && c != '-' && c != '.' {
+    for label in domain.split('.') {
+        if label.is_empty() || label.len() > 63 || label.starts_with('-') || label.ends_with('-') {
             return false;
+        }
+
+        for c in label.chars() {
+            if !c.is_ascii_alphanumeric() && c != '-' {
+                return false;
+            }
         }
     }
 
@@ -483,3 +546,5 @@ pub(crate) fn parse_autolink(p: &mut MarkdownParser) -> ParsedSyntax {
 
     Present(m.complete(p, MD_AUTOLINK))
 }
+
+// #endregion

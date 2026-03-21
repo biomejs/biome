@@ -1,0 +1,11 @@
+@supports (#{$name}) {
+  .a {
+    color: red;
+  }
+}
+
+@supports (margin-#{$side}) {
+  .b {
+    color: blue;
+  }
+}
