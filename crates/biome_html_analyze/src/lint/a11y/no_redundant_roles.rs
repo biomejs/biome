@@ -4,7 +4,7 @@ use biome_analyze::{
 use biome_aria_metadata::AriaRole;
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::AnyHtmlElement;
+use biome_html_syntax::{AnyHtmlElement, HtmlFileSource};
 use biome_rowan::{AstNode, BatchMutationExt, Text, TextRange, TokenText};
 use biome_rule_options::no_redundant_roles::NoRedundantRolesOptions;
 
@@ -73,6 +73,21 @@ impl Rule for NoRedundantRoles {
         let node = ctx.query();
 
         let element_name = node.name()?;
+
+        // In non-HTML files (Vue, Svelte, Astro), PascalCase elements like
+        // <Button> are components, not native HTML elements. Skip them.
+        // In plain HTML, tags are case-insensitive and handled by
+        // eq_ignore_ascii_case in the implicit role lookup.
+        let file_source = ctx.source_type::<HtmlFileSource>();
+        if !file_source.is_html()
+            && element_name
+                .text()
+                .as_bytes()
+                .first()
+                .is_some_and(u8::is_ascii_uppercase)
+        {
+            return None;
+        }
 
         let role_attribute = node.find_attribute_by_name("role")?;
         let role_value = role_attribute.initializer()?.value().ok()?.string_value()?;
@@ -237,13 +252,13 @@ fn get_implicit_role_for_element(element_name: &str, node: &AnyHtmlElement) -> O
         {
             AriaRole::Rowgroup
         } else if element_name.eq_ignore_ascii_case("th") {
-            let scope_value = get_attribute_value(node, "scope");
+            let scope_value = get_attribute_value_lowercase(node, "scope");
             match scope_value.as_deref() {
                 Some("col") => AriaRole::Columnheader,
                 _ => AriaRole::Rowheader,
             }
         } else if element_name.eq_ignore_ascii_case("input") {
-            let type_value = get_attribute_value(node, "type");
+            let type_value = get_attribute_value_lowercase(node, "type");
             match type_value.as_deref() {
                 Some("checkbox") => AriaRole::Checkbox,
                 Some("number") => AriaRole::Spinbutton,
@@ -339,4 +354,13 @@ fn get_attribute_value(node: &AnyHtmlElement, name: &str) -> Option<String> {
     let attr = node.find_attribute_by_name(name)?;
     let value = attr.initializer()?.value().ok()?.string_value()?;
     Some(value.text().to_string())
+}
+
+/// Like get_attribute_value but returns the value trimmed and lowercased.
+/// HTML enumerated attributes (like input type, th scope) are ASCII
+/// case-insensitive per spec.
+fn get_attribute_value_lowercase(node: &AnyHtmlElement, name: &str) -> Option<String> {
+    let attr = node.find_attribute_by_name(name)?;
+    let value = attr.initializer()?.value().ok()?.string_value()?;
+    Some(value.text().trim().to_ascii_lowercase())
 }
