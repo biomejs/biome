@@ -44,7 +44,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoRedundantRoles {
-        version: "2.4.0",
+        version: "next",
         name: "noRedundantRoles",
         language: "html",
         sources: &[
