@@ -741,19 +741,22 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
                 continue;
             }
 
-            return process_fix_all.finish(|| {
-                Ok(if params.should_format {
-                    Either::Left(format_node(
-                        params.settings.format_options::<JsonLanguage>(
-                            params.biome_path,
-                            &params.document_file_source,
-                        ),
-                        tree.syntax(),
-                    ))
-                } else {
-                    Either::Right(tree.syntax().to_string())
-                })
-            });
+            return process_fix_all.finish(
+                || {
+                    Ok(if params.should_format {
+                        Either::Left(format_node(
+                            params.settings.format_options::<JsonLanguage>(
+                                params.biome_path,
+                                &params.document_file_source,
+                            ),
+                            tree.syntax(),
+                        ))
+                    } else {
+                        Either::Right(tree.syntax().to_string())
+                    })
+                },
+                params.embeds_initial_indent,
+            );
         }
     }
 }

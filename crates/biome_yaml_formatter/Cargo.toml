@@ -28,7 +28,7 @@ schemars          = { workspace = true, optional = true }
 serde             = { workspace = true, features = ["derive"], optional = true }
 
 [dev-dependencies]
-biome_formatter   = { workspace = true, features = ["countme"] }
+biome_formatter   = { path = "../biome_formatter", features = ["countme"] }
 biome_yaml_parser = { path = "../biome_yaml_parser" }
 
 [features]

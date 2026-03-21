@@ -3,7 +3,10 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid-multiple-ref-types.vue
 ---
 # Input
-```ts
+```vue
+/* should not generate diagnostics */
+
+<script>
 import { ref, computed, toRef, toRefs, reactive, customRef, shallowRef } from 'vue'
 
 let count = ref(0)
@@ -40,5 +43,6 @@ console.log(`${cref.value}`)
 
 const foo = shallowRef({});
 const n = foo.value + 1
+</script>
 
 ```

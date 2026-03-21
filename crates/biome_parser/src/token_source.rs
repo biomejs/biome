@@ -74,6 +74,11 @@ pub trait TokenSource {
     /// Returns true if the current token is preceded by a line break
     fn has_preceding_line_break(&self) -> bool;
 
+    /// Returns true if the current token is preceded by whitespace trivia.
+    fn has_preceding_whitespace(&self) -> bool {
+        false
+    }
+
     fn bump(&mut self);
 
     fn skip_as_trivia(&mut self);

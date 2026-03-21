@@ -3,7 +3,8 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid-with-setup.vue
 ---
 # Input
-```ts
+```vue
+<script>
 export default {
   props: ['foo'],
   computed: {
@@ -25,47 +26,48 @@ export default {
     }
   }
 }
-
+</script>
 ```
 
 # Diagnostics
 ```
-invalid-with-setup.vue:2:11 lint/correctness/noVueDuplicateKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-with-setup.vue:3:11 lint/correctness/noVueDuplicateKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Duplicate key foo found in Vue component.
   
-    1 │ export default {
-  > 2 │   props: ['foo'],
+    1 │ <script>
+    2 │ export default {
+  > 3 │   props: ['foo'],
       │           ^^^^^
-    3 │   computed: {
-    4 │     foo () {}
+    4 │   computed: {
+    5 │     foo () {}
   
   i Key foo is also defined here.
   
-    2 │   props: ['foo'],
-    3 │   computed: {
-  > 4 │     foo () {}
+    3 │   props: ['foo'],
+    4 │   computed: {
+  > 5 │     foo () {}
       │     ^^^
-    5 │   },
-    6 │   data () {
+    6 │   },
+    7 │   data () {
   
   i Key foo is also defined here.
   
-     6 │   data () {
-     7 │     return {
-   > 8 │       foo: null
+     7 │   data () {
+     8 │     return {
+   > 9 │       foo: null
        │       ^^^
-     9 │     }
-    10 │   },
+    10 │     }
+    11 │   },
   
   i Key foo is also defined here.
   
-    10 │   },
-    11 │   methods: {
-  > 12 │     foo () {}
+    11 │   },
+    12 │   methods: {
+  > 13 │     foo () {}
        │     ^^^
-    13 │   },
-    14 │   setup () {
+    14 │   },
+    15 │   setup () {
   
   i Keys defined in different Vue component options (props, data, methods, computed) can conflict when accessed in the template. Rename the key to avoid conflicts.
   

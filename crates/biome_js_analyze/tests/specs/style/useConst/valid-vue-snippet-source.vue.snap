@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-vue-snippet-source.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+let hello = "Hello World";
+</script>
+
+<template>
+    <span>{hello}</span>
+</template>
+
+```

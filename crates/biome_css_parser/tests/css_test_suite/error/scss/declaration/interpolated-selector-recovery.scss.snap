@@ -1,0 +1,295 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+.test {
+  #{$name};
+  width: 1px;
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..1 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@1..6 "test" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssBogusBlock {
+                items: [
+                    L_CURLY@6..7 "{" [] [],
+                    CssBogus {
+                        items: [
+                            ScssInterpolatedIdentifier {
+                                items: ScssInterpolatedIdentifierPartList [
+                                    ScssInterpolation {
+                                        hash_token: HASH@7..11 "#" [Newline("\n"), Whitespace("  ")] [],
+                                        l_curly_token: L_CURLY@11..12 "{" [] [],
+                                        value: ScssExpression {
+                                            items: ScssExpressionItemList [
+                                                ScssIdentifier {
+                                                    dollar_token: DOLLAR@12..13 "$" [] [],
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@13..17 "name" [] [],
+                                                    },
+                                                },
+                                            ],
+                                        },
+                                        r_curly_token: R_CURLY@17..18 "}" [] [],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+            },
+        },
+        CssBogusRule {
+            items: [
+                SEMICOLON@18..19 ";" [] [],
+            ],
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@19..27 "width" [Newline("\n"), Whitespace("  ")] [],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [
+                        CssBogusSubSelector {
+                            items: [
+                                COLON@27..29 ":" [] [Whitespace(" ")],
+                            ],
+                        },
+                    ],
+                },
+                missing separator,
+                CssBogusSelector {
+                    items: [
+                        CSS_DIMENSION_VALUE@29..30 "1" [] [],
+                    ],
+                },
+                missing separator,
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@30..32 "px" [] [],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [],
+                },
+            ],
+            block: CssBogusBlock {
+                items: [
+                    CssDeclarationOrRuleList [
+                        CssEmptyDeclaration {
+                            semicolon_token: SEMICOLON@32..33 ";" [] [],
+                        },
+                    ],
+                    R_CURLY@33..35 "}" [Newline("\n")] [],
+                ],
+            },
+        },
+    ],
+    eof_token: EOF@35..36 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..36
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..35
+    0: CSS_QUALIFIED_RULE@0..18
+      0: CSS_SELECTOR_LIST@0..6
+        0: CSS_COMPOUND_SELECTOR@0..6
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..6
+            0: CSS_CLASS_SELECTOR@0..6
+              0: DOT@0..1 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@1..6
+                0: IDENT@1..6 "test" [] [Whitespace(" ")]
+      1: CSS_BOGUS_BLOCK@6..18
+        0: L_CURLY@6..7 "{" [] []
+        1: CSS_BOGUS@7..18
+          0: SCSS_INTERPOLATED_IDENTIFIER@7..18
+            0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@7..18
+              0: SCSS_INTERPOLATION@7..18
+                0: HASH@7..11 "#" [Newline("\n"), Whitespace("  ")] []
+                1: L_CURLY@11..12 "{" [] []
+                2: SCSS_EXPRESSION@12..17
+                  0: SCSS_EXPRESSION_ITEM_LIST@12..17
+                    0: SCSS_IDENTIFIER@12..17
+                      0: DOLLAR@12..13 "$" [] []
+                      1: CSS_IDENTIFIER@13..17
+                        0: IDENT@13..17 "name" [] []
+                3: R_CURLY@17..18 "}" [] []
+    1: CSS_BOGUS_RULE@18..19
+      0: SEMICOLON@18..19 ";" [] []
+    2: CSS_QUALIFIED_RULE@19..35
+      0: CSS_SELECTOR_LIST@19..32
+        0: CSS_COMPOUND_SELECTOR@19..29
+          0: CSS_NESTED_SELECTOR_LIST@19..19
+          1: CSS_TYPE_SELECTOR@19..27
+            0: (empty)
+            1: CSS_IDENTIFIER@19..27
+              0: IDENT@19..27 "width" [Newline("\n"), Whitespace("  ")] []
+          2: CSS_SUB_SELECTOR_LIST@27..29
+            0: CSS_BOGUS_SUB_SELECTOR@27..29
+              0: COLON@27..29 ":" [] [Whitespace(" ")]
+        1: (empty)
+        2: CSS_BOGUS_SELECTOR@29..30
+          0: CSS_DIMENSION_VALUE@29..30 "1" [] []
+        3: (empty)
+        4: CSS_COMPOUND_SELECTOR@30..32
+          0: CSS_NESTED_SELECTOR_LIST@30..30
+          1: CSS_TYPE_SELECTOR@30..32
+            0: (empty)
+            1: CSS_IDENTIFIER@30..32
+              0: IDENT@30..32 "px" [] []
+          2: CSS_SUB_SELECTOR_LIST@32..32
+      1: CSS_BOGUS_BLOCK@32..35
+        0: CSS_DECLARATION_OR_RULE_LIST@32..33
+          0: CSS_EMPTY_DECLARATION@32..33
+            0: SEMICOLON@32..33 ";" [] []
+        1: R_CURLY@33..35 "}" [Newline("\n")] []
+  2: EOF@35..36 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+interpolated-selector-recovery.scss:2:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a declaration, or an at rule but instead found ';'.
+  
+    1 │ .test {
+  > 2 │   #{$name};
+      │           ^
+    3 │   width: 1px;
+    4 │ }
+  
+  i Expected a declaration, or an at rule here.
+  
+    1 │ .test {
+  > 2 │   #{$name};
+      │           ^
+    3 │   width: 1px;
+    4 │ }
+  
+interpolated-selector-recovery.scss:3:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    1 │ .test {
+    2 │   #{$name};
+  > 3 │   width: 1px;
+      │          ^
+    4 │ }
+    5 │ 
+  
+  i Expected one of:
+  
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - state
+  - current
+  - past
+  - future
+  
+interpolated-selector-recovery.scss:3:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `px`
+  
+    1 │ .test {
+    2 │   #{$name};
+  > 3 │   width: 1px;
+      │           ^^
+    4 │ }
+    5 │ 
+  
+  i Remove px
+  
+interpolated-selector-recovery.scss:3:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `;`
+  
+    1 │ .test {
+    2 │   #{$name};
+  > 3 │   width: 1px;
+      │             ^
+    4 │ }
+    5 │ 
+  
+  i Remove ;
+  
+```

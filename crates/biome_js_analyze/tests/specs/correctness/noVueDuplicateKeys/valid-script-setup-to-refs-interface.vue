@@ -1,4 +1,4 @@
-<!-- should not emit diagnostics -->
+<!-- should not generate diagnostics -->
 
 <script setup lang="ts">
 import { toRefs } from 'vue';

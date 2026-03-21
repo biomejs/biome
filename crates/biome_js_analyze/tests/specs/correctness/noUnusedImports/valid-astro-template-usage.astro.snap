@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-astro-template-usage.astro
+---
+# Input
+```astro
+<!-- should not generate diagnostics -->
+---
+import Component from "./Component.vue"
+---
+
+<Component />
+
+```

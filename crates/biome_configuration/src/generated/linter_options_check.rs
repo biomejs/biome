@@ -274,6 +274,20 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "noDrizzleDeleteWithoutWhere",
+        TypeId::of::<
+            biome_rule_options::no_drizzle_delete_without_where::NoDrizzleDeleteWithoutWhereOptions,
+        >(),
+    ));
+    result.push((
+        "nursery",
+        "noDrizzleUpdateWithoutWhere",
+        TypeId::of::<
+            biome_rule_options::no_drizzle_update_without_where::NoDrizzleUpdateWithoutWhereOptions,
+        >(),
+    ));
+    result.push((
+        "nursery",
         "noDuplicateArgumentNames",
         TypeId::of::<
             biome_rule_options::no_duplicate_argument_names::NoDuplicateArgumentNamesOptions,

@@ -1,0 +1,15 @@
+.foo-#{$name {
+  color: red;
+}
+
+.#{} {
+  color: red;
+}
+
+:foo-#{$name} {
+  color: red;
+}
+
+::foo-#{$name} {
+  color: red;
+}

@@ -141,6 +141,20 @@ Snapshot commands:
 - `s` - skip snapshot
 - `q` - quit
 
+### Pruning Orphaned Snapshots
+
+When tests are removed or renamed, their old snapshot files become orphaned. **Never delete snapshot files manually with `rm`** — always use insta's built-in pruning:
+
+```shell
+# Delete unreferenced snapshots after a successful test run
+cargo insta test --unreferenced delete -p <crate_name>
+
+# Or scoped to specific tests
+cargo insta test --unreferenced delete -p biome_cli --test main -- "handle_vue"
+```
+
+This runs the tests first, then deletes any `.snap` files that no test references. It is the only safe way to clean up snapshots — manual `rm` risks deleting snapshots that are still needed or creating git conflicts.
+
 ### Test Lint Rules
 
 ```shell
@@ -241,8 +255,31 @@ The comment is strongly recommended and is also enforced when present: if the co
 
 - The comment is found by scanning the entire file's leading trivia — it does not have to be literally the first token, but putting it at the very top (line 1) is the established convention.
 - Fixture/support files (e.g. `foo.js`, `bar.ts`) that don't contain "valid" or "invalid" in their name do **not** require a comment, since they are not considered "valid test files" by the runner.
-- Files excluded from comment enforcement regardless of name: `.snap`, `.json`, `.jsonc`, `.svelte`, `.vue`, `.astro`,
-  `.html`.
+- Files excluded from comment enforcement regardless of name: `.snap`, `.json`, `.jsonc`.
+
+**HTML-ish files (`.vue`, `.svelte`, `.astro`, `.html`):**
+
+These files are analyzed via the workspace-based test path (`analyze_with_workspace` in `biome_test_utils`), which
+checks the expectation comment by scanning the **raw file content** (not the parsed AST trivia). Use an HTML comment
+at the very top of the file:
+
+```vue
+<!-- should not generate diagnostics -->
+<script setup lang="ts">
+const x = 1;
+</script>
+<template>{{ x }}</template>
+```
+
+```vue
+<!-- should generate diagnostics -->
+<script>
+debugger;
+</script>
+```
+
+The same rules apply: valid files **must** have the comment, invalid files **should** have it.
+Do not place the comment inside `<script>` — put it at the top level of the file as an HTML comment.
 
 ### Code Generation Commands
 

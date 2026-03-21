@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-vue-template-usage.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+import Component from "./Component.vue"
+</script>
+
+<template>
+    <Component />
+</template>
+
+```

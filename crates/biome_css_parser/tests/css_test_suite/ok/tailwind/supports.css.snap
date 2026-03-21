@@ -1,0 +1,223 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@import "tailwindcss/theme.css" supports(--color-*: initial);
+
+@supports (--color-*: initial) {
+  .box {
+    color: red;
+  }
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssImportAtRule {
+                import_token: IMPORT_KW@1..8 "import" [] [Whitespace(" ")],
+                url: CssString {
+                    value_token: CSS_STRING_LITERAL@8..32 "\"tailwindcss/theme.css\"" [] [Whitespace(" ")],
+                },
+                layer: missing (optional),
+                supports: CssImportSupports {
+                    supports_token: SUPPORTS_KW@32..40 "supports" [] [],
+                    l_paren_token: L_PAREN@40..41 "(" [] [],
+                    condition: CssDeclaration {
+                        property: CssGenericProperty {
+                            name: TwValueThemeReference {
+                                reference: CssDashedIdentifier {
+                                    value_token: IDENT@41..48 "--color" [] [],
+                                },
+                                minus_token: MINUS@48..49 "-" [] [],
+                                star_token: STAR@49..50 "*" [] [],
+                            },
+                            colon_token: COLON@50..52 ":" [] [Whitespace(" ")],
+                            value: CssGenericComponentValueList [
+                                CssIdentifier {
+                                    value_token: IDENT@52..59 "initial" [] [],
+                                },
+                            ],
+                        },
+                        important: missing (optional),
+                    },
+                    r_paren_token: R_PAREN@59..60 ")" [] [],
+                },
+                media: CssMediaQueryList [],
+                semicolon_token: SEMICOLON@60..61 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@61..64 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssSupportsAtRule {
+                declarator: CssSupportsAtRuleDeclarator {
+                    supports_token: SUPPORTS_KW@64..73 "supports" [] [Whitespace(" ")],
+                    condition: CssSupportsFeatureDeclaration {
+                        l_paren_token: L_PAREN@73..74 "(" [] [],
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: TwValueThemeReference {
+                                    reference: CssDashedIdentifier {
+                                        value_token: IDENT@74..81 "--color" [] [],
+                                    },
+                                    minus_token: MINUS@81..82 "-" [] [],
+                                    star_token: STAR@82..83 "*" [] [],
+                                },
+                                colon_token: COLON@83..85 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@85..92 "initial" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        r_paren_token: R_PAREN@92..94 ")" [] [Whitespace(" ")],
+                    },
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@94..95 "{" [] [],
+                    rules: CssRuleList [
+                        CssQualifiedRule {
+                            prelude: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: missing (optional),
+                                    sub_selectors: CssSubSelectorList [
+                                        CssClassSelector {
+                                            dot_token: DOT@95..99 "." [Newline("\n"), Whitespace("  ")] [],
+                                            name: CssCustomIdentifier {
+                                                value_token: IDENT@99..103 "box" [] [Whitespace(" ")],
+                                            },
+                                        },
+                                    ],
+                                },
+                            ],
+                            block: CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@103..104 "{" [] [],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@104..114 "color" [Newline("\n"), Whitespace("    ")] [],
+                                                },
+                                                colon_token: COLON@114..116 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@116..119 "red" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@119..120 ";" [] [],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@120..124 "}" [Newline("\n"), Whitespace("  ")] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@124..126 "}" [Newline("\n")] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@126..127 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..127
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..126
+    0: CSS_AT_RULE@0..61
+      0: AT@0..1 "@" [] []
+      1: CSS_IMPORT_AT_RULE@1..61
+        0: IMPORT_KW@1..8 "import" [] [Whitespace(" ")]
+        1: CSS_STRING@8..32
+          0: CSS_STRING_LITERAL@8..32 "\"tailwindcss/theme.css\"" [] [Whitespace(" ")]
+        2: (empty)
+        3: CSS_IMPORT_SUPPORTS@32..60
+          0: SUPPORTS_KW@32..40 "supports" [] []
+          1: L_PAREN@40..41 "(" [] []
+          2: CSS_DECLARATION@41..59
+            0: CSS_GENERIC_PROPERTY@41..59
+              0: TW_VALUE_THEME_REFERENCE@41..50
+                0: CSS_DASHED_IDENTIFIER@41..48
+                  0: IDENT@41..48 "--color" [] []
+                1: MINUS@48..49 "-" [] []
+                2: STAR@49..50 "*" [] []
+              1: COLON@50..52 ":" [] [Whitespace(" ")]
+              2: CSS_GENERIC_COMPONENT_VALUE_LIST@52..59
+                0: CSS_IDENTIFIER@52..59
+                  0: IDENT@52..59 "initial" [] []
+            1: (empty)
+          3: R_PAREN@59..60 ")" [] []
+        4: CSS_MEDIA_QUERY_LIST@60..60
+        5: SEMICOLON@60..61 ";" [] []
+    1: CSS_AT_RULE@61..126
+      0: AT@61..64 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_SUPPORTS_AT_RULE@64..126
+        0: CSS_SUPPORTS_AT_RULE_DECLARATOR@64..94
+          0: SUPPORTS_KW@64..73 "supports" [] [Whitespace(" ")]
+          1: CSS_SUPPORTS_FEATURE_DECLARATION@73..94
+            0: L_PAREN@73..74 "(" [] []
+            1: CSS_DECLARATION@74..92
+              0: CSS_GENERIC_PROPERTY@74..92
+                0: TW_VALUE_THEME_REFERENCE@74..83
+                  0: CSS_DASHED_IDENTIFIER@74..81
+                    0: IDENT@74..81 "--color" [] []
+                  1: MINUS@81..82 "-" [] []
+                  2: STAR@82..83 "*" [] []
+                1: COLON@83..85 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@85..92
+                  0: CSS_IDENTIFIER@85..92
+                    0: IDENT@85..92 "initial" [] []
+              1: (empty)
+            2: R_PAREN@92..94 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@94..126
+          0: L_CURLY@94..95 "{" [] []
+          1: CSS_RULE_LIST@95..124
+            0: CSS_QUALIFIED_RULE@95..124
+              0: CSS_SELECTOR_LIST@95..103
+                0: CSS_COMPOUND_SELECTOR@95..103
+                  0: CSS_NESTED_SELECTOR_LIST@95..95
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@95..103
+                    0: CSS_CLASS_SELECTOR@95..103
+                      0: DOT@95..99 "." [Newline("\n"), Whitespace("  ")] []
+                      1: CSS_CUSTOM_IDENTIFIER@99..103
+                        0: IDENT@99..103 "box" [] [Whitespace(" ")]
+              1: CSS_DECLARATION_OR_RULE_BLOCK@103..124
+                0: L_CURLY@103..104 "{" [] []
+                1: CSS_DECLARATION_OR_RULE_LIST@104..120
+                  0: CSS_DECLARATION_WITH_SEMICOLON@104..120
+                    0: CSS_DECLARATION@104..119
+                      0: CSS_GENERIC_PROPERTY@104..119
+                        0: CSS_IDENTIFIER@104..114
+                          0: IDENT@104..114 "color" [Newline("\n"), Whitespace("    ")] []
+                        1: COLON@114..116 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@116..119
+                          0: CSS_IDENTIFIER@116..119
+                            0: IDENT@116..119 "red" [] []
+                      1: (empty)
+                    1: SEMICOLON@119..120 ";" [] []
+                2: R_CURLY@120..124 "}" [Newline("\n"), Whitespace("  ")] []
+          2: R_CURLY@124..126 "}" [Newline("\n")] []
+  2: EOF@126..127 "" [Newline("\n")] []
+
+```

@@ -207,6 +207,8 @@ define_categories! {
     "lint/nursery/noMultiStr": "https://biomejs.dev/linter/rules/no-multi-str",
     "lint/nursery/noNestedPromises": "https://biomejs.dev/linter/rules/no-nested-promises",
     "lint/nursery/noParametersOnlyUsedInRecursion": "https://biomejs.dev/linter/rules/no-parameters-only-used-in-recursion",
+    "lint/nursery/noDrizzleDeleteWithoutWhere": "https://biomejs.dev/linter/rules/no-drizzle-delete-without-where",
+    "lint/nursery/noDrizzleUpdateWithoutWhere": "https://biomejs.dev/linter/rules/no-drizzle-update-without-where",
     "lint/nursery/noPlaywrightElementHandle": "https://biomejs.dev/linter/rules/no-playwright-element-handle",
     "lint/nursery/noPlaywrightEval": "https://biomejs.dev/linter/rules/no-playwright-eval",
     "lint/nursery/noPlaywrightForceOption": "https://biomejs.dev/linter/rules/no-playwright-force-option",

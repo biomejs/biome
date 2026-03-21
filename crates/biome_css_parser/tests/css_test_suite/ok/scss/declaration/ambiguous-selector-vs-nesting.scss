@@ -14,4 +14,20 @@
   font: bold {
     family: serif;
   }
+
+  #{$name}:hover {
+    color: green;
+  }
+
+  a:#{$pseudo} {
+    color: teal;
+  }
+
+  font-#{$weight}:bold {
+    color: purple;
+  }
+
+  font-#{$weight}::before {
+    color: orange;
+  }
 }

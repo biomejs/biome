@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-svelte-template-usage.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+<script>
+import Component from "./Component.vue"
+</script>
+
+<Component />
+
+```

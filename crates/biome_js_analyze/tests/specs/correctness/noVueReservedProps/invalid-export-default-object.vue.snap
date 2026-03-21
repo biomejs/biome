@@ -3,7 +3,8 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid-export-default-object.vue
 ---
 # Input
-```ts
+```vue
+<script>
 export default {
     props: {
         ref: String,
@@ -11,21 +12,22 @@ export default {
         foo: String,
     }
 };
+</script>
 
 ```
 
 # Diagnostics
 ```
-invalid-export-default-object.vue:3:9 lint/correctness/noVueReservedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-export-default-object.vue:4:9 lint/correctness/noVueReservedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × ref is a reserved attribute and cannot be used as props.
   
-    1 │ export default {
-    2 │     props: {
-  > 3 │         ref: String,
+    2 │ export default {
+    3 │     props: {
+  > 4 │         ref: String,
       │         ^^^
-    4 │         key: String,
-    5 │         foo: String,
+    5 │         key: String,
+    6 │         foo: String,
   
   i Rename the prop to avoid possible conflicts.
   
@@ -33,16 +35,16 @@ invalid-export-default-object.vue:3:9 lint/correctness/noVueReservedProps ━━
 ```
 
 ```
-invalid-export-default-object.vue:4:9 lint/correctness/noVueReservedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-export-default-object.vue:5:9 lint/correctness/noVueReservedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × key is a reserved attribute and cannot be used as props.
   
-    2 │     props: {
-    3 │         ref: String,
-  > 4 │         key: String,
+    3 │     props: {
+    4 │         ref: String,
+  > 5 │         key: String,
       │         ^^^
-    5 │         foo: String,
-    6 │     }
+    6 │         foo: String,
+    7 │     }
   
   i Rename the prop to avoid possible conflicts.
   

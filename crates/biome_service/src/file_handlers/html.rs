@@ -881,12 +881,30 @@ fn parse_embedded_nodes(
                 }
             }
 
-            // Pass 4: directive attributes via registry using captured embedded_file_source
+            // Pass 4: directive attributes and attributes which initializer is a text expression
             for element in html_root.syntax().descendants() {
                 // Handle special Svelte directives (bind:, class:, etc.)
                 if let Some(directive) = AnySvelteDirective::cast_ref(&element)
                     && let Some(initializer) = directive.initializer()
                     && let Some(candidate) = build_svelte_directive_candidate(&initializer)
+                    && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
+                        HostLanguage::Html,
+                        &candidate,
+                        &doc_file_source,
+                    )
+                    && let Some(parsed) = parse_matched_embed(
+                        &candidate,
+                        &embed_match,
+                        &mut ctx,
+                        Some(embedded_file_source),
+                    )
+                {
+                    nodes.push(parsed.node);
+                }
+
+                if let Some(attr) = HtmlAttribute::cast_ref(&element)
+                    && let Some(initializer) = attr.initializer()
+                    && let Some(candidate) = build_attribute_expression_candidate(&initializer)
                     && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
                         HostLanguage::Html,
                         &candidate,
@@ -1646,24 +1664,27 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         })?;
 
         if result.is_none() {
-            return process_fix_all.finish(|| {
-                Ok(if params.should_format {
-                    Either::Left(format_node(
-                        params.settings.format_options::<HtmlLanguage>(
-                            params.biome_path,
-                            &params.document_file_source,
-                        ),
-                        tree.syntax(),
-                        // NOTE: this is important that stays false. In this instance, the formatting of embedded
-                        // nodes has already happened, because the workspace during fix_all() process the embedded nodes
-                        // first, and then the root document. This means the embedded nodes don't need to be formatted and can
-                        // be printed verbatim by the formatter.
-                        false,
-                    ))
-                } else {
-                    Either::Right(tree.syntax().to_string())
-                })
-            });
+            return process_fix_all.finish(
+                || {
+                    Ok(if params.should_format {
+                        Either::Left(format_node(
+                            params.settings.format_options::<HtmlLanguage>(
+                                params.biome_path,
+                                &params.document_file_source,
+                            ),
+                            tree.syntax(),
+                            // NOTE: this is important that stays false. In this instance, the formatting of embedded
+                            // nodes has already happened, because the workspace during fix_all() process the embedded nodes
+                            // first, and then the root document. This means the embedded nodes don't need to be formatted and can
+                            // be printed verbatim by the formatter.
+                            false,
+                        ))
+                    } else {
+                        Either::Right(tree.syntax().to_string())
+                    })
+                },
+                params.embeds_initial_indent,
+            );
         }
     }
 }

@@ -487,6 +487,83 @@ fn pull_diagnostics_and_actions_for_js_file() {
     insta::assert_debug_snapshot!(result)
 }
 
+/// Regression test for https://github.com/biomejs/biome/issues/9506 and
+/// https://github.com/biomejs/biome/issues/9479.
+///
+/// `<script type="speculationrules">` and `<script type="application/ld+json">`
+/// contain JSON-like content that is NOT JavaScript. Before this fix, biome's
+/// embed registry fallback would treat these as JavaScript, causing false
+/// parse errors and incorrect lint diagnostics.
+#[test]
+fn no_diagnostics_for_unsupported_script_types() {
+    // speculationrules content is JSON-like but is NOT JavaScript.
+    // application/ld+json content is JSON-LD, also not JavaScript.
+    // Both should be silently skipped by the embed detector (no JS parse errors).
+    const FILE_CONTENT: &str = r#"<!doctype html>
+<html>
+  <head>
+    <script type="speculationrules">
+      {
+        "prerender": [
+          { "source": "list", "urls": ["/next-page"] }
+        ]
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Test"
+      }
+    </script>
+  </head>
+</html>"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from("/project/file.html"), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/file.html"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics_and_actions(PullDiagnosticsAndActionsParams {
+            path: BiomePath::new("/project/file.html"),
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            project_key,
+            categories: Default::default(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    assert!(
+        result.diagnostics.is_empty(),
+        "Expected no diagnostics for unsupported script types, got: {:#?}",
+        result.diagnostics
+    );
+}
+
 #[test]
 fn format_js_with_embedded_css() {
     const FILE_PATH: &str = "/project/file.js";

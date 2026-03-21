@@ -3,7 +3,9 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid-custom.vue
 ---
 # Input
-```ts
+```vue
+<!-- should not generate diagnostics -->
+<script lang="ts" setup>
 import { ref } from 'vue'
 
 interface Foo {}
@@ -20,5 +22,8 @@ defineProps({})
 const emit = defineEmits([])
 
 const count = ref(0)
+</script>
+
+<template><div /></template>
 
 ```

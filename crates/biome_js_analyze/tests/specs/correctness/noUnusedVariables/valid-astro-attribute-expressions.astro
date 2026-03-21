@@ -1,0 +1,23 @@
+<!-- should not generate diagnostics -->
+---
+const handler = () => {};
+const dynamicId = "foo";
+const dynamicClass = "bar";
+const label = "Click me";
+const pageTitle = "Home";
+const sectionId = "main";
+const dataTheme = "dark";
+const items = ["a", "b", "c"];
+const showList = true;
+---
+
+<html>
+    <head><title>{pageTitle}</title></head>
+    <body>
+        <button onclick={handler} id={dynamicId} class={dynamicClass} aria-label={label}>Click</button>
+        <section id={sectionId} data-theme={dataTheme}>
+            <div set:html={items.map(i => `<li>${i}</li>`).join("")} />
+            <span set:text={showList ? label : "hidden"} />
+        </section>
+    </body>
+</html>

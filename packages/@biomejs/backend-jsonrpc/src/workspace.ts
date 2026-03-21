@@ -1091,6 +1091,7 @@ export type JsonTrailingCommas = "none" | "all";
  * Rule domains
  */
 export type RuleDomain =
+	| "drizzle"
 	| "react"
 	| "test"
 	| "solid"
@@ -2101,6 +2102,16 @@ See https://biomejs.dev/linter/rules/no-deprecated-media-type
 See https://biomejs.dev/linter/rules/no-div-regex 
 	 */
 	noDivRegex?: NoDivRegexConfiguration;
+	/**
+	* Require .where() to be called when using .delete() with Drizzle ORM.
+See https://biomejs.dev/linter/rules/no-drizzle-delete-without-where 
+	 */
+	noDrizzleDeleteWithoutWhere?: NoDrizzleDeleteWithoutWhereConfiguration;
+	/**
+	* Require .where() to be called when using .update() with Drizzle ORM.
+See https://biomejs.dev/linter/rules/no-drizzle-update-without-where 
+	 */
+	noDrizzleUpdateWithoutWhere?: NoDrizzleUpdateWithoutWhereConfiguration;
 	/**
 	* Require all argument names for fields & directives to be unique.
 See https://biomejs.dev/linter/rules/no-duplicate-argument-names 
@@ -4145,6 +4156,12 @@ export type NoDeprecatedMediaTypeConfiguration =
 export type NoDivRegexConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDivRegexOptions;
+export type NoDrizzleDeleteWithoutWhereConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDrizzleDeleteWithoutWhereOptions;
+export type NoDrizzleUpdateWithoutWhereConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDrizzleUpdateWithoutWhereOptions;
 export type NoDuplicateArgumentNamesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateArgumentNamesOptions;
@@ -5808,6 +5825,14 @@ export interface RuleWithNoDivRegexOptions {
 	level: RulePlainConfiguration;
 	options?: NoDivRegexOptions;
 }
+export interface RuleWithNoDrizzleDeleteWithoutWhereOptions {
+	level: RulePlainConfiguration;
+	options?: NoDrizzleDeleteWithoutWhereOptions;
+}
+export interface RuleWithNoDrizzleUpdateWithoutWhereOptions {
+	level: RulePlainConfiguration;
+	options?: NoDrizzleUpdateWithoutWhereOptions;
+}
 export interface RuleWithNoDuplicateArgumentNamesOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicateArgumentNamesOptions;
@@ -7443,6 +7468,18 @@ export interface NoDeprecatedMediaTypeOptions {
 	allow?: string[];
 }
 export type NoDivRegexOptions = {};
+export interface NoDrizzleDeleteWithoutWhereOptions {
+	/**
+	 * List of variable names to consider as Drizzle ORM instances.
+	 */
+	drizzleObjectName?: string[];
+}
+export interface NoDrizzleUpdateWithoutWhereOptions {
+	/**
+	 * List of variable names to consider as Drizzle ORM instances.
+	 */
+	drizzleObjectName?: string[];
+}
 export type NoDuplicateArgumentNamesOptions = {};
 export type NoDuplicateAttributesOptions = {};
 export type NoDuplicateEnumValueNamesOptions = {};
@@ -8594,6 +8631,8 @@ export type Category =
 	| "lint/nursery/noMultiStr"
 	| "lint/nursery/noNestedPromises"
 	| "lint/nursery/noParametersOnlyUsedInRecursion"
+	| "lint/nursery/noDrizzleDeleteWithoutWhere"
+	| "lint/nursery/noDrizzleUpdateWithoutWhere"
 	| "lint/nursery/noPlaywrightElementHandle"
 	| "lint/nursery/noPlaywrightEval"
 	| "lint/nursery/noPlaywrightForceOption"

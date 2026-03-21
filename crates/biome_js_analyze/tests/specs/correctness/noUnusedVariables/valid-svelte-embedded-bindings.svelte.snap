@@ -1,0 +1,24 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-svelte-embedded-bindings.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+<script>
+import { Component } from "./component.svelte";
+let hello = "Hello World";
+let array = [];
+let props = [];
+</script>
+
+<html>
+    <span>{hello}</span>
+    <span>{notDefined}</span>
+    {#each array as item}
+    {/each}
+    <Component />
+    <input {...props} />
+</html>
+
+```

@@ -3,29 +3,33 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid-props-only.vue
 ---
 # Input
-```ts
+```vue
+<script>
 // should generate diagnostics
 // Options API with props only - still Options API, not Composition API
 export default {
   props: ['message']
 }
+</script>
+
 
 ```
 
 # Diagnostics
 ```
-invalid-props-only.vue:3:16 lint/nursery/noVueOptionsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-props-only.vue:4:16 lint/nursery/noVueOptionsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Using the Options API is not allowed.
   
-    1 │ // should generate diagnostics
-    2 │ // Options API with props only - still Options API, not Composition API
-  > 3 │ export default {
+    2 │ // should generate diagnostics
+    3 │ // Options API with props only - still Options API, not Composition API
+  > 4 │ export default {
       │                ^
-  > 4 │   props: ['message']
-  > 5 │ }
+  > 5 │   props: ['message']
+  > 6 │ }
       │ ^
-    6 │ 
+    7 │ </script>
+    8 │ 
   
   i Although the Options API is still supported by Vue, using the Composition API is recommended, and makes it possible to use Vue's Vapor mode for better performance.
   

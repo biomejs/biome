@@ -188,6 +188,8 @@ pub enum RuleSource<'a> {
     EslintYml(&'a str),
     /// Rules from [Eslint CSS](https://github.com/eslint/css)
     EslintCss(&'a str),
+    /// Rules from [Eslint Plugin Drizzle](https://orm.drizzle.team/docs/eslint-plugin)
+    EslintDrizzle(&'a str),
     /// Action for https://github.com/keithamus/sort-package-json
     SortPackageJson,
 }
@@ -244,6 +246,7 @@ impl<'a> std::fmt::Display for RuleSource<'a> {
             Self::EslintMarkdown(_) => write!(f, "@eslint/markdown"),
             Self::EslintYml(_) => write!(f, "eslint-plugin-yml"),
             Self::EslintCss(_) => write!(f, "@eslint/css"),
+            Self::EslintDrizzle(_) => write!(f, "eslint-plugin-drizzle"),
             Self::SortPackageJson => write!(f, "sort-package-json"),
         }
     }
@@ -310,7 +313,8 @@ impl<'a> RuleSource<'a> {
             Self::EslintMarkdown(_) => 42,
             Self::EslintYml(_) => 43,
             Self::EslintCss(_) => 44,
-            Self::SortPackageJson => 45,
+            Self::EslintDrizzle(_) => 45,
+            Self::SortPackageJson => 46,
         }
     }
 
@@ -374,7 +378,8 @@ impl<'a> RuleSource<'a> {
             | Self::EslintPlaywright(rule_name)
             | Self::EslintJson(rule_name)
             | Self::EslintMarkdown(rule_name)
-            | Self::EslintYml(rule_name) => rule_name,
+            | Self::EslintYml(rule_name)
+            | Self::EslintDrizzle(rule_name) => rule_name,
             Self::SortPackageJson => "sort-package-json",
         }
     }
@@ -427,6 +432,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintMarkdown(_) => "markdown",
             Self::EslintYml(_) => "yml",
             Self::EslintCss(_) => "css",
+            Self::EslintDrizzle(_) => "drizzle",
         }
     }
 
@@ -485,6 +491,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintMarkdown(rule_name) => format!("https://github.com/eslint/markdown/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintYml(rule_name) => format!("https://ota-meshi.github.io/eslint-plugin-yml/rules/{rule_name}.html"),
             Self::EslintCss(rule_name) => format!("https://github.com/eslint/css/blob/main/docs/rules/{rule_name}.md"),
+            Self::EslintDrizzle(rule_name) => format!("https://orm.drizzle.team/docs/eslint-plugin#{rule_name}"),
             Self::SortPackageJson => "https://github.com/keithamus/sort-package-json".to_string(),
         }
     }
@@ -574,6 +581,8 @@ impl RuleSourceKind {
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum RuleDomain {
+    /// Drizzle ORM rules
+    Drizzle,
     /// React library rules
     React,
     /// Testing rules
@@ -602,6 +611,7 @@ impl Display for RuleDomain {
     fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
         // use lower case naming, it needs to match the name of the configuration
         match self {
+            Self::Drizzle => fmt.write_str("drizzle"),
             Self::React => fmt.write_str("react"),
             Self::Test => fmt.write_str("test"),
             Self::Solid => fmt.write_str("solid"),
@@ -655,6 +665,7 @@ impl RuleDomain {
             Self::Turborepo => &[&("turbo", ">=1.0.0")],
             Self::Playwright => &[&("@playwright/test", ">=1.0.0")],
             Self::Types => &[],
+            Self::Drizzle => &[&("drizzle-orm", ">=0.9.0")],
         }
     }
 
@@ -695,6 +706,7 @@ impl RuleDomain {
             Self::Turborepo => &[],
             Self::Playwright => &["test", "expect"],
             Self::Types => &[],
+            Self::Drizzle => &[],
         }
     }
 
@@ -711,6 +723,7 @@ impl RuleDomain {
             Self::Turborepo => "turborepo",
             Self::Playwright => "playwright",
             Self::Types => "types",
+            Self::Drizzle => "drizzle",
         }
     }
 }
@@ -731,6 +744,7 @@ impl FromStr for RuleDomain {
             "turborepo" => Ok(Self::Turborepo),
             "playwright" => Ok(Self::Playwright),
             "types" => Ok(Self::Types),
+            "drizzle" => Ok(Self::Drizzle),
             _ => Err("Invalid rule domain"),
         }
     }
