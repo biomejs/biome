@@ -7,6 +7,7 @@ use biome_diagnostics::Severity;
 use biome_html_syntax::{AnyHtmlElement, HtmlFileSource};
 use biome_rowan::{AstNode, BatchMutationExt, Text, TextRange, TokenText};
 use biome_rule_options::no_redundant_roles::NoRedundantRolesOptions;
+use biome_string_case::StrLikeExtension;
 
 use crate::HtmlRuleAction;
 
@@ -76,8 +77,6 @@ impl Rule for NoRedundantRoles {
 
         // In non-HTML files (Vue, Svelte, Astro), PascalCase elements like
         // <Button> are components, not native HTML elements. Skip them.
-        // In plain HTML, tags are case-insensitive and handled by
-        // eq_ignore_ascii_case in the implicit role lookup.
         let file_source = ctx.source_type::<HtmlFileSource>();
         if !file_source.is_html()
             && element_name
@@ -94,8 +93,11 @@ impl Rule for NoRedundantRoles {
         let role_trimmed = role_value.text().trim();
 
         let explicit_role = AriaRole::from_roles(role_trimmed)?;
-        let implicit_role =
-            get_implicit_role_for_element(element_name.text(), node)?;
+
+        // Lowercase the element name once for the match table.
+        // HTML tag names are case-insensitive but the parser preserves source casing.
+        let name_lower = element_name.text().to_ascii_lowercase_cow();
+        let implicit_role = get_implicit_role_for_element(&name_lower, node)?;
 
         if explicit_role == implicit_role {
             return Some(RuleState {
@@ -137,129 +139,61 @@ impl Rule for NoRedundantRoles {
 ///
 /// Based on the WAI-ARIA spec: <https://www.w3.org/TR/html-aria/>
 ///
-/// Uses case-insensitive matching since HTML tag names preserve their
-/// original casing from the source.
+/// Expects `element_name` to already be lowercased.
 fn get_implicit_role_for_element(element_name: &str, node: &AnyHtmlElement) -> Option<AriaRole> {
-    // HTML tag names are case-insensitive, so match against lowercase.
-    // Using eq_ignore_ascii_case via the match guard to avoid allocating.
-    Some(
-        if element_name.eq_ignore_ascii_case("article") {
-            AriaRole::Article
-        } else if element_name.eq_ignore_ascii_case("aside") {
-            AriaRole::Complementary
-        } else if element_name.eq_ignore_ascii_case("blockquote") {
-            AriaRole::Blockquote
-        } else if element_name.eq_ignore_ascii_case("button") {
-            AriaRole::Button
-        } else if element_name.eq_ignore_ascii_case("caption")
-            || element_name.eq_ignore_ascii_case("figcaption")
-            || element_name.eq_ignore_ascii_case("legend")
-        {
-            AriaRole::Caption
-        } else if element_name.eq_ignore_ascii_case("code") {
-            AriaRole::Code
-        } else if element_name.eq_ignore_ascii_case("datalist") {
-            AriaRole::Listbox
-        } else if element_name.eq_ignore_ascii_case("del")
-            || element_name.eq_ignore_ascii_case("s")
-        {
-            AriaRole::Deletion
-        } else if element_name.eq_ignore_ascii_case("dd") {
-            AriaRole::Definition
-        } else if element_name.eq_ignore_ascii_case("dt")
-            || element_name.eq_ignore_ascii_case("dfn")
-        {
-            AriaRole::Term
-        } else if element_name.eq_ignore_ascii_case("mark") {
-            AriaRole::Mark
-        } else if element_name.eq_ignore_ascii_case("dialog") {
-            AriaRole::Dialog
-        } else if element_name.eq_ignore_ascii_case("em") {
-            AriaRole::Emphasis
-        } else if element_name.eq_ignore_ascii_case("figure") {
-            AriaRole::Figure
-        } else if element_name.eq_ignore_ascii_case("form") {
-            AriaRole::Form
-        } else if element_name.eq_ignore_ascii_case("hr") {
-            AriaRole::Separator
-        } else if element_name.eq_ignore_ascii_case("html") {
-            AriaRole::Document
-        } else if element_name.eq_ignore_ascii_case("ins") {
-            AriaRole::Insertion
-        } else if element_name.eq_ignore_ascii_case("main") {
-            AriaRole::Main
-        } else if element_name.eq_ignore_ascii_case("marquee") {
-            AriaRole::Marquee
-        } else if element_name.eq_ignore_ascii_case("math") {
-            AriaRole::Math
-        } else if element_name.eq_ignore_ascii_case("menu")
-            || element_name.eq_ignore_ascii_case("ul")
-            || element_name.eq_ignore_ascii_case("ol")
-        {
-            AriaRole::List
-        } else if element_name.eq_ignore_ascii_case("meter") {
-            AriaRole::Meter
-        } else if element_name.eq_ignore_ascii_case("nav") {
-            AriaRole::Navigation
-        } else if element_name.eq_ignore_ascii_case("li") {
-            AriaRole::Listitem
-        } else if element_name.eq_ignore_ascii_case("option") {
-            AriaRole::Option
-        } else if element_name.eq_ignore_ascii_case("hgroup")
-            || element_name.eq_ignore_ascii_case("optgroup")
-            || element_name.eq_ignore_ascii_case("address")
-            || element_name.eq_ignore_ascii_case("details")
-            || element_name.eq_ignore_ascii_case("fieldset")
-        {
-            AriaRole::Group
-        } else if element_name.eq_ignore_ascii_case("output") {
-            AriaRole::Status
-        } else if element_name.eq_ignore_ascii_case("p") {
-            AriaRole::Paragraph
-        } else if element_name.eq_ignore_ascii_case("progress") {
-            AriaRole::Progressbar
-        } else if element_name.eq_ignore_ascii_case("search") {
-            AriaRole::Search
-        } else if element_name.eq_ignore_ascii_case("strong") {
-            AriaRole::Strong
-        } else if element_name.eq_ignore_ascii_case("sub") {
-            AriaRole::Subscript
-        } else if element_name.eq_ignore_ascii_case("sup") {
-            AriaRole::Superscript
-        } else if element_name.eq_ignore_ascii_case("svg") {
-            AriaRole::GraphicsDocument
-        } else if element_name.eq_ignore_ascii_case("table") {
-            AriaRole::Table
-        } else if element_name.eq_ignore_ascii_case("textarea") {
-            AriaRole::Textbox
-        } else if element_name.eq_ignore_ascii_case("tr") {
-            AriaRole::Row
-        } else if element_name.eq_ignore_ascii_case("td") {
-            AriaRole::Cell
-        } else if element_name.eq_ignore_ascii_case("time") {
-            AriaRole::Time
-        } else if element_name.eq_ignore_ascii_case("h1")
-            || element_name.eq_ignore_ascii_case("h2")
-            || element_name.eq_ignore_ascii_case("h3")
-            || element_name.eq_ignore_ascii_case("h4")
-            || element_name.eq_ignore_ascii_case("h5")
-            || element_name.eq_ignore_ascii_case("h6")
-        {
-            AriaRole::Heading
-        } else if element_name.eq_ignore_ascii_case("tbody")
-            || element_name.eq_ignore_ascii_case("tfoot")
-            || element_name.eq_ignore_ascii_case("thead")
-        {
-            AriaRole::Rowgroup
-        } else if element_name.eq_ignore_ascii_case("th") {
-            let scope_value = get_attribute_value_lowercase(node, "scope");
-            match scope_value.as_deref() {
+    Some(match element_name {
+        "article" => AriaRole::Article,
+        "aside" => AriaRole::Complementary,
+        "blockquote" => AriaRole::Blockquote,
+        "button" => AriaRole::Button,
+        "caption" | "figcaption" | "legend" => AriaRole::Caption,
+        "code" => AriaRole::Code,
+        "datalist" => AriaRole::Listbox,
+        "del" | "s" => AriaRole::Deletion,
+        "dd" => AriaRole::Definition,
+        "dt" | "dfn" => AriaRole::Term,
+        "mark" => AriaRole::Mark,
+        "dialog" => AriaRole::Dialog,
+        "em" => AriaRole::Emphasis,
+        "figure" => AriaRole::Figure,
+        "form" => AriaRole::Form,
+        "hr" => AriaRole::Separator,
+        "html" => AriaRole::Document,
+        "ins" => AriaRole::Insertion,
+        "main" => AriaRole::Main,
+        "marquee" => AriaRole::Marquee,
+        "math" => AriaRole::Math,
+        "menu" | "ul" | "ol" => AriaRole::List,
+        "meter" => AriaRole::Meter,
+        "nav" => AriaRole::Navigation,
+        "li" => AriaRole::Listitem,
+        "option" => AriaRole::Option,
+        "hgroup" | "optgroup" | "address" | "details" | "fieldset" => AriaRole::Group,
+        "output" => AriaRole::Status,
+        "p" => AriaRole::Paragraph,
+        "progress" => AriaRole::Progressbar,
+        "search" => AriaRole::Search,
+        "strong" => AriaRole::Strong,
+        "sub" => AriaRole::Subscript,
+        "sup" => AriaRole::Superscript,
+        "svg" => AriaRole::GraphicsDocument,
+        "table" => AriaRole::Table,
+        "textarea" => AriaRole::Textbox,
+        "tr" => AriaRole::Row,
+        "td" => AriaRole::Cell,
+        "time" => AriaRole::Time,
+        "h1" | "h2" | "h3" | "h4" | "h5" | "h6" => AriaRole::Heading,
+        "tbody" | "tfoot" | "thead" => AriaRole::Rowgroup,
+        "th" => {
+            let scope_lower = get_attribute_lowercase(node, "scope");
+            match scope_lower.as_deref() {
                 Some("col") => AriaRole::Columnheader,
                 _ => AriaRole::Rowheader,
             }
-        } else if element_name.eq_ignore_ascii_case("input") {
-            let type_value = get_attribute_value_lowercase(node, "type");
-            match type_value.as_deref() {
+        }
+        "input" => {
+            let type_lower = get_attribute_lowercase(node, "type");
+            match type_lower.as_deref() {
                 Some("checkbox") => AriaRole::Checkbox,
                 Some("number") => AriaRole::Spinbutton,
                 Some("radio") => AriaRole::Radio,
@@ -284,16 +218,15 @@ fn get_implicit_role_for_element(element_name: &str, node: &AnyHtmlElement) -> O
                     }
                 }
             }
-        } else if element_name.eq_ignore_ascii_case("a")
-            || element_name.eq_ignore_ascii_case("area")
-            || element_name.eq_ignore_ascii_case("link")
-        {
+        }
+        "a" | "area" | "link" => {
             if node.find_attribute_by_name("href").is_some() {
                 AriaRole::Link
             } else {
                 AriaRole::Generic
             }
-        } else if element_name.eq_ignore_ascii_case("img") {
+        }
+        "img" => {
             let alt_value = get_attribute_value(node, "alt");
             match alt_value.as_deref() {
                 Some(value) if !value.trim().is_empty() => AriaRole::Img,
@@ -309,7 +242,8 @@ fn get_implicit_role_for_element(element_name: &str, node: &AnyHtmlElement) -> O
                 }
                 None => AriaRole::Img,
             }
-        } else if element_name.eq_ignore_ascii_case("section") {
+        }
+        "section" => {
             if node.find_attribute_by_name("aria-labelledby").is_some()
                 || node.find_attribute_by_name("aria-label").is_some()
                 || node.find_attribute_by_name("title").is_some()
@@ -318,7 +252,8 @@ fn get_implicit_role_for_element(element_name: &str, node: &AnyHtmlElement) -> O
             } else {
                 AriaRole::Generic
             }
-        } else if element_name.eq_ignore_ascii_case("select") {
+        }
+        "select" => {
             let size = get_attribute_value(node, "size")
                 .and_then(|v| v.parse::<i32>().ok())
                 .unwrap_or(0);
@@ -327,27 +262,11 @@ fn get_implicit_role_for_element(element_name: &str, node: &AnyHtmlElement) -> O
             } else {
                 AriaRole::Listbox
             }
-        } else if element_name.eq_ignore_ascii_case("b")
-            || element_name.eq_ignore_ascii_case("bdi")
-            || element_name.eq_ignore_ascii_case("bdo")
-            || element_name.eq_ignore_ascii_case("body")
-            || element_name.eq_ignore_ascii_case("data")
-            || element_name.eq_ignore_ascii_case("div")
-            || element_name.eq_ignore_ascii_case("i")
-            || element_name.eq_ignore_ascii_case("q")
-            || element_name.eq_ignore_ascii_case("samp")
-            || element_name.eq_ignore_ascii_case("small")
-            || element_name.eq_ignore_ascii_case("span")
-            || element_name.eq_ignore_ascii_case("u")
-            || element_name.eq_ignore_ascii_case("pre")
-            || element_name.eq_ignore_ascii_case("header")
-            || element_name.eq_ignore_ascii_case("footer")
-        {
-            AriaRole::Generic
-        } else {
-            return None;
-        },
-    )
+        }
+        "b" | "bdi" | "bdo" | "body" | "data" | "div" | "i" | "q" | "samp" | "small"
+        | "span" | "u" | "pre" | "header" | "footer" => AriaRole::Generic,
+        _ => return None,
+    })
 }
 
 fn get_attribute_value(node: &AnyHtmlElement, name: &str) -> Option<String> {
@@ -356,11 +275,11 @@ fn get_attribute_value(node: &AnyHtmlElement, name: &str) -> Option<String> {
     Some(value.text().to_string())
 }
 
-/// Like get_attribute_value but returns the value trimmed and lowercased.
-/// HTML enumerated attributes (like input type, th scope) are ASCII
-/// case-insensitive per spec.
-fn get_attribute_value_lowercase(node: &AnyHtmlElement, name: &str) -> Option<String> {
+/// Get an attribute value, trimmed and lowercased.
+/// HTML enumerated attributes (input type, th scope) are ASCII case-insensitive per spec.
+fn get_attribute_lowercase(node: &AnyHtmlElement, name: &str) -> Option<String> {
     let attr = node.find_attribute_by_name(name)?;
     let value = attr.initializer()?.value().ok()?.string_value()?;
-    Some(value.text().trim().to_ascii_lowercase())
+    let text = value.text().trim();
+    Some(text.to_ascii_lowercase_cow().into_owned())
 }
