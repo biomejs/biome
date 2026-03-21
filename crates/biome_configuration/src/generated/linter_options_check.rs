@@ -1931,6 +1931,12 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         >(),
     ));
     result.push((
+        "nursery",
+        "useReduceTypeParameter",
+        TypeId::of::<biome_rule_options::use_reduce_type_parameter::UseReduceTypeParameterOptions>(
+        ),
+    ));
+    result.push((
         "complexity",
         "useRegexLiterals",
         TypeId::of::<biome_rule_options::use_regex_literals::UseRegexLiteralsOptions>(),

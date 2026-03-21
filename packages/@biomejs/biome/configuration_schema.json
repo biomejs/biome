@@ -6410,6 +6410,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useReduceTypeParameter": {
+					"description": "Enforce using a type parameter on Array#reduce instead of casting the initial value.\nSee https://biomejs.dev/linter/rules/use-reduce-type-parameter",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseReduceTypeParameterConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useRegexpExec": {
 					"description": "Enforce RegExp#exec over String#match if no global flag is provided.\nSee https://biomejs.dev/linter/rules/use-regexp-exec",
 					"anyOf": [
@@ -10963,6 +10970,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseReduceTypeParameterOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseReduceTypeParameterOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseRegexLiteralsOptions": {
 			"type": "object",
 			"properties": {
@@ -14319,6 +14336,16 @@
 					"type": ["boolean", "null"]
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseReduceTypeParameterConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseReduceTypeParameterOptions" }
+			]
+		},
+		"UseReduceTypeParameterOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseRegexLiteralsConfiguration": {
