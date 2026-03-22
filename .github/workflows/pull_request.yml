@@ -69,13 +69,16 @@ jobs:
 
   deny:
     name: Cargo Deny
-    runs-on: depot-ubuntu-24.04
+    runs-on: depot-ubuntu-24.04-arm
     steps:
       - name: Checkout PR Branch
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - uses: EmbarkStudios/cargo-deny-action@44db170f6a7d12a6e90340e9e0fca1f650d34b14 # v2.0.15
+      - name: Install cargo-deny
+        uses: taiki-e/install-action@cfdb446e391c69574ebc316dfb7d7849ec12b940 # v2.68.8
         with:
-          command: check bans
+          tool: cargo-deny
+      - name: Run cargo-deny
+        run: cargo deny check bans
 
   test:
     name: Test
