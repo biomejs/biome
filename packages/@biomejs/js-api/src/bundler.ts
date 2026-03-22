@@ -3,6 +3,7 @@ import * as moduleBundler from "@biomejs/wasm-bundler";
 import { BiomeCommon } from "./common";
 
 export type * from "./common";
+export { spanInBytesToSpanInCodeUnits } from "./utils";
 export type { Configuration, Diagnostic };
 
 export class Biome extends BiomeCommon<Configuration, Diagnostic> {

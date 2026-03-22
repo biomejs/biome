@@ -3,6 +3,7 @@ import * as moduleNodeJs from "@biomejs/wasm-nodejs";
 import { BiomeCommon } from "./common";
 
 export type * from "./common";
+export { spanInBytesToSpanInCodeUnits } from "./utils";
 export type { Configuration, Diagnostic };
 
 export class Biome extends BiomeCommon<Configuration, Diagnostic> {
