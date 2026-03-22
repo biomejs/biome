@@ -1,0 +1,35 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.vue
+---
+# Input
+```html
+<template>
+  <!-- should not generate diagnostics -->
+
+  <!-- onmouseover paired with onfocus -->
+  <div onmouseover="handleMouseOver()" onfocus="handleFocus()"></div>
+
+  <!-- onmouseout paired with onblur -->
+  <div onmouseout="handleMouseOut()" onblur="handleBlur()"></div>
+
+  <!-- both mouse events with both keyboard events -->
+  <div onmouseover="handleMouseOver()" onfocus="handleFocus()" onmouseout="handleMouseOut()" onblur="handleBlur()"></div>
+
+  <!-- no mouse events -->
+  <div onclick="handleClick()"></div>
+
+  <!-- case insensitive attribute matching -->
+  <div ONMOUSEOVER="handleMouseOver()" ONFOCUS="handleFocus()"></div>
+  <div OnMouseOut="handleMouseOut()" OnBlur="handleBlur()"></div>
+
+  <!-- self-closing elements -->
+  <input onmouseover="handleMouseOver()" onfocus="handleFocus()" />
+
+  <!-- PascalCase custom components should be ignored -->
+  <MyComponent onmouseover="handleMouseOver()"></MyComponent>
+  <MyComponent onmouseout="handleMouseOut()"></MyComponent>
+  <CustomButton onmouseover="handleMouseOver()" onmouseout="handleMouseOut()"></CustomButton>
+</template>
+
+```

@@ -1,0 +1,37 @@
+<!-- should not generate diagnostics -->
+
+<!-- no mouse events at all -->
+<div></div>
+<div onclick="handleClick()"></div>
+<span>some text</span>
+
+<!-- only keyboard events, no mouse events -->
+<div onfocus="handleFocus()"></div>
+<div onblur="handleBlur()"></div>
+
+<!-- onmouseover paired with onfocus -->
+<div onmouseover="handleMouseOver()" onfocus="handleFocus()"></div>
+
+<!-- onmouseout paired with onblur -->
+<div onmouseout="handleMouseOut()" onblur="handleBlur()"></div>
+
+<!-- both mouse events with both keyboard events -->
+<div onmouseover="handleMouseOver()" onfocus="handleFocus()" onmouseout="handleMouseOut()" onblur="handleBlur()"></div>
+
+<!-- case insensitive attribute matching -->
+<div ONMOUSEOVER="handleMouseOver()" ONFOCUS="handleFocus()"></div>
+<div OnMouseOut="handleMouseOut()" OnBlur="handleBlur()"></div>
+<div onMouseOver="handleMouseOver()" onFocus="handleFocus()"></div>
+
+<!-- self-closing elements -->
+<input onmouseover="handleMouseOver()" onfocus="handleFocus()" />
+<input onmouseout="handleMouseOut()" onblur="handleBlur()" />
+
+<!-- different element types -->
+<a onmouseover="handleMouseOver()" onfocus="handleFocus()">link</a>
+<button onmouseout="handleMouseOut()" onblur="handleBlur()">button</button>
+<span onmouseover="handleMouseOver()" onfocus="handleFocus()">text</span>
+
+<!-- empty attribute values are still considered present -->
+<div onmouseover="" onfocus=""></div>
+<div onmouseout="" onblur=""></div>
