@@ -11,13 +11,22 @@ import { Y, X } from "x";
 
 # Diagnostics
 ```
-unorganized-import-specifiers.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+unorganized-import-specifiers.js assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Some imports or exports are not organized.
+  
+  i Sort the imported or exported names.
   
   > 1 │ import D, { B, A } from "a";
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     2 │ import { Y, X } from "x";
+    3 │ 
+  
+  i Sort the imported or exported names.
+  
+    1 │ import D, { B, A } from "a";
+  > 2 │ import { Y, X } from "x";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
     3 │ 
   
   i Safe fix: Organize Imports (Biome)

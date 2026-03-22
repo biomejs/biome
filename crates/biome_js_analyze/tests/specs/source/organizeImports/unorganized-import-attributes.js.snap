@@ -10,9 +10,11 @@ import { A, B } from "" with { "k2": "", "k1": "" };
 
 # Diagnostics
 ```
-unorganized-import-attributes.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+unorganized-import-attributes.js assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Some imports or exports are not organized.
+  
+  i Sort the imported or exported names.
   
   > 1 │ import { A, B } from "" with { "k2": "", "k1": "" };
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

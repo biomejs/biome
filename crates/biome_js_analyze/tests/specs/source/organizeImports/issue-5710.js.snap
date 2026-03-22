@@ -16,9 +16,11 @@ _Note: The parser emitted 2 diagnostics which are not shown here._
 
 # Diagnostics
 ```
-issue-5710.js:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+issue-5710.js assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Some imports or exports are not organized.
+  
+  i Sort the imported or exported names.
   
     1 │ // The last `inject` specifier is a bogus node.
   > 2 │ import { inject, Injectable, inject } from '@angular/core';

@@ -11,27 +11,13 @@ import { Moment } from 'moment';
 
 ```
 
-# Diagnostics
-```
-mergeable-with_header.js:3:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i The imports and exports are not sorted.
-  
-    1 │ // Header comment
-    2 │ 
-  > 3 │ import moment from 'moment';
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    4 │ import { Moment } from 'moment';
-    5 │ 
-  
-  i Safe fix: Organize Imports (Biome)
-  
-    1 1 │   // Header comment
-    2 2 │   
-    3   │ - import·moment·from·'moment';
-    4   │ - import·{·Moment·}·from·'moment';
-      3 │ + import·moment,·{·Moment·}·from·'moment';
-    5 4 │   
-  
+# Actions
+```diff
+@@ -1,4 +1,3 @@
+ // Header comment
+ 
+-import moment from 'moment';
+-import { Moment } from 'moment';
++import moment, { Moment } from 'moment';
 
 ```

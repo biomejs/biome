@@ -14,7 +14,9 @@ use biome_js_syntax::{
     AnyJsCombinedSpecifier, AnyJsExportClause, AnyJsImportClause, AnyJsModuleItem, JsModule,
     JsSyntaxKind, T,
 };
-use biome_rowan::{AstNode, BatchMutationExt, TextRange, TriviaPieceKind, chain_trivia_pieces};
+use biome_rowan::{
+    AstNode, AstNodeList, BatchMutationExt, TextRange, TriviaPieceKind, chain_trivia_pieces,
+};
 use biome_rule_options::{organize_imports::OrganizeImportsOptions, sort_order::SortOrder};
 use import_key::{ImportInfo, ImportKey};
 use rustc_hash::FxHashMap;
@@ -745,13 +747,97 @@ impl Rule for OrganizeImports {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        Some(RuleDiagnostic::new(
+        #[derive(Debug, Copy, Clone)]
+        enum IssueKind {
+            AddLeadingNewline,
+            UnorganizedItem,
+            UnsortedChunk,
+        }
+        impl IssueKind {
+            const fn message(self) -> &'static str {
+                match self {
+                    Self::AddLeadingNewline => {
+                        "This statement ends a chunk of imports or exports and thus must be preceded by a blank line. Add a newline before this statement."
+                    }
+                    Self::UnorganizedItem => "Sort the imported or exported names.",
+                    Self::UnsortedChunk => "Sort this chunk of imports or exports.",
+                }
+            }
+        }
+        struct LocatedIssueKind {
+            range: TextRange,
+            kind: IssueKind,
+        }
+        let root = ctx.query();
+        let root_items = root.items();
+        let mut located_issue_kinds: Vec<LocatedIssueKind> = Vec::with_capacity(state.len());
+        let mut last_unsorted_chunk_message_index = 0;
+        for issue in state {
+            let located_issue_kind = match issue {
+                Issue::AddLeadingNewline { slot_index } => {
+                    let text_range = root_items
+                        .iter()
+                        .nth(*slot_index as usize)?
+                        .syntax()
+                        .text_trimmed_range();
+                    LocatedIssueKind {
+                        range: text_range,
+                        kind: IssueKind::AddLeadingNewline,
+                    }
+                }
+                Issue::UnorganizedItem { slot_index, .. } => {
+                    let text_range = root_items
+                        .iter()
+                        .nth(*slot_index as usize)?
+                        .syntax()
+                        .text_trimmed_range();
+                    LocatedIssueKind {
+                        range: text_range,
+                        kind: IssueKind::UnorganizedItem,
+                    }
+                }
+                Issue::UnsortedChunk { slot_indexes } => {
+                    let first_text_range = root_items
+                        .iter()
+                        .nth(slot_indexes.start as usize)?
+                        .syntax()
+                        .text_trimmed_range();
+                    let last_text_range = root_items
+                        .iter()
+                        .nth(slot_indexes.end as usize)?
+                        .syntax()
+                        .text_trimmed_range();
+                    let text_range = first_text_range.cover(last_text_range);
+                    let mut i = last_unsorted_chunk_message_index + 1;
+                    // Remove issues that are covered by the current one.
+                    while i < located_issue_kinds.len() {
+                        if text_range.contains_range(located_issue_kinds[i].range) {
+                            located_issue_kinds.remove(i);
+                        } else {
+                            i += 1;
+                        }
+                    }
+                    last_unsorted_chunk_message_index = located_issue_kinds.len();
+                    LocatedIssueKind {
+                        range: text_range,
+                        kind: IssueKind::UnsortedChunk,
+                    }
+                }
+            };
+            located_issue_kinds.push(located_issue_kind);
+        }
+        let mut diagnostic = RuleDiagnostic::new(
             category!("assist/source/organizeImports"),
-            Self::text_range(ctx, state),
+            None as Option<TextRange>,
             markup! {
-                "The imports and exports are not sorted."
+                "Some imports or exports are not organized."
             },
-        ))
+        );
+        for located_issue_kind in located_issue_kinds {
+            diagnostic =
+                diagnostic.detail(located_issue_kind.range, located_issue_kind.kind.message());
+        }
+        Some(diagnostic)
     }
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
@@ -772,7 +858,7 @@ impl Rule for OrganizeImports {
             if let Some(chunk) = chunk
                 && !chunk.slot_indexes.is_empty()
             {
-                result.push(Issue::UnsortedChunkPrefix {
+                result.push(Issue::UnsortedChunk {
                     slot_indexes: chunk.slot_indexes,
                 });
             }
@@ -999,7 +1085,7 @@ impl Rule for OrganizeImports {
                     // Save the node
                     organized_items.insert(*slot_index, AnyJsModuleItem::cast(item)?);
                 }
-                Issue::UnsortedChunkPrefix { slot_indexes } => {
+                Issue::UnsortedChunk { slot_indexes } => {
                     debug_assert!(import_keys.is_empty(), "import_keys was previously drained");
                     // Collect all import keys and the associated items.
                     import_keys.reserve(slot_indexes.len());
@@ -1146,11 +1232,6 @@ pub enum Issue {
         // Slot index of a statement that must starts with a blank line
         slot_index: u32,
     },
-    /// Prefix of an unsorted chunk of imports or exports
-    UnsortedChunkPrefix {
-        /// Slot indexes of all the first imports or exports.
-        slot_indexes: std::ops::Range<u32>,
-    },
     /// Import or export with one or several of the following issues:
     /// - has unsorted specifiers
     /// - has unsorted attributes
@@ -1161,6 +1242,11 @@ pub enum Issue {
         are_attributes_unsorted: bool,
         are_specifiers_unsorted: bool,
         newline_issue: NewLineIssue,
+    },
+    /// Unsorted chunk of imports or exports
+    UnsortedChunk {
+        /// Slot indexes of all the first imports or exports.
+        slot_indexes: std::ops::Range<u32>,
     },
 }
 

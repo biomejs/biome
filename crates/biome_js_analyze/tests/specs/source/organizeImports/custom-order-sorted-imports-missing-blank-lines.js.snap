@@ -12,14 +12,25 @@ import bare from "bare"
 
 # Diagnostics
 ```
-custom-order-sorted-imports-missing-blank-lines.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━
+custom-order-sorted-imports-missing-blank-lines.js assist/source/organizeImports  FIXABLE  ━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Some imports or exports are not organized.
   
-  > 1 │ import { test as testBun } from "bun:test"
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    2 │ import { test as testNode } from "node:test"
+  i Sort the imported or exported names.
+  
+    1 │ import { test as testBun } from "bun:test"
+  > 2 │ import { test as testNode } from "node:test"
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     3 │ import bare from "bare"
+    4 │ 
+  
+  i Sort the imported or exported names.
+  
+    1 │ import { test as testBun } from "bun:test"
+    2 │ import { test as testNode } from "node:test"
+  > 3 │ import bare from "bare"
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
   
   i Safe fix: Organize Imports (Biome)
   

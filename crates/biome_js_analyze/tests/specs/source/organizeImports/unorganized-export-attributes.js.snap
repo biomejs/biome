@@ -10,9 +10,11 @@ export { A, B } from "" with { "k2": "", "k1": "" };
 
 # Diagnostics
 ```
-unorganized-export-attributes.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+unorganized-export-attributes.js assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The imports and exports are not sorted.
+  i Some imports or exports are not organized.
+  
+  i Sort the imported or exported names.
   
   > 1 │ export { A, B } from "" with { "k2": "", "k1": "" };
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
