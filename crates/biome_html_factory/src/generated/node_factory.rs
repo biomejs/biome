@@ -6,6 +6,164 @@ use biome_html_syntax::{
     HtmlSyntaxToken as SyntaxToken, *,
 };
 use biome_rowan::AstNode;
+pub fn angular_binding_name(value_token: SyntaxToken) -> AngularBindingName {
+    AngularBindingName::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_BINDING_NAME,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn angular_event_binding(
+    l_paren_token: SyntaxToken,
+    name: AngularBindingName,
+    r_paren_token: SyntaxToken,
+) -> AngularEventBindingBuilder {
+    AngularEventBindingBuilder {
+        l_paren_token,
+        name,
+        r_paren_token,
+        initializer: None,
+    }
+}
+pub struct AngularEventBindingBuilder {
+    l_paren_token: SyntaxToken,
+    name: AngularBindingName,
+    r_paren_token: SyntaxToken,
+    initializer: Option<HtmlAttributeInitializerClause>,
+}
+impl AngularEventBindingBuilder {
+    pub fn with_initializer(mut self, initializer: HtmlAttributeInitializerClause) -> Self {
+        self.initializer = Some(initializer);
+        self
+    }
+    pub fn build(self) -> AngularEventBinding {
+        AngularEventBinding::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::ANGULAR_EVENT_BINDING,
+            [
+                Some(SyntaxElement::Token(self.l_paren_token)),
+                Some(SyntaxElement::Node(self.name.into_syntax())),
+                Some(SyntaxElement::Token(self.r_paren_token)),
+                self.initializer
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn angular_property_binding(
+    l_brack_token: SyntaxToken,
+    name: AngularBindingName,
+    r_brack_token: SyntaxToken,
+) -> AngularPropertyBindingBuilder {
+    AngularPropertyBindingBuilder {
+        l_brack_token,
+        name,
+        r_brack_token,
+        initializer: None,
+    }
+}
+pub struct AngularPropertyBindingBuilder {
+    l_brack_token: SyntaxToken,
+    name: AngularBindingName,
+    r_brack_token: SyntaxToken,
+    initializer: Option<HtmlAttributeInitializerClause>,
+}
+impl AngularPropertyBindingBuilder {
+    pub fn with_initializer(mut self, initializer: HtmlAttributeInitializerClause) -> Self {
+        self.initializer = Some(initializer);
+        self
+    }
+    pub fn build(self) -> AngularPropertyBinding {
+        AngularPropertyBinding::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::ANGULAR_PROPERTY_BINDING,
+            [
+                Some(SyntaxElement::Token(self.l_brack_token)),
+                Some(SyntaxElement::Node(self.name.into_syntax())),
+                Some(SyntaxElement::Token(self.r_brack_token)),
+                self.initializer
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn angular_structural_directive(
+    star_token: SyntaxToken,
+    name: AngularBindingName,
+) -> AngularStructuralDirectiveBuilder {
+    AngularStructuralDirectiveBuilder {
+        star_token,
+        name,
+        initializer: None,
+    }
+}
+pub struct AngularStructuralDirectiveBuilder {
+    star_token: SyntaxToken,
+    name: AngularBindingName,
+    initializer: Option<HtmlAttributeInitializerClause>,
+}
+impl AngularStructuralDirectiveBuilder {
+    pub fn with_initializer(mut self, initializer: HtmlAttributeInitializerClause) -> Self {
+        self.initializer = Some(initializer);
+        self
+    }
+    pub fn build(self) -> AngularStructuralDirective {
+        AngularStructuralDirective::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::ANGULAR_STRUCTURAL_DIRECTIVE,
+            [
+                Some(SyntaxElement::Token(self.star_token)),
+                Some(SyntaxElement::Node(self.name.into_syntax())),
+                self.initializer
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn angular_template_ref_variable(
+    hash_token: SyntaxToken,
+    name: AngularBindingName,
+) -> AngularTemplateRefVariable {
+    AngularTemplateRefVariable::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_TEMPLATE_REF_VARIABLE,
+        [
+            Some(SyntaxElement::Token(hash_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+        ],
+    ))
+}
+pub fn angular_two_way_binding(
+    l_bracket_paren_token: SyntaxToken,
+    name: AngularBindingName,
+    r_bracket_paren_token: SyntaxToken,
+) -> AngularTwoWayBindingBuilder {
+    AngularTwoWayBindingBuilder {
+        l_bracket_paren_token,
+        name,
+        r_bracket_paren_token,
+        initializer: None,
+    }
+}
+pub struct AngularTwoWayBindingBuilder {
+    l_bracket_paren_token: SyntaxToken,
+    name: AngularBindingName,
+    r_bracket_paren_token: SyntaxToken,
+    initializer: Option<HtmlAttributeInitializerClause>,
+}
+impl AngularTwoWayBindingBuilder {
+    pub fn with_initializer(mut self, initializer: HtmlAttributeInitializerClause) -> Self {
+        self.initializer = Some(initializer);
+        self
+    }
+    pub fn build(self) -> AngularTwoWayBinding {
+        AngularTwoWayBinding::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::ANGULAR_TWO_WAY_BINDING,
+            [
+                Some(SyntaxElement::Token(self.l_bracket_paren_token)),
+                Some(SyntaxElement::Node(self.name.into_syntax())),
+                Some(SyntaxElement::Token(self.r_bracket_paren_token)),
+                self.initializer
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
 pub fn astro_class_directive(
     class_token: SyntaxToken,
     value: AstroDirectiveValue,

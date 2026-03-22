@@ -118,6 +118,7 @@ pub struct HtmlParserOptions {
     pub(crate) vue: bool,
     pub(crate) svelte: bool,
     pub(crate) is_html: bool,
+    pub(crate) angular: bool,
 }
 
 impl HtmlParserOptions {
@@ -158,6 +159,15 @@ impl HtmlParserOptions {
         self
     }
 
+    pub fn set_angular(&mut self, value: bool) {
+        self.angular = value;
+    }
+
+    pub fn with_angular(mut self) -> Self {
+        self.angular = true;
+        self
+    }
+
     pub fn is_html(&self) -> bool {
         self.is_html
     }
@@ -185,6 +195,9 @@ impl From<&HtmlFileSource> for HtmlParserOptions {
             }
             HtmlVariant::Svelte => {
                 options = options.with_single_text_expression().with_svelte();
+            }
+            HtmlVariant::Angular => {
+                options = options.with_double_text_expression().with_angular();
             }
         }
 

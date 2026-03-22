@@ -113,6 +113,10 @@ pub(crate) fn disabled_vue(p: &HtmlParser, range: TextRange) -> ParseDiagnostic 
     p.err_builder("Vue syntax isn't enabled. Is this supposed to be a .vue file?", range).with_hint(markup!("Remove it or enable the parsing using the "<Emphasis>"html.parser.vue"</Emphasis>" option."))
 }
 
+pub(crate) fn disabled_angular(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder("Angular syntax isn't enabled. Is this supposed to be a .component.html file?", range).with_hint(markup!("Remove it or enable the parsing using the "<Emphasis>"html.parser.angular"</Emphasis>" option."))
+}
+
 pub(crate) fn expected_vue_directive_argument(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
     expected_node("vue directive argument", range, p).into_diagnostic(p)
 }
