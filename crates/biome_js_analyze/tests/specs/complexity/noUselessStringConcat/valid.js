@@ -18,3 +18,7 @@ const stylisticConcatLeading = 'foo' // formatting
 const stylisticConcatLeading = `foo`
                         + 'bar'
                         + `baz`
+// Tagged templates should not be treated as plain strings
+const a = t`translate-me` + "!"
+const a = "prefix" + sql`query`
+const a = tag`a` + tag`b`
