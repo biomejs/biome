@@ -1,0 +1,68 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: unsorted.vue
+---
+# Input
+```html
+<p v-text="msg" v-show="ok" dir="auto" v-foo:bar.baz id="hello" class="flex"></p>
+<div v-slot:default v-on:click="doThis" v-once v-bind="{ id: someProp, 'other-attr': otherProp } "
+  v-bind:src="'/path/to/images/' + fileName"
+    spellcheck="true"
+  tabindex="-1"
+  dir="auto"
+  v-bind:class="{ red: isRed }"></div>
+
+```
+
+# Diagnostics
+```
+unsorted.vue:1:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+  > 1 │ <p v-text="msg" v-show="ok" dir="auto" v-foo:bar.baz id="hello" class="flex"></p>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ <div v-slot:default v-on:click="doThis" v-once v-bind="{ id: someProp, 'other-attr': otherProp } "
+    3 │   v-bind:src="'/path/to/images/' + fileName"
+  
+  i Safe fix: Sort the HTML attributes.
+  
+    1   │ - <p·v-text="msg"·v-show="ok"·dir="auto"·v-foo:bar.baz·id="hello"·class="flex"></p>
+      1 │ + <p·v-text="msg"·v-show="ok"·dir="auto"·v-foo:bar.baz·class="flex"id="hello"·></p>
+    2 2 │   <div v-slot:default v-on:click="doThis" v-once v-bind="{ id: someProp, 'other-attr': otherProp } "
+    3 3 │     v-bind:src="'/path/to/images/' + fileName"
+  
+
+```
+
+```
+unsorted.vue:2:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+    1 │ <p v-text="msg" v-show="ok" dir="auto" v-foo:bar.baz id="hello" class="flex"></p>
+  > 2 │ <div v-slot:default v-on:click="doThis" v-once v-bind="{ id: someProp, 'other-attr': otherProp } "
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 3 │   v-bind:src="'/path/to/images/' + fileName"
+  > 4 │     spellcheck="true"
+  > 5 │   tabindex="-1"
+  > 6 │   dir="auto"
+  > 7 │   v-bind:class="{ red: isRed }"></div>
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+  
+  i Safe fix: Sort the HTML attributes.
+  
+    2 2 │   <div v-slot:default v-on:click="doThis" v-once v-bind="{ id: someProp, 'other-attr': otherProp } "
+    3 3 │     v-bind:src="'/path/to/images/' + fileName"
+    4   │ - ····spellcheck="true"
+    5   │ - ··tabindex="-1"
+    6   │ - ··dir="auto"
+      4 │ + ··dir="auto"
+      5 │ + ····spellcheck="true"
+      6 │ + ··tabindex="-1"
+    7 7 │     v-bind:class="{ red: isRed }"></div>
+    8 8 │   
+  
+
+```

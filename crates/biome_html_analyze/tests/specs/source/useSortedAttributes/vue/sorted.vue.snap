@@ -1,0 +1,15 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: sorted.vue
+---
+# Input
+```html
+<p v-text="msg" v-show="ok" dir="auto" v-foo:bar.baz class="flex" id="hello"></p>
+<div v-slot:default v-on:click="doThis" v-once v-bind="{ id: someProp, 'other-attr': otherProp } "
+  v-bind:src="'/path/to/images/' + fileName"
+  dir="auto"
+  spellcheck="true"
+  tabindex="-1"
+  v-bind:class="{ red: isRed }"></div>
+
+```

@@ -1,0 +1,20 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: sorted.astro
+---
+# Input
+```html
+<Component
+  client:load
+  class:list={classes}
+  set:text={text}
+  is:raw
+  dir="auto"
+  spellcheck="true"
+  tabindex="-1"
+  define:vars={vars}
+  server:defer
+  id="myid"
+/>
+
+```

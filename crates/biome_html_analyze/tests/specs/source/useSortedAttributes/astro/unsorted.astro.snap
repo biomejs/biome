@@ -1,0 +1,54 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: unsorted.astro
+---
+# Input
+```html
+<Component
+  client:load
+  class:list={classes}
+  set:text={text}
+  is:raw
+  spellcheck="true"
+  tabindex="-1"
+  dir="auto"
+  define:vars={vars}
+  server:defer
+  id="myid"
+/>
+
+```
+
+# Diagnostics
+```
+unsorted.astro:1:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+   > 1 │ <Component
+       │ ^^^^^^^^^^
+   > 2 │   client:load
+   > 3 │   class:list={classes}
+   > 4 │   set:text={text}
+        ...
+  > 10 │   server:defer
+  > 11 │   id="myid"
+  > 12 │ />
+       │ ^^
+    13 │ 
+  
+  i Safe fix: Sort the HTML attributes.
+  
+     4  4 │     set:text={text}
+     5  5 │     is:raw
+     6    │ - ··spellcheck="true"
+     7    │ - ··tabindex="-1"
+     8    │ - ··dir="auto"
+        6 │ + ··dir="auto"
+        7 │ + ··spellcheck="true"
+        8 │ + ··tabindex="-1"
+     9  9 │     define:vars={vars}
+    10 10 │     server:defer
+  
+
+```
