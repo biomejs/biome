@@ -1,0 +1,232 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+<div style={{ color: "red" }}>Error</div>;
+
+<div {...rest} style={{ color: "red" }}>Error</div>;
+
+<button style={{ background: "blue", color: "white" }}>Click</button>;
+
+<p style={{ margin: 0, padding: "10px" }}>Paragraph</p>;
+
+<span style={styles}>Styled</span>;
+
+<img style={{ width: "100px" }} src="image.png" alt="Image" />;
+
+React.createElement("div", { style: { color: "red" }, className: "container" });
+
+React.createElement("div", { ...rest, style: { color: "red" }, className: "container" });
+
+React.createElement("button", { style: { background: "blue" }, onClick: () => { } }, "Click");
+
+```
+
+# Diagnostics
+```
+invalid.jsx:2:6 lint/nursery/noInlineStyles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected style attribute.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ <div style={{ color: "red" }}>Error</div>;
+      │      ^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ <div {...rest} style={{ color: "red" }}>Error</div>;
+  
+  i Inline styles make code harder to maintain, reduce reusability, and can prevent effective use of a strict Content Security Policy. Use external CSS classes or stylesheets instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the style attribute.
+  
+    2 │ <div·style={{·color:·"red"·}}>Error</div>;
+      │      ------------------------             
+
+```
+
+```
+invalid.jsx:4:16 lint/nursery/noInlineStyles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected style attribute.
+  
+    2 │ <div style={{ color: "red" }}>Error</div>;
+    3 │ 
+  > 4 │ <div {...rest} style={{ color: "red" }}>Error</div>;
+      │                ^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ <button style={{ background: "blue", color: "white" }}>Click</button>;
+  
+  i Inline styles make code harder to maintain, reduce reusability, and can prevent effective use of a strict Content Security Policy. Use external CSS classes or stylesheets instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the style attribute.
+  
+    4 │ <div·{...rest}·style={{·color:·"red"·}}>Error</div>;
+      │                ------------------------             
+
+```
+
+```
+invalid.jsx:6:9 lint/nursery/noInlineStyles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected style attribute.
+  
+    4 │ <div {...rest} style={{ color: "red" }}>Error</div>;
+    5 │ 
+  > 6 │ <button style={{ background: "blue", color: "white" }}>Click</button>;
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ <p style={{ margin: 0, padding: "10px" }}>Paragraph</p>;
+  
+  i Inline styles make code harder to maintain, reduce reusability, and can prevent effective use of a strict Content Security Policy. Use external CSS classes or stylesheets instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the style attribute.
+  
+    6 │ <button·style={{·background:·"blue",·color:·"white"·}}>Click</button>;
+      │         ----------------------------------------------                
+
+```
+
+```
+invalid.jsx:8:4 lint/nursery/noInlineStyles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected style attribute.
+  
+     6 │ <button style={{ background: "blue", color: "white" }}>Click</button>;
+     7 │ 
+   > 8 │ <p style={{ margin: 0, padding: "10px" }}>Paragraph</p>;
+       │    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ <span style={styles}>Styled</span>;
+  
+  i Inline styles make code harder to maintain, reduce reusability, and can prevent effective use of a strict Content Security Policy. Use external CSS classes or stylesheets instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the style attribute.
+  
+    8 │ <p·style={{·margin:·0,·padding:·"10px"·}}>Paragraph</p>;
+      │    --------------------------------------               
+
+```
+
+```
+invalid.jsx:10:7 lint/nursery/noInlineStyles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected style attribute.
+  
+     8 │ <p style={{ margin: 0, padding: "10px" }}>Paragraph</p>;
+     9 │ 
+  > 10 │ <span style={styles}>Styled</span>;
+       │       ^^^^^^^^^^^^^^
+    11 │ 
+    12 │ <img style={{ width: "100px" }} src="image.png" alt="Image" />;
+  
+  i Inline styles make code harder to maintain, reduce reusability, and can prevent effective use of a strict Content Security Policy. Use external CSS classes or stylesheets instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the style attribute.
+  
+    10 │ <span·style={styles}>Styled</span>;
+       │       --------------               
+
+```
+
+```
+invalid.jsx:12:6 lint/nursery/noInlineStyles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected style attribute.
+  
+    10 │ <span style={styles}>Styled</span>;
+    11 │ 
+  > 12 │ <img style={{ width: "100px" }} src="image.png" alt="Image" />;
+       │      ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 
+    14 │ React.createElement("div", { style: { color: "red" }, className: "container" });
+  
+  i Inline styles make code harder to maintain, reduce reusability, and can prevent effective use of a strict Content Security Policy. Use external CSS classes or stylesheets instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the style attribute.
+  
+    12 │ <img·style={{·width:·"100px"·}}·src="image.png"·alt="Image"·/>;
+       │      ---------------------------                               
+
+```
+
+```
+invalid.jsx:14:30 lint/nursery/noInlineStyles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected style attribute.
+  
+    12 │ <img style={{ width: "100px" }} src="image.png" alt="Image" />;
+    13 │ 
+  > 14 │ React.createElement("div", { style: { color: "red" }, className: "container" });
+       │                              ^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ 
+    16 │ React.createElement("div", { ...rest, style: { color: "red" }, className: "container" });
+  
+  i Inline styles make code harder to maintain, reduce reusability, and can prevent effective use of a strict Content Security Policy. Use external CSS classes or stylesheets instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the style attribute.
+  
+    14 │ React.createElement("div",·{·style:·{·color:·"red"·},·className:·"container"·});
+       │                              -------------------------                          
+
+```
+
+```
+invalid.jsx:16:39 lint/nursery/noInlineStyles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected style attribute.
+  
+    14 │ React.createElement("div", { style: { color: "red" }, className: "container" });
+    15 │ 
+  > 16 │ React.createElement("div", { ...rest, style: { color: "red" }, className: "container" });
+       │                                       ^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ 
+    18 │ React.createElement("button", { style: { background: "blue" }, onClick: () => { } }, "Click");
+  
+  i Inline styles make code harder to maintain, reduce reusability, and can prevent effective use of a strict Content Security Policy. Use external CSS classes or stylesheets instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the style attribute.
+  
+    16 │ React.createElement("div",·{·...rest,·style:·{·color:·"red"·},·className:·"container"·});
+       │                                       -------------------------                          
+
+```
+
+```
+invalid.jsx:18:33 lint/nursery/noInlineStyles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected style attribute.
+  
+    16 │ React.createElement("div", { ...rest, style: { color: "red" }, className: "container" });
+    17 │ 
+  > 18 │ React.createElement("button", { style: { background: "blue" }, onClick: () => { } }, "Click");
+       │                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ 
+  
+  i Inline styles make code harder to maintain, reduce reusability, and can prevent effective use of a strict Content Security Policy. Use external CSS classes or stylesheets instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the style attribute.
+  
+    18 │ React.createElement("button",·{·style:·{·background:·"blue"·},·onClick:·()·=>·{·}·},·"Click");
+       │                                 -------------------------------                               
+
+```

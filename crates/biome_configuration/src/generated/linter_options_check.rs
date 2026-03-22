@@ -631,6 +631,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_inferrable_types::NoInferrableTypesOptions>(),
     ));
     result.push((
+        "nursery",
+        "noInlineStyles",
+        TypeId::of::<biome_rule_options::no_inline_styles::NoInlineStylesOptions>(),
+    ));
+    result.push((
         "correctness",
         "noInnerDeclarations",
         TypeId::of::<biome_rule_options::no_inner_declarations::NoInnerDeclarationsOptions>(),
