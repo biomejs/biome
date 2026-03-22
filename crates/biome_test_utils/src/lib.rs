@@ -929,7 +929,7 @@ pub fn analyze_with_workspace(
             project_key,
             path: BiomePath::new(&virtual_file_path),
             content: FileContent::FromClient {
-                content: input_code.to_string(),
+                content: input_code.clone(),
                 version: 0,
             },
             document_file_source: Some(document_file_source),
