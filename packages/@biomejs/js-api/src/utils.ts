@@ -18,10 +18,8 @@ function getUtf8ByteLength(codeUnit: string): number {
 	if (56320 <= code && code <= 57343) {
 		return 0;
 	}
-	if (code < 65536) {
-		return 3;
-	}
-	throw new Error(`Bad UTF-16 code unit "${codeUnit}" with code ${code}`);
+	// Remaining BMP characters (non-surrogates above 2047)
+	return 3;
 }
 
 /**
