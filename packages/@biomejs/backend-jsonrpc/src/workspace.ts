@@ -697,6 +697,14 @@ export interface HtmlParserConfiguration {
 	 * Enables the parsing of double text expressions such as `{{ expression }}` inside `.html` files
 	 */
 	interpolation?: Bool;
+	/**
+	* Enables parsing of Vue syntax (v-if, v-bind, etc.) in `.html` files.
+
+Biome will already automatically enable Vue parsing in `.vue` files, so you probably don't want
+to enable this option. This only affects `.html` files, and does not change how `.vue`, `.svelte`,
+or `.astro` files are parsed. 
+	 */
+	vue?: Bool;
 }
 /**
  * Assist options specific to the JavaScript assist
