@@ -142,6 +142,7 @@ quickcheck_macros            = "1.1.0"
 quote                        = "1.0.45"
 rayon                        = "1.11.0"
 regex                        = "1.12.3"
+reqwest                      = { version = "0.12.15", default-features = false }
 rust-lapper                  = "1.2.0"
 rustc-hash                   = "2.1.1"
 schemars                     = { version = "1.2.1", features = ["indexmap2", "smallvec1"] }

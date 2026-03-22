@@ -56,6 +56,8 @@ pub enum CliDiagnostic {
     NoFilesWereProcessed(NoFilesWereProcessed),
     /// Errors thrown when running the `biome migrate` command
     MigrateError(MigrationDiagnostic),
+    /// Errors thrown when running the `biome upgrade` command
+    UpgradeError(UpgradeDiagnostic),
     /// Emitted during the reporting phase
     Report(ReportDiagnostic),
     /// Emitted when there's an error emitted when using stdin mode
@@ -258,6 +260,19 @@ pub struct MigrationDiagnostic {
 }
 
 #[derive(Debug, Diagnostic)]
+#[diagnostic(
+	category = "upgrade",
+	severity = Error,
+)]
+pub struct UpgradeDiagnostic {
+    #[message]
+    #[description]
+    pub message: MessageAndDescription,
+    #[source]
+    pub source: Option<Error>,
+}
+
+#[derive(Debug, Diagnostic)]
 pub enum ReportDiagnostic {
     /// Emitted when trying to serialise the report
     Serialization(SerdeJsonError),
@@ -446,6 +461,14 @@ impl CliDiagnostic {
         Self::OverflowNumberArgument(OverflowNumberArgument {
             argument: argument.into(),
             maximum,
+        })
+    }
+
+    /// Errors thrown when running the `biome upgrade` command
+    pub fn upgrade_error(message: impl Into<String>, source: Option<Error>) -> Self {
+        Self::UpgradeError(UpgradeDiagnostic {
+            message: MessageAndDescription::from(message.into()),
+            source,
         })
     }
 
