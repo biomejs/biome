@@ -19,6 +19,10 @@ expression: valid.vue
   <!-- no mouse events -->
   <div onclick="handleClick()"></div>
 
+  <!-- case insensitive attribute matching -->
+  <div ONMOUSEOVER="handleMouseOver()" ONFOCUS="handleFocus()"></div>
+  <div OnMouseOut="handleMouseOut()" OnBlur="handleBlur()"></div>
+
   <!-- self-closing elements -->
   <input onmouseover="handleMouseOver()" onfocus="handleFocus()" />
 
