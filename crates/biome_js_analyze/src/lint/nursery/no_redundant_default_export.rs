@@ -105,7 +105,7 @@ fn get_binding_from_identifier(
             .name()
             .ok()
             .and_then(|ref_id| model.binding(&ref_id)),
-        AnyIdentifier::JsLiteralExportName(_) => None,
+        AnyIdentifier::AnyJsLiteralExportName(_) => None,
     }
 }
 

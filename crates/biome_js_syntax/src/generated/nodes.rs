@@ -1990,7 +1990,7 @@ impl JsExportAsClause {
     pub fn as_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn exported_name(&self) -> SyntaxResult<JsLiteralExportName> {
+    pub fn exported_name(&self) -> SyntaxResult<AnyJsLiteralExportName> {
         support::required_node(&self.syntax, 1usize)
     }
 }
@@ -2005,7 +2005,7 @@ impl Serialize for JsExportAsClause {
 #[derive(Serialize)]
 pub struct JsExportAsClauseFields {
     pub as_token: SyntaxResult<SyntaxToken>,
-    pub exported_name: SyntaxResult<JsLiteralExportName>,
+    pub exported_name: SyntaxResult<AnyJsLiteralExportName>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct JsExportDefaultDeclarationClause {
@@ -2311,7 +2311,7 @@ impl JsExportNamedFromSpecifier {
     pub fn type_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 0usize)
     }
-    pub fn source_name(&self) -> SyntaxResult<JsLiteralExportName> {
+    pub fn source_name(&self) -> SyntaxResult<AnyJsLiteralExportName> {
         support::required_node(&self.syntax, 1usize)
     }
     pub fn export_as(&self) -> Option<JsExportAsClause> {
@@ -2329,7 +2329,7 @@ impl Serialize for JsExportNamedFromSpecifier {
 #[derive(Serialize)]
 pub struct JsExportNamedFromSpecifierFields {
     pub type_token: Option<SyntaxToken>,
-    pub source_name: SyntaxResult<JsLiteralExportName>,
+    pub source_name: SyntaxResult<AnyJsLiteralExportName>,
     pub export_as: Option<JsExportAsClause>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -2403,7 +2403,7 @@ impl JsExportNamedSpecifier {
     pub fn as_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 2usize)
     }
-    pub fn exported_name(&self) -> SyntaxResult<JsLiteralExportName> {
+    pub fn exported_name(&self) -> SyntaxResult<AnyJsLiteralExportName> {
         support::required_node(&self.syntax, 3usize)
     }
 }
@@ -2420,7 +2420,7 @@ pub struct JsExportNamedSpecifierFields {
     pub type_token: Option<SyntaxToken>,
     pub local_name: SyntaxResult<JsReferenceIdentifier>,
     pub as_token: SyntaxResult<SyntaxToken>,
-    pub exported_name: SyntaxResult<JsLiteralExportName>,
+    pub exported_name: SyntaxResult<AnyJsLiteralExportName>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct JsExpressionSnippet {
@@ -4645,7 +4645,7 @@ impl JsNamedImportSpecifier {
     pub fn type_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 0usize)
     }
-    pub fn name(&self) -> SyntaxResult<JsLiteralExportName> {
+    pub fn name(&self) -> SyntaxResult<AnyJsLiteralExportName> {
         support::required_node(&self.syntax, 1usize)
     }
     pub fn as_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -4666,7 +4666,7 @@ impl Serialize for JsNamedImportSpecifier {
 #[derive(Serialize)]
 pub struct JsNamedImportSpecifierFields {
     pub type_token: Option<SyntaxToken>,
-    pub name: SyntaxResult<JsLiteralExportName>,
+    pub name: SyntaxResult<AnyJsLiteralExportName>,
     pub as_token: SyntaxResult<SyntaxToken>,
     pub local_name: SyntaxResult<AnyJsBinding>,
 }
@@ -14757,6 +14757,25 @@ impl AnyJsInProperty {
     pub fn as_js_private_name(&self) -> Option<&JsPrivateName> {
         match &self {
             Self::JsPrivateName(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyJsLiteralExportName {
+    JsLiteralExportName(JsLiteralExportName),
+    JsMetavariable(JsMetavariable),
+}
+impl AnyJsLiteralExportName {
+    pub fn as_js_literal_export_name(&self) -> Option<&JsLiteralExportName> {
+        match &self {
+            Self::JsLiteralExportName(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
+        match &self {
+            Self::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -35726,6 +35745,66 @@ impl From<AnyJsInProperty> for SyntaxElement {
         node.into()
     }
 }
+impl From<JsLiteralExportName> for AnyJsLiteralExportName {
+    fn from(node: JsLiteralExportName) -> Self {
+        Self::JsLiteralExportName(node)
+    }
+}
+impl From<JsMetavariable> for AnyJsLiteralExportName {
+    fn from(node: JsMetavariable) -> Self {
+        Self::JsMetavariable(node)
+    }
+}
+impl AstNode for AnyJsLiteralExportName {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        JsLiteralExportName::KIND_SET.union(JsMetavariable::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, JS_LITERAL_EXPORT_NAME | JS_METAVARIABLE)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            JS_LITERAL_EXPORT_NAME => Self::JsLiteralExportName(JsLiteralExportName { syntax }),
+            JS_METAVARIABLE => Self::JsMetavariable(JsMetavariable { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::JsLiteralExportName(it) => it.syntax(),
+            Self::JsMetavariable(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::JsLiteralExportName(it) => it.into_syntax(),
+            Self::JsMetavariable(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyJsLiteralExportName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::JsLiteralExportName(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyJsLiteralExportName> for SyntaxNode {
+    fn from(n: AnyJsLiteralExportName) -> Self {
+        match n {
+            AnyJsLiteralExportName::JsLiteralExportName(it) => it.into_syntax(),
+            AnyJsLiteralExportName::JsMetavariable(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyJsLiteralExportName> for SyntaxElement {
+    fn from(n: AnyJsLiteralExportName) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<JsBigintLiteralExpression> for AnyJsLiteralExpression {
     fn from(node: JsBigintLiteralExpression) -> Self {
         Self::JsBigintLiteralExpression(node)
@@ -40248,6 +40327,11 @@ impl std::fmt::Display for AnyJsImportClause {
     }
 }
 impl std::fmt::Display for AnyJsInProperty {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyJsLiteralExportName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

@@ -1336,7 +1336,7 @@ AnyJsNamedImportSpecifier =
 //          ^^^^^^^^^^^^^^^^^
 JsNamedImportSpecifier =
     'type'?
-    name: JsLiteralExportName
+    name: AnyJsLiteralExportName
     'as'
     local_name: AnyJsBinding
 
@@ -1371,6 +1371,10 @@ JsImportAssertionEntry =
 //          ^
 // export { a as "a-b-c" };
 //               ^^^^^^^
+AnyJsLiteralExportName =
+	JsLiteralExportName
+	| JsMetavariable
+
 JsLiteralExportName = value: ('ident' | 'js_string_literal')
 
 
@@ -1493,7 +1497,7 @@ JsExportNamedSpecifier =
     'type'?
     local_name: JsReferenceIdentifier
     'as'
-    exported_name: JsLiteralExportName
+    exported_name: AnyJsLiteralExportName
 
 JsExportFromClause =
 	'type'?
@@ -1530,7 +1534,7 @@ JsExportNamedFromSpecifierList = (JsExportNamedFromSpecifier (',' JsExportNamedF
 //          ^^^^^^
 JsExportNamedFromSpecifier =
     'type'?
-    source_name: JsLiteralExportName
+    source_name: AnyJsLiteralExportName
     export_as: JsExportAsClause?
 
 
@@ -1538,7 +1542,7 @@ JsExportNamedFromSpecifier =
 //            ^^^^
 JsExportAsClause =
     'as'
-    exported_name: JsLiteralExportName
+    exported_name: AnyJsLiteralExportName
 
 // export as namespace mathLib
 //        ^^^^^^^^^^^^^^^^^^^^
