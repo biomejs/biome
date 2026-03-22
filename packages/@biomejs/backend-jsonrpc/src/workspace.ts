@@ -1390,7 +1390,7 @@ See https://biomejs.dev/linter/rules/use-key-with-click-events
 	 */
 	useKeyWithClickEvents?: UseKeyWithClickEventsConfiguration;
 	/**
-	* Enforce onMouseOver / onMouseOut are accompanied by onFocus / onBlur.
+	* Enforce that onmouseover is accompanied by onfocus and onmouseout by onblur.
 See https://biomejs.dev/linter/rules/use-key-with-mouse-events 
 	 */
 	useKeyWithMouseEvents?: UseKeyWithMouseEventsConfiguration;
