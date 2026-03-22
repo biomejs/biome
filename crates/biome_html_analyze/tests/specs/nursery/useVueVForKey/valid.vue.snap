@@ -3,7 +3,7 @@ source: crates/biome_html_analyze/tests/spec_tests.rs
 expression: valid.vue
 ---
 # Input
-```html
+```vue
 <!-- should not generate diagnostics -->
 <ul>
   <li v-for="item in items" :key="item.id">{{ item }}</li>

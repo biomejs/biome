@@ -3,7 +3,7 @@ source: crates/biome_html_analyze/tests/spec_tests.rs
 expression: valid.astro
 ---
 # Input
-```html
+```astro
 <!-- should not generate diagnostics -->
 <video><track kind="captions" /></video>
 <audio><track kind="captions" /></audio>

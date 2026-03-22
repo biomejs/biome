@@ -1,2 +1,2 @@
-<!-- valid v-cloak cases -->
+<!-- should not generate diagnostics -->
 <div v-cloak></div>

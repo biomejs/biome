@@ -3,7 +3,7 @@ source: crates/biome_html_analyze/tests/spec_tests.rs
 expression: valid.vue
 ---
 # Input
-```html
+```vue
 <script setup>
 </script><!-- should not generate diagnostics -->
 <img alt="foo" />

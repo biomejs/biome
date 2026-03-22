@@ -861,11 +861,21 @@ pub fn assert_diagnostics_expectation_from_content(
 ///
 /// Returns a snapshot string in the standard analyzer snapshot format
 /// (`# Input` / `# Diagnostics`).
-pub fn analyze_with_workspace(input_file: &Utf8Path, group: &str, rule: &str) -> String {
-    let file_name = input_file.file_name().unwrap();
-    let input_code = std::fs::read_to_string(input_file)
-        .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
+pub fn analyze_with_workspace(
+    input_file: &Utf8Path,
+    input_code: String,
+    group: &str,
+    rule: &str,
+) -> String {
+    let document_file_source = DocumentFileSource::from_well_known(input_file, true);
 
+    if document_file_source == DocumentFileSource::Unknown {
+        panic!(
+            "Invalid document file source: {:?}. Make sure the document is supported by Biome.",
+            input_file
+        );
+    };
+    let file_name = input_file.file_name().unwrap();
     let project_root = Utf8PathBuf::from("/test-project");
     let virtual_file_path = project_root.join(file_name);
 
@@ -919,10 +929,10 @@ pub fn analyze_with_workspace(input_file: &Utf8Path, group: &str, rule: &str) ->
             project_key,
             path: BiomePath::new(&virtual_file_path),
             content: FileContent::FromClient {
-                content: input_code.clone(),
+                content: input_code.to_string(),
                 version: 0,
             },
-            document_file_source: None,
+            document_file_source: Some(document_file_source),
             persist_node_cache: false,
             inline_config: None,
         })

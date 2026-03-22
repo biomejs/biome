@@ -4,7 +4,7 @@ expression: valid.html
 ---
 # Input
 ```html
-<!-- Valid cases - should NOT trigger the rule -->
+<!-- should not generate diagnostics -->
 
 <a href="https://example.com">Link</a>
 

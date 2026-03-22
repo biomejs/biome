@@ -1,3 +1,4 @@
+<!-- should not generate diagnostics -->
 <!-- Custom components should not trigger the rule -->
 <Link></Link>
 <CustomAnchor></CustomAnchor>

@@ -1,3 +1,4 @@
+<!-- should not generate diagnostics -->
 <template>
   <!-- Custom components should not trigger the rule -->
   <Link></Link>

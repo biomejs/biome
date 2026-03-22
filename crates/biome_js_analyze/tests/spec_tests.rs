@@ -92,8 +92,11 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     // handles embedded language extraction via the HTML parser pipeline.
     let is_html_ish = matches!(extension, "vue" | "svelte" | "astro" | "html");
 
+    let input_code = read_to_string(input_file)
+        .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
+
     let snapshot = if is_html_ish {
-        analyze_with_workspace(input_file, group, rule)
+        analyze_with_workspace(input_file, input_code, group, rule)
     } else {
         let rule_filter = RuleFilter::Rule(group, rule);
         let filter = AnalysisFilter {
@@ -102,9 +105,6 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
         };
 
         let mut snapshot = String::new();
-
-        let input_code = read_to_string(input_file)
-            .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
 
         if let Some(scripts) = scripts_from_json(extension, &input_code) {
             for script in scripts {
