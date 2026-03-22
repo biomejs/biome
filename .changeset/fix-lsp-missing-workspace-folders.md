@@ -2,4 +2,4 @@
 "@biomejs/biome": patch
 ---
 
-Fixed [#9557](https://github.com/biomejs/biome/pull/9557): LSP server crash when the client does not send `workspaceFolders` in `InitializeParams`. The file watcher registration now uses the original `rootUri` directly instead of round-tripping through a filesystem path.
+Fixed [#9557](https://github.com/biomejs/biome/pull/9557): Biome's LSP server no longer crashes on startup when used with editors that don't send `workspaceFolders` during initialization. This affected any LSP client that only sends `rootUri`, which is valid per the LSP specification.
