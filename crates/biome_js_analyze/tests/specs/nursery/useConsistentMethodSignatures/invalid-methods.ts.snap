@@ -46,8 +46,6 @@ invalid-methods.ts:4:3 lint/nursery/useConsistentMethodSignatures  FIXABLE  ━�
   
   i If this isn't what you want, consider changing the style option in the rule's settings.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8780 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Convert to method-style signature.
@@ -76,8 +74,6 @@ invalid-methods.ts:8:3 lint/nursery/useConsistentMethodSignatures  FIXABLE  ━�
   i Consistently using a single style of method signatures helps improve readability and consistency.
   
   i If this isn't what you want, consider changing the style option in the rule's settings.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8780 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -109,8 +105,6 @@ invalid-methods.ts:13:7 lint/nursery/useConsistentMethodSignatures  FIXABLE  ━
   
   i If this isn't what you want, consider changing the style option in the rule's settings.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8780 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Convert to method-style signature.
@@ -139,8 +133,6 @@ invalid-methods.ts:18:3 lint/nursery/useConsistentMethodSignatures  FIXABLE  ━
   i Consistently using a single style of method signatures helps improve readability and consistency.
   
   i If this isn't what you want, consider changing the style option in the rule's settings.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8780 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
