@@ -131,7 +131,7 @@ pub fn generate_analyzer() -> Result<()> {
     )?;
     generate_analyzer_crate(
         "biome_graphql_analyze",
-        &["lint"],
+        &["lint", "assist"],
         update_graphql_registry_builder,
     )?;
     generate_analyzer_crate(
