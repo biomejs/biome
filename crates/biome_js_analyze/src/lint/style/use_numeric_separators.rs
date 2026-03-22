@@ -52,6 +52,53 @@ declare_lint_rule! {
     /// var a = 0b1100_1100;
     /// ```
     ///
+    /// ## Options
+    ///
+    /// Each numeric literal type can be configured with its own options object.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "decimal": {
+    ///             "minimumDigits": 7,
+    ///             "groupLength": 3
+    ///         },
+    ///         "hexadecimal": {
+    ///             "minimumDigits": 4,
+    ///             "groupLength": 2
+    ///         }
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ### `binary`
+    ///
+    /// Options for binary literals (e.g., `0b1010_0001`).
+    ///
+    /// - `minimumDigits` — Minimum number of digits required before adding separators. **Default: `0`**
+    /// - `groupLength` — Number of digits between separators. **Default: `4`**
+    ///
+    /// ### `octal`
+    ///
+    /// Options for octal literals (e.g., `0o1234_5670`).
+    ///
+    /// - `minimumDigits` — Minimum number of digits required before adding separators. **Default: `0`**
+    /// - `groupLength` — Number of digits between separators. **Default: `4`**
+    ///
+    /// ### `decimal`
+    ///
+    /// Options for decimal literals (e.g., `1_234_567`).
+    ///
+    /// - `minimumDigits` — Minimum number of digits required before adding separators. **Default: `5`**
+    /// - `groupLength` — Number of digits between separators. **Default: `3`**
+    ///
+    /// ### `hexadecimal`
+    ///
+    /// Options for hexadecimal literals (e.g., `0xAB_CD`).
+    ///
+    /// - `minimumDigits` — Minimum number of digits required before adding separators. **Default: `0`**
+    /// - `groupLength` — Number of digits between separators. **Default: `2`**
+    ///
     pub UseNumericSeparators {
         version: "2.0.0",
         name: "useNumericSeparators",
@@ -77,7 +124,7 @@ impl Rule for UseNumericSeparators {
             return None;
         }
 
-        let expected = format_numeric_literal(raw);
+        let expected = format_numeric_literal(raw, ctx.options());
 
         if raw == expected {
             None
@@ -122,7 +169,7 @@ impl Rule for UseNumericSeparators {
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         let token = ctx.query().value_token().ok()?;
-        let num = format_numeric_literal(token.text_trimmed());
+        let num = format_numeric_literal(token.text_trimmed(), ctx.options());
 
         let new_token = JsSyntaxToken::new_detached(token.kind(), &num, [], []);
         let mut mutation = ctx.root().begin();
@@ -148,14 +195,8 @@ pub enum State {
     UnnecessaryGrouping,
 }
 
-// Options for the minimum length of a number required before adding separators and the length of digit groups between separators, respectively.
-const BINARY_OPTS: (usize, usize) = (0, 4);
-const OCTAL_OPTS: (usize, usize) = (0, 4);
-const DECIMAL_OPTS: (usize, usize) = (5, 3);
-const HEXADECIMAL_OPTS: (usize, usize) = (0, 2);
-
 /// Formats all parts of a numeric literal by adding separators between groups of digits when appropriate.
-fn format_numeric_literal(raw: &str) -> String {
+fn format_numeric_literal(raw: &str, options: &UseNumericSeparatorsOptions) -> String {
     let mut bytes = raw.bytes().peekable();
     let mut result = Vec::new();
     let mut current_num = Vec::new();
@@ -164,7 +205,7 @@ fn format_numeric_literal(raw: &str) -> String {
     let mut in_fraction = false;
     let mut prefix_parsed = false;
 
-    let (mut min_digits, mut group_len) = DECIMAL_OPTS;
+    let (mut min_digits, mut group_len) = options.decimal();
 
     while let Some(b) = bytes.next() {
         match b {
@@ -172,9 +213,9 @@ fn format_numeric_literal(raw: &str) -> String {
             b'0' if !prefix_parsed && !in_fraction => {
                 if let Some(&next) = bytes.peek() {
                     let opts = match next {
-                        b'b' | b'B' => Some(BINARY_OPTS),
-                        b'o' | b'O' | b'0'..=b'7' => Some(OCTAL_OPTS),
-                        b'x' | b'X' => Some(HEXADECIMAL_OPTS),
+                        b'b' | b'B' => Some(options.binary()),
+                        b'o' | b'O' | b'0'..=b'7' => Some(options.octal()),
+                        b'x' | b'X' => Some(options.hexadecimal()),
                         _ => None,
                     };
 

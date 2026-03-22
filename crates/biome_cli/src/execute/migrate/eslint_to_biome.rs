@@ -737,6 +737,21 @@ fn migrate_eslint_rule(
                 }
             }
         }
+        eslint_eslint::Rule::UnicornNumericSeparatorsStyle(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
+                let group = rules.style.get_or_insert_with(Default::default);
+                if let SeverityOrGroup::Group(group) = group {
+                    group.use_numeric_separators =
+                        Some(biome_config::RuleFixConfiguration::WithOptions(
+                            biome_config::RuleWithFixOptions {
+                                level: conf.severity().into(),
+                                fix: None,
+                                options: conf.option_or_default().into(),
+                            },
+                        ));
+                }
+            }
+        }
         eslint_eslint::Rule::UnicornFilenameCase(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
                 let group = rules.style.get_or_insert_with(Default::default);

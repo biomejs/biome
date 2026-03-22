@@ -5893,6 +5893,26 @@
 			"description": "Normalized Biome glob pattern that strips `./` from the pattern.",
 			"type": "string"
 		},
+		"NumericLiteralSeparatorOptions": {
+			"type": "object",
+			"properties": {
+				"groupLength": {
+					"description": "Number of digits between separators.",
+					"type": ["integer", "null"],
+					"format": "uint8",
+					"maximum": 255,
+					"minimum": 0
+				},
+				"minimumDigits": {
+					"description": "Minimum number of digits required before adding separators.",
+					"type": ["integer", "null"],
+					"format": "uint8",
+					"maximum": 255,
+					"minimum": 0
+				}
+			},
+			"additionalProperties": false
+		},
 		"Nursery": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -14368,6 +14388,36 @@
 		},
 		"UseNumericSeparatorsOptions": {
 			"type": "object",
+			"properties": {
+				"binary": {
+					"description": "Options for binary literals (e.g., `0b1010_0001`).",
+					"anyOf": [
+						{ "$ref": "#/$defs/NumericLiteralSeparatorOptions" },
+						{ "type": "null" }
+					]
+				},
+				"decimal": {
+					"description": "Options for decimal literals (e.g., `1_234_567`).",
+					"anyOf": [
+						{ "$ref": "#/$defs/NumericLiteralSeparatorOptions" },
+						{ "type": "null" }
+					]
+				},
+				"hexadecimal": {
+					"description": "Options for hexadecimal literals (e.g., `0xAB_CD`).",
+					"anyOf": [
+						{ "$ref": "#/$defs/NumericLiteralSeparatorOptions" },
+						{ "type": "null" }
+					]
+				},
+				"octal": {
+					"description": "Options for octal literals (e.g., `0o1234_5670`).",
+					"anyOf": [
+						{ "$ref": "#/$defs/NumericLiteralSeparatorOptions" },
+						{ "type": "null" }
+					]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseObjectSpreadConfiguration": {

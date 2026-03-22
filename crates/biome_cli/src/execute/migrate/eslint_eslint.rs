@@ -576,6 +576,11 @@ impl Deserializable for Rules {
                                 result.insert(Rule::UnicornFilenameCase(conf));
                             }
                         }
+                        "unicorn/numeric-separators-style" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::UnicornNumericSeparatorsStyle(conf));
+                            }
+                        }
                         // Other rules
                         rule_name => {
                             if let Some(conf) = RuleConf::<()>::deserialize(ctx, &value, name) {
@@ -663,6 +668,7 @@ pub(crate) enum Rule {
     ),
     TypeScriptNamingConvention(RuleConf<Box<eslint_typescript::NamingConventionSelection>>),
     UnicornFilenameCase(RuleConf<eslint_unicorn::FilenameCaseOptions>),
+    UnicornNumericSeparatorsStyle(RuleConf<eslint_unicorn::NumericSeparatorsStyleOptions>),
     // If you add new variants, don't forget to update [Rules::deserialize].
 }
 impl Rule {
@@ -683,6 +689,9 @@ impl Rule {
                 Cow::Borrowed("@typescript-eslint/naming-convention")
             }
             Self::UnicornFilenameCase(_) => Cow::Borrowed("unicorn/filename-case"),
+            Self::UnicornNumericSeparatorsStyle(_) => {
+                Cow::Borrowed("unicorn/numeric-separators-style")
+            }
         }
     }
 }
