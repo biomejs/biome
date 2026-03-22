@@ -1,0 +1,35 @@
+<!-- should generate diagnostics -->
+
+<!-- onmouseover without onfocus -->
+<div onmouseover="handleMouseOver()"></div>
+
+<!-- onmouseout without onblur -->
+<div onmouseout="handleMouseOut()"></div>
+
+<!-- onmouseover without onfocus (has onblur but not onfocus) -->
+<div onmouseover="handleMouseOver()" onblur="handleBlur()"></div>
+
+<!-- onmouseout without onblur (has onfocus but not onblur) -->
+<div onmouseout="handleMouseOut()" onfocus="handleFocus()"></div>
+
+<!-- case insensitive - still invalid -->
+<div ONMOUSEOVER="handleMouseOver()"></div>
+<div OnMouseOut="handleMouseOut()"></div>
+<div onMouseOver="handleMouseOver()"></div>
+
+<!-- self-closing elements without keyboard pair -->
+<input onmouseover="handleMouseOver()" />
+<input onmouseout="handleMouseOut()" />
+
+<!-- different element types -->
+<a onmouseover="handleMouseOver()">link</a>
+<button onmouseout="handleMouseOut()">button</button>
+<span onmouseover="handleMouseOver()">text</span>
+
+<!-- with non-opening element (opening tag, closing tag) -->
+<div onmouseover="handleMouseOver()">content</div>
+<div onmouseout="handleMouseOut()">content</div>
+
+<!-- empty mouse event value but no keyboard pair -->
+<div onmouseover=""></div>
+<div onmouseout=""></div>
