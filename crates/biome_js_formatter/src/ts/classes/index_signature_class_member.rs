@@ -23,17 +23,36 @@ impl FormatNodeRule<TsIndexSignatureClassMember> for FormatTsIndexSignatureClass
             semicolon_token,
         } = node.as_fields();
 
-        write!(
-            f,
-            [
-                modifiers.format(),
-                space(),
-                l_brack_token.format(),
-                parameter.format(),
-                r_brack_token.format(),
-                type_annotation.format(),
-                FormatOptionalSemicolon::new(semicolon_token.as_ref())
-            ]
-        )
+        let delimiter_spacing = f.options().delimiter_spacing().value();
+
+        if delimiter_spacing {
+            write!(
+                f,
+                [
+                    modifiers.format(),
+                    space(),
+                    l_brack_token.format(),
+                    space(),
+                    parameter.format(),
+                    space(),
+                    r_brack_token.format(),
+                    type_annotation.format(),
+                    FormatOptionalSemicolon::new(semicolon_token.as_ref())
+                ]
+            )
+        } else {
+            write!(
+                f,
+                [
+                    modifiers.format(),
+                    space(),
+                    l_brack_token.format(),
+                    parameter.format(),
+                    r_brack_token.format(),
+                    type_annotation.format(),
+                    FormatOptionalSemicolon::new(semicolon_token.as_ref())
+                ]
+            )
+        }
     }
 }

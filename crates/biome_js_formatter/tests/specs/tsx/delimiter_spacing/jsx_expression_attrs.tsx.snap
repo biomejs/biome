@@ -1,0 +1,165 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: tsx/delimiter_spacing/jsx_expression_attrs.tsx
+---
+# Input
+
+```tsx
+// =====================
+// TypeScript spread patterns
+// =====================
+
+// Type assertion spread
+<Foo {...(props as FooProps)} />;
+
+// Non-null assertion spread
+<Foo {...props!} />;
+
+// Satisfies operator
+<Foo {...(props satisfies Props)} />;
+
+// Generic function call
+<Foo {...getProps<T>(arg)} />;
+
+// As const spread
+<Foo {...({ a: 1 } as const)} />;
+
+// Type assertion with member expression
+<Foo {...(obj.props as FooProps)} />;
+
+// Non-null assertion with call expression
+<Foo {...getData()!} />;
+
+// Complex type assertion
+<Foo {...(condition ? a : b) as Props} />;
+
+// Type assertion in spread children
+<Foo>{...(items as Item[])}</Foo>;
+
+// Non-null assertion in spread children
+<Foo>{...items!}</Foo>;
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing commas: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Delimiter spacing: false
+Bracket same line: false
+Attribute Position: Auto
+Expand lists: Auto
+Operator linebreak: After
+Trailing newline: true
+-----
+
+```tsx
+// =====================
+// TypeScript spread patterns
+// =====================
+
+// Type assertion spread
+<Foo {...(props as FooProps)} />;
+
+// Non-null assertion spread
+<Foo {...props!} />;
+
+// Satisfies operator
+<Foo {...(props satisfies Props)} />;
+
+// Generic function call
+<Foo {...getProps<T>(arg)} />;
+
+// As const spread
+<Foo {...({ a: 1 } as const)} />;
+
+// Type assertion with member expression
+<Foo {...(obj.props as FooProps)} />;
+
+// Non-null assertion with call expression
+<Foo {...getData()!} />;
+
+// Complex type assertion
+<Foo {...((condition ? a : b) as Props)} />;
+
+// Type assertion in spread children
+<Foo>{...(items as Item[])}</Foo>;
+
+// Non-null assertion in spread children
+<Foo>{...items!}</Foo>;
+
+```
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing commas: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Delimiter spacing: true
+Bracket same line: false
+Attribute Position: Auto
+Expand lists: Auto
+Operator linebreak: After
+Trailing newline: true
+-----
+
+```tsx
+// =====================
+// TypeScript spread patterns
+// =====================
+
+// Type assertion spread
+<Foo { ...( props as FooProps ) } />;
+
+// Non-null assertion spread
+<Foo { ...props! } />;
+
+// Satisfies operator
+<Foo { ...( props satisfies Props ) } />;
+
+// Generic function call
+<Foo { ...getProps< T >( arg ) } />;
+
+// As const spread
+<Foo { ...( { a: 1 } as const ) } />;
+
+// Type assertion with member expression
+<Foo { ...( obj.props as FooProps ) } />;
+
+// Non-null assertion with call expression
+<Foo { ...getData()! } />;
+
+// Complex type assertion
+<Foo { ...( ( condition ? a : b ) as Props ) } />;
+
+// Type assertion in spread children
+<Foo>{ ...( items as Item[] ) }</Foo>;
+
+// Non-null assertion in spread children
+<Foo>{ ...items! }</Foo>;
+
+```

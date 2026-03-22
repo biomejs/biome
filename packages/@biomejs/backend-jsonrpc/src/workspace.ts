@@ -176,6 +176,14 @@ export interface FormatterConfiguration {
 	 * Whether to insert spaces around brackets in object literals. Defaults to true.
 	 */
 	bracketSpacing?: BracketSpacing;
+	/**
+	* Whether to insert spaces inside delimiters (after the opening delimiter and before the
+closing delimiter), such as parentheses, brackets, angle brackets, and template literal
+interpolations. Spaces are not added before the opening delimiter, and empty delimiters
+are not affected. Only applies when the content fits on a single line. The specific
+delimiters affected depend on the language. Defaults to false. 
+	 */
+	delimiterSpacing?: DelimiterSpacing;
 	enabled?: Bool;
 	/**
 	* Whether to expand arrays and objects on multiple lines.
@@ -420,6 +428,13 @@ export interface CssAssistConfiguration {
  */
 export interface CssFormatterConfiguration {
 	/**
+	* Whether to insert spaces inside delimiters (after the opening delimiter and before the
+closing delimiter). Only applies when the content fits on a single line, and empty
+delimiters are not affected. For CSS, affects parentheses (e.g., `rgb( 0, 0, 0 )`) and
+square brackets (e.g., `[ data-attr ]`). Defaults to false. 
+	 */
+	delimiterSpacing?: DelimiterSpacing;
+	/**
 	 * Control the formatter for CSS (and its super languages) files.
 	 */
 	enabled?: Bool;
@@ -491,6 +506,14 @@ export type AttributePosition = "auto" | "multiline";
  */
 export type BracketSameLine = boolean;
 export type BracketSpacing = boolean;
+/**
+	* Whether to insert spaces inside delimiters (after the opening delimiter and before the closing
+delimiter), such as parentheses, brackets, angle brackets, and template literal interpolations.
+Spaces are not added before the opening delimiter, and empty delimiters are not affected.
+Only applies when the content fits on a single line; when content breaks across multiple lines,
+no extra spaces are added. The specific delimiters affected depend on the language. 
+	 */
+export type DelimiterSpacing = boolean;
 export type Expand = "auto" | "always" | "never";
 export type IndentStyle = "tab" | "space";
 export type IndentWidth = number;
@@ -728,6 +751,18 @@ export interface JsFormatterConfiguration {
 	 */
 	bracketSpacing?: BracketSpacing;
 	/**
+	* Whether to insert spaces inside delimiters (after the opening delimiter and before the
+closing delimiter). Only applies when the content fits on a single line. Spaces are not
+added before the opening delimiter (e.g., `function f()` stays `function f()`, not
+`function f ()`), and empty delimiters are not affected (e.g., `fn()` stays `fn()`).
+For JavaScript and TypeScript, affects parentheses (e.g., `foo( a, b )`), square brackets
+(e.g., `[ a, b ]`), template literal interpolations (e.g., `${ expr }`), TypeScript angle
+brackets (e.g., `foo< T >()`), JSX expression braces (e.g., `{ value }`), and the logical
+NOT operator (e.g., `! x`, but in chains only after the last one: `!! x`). Defaults to
+false. 
+	 */
+	delimiterSpacing?: DelimiterSpacing;
+	/**
 	 * Control the formatter for JavaScript (and its super languages) files.
 	 */
 	enabled?: Bool;
@@ -843,6 +878,13 @@ export interface JsonFormatterConfiguration {
 	 * Whether to insert spaces around brackets in object literals. Defaults to true.
 	 */
 	bracketSpacing?: BracketSpacing;
+	/**
+	* Whether to insert spaces inside delimiters (after the opening delimiter and before the
+closing delimiter). Only applies when the content fits on a single line, and empty
+brackets are not affected. For JSON, affects square brackets (e.g., `[ 1, 2, 3 ]`).
+Defaults to false. 
+	 */
+	delimiterSpacing?: DelimiterSpacing;
 	/**
 	 * Control the formatter for JSON (and its super languages) files.
 	 */
@@ -1141,6 +1183,14 @@ export interface OverrideFormatterConfiguration {
 	 * Whether to insert spaces around brackets in object literals. Defaults to true.
 	 */
 	bracketSpacing?: BracketSpacing;
+	/**
+	* Whether to insert spaces inside delimiters (after the opening delimiter and before the
+closing delimiter), such as parentheses, brackets, angle brackets, and template literal
+interpolations. Spaces are not added before the opening delimiter, and empty delimiters
+are not affected. Only applies when the content fits on a single line. The specific
+delimiters affected depend on the language. Defaults to false. 
+	 */
+	delimiterSpacing?: DelimiterSpacing;
 	enabled?: Bool;
 	/**
 	* Whether to expand arrays and objects on multiple lines.

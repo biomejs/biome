@@ -1,0 +1,258 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/module/delimiter-spacing/conditionals_misc.js
+---
+# Input
+
+```js
+// =====================
+// Await expressions with grouping parentheses
+// =====================
+
+// Await with parentheses
+async function foo1() {
+	return await (a || b);
+}
+
+// Await in expression (formatter adds parens)
+async function foo2() {
+	const a = await b + await c;
+}
+
+// =====================
+// Extends clause with parentheses
+// =====================
+
+// Extends with call expression
+class A extends mixin(Base) {}
+
+// Extends with grouping expression
+class B extends (a ? C : D) {}
+
+// =====================
+// Require expressions
+// =====================
+
+// Basic require
+const foo3 = require("module");
+
+// Require with path
+const foo4 = require("./path/to/module");
+
+// Require with variable
+const foo5 = require(a);
+
+// Require in destructuring
+const { a, b } = require("module");
+
+// Require in array destructuring
+const [c] = require("module");
+
+// =====================
+// Function declarations
+// =====================
+
+// Function declaration with parameters
+function foo6(a, b, c) {}
+
+// Function declaration with object destructuring
+function foo7({a, b}) {}
+
+// Function declaration with array destructuring
+function foo8([a, b]) {}
+
+// Async function declaration
+async function foo9(a) {}
+
+// Generator function declaration
+function* foo10(a) {}
+
+// Async generator function declaration
+async function* foo11(a) {}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing commas: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Delimiter spacing: false
+Bracket same line: false
+Attribute Position: Auto
+Expand lists: Auto
+Operator linebreak: After
+Trailing newline: true
+-----
+
+```js
+// =====================
+// Await expressions with grouping parentheses
+// =====================
+
+// Await with parentheses
+async function foo1() {
+	return await (a || b);
+}
+
+// Await in expression (formatter adds parens)
+async function foo2() {
+	const a = (await b) + (await c);
+}
+
+// =====================
+// Extends clause with parentheses
+// =====================
+
+// Extends with call expression
+class A extends mixin(Base) {}
+
+// Extends with grouping expression
+class B extends (a ? C : D) {}
+
+// =====================
+// Require expressions
+// =====================
+
+// Basic require
+const foo3 = require("module");
+
+// Require with path
+const foo4 = require("./path/to/module");
+
+// Require with variable
+const foo5 = require(a);
+
+// Require in destructuring
+const { a, b } = require("module");
+
+// Require in array destructuring
+const [c] = require("module");
+
+// =====================
+// Function declarations
+// =====================
+
+// Function declaration with parameters
+function foo6(a, b, c) {}
+
+// Function declaration with object destructuring
+function foo7({ a, b }) {}
+
+// Function declaration with array destructuring
+function foo8([a, b]) {}
+
+// Async function declaration
+async function foo9(a) {}
+
+// Generator function declaration
+function* foo10(a) {}
+
+// Async generator function declaration
+async function* foo11(a) {}
+
+```
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing commas: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Delimiter spacing: true
+Bracket same line: false
+Attribute Position: Auto
+Expand lists: Auto
+Operator linebreak: After
+Trailing newline: true
+-----
+
+```js
+// =====================
+// Await expressions with grouping parentheses
+// =====================
+
+// Await with parentheses
+async function foo1() {
+	return await ( a || b );
+}
+
+// Await in expression (formatter adds parens)
+async function foo2() {
+	const a = ( await b ) + ( await c );
+}
+
+// =====================
+// Extends clause with parentheses
+// =====================
+
+// Extends with call expression
+class A extends mixin( Base ) {}
+
+// Extends with grouping expression
+class B extends ( a ? C : D ) {}
+
+// =====================
+// Require expressions
+// =====================
+
+// Basic require
+const foo3 = require( "module" );
+
+// Require with path
+const foo4 = require( "./path/to/module" );
+
+// Require with variable
+const foo5 = require( a );
+
+// Require in destructuring
+const { a, b } = require( "module" );
+
+// Require in array destructuring
+const [ c ] = require( "module" );
+
+// =====================
+// Function declarations
+// =====================
+
+// Function declaration with parameters
+function foo6( a, b, c ) {}
+
+// Function declaration with object destructuring
+function foo7( { a, b } ) {}
+
+// Function declaration with array destructuring
+function foo8( [ a, b ] ) {}
+
+// Async function declaration
+async function foo9( a ) {}
+
+// Generator function declaration
+function* foo10( a ) {}
+
+// Async generator function declaration
+async function* foo11( a ) {}
+
+```

@@ -1,8 +1,8 @@
 use crate::bool::Bool;
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
-    AttributePosition, BracketSameLine, BracketSpacing, Expand, IndentStyle, IndentWidth,
-    LineEnding, LineWidth, TrailingNewline,
+    AttributePosition, BracketSameLine, BracketSpacing, DelimiterSpacing, Expand, IndentStyle,
+    IndentWidth, LineEnding, LineWidth, TrailingNewline,
 };
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
@@ -63,6 +63,15 @@ pub struct FormatterConfiguration {
     #[bpaf(long("bracket-spacing"), argument("true|false"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bracket_spacing: Option<BracketSpacing>,
+
+    /// Whether to insert spaces inside delimiters (after the opening delimiter and before the
+    /// closing delimiter), such as parentheses, brackets, angle brackets, and template literal
+    /// interpolations. Spaces are not added before the opening delimiter, and empty delimiters
+    /// are not affected. Only applies when the content fits on a single line. The specific
+    /// delimiters affected depend on the language. Defaults to false.
+    #[bpaf(long("delimiter-spacing"), argument("true|false"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub delimiter_spacing: Option<DelimiterSpacing>,
 
     /// Whether to expand arrays and objects on multiple lines.
     /// When set to `auto`, object literals are formatted on multiple lines if the first property has a newline,
@@ -134,6 +143,10 @@ impl FormatterConfiguration {
 
     pub fn bracket_spacing_resolved(&self) -> BracketSpacing {
         self.bracket_spacing.unwrap_or_default()
+    }
+
+    pub fn delimiter_spacing_resolved(&self) -> DelimiterSpacing {
+        self.delimiter_spacing.unwrap_or_default()
     }
 
     pub fn expand_resolved(&self) -> Expand {

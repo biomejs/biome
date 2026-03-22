@@ -1,0 +1,268 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/delimiter_spacing/container.css
+---
+# Input
+
+```css
+/* Size queries */
+@container (min-width: 400px) {
+    .card {
+        padding: 20px;
+    }
+}
+
+@container (max-width: 300px) {
+    .card {
+        padding: 10px;
+    }
+}
+
+/* Named containers */
+@container sidebar (width > 300px) {
+    .nav {
+        display: flex;
+    }
+}
+
+@container main (min-height: 500px) {
+    .content {
+        overflow: auto;
+    }
+}
+
+/* Range syntax */
+@container (width >= 400px) {
+    .responsive {
+        font-size: 16px;
+    }
+}
+
+@container (200px <= width <= 400px) {
+    .medium {
+        font-size: 14px;
+    }
+}
+
+/* Style queries */
+@container style(--theme: dark) {
+    .themed {
+        background: black;
+        color: white;
+    }
+}
+
+@container style(--responsive: true) {
+    .adaptive {
+        display: grid;
+    }
+}
+
+/* Combined queries */
+@container (width > 400px) and (height > 300px) {
+    .large {
+        display: block;
+    }
+}
+
+@container sidebar (width > 200px) and style(--expanded: true) {
+    .expanded-nav {
+        width: 100%;
+    }
+}
+
+/* Nested container queries */
+@container (min-width: 500px) {
+    @container (min-height: 300px) {
+        .nested {
+            display: flex;
+        }
+    }
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+Delimiter spacing: false
+Trailing newline: true
+-----
+
+```css
+/* Size queries */
+@container (min-width: 400px) {
+	.card {
+		padding: 20px;
+	}
+}
+
+@container (max-width: 300px) {
+	.card {
+		padding: 10px;
+	}
+}
+
+/* Named containers */
+@container sidebar (width > 300px) {
+	.nav {
+		display: flex;
+	}
+}
+
+@container main (min-height: 500px) {
+	.content {
+		overflow: auto;
+	}
+}
+
+/* Range syntax */
+@container (width >= 400px) {
+	.responsive {
+		font-size: 16px;
+	}
+}
+
+@container (200px <= width <= 400px) {
+	.medium {
+		font-size: 14px;
+	}
+}
+
+/* Style queries */
+@container style(--theme: dark) {
+	.themed {
+		background: black;
+		color: white;
+	}
+}
+
+@container style(--responsive: true) {
+	.adaptive {
+		display: grid;
+	}
+}
+
+/* Combined queries */
+@container (width > 400px) and (height > 300px) {
+	.large {
+		display: block;
+	}
+}
+
+@container sidebar (width > 200px) and style(--expanded: true) {
+	.expanded-nav {
+		width: 100%;
+	}
+}
+
+/* Nested container queries */
+@container (min-width: 500px) {
+	@container (min-height: 300px) {
+		.nested {
+			display: flex;
+		}
+	}
+}
+
+```
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+Delimiter spacing: true
+Trailing newline: true
+-----
+
+```css
+/* Size queries */
+@container ( min-width: 400px ) {
+	.card {
+		padding: 20px;
+	}
+}
+
+@container ( max-width: 300px ) {
+	.card {
+		padding: 10px;
+	}
+}
+
+/* Named containers */
+@container sidebar ( width > 300px ) {
+	.nav {
+		display: flex;
+	}
+}
+
+@container main ( min-height: 500px ) {
+	.content {
+		overflow: auto;
+	}
+}
+
+/* Range syntax */
+@container ( width >= 400px ) {
+	.responsive {
+		font-size: 16px;
+	}
+}
+
+@container ( 200px <= width <= 400px ) {
+	.medium {
+		font-size: 14px;
+	}
+}
+
+/* Style queries */
+@container style( --theme: dark ) {
+	.themed {
+		background: black;
+		color: white;
+	}
+}
+
+@container style( --responsive: true ) {
+	.adaptive {
+		display: grid;
+	}
+}
+
+/* Combined queries */
+@container ( width > 400px ) and ( height > 300px ) {
+	.large {
+		display: block;
+	}
+}
+
+@container sidebar ( width > 200px ) and style( --expanded: true ) {
+	.expanded-nav {
+		width: 100%;
+	}
+}
+
+/* Nested container queries */
+@container ( min-width: 500px ) {
+	@container ( min-height: 300px ) {
+		.nested {
+			display: flex;
+		}
+	}
+}
+
+```

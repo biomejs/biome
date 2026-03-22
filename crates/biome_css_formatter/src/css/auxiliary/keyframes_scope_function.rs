@@ -17,14 +17,30 @@ impl FormatNodeRule<CssKeyframesScopeFunction> for FormatCssKeyframesScopeFuncti
             r_paren_token,
         } = node.as_fields();
 
-        write!(
-            f,
-            [
-                scope.format(),
-                l_paren_token.format(),
-                name.format(),
-                r_paren_token.format(),
-            ]
-        )
+        let should_insert_space = f.options().delimiter_spacing().value();
+
+        if should_insert_space {
+            write!(
+                f,
+                [
+                    scope.format(),
+                    l_paren_token.format(),
+                    space(),
+                    name.format(),
+                    space(),
+                    r_paren_token.format(),
+                ]
+            )
+        } else {
+            write!(
+                f,
+                [
+                    scope.format(),
+                    l_paren_token.format(),
+                    name.format(),
+                    r_paren_token.format(),
+                ]
+            )
+        }
     }
 }

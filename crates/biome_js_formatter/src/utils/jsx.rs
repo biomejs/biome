@@ -178,9 +178,12 @@ pub(crate) struct JsxRawSpace;
 
 impl Format<JsFormatContext> for JsxRawSpace {
     fn fmt(&self, f: &mut Formatter<JsFormatContext>) -> FormatResult<()> {
-        let jsx_space = match f.options().quote_style() {
-            QuoteStyle::Double => r#"{" "}"#,
-            QuoteStyle::Single => "{' '}",
+        let delimiter_spacing = f.options().delimiter_spacing().value();
+        let jsx_space = match (f.options().quote_style(), delimiter_spacing) {
+            (QuoteStyle::Double, false) => r#"{" "}"#,
+            (QuoteStyle::Double, true) => r#"{ " " }"#,
+            (QuoteStyle::Single, false) => "{' '}",
+            (QuoteStyle::Single, true) => "{ ' ' }",
         };
 
         write!(f, [token(jsx_space)])

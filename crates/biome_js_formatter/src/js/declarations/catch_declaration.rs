@@ -35,6 +35,8 @@ impl FormatNodeRule<JsCatchDeclaration> for FormatJsCatchDeclaration {
             .iter()
             .any(|comment| comment.lines_before() > 0 || comment.kind().is_line());
 
+        let should_insert_space_around_delimiters = f.options().delimiter_spacing().value();
+
         if leading_comment_with_break || trailing_comment_with_break {
             write!(
                 f,
@@ -45,15 +47,19 @@ impl FormatNodeRule<JsCatchDeclaration> for FormatJsCatchDeclaration {
                 ]
             )
         } else {
-            write!(
-                f,
-                [
-                    l_paren_token.format(),
-                    binding.format(),
-                    type_annotation.format(),
-                    r_paren_token.format()
-                ]
-            )
+            write!(f, [l_paren_token.format()])?;
+
+            if should_insert_space_around_delimiters {
+                write!(f, [space()])?;
+            }
+
+            write!(f, [binding.format(), type_annotation.format()])?;
+
+            if should_insert_space_around_delimiters {
+                write!(f, [space()])?;
+            }
+
+            write!(f, [r_paren_token.format()])
         }
     }
 }

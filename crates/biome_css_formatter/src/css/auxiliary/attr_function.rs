@@ -16,23 +16,28 @@ impl FormatNodeRule<CssAttrFunction> for FormatCssAttrFunction {
             r_paren_token,
         } = node.as_fields();
 
+        let should_insert_space = f.options().delimiter_spacing().value();
+
         write!(
             f,
             [
                 name_token.format(),
                 group(&format_args![
                     l_paren_token.format(),
-                    soft_block_indent(&format_with(|f| {
-                        write!(f, [group(&attr_name.format())])?;
+                    soft_block_indent_with_maybe_space(
+                        &format_with(|f| {
+                            write!(f, [group(&attr_name.format())])?;
 
-                        if let Some(attr_type) = &attr_type {
-                            write!(f, [soft_line_break_or_space(), attr_type.format()])?;
-                        }
+                            if let Some(attr_type) = &attr_type {
+                                write!(f, [soft_line_break_or_space(), attr_type.format()])?;
+                            }
 
-                        write!(f, [fallback_value.format()])?;
+                            write!(f, [fallback_value.format()])?;
 
-                        Ok(())
-                    })),
+                            Ok(())
+                        }),
+                        should_insert_space
+                    ),
                     r_paren_token.format()
                 ])
             ]

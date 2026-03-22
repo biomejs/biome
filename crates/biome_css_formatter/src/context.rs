@@ -3,7 +3,7 @@ use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineEnding, LineWidth,
     TrailingNewline, TransformSourceMap,
 };
-use biome_formatter::{IndentWidth, QuoteStyle, prelude::*};
+use biome_formatter::{DelimiterSpacing, IndentWidth, QuoteStyle, prelude::*};
 
 use crate::comments::{CssComments, FormatCssLeadingComment};
 use biome_css_syntax::{CssFileSource, CssLanguage};
@@ -62,6 +62,7 @@ pub struct CssFormatOptions {
     line_ending: LineEnding,
     line_width: LineWidth,
     quote_style: QuoteStyle,
+    delimiter_spacing: DelimiterSpacing,
     /// Whether to add a trailing newline at the end of the file. Defaults to true.
     trailing_newline: TrailingNewline,
     _file_source: CssFileSource,
@@ -76,6 +77,7 @@ impl CssFormatOptions {
             line_ending: LineEnding::default(),
             line_width: LineWidth::default(),
             quote_style: QuoteStyle::default(),
+            delimiter_spacing: DelimiterSpacing::default(),
             trailing_newline: TrailingNewline::default(),
         }
     }
@@ -105,6 +107,11 @@ impl CssFormatOptions {
         self
     }
 
+    pub fn with_delimiter_spacing(mut self, delimiter_spacing: DelimiterSpacing) -> Self {
+        self.delimiter_spacing = delimiter_spacing;
+        self
+    }
+
     pub fn with_trailing_newline(mut self, trailing_newline: TrailingNewline) -> Self {
         self.trailing_newline = trailing_newline;
         self
@@ -130,12 +137,20 @@ impl CssFormatOptions {
         self.quote_style = quote_style;
     }
 
+    pub fn set_delimiter_spacing(&mut self, delimiter_spacing: DelimiterSpacing) {
+        self.delimiter_spacing = delimiter_spacing;
+    }
+
     pub fn set_trailing_newline(&mut self, trailing_newline: TrailingNewline) {
         self.trailing_newline = trailing_newline;
     }
 
     pub fn quote_style(&self) -> QuoteStyle {
         self.quote_style
+    }
+
+    pub fn delimiter_spacing(&self) -> DelimiterSpacing {
+        self.delimiter_spacing
     }
 
     pub fn trailing_newline(&self) -> TrailingNewline {
@@ -176,6 +191,7 @@ impl fmt::Display for CssFormatOptions {
         writeln!(f, "Line ending: {}", self.line_ending)?;
         writeln!(f, "Line width: {}", self.line_width.value())?;
         writeln!(f, "Quote style: {}", self.quote_style)?;
+        writeln!(f, "Delimiter spacing: {}", self.delimiter_spacing.value())?;
         writeln!(f, "Trailing newline: {}", self.trailing_newline.value())
     }
 }

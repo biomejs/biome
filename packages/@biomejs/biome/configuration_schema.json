@@ -1437,6 +1437,10 @@
 			"description": "Options that changes how the CSS formatter behaves",
 			"type": "object",
 			"properties": {
+				"delimiterSpacing": {
+					"description": "Whether to insert spaces inside delimiters (after the opening delimiter and before the\nclosing delimiter). Only applies when the content fits on a single line, and empty\ndelimiters are not affected. For CSS, affects parentheses (e.g., `rgb( 0, 0, 0 )`) and\nsquare brackets (e.g., `[ data-attr ]`). Defaults to false.",
+					"anyOf": [{ "$ref": "#/$defs/DelimiterSpacing" }, { "type": "null" }]
+				},
 				"enabled": {
 					"description": "Control the formatter for CSS (and its super languages) files.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
@@ -1532,6 +1536,10 @@
 					"const": "runtime"
 				}
 			]
+		},
+		"DelimiterSpacing": {
+			"description": "Whether to insert spaces inside delimiters (after the opening delimiter and before the closing\ndelimiter), such as parentheses, brackets, angle brackets, and template literal interpolations.\nSpaces are not added before the opening delimiter, and empty delimiters are not affected.\nOnly applies when the content fits on a single line; when content breaks across multiple lines,\nno extra spaces are added. The specific delimiters affected depend on the language.",
+			"type": "boolean"
 		},
 		"DependencyAvailability": {
 			"oneOf": [
@@ -1669,6 +1677,10 @@
 				"bracketSpacing": {
 					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
 					"anyOf": [{ "$ref": "#/$defs/BracketSpacing" }, { "type": "null" }]
+				},
+				"delimiterSpacing": {
+					"description": "Whether to insert spaces inside delimiters (after the opening delimiter and before the\nclosing delimiter), such as parentheses, brackets, angle brackets, and template literal\ninterpolations. Spaces are not added before the opening delimiter, and empty delimiters\nare not affected. Only applies when the content fits on a single line. The specific\ndelimiters affected depend on the language. Defaults to false.",
+					"anyOf": [{ "$ref": "#/$defs/DelimiterSpacing" }, { "type": "null" }]
 				},
 				"enabled": {
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
@@ -2211,6 +2223,10 @@
 					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
 					"anyOf": [{ "$ref": "#/$defs/BracketSpacing" }, { "type": "null" }]
 				},
+				"delimiterSpacing": {
+					"description": "Whether to insert spaces inside delimiters (after the opening delimiter and before the\nclosing delimiter). Only applies when the content fits on a single line. Spaces are not\nadded before the opening delimiter (e.g., `function f()` stays `function f()`, not\n`function f ()`), and empty delimiters are not affected (e.g., `fn()` stays `fn()`).\nFor JavaScript and TypeScript, affects parentheses (e.g., `foo( a, b )`), square brackets\n(e.g., `[ a, b ]`), template literal interpolations (e.g., `${ expr }`), TypeScript angle\nbrackets (e.g., `foo< T >()`), JSX expression braces (e.g., `{ value }`), and the logical\nNOT operator (e.g., `! x`, but in chains only after the last one: `!! x`). Defaults to\nfalse.",
+					"anyOf": [{ "$ref": "#/$defs/DelimiterSpacing" }, { "type": "null" }]
+				},
 				"enabled": {
 					"description": "Control the formatter for JavaScript (and its super languages) files.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
@@ -2353,6 +2369,10 @@
 				"bracketSpacing": {
 					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
 					"anyOf": [{ "$ref": "#/$defs/BracketSpacing" }, { "type": "null" }]
+				},
+				"delimiterSpacing": {
+					"description": "Whether to insert spaces inside delimiters (after the opening delimiter and before the\nclosing delimiter). Only applies when the content fits on a single line, and empty\nbrackets are not affected. For JSON, affects square brackets (e.g., `[ 1, 2, 3 ]`).\nDefaults to false.",
+					"anyOf": [{ "$ref": "#/$defs/DelimiterSpacing" }, { "type": "null" }]
 				},
 				"enabled": {
 					"description": "Control the formatter for JSON (and its super languages) files.",
@@ -6759,6 +6779,10 @@
 				"bracketSpacing": {
 					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
 					"anyOf": [{ "$ref": "#/$defs/BracketSpacing" }, { "type": "null" }]
+				},
+				"delimiterSpacing": {
+					"description": "Whether to insert spaces inside delimiters (after the opening delimiter and before the\nclosing delimiter), such as parentheses, brackets, angle brackets, and template literal\ninterpolations. Spaces are not added before the opening delimiter, and empty delimiters\nare not affected. Only applies when the content fits on a single line. The specific\ndelimiters affected depend on the language. Defaults to false.",
+					"anyOf": [{ "$ref": "#/$defs/DelimiterSpacing" }, { "type": "null" }]
 				},
 				"enabled": {
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]

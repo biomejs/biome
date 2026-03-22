@@ -22,6 +22,7 @@ impl FormatNodeRule<TsTypeAssertionExpression> for FormatTsTypeAssertionExpressi
         } = node.as_fields();
 
         let expression = expression?;
+        let delimiter_spacing = f.options().delimiter_spacing().value();
 
         let break_after_cast = !matches!(
             expression,
@@ -33,7 +34,10 @@ impl FormatNodeRule<TsTypeAssertionExpression> for FormatTsTypeAssertionExpressi
                 f,
                 [
                     l_angle_token.format(),
-                    group(&soft_block_indent(&ty.format())),
+                    group(&soft_block_indent_with_maybe_space(
+                        &ty.format(),
+                        delimiter_spacing
+                    )),
                     r_angle_token.format(),
                 ]
             )

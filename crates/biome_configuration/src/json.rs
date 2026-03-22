@@ -1,7 +1,8 @@
 use crate::bool::Bool;
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
-    BracketSpacing, Expand, IndentStyle, IndentWidth, LineEnding, LineWidth, TrailingNewline,
+    BracketSpacing, DelimiterSpacing, Expand, IndentStyle, IndentWidth, LineEnding, LineWidth,
+    TrailingNewline,
 };
 use biome_json_formatter::context::TrailingCommas;
 use bpaf::Bpaf;
@@ -108,6 +109,14 @@ pub struct JsonFormatterConfiguration {
     #[bpaf(long("json-formatter-bracket-spacing"), argument("true|false"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bracket_spacing: Option<BracketSpacing>,
+
+    /// Whether to insert spaces inside delimiters (after the opening delimiter and before the
+    /// closing delimiter). Only applies when the content fits on a single line, and empty
+    /// brackets are not affected. For JSON, affects square brackets (e.g., `[ 1, 2, 3 ]`).
+    /// Defaults to false.
+    #[bpaf(long("json-formatter-delimiter-spacing"), argument("true|false"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub delimiter_spacing: Option<DelimiterSpacing>,
 
     /// Whether to add a trailing newline at the end of the file.
     ///

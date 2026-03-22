@@ -1,0 +1,446 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/module/delimiter-spacing/arrow_functions.js
+---
+# Input
+
+```js
+// =====================
+// Arrow function body with parentheses (sequence expressions)
+// =====================
+
+// Sequence expression body without comments - gets spaces
+const foo1 = (a) => (a, b);
+
+// Sequence expression body with multiple items
+const foo2 = (a) => (a, b, c);
+
+// Conditional body - gets spaces
+const foo3 = (a) => (a ? b : c);
+
+// Binary expression body - gets spaces
+const foo4 = (a) => (a + b);
+
+// =====================
+// Arrow function body with comments (breaks to multi-line)
+// =====================
+
+// Sequence expression body with leading line comment (No change)
+const foo5 = (a) =>
+	(
+		// comment
+		a, b
+	);
+
+// Sequence expression body with trailing line comment (No change)
+const foo6 = (a) =>
+	(
+		a, b
+		// comment
+	);
+
+// Sequence expression body with leading block comment (No change)
+const foo7 = (a) =>
+	(
+		/* comment */ a, b
+	);
+
+// =====================
+// Arrow function signature with bindings
+// =====================
+
+// Single identifier binding - no special spacing
+const foo8 = (a) => a;
+
+// Object binding parameter - uses hug layout
+const foo9 = ({a}) => a;
+
+// Object binding with multiple properties
+const foo10 = ({a, b}) => a + b;
+
+// Array binding parameter - uses hug layout
+const foo11 = ([a]) => a;
+
+// Array binding with multiple elements
+const foo12 = ([a, b]) => a + b;
+
+// =====================
+// Arrow chains
+// =====================
+
+// Simple arrow chain
+const foo13 = (a) => (b) => a + b;
+
+// Arrow chain with sequence body
+const foo14 = (a) => (b) => (a, b);
+
+// Arrow chain with object binding
+const foo15 = ({a}) => ({b}) => a + b;
+
+// Arrow chain with conditional
+const foo16 = (a) => (b) => (a ? b : c);
+
+// Arrow chain with comments (breaks)
+const foo17 = (a) => (b) =>
+	(
+		/* comment */ a, b
+	);
+
+// =====================
+// Async arrow functions
+// =====================
+
+// Async arrow with sequence body
+const foo18 = async (a) => (a, await b);
+
+// Async arrow with object binding
+const foo19 = async ({a}) => a;
+
+// Async arrow with conditional
+const foo20 = async (a) => (a ? await b : c);
+
+// =====================
+// Arrow functions in various contexts
+// =====================
+
+// Arrow as callback
+foo((a) => (a, b));
+
+// Arrow as method value
+const bar = {
+	a: (a) => (a, b),
+};
+
+// Arrow in array
+const baz = [(a) => (a, b)];
+
+// Arrow as default parameter
+function f(callback = (a) => (a, b)) {}
+
+// Arrow in ternary
+const foo21 = x ? (a) => (a, b) : (a) => (a, c);
+
+// =====================
+// Boundary tests
+// =====================
+
+// Boundary: 76 chars without spaces, 81 with spaces (fits on one line)
+const foo22 = (a) => (aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, b);
+
+// Boundary: 77 chars without spaces, 82 with spaces (breaks to multiple lines)
+const foo23 = (a) => (aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, b);
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing commas: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Delimiter spacing: false
+Bracket same line: false
+Attribute Position: Auto
+Expand lists: Auto
+Operator linebreak: After
+Trailing newline: true
+-----
+
+```js
+// =====================
+// Arrow function body with parentheses (sequence expressions)
+// =====================
+
+// Sequence expression body without comments - gets spaces
+const foo1 = (a) => (a, b);
+
+// Sequence expression body with multiple items
+const foo2 = (a) => (a, b, c);
+
+// Conditional body - gets spaces
+const foo3 = (a) => (a ? b : c);
+
+// Binary expression body - gets spaces
+const foo4 = (a) => a + b;
+
+// =====================
+// Arrow function body with comments (breaks to multi-line)
+// =====================
+
+// Sequence expression body with leading line comment (No change)
+const foo5 = (a) =>
+	(
+		// comment
+		a, b
+	);
+
+// Sequence expression body with trailing line comment (No change)
+const foo6 = (a) =>
+	(
+		a, b
+		// comment
+	);
+
+// Sequence expression body with leading block comment (No change)
+const foo7 = (a) =>
+	(
+		/* comment */ a, b
+	);
+
+// =====================
+// Arrow function signature with bindings
+// =====================
+
+// Single identifier binding - no special spacing
+const foo8 = (a) => a;
+
+// Object binding parameter - uses hug layout
+const foo9 = ({ a }) => a;
+
+// Object binding with multiple properties
+const foo10 = ({ a, b }) => a + b;
+
+// Array binding parameter - uses hug layout
+const foo11 = ([a]) => a;
+
+// Array binding with multiple elements
+const foo12 = ([a, b]) => a + b;
+
+// =====================
+// Arrow chains
+// =====================
+
+// Simple arrow chain
+const foo13 = (a) => (b) => a + b;
+
+// Arrow chain with sequence body
+const foo14 = (a) => (b) => (a, b);
+
+// Arrow chain with object binding
+const foo15 =
+	({ a }) =>
+	({ b }) =>
+		a + b;
+
+// Arrow chain with conditional
+const foo16 = (a) => (b) => (a ? b : c);
+
+// Arrow chain with comments (breaks)
+const foo17 = (a) => (b) =>
+	(
+		/* comment */ a, b
+	);
+
+// =====================
+// Async arrow functions
+// =====================
+
+// Async arrow with sequence body
+const foo18 = async (a) => (a, await b);
+
+// Async arrow with object binding
+const foo19 = async ({ a }) => a;
+
+// Async arrow with conditional
+const foo20 = async (a) => (a ? await b : c);
+
+// =====================
+// Arrow functions in various contexts
+// =====================
+
+// Arrow as callback
+foo((a) => (a, b));
+
+// Arrow as method value
+const bar = {
+	a: (a) => (a, b),
+};
+
+// Arrow in array
+const baz = [(a) => (a, b)];
+
+// Arrow as default parameter
+function f(callback = (a) => (a, b)) {}
+
+// Arrow in ternary
+const foo21 = x ? (a) => (a, b) : (a) => (a, c);
+
+// =====================
+// Boundary tests
+// =====================
+
+// Boundary: 76 chars without spaces, 81 with spaces (fits on one line)
+const foo22 = (a) => (aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, b);
+
+// Boundary: 77 chars without spaces, 82 with spaces (breaks to multiple lines)
+const foo23 = (a) => (aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, b);
+
+```
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing commas: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Delimiter spacing: true
+Bracket same line: false
+Attribute Position: Auto
+Expand lists: Auto
+Operator linebreak: After
+Trailing newline: true
+-----
+
+```js
+// =====================
+// Arrow function body with parentheses (sequence expressions)
+// =====================
+
+// Sequence expression body without comments - gets spaces
+const foo1 = ( a ) => ( a, b );
+
+// Sequence expression body with multiple items
+const foo2 = ( a ) => ( a, b, c );
+
+// Conditional body - gets spaces
+const foo3 = ( a ) => ( a ? b : c );
+
+// Binary expression body - gets spaces
+const foo4 = ( a ) => a + b;
+
+// =====================
+// Arrow function body with comments (breaks to multi-line)
+// =====================
+
+// Sequence expression body with leading line comment (No change)
+const foo5 = ( a ) =>
+	(
+		// comment
+		a, b
+	);
+
+// Sequence expression body with trailing line comment (No change)
+const foo6 = ( a ) =>
+	(
+		a, b
+		// comment
+	);
+
+// Sequence expression body with leading block comment (No change)
+const foo7 = ( a ) =>
+	(
+		/* comment */ a, b
+	);
+
+// =====================
+// Arrow function signature with bindings
+// =====================
+
+// Single identifier binding - no special spacing
+const foo8 = ( a ) => a;
+
+// Object binding parameter - uses hug layout
+const foo9 = ( { a } ) => a;
+
+// Object binding with multiple properties
+const foo10 = ( { a, b } ) => a + b;
+
+// Array binding parameter - uses hug layout
+const foo11 = ( [ a ] ) => a;
+
+// Array binding with multiple elements
+const foo12 = ( [ a, b ] ) => a + b;
+
+// =====================
+// Arrow chains
+// =====================
+
+// Simple arrow chain
+const foo13 = ( a ) => ( b ) => a + b;
+
+// Arrow chain with sequence body
+const foo14 = ( a ) => ( b ) => ( a, b );
+
+// Arrow chain with object binding
+const foo15 =
+	( { a } ) =>
+	( { b } ) =>
+		a + b;
+
+// Arrow chain with conditional
+const foo16 = ( a ) => ( b ) => (a ? b : c);
+
+// Arrow chain with comments (breaks)
+const foo17 = ( a ) => ( b ) =>
+	(
+		/* comment */ a, b
+	);
+
+// =====================
+// Async arrow functions
+// =====================
+
+// Async arrow with sequence body
+const foo18 = async ( a ) => ( a, await b );
+
+// Async arrow with object binding
+const foo19 = async ( { a } ) => a;
+
+// Async arrow with conditional
+const foo20 = async ( a ) => ( a ? await b : c );
+
+// =====================
+// Arrow functions in various contexts
+// =====================
+
+// Arrow as callback
+foo( ( a ) => ( a, b ) );
+
+// Arrow as method value
+const bar = {
+	a: ( a ) => ( a, b ),
+};
+
+// Arrow in array
+const baz = [ ( a ) => ( a, b ) ];
+
+// Arrow as default parameter
+function f( callback = ( a ) => ( a, b ) ) {}
+
+// Arrow in ternary
+const foo21 = x ? ( a ) => ( a, b ) : ( a ) => ( a, c );
+
+// =====================
+// Boundary tests
+// =====================
+
+// Boundary: 76 chars without spaces, 81 with spaces (fits on one line)
+const foo22 = ( a ) => ( aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, b );
+
+// Boundary: 77 chars without spaces, 82 with spaces (breaks to multiple lines)
+const foo23 = ( a ) => (
+	aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, b
+);
+
+```

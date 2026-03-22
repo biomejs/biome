@@ -1,0 +1,266 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/module/delimiter-spacing/unary.js
+---
+# Input
+
+```js
+// =====================
+// Logical not operator
+// =====================
+
+// Basic logical not with identifier
+!a;
+
+// Logical not with literal values
+!true;
+!false;
+!0;
+
+// Double logical not (no space between the two !s)
+!!a;
+!!true;
+
+// Triple logical not
+!!!a;
+
+// Quadruple logical not
+!!!!a;
+
+// Logical not with function call
+!foo();
+
+// Logical not with member expression
+!foo.bar;
+
+// Logical not chained with other unary operators
+!-a;
+-!a;
+!+a;
++!a;
+!~a;
+~!a;
+
+// Logical not with parenthesized expression
+!(a || b);
+
+// Trailing comment on expression
+!a /* comment */;
+
+// Multiple comments around expression
+!/* before */ a /* after */;
+
+// =====================
+// Contrast: other unary operators (no space added)
+// =====================
+
+-a;
++a;
+~a;
+typeof a;
+void a;
+
+// =====================
+// Boundary tests
+// =====================
+
+// Boundary: 79 chars without space, 80 with space = fits on one line
+!aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;
+
+// Boundary: 80 chars without space, 81 with space = exceeds line width
+// (atomic identifiers don't break, they just exceed)
+!aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing commas: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Delimiter spacing: false
+Bracket same line: false
+Attribute Position: Auto
+Expand lists: Auto
+Operator linebreak: After
+Trailing newline: true
+-----
+
+```js
+// =====================
+// Logical not operator
+// =====================
+
+// Basic logical not with identifier
+!a;
+
+// Logical not with literal values
+!true;
+!false;
+!0;
+
+// Double logical not (no space between the two !s)
+!!a;
+!!true;
+
+// Triple logical not
+!!!a;
+
+// Quadruple logical not
+!!!!a;
+
+// Logical not with function call
+!foo();
+
+// Logical not with member expression
+!foo.bar;
+
+// Logical not chained with other unary operators
+!-a;
+-!a;
+!+a;
++!a;
+!~a;
+~!a;
+
+// Logical not with parenthesized expression
+!(a || b);
+
+// Trailing comment on expression
+!a /* comment */;
+
+// Multiple comments around expression
+!(/* before */ a) /* after */;
+
+// =====================
+// Contrast: other unary operators (no space added)
+// =====================
+
+-a;
++a;
+~a;
+typeof a;
+void a;
+
+// =====================
+// Boundary tests
+// =====================
+
+// Boundary: 79 chars without space, 80 with space = fits on one line
+!aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;
+
+// Boundary: 80 chars without space, 81 with space = exceeds line width
+// (atomic identifiers don't break, they just exceed)
+!aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;
+
+```
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing commas: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Delimiter spacing: true
+Bracket same line: false
+Attribute Position: Auto
+Expand lists: Auto
+Operator linebreak: After
+Trailing newline: true
+-----
+
+```js
+// =====================
+// Logical not operator
+// =====================
+
+// Basic logical not with identifier
+! a;
+
+// Logical not with literal values
+! true;
+! false;
+! 0;
+
+// Double logical not (no space between the two !s)
+!! a;
+!! true;
+
+// Triple logical not
+!!! a;
+
+// Quadruple logical not
+!!!! a;
+
+// Logical not with function call
+! foo();
+
+// Logical not with member expression
+! foo.bar;
+
+// Logical not chained with other unary operators
+! -a;
+-! a;
+! +a;
++! a;
+! ~a;
+~! a;
+
+// Logical not with parenthesized expression
+! ( a || b );
+
+// Trailing comment on expression
+! a /* comment */;
+
+// Multiple comments around expression
+! ( /* before */ a ) /* after */;
+
+// =====================
+// Contrast: other unary operators (no space added)
+// =====================
+
+-a;
++a;
+~a;
+typeof a;
+void a;
+
+// =====================
+// Boundary tests
+// =====================
+
+// Boundary: 79 chars without space, 80 with space = fits on one line
+! aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;
+
+// Boundary: 80 chars without space, 81 with space = exceeds line width
+// (atomic identifiers don't break, they just exceed)
+! aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+   65: ! aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;
+```

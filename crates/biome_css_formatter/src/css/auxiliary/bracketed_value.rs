@@ -12,13 +12,28 @@ impl FormatNodeRule<CssBracketedValue> for FormatCssBracketedValue {
             r_brack_token,
         } = node.as_fields();
 
-        write!(
-            f,
-            [
-                l_brack_token.format(),
-                items.format(),
-                r_brack_token.format()
-            ]
-        )
+        let should_insert_space = f.options().delimiter_spacing().value();
+
+        if should_insert_space {
+            write!(
+                f,
+                [
+                    l_brack_token.format(),
+                    space(),
+                    items.format(),
+                    space(),
+                    r_brack_token.format()
+                ]
+            )
+        } else {
+            write!(
+                f,
+                [
+                    l_brack_token.format(),
+                    items.format(),
+                    r_brack_token.format()
+                ]
+            )
+        }
     }
 }

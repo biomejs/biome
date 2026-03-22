@@ -14,13 +14,15 @@ impl FormatNodeRule<CssIfStyleTest> for FormatCssIfStyleTest {
             r_paren_token,
         } = node.as_fields();
 
+        let should_insert_space = f.options().delimiter_spacing().value();
+
         write!(
             f,
             [
                 style_token.format(),
                 group(&format_args![
                     l_paren_token.format(),
-                    soft_block_indent(&test.format()),
+                    soft_block_indent_with_maybe_space(&test.format(), should_insert_space),
                     r_paren_token.format()
                 ])
             ]

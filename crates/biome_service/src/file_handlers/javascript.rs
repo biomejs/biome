@@ -37,8 +37,9 @@ use biome_css_parser::parse_css_with_offset_and_cache;
 use biome_css_syntax::{CssFileSource, CssLanguage, EmbeddingKind};
 use biome_formatter::prelude::{Document, Interned, LineMode, Tag};
 use biome_formatter::{
-    AttributePosition, BracketSameLine, BracketSpacing, Expand, FormatElement, FormatError,
-    IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle, TrailingNewline,
+    AttributePosition, BracketSameLine, BracketSpacing, DelimiterSpacing, Expand, FormatElement,
+    FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
+    TrailingNewline,
 };
 use biome_fs::BiomePath;
 use biome_graphql_parser::parse_graphql_with_offset_and_cache;
@@ -86,6 +87,7 @@ pub struct JsFormatterSettings {
     pub semicolons: Option<Semicolons>,
     pub arrow_parentheses: Option<ArrowParentheses>,
     pub bracket_spacing: Option<BracketSpacing>,
+    pub delimiter_spacing: Option<DelimiterSpacing>,
     pub bracket_same_line: Option<BracketSameLine>,
     pub line_ending: Option<LineEnding>,
     pub line_width: Option<LineWidth>,
@@ -111,6 +113,7 @@ impl From<JsFormatterConfiguration> for JsFormatterSettings {
             enabled: value.enabled,
             line_width: value.line_width,
             bracket_spacing: value.bracket_spacing,
+            delimiter_spacing: value.delimiter_spacing,
             attribute_position: value.attribute_position,
             indent_width: value.indent_width,
             indent_style: value.indent_style,
@@ -270,6 +273,12 @@ impl ServiceLanguage for JsLanguage {
             language
                 .bracket_spacing
                 .or(global.bracket_spacing)
+                .unwrap_or_default(),
+        )
+        .with_delimiter_spacing(
+            language
+                .delimiter_spacing
+                .or(global.delimiter_spacing)
                 .unwrap_or_default(),
         )
         .with_bracket_same_line(
