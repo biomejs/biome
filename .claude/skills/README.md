@@ -32,6 +32,7 @@ Skills complement the specialized **agents** in `.claude/agents/` - agents are p
 | **[type-inference](./type-inference/SKILL.md)** | Work with module graph and type inference system | `biome-lint-engineer` |
 | **[diagnostics-development](./diagnostics-development/SKILL.md)** | Create user-friendly error messages and diagnostics | Any agent |
 | **[prettier-compare](./prettier-compare/SKILL.md)** | Compare Biome and Prettier formatting output and IR | `ir-formatter-engineer` |
+| **[eslint-migrate-options](./eslint-migrate-options/SKILL.md)** | Write custom ESLint-to-Biome option migrators | Any agent |
 
 ## Quick Workflow Guide
 
@@ -184,7 +185,9 @@ Skills are designed to be **quick reference cards** - scan in 30 seconds and kno
 │   └── SKILL.md
 ├── diagnostics-development/
 │   └── SKILL.md
-└── prettier-compare/
+├── prettier-compare/
+│   └── SKILL.md
+└── eslint-migrate-options/
     └── SKILL.md
 ```
 
