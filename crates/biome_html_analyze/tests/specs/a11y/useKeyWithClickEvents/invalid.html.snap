@@ -1,0 +1,179 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+
+<!-- div with onclick but no keyboard handler -->
+<div onclick="handleClick()" />
+<div onclick="handleClick()">content</div>
+
+<!-- span with onclick but no keyboard handler -->
+<span onclick="handleClick()">text</span>
+
+<!-- section with onclick but no keyboard handler -->
+<section onclick="handleClick()">content</section>
+
+<!-- main with onclick but no keyboard handler -->
+<main onclick="handleClick()">content</main>
+
+<!-- article with onclick but no keyboard handler -->
+<article onclick="handleClick()">content</article>
+
+<!-- header with onclick but no keyboard handler -->
+<header onclick="handleClick()">content</header>
+
+<!-- footer with onclick but no keyboard handler -->
+<footer onclick="handleClick()">content</footer>
+
+<!-- aria-hidden="false" should still flag -->
+<div onclick="handleClick()" aria-hidden="false">content</div>
+
+```
+
+# Diagnostics
+```
+invalid.html:4:1 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Enforce to have the onclick mouse event with the onkeyup, the onkeydown, or the onkeypress keyboard event.
+  
+    3 │ <!-- div with onclick but no keyboard handler -->
+  > 4 │ <div onclick="handleClick()" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ <div onclick="handleClick()">content</div>
+    6 │ 
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+```
+
+```
+invalid.html:5:1 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Enforce to have the onclick mouse event with the onkeyup, the onkeydown, or the onkeypress keyboard event.
+  
+    3 │ <!-- div with onclick but no keyboard handler -->
+    4 │ <div onclick="handleClick()" />
+  > 5 │ <div onclick="handleClick()">content</div>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ <!-- span with onclick but no keyboard handler -->
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+```
+
+```
+invalid.html:8:1 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Enforce to have the onclick mouse event with the onkeyup, the onkeydown, or the onkeypress keyboard event.
+  
+     7 │ <!-- span with onclick but no keyboard handler -->
+   > 8 │ <span onclick="handleClick()">text</span>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ <!-- section with onclick but no keyboard handler -->
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+```
+
+```
+invalid.html:11:1 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Enforce to have the onclick mouse event with the onkeyup, the onkeydown, or the onkeypress keyboard event.
+  
+    10 │ <!-- section with onclick but no keyboard handler -->
+  > 11 │ <section onclick="handleClick()">content</section>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+    13 │ <!-- main with onclick but no keyboard handler -->
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+```
+
+```
+invalid.html:14:1 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Enforce to have the onclick mouse event with the onkeyup, the onkeydown, or the onkeypress keyboard event.
+  
+    13 │ <!-- main with onclick but no keyboard handler -->
+  > 14 │ <main onclick="handleClick()">content</main>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ 
+    16 │ <!-- article with onclick but no keyboard handler -->
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+```
+
+```
+invalid.html:17:1 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Enforce to have the onclick mouse event with the onkeyup, the onkeydown, or the onkeypress keyboard event.
+  
+    16 │ <!-- article with onclick but no keyboard handler -->
+  > 17 │ <article onclick="handleClick()">content</article>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ 
+    19 │ <!-- header with onclick but no keyboard handler -->
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+```
+
+```
+invalid.html:20:1 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Enforce to have the onclick mouse event with the onkeyup, the onkeydown, or the onkeypress keyboard event.
+  
+    19 │ <!-- header with onclick but no keyboard handler -->
+  > 20 │ <header onclick="handleClick()">content</header>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ 
+    22 │ <!-- footer with onclick but no keyboard handler -->
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+```
+
+```
+invalid.html:23:1 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Enforce to have the onclick mouse event with the onkeyup, the onkeydown, or the onkeypress keyboard event.
+  
+    22 │ <!-- footer with onclick but no keyboard handler -->
+  > 23 │ <footer onclick="handleClick()">content</footer>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ 
+    25 │ <!-- aria-hidden="false" should still flag -->
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+```
+
+```
+invalid.html:26:1 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Enforce to have the onclick mouse event with the onkeyup, the onkeydown, or the onkeypress keyboard event.
+  
+    25 │ <!-- aria-hidden="false" should still flag -->
+  > 26 │ <div onclick="handleClick()" aria-hidden="false">content</div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ 
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+```
