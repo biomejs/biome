@@ -5272,7 +5272,7 @@ async fn change_document_inverted_range_does_not_panic() -> Result<()> {
 /// Regression test: the LSP server should not crash when the client sends
 /// `didChangeWatchedFiles.dynamicRegistration: true` but no `workspaceFolders`
 /// in `InitializeParams`. This is valid per the LSP spec — `workspaceFolders`
-/// is optional and some clients (e.g., Emacs lsp-mode) only send `rootUri`.
+/// is optional and some clients only send `rootUri`.
 #[tokio::test]
 #[expect(deprecated)]
 async fn initialize_without_workspace_folders_does_not_panic() -> Result<()> {
