@@ -16,11 +16,6 @@ a3.reduce<number[]>((arr, num) => arr.concat(num), []);
 const a4: number[] = [1, 2, 3];
 a4.reduce((arr, num) => arr.concat(num), [] satisfies number[]);
 
-// custom class with reduce method (not an array)
-class Store { reduce(fn: Function, init: any) { return init; } }
-const store = new Store();
-store.reduce((acc: any, x: any) => acc, {} as Record<string, boolean>);
-
 // not reduce/reduceRight
 const a5: number[] = [1, 2, 3];
 a5.map((n) => n * 2);

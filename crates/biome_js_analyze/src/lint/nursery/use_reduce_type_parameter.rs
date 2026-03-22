@@ -1,7 +1,6 @@
 use crate::JsRuleAction;
-use crate::services::typed::Typed;
 use biome_analyze::{
-    FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_factory::make;
@@ -20,9 +19,6 @@ declare_lint_rule! {
     /// is not checked against the accumulator usage in the callback. Using a type parameter on
     /// `reduce` instead is more type-safe because TypeScript will verify that the callback's
     /// return type matches the declared type.
-    ///
-    /// This rule uses type information to ensure it only triggers on actual array or tuple
-    /// `reduce`/`reduceRight` calls, not on custom objects with a method of the same name.
     ///
     /// ## Examples
     ///
@@ -67,7 +63,6 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintTypeScript("prefer-reduce-type-parameter").inspired()],
         recommended: false,
         fix_kind: FixKind::Unsafe,
-        domains: &[RuleDomain::Types],
     }
 }
 
@@ -78,7 +73,7 @@ pub struct UseReduceTypeParameterState {
 }
 
 impl Rule for UseReduceTypeParameter {
-    type Query = Typed<JsCallExpression>;
+    type Query = Ast<JsCallExpression>;
     type State = UseReduceTypeParameterState;
     type Signals = Option<Self::State>;
     type Options = UseReduceTypeParameterOptions;
@@ -104,13 +99,7 @@ impl Rule for UseReduceTypeParameter {
         if method_name != "reduce" && method_name != "reduceRight" {
             return None;
         }
-
-        // Use type information to verify the receiver is an array or tuple
-        let call_object = member_expr.object().ok()?;
-        let ty = ctx.type_of_expression(&call_object);
-        if !is_array_or_tuple(&ty) {
-            return None;
-        }
+        let is_reduce_right = method_name == "reduceRight";
 
         let args = call.arguments().ok()?.args();
 
@@ -126,23 +115,23 @@ impl Rule for UseReduceTypeParameter {
         };
 
         let mut state = extract_assertion(second_expr)?;
-        state.is_reduce_right = method_name == "reduceRight";
+        state.is_reduce_right = is_reduce_right;
         Some(state)
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let call = ctx.query();
         let method = if state.is_reduce_right {
-            "reduceRight"
+            "Array#reduceRight"
         } else {
-            "reduce"
+            "Array#reduce"
         };
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 call.syntax().text_trimmed_range(),
                 markup! {
-                    "The initial value of "<Emphasis>{method}</Emphasis>" uses a type assertion instead of a type parameter."
+                    "Use a type parameter on "<Emphasis>{method}</Emphasis>" instead of a type assertion for the initial value."
                 },
             )
             .note(markup! {
@@ -218,18 +207,4 @@ fn extract_assertion(expr: AnyJsExpression) -> Option<UseReduceTypeParameterStat
     }
 
     None
-}
-
-/// Check if a type is an array or tuple.
-fn is_array_or_tuple(ty: &biome_js_type_info::Type) -> bool {
-    if ty.is_array_of(|_| true) {
-        return true;
-    }
-    // Check for tuple types via resolved data
-    if let Some(data) = ty.resolved_data()
-        && matches!(data.as_raw_data(), biome_js_type_info::TypeData::Tuple(_))
-    {
-        return true;
-    }
-    false
 }

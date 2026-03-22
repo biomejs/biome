@@ -1,5 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
 expression: invalid.ts
 ---
 # Input
@@ -51,7 +52,7 @@ tuple1.reduce((sum, n) => sum + n, 0 as number);
 ```
 invalid.ts:3:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The initial value of reduce uses a type assertion instead of a type parameter.
+  i Use a type parameter on Array#reduce instead of a type assertion for the initial value.
   
     1 │ // basic reduce with as assertion
     2 │ const arr1: number[] = [1, 2, 3];
@@ -79,7 +80,7 @@ invalid.ts:3:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━�
 ```
 invalid.ts:7:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The initial value of reduce uses a type assertion instead of a type parameter.
+  i Use a type parameter on Array#reduce instead of a type assertion for the initial value.
   
     5 │ // object accumulator
     6 │ const arr2: string[] = ['a', 'b'];
@@ -107,7 +108,7 @@ invalid.ts:7:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━�
 ```
 invalid.ts:11:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The initial value of reduceRight uses a type assertion instead of a type parameter.
+  i Use a type parameter on Array#reduceRight instead of a type assertion for the initial value.
   
      9 │ // reduceRight
     10 │ const arr3: number[] = [1, 2, 3];
@@ -135,7 +136,7 @@ invalid.ts:11:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━
 ```
 invalid.ts:15:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The initial value of reduce uses a type assertion instead of a type parameter.
+  i Use a type parameter on Array#reduce instead of a type assertion for the initial value.
   
     13 │ // tuple type
     14 │ const arr4: string[] = ['x'];
@@ -163,7 +164,7 @@ invalid.ts:15:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━
 ```
 invalid.ts:19:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The initial value of reduce uses a type assertion instead of a type parameter.
+  i Use a type parameter on Array#reduce instead of a type assertion for the initial value.
   
     17 │ // union type
     18 │ const arr5: number[] = [1, 2];
@@ -191,7 +192,7 @@ invalid.ts:19:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━
 ```
 invalid.ts:23:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The initial value of reduce uses a type assertion instead of a type parameter.
+  i Use a type parameter on Array#reduce instead of a type assertion for the initial value.
   
     21 │ // intersection type
     22 │ const arr6: object[] = [];
@@ -219,7 +220,7 @@ invalid.ts:23:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━
 ```
 invalid.ts:27:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The initial value of reduce uses a type assertion instead of a type parameter.
+  i Use a type parameter on Array#reduce instead of a type assertion for the initial value.
   
     25 │ // angle bracket assertion (<Type>expr syntax)
     26 │ const arr7: number[] = [1, 2, 3];
@@ -247,7 +248,7 @@ invalid.ts:27:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━
 ```
 invalid.ts:31:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The initial value of reduce uses a type assertion instead of a type parameter.
+  i Use a type parameter on Array#reduce instead of a type assertion for the initial value.
   
     29 │ // parenthesized as assertion
     30 │ const arr8: number[] = [1, 2, 3];
@@ -275,7 +276,7 @@ invalid.ts:31:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━
 ```
 invalid.ts:35:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The initial value of reduce uses a type assertion instead of a type parameter.
+  i Use a type parameter on Array#reduce instead of a type assertion for the initial value.
   
     33 │ // parenthesized angle bracket assertion
     34 │ const arr9: number[] = [1, 2, 3];
@@ -303,7 +304,7 @@ invalid.ts:35:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━
 ```
 invalid.ts:39:1 lint/nursery/useReduceTypeParameter  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The initial value of reduce uses a type assertion instead of a type parameter.
+  i Use a type parameter on Array#reduce instead of a type assertion for the initial value.
   
     37 │ // tuple receiver
     38 │ const tuple1: [number, number, number] = [1, 2, 3];
