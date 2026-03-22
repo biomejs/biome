@@ -166,4 +166,10 @@ pub(crate) enum TemplateTagKind {
     },
     /// Call expression: styled(Component)``, graphql(``)
     CallExpression { callee: TokenText },
+    /// Content comment: `#graphql` on the first line of the template content,
+    /// or `/* GraphQL */` block comment before the template literal.
+    ContentComment {
+        /// The normalized comment text, e.g. "graphql" or "css".
+        language: &'static str,
+    },
 }

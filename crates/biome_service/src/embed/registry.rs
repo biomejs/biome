@@ -182,7 +182,7 @@ fn resolve_directive_language(
     Some(GuestLanguage::JsModule)
 }
 
-static JS_DETECTORS: [EmbedDetector; 5] = [
+static JS_DETECTORS: [EmbedDetector; 7] = [
     // css`` → CSS
     EmbedDetector::TemplateTag {
         tag: "css",
@@ -207,5 +207,15 @@ static JS_DETECTORS: [EmbedDetector; 5] = [
     EmbedDetector::TemplateExpression {
         object: "graphql",
         target: EmbedTarget::Static(GuestLanguage::GraphQL),
+    },
+    // `#graphql\n...` or /* GraphQL */`...` → GraphQL
+    EmbedDetector::TemplateComment {
+        language: "graphql",
+        target: EmbedTarget::Static(GuestLanguage::GraphQL),
+    },
+    // `#css\n...` or /* CSS */`...` → CSS
+    EmbedDetector::TemplateComment {
+        language: "css",
+        target: EmbedTarget::Static(GuestLanguage::Css),
     },
 ];

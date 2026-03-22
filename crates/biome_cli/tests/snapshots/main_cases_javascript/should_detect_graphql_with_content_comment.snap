@@ -1,0 +1,32 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 520
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "javascript": {
+    "experimentalEmbeddedSnippetsEnabled": true,
+    "formatter": {
+      "enabled": true
+    }
+  }
+}
+```
+
+## `file.js`
+
+```js
+const query = `#graphql
+query { people(id: $personId) { name } }`;
+const query2 = /* GraphQL */ `query { people(id: $personId) { name } }`;
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```

@@ -1,0 +1,126 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 212
+info: "js\\multiparser-graphql\\inline-comment-tag.js"
+---
+
+# Input
+
+```js
+const query = `#graphql
+      {
+    user(   id :   5  )  {
+      firstName
+
+      lastName
+    }
+  }
+`;
+
+const queryString = `#graphql
+query foo {
+	bar
+}` as const;
+
+`#graphql
+      {
+    user(   id :   5 , type:
+    "without variable assignment"  )  {
+      firstName
+
+      lastName
+    }
+  }
+`;
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,6 +1,6 @@
+ const query = `#graphql
+-  {
+-    user(id: 5) {
++      {
++    user(   id :   5  )  {
+       firstName
+ 
+       lastName
+@@ -9,14 +9,14 @@
+ `;
+ 
+ const queryString = `#graphql
+-  query foo {
+-    bar
+-  }
+-` as const;
++query foo {
++	bar
++}` as const;
+ 
+ `#graphql
+-  {
+-    user(id: 5, type: "without variable assignment") {
++      {
++    user(   id :   5 , type:
++    "without variable assignment"  )  {
+       firstName
+ 
+       lastName
+```
+
+# Output
+
+```js
+const query = `#graphql
+      {
+    user(   id :   5  )  {
+      firstName
+
+      lastName
+    }
+  }
+`;
+
+const queryString = `#graphql
+query foo {
+	bar
+}` as const;
+
+`#graphql
+      {
+    user(   id :   5 , type:
+    "without variable assignment"  )  {
+      firstName
+
+      lastName
+    }
+  }
+`;
+```
+
+# Errors
+```
+inline-comment-tag.js:11:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'as' expression are a TypeScript only feature. Convert your file to a TypeScript file or remove the syntax.
+  
+     9 │ `;
+    10 │ 
+  > 11 │ const queryString = `#graphql
+       │                     ^^^^^^^^^
+  > 12 │ query foo {
+  > 13 │ 	bar
+  > 14 │ }` as const;
+       │ ^^^^^^^^^^^
+    15 │ 
+    16 │ `#graphql
+  
+  i TypeScript only syntax
+  
+
+```

@@ -628,9 +628,26 @@ fn build_js_template_candidate(expr: &JsTemplateExpression) -> Option<EmbedCandi
         return None;
     };
 
-    let tag_kind = template_expression_to_template_tag(expr)?;
-
     let content_token = chunk.template_chunk_token().ok()?;
+
+    // Try regular tag detection first (gql``, styled.div``, graphql(``), etc.)
+    if let Some(tag_kind) = template_expression_to_template_tag(expr) {
+        return Some(EmbedCandidate::TaggedTemplate {
+            tag: tag_kind,
+            content: EmbedContent {
+                element_range: chunk.range(),
+                content_range: content_token.text_range(),
+                content_offset: content_token.text_range().start(),
+                text: content_token.token_text(),
+            },
+        });
+    }
+
+    // No tag found — try content comment detection (`#graphql` on first line)
+    // or block comment before the template (`/* GraphQL */`...``)
+    let tag_kind = detect_content_comment_tag(content_token.token_text().text())
+        .or_else(|| detect_block_comment_tag(expr))?;
+
     Some(EmbedCandidate::TaggedTemplate {
         tag: tag_kind,
         content: EmbedContent {
@@ -640,6 +657,63 @@ fn build_js_template_candidate(expr: &JsTemplateExpression) -> Option<EmbedCandi
             text: content_token.token_text(),
         },
     })
+}
+
+/// Detect a `#graphql` or `#css` comment on the first line of the template content.
+///
+/// Matches patterns like:
+/// ```js
+/// const query = `#graphql
+///   query { user { name } }
+/// `;
+/// ```
+fn detect_content_comment_tag(text: &str) -> Option<TemplateTagKind> {
+    let trimmed = text.trim_start_matches(['\n', '\r', ' ', '\t']);
+    let rest = trimmed.strip_prefix('#')?;
+    let language_id = rest.split(|c: char| c.is_whitespace()).next()?;
+    match language_id {
+        "graphql" => Some(TemplateTagKind::ContentComment { language: "graphql" }),
+        "css" => Some(TemplateTagKind::ContentComment { language: "css" }),
+        _ => None,
+    }
+}
+
+/// Detect a `/* GraphQL */` or `/* CSS */` block comment immediately before
+/// the template literal.
+///
+/// Matches patterns like:
+/// ```js
+/// const query = /* GraphQL */`
+///   query { user { name } }
+/// `;
+/// ```
+fn detect_block_comment_tag(expr: &JsTemplateExpression) -> Option<TemplateTagKind> {
+    // Only for untagged templates
+    if expr.tag().is_some() {
+        return None;
+    }
+
+    let l_tick = expr.l_tick_token().ok()?;
+    let last_comment = l_tick
+        .leading_trivia()
+        .pieces()
+        .filter(|piece| piece.kind().is_multiline_comment())
+        .last()?;
+
+    let comment_text = last_comment.text();
+    // Strip `/*` and `*/` and trim whitespace
+    let inner = comment_text
+        .strip_prefix("/*")?
+        .strip_suffix("*/")?
+        .trim();
+
+    if inner.eq_ignore_ascii_case("graphql") {
+        Some(TemplateTagKind::ContentComment { language: "graphql" })
+    } else if inner.eq_ignore_ascii_case("css") {
+        Some(TemplateTagKind::ContentComment { language: "css" })
+    } else {
+        None
+    }
 }
 
 /// Classify a template expression's tag into a `TemplateTagKind`.

@@ -31,6 +31,14 @@ pub(crate) enum EmbedDetector {
         target: EmbedTarget,
     },
 
+    /// Matches `EmbedCandidate::TaggedTemplate` where the tag is a
+    /// `ContentComment` with a matching language identifier.
+    /// e.g. `` `#graphql\n...` ``, `` /* GraphQL */`...` ``
+    TemplateComment {
+        language: &'static str,
+        target: EmbedTarget,
+    },
+
     /// Matches `EmbedCandidate::TextExpression`. Always matches (no pattern).
     /// The guest language depends on the host framework.
     TextExpression { target: EmbedTarget },
@@ -101,6 +109,24 @@ impl EmbedDetector {
                 }
                 _ => None,
             },
+
+            // TemplateComment detector + TaggedTemplate candidate with ContentComment tag
+            (
+                Self::TemplateComment {
+                    language: expected,
+                    target,
+                },
+                EmbedCandidate::TaggedTemplate {
+                    tag: TemplateTagKind::ContentComment { language },
+                    ..
+                },
+            ) => {
+                if *language == *expected {
+                    target.resolve(candidate, file_source)
+                } else {
+                    None
+                }
+            }
 
             // TextExpression detector + TextExpression candidate: always matches
             (Self::TextExpression { target }, EmbedCandidate::TextExpression { .. }) => {

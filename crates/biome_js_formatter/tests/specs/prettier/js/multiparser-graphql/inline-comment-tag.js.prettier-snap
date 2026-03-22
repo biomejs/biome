@@ -1,0 +1,25 @@
+const query = `#graphql
+  {
+    user(id: 5) {
+      firstName
+
+      lastName
+    }
+  }
+`;
+
+const queryString = `#graphql
+  query foo {
+    bar
+  }
+` as const;
+
+`#graphql
+  {
+    user(id: 5, type: "without variable assignment") {
+      firstName
+
+      lastName
+    }
+  }
+`;

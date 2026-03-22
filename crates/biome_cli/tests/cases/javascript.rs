@@ -99,6 +99,51 @@ const Bar = styled.div`background-color: red !important; align: center; padding:
 }
 
 #[test]
+fn should_detect_graphql_with_content_comment() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let js_file = Utf8Path::new("file.js");
+    fs.insert(
+        js_file.into(),
+        r#"const query = `#graphql
+query { people(id: $personId) { name } }`;
+const query2 = /* GraphQL */`query { people(id: $personId) { name } }`;
+"#
+        .as_bytes(),
+    );
+
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{
+    "javascript": {
+        "experimentalEmbeddedSnippetsEnabled": true,
+        "formatter": {
+            "enabled": true
+        }
+    }
+}"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", js_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_detect_graphql_with_content_comment",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn should_apply_fixes_to_embedded_languages() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
