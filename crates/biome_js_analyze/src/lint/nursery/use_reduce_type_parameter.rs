@@ -24,35 +24,29 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```ts,file=invalid.ts,expect_diagnostic
+    /// ```ts,expect_diagnostic
     /// const arr: number[] = [1, 2, 3];
     /// arr.reduce((sum, num) => sum.concat(num * 2), [] as number[]);
     /// ```
     ///
-    /// ```ts,file=invalid2.ts,expect_diagnostic
+    /// ```ts,expect_diagnostic
     /// const arr: string[] = ['a', 'b'];
     /// arr.reduce((acc, name) => ({ ...acc, [name]: true }), {} as Record<string, boolean>);
     /// ```
     ///
-    /// ```ts,file=invalid3.ts,expect_diagnostic
+    /// ```ts,expect_diagnostic
     /// const arr: number[] = [1, 2, 3];
     /// arr.reduceRight((sum, num) => sum.concat(num * 2), [] as number[]);
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```ts,file=valid.ts
+    /// ```ts
     /// const arr: number[] = [1, 2, 3];
     /// arr.reduce<number[]>((sum, num) => sum.concat(num * 2), []);
-    /// ```
     ///
-    /// ```ts,file=valid2.ts
-    /// const arr: number[] = [1, 2, 3];
     /// arr.reduce((a, b) => a + b);
-    /// ```
     ///
-    /// ```ts,file=valid3.ts
-    /// const arr: number[] = [1, 2, 3];
     /// arr.reduce((sum, n) => sum + n, 0);
     /// ```
     ///
