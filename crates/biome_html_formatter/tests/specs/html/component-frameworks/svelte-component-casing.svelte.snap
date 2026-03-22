@@ -22,31 +22,10 @@ info: component-frameworks/svelte-component-casing.svelte
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Attribute Position: Auto
-Bracket same line: false
-Whitespace sensitivity: css
-Indent script and style: false
-Self close void elements: never
-Trailing newline: true
------
+# Formatted
 
 ```svelte
-<script lang="ts">
-  import Button from './Button.svelte';
-  import TextInput from './TextInput.svelte';
-  import Select from './Select.svelte';
-</script>
+<script lang="ts"></script>
 
 <Button label="test button" />
 <TextInput placeholder="enter text" />
@@ -58,9 +37,3 @@ Trailing newline: true
 </select>
 
 ```
-
-
-
-## Unimplemented nodes/tokens
-
-"\n  import Button from './Button.svelte';\n  import TextInput from './TextInput.svelte';\n  import Select from './Select.svelte';\n" => 18..145

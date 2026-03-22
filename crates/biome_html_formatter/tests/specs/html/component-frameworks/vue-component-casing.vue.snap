@@ -20,30 +20,10 @@ import TextInput from './TextInput.vue';
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Attribute Position: Auto
-Bracket same line: false
-Whitespace sensitivity: css
-Indent script and style: false
-Self close void elements: never
-Trailing newline: true
------
+# Formatted
 
 ```vue
-<script setup lang="ts">
-import Button from './Button.vue';
-import TextInput from './TextInput.vue';
-</script>
+<script setup lang="ts"></script>
 
 <template>
 	<Button label="test button" />
@@ -52,9 +32,3 @@ import TextInput from './TextInput.vue';
 </template>
 
 ```
-
-
-
-## Unimplemented nodes/tokens
-
-"\nimport Button from './Button.vue';\nimport TextInput from './TextInput.vue';\n" => 24..101

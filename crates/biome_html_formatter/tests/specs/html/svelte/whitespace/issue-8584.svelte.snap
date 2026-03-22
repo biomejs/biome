@@ -15,36 +15,11 @@ info: svelte/whitespace/issue-8584.svelte
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Attribute Position: Auto
-Bracket same line: false
-Whitespace sensitivity: css
-Indent script and style: false
-Self close void elements: never
-Trailing newline: true
------
+# Formatted
 
 ```svelte
-<script>
-	const framework = "Astro";
-</script>
+<script></script>
 
 <h1>Hello, {framework} and Svelte!</h1>
 
 ```
-
-
-
-## Unimplemented nodes/tokens
-
-"\n\tconst framework = \"Astro\";\n" => 8..37

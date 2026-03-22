@@ -382,6 +382,7 @@ dependencies = [
  "mimalloc",
  "serde",
  "serde_json",
+ "similar-asserts",
  "tests_macros",
  "tikv-jemallocator",
 ]
@@ -653,6 +654,7 @@ dependencies = [
  "mimalloc",
  "serde",
  "serde_json",
+ "similar-asserts",
  "tests_macros",
  "tikv-jemallocator",
 ]
@@ -728,6 +730,7 @@ dependencies = [
  "camino",
  "serde",
  "serde_json",
+ "similar-asserts",
  "tests_macros",
 ]
 
@@ -866,6 +869,7 @@ dependencies = [
  "mimalloc",
  "schemars",
  "serde",
+ "similar-asserts",
  "tests_macros",
  "tikv-jemallocator",
 ]
@@ -970,6 +974,7 @@ dependencies = [
 name = "biome_js_formatter"
 version = "0.5.7"
 dependencies = [
+ "biome_configuration",
  "biome_deserialize",
  "biome_deserialize_macros",
  "biome_diagnostics_categories",
@@ -995,6 +1000,7 @@ dependencies = [
  "schemars",
  "serde",
  "serde_json",
+ "similar-asserts",
  "smallvec",
  "tests_macros",
  "tikv-jemallocator",
@@ -1177,6 +1183,7 @@ dependencies = [
 name = "biome_json_formatter"
 version = "0.5.7"
 dependencies = [
+ "biome_configuration",
  "biome_deserialize",
  "biome_deserialize_macros",
  "biome_diagnostics",
@@ -1197,6 +1204,7 @@ dependencies = [
  "schemars",
  "serde",
  "serde_json",
+ "similar-asserts",
  "tests_macros",
  "tikv-jemallocator",
 ]

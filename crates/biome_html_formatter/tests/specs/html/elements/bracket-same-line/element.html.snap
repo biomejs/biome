@@ -19,52 +19,18 @@ info: elements/bracket-same-line/element.html
 ```
 
 
-=============================
+# Options
 
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Attribute Position: Auto
-Bracket same line: false
-Whitespace sensitivity: css
-Indent script and style: false
-Self close void elements: never
-Trailing newline: true
------
-
-```html
-<div
-	id="hello"
-	class="world really-long-class-name another-really-long-class-name"
-	style="color: red"
-	data-foo="bar"
-	data-bar="foo"
->
-	hello world
-</div>
-
+```json
+{
+  "$schema": "../../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "formatter": {
+    "bracketSameLine": true
+  }
+}
 ```
 
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Attribute Position: Auto
-Bracket same line: true
-Whitespace sensitivity: css
-Indent script and style: false
-Self close void elements: never
-Trailing newline: true
------
+# Formatted
 
 ```html
 <div

@@ -1,24 +1,14 @@
-use biome_formatter::{AttributePosition, IndentStyle, LineWidth};
-use biome_formatter_test::check_reformat::CheckReformat;
-use biome_html_formatter::context::HtmlFormatOptions;
-use biome_html_formatter::{HtmlFormatLanguage, format_node};
-use biome_html_parser::{HtmlParserOptions, parse_html};
-use biome_html_syntax::HtmlFileSource;
-
-mod language {
-    include!("language.rs");
-}
+use biome_fs::{BiomePath, MemoryFileSystem};
+use biome_service::workspace::{
+    ChangeFileParams, FileContent, FormatFileParams, GetFormatterIRParams, OpenFileParams,
+    OpenProjectParams, server,
+};
+use std::sync::Arc;
 
 #[ignore]
 #[test]
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
-    //     let src = r#"
-    // <span>foo</span>
-    // <!-- biome-ignore format: reason -->
-    // foo bar baz boof
-    // quick brown fox
-    // "#;
     let src = r#"
 {#snippet ff.call()}
     {page.value}
@@ -28,25 +18,71 @@ fn quick_test() {
     </div>
 {/snippet}
 "#;
-    let source_type = HtmlFileSource::html();
-    let tree = parse_html(src, HtmlParserOptions::from(&source_type));
-    let options = HtmlFormatOptions::new(source_type)
-        .with_indent_style(IndentStyle::Space)
-        .with_line_width(LineWidth::try_from(80).unwrap())
-        .with_attribute_position(AttributePosition::Auto);
+    let fs = MemoryFileSystem::default();
+    let workspace = server(Arc::new(fs), None);
 
-    let doc = format_node(options.clone(), &tree.syntax(), false).unwrap();
-    let result = doc.print().unwrap();
+    let project = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new(""),
+            open_uninitialized: true,
+        })
+        .unwrap();
 
-    println!("{}", doc.into_document());
-    eprintln!("{}", result.as_code());
+    let path = BiomePath::new("test.html");
+    workspace
+        .open_file(OpenFileParams {
+            project_key: project.project_key,
+            path: path.clone(),
+            content: FileContent::FromClient {
+                content: src.to_string(),
+                version: 0,
+            },
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
 
-    CheckReformat::new(
-        &tree.syntax(),
-        result.as_code(),
-        "testing",
-        &language::HtmlTestFormatLanguage::new(source_type),
-        HtmlFormatLanguage::new(options),
-    )
-    .check_reformat();
+    // Print IR
+    if let Ok(ir) = workspace.get_formatter_ir(GetFormatterIRParams {
+        project_key: project.project_key,
+        path: path.clone(),
+    }) {
+        println!("{ir}");
+    }
+
+    let printed = workspace
+        .format_file(FormatFileParams {
+            project_key: project.project_key,
+            path: path.clone(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    eprintln!("{}", printed.as_code());
+
+    // Idempotency check
+    workspace
+        .change_file(ChangeFileParams {
+            project_key: project.project_key,
+            path: path.clone(),
+            content: printed.as_code().to_string(),
+            version: 1,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let re_printed = workspace
+        .format_file(FormatFileParams {
+            project_key: project.project_key,
+            path: path.clone(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    similar_asserts::assert_eq!(
+        re_printed.as_code(),
+        printed.as_code(),
+        "Formatter is not idempotent"
+    );
 }

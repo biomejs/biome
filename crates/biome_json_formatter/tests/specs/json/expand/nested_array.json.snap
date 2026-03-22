@@ -13,59 +13,20 @@ info: json/expand/nested_array.json
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Trailing commas: None
-Expand: Auto
-Bracket spacing: true
-Trailing newline: true
------
+# Options
 
 ```json
 {
-	"array": [
-		111111,
-		[1, 2, "a"],
-		4444444444444444444444444444,
-		666666666666666,
-		"abababababababababababababababababab"
-	],
-	"long": [
-		11111,
-		[
-			"nestedddddddddddd",
-			22222222222222222222222222,
-			true,
-			5555555555555555555555,
-			"indenteddddddddddddddddddddddddddddd"
-		],
-		"Element"
-	]
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "json": {
+    "formatter": {
+      "expand": "always"
+    }
+  }
 }
-
 ```
 
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Trailing commas: None
-Expand: Always
-Bracket spacing: true
-Trailing newline: true
------
+# Formatted
 
 ```json
 {

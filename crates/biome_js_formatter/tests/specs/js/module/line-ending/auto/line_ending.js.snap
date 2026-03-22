@@ -27,72 +27,18 @@ export const env = createEnv({
 ```
 
 
-=============================
+# Options
 
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
-Trailing newline: true
------
-
-```js
-// Original file in LF
-// just some random code
-export const env = createEnv({
-	DISCORD_TOKEN: { type: "string" },
-	TOPGG_TOKEN: { type: "string" },
-
-	GUILD_LOGS: { type: "string" },
-	GLOBAL_DETECTOR_LOGS: { type: "string" },
-	TEST_GUILD: { type: "string" },
-
-	SUPPORT_INVITE: { type: "string" },
-	GAS_INVITE: { type: "string" },
-
-	DOCS_LINK: { type: "string" },
-
-	NODE_ENV: { type: "string" },
-});
-
+```json
+{
+  "$schema": "../../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "formatter": {
+    "lineEnding": "auto"
+  }
+}
 ```
 
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: AUTO
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
-Trailing newline: true
------
+# Formatted
 
 ```js
 // Original file in LF

@@ -1,6 +1,5 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: css/scss/at-rule/forward.scss
 ---
 
@@ -37,20 +36,7 @@ $spacing:4px
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-Trailing newline: true
------
+# Formatted
 
 ```scss
 @forward "theme";
@@ -59,19 +45,13 @@ Trailing newline: true
 
 @forward "theme" hide $private, internal-mixin;
 
-@forward "theme"as
-theme-*;
+@forward "theme" as theme-*;
 
 @forward "theme" with (
 	$spacing: 4px !default,
 	$radius: 2px
 );
 
-@forward "theme" as theme-* show
-$color,
-button
-with(
-$spacing:4px
-);
+@forward "theme" as theme-* show $color, button with ($spacing: 4px);
 
 ```

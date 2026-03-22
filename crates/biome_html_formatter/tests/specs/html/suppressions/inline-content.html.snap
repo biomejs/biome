@@ -11,24 +11,7 @@ info: suppressions/inline-content.html
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Attribute Position: Auto
-Bracket same line: false
-Whitespace sensitivity: css
-Indent script and style: false
-Self close void elements: never
-Trailing newline: true
------
+# Formatted
 
 ```html
 123<!--biome-ignore format: prettier ignore-->4      56

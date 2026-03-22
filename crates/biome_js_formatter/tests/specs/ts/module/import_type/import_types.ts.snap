@@ -32,70 +32,20 @@ import {bar, type Bar as Baz} from 'baz';
 ```
 
 
-=============================
+# Options
 
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
-Trailing newline: true
------
-
-```ts
-import type { a, b, c } from "D";
-
-import type { adsadasdasdasdasdasdasdasdasdasdas, d, e } from "W";
-
-import type TheDefault from "foo";
-
-// Single named alias import
-import type { foo as bar } from "foo";
-// Multiple named imports
-import type { foo as baz, aaa } from "foo";
-
-// Type imports within specifier list
-import { foo, type Foo } from "foo";
-import { type Bar } from "bar";
-import { bar, type Bar as Baz } from "baz";
-
+```json
+{
+  "$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "javascript": {
+    "formatter": {
+      "bracketSpacing": false
+    }
+  }
+}
 ```
 
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: false
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
-Trailing newline: true
------
+# Formatted
 
 ```ts
 import type {a, b, c} from "D";

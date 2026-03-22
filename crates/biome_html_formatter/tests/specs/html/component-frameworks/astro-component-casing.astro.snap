@@ -19,29 +19,10 @@ import TextInput from './TextInput.astro';
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Attribute Position: Auto
-Bracket same line: false
-Whitespace sensitivity: css
-Indent script and style: false
-Self close void elements: never
-Trailing newline: true
------
+# Formatted
 
 ```astro
 ---
-import Button from './Button.astro';
-import TextInput from './TextInput.astro';
 ---
 
 <Button label="test button" />
@@ -50,9 +31,3 @@ import TextInput from './TextInput.astro';
 <input type="text">
 
 ```
-
-
-
-## Unimplemented nodes/tokens
-
-"import Button from './Button.astro';\nimport TextInput from './TextInput.astro';\n-" => 4..85
