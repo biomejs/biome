@@ -16,7 +16,7 @@ mod utils;
 
 mod embed;
 
-#[cfg(feature = "testing")]
+#[cfg(any(test, feature = "testing"))]
 pub mod test_utils;
 
 use camino::Utf8Path;
