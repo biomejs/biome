@@ -43,90 +43,18 @@ export const queryAuditLog = async ({
 ```
 
 
-=============================
+# Options
 
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
-Trailing newline: true
------
-
-```ts
-export function formatNumber1(
-	value: string,
-	{
-		a,
-		b,
-		c,
-		formatNumber,
-		...props
-	}: Omit<NumberFormatterProps, "value" | "defaultFractionDigits"> & {
-		useGrouping?: boolean;
-	},
-): string {}
-
-export function formatNumber2(
-	value: string,
-	{
-		a,
-	}: Omit<NumberFormatterProps, "value" | "defaultFractionDigits"> & {
-		useGrouping?: boolean;
-	},
-): string {}
-
-export const findByDatefindByDatefindByDatefindByDate = (
-	_,
-	{ date },
-	{ req },
-) => findByDatefindByDatefindByDatefindByDate;
-
-export const queryAuditLog = async ({
-	startDate,
-	endDate,
-	jobId,
-	src,
-	type,
-}: Filter): Promise<DBAuditLog[]> => {};
-
+```json
+{
+  "$schema": "../../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "formatter": {
+    "lineWidth": 120
+  }
+}
 ```
 
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 120
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
-Trailing newline: true
------
+# Formatted
 
 ```ts
 export function formatNumber1(

@@ -19,71 +19,20 @@ x2 = (a) => ((askTrovenaBeenaDependsRowans1, askTrovenaBeenaDependsRowans2, askT
 ```
 
 
-=============================
+# Options
 
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
-Trailing newline: true
------
-
-```js
-x =
-	(bifornCringerMoshedPerplexSawder) =>
-	(askTrovenaBeenaDependsRowans, glimseGlyphsHazardNoopsTieTie) =>
-	(f00) => {
-		averredBathersBoxroomBuggyNurl();
-	}; // BOOM
-
-x2 =
-	(a) =>
-	(
-		askTrovenaBeenaDependsRowans1,
-		askTrovenaBeenaDependsRowans2,
-		askTrovenaBeenaDependsRowans3,
-	) => {
-		c();
-	} /* ! */; // KABOOM
-
+```json
+{
+  "$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "javascript": {
+    "formatter": {
+      "arrowParentheses": "asNeeded"
+    }
+  }
+}
 ```
 
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: As needed
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
-Trailing newline: true
------
+# Formatted
 
 ```js
 x =

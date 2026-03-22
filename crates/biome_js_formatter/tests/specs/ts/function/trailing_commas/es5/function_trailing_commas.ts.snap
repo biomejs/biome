@@ -47,94 +47,20 @@ connect(
 ```
 
 
-=============================
+# Options
 
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
-Trailing newline: true
------
-
-```ts
-function test<
-	longlonglonglonglonglonglongT1,
-	longlonglonglonglonglonglongT2,
-	longlonglonglonglonglonglongT3,
->(
-	longlonglonglonglonglonglongItem1,
-	longlonglonglonglonglonglongItem2,
-	longlonglonglonglonglonglongItem3,
-) {}
-const test1 = <
-	longlonglonglonglonglonglongT1,
-	longlonglonglonglonglonglongT2,
-	longlonglonglonglonglonglongT3,
->(
-	longlonglonglonglonglonglongItem1,
-	longlonglonglonglonglonglongItem2,
-	longlonglonglonglonglonglongItem3,
-) => {};
-test<
-	longlonglonglonglonglonglongT1,
-	longlonglonglonglonglonglongT2,
-	longlonglonglonglonglonglongT3
->(
-	longlonglonglonglonglonglongItem1,
-	longlonglonglonglonglonglongItem2,
-	longlonglonglonglonglonglongItem3,
-);
-
-this.test(
-	longlonglonglonglonglonglongT1,
-	longlonglonglonglonglonglongT2,
-	longlonglonglonglonglonglongT3,
-);
-
-connect(
-	mapStateToPropsmapStateToProps,
-	mapDispatchToPropsmapDispatchToProps,
-	mergePropsmergeProps,
-)(Component);
-
+```json
+{
+  "$schema": "../../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "javascript": {
+    "formatter": {
+      "trailingCommas": "es5"
+    }
+  }
+}
 ```
 
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: ES5
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
-Trailing newline: true
------
+# Formatted
 
 ```ts
 function test<

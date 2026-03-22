@@ -14,39 +14,19 @@ info: css/tailwind/plugin-with-options.css
 ```
 
 
-=============================
+# Options
 
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-Trailing newline: true
------
-
-```css
-@plugin "my-plugin" {
-	debug: false;
-	threshold: 0.5;
+```json
+{
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  }
 }
-
 ```
 
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-Trailing newline: true
------
+# Formatted
 
 ```css
 @plugin "my-plugin" {

@@ -18,30 +18,7 @@ type LongImportType = typeof import("./long/long/long/long/long/long/long/long/p
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
-Trailing newline: true
------
+# Formatted
 
 ```ts
 type ImportType1 = typeof import("source");

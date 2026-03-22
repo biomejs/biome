@@ -24,57 +24,20 @@ info: self-closing/always.html
 ```
 
 
-=============================
+# Options
 
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Attribute Position: Auto
-Bracket same line: false
-Whitespace sensitivity: css
-Indent script and style: false
-Self close void elements: never
-Trailing newline: true
------
-
-```html
-<br>
-<img>
-<area>
-<base>
-<col>
-<embed>
-<hr>
-<img>
-<input>
-<link>
-<meta>
-<source>
-<track>
-<wbr>
-
+```json
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "html": {
+    "formatter": {
+      "selfCloseVoidElements": "always"
+    }
+  }
+}
 ```
 
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Attribute Position: Auto
-Bracket same line: false
-Whitespace sensitivity: css
-Indent script and style: false
-Self close void elements: always
-Trailing newline: true
------
+# Formatted
 
 ```html
 <br />

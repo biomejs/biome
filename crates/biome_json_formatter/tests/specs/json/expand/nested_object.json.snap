@@ -11,44 +11,20 @@ info: json/expand/nested_object.json
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Trailing commas: None
-Expand: Auto
-Bracket spacing: true
-Trailing newline: true
------
+# Options
 
 ```json
 {
-	"number": 123,
-	"string": "some-string",
-	"object": { "object": { "number": 123, "boolean": false } }
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "json": {
+    "formatter": {
+      "expand": "always"
+    }
+  }
 }
-
 ```
 
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Trailing commas: None
-Expand: Always
-Bracket spacing: true
-Trailing newline: true
------
+# Formatted
 
 ```json
 {

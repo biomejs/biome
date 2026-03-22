@@ -61,153 +61,20 @@ try {
 ```
 
 
-=============================
+# Options
 
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
-Trailing newline: true
------
-
-```js
-({ normal, long, includes, multiple, bindings }) => {
-	hello();
-};
-({
-	normal,
-	long,
-	includes,
-	multiple,
-	bindings,
-	enough,
-	to,
-	pass,
-	the,
-	lineLength,
-}) => {
-	hello();
-};
-
-({
-	normal: something,
-	n: {
-		yes: what,
-		layout: { e },
-	},
-}) => {
-	bar();
-};
-
-({
-	n: {
-		l: { e },
-	},
-}) => {
-	bar();
-};
-
-const obj = {
-	flat(id, { title }) {
-		return id + title;
-	},
-
-	nested(id, { blog: { title } }) {
-		return id + title;
-	},
-
-	twice(
-		id,
-		{
-			blog: {
-				middle: { title },
-			},
-		},
-	) {
-		return id + title;
-	},
-};
-
-class A {
-	flat(id, { title }) {
-		return id + title;
-	}
-	func(id, { blog: { title } }) {
-		return id + title;
-	}
-
-	twice(
-		id,
-		{
-			blog: {
-				middle: { title },
-			},
-		},
-	) {
-		return id + title;
-	}
+```json
+{
+  "$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "javascript": {
+    "formatter": {
+      "bracketSpacing": false
+    }
+  }
 }
-
-try {
-	foo();
-} catch ({ error }) {
-	nothing();
-}
-
-try {
-	foo();
-} catch ({ error: { nestedOnce } }) {
-	nothing();
-}
-
-try {
-	foo();
-} catch ({
-	error: {
-		nested: { twice },
-	},
-}) {
-	nothing();
-}
-
 ```
 
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: false
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
-Trailing newline: true
------
+# Formatted
 
 ```js
 ({normal, long, includes, multiple, bindings}) => {

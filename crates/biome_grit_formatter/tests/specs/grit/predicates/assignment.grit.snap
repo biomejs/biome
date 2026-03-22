@@ -11,20 +11,7 @@ $new_log_call=`logger.log($message)`}
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Attribute Position: Auto
-Trailing newline: true
------
+# Formatted
 
 ```grit
 `console.log($message)` as $log where { $new_log_call = `logger.log($message)` }

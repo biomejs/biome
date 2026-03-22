@@ -268,30 +268,7 @@ class Foo {
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
-Trailing newline: true
------
+# Formatted
 
 ```ts
 @sealed
@@ -299,11 +276,7 @@ class Test {
 	@readonly
 	prop: string;
 
-	constructor(
-		@param test,
-		@readonly private other,
-		@aVeryLongDecoratorNameLetsSeeWhatHappensWithIt last,
-	) {}
+	constructor(@param test, @readonly private other, @aVeryLongDecoratorNameLetsSeeWhatHappensWithIt last) {}
 
 	method(@param a) {}
 
@@ -342,12 +315,16 @@ class Foo {
 		private readonly myProcessor: IMyProcessor,
 
 		@inject(InjectionTypes.AnotherThing)
+
 		private readonly anotherThing: IAnotherThing | undefined,
-	) {}
+	) { }
 }
 
 export class TestTextFileService {
-	constructor(@ILifecycleService lifecycleService) {}
+	constructor(
+		@ILifecycleService lifecycleService,
+	) {
+	}
 }
 
 @commonEditorContribution
@@ -363,7 +340,7 @@ class AngularComponent {
 class Class {
 	method(
 		@Decorator
-		{ prop1, prop2 }: Type,
+			{ prop1, prop2 }: Type
 	) {
 		doSomething();
 	}
@@ -373,7 +350,7 @@ class Class2 {
 	method(
 		@Decorator1
 		@Decorator2
-		{ prop1, prop2 }: Type,
+			{ prop1, prop2 }: Type
 	) {
 		doSomething();
 	}
@@ -382,7 +359,7 @@ class Class2 {
 class Class3 {
 	method(
 		@Decorator
-		{ prop1_1, prop1_2 }: Type,
+			{ prop1_1, prop1_2 }: Type,
 		{ prop2_1, prop2_2 }: Type,
 	) {
 		doSomething();
@@ -393,19 +370,31 @@ class Class4 {
 	method(
 		param1,
 		@Decorator
-		{ prop1, prop2 }: Type,
+			{ prop1, prop2 }: Type,
 	) {}
 }
 
 class Class5 {
-	method(@Decorator { prop1 }: Type) {}
+	method(
+		@Decorator { prop1 }: Type
+	) {}
 }
 
 class Class6 {
-	method(@Decorator({}) { prop1 }: Type) {}
-	method(@Decorator({}) { prop1 }: Type) {}
-	method(@Decorator([]) { prop1 }: Type) {}
-	method(@Decorator([]) { prop1 }: Type) {}
+	method(
+		@Decorator({}) { prop1 }: Type
+	) {}
+	method(
+		@Decorator(
+			{}) { prop1 }: Type
+	) {}
+	method(
+		@Decorator([]) { prop1 }: Type
+	) {}
+	method(
+		@Decorator(
+			[]) { prop1 }: Type
+	) {}
 }
 
 @d1
@@ -437,14 +426,13 @@ class Class3 {
 	@d3.bar fieldC;
 	@d4.baz() fieldD;
 
-	constructor(
+	constructor (
 		@d1 private x: number,
 		@d2(foo) private y: number,
-		@d3("foo") private z: number,
+		@d3('foo') private z: number,
 		@d4({
-			x: string,
-		})
-		private a: string,
+			x: string
+		}) private a: string,
 	) {}
 }
 
@@ -465,11 +453,7 @@ class Test {
 	@readonly
 	prop: string;
 
-	constructor(
-		@param test,
-		@readonly private other,
-		@aVeryLongDecoratorNameLetsSeeWhatHappensWithIt last,
-	) {}
+	constructor(@param test, @readonly private other, @aVeryLongDecoratorNameLetsSeeWhatHappensWithIt last) {}
 
 	method(@param a) {}
 
@@ -481,7 +465,7 @@ class Test {
 class Class4 {
 	method(
 		@Decorator
-		{ prop1_1, prop1_2 }: Type = {},
+			{ prop1_1, prop1_2 }: Type = {},
 		{ prop2_1, prop2_2 }: Type,
 	) {
 		doSomething();
@@ -509,15 +493,12 @@ class Class2 {
 }
 
 class Class3 {
-	constructor(
-		private aaaaaaaaaaaaaaaaa: {
-			aaaaaaaaaaaaa: number;
-			bbbbbbbbbbb: string;
-			cccccccccccc: Type;
-		},
+	constructor (
+		private aaaaaaaaaaaaaaaaa: {aaaaaaaaaaaaa: number; bbbbbbbbbbb: string; cccccccccccc: Type},
 		@d1 private readonly x: number,
 		@d2(foo) private y: number,
-		@d3("foo") private z: number,
+		@d3('foo') private z: number,
+
 	) {}
 }
 
@@ -528,18 +509,25 @@ class Foo {
 		/*leading same line*/ @Decorator /*trailing*/
 		//leading own line between
 		/*leading same line between*/ @dec //trailing
-		/*leading parameter*/
-		parameter: number,
+			/*leading parameter*/
+			parameter: number,
 	) {}
 
 	method(
 		//leading own line
 		/*leading same line*/ @Decorator /*trailing*/
-		//leading own line between
-		/*leading same line between*/ @dec //trailing
-		/*leading parameter*/
-		parameter,
+	//leading own line between
+	/*leading same line between*/ @dec //trailing
+	/*leading parameter*/
+	parameter,
 	) {}
 }
 
+```
+
+# Lines exceeding max width of 80 characters
+```
+    6: 	constructor(@param test, @readonly private other, @aVeryLongDecoratorNameLetsSeeWhatHappensWithIt last) {}
+  183: 	constructor(@param test, @readonly private other, @aVeryLongDecoratorNameLetsSeeWhatHappensWithIt last) {}
+  224: 		private aaaaaaaaaaaaaaaaa: {aaaaaaaaaaaaa: number; bbbbbbbbbbb: string; cccccccccccc: Type},
 ```

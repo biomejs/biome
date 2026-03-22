@@ -34,6 +34,7 @@ schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true, features = ["derive"], optional = true }
 
 [dev-dependencies]
+biome_configuration  = { path = "../biome_configuration" }
 biome_formatter      = { path = "../biome_formatter", features = ["countme"] }
 biome_formatter_test = { path = "../biome_formatter_test" }
 biome_fs             = { path = "../biome_fs" }
@@ -44,6 +45,7 @@ biome_test_utils     = { path = "../biome_test_utils" }
 countme              = { workspace = true, features = ["enable"] }
 criterion            = { package = "codspeed-criterion-compat", version = "*" }
 serde_json           = { workspace = true }
+similar-asserts      = { workspace = true }
 tests_macros         = { path = "../tests_macros" }
 
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]

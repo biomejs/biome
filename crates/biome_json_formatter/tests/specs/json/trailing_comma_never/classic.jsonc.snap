@@ -17,46 +17,23 @@ info: json/trailing_comma_never/classic.jsonc
 ```
 
 
-=============================
+# Options
 
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Trailing commas: None
-Expand: Auto
-Bracket spacing: true
-Trailing newline: true
------
-
-```jsonc
+```json
 {
-	"list": [],
-	"list1": [],
-	"list2": [],
-	"list3": [],
-	"list4": []
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "json": {
+    "parser": {
+      "allowTrailingCommas": true
+    },
+    "formatter": {
+      "trailingCommas": "all"
+    }
+  }
 }
-
 ```
 
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Trailing commas: All
-Expand: Auto
-Bracket spacing: true
-Trailing newline: true
------
+# Formatted
 
 ```jsonc
 {

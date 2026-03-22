@@ -53,98 +53,20 @@ const a = <div></div>;
 ```
 
 
-=============================
+# Options
 
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
-Trailing newline: true
------
-
-```jsx
-const a = <div></div>;
-
-<Foo
-	className={style}
-	reallyLongAttributeName1={longComplexValue}
-	reallyLongAttributeName2={anotherLongValue}
-/>;
-
-<Foo
-	className={style}
-	reallyLongAttributeName1={longComplexValue}
-	reallyLongAttributeName2={anotherLongValue} // comment
-/>;
-
-<Foo
-	className={style}
-	reallyLongAttributeName1={longComplexValue}
-	reallyLongAttributeName2={anotherLongValue}
->
-	Hi
-</Foo>;
-
-<Foo
-	className={style}
-	reallyLongAttributeName1={longComplexValue}
-	reallyLongAttributeName2={anotherLongValue}
-	// comment
->
-	Hi
-</Foo>;
-
-<Foo
-	className={style}
-	reallyLongAttributeName1={longComplexValue}
-	reallyLongAttributeName2={anotherLongValue}
-	// comment
-	reallyLongAttributeName3={yetAnotherLongValue}
->
-	Hi
-</Foo>;
-
-<div className="hi" />;
-<div className="hi"></div>;
-
+```json
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "javascript": {
+    "formatter": {
+      "bracketSameLine": true
+    }
+  }
+}
 ```
 
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: true
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
-Trailing newline: true
------
+# Formatted
 
 ```jsx
 const a = <div></div>;

@@ -51,20 +51,7 @@ html:active-view-transition-type(
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-Trailing newline: true
------
+# Formatted
 
 ```css
 html:active-view-transition-type(backwards, forwards, backwards, forwards) {

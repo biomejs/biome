@@ -15,40 +15,18 @@ info: graphql/object/spacing/object_spacing.graphql
 ```
 
 
-=============================
+# Options
 
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Bracket spacing: true
-Quote style: Double Quotes
-Trailing newline: true
------
-
-```graphql
+```json
 {
-	field_value(object_value: { key: "value" })
+  "$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "formatter": {
+    "bracketSpacing": false
+  }
 }
-
 ```
 
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Bracket spacing: false
-Quote style: Double Quotes
-Trailing newline: true
------
+# Formatted
 
 ```graphql
 {

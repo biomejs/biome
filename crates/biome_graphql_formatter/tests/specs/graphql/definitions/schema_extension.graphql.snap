@@ -37,21 +37,7 @@ schema @decs{
 ```
 
 
-=============================
-
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Bracket spacing: true
-Quote style: Double Quotes
-Trailing newline: true
------
+# Formatted
 
 ```graphql
 extend schema {
