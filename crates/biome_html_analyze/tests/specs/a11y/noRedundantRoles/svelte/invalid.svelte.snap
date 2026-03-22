@@ -1,0 +1,65 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.svelte
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<article role="article"></article>
+<button role="button"></button>
+<nav role="navigation"></nav>
+```
+
+# Diagnostics
+```
+invalid.svelte:2:10 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'article' on the 'article' element is redundant, because it is implied by its semantic.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <article role="article"></article>
+      │          ^^^^^^^^^^^^^^
+    3 │ <button role="button"></button>
+    4 │ <nav role="navigation"></nav>
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    2 │ <article·role="article"></article>
+      │          --------------           
+
+```
+
+```
+invalid.svelte:3:9 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'button' on the 'button' element is redundant, because it is implied by its semantic.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <article role="article"></article>
+  > 3 │ <button role="button"></button>
+      │         ^^^^^^^^^^^^^
+    4 │ <nav role="navigation"></nav>
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    3 │ <button·role="button"></button>
+      │         -------------          
+
+```
+
+```
+invalid.svelte:4:6 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'navigation' on the 'nav' element is redundant, because it is implied by its semantic.
+  
+    2 │ <article role="article"></article>
+    3 │ <button role="button"></button>
+  > 4 │ <nav role="navigation"></nav>
+      │      ^^^^^^^^^^^^^^^^^
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    4 │ <nav·role="navigation"></nav>
+      │      -----------------       
+
+```

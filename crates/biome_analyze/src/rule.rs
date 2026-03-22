@@ -190,6 +190,8 @@ pub enum RuleSource<'a> {
     EslintCss(&'a str),
     /// Rules from [Eslint Plugin Drizzle](https://orm.drizzle.team/docs/eslint-plugin)
     EslintDrizzle(&'a str),
+    /// Action for https://github.com/keithamus/sort-package-json
+    SortPackageJson,
 }
 
 impl<'a> std::fmt::Display for RuleSource<'a> {
@@ -245,6 +247,7 @@ impl<'a> std::fmt::Display for RuleSource<'a> {
             Self::EslintYml(_) => write!(f, "eslint-plugin-yml"),
             Self::EslintCss(_) => write!(f, "@eslint/css"),
             Self::EslintDrizzle(_) => write!(f, "eslint-plugin-drizzle"),
+            Self::SortPackageJson => write!(f, "sort-package-json"),
         }
     }
 }
@@ -311,6 +314,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintYml(_) => 43,
             Self::EslintCss(_) => 44,
             Self::EslintDrizzle(_) => 45,
+            Self::SortPackageJson => 46,
         }
     }
 
@@ -376,6 +380,7 @@ impl<'a> RuleSource<'a> {
             | Self::EslintMarkdown(rule_name)
             | Self::EslintYml(rule_name)
             | Self::EslintDrizzle(rule_name) => rule_name,
+            Self::SortPackageJson => "sort-package-json",
         }
     }
 
@@ -385,6 +390,7 @@ impl<'a> RuleSource<'a> {
             | Self::DenoLint(_)
             | Self::Eslint(_)
             | Self::GraphqlSchemaLinter(_)
+            | Self::SortPackageJson
             | Self::Stylelint(_) => "",
             Self::EslintBarrelFiles(_) => "barrel-files",
             Self::EslintGraphql(_) => "@graphql-eslint",
@@ -486,6 +492,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintYml(rule_name) => format!("https://ota-meshi.github.io/eslint-plugin-yml/rules/{rule_name}.html"),
             Self::EslintCss(rule_name) => format!("https://github.com/eslint/css/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintDrizzle(rule_name) => format!("https://orm.drizzle.team/docs/eslint-plugin#{rule_name}"),
+            Self::SortPackageJson => "https://github.com/keithamus/sort-package-json".to_string(),
         }
     }
 
@@ -507,6 +514,7 @@ impl<'a> RuleSource<'a> {
                 | Self::Eslint(_)
                 | Self::GraphqlSchemaLinter(_)
                 | Self::Stylelint(_)
+                | Self::SortPackageJson
         )
     }
 
@@ -1453,12 +1461,6 @@ pub struct RuleDiagnostic {
     advice_offset: Option<TextSize>,
 }
 
-impl RuleDiagnostic {
-    pub(crate) fn set_advice_offset(&mut self, offset: TextSize) {
-        self.advice_offset = Some(offset);
-    }
-}
-
 impl Diagnostic for RuleDiagnostic {
     fn severity(&self) -> Severity {
         self.severity
@@ -1563,6 +1565,10 @@ impl RuleDiagnostic {
             severity: Severity::default(),
             advice_offset: None,
         }
+    }
+
+    pub(crate) fn set_advice_offset(&mut self, offset: TextSize) {
+        self.advice_offset = Some(offset);
     }
 
     /// Marks this diagnostic as deprecated code, which will

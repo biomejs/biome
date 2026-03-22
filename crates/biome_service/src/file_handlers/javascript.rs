@@ -953,6 +953,7 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
     let tree = params.parse.tree();
     let analyzer_options = params.settings.analyzer_options::<JsLanguage>(
         params.path,
+        params.working_directory,
         &params.language,
         params.suppression_reason.as_deref(),
     );
@@ -1029,12 +1030,17 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         categories,
         action_offset,
         document_services,
+        working_directory,
     } = params;
     let _ = debug_span!("Code actions JavaScript", range =? range, path =? path).entered();
     let tree = parse.tree();
     let _ = trace_span!("Parsed file").entered();
-    let analyzer_options =
-        settings.analyzer_options::<JsLanguage>(path, &language, suppression_reason.as_deref());
+    let analyzer_options = settings.analyzer_options::<JsLanguage>(
+        path,
+        working_directory,
+        &language,
+        suppression_reason.as_deref(),
+    );
     let mut actions = Vec::new();
     let (enabled_rules, disabled_rules, analyzer_options) =
         AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
@@ -1101,6 +1107,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         .as_linter_rules(params.biome_path.as_path());
     let analyzer_options = params.settings.analyzer_options::<JsLanguage>(
         params.biome_path,
+        params.working_directory,
         &params.document_file_source,
         params.suppression_reason.as_deref(),
     );
@@ -1158,6 +1165,10 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             |signal| process_fix_all.process_signal(signal),
         );
 
+        // Extract plugin text_edit before the action is consumed by process_action,
+        // since plugin rewrites use text_edit instead of tree mutations.
+        let plugin_text_edit = action.as_ref().and_then(|a| a.text_edit.clone());
+
         let result = process_fix_all.process_action(action, |root| {
             tree = match AnyJsRoot::cast(root) {
                 Some(tree) => tree,
@@ -1167,6 +1178,19 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         })?;
 
         if result.is_none() {
+            // No tree mutation was applied. Check if there's a plugin text edit
+            // to apply (plugin rewrites produce text edits, not tree mutations).
+            if let Some(new_text) = process_fix_all
+                .apply_plugin_text_edit(plugin_text_edit, &tree.syntax().to_string())?
+            {
+                let options = params
+                    .settings
+                    .parse_options::<JsLanguage>(params.biome_path, &params.document_file_source);
+                let parse = biome_js_parser::parse(&new_text, file_source, options);
+                tree = parse.tree();
+                continue;
+            }
+
             return process_fix_all.finish(
                 || {
                     Ok(if params.should_format {
@@ -1332,10 +1356,15 @@ pub(crate) fn pull_diagnostics_and_actions(
         plugins,
         diagnostic_offset,
         document_services,
+        working_directory,
     } = params;
     let tree = parse.tree();
-    let analyzer_options =
-        settings.analyzer_options::<JsLanguage>(path, &language, suppression_reason.as_deref());
+    let analyzer_options = settings.analyzer_options::<JsLanguage>(
+        path,
+        working_directory,
+        &language,
+        suppression_reason.as_deref(),
+    );
     let (enabled_rules, disabled_rules, analyzer_options) =
         AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
             .with_only(only)

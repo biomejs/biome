@@ -16,8 +16,8 @@ mod utils;
 
 mod embed;
 
-#[cfg(test)]
-mod test_utils;
+#[cfg(feature = "testing")]
+pub mod test_utils;
 
 use camino::Utf8Path;
 use std::ops::Deref;

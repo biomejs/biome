@@ -27,7 +27,10 @@ use biome_configuration::html::{
     HtmlLinterConfiguration, HtmlLinterEnabled, HtmlParseInterpolation, HtmlParserConfiguration,
 };
 use biome_css_parser::{CssModulesKind, parse_css_with_offset_and_cache};
-use biome_css_syntax::{CssFileSource, CssLanguage};
+use biome_css_syntax::{
+    CssFileSource, CssLanguage, EmbeddingHtmlKind, EmbeddingKind as CssEmbeddingKind,
+    EmbeddingStyleApplicability,
+};
 use biome_formatter::format_element::{Interned, LineMode};
 use biome_formatter::prelude::{Document, Tag};
 use biome_formatter::{
@@ -35,7 +38,7 @@ use biome_formatter::{
     LineWidth, Printed, TrailingNewline,
 };
 use biome_fs::BiomePath;
-use biome_html_analyze::analyze;
+use biome_html_analyze::{HtmlAnalyzerServices, analyze};
 use biome_html_factory::make::ident;
 use biome_html_formatter::context::SelfCloseVoidElements;
 use biome_html_formatter::{
@@ -1245,6 +1248,37 @@ fn parse_matched_embed(
         GuestLanguage::Css => {
             let css_source = if ctx.host_file_source.is_html() {
                 CssFileSource::css()
+                    .with_embedding_kind(CssEmbeddingKind::Html(EmbeddingHtmlKind::Html))
+            } else if ctx.host_file_source.is_vue() {
+                // Vue: <style scoped> and <style module> are component-local.
+                // Plain <style> (no attribute) leaks into the global scope.
+                let applicability =
+                    if candidate.has_attribute("scoped") || candidate.has_attribute("module") {
+                        EmbeddingStyleApplicability::Local
+                    } else {
+                        EmbeddingStyleApplicability::Global
+                    };
+                CssFileSource::new_css_modules().with_embedding_kind(CssEmbeddingKind::Html(
+                    EmbeddingHtmlKind::Vue { applicability },
+                ))
+            } else if ctx.host_file_source.is_astro() {
+                // Astro: <style is:global> is global; plain <style> is local
+                let applicability = if candidate.has_attribute("is:global") {
+                    EmbeddingStyleApplicability::Global
+                } else {
+                    EmbeddingStyleApplicability::Local
+                };
+                CssFileSource::new_css_modules().with_embedding_kind(CssEmbeddingKind::Html(
+                    EmbeddingHtmlKind::Astro { applicability },
+                ))
+            } else if ctx.host_file_source.is_svelte() {
+                // Svelte: plain <style> is local (global classes via :global()
+                // are detected at the selector level by the CSS semantic model)
+                CssFileSource::new_css_modules().with_embedding_kind(CssEmbeddingKind::Html(
+                    EmbeddingHtmlKind::Svelte {
+                        applicability: EmbeddingStyleApplicability::Local,
+                    },
+                ))
             } else {
                 CssFileSource::new_css_modules()
             };
@@ -1441,6 +1475,7 @@ fn lint(params: LintParams) -> LintResults {
     let workspace_settings = &params.settings;
     let analyzer_options = workspace_settings.analyzer_options::<HtmlLanguage>(
         params.path,
+        params.working_directory,
         &params.language,
         params.suppression_reason.as_deref(),
     );
@@ -1465,10 +1500,18 @@ fn lint(params: LintParams) -> LintResults {
     let mut process_lint = ProcessLint::new(&params);
 
     let source_type = params.language.to_html_file_source().unwrap_or_default();
-    let (_, analyze_diagnostics) =
-        analyze(&tree, filter, &analyzer_options, source_type, |signal| {
-            process_lint.process_signal(signal)
-        });
+    let html_services = HtmlAnalyzerServices {
+        module_graph: Some(params.module_graph.clone()),
+        project_layout: Some(params.project_layout.clone()),
+    };
+    let (_, analyze_diagnostics) = analyze(
+        &tree,
+        filter,
+        &analyzer_options,
+        source_type,
+        html_services,
+        |signal| process_lint.process_signal(signal),
+    );
 
     process_lint.into_result(
         params
@@ -1484,7 +1527,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         range,
         settings,
         path,
-        module_graph: _,
+        module_graph,
         project_layout,
         language,
         only,
@@ -1495,6 +1538,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         categories,
         action_offset,
         document_services: _,
+        working_directory,
     } = params;
     let _ = debug_span!("Code actions HTML", range =? range, path =? path).entered();
     let tree = parse.tree();
@@ -1505,8 +1549,12 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             actions: Vec::new(),
         };
     };
-    let analyzer_options =
-        settings.analyzer_options::<HtmlLanguage>(path, &language, suppression_reason.as_deref());
+    let analyzer_options = settings.analyzer_options::<HtmlLanguage>(
+        path,
+        working_directory,
+        &language,
+        suppression_reason.as_deref(),
+    );
     let mut actions = Vec::new();
     let (enabled_rules, disabled_rules, analyzer_options) =
         AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
@@ -1514,7 +1562,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             .with_skip(skip)
             .with_path(path.as_path())
             .with_enabled_selectors(rules)
-            .with_project_layout(project_layout)
+            .with_project_layout(project_layout.clone())
             .finish();
 
     let filter = AnalysisFilter {
@@ -1524,20 +1572,31 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         range,
     };
 
-    analyze(&tree, filter, &analyzer_options, source_type, |signal| {
-        actions.extend(signal.actions().into_code_action_iter().map(|item| {
-            CodeAction {
-                category: item.category.clone(),
-                rule_name: item
-                    .rule_name
-                    .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
-                suggestion: item.suggestion,
-                offset: action_offset,
-            }
-        }));
+    let html_services = HtmlAnalyzerServices {
+        module_graph: Some(module_graph),
+        project_layout: Some(project_layout),
+    };
+    analyze(
+        &tree,
+        filter,
+        &analyzer_options,
+        source_type,
+        html_services,
+        |signal| {
+            actions.extend(signal.actions().into_code_action_iter().map(|item| {
+                CodeAction {
+                    category: item.category.clone(),
+                    rule_name: item
+                        .rule_name
+                        .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
+                    suggestion: item.suggestion,
+                    offset: action_offset,
+                }
+            }));
 
-        ControlFlow::<Never>::Continue(())
-    });
+            ControlFlow::<Never>::Continue(())
+        },
+    );
 
     PullActionsResult { actions }
 }
@@ -1553,6 +1612,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         .as_linter_rules(params.biome_path.as_path());
     let analyzer_options = params.settings.analyzer_options::<HtmlLanguage>(
         params.biome_path,
+        params.working_directory,
         &params.document_file_source,
         params.suppression_reason.as_deref(),
     );
@@ -1583,9 +1643,18 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         .to_html_file_source()
         .unwrap_or_default();
     loop {
-        let (action, _) = analyze(&tree, filter, &analyzer_options, source_type, |signal| {
-            process_fix_all.process_signal(signal)
-        });
+        let html_services = HtmlAnalyzerServices {
+            module_graph: Some(params.module_graph.clone()),
+            project_layout: Some(params.project_layout.clone()),
+        };
+        let (action, _) = analyze(
+            &tree,
+            filter,
+            &analyzer_options,
+            source_type,
+            html_services,
+            |signal| process_fix_all.process_signal(signal),
+        );
         let result = process_fix_all.process_action(action, |root| {
             tree = match HtmlRoot::cast(root) {
                 Some(tree) => tree,

@@ -228,8 +228,10 @@ define_categories! {
     "lint/nursery/noSyncScripts": "https://biomejs.dev/linter/rules/no-sync-scripts",
     "lint/nursery/noTernary": "https://biomejs.dev/linter/rules/no-ternary",
     "lint/nursery/noUndeclaredEnvVars": "https://biomejs.dev/linter/rules/no-undeclared-env-vars",
+    "lint/nursery/noUndeclaredClasses": "https://biomejs.dev/linter/rules/no-undeclared-classes",
     "lint/nursery/noUnknownAttribute": "https://biomejs.dev/linter/rules/no-unknown-attribute",
     "lint/nursery/noUnnecessaryConditions": "https://biomejs.dev/linter/rules/no-unnecessary-conditions",
+    "lint/nursery/noUnusedClasses": "https://biomejs.dev/linter/rules/no-unused-classes",
     "lint/nursery/noUnwantedPolyfillio": "https://biomejs.dev/linter/rules/no-unwanted-polyfillio",
     "lint/nursery/noUselessBackrefInRegex": "https://biomejs.dev/linter/rules/no-useless-backref-in-regex",
     "lint/nursery/noUselessReturn": "https://biomejs.dev/linter/rules/no-useless-return",
@@ -498,11 +500,12 @@ define_categories! {
     // end lint rules
     // start assist actions
     "assist/source/noDuplicateClasses": "https://biomejs.dev/assist/actions/no-duplicate-classes",
+    "assist/source/organizeImports": "https://biomejs.dev/assist/actions/organize-imports",
+    "assist/source/useSortedAttributes": "https://biomejs.dev/assist/actions/use-sorted-attributes",
     "assist/source/useSortedInterfaceMembers": "https://biomejs.dev/assist/actions/use-sorted-interface-members",
     "assist/source/useSortedKeys": "https://biomejs.dev/assist/actions/use-sorted-keys",
+    "assist/source/useSortedPackageJson": "https://biomejs.dev/assist/actions/use-sorted-package-json",
     "assist/source/useSortedProperties": "https://biomejs.dev/assist/actions/use-sorted-properties",
-    "assist/source/useSortedAttributes": "https://biomejs.dev/assist/actions/use-sorted-attributes",
-    "assist/source/organizeImports": "https://biomejs.dev/assist/actions/organize-imports",
     // end assist actions
     ; // start syntax rules
     "syntax/correctness/noTypeOnlyImportAttributes",

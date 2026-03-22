@@ -165,7 +165,10 @@ pub(crate) fn analyze_and_snap(
 
     let mut code_fixes = Vec::new();
     let configuration_source = load_configuration_source(input_file);
-    let options = create_analyzer_options::<JsonLanguage>(input_file, &mut diagnostics);
+    // Use the parent directory as a working directory for relative paths in diagnostics
+    let working_directory = input_file.parent().unwrap_or(Utf8Path::new("."));
+    let options =
+        create_analyzer_options::<JsonLanguage>(input_file, working_directory, &mut diagnostics);
     let services = JsonAnalyzeServices {
         file_source,
         configuration_provider: configuration_source.map(|(config, list)| {

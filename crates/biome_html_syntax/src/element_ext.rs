@@ -300,7 +300,7 @@ impl HtmlElement {
         name_text.eq_ignore_ascii_case("script")
     }
 
-    fn has_attribute(&self, name: &str, value: &str) -> bool {
+    fn has_attribute_with_value(&self, name: &str, value: &str) -> bool {
         let attribute = self.find_attribute_by_name(name);
         attribute.is_some_and(|attribute| {
             attribute
@@ -317,12 +317,12 @@ impl HtmlElement {
 
     /// Returns `true` if the element is a `<script type="module">`
     pub fn is_javascript_module(&self) -> SyntaxResult<bool> {
-        Ok(self.is_script_tag() && self.has_attribute("type", "module"))
+        Ok(self.is_script_tag() && self.has_attribute_with_value("type", "module"))
     }
 
     /// Returns `true` if the element is a `<script lang="ts">`
     pub fn is_typescript_lang(&self) -> bool {
-        self.is_script_tag() && self.has_attribute("lang", "ts")
+        self.is_script_tag() && self.has_attribute_with_value("lang", "ts")
     }
 
     /// Returns `true` if the element is a `<script setup>` tag.
@@ -332,17 +332,23 @@ impl HtmlElement {
 
     /// Returns `true` if the element is a `<script lang="jsx">`
     pub fn is_jsx_lang(&self) -> bool {
-        self.is_script_tag() && self.has_attribute("lang", "jsx")
+        self.is_script_tag() && self.has_attribute_with_value("lang", "jsx")
     }
 
     /// Returns `true` if the element is a `<script lang="tsx">`
     pub fn is_tsx_lang(&self) -> bool {
-        self.is_script_tag() && self.has_attribute("lang", "tsx")
+        self.is_script_tag() && self.has_attribute_with_value("lang", "tsx")
     }
 
     /// Returns `true` if the element is a `<style lang="sass">` or `<style lang="scss">`
     pub fn is_sass_lang(&self) -> bool {
-        self.is_style_tag() && self.has_attribute("lang", "scss")
+        self.is_style_tag()
+            && (self.has_attribute_with_value("lang", "scss")
+                || self.has_attribute_with_value("lang", "sass"))
+    }
+
+    pub fn is_style_scoped(&self, attribute_name: &str) -> bool {
+        self.is_style_tag() && self.find_attribute_by_name(attribute_name).is_some()
     }
 
     pub fn name(&self) -> SyntaxResult<AnyHtmlTagName> {

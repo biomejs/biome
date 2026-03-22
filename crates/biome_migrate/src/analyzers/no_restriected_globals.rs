@@ -25,7 +25,7 @@ impl Rule for NoRestrictedGlobals {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        if node.name().ok()?.inner_string_text()?.ok()?.text() != "noRestrictedGlobals" {
+        if node.name().ok()?.inner_string_text()?.text() != "noRestrictedGlobals" {
             return None;
         }
 
@@ -117,7 +117,6 @@ fn find_json_member_by_name(members: JsonMemberList, name: &str) -> Option<JsonM
             .name()
             .ok()
             .and_then(|name| name.inner_string_text())
-            .and_then(|r| r.ok())
             .is_some_and(|text| text.text() == name)
     })
 }

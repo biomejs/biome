@@ -5084,6 +5084,17 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUndeclaredClassesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUndeclaredClassesOptions" }
+			]
+		},
+		"NoUndeclaredClassesOptions": {
+			"description": "Options for the `noUndeclaredClasses` rule.",
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUndeclaredDependenciesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5362,6 +5373,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUnusedClassesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUnusedClassesOptions" }
+			]
+		},
+		"NoUnusedClassesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUnusedExpressionsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5437,9 +5458,57 @@
 		"NoUnusedVariablesOptions": {
 			"type": "object",
 			"properties": {
+				"ignore": {
+					"description": "An object defining ignored identifiers for different language constructs.",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUnusedVariablesOptionsIgnore" },
+						{ "type": "null" }
+					]
+				},
 				"ignoreRestSiblings": {
 					"description": "Whether to ignore unused variables from an object destructuring with a spread.",
 					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
+		"NoUnusedVariablesOptionsIgnore": {
+			"type": "object",
+			"properties": {
+				"*": {
+					"description": "An array of identifiers to ignore. Use \"*\" to ignore all identifiers.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"class": {
+					"description": "An array of class names to ignore. Use \"*\" to ignore all identifiers.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"function": {
+					"description": "An array of function names to ignore. Use \"*\" to ignore all identifiers.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"interface": {
+					"description": "An array of interface names to ignore. Use \"*\" to ignore all identifiers.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"typeAlias": {
+					"description": "An array of type aliases to ignore. Use \"*\" to ignore all identifiers.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"typeParameter": {
+					"description": "An array of type parameters to ignore. Use \"*\" to ignore all identifiers.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"variable": {
+					"description": "An array of variable names to ignore. Use \"*\" to ignore all identifiers.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
 				}
 			},
 			"additionalProperties": false
@@ -6194,6 +6263,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUndeclaredClasses": {
+					"description": "Reports CSS class names in HTML class attributes that are not defined in any \\<style> block or linked stylesheet available to the file.\nSee https://biomejs.dev/linter/rules/no-undeclared-classes",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUndeclaredClassesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUndeclaredEnvVars": {
 					"description": "Disallow the use of undeclared environment variables.\nSee https://biomejs.dev/linter/rules/no-undeclared-env-vars",
 					"anyOf": [
@@ -6212,6 +6288,13 @@
 					"description": "Disallow unnecessary type-based conditions that can be statically determined as redundant.\nSee https://biomejs.dev/linter/rules/no-unnecessary-conditions",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnnecessaryConditionsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnusedClasses": {
+					"description": "Reports CSS class selectors that are never referenced in any JSX or HTML file.\nSee https://biomejs.dev/linter/rules/no-unused-classes",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUnusedClassesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6624,10 +6707,16 @@
 			"type": "object",
 			"properties": {
 				"groups": {
+					"description": "Groups to change how imports and exports are sorted.",
 					"anyOf": [{ "$ref": "#/$defs/ImportGroups" }, { "type": "null" }]
 				},
 				"identifierOrder": {
+					"description": "Order used for sorting identifiers within imports and exports.\n\nDefault: `natural`.",
 					"anyOf": [{ "$ref": "#/$defs/SortOrder" }, { "type": "null" }]
+				},
+				"sortBareImports": {
+					"description": "If `true`, bare imports such as `import \"module\"` are sorted with other imports.",
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
@@ -6952,7 +7041,30 @@
 			},
 			"additionalProperties": false
 		},
-		"PluginConfiguration": { "anyOf": [{ "type": "string" }] },
+		"PluginConfiguration": {
+			"description": "Configuration for a single plugin entry.\n\nCan be either a plain path string or an object with path and options:\n\n```json\n{\n  \"plugins\": [\n    \"simple-plugin.grit\",\n    { \"path\": \"scoped-plugin.grit\", \"includes\": [\"src/**/*.ts\"] }\n  ]\n}\n```",
+			"anyOf": [
+				{ "description": "A plain path to the plugin.", "type": "string" },
+				{
+					"description": "A path with additional options.",
+					"$ref": "#/$defs/PluginWithOptions"
+				}
+			]
+		},
+		"PluginWithOptions": {
+			"description": "Plugin path with additional options.",
+			"type": "object",
+			"properties": {
+				"includes": {
+					"description": "A list of glob patterns. The plugin will only run on files matching\nthese patterns. Use negated globs (e.g., `!**/*.test.ts`) for exclusions.",
+					"type": ["array", "null"],
+					"items": { "$ref": "#/$defs/NormalizedGlob" }
+				},
+				"path": { "description": "The path to the plugin.", "type": "string" }
+			},
+			"additionalProperties": false,
+			"required": ["path"]
+		},
 		"Plugins": {
 			"type": "array",
 			"items": { "$ref": "#/$defs/PluginConfiguration" }
@@ -7017,6 +7129,14 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseSortedKeysOptions" }
+			},
+			"required": ["level", "options"]
+		},
+		"RuleAssistWithUseSortedPackageJsonOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseSortedPackageJsonOptions" }
 			},
 			"required": ["level", "options"]
 		},
@@ -9300,6 +9420,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoUndeclaredClassesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUndeclaredClassesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoUndeclaredDependenciesOptions": {
 			"type": "object",
 			"properties": {
@@ -9486,6 +9615,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUnsafeOptionalChainingOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUnusedClassesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUnusedClassesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -11710,6 +11848,13 @@
 					"description": "Sort the keys of a JSON object in natural order.\nSee https://biomejs.dev/assist/actions/use-sorted-keys",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseSortedKeysConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useSortedPackageJson": {
+					"description": "Organize package.json fields according to established conventions.\nSee https://biomejs.dev/assist/actions/use-sorted-package-json",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseSortedPackageJsonConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -14521,6 +14666,16 @@
 					"anyOf": [{ "$ref": "#/$defs/SortOrder" }, { "type": "null" }]
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseSortedPackageJsonConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				{ "$ref": "#/$defs/RuleAssistWithUseSortedPackageJsonOptions" }
+			]
+		},
+		"UseSortedPackageJsonOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseSortedPropertiesConfiguration": {

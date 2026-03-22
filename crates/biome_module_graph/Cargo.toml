@@ -22,6 +22,7 @@ biome_css_syntax     = { workspace = true }
 biome_diagnostics    = { workspace = true }
 biome_formatter      = { workspace = true }
 biome_fs             = { workspace = true }
+biome_html_syntax    = { workspace = true }
 biome_js_semantic    = { workspace = true }
 biome_js_syntax      = { workspace = true }
 biome_js_type_info   = { workspace = true }
@@ -42,15 +43,21 @@ serde_json           = { workspace = true }
 static_assertions    = { workspace = true }
 
 [dev-dependencies]
-biome_deserialize  = { path = "../biome_deserialize" }
-biome_js_formatter = { path = "../biome_js_formatter" }
-biome_js_parser    = { path = "../biome_js_parser" }
-biome_json_parser  = { path = "../biome_json_parser" }
-biome_json_value   = { path = "../biome_json_value" }
-biome_test_utils   = { path = "../biome_test_utils" }
-divan              = { package = "codspeed-divan-compat", version = "=4.2.1" }
-insta              = { workspace = true }
-walkdir            = { workspace = true }
+biome_configuration  = { path = "../biome_configuration" }
+biome_css_formatter  = { path = "../biome_css_formatter" }
+biome_css_parser     = { path = "../biome_css_parser" }
+biome_deserialize    = { path = "../biome_deserialize" }
+biome_html_formatter = { path = "../biome_html_formatter" }
+biome_html_parser    = { path = "../biome_html_parser" }
+biome_js_formatter   = { path = "../biome_js_formatter" }
+biome_js_parser      = { path = "../biome_js_parser" }
+biome_json_parser    = { path = "../biome_json_parser" }
+biome_json_value     = { path = "../biome_json_value" }
+biome_service        = { path = "../biome_service", features = ["testing"] }
+biome_test_utils     = { path = "../biome_test_utils" }
+divan                = { package = "codspeed-divan-compat", version = "=4.2.1" }
+insta                = { workspace = true }
+walkdir              = { workspace = true }
 
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
 tikv-jemallocator = { workspace = true }

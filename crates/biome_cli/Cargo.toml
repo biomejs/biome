@@ -83,6 +83,7 @@ tracing-tree             = "0.4.1"
 
 [dev-dependencies]
 biome_css_formatter  = { path = "../biome_css_formatter" }
+biome_css_parser     = { path = "../biome_css_parser" }
 biome_js_formatter   = { path = "../biome_js_formatter" }
 biome_json_formatter = { path = "../biome_json_formatter" }
 biome_json_parser    = { path = "../biome_json_parser" }

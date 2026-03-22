@@ -177,7 +177,10 @@ pub(crate) fn analyze_and_snap(
     let parsed = parse(input_code, source_type, parser_options);
     let root = parsed.tree();
 
-    let mut options = create_analyzer_options::<JsLanguage>(input_file, &mut diagnostics);
+    // Use the parent directory as working directory for relative paths in diagnostics
+    let working_directory = input_file.parent().unwrap_or(Utf8Path::new("."));
+    let mut options =
+        create_analyzer_options::<JsLanguage>(input_file, working_directory, &mut diagnostics);
 
     // Query tsconfig.json for JSX factory settings if jsx_runtime is ReactClassic
     // and the factory settings are not already set
@@ -484,6 +487,7 @@ fn run_plugin_test(input: &'static str, _: &str, _: &str, _: &str) {
     let plugin = match AnalyzerGritPlugin::load(
         &OsFileSystem::new(plugin_path.to_owned()),
         Utf8Path::new(plugin_path),
+        None,
     ) {
         Ok(plugin) => plugin,
         Err(err) => panic!("Cannot load plugin: {err:?}"),

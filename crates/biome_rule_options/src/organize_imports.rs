@@ -10,8 +10,15 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct OrganizeImportsOptions {
+    /// Groups to change how imports and exports are sorted.
     #[serde(skip_serializing_if = "Option::<_>::is_none")]
     pub groups: Option<ImportGroups>,
+    /// Order used for sorting identifiers within imports and exports.
+    ///
+    /// Default: `natural`.
     #[serde(skip_serializing_if = "Option::<_>::is_none")]
     pub identifier_order: Option<SortOrder>,
+    /// If `true`, bare imports such as `import "module"` are sorted with other imports.
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub sort_bare_imports: Option<bool>,
 }

@@ -522,22 +522,29 @@ fn assert_lint(
 
                 let options = test.create_analyzer_options::<HtmlLanguage>(config)?;
 
-                biome_html_analyze::analyze(&root, filter, &options, source, |signal| {
-                    if let Some(mut diag) = signal.diagnostic() {
-                        for action in signal.actions() {
-                            if !action.is_suppression() {
-                                diag = diag.add_code_suggestion(action.into());
+                biome_html_analyze::analyze(
+                    &root,
+                    filter,
+                    &options,
+                    source,
+                    biome_html_analyze::HtmlAnalyzerServices::default(),
+                    |signal| {
+                        if let Some(mut diag) = signal.diagnostic() {
+                            for action in signal.actions() {
+                                if !action.is_suppression() {
+                                    diag = diag.add_code_suggestion(action.into());
+                                }
                             }
+
+                            let error = diag
+                                .with_file_path(test.file_path())
+                                .with_file_source_code(code);
+                            diagnostics.write_diagnostic(error);
                         }
 
-                        let error = diag
-                            .with_file_path(test.file_path())
-                            .with_file_source_code(code);
-                        diagnostics.write_diagnostic(error);
-                    }
-
-                    ControlFlow::<()>::Continue(())
-                });
+                        ControlFlow::<()>::Continue(())
+                    },
+                );
             }
         }
         DocumentFileSource::Grit(..) => todo!("Grit analysis is not yet supported"),
@@ -609,7 +616,7 @@ fn get_first_member<V: Into<AnyJsonValue>>(parent: V, expected_name: &str) -> Op
         .into_iter()
         .next()?
         .ok()?;
-    let member_name = member.name().ok()?.inner_string_text()?.ok()?.to_string();
+    let member_name = member.name().ok()?.inner_string_text()?.to_string();
 
     if member_name.as_str() == expected_name {
         member.value().ok()

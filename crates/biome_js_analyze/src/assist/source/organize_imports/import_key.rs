@@ -75,16 +75,17 @@ impl PartialOrd for ImportKey {
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[enumflags2::bitflags]
-#[repr(u8)]
+#[repr(u16)]
 pub enum ImportStatementKind {
-    NamespaceType = 1 << 0,
-    DefaultType = 1 << 1,
-    NamedType = 1 << 2,
-    Namespace = 1 << 3,
-    DefaultNamespace = 1 << 4,
-    Default = 1 << 5,
-    DefaultNamed = 1 << 6,
-    Named = 1 << 7,
+    Bare = 1 << 0,
+    NamespaceType = 1 << 1,
+    DefaultType = 1 << 2,
+    NamedType = 1 << 3,
+    Namespace = 1 << 4,
+    DefaultNamespace = 1 << 5,
+    Default = 1 << 6,
+    DefaultNamed = 1 << 7,
+    Named = 1 << 8,
 }
 impl ImportStatementKind {
     pub fn has_type_token(self) -> bool {
@@ -127,9 +128,12 @@ impl ImportInfo {
         value: &JsImport,
     ) -> Option<(Self, Option<JsNamedSpecifiers>, Option<JsImportAssertion>)> {
         let (kind, named_specifiers, source, attributes) = match value.import_clause().ok()? {
-            AnyJsImportClause::JsImportBareClause(_) => {
-                return None;
-            }
+            AnyJsImportClause::JsImportBareClause(clause) => (
+                ImportStatementKind::Bare,
+                None,
+                clause.source(),
+                clause.assertion(),
+            ),
             AnyJsImportClause::JsImportCombinedClause(clause) => {
                 let (kind, named_specifiers) = match clause.specifier().ok()? {
                     AnyJsCombinedSpecifier::JsNamedImportSpecifiers(specifiers) => {

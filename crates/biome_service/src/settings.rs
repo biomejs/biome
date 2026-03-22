@@ -487,6 +487,7 @@ impl<'a> SettingsHandle<'a, Option<Configuration>> {
     pub fn analyzer_options<L>(
         &self,
         path: &BiomePath,
+        working_directory: Option<&Utf8Path>,
         file_source: &DocumentFileSource,
         suppression_reason: Option<&str>,
     ) -> AnalyzerOptions
@@ -496,14 +497,18 @@ impl<'a> SettingsHandle<'a, Option<Configuration>> {
         let settings = self.as_merged_settings();
         let linter_settings = &L::lookup_settings(&settings.languages).linter;
         let environment = L::resolve_environment(&settings);
-        L::resolve_analyzer_options(
+        let mut options = L::resolve_analyzer_options(
             &settings,
             linter_settings,
             environment,
             path,
             file_source,
             suppression_reason,
-        )
+        );
+        if let Some(wd) = working_directory {
+            options = options.with_working_directory(wd);
+        }
+        options
     }
 
     /// Whether the linter is enabled for this file path
