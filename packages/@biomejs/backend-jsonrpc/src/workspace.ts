@@ -6008,6 +6008,7 @@ export interface RuleWithUseConsistentGraphqlDescriptionsOptions {
 	options?: UseConsistentGraphqlDescriptionsOptions;
 }
 export interface RuleWithUseConsistentMethodSignaturesOptions {
+	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseConsistentMethodSignaturesOptions;
 }
