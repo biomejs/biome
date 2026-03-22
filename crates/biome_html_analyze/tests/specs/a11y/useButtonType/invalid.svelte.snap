@@ -3,7 +3,7 @@ source: crates/biome_html_analyze/tests/spec_tests.rs
 expression: invalid.svelte
 ---
 # Input
-```html
+```svelte
 <!-- should generate diagnostics -->
 
 <button>Do something</button>

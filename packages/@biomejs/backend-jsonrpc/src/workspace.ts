@@ -9096,6 +9096,12 @@ export type EmbeddingKind =
 	| {
 			Vue: {
 				/**
+	* Whether this embed should be parsed as statements (module/script).
+When `false`, the content is parsed as an expression via `parse_template_expression`.
+Source-level embeds (`<script>`) use `true`; directives and text expressions use `false`. 
+	 */
+				allow_statements: boolean;
+				/**
 				 * Whether this is a v-on event handler (e.g., @click="handler")
 				 */
 				event_handler: boolean;

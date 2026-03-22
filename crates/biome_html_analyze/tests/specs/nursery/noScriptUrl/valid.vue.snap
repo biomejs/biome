@@ -3,8 +3,8 @@ source: crates/biome_html_analyze/tests/spec_tests.rs
 expression: valid.vue
 ---
 # Input
-```html
-<!-- Vue valid cases - should NOT trigger the rule -->
+```vue
+<!-- should not generate diagnostics -->
 
 <template>
   <a href="/about">About</a>

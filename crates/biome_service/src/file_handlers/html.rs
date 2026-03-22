@@ -1148,6 +1148,7 @@ fn parse_matched_embed(
                             setup: candidate.has_attribute("setup"),
                             is_source: true,
                             event_handler: false,
+                            allow_statements: true,
                         });
                     }
                     // Astro <script> tags and plain HTML: no EmbeddingKind
@@ -1169,6 +1170,7 @@ fn parse_matched_embed(
                             setup: false,
                             is_source: false,
                             event_handler: false,
+                            allow_statements: false,
                         });
                     }
                     false
@@ -1188,6 +1190,7 @@ fn parse_matched_embed(
                             setup: false,
                             is_source: false,
                             event_handler: *is_event_handler,
+                            allow_statements: false,
                         });
                     }
                     false

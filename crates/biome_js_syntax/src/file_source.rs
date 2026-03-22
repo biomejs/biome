@@ -131,6 +131,10 @@ pub enum EmbeddingKind {
         is_source: bool,
         /// Whether this is a v-on event handler (e.g., @click="handler")
         event_handler: bool,
+        /// Whether this embed should be parsed as statements (module/script).
+        /// When `false`, the content is parsed as an expression via `parse_template_expression`.
+        /// Source-level embeds (`<script>`) use `true`; directives and text expressions use `false`.
+        allow_statements: bool,
     },
     Svelte {
         /// Where the bindings are defined
@@ -238,6 +242,7 @@ impl JsFileSource {
             setup: false,
             is_source: true,
             event_handler: false,
+            allow_statements: true,
         })
     }
 
@@ -247,6 +252,7 @@ impl JsFileSource {
             setup: true,
             is_source: true,
             event_handler: false,
+            allow_statements: true,
         })
     }
 
@@ -337,14 +343,14 @@ impl JsFileSource {
 
     /// Returns true if this is a template expression that should be parsed as an expression
     /// rather than as a module/script. Template expressions in frameworks like Vue ({{ }}),
-    /// Svelte ({ }), and Astro ({ }) should parse `{ duration }` as an object literal,
-    /// not as a block statement.
+    /// Svelte ({ }), and Astro ({ }), as well as Vue directive values (`v-bind:class="..."`),
+    /// should parse `{ duration }` as an object literal, not as a block statement.
     pub const fn is_template_expression(&self) -> bool {
         matches!(
             self.embedding_kind,
             EmbeddingKind::Svelte { is_source: false }
                 | EmbeddingKind::Vue {
-                    is_source: false,
+                    allow_statements: false,
                     ..
                 }
                 | EmbeddingKind::Astro { frontmatter: false }
