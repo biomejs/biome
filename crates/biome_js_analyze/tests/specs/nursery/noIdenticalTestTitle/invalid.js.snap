@@ -1,5 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 154
 expression: invalid.js
 ---
 # Input
@@ -31,6 +32,17 @@ describe('template titles', () => {
 // Duplicate describe titles using no-substitution templates
 describe(`suite alpha`, () => {});
 describe(`suite alpha`, () => {});
+
+// One top-level traversal should still catch nested duplicate scopes
+test('top-level anchor', () => {});
+describe('outer mixed scope', () => {
+  describe('nested suite', () => {
+    it('nested duplicate test', () => {});
+    it('nested duplicate test', () => {});
+  });
+
+  describe('nested suite', () => {});
+});
 
 ```
 
@@ -129,6 +141,49 @@ invalid.js:27:1 lint/nursery/noIdenticalTestTitle ━━━━━━━━━━
   > 27 │ describe(`suite alpha`, () => {});
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     28 │ 
+    29 │ // One top-level traversal should still catch nested duplicate scopes
+  
+  i A describe with this title already exists in the same scope.
+  
+  i Rename the describe to give it a unique, descriptive title.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:34:5 lint/nursery/noIdenticalTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate test title found.
+  
+    32 │   describe('nested suite', () => {
+    33 │     it('nested duplicate test', () => {});
+  > 34 │     it('nested duplicate test', () => {});
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    35 │   });
+    36 │ 
+  
+  i A test with this title already exists in the same scope.
+  
+  i Rename the test to give it a unique, descriptive title.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:37:3 lint/nursery/noIdenticalTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate describe title found.
+  
+    35 │   });
+    36 │ 
+  > 37 │   describe('nested suite', () => {});
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    38 │ });
+    39 │ 
   
   i A describe with this title already exists in the same scope.
   

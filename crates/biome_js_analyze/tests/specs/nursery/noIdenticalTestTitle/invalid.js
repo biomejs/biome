@@ -25,3 +25,14 @@ describe('template titles', () => {
 // Duplicate describe titles using no-substitution templates
 describe(`suite alpha`, () => {});
 describe(`suite alpha`, () => {});
+
+// One top-level traversal should still catch nested duplicate scopes
+test('top-level anchor', () => {});
+describe('outer mixed scope', () => {
+  describe('nested suite', () => {
+    it('nested duplicate test', () => {});
+    it('nested duplicate test', () => {});
+  });
+
+  describe('nested suite', () => {});
+});

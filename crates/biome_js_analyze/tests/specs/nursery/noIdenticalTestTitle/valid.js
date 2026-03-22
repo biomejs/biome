@@ -50,3 +50,21 @@ describe('template dynamic', () => {
   it(`test ${title} one`, () => {});
   it(`test ${title} two`, () => {});
 });
+
+// Same title can be used once for a suite and once for a test in the same scope
+describe('separate namespaces', () => {
+  describe('shared title', () => {});
+  it('shared title', () => {});
+});
+
+// Same titles in different nested scopes remain valid
+test('top-level owner', () => {});
+describe('outer valid scope', () => {
+  describe('child one', () => {
+    it('same nested title', () => {});
+  });
+
+  describe('child two', () => {
+    it('same nested title', () => {});
+  });
+});
