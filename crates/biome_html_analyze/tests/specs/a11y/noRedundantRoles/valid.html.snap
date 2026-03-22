@@ -1,0 +1,21 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.html
+---
+# Input
+```html
+<!-- should not generate diagnostics -->
+<article role="presentation"></article>
+<button role="link"></button>
+<div role="button"></div>
+<span role="alert"></span>
+<article></article>
+<button></button>
+<h1>title</h1>
+<nav></nav>
+<div role="alert"></div>
+<span role="status"></span>
+<a role="link">link</a>
+<img alt="" role="img" />
+
+```

@@ -1,0 +1,72 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<template>
+<article role="article"></article>
+<button role="button"></button>
+<nav role="navigation"></nav>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:10 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'article' on the 'article' element is redundant, because it is implied by its semantic.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │ <article role="article"></article>
+      │          ^^^^^^^^^^^^^^
+    4 │ <button role="button"></button>
+    5 │ <nav role="navigation"></nav>
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    3 │ <article·role="article"></article>
+      │          --------------           
+
+```
+
+```
+invalid.vue:4:9 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'button' on the 'button' element is redundant, because it is implied by its semantic.
+  
+    2 │ <template>
+    3 │ <article role="article"></article>
+  > 4 │ <button role="button"></button>
+      │         ^^^^^^^^^^^^^
+    5 │ <nav role="navigation"></nav>
+    6 │ </template>
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    4 │ <button·role="button"></button>
+      │         -------------          
+
+```
+
+```
+invalid.vue:5:6 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'navigation' on the 'nav' element is redundant, because it is implied by its semantic.
+  
+    3 │ <article role="article"></article>
+    4 │ <button role="button"></button>
+  > 5 │ <nav role="navigation"></nav>
+      │      ^^^^^^^^^^^^^^^^^
+    6 │ </template>
+    7 │ 
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    5 │ <nav·role="navigation"></nav>
+      │      -----------------       
+
+```
