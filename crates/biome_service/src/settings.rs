@@ -1879,8 +1879,10 @@ impl OverrideSettingPattern {
         if let Some(interpolation) = html_parser.interpolation {
             options.set_double_text_expression(interpolation.value());
         }
-        if let Some(vue) = html_parser.vue {
-            options.set_vue(vue.value());
+        if options.is_html() {
+            if let Some(vue) = html_parser.vue {
+                options.set_vue(vue.value());
+            }
         }
     }
 

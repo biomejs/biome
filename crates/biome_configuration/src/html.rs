@@ -63,8 +63,8 @@ pub struct HtmlParserConfiguration {
     /// Enables parsing of Vue syntax (v-if, v-bind, etc.) in `.html` files.
     ///
     /// Biome will already automatically enable Vue parsing in `.vue` files, so you probably don't want
-    /// to enable this option. This will cause the parser to treat **all** HTML files (including `.svelte`
-    /// and `.astro` files) as if they were Vue files.
+    /// to enable this option. This only affects `.html` files, and does not change how `.vue`, `.svelte`,
+    /// or `.astro` files are parsed.
     pub vue: Option<HtmlParseVue>,
 }
 
