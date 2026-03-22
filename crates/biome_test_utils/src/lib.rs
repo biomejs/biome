@@ -5,9 +5,8 @@ mod bench_case;
 pub use bench_case::BenchCase;
 use biome_analyze::options::{JsxRuntime, PreferredQuote};
 use biome_analyze::{AnalyzerAction, AnalyzerConfiguration, AnalyzerOptions, RuleCategories};
-use biome_configuration::analyzer::AnalyzerSelector;
-use biome_configuration::html::HtmlConfiguration;
 use biome_configuration::HtmlConfiguration;
+use biome_configuration::analyzer::AnalyzerSelector;
 use biome_configuration::{Configuration, ConfigurationPathHint};
 use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
@@ -15,7 +14,6 @@ use biome_css_parser::CssParserOptions;
 use biome_css_syntax::AnyCssRoot;
 use biome_diagnostics::termcolor::Buffer;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
-use biome_fs::MemoryFileSystem;
 use biome_fs::{BiomePath, FileSystem, MemoryFileSystem, OsFileSystem};
 use biome_html_parser::HtmlParserOptions;
 use biome_html_syntax::HtmlRoot;
@@ -31,16 +29,14 @@ use biome_service::WorkspaceError;
 use biome_service::configuration::{LoadedConfiguration, load_configuration};
 use biome_service::file_handlers::DocumentFileSource;
 use biome_service::projects::Projects;
-use biome_service::settings::ModuleGraphResolutionKind;
 use biome_service::settings::{
     ModuleGraphResolutionKind, ServiceLanguage, Settings, SettingsHandle,
 };
+use biome_service::test_utils::setup_workspace_and_open_project;
 use biome_service::workspace::{
     FileContent, OpenFileParams, OpenProjectParams, PullDiagnosticsParams, ScanKind,
     ScanProjectParams, UpdateSettingsParams, server,
 };
-use biome_service::test_utils::setup_workspace_and_open_project;
-use biome_service::workspace::UpdateSettingsParams;
 use biome_string_case::StrLikeExtension;
 use camino::{Utf8Path, Utf8PathBuf};
 use json_comments::StripComments;

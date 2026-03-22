@@ -289,6 +289,7 @@ pub(crate) fn collect_css_classes(
                     }
                 } else if let Some(class_selector) = CssClassSelector::cast(node)
                     && let Ok(name) = class_selector.name()
+                    && let Some(name) = name.as_css_custom_identifier()
                     && let Ok(token) = name.value_token()
                 {
                     // Selectors inside :global(...) are always globally scoped,

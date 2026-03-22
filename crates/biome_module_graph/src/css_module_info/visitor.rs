@@ -74,6 +74,7 @@ impl<'a> CssModuleVisitor<'a> {
     /// Each token represents a single class name (e.g., "header" from `.header`).
     fn visit_class_selector(node: CssClassSelector, classes: &mut IndexSet<TokenText>) {
         if let Ok(name) = node.name()
+            && let Some(name) = name.as_css_custom_identifier()
             && let Ok(token) = name.value_token()
         {
             classes.insert(token.token_text_trimmed());
