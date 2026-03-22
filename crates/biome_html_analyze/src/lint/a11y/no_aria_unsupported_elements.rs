@@ -6,8 +6,9 @@ use biome_analyze::{
 use biome_aria_metadata::AriaAttribute;
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::AnyHtmlElement;
+use biome_html_syntax::{AnyHtmlElement, HtmlFileSource};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
+use biome_string_case::StrLikeExtension;
 use biome_rule_options::no_aria_unsupported_elements::NoAriaUnsupportedElementsOptions;
 
 use crate::HtmlRuleAction;
@@ -80,18 +81,26 @@ impl Rule for NoAriaUnsupportedElements {
         let node = ctx.query();
 
         let element_name = node.name()?;
+        let source_type = ctx.source_type::<HtmlFileSource>();
 
-        if ARIA_UNSUPPORTED_ELEMENTS
-            .iter()
-            .any(|el| element_name.eq_ignore_ascii_case(el))
-        {
+        let is_unsupported = if source_type.is_html() {
+            ARIA_UNSUPPORTED_ELEMENTS
+                .iter()
+                .any(|el| element_name.eq_ignore_ascii_case(el))
+        } else {
+            ARIA_UNSUPPORTED_ELEMENTS
+                .iter()
+                .any(|el| element_name.text() == *el)
+        };
+
+        if is_unsupported {
             let attributes = node.attributes()?;
             let report = attributes.iter().find_map(|attribute| {
                 let attribute = attribute.as_html_attribute()?;
                 let attribute_name = attribute.name().ok()?.value_token().ok()?;
-                let attribute_name_text = attribute_name.text_trimmed();
+                let attribute_name_text = attribute_name.token_text_trimmed();
 
-                let attribute_name_lower = attribute_name_text.to_lowercase();
+                let attribute_name_lower = attribute_name_text.to_ascii_lowercase_cow();
                 if attribute_name_lower.starts_with("aria-")
                     && AriaAttribute::from_str(&attribute_name_lower).is_ok()
                 {
@@ -139,8 +148,8 @@ impl Rule for NoAriaUnsupportedElements {
         let attribute = attributes.iter().find_map(|attribute| {
             let html_attribute = attribute.as_html_attribute()?;
             let attribute_name = html_attribute.name().ok()?.value_token().ok()?;
-            let attribute_name_text = attribute_name.text_trimmed();
-            let attribute_name_lower = attribute_name_text.to_lowercase();
+            let attribute_name_text = attribute_name.token_text_trimmed();
+            let attribute_name_lower = attribute_name_text.to_ascii_lowercase_cow();
             (attribute_name_text.eq_ignore_ascii_case("role")
                 || (attribute_name_lower.starts_with("aria-")
                     && AriaAttribute::from_str(&attribute_name_lower).is_ok()))
