@@ -1371,7 +1371,7 @@ JsImportAssertionEntry =
 //          ^
 // export { a as "a-b-c" };
 //               ^^^^^^^
-JsLiteralExportName = value: ('ident' | 'js_string_literal')
+JsLiteralExportName = value: ('ident' | 'js_string_literal' | 'grit_metavariable')
 
 
 // import "test"
