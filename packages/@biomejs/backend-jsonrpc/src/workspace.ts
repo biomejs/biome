@@ -1079,6 +1079,7 @@ export type RuleDomain =
 	| "next"
 	| "qwik"
 	| "vue"
+	| "angular"
 	| "project"
 	| "tailwind"
 	| "turborepo"
@@ -9181,7 +9182,8 @@ export type HtmlVariant =
 	| { Standard: HtmlTextExpressions }
 	| "Astro"
 	| "Vue"
-	| "Svelte";
+	| "Svelte"
+	| "Angular";
 export type GritVariant = "Standard";
 export type MarkdownVariant = "Standard";
 export type EmbeddingHtmlKind = "None" | "Html" | "Vue" | "Astro" | "Svelte";

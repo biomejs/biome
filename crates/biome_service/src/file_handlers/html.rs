@@ -918,6 +918,9 @@ fn parse_embedded_nodes(
                 }
             }
         }
+        HtmlVariant::Angular => {
+            // TODO
+        }
     }
 
     ParseEmbedResult { nodes }

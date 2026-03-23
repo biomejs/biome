@@ -7080,6 +7080,11 @@
 					"const": "vue"
 				},
 				{
+					"description": "Angular framework rules",
+					"type": "string",
+					"const": "angular"
+				},
+				{
 					"description": "For rules that require querying multiple files inside a project",
 					"type": "string",
 					"const": "project"
