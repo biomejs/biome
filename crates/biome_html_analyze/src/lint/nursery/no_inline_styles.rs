@@ -45,7 +45,7 @@ declare_lint_rule! {
     /// - [Content Security Policy: Allowing inline styles](https://content-security-policy.com/examples/allow-inline-style)
     ///
     pub NoInlineStyles {
-        version: "next",
+        version: "2.4.9",
         name: "noInlineStyles",
         language: "html",
         recommended: false,
