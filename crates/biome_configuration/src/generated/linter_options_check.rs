@@ -380,6 +380,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noDuplicateProperties",
         TypeId::of::<biome_rule_options::no_duplicate_properties::NoDuplicatePropertiesOptions>(),
     ));
+    result.push((
+        "nursery",
+        "noDuplicateSelectors",
+        TypeId::of::<biome_rule_options::no_duplicate_selectors::NoDuplicateSelectorsOptions>(),
+    ));
     result.push(("suspicious", "noDuplicateSelectorsKeyframeBlock", TypeId::of::<biome_rule_options::no_duplicate_selectors_keyframe_block::NoDuplicateSelectorsKeyframeBlockOptions>()));
     result.push((
         "suspicious",
