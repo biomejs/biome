@@ -1,0 +1,6 @@
+{
+    "dependencies": {
+        "trusted-pkg": "^1.0.0",
+        "custom-license-pkg": "^1.0.0"
+    }
+}
