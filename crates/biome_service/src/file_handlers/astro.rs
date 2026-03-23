@@ -13,6 +13,7 @@ use biome_js_syntax::{JsFileSource, TextRange, TextSize};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
 use regex::{Matches, Regex, RegexBuilder};
+use std::ops::Range;
 use std::sync::LazyLock;
 
 use super::SearchCapabilities;
@@ -32,16 +33,12 @@ impl AstroFileHandler {
     ///
     /// If the frontmatter doesn't exist, an empty string is returned.
     pub fn input(text: &str) -> &str {
-        let mut matches = Self::matches(text);
-        match (matches.next(), matches.next()) {
-            (Some(start), Some(end)) => &text[start.end()..end.start()],
-            _ => "",
-        }
+        Self::content_range(text).map_or("", |range| &text[range])
     }
 
     /// Returns the start byte offset of the Astro fence
     pub fn start(input: &str) -> Option<u32> {
-        ASTRO_FENCE.find_iter(input).next().map(|m| m.end() as u32)
+        Self::content_range(input).map(|range| range.start as u32)
     }
 
     fn matches(input: &str) -> Matches<'_, '_> {
@@ -51,17 +48,47 @@ impl AstroFileHandler {
     /// It takes the original content of an Astro file, and new output of an Astro file. The output is only the content contained inside the
     /// Astro fences. The function replaces `output` inside those fences.
     pub fn output(input: &str, output: &str) -> String {
-        let mut matches = Self::matches(input);
-        if let (Some(start), Some(end)) = (matches.next(), matches.next()) {
-            format!(
-                "{}{}{}",
-                &input[..start.end() + 1],
-                output.trim_start(),
-                &input[end.start()..]
-            )
+        if let Some(range) = Self::content_range(input) {
+            format!("{}{}{}", &input[..range.start], output, &input[range.end..])
         } else {
             input.to_string()
         }
+    }
+
+    /// Returns the byte range of the actual frontmatter code inside the `---` fences.
+    ///
+    /// Astro frontmatter commonly includes a newline immediately after the opening
+    /// fence and before the closing fence. Those wrapper-adjacent bytes are part of
+    /// the host document layout, but they should not be treated as part of the
+    /// embedded JavaScript/TypeScript snippet itself.
+    ///
+    /// Keeping them in the embedded slice makes snippet-based assists like
+    /// `organizeImports` observe a different input than standalone JS/TS, which can
+    /// lead to incorrect blank-line edits at the snippet boundary. By trimming only
+    /// the fence-adjacent whitespace, we keep parser offsets and fix application
+    /// aligned to the meaningful frontmatter content while still preserving the host
+    /// document's surrounding layout.
+    fn content_range(input: &str) -> Option<Range<usize>> {
+        let mut matches = Self::matches(input);
+        let (start, end) = (matches.next()?, matches.next()?);
+        let content = &input[start.end()..end.start()];
+        let leading_whitespace = content
+            .bytes()
+            .take_while(|byte| matches!(byte, b' ' | b'\t' | b'\n' | b'\r'))
+            .count();
+        let trailing_whitespace = content
+            .bytes()
+            .rev()
+            .take_while(|byte| matches!(byte, b' ' | b'\t' | b'\n' | b'\r'))
+            .count();
+        let content_start = start.end() + leading_whitespace;
+        let content_end = if leading_whitespace == content.len() {
+            content_start
+        } else {
+            end.start() - trailing_whitespace
+        };
+
+        Some(content_start..content_end)
     }
 }
 

@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: valid-issue-9097-astro.astro
+---
+# Input
+```astro
+<!-- should not generate diagnostics -->
+---
+import Page from "./page.astro";
+---
+
+<div />
+
+```

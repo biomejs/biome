@@ -58,7 +58,9 @@ use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage};
 use biome_json_parser::parse_json_with_offset_and_cache;
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_parser::AnyParse;
-use biome_rowan::{AstNode, AstNodeList, BatchMutation, NodeCache, SendNode, TextSize};
+use biome_rowan::{
+    AstNode, AstNodeList, BatchMutation, NodeCache, SendNode, TextRange, TextSize, TokenText,
+};
 use camino::Utf8Path;
 use either::Either;
 use std::borrow::Cow;
@@ -961,17 +963,17 @@ fn build_html_candidate(element: &HtmlElement) -> Option<EmbedCandidate> {
         child.as_html_embedded_content().cloned()
     })?;
     let value_token = content_child.value_token().ok()?;
+    let (content_range, text) =
+        trim_embedded_content(value_token.text_range(), value_token.token_text());
 
     Some(EmbedCandidate::Element {
         tag_name,
         attributes,
         content: EmbedContent {
             element_range: content_child.range(),
-            content_range: value_token.text_range(),
-            content_offset: value_token.text_range().start(),
-            // Use full token text (including trivia) to match the untrimmed content_offset.
-            // The parser needs text and offset to be consistent.
-            text: value_token.token_text(),
+            content_range,
+            content_offset: content_range.start(),
+            text,
         },
     })
 }
@@ -979,15 +981,15 @@ fn build_html_candidate(element: &HtmlElement) -> Option<EmbedCandidate> {
 /// Build an `EmbedCandidate::Frontmatter` from Astro's `---` block.
 fn build_astro_frontmatter_candidate(element: &AstroEmbeddedContent) -> Option<EmbedCandidate> {
     let content_token = element.content_token()?;
+    let (content_range, text) =
+        trim_embedded_content(content_token.text_range(), content_token.token_text());
 
     Some(EmbedCandidate::Frontmatter {
         content: EmbedContent {
             element_range: element.range(),
-            content_range: content_token.text_trimmed_range(),
-            content_offset: content_token.text_range().start(),
-            // Use full token text (including trivia) to match the untrimmed content_offset.
-            // The parser needs text and offset to be consistent.
-            text: content_token.token_text(),
+            content_range,
+            content_offset: content_range.start(),
+            text,
         },
     })
 }
@@ -1644,12 +1646,17 @@ pub(crate) fn update_snippets(
         };
 
         if let Some(value_token) = element.value_token() {
-            let leading_trivia = read_leading_trivia(value_token.text_trimmed());
-            let trailing_trivia = read_trailing_trivia(value_token.text_trimmed());
+            let token_text = value_token.token_text();
+            let leading_trivia = if matches!(element, AnyEmbeddedContent::AstroEmbeddedContent(_)) {
+                Cow::Borrowed("")
+            } else {
+                read_leading_trivia(&token_text)
+            };
+            let trailing_trivia = read_trailing_trivia(&token_text);
             let new_token = ident(&format!(
                 "{}{}{}",
                 leading_trivia,
-                snippet.new_code.trim(), // trim to avoid duplicating trivia
+                snippet.new_code.as_str(),
                 trailing_trivia
             ));
             mutation.replace_token(value_token, new_token);
@@ -1691,6 +1698,42 @@ fn read_leading_trivia(value: &str) -> Cow<'_, str> {
     } else {
         Cow::Borrowed("")
     }
+}
+
+/// Trims wrapper-adjacent whitespace from a source-level embedded snippet.
+///
+/// For `<script>`-like embedded content and Astro frontmatter in the HTML full
+/// support pipeline, the syntax token usually includes leading and trailing
+/// whitespace that belongs to the host document structure rather than to the
+/// embedded JS/TS program itself.
+///
+/// This helper returns a `TextRange` and `TokenText` slice that both point to the
+/// meaningful embedded source only. Keeping the text and range trimmed in lockstep
+/// ensures that parsing, diagnostic remapping, and code-action application all use
+/// the same snippet boundaries. Without this, assists like `organizeImports` can
+/// infer extra blank lines from host-side wrapper whitespace and then reinsert those
+/// edits incorrectly into Astro, Vue, or Svelte files.
+fn trim_embedded_content(range: TextRange, value: TokenText) -> (TextRange, TokenText) {
+    let leading_len = read_leading_trivia(value.text()).len();
+    let trailing_len = read_trailing_trivia(value.text()).len();
+    let value_len = value.len();
+    let content_start = range.start() + TextSize::from(leading_len as u32);
+    let all_whitespace = value_len == TextSize::from(leading_len as u32);
+    let content_end = if all_whitespace {
+        content_start
+    } else {
+        range.end() - TextSize::from(trailing_len as u32)
+    };
+    let text = if all_whitespace {
+        value.slice(TextRange::empty(TextSize::from(0)))
+    } else {
+        value.slice(TextRange::new(
+            TextSize::from(leading_len as u32),
+            value_len - TextSize::from(trailing_len as u32),
+        ))
+    };
+
+    (TextRange::new(content_start, content_end), text)
 }
 
 /// Extracts all trailing whitespace (spaces, tabs, newlines, carriage returns) from a string.
