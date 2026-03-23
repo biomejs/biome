@@ -58,7 +58,7 @@ crossbeam                = { workspace = true }
 dashmap                  = { workspace = true }
 papaya                   = { workspace = true }
 path-absolutize          = { workspace = true }
-quick-junit              = "0.5.2"
+quick-junit              = "0.6.0"
 rayon                    = { workspace = true }
 regex                    = { workspace = true }
 rustc-hash               = { workspace = true }
@@ -89,14 +89,14 @@ biome_json_parser    = { path = "../biome_json_parser" }
 directories          = { workspace = true }
 insta                = { workspace = true }
 regex                = { workspace = true }
-serial_test          = "3.3.1"
+serial_test          = "=3.3.1"
 tokio                = { workspace = true, features = ["io-util"] }
 
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dependencies]
 tikv-jemallocator = { workspace = true }
 
 [target.'cfg(unix)'.dependencies]
-libc  = "0.2.180"
+libc  = "0.2.183"
 tokio = { workspace = true, features = ["process"] }
 
 [target.'cfg(windows)'.dependencies]
