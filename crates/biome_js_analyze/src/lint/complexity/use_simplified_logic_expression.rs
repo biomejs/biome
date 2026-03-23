@@ -87,13 +87,6 @@ impl Rule for UseSimplifiedLogicExpression {
                     return simplify_or_expression(literal, right).map(|expr| (false, expr));
                 }
 
-                if let AnyJsExpression::AnyJsLiteralExpression(
-                    AnyJsLiteralExpression::JsBooleanLiteralExpression(literal),
-                ) = right
-                {
-                    return simplify_or_expression(literal, left).map(|expr| (false, expr));
-                }
-
                 if could_apply_de_morgan(node).unwrap_or(false) {
                     return simplify_de_morgan(node)
                         .map(|expr| (true, AnyJsExpression::JsUnaryExpression(expr)));
@@ -105,13 +98,6 @@ impl Rule for UseSimplifiedLogicExpression {
                 ) = left
                 {
                     return simplify_and_expression(literal, right).map(|expr| (false, expr));
-                }
-
-                if let AnyJsExpression::AnyJsLiteralExpression(
-                    AnyJsLiteralExpression::JsBooleanLiteralExpression(literal),
-                ) = right
-                {
-                    return simplify_and_expression(literal, left).map(|expr| (false, expr));
                 }
 
                 if could_apply_de_morgan(node).unwrap_or(false) {
