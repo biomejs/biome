@@ -3893,6 +3893,16 @@
 			]
 		},
 		"NoHexColorsOptions": { "type": "object", "additionalProperties": false },
+		"NoIdenticalTestTitleConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoIdenticalTestTitleOptions" }
+			]
+		},
+		"NoIdenticalTestTitleOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoImgElementConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6012,6 +6022,13 @@
 					"description": "Disallow hex colors.\nSee https://biomejs.dev/linter/rules/no-hex-colors",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoHexColorsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noIdenticalTestTitle": {
+					"description": "Disallow identical titles in test suites and test cases.\nSee https://biomejs.dev/linter/rules/no-identical-test-title",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoIdenticalTestTitleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -8251,6 +8268,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoHexColorsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoIdenticalTestTitleOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoIdenticalTestTitleOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

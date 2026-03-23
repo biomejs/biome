@@ -2162,6 +2162,11 @@ See https://biomejs.dev/linter/rules/no-hex-colors
 	 */
 	noHexColors?: NoHexColorsConfiguration;
 	/**
+	* Disallow identical titles in test suites and test cases.
+See https://biomejs.dev/linter/rules/no-identical-test-title 
+	 */
+	noIdenticalTestTitle?: NoIdenticalTestTitleConfiguration;
+	/**
 	* Disallows the usage of the unary operators ++ and --.
 See https://biomejs.dev/linter/rules/no-increment-decrement 
 	 */
@@ -4168,6 +4173,9 @@ export type NoForInConfiguration =
 export type NoHexColorsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoHexColorsOptions;
+export type NoIdenticalTestTitleConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoIdenticalTestTitleOptions;
 export type NoIncrementDecrementConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoIncrementDecrementOptions;
@@ -5842,6 +5850,10 @@ export interface RuleWithNoHexColorsOptions {
 	level: RulePlainConfiguration;
 	options?: NoHexColorsOptions;
 }
+export interface RuleWithNoIdenticalTestTitleOptions {
+	level: RulePlainConfiguration;
+	options?: NoIdenticalTestTitleOptions;
+}
 export interface RuleWithNoIncrementDecrementOptions {
 	level: RulePlainConfiguration;
 	options?: NoIncrementDecrementOptions;
@@ -7444,6 +7456,7 @@ export type NoFloatingClassesOptions = {};
 export type NoFloatingPromisesOptions = {};
 export type NoForInOptions = {};
 export type NoHexColorsOptions = {};
+export type NoIdenticalTestTitleOptions = {};
 export interface NoIncrementDecrementOptions {
 	/**
 	 * Allows unary operators ++ and -- in the afterthought (final expression) of a for loop.
@@ -8520,6 +8533,7 @@ export type Category =
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noForIn"
 	| "lint/nursery/noHexColors"
+	| "lint/nursery/noIdenticalTestTitle"
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noIncrementDecrement"
 	| "lint/nursery/noInlineStyles"
