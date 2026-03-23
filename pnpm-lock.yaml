@@ -33,8 +33,8 @@ importers:
         specifier: 8.54.0
         version: 8.54.0(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3)
       dprint:
-        specifier: 0.52.0
-        version: 0.52.0
+        specifier: 0.53.0
+        version: 0.53.0
       eslint:
         specifier: 9.39.4
         version: 9.39.4(jiti@2.6.1)
@@ -304,65 +304,65 @@ packages:
   '@dimforge/rapier2d-simd-compat@0.17.3':
     resolution: {integrity: sha512-bijvwWz6NHsNj5e5i1vtd3dU2pDhthSaTUZSh14DUGGKJfw8eMnlWZsxwHBxB/a3AXVNDjL9abuHw1k9FGR+jg==}
 
-  '@dprint/darwin-arm64@0.52.0':
-    resolution: {integrity: sha512-HHpmHCeFw1V9qUU0pJrz7LihrMgQJ5DOejfI3GRCJOd2ue3Api3/ZrzNSIqUbnx/j0RT5c7zxZR5aTE0RHwRFQ==}
+  '@dprint/darwin-arm64@0.53.0':
+    resolution: {integrity: sha512-ks9Y6koRRHWQOGIXuAUTZt5QkbR8uRVYvj80SKbjZTBYWaazjgPBbzYjnsz5qD6K/ALAqjfGFj5pAx8hgpkxeQ==}
     cpu: [arm64]
     os: [darwin]
 
-  '@dprint/darwin-x64@0.52.0':
-    resolution: {integrity: sha512-ZuoYH/hyzFhwwFUmykkm1QvLk9u7zxpKL6M8r1fY+lINucujIoGZxW1PjRbbIXaST6nDLbQB21P7LyNncAByOg==}
+  '@dprint/darwin-x64@0.53.0':
+    resolution: {integrity: sha512-h50X4bVMqcBbJBmH25ilyEBi/xqpxDIBuK01+k7TFMdk65N1u8hUjJyVV+2cEUhmHvXF/HVtSrRIRgIPJbQa5g==}
     cpu: [x64]
     os: [darwin]
 
-  '@dprint/linux-arm64-glibc@0.52.0':
-    resolution: {integrity: sha512-waghQcB32CLMuCxnVRQktc7U1S2qsL4spUmvCMyu4ufhZqXf4rQn07L1NcSmQOap40q9Db8ZBmLHfHm1Kab6uA==}
+  '@dprint/linux-arm64-glibc@0.53.0':
+    resolution: {integrity: sha512-pQ2uGibLcshKvz6DAnJ+/I8GJ3BSTwfFbt7itC74ci0mIiY0szMByby1ctA8ojL0U6mQewsueN3uETx7udfurA==}
     cpu: [arm64]
     os: [linux]
     libc: [glibc]
 
-  '@dprint/linux-arm64-musl@0.52.0':
-    resolution: {integrity: sha512-8ml2DmF8i7eEou1G5nqgMMhRir89Fsd9cMLZRPZN/FSw6Nc3vAhk2MqZIrYk2DGfoWts7jis6XvEu3/TwMP8fw==}
+  '@dprint/linux-arm64-musl@0.53.0':
+    resolution: {integrity: sha512-YhUs/fsuftp8gaeHjraCGVHdyflhbZDMLfqRaDtlzXMS5byc+z3NWsWxDc2YRXCPt614ulr6l6fDWp6wiOzJyg==}
     cpu: [arm64]
     os: [linux]
     libc: [musl]
 
-  '@dprint/linux-loong64-glibc@0.52.0':
-    resolution: {integrity: sha512-tKj7Bwtcf/zNa1onoshYfQ8CaYz0N6BRYKsovop1H1d2dsRBYAKkR/FvTaPRJp1+Sx7Lc0RjRllFezkhLMRxPw==}
+  '@dprint/linux-loong64-glibc@0.53.0':
+    resolution: {integrity: sha512-Q4VZfD18+xIHbXcEq4xlHsYhYSENkrP7bYIXSZlMtAqgZiiSOZ1rYKRmtOWWbBhD5nJ1E0lN/AddEl8eYI8Ehg==}
     cpu: [loong64]
     os: [linux]
     libc: [glibc]
 
-  '@dprint/linux-loong64-musl@0.52.0':
-    resolution: {integrity: sha512-8X+ICN/Pc4B+Zog2UXNDJph5uKLf0VVUItYEQbdbwqsWGzPa27Kqri5ainlFzaDs5TFkJHQKQlphg+TLyxBQ7A==}
+  '@dprint/linux-loong64-musl@0.53.0':
+    resolution: {integrity: sha512-CUwrJ/GuNRk3gnDDU/ovqirOecr6ifiNLtTvfmfY83Xui3eJ2iNHQgy/BTgPhX9SDi6gnvMc+/yWUGGtsl3sag==}
     cpu: [loong64]
     os: [linux]
     libc: [musl]
 
-  '@dprint/linux-riscv64-glibc@0.52.0':
-    resolution: {integrity: sha512-uQb2VqSnznfZHhrAKLxpjXMc7/c3AYepllVUhcGCdrTVp1fb7inHEilT2wSXUjOipBbfPG33cZWRzAgc5/Effg==}
+  '@dprint/linux-riscv64-glibc@0.53.0':
+    resolution: {integrity: sha512-R4wNskl87MhDK5YjYtn4qn8nFw+rtS5evudzVIz01UTyrnEiFynJbW6vUPFEl7r92FeZKdlqRuDBWDAsz8HhvQ==}
     cpu: [riscv64]
     os: [linux]
     libc: [glibc]
 
-  '@dprint/linux-x64-glibc@0.52.0':
-    resolution: {integrity: sha512-Yh3fZYUcHmII+swTUh0qgf0lEPrz4+7v3tq+vqXR8/xa3Sx8QH5MQJsJDw8Ll1mmKX5HrkBNxA5rC1lIDuFn9g==}
+  '@dprint/linux-x64-glibc@0.53.0':
+    resolution: {integrity: sha512-ynaC2AR9wXUtOnys3EUXCj7O2C75PCX2iMOIhDaqY/7+V9uigQEoNZqN9N/v72HSPhBNw37Z19Jy+yOwsvOwlg==}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
 
-  '@dprint/linux-x64-musl@0.52.0':
-    resolution: {integrity: sha512-zdcgL6+PRjyZ4HVll9DuIn2ZnnxKuU0cwXtpfUZNdy+xRh1+OedUY5aZQRDN4163vkLxV9znXQT/TS0+giph1g==}
+  '@dprint/linux-x64-musl@0.53.0':
+    resolution: {integrity: sha512-0/BY9FSmqfESeBfto2rZj2aX9ihlxHxtesfSZoCSGWdb9xPnhgn0D2CIswLZS7U37uSdX4+D8Hi97NWOLls+RA==}
     cpu: [x64]
     os: [linux]
     libc: [musl]
 
-  '@dprint/win32-arm64@0.52.0':
-    resolution: {integrity: sha512-rQGhSbl2pcnU4Tl3xXJSPRi1smfIIf7XhVwzNOG7vcSExfcK8yYrrCS3z4VImYKqhI1kvv6gSfnIligtoyaX/g==}
+  '@dprint/win32-arm64@0.53.0':
+    resolution: {integrity: sha512-RotC4SDfBvMuImh9DnPq3tMnzaol4lCQDa/QMPq1Ev4oAQGfxRlNKeI7hvwgY+otH6HJfwpD+YKv7YdNBEoH1g==}
     cpu: [arm64]
     os: [win32]
 
-  '@dprint/win32-x64@0.52.0':
-    resolution: {integrity: sha512-Bi4kW6z9eVtRdNSztSvjjYET4SQzX/OYqsexVyppxv24m5RNOG1h+c9F5MFJpYy9LqQBAKHOQfkzQwPrdgNOXQ==}
+  '@dprint/win32-x64@0.53.0':
+    resolution: {integrity: sha512-Z6a5Qua1QRoOZpDQTlfcIVOubZ1N0e84dc6NEtBriBNjfy8mUPS2zF+ifSx2M7EeuCKIyNAotVLmD2iydp2Ekg==}
     cpu: [x64]
     os: [win32]
 
@@ -1259,8 +1259,8 @@ packages:
     resolution: {integrity: sha512-IrPdXQsk2BbzvCBGBOTmmSH5SodmqZNt4ERAZDmW4CT+tL8VtvinqywuANaFu4bOMWki16nqf0e4oC0QIaDr/g==}
     engines: {node: '>=10'}
 
-  dprint@0.52.0:
-    resolution: {integrity: sha512-qXf3B6/G4E6SJKngfo7a0z1ja21o/JJ55cF8xyhyIqvJGrpJ96vhXLr37RrbWBWIj8eV+hquBkCAV6jCwenQYA==}
+  dprint@0.53.0:
+    resolution: {integrity: sha512-6t/XQviNEMNIUeDFcGCbqF11JG2cUR3fxX0IQwEV2odFdNC1RwBjIRNhxHYR7vXQtaUMHntcsWuETX+V4evdcg==}
     hasBin: true
 
   enquirer@2.4.1:
@@ -2396,37 +2396,37 @@ snapshots:
   '@dimforge/rapier2d-simd-compat@0.17.3':
     optional: true
 
-  '@dprint/darwin-arm64@0.52.0':
+  '@dprint/darwin-arm64@0.53.0':
     optional: true
 
-  '@dprint/darwin-x64@0.52.0':
+  '@dprint/darwin-x64@0.53.0':
     optional: true
 
-  '@dprint/linux-arm64-glibc@0.52.0':
+  '@dprint/linux-arm64-glibc@0.53.0':
     optional: true
 
-  '@dprint/linux-arm64-musl@0.52.0':
+  '@dprint/linux-arm64-musl@0.53.0':
     optional: true
 
-  '@dprint/linux-loong64-glibc@0.52.0':
+  '@dprint/linux-loong64-glibc@0.53.0':
     optional: true
 
-  '@dprint/linux-loong64-musl@0.52.0':
+  '@dprint/linux-loong64-musl@0.53.0':
     optional: true
 
-  '@dprint/linux-riscv64-glibc@0.52.0':
+  '@dprint/linux-riscv64-glibc@0.53.0':
     optional: true
 
-  '@dprint/linux-x64-glibc@0.52.0':
+  '@dprint/linux-x64-glibc@0.53.0':
     optional: true
 
-  '@dprint/linux-x64-musl@0.52.0':
+  '@dprint/linux-x64-musl@0.53.0':
     optional: true
 
-  '@dprint/win32-arm64@0.52.0':
+  '@dprint/win32-arm64@0.53.0':
     optional: true
 
-  '@dprint/win32-x64@0.52.0':
+  '@dprint/win32-x64@0.53.0':
     optional: true
 
   '@esbuild/aix-ppc64@0.27.2':
@@ -3269,19 +3269,19 @@ snapshots:
 
   dotenv@8.6.0: {}
 
-  dprint@0.52.0:
+  dprint@0.53.0:
     optionalDependencies:
-      '@dprint/darwin-arm64': 0.52.0
-      '@dprint/darwin-x64': 0.52.0
-      '@dprint/linux-arm64-glibc': 0.52.0
-      '@dprint/linux-arm64-musl': 0.52.0
-      '@dprint/linux-loong64-glibc': 0.52.0
-      '@dprint/linux-loong64-musl': 0.52.0
-      '@dprint/linux-riscv64-glibc': 0.52.0
-      '@dprint/linux-x64-glibc': 0.52.0
-      '@dprint/linux-x64-musl': 0.52.0
-      '@dprint/win32-arm64': 0.52.0
-      '@dprint/win32-x64': 0.52.0
+      '@dprint/darwin-arm64': 0.53.0
+      '@dprint/darwin-x64': 0.53.0
+      '@dprint/linux-arm64-glibc': 0.53.0
+      '@dprint/linux-arm64-musl': 0.53.0
+      '@dprint/linux-loong64-glibc': 0.53.0
+      '@dprint/linux-loong64-musl': 0.53.0
+      '@dprint/linux-riscv64-glibc': 0.53.0
+      '@dprint/linux-x64-glibc': 0.53.0
+      '@dprint/linux-x64-musl': 0.53.0
+      '@dprint/win32-arm64': 0.53.0
+      '@dprint/win32-x64': 0.53.0
 
   enquirer@2.4.1:
     dependencies:
