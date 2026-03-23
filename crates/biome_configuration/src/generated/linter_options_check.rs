@@ -2029,6 +2029,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_symbol_description::UseSymbolDescriptionOptions>(),
     ));
     result.push((
+        "nursery",
+        "useTailwindShorthandClasses",
+        TypeId::of::<
+            biome_rule_options::use_tailwind_shorthand_classes::UseTailwindShorthandClassesOptions,
+        >(),
+    ));
+    result.push((
         "style",
         "useTemplate",
         TypeId::of::<biome_rule_options::use_template::UseTemplateOptions>(),

@@ -5,10 +5,14 @@ use super::{
     ParserCapabilities, ProcessFixAll, ProcessLint, SearchCapabilities, UpdateSnippetsNodes,
 };
 use crate::configuration::to_analyzer_rules;
+use crate::embed::languages::EmbeddedLanguageId;
 use crate::embed::registry::{EmbedDetectorsRegistry, EmbedMatch};
-use crate::embed::types::{EmbedCandidate, EmbedContent, GuestLanguage, HostLanguage};
+use crate::embed::types::{
+    EmbedCandidate, EmbedContent, EmbedDetectionContext, GuestLanguage, HostLanguage,
+};
 use crate::settings::{
-    OverrideSettings, SettingsWithEditor, check_feature_activity, check_override_feature_activity,
+    OverrideSettings, SettingsWithEditor, TailwindClassDetectionConfig, check_feature_activity,
+    check_override_feature_activity,
 };
 use crate::workspace::document::AnyEmbeddedSnippet;
 use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
@@ -36,7 +40,7 @@ use biome_formatter::{
 };
 use biome_fs::BiomePath;
 use biome_html_analyze::analyze;
-use biome_html_factory::make::ident;
+use biome_html_factory::make::{html_string_literal, ident};
 use biome_html_formatter::context::SelfCloseVoidElements;
 use biome_html_formatter::{
     HtmlFormatOptions,
@@ -46,19 +50,22 @@ use biome_html_formatter::{
 use biome_html_parser::{HtmlParserOptions, parse_html_with_cache};
 use biome_html_syntax::element_ext::AnyEmbeddedContent;
 use biome_html_syntax::{
-    AnyAstroDirective, AnySvelteDirective, AstroEmbeddedContent, HtmlAttribute,
-    HtmlAttributeInitializerClause, HtmlDoubleTextExpression, HtmlElement, HtmlFileSource,
-    HtmlLanguage, HtmlRoot, HtmlSingleTextExpression, HtmlSyntaxNode, HtmlTextExpression,
-    HtmlTextExpressions, HtmlVariant, SvelteAwaitBlock, SvelteEachBlock, SvelteIfBlock,
-    SvelteKeyBlock, VueDirective, VueVBindShorthandDirective, VueVOnShorthandDirective,
-    VueVSlotShorthandDirective,
+    AnyAstroDirective, AnyHtmlAttributeInitializer, AnySvelteDirective, AstroEmbeddedContent,
+    HtmlAttribute, HtmlAttributeInitializerClause, HtmlAttributeSingleTextExpression,
+    HtmlDoubleTextExpression, HtmlElement, HtmlFileSource, HtmlLanguage, HtmlRoot,
+    HtmlSelfClosingElement, HtmlSingleTextExpression, HtmlSyntaxKind, HtmlSyntaxNode,
+    HtmlSyntaxToken, HtmlTextExpression, HtmlTextExpressions, HtmlVariant, SvelteAwaitBlock,
+    SvelteEachBlock, SvelteIfBlock, SvelteKeyBlock, VueDirective, VueVBindShorthandDirective,
+    VueVOnShorthandDirective, VueVSlotShorthandDirective,
 };
 use biome_js_parser::parse_js_with_offset_and_cache;
-use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage};
+use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, JsStringLiteralExpression};
 use biome_json_parser::parse_json_with_offset_and_cache;
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_parser::AnyParse;
-use biome_rowan::{AstNode, AstNodeList, BatchMutation, NodeCache, SendNode, TextSize};
+use biome_rowan::{AstNode, AstNodeList, BatchMutation, NodeCache, SendNode, TextRange, TextSize};
+use biome_tailwind_parser::parse_tailwind_with_offset_and_cache;
+use biome_tailwind_syntax::TailwindLanguage;
 use camino::Utf8Path;
 use either::Either;
 use std::borrow::Cow;
@@ -430,24 +437,43 @@ fn parse_embedded_nodes(
     };
 
     match file_source.variant() {
-        HtmlVariant::Standard(text_expression) => {
+        HtmlVariant::Standard(text_expressions) => {
             for element in html_root.syntax().descendants() {
-                // Element-level embeds via registry
-                if let Some(html_element) = HtmlElement::cast_ref(&element)
-                    && let Some(candidate) = build_html_candidate(&html_element)
-                    && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
-                        HostLanguage::Html,
-                        &candidate,
+                if let Some(html_element) = HtmlElement::cast_ref(&element) {
+                    if let Some(candidate) = build_html_candidate(&html_element)
+                        && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
+                            HostLanguage::Html,
+                            &candidate,
+                            &doc_file_source,
+                        )
+                        && let Some(parsed) =
+                            parse_matched_embed(&candidate, &embed_match, &mut ctx, None)
+                    {
+                        nodes.push(parsed.node);
+                    }
+
+                    if let Ok(opening) = html_element.opening_element() {
+                        for content in parse_html_attribute_embeds(
+                            &opening.attributes(),
+                            &doc_file_source,
+                            JsFileSource::js_module(),
+                            &mut ctx,
+                        ) {
+                            nodes.push(content);
+                        }
+                    }
+                } else if let Some(self_closing) = HtmlSelfClosingElement::cast_ref(&element) {
+                    for content in parse_html_attribute_embeds(
+                        &self_closing.attributes(),
                         &doc_file_source,
-                    )
-                    && let Some(parsed) =
-                        parse_matched_embed(&candidate, &embed_match, &mut ctx, None)
-                {
-                    nodes.push(parsed.node);
+                        JsFileSource::js_module(),
+                        &mut ctx,
+                    ) {
+                        nodes.push(content);
+                    }
                 }
 
-                // Text expressions via registry
-                match text_expression {
+                match text_expressions {
                     HtmlTextExpressions::Single => {
                         if let Some(text_expression) = HtmlSingleTextExpression::cast_ref(&element)
                             && let Ok(expression) = text_expression.expression()
@@ -463,7 +489,6 @@ fn parse_embedded_nodes(
                             nodes.push(parsed.node);
                         }
                     }
-
                     HtmlTextExpressions::Double => {
                         if let Some(text_expression) = HtmlDoubleTextExpression::cast_ref(&element)
                             && let Ok(expression) = text_expression.expression()
@@ -486,7 +511,6 @@ fn parse_embedded_nodes(
 
         HtmlVariant::Astro => {
             for element in html_root.syntax().descendants() {
-                // Astro frontmatter → registry
                 if let Some(astro_content) = AstroEmbeddedContent::cast_ref(&element)
                     && let Some(candidate) = build_astro_frontmatter_candidate(&astro_content)
                     && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
@@ -500,7 +524,6 @@ fn parse_embedded_nodes(
                     nodes.push(parsed.node);
                 }
 
-                // Text expressions via registry
                 if let Some(text_expression) = HtmlSingleTextExpression::cast_ref(&element)
                     && let Ok(expression) = text_expression.expression()
                     && let Some(candidate) = build_text_expression_candidate(&expression)
@@ -515,18 +538,38 @@ fn parse_embedded_nodes(
                     nodes.push(parsed.node);
                 }
 
-                // HTML elements (script/style) → registry
-                if let Some(html_element) = HtmlElement::cast_ref(&element)
-                    && let Some(candidate) = build_html_candidate(&html_element)
-                    && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
-                        HostLanguage::Html,
-                        &candidate,
+                if let Some(html_element) = HtmlElement::cast_ref(&element) {
+                    if let Some(candidate) = build_html_candidate(&html_element)
+                        && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
+                            HostLanguage::Html,
+                            &candidate,
+                            &doc_file_source,
+                        )
+                        && let Some(parsed) =
+                            parse_matched_embed(&candidate, &embed_match, &mut ctx, None)
+                    {
+                        nodes.push(parsed.node);
+                    }
+
+                    if let Ok(opening) = html_element.opening_element() {
+                        for content in parse_html_attribute_embeds(
+                            &opening.attributes(),
+                            &doc_file_source,
+                            JsFileSource::js_module(),
+                            &mut ctx,
+                        ) {
+                            nodes.push(content);
+                        }
+                    }
+                } else if let Some(self_closing) = HtmlSelfClosingElement::cast_ref(&element) {
+                    for content in parse_html_attribute_embeds(
+                        &self_closing.attributes(),
                         &doc_file_source,
-                    )
-                    && let Some(parsed) =
-                        parse_matched_embed(&candidate, &embed_match, &mut ctx, None)
-                {
-                    nodes.push(parsed.node);
+                        JsFileSource::js_module(),
+                        &mut ctx,
+                    ) {
+                        nodes.push(content);
+                    }
                 }
 
                 // Astro directives: class:list={...}, define:vars={...}, etc.
@@ -560,42 +603,13 @@ fn parse_embedded_nodes(
                 }
             }
         }
+
         HtmlVariant::Vue => {
-            // Two-pass: collect elements + expressions, then process
-            let mut elements = vec![];
-            let mut snippet_expressions = vec![];
-            for element in html_root.syntax().descendants() {
-                if let Some(text_expression) = HtmlDoubleTextExpression::cast_ref(&element) {
-                    snippet_expressions.push(text_expression);
-                }
-
-                if let Some(element) = HtmlElement::cast_ref(&element) {
-                    elements.push(element);
-                }
-            }
-
-            // Pass 1: elements via registry, collecting JS file sources
             let mut embedded_file_source = JsFileSource::js_module();
-            for element in elements {
-                if let Some(candidate) = build_html_candidate(&element)
-                    && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
-                        HostLanguage::Html,
-                        &candidate,
-                        &doc_file_source,
-                    )
-                    && let Some(parsed) =
-                        parse_matched_embed(&candidate, &embed_match, &mut ctx, None)
-                {
-                    if let Some(js_fs) = parsed.js_file_source {
-                        embedded_file_source = merge_js_file_source(embedded_file_source, js_fs);
-                    }
-                    nodes.push(parsed.node);
-                }
-            }
 
-            // Pass 2: text expressions via registry using merged embedded_file_source
-            for snippet in snippet_expressions {
-                if let Ok(expression) = snippet.expression()
+            for element in html_root.syntax().descendants() {
+                if let Some(text_expression) = HtmlDoubleTextExpression::cast_ref(&element)
+                    && let Ok(expression) = text_expression.expression()
                     && let Some(candidate) = build_text_expression_candidate(&expression)
                     && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
                         HostLanguage::Html,
@@ -611,11 +625,45 @@ fn parse_embedded_nodes(
                 {
                     nodes.push(parsed.node);
                 }
-            }
 
-            // Pass 3: directive attributes via registry using merged embedded_file_source
-            for element in html_root.syntax().descendants() {
-                // Handle @click shorthand (VueVOnShorthandDirective)
+                if let Some(html_element) = HtmlElement::cast_ref(&element) {
+                    if let Some(candidate) = build_html_candidate(&html_element)
+                        && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
+                            HostLanguage::Html,
+                            &candidate,
+                            &doc_file_source,
+                        )
+                        && let Some(parsed) =
+                            parse_matched_embed(&candidate, &embed_match, &mut ctx, None)
+                    {
+                        if let Some(js_fs) = parsed.js_file_source {
+                            embedded_file_source =
+                                merge_js_file_source(embedded_file_source, js_fs);
+                        }
+                        nodes.push(parsed.node);
+                    }
+
+                    if let Ok(opening) = html_element.opening_element() {
+                        for content in parse_html_attribute_embeds(
+                            &opening.attributes(),
+                            &doc_file_source,
+                            embedded_file_source,
+                            &mut ctx,
+                        ) {
+                            nodes.push(content);
+                        }
+                    }
+                } else if let Some(self_closing) = HtmlSelfClosingElement::cast_ref(&element) {
+                    for content in parse_html_attribute_embeds(
+                        &self_closing.attributes(),
+                        &doc_file_source,
+                        embedded_file_source,
+                        &mut ctx,
+                    ) {
+                        nodes.push(content);
+                    }
+                }
+
                 if let Some(directive) = VueVOnShorthandDirective::cast_ref(&element)
                     && let Some(initializer) = directive.initializer()
                     && let Some(candidate) = build_vue_directive_candidate(&initializer, true)
@@ -634,7 +682,6 @@ fn parse_embedded_nodes(
                     nodes.push(parsed.node);
                 }
 
-                // Handle :prop shorthand (VueVBindShorthandDirective)
                 if let Some(directive) = VueVBindShorthandDirective::cast_ref(&element)
                     && let Some(initializer) = directive.initializer()
                     && let Some(candidate) = build_vue_directive_candidate(&initializer, false)
@@ -653,7 +700,6 @@ fn parse_embedded_nodes(
                     nodes.push(parsed.node);
                 }
 
-                // Handle #slot shorthand (VueVSlotShorthandDirective)
                 if let Some(directive) = VueVSlotShorthandDirective::cast_ref(&element)
                     && let Some(initializer) = directive.initializer()
                     && let Some(candidate) = build_vue_directive_candidate(&initializer, false)
@@ -672,7 +718,6 @@ fn parse_embedded_nodes(
                     nodes.push(parsed.node);
                 }
 
-                // Handle full directives (v-on:, v-bind:, v-if, v-show, etc.)
                 if let Some(directive) = VueDirective::cast_ref(&element)
                     && let Some(initializer) = directive.initializer()
                 {
@@ -698,42 +743,13 @@ fn parse_embedded_nodes(
                 }
             }
         }
+
         HtmlVariant::Svelte => {
-            // Two-pass: collect elements + expressions, then process
-            let mut elements = vec![];
-            let mut snippet_expressions = vec![];
-            for element in html_root.syntax().descendants() {
-                if let Some(text_expression) = HtmlSingleTextExpression::cast_ref(&element) {
-                    snippet_expressions.push(text_expression);
-                }
-
-                if let Some(element) = HtmlElement::cast_ref(&element) {
-                    elements.push(element);
-                }
-            }
-
-            // Pass 1: elements via registry, collecting JS file sources
             let mut embedded_file_source = JsFileSource::js_module();
-            for element in elements {
-                if let Some(candidate) = build_html_candidate(&element)
-                    && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
-                        HostLanguage::Html,
-                        &candidate,
-                        &doc_file_source,
-                    )
-                    && let Some(parsed) =
-                        parse_matched_embed(&candidate, &embed_match, &mut ctx, None)
-                {
-                    if let Some(js_fs) = parsed.js_file_source {
-                        embedded_file_source = merge_js_file_source(embedded_file_source, js_fs);
-                    }
-                    nodes.push(parsed.node);
-                }
-            }
 
-            // Pass 2: text expressions via registry using merged embedded_file_source
-            for snippet in snippet_expressions {
-                if let Ok(expression) = snippet.expression()
+            for element in html_root.syntax().descendants() {
+                if let Some(text_expression) = HtmlSingleTextExpression::cast_ref(&element)
+                    && let Ok(expression) = text_expression.expression()
                     && let Some(candidate) = build_text_expression_candidate(&expression)
                     && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
                         HostLanguage::Html,
@@ -749,11 +765,45 @@ fn parse_embedded_nodes(
                 {
                     nodes.push(parsed.node);
                 }
-            }
 
-            // Pass 3: control flow blocks via registry
-            for element in html_root.syntax().descendants() {
-                // Handle {#if expression}
+                if let Some(html_element) = HtmlElement::cast_ref(&element) {
+                    if let Some(candidate) = build_html_candidate(&html_element)
+                        && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
+                            HostLanguage::Html,
+                            &candidate,
+                            &doc_file_source,
+                        )
+                        && let Some(parsed) =
+                            parse_matched_embed(&candidate, &embed_match, &mut ctx, None)
+                    {
+                        if let Some(js_fs) = parsed.js_file_source {
+                            embedded_file_source =
+                                merge_js_file_source(embedded_file_source, js_fs);
+                        }
+                        nodes.push(parsed.node);
+                    }
+
+                    if let Ok(opening) = html_element.opening_element() {
+                        for content in parse_html_attribute_embeds(
+                            &opening.attributes(),
+                            &doc_file_source,
+                            embedded_file_source,
+                            &mut ctx,
+                        ) {
+                            nodes.push(content);
+                        }
+                    }
+                } else if let Some(self_closing) = HtmlSelfClosingElement::cast_ref(&element) {
+                    for content in parse_html_attribute_embeds(
+                        &self_closing.attributes(),
+                        &doc_file_source,
+                        embedded_file_source,
+                        &mut ctx,
+                    ) {
+                        nodes.push(content);
+                    }
+                }
+
                 if let Some(if_block) = SvelteIfBlock::cast_ref(&element)
                     && let Ok(opening_block) = if_block.opening_block()
                     && let Ok(expression) = opening_block.expression()
@@ -773,7 +823,6 @@ fn parse_embedded_nodes(
                     nodes.push(parsed.node);
                 }
 
-                // Handle {:else if expression}
                 if let Some(if_block) = SvelteIfBlock::cast_ref(&element) {
                     for else_if_clause in if_block.else_if_clauses() {
                         if let Ok(expression) = else_if_clause.expression()
@@ -795,7 +844,6 @@ fn parse_embedded_nodes(
                     }
                 }
 
-                // Handle {#each expression as item}
                 if let Some(each_block) = SvelteEachBlock::cast_ref(&element)
                     && let Ok(opening_block) = each_block.opening_block()
                 {
@@ -837,7 +885,6 @@ fn parse_embedded_nodes(
                     }
                 }
 
-                // Handle {#await expression}
                 if let Some(await_block) = SvelteAwaitBlock::cast_ref(&element)
                     && let Ok(opening_block) = await_block.opening_block()
                     && let Ok(expression) = opening_block.expression()
@@ -857,7 +904,6 @@ fn parse_embedded_nodes(
                     nodes.push(parsed.node);
                 }
 
-                // Handle {#key expression}
                 if let Some(key_block) = SvelteKeyBlock::cast_ref(&element)
                     && let Ok(opening_block) = key_block.opening_block()
                     && let Ok(expression) = opening_block.expression()
@@ -876,11 +922,7 @@ fn parse_embedded_nodes(
                 {
                     nodes.push(parsed.node);
                 }
-            }
 
-            // Pass 4: directive attributes and attributes which initializer is a text expression
-            for element in html_root.syntax().descendants() {
-                // Handle special Svelte directives (bind:, class:, etc.)
                 if let Some(directive) = AnySvelteDirective::cast_ref(&element)
                     && let Some(initializer) = directive.initializer()
                     && let Some(candidate) = build_svelte_directive_candidate(&initializer)
@@ -899,8 +941,8 @@ fn parse_embedded_nodes(
                     nodes.push(parsed.node);
                 }
 
-                if let Some(attr) = HtmlAttribute::cast_ref(&element)
-                    && let Some(initializer) = attr.initializer()
+                if let Some(attribute) = HtmlAttribute::cast_ref(&element)
+                    && let Some(initializer) = attribute.initializer()
                     && let Some(candidate) = build_attribute_expression_candidate(&initializer)
                     && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
                         HostLanguage::Html,
@@ -1069,10 +1111,210 @@ fn build_attribute_expression_candidate(
     })
 }
 
+fn parse_html_attribute_embeds(
+    element_attributes: &biome_html_syntax::HtmlAttributeList,
+    doc_file_source: &DocumentFileSource,
+    js_file_source: JsFileSource,
+    ctx: &mut EmbedParseContext,
+) -> Vec<AnyEmbeddedSnippet> {
+    let mut results = Vec::new();
+    let detection_context = EmbedDetectionContext {
+        file_source: doc_file_source,
+        tailwind_class_detection_config: &TailwindClassDetectionConfig::default(),
+    };
+
+    for attribute in element_attributes {
+        let Some(attribute) = attribute.as_html_attribute() else {
+            continue;
+        };
+
+        let Some(initializer) = attribute.initializer() else {
+            continue;
+        };
+        let Ok(value) = initializer.value() else {
+            continue;
+        };
+
+        match value {
+            AnyHtmlAttributeInitializer::HtmlString(_) => {
+                let Some(candidate) = build_html_attribute_value_candidate(attribute) else {
+                    continue;
+                };
+
+                let Some(embed_match) = EmbedDetectorsRegistry::detect_match_with_context(
+                    HostLanguage::Html,
+                    &candidate,
+                    &detection_context,
+                ) else {
+                    continue;
+                };
+
+                if let Some(parsed) = parse_matched_embed(&candidate, &embed_match, ctx, None) {
+                    results.push(parsed.node);
+                }
+            }
+            AnyHtmlAttributeInitializer::HtmlAttributeSingleTextExpression(text_expression) => {
+                results.extend(parse_html_attribute_expression_embeds(
+                    attribute,
+                    &text_expression,
+                    doc_file_source,
+                    js_file_source,
+                    ctx,
+                ));
+            }
+        }
+    }
+
+    results
+}
+
+fn parse_html_attribute_expression_embeds(
+    attribute: &HtmlAttribute,
+    text_expression: &HtmlAttributeSingleTextExpression,
+    doc_file_source: &DocumentFileSource,
+    js_file_source: JsFileSource,
+    ctx: &mut EmbedParseContext,
+) -> Vec<AnyEmbeddedSnippet> {
+    let mut results = Vec::new();
+    let detection_context = EmbedDetectionContext {
+        file_source: doc_file_source,
+        tailwind_class_detection_config: &TailwindClassDetectionConfig::default(),
+    };
+
+    let Ok(expression) = text_expression.expression() else {
+        return results;
+    };
+    let Ok(content_token) = expression.html_literal_token() else {
+        return results;
+    };
+
+    let doc_source = DocumentFileSource::Js(js_file_source);
+    let options = ctx
+        .settings
+        .parse_options::<JsLanguage>(ctx.biome_path, &doc_source);
+    let parse = parse_js_with_offset_and_cache(
+        content_token.text(),
+        content_token.text_range().start(),
+        js_file_source,
+        options,
+        ctx.cache,
+    );
+
+    let js_root: biome_js_syntax::AnyJsRoot = parse.tree();
+    for node in js_root.syntax().descendants() {
+        let Some(string_lit) = JsStringLiteralExpression::cast(node) else {
+            continue;
+        };
+        let Ok(value_token) = string_lit.value_token() else {
+            continue;
+        };
+        let Ok(inner_text) = string_lit.inner_string_text() else {
+            continue;
+        };
+
+        let candidate = build_tailwind_nested_attribute_candidate(
+            attribute,
+            content_token.text_range().start(),
+            value_token,
+            inner_text,
+        );
+        let Some(embed_match) = EmbedDetectorsRegistry::detect_match_with_context(
+            HostLanguage::Html,
+            &candidate,
+            &detection_context,
+        ) else {
+            continue;
+        };
+
+        if let Some(parsed) = parse_matched_embed(&candidate, &embed_match, ctx, None) {
+            results.push(parsed.node);
+        }
+    }
+
+    results
+}
+
+fn build_html_attribute_value_candidate(attribute: &HtmlAttribute) -> Option<EmbedCandidate> {
+    let name = attribute
+        .name()
+        .ok()?
+        .value_token()
+        .ok()?
+        .token_text_trimmed()
+        .to_string();
+    let initializer = attribute.initializer()?;
+    let value = initializer.value().ok()?;
+    let html_string = value.as_html_string()?;
+    let content_token = html_string.value_token().ok()?;
+    let inner_text = html_string.inner_string_text().ok()?;
+    let token_range = content_token.text_trimmed_range();
+    let inner_offset = token_range.start() + TextSize::from(1);
+
+    Some(EmbedCandidate::AttributeValue {
+        name,
+        content: EmbedContent {
+            element_range: attribute.range(),
+            content_range: token_range,
+            content_offset: inner_offset,
+            text: inner_text,
+        },
+    })
+}
+
+fn build_tailwind_nested_attribute_candidate(
+    attribute: &HtmlAttribute,
+    base_offset: TextSize,
+    value_token: biome_js_syntax::JsSyntaxToken,
+    inner_text: biome_rowan::TokenText,
+) -> EmbedCandidate {
+    let name = attribute
+        .name()
+        .ok()
+        .and_then(|name| name.value_token().ok())
+        .map(|token| token.token_text_trimmed().to_string())
+        .unwrap_or_default();
+    let local_token_range = value_token.text_trimmed_range();
+    let token_range = TextRange::new(
+        base_offset + local_token_range.start(),
+        base_offset + local_token_range.end(),
+    );
+    let inner_offset = token_range.start() + TextSize::from(1);
+    let element_range = inner_text.source_range(token_range);
+
+    EmbedCandidate::AttributeValue {
+        name,
+        content: EmbedContent {
+            element_range,
+            content_range: token_range,
+            content_offset: inner_offset,
+            text: inner_text,
+        },
+    }
+}
+
+fn apply_tailwind_fix_to_attribute_expression(
+    text_expression: &HtmlAttributeSingleTextExpression,
+    snippets: &[UpdateSnippetsNodes],
+) -> Option<String> {
+    let expression = text_expression.expression().ok()?;
+    let value_token = expression.html_literal_token().ok()?;
+
+    let nested_replacement =
+        apply_nested_snippet_replacements(value_token.text(), value_token.text_range(), snippets);
+
+    let direct_replacement = snippets
+        .iter()
+        .find(|snippet| snippet.range == expression.range())
+        .map(|snippet| snippet.new_code.clone())
+        .filter(|replacement| replacement != value_token.text());
+
+    direct_replacement.or(nested_replacement)
+}
+
 /// Result of parsing a matched embed.
 struct ParsedEmbed {
-    /// The parsed snippet + file source, ready to push to `nodes`.
-    node: (AnyEmbeddedSnippet, DocumentFileSource),
+    /// The parsed snippet, ready to push to `nodes`.
+    node: AnyEmbeddedSnippet,
     /// If JS was parsed, the resolved JsFileSource (for `embedded_file_source` capture).
     js_file_source: Option<JsFileSource>,
 }
@@ -1235,7 +1477,7 @@ fn parse_matched_embed(
             };
 
             Some(ParsedEmbed {
-                node: ((snippet, js_services).into(), doc_source),
+                node: AnyEmbeddedSnippet::from((snippet, js_services)).with_file_source(doc_source),
                 // Only source-level embeds contribute to embedded_file_source capture
                 js_file_source: if is_source_level {
                     Some(js_source)
@@ -1283,7 +1525,8 @@ fn parse_matched_embed(
             );
 
             Some(ParsedEmbed {
-                node: ((snippet, services.into()).into(), doc_source),
+                node: AnyEmbeddedSnippet::from((snippet, services.into()))
+                    .with_file_source(doc_source),
                 js_file_source: None,
             })
         }
@@ -1308,7 +1551,7 @@ fn parse_matched_embed(
             );
 
             Some(ParsedEmbed {
-                node: (snippet.into(), doc_source),
+                node: AnyEmbeddedSnippet::from(snippet).with_file_source(doc_source),
                 js_file_source: None,
             })
         }
@@ -1316,6 +1559,31 @@ fn parse_matched_embed(
         GuestLanguage::GraphQL => {
             // GraphQL embeds are only used by the JS handler, not HTML
             None
+        }
+
+        GuestLanguage::Tailwind => {
+            debug_assert_eq!(
+                embed_match.guest.embedded_language_id(),
+                EmbeddedLanguageId::Tailwind
+            );
+            debug_assert!(embed_match.guest.document_file_source().is_none());
+            let parse = parse_tailwind_with_offset_and_cache(
+                content.text.text(),
+                content.content_offset,
+                ctx.cache,
+            );
+
+            let snippet: EmbeddedSnippet<TailwindLanguage> = EmbeddedSnippet::new(
+                parse.into(),
+                content.element_range,
+                content.content_range,
+                content.content_offset,
+            );
+
+            Some(ParsedEmbed {
+                node: snippet.into(),
+                js_file_source: None,
+            })
         }
     }
 }
@@ -1630,35 +1898,136 @@ pub(crate) fn update_snippets(
 ) -> Result<SendNode, WorkspaceError> {
     let tree: HtmlRoot = root.tree();
     let mut mutation = BatchMutation::new(tree.syntax().clone());
-    let iterator = tree
-        .syntax()
-        .descendants()
-        .filter_map(AnyEmbeddedContent::cast);
+    for node in tree.syntax().descendants() {
+        if let Some(element) = AnyEmbeddedContent::cast(node.clone()) {
+            let Some(snippet) = new_snippets
+                .iter()
+                .find(|snippet| snippet.range == element.range())
+            else {
+                continue;
+            };
 
-    for element in iterator {
-        let Some(snippet) = new_snippets
-            .iter()
-            .find(|snippet| snippet.range == element.range())
-        else {
+            if let Some(value_token) = element.value_token() {
+                let leading_trivia = read_leading_trivia(value_token.text_trimmed());
+                let trailing_trivia = read_trailing_trivia(value_token.text_trimmed());
+                let new_token = ident(&format!(
+                    "{}{}{}",
+                    leading_trivia,
+                    snippet.new_code.trim(),
+                    trailing_trivia
+                ));
+                mutation.replace_token(value_token, new_token);
+            }
+
+            continue;
+        }
+
+        let Some(attribute) = HtmlAttribute::cast(node.clone()) else {
+            let Some(text_expression) = HtmlTextExpression::cast(node) else {
+                continue;
+            };
+            let Some(snippet) = new_snippets
+                .iter()
+                .find(|snippet| snippet.range == text_expression.range())
+            else {
+                continue;
+            };
+
+            let Ok(value_token) = text_expression.html_literal_token() else {
+                continue;
+            };
+
+            let new_token = HtmlSyntaxToken::new_detached(
+                HtmlSyntaxKind::HTML_LITERAL,
+                snippet.new_code.as_str(),
+                [],
+                [],
+            );
+            mutation.replace_token(value_token, new_token);
+            continue;
+        };
+        let Some(initializer) = attribute.initializer() else {
+            continue;
+        };
+        let Ok(value) = initializer.value() else {
             continue;
         };
 
-        if let Some(value_token) = element.value_token() {
-            let leading_trivia = read_leading_trivia(value_token.text_trimmed());
-            let trailing_trivia = read_trailing_trivia(value_token.text_trimmed());
-            let new_token = ident(&format!(
-                "{}{}{}",
-                leading_trivia,
-                snippet.new_code.trim(), // trim to avoid duplicating trivia
-                trailing_trivia
-            ));
-            mutation.replace_token(value_token, new_token);
+        match value {
+            AnyHtmlAttributeInitializer::HtmlString(html_string) => {
+                let Some(snippet) = new_snippets
+                    .iter()
+                    .find(|snippet| snippet.range == attribute.range())
+                else {
+                    continue;
+                };
+                let Ok(value_token) = html_string.value_token() else {
+                    continue;
+                };
+
+                let new_token = html_string_literal(snippet.new_code.as_str());
+                mutation.replace_token(value_token, new_token);
+            }
+            AnyHtmlAttributeInitializer::HtmlAttributeSingleTextExpression(text_expression) => {
+                let replacement =
+                    apply_tailwind_fix_to_attribute_expression(&text_expression, &new_snippets);
+                let Some(replacement) = replacement else {
+                    continue;
+                };
+
+                let Ok(expression) = text_expression.expression() else {
+                    continue;
+                };
+                let Ok(value_token) = expression.html_literal_token() else {
+                    continue;
+                };
+
+                mutation.replace_token(value_token, ident(replacement.as_str()));
+            }
         }
     }
 
     let root = mutation.commit();
 
     Ok(root.as_send().unwrap())
+}
+
+fn apply_nested_snippet_replacements(
+    original: &str,
+    container_range: biome_rowan::TextRange,
+    snippets: &[UpdateSnippetsNodes],
+) -> Option<String> {
+    let mut replacements: Vec<_> = snippets
+        .iter()
+        .filter(|snippet| {
+            container_range.start() <= snippet.range.start()
+                && snippet.range.end() <= container_range.end()
+                && snippet.range != container_range
+        })
+        .collect();
+
+    if replacements.is_empty() {
+        return None;
+    }
+
+    replacements.sort_by_key(|snippet| snippet.range.start());
+
+    let mut updated = original.to_string();
+    for snippet in replacements.into_iter().rev() {
+        let start: usize = (snippet.range.start() - container_range.start()).into();
+        let end: usize = (snippet.range.end() - container_range.start()).into();
+        let original_slice = &updated[start..end];
+        let replacement = if original_slice.starts_with('"') && original_slice.ends_with('"') {
+            format!("\"{}\"", snippet.new_code)
+        } else if original_slice.starts_with('\'') && original_slice.ends_with('\'') {
+            format!("'{}'", snippet.new_code)
+        } else {
+            snippet.new_code.clone()
+        };
+        updated.replace_range(start..end, &replacement);
+    }
+
+    Some(updated)
 }
 
 /// Extracts all leading whitespace (spaces, tabs, newlines, carriage returns) from a string.

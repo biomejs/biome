@@ -7,17 +7,21 @@ use super::{
 };
 use crate::configuration::to_analyzer_rules;
 use crate::diagnostics::extension_error;
+use crate::embed::languages::EmbeddedLanguageId;
 use crate::embed::registry::{EmbedDetectorsRegistry, EmbedMatch};
 use crate::embed::types::{
-    EmbedCandidate, EmbedContent, GuestLanguage, HostLanguage, TemplateTagKind,
+    EmbedCandidate, EmbedContent, EmbedDetectionContext, GuestLanguage, HostLanguage,
+    TemplateTagKind,
 };
 use crate::file_handlers::FixAllParams;
 use crate::settings::{
-    OverrideSettings, Settings, SettingsWithEditor, check_feature_activity,
-    check_override_feature_activity,
+    OverrideSettings, Settings, SettingsWithEditor, TailwindClassDetectionConfig,
+    check_feature_activity, check_override_feature_activity,
 };
 use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
-use crate::workspace::{DocumentFileSource, EmbeddedSnippet, PullDiagnosticsAndActionsResult};
+use crate::workspace::{
+    AnyEmbeddedSnippet, DocumentFileSource, EmbeddedSnippet, PullDiagnosticsAndActionsResult,
+};
 use crate::{
     WorkspaceError,
     settings::{FormatSettings, LanguageListSettings, LanguageSettings, ServiceLanguage},
@@ -42,12 +46,15 @@ use biome_formatter::{
 };
 use biome_fs::BiomePath;
 use biome_graphql_parser::parse_graphql_with_offset_and_cache;
-use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
+use biome_graphql_syntax::GraphqlLanguage;
 use biome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
 use biome_js_analyze::{
     ControlFlowGraph, JsAnalyzerServices, analyze, analyze_with_inspect_matcher,
 };
-use biome_js_factory::make::ident;
+use biome_js_factory::make::{
+    ident, js_string_literal, js_string_literal_single_quotes, jsx_string_literal,
+    jsx_string_literal_single_quotes,
+};
 use biome_js_formatter::context::trailing_commas::TrailingCommas;
 use biome_js_formatter::context::{
     ArrowParentheses, JsFormatOptions, OperatorLinebreak, QuoteProperties, Semicolons,
@@ -56,10 +63,11 @@ use biome_js_formatter::format_node;
 use biome_js_parser::JsParserOptions;
 use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsRoot, AnyJsTemplateElement, JsCallArgumentList, JsCallArguments,
-    JsCallExpression, JsClassDeclaration, JsClassExpression, JsFileSource, JsFunctionDeclaration,
-    JsLanguage, JsSyntaxNode, JsTemplateChunkElement, JsTemplateExpression, JsVariableDeclarator,
-    TextRange, TextSize, TokenAtOffset,
+    AnyJsCallArgument, AnyJsExpression, AnyJsRoot, AnyJsTemplateElement, JsCallArgumentList,
+    JsCallArguments, JsCallExpression, JsClassDeclaration, JsClassExpression, JsFileSource,
+    JsFunctionDeclaration, JsLanguage, JsStringLiteralExpression, JsSyntaxNode,
+    JsTemplateChunkElement, JsTemplateExpression, JsVariableDeclarator, JsxAttribute,
+    JsxOpeningElement, JsxSelfClosingElement, JsxString, TextRange, TextSize, TokenAtOffset,
 };
 use biome_js_type_info::{GlobalsResolver, ScopeId, TypeData, TypeResolver};
 use biome_module_graph::ModuleGraph;
@@ -68,6 +76,8 @@ use biome_rowan::{
     AstNode, AstNodeList, BatchMutation, BatchMutationExt, Direction, NodeCache, SendNode,
     WalkEvent,
 };
+use biome_tailwind_parser::parse_tailwind_with_offset_and_cache;
+use biome_tailwind_syntax::TailwindLanguage;
 use camino::Utf8Path;
 use either::Either;
 use serde::{Deserialize, Serialize};
@@ -568,11 +578,11 @@ fn parse(
 ) -> ParseResult {
     let options = settings.parse_options::<JsLanguage>(biome_path, &file_source);
 
-    let file_source = file_source.to_js_file_source().unwrap_or_default();
-    let parse = biome_js_parser::parse_js_with_cache(text, file_source, options, cache);
+    let js_file_source = file_source.to_js_file_source().unwrap_or_default();
+    let parse = biome_js_parser::parse_js_with_cache(text, js_file_source, options, cache);
     ParseResult {
         any_parse: parse.into(),
-        language: Some(file_source.into()),
+        language: Some(file_source),
     }
 }
 
@@ -584,16 +594,23 @@ fn parse_embedded_nodes(
     cache: &mut NodeCache,
     _builder: &mut EmbeddedBuilder,
 ) -> ParseEmbedResult {
+    let js_file_source = file_source.to_js_file_source().unwrap_or_default();
     if !settings
         .as_ref()
         .experimental_js_embedded_snippets_enabled()
+        && !js_file_source.is_embedded()
     {
         return ParseEmbedResult { nodes: vec![] };
     }
 
     let js_root: AnyJsRoot = root.tree();
 
-    let nodes = js_root
+    let detection_context = EmbedDetectionContext {
+        file_source,
+        tailwind_class_detection_config: &TailwindClassDetectionConfig::default(),
+    };
+
+    let mut nodes: Vec<AnyEmbeddedSnippet> = js_root
         .syntax()
         .descendants()
         .filter_map(JsTemplateExpression::cast)
@@ -604,13 +621,136 @@ fn parse_embedded_nodes(
                 &candidate,
                 file_source,
             )?;
-            let (snippet, doc_source) =
-                parse_js_matched_embed(&candidate, &embed_match, cache, biome_path, settings)?;
-            Some((snippet.into(), doc_source))
+            parse_js_matched_embed(&candidate, &embed_match, cache, biome_path, settings)
         })
         .collect();
 
+    for node in js_root.syntax().descendants() {
+        if let Some(opening) = JsxOpeningElement::cast_ref(&node) {
+            for attribute in opening.attributes() {
+                if let Some(attribute) = attribute.as_jsx_attribute()
+                    && let Some(candidate) = build_jsx_attribute_value_candidate(attribute)
+                    && let Some(embed_match) = EmbedDetectorsRegistry::detect_match_with_context(
+                        HostLanguage::JavaScript,
+                        &candidate,
+                        &detection_context,
+                    )
+                    && let Some(snippet) = parse_js_matched_embed(
+                        &candidate,
+                        &embed_match,
+                        cache,
+                        biome_path,
+                        settings,
+                    )
+                {
+                    nodes.push(snippet);
+                }
+            }
+        } else if let Some(self_closing) = JsxSelfClosingElement::cast_ref(&node) {
+            for attribute in self_closing.attributes() {
+                if let Some(attribute) = attribute.as_jsx_attribute()
+                    && let Some(candidate) = build_jsx_attribute_value_candidate(attribute)
+                    && let Some(embed_match) = EmbedDetectorsRegistry::detect_match_with_context(
+                        HostLanguage::JavaScript,
+                        &candidate,
+                        &detection_context,
+                    )
+                    && let Some(snippet) = parse_js_matched_embed(
+                        &candidate,
+                        &embed_match,
+                        cache,
+                        biome_path,
+                        settings,
+                    )
+                {
+                    nodes.push(snippet);
+                }
+            }
+        } else if let Some(call_expr) = JsCallExpression::cast_ref(&node)
+            && let Ok(args) = call_expr.arguments()
+        {
+            for arg in args.args() {
+                if let Ok(AnyJsCallArgument::AnyJsExpression(expr)) = arg
+                    && let Some(string_lit) = expr
+                        .as_any_js_literal_expression()
+                        .and_then(|lit| lit.as_js_string_literal_expression())
+                    && let Some(candidate) =
+                        build_tailwind_call_argument_candidate(&call_expr, string_lit)
+                    && let Some(embed_match) = EmbedDetectorsRegistry::detect_match_with_context(
+                        HostLanguage::JavaScript,
+                        &candidate,
+                        &detection_context,
+                    )
+                    && let Some(snippet) = parse_js_matched_embed(
+                        &candidate,
+                        &embed_match,
+                        cache,
+                        biome_path,
+                        settings,
+                    )
+                {
+                    nodes.push(snippet);
+                }
+            }
+        }
+    }
+
     ParseEmbedResult { nodes }
+}
+
+fn build_jsx_attribute_value_candidate(attribute: &JsxAttribute) -> Option<EmbedCandidate> {
+    let name = attribute
+        .name_value_token()
+        .ok()?
+        .token_text_trimmed()
+        .to_string();
+    let initializer = attribute.initializer()?;
+    let value = initializer.value().ok()?;
+    let jsx_string = value.as_jsx_string()?;
+    let token = jsx_string.value_token().ok()?;
+    let inner_text = jsx_string.inner_string_text().ok()?;
+    let token_range = token.text_trimmed_range();
+    let inner_offset = token_range.start() + TextSize::from(1);
+
+    Some(EmbedCandidate::AttributeValue {
+        name,
+        content: EmbedContent {
+            element_range: attribute.range(),
+            content_range: token_range,
+            content_offset: inner_offset,
+            text: inner_text,
+        },
+    })
+}
+
+fn build_tailwind_call_argument_candidate(
+    call_expr: &JsCallExpression,
+    string_lit: &JsStringLiteralExpression,
+) -> Option<EmbedCandidate> {
+    let callee = match call_expr.callee().ok()? {
+        AnyJsExpression::JsIdentifierExpression(ident) => ident
+            .name()
+            .ok()?
+            .value_token()
+            .ok()?
+            .token_text_trimmed()
+            .to_string(),
+        _ => return None,
+    };
+    let token = string_lit.value_token().ok()?;
+    let inner_text = string_lit.inner_string_text().ok()?;
+    let token_range = token.text_trimmed_range();
+    let inner_offset = token_range.start() + TextSize::from(1);
+
+    Some(EmbedCandidate::CallArgument {
+        callee,
+        content: EmbedContent {
+            element_range: string_lit.range(),
+            content_range: token_range,
+            content_offset: inner_offset,
+            text: inner_text,
+        },
+    })
 }
 
 /// Build an `EmbedCandidate::TaggedTemplate` from a `JsTemplateExpression`.
@@ -706,17 +846,13 @@ fn template_expression_to_template_tag(expr: &JsTemplateExpression) -> Option<Te
 
 /// Parse an embed site that the JS registry matched.
 ///
-/// Note: The old code returned `EmbeddedSnippet<JsLanguage>` for ALL languages
-/// (CSS, GraphQL), not the actual language type. This is because `AnyEmbeddedSnippet`
-/// erases the language via `AnyParse`, and the JS handler stores everything as
-/// `AnyEmbeddedSnippet::Js`. We preserve this behavior for compatibility.
 fn parse_js_matched_embed(
     candidate: &EmbedCandidate,
     embed_match: &EmbedMatch,
     cache: &mut NodeCache,
     biome_path: &BiomePath,
     settings: &SettingsWithEditor,
-) -> Option<(EmbeddedSnippet<JsLanguage>, DocumentFileSource)> {
+) -> Option<AnyEmbeddedSnippet> {
     let content = candidate.content();
 
     match embed_match.guest {
@@ -733,32 +869,57 @@ fn parse_js_matched_embed(
                 options,
             );
 
-            let snippet = EmbeddedSnippet::new(
+            let snippet = EmbeddedSnippet::<CssLanguage>::new(
                 parse.into(),
                 content.element_range,
                 content.content_range,
                 content.content_offset,
             );
 
-            Some((snippet, file_source))
+            Some(AnyEmbeddedSnippet::from(snippet).with_file_source(file_source))
         }
 
         GuestLanguage::GraphQL => {
-            let file_source = DocumentFileSource::Graphql(GraphqlFileSource::graphql());
             let parse = parse_graphql_with_offset_and_cache(
                 content.text.text(),
                 content.content_offset,
                 cache,
             );
 
-            let snippet = EmbeddedSnippet::new(
+            let snippet = EmbeddedSnippet::<GraphqlLanguage>::new(
                 parse.into(),
                 content.element_range,
                 content.content_range,
                 content.content_offset,
             );
 
-            Some((snippet, file_source))
+            Some(
+                AnyEmbeddedSnippet::from(snippet).with_file_source(DocumentFileSource::Graphql(
+                    biome_graphql_syntax::GraphqlFileSource::graphql(),
+                )),
+            )
+        }
+
+        GuestLanguage::Tailwind => {
+            debug_assert_eq!(
+                embed_match.guest.embedded_language_id(),
+                EmbeddedLanguageId::Tailwind
+            );
+            debug_assert!(embed_match.guest.document_file_source().is_none());
+            let parse = parse_tailwind_with_offset_and_cache(
+                content.text.text(),
+                content.content_offset,
+                cache,
+            );
+
+            let snippet = EmbeddedSnippet::<TailwindLanguage>::new(
+                parse.into(),
+                content.element_range,
+                content.content_range,
+                content.content_offset,
+            );
+
+            Some(snippet.into())
         }
 
         // JS embeds inside JS templates are not applicable
@@ -1424,12 +1585,46 @@ fn update_snippets(
 ) -> Result<SendNode, WorkspaceError> {
     let tree: AnyJsRoot = root.tree();
     let mut mutation = BatchMutation::new(tree.syntax().clone());
-    let iterator = tree
-        .syntax()
-        .descendants()
-        .filter_map(JsTemplateChunkElement::cast);
+    for node in tree.syntax().descendants() {
+        if let Some(element) = JsTemplateChunkElement::cast(node.clone()) {
+            let Some(snippet) = new_snippets
+                .iter()
+                .find(|snippet| snippet.range == element.range())
+            else {
+                continue;
+            };
 
-    for element in iterator {
+            if let Ok(value_token) = element.template_chunk_token() {
+                let new_token = ident(snippet.new_code.as_str());
+                mutation.replace_token(value_token, new_token);
+            }
+
+            continue;
+        }
+
+        if let Some(element) = JsStringLiteralExpression::cast(node.clone()) {
+            let Some(snippet) = new_snippets
+                .iter()
+                .find(|snippet| snippet.range == element.range())
+            else {
+                continue;
+            };
+
+            if let Ok(value_token) = element.value_token() {
+                let new_token = if value_token.text_trimmed().starts_with('"') {
+                    js_string_literal(snippet.new_code.as_str())
+                } else {
+                    js_string_literal_single_quotes(snippet.new_code.as_str())
+                };
+                mutation.replace_token(value_token, new_token);
+            }
+
+            continue;
+        }
+
+        let Some(element) = JsxString::cast(node) else {
+            continue;
+        };
         let Some(snippet) = new_snippets
             .iter()
             .find(|snippet| snippet.range == element.range())
@@ -1437,8 +1632,12 @@ fn update_snippets(
             continue;
         };
 
-        if let Ok(value_token) = element.template_chunk_token() {
-            let new_token = ident(snippet.new_code.as_str());
+        if let Ok(value_token) = element.value_token() {
+            let new_token = if value_token.text_trimmed().starts_with('"') {
+                jsx_string_literal(snippet.new_code.as_str())
+            } else {
+                jsx_string_literal_single_quotes(snippet.new_code.as_str())
+            };
             mutation.replace_token(value_token, new_token);
         }
     }

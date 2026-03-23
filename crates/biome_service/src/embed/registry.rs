@@ -1,5 +1,6 @@
 use crate::embed::detector::{EmbedDetector, EmbedTarget};
-use crate::embed::types::{EmbedCandidate, GuestLanguage, HostLanguage};
+use crate::embed::types::{EmbedCandidate, EmbedDetectionContext, GuestLanguage, HostLanguage};
+use crate::settings::TailwindClassDetectionConfig;
 use crate::workspace::DocumentFileSource;
 use biome_html_syntax::ScriptType;
 
@@ -26,9 +27,24 @@ impl EmbedDetectorsRegistry {
         candidate: &EmbedCandidate,
         file_source: &DocumentFileSource,
     ) -> Option<EmbedMatch> {
+        let tailwind_class_detection_config = TailwindClassDetectionConfig::default();
+        let context = EmbedDetectionContext {
+            file_source,
+            tailwind_class_detection_config: &tailwind_class_detection_config,
+        };
+
+        Self::detect_match_with_context(host, candidate, &context)
+    }
+
+    /// Find the first matching detector for a candidate using the provided context.
+    pub fn detect_match_with_context(
+        host: HostLanguage,
+        candidate: &EmbedCandidate,
+        context: &EmbedDetectionContext,
+    ) -> Option<EmbedMatch> {
         let detectors = Self::detectors(host);
         for detector in detectors {
-            if let Some(guest) = detector.try_match(candidate, file_source) {
+            if let Some(guest) = detector.try_match(candidate, context) {
                 return Some(EmbedMatch { guest });
             }
         }
@@ -36,7 +52,7 @@ impl EmbedDetectorsRegistry {
     }
 }
 
-static HTML_DETECTORS: [EmbedDetector; 5] = [
+static HTML_DETECTORS: [EmbedDetector; 6] = [
     // <script> → JS/TS/JSON (dynamic: depends on type/lang attributes + framework)
     //
     // A single detector handles all <script> variants via the dynamic resolver:
@@ -100,15 +116,21 @@ static HTML_DETECTORS: [EmbedDetector; 5] = [
             fallback: None,
         },
     },
+    EmbedDetector::AttributeValue {
+        target: EmbedTarget::Dynamic {
+            resolver: resolve_tailwind_attribute_language,
+            fallback: None,
+        },
+    },
 ];
 
 /// Resolves the guest language for a <script> tag based on attributes and host framework.
 /// Mirrors current logic in html.rs parse_embedded_script (978-1065).
 fn resolve_script_language(
     candidate: &EmbedCandidate,
-    file_source: &DocumentFileSource,
+    context: &EmbedDetectionContext,
 ) -> Option<GuestLanguage> {
-    let html_source = file_source.to_html_file_source()?;
+    let html_source = context.file_source.to_html_file_source()?;
 
     // Check script type attribute first
     if let Some(type_value) = candidate.attribute("type") {
@@ -148,7 +170,7 @@ fn resolve_script_language(
 
 fn resolve_style_language(
     candidate: &EmbedCandidate,
-    _file_source: &DocumentFileSource,
+    _context: &EmbedDetectionContext,
 ) -> Option<GuestLanguage> {
     // SCSS is not supported — return None to skip this element
     if candidate.has_attribute_value("lang", "scss") {
@@ -163,9 +185,9 @@ fn resolve_style_language(
 /// (the handler overrides with `embedded_file_source` for Vue/Svelte).
 fn resolve_text_expression_language(
     _candidate: &EmbedCandidate,
-    file_source: &DocumentFileSource,
+    context: &EmbedDetectionContext,
 ) -> Option<GuestLanguage> {
-    let html_source = file_source.to_html_file_source()?;
+    let html_source = context.file_source.to_html_file_source()?;
     if html_source.is_astro() {
         Some(GuestLanguage::Tsx)
     } else {
@@ -177,12 +199,38 @@ fn resolve_text_expression_language(
 /// Always JS — the handler applies framework-specific EmbeddingKind.
 fn resolve_directive_language(
     _candidate: &EmbedCandidate,
-    _file_source: &DocumentFileSource,
+    _context: &EmbedDetectionContext,
 ) -> Option<GuestLanguage> {
     Some(GuestLanguage::JsModule)
 }
 
-static JS_DETECTORS: [EmbedDetector; 5] = [
+fn resolve_tailwind_attribute_language(
+    candidate: &EmbedCandidate,
+    context: &EmbedDetectionContext,
+) -> Option<GuestLanguage> {
+    let attribute_name = candidate.attribute_name()?;
+    context
+        .tailwind_class_detection_config
+        .attributes
+        .iter()
+        .any(|configured| configured == attribute_name)
+        .then_some(GuestLanguage::Tailwind)
+}
+
+fn resolve_tailwind_call_language(
+    candidate: &EmbedCandidate,
+    context: &EmbedDetectionContext,
+) -> Option<GuestLanguage> {
+    let callee = candidate.call_argument_callee()?;
+    context
+        .tailwind_class_detection_config
+        .functions
+        .iter()
+        .any(|configured| configured == callee)
+        .then_some(GuestLanguage::Tailwind)
+}
+
+static JS_DETECTORS: [EmbedDetector; 7] = [
     // css`` → CSS
     EmbedDetector::TemplateTag {
         tag: "css",
@@ -208,4 +256,142 @@ static JS_DETECTORS: [EmbedDetector; 5] = [
         object: "graphql",
         target: EmbedTarget::Static(GuestLanguage::GraphQL),
     },
+    EmbedDetector::AttributeValue {
+        target: EmbedTarget::Dynamic {
+            resolver: resolve_tailwind_attribute_language,
+            fallback: None,
+        },
+    },
+    EmbedDetector::CallArgument {
+        target: EmbedTarget::Dynamic {
+            resolver: resolve_tailwind_call_language,
+            fallback: None,
+        },
+    },
 ];
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use biome_js_syntax::JsFileSource;
+    use biome_rowan::{RawSyntaxKind, TextRange, TextSize, TokenText};
+
+    fn content() -> crate::embed::types::EmbedContent {
+        crate::embed::types::EmbedContent {
+            element_range: TextRange::new(TextSize::from(0), TextSize::from(5)),
+            content_range: TextRange::new(TextSize::from(1), TextSize::from(4)),
+            content_offset: TextSize::from(1),
+            text: TokenText::new_raw(RawSyntaxKind(0), "foo"),
+        }
+    }
+
+    #[test]
+    fn detects_tailwind_attribute_with_default_config() {
+        let candidate = EmbedCandidate::AttributeValue {
+            name: "class".into(),
+            content: content(),
+        };
+        let file_source = DocumentFileSource::Html(Default::default());
+        let tailwind = TailwindClassDetectionConfig::default();
+        let context = EmbedDetectionContext {
+            file_source: &file_source,
+            tailwind_class_detection_config: &tailwind,
+        };
+
+        let detected = EmbedDetectorsRegistry::detect_match_with_context(
+            HostLanguage::Html,
+            &candidate,
+            &context,
+        );
+
+        assert!(matches!(
+            detected,
+            Some(EmbedMatch {
+                guest: GuestLanguage::Tailwind
+            })
+        ));
+    }
+
+    #[test]
+    fn respects_custom_tailwind_attribute_config() {
+        let candidate = EmbedCandidate::AttributeValue {
+            name: "tw".into(),
+            content: content(),
+        };
+        let file_source = DocumentFileSource::Html(Default::default());
+        let tailwind = TailwindClassDetectionConfig {
+            attributes: vec!["tw".into()],
+            functions: vec![],
+        };
+        let context = EmbedDetectionContext {
+            file_source: &file_source,
+            tailwind_class_detection_config: &tailwind,
+        };
+
+        let detected = EmbedDetectorsRegistry::detect_match_with_context(
+            HostLanguage::Html,
+            &candidate,
+            &context,
+        );
+
+        assert!(matches!(
+            detected,
+            Some(EmbedMatch {
+                guest: GuestLanguage::Tailwind
+            })
+        ));
+    }
+
+    #[test]
+    fn skips_unconfigured_tailwind_attribute() {
+        let candidate = EmbedCandidate::AttributeValue {
+            name: "class".into(),
+            content: content(),
+        };
+        let file_source = DocumentFileSource::Html(Default::default());
+        let tailwind = TailwindClassDetectionConfig {
+            attributes: vec!["tw".into()],
+            functions: vec![],
+        };
+        let context = EmbedDetectionContext {
+            file_source: &file_source,
+            tailwind_class_detection_config: &tailwind,
+        };
+
+        assert!(
+            EmbedDetectorsRegistry::detect_match_with_context(
+                HostLanguage::Html,
+                &candidate,
+                &context
+            )
+            .is_none()
+        );
+    }
+
+    #[test]
+    fn detects_tailwind_call_argument_with_default_config() {
+        let candidate = EmbedCandidate::CallArgument {
+            callee: "clsx".into(),
+            content: content(),
+        };
+        let file_source = DocumentFileSource::Js(JsFileSource::jsx());
+        let tailwind = TailwindClassDetectionConfig::default();
+        let context = EmbedDetectionContext {
+            file_source: &file_source,
+            tailwind_class_detection_config: &tailwind,
+        };
+
+        let detected = EmbedDetectorsRegistry::detect_match_with_context(
+            HostLanguage::JavaScript,
+            &candidate,
+            &context,
+        );
+
+        assert!(matches!(
+            detected,
+            Some(EmbedMatch {
+                guest: GuestLanguage::Tailwind
+            })
+        ));
+    }
+}

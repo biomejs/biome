@@ -6,37 +6,40 @@ description = "Internal script to make sure that the metadata or the rules are c
 publish     = false
 
 [dependencies]
-anyhow                = { workspace = true }
-biome_analyze         = { workspace = true }
-biome_configuration   = { workspace = true }
-biome_console         = { workspace = true }
-biome_css_analyze     = { workspace = true }
-biome_css_parser      = { workspace = true }
-biome_css_semantic    = { workspace = true }
-biome_css_syntax      = { workspace = true }
-biome_deserialize     = { workspace = true }
-biome_diagnostics     = { workspace = true }
-biome_fs              = { workspace = true }
-biome_graphql_analyze = { workspace = true }
-biome_graphql_parser  = { workspace = true }
-biome_graphql_syntax  = { workspace = true }
-biome_html_analyze    = { workspace = true }
-biome_html_parser     = { workspace = true }
-biome_html_syntax     = { workspace = true }
-biome_js_analyze      = { workspace = true }
-biome_js_parser       = { workspace = true }
-biome_js_syntax       = { workspace = true }
-biome_json_analyze    = { workspace = true }
-biome_json_factory    = { workspace = true }
-biome_json_parser     = { workspace = true }
-biome_json_syntax     = { workspace = true }
-biome_module_graph    = { workspace = true }
-biome_project_layout  = { workspace = true }
-biome_rowan           = { workspace = true }
-biome_ruledoc_utils   = { workspace = true }
-biome_service         = { workspace = true }
-camino                = { workspace = true }
-pulldown-cmark        = "0.13.0"
+anyhow                 = { workspace = true }
+biome_analyze          = { workspace = true }
+biome_configuration    = { workspace = true }
+biome_console          = { workspace = true }
+biome_css_analyze      = { workspace = true }
+biome_css_parser       = { workspace = true }
+biome_css_semantic     = { workspace = true }
+biome_css_syntax       = { workspace = true }
+biome_deserialize      = { workspace = true }
+biome_diagnostics      = { workspace = true }
+biome_fs               = { workspace = true }
+biome_graphql_analyze  = { workspace = true }
+biome_graphql_parser   = { workspace = true }
+biome_graphql_syntax   = { workspace = true }
+biome_html_analyze     = { workspace = true }
+biome_html_parser      = { workspace = true }
+biome_html_syntax      = { workspace = true }
+biome_js_analyze       = { workspace = true }
+biome_js_parser        = { workspace = true }
+biome_js_syntax        = { workspace = true }
+biome_json_analyze     = { workspace = true }
+biome_json_factory     = { workspace = true }
+biome_json_parser      = { workspace = true }
+biome_json_syntax      = { workspace = true }
+biome_module_graph     = { workspace = true }
+biome_project_layout   = { workspace = true }
+biome_rowan            = { workspace = true }
+biome_ruledoc_utils    = { workspace = true }
+biome_service          = { workspace = true }
+biome_tailwind_analyze = { workspace = true }
+biome_tailwind_parser  = { workspace = true }
+biome_tailwind_syntax  = { workspace = true }
+camino                 = { workspace = true }
+pulldown-cmark         = "0.13.0"
 
 [lints]
 workspace = true

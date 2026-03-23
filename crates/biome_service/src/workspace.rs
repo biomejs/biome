@@ -69,7 +69,8 @@ use biome_text_edit::TextEdit;
 use camino::Utf8Path;
 use crossbeam::channel::bounded;
 pub use document::{
-    AnyEmbeddedSnippet, CssDocumentServices, DocumentServices, EmbeddedSnippet, JsDocumentServices,
+    AnyEmbeddedSnippet, CssDocumentServices, DocumentServices, EmbeddedSnippet,
+    EmbeddedSnippetLanguage, JsDocumentServices,
 };
 use enumflags2::{BitFlags, bitflags};
 use rustc_hash::FxHashMap;
