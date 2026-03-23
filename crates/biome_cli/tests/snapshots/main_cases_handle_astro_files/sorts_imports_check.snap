@@ -1,5 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 520
 expression: redactor(content)
 ---
 ## `file.astro`
@@ -38,12 +39,10 @@ file.astro:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━�
   
   i Safe fix: Organize Imports (Biome)
   
-    1 1 │   
-    2   │ - import·{·getLocale·}·from·"astro:i18n";
-    3   │ - import·{·Code·}·from·"astro:components";
-      2 │ + import·{·Code·}·from·"astro:components";
-      3 │ + import·{·getLocale·}·from·"astro:i18n";
-    4 4 │   
+    1   │ - import·{·getLocale·}·from·"astro:i18n";
+    2   │ - import·{·Code·}·from·"astro:components";
+      1 │ + import·{·Code·}·from·"astro:components";
+      2 │ + import·{·getLocale·}·from·"astro:i18n";
   
 
 ```

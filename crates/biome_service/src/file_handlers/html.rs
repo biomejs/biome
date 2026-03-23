@@ -963,17 +963,21 @@ fn build_html_candidate(element: &HtmlElement) -> Option<EmbedCandidate> {
         child.as_html_embedded_content().cloned()
     })?;
     let value_token = content_child.value_token().ok()?;
-    let (content_range, text) =
-        trim_embedded_content(value_token.text_range(), value_token.token_text());
 
     Some(EmbedCandidate::Element {
         tag_name,
         attributes,
         content: EmbedContent {
             element_range: content_child.range(),
-            content_range,
-            content_offset: content_range.start(),
-            text,
+            // Keep the full token range here.
+            //
+            // `content_range` is also used by the HTML formatter's embedded-node
+            // placeholders. If we trim it to the inner JS/TS text, formatter-driven
+            // delegation no longer spans the original host token and full-support
+            // formatting starts dropping or misplacing wrapper whitespace.
+            content_range: value_token.text_range(),
+            content_offset: value_token.text_range().start(),
+            text: value_token.token_text(),
         },
     })
 }
@@ -981,15 +985,17 @@ fn build_html_candidate(element: &HtmlElement) -> Option<EmbedCandidate> {
 /// Build an `EmbedCandidate::Frontmatter` from Astro's `---` block.
 fn build_astro_frontmatter_candidate(element: &AstroEmbeddedContent) -> Option<EmbedCandidate> {
     let content_token = element.content_token()?;
-    let (content_range, text) =
-        trim_embedded_content(content_token.text_range(), content_token.token_text());
 
     Some(EmbedCandidate::Frontmatter {
         content: EmbedContent {
             element_range: element.range(),
-            content_range,
-            content_offset: content_range.start(),
-            text,
+            // Frontmatter is special: the formatter delegates using the whole
+            // `AstroEmbeddedContent` node range (`element_range`), not this token
+            // range. We can therefore use the trimmed token range here to keep
+            // frontmatter diagnostics/code-action ranges anchored to the actual code.
+            content_range: content_token.text_trimmed_range(),
+            content_offset: content_token.text_range().start(),
+            text: content_token.token_text(),
         },
     })
 }
@@ -1200,13 +1206,26 @@ fn parse_matched_embed(
                 _ => false,
             };
 
+            let (content_offset, content_text) = if is_source_level {
+                // For source-level snippets (`<script>` and frontmatter), parse the
+                // embedded program as if the wrapper-adjacent newline/indent bytes
+                // were not part of the guest language.
+                //
+                // This is the actual issue #9097 fix: assists such as
+                // `organizeImports` should reason about the JS/TS source only, not
+                // about the host document's padding around that source.
+                trim_embedded_content(content.content_offset, content.text.clone())
+            } else {
+                (content.content_offset, content.text.clone())
+            };
+
             let doc_source = DocumentFileSource::Js(js_source);
             let options = ctx
                 .settings
                 .parse_options::<JsLanguage>(ctx.biome_path, &doc_source);
             let parse = parse_js_with_offset_and_cache(
-                content.text.text(),
-                content.content_offset,
+                content_text.text(),
+                content_offset,
                 js_source,
                 options,
                 ctx.cache,
@@ -1220,8 +1239,12 @@ fn parse_matched_embed(
             let snippet: EmbeddedSnippet<JsLanguage> = EmbeddedSnippet::new(
                 parse.into(),
                 content.element_range,
+                // Preserve the original host-side range for snippet bookkeeping.
+                // The parse offset above is trimmed for source-level analysis, but
+                // the snippet still needs to point back at the host document span
+                // used by formatter delegation and snippet replacement.
                 content.content_range,
-                content.content_offset,
+                content_offset,
             );
 
             // Source-level embeds get full services; expression-level don't
@@ -1646,17 +1669,12 @@ pub(crate) fn update_snippets(
         };
 
         if let Some(value_token) = element.value_token() {
-            let token_text = value_token.token_text();
-            let leading_trivia = if matches!(element, AnyEmbeddedContent::AstroEmbeddedContent(_)) {
-                Cow::Borrowed("")
-            } else {
-                read_leading_trivia(&token_text)
-            };
-            let trailing_trivia = read_trailing_trivia(&token_text);
+            let leading_trivia = read_leading_trivia(value_token.text_trimmed());
+            let trailing_trivia = read_trailing_trivia(value_token.text_trimmed());
             let new_token = ident(&format!(
                 "{}{}{}",
                 leading_trivia,
-                snippet.new_code.as_str(),
+                snippet.new_code.trim(),
                 trailing_trivia
             ));
             mutation.replace_token(value_token, new_token);
@@ -1707,23 +1725,20 @@ fn read_leading_trivia(value: &str) -> Cow<'_, str> {
 /// whitespace that belongs to the host document structure rather than to the
 /// embedded JS/TS program itself.
 ///
-/// This helper returns a `TextRange` and `TokenText` slice that both point to the
-/// meaningful embedded source only. Keeping the text and range trimmed in lockstep
-/// ensures that parsing, diagnostic remapping, and code-action application all use
-/// the same snippet boundaries. Without this, assists like `organizeImports` can
-/// infer extra blank lines from host-side wrapper whitespace and then reinsert those
-/// edits incorrectly into Astro, Vue, or Svelte files.
-fn trim_embedded_content(range: TextRange, value: TokenText) -> (TextRange, TokenText) {
+/// This helper is intentionally used only for source-level JS/TS parsing and
+/// diagnostic/code-action offsets.
+///
+/// We do *not* use it to rewrite `content_range`, because the HTML formatter and
+/// embedded-snippet replacement logic still need the original host-document span.
+/// In other words:
+/// - trimmed `offset`/`text` are for guest-language analysis
+/// - untrimmed `content_range` is for host-document plumbing
+fn trim_embedded_content(offset: TextSize, value: TokenText) -> (TextSize, TokenText) {
     let leading_len = read_leading_trivia(value.text()).len();
     let trailing_len = read_trailing_trivia(value.text()).len();
     let value_len = value.len();
-    let content_start = range.start() + TextSize::from(leading_len as u32);
+    let content_start = offset + TextSize::from(leading_len as u32);
     let all_whitespace = value_len == TextSize::from(leading_len as u32);
-    let content_end = if all_whitespace {
-        content_start
-    } else {
-        range.end() - TextSize::from(trailing_len as u32)
-    };
     let text = if all_whitespace {
         value.slice(TextRange::empty(TextSize::from(0)))
     } else {
@@ -1733,7 +1748,7 @@ fn trim_embedded_content(range: TextRange, value: TokenText) -> (TextRange, Toke
         ))
     };
 
-    (TextRange::new(content_start, content_end), text)
+    (content_start, text)
 }
 
 /// Extracts all trailing whitespace (spaces, tabs, newlines, carriage returns) from a string.

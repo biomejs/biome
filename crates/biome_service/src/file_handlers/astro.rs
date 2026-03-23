@@ -48,8 +48,33 @@ impl AstroFileHandler {
     /// It takes the original content of an Astro file, and new output of an Astro file. The output is only the content contained inside the
     /// Astro fences. The function replaces `output` inside those fences.
     pub fn output(input: &str, output: &str) -> String {
-        if let Some(range) = Self::content_range(input) {
-            format!("{}{}{}", &input[..range.start], output, &input[range.end..])
+        let mut matches = Self::matches(input);
+        if let (Some(start), Some(end)) = (matches.next(), matches.next()) {
+            // Keep legacy reconstruction behavior here.
+            //
+            // `content_range()` trims frontmatter for parsing and fix offsets, but
+            // when we write the final file back we still want the canonical fence
+            // layout: opening fence line, content, closing fence line. Rebuilding
+            // from the raw fence matches preserves that layout and avoids gluing the
+            // closing `---` onto the last line of code.
+            let line_ending = if input[start.end()..end.start()].contains("\r\n") {
+                "\r\n"
+            } else {
+                "\n"
+            };
+            let output = output.trim_start();
+            let output = if output.is_empty() || output.ends_with(['\n', '\r']) {
+                output.to_string()
+            } else {
+                format!("{output}{line_ending}")
+            };
+
+            format!(
+                "{}{}{}",
+                &input[..start.end() + 1],
+                output,
+                &input[end.start()..]
+            )
         } else {
             input.to_string()
         }

@@ -1,5 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 520
 expression: redactor(content)
 ---
 ## `file.astro`
@@ -37,11 +38,8 @@ file.astro:2:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━�
   
   i Unsafe fix: Remove debugger statement
   
-    1   │ - 
-    2   │ - debugger;
-      1 │ + 
-    3 2 │   
-  
+    1 │ debugger;
+      │ ---------
 
 ```
 
