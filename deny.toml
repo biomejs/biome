@@ -1,0 +1,14 @@
+# https://embarkstudios.github.io/cargo-deny/
+#
+# cargo-deny checks our dependency tree for issues.
+# Run locally with: cargo deny check bans
+
+[graph]
+all-features = true
+
+[bans]
+multiple-versions = "allow"
+deny = [
+    # The `paste` crate is no longer maintained.
+    { crate = "paste", use-instead = "pastey" },
+]
