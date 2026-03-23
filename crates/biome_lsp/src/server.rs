@@ -20,7 +20,6 @@ use futures::future::ready;
 use rustc_hash::FxHashMap;
 use serde_json::json;
 use std::panic::RefUnwindSafe;
-use std::str::FromStr;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use tokio::io::{AsyncRead, AsyncWrite};
@@ -173,20 +172,21 @@ impl LSPServer {
                 CapabilityStatus::Enable(Some(json!(DidChangeWatchedFilesRegistrationOptions {
                     watchers
                 })))
-            } else if let Some(base_path) = self.session.base_path() {
+            } else if let Some(base_uri) = self.session.base_uri() {
+                let base_path = self.session.base_path();
                 let value = DidChangeWatchedFilesRegistrationOptions {
                     watchers: vec![
                         FileSystemWatcher {
                             glob_pattern: GlobPattern::Relative(RelativePattern {
                                 pattern: "**/biome.{json,jsonc}".to_string(),
-                                base_uri: OneOf::Right(Uri::from_str(base_path.as_str()).unwrap()),
+                                base_uri: OneOf::Right(base_uri),
                             }),
                             kind: Some(WatchKind::all()),
                         },
                         FileSystemWatcher {
-                            glob_pattern: GlobPattern::String(format!(
-                                "{}/.editorconfig",
-                                base_path.as_path().as_str()
+                            glob_pattern: GlobPattern::String(base_path.map_or_else(
+                                || "**/.editorconfig".to_string(),
+                                |p| format!("{}/.editorconfig", p.as_path().as_str()),
                             )),
                             kind: Some(WatchKind::all()),
                         },

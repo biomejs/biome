@@ -5269,4 +5269,60 @@ async fn change_document_inverted_range_does_not_panic() -> Result<()> {
     Ok(())
 }
 
+/// Regression test: the LSP server should not crash when the client sends
+/// `didChangeWatchedFiles.dynamicRegistration: true` but no `workspaceFolders`
+/// in `InitializeParams`. This is valid per the LSP spec — `workspaceFolders`
+/// is optional and some clients only send `rootUri`.
+#[tokio::test]
+#[expect(deprecated)]
+async fn initialize_without_workspace_folders_does_not_panic() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    let _res: InitializeResult = server
+        .request(
+            "initialize",
+            "_init",
+            InitializeParams {
+                process_id: None,
+                root_path: None,
+                root_uri: Some(uri!("")),
+                initialization_options: None,
+                capabilities: ClientCapabilities {
+                    workspace: Some(lsp::WorkspaceClientCapabilities {
+                        did_change_watched_files: Some(
+                            lsp::DidChangeWatchedFilesClientCapabilities {
+                                dynamic_registration: Some(true),
+                                relative_pattern_support: None,
+                            },
+                        ),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                },
+                trace: None,
+                workspace_folders: None,
+                client_info: None,
+                locale: None,
+                work_done_progress_params: Default::default(),
+            },
+        )
+        .await?
+        .context("initialize returned None")?;
+
+    // `initialized` triggers `setup_capabilities` which registers file watchers.
+    // Before the fix, this panicked because it tried to parse a filesystem path as a URI.
+    server.initialized().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
 // #endregion
