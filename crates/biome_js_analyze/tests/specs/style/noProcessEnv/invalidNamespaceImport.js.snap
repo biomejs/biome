@@ -1,0 +1,44 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidNamespaceImport.js
+---
+# Input
+```js
+import * as process from "node:process";
+process.env;
+process.env.BAZ;
+
+```
+
+# Diagnostics
+```
+invalidNamespaceImport.js:2:1 lint/style/noProcessEnv ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use process.env.
+  
+    1 │ import * as process from "node:process";
+  > 2 │ process.env;
+      │ ^^^^^^^^^^^
+    3 │ process.env.BAZ;
+    4 │ 
+  
+  i Use a centralized configuration file instead for better maintainability and deployment consistency.
+  
+
+```
+
+```
+invalidNamespaceImport.js:3:1 lint/style/noProcessEnv ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use process.env.
+  
+    1 │ import * as process from "node:process";
+    2 │ process.env;
+  > 3 │ process.env.BAZ;
+      │ ^^^^^^^^^^^
+    4 │ 
+  
+  i Use a centralized configuration file instead for better maintainability and deployment consistency.
+  
+
+```
