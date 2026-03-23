@@ -4661,6 +4661,77 @@ async fn should_acknowledge_changes_in_settings_when_pulling_diagnostics() -> Re
 }
 
 #[tokio::test]
+async fn should_apply_wrapped_biome_settings_from_did_change_configuration() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server
+        .open_document("import { b, a } from \"./foo\";\n")
+        .await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+
+    assert!(notification.is_some());
+
+    let notification = notification.expect("notification");
+    assert!(matches!(
+        notification,
+        ServerNotification::PublishDiagnostics(_)
+    ));
+    if let ServerNotification::PublishDiagnostics(result) = notification {
+        assert!(
+            !result.diagnostics.is_empty(),
+            "should contain diagnostics before applying wrapped biome settings"
+        );
+    }
+
+    sleep(Duration::from_millis(300)).await;
+
+    server
+        .notify(
+            "workspace/didChangeConfiguration",
+            DidChangeConfigurationParams {
+                settings: serde_json::json!({
+                    "biome": {
+                        "requireConfiguration": true,
+                        "configurationPath": null,
+                    }
+                }),
+            },
+        )
+        .await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+
+    assert_eq!(
+        notification,
+        Some(ServerNotification::PublishDiagnostics(
+            PublishDiagnosticsParams {
+                uri: uri!("document.js"),
+                version: Some(0),
+                diagnostics: vec![],
+            }
+        )),
+        "diagnostics should be cleared after applying wrapped biome settings from didChangeConfiguration"
+    );
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
 async fn pull_plugin_diagnostics_for_vue_files() -> Result<()> {
     let fs = MemoryFileSystem::default();
 

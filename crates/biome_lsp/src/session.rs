@@ -1169,6 +1169,10 @@ impl Session {
                 }
             }
             Some(settings) => {
+                let settings = settings
+                    .get(CONFIGURATION_SECTION)
+                    .cloned()
+                    .unwrap_or(settings);
                 let mut config = self.extension_settings.write().unwrap();
                 if let Err(err) = config.set_workspace_settings(settings) {
                     error!("Couldn't set client configuration: {}", err);
