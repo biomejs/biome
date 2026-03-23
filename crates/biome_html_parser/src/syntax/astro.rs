@@ -163,10 +163,12 @@ pub const ASTRO_DIRECTIVE_TOKEN_SET: TokenSet<HtmlSyntaxKind> = token_set![
     T![define],
 ];
 
+#[inline]
 pub(crate) fn is_at_astro_directive_keyword(p: &mut HtmlParser) -> bool {
     p.at_ts(ASTRO_DIRECTIVE_TOKEN_SET)
 }
 
+#[inline]
 pub(crate) fn is_astro_directive_keyword(token: HtmlSyntaxKind) -> bool {
     ASTRO_DIRECTIVE_TOKEN_SET.contains(token)
 }

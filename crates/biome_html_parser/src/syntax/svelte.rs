@@ -1255,18 +1255,22 @@ const SVELTE_DIRECTIVE_KEYWORDS: TokenSet<HtmlSyntaxKind> = token_set!(
     T![animate]
 );
 
+#[inline]
 pub(crate) fn is_at_svelte_keyword(p: &HtmlParser) -> bool {
     p.at_ts(SVELTE_KEYWORDS)
 }
 
+#[inline]
 fn is_at_svelte_directive_keyword(token: HtmlSyntaxKind) -> bool {
     SVELTE_DIRECTIVE_KEYWORDS.contains(token)
 }
 
+#[inline]
 fn is_at_else_opening_block(p: &mut HtmlParser) -> bool {
     p.at(T!["{:"]) && p.nth_at(1, T![else])
 }
 
+#[inline]
 fn is_at_then_or_catch_block(p: &mut HtmlParser) -> bool {
     p.at(T!["{:"]) && (p.nth_at(1, T![then]) || p.nth_at(1, T![catch]))
 }
