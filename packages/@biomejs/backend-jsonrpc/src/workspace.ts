@@ -7592,6 +7592,13 @@ that appear in places where the falsy-checking behavior may be intentional.
 Default: `true` 
 	 */
 	ignoreConditionalTests?: boolean;
+	/**
+	* Whether to ignore ternary expressions that could be simplified
+using the nullish coalescing operator.
+
+Default: `false` 
+	 */
+	ignoreTernaryTests?: boolean;
 }
 export type UsePlaywrightValidDescribeCallbackOptions = {};
 export type UseRegexpExecOptions = {};
