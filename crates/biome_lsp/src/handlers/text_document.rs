@@ -80,7 +80,8 @@ async fn ensure_project_for_opened_document(
         if let Some(config_path) = session.get_settings_configuration_path() {
             if !config_path.is_absolute() {
                 let file_path = path.to_path_buf();
-                // Resolve relative configurationPath per file so the correct workspace folder is used.
+                // Re-resolve relative configurationPath per file so each workspace folder uses
+                // its own config, even when a project is already open.
                 if let Some(resolved_path) = session.resolve_configuration_path(Some(&file_path)) {
                     let status = session
                         .load_biome_configuration_file(resolved_path, false)
@@ -90,6 +91,7 @@ async fn ensure_project_for_opened_document(
                         error!("Configuration could not be loaded for {path}");
                         return None;
                     }
+                    // Re-check after loading: a nested project may have been registered.
                     return match session.project_for_path(path) {
                         Some(updated_key) => Some(updated_key),
                         None => {
@@ -110,7 +112,7 @@ async fn ensure_project_for_opened_document(
         session.load_extension_settings(None).await;
     }
 
-    let status = load_from_workspace_base(session, path).await;
+    let status = load_from_workspace_root_for_path(session, path).await;
 
     session.set_configuration_status(status);
 
@@ -128,7 +130,11 @@ async fn ensure_project_for_opened_document(
     }
 }
 
-async fn load_from_workspace_base(session: &Arc<Session>, path: &Utf8Path) -> ConfigurationStatus {
+/// Load configuration anchored to the workspace root that contains `path`.
+async fn load_from_workspace_root_for_path(
+    session: &Arc<Session>,
+    path: &Utf8Path,
+) -> ConfigurationStatus {
     let file_path = path.to_path_buf();
     if let Some(path) = session.resolve_configuration_path(Some(&file_path)) {
         info!("Loading user configuration from text_document {:?}", &path);
