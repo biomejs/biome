@@ -1,0 +1,13 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.svg
+---
+# Input
+```html
+<!-- should not generate diagnostics -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+	<title>Red circle</title>
+	<circle cx="50" cy="50" r="40" fill="red" />
+</svg>
+
+```

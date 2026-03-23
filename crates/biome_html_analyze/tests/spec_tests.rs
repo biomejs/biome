@@ -18,8 +18,8 @@ use camino::Utf8Path;
 use std::ops::Deref;
 use std::{fs::read_to_string, slice};
 
-tests_macros::gen_tests! {"tests/specs/**/*.{html,vue,svelte,astro,json,jsonc}", crate::run_test, "module"}
-tests_macros::gen_tests! {"tests/suppression/**/*.{html,vue,svelte,astro,json,jsonc}", crate::run_suppression_test, "module"}
+tests_macros::gen_tests! {"tests/specs/**/*.{html,svg,vue,svelte,astro,json,jsonc}", crate::run_test, "module"}
+tests_macros::gen_tests! {"tests/suppression/**/*.{html,svg,vue,svelte,astro,json,jsonc}", crate::run_suppression_test, "module"}
 
 /// Checks if any of the enabled rules is in the project domain and requires the module graph.
 struct NeedsModuleGraph<'a> {

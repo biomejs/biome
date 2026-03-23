@@ -1,0 +1,31 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.svg
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+	<circle cx="50" cy="50" r="40" fill="red" />
+</svg>
+
+```
+
+# Diagnostics
+```
+invalid.svg:2:1 lint/a11y/noSvgWithoutTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Alternative text title element cannot be empty
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 3 │ 	<circle cx="50" cy="50" r="40" fill="red" />
+  > 4 │ </svg>
+      │ ^^^^^^
+    5 │ 
+  
+  i For accessibility purposes, SVGs should have an alternative text, provided via title element. If the svg element has role="img", you should add the aria-label or aria-labelledby attribute.
+  
+
+```
