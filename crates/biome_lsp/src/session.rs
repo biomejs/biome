@@ -68,6 +68,12 @@ pub(crate) struct ClientInformation {
 #[derive(Clone, Copy, Eq, PartialEq, Hash, Debug)]
 pub(crate) struct SessionKey(pub u64);
 
+#[derive(Clone, Hash, PartialEq, Eq)]
+struct ConfigurationCacheKey {
+    base_path: Utf8PathBuf,
+    settings_path: Option<Utf8PathBuf>,
+}
+
 /// Represents the state of an LSP server session.
 pub(crate) struct Session {
     /// The unique key identifying this session.
@@ -114,6 +120,10 @@ pub(crate) struct Session {
     /// Lock used to synchronize multiple atomic operations to load the configuration file
     loading_operations:
         TokioRwLock<FxHashMap<Utf8PathBuf, tokio::sync::broadcast::Sender<ConfigurationStatus>>>,
+
+    /// Cached configuration status per base path to avoid reloading on every request.
+    configuration_status_by_path:
+        TokioRwLock<FxHashMap<ConfigurationCacheKey, ConfigurationStatus>>,
 }
 
 /// The parameters provided by the client in the "initialize" request
@@ -226,6 +236,7 @@ impl Session {
             initialized: AtomicBool::new(false),
             service_rx,
             loading_operations: Default::default(),
+            configuration_status_by_path: Default::default(),
             workspace_folders: Default::default(),
         }
     }
@@ -329,7 +340,8 @@ impl Session {
         self.projects
             .pin()
             .iter()
-            .find(|(project_path, _project_key)| path.starts_with(project_path.as_path()))
+            .filter(|(project_path, _project_key)| path.starts_with(project_path.as_path()))
+            .max_by_key(|(project_path, _project_key)| project_path.as_str().len())
             .map(|(_project_path, project_key)| *project_key)
     }
 
@@ -896,12 +908,18 @@ impl Session {
         base_path: ConfigurationPathHint,
         reload: bool,
     ) -> ConfigurationStatus {
-        let current_status = self.configuration_status();
-        if current_status.is_loaded() && !reload {
-            return current_status;
-        }
         // Check if there's already an ongoing operation for this path
         let path_to_index = base_path.to_path_buf().unwrap_or_default();
+        let cache_key = ConfigurationCacheKey {
+            base_path: path_to_index.clone(),
+            settings_path: self.get_settings_configuration_path(),
+        };
+        if !reload {
+            let cached = self.configuration_status_by_path.read().await;
+            if let Some(status) = cached.get(&cache_key) {
+                return *status;
+            }
+        }
         {
             let operations = self.loading_operations.read().await;
 
@@ -942,6 +960,11 @@ impl Session {
         let status = self
             .load_biome_configuration_file_internal(base_path.clone(), reload)
             .await;
+
+        {
+            let mut cached = self.configuration_status_by_path.write().await;
+            cached.insert(cache_key, status);
+        }
 
         // Broadcast the result to any waiting tasks
         let _ = tx.send(status);
@@ -1063,7 +1086,22 @@ impl Session {
                 path.to_path_buf()
             }
             ConfigurationPathHint::FromUser(path) => {
-                if fs.path_is_file(path) {
+                let workspace_root = self
+                    .get_workspace_folders()
+                    .unwrap_or_default()
+                    .into_iter()
+                    .filter_map(|folder| {
+                        folder
+                            .uri
+                            .to_file_path()
+                            .and_then(|p| Utf8PathBuf::from_path_buf(p.to_path_buf()).ok())
+                    })
+                    .filter(|root| path.starts_with(root))
+                    .max_by_key(|root| root.as_str().len());
+
+                if let Some(root) = workspace_root {
+                    root
+                } else if fs.path_is_file(path) {
                     path.parent()
                         .map_or(fs.working_directory().unwrap_or_default(), |p| {
                             p.to_path_buf()
@@ -1175,6 +1213,11 @@ impl Session {
                 }
             }
         }
+        self.clear_configuration_cache().await;
+    }
+
+    pub(crate) async fn clear_configuration_cache(&self) {
+        self.configuration_status_by_path.write().await.clear();
     }
 
     /// Broadcast a shutdown signal to all active connections
@@ -1252,5 +1295,88 @@ impl Session {
             .map_or(PositionEncoding::Wide(WideEncoding::Utf16), |params| {
                 negotiated_encoding(&params.client_capabilities)
             })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use biome_fs::MemoryFileSystem;
+    use biome_service::WorkspaceServer;
+    use crossbeam::channel::bounded;
+    use std::sync::Mutex;
+    use tokio::sync::Notify;
+    use tower_lsp_server::LanguageServer;
+    use tower_lsp_server::LspService;
+    use tower_lsp_server::jsonrpc::Result as JsonRpcResult;
+    use tower_lsp_server::ls_types::{InitializeParams, InitializeResult};
+
+    struct DummyServer;
+
+    impl LanguageServer for DummyServer {
+        async fn initialize(&self, _params: InitializeParams) -> JsonRpcResult<InitializeResult> {
+            Ok(InitializeResult::default())
+        }
+
+        async fn shutdown(&self) -> JsonRpcResult<()> {
+            Ok(())
+        }
+    }
+
+    fn create_test_session() -> Arc<Session> {
+        let (watcher_tx, _) = bounded(0);
+        let (service_tx, service_rx) = watch::channel(ServiceNotification::IndexUpdated);
+        let workspace = Arc::new(WorkspaceServer::new(
+            Arc::new(MemoryFileSystem::default()),
+            watcher_tx,
+            service_tx,
+            None,
+        ));
+        let cancellation = Arc::new(Notify::new());
+        let session_slot: Arc<Mutex<Option<Arc<Session>>>> = Arc::new(Mutex::new(None));
+
+        let slot = session_slot.clone();
+        let workspace = workspace.clone();
+        let cancellation = cancellation.clone();
+        let service_rx = service_rx.clone();
+
+        let (_service, _socket) = LspService::build(move |client| {
+            let session = Arc::new(Session::new(
+                SessionKey(0),
+                client,
+                workspace.clone(),
+                cancellation.clone(),
+                service_rx.clone(),
+            ));
+            *slot.lock().unwrap() = Some(session.clone());
+            DummyServer
+        })
+        .finish();
+
+        session_slot
+            .lock()
+            .unwrap()
+            .take()
+            .expect("session should be initialized")
+    }
+
+    #[tokio::test]
+    async fn project_for_path_prefers_most_specific_root() {
+        let session = create_test_session();
+
+        let root = BiomePath::new(Utf8PathBuf::from("workspace"));
+        let nested = BiomePath::new(Utf8PathBuf::from("workspace/packages/app"));
+        let root_key = ProjectKey::new();
+        let nested_key = ProjectKey::new();
+
+        session.projects.pin().insert(root, root_key);
+        session.projects.pin().insert(nested, nested_key);
+
+        let file_path = Utf8PathBuf::from("workspace/packages/app/src/main.js");
+        let selected = session
+            .project_for_path(file_path.as_path())
+            .expect("expected a project match");
+
+        assert_eq!(selected, nested_key);
     }
 }

@@ -5,9 +5,9 @@ use crate::{documents::Document, session::Session};
 use biome_configuration::ConfigurationPathHint;
 use biome_service::workspace::{
     ChangeFileParams, CloseFileParams, DocumentFileSource, FeaturesBuilder, FileContent,
-    GetFileContentParams, IgnoreKind, OpenFileParams, PathIsIgnoredParams,
+    GetFileContentParams, IgnoreKind, OpenFileParams, PathIsIgnoredParams, ProjectKey,
 };
-use camino::Utf8PathBuf;
+use camino::{Utf8Path, Utf8PathBuf};
 use std::sync::Arc;
 use tower_lsp_server::ls_types as lsp;
 use tracing::{debug, error, field, info, trace};
@@ -31,86 +31,8 @@ pub(crate) async fn did_open(
     let language_hint = DocumentFileSource::from_language_id(&params.text_document.language_id);
 
     let path = session.file_path(&url)?;
-
-    let project_key = match session.project_for_path(&path) {
-        Some(project_key) => project_key,
-        None => {
-            info!("No open project for path: {path:?}. Opening new project.");
-
-            session.set_configuration_status(ConfigurationStatus::Loading);
-            if !session.has_initialized() {
-                session.load_extension_settings(None).await;
-            }
-
-            let status = if let Some(config_path) = session.resolve_configuration_path(Some(&path))
-            {
-                info!(
-                    "Loading user configuration from text_document {:?}",
-                    &config_path
-                );
-                session
-                    .load_biome_configuration_file(config_path, false)
-                    .await
-            } else {
-                let project_path = path
-                    .parent()
-                    .map(|parent| parent.to_path_buf())
-                    .unwrap_or_default();
-                info!("Loading configuration from text_document {}", &project_path);
-                // First check if the current file belongs to any registered workspace folder.
-                // If so, return that folder; otherwise, use the folder computed by did_open.
-                let project_path = if let Some(workspace_folders) = session.get_workspace_folders()
-                {
-                    if let Some(ws_root) = workspace_folders
-                        .iter()
-                        .filter_map(|folder| {
-                            folder.uri.to_file_path().map(|p| {
-                                Utf8PathBuf::from_path_buf(p.to_path_buf())
-                                    .expect("To have a valid UTF-8 path")
-                            })
-                        })
-                        .find(|ws| project_path.starts_with(ws))
-                    {
-                        ws_root
-                    } else {
-                        project_path.clone()
-                    }
-                } else if let Some(base_path) = session.base_path() {
-                    if project_path.starts_with(&base_path) {
-                        base_path
-                    } else {
-                        project_path.clone()
-                    }
-                } else {
-                    project_path
-                };
-
-                session
-                    .load_biome_configuration_file(
-                        ConfigurationPathHint::FromLsp(project_path),
-                        false,
-                    )
-                    .await
-            };
-
-            session.set_configuration_status(status);
-
-            if status.is_loaded() {
-                match session.project_for_path(&path) {
-                    Some(project_key) => project_key,
-
-                    None => {
-                        error!("Could not find project for {path}");
-
-                        return Ok(());
-                    }
-                }
-            } else {
-                error!("Configuration could not be loaded for {path}");
-
-                return Ok(());
-            }
-        }
+    let Some(project_key) = load_project_for_open(session, &path).await else {
+        return Ok(());
     };
 
     let is_ignored = session
@@ -146,6 +68,103 @@ pub(crate) async fn did_open(
     }
 
     Ok(())
+}
+
+async fn load_project_for_open(session: &Arc<Session>, path: &Utf8Path) -> Option<ProjectKey> {
+    if let Some(project_key) = session.project_for_path(path) {
+        if let Some(config_path) = session.get_settings_configuration_path() {
+            if !config_path.is_absolute() {
+                let file_path = path.to_path_buf();
+                if let Some(resolved_path) = session.resolve_configuration_path(Some(&file_path)) {
+                    let status = session
+                        .load_biome_configuration_file(resolved_path, false)
+                        .await;
+                    session.set_configuration_status(status);
+                    if !status.is_loaded() {
+                        error!("Configuration could not be loaded for {path}");
+                        return None;
+                    }
+                    return match session.project_for_path(path) {
+                        Some(updated_key) => Some(updated_key),
+                        None => {
+                            error!("Could not find project for {path}");
+                            None
+                        }
+                    };
+                }
+            }
+        }
+        return Some(project_key);
+    } else {
+        info!("No open project for path: {path:?}. Opening new project.");
+    }
+
+    session.set_configuration_status(ConfigurationStatus::Loading);
+    if !session.has_initialized() {
+        session.load_extension_settings(None).await;
+    }
+
+    let status = load_status_for_open(session, path).await;
+
+    session.set_configuration_status(status);
+
+    if status.is_loaded() {
+        match session.project_for_path(path) {
+            Some(project_key) => Some(project_key),
+            None => {
+                error!("Could not find project for {path}");
+                None
+            }
+        }
+    } else {
+        error!("Configuration could not be loaded for {path}");
+        None
+    }
+}
+
+async fn load_status_for_open(session: &Arc<Session>, path: &Utf8Path) -> ConfigurationStatus {
+    load_from_workspace_base(session, path).await
+}
+
+async fn load_from_workspace_base(session: &Arc<Session>, path: &Utf8Path) -> ConfigurationStatus {
+    let file_path = path.to_path_buf();
+    if let Some(path) = session.resolve_configuration_path(Some(&file_path)) {
+        info!("Loading user configuration from text_document {:?}", &path);
+        return session.load_biome_configuration_file(path, false).await;
+    }
+
+    let project_path = path
+        .parent()
+        .map(|parent| parent.to_path_buf())
+        .unwrap_or_default();
+    info!("Loading configuration from text_document {}", &project_path);
+    let project_path = resolve_workspace_base_path(session, &project_path);
+
+    session
+        .load_biome_configuration_file(ConfigurationPathHint::FromLsp(project_path), false)
+        .await
+}
+
+fn resolve_workspace_base_path(session: &Session, project_path: &Utf8Path) -> Utf8PathBuf {
+    let workspace_base = || {
+        let workspace_folders = session.get_workspace_folders()?;
+        workspace_folders
+            .iter()
+            .filter_map(|folder| {
+                folder.uri.to_file_path().map(|p| {
+                    Utf8PathBuf::from_path_buf(p.to_path_buf()).expect("To have a valid UTF-8 path")
+                })
+            })
+            .filter(|ws| project_path.starts_with(ws))
+            .max_by_key(|ws| ws.as_str().len())
+    };
+    workspace_base()
+        .or_else(|| {
+            session
+                .base_path()
+                .and_then(|base_path| project_path.starts_with(&base_path).then_some(base_path))
+        })
+        .unwrap_or_else(|| project_path.to_path_buf())
 }
 
 /// Handler for `textDocument/didChange` LSP notification
