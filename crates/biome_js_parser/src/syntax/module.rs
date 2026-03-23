@@ -1496,9 +1496,19 @@ fn parse_literal_export_name(p: &mut JsParser) -> ParsedSyntax {
             p.bump_remap(T![ident]);
             Present(m.complete(p, JS_LITERAL_EXPORT_NAME))
         }
-        t if t.is_metavariable() => parse_metavariable(p),
+        t if t.is_metavariable() => parse_metavariable_literal_export_name(p),
         _ => Absent,
     }
+}
+
+fn parse_metavariable_literal_export_name(p: &mut JsParser) -> ParsedSyntax {
+    if !is_at_metavariable(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump_any();
+    Present(m.complete(p, JS_LITERAL_EXPORT_NAME))
 }
 
 pub(crate) fn parse_module_source(p: &mut JsParser) -> ParsedSyntax {

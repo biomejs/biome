@@ -3352,7 +3352,10 @@ impl SyntaxFactory for JsSyntaxFactory {
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
-                    && matches!(element.kind(), IDENT | JS_STRING_LITERAL)
+                    && matches!(
+                        element.kind(),
+                        IDENT | JS_STRING_LITERAL | GRIT_METAVARIABLE
+                    )
                 {
                     slots.mark_present();
                     current_element = elements.next();

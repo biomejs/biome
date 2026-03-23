@@ -109,6 +109,7 @@ impl GritTargetLanguageImpl for JsTargetLanguage {
     fn is_alternative_metavariable_kind(kind: GritTargetSyntaxKind) -> bool {
         kind.as_js_kind().is_some_and(|kind| {
             kind == JsSyntaxKind::JS_TEMPLATE_ELEMENT_LIST
+                || kind == JsSyntaxKind::JS_LITERAL_EXPORT_NAME
                 || kind == JsSyntaxKind::TS_TEMPLATE_ELEMENT_LIST
         })
     }
