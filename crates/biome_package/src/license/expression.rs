@@ -4,9 +4,9 @@ use super::generated::LICENSE_LIST;
 #[derive(Debug, Default)]
 pub struct TrustConfig<'a> {
     /// Additional license identifiers to trust beyond valid SPDX identifiers.
-    pub allow: &'a [&'a str],
+    pub allow: &'a [Box<str>],
     /// License identifiers to explicitly deny.
-    pub deny: &'a [&'a str],
+    pub deny: &'a [Box<str>],
     /// Require licenses to be OSI-approved.
     pub require_osi_approved: bool,
     /// Require licenses to be FSF libre.
@@ -61,24 +61,6 @@ impl<'a> SpdxExpression<'a> {
         }
         let (expr, rest) = parse_or(&tokens)?;
         if rest.is_empty() { Some(expr) } else { None }
-    }
-
-    /// Check whether this expression is trusted given the SPDX list,
-    /// an additional allow list, and a deny list.
-    ///
-    /// A single license ID is trusted if:
-    /// - It is NOT in the `deny` list (case-insensitive), AND
-    /// - It IS a valid SPDX identifier, OR it IS in the `allow` list (case-insensitive)
-    ///
-    /// For `OR(a, b)`: trusted if either branch is trusted.
-    /// For `AND(a, b)`: trusted if both branches are trusted.
-    pub fn is_trusted(&self, allow: &[&str], deny: &[&str]) -> bool {
-        self.check_trust(&TrustConfig {
-            allow,
-            deny,
-            ..TrustConfig::default()
-        })
-        .is_ok()
     }
 
     /// Check whether this expression is trusted given a full [`TrustConfig`].
@@ -344,68 +326,102 @@ mod tests {
         assert!(SpdxExpression::parse("   ").is_none());
     }
 
+    fn boxed(strings: &[&str]) -> Vec<Box<str>> {
+        strings.iter().map(|s| Box::from(*s)).collect()
+    }
+
+    fn config<'a>(allow: &'a [Box<str>], deny: &'a [Box<str>]) -> TrustConfig<'a> {
+        TrustConfig {
+            allow,
+            deny,
+            ignore_deprecated: true,
+            ..TrustConfig::default()
+        }
+    }
+
     #[test]
     fn trust_valid_spdx() {
         let expr = SpdxExpression::parse("MIT").unwrap();
-        assert!(expr.is_trusted(&[], &[]));
+        assert!(expr.check_trust(&config(&[], &[])).is_ok());
     }
 
     #[test]
     fn trust_invalid_spdx() {
         let expr = SpdxExpression::parse("foo").unwrap();
-        assert!(!expr.is_trusted(&[], &[]));
+        assert_eq!(
+            expr.check_trust(&config(&[], &[])),
+            Err(RejectReason::Untrusted)
+        );
     }
 
     #[test]
     fn trust_allowed_non_spdx() {
         let expr = SpdxExpression::parse("foo").unwrap();
-        assert!(expr.is_trusted(&["foo"], &[]));
+        let allow = boxed(&["foo"]);
+        assert!(expr.check_trust(&config(&allow, &[])).is_ok());
     }
 
     #[test]
     fn trust_denied_spdx() {
         let expr = SpdxExpression::parse("MIT").unwrap();
-        assert!(!expr.is_trusted(&[], &["MIT"]));
+        let deny = boxed(&["MIT"]);
+        assert_eq!(
+            expr.check_trust(&config(&[], &deny)),
+            Err(RejectReason::Denied)
+        );
     }
 
     #[test]
     fn trust_deny_overrides_allow() {
         let expr = SpdxExpression::parse("foo").unwrap();
-        assert!(!expr.is_trusted(&["foo"], &["foo"]));
+        let allow = boxed(&["foo"]);
+        let deny = boxed(&["foo"]);
+        assert_eq!(
+            expr.check_trust(&config(&allow, &deny)),
+            Err(RejectReason::Denied)
+        );
     }
 
     #[test]
     fn trust_case_insensitive() {
         let expr = SpdxExpression::parse("foo").unwrap();
-        assert!(expr.is_trusted(&["FOO"], &[]));
+        let allow = boxed(&["FOO"]);
+        assert!(expr.check_trust(&config(&allow, &[])).is_ok());
 
         let expr = SpdxExpression::parse("MIT").unwrap();
-        assert!(!expr.is_trusted(&[], &["mit"]));
+        let deny = boxed(&["mit"]);
+        assert_eq!(
+            expr.check_trust(&config(&[], &deny)),
+            Err(RejectReason::Denied)
+        );
     }
 
     #[test]
     fn trust_or_one_trusted() {
         let expr = SpdxExpression::parse("MIT OR foo").unwrap();
         // MIT is valid SPDX, so the OR is trusted
-        assert!(expr.is_trusted(&[], &[]));
+        assert!(expr.check_trust(&config(&[], &[])).is_ok());
     }
 
     #[test]
     fn trust_or_none_trusted() {
         let expr = SpdxExpression::parse("foo OR bar").unwrap();
-        assert!(!expr.is_trusted(&[], &[]));
+        assert!(expr.check_trust(&config(&[], &[])).is_err());
     }
 
     #[test]
     fn trust_and_all_trusted() {
         let expr = SpdxExpression::parse("MIT AND ISC").unwrap();
-        assert!(expr.is_trusted(&[], &[]));
+        assert!(expr.check_trust(&config(&[], &[])).is_ok());
     }
 
     #[test]
     fn trust_and_one_untrusted() {
         let expr = SpdxExpression::parse("MIT AND foo").unwrap();
-        assert!(!expr.is_trusted(&[], &[]));
+        assert_eq!(
+            expr.check_trust(&config(&[], &[])),
+            Err(RejectReason::Untrusted)
+        );
     }
 
     #[test]
@@ -413,13 +429,18 @@ mod tests {
         // "MIT OR GPL-3.0-only" with deny: ["GPL-3.0-only"]
         // MIT is trusted, so the OR passes
         let expr = SpdxExpression::parse("MIT OR GPL-3.0-only").unwrap();
-        assert!(expr.is_trusted(&[], &["GPL-3.0-only"]));
+        let deny = boxed(&["GPL-3.0-only"]);
+        assert!(expr.check_trust(&config(&[], &deny)).is_ok());
     }
 
     #[test]
     fn trust_or_both_denied() {
         let expr = SpdxExpression::parse("MIT OR Apache-2.0").unwrap();
-        assert!(!expr.is_trusted(&[], &["MIT", "Apache-2.0"]));
+        let deny = boxed(&["MIT", "Apache-2.0"]);
+        assert_eq!(
+            expr.check_trust(&config(&[], &deny)),
+            Err(RejectReason::Denied)
+        );
     }
 
     #[test]
@@ -486,8 +507,9 @@ mod tests {
     fn check_trust_allow_bypasses_osi_and_fsf() {
         // Abstyles is not OSI or FSF, but explicitly allowed
         let expr = SpdxExpression::parse("Abstyles").unwrap();
+        let allow = boxed(&["Abstyles"]);
         let config = TrustConfig {
-            allow: &["Abstyles"],
+            allow: &allow,
             require_osi_approved: true,
             require_fsf_libre: true,
             ..TrustConfig::default()
@@ -498,8 +520,9 @@ mod tests {
     #[test]
     fn check_trust_deny_overrides_everything() {
         let expr = SpdxExpression::parse("MIT").unwrap();
+        let deny = boxed(&["MIT"]);
         let config = TrustConfig {
-            deny: &["MIT"],
+            deny: &deny,
             ..TrustConfig::default()
         };
         assert_eq!(expr.check_trust(&config), Err(RejectReason::Denied));

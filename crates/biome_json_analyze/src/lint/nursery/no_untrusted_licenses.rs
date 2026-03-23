@@ -1,10 +1,12 @@
 use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_json_syntax::{JsonRoot, JsonSyntaxToken};
+use biome_json_syntax::{JsonMember, JsonRoot};
 use biome_package::{RejectReason, SpdxExpression, TrustConfig};
+use biome_project_layout::ProjectLayout;
 use biome_rowan::{AstSeparatedList, TextRange};
 use biome_rule_options::no_untrusted_licenses::NoUntrustedLicensesOptions;
+use camino::Utf8Path;
 
 use crate::services::project_layout::PackageJsonFile;
 use crate::utils::is_package_json;
@@ -195,134 +197,68 @@ impl Rule for NoUntrustedLicenses {
     type Options = NoUntrustedLicensesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let mut signals = Vec::new();
-
         let path = ctx.file_path();
         if !is_package_json(path) {
-            return signals;
+            return Vec::new();
         }
 
-        let project_layout = match ctx.project_layout() {
-            Some(layout) => layout,
-            None => return signals,
+        let Some(project_layout) = ctx.project_layout() else {
+            return Vec::new();
         };
 
-        let project_dir = match path.parent() {
-            Some(dir) => dir,
-            None => return signals,
+        let Some(project_dir) = path.parent() else {
+            return Vec::new();
         };
 
         let options = ctx.options();
-        let allow: Vec<&str> = options
-            .allow
-            .as_deref()
-            .unwrap_or_default()
-            .iter()
-            .map(|s| s.as_ref())
-            .collect();
-        let deny: Vec<&str> = options
-            .deny
-            .as_deref()
-            .unwrap_or_default()
-            .iter()
-            .map(|s| s.as_ref())
-            .collect();
+
         let trust_config = TrustConfig {
-            allow: &allow,
-            deny: &deny,
-            require_osi_approved: options.require_osi_approved.unwrap_or(false),
-            require_fsf_libre: options.require_fsf_libre.unwrap_or(false),
-            ignore_deprecated: options.ignore_deprecated.unwrap_or(false),
+            allow: options.allow.as_deref().unwrap_or_default(),
+            deny: options.deny.as_deref().unwrap_or_default(),
+            require_osi_approved: options.require_osi_approved.unwrap_or_default(),
+            require_fsf_libre: options.require_fsf_libre.unwrap_or_default(),
+            ignore_deprecated: options.ignore_deprecated.unwrap_or_default(),
         };
 
         let root = ctx.query();
-        let value = match root.value().ok() {
-            Some(v) => v,
-            None => return signals,
+        let Some(value) = root.value().ok() else {
+            return Vec::new();
         };
-        let object = match value.as_json_object_value() {
-            Some(o) => o,
-            None => return signals,
+        let Some(object) = value.as_json_object_value() else {
+            return Vec::new();
         };
+
+        let mut signals = Vec::new();
 
         for member in object.json_member_list().iter().flatten() {
-            let name = match member.name().ok() {
-                Some(n) => n,
-                None => continue,
+            let Some(name) = member.name().ok() else {
+                continue;
             };
-            let name_text = match name.inner_string_text().and_then(|t| t.ok()) {
-                Some(t) => t,
-                None => continue,
+            let Some(name_text) = name.inner_string_text().and_then(|t| t.ok()) else {
+                continue;
             };
-
             if !DEPENDENCY_GROUPS.contains(&name_text.text()) {
                 continue;
             }
-
-            let group_name = name_text.text().to_string();
-            let dep_value = match member.value().ok() {
-                Some(v) => v,
-                None => continue,
+            let group_name = name_text.text();
+            let Some(dep_value) = member.value().ok() else {
+                continue;
             };
-            let dep_object = match dep_value.as_json_object_value() {
-                Some(o) => o,
-                None => continue,
+            let Some(dep_object) = dep_value.as_json_object_value() else {
+                continue;
             };
 
             for dep_member in dep_object.json_member_list().iter().flatten() {
-                let dep_name_node = match dep_member.name().ok() {
-                    Some(n) => n,
-                    None => continue,
+                let Some(state) = check_dep(
+                    &dep_member,
+                    group_name,
+                    project_layout,
+                    project_dir,
+                    &trust_config,
+                ) else {
+                    continue;
                 };
-                let dep_name_token: JsonSyntaxToken = match dep_name_node
-                    .as_json_member_name()
-                    .and_then(|n| n.value_token().ok())
-                {
-                    Some(t) => t,
-                    None => continue,
-                };
-                let dep_name_text = match dep_name_node.inner_string_text().and_then(|t| t.ok()) {
-                    Some(t) => t,
-                    None => continue,
-                };
-                let dep_name = dep_name_text.text().to_string();
-
-                // Look up the dependency's package.json from node_modules
-                let dep_manifest = project_layout.get_dependency_manifest(project_dir, &dep_name);
-
-                let dep_manifest = match dep_manifest {
-                    Some(m) => m,
-                    None => {
-                        // Dependency not scanned — skip silently
-                        continue;
-                    }
-                };
-
-                let license_field = dep_manifest.license.as_ref().map(|(l, _)| l.to_string());
-
-                let reason = match &license_field {
-                    None => Some(Reason::Missing),
-                    Some(license_str) => match SpdxExpression::parse(license_str) {
-                        Some(expr) => expr
-                            .check_trust(&trust_config)
-                            .err()
-                            .map(|r| Reason::Rejected(r, license_str.clone())),
-                        // Could not parse expression — treat as untrusted
-                        None => Some(Reason::Rejected(
-                            RejectReason::Untrusted,
-                            license_str.clone(),
-                        )),
-                    },
-                };
-
-                if let Some(reason) = reason {
-                    signals.push(RuleState {
-                        dep_name,
-                        dep_group: group_name.clone(),
-                        reason,
-                        range: dep_name_token.text_trimmed_range(),
-                    });
-                }
+                signals.push(state);
             }
         }
 
@@ -400,4 +336,39 @@ impl Rule for NoUntrustedLicenses {
 
         Some(diagnostic)
     }
+}
+
+fn check_dep(
+    dep_member: &JsonMember,
+    group_name: &str,
+    project_layout: &ProjectLayout,
+    project_dir: &Utf8Path,
+    trust_config: &TrustConfig<'_>,
+) -> Option<RuleState> {
+    let dep_name_node = dep_member.name().ok()?;
+    let dep_name_token = dep_name_node.as_json_member_name()?.value_token().ok()?;
+    let dep_name = dep_name_node.inner_string_text()?.ok()?.text().to_string();
+
+    let dep_manifest = project_layout.get_dependency_manifest(project_dir, &dep_name)?;
+
+    let reason = match dep_manifest.license.as_ref() {
+        None => Reason::Missing,
+        Some((license, _)) => {
+            let license_str = license.to_string();
+            match SpdxExpression::parse(&license_str) {
+                Some(expr) => expr
+                    .check_trust(trust_config)
+                    .err()
+                    .map(|r| Reason::Rejected(r, license_str))?,
+                None => Reason::Rejected(RejectReason::Untrusted, license_str),
+            }
+        }
+    };
+
+    Some(RuleState {
+        dep_name,
+        dep_group: group_name.to_string(),
+        reason,
+        range: dep_name_token.text_trimmed_range(),
+    })
 }
