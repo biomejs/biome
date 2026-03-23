@@ -4827,7 +4827,16 @@ async fn relative_configuration_path_resolves_against_correct_workspace_folder()
         })
         .await?;
 
-    // Open a file in test_two — its config disables the formatter.
+    // Open a file in test_one first, so a project is already open.
+    server
+        .open_named_document(
+            r#"statement(   );"#,
+            uri!("test_one/document.js"),
+            "javascript",
+        )
+        .await?;
+
+    // Now open a file in test_two — its config disables the formatter.
     server
         .open_named_document(
             r#"statement(   );"#,

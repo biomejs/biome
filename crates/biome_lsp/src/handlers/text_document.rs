@@ -31,7 +31,7 @@ pub(crate) async fn did_open(
     let language_hint = DocumentFileSource::from_language_id(&params.text_document.language_id);
 
     let path = session.file_path(&url)?;
-    let Some(project_key) = load_project_for_open(session, &path).await else {
+    let Some(project_key) = ensure_project_for_opened_document(session, &path).await else {
         return Ok(());
     };
 
@@ -70,11 +70,17 @@ pub(crate) async fn did_open(
     Ok(())
 }
 
-async fn load_project_for_open(session: &Arc<Session>, path: &Utf8Path) -> Option<ProjectKey> {
+/// Ensure the file is associated with a project and the correct configuration
+/// is loaded before opening the document.
+async fn ensure_project_for_opened_document(
+    session: &Arc<Session>,
+    path: &Utf8Path,
+) -> Option<ProjectKey> {
     if let Some(project_key) = session.project_for_path(path) {
         if let Some(config_path) = session.get_settings_configuration_path() {
             if !config_path.is_absolute() {
                 let file_path = path.to_path_buf();
+                // Resolve relative configurationPath per file so the correct workspace folder is used.
                 if let Some(resolved_path) = session.resolve_configuration_path(Some(&file_path)) {
                     let status = session
                         .load_biome_configuration_file(resolved_path, false)
@@ -104,7 +110,7 @@ async fn load_project_for_open(session: &Arc<Session>, path: &Utf8Path) -> Optio
         session.load_extension_settings(None).await;
     }
 
-    let status = load_status_for_open(session, path).await;
+    let status = load_from_workspace_base(session, path).await;
 
     session.set_configuration_status(status);
 
@@ -120,10 +126,6 @@ async fn load_project_for_open(session: &Arc<Session>, path: &Utf8Path) -> Optio
         error!("Configuration could not be loaded for {path}");
         None
     }
-}
-
-async fn load_status_for_open(session: &Arc<Session>, path: &Utf8Path) -> ConfigurationStatus {
-    load_from_workspace_base(session, path).await
 }
 
 async fn load_from_workspace_base(session: &Arc<Session>, path: &Utf8Path) -> ConfigurationStatus {
