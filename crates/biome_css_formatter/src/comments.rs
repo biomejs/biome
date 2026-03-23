@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use biome_css_syntax::{
-    AnyCssDeclarationName, AnyCssRoot, CssComplexSelector, CssFunction, CssIdentifier, CssLanguage,
-    CssSyntaxKind, TextLen, TextSize,
+    AnyCssDeclarationName, AnyCssRoot, CssComplexSelector, CssFunction, CssGenericProperty,
+    CssIdentifier, CssLanguage, CssSyntaxKind, TextLen, TextSize,
 };
 use biome_diagnostics::category;
 use biome_formatter::comments::{
@@ -99,19 +99,68 @@ impl CommentStyle for CssCommentStyle {
     ) -> CommentPlacement<Self::Language> {
         match comment.text_position() {
             CommentTextPosition::EndOfLine => handle_function_comment(comment)
+                .or_else(handle_generic_property_comment)
                 .or_else(handle_declaration_name_comment)
                 .or_else(handle_complex_selector_comment)
                 .or_else(handle_global_suppression),
             CommentTextPosition::OwnLine => handle_function_comment(comment)
+                .or_else(handle_generic_property_comment)
                 .or_else(handle_declaration_name_comment)
                 .or_else(handle_complex_selector_comment)
                 .or_else(handle_global_suppression),
             CommentTextPosition::SameLine => handle_function_comment(comment)
+                .or_else(handle_generic_property_comment)
                 .or_else(handle_declaration_name_comment)
                 .or_else(handle_complex_selector_comment)
                 .or_else(handle_global_suppression),
         }
     }
+}
+
+fn handle_generic_property_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    // Check if the comment is inside a CSS generic property (e.g., color: value)
+    let Some(generic_property) = comment
+        .enclosing_node()
+        .ancestors()
+        .find_map(CssGenericProperty::cast)
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    let Ok(name) = generic_property.name() else {
+        return CommentPlacement::Default(comment);
+    };
+
+    let comment_piece = comment.piece();
+
+    // Check if the comment is in the name's trailing trivia (before colon)
+    // Example: `color /* comment */: value`
+    if let Some(name_token) = name.syntax().last_token() {
+        for piece in name_token.trailing_trivia().pieces() {
+            if piece.is_comments() && piece.text() == comment_piece.text() {
+                // Our placement is slightly better than Prettier because it adds some spacing
+                return CommentPlacement::trailing(name.into_syntax(), comment);
+            }
+        }
+    }
+
+    if let (Some(preceding), Some(following)) = (comment.preceding_node(), comment.following_node())
+    {
+        // If preceding is the property name and following is in the value list
+        if preceding == name.syntax()
+            && following
+                .parent()
+                .is_some_and(|p| p.kind() == CssSyntaxKind::CSS_GENERIC_COMPONENT_VALUE_LIST)
+        {
+            // Place comment as dangling on the property so it can be formatted inline
+            // between the colon and values
+            return CommentPlacement::trailing(generic_property.into_syntax(), comment);
+        }
+    }
+
+    CommentPlacement::Default(comment)
 }
 
 fn handle_declaration_name_comment(

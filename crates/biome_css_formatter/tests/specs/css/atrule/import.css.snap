@@ -328,7 +328,7 @@ st.css");
 @import url("./test.css") /* Comment */
 	layer(/* Comment */ /* Comment */ default) /* Comment */
 	supports(
-		/* Comment */ /* Comment */ /* Comment */ display: flex /* Comment */
+		/* Comment */ display /* Comment */ /* Comment */: flex /* Comment */
 	) /* Comment */
 	screen /* Comment */ and /* Comment */ (
 		/* Comment */ /* Comment */ /* Comment */ min-width: 400px /* Comment */
