@@ -1,0 +1,500 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+---
+# Input
+```css
+/* should generate diagnostics */
+
+/* 1. Basic duplicate: same selector twice in the same file */
+.foo {}
+.foo {}
+
+/* 2. Duplicate type selector */
+div { color: red; }
+div { color: blue; }
+
+/* 3. Duplicate inside same @media block */
+@media (min-width: 600px) {
+  .bar {}
+  .bar {}
+}
+
+/* 4. Selector list: same list in different order counts as duplicate */
+.a, .b {}
+.b, .a {}
+
+/* 5. Nesting resolved: `a { & b {} }` produces `a b`, same as explicit `a b {}` */
+a b {}
+a {
+  & b {}
+}
+
+/* 6. Compound selector ordering: .a.b == .b.a */
+.a.b {}
+.b.a {}
+
+/* 7. Type selector case-insensitivity: DIV == div */
+DIV { color: red; }
+div { color: blue; }
+
+/* 8. Descendant via nesting: `.nav .link {}` == `.nav { .link {} }` */
+.nav .link {}
+.nav {
+  .link {}
+}
+
+/* 9. Multi-level nesting: `.x .y .z {}` == `.x { .y { .z {} } }` */
+.x .y .z {}
+.x {
+  .y {
+    .z {}
+  }
+}
+
+/* 10. Nesting with ampersand and pseudo-class:
+   `button:hover {}` == `button { &:hover {} }` */
+button:hover {}
+button {
+  &:hover {}
+}
+
+/* 11. Nesting with ampersand and pseudo-element:
+   `span::before {}` == `span { &::before {} }` */
+span::before {}
+span {
+  &::before {}
+}
+
+/* 12. Selector list duplicate via nesting: `.p .r, .q .r` == `.p, .q { .r {} }` */
+.p .r {}
+.q .r {}
+.p, .q {
+  .r {}
+}
+
+/* 13. Sibling combinator via nesting: `h3 ~ p {}` == `h3 { & ~ p {} }` */
+h3 ~ p {}
+h3 {
+  & ~ p {}
+}
+
+/* 14. Duplicate with attribute selector */
+[type="text"] {}
+[type="text"] {}
+
+/* 15. Duplicate with ID and class compound selector */
+#main .content {}
+#main {
+  .content {}
+}
+
+```
+
+# Diagnostics
+```
+invalid.css:5:1 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector list ".foo".
+  
+    3 │ /* 1. Basic duplicate: same selector twice in the same file */
+    4 │ .foo {}
+  > 5 │ .foo {}
+      │ ^^^^^^^
+    6 │ 
+    7 │ /* 2. Duplicate type selector */
+  
+  i It was first defined here.
+  
+    3 │ /* 1. Basic duplicate: same selector twice in the same file */
+  > 4 │ .foo {}
+      │ ^^^^^^^
+    5 │ .foo {}
+    6 │ 
+  
+  i Remove or merge the duplicate rule to keep the stylesheet clean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:9:1 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector list "div".
+  
+     7 │ /* 2. Duplicate type selector */
+     8 │ div { color: red; }
+   > 9 │ div { color: blue; }
+       │ ^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+    11 │ /* 3. Duplicate inside same @media block */
+  
+  i It was first defined here.
+  
+     7 │ /* 2. Duplicate type selector */
+   > 8 │ div { color: red; }
+       │ ^^^^^^^^^^^^^^^^^^^
+     9 │ div { color: blue; }
+    10 │ 
+  
+  i Remove or merge the duplicate rule to keep the stylesheet clean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:14:3 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector list ".bar".
+  
+    12 │ @media (min-width: 600px) {
+    13 │   .bar {}
+  > 14 │   .bar {}
+       │   ^^^^^^^
+    15 │ }
+    16 │ 
+  
+  i It was first defined here.
+  
+    11 │ /* 3. Duplicate inside same @media block */
+    12 │ @media (min-width: 600px) {
+  > 13 │   .bar {}
+       │   ^^^^^^^
+    14 │   .bar {}
+    15 │ }
+  
+  i Remove or merge the duplicate rule to keep the stylesheet clean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:19:1 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector list ".a, .b".
+  
+    17 │ /* 4. Selector list: same list in different order counts as duplicate */
+    18 │ .a, .b {}
+  > 19 │ .b, .a {}
+       │ ^^^^^^^^^
+    20 │ 
+    21 │ /* 5. Nesting resolved: `a { & b {} }` produces `a b`, same as explicit `a b {}` */
+  
+  i It was first defined here.
+  
+    17 │ /* 4. Selector list: same list in different order counts as duplicate */
+  > 18 │ .a, .b {}
+       │ ^^^^^^^^^
+    19 │ .b, .a {}
+    20 │ 
+  
+  i Remove or merge the duplicate rule to keep the stylesheet clean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:24:3 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector list "a b".
+  
+    22 │ a b {}
+    23 │ a {
+  > 24 │   & b {}
+       │   ^^^^^^
+    25 │ }
+    26 │ 
+  
+  i It was first defined here.
+  
+    21 │ /* 5. Nesting resolved: `a { & b {} }` produces `a b`, same as explicit `a b {}` */
+  > 22 │ a b {}
+       │ ^^^^^^
+    23 │ a {
+    24 │   & b {}
+  
+  i Remove or merge the duplicate rule to keep the stylesheet clean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:29:1 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector list ".a.b".
+  
+    27 │ /* 6. Compound selector ordering: .a.b == .b.a */
+    28 │ .a.b {}
+  > 29 │ .b.a {}
+       │ ^^^^^^^
+    30 │ 
+    31 │ /* 7. Type selector case-insensitivity: DIV == div */
+  
+  i It was first defined here.
+  
+    27 │ /* 6. Compound selector ordering: .a.b == .b.a */
+  > 28 │ .a.b {}
+       │ ^^^^^^^
+    29 │ .b.a {}
+    30 │ 
+  
+  i Remove or merge the duplicate rule to keep the stylesheet clean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:32:1 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector list "div".
+  
+    31 │ /* 7. Type selector case-insensitivity: DIV == div */
+  > 32 │ DIV { color: red; }
+       │ ^^^^^^^^^^^^^^^^^^^
+    33 │ div { color: blue; }
+    34 │ 
+  
+  i It was first defined here.
+  
+     7 │ /* 2. Duplicate type selector */
+   > 8 │ div { color: red; }
+       │ ^^^^^^^^^^^^^^^^^^^
+     9 │ div { color: blue; }
+    10 │ 
+  
+  i Remove or merge the duplicate rule to keep the stylesheet clean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:33:1 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector list "div".
+  
+    31 │ /* 7. Type selector case-insensitivity: DIV == div */
+    32 │ DIV { color: red; }
+  > 33 │ div { color: blue; }
+       │ ^^^^^^^^^^^^^^^^^^^^
+    34 │ 
+    35 │ /* 8. Descendant via nesting: `.nav .link {}` == `.nav { .link {} }` */
+  
+  i It was first defined here.
+  
+     7 │ /* 2. Duplicate type selector */
+   > 8 │ div { color: red; }
+       │ ^^^^^^^^^^^^^^^^^^^
+     9 │ div { color: blue; }
+    10 │ 
+  
+  i Remove or merge the duplicate rule to keep the stylesheet clean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:38:3 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector list ".nav .link".
+  
+    36 │ .nav .link {}
+    37 │ .nav {
+  > 38 │   .link {}
+       │   ^^^^^^^^
+    39 │ }
+    40 │ 
+  
+  i It was first defined here.
+  
+    35 │ /* 8. Descendant via nesting: `.nav .link {}` == `.nav { .link {} }` */
+  > 36 │ .nav .link {}
+       │ ^^^^^^^^^^^^^
+    37 │ .nav {
+    38 │   .link {}
+  
+  i Remove or merge the duplicate rule to keep the stylesheet clean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:45:5 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector list ".x .y .z".
+  
+    43 │ .x {
+    44 │   .y {
+  > 45 │     .z {}
+       │     ^^^^^
+    46 │   }
+    47 │ }
+  
+  i It was first defined here.
+  
+    41 │ /* 9. Multi-level nesting: `.x .y .z {}` == `.x { .y { .z {} } }` */
+  > 42 │ .x .y .z {}
+       │ ^^^^^^^^^^^
+    43 │ .x {
+    44 │   .y {
+  
+  i Remove or merge the duplicate rule to keep the stylesheet clean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:53:3 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector list "button:hover".
+  
+    51 │ button:hover {}
+    52 │ button {
+  > 53 │   &:hover {}
+       │   ^^^^^^^^^^
+    54 │ }
+    55 │ 
+  
+  i It was first defined here.
+  
+    49 │ /* 10. Nesting with ampersand and pseudo-class:
+    50 │    `button:hover {}` == `button { &:hover {} }` */
+  > 51 │ button:hover {}
+       │ ^^^^^^^^^^^^^^^
+    52 │ button {
+    53 │   &:hover {}
+  
+  i Remove or merge the duplicate rule to keep the stylesheet clean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:60:3 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector list "span::before".
+  
+    58 │ span::before {}
+    59 │ span {
+  > 60 │   &::before {}
+       │   ^^^^^^^^^^^^
+    61 │ }
+    62 │ 
+  
+  i It was first defined here.
+  
+    56 │ /* 11. Nesting with ampersand and pseudo-element:
+    57 │    `span::before {}` == `span { &::before {} }` */
+  > 58 │ span::before {}
+       │ ^^^^^^^^^^^^^^^
+    59 │ span {
+    60 │   &::before {}
+  
+  i Remove or merge the duplicate rule to keep the stylesheet clean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:73:3 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector list "h3 ~ p".
+  
+    71 │ h3 ~ p {}
+    72 │ h3 {
+  > 73 │   & ~ p {}
+       │   ^^^^^^^^
+    74 │ }
+    75 │ 
+  
+  i It was first defined here.
+  
+    70 │ /* 13. Sibling combinator via nesting: `h3 ~ p {}` == `h3 { & ~ p {} }` */
+  > 71 │ h3 ~ p {}
+       │ ^^^^^^^^^
+    72 │ h3 {
+    73 │   & ~ p {}
+  
+  i Remove or merge the duplicate rule to keep the stylesheet clean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:78:1 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector list "[type="text"]".
+  
+    76 │ /* 14. Duplicate with attribute selector */
+    77 │ [type="text"] {}
+  > 78 │ [type="text"] {}
+       │ ^^^^^^^^^^^^^^^^
+    79 │ 
+    80 │ /* 15. Duplicate with ID and class compound selector */
+  
+  i It was first defined here.
+  
+    76 │ /* 14. Duplicate with attribute selector */
+  > 77 │ [type="text"] {}
+       │ ^^^^^^^^^^^^^^^^
+    78 │ [type="text"] {}
+    79 │ 
+  
+  i Remove or merge the duplicate rule to keep the stylesheet clean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:83:3 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector list "#main .content".
+  
+    81 │ #main .content {}
+    82 │ #main {
+  > 83 │   .content {}
+       │   ^^^^^^^^^^^
+    84 │ }
+    85 │ 
+  
+  i It was first defined here.
+  
+    80 │ /* 15. Duplicate with ID and class compound selector */
+  > 81 │ #main .content {}
+       │ ^^^^^^^^^^^^^^^^^
+    82 │ #main {
+    83 │   .content {}
+  
+  i Remove or merge the duplicate rule to keep the stylesheet clean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
