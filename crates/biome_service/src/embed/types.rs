@@ -76,8 +76,10 @@ pub(crate) enum EmbedCandidate {
     TextExpression { content: EmbedContent },
 
     /// A directive attribute value containing JS.
-    /// Vue: `@click="handler()"`, `:prop="value"`, `v-if="cond"`
-    /// Svelte: `on:click={handler}`, `bind:value={x}`
+    /// - Vue: `@click="handler()"`, `:prop="value"`, `v-if="cond"`
+    /// - Svelte: `on:click={handler}`, `bind:value={x}`
+    /// - Astro: `define:vars={{ x }}`,
+    ///
     /// Built from `HtmlAttributeInitializerClause` by the HTML handler.
     Directive {
         content: EmbedContent,
