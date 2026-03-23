@@ -13,14 +13,14 @@ set windows-powershell := true
 install-tools:
 	cargo install cargo-binstall
 	cargo binstall cargo-insta wasm-opt
-	cargo binstall wasm-bindgen-cli --version 0.2.105
+	cargo binstall wasm-bindgen-cli --version 0.2.106
 	pnpm install
 
 # Upgrades the tools needed to develop
 upgrade-tools:
 	cargo install cargo-binstall --force
 	cargo binstall cargo-insta wasm-opt --force
-	cargo binstall wasm-bindgen-cli --version 0.2.105 --force
+	cargo binstall wasm-bindgen-cli --version 0.2.106 --force
 
 # Generate all files across crates and tools. You rarely want to use it locally.
 gen-all:
@@ -137,6 +137,48 @@ build-wasm-web:
     --typescript
   wasm-opt packages/@biomejs/wasm-web/biome_wasm_bg.wasm \
     -o packages/@biomejs/wasm-web/biome_wasm_bg.wasm \
+    -Os \
+    -g
+
+# Build resolver WASM for Node.js target (development)
+build-wasm-resolver-node-dev:
+  cargo build --lib --target wasm32-unknown-unknown -p biome_resolver_wasm
+  wasm-bindgen target/wasm32-unknown-unknown/debug/biome_resolver_wasm.wasm \
+    --out-dir packages/@biomejs/wasm-resolver-nodejs \
+    --target nodejs \
+    --typescript
+
+# Build resolver WASM for Node.js target (release)
+build-wasm-resolver-node:
+  cargo build --lib --target wasm32-unknown-unknown --release -p biome_resolver_wasm
+  wasm-bindgen target/wasm32-unknown-unknown/release/biome_resolver_wasm.wasm \
+    --out-dir packages/@biomejs/wasm-resolver-nodejs \
+    --no-demangle \
+    --target nodejs \
+    --typescript
+  wasm-opt packages/@biomejs/wasm-resolver-nodejs/biome_resolver_wasm_bg.wasm \
+    -o packages/@biomejs/wasm-resolver-nodejs/biome_resolver_wasm_bg.wasm \
+    -Os \
+    -g
+
+# Build resolver WASM for web target (development)
+build-wasm-resolver-web-dev:
+  cargo build --lib --target wasm32-unknown-unknown -p biome_resolver_wasm
+  wasm-bindgen target/wasm32-unknown-unknown/debug/biome_resolver_wasm.wasm \
+    --out-dir packages/@biomejs/wasm-resolver-web \
+    --target web \
+    --typescript
+
+# Build resolver WASM for web target (release)
+build-wasm-resolver-web:
+  cargo build --lib --target wasm32-unknown-unknown --release -p biome_resolver_wasm
+  wasm-bindgen target/wasm32-unknown-unknown/release/biome_resolver_wasm.wasm \
+    --out-dir packages/@biomejs/wasm-resolver-web \
+    --no-demangle \
+    --target web \
+    --typescript
+  wasm-opt packages/@biomejs/wasm-resolver-web/biome_resolver_wasm_bg.wasm \
+    -o packages/@biomejs/wasm-resolver-web/biome_resolver_wasm_bg.wasm \
     -Os \
     -g
 

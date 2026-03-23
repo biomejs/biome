@@ -64,7 +64,22 @@ impl Manifest for TsConfigJson {
 }
 
 impl TsConfigJson {
-    fn parse(path: &Utf8Path, json: &str) -> (Self, Vec<Error>) {
+    /// Parses a `tsconfig.json` file from its content.
+    ///
+    /// # Arguments
+    ///
+    /// * `path` — absolute path to the `tsconfig.json` file. Used to resolve
+    ///   relative paths inside the config (e.g. `baseUrl`, `paths`). Must be
+    ///   an absolute path; passing a relative path will cause a panic inside
+    ///   [`Self::initialise_paths`].
+    /// * `json` — the raw JSON (or JSONC) content of the file.
+    ///
+    /// # Returns
+    ///
+    /// A tuple of `(TsConfigJson, Vec<Error>)`. If the `Vec` is non-empty,
+    /// the file contained parse errors and the returned struct may be partially
+    /// populated with default values.
+    pub fn parse(path: &Utf8Path, json: &str) -> (Self, Vec<Error>) {
         let (tsconfig, diagnostics) = deserialize_from_json_str(
             json,
             JsonParserOptions::default()
