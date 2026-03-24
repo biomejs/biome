@@ -116,7 +116,7 @@ Before opening, ensure:
    - Lint rules: `just gen-rules && just gen-configuration`
    - Grammar: `just gen-grammar <lang>`
    - Bindings: `just gen-bindings`
-6. Changeset created (if user-facing change): `just new-changeset`
+6. Changeset created (if user-facing change): `just new-changeset-empty`
 7. Snapshot tests reviewed: `cargo insta review`
 
 ## References
