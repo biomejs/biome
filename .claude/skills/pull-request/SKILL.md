@@ -13,7 +13,7 @@ Use this skill when creating a pull request for the Biome repository. It covers 
 If AI was used in any capacity to produce the PR, **you must disclose it** in the PR description. Examples:
 
 > This PR was written primarily by Claude Code.
-
+>
 > I consulted ChatGPT to understand the codebase but the solution was fully authored manually by myself.
 
 This is mandatory. It helps reviewers apply appropriate scrutiny.
