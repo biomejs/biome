@@ -9,4 +9,4 @@ The rule has the following options:
 - `deny`: a list of licenses that should trigger the rule. Useful to deny licenses that don't fit your project/organisation.
   When both `deny` and `allow` are provided, `deny` takes precedence.
 - `requireOsiApproved`: whether the licenses need to be approved by the [Open Source Initiative](https://opensource.org/).
-- `requireFsfLibre`: whether the liceses need to be approved by the [Free Software Foundation](https://www.gnu.org/licenses/license-list.html).
+- `requireFsfLibre`: whether the licenses need to be approved by the [Free Software Foundation](https://www.gnu.org/licenses/license-list.html).
