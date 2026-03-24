@@ -30,6 +30,7 @@ declare_lint_rule! {
     ///
     /// :::note
     /// This rule catches only dependencies that are actually used in your project (i.e., imported by some code).
+    /// Currently, the `WITH` specifier is currently not supported.
     /// :::
     ///
     /// ## Examples
@@ -171,8 +172,6 @@ const DEPENDENCY_GROUPS: &[&str] = &[
     "devDependencies",
     "peerDependencies",
     "optionalDependencies",
-    "bundleDependencies",
-    "bundledDependencies",
 ];
 
 /// Why a dependency was flagged.
