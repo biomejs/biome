@@ -176,6 +176,14 @@ export interface FormatterConfiguration {
 	 * Whether to insert spaces around brackets in object literals. Defaults to true.
 	 */
 	bracketSpacing?: BracketSpacing;
+	/**
+	* Whether to insert spaces inside delimiters (after the opening delimiter and before the
+closing delimiter), such as parentheses, brackets, angle brackets, and template literal
+interpolations. Spaces are not added before the opening delimiter, and empty delimiters
+are not affected. Only applies when the content fits on a single line. The specific
+delimiters affected depend on the language. Defaults to false. 
+	 */
+	delimiterSpacing?: DelimiterSpacing;
 	enabled?: Bool;
 	/**
 	* Whether to expand arrays and objects on multiple lines.
@@ -491,6 +499,14 @@ export type AttributePosition = "auto" | "multiline";
  */
 export type BracketSameLine = boolean;
 export type BracketSpacing = boolean;
+/**
+	* Whether to insert spaces inside delimiters (after the opening delimiter and before the closing
+delimiter), such as parentheses, brackets, angle brackets, and template literal interpolations.
+Spaces are not added before the opening delimiter, and empty delimiters are not affected.
+Only applies when the content fits on a single line; when content breaks across multiple lines,
+no extra spaces are added. The specific delimiters affected depend on the language. 
+	 */
+export type DelimiterSpacing = boolean;
 export type Expand = "auto" | "always" | "never";
 export type IndentStyle = "tab" | "space";
 export type IndentWidth = number;
@@ -1141,6 +1157,14 @@ export interface OverrideFormatterConfiguration {
 	 * Whether to insert spaces around brackets in object literals. Defaults to true.
 	 */
 	bracketSpacing?: BracketSpacing;
+	/**
+	* Whether to insert spaces inside delimiters (after the opening delimiter and before the
+closing delimiter), such as parentheses, brackets, angle brackets, and template literal
+interpolations. Spaces are not added before the opening delimiter, and empty delimiters
+are not affected. Only applies when the content fits on a single line. The specific
+delimiters affected depend on the language. Defaults to false. 
+	 */
+	delimiterSpacing?: DelimiterSpacing;
 	enabled?: Bool;
 	/**
 	* Whether to expand arrays and objects on multiple lines.

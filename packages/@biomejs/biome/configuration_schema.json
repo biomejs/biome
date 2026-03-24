@@ -1533,6 +1533,10 @@
 				}
 			]
 		},
+		"DelimiterSpacing": {
+			"description": "Whether to insert spaces inside delimiters (after the opening delimiter and before the closing\ndelimiter), such as parentheses, brackets, angle brackets, and template literal interpolations.\nSpaces are not added before the opening delimiter, and empty delimiters are not affected.\nOnly applies when the content fits on a single line; when content breaks across multiple lines,\nno extra spaces are added. The specific delimiters affected depend on the language.",
+			"type": "boolean"
+		},
 		"DependencyAvailability": {
 			"oneOf": [
 				{
@@ -1669,6 +1673,10 @@
 				"bracketSpacing": {
 					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
 					"anyOf": [{ "$ref": "#/$defs/BracketSpacing" }, { "type": "null" }]
+				},
+				"delimiterSpacing": {
+					"description": "Whether to insert spaces inside delimiters (after the opening delimiter and before the\nclosing delimiter), such as parentheses, brackets, angle brackets, and template literal\ninterpolations. Spaces are not added before the opening delimiter, and empty delimiters\nare not affected. Only applies when the content fits on a single line. The specific\ndelimiters affected depend on the language. Defaults to false.",
+					"anyOf": [{ "$ref": "#/$defs/DelimiterSpacing" }, { "type": "null" }]
 				},
 				"enabled": {
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
@@ -6834,6 +6842,10 @@
 				"bracketSpacing": {
 					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
 					"anyOf": [{ "$ref": "#/$defs/BracketSpacing" }, { "type": "null" }]
+				},
+				"delimiterSpacing": {
+					"description": "Whether to insert spaces inside delimiters (after the opening delimiter and before the\nclosing delimiter), such as parentheses, brackets, angle brackets, and template literal\ninterpolations. Spaces are not added before the opening delimiter, and empty delimiters\nare not affected. Only applies when the content fits on a single line. The specific\ndelimiters affected depend on the language. Defaults to false.",
+					"anyOf": [{ "$ref": "#/$defs/DelimiterSpacing" }, { "type": "null" }]
 				},
 				"enabled": {
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]

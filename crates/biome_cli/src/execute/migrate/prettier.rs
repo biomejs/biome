@@ -235,6 +235,7 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::Configuration {
             bracket_same_line: Some(value.bracket_line.into()),
             attribute_position: Some(AttributePosition::default()),
             bracket_spacing: Some(BracketSpacing::default()),
+            delimiter_spacing: None,
             expand: Some(value.object_wrap.into()),
             format_with_errors: Some(false.into()),
             includes: None,
