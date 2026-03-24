@@ -1,7 +1,7 @@
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
-use biome_console::{MarkupBuf, markup};
+use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_html_syntax::{AnyHtmlElement, HtmlFileSource};
 use biome_rowan::AstNode;
@@ -65,19 +65,6 @@ pub enum UseKeyWithMouseEventsState {
     MissingOnBlur,
 }
 
-impl UseKeyWithMouseEventsState {
-    fn message(&self) -> MarkupBuf {
-        match self {
-            Self::MissingOnBlur => {
-                markup! {"onmouseout must be accompanied by onblur for accessibility."}.to_owned()
-            }
-            Self::MissingOnFocus => {
-                markup! {"onmouseover must be accompanied by onfocus for accessibility."}.to_owned()
-            }
-        }
-    }
-}
-
 impl Rule for UseKeyWithMouseEvents {
     type Query = Ast<AnyHtmlElement>;
     type State = UseKeyWithMouseEventsState;
@@ -115,15 +102,32 @@ impl Rule for UseKeyWithMouseEvents {
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
-        let footer_note_text = markup! {"Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation."};
+        let (message, note) = match state {
+            UseKeyWithMouseEventsState::MissingOnFocus => (
+                markup! {
+                    <Emphasis>"onmouseover"</Emphasis>" must be accompanied by "<Emphasis>"onfocus"</Emphasis>"."
+                },
+                markup! {
+                    "Users who navigate via keyboard cannot interact with elements that only have mouse event handlers. Add an "<Emphasis>"onfocus"</Emphasis>" attribute to ensure keyboard accessibility."
+                },
+            ),
+            UseKeyWithMouseEventsState::MissingOnBlur => (
+                markup! {
+                    <Emphasis>"onmouseout"</Emphasis>" must be accompanied by "<Emphasis>"onblur"</Emphasis>"."
+                },
+                markup! {
+                    "Users who navigate via keyboard cannot interact with elements that only have mouse event handlers. Add an "<Emphasis>"onblur"</Emphasis>" attribute to ensure keyboard accessibility."
+                },
+            ),
+        };
 
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 node.syntax().text_trimmed_range(),
-                state.message(),
+                message,
             )
-            .note(footer_note_text),
+            .note(note),
         )
     }
 }

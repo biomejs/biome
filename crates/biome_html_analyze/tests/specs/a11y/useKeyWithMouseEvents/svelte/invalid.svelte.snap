@@ -29,7 +29,7 @@ expression: invalid.svelte
 ```
 invalid.svelte:4:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × onmouseover must be accompanied by onfocus for accessibility.
+  × onmouseover must be accompanied by onfocus.
   
     3 │ <!-- onmouseover without onfocus -->
   > 4 │ <div onmouseover="handleMouseOver()"></div>
@@ -37,7 +37,7 @@ invalid.svelte:4:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━�
     5 │ 
     6 │ <!-- onmouseout without onblur -->
   
-  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  i Users who navigate via keyboard cannot interact with elements that only have mouse event handlers. Add an onfocus attribute to ensure keyboard accessibility.
   
 
 ```
@@ -45,7 +45,7 @@ invalid.svelte:4:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━�
 ```
 invalid.svelte:7:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × onmouseout must be accompanied by onblur for accessibility.
+  × onmouseout must be accompanied by onblur.
   
     6 │ <!-- onmouseout without onblur -->
   > 7 │ <div onmouseout="handleMouseOut()"></div>
@@ -53,7 +53,7 @@ invalid.svelte:7:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━�
     8 │ 
     9 │ <!-- has wrong keyboard pair -->
   
-  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  i Users who navigate via keyboard cannot interact with elements that only have mouse event handlers. Add an onblur attribute to ensure keyboard accessibility.
   
 
 ```
@@ -61,7 +61,7 @@ invalid.svelte:7:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━�
 ```
 invalid.svelte:10:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × onmouseover must be accompanied by onfocus for accessibility.
+  × onmouseover must be accompanied by onfocus.
   
      9 │ <!-- has wrong keyboard pair -->
   > 10 │ <div onmouseover="handleMouseOver()" onblur="handleBlur()"></div>
@@ -69,7 +69,7 @@ invalid.svelte:10:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━�
     11 │ <div onmouseout="handleMouseOut()" onfocus="handleFocus()"></div>
     12 │ 
   
-  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  i Users who navigate via keyboard cannot interact with elements that only have mouse event handlers. Add an onfocus attribute to ensure keyboard accessibility.
   
 
 ```
@@ -77,7 +77,7 @@ invalid.svelte:10:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━�
 ```
 invalid.svelte:11:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × onmouseout must be accompanied by onblur for accessibility.
+  × onmouseout must be accompanied by onblur.
   
      9 │ <!-- has wrong keyboard pair -->
     10 │ <div onmouseover="handleMouseOver()" onblur="handleBlur()"></div>
@@ -86,7 +86,7 @@ invalid.svelte:11:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━�
     12 │ 
     13 │ <!-- self-closing elements -->
   
-  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  i Users who navigate via keyboard cannot interact with elements that only have mouse event handlers. Add an onblur attribute to ensure keyboard accessibility.
   
 
 ```
@@ -94,7 +94,7 @@ invalid.svelte:11:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━�
 ```
 invalid.svelte:14:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × onmouseover must be accompanied by onfocus for accessibility.
+  × onmouseover must be accompanied by onfocus.
   
     13 │ <!-- self-closing elements -->
   > 14 │ <input onmouseover="handleMouseOver()" />
@@ -102,7 +102,7 @@ invalid.svelte:14:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━�
     15 │ 
     16 │ <!-- different element types -->
   
-  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  i Users who navigate via keyboard cannot interact with elements that only have mouse event handlers. Add an onfocus attribute to ensure keyboard accessibility.
   
 
 ```
@@ -110,7 +110,7 @@ invalid.svelte:14:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━�
 ```
 invalid.svelte:17:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × onmouseover must be accompanied by onfocus for accessibility.
+  × onmouseover must be accompanied by onfocus.
   
     16 │ <!-- different element types -->
   > 17 │ <a onmouseover="handleMouseOver()">link</a>
@@ -118,7 +118,7 @@ invalid.svelte:17:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━�
     18 │ <button onmouseout="handleMouseOut()">button</button>
     19 │ 
   
-  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  i Users who navigate via keyboard cannot interact with elements that only have mouse event handlers. Add an onfocus attribute to ensure keyboard accessibility.
   
 
 ```
@@ -126,7 +126,7 @@ invalid.svelte:17:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━�
 ```
 invalid.svelte:18:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × onmouseout must be accompanied by onblur for accessibility.
+  × onmouseout must be accompanied by onblur.
   
     16 │ <!-- different element types -->
     17 │ <a onmouseover="handleMouseOver()">link</a>
@@ -134,7 +134,7 @@ invalid.svelte:18:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     19 │ 
   
-  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  i Users who navigate via keyboard cannot interact with elements that only have mouse event handlers. Add an onblur attribute to ensure keyboard accessibility.
   
 
 ```
