@@ -1,0 +1,61 @@
+# Depot CI Migration
+# Source: .github/workflows/autofix.yml
+#
+# No changes were necessary.
+
+name: autofix.ci # needed to securely identify the workflow
+on:
+  merge_group:
+  pull_request:
+    branches:
+      - main
+      - next
+    paths: # Only run when changes are made to rust code or root Cargo
+      - "crates/**"
+      - "fuzz/**"
+      - "xtask/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "rust-toolchain.toml"
+      - "rustfmt.toml"
+permissions:
+  contents: read
+jobs:
+  autofix:
+    runs-on: depot-ubuntu-24.04-arm-16
+    if: ${{ github.actor != 'autofix-ci[bot]' }}
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Install toolchain
+        uses: moonrepo/setup-rust@ede6de059f8046a5e236c94046823e2af11ca670 # v1.2.2
+        with:
+          components: rustfmt
+          cache-base: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Run all the codegen
+      - name: Run the grammar codegen
+        run: cargo codegen grammar
+      - name: Run the analyzer codegen
+        run: cargo codegen analyzer
+      - name: Run the configuration codegen
+        run: cargo codegen-configuration
+      - name: Run the schema codegen
+        run: cargo codegen-schema
+      - name: Run the bindings codegen
+        run: cargo codegen-bindings
+      - name: Run the migrate codegen
+        run: cargo codegen-migrate
+      # Format Rust and TOML files
+      - name: Run format
+        run: |
+          cargo fmt --all
+      - uses: tombi-toml/setup-tombi@f7cb38e77d9a62bc27a8445bf50e660e9496b893 # v1.0.7
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          version: '0.7.32'
+      - name: Format TOML files
+        run: tombi format
+      - uses: autofix-ci/action@7a166d7532b277f34e16238930461bf77f9d7ed8
