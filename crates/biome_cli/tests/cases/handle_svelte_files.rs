@@ -675,6 +675,46 @@ import Component from "./Component.vue"
     ));
 }
 
+#[test]
+fn no_unused_imports_is_not_triggered_for_aliased_svelte_component_in_template() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.svelte");
+    fs.insert(
+        file.into(),
+        r#"<script lang="ts">
+import { default as ComponentAlias } from "./Component.svelte";
+</script>
+
+<ComponentAlias />
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=noUnusedImports", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_unused_imports_is_not_triggered_for_aliased_svelte_component_in_template",
+        fs,
+        console,
+        result,
+    ));
+}
+
 const SVELTE_ENUM_IN_TEMPLATE: &str = r#"<script lang="ts">
 import { Component, FooEnum } from './types';
 </script>
