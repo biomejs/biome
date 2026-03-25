@@ -379,7 +379,7 @@ impl AnyJsExportNamedSpecifier {
     /// ## Examples
     ///
     /// ```
-    /// use biome_js_syntax::{AnyJsExportNamedSpecifier, T};
+    /// use biome_js_syntax::{AnyJsExportNamedSpecifier, AnyJsLiteralExportName, T};
     /// use biome_js_factory::make;
     ///
     /// let specifier = make::js_export_named_shorthand_specifier(
@@ -392,7 +392,7 @@ impl AnyJsExportNamedSpecifier {
     /// let specifier = make::js_export_named_specifier(
     ///     make::js_reference_identifier(make::ident("a")),
     ///     make::token(T![as]),
-    ///     make::js_literal_export_name(make::ident("b")),
+    ///     AnyJsLiteralExportName::JsLiteralExportName(make::js_literal_export_name(make::ident("b"))),
     /// ).build();
     /// let export = AnyJsExportNamedSpecifier::from(specifier.clone());
     ///
