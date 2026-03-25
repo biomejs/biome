@@ -2,4 +2,4 @@
 "@biomejs/biome": minor
 ---
 
-Port `useAriaActivedescendantWithTabindex` a11y rule to HTML. The rule enforces that non-interactive HTML elements with `aria-activedescendant` also have a `tabindex` attribute.
+Ported [`useAriaActivedescendantWithTabindex`](https://biomejs.dev/linter/rules/use-aria-activedescendant-with-tabindex/) a11y rule to HTML.
