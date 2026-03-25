@@ -137,6 +137,13 @@ pub(crate) async fn did_open(
         document_file_source: Some(language_hint),
         persist_node_cache: true,
         inline_config: session.inline_config(),
+        needs_document_services: Some(
+            session
+                .extension_settings
+                .read()
+                .unwrap()
+                .goto_definition_enabled(),
+        ),
     })?;
 
     session.insert_document(url.clone(), doc);

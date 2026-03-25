@@ -4,7 +4,7 @@ use crate::css_module_info::{CssClassDefinition, CssClassReference};
 use biome_css_syntax::{AnyCssRoot, CssFileSource};
 use biome_js_syntax::AnyJsRoot;
 use biome_resolver::ResolvedPath;
-use biome_rowan::Text;
+use biome_rowan::{Text, TextSize};
 use indexmap::IndexMap;
 use indexmap::IndexSet;
 use std::collections::BTreeSet;
@@ -27,10 +27,11 @@ pub(crate) use visitor::HtmlModuleVisitor;
 /// The module graph is responsible for all downstream logic (class collection,
 /// import resolution, upward traversal).
 pub enum HtmlEmbeddedContent {
-    /// A `<style>` block with its resolved CSS source (carries [`EmbeddingApplicability`]).
+    /// A `<style>` block with its resolved CSS source and content offset
+    /// within the parent document.
     ///
     /// [`EmbeddingApplicability`]: biome_css_syntax::EmbeddingStyleApplicability
-    Css(AnyCssRoot, CssFileSource),
+    Css(AnyCssRoot, CssFileSource, TextSize),
     /// A `<script>` block parsed as JS/TS.
     Js(AnyJsRoot),
 }

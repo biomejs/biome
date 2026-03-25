@@ -1,6 +1,7 @@
 use super::{
-    AnalyzerVisitorBuilder, CodeActionsParams, EnabledForPath, ExtensionHandler, FixAllParams,
-    LintParams, LintResults, ParseResult, ProcessFixAll, ProcessLint, SearchCapabilities, search,
+    AnalyzerVisitorBuilder, CodeActionsParams, EditorCapabilities, EnabledForPath,
+    ExtensionHandler, FixAllParams, LintParams, LintResults, ParseResult, ProcessFixAll,
+    ProcessLint, ResolveDefinitionParams, SearchCapabilities, search,
 };
 use crate::WorkspaceError;
 use crate::configuration::to_analyzer_rules;
@@ -13,7 +14,8 @@ use crate::settings::{
     Settings, SettingsWithEditor, check_feature_activity, check_override_feature_activity,
 };
 use crate::workspace::{
-    CodeAction, DocumentFileSource, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
+    CodeAction, DefinitionReference, DocumentFileSource, FixFileResult, GetSyntaxTreeResult,
+    GoToDefinitionResult, PullActionsResult,
 };
 use biome_analyze::options::PreferredQuote;
 use biome_analyze::{AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never};
@@ -393,6 +395,10 @@ impl ExtensionHandler for CssFileHandler {
                 linter: Some(linter_enabled),
                 assist: Some(assist_enabled),
                 search: Some(search_enabled),
+            },
+            editors: EditorCapabilities {
+                resolve_binding: None,
+                resolve_definition: Some(resolve_definition),
             },
         }
     }
@@ -774,6 +780,29 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                 params.embeds_initial_indent,
             );
         }
+    }
+}
+
+/// Destination-side capability for CSS: resolves a binding reference to a
+/// CSS class definition location.
+pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoToDefinitionResult> {
+    match params.definition_ref {
+        DefinitionReference::CssClass { class_name } => {
+            let path = params.path.as_path();
+            let (css_path, mut range, content_offset) = params
+                .module_graph
+                .find_css_class_definition(path, class_name)?;
+            // For inline `<style>` blocks, the range is snippet-local.
+            // Apply the content_offset to get parent document coordinates.
+            if let Some(offset) = content_offset {
+                range += offset;
+            }
+            Some(GoToDefinitionResult {
+                path: BiomePath::new(css_path.to_string()),
+                range,
+            })
+        }
+        _ => None,
     }
 }
 

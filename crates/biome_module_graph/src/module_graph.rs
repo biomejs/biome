@@ -28,9 +28,10 @@ use biome_js_type_info::ImportSymbol;
 use biome_jsdoc_comment::JsdocComment;
 use biome_project_layout::ProjectLayout;
 use biome_resolver::{FsWithResolverProxy, PathInfo};
+use biome_rowan::{TextRange, TextSize};
 use camino::{Utf8Path, Utf8PathBuf};
 pub(crate) use fs_proxy::ModuleGraphFsProxy;
-use indexmap::IndexSet;
+use indexmap::IndexMap;
 use papaya::{HashMap, HashMapRef, LocalGuard};
 use rustc_hash::{FxBuildHasher, FxHashSet};
 use std::collections::VecDeque;
@@ -280,6 +281,63 @@ impl ModuleGraph {
         })
     }
 
+    /// Finds the CSS file and text range where a class is defined, searching
+    /// all available paths: JS imports, HTML inline styles, linked stylesheets,
+    /// and CSS imports from embedded `<script>` blocks.
+    ///
+    /// Returns the CSS file path, the selector range, and an optional content
+    /// offset for inline `<style>` blocks (needed to translate snippet-local
+    /// ranges to parent document coordinates).
+    pub fn find_css_class_definition(
+        &self,
+        path: &Utf8Path,
+        class_name: &str,
+    ) -> Option<(Utf8PathBuf, TextRange, Option<TextSize>)> {
+        // 1. Check inline style classes in HTML-like files (carry content_offset)
+        if let Some(html_info) = self.html_module_info_for_path(path) {
+            for class_def in &html_info.style_classes {
+                if class_def.name.text() == class_name {
+                    return Some((
+                        path.to_path_buf(),
+                        class_def.range,
+                        class_def.content_offset,
+                    ));
+                }
+            }
+        }
+
+        // 2. Check CSS files reachable from HTML (linked stylesheets + script imports)
+        for step in self.traverse_import_tree_for_html_classes(path) {
+            if step.css_path == path {
+                continue; // Already checked inline styles above
+            }
+            if let Some(range) = step.css_classes.iter().find_map(|(token, range)| {
+                if token.text() == class_name {
+                    Some(*range)
+                } else {
+                    None
+                }
+            }) {
+                return Some((step.css_path, range, None));
+            }
+        }
+
+        // 3. Check CSS files imported by JS (e.g., `import './styles.css'` in JSX)
+        for step in self.traverse_import_tree_for_classes(path) {
+            if let Some(range) = step.css_classes.iter().find_map(|(token, range)| {
+                if token.text() == class_name {
+                    Some(*range)
+                } else {
+                    None
+                }
+            }) {
+                return Some((step.css_path, range, None));
+            }
+        }
+
+        None
+    }
+
     /// Builds diagnostic information with full component chains for error reporting.
     ///
     /// This re-traverses the import tree to build the component chain for each CSS file.
@@ -440,10 +498,10 @@ impl ModuleGraph {
             // For same-file checks, scoped styles still apply to the component's own
             // elements, so both Global and Local classes are valid. Only when classes
             // are traversed from imported/parent files do we restrict to Global.
-            let all_inline_classes: IndexSet<_> = html_info
+            let all_inline_classes: IndexMap<_, _> = html_info
                 .style_classes
                 .iter()
-                .map(|c| c.name.clone())
+                .map(|c| (c.name.clone(), c.range))
                 .collect();
             if !all_inline_classes.is_empty() {
                 inline_steps.push(CssClassStep {
@@ -452,9 +510,22 @@ impl ModuleGraph {
                 });
             }
 
-            // 2. Directly linked external stylesheets.
+            // 2. Directly linked external stylesheets (<link rel="stylesheet">).
             for stylesheet_path in &html_info.imported_stylesheets {
                 if let Some(path) = stylesheet_path.as_path()
+                    && let Some(css_info) = self.css_module_info_for_path(path)
+                {
+                    linked_steps.push(CssClassStep {
+                        css_path: path.to_path_buf(),
+                        css_classes: css_info.classes.clone(),
+                    });
+                }
+            }
+
+            // 2b. CSS files imported from embedded <script> blocks
+            // (e.g., `import "./index.css"` in Astro frontmatter).
+            for import_path in html_info.static_import_paths.values() {
+                if let Some(path) = import_path.as_path()
                     && let Some(css_info) = self.css_module_info_for_path(path)
                 {
                     linked_steps.push(CssClassStep {
@@ -543,7 +614,7 @@ impl ModuleGraph {
                 if let Some(path) = import_path.as_path()
                     && let Some(css_info) = self.css_module_info_for_path(path)
                 {
-                    for class in css_info.classes.iter() {
+                    for (class, _range) in css_info.classes.iter() {
                         let class_name = class.text().to_string();
                         available_classes.insert(class_name.clone());
                     }
@@ -606,7 +677,7 @@ impl ModuleGraph {
                                 if let Some(path) = import_path.as_path()
                                     && let Some(css_info) = self.css_module_info_for_path(path)
                                 {
-                                    for class in css_info.classes.iter() {
+                                    for (class, _range) in css_info.classes.iter() {
                                         let class_name = class.text().to_string();
                                         available_classes.insert(class_name.clone());
                                     }
@@ -634,7 +705,7 @@ impl ModuleGraph {
                                 if let Some(path) = stylesheet_path.as_path()
                                     && let Some(css_info) = self.css_module_info_for_path(path)
                                 {
-                                    for class in css_info.classes.iter() {
+                                    for (class, _range) in css_info.classes.iter() {
                                         let class_name = class.text().to_string();
                                         available_classes.insert(class_name.clone());
                                     }

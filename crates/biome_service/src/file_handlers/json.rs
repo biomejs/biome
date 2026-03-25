@@ -1,6 +1,7 @@
 use super::{
-    AnalyzerVisitorBuilder, CodeActionsParams, DocumentFileSource, EnabledForPath,
-    ExtensionHandler, ParseResult, ProcessFixAll, ProcessLint, SearchCapabilities, search,
+    AnalyzerVisitorBuilder, CodeActionsParams, DocumentFileSource, EditorCapabilities,
+    EnabledForPath, ExtensionHandler, ParseResult, ProcessFixAll, ProcessLint, SearchCapabilities,
+    search,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::DebugCapabilities;
@@ -370,6 +371,10 @@ impl ExtensionHandler for JsonFileHandler {
             },
             search: SearchCapabilities {
                 search: Some(search),
+            },
+            editors: EditorCapabilities {
+                resolve_binding: None,
+                resolve_definition: None,
             },
         }
     }

@@ -74,7 +74,7 @@ impl Rule for NoUndeclaredClasses {
             for step in module_graph.traverse_import_tree_for_classes(file_path) {
                 if step
                     .css_classes
-                    .iter()
+                    .keys()
                     .any(|token| token.text() == class_name)
                 {
                     found_class = true;

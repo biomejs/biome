@@ -1,7 +1,7 @@
 use super::{
-    AnalyzerVisitorBuilder, CodeActionsParams, DocumentFileSource, EnabledForPath,
-    ExtensionHandler, FixAllParams, LintParams, LintResults, ParseResult, ProcessFixAll,
-    ProcessLint, SearchCapabilities,
+    AnalyzerVisitorBuilder, CodeActionsParams, DocumentFileSource, EditorCapabilities,
+    EnabledForPath, ExtensionHandler, FixAllParams, LintParams, LintResults, ParseResult,
+    ProcessFixAll, ProcessLint, SearchCapabilities,
 };
 use crate::WorkspaceError;
 use crate::configuration::to_analyzer_rules;
@@ -307,6 +307,10 @@ impl ExtensionHandler for GraphqlFileHandler {
                 format_embedded: None,
             },
             search: SearchCapabilities { search: None },
+            editors: EditorCapabilities {
+                resolve_binding: None,
+                resolve_definition: None,
+            },
         }
     }
 }

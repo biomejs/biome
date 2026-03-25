@@ -1105,6 +1105,7 @@ pub fn analyze_with_workspace(input_file: &Utf8Path, group: &str, rule: &str) ->
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .expect("failed to open file");
 

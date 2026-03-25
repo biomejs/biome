@@ -1,7 +1,7 @@
 use super::{
-    AnalyzerCapabilities, Capabilities, DebugCapabilities, DocumentFileSource, EnabledForPath,
-    ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults, ParseResult,
-    ParserCapabilities, SearchCapabilities,
+    AnalyzerCapabilities, Capabilities, DebugCapabilities, DocumentFileSource, EditorCapabilities,
+    EnabledForPath, ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults,
+    ParseResult, ParserCapabilities, SearchCapabilities,
 };
 use crate::settings::{
     OverrideSettings, SettingsWithEditor, check_feature_activity, check_override_feature_activity,
@@ -285,6 +285,10 @@ impl ExtensionHandler for GritFileHandler {
                 format_embedded: None,
             },
             search: SearchCapabilities { search: None },
+            editors: EditorCapabilities {
+                resolve_binding: None,
+                resolve_definition: None,
+            },
         }
     }
 }

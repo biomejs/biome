@@ -178,6 +178,17 @@ impl JsModuleInfo {
                 .collect::<BTreeSet<_>>(),
         }
     }
+
+    pub fn find_resolved_path_by_symbol(&self, name: &str) -> Option<&Utf8Path> {
+        self.static_imports
+            .get(name)
+            .and_then(|import| import.resolved_path.as_path())
+            .or_else(|| {
+                self.dynamic_import_paths
+                    .get(name)
+                    .and_then(|import| import.resolved_path.as_path())
+            })
+    }
 }
 
 #[derive(Debug)]

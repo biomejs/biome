@@ -31,6 +31,9 @@ pub struct WorkspaceSettings {
 
     /// Inline configuration, which gets merged before applying querying instructions via workspace
     pub inline_config: Option<Configuration>,
+
+    /// Enables the "go-to" features, by-passing the use of linting or assist
+    pub go_to_definition: Option<bool>,
 }
 
 #[derive(Debug, Default, Clone, Deserialize, Serialize, PartialEq, Eq)]
@@ -77,5 +80,9 @@ impl ExtensionSettings {
 
     pub(crate) fn inline_config(&self) -> Option<Configuration> {
         self.settings.inline_config.clone()
+    }
+
+    pub(crate) fn goto_definition_enabled(&self) -> bool {
+        self.settings.go_to_definition.unwrap_or_default()
     }
 }

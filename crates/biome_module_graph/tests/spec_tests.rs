@@ -2705,11 +2705,11 @@ export function App() {
         .css_module_info_for_path(Utf8Path::new("/src/styles.css"))
         .expect("styles.css must be in module graph");
     assert!(
-        css_info.classes.contains("button"),
+        css_info.classes.contains_key("button"),
         "styles.css must define class 'button'"
     );
     assert!(
-        css_info.classes.contains("header"),
+        css_info.classes.contains_key("header"),
         "styles.css must define class 'header'"
     );
 
@@ -3271,7 +3271,7 @@ fn parse_embedded_css(src: &str, file_source: CssFileSource) -> HtmlEmbeddedCont
         ..Default::default()
     };
     let parsed = biome_css_parser::parse_css(src, file_source, options);
-    HtmlEmbeddedContent::Css(parsed.tree(), file_source)
+    HtmlEmbeddedContent::Css(parsed.tree(), file_source, biome_rowan::TextSize::from(0))
 }
 
 /// Parses an HTML snippet and returns a `HtmlRoot`.
@@ -3350,7 +3350,7 @@ fn test_html_inline_style_classes_are_global() {
     // The traversal must yield the class.
     let found = module_graph
         .traverse_import_tree_for_html_classes(Utf8Path::new("/src/index.html"))
-        .any(|step| step.css_classes.iter().any(|c| c.text() == "card"));
+        .any(|step| step.css_classes.keys().any(|c| c.text() == "card"));
     assert!(found, "Global class must appear in traversal");
 }
 
@@ -3418,7 +3418,7 @@ fn test_vue_unscoped_style_classes_are_global() {
 
     let found = module_graph
         .traverse_import_tree_for_html_classes(Utf8Path::new("/src/Comp.vue"))
-        .any(|step| step.css_classes.iter().any(|c| c.text() == "card"));
+        .any(|step| step.css_classes.keys().any(|c| c.text() == "card"));
     assert!(found, "Global class must appear in traversal");
 }
 
@@ -3459,7 +3459,7 @@ fn test_vue_scoped_style_classes_are_local_and_hidden() {
     // because scoped styles still apply to the component's own elements.
     let found = module_graph
         .traverse_import_tree_for_html_classes(Utf8Path::new("/src/Scoped.vue"))
-        .any(|step| step.css_classes.iter().any(|c| c.text() == "alpha"));
+        .any(|step| step.css_classes.keys().any(|c| c.text() == "alpha"));
     assert!(
         found,
         "Local inline class MUST appear in same-file traversal"
@@ -3498,7 +3498,7 @@ fn test_vue_mixed_scoped_and_unscoped() {
         .traverse_import_tree_for_html_classes(Utf8Path::new("/src/Mixed.vue"))
         .flat_map(|step| {
             step.css_classes
-                .iter()
+                .keys()
                 .map(|c| c.text().to_string())
                 .collect::<Vec<_>>()
         })
@@ -3543,7 +3543,7 @@ fn test_astro_local_style_classes_are_hidden() {
     // parent/consumer files.
     let found = module_graph
         .traverse_import_tree_for_html_classes(Utf8Path::new("/src/Page.astro"))
-        .any(|step| step.css_classes.iter().any(|c| c.text() == "hero"));
+        .any(|step| step.css_classes.keys().any(|c| c.text() == "hero"));
     assert!(
         found,
         "Astro local class MUST appear in same-file traversal"
@@ -3566,7 +3566,7 @@ fn test_astro_global_style_classes_are_visible() {
 
     let found = module_graph
         .traverse_import_tree_for_html_classes(Utf8Path::new("/src/Layout.astro"))
-        .any(|step| step.css_classes.iter().any(|c| c.text() == "wrapper"));
+        .any(|step| step.css_classes.keys().any(|c| c.text() == "wrapper"));
     assert!(found, "Astro is:global class must appear in traversal");
 }
 
@@ -3606,7 +3606,7 @@ fn test_svelte_local_style_classes_are_hidden() {
     // parent/consumer files.
     let found = module_graph
         .traverse_import_tree_for_html_classes(Utf8Path::new("/src/Button.svelte"))
-        .any(|step| step.css_classes.iter().any(|c| c.text() == "btn"));
+        .any(|step| step.css_classes.keys().any(|c| c.text() == "btn"));
     assert!(
         found,
         "Svelte local class MUST appear in same-file traversal"
@@ -3651,7 +3651,7 @@ fn test_svelte_global_pseudo_class_is_visible() {
     // And it must appear in the traversal.
     let found = module_graph
         .traverse_import_tree_for_html_classes(Utf8Path::new("/src/Global.svelte"))
-        .any(|step| step.css_classes.iter().any(|c| c.text() == "prose"));
+        .any(|step| step.css_classes.keys().any(|c| c.text() == "prose"));
     assert!(found, ":global class must appear in traversal");
 }
 
@@ -3758,7 +3758,7 @@ fn test_vue_upward_traversal() {
     // Verify upward traversal finds btn from app.css
     let available_classes: Vec<_> = module_graph
         .traverse_import_tree_for_html_classes(Utf8Path::new("/src/Button.vue"))
-        .flat_map(|step| step.css_classes.into_iter())
+        .flat_map(|step| step.css_classes.into_keys())
         .collect();
 
     assert!(

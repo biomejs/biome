@@ -403,6 +403,7 @@ impl From<&ScanKind> for ModuleGraphResolutionKind {
 }
 
 pub type SettingsWithEditor<'a> = SettingsHandle<'a, Option<Configuration>>;
+pub type SettingsWithCapability<'a> = SettingsHandle<'a, bool>;
 
 /// Handle object holding a temporary lock on the workspace settings until
 /// the deferred language-specific options resolution is called
@@ -536,6 +537,12 @@ impl<'a> SettingsHandle<'a, Option<Configuration>> {
     {
         let settings = self.as_merged_settings();
         L::assist_enabled_for_file_path(&settings, path)
+    }
+}
+
+impl<'a> SettingsHandle<'a, bool> {
+    pub fn is_capability_enabled(&self) -> bool {
+        self.editor
     }
 }
 

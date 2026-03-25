@@ -1295,6 +1295,7 @@ dependencies = [
  "tower",
  "tower-lsp-server",
  "tracing",
+ "url",
  "uuid",
 ]
 
@@ -1667,6 +1668,7 @@ dependencies = [
  "biome_project_layout",
  "biome_resolver",
  "biome_rowan",
+ "biome_service",
  "biome_string_case",
  "biome_text_edit",
  "boxcar",

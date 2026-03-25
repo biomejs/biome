@@ -615,6 +615,24 @@ impl Session {
         result
     }
 
+    pub(crate) fn can_register_goto_definition(&self) -> bool {
+        let result = self
+            .initialize_params
+            .get()
+            .and_then(|c| c.client_capabilities.text_document.as_ref())
+            .and_then(|c| c.definition.as_ref())
+            .and_then(|c| c.dynamic_registration)
+            == Some(true)
+            || self
+                .extension_settings
+                .read()
+                .unwrap()
+                .goto_definition_enabled();
+        info!("Can register gotoDefinition: {result}");
+
+        result
+    }
+
     /// Get the current workspace folders
     pub(crate) fn get_workspace_folders(&self) -> Option<Vec<WorkspaceFolder>> {
         self.workspace_folders.read().unwrap().clone()

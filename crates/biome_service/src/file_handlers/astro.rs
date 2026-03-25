@@ -1,8 +1,8 @@
 use crate::WorkspaceError;
 use crate::file_handlers::{
-    AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities, EnabledForPath,
-    ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults, ParseResult,
-    ParserCapabilities, javascript,
+    AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities, EditorCapabilities,
+    EnabledForPath, ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults,
+    ParseResult, ParserCapabilities, javascript,
 };
 use crate::settings::SettingsWithEditor;
 use crate::workspace::{DocumentFileSource, FixFileResult, PullActionsResult};
@@ -103,6 +103,10 @@ impl ExtensionHandler for AstroFileHandler {
             },
             // TODO: We should be able to search JS portions already
             search: SearchCapabilities { search: None },
+            editors: EditorCapabilities {
+                resolve_binding: None,
+                resolve_definition: None,
+            },
         }
     }
 }

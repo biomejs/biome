@@ -129,7 +129,7 @@ impl Rule for NoUndeclaredClasses {
             for step in &css_steps {
                 if step
                     .css_classes
-                    .iter()
+                    .keys()
                     .any(|token| token.text() == class_name)
                 {
                     found_class = true;

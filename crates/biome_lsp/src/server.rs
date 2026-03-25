@@ -268,6 +268,16 @@ impl LSPServer {
             },
         );
 
+        capabilities.add_capability(
+            "biome_go_to_definition",
+            "textDocument/definition",
+            if is_linting_and_formatting_disabled || !self.session.can_register_goto_definition() {
+                CapabilityStatus::Disable
+            } else {
+                CapabilityStatus::Enable(None)
+            },
+        );
+
         self.session.register_capabilities(capabilities).await;
     }
 
@@ -487,6 +497,17 @@ impl LanguageServer for LSPServer {
 
         self.map_op_error(result).await
     }
+
+    async fn goto_definition(
+        &self,
+        params: GotoDefinitionParams,
+    ) -> LspResult<Option<GotoDefinitionResponse>> {
+        let result = biome_diagnostics::panic::catch_unwind(move || {
+            handlers::navigation::goto_definition(&self.session, params)
+        });
+
+        self.map_op_error(result).await
+    }
 }
 
 impl Drop for LSPServer {
@@ -676,6 +697,7 @@ impl ServerFactory {
         workspace_method!(builder, format_on_type);
         workspace_method!(builder, fix_file);
         workspace_method!(builder, rename);
+        workspace_method!(builder, go_to_definition);
         workspace_method!(builder, parse_pattern);
         workspace_method!(builder, search_pattern);
         workspace_method!(builder, drop_pattern);
@@ -723,3 +745,7 @@ impl ServerConnection {
 #[cfg(test)]
 #[path = "server.tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "server_navigation.tests.rs"]
+mod navigation_tests;

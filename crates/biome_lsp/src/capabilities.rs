@@ -94,6 +94,18 @@ pub(crate) fn server_capabilities(capabilities: &ClientCapabilities) -> ServerCa
             }
         });
 
+    let definition_provider = capabilities
+        .text_document
+        .as_ref()
+        .and_then(|text_document| text_document.definition.as_ref())
+        .and_then(|definition| {
+            if definition.dynamic_registration.unwrap_or(false) {
+                None
+            } else {
+                Some(OneOf::Left(true))
+            }
+        });
+
     ServerCapabilities {
         position_encoding: Some(match negotiated_encoding(capabilities) {
             PositionEncoding::Utf8 => PositionEncodingKind::UTF8,
@@ -109,6 +121,7 @@ pub(crate) fn server_capabilities(capabilities: &ClientCapabilities) -> ServerCa
         document_range_formatting_provider: supports_range_formatter_dynamic_registration,
         document_on_type_formatting_provider: supports_on_type_formatter_dynamic_registration,
         code_action_provider,
+        definition_provider,
         rename_provider: None,
         workspace: Some(WorkspaceServerCapabilities {
             workspace_folders: Some(WorkspaceFoldersServerCapabilities {

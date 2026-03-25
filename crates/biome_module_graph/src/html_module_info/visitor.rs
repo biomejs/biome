@@ -10,7 +10,7 @@ use biome_html_syntax::{
 };
 use biome_js_syntax::{AnyJsImportLike, AnyJsRoot};
 use biome_resolver::{ResolveOptions, ResolvedPath, resolve};
-use biome_rowan::{AstNode, Text, TokenText, WalkEvent};
+use biome_rowan::{AstNode, Text, TextSize, TokenText, WalkEvent};
 use camino::{Utf8Path, Utf8PathBuf};
 use indexmap::{IndexMap, IndexSet};
 
@@ -88,8 +88,8 @@ impl<'a> HtmlModuleVisitor<'a> {
         for content in self.embedded_content {
             match content {
                 // CSS block: collect class definitions (with applicability scoping).
-                HtmlEmbeddedContent::Css(css_root, file_source) => {
-                    collect_css_classes(css_root, &mut style_classes, file_source);
+                HtmlEmbeddedContent::Css(css_root, file_source, content_offset) => {
+                    collect_css_classes(css_root, &mut style_classes, file_source, *content_offset);
                 }
                 // JS block: collect static import paths for upward traversal.
                 HtmlEmbeddedContent::Js(js_root) => {
@@ -274,6 +274,7 @@ pub(crate) fn collect_css_classes(
     css_root: &AnyCssRoot,
     classes: &mut IndexSet<CssClassDefinition>,
     file_source: &CssFileSource,
+    content_offset: TextSize,
 ) {
     // Applicability for selectors *not* inside :global(...).
     // Selectors inside :global(...) are unconditionally Global.
@@ -301,6 +302,8 @@ pub(crate) fn collect_css_classes(
                     };
                     classes.insert(CssClassDefinition {
                         name: token.token_text_trimmed(),
+                        range: token.text_trimmed_range(),
+                        content_offset: Some(content_offset),
                         applicability,
                     });
                 }

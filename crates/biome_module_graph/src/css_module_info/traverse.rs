@@ -1,8 +1,8 @@
 use crate::ModuleInfo;
 use biome_console::markup;
-use biome_rowan::TokenText;
+use biome_rowan::{TextRange, TokenText};
 use camino::{Utf8Path, Utf8PathBuf};
-use indexmap::IndexSet;
+use indexmap::IndexMap;
 use rustc_hash::FxHashSet;
 use std::vec::IntoIter;
 
@@ -12,8 +12,8 @@ use std::vec::IntoIter;
 pub struct CssClassStep {
     /// The path of the CSS file discovered in this step
     pub css_path: Utf8PathBuf,
-    /// The CSS class names found in this CSS file
-    pub css_classes: IndexSet<TokenText>,
+    /// The CSS class names and their selector ranges found in this CSS file
+    pub css_classes: IndexMap<TokenText, TextRange>,
 }
 
 /// Rich diagnostic information including component chain.

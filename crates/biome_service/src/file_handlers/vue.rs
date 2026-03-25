@@ -1,4 +1,7 @@
-use super::{ParsedLangAndSetup, SearchCapabilities, parse_lang_and_setup_from_script_opening_tag};
+use super::{
+    EditorCapabilities, ParsedLangAndSetup, SearchCapabilities,
+    parse_lang_and_setup_from_script_opening_tag,
+};
 use crate::WorkspaceError;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities, EnabledForPath,
@@ -126,6 +129,10 @@ impl ExtensionHandler for VueFileHandler {
             },
             // TODO: We should be able to search JS portions already
             search: SearchCapabilities { search: None },
+            editors: EditorCapabilities {
+                resolve_binding: None,
+                resolve_definition: None,
+            },
         }
     }
 }

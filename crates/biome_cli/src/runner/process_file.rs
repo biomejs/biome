@@ -264,6 +264,7 @@ impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
                 content: FileContent::from_client(&input),
                 persist_node_cache: false,
                 inline_config: None,
+                needs_document_services: None,
             })?;
 
             Ok(Self { guard, path, file })
