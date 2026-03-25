@@ -31,7 +31,12 @@ pub(crate) async fn did_open(
     let language_hint = DocumentFileSource::from_language_id(&params.text_document.language_id);
 
     let path = session.file_path(&url)?;
-    let Some(project_key) = ensure_project_for_opened_document(session, &path).await else {
+    let file_path = path.to_path_buf();
+    let config_path = session.resolve_configuration_path(Some(&file_path));
+
+    let Some(project_key) =
+        ensure_project_for_opened_document(session, &path, config_path.as_ref()).await
+    else {
         return Ok(());
     };
 
@@ -75,55 +80,50 @@ pub(crate) async fn did_open(
 async fn ensure_project_for_opened_document(
     session: &Arc<Session>,
     path: &Utf8Path,
+    config_path: Option<&ConfigurationPathHint>,
 ) -> Option<ProjectKey> {
+    let is_relative_config_path = session
+        .get_settings_configuration_path()
+        .is_some_and(|config_path| !config_path.is_absolute());
+
+    let mut load_status = None;
+
     if let Some(project_key) = session.project_for_path(path) {
-        if let Some(config_path) = session.get_settings_configuration_path() {
-            if !config_path.is_absolute() {
-                let file_path = path.to_path_buf();
-                // Re-resolve relative configurationPath per file so each workspace folder uses
-                // its own config, even when a project is already open.
-                if let Some(resolved_path) = session.resolve_configuration_path(Some(&file_path)) {
-                    let status = session
-                        .load_biome_configuration_file(resolved_path, false)
-                        .await;
-                    session.set_configuration_status(status);
-                    if !status.is_loaded() {
-                        error!("Configuration could not be loaded for {path}");
-                        return None;
-                    }
-                    // Re-check after loading: a nested project may have been registered.
-                    return match session.project_for_path(path) {
-                        Some(updated_key) => Some(updated_key),
-                        None => {
-                            error!("Could not find project for {path}");
-                            None
-                        }
-                    };
-                }
+        if is_relative_config_path {
+            // Absolute configurationPath is global; only relative needs per-file resolution.
+            // Use the per-file resolved configurationPath so each workspace folder
+            // uses its own config, even when a project is already open.
+            if let Some(resolved_path) = config_path {
+                session.set_configuration_status(ConfigurationStatus::Loading);
+                let status = session
+                    .load_biome_configuration_file(resolved_path.clone(), false)
+                    .await;
+                load_status = Some(status);
             }
         }
-        return Some(project_key);
+        if load_status.is_none() {
+            return Some(project_key);
+        }
     } else {
         info!("No open project for path: {path:?}. Opening new project.");
     }
 
-    session.set_configuration_status(ConfigurationStatus::Loading);
-    if !session.has_initialized() {
-        session.load_extension_settings(None).await;
+    if load_status.is_none() {
+        session.set_configuration_status(ConfigurationStatus::Loading);
+        if !session.has_initialized() {
+            session.load_extension_settings(None).await;
+        }
+        load_status = Some(load_from_workspace_root_for_path(session, path, config_path).await);
     }
-
-    let status = load_from_workspace_root_for_path(session, path).await;
+    let status = load_status.expect("load_status should be set");
 
     session.set_configuration_status(status);
 
     if status.is_loaded() {
-        match session.project_for_path(path) {
-            Some(project_key) => Some(project_key),
-            None => {
-                error!("Could not find project for {path}");
-                None
-            }
-        }
+        session.project_for_path(path).or_else(|| {
+            error!("Could not find project for {path}");
+            None
+        })
     } else {
         error!("Configuration could not be loaded for {path}");
         None
@@ -134,11 +134,13 @@ async fn ensure_project_for_opened_document(
 async fn load_from_workspace_root_for_path(
     session: &Arc<Session>,
     path: &Utf8Path,
+    config_path: Option<&ConfigurationPathHint>,
 ) -> ConfigurationStatus {
-    let file_path = path.to_path_buf();
-    if let Some(path) = session.resolve_configuration_path(Some(&file_path)) {
+    if let Some(path) = config_path {
         info!("Loading user configuration from text_document {:?}", &path);
-        return session.load_biome_configuration_file(path, false).await;
+        return session
+            .load_biome_configuration_file(path.clone(), false)
+            .await;
     }
 
     let project_path = path
