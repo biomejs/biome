@@ -641,9 +641,11 @@ impl<'a> ProcessLint<'a> {
             diagnostics: Default::default(),
             // Do not report unused suppression comment diagnostics if:
             // - it is a syntax-only analyzer pass, or
-            // - if a single rule is run.
+            // - if a single rule is run, or
+            // - if rules or domains are skipped.
             ignores_suppression_comment: !params.categories.contains(RuleCategory::Lint)
-                || !params.only.is_empty(),
+                || !params.only.is_empty()
+                || !params.skip.is_empty(),
             rules: params
                 .settings
                 .as_ref()
