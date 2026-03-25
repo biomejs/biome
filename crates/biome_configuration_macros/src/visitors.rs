@@ -8,6 +8,7 @@ use biome_graphql_syntax::GraphqlLanguage;
 use biome_html_syntax::HtmlLanguage;
 use biome_js_syntax::JsLanguage;
 use biome_json_syntax::JsonLanguage;
+use biome_tailwind_syntax::TailwindLanguage;
 
 // ======= LINT ======
 #[derive(Default)]
@@ -119,6 +120,25 @@ impl RegistryVisitor<HtmlLanguage> for LintRulesVisitor {
     }
 }
 
+impl RegistryVisitor<TailwindLanguage> for LintRulesVisitor {
+    fn record_category<C: GroupCategory<Language = TailwindLanguage>>(&mut self) {
+        if matches!(C::CATEGORY, RuleCategory::Lint) {
+            C::record_groups(self);
+        }
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = TailwindLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.groups
+            .entry(<R::Group as RuleGroup>::NAME)
+            .or_default()
+            .insert(R::METADATA.name, R::METADATA);
+    }
+}
+
 // ======= ASSIST ======
 #[derive(Default)]
 pub struct AssistActionsVisitor {
@@ -210,6 +230,25 @@ impl RegistryVisitor<HtmlLanguage> for AssistActionsVisitor {
     fn record_rule<R>(&mut self)
     where
         R: Rule<Options: Default, Query: Queryable<Language = HtmlLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.groups
+            .entry(<R::Group as RuleGroup>::NAME)
+            .or_default()
+            .insert(R::METADATA.name, R::METADATA);
+    }
+}
+
+impl RegistryVisitor<TailwindLanguage> for AssistActionsVisitor {
+    fn record_category<C: GroupCategory<Language = TailwindLanguage>>(&mut self) {
+        if matches!(C::CATEGORY, RuleCategory::Action) {
+            C::record_groups(self);
+        }
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = TailwindLanguage, Output: Clone>>
             + 'static,
     {
         self.groups

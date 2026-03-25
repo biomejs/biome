@@ -1,0 +1,37 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 520
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "javascript": {
+    "experimentalEmbeddedSnippetsEnabled": true,
+    "linter": {
+      "enabled": true
+    }
+  },
+  "linter": {
+    "rules": {
+      "recommended": false,
+      "nursery": {
+        "useTailwindShorthandClasses": "error"
+      }
+    }
+  }
+}
+```
+
+## `file.js`
+
+```js
+clsx("mx-2");
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. Fixed 1 file.
+```

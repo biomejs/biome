@@ -1,0 +1,10 @@
+---
+source: crates/biome_tailwind_analyze/tests/spec_tests.rs
+expression: valid.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+<div class="mx-2"></div>
+
+```
