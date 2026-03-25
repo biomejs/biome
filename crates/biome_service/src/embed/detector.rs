@@ -1,5 +1,4 @@
-use crate::embed::types::{EmbedCandidate, GuestLanguage, TemplateTagKind};
-use crate::workspace::DocumentFileSource;
+use crate::embed::types::{EmbedCandidate, EmbedDetectionContext, GuestLanguage, TemplateTagKind};
 
 /// A single embed detector. Entirely const-constructible.
 ///
@@ -38,6 +37,12 @@ pub(crate) enum EmbedDetector {
     /// Matches `EmbedCandidate::Directive`. Always matches (no pattern).
     /// The guest language depends on the host framework.
     Directive { target: EmbedTarget },
+
+    /// Matches `EmbedCandidate::AttributeValue` by attribute name.
+    AttributeValue { target: EmbedTarget },
+
+    /// Matches `EmbedCandidate::CallArgument` by callee name.
+    CallArgument { target: EmbedTarget },
 }
 
 impl EmbedDetector {
@@ -47,13 +52,13 @@ impl EmbedDetector {
     pub fn try_match(
         &self,
         candidate: &EmbedCandidate,
-        file_source: &DocumentFileSource,
+        context: &EmbedDetectionContext,
     ) -> Option<GuestLanguage> {
         match (self, candidate) {
             // Element detector VS an Element candidate: match by tag name
             (Self::Element { tag, target }, EmbedCandidate::Element { tag_name, .. }) => {
                 if tag_name.text().eq_ignore_ascii_case(tag) {
-                    target.resolve(candidate, file_source)
+                    target.resolve(candidate, context)
                 } else {
                     None
                 }
@@ -61,7 +66,7 @@ impl EmbedDetector {
 
             // Frontmatter detector + Frontmatter candidate: always matches
             (Self::Frontmatter { target }, EmbedCandidate::Frontmatter { .. }) => {
-                target.resolve(candidate, file_source)
+                target.resolve(candidate, context)
             }
 
             // TemplateTag detector + TaggedTemplate candidate with Identifier tag
@@ -73,7 +78,7 @@ impl EmbedDetector {
                 },
             ) => {
                 if name.text() == *tag {
-                    target.resolve(candidate, file_source)
+                    target.resolve(candidate, context)
                 } else {
                     None
                 }
@@ -87,14 +92,14 @@ impl EmbedDetector {
             ) => match tag {
                 TemplateTagKind::MemberExpression { object: obj, .. } => {
                     if obj.text() == *object {
-                        target.resolve(candidate, file_source)
+                        target.resolve(candidate, context)
                     } else {
                         None
                     }
                 }
                 TemplateTagKind::CallExpression { callee } => {
                     if callee.text() == *object {
-                        target.resolve(candidate, file_source)
+                        target.resolve(candidate, context)
                     } else {
                         None
                     }
@@ -104,12 +109,20 @@ impl EmbedDetector {
 
             // TextExpression detector + TextExpression candidate: always matches
             (Self::TextExpression { target }, EmbedCandidate::TextExpression { .. }) => {
-                target.resolve(candidate, file_source)
+                target.resolve(candidate, context)
             }
 
             // Directive detector + Directive candidate: always matches
             (Self::Directive { target }, EmbedCandidate::Directive { .. }) => {
-                target.resolve(candidate, file_source)
+                target.resolve(candidate, context)
+            }
+
+            (Self::AttributeValue { target }, EmbedCandidate::AttributeValue { .. }) => {
+                target.resolve(candidate, context)
+            }
+
+            (Self::CallArgument { target }, EmbedCandidate::CallArgument { .. }) => {
+                target.resolve(candidate, context)
             }
 
             // Mismatched variant — no match
@@ -126,7 +139,7 @@ pub(crate) enum EmbedTarget {
     /// Guest language depends on element attributes / host file source.
     Dynamic {
         /// Function that is used to determine the guest language.
-        resolver: fn(&EmbedCandidate, &DocumentFileSource) -> Option<GuestLanguage>,
+        resolver: fn(&EmbedCandidate, &EmbedDetectionContext) -> Option<GuestLanguage>,
         /// Possible fallback. Use `None` to tell the matcher to ignore the snippet
         fallback: Option<GuestLanguage>,
     },
@@ -137,11 +150,11 @@ impl EmbedTarget {
     fn resolve(
         &self,
         candidate: &EmbedCandidate,
-        file_source: &DocumentFileSource,
+        context: &EmbedDetectionContext,
     ) -> Option<GuestLanguage> {
         match self {
             Self::Static(g) => Some(*g),
-            Self::Dynamic { resolver, fallback } => resolver(candidate, file_source).or(*fallback),
+            Self::Dynamic { resolver, fallback } => resolver(candidate, context).or(*fallback),
         }
     }
 }

@@ -951,7 +951,7 @@ pub fn analyze_with_workspace(
             categories: RuleCategories::default(),
             only: vec![rule_selector],
             skip: vec![],
-            enabled_rules: vec![],
+            enabled_rules: vec![rule_selector],
             pull_code_actions: true,
             inline_config: None,
         })
