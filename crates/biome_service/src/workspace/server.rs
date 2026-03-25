@@ -2,6 +2,7 @@ use super::{document::Document, *};
 use crate::Watcher;
 use crate::configuration::{LoadedConfiguration, ProjectScanComputer, read_config};
 use crate::diagnostics::{FileTooLarge, NoIgnoreFileFound, VcsDiagnostic};
+use crate::embed::languages::EmbeddedLanguageId;
 use crate::file_handlers::{
     Capabilities, CodeActionsParams, DiagnosticsAndActionsParams, DocumentFileSource, Features,
     FixAllParams, FormatEmbedNode, LintParams, LintResults, ParseResult, UpdateSnippetsNodes,
@@ -490,8 +491,8 @@ impl WorkspaceServer {
         // Track value references from non-source snippets (templates)
         let mut value_references = EmbeddedValueReferences::default();
         for snippet in &embedded_snippets {
-            if let Some(js_snippet) = snippet.as_js_embedded_snippet() {
-                let Some(file_source) = self.get_source(snippet.file_source_index()) else {
+            if snippet.language() == EmbeddedLanguageId::Js {
+                let Some(file_source) = snippet.file_source() else {
                     continue;
                 };
                 let Some(js_file_source) = file_source.to_js_file_source() else {
@@ -499,8 +500,9 @@ impl WorkspaceServer {
                 };
                 // Only process non-source snippets (templates)
                 if !js_file_source.is_embedded_source() {
+                    let js_root: AnyJsRoot = snippet.parse().tree();
                     let mut builder = value_references.builder();
-                    builder.visit_non_source_snippet(&js_snippet.parse.tree());
+                    builder.visit_non_source_snippet(&js_root);
                     value_references.finish(builder);
                 }
             }
@@ -685,13 +687,7 @@ impl WorkspaceServer {
             .ok_or_else(|| WorkspaceError::not_found(path.to_string()))
             .and_then(|doc| match &doc.syntax {
                 Some(syntax) => match syntax {
-                    Ok(syntax) => Ok((
-                        syntax.clone(),
-                        doc.get_embedded_snippets_format_nodes(|file_source_index| {
-                            self.get_source(file_source_index)
-                                .expect("Document source must exist")
-                        }),
-                    )),
+                    Ok(syntax) => Ok((syntax.clone(), doc.get_embedded_snippets_format_nodes())),
                     Err(FileTooLarge { .. }) => Err(WorkspaceError::file_ignored(path.to_string())),
                 },
                 None => Err(WorkspaceError::not_found(path.to_string())),
@@ -709,22 +705,176 @@ impl WorkspaceServer {
         builder: &mut EmbeddedBuilder,
     ) -> Result<Vec<AnyEmbeddedSnippet>, WorkspaceError> {
         let mut embedded_nodes = Vec::new();
-        let capabilities = self.get_file_capabilities(
-            path,
-            settings.as_ref().experimental_full_html_support_enabled(),
-        );
+        let capabilities = self.features.get_capabilities(*source);
         let Some(parse_embedded_nodes) = capabilities.parser.parse_embedded_nodes else {
             return Ok(Default::default());
         };
         let result = parse_embedded_nodes(root, path, source, settings, cache, builder);
 
-        for (mut content, file_source) in result.nodes {
-            let index = self.insert_source(file_source);
-            content.set_file_source_index(index);
+        for content in result.nodes {
             embedded_nodes.push(content);
         }
 
         Ok(embedded_nodes)
+    }
+
+    #[expect(clippy::too_many_arguments)]
+    fn fix_file_with_embeds<'a>(
+        &self,
+        mut parse: AnyParse,
+        document_file_source: DocumentFileSource,
+        document_services: &'a DocumentServices,
+        path: &'a BiomePath,
+        fix_file_mode: FixFileMode,
+        should_format: bool,
+        only: &'a [AnalyzerSelector],
+        skip: &'a [AnalyzerSelector],
+        enabled_rules: &'a [AnalyzerSelector],
+        rule_categories: RuleCategories,
+        suppression_reason: Option<String>,
+        settings: &'a SettingsWithEditor<'a>,
+        plugins: AnalyzerPluginVec,
+    ) -> Result<FixFileResult, WorkspaceError> {
+        let capabilities = self.features.get_capabilities(document_file_source);
+        let fix_all = capabilities
+            .analyzer
+            .fix_all
+            .ok_or_else(self.build_capability_error(path.as_path()))?;
+
+        let mut errors = 0;
+        let mut actions = vec![];
+        let mut skipped_suggested_fixes = 0;
+
+        if let Some(update_snippets) = capabilities.analyzer.update_snippets {
+            let exported_bindings = EmbeddedExportedBindings::default();
+            let mut builder = exported_bindings.builder();
+            let mut node_cache = NodeCache::default();
+            let embedded_snippets = self.parse_embedded_language_snippets(
+                path,
+                &document_file_source,
+                &parse,
+                &mut node_cache,
+                settings,
+                &mut builder,
+            )?;
+
+            let mut new_snippets = vec![];
+            for embedded_snippet in embedded_snippets {
+                let results = if let Some(file_source) = embedded_snippet
+                    .file_source()
+                    .or_else(|| embedded_snippet.language().document_file_source())
+                {
+                    self.fix_file_with_embeds(
+                        embedded_snippet.parse(),
+                        file_source,
+                        document_services,
+                        path,
+                        fix_file_mode,
+                        should_format,
+                        only,
+                        skip,
+                        enabled_rules,
+                        rule_categories,
+                        suppression_reason.clone(),
+                        settings,
+                        plugins.clone(),
+                    )?
+                } else {
+                    let Some(results) = embedded_snippet.language().fix_all(
+                        &self.features,
+                        document_file_source,
+                        FixAllParams {
+                            parse: embedded_snippet.parse().clone(),
+                            fix_file_mode,
+                            settings,
+                            should_format,
+                            biome_path: path,
+                            module_graph: self.module_graph.clone(),
+                            project_layout: self.project_layout.clone(),
+                            document_file_source,
+                            only,
+                            skip,
+                            rule_categories,
+                            suppression_reason: suppression_reason.clone(),
+                            enabled_rules,
+                            plugins: plugins.clone(),
+                            document_services,
+                            embeds_initial_indent: 0,
+                        },
+                    ) else {
+                        continue;
+                    };
+
+                    results?
+                };
+
+                actions.extend(results.actions);
+                errors += results.errors;
+                skipped_suggested_fixes += results.skipped_suggested_fixes;
+
+                new_snippets.push(UpdateSnippetsNodes {
+                    range: embedded_snippet.element_range(),
+                    new_code: results.code,
+                });
+            }
+
+            let new_root = update_snippets(parse.clone(), new_snippets)?;
+            if parse.is_embedded_node_parse() {
+                let embedded_language = match document_file_source {
+                    DocumentFileSource::Js(_) => Some(EmbeddedLanguageId::Js),
+                    DocumentFileSource::Css(_) => Some(EmbeddedLanguageId::Css),
+                    DocumentFileSource::Graphql(_) => Some(EmbeddedLanguageId::Graphql),
+                    DocumentFileSource::Json(_) => Some(EmbeddedLanguageId::Json),
+                    DocumentFileSource::Grit(_)
+                    | DocumentFileSource::Html(_)
+                    | DocumentFileSource::Markdown(_)
+                    | DocumentFileSource::Ignore
+                    | DocumentFileSource::Unknown => None,
+                };
+
+                if let Some(embedded_language) = embedded_language {
+                    embedded_language.set_new_root(
+                        &mut parse,
+                        new_root,
+                        Some(document_file_source),
+                    );
+                } else {
+                    parse.set_new_root(new_root);
+                }
+            } else {
+                parse.set_new_root(new_root);
+            }
+        }
+
+        let fix_result = fix_all(FixAllParams {
+            parse,
+            fix_file_mode,
+            settings,
+            should_format,
+            biome_path: path,
+            module_graph: self.module_graph.clone(),
+            project_layout: self.project_layout.clone(),
+            document_file_source,
+            only,
+            skip,
+            rule_categories,
+            suppression_reason,
+            enabled_rules,
+            plugins,
+            document_services,
+            embeds_initial_indent: 0,
+        })?;
+
+        actions.extend(fix_result.actions);
+        errors += fix_result.errors;
+        skipped_suggested_fixes += fix_result.skipped_suggested_fixes;
+
+        Ok(FixFileResult {
+            errors,
+            code: fix_result.code,
+            actions,
+            skipped_suggested_fixes,
+        })
     }
 
     fn parse(
@@ -1628,8 +1778,8 @@ impl Workspace for WorkspaceServer {
         // Track value references from non-source snippets (templates)
         let mut value_references = EmbeddedValueReferences::default();
         for snippet in &embedded_snippets {
-            if let Some(js_snippet) = snippet.as_js_embedded_snippet() {
-                let Some(file_source) = self.get_source(snippet.file_source_index()) else {
+            if snippet.language() == EmbeddedLanguageId::Js {
+                let Some(file_source) = snippet.file_source() else {
                     continue;
                 };
                 let Some(js_file_source) = file_source.to_js_file_source() else {
@@ -1637,8 +1787,9 @@ impl Workspace for WorkspaceServer {
                 };
                 // Only process non-source snippets (templates)
                 if !js_file_source.is_embedded_source() {
+                    let js_root: AnyJsRoot = snippet.parse().tree();
                     let mut builder = value_references.builder();
-                    builder.visit_non_source_snippet(&js_snippet.parse.tree());
+                    builder.visit_non_source_snippet(&js_root);
                     value_references.finish(builder);
                 }
             }
@@ -1784,33 +1935,31 @@ impl Workspace for WorkspaceServer {
                 mut skipped_diagnostics,
             } = results;
             for embedded_node in &embedded_snippets {
-                let Some(file_source) = self.get_source(embedded_node.file_source_index()) else {
+                let embedded_file_source = embedded_node.file_source().unwrap_or(language);
+                let Some(results) = embedded_node.language().lint(
+                    &self.features,
+                    embedded_file_source,
+                    LintParams {
+                        parse: embedded_node.parse().clone(),
+                        settings: &settings,
+                        path: &path,
+                        only: &only,
+                        skip: &skip,
+                        language: embedded_file_source,
+                        categories,
+                        module_graph: self.module_graph.clone(),
+                        project_layout: self.project_layout.clone(),
+                        suppression_reason: None,
+                        enabled_selectors: &enabled_rules,
+                        pull_code_actions,
+                        plugins: plugins.clone(),
+                        diagnostic_offset: Some(embedded_node.content_offset()),
+                        document_services: &services,
+                        snippet_services: Some(embedded_node.as_snippet_services()),
+                    },
+                ) else {
                     continue;
                 };
-                let capabilities = self.features.get_capabilities(file_source);
-                let Some(lint) = capabilities.analyzer.lint else {
-                    continue;
-                };
-                let snippet_services = embedded_node.as_snippet_services();
-
-                let results = lint(LintParams {
-                    parse: embedded_node.parse().clone(),
-                    settings: &settings,
-                    path: &path,
-                    only: &only,
-                    skip: &skip,
-                    language: file_source,
-                    categories,
-                    module_graph: self.module_graph.clone(),
-                    project_layout: self.project_layout.clone(),
-                    suppression_reason: None,
-                    enabled_selectors: &enabled_rules,
-                    pull_code_actions,
-                    plugins: plugins.clone(),
-                    diagnostic_offset: Some(embedded_node.content_offset()),
-                    document_services: &services,
-                    snippet_services: Some(snippet_services),
-                });
 
                 diagnostics.extend(results.diagnostics);
                 skipped_diagnostics += results.skipped_diagnostics;
@@ -1910,10 +2059,13 @@ impl Workspace for WorkspaceServer {
             });
 
             for embedded_node in embedded_snippets {
-                let Some(file_source) = self.get_source(embedded_node.file_source_index()) else {
+                let file_source = embedded_node.file_source().unwrap_or(language);
+                let Some(capabilities) = embedded_node
+                    .language()
+                    .capabilities(&self.features, file_source)
+                else {
                     continue;
                 };
-                let capabilities = self.features.get_capabilities(file_source);
                 let Some(pull_diagnostics_and_actions) =
                     capabilities.analyzer.pull_diagnostics_and_actions
                 else {
@@ -2010,31 +2162,33 @@ impl Workspace for WorkspaceServer {
         });
 
         for embedded_snippet in embedded_snippets {
-            let Some(file_source) = self.get_source(embedded_snippet.file_source_index()) else {
+            let file_source = embedded_snippet
+                .language()
+                .document_file_source()
+                .unwrap_or(language);
+            let Some(embedded_actions_result) = embedded_snippet.language().code_actions(
+                &self.features,
+                file_source,
+                CodeActionsParams {
+                    parse: embedded_snippet.parse(),
+                    range,
+                    settings: &settings,
+                    path: &path,
+                    module_graph: self.module_graph.clone(),
+                    project_layout: self.project_layout.clone(),
+                    language: file_source,
+                    only: &only,
+                    skip: &skip,
+                    suppression_reason: None,
+                    enabled_rules: &enabled_rules,
+                    plugins: Vec::new(),
+                    categories,
+                    action_offset: Some(embedded_snippet.content_offset()),
+                    document_services: &services,
+                },
+            ) else {
                 continue;
             };
-            let capabilities = self.features.get_capabilities(file_source);
-            let Some(code_actions) = capabilities.analyzer.code_actions else {
-                continue;
-            };
-
-            let embedded_actions_result = code_actions(CodeActionsParams {
-                parse: embedded_snippet.parse(),
-                range,
-                settings: &settings,
-                path: &path,
-                module_graph: self.module_graph.clone(),
-                project_layout: self.project_layout.clone(),
-                language: file_source,
-                only: &only,
-                skip: &skip,
-                suppression_reason: None,
-                enabled_rules: &enabled_rules,
-                plugins: Vec::new(),
-                categories,
-                action_offset: Some(embedded_snippet.content_offset()),
-                document_services: &services,
-            });
 
             result.actions.extend(embedded_actions_result.actions);
         }
@@ -2194,16 +2348,7 @@ impl Workspace for WorkspaceServer {
             .projects
             .get_settings_based_on_path(project_key, &path)
             .ok_or_else(WorkspaceError::no_project)?;
-        let capabilities =
-            self.get_file_capabilities(&path, settings.experimental_full_html_support_enabled());
-
-        let fix_all = capabilities
-            .analyzer
-            .fix_all
-            .ok_or_else(self.build_capability_error(&path))?;
-
-        let (mut parse, embedded_snippets, services) =
-            self.get_parse_with_snippets_and_services(&path)?;
+        let (parse, _, services) = self.get_parse_with_snippets_and_services(&path)?;
 
         let plugins = self
             .get_analyzer_plugins_for_project(
@@ -2219,86 +2364,23 @@ impl Workspace for WorkspaceServer {
             Vec::new()
         };
 
-        let mut errors = 0;
-        let mut actions = vec![];
-        let mut skipped_suggested_fixes = 0;
         let settings = self.settings_handle(&settings, inline_config);
 
-        if let Some(update_snippets) = capabilities.analyzer.update_snippets {
-            let mut new_snippets = vec![];
-            for embedded_snippet in embedded_snippets {
-                let Some(document_file_source) =
-                    self.get_source(embedded_snippet.file_source_index())
-                else {
-                    continue;
-                };
-                let capabilities = self.features.get_capabilities(document_file_source);
-                let Some(fix_all) = capabilities.analyzer.fix_all else {
-                    continue;
-                };
-
-                let results = fix_all(FixAllParams {
-                    parse: embedded_snippet.parse(),
-                    fix_file_mode,
-                    settings: &settings,
-                    should_format,
-                    biome_path: &path,
-                    module_graph: self.module_graph.clone(),
-                    project_layout: self.project_layout.clone(),
-                    document_file_source,
-                    only: &only,
-                    skip: &skip,
-                    rule_categories,
-                    suppression_reason: suppression_reason.clone(),
-                    enabled_rules: &enabled_rules,
-                    plugins: plugins.clone(),
-                    document_services: &services,
-                    embeds_initial_indent: 0,
-                })?;
-
-                actions.extend(results.actions);
-                errors += results.errors;
-                skipped_suggested_fixes += results.skipped_suggested_fixes;
-
-                new_snippets.push(UpdateSnippetsNodes {
-                    range: embedded_snippet.element_range(),
-                    new_code: results.code,
-                });
-            }
-
-            let new_root = update_snippets(parse.clone(), new_snippets)?;
-            parse.set_new_root(new_root);
-        }
-
-        let fix_result = fix_all(FixAllParams {
+        self.fix_file_with_embeds(
             parse,
+            language,
+            &services,
+            &path,
             fix_file_mode,
-            settings: &settings,
             should_format,
-            biome_path: &path,
-            module_graph: self.module_graph.clone(),
-            project_layout: self.project_layout.clone(),
-            document_file_source: language,
-            only: &only,
-            skip: &skip,
+            &only,
+            &skip,
+            &enabled_rules,
             rule_categories,
-            suppression_reason: suppression_reason.clone(),
-            enabled_rules: &enabled_rules,
-            plugins: plugins.clone(),
-            document_services: &services,
-            embeds_initial_indent: 0,
-        })?;
-
-        actions.extend(fix_result.actions);
-        errors += fix_result.errors;
-        skipped_suggested_fixes += fix_result.skipped_suggested_fixes;
-
-        Ok(FixFileResult {
-            errors,
-            code: fix_result.code,
-            actions,
-            skipped_suggested_fixes,
-        })
+            suppression_reason,
+            &settings,
+            plugins,
+        )
     }
 
     fn rename(&self, params: RenameParams) -> Result<RenameResult, WorkspaceError> {

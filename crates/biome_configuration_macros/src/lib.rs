@@ -46,6 +46,7 @@ fn collect_lint_rules() -> LintRulesVisitor {
     biome_css_analyze::visit_registry(&mut lint_visitor);
     biome_graphql_analyze::visit_registry(&mut lint_visitor);
     biome_html_analyze::visit_registry(&mut lint_visitor);
+    biome_tailwind_analyze::visit_registry(&mut lint_visitor);
 
     lint_visitor
 }
