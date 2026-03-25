@@ -606,6 +606,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_implicit_coercions::NoImplicitCoercionsOptions>(),
     ));
     result.push((
+        "nursery",
+        "noImpliedEval",
+        TypeId::of::<biome_rule_options::no_implied_eval::NoImpliedEvalOptions>(),
+    ));
+    result.push((
         "suspicious",
         "noImportAssign",
         TypeId::of::<biome_rule_options::no_import_assign::NoImportAssignOptions>(),
