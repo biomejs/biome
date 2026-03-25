@@ -2,7 +2,7 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::AnyHtmlElement;
+use biome_html_syntax::{AnyHtmlElement, HtmlFileSource};
 use biome_rowan::AstNode;
 use biome_rule_options::use_aria_activedescendant_with_tabindex::UseAriaActivedescendantWithTabindexOptions;
 
@@ -21,6 +21,13 @@ declare_lint_rule! {
     ///
     /// Because an element with `aria-activedescendant` must be tabbable,
     /// it must either have an inherent tabIndex of zero or declare a tabindex attribute.
+    ///
+    /// :::note
+    /// In `.html` files, this rule matches element names case-insensitively (e.g., `<DIV>`, `<div>`).
+    ///
+    /// In component-based frameworks (Vue, Svelte, Astro), only lowercase element names are checked.
+    /// PascalCase variants are assumed to be custom components and are ignored.
+    /// :::
     ///
     /// ## Examples
     ///
@@ -59,16 +66,6 @@ const INTERACTIVE_ELEMENTS: &[&str] = &[
     "button", "input", "select", "textarea",
 ];
 
-/// Check if the HTML element is natively interactive.
-fn is_interactive_element(element_name: &str) -> bool {
-    INTERACTIVE_ELEMENTS.contains(&element_name)
-}
-
-/// Check if the element is an anchor with an href (which is natively focusable).
-fn is_anchor_with_href(element: &AnyHtmlElement, element_name: &str) -> bool {
-    element_name == "a" && element.find_attribute_by_name("href").is_some()
-}
-
 impl Rule for UseAriaActivedescendantWithTabindex {
     type Query = Ast<AnyHtmlElement>;
     type State = ();
@@ -84,17 +81,20 @@ impl Rule for UseAriaActivedescendantWithTabindex {
         }
 
         // Get element name
-        let name = element.name().ok()?;
-        let name_token = name.value_token().ok()?;
-        let element_name = name_token.text_trimmed();
+        let element_name = element.name()?;
+        let element_name = element_name.text();
+
+        let source_type = ctx.source_type::<HtmlFileSource>();
 
         // Skip interactive elements (they are natively tabbable)
-        if is_interactive_element(element_name) {
+        // In HTML files: case-insensitive (BUTTON, Button, button all match)
+        // In component frameworks (Vue, Svelte, Astro): case-sensitive (only lowercase matches)
+        if is_interactive_element(element_name, source_type.is_html()) {
             return None;
         }
 
         // Skip anchor elements with href (natively focusable)
-        if is_anchor_with_href(element, element_name) {
+        if is_anchor_with_href(element, element_name, source_type.is_html()) {
             return None;
         }
 
@@ -124,4 +124,25 @@ impl Rule for UseAriaActivedescendantWithTabindex {
             ),
         )
     }
+}
+
+/// Check if the HTML element is natively interactive.
+fn is_interactive_element(element_name: &str, is_html: bool) -> bool {
+    if is_html {
+        INTERACTIVE_ELEMENTS
+            .iter()
+            .any(|&name| element_name.eq_ignore_ascii_case(name))
+    } else {
+        INTERACTIVE_ELEMENTS.contains(&element_name)
+    }
+}
+
+/// Check if the element is an anchor with an href (which is natively focusable).
+fn is_anchor_with_href(element: &AnyHtmlElement, element_name: &str, is_html: bool) -> bool {
+    let is_anchor = if is_html {
+        element_name.eq_ignore_ascii_case("a")
+    } else {
+        element_name == "a"
+    };
+    is_anchor && element.find_attribute_by_name("href").is_some()
 }
