@@ -1,5 +1,6 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
 expression: snapshot
 ---
 
@@ -36,18 +37,24 @@ CssRoot {
                         },
                     ],
                 },
-                ScssVariableModifierList [
-                    ScssVariableModifier {
-                        excl_token: BANG@144..145 "!" [] [],
-                        value: DEFAULT_KW@145..153 "default" [] [Whitespace(" ")],
-                    },
-                ],
-                ERROR_TOKEN@153..154 "?" [] [],
-                ERROR_TOKEN@154..155 "?" [] [],
-                ERROR_TOKEN@155..157 "?" [] [Whitespace(" ")],
-                ScssVariableModifier {
-                    excl_token: BANG@157..158 "!" [] [],
-                    value: DEFAULT_KW@158..165 "default" [] [],
+                CssBogus {
+                    items: [
+                        ScssVariableModifier {
+                            excl_token: BANG@144..145 "!" [] [],
+                            value: DEFAULT_KW@145..153 "default" [] [Whitespace(" ")],
+                        },
+                        CssBogus {
+                            items: [
+                                ERROR_TOKEN@153..154 "?" [] [],
+                                ERROR_TOKEN@154..155 "?" [] [],
+                                ERROR_TOKEN@155..157 "?" [] [Whitespace(" ")],
+                            ],
+                        },
+                        ScssVariableModifier {
+                            excl_token: BANG@157..158 "!" [] [],
+                            value: DEFAULT_KW@158..165 "default" [] [],
+                        },
+                    ],
                 },
                 SEMICOLON@165..166 ";" [] [],
             ],
@@ -68,18 +75,24 @@ CssRoot {
                         },
                     ],
                 },
-                ScssVariableModifierList [
-                    ScssVariableModifier {
-                        excl_token: BANG@187..188 "!" [] [],
-                        value: GLOBAL_KW@188..195 "global" [] [Whitespace(" ")],
-                    },
-                ],
-                ERROR_TOKEN@195..196 "?" [] [],
-                ERROR_TOKEN@196..197 "?" [] [],
-                ERROR_TOKEN@197..199 "?" [] [Whitespace(" ")],
-                ScssVariableModifier {
-                    excl_token: BANG@199..200 "!" [] [],
-                    value: GLOBAL_KW@200..206 "global" [] [],
+                CssBogus {
+                    items: [
+                        ScssVariableModifier {
+                            excl_token: BANG@187..188 "!" [] [],
+                            value: GLOBAL_KW@188..195 "global" [] [Whitespace(" ")],
+                        },
+                        CssBogus {
+                            items: [
+                                ERROR_TOKEN@195..196 "?" [] [],
+                                ERROR_TOKEN@196..197 "?" [] [],
+                                ERROR_TOKEN@197..199 "?" [] [Whitespace(" ")],
+                            ],
+                        },
+                        ScssVariableModifier {
+                            excl_token: BANG@199..200 "!" [] [],
+                            value: GLOBAL_KW@200..206 "global" [] [],
+                        },
+                    ],
                 },
                 SEMICOLON@206..207 ";" [] [],
             ],
@@ -105,17 +118,18 @@ CssRoot {
         0: SCSS_EXPRESSION_ITEM_LIST@142..144
           0: CSS_NUMBER@142..144
             0: CSS_NUMBER_LITERAL@142..144 "1" [] [Whitespace(" ")]
-      3: SCSS_VARIABLE_MODIFIER_LIST@144..153
+      3: CSS_BOGUS@144..165
         0: SCSS_VARIABLE_MODIFIER@144..153
           0: BANG@144..145 "!" [] []
           1: DEFAULT_KW@145..153 "default" [] [Whitespace(" ")]
-      4: ERROR_TOKEN@153..154 "?" [] []
-      5: ERROR_TOKEN@154..155 "?" [] []
-      6: ERROR_TOKEN@155..157 "?" [] [Whitespace(" ")]
-      7: SCSS_VARIABLE_MODIFIER@157..165
-        0: BANG@157..158 "!" [] []
-        1: DEFAULT_KW@158..165 "default" [] []
-      8: SEMICOLON@165..166 ";" [] []
+        1: CSS_BOGUS@153..157
+          0: ERROR_TOKEN@153..154 "?" [] []
+          1: ERROR_TOKEN@154..155 "?" [] []
+          2: ERROR_TOKEN@155..157 "?" [] [Whitespace(" ")]
+        2: SCSS_VARIABLE_MODIFIER@157..165
+          0: BANG@157..158 "!" [] []
+          1: DEFAULT_KW@158..165 "default" [] []
+      4: SEMICOLON@165..166 ";" [] []
     1: CSS_BOGUS@166..207
       0: SCSS_IDENTIFIER@166..183
         0: DOLLAR@166..168 "$" [Newline("\n")] []
@@ -126,17 +140,18 @@ CssRoot {
         0: SCSS_EXPRESSION_ITEM_LIST@185..187
           0: CSS_NUMBER@185..187
             0: CSS_NUMBER_LITERAL@185..187 "1" [] [Whitespace(" ")]
-      3: SCSS_VARIABLE_MODIFIER_LIST@187..195
+      3: CSS_BOGUS@187..206
         0: SCSS_VARIABLE_MODIFIER@187..195
           0: BANG@187..188 "!" [] []
           1: GLOBAL_KW@188..195 "global" [] [Whitespace(" ")]
-      4: ERROR_TOKEN@195..196 "?" [] []
-      5: ERROR_TOKEN@196..197 "?" [] []
-      6: ERROR_TOKEN@197..199 "?" [] [Whitespace(" ")]
-      7: SCSS_VARIABLE_MODIFIER@199..206
-        0: BANG@199..200 "!" [] []
-        1: GLOBAL_KW@200..206 "global" [] []
-      8: SEMICOLON@206..207 ";" [] []
+        1: CSS_BOGUS@195..199
+          0: ERROR_TOKEN@195..196 "?" [] []
+          1: ERROR_TOKEN@196..197 "?" [] []
+          2: ERROR_TOKEN@197..199 "?" [] [Whitespace(" ")]
+        2: SCSS_VARIABLE_MODIFIER@199..206
+          0: BANG@199..200 "!" [] []
+          1: GLOBAL_KW@200..206 "global" [] []
+      4: SEMICOLON@206..207 ";" [] []
   2: EOF@207..208 "" [Newline("\n")] []
 
 ```

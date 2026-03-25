@@ -1,5 +1,6 @@
 use crate::markdown::auxiliary::paragraph::FormatMdParagraphOptions;
 use crate::prelude::*;
+use crate::verbatim::format_verbatim_node;
 use biome_formatter::write;
 use biome_markdown_syntax::{MdHeader, MdHeaderFields};
 
@@ -8,10 +9,13 @@ pub(crate) struct FormatMdHeader;
 impl FormatNodeRule<MdHeader> for FormatMdHeader {
     fn fmt_fields(&self, node: &MdHeader, f: &mut MarkdownFormatter) -> FormatResult<()> {
         let MdHeaderFields {
+            indent,
             before,
             content,
             after,
         } = node.as_fields();
+
+        write!(f, [format_verbatim_node(indent.syntax())])?;
 
         write!(f, [before.format()])?;
 

@@ -59,6 +59,34 @@ use crate::parser::{ListItemIndent, ListTightness, QuoteIndent};
 use crate::syntax::reference::normalize_reference_label;
 use crate::syntax::{INDENT_CODE_BLOCK_SPACES, MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES};
 
+/// Compute the column width of an `MdIndentTokenList`.
+fn indent_list_width(list: &biome_markdown_syntax::MdIndentTokenList) -> usize {
+    let mut width = 0usize;
+    for c in indent_list_text(list).chars() {
+        match c {
+            ' ' => width += 1,
+            '\t' => width += TAB_STOP_SPACES - (width % TAB_STOP_SPACES),
+            _ => {}
+        }
+    }
+    width
+}
+
+/// Collect the raw text of an `MdIndentTokenList`.
+fn indent_list_text(list: &biome_markdown_syntax::MdIndentTokenList) -> String {
+    let mut text = String::new();
+    for token in list.iter() {
+        for tok in token
+            .syntax()
+            .descendants_with_tokens(Direction::Next)
+            .filter_map(|el| el.into_token())
+        {
+            text.push_str(tok.text());
+        }
+    }
+    text
+}
+
 // ============================================================================
 // Line Handling Utilities
 // ============================================================================
@@ -1147,24 +1175,8 @@ fn render_fenced_code_block(
 ) {
     out.push_str("<pre><code");
 
-    // Determine the fence indentation by looking at leading trivia
-    let fence_leading_indent = code.l_fence().ok().map_or(0, |fence| {
-        // Count leading spaces/tabs in the trivia before the fence
-        let trivia = fence.leading_trivia();
-        let mut indent = 0usize;
-        for piece in trivia.pieces() {
-            let text = piece.text();
-            for c in text.chars() {
-                match c {
-                    ' ' => indent += 1,
-                    '\t' => indent += TAB_STOP_SPACES - (indent % TAB_STOP_SPACES),
-                    '\n' | '\r' => indent = 0, // Reset at newlines
-                    _ => {}
-                }
-            }
-        }
-        indent
-    });
+    // Determine the fence indentation from the explicit indent slot
+    let fence_leading_indent = indent_list_width(&code.indent());
     let container_indent = list_indent + quote_indent;
     let fence_indent = fence_leading_indent
         .saturating_sub(container_indent)
@@ -1275,7 +1287,9 @@ fn render_html_block(
     list_indent: usize,
     quote_indent: usize,
 ) {
-    let mut content = collect_raw_inline_text(&html.content());
+    // Prepend the block prefix indent (now in explicit slot, not trivia)
+    let mut content = indent_list_text(&html.indent());
+    content.push_str(&collect_raw_inline_text(&html.content()));
     if list_indent > 0 {
         content = strip_indent_preserve_tabs(&content, list_indent);
     }

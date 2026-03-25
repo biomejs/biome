@@ -1427,6 +1427,17 @@ impl TypeReferenceQualifier {
         self.path.is_identifier("Promise")
     }
 
+    /// Checks whether this type qualifier references a `Record` type.
+    ///
+    /// This method simply checks whether the reference is for a literal
+    /// `Record`, without considering whether another symbol named `Record` is
+    /// in scope. It can be used _after_ type resolution has failed to find a
+    /// `Record` symbol in scope, but should not be used _instead of_ such type
+    /// resolution.
+    pub fn is_record(&self) -> bool {
+        self.path.is_identifier("Record")
+    }
+
     /// Checks whether this type qualifier references the `RegExp` type.
     ///
     /// This method simply checks whether the reference is for a literal

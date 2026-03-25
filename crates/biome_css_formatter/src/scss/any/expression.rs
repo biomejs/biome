@@ -11,6 +11,7 @@ impl FormatRule<AnyScssExpression> for FormatAnyScssExpression {
             AnyScssExpression::AnyCssValue(node) => node.format().fmt(f),
             AnyScssExpression::ScssBinaryExpression(node) => node.format().fmt(f),
             AnyScssExpression::ScssExpression(node) => node.format().fmt(f),
+            AnyScssExpression::ScssInterpolation(node) => node.format().fmt(f),
             AnyScssExpression::ScssListExpression(node) => node.format().fmt(f),
             AnyScssExpression::ScssMapExpression(node) => node.format().fmt(f),
             AnyScssExpression::ScssParenthesizedExpression(node) => node.format().fmt(f),

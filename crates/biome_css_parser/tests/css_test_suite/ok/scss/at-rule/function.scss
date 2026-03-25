@@ -1,0 +1,7 @@
+@function double($value: 2) {
+  @return $value * 2;
+}
+
+@function scale($value, $ratio: 1.5, $rest...) {
+  @return $value * $ratio;
+}

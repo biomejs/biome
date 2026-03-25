@@ -1,0 +1,31 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/scss/at-rule/else.scss
+---
+
+# Input
+
+```scss
+@else{
+color:red;
+}
+
+@else if $state==loading{
+color:blue;
+}
+
+```
+
+
+# Formatted
+
+```scss
+@else{
+color:red;
+}
+
+@else if $state==loading{
+color:blue;
+}
+
+```

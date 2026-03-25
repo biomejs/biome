@@ -1,13 +1,13 @@
 ---
 name: testing-codegen
-description: Guide for testing workflows and code generation commands in Biome. Use when running snapshot tests for lint rules, creating changesets for PRs, managing insta snapshots, or regenerating analyzer/parser/formatter code after changes.
+description: Guide for testing workflows and code generation commands in Biome. Use when running snapshot tests for lint rules, managing insta snapshots, or regenerating analyzer/parser/formatter code after changes.
 compatibility: Designed for coding agents working on the Biome codebase (github.com/biomejs/biome).
 ---
 
 ## Purpose
 
-Use this skill for testing, code generation, and preparing contributions. Covers snapshot testing with
-`insta`, code generation commands, and changeset creation.
+Use this skill for testing and code generation. Covers snapshot testing with
+`insta` and code generation commands.
 
 ## Prerequisites
 
@@ -129,6 +129,20 @@ Snapshot commands:
 - `s` - skip snapshot
 - `q` - quit
 
+### Pruning Orphaned Snapshots
+
+When tests are removed or renamed, their old snapshot files become orphaned. **Never delete snapshot files manually with `rm`** — always use insta's built-in pruning:
+
+```shell
+# Delete unreferenced snapshots after a successful test run
+cargo insta test --unreferenced delete -p <crate_name>
+
+# Or scoped to specific tests
+cargo insta test --unreferenced delete -p biome_cli --test main -- "handle_vue"
+```
+
+This runs the tests first, then deletes any `.snap` files that no test references. It is the only safe way to clean up snapshots — manual `rm` risks deleting snapshots that are still needed or creating git conflicts.
+
 ### Test Lint Rules
 
 ```shell
@@ -229,8 +243,31 @@ The comment is strongly recommended and is also enforced when present: if the co
 
 - The comment is found by scanning the entire file's leading trivia — it does not have to be literally the first token, but putting it at the very top (line 1) is the established convention.
 - Fixture/support files (e.g. `foo.js`, `bar.ts`) that don't contain "valid" or "invalid" in their name do **not** require a comment, since they are not considered "valid test files" by the runner.
-- Files excluded from comment enforcement regardless of name: `.snap`, `.json`, `.jsonc`, `.svelte`, `.vue`, `.astro`,
-  `.html`.
+- Files excluded from comment enforcement regardless of name: `.snap`, `.json`, `.jsonc`.
+
+**HTML-ish files (`.vue`, `.svelte`, `.astro`, `.html`):**
+
+These files are analyzed via the workspace-based test path (`analyze_with_workspace` in `biome_test_utils`), which
+checks the expectation comment by scanning the **raw file content** (not the parsed AST trivia). Use an HTML comment
+at the very top of the file:
+
+```vue
+<!-- should not generate diagnostics -->
+<script setup lang="ts">
+const x = 1;
+</script>
+<template>{{ x }}</template>
+```
+
+```vue
+<!-- should generate diagnostics -->
+<script>
+debugger;
+</script>
+```
+
+The same rules apply: valid files **must** have the comment, invalid files **should** have it.
+Do not place the comment inside `<script>` — put it at the top level of the file as an HTML comment.
 
 ### Code Generation Commands
 
@@ -299,48 +336,6 @@ just f  # Format Rust and TOML
 just l  # Lint code
 ```
 
-### Create Changeset
-
-For user-visible changes (bug fixes, new features):
-
-```shell
-just new-changeset
-```
-
-This prompts for:
-
-1. **Package selection**: Usually `@biomejs/biome`
-2. **Change type**:
-   - `patch` - Bug fixes
-   - `minor` - New features
-   - `major` - Breaking changes (requires targeting `next` branch)
-3. **Description**: What changed (used in CHANGELOG)
-
-**Changeset writing guidelines:**
-
-- Be concise and clear (1-3 sentences)
-- Start bug fixes with: `Fixed [#issue](link): ...`
-- Use past tense for your actions: "Added", "Fixed", "Changed"
-- Use present tense for Biome behavior: "Biome now supports..."
-- Include code examples for new rules/features
-- Link to rules: `[useConst](https://biomejs.dev/linter/rules/use-const/)`
-- End sentences with periods
-
-Example changeset:
-
-```markdown
----
-"@biomejs/biome": patch
----
-
-Fixed [#1234](https://github.com/biomejs/biome/issues/1234): The rule [
-`noVar`](https://biomejs.dev/linter/rules/no-var/) now correctly handles variables in for loops.
-
-Biome now analyzes the scope of loop variables properly.
-```
-
-**Edit changeset** - Files created in `.changeset/` directory, edit them directly.
-
 ### Run Doctests
 
 Test code examples in documentation comments:
@@ -375,7 +370,6 @@ cargo test test_name -- --show-output
 - **`.jsonc` arrays**: Use for multiple quick test cases in script context (no imports/exports)
 - **Code generation order**: Grammar → Analyzer → Formatter → Bindings
 - **CI compatibility**: Use `just` commands when possible (matches CI)
-- **Changeset timing**: Create before opening PR, can edit after
 - **Snapshot review**: Always review snapshots carefully - don't blindly accept
 - **Test performance**: Use `#[ignore]` for slow tests, run with `cargo test -- --ignored`
 - **Parser inspection**: Use `just qt <package>` to run quick_test and inspect AST, NOT full Biome builds (much faster)
@@ -431,4 +425,4 @@ fn quick_test() {
 - Main testing guide: `CONTRIBUTING.md` § Testing
 - Insta documentation: https://insta.rs
 - Analyzer testing: `crates/biome_analyze/CONTRIBUTING.md` § Testing
-- Changeset guide: `CONTRIBUTING.md` § Changelog
+- Changeset guide: `../changeset/SKILL.md`

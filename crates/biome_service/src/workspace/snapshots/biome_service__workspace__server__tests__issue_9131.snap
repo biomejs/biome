@@ -1,0 +1,15 @@
+---
+source: crates/biome_service/src/workspace/server.tests.rs
+expression: result.as_code()
+---
+const bulkUpsertTransactionsMutation = graphql(`
+	mutation test($input: Test!) {
+		test(input: $input) {
+			apple
+		}
+	}
+`);
+
+console.log(`test`); // plain template as call argument
+
+const highlight = foo`some tagged template`; // unknown tagged template

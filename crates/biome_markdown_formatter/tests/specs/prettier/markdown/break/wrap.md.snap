@@ -20,27 +20,27 @@ word very-very-very-very-very-very-very-very-very-very-long-word very-very-very-
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,5 +1,4 @@
--a  
+@@ -1,5 +1,5 @@
+ a  
 - very-very-very-very-very-very-very-very-very-very-long-word very-very-very-very-very-very-very-very-very-very-long-word very-very-very-very-very-very-very-very-very-very-long-word
-+a
 +very-very-very-very-very-very-very-very-very-very-long-word very-very-very-very-very-very-very-very-very-very-long-word very-very-very-very-very-very-very-very-very-very-long-word
  
--\
+ \
  word very-very-very-very-very-very-very-very-very-very-long-word very-very-very-very-very-very-very-very-very-very-long-word
 ```
 
 # Output
 
 ```md
-a
+a  
 very-very-very-very-very-very-very-very-very-very-long-word very-very-very-very-very-very-very-very-very-very-long-word very-very-very-very-very-very-very-very-very-very-long-word
 
+\
 word very-very-very-very-very-very-very-very-very-very-long-word very-very-very-very-very-very-very-very-very-very-long-word
 ```
 
 # Lines exceeding max width of 80 characters
 ```
     2: very-very-very-very-very-very-very-very-very-very-long-word very-very-very-very-very-very-very-very-very-very-long-word very-very-very-very-very-very-very-very-very-very-long-word
-    4: word very-very-very-very-very-very-very-very-very-very-long-word very-very-very-very-very-very-very-very-very-very-long-word
+    5: word very-very-very-very-very-very-very-very-very-very-long-word very-very-very-very-very-very-very-very-very-very-long-word
 ```

@@ -52,7 +52,7 @@ pub(crate) fn at_header(p: &mut MarkdownParser) -> bool {
 
 /// Parse an ATX header.
 ///
-/// Grammar: MdHeader = before: MdHashList content: MdParagraph? after: MdHashList
+/// Grammar: MdHeader = indent: MdIndentTokenList before: MdHashList content: MdParagraph? after: MdHashList
 ///
 /// ATX headers start with 1-6 `#` characters followed by space or end of line.
 /// More than 6 `#` characters is not a valid header.
@@ -80,7 +80,7 @@ pub(crate) fn parse_header(p: &mut MarkdownParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
+    p.emit_line_indent(MAX_BLOCK_PREFIX_INDENT);
 
     // Parse opening hashes (MdHashList containing MdHash nodes)
     parse_hash_list(p);

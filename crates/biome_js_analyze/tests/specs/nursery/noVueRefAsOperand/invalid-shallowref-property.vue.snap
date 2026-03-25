@@ -3,24 +3,29 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid-shallowref-property.vue
 ---
 # Input
-```ts
+```vue
+/* should generate diagnostics */
+
+<script>
 import { shallowRef } from 'vue'
 const foo = shallowRef({})
 foo.bar = 123
+</script>
 
 ```
 
 # Diagnostics
 ```
-invalid-shallowref-property.vue:3:1 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-shallowref-property.vue:6:1 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Ref value is accessed without `.value`.
   
-    1 │ import { shallowRef } from 'vue'
-    2 │ const foo = shallowRef({})
-  > 3 │ foo.bar = 123
+    4 │ import { shallowRef } from 'vue'
+    5 │ const foo = shallowRef({})
+  > 6 │ foo.bar = 123
       │ ^^^
-    4 │ 
+    7 │ </script>
+    8 │ 
   
   i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
   

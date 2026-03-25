@@ -6,3 +6,4 @@ pub(crate) mod code_block;
 pub(crate) mod container_block;
 pub(crate) mod inline;
 pub(crate) mod leaf_block;
+pub(crate) mod thematic_break_part;

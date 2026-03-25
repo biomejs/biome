@@ -194,6 +194,11 @@ pub trait Parser: Sized {
         self.source().has_preceding_line_break()
     }
 
+    /// Tests if there's whitespace trivia before the current token.
+    fn has_preceding_whitespace(&self) -> bool {
+        self.source().has_preceding_whitespace()
+    }
+
     /// Get the source code of the parser's current token.
     fn cur_text(&self) -> &str {
         &self.source().text()[self.cur_range()]
@@ -656,6 +661,24 @@ pub trait SyntaxFeature: Sized {
                 }
                 _ => Absent,
             }
+        }
+    }
+
+    /// Parses a syntax only if this feature is supported.
+    ///
+    /// Returns [ParsedSyntax::Absent] if the feature isn't supported.
+    fn parse_supported_syntax<'source, P>(
+        &self,
+        p: &mut Self::Parser<'source>,
+        parse: P,
+    ) -> ParsedSyntax
+    where
+        P: FnOnce(&mut Self::Parser<'source>) -> ParsedSyntax,
+    {
+        if self.is_supported(p) {
+            parse(p)
+        } else {
+            Absent
         }
     }
 

@@ -2,7 +2,9 @@
 mod generate_bindings;
 #[cfg(feature = "configuration")]
 mod generate_configuration;
-#[cfg(feature = "license")]
+#[cfg(feature = "external_data")]
+mod generate_css_baseline;
+#[cfg(feature = "external_data")]
 mod generate_license;
 #[cfg(feature = "configuration")]
 mod generate_migrate_eslint;
@@ -15,8 +17,9 @@ use crate::generate_bindings::generate_workspace_bindings;
 use crate::generate_configuration::generate_rule_options;
 #[cfg(feature = "configuration")]
 use crate::generate_configuration::generate_rules_configuration;
-
-#[cfg(feature = "license")]
+#[cfg(feature = "external_data")]
+use crate::generate_css_baseline::generate_css_baseline;
+#[cfg(feature = "external_data")]
 use crate::generate_license::generate_license;
 #[cfg(feature = "configuration")]
 use crate::generate_migrate_eslint::generate_migrate_eslint;
@@ -61,7 +64,7 @@ fn main() -> Result<()> {
             generate_workspace_bindings(Overwrite)?;
         }
         TaskCommand::License => {
-            #[cfg(feature = "license")]
+            #[cfg(feature = "external_data")]
             generate_license(Overwrite)?;
         }
         TaskCommand::Grammar(language_list) => {
@@ -69,6 +72,10 @@ fn main() -> Result<()> {
         }
         TaskCommand::Unicode => {
             generate_tables()?;
+        }
+        TaskCommand::CssBaseline => {
+            #[cfg(feature = "external_data")]
+            generate_css_baseline(Overwrite)?;
         }
         TaskCommand::NewRule {
             category,

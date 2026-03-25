@@ -1,0 +1,19 @@
+/* should not generate diagnostics */
+
+/* allowProperties excludes these non-widely-available properties */
+a { accent-color: bar; backdrop-filter: auto }
+
+/* allowFunctions */
+a { color: color-mix(in srgb, plum, #123456); }
+
+/* allowMediaConditions */
+@media (scripting: none) { a { color: red; } }
+
+/* allowSelectors */
+h1:has(+ h2) { margin: 0 0 0.25rem 0; }
+
+/* allowPropertyValues: clip-path:fill-box */
+a { clip-path: fill-box; }
+
+/* allowAtRules: container */
+@container (min-width: 800px) { a { color: red; } }

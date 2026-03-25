@@ -168,14 +168,14 @@ impl Projects {
 
     pub fn is_ignored_by_top_level_config(
         &self,
-        fs: &dyn FileSystem,
         project_key: ProjectKey,
         path: &Utf8Path,
+        is_dir: bool,
         ignore_kind: IgnoreKind,
     ) -> bool {
         match self.0.pin().get(&project_key) {
             Some(project_data) => {
-                is_ignored_by_top_level_config(fs, project_data, path, ignore_kind)
+                is_ignored_by_top_level_config(project_data, path, is_dir, ignore_kind)
             }
             None => false,
         }
@@ -184,9 +184,9 @@ impl Projects {
     #[inline]
     pub fn is_ignored(
         &self,
-        fs: &dyn FileSystem,
         project_key: ProjectKey,
         path: &Utf8Path,
+        is_dir: bool,
         features: FeatureName,
         ignore_kind: IgnoreKind,
     ) -> bool {
@@ -196,7 +196,7 @@ impl Projects {
         };
 
         let is_ignored_by_top_level_config =
-            is_ignored_by_top_level_config(fs, project_data, path, ignore_kind);
+            is_ignored_by_top_level_config(project_data, path, is_dir, ignore_kind);
 
         // If there are specific features enabled, but all of them ignore the
         // path, then we treat the path as ignored too.
@@ -214,7 +214,7 @@ impl Projects {
     pub fn get_file_features(
         &self,
         GetFileFeaturesParams {
-            fs,
+            fs: _,
             project_key,
             path,
             requested_features,
@@ -246,8 +246,12 @@ impl Projects {
             // Never ignore Biome's top-level config file
         } else if !skip_ignore_check {
             let is_ignored = {
-                let is_ignored_by_top_level_config =
-                    is_ignored_by_top_level_config(fs, project_data, path, IgnoreKind::Ancestors);
+                let is_ignored_by_top_level_config = is_ignored_by_top_level_config(
+                    project_data,
+                    path,
+                    false,
+                    IgnoreKind::Ancestors,
+                );
 
                 // If there are specific features enabled, but all of them ignore the
                 // path, then we treat the path as ignored too.
@@ -361,9 +365,9 @@ impl Projects {
 
 #[inline]
 fn is_ignored_by_top_level_config(
-    fs: &dyn FileSystem,
     project_data: &ProjectData,
     path: &Utf8Path,
+    is_dir: bool,
     ignore_kind: IgnoreKind,
 ) -> bool {
     // First check if the path is ignored by the `files.includes` setting
@@ -376,7 +380,7 @@ fn is_ignored_by_top_level_config(
             &project_data.root_settings.files.includes,
             |(_, settings)| &settings.files.includes,
         );
-    let mut is_included = if fs.path_is_dir(path) {
+    let mut is_included = if is_dir {
         includes.is_dir_included(path)
     } else {
         includes.is_file_included(path)
@@ -402,7 +406,7 @@ fn is_ignored_by_top_level_config(
     let is_ignored_by_vcs = project_data
         .root_settings
         .vcs_settings
-        .is_ignored(path, root_path);
+        .is_ignored(path, is_dir, root_path);
 
     !is_included || is_ignored_by_vcs
 }

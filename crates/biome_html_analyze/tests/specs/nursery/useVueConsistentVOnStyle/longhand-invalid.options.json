@@ -5,6 +5,7 @@
     "rules": {
       "nursery": {
         "useVueConsistentVOnStyle": {
+          "level": "on",
           "options": {
             "style": "longhand"
           }

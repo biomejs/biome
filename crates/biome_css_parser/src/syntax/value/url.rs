@@ -20,7 +20,13 @@ const URL_SET: TokenSet<CssSyntaxKind> = token_set![T![url], T![src]];
 
 /// Determines if the current position of the parser is at the beginning of a URL function.
 pub(crate) fn is_at_url_function(p: &mut CssParser) -> bool {
-    p.at_ts(URL_SET) && p.nth_at(1, T!['('])
+    is_nth_at_url_function(p, 0)
+}
+
+/// Determines if the token at offset `n` begins a URL function.
+#[inline]
+pub(crate) fn is_nth_at_url_function(p: &mut CssParser, n: usize) -> bool {
+    p.nth_at_ts(n, URL_SET) && p.nth_at(n + 1, T!['('])
 }
 
 /// Parses a URL function from the current position of the CSS parser.

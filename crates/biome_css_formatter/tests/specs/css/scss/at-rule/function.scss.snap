@@ -1,0 +1,29 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/scss/at-rule/function.scss
+---
+
+# Input
+
+```scss
+@function
+double(
+$value:2,
+$ratio: 1.5,
+$rest...
+){
+@return
+$value * $ratio;
+}
+
+```
+
+
+# Formatted
+
+```scss
+@function double($value: 2, $ratio: 1.5, $rest...) {
+	@return $value * $ratio;
+}
+
+```

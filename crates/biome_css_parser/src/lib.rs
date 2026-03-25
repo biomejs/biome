@@ -8,7 +8,7 @@ use biome_css_factory::CssSyntaxFactory;
 use biome_css_syntax::{AnyCssRoot, CssFileSource, CssLanguage, CssSyntaxNode};
 pub use biome_parser::prelude::*;
 use biome_parser::{AnyParse, EmbeddedNodeParse, NodeParse};
-use biome_rowan::{AstNode, NodeCache, SyntaxNodeWithOffset};
+use biome_rowan::{AstNode, NodeCache, SyntaxNodeWithOffset, TextSize};
 pub use parser::{CssModulesKind, CssParserOptions};
 
 mod lexer;
@@ -22,7 +22,7 @@ pub(crate) type CssLosslessTreeSink<'source> =
     LosslessTreeSink<'source, CssLanguage, CssSyntaxFactory>;
 
 pub(crate) type CssOffsetLosslessTreeSink<'source> =
-    biome_parser::tree_sink::OffsetLosslessTreeSink<'source, CssLanguage, CssSyntaxFactory>;
+    OffsetLosslessTreeSink<'source, CssLanguage, CssSyntaxFactory>;
 
 pub fn parse_css(source: &str, source_type: CssFileSource, options: CssParserOptions) -> CssParse {
     let mut cache = NodeCache::default();
@@ -166,7 +166,7 @@ impl CssOffsetParse {
     }
 
     /// Get the base offset applied to this parse result
-    pub fn base_offset(&self) -> biome_rowan::TextSize {
+    pub fn base_offset(&self) -> TextSize {
         self.root.base_offset()
     }
 

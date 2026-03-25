@@ -38,6 +38,7 @@ MdDocument {
     bom_token: missing (optional),
     value: MdBlockList [
         MdHeader {
+            indent: MdIndentTokenList [],
             before: MdHashList [
                 MdHash {
                     hash_token: HASH@0..1 "#" [] [],
@@ -74,6 +75,7 @@ MdDocument {
             value_token: NEWLINE@85..86 "\n" [] [],
         },
         MdHeader {
+            indent: MdIndentTokenList [],
             before: MdHashList [
                 MdHash {
                     hash_token: HASH@86..88 "##" [] [],
@@ -137,6 +139,7 @@ MdDocument {
             value_token: NEWLINE@196..197 "\n" [] [],
         },
         MdHeader {
+            indent: MdIndentTokenList [],
             before: MdHashList [
                 MdHash {
                     hash_token: HASH@197..199 "##" [] [],
@@ -293,6 +296,7 @@ MdDocument {
             value_token: NEWLINE@506..507 "\n" [] [],
         },
         MdHeader {
+            indent: MdIndentTokenList [],
             before: MdHashList [
                 MdHash {
                     hash_token: HASH@507..509 "##" [] [],
@@ -433,15 +437,16 @@ MdDocument {
   0: (empty)
   1: MD_BLOCK_LIST@0..658
     0: MD_HEADER@0..27
-      0: MD_HASH_LIST@0..1
+      0: MD_INDENT_TOKEN_LIST@0..0
+      1: MD_HASH_LIST@0..1
         0: MD_HASH@0..1
           0: HASH@0..1 "#" [] []
-      1: MD_PARAGRAPH@1..27
+      2: MD_PARAGRAPH@1..27
         0: MD_INLINE_ITEM_LIST@1..27
           0: MD_TEXTUAL@1..27
             0: MD_TEXTUAL_LITERAL@1..27 " Invalid Inline HTML Cases" [] []
         1: (empty)
-      2: MD_HASH_LIST@27..27
+      3: MD_HASH_LIST@27..27
     1: MD_NEWLINE@27..28
       0: NEWLINE@27..28 "\n" [] []
     2: MD_NEWLINE@28..29
@@ -456,15 +461,16 @@ MdDocument {
     4: MD_NEWLINE@85..86
       0: NEWLINE@85..86 "\n" [] []
     5: MD_HEADER@86..107
-      0: MD_HASH_LIST@86..88
+      0: MD_INDENT_TOKEN_LIST@86..86
+      1: MD_HASH_LIST@86..88
         0: MD_HASH@86..88
           0: HASH@86..88 "##" [] []
-      1: MD_PARAGRAPH@88..107
+      2: MD_PARAGRAPH@88..107
         0: MD_INLINE_ITEM_LIST@88..107
           0: MD_TEXTUAL@88..107
             0: MD_TEXTUAL_LITERAL@88..107 " Period in Tag Name" [] []
         1: (empty)
-      2: MD_HASH_LIST@107..107
+      3: MD_HASH_LIST@107..107
     6: MD_NEWLINE@107..108
       0: NEWLINE@107..108 "\n" [] []
     7: MD_PARAGRAPH@108..196
@@ -497,15 +503,16 @@ MdDocument {
     8: MD_NEWLINE@196..197
       0: NEWLINE@196..197 "\n" [] []
     9: MD_HEADER@197..213
-      0: MD_HASH_LIST@197..199
+      0: MD_INDENT_TOKEN_LIST@197..197
+      1: MD_HASH_LIST@197..199
         0: MD_HASH@197..199
           0: HASH@197..199 "##" [] []
-      1: MD_PARAGRAPH@199..213
+      2: MD_PARAGRAPH@199..213
         0: MD_INLINE_ITEM_LIST@199..213
           0: MD_TEXTUAL@199..213
             0: MD_TEXTUAL_LITERAL@199..213 " Unclosed Tags" [] []
         1: (empty)
-      2: MD_HASH_LIST@213..213
+      3: MD_HASH_LIST@213..213
     10: MD_NEWLINE@213..214
       0: NEWLINE@213..214 "\n" [] []
     11: MD_PARAGRAPH@214..506
@@ -600,15 +607,16 @@ MdDocument {
     12: MD_NEWLINE@506..507
       0: NEWLINE@506..507 "\n" [] []
     13: MD_HEADER@507..526
-      0: MD_HASH_LIST@507..509
+      0: MD_INDENT_TOKEN_LIST@507..507
+      1: MD_HASH_LIST@507..509
         0: MD_HASH@507..509
           0: HASH@507..509 "##" [] []
-      1: MD_PARAGRAPH@509..526
+      2: MD_PARAGRAPH@509..526
         0: MD_INLINE_ITEM_LIST@509..526
           0: MD_TEXTUAL@509..526
             0: MD_TEXTUAL_LITERAL@509..526 " Invalid Comments" [] []
         1: (empty)
-      2: MD_HASH_LIST@526..526
+      3: MD_HASH_LIST@526..526
     14: MD_NEWLINE@526..527
       0: NEWLINE@526..527 "\n" [] []
     15: MD_PARAGRAPH@527..658

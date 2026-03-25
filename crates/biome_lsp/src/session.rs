@@ -8,7 +8,7 @@ use biome_configuration::{Configuration, ConfigurationPathHint};
 use biome_console::markup;
 use biome_deserialize::Merge;
 use biome_diagnostics::PrintDescription;
-use biome_fs::BiomePath;
+use biome_fs::{BiomePath, normalize_path};
 use biome_line_index::WideEncoding;
 use biome_lsp_converters::{PositionEncoding, negotiated_encoding};
 use biome_service::Workspace;
@@ -640,6 +640,12 @@ impl Session {
         }
     }
 
+    /// Returns the root URI of the workspace as provided by the client
+    pub(crate) fn base_uri(&self) -> Option<Uri> {
+        let initialize_params = self.initialize_params.get()?;
+        initialize_params.root_uri.clone()
+    }
+
     /// Returns the base path of the workspace on the filesystem if it has one
     pub(crate) fn base_path(&self) -> Option<Utf8PathBuf> {
         let initialize_params = self.initialize_params.get()?;
@@ -700,12 +706,8 @@ impl Session {
     pub(crate) fn resolve_configuration_path(
         &self,
         file_path: Option<&Utf8PathBuf>,
-    ) -> Option<Utf8PathBuf> {
+    ) -> Option<ConfigurationPathHint> {
         let config_path = self.get_settings_configuration_path()?;
-
-        if config_path.is_absolute() {
-            return Some(config_path);
-        }
 
         // Collect workspace folder roots as absolute Utf8PathBufs.
         let workspace_roots: Vec<Utf8PathBuf> = self
@@ -720,6 +722,18 @@ impl Session {
             })
             .collect();
 
+        let hint_for_path = |path: Utf8PathBuf| {
+            Some(if workspace_roots.iter().any(|r| path.starts_with(r)) {
+                ConfigurationPathHint::FromUser(path)
+            } else {
+                ConfigurationPathHint::FromUserExternal(path)
+            })
+        };
+
+        if config_path.is_absolute() {
+            return hint_for_path(config_path);
+        }
+
         if let Some(file_path) = file_path {
             // Find the workspace folder that contains this file and resolve
             // the relative config path against that folder.
@@ -728,7 +742,8 @@ impl Session {
                 .filter(|root| file_path.starts_with(*root))
                 .max_by_key(|root| root.as_str().len())
             {
-                return Some(root.join(&config_path));
+                let joined = normalize_path(&root.join(config_path));
+                return hint_for_path(joined);
             }
         }
 
@@ -739,17 +754,19 @@ impl Session {
         // correct per-file resolution happens in `did_open` where the file
         // path is available.
         if let Some(root) = workspace_roots.first() {
-            return Some(root.join(&config_path));
+            let joined = normalize_path(&root.join(&config_path));
+            return hint_for_path(joined);
         }
 
         // Fall back to the (deprecated) root_uri base path.
         if let Some(base) = self.base_path() {
-            return Some(base.join(&config_path));
+            let joined = normalize_path(&base.join(&config_path));
+            return hint_for_path(joined);
         }
 
         // Nothing to resolve against; return the path unchanged and let the
         // downstream loader produce a meaningful error.
-        Some(config_path)
+        Some(ConfigurationPathHint::FromUserExternal(config_path))
     }
 
     /// This function attempts to read the `biome.json` configuration file from
@@ -761,7 +778,7 @@ impl Session {
             self.set_configuration_status(ConfigurationStatus::Loading);
 
             let status = self
-                .load_biome_configuration_file(ConfigurationPathHint::FromUser(config_path), reload)
+                .load_biome_configuration_file(config_path, reload)
                 .await;
             debug!("Configuration status: {:?}", status);
             self.set_configuration_status(status);
@@ -960,7 +977,32 @@ impl Session {
             }
         };
         if !loaded_configuration.loaded_location.is_in_project() {
-            let message = PrintDescription(&ConfigurationOutsideProject).to_string();
+            let config_path = loaded_configuration
+                .file_path
+                .as_ref()
+                .map_or_else(|| "<unknown>".to_string(), |p| p.to_string());
+            let working_directory = match &base_path {
+                ConfigurationPathHint::FromLsp(path)
+                | ConfigurationPathHint::FromWorkspace(path) => path.to_string(),
+                ConfigurationPathHint::FromUser(path) => {
+                    let fs = self.workspace.fs();
+                    if fs.path_is_file(path) {
+                        path.parent()
+                            .map_or("<unknown>".to_string(), |p| p.to_string())
+                    } else {
+                        path.to_string()
+                    }
+                }
+                ConfigurationPathHint::FromUserExternal(_) => self
+                    .base_path()
+                    .map_or("<unknown>".to_string(), |p| p.to_string()),
+                ConfigurationPathHint::None => "<unknown>".to_string(),
+            };
+            let message = PrintDescription(&ConfigurationOutsideProject {
+                config_path,
+                working_directory,
+            })
+            .to_string();
             self.client.log_message(MessageType::INFO, message).await;
         }
 
@@ -1022,12 +1064,12 @@ impl Session {
         // the working directory. Otherwise, the base path of the session is used, then the current
         // working directory is used as the last resort.
         debug!("Configuration path provided {:?}", &base_path);
-        let path = match &base_path {
+        let project_path = match &base_path {
             ConfigurationPathHint::FromLsp(path) | ConfigurationPathHint::FromWorkspace(path) => {
                 path.to_path_buf()
             }
             ConfigurationPathHint::FromUser(path) => {
-                if path.is_file() {
+                if fs.path_is_file(path) {
                     path.parent()
                         .map_or(fs.working_directory().unwrap_or_default(), |p| {
                             p.to_path_buf()
@@ -1042,11 +1084,11 @@ impl Session {
                 .unwrap_or_default(),
         };
 
-        let project_key = match self.project_for_path(&path) {
+        let project_key = match self.project_for_path(&project_path) {
             Some(project_key) => project_key,
             None => {
                 let register_result = self.workspace.open_project(OpenProjectParams {
-                    path: path.as_path().into(),
+                    path: project_path.as_path().into(),
                     open_uninitialized: true,
                 });
                 let OpenProjectResult { project_key } = match register_result {
@@ -1079,7 +1121,7 @@ impl Session {
             module_graph_resolution_kind: ModuleGraphResolutionKind::from(&scan_kind),
         });
 
-        self.insert_and_scan_project(project_key, path.into(), scan_kind, force)
+        self.insert_and_scan_project(project_key, project_path.into(), scan_kind, force)
             .await;
 
         if let Err(WorkspaceError::PluginErrors(error)) = result {
@@ -1133,6 +1175,10 @@ impl Session {
                 }
             }
             Some(settings) => {
+                let settings = settings
+                    .get(CONFIGURATION_SECTION)
+                    .cloned()
+                    .unwrap_or(settings);
                 let mut config = self.extension_settings.write().unwrap();
                 if let Err(err) = config.set_workspace_settings(settings) {
                     error!("Couldn't set client configuration: {}", err);

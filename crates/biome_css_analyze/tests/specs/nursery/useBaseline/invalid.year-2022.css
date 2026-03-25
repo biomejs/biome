@@ -1,0 +1,7 @@
+/* should generate diagnostics */
+
+/* hyphens became newly available in 2023, fails cutoff of 2022 */
+p { hyphens: auto; }
+
+/* :has became newly available in 2023, fails cutoff of 2022 */
+h1:has(+ h2) { margin: 0; }

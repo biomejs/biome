@@ -3,24 +3,29 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid-optional-chaining.vue
 ---
 # Input
-```ts
+```vue
+/* should generate diagnostics */
+
+<script>
 import { ref } from 'vue'
 const foo = ref(123)
 const bar = foo?.bar
+</script>
 
 ```
 
 # Diagnostics
 ```
-invalid-optional-chaining.vue:3:13 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-optional-chaining.vue:6:13 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Ref value is accessed without `.value`.
   
-    1 │ import { ref } from 'vue'
-    2 │ const foo = ref(123)
-  > 3 │ const bar = foo?.bar
+    4 │ import { ref } from 'vue'
+    5 │ const foo = ref(123)
+  > 6 │ const bar = foo?.bar
       │             ^^^
-    4 │ 
+    7 │ </script>
+    8 │ 
   
   i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
   

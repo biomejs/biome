@@ -574,6 +574,26 @@ pub(crate) fn skip_optional_marker_space(p: &mut MarkdownParser, preserve_tab: b
     false
 }
 
+/// Emit the optional space/tab after a `>` quote marker as an explicit CST node.
+pub(crate) fn emit_optional_marker_space(p: &mut MarkdownParser, preserve_tab: bool) -> bool {
+    if !p.at(MD_TEXTUAL_LITERAL) {
+        return false;
+    }
+
+    let text = p.cur_text();
+    if text == " " {
+        p.bump_remap(MD_QUOTE_POST_MARKER_SPACE);
+        return true;
+    }
+    if text == "\t" {
+        if !preserve_tab {
+            p.bump_remap(MD_QUOTE_POST_MARKER_SPACE);
+        }
+        return true;
+    }
+    false
+}
+
 pub(crate) fn has_quote_prefix(p: &mut MarkdownParser, depth: usize) -> bool {
     if depth == 0 {
         return false;

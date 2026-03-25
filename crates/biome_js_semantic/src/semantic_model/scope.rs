@@ -14,8 +14,9 @@ pub(crate) struct SemanticModelScopeData {
     pub(crate) children: Vec<ScopeId>,
     // All bindings of this scope (points to SemanticModelData::bindings)
     pub(crate) bindings: Vec<BindingId>,
-    // Map pointing to the [bindings] vec of each bindings by its name
-    pub(crate) bindings_by_name: FxHashMap<TokenText, BindingId>,
+    // Map pointing to the [bindings] vec of each bindings by its name,
+    // tracking the Type/Value/Namespace distinction for TypeScript declaration merging
+    pub(crate) bindings_by_name: FxHashMap<TokenText, TsBindingReference>,
     // All read references of a scope
     pub(crate) read_references: Vec<ReferenceId>,
     // All write references of a scope
@@ -103,16 +104,31 @@ impl Scope {
 
     /// Returns a [Binding] by its name, like it appears on code.  It **does
     /// not** returns bindings of parent scopes.
+    ///
+    /// When a name has both a type and value binding (e.g., a class), this
+    /// returns the value binding (or the type binding if only a type exists).
     pub fn get_binding(&self, name: impl AsRef<str>) -> Option<Binding> {
         let data = &self.data.scopes[self.id.index()];
 
         let name = name.as_ref();
-        let id = *data.bindings_by_name.get(name)?;
+        let binding_ref = data.bindings_by_name.get(name)?;
+        let id = binding_ref.value_ty_or_ty();
 
         Some(Binding {
             data: self.data.clone(),
             id,
         })
+    }
+
+    /// Returns the [TsBindingReference] for a name in this scope, which
+    /// tracks whether the name refers to a type, value, namespace, or a
+    /// merged combination thereof.
+    ///
+    /// It **does not** return bindings of parent scopes.
+    pub fn get_binding_reference(&self, name: impl AsRef<str>) -> Option<TsBindingReference> {
+        let data = &self.data.scopes[self.id.index()];
+        let name = name.as_ref();
+        data.bindings_by_name.get(name).copied()
     }
 
     /// Checks if the current scope is one of the ancestor of "other". Given

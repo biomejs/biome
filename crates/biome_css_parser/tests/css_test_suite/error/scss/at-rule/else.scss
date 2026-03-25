@@ -1,0 +1,13 @@
+@else {
+  color: red;
+}
+
+@if $theme == dark {
+  color: white;
+} @else
+
+@if $state == loading {
+  color: blue;
+} @else if {
+  color: green;
+}

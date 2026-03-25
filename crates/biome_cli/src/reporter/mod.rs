@@ -21,7 +21,6 @@ use biome_json_factory::make::{
 use biome_json_syntax::{AnyJsonMemberName, AnyJsonValue, JsonMember, T};
 use camino::Utf8Path;
 use serde::Serialize;
-use std::collections::BTreeSet;
 use std::io;
 use std::time::Duration;
 
@@ -183,7 +182,7 @@ pub(crate) trait ReporterVisitor {
     fn report_handled_paths(
         &mut self,
         _writer: &mut dyn ReporterWriter,
-        _evaluated_paths: BTreeSet<BiomePath>,
+        _evaluated_paths: Vec<BiomePath>,
         _working_directory: Option<&Utf8Path>,
     ) -> io::Result<()> {
         Ok(())

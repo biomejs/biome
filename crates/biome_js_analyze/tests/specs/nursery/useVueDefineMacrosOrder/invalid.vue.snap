@@ -3,7 +3,8 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.vue
 ---
 # Input
-```ts
+```vue
+<script lang="ts" setup>
 import { ref } from 'vue'
 
 interface Foo {}
@@ -20,21 +21,24 @@ const emit = defineEmits([])
 defineProps({})
 
 const count = ref(0)
+</script>
+
+<template><div /></template>
 
 ```
 
 # Diagnostics
 ```
-invalid.vue:14:1 lint/nursery/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:15:1 lint/nursery/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i defineProps macro is out of order.
   
-    12 │ const emit = defineEmits([])
-    13 │ /** Props */
-  > 14 │ defineProps({})
+    13 │ const emit = defineEmits([])
+    14 │ /** Props */
+  > 15 │ defineProps({})
        │ ^^^^^^^^^^^^^^^
-    15 │ 
-    16 │ const count = ref(0)
+    16 │ 
+    17 │ const count = ref(0)
   
   i Macros defined in <script setup> should be ordered as follows: defineModel, defineProps, defineEmits
   
@@ -44,19 +48,19 @@ invalid.vue:14:1 lint/nursery/useVueDefineMacrosOrder  FIXABLE  ━━━━━�
   
   i Unsafe fix: Reorder macro defineProps.
   
-     8  8 │   
-     9  9 │   debugger
-       10 │ + /**·Props·*/
-       11 │ + defineProps({})
-       12 │ + 
-    10 13 │   
-    11 14 │   // Define the props and emits
-    12    │ - const·emit·=·defineEmits([])
-    13    │ - /**·Props·*/
-    14    │ - defineProps({})
-       15 │ + const·emit·=·defineEmits([])
-    15 16 │   
-    16 17 │   const count = ref(0)
+     9  9 │   
+    10 10 │   debugger
+       11 │ + /**·Props·*/
+       12 │ + defineProps({})
+       13 │ + 
+    11 14 │   
+    12 15 │   // Define the props and emits
+    13    │ - const·emit·=·defineEmits([])
+    14    │ - /**·Props·*/
+    15    │ - defineProps({})
+       16 │ + const·emit·=·defineEmits([])
+    16 17 │   
+    17 18 │   const count = ref(0)
   
 
 ```

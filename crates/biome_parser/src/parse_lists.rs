@@ -136,6 +136,14 @@ pub trait ParseSeparatedList {
         p.expect(self.separating_element_kind())
     }
 
+    /// Called when [Self::parse_element] returns [ParsedSyntax::Absent] and the parser is
+    /// already positioned at the separating token.
+    ///
+    /// The default implementation does nothing because many separated lists allow sparse
+    /// elements or prefer to continue without an additional diagnostic. Parsers that want an
+    /// explicit "missing element before separator" diagnostic can override this hook.
+    fn diagnose_missing_element(&mut self, _p: &mut Self::Parser<'_>) {}
+
     /// Parses a list of elements separated by a recurring element
     ///
     /// # Panics
@@ -167,7 +175,7 @@ pub trait ParseSeparatedList {
             let parsed_element = self.parse_element(p);
 
             if parsed_element.is_absent() && p.at(self.separating_element_kind()) {
-                // a missing element
+                self.diagnose_missing_element(p);
                 continue;
             }
             if self.recover(p, parsed_element).is_err() {

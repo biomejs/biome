@@ -18,14 +18,14 @@ bbb
 --- Prettier
 +++ Biome
 @@ -1,2 +1,2 @@
--aaa  
-+aaa
- bbb
+ aaa  
+-bbb
++bbb  
 ```
 
 # Output
 
 ```md
-aaa
-bbb
+aaa  
+bbb  
 ```

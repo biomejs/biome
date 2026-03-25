@@ -1,0 +1,116 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+- foo
+  - bar
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@0..1 "-" [] [],
+                        post_marker_space_token: missing (optional),
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@1..5 " foo" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@5..6 "\n" [] [],
+                                },
+                            ],
+                            hard_line: missing (optional),
+                        },
+                        MdBulletListItem {
+                            md_bullet_list: MdBulletList [
+                                MdBullet {
+                                    prefix: MdListMarkerPrefix {
+                                        pre_marker_indent: MdIndentTokenList [],
+                                        marker: MINUS@6..9 "-" [Skipped(" "), Skipped(" ")] [],
+                                        post_marker_space_token: missing (optional),
+                                        content_indent: MdIndentTokenList [],
+                                    },
+                                    content: MdBlockList [
+                                        MdParagraph {
+                                            list: MdInlineItemList [
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@9..13 " bar" [] [],
+                                                },
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@13..14 "\n" [] [],
+                                                },
+                                            ],
+                                            hard_line: missing (optional),
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@14..14 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..14
+  0: (empty)
+  1: MD_BLOCK_LIST@0..14
+    0: MD_BULLET_LIST_ITEM@0..14
+      0: MD_BULLET_LIST@0..14
+        0: MD_BULLET@0..14
+          0: MD_LIST_MARKER_PREFIX@0..1
+            0: MD_INDENT_TOKEN_LIST@0..0
+            1: MINUS@0..1 "-" [] []
+            2: (empty)
+            3: MD_INDENT_TOKEN_LIST@1..1
+          1: MD_BLOCK_LIST@1..14
+            0: MD_PARAGRAPH@1..6
+              0: MD_INLINE_ITEM_LIST@1..6
+                0: MD_TEXTUAL@1..5
+                  0: MD_TEXTUAL_LITERAL@1..5 " foo" [] []
+                1: MD_TEXTUAL@5..6
+                  0: MD_TEXTUAL_LITERAL@5..6 "\n" [] []
+              1: (empty)
+            1: MD_BULLET_LIST_ITEM@6..14
+              0: MD_BULLET_LIST@6..14
+                0: MD_BULLET@6..14
+                  0: MD_LIST_MARKER_PREFIX@6..9
+                    0: MD_INDENT_TOKEN_LIST@6..6
+                    1: MINUS@6..9 "-" [Skipped(" "), Skipped(" ")] []
+                    2: (empty)
+                    3: MD_INDENT_TOKEN_LIST@9..9
+                  1: MD_BLOCK_LIST@9..14
+                    0: MD_PARAGRAPH@9..14
+                      0: MD_INLINE_ITEM_LIST@9..14
+                        0: MD_TEXTUAL@9..13
+                          0: MD_TEXTUAL_LITERAL@9..13 " bar" [] []
+                        1: MD_TEXTUAL@13..14
+                          0: MD_TEXTUAL_LITERAL@13..14 "\n" [] []
+                      1: (empty)
+  2: EOF@14..14 "" [] []
+
+```

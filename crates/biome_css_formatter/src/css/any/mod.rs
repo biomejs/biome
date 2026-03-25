@@ -88,6 +88,8 @@ pub(crate) mod rule;
 pub(crate) mod rule_block;
 pub(crate) mod scope_range;
 pub(crate) mod selector;
+pub(crate) mod selector_custom_identifier;
+pub(crate) mod selector_identifier;
 pub(crate) mod simple_selector;
 pub(crate) mod sub_selector;
 pub(crate) mod supports_and_combinable_condition;

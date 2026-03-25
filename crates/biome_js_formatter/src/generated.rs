@@ -11979,6 +11979,31 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsInProperty {
         )
     }
 }
+impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsLiteralExportName {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_js_syntax::AnyJsLiteralExportName,
+        crate::js::any::literal_export_name::FormatAnyJsLiteralExportName,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::js::any::literal_export_name::FormatAnyJsLiteralExportName::default(),
+        )
+    }
+}
+impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsLiteralExportName {
+    type Format = FormatOwnedWithRule<
+        biome_js_syntax::AnyJsLiteralExportName,
+        crate::js::any::literal_export_name::FormatAnyJsLiteralExportName,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::js::any::literal_export_name::FormatAnyJsLiteralExportName::default(),
+        )
+    }
+}
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsLiteralExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
