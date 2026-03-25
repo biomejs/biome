@@ -1,9 +1,11 @@
 use biome_fs::{BiomePath, FileSystem, MemoryFileSystem};
 use biome_js_parser::JsParserOptions;
+use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_js_syntax::{AnyJsRoot, JsFileSource};
 use biome_module_graph::ModuleGraph;
 use biome_project_layout::ProjectLayout;
 use divan::Bencher;
+use std::sync::Arc;
 
 #[cfg(target_os = "windows")]
 #[global_allocator]
@@ -65,14 +67,15 @@ fn bench_index_d_ts(bencher: Bencher, name: &str) {
 
             let path = BiomePath::new(name);
             let root = get_js_root(&fs, &path);
-            (fs, path, root)
+            let semantic_model = Arc::new(semantic_model(&root, SemanticModelOptions::default()));
+            (fs, path, root, semantic_model)
         })
-        .bench_local_values(|(fs, path, root)| {
+        .bench_local_values(|(fs, path, root, semantic_model)| {
             let module_graph = ModuleGraph::default();
             module_graph.update_graph_for_js_paths(
                 &fs,
                 &ProjectLayout::default(),
-                &[(&path, root)],
+                &[(&path, root, semantic_model)],
                 true,
             );
             divan::black_box(&module_graph);

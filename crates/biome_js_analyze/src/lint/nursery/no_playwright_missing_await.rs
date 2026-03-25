@@ -1,10 +1,11 @@
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext,
+    FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext,
     declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
+use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsExpression, JsArrowFunctionExpression, JsCallExpression, JsSyntaxKind,
 };
@@ -12,7 +13,8 @@ use biome_rowan::{AstNode, BatchMutationExt, TokenText, TriviaPieceKind};
 
 use biome_rule_options::no_playwright_missing_await::NoPlaywrightMissingAwaitOptions;
 
-use crate::frameworks::playwright::find_member_in_chain;
+use crate::frameworks::playwright::{find_member_in_chain, is_playwright_call_chain_or_resolved};
+use crate::services::semantic::Semantic;
 use crate::{JsRuleAction, ast_utils::is_await_allowed};
 
 declare_lint_rule! {
@@ -70,13 +72,14 @@ declare_lint_rule! {
 }
 
 impl Rule for NoPlaywrightMissingAwait {
-    type Query = Ast<JsCallExpression>;
+    type Query = Semantic<JsCallExpression>;
     type State = MissingAwaitType;
     type Signals = Option<Self::State>;
     type Options = NoPlaywrightMissingAwaitOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let call_expr = ctx.query();
+        let model = ctx.model();
 
         // Check for test.step() calls
         if is_test_step_call(call_expr) {
@@ -87,7 +90,7 @@ impl Rule for NoPlaywrightMissingAwait {
         }
 
         // Check for expect calls with async matchers
-        if let Some(matcher_name) = get_async_expect_matcher(call_expr)
+        if let Some(matcher_name) = get_async_expect_matcher(call_expr, model)
             && !is_properly_handled(call_expr)
         {
             return Some(matcher_name);
@@ -203,40 +206,46 @@ impl Rule for NoPlaywrightMissingAwait {
     }
 }
 
-// Playwright async matchers (web-first assertions)
-// IMPORTANT: Keep this array sorted for binary search
-const ASYNC_PLAYWRIGHT_MATCHERS: &[&str] = &[
+// Playwright-only async matchers — these don't exist in jest-dom and can be flagged unconditionally.
+// IMPORTANT: Keep this array sorted for binary search.
+const PLAYWRIGHT_ONLY_MATCHERS: &[&str] = &[
     "toBeAttached",
-    "toBeChecked",
-    "toBeDisabled",
     "toBeEditable",
-    "toBeEmpty",
-    "toBeEnabled",
     "toBeFocused",
     "toBeHidden",
     "toBeInViewport",
     "toBeOK",
-    "toBeVisible",
     "toContainClass",
     "toContainText",
-    "toHaveAccessibleDescription",
-    "toHaveAccessibleErrorMessage",
-    "toHaveAccessibleName",
-    "toHaveAttribute",
     "toHaveCSS",
-    "toHaveClass",
     "toHaveCount",
     "toHaveId",
     "toHaveJSProperty",
-    "toHaveRole",
     "toHaveScreenshot",
     "toHaveText",
     "toHaveTitle",
     "toHaveURL",
-    "toHaveValue",
     "toHaveValues",
     "toMatchAriaSnapshot",
     "toPass",
+];
+
+// Matchers shared between Playwright (async) and jest-dom (sync).
+// These are only flagged when expect()'s argument is a Playwright locator/page.
+// IMPORTANT: Keep this array sorted for binary search.
+const OVERLAPPING_MATCHERS: &[&str] = &[
+    "toBeChecked",
+    "toBeDisabled",
+    "toBeEmpty",
+    "toBeEnabled",
+    "toBeVisible",
+    "toHaveAccessibleDescription",
+    "toHaveAccessibleErrorMessage",
+    "toHaveAccessibleName",
+    "toHaveAttribute",
+    "toHaveClass",
+    "toHaveRole",
+    "toHaveValue",
 ];
 
 #[derive(Debug)]
@@ -282,7 +291,10 @@ fn is_test_step_call(call_expr: &JsCallExpression) -> bool {
     is_member_call_pattern(call_expr, "test", "step")
 }
 
-fn get_async_expect_matcher(call_expr: &JsCallExpression) -> Option<MissingAwaitType> {
+fn get_async_expect_matcher(
+    call_expr: &JsCallExpression,
+    model: &SemanticModel,
+) -> Option<MissingAwaitType> {
     let callee = call_expr.callee().ok()?;
 
     // Must be a member expression (matcher call)
@@ -304,20 +316,71 @@ fn get_async_expect_matcher(call_expr: &JsCallExpression) -> Option<MissingAwait
         return Some(MissingAwaitType::ExpectPoll);
     }
 
-    // Then check if it's an async Playwright matcher
-    if ASYNC_PLAYWRIGHT_MATCHERS
-        .binary_search(&matcher_name.text())
-        .is_err()
-    {
+    let matcher_text = matcher_name.text();
+    let is_playwright_only = PLAYWRIGHT_ONLY_MATCHERS.binary_search(&matcher_text).is_ok();
+    let is_overlapping = OVERLAPPING_MATCHERS.binary_search(&matcher_text).is_ok();
+
+    if !is_playwright_only && !is_overlapping {
         return None;
     }
 
     // Check if the chain starts with expect
-    if has_expect_in_chain(&object) {
-        return Some(MissingAwaitType::ExpectMatcher(matcher_name));
+    if !has_expect_in_chain(&object) {
+        return None;
     }
 
-    None
+    // For overlapping matchers (shared with jest-dom), only flag when expect()'s
+    // argument is a Playwright locator/page to avoid false positives on jest-dom code.
+    if is_overlapping {
+        let expect_arg = find_expect_first_arg(&object)?;
+        if !is_playwright_call_chain_or_resolved(&expect_arg, model) {
+            return None;
+        }
+    }
+
+    Some(MissingAwaitType::ExpectMatcher(matcher_name))
+}
+
+/// Walks an expression chain to find the `expect(...)` call and returns its first argument.
+/// For `expect(page.locator('btn')).not.toBeVisible()`, returns `page.locator('btn')`.
+fn find_expect_first_arg(expr: &AnyJsExpression) -> Option<AnyJsExpression> {
+    match expr {
+        AnyJsExpression::JsCallExpression(call) => {
+            let callee = call.callee().ok()?;
+            match &callee {
+                AnyJsExpression::JsIdentifierExpression(id) => {
+                    let name = id.name().ok()?;
+                    let token = name.value_token().ok()?;
+                    if token.text_trimmed() == "expect" {
+                        let args = call.arguments().ok()?;
+                        let first = args.args().into_iter().next()?.ok()?;
+                        return first.as_any_js_expression().cloned();
+                    }
+                    None
+                }
+                AnyJsExpression::JsStaticMemberExpression(member) => {
+                    // expect.soft(...) — the object is `expect`, first arg is what we want
+                    let object = member.object().ok()?;
+                    if let AnyJsExpression::JsIdentifierExpression(id) = &object
+                        && let Ok(name) = id.name()
+                        && let Ok(token) = name.value_token()
+                        && token.text_trimmed() == "expect"
+                    {
+                        let args = call.arguments().ok()?;
+                        let first = args.args().into_iter().next()?.ok()?;
+                        return first.as_any_js_expression().cloned();
+                    }
+                    None
+                }
+                _ => None,
+            }
+        }
+        AnyJsExpression::JsStaticMemberExpression(member) => {
+            let object = member.object().ok()?;
+            find_expect_first_arg(&object)
+        }
+        _ => None,
+    }
 }
 
 fn has_expect_in_chain(expr: &AnyJsExpression) -> bool {
@@ -487,7 +550,12 @@ mod tests {
     use super::*;
 
     #[test]
-    fn async_matchers_sorted() {
-        assert!(ASYNC_PLAYWRIGHT_MATCHERS.is_sorted());
+    fn playwright_only_matchers_sorted() {
+        assert!(PLAYWRIGHT_ONLY_MATCHERS.is_sorted());
+    }
+
+    #[test]
+    fn overlapping_matchers_sorted() {
+        assert!(OVERLAPPING_MATCHERS.is_sorted());
     }
 }

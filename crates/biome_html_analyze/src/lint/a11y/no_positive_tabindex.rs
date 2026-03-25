@@ -4,6 +4,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_html_syntax::{AnyHtmlElement, HtmlAttribute};
 use biome_rowan::{AstNode, BatchMutationExt, TextRange};
+use biome_rule_options::no_positive_tabindex::NoPositiveTabindexOptions;
 
 use crate::HtmlRuleAction;
 
@@ -58,7 +59,7 @@ impl Rule for NoPositiveTabindex {
     type Query = Ast<AnyHtmlElement>;
     type State = NoPositiveTabindexState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoPositiveTabindexOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();

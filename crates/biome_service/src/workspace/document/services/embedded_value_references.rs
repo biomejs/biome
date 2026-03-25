@@ -3,6 +3,7 @@ use biome_html_syntax::{
 };
 use biome_js_syntax::{
     AnyJsIdentifierUsage, AnyJsRoot, JsReferenceIdentifier, JsStaticMemberExpression,
+    JsxReferenceIdentifier,
 };
 use biome_rowan::{AstNode, TextRange, TokenText, WalkEvent};
 use rustc_hash::FxHashMap;
@@ -41,7 +42,9 @@ impl EmbeddedValueReferencesBuilder {
         for event in preorder {
             match event {
                 WalkEvent::Enter(node) => {
-                    if let Some(reference) = JsReferenceIdentifier::cast_ref(&node) {
+                    if let Some(reference) = JsxReferenceIdentifier::cast_ref(&node) {
+                        self.visit_jsx_reference_identifier(reference);
+                    } else if let Some(reference) = JsReferenceIdentifier::cast_ref(&node) {
                         self.visit_reference_identifier(reference);
                     } else if let Some(member) = JsStaticMemberExpression::cast_ref(&node) {
                         self.visit_static_member_expression(member);
@@ -142,6 +145,15 @@ impl EmbeddedValueReferencesBuilder {
         }
     }
 
+    fn visit_jsx_reference_identifier(&mut self, reference: JsxReferenceIdentifier) -> Option<()> {
+        let name_token = reference.value_token().ok()?;
+        self.references.insert(
+            name_token.text_trimmed_range(),
+            name_token.token_text_trimmed(),
+        );
+        Some(())
+    }
+
     fn visit_reference_identifier(&mut self, reference: JsReferenceIdentifier) -> Option<()> {
         let usage = AnyJsIdentifierUsage::from(reference.clone());
         if usage.is_only_type() {
@@ -232,11 +244,11 @@ mod tests {
 
     #[test]
     fn tracks_html_element_names() {
-        use biome_html_parser::{HtmlParseOptions, parse_html};
+        use biome_html_parser::{HtmlParserOptions, parse_html};
 
         let source = r#"<Component /><AvatarPrimitive.Fallback />"#;
         // Enable Vue parsing so component names are parsed correctly
-        let parsed = parse_html(source, HtmlParseOptions::default().with_vue());
+        let parsed = parse_html(source, HtmlParserOptions::default().with_vue());
 
         println!("Diagnostics: {:?}", parsed.diagnostics());
         println!("Has errors: {}", !parsed.diagnostics().is_empty());

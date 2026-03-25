@@ -3,28 +3,30 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid-data-object.vue
 ---
 # Input
-```ts
+```vue
+<script>
 export default {
     data: {
         $el: '',
         _foo: String,
     },
 };
+</script>
 
 ```
 
 # Diagnostics
 ```
-invalid-data-object.vue:3:9 lint/correctness/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-data-object.vue:4:9 lint/correctness/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Key $el is reserved in Vue.
   
-    1 │ export default {
-    2 │     data: {
-  > 3 │         $el: '',
+    2 │ export default {
+    3 │     data: {
+  > 4 │         $el: '',
       │         ^^^
-    4 │         _foo: String,
-    5 │     },
+    5 │         _foo: String,
+    6 │     },
   
   i Rename the key to avoid conflicts with Vue reserved keys.
   
@@ -32,16 +34,16 @@ invalid-data-object.vue:3:9 lint/correctness/noVueReservedKeys ━━━━━�
 ```
 
 ```
-invalid-data-object.vue:4:9 lint/correctness/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-data-object.vue:5:9 lint/correctness/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Keys starting with an underscore are reserved in Vue.
   
-    2 │     data: {
-    3 │         $el: '',
-  > 4 │         _foo: String,
+    3 │     data: {
+    4 │         $el: '',
+  > 5 │         _foo: String,
       │         ^^^^
-    5 │     },
-    6 │ };
+    6 │     },
+    7 │ };
   
   i Rename the key to avoid conflicts with Vue reserved keys.
   

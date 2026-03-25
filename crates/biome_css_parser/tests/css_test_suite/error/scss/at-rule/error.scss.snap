@@ -1,0 +1,118 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@error if($cond, , blue
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: ScssErrorAtRule {
+                error_token: ERROR_KW@1..7 "error" [] [Whitespace(" ")],
+                value: ScssExpression {
+                    items: ScssExpressionItemList [
+                        CssFunction {
+                            name: CssIdentifier {
+                                value_token: IDENT@7..9 "if" [] [],
+                            },
+                            l_paren_token: L_PAREN@9..10 "(" [] [],
+                            items: CssParameterList [
+                                ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        ScssIdentifier {
+                                            dollar_token: DOLLAR@10..11 "$" [] [],
+                                            name: CssIdentifier {
+                                                value_token: IDENT@11..15 "cond" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                                COMMA@15..17 "," [] [Whitespace(" ")],
+                                missing element,
+                                COMMA@17..19 "," [] [Whitespace(" ")],
+                                ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssIdentifier {
+                                            value_token: IDENT@19..23 "blue" [] [],
+                                        },
+                                    ],
+                                },
+                            ],
+                            r_paren_token: missing (required),
+                        },
+                    ],
+                },
+                semicolon_token: missing (required),
+            },
+        },
+    ],
+    eof_token: EOF@23..24 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..24
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..23
+    0: CSS_AT_RULE@0..23
+      0: AT@0..1 "@" [] []
+      1: SCSS_ERROR_AT_RULE@1..23
+        0: ERROR_KW@1..7 "error" [] [Whitespace(" ")]
+        1: SCSS_EXPRESSION@7..23
+          0: SCSS_EXPRESSION_ITEM_LIST@7..23
+            0: CSS_FUNCTION@7..23
+              0: CSS_IDENTIFIER@7..9
+                0: IDENT@7..9 "if" [] []
+              1: L_PAREN@9..10 "(" [] []
+              2: CSS_PARAMETER_LIST@10..23
+                0: SCSS_EXPRESSION@10..15
+                  0: SCSS_EXPRESSION_ITEM_LIST@10..15
+                    0: SCSS_IDENTIFIER@10..15
+                      0: DOLLAR@10..11 "$" [] []
+                      1: CSS_IDENTIFIER@11..15
+                        0: IDENT@11..15 "cond" [] []
+                1: COMMA@15..17 "," [] [Whitespace(" ")]
+                2: (empty)
+                3: COMMA@17..19 "," [] [Whitespace(" ")]
+                4: SCSS_EXPRESSION@19..23
+                  0: SCSS_EXPRESSION_ITEM_LIST@19..23
+                    0: CSS_IDENTIFIER@19..23
+                      0: IDENT@19..23 "blue" [] []
+              3: (empty)
+        2: (empty)
+  2: EOF@23..24 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+error.scss:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead the file ends
+  
+    1 │ @error if($cond, , blue
+  > 2 │ 
+      │ 
+  
+  i the file ends here
+  
+    1 │ @error if($cond, , blue
+  > 2 │ 
+      │ 
+  
+```

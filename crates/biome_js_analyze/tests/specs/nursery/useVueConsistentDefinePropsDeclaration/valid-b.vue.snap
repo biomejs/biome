@@ -3,7 +3,9 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid-b.vue
 ---
 # Input
-```ts
+```vue
+<!-- should not generate diagnostics -->
+<script setup lang="ts">
 const props = defineProps<{
 	kind: string;
 	enabled?: boolean;
@@ -15,5 +17,6 @@ const emit = defineEmits<{
 
 foo("someParam");
 foo<string>();
+</script>
 
 ```

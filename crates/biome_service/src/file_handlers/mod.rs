@@ -28,7 +28,7 @@ use biome_console::fmt::Formatter;
 use biome_css_analyze::METADATA as css_metadata;
 use biome_css_syntax::{CssFileSource, CssLanguage};
 use biome_diagnostics::{Applicability, Diagnostic, DiagnosticExt, Error, Severity, category};
-use biome_formatter::{FormatContext, FormatResult, Formatted, Printed};
+use biome_formatter::{FormatContext, FormatResult, Formatted, Printed, SourceMapGeneration};
 use biome_fs::BiomePath;
 use biome_graphql_analyze::METADATA as graphql_metadata;
 use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
@@ -55,7 +55,7 @@ use either::Either;
 use grit::GritFileHandler;
 use html::HtmlFileHandler;
 pub use javascript::JsFormatterSettings;
-use markdown::MarkdownFileHandler;
+use md::MarkdownFileHandler;
 use rustc_hash::FxHashSet;
 use std::borrow::Cow;
 use std::collections::HashSet;
@@ -70,7 +70,7 @@ pub(crate) mod html;
 mod ignore;
 pub(crate) mod javascript;
 pub(crate) mod json;
-pub(crate) mod markdown;
+pub(crate) mod md;
 pub mod svelte;
 mod unknown;
 pub mod vue;
@@ -169,6 +169,11 @@ impl DocumentFileSource {
             return Ok(file_source.into());
         }
         if let Ok(file_source) = GraphqlFileSource::try_from_well_known(path) {
+            return Ok(file_source.into());
+        }
+
+        #[cfg(feature = "markdown")]
+        if let Ok(file_source) = MdFileSource::try_from_well_known(path) {
             return Ok(file_source.into());
         }
 
@@ -500,6 +505,10 @@ pub struct FixAllParams<'a> {
     pub(crate) enabled_rules: &'a [AnalyzerSelector],
     pub(crate) plugins: AnalyzerPluginVec,
     pub(crate) document_services: &'a DocumentServices,
+    /// The initial indentation level to apply when printing formatted code.
+    /// Used by embedded language handlers (Svelte, Vue) to preserve
+    /// `indentScriptAndStyle` indentation during fix-all operations.
+    pub(crate) embeds_initial_indent: u16,
 }
 
 #[derive(Default)]
@@ -867,13 +876,29 @@ impl<'a> ProcessFixAll<'a> {
 
     /// Finish processing the fix all actions. Returns the result of the fix-all actions. The `format_tree`
     /// is a closure that must return the new code (formatted, if needed).
-    pub(crate) fn finish<F, C>(self, format_tree: F) -> Result<FixFileResult, WorkspaceError>
+    ///
+    /// `initial_indent` specifies the base indentation level for printing. This is used by
+    /// embedded language handlers (e.g. Svelte, Vue) to preserve `indentScriptAndStyle`
+    /// indentation when formatting during fix-all operations.
+    pub(crate) fn finish<F, C>(
+        self,
+        format_tree: F,
+        initial_indent: u16,
+    ) -> Result<FixFileResult, WorkspaceError>
     where
         F: FnOnce() -> Result<Either<FormatResult<Formatted<C>>, String>, WorkspaceError>,
         C: FormatContext,
     {
         let code = match format_tree()? {
-            Either::Left(printed) => printed?.print()?.into_code(),
+            Either::Left(printed) => {
+                if initial_indent > 0 {
+                    printed?
+                        .print_with_indent(initial_indent, SourceMapGeneration::Disabled)?
+                        .into_code()
+                } else {
+                    printed?.print()?.into_code()
+                }
+            }
             Either::Right(string) => string,
         };
         Ok(FixFileResult {
@@ -1397,8 +1422,6 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
 
     /// It loops over the domains of the current rule, and check each domain specify
     /// a dependency.
-    ///
-    /// Returns `true` if the rule was enabled, `false` otherwise
     fn record_rule_from_manifest<R, L>(&mut self, rule_filter: RuleFilter<'static>)
     where
         L: biome_rowan::Language,
@@ -1419,16 +1442,20 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         }
 
         let no_only = self.only.is_some_and(|only| only.is_empty());
-        let no_domains = self
-            .settings
-            .as_linter_domains(path)
-            .is_none_or(|d| d.is_empty());
-        if !(no_only && no_domains) {
+        if !no_only {
             return;
         }
 
+        let domains = self.settings.as_linter_domains(path);
         if let Some(manifest) = &self.package_json {
             for domain in R::METADATA.domains {
+                if domains
+                    .as_ref()
+                    .is_some_and(|domains| domains.contains_key(domain))
+                {
+                    continue;
+                }
+
                 let matches_a_dependency = domain
                     .manifest_dependencies()
                     .iter()
@@ -1530,14 +1557,15 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
         L: biome_rowan::Language,
     {
-        if let Some(rule_filter) = rule_filter
-            && rule_filter.match_rule::<R>()
-        {
-            // first we want to register rules via "magic default"
-            self.record_rule_from_manifest::<R, L>(rule_filter);
-            // then we want to register rules
-            self.record_rule_from_domains::<R, L>(rule_filter);
+        let Some(rule_filter) = rule_filter.filter(|rule_filter| rule_filter.match_rule::<R>())
+        else {
+            return;
         };
+
+        // first we want to register rules via "magic default"
+        self.record_rule_from_manifest::<R, L>(rule_filter);
+        // then we want to register rules
+        self.record_rule_from_domains::<R, L>(rule_filter);
 
         // Do not report unused suppression comment diagnostics if:
         // - it is a syntax-only analyzer pass, or
@@ -2008,43 +2036,5 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
         disabled_rules.extend(assists_disabled_rules);
 
         (enabled_rules, disabled_rules, analyzer_options)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::{DocumentFileSource, Features};
-    use camino::Utf8Path;
-
-    #[test]
-    fn markdown_file_source_detection_and_capabilities() {
-        let source = DocumentFileSource::from_path(Utf8Path::new("docs/readme.md"), false);
-        assert!(matches!(source, DocumentFileSource::Unknown));
-
-        let language_source = DocumentFileSource::from_language_id("markdown");
-        assert!(matches!(language_source, DocumentFileSource::Unknown));
-
-        assert!(!DocumentFileSource::can_parse(Utf8Path::new(
-            "docs/readme.md"
-        )));
-        assert!(!DocumentFileSource::can_read(Utf8Path::new(
-            "docs/readme.md"
-        )));
-        assert!(!DocumentFileSource::can_contain_embeds(
-            Utf8Path::new("docs/readme.md"),
-            false
-        ));
-    }
-
-    #[test]
-    fn markdown_features_provide_formatter_capabilities() {
-        let features = Features::new();
-        let capabilities = features.get_capabilities(DocumentFileSource::from_path(
-            Utf8Path::new("doc.md"),
-            false,
-        ));
-
-        assert!(capabilities.formatter.format.is_none());
-        assert!(capabilities.parser.parse.is_none());
     }
 }

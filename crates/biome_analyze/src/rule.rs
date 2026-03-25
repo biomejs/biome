@@ -180,6 +180,16 @@ pub enum RuleSource<'a> {
     HtmlEslint(&'a str),
     /// Rules from [Eslint Plugin Playwright](https://github.com/playwright-community/eslint-plugin-playwright)
     EslintPlaywright(&'a str),
+    /// Rules from [Eslint Plugin Json](https://github.com/eslint/json)
+    EslintJson(&'a str),
+    /// Rules from [Eslint Plugin Markdown](https://github.com/eslint/markdown)
+    EslintMarkdown(&'a str),
+    /// Rules from [Eslint Plugin Yml](https://ota-meshi.github.io/eslint-plugin-yml/)
+    EslintYml(&'a str),
+    /// Rules from [Eslint CSS](https://github.com/eslint/css)
+    EslintCss(&'a str),
+    /// Rules from [Eslint Plugin Drizzle](https://orm.drizzle.team/docs/eslint-plugin)
+    EslintDrizzle(&'a str),
 }
 
 impl<'a> std::fmt::Display for RuleSource<'a> {
@@ -230,6 +240,11 @@ impl<'a> std::fmt::Display for RuleSource<'a> {
             Self::EslintTurbo(_) => write!(f, "eslint-plugin-turbo"),
             Self::HtmlEslint(_) => write!(f, "@html-eslint/eslint-plugin"),
             Self::EslintPlaywright(_) => write!(f, "eslint-plugin-playwright"),
+            Self::EslintJson(_) => write!(f, "@eslint/json"),
+            Self::EslintMarkdown(_) => write!(f, "@eslint/markdown"),
+            Self::EslintYml(_) => write!(f, "eslint-plugin-yml"),
+            Self::EslintCss(_) => write!(f, "@eslint/css"),
+            Self::EslintDrizzle(_) => write!(f, "eslint-plugin-drizzle"),
         }
     }
 }
@@ -289,8 +304,13 @@ impl<'a> RuleSource<'a> {
             Self::Stylelint(_) => 36,
             Self::EslintTurbo(_) => 37,
             Self::HtmlEslint(_) => 38,
-            Self::EslintE18e(_) => 38,
-            Self::EslintBetterTailwindcss(_) => 39,
+            Self::EslintE18e(_) => 39,
+            Self::EslintBetterTailwindcss(_) => 40,
+            Self::EslintJson(_) => 41,
+            Self::EslintMarkdown(_) => 42,
+            Self::EslintYml(_) => 43,
+            Self::EslintCss(_) => 44,
+            Self::EslintDrizzle(_) => 45,
         }
     }
 
@@ -350,7 +370,12 @@ impl<'a> RuleSource<'a> {
             | Self::Stylelint(rule_name)
             | Self::EslintTurbo(rule_name)
             | Self::HtmlEslint(rule_name)
-            | Self::EslintPlaywright(rule_name) => rule_name,
+            | Self::EslintCss(rule_name)
+            | Self::EslintPlaywright(rule_name)
+            | Self::EslintJson(rule_name)
+            | Self::EslintMarkdown(rule_name)
+            | Self::EslintYml(rule_name)
+            | Self::EslintDrizzle(rule_name) => rule_name,
         }
     }
 
@@ -397,6 +422,11 @@ impl<'a> RuleSource<'a> {
             Self::EslintPlaywright(_) => "playwright",
             Self::EslintE18e(_) => "e18e",
             Self::EslintBetterTailwindcss(_) => "better-tailwindcss",
+            Self::EslintJson(_) => "json",
+            Self::EslintMarkdown(_) => "markdown",
+            Self::EslintYml(_) => "yml",
+            Self::EslintCss(_) => "css",
+            Self::EslintDrizzle(_) => "drizzle",
         }
     }
 
@@ -451,6 +481,11 @@ impl<'a> RuleSource<'a> {
             Self::EslintTurbo(rule_name) => format!("https://github.com/vercel/turborepo/blob/main/packages/eslint-plugin-turbo/docs/rules/{rule_name}.md"),
             Self::HtmlEslint(rule_name) => format!("https://html-eslint.org/docs/rules/{rule_name}"),
             Self::EslintPlaywright(rule_name) => format!("https://github.com/playwright-community/eslint-plugin-playwright/blob/main/docs/rules/{rule_name}.md"),
+            Self::EslintJson(rule_name) => format!("https://github.com/eslint/json/blob/main/docs/rules/{rule_name}.md"),
+            Self::EslintMarkdown(rule_name) => format!("https://github.com/eslint/markdown/blob/main/docs/rules/{rule_name}.md"),
+            Self::EslintYml(rule_name) => format!("https://ota-meshi.github.io/eslint-plugin-yml/rules/{rule_name}.html"),
+            Self::EslintCss(rule_name) => format!("https://github.com/eslint/css/blob/main/docs/rules/{rule_name}.md"),
+            Self::EslintDrizzle(rule_name) => format!("https://orm.drizzle.team/docs/eslint-plugin#{rule_name}"),
         }
     }
 
@@ -538,6 +573,8 @@ impl RuleSourceKind {
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum RuleDomain {
+    /// Drizzle ORM rules
+    Drizzle,
     /// React library rules
     React,
     /// Testing rules
@@ -566,6 +603,7 @@ impl Display for RuleDomain {
     fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
         // use lower case naming, it needs to match the name of the configuration
         match self {
+            Self::Drizzle => fmt.write_str("drizzle"),
             Self::React => fmt.write_str("react"),
             Self::Test => fmt.write_str("test"),
             Self::Solid => fmt.write_str("solid"),
@@ -619,6 +657,7 @@ impl RuleDomain {
             Self::Turborepo => &[&("turbo", ">=1.0.0")],
             Self::Playwright => &[&("@playwright/test", ">=1.0.0")],
             Self::Types => &[],
+            Self::Drizzle => &[&("drizzle-orm", ">=0.9.0")],
         }
     }
 
@@ -659,6 +698,7 @@ impl RuleDomain {
             Self::Turborepo => &[],
             Self::Playwright => &["test", "expect"],
             Self::Types => &[],
+            Self::Drizzle => &[],
         }
     }
 
@@ -675,6 +715,7 @@ impl RuleDomain {
             Self::Turborepo => "turborepo",
             Self::Playwright => "playwright",
             Self::Types => "types",
+            Self::Drizzle => "drizzle",
         }
     }
 }
@@ -695,6 +736,7 @@ impl FromStr for RuleDomain {
             "turborepo" => Ok(Self::Turborepo),
             "playwright" => Ok(Self::Playwright),
             "types" => Ok(Self::Types),
+            "drizzle" => Ok(Self::Drizzle),
             _ => Err("Invalid rule domain"),
         }
     }

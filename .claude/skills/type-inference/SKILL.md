@@ -1,6 +1,7 @@
 ---
 name: type-inference
-description: Guide for working with Biome's module graph and type inference system. Use when implementing type-aware lint rules or working on TypeScript support. Examples:<example>User needs to understand type resolution for a lint rule</example><example>User is working on the module graph infrastructure</example><example>User wants to implement type inference for a new feature</example>
+description: Guide for working with Biome's module graph and type inference system. Use when implementing type-aware lint rules, understanding type resolution, working on the module graph infrastructure, or implementing type inference for new features.
+compatibility: Designed for coding agents working on the Biome codebase (github.com/biomejs/biome).
 ---
 
 ## Purpose
@@ -28,15 +29,24 @@ Use this skill when working with Biome's type inference system and module graph.
 Types are stored in `TypeData` enum with many variants:
 
 ```rust
+// Simplified — see crates/biome_js_type_info/src/type_data.rs for the full enum
 enum TypeData {
-    Unknown,              // Inference not implemented
-    UnknownKeyword,       // Explicit 'unknown' keyword
-    String,               // String type
-    Number,               // Number type
-    Function(FunctionType), // Function with parameters
-    Object(ObjectType),   // Object with properties
-    Reference,            // Reference to another type
-    // ... many more variants
+    Unknown,                            // Inference not implemented
+    Global,                             // Global type reference
+    BigInt, Boolean, Null, Number,      // Primitive types
+    String, Symbol, Undefined,
+    Function(Box<Function>),            // Function with parameters
+    Object(Box<Object>),                // Object with properties
+    Class(Box<Class>),                  // Class definition
+    Interface(Box<Interface>),          // Interface definition
+    Union(Box<Union>),                  // Union type (A | B)
+    Intersection(Box<Intersection>),    // Intersection type (A & B)
+    Tuple(Box<Tuple>),                  // Tuple type
+    Literal(Box<Literal>),              // Literal type ("foo", 42)
+    Reference(TypeReference),           // Reference to another type
+    TypeofExpression(Box<TypeofExpression>), // typeof an expression
+    // ... plus Conditional, Generic, TypeOperator, InstanceOf,
+    //     keyword variants (AnyKeyword, NeverKeyword, VoidKeyword, etc.)
 }
 ```
 
@@ -46,12 +56,13 @@ Instead of direct type references, use `TypeReference`:
 
 ```rust
 enum TypeReference {
-    Qualifier(TypeReferenceQualifier),  // Name-based reference
-    Resolved(ResolvedTypeId),            // Resolved to type ID
-    Import(TypeImportQualifier),         // Import reference
-    Unknown,                             // Could not resolve
+    Qualifier(Box<TypeReferenceQualifier>),  // Name-based reference
+    Resolved(ResolvedTypeId),                 // Resolved to type ID
+    Import(Box<TypeImportQualifier>),         // Import reference
 }
 ```
+
+**Note:** There is no `Unknown` variant. Unknown types are represented as `TypeReference::Resolved(GLOBAL_UNKNOWN_ID)`. Use `TypeReference::unknown()` to create one.
 
 ## Type Resolution Phases
 
@@ -96,7 +107,7 @@ TypeData::TypeofExpression(TypeofExpression::Addition {
 2. Resolves `TypeReference::Import` by following imports
 3. Converts to `TypeReference::Resolved` after following imports
 
-**Where**: Implemented in `js_module_info/scoped_resolver.rs`
+**Where**: Implemented in `js_module_info/module_resolver.rs`
 
 **Limitation**: Results cannot be cached (would become stale on file changes)
 
@@ -126,7 +137,7 @@ use biome_js_type_info::{TypeResolver, ResolvedTypeData};
 fn analyze_type(resolver: &impl TypeResolver, type_ref: TypeReference) {
     // Resolve the reference
     let resolved_data: ResolvedTypeData = resolver.resolve_type(type_ref);
-    
+
     // Get raw data for pattern matching
     match resolved_data.as_raw_data() {
         TypeData::String => { /* handle string */ },
@@ -134,7 +145,7 @@ fn analyze_type(resolver: &impl TypeResolver, type_ref: TypeReference) {
         TypeData::Function(func) => { /* handle function */ },
         _ => { /* handle others */ }
     }
-    
+
     // Resolve nested references
     if let TypeData::Reference(inner_ref) = resolved_data.as_raw_data() {
         let inner_data = resolver.resolve_type(*inner_ref);
@@ -163,24 +174,24 @@ use biome_js_type_info::{TypeResolver, TypeData};
 
 impl Rule for MyTypeRule {
     type Query = Semantic<JsCallExpression>;
-    
+
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let model = ctx.model();
-        
+
         // Get type resolver from model
         let resolver = model.type_resolver();
-        
+
         // Get type of expression
         let expr_type = node.callee().ok()?.infer_type(resolver);
-        
+
         // Check the type
         match expr_type.as_raw_data() {
             TypeData::Function(_) => { /* valid */ },
             TypeData::Unknown => { /* might be valid, can't tell */ },
             _ => { return Some(()); /* not callable */ }
         }
-        
+
         None
     }
 }
@@ -189,17 +200,17 @@ impl Rule for MyTypeRule {
 ### Navigate Type References
 
 ```rust
-fn is_array_type(resolver: &impl TypeResolver, type_ref: TypeReference) -> bool {
+fn is_string_type(resolver: &impl TypeResolver, type_ref: TypeReference) -> bool {
     let resolved = resolver.resolve_type(type_ref);
-    
+
     // Follow references
     let data = match resolved.as_raw_data() {
         TypeData::Reference(ref_to) => resolver.resolve_type(*ref_to),
-        other => resolved,
+        _other => resolved,
     };
-    
-    // Check if it's an Array
-    matches!(data.as_raw_data(), TypeData::Array(_))
+
+    // Check the resolved type
+    matches!(data.as_raw_data(), TypeData::String)
 }
 ```
 
@@ -208,14 +219,14 @@ fn is_array_type(resolver: &impl TypeResolver, type_ref: TypeReference) -> bool 
 ```rust
 fn analyze_function(resolver: &impl TypeResolver, type_ref: TypeReference) {
     let resolved = resolver.resolve_type(type_ref);
-    
+
     if let TypeData::Function(func_type) = resolved.as_raw_data() {
         // Access parameters
         for param in func_type.parameters() {
             let param_type = resolver.resolve_type(param.type_ref());
             // Analyze parameter type
         }
-        
+
         // Access return type
         let return_type = resolver.resolve_type(func_type.return_type());
     }

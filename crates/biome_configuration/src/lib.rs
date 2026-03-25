@@ -155,6 +155,12 @@ pub struct Configuration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub css: Option<CssConfiguration>,
 
+    /// Specific configuration for the Markdown language
+    #[bpaf(external(markdown_configuration), optional, hide)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "markdown")]
+    pub markdown: Option<MarkdownConfiguration>,
+
     /// Specific configuration for the GraphQL language
     #[bpaf(external(graphql_configuration), optional)]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -695,6 +701,10 @@ pub enum ConfigurationPathHint {
     /// The path can either be a directory path or a file path.
     /// Throws any kind of I/O errors.
     FromUser(Utf8PathBuf),
+
+    /// Very similar to [ConfigurationPathHint::FromUser]. However, this variant is used to indicate
+    /// that the configuration is outside of the current workspace.
+    FromUserExternal(Utf8PathBuf),
 }
 
 impl Display for ConfigurationPathHint {
@@ -707,7 +717,7 @@ impl Display for ConfigurationPathHint {
             Self::FromLsp(path) => {
                 write!(fmt, "Configuration path provided from the LSP: {path}",)
             }
-            Self::FromUser(path) => {
+            Self::FromUser(path) | Self::FromUserExternal(path) => {
                 write!(fmt, "Configuration path provided by the user: {path}",)
             }
         }
@@ -725,9 +735,10 @@ impl ConfigurationPathHint {
     pub fn to_path_buf(&self) -> Option<Utf8PathBuf> {
         match self {
             Self::None => None,
-            Self::FromWorkspace(path) | Self::FromLsp(path) | Self::FromUser(path) => {
-                Some(path.to_path_buf())
-            }
+            Self::FromWorkspace(path)
+            | Self::FromLsp(path)
+            | Self::FromUser(path)
+            | Self::FromUserExternal(path) => Some(path.to_path_buf()),
         }
     }
 }

@@ -1,0 +1,267 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
+expression: snapshot
+---
+
+## Input
+
+```css
+@while {
+  color: red;
+}
+
+@while $count > {
+  color: red;
+}
+
+@while $count > 0
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: ScssWhileAtRule {
+                while_token: WHILE_KW@1..7 "while" [] [Whitespace(" ")],
+                condition: missing (required),
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@7..8 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@8..16 "color" [Newline("\n"), Whitespace("  ")] [],
+                                    },
+                                    colon_token: COLON@16..18 ":" [] [Whitespace(" ")],
+                                    value: ScssExpression {
+                                        items: ScssExpressionItemList [
+                                            CssIdentifier {
+                                                value_token: IDENT@18..21 "red" [] [],
+                                            },
+                                        ],
+                                    },
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@21..22 ";" [] [],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@22..24 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@24..27 "@" [Newline("\n"), Newline("\n")] [],
+            rule: ScssWhileAtRule {
+                while_token: WHILE_KW@27..33 "while" [] [Whitespace(" ")],
+                condition: ScssExpression {
+                    items: ScssExpressionItemList [
+                        ScssBinaryExpression {
+                            left: ScssIdentifier {
+                                dollar_token: DOLLAR@33..34 "$" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@34..40 "count" [] [Whitespace(" ")],
+                                },
+                            },
+                            operator: R_ANGLE@40..42 ">" [] [Whitespace(" ")],
+                            right: missing (required),
+                        },
+                    ],
+                },
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@42..43 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@43..51 "color" [Newline("\n"), Whitespace("  ")] [],
+                                    },
+                                    colon_token: COLON@51..53 ":" [] [Whitespace(" ")],
+                                    value: ScssExpression {
+                                        items: ScssExpressionItemList [
+                                            CssIdentifier {
+                                                value_token: IDENT@53..56 "red" [] [],
+                                            },
+                                        ],
+                                    },
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@56..57 ";" [] [],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@57..59 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@59..62 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    WHILE_KW@62..68 "while" [] [Whitespace(" ")],
+                    ScssExpression {
+                        items: ScssExpressionItemList [
+                            ScssBinaryExpression {
+                                left: ScssIdentifier {
+                                    dollar_token: DOLLAR@68..69 "$" [] [],
+                                    name: CssIdentifier {
+                                        value_token: IDENT@69..75 "count" [] [Whitespace(" ")],
+                                    },
+                                },
+                                operator: R_ANGLE@75..77 ">" [] [Whitespace(" ")],
+                                right: CssNumber {
+                                    value_token: CSS_NUMBER_LITERAL@77..78 "0" [] [],
+                                },
+                            },
+                        ],
+                    },
+                    CssBogusBlock {
+                        items: [],
+                    },
+                ],
+            },
+        },
+    ],
+    eof_token: EOF@78..79 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..79
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..78
+    0: CSS_AT_RULE@0..24
+      0: AT@0..1 "@" [] []
+      1: SCSS_WHILE_AT_RULE@1..24
+        0: WHILE_KW@1..7 "while" [] [Whitespace(" ")]
+        1: (empty)
+        2: CSS_DECLARATION_OR_RULE_BLOCK@7..24
+          0: L_CURLY@7..8 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@8..22
+            0: CSS_DECLARATION_WITH_SEMICOLON@8..22
+              0: CSS_DECLARATION@8..21
+                0: CSS_GENERIC_PROPERTY@8..21
+                  0: CSS_IDENTIFIER@8..16
+                    0: IDENT@8..16 "color" [Newline("\n"), Whitespace("  ")] []
+                  1: COLON@16..18 ":" [] [Whitespace(" ")]
+                  2: SCSS_EXPRESSION@18..21
+                    0: SCSS_EXPRESSION_ITEM_LIST@18..21
+                      0: CSS_IDENTIFIER@18..21
+                        0: IDENT@18..21 "red" [] []
+                1: (empty)
+              1: SEMICOLON@21..22 ";" [] []
+          2: R_CURLY@22..24 "}" [Newline("\n")] []
+    1: CSS_AT_RULE@24..59
+      0: AT@24..27 "@" [Newline("\n"), Newline("\n")] []
+      1: SCSS_WHILE_AT_RULE@27..59
+        0: WHILE_KW@27..33 "while" [] [Whitespace(" ")]
+        1: SCSS_EXPRESSION@33..42
+          0: SCSS_EXPRESSION_ITEM_LIST@33..42
+            0: SCSS_BINARY_EXPRESSION@33..42
+              0: SCSS_IDENTIFIER@33..40
+                0: DOLLAR@33..34 "$" [] []
+                1: CSS_IDENTIFIER@34..40
+                  0: IDENT@34..40 "count" [] [Whitespace(" ")]
+              1: R_ANGLE@40..42 ">" [] [Whitespace(" ")]
+              2: (empty)
+        2: CSS_DECLARATION_OR_RULE_BLOCK@42..59
+          0: L_CURLY@42..43 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@43..57
+            0: CSS_DECLARATION_WITH_SEMICOLON@43..57
+              0: CSS_DECLARATION@43..56
+                0: CSS_GENERIC_PROPERTY@43..56
+                  0: CSS_IDENTIFIER@43..51
+                    0: IDENT@43..51 "color" [Newline("\n"), Whitespace("  ")] []
+                  1: COLON@51..53 ":" [] [Whitespace(" ")]
+                  2: SCSS_EXPRESSION@53..56
+                    0: SCSS_EXPRESSION_ITEM_LIST@53..56
+                      0: CSS_IDENTIFIER@53..56
+                        0: IDENT@53..56 "red" [] []
+                1: (empty)
+              1: SEMICOLON@56..57 ";" [] []
+          2: R_CURLY@57..59 "}" [Newline("\n")] []
+    2: CSS_AT_RULE@59..78
+      0: AT@59..62 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@62..78
+        0: WHILE_KW@62..68 "while" [] [Whitespace(" ")]
+        1: SCSS_EXPRESSION@68..78
+          0: SCSS_EXPRESSION_ITEM_LIST@68..78
+            0: SCSS_BINARY_EXPRESSION@68..78
+              0: SCSS_IDENTIFIER@68..75
+                0: DOLLAR@68..69 "$" [] []
+                1: CSS_IDENTIFIER@69..75
+                  0: IDENT@69..75 "count" [] [Whitespace(" ")]
+              1: R_ANGLE@75..77 ">" [] [Whitespace(" ")]
+              2: CSS_NUMBER@77..78
+                0: CSS_NUMBER_LITERAL@77..78 "0" [] []
+        2: CSS_BOGUS_BLOCK@78..78
+  2: EOF@78..79 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+while.scss:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found '{'.
+  
+  > 1 │ @while {
+      │        ^
+    2 │   color: red;
+    3 │ }
+  
+  i Expected a SCSS expression here.
+  
+  > 1 │ @while {
+      │        ^
+    2 │   color: red;
+    3 │ }
+  
+while.scss:5:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    3 │ }
+    4 │ 
+  > 5 │ @while $count > {
+      │                 ^
+    6 │   color: red;
+    7 │ }
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+while.scss:10:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `{` but instead the file ends
+  
+     9 │ @while $count > 0
+  > 10 │ 
+       │ 
+  
+  i the file ends here
+  
+     9 │ @while $count > 0
+  > 10 │ 
+       │ 
+  
+```

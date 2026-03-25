@@ -62,7 +62,7 @@ jsxDependencies.jsx:8:22 lint/correctness/useExhaustiveDependencies  FIXABLE  �
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency Sub to the list.
   
     8 │ ··const·renderItem·=·useCallback(()·=>·<Sub·/>,·[Sub·])
       │                                                  ++++  
@@ -94,7 +94,7 @@ jsxDependencies.jsx:28:22 lint/correctness/useExhaustiveDependencies  FIXABLE  �
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency LocalSub to the list.
   
     28 │ ····const·memoized·=·useCallback(()·=>·<LocalSub·/>,·[LocalSub·]);
        │                                                       +++++++++   

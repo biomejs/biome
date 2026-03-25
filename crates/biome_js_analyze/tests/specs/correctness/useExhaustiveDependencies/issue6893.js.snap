@@ -42,7 +42,7 @@ issue6893.js:5:8 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━�
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency firstId to the list.
   
     7 │ → },·[firstId])
       │       +++++++  
@@ -75,7 +75,7 @@ issue6893.js:5:8 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━�
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency secondId to the list.
   
     7 │ → },·[secondId])
       │       ++++++++  

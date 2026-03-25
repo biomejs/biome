@@ -1,0 +1,19 @@
+@each $item in $list {
+  color: $item;
+}
+
+@each $key, $value in $map {
+  color: $key;
+  background: $value;
+}
+
+@each $animal in puma, sea-slug, egret, salamander {
+  color: red;
+}
+
+@each $name, $size in (
+  h1: 32px,
+  h2: 24px,
+) {
+  font-size: $size;
+}

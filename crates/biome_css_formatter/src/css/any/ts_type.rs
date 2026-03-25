@@ -9,7 +9,6 @@ impl FormatRule<AnyCssType> for FormatAnyCssType {
     fn fmt(&self, node: &AnyCssType, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
             AnyCssType::AnyCssSyntaxComponent(node) => node.format().fmt(f),
-            AnyCssType::CssBogusType(node) => node.format().fmt(f),
             AnyCssType::CssTypeFunction(node) => node.format().fmt(f),
         }
     }

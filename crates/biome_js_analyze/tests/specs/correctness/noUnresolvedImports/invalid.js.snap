@@ -4,6 +4,7 @@ expression: invalid.js
 ---
 # Input
 ```js
+/* should generate diagnostics */
 import foo from "./foo.js";
 import { bar } from "./bar";
 import { other } from "./nonExisting";
@@ -12,14 +13,15 @@ import { other } from "./nonExisting";
 
 # Diagnostics
 ```
-invalid.js:1:8 lint/correctness/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:8 lint/correctness/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The path ./foo.js has no default export.
   
-  > 1 │ import foo from "./foo.js";
+    1 │ /* should generate diagnostics */
+  > 2 │ import foo from "./foo.js";
       │        ^^^
-    2 │ import { bar } from "./bar";
-    3 │ import { other } from "./nonExisting";
+    3 │ import { bar } from "./bar";
+    4 │ import { other } from "./nonExisting";
   
   i Make sure that the path is correct and that you're importing the right symbol.
   
@@ -27,15 +29,16 @@ invalid.js:1:8 lint/correctness/noUnresolvedImports ━━━━━━━━━�
 ```
 
 ```
-invalid.js:2:10 lint/correctness/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:10 lint/correctness/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The path ./bar has no export named bar.
   
-    1 │ import foo from "./foo.js";
-  > 2 │ import { bar } from "./bar";
+    1 │ /* should generate diagnostics */
+    2 │ import foo from "./foo.js";
+  > 3 │ import { bar } from "./bar";
       │          ^^^
-    3 │ import { other } from "./nonExisting";
-    4 │ 
+    4 │ import { other } from "./nonExisting";
+    5 │ 
   
   i Make sure that the path is correct and that you're importing the right symbol.
   
@@ -43,15 +46,15 @@ invalid.js:2:10 lint/correctness/noUnresolvedImports ━━━━━━━━━
 ```
 
 ```
-invalid.js:3:23 lint/correctness/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:4:23 lint/correctness/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The path ./nonExisting cannot be resolved: module not found
   
-    1 │ import foo from "./foo.js";
-    2 │ import { bar } from "./bar";
-  > 3 │ import { other } from "./nonExisting";
+    2 │ import foo from "./foo.js";
+    3 │ import { bar } from "./bar";
+  > 4 │ import { other } from "./nonExisting";
       │                       ^^^^^^^^^^^^^^^
-    4 │ 
+    5 │ 
   
   i Make sure that the path exists and is readable.
   

@@ -42,10 +42,14 @@ pub(crate) async fn did_open(
                 session.load_extension_settings(None).await;
             }
 
-            let status = if let Some(path) = session.get_settings_configuration_path() {
-                info!("Loading user configuration from text_document {}", &path);
+            let status = if let Some(config_path) = session.resolve_configuration_path(Some(&path))
+            {
+                info!(
+                    "Loading user configuration from text_document {:?}",
+                    &config_path
+                );
                 session
-                    .load_biome_configuration_file(ConfigurationPathHint::FromUser(path), false)
+                    .load_biome_configuration_file(config_path, false)
                     .await
             } else {
                 let project_path = path
@@ -114,6 +118,7 @@ pub(crate) async fn did_open(
         .is_path_ignored(PathIsIgnoredParams {
             project_key,
             path: path.clone(),
+            is_dir: false,
             features: FeaturesBuilder::new().build(),
             ignore_kind: IgnoreKind::Ancestors,
         })
@@ -162,6 +167,7 @@ pub(crate) async fn did_change(
     let features = FeaturesBuilder::new().build();
     if session.workspace.is_path_ignored(PathIsIgnoredParams {
         path: path.clone(),
+        is_dir: false,
         project_key: doc.project_key,
         features,
         ignore_kind: IgnoreKind::Ancestors,

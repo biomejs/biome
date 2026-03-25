@@ -44,18 +44,20 @@ CssRoot {
                             value_token: IDENT@7..14 "font" [Newline("\n"), Whitespace("  ")] [],
                         },
                         colon_token: COLON@14..16 ":" [] [Whitespace(" ")],
-                        value: CssGenericComponentValueList [
-                            CssRegularDimension {
-                                value_token: CSS_NUMBER_LITERAL@16..18 "12" [] [],
-                                unit_token: IDENT@18..20 "px" [] [],
-                            },
-                            CssGenericDelimiter {
-                                value: SLASH@20..21 "/" [] [],
-                            },
-                            CssNumber {
-                                value_token: CSS_NUMBER_LITERAL@21..25 "1.2" [] [Whitespace(" ")],
-                            },
-                        ],
+                        value: ScssExpression {
+                            items: ScssExpressionItemList [
+                                ScssBinaryExpression {
+                                    left: CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@16..18 "12" [] [],
+                                        unit_token: IDENT@18..20 "px" [] [],
+                                    },
+                                    operator: SLASH@20..21 "/" [] [],
+                                    right: CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@21..25 "1.2" [] [Whitespace(" ")],
+                                    },
+                                },
+                            ],
+                        },
                         block: CssDeclarationOrRuleBlock {
                             l_curly_token: L_CURLY@25..26 "{" [] [],
                             items: CssDeclarationOrRuleList [
@@ -66,11 +68,13 @@ CssRoot {
                                                 value_token: IDENT@26..37 "family" [Newline("\n"), Whitespace("    ")] [],
                                             },
                                             colon_token: COLON@37..39 ":" [] [Whitespace(" ")],
-                                            value: CssGenericComponentValueList [
-                                                CssIdentifier {
-                                                    value_token: IDENT@39..49 "sans-serif" [] [],
-                                                },
-                                            ],
+                                            value: ScssExpression {
+                                                items: ScssExpressionItemList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@39..49 "sans-serif" [] [],
+                                                    },
+                                                ],
+                                            },
                                         },
                                         important: missing (optional),
                                     },
@@ -112,14 +116,15 @@ CssRoot {
             0: CSS_IDENTIFIER@7..14
               0: IDENT@7..14 "font" [Newline("\n"), Whitespace("  ")] []
             1: COLON@14..16 ":" [] [Whitespace(" ")]
-            2: CSS_GENERIC_COMPONENT_VALUE_LIST@16..25
-              0: CSS_REGULAR_DIMENSION@16..20
-                0: CSS_NUMBER_LITERAL@16..18 "12" [] []
-                1: IDENT@18..20 "px" [] []
-              1: CSS_GENERIC_DELIMITER@20..21
-                0: SLASH@20..21 "/" [] []
-              2: CSS_NUMBER@21..25
-                0: CSS_NUMBER_LITERAL@21..25 "1.2" [] [Whitespace(" ")]
+            2: SCSS_EXPRESSION@16..25
+              0: SCSS_EXPRESSION_ITEM_LIST@16..25
+                0: SCSS_BINARY_EXPRESSION@16..25
+                  0: CSS_REGULAR_DIMENSION@16..20
+                    0: CSS_NUMBER_LITERAL@16..18 "12" [] []
+                    1: IDENT@18..20 "px" [] []
+                  1: SLASH@20..21 "/" [] []
+                  2: CSS_NUMBER@21..25
+                    0: CSS_NUMBER_LITERAL@21..25 "1.2" [] [Whitespace(" ")]
             3: CSS_DECLARATION_OR_RULE_BLOCK@25..54
               0: L_CURLY@25..26 "{" [] []
               1: CSS_DECLARATION_OR_RULE_LIST@26..50
@@ -129,9 +134,10 @@ CssRoot {
                       0: CSS_IDENTIFIER@26..37
                         0: IDENT@26..37 "family" [Newline("\n"), Whitespace("    ")] []
                       1: COLON@37..39 ":" [] [Whitespace(" ")]
-                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@39..49
-                        0: CSS_IDENTIFIER@39..49
-                          0: IDENT@39..49 "sans-serif" [] []
+                      2: SCSS_EXPRESSION@39..49
+                        0: SCSS_EXPRESSION_ITEM_LIST@39..49
+                          0: CSS_IDENTIFIER@39..49
+                            0: IDENT@39..49 "sans-serif" [] []
                     1: (empty)
                   1: SEMICOLON@49..50 ";" [] []
               2: R_CURLY@50..54 "}" [Newline("\n"), Whitespace("  ")] []

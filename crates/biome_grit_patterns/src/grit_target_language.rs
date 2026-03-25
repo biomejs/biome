@@ -181,7 +181,9 @@ macro_rules! generate_target_language {
             fn is_metavariable(&self, node: &GritTargetNode) -> bool {
                 node.kind() == self.metavariable_kind()
                     || (self.is_alternative_metavariable_kind(node.kind())
-                        && self.exact_replaced_variable_regex().is_match(node.text()))
+                        && self
+                            .exact_replaced_variable_regex()
+                            .is_match(node.text().trim()))
             }
 
             fn align_padding<'a>(

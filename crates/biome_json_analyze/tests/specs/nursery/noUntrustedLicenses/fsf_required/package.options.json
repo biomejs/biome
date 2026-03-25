@@ -1,0 +1,15 @@
+{
+    "linter": {
+        "rules": {
+            "nursery": {
+                "noUntrustedLicenses": {
+                    "level": "error",
+                    "options": {
+                        "requireFsfLibre": true,
+                        "ignoreDeprecated": true
+                    }
+                }
+            }
+        }
+    }
+}

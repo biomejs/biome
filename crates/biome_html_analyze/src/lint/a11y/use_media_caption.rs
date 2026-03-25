@@ -5,6 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_html_syntax::{AnyHtmlElement, HtmlElementList, HtmlFileSource};
 use biome_rowan::AstNode;
+use biome_rule_options::use_media_caption::UseMediaCaptionOptions;
 
 declare_lint_rule! {
     /// Enforces that `audio` and `video` elements must have a `track` for captions.
@@ -71,7 +72,7 @@ impl Rule for UseMediaCaption {
     type Query = Ast<AnyHtmlElement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseMediaCaptionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

@@ -23,6 +23,7 @@ MdDocument {
     bom_token: missing (optional),
     value: MdBlockList [
         MdHtmlBlock {
+            indent: MdIndentTokenList [],
             content: MdInlineItemList [
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@0..1 "<" [] [],
@@ -88,7 +89,8 @@ MdDocument {
   0: (empty)
   1: MD_BLOCK_LIST@0..101
     0: MD_HTML_BLOCK@0..67
-      0: MD_INLINE_ITEM_LIST@0..67
+      0: MD_INDENT_TOKEN_LIST@0..0
+      1: MD_INLINE_ITEM_LIST@0..67
         0: MD_TEXTUAL@0..1
           0: MD_TEXTUAL_LITERAL@0..1 "<" [] []
         1: MD_TEXTUAL@1..4

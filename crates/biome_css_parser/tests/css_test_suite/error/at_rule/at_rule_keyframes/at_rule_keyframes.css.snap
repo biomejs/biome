@@ -122,15 +122,13 @@ CssRoot {
                                                         },
                                                         l_paren_token: L_PAREN@44..45 "(" [] [],
                                                         items: CssParameterList [
-                                                            CssParameter {
-                                                                any_css_expression: CssListOfComponentValuesExpression {
-                                                                    css_component_value_list: CssComponentValueList [
-                                                                        CssPercentage {
-                                                                            value_token: CSS_NUMBER_LITERAL@45..46 "0" [] [],
-                                                                            percent_token: PERCENT@46..47 "%" [] [],
-                                                                        },
-                                                                    ],
-                                                                },
+                                                            CssListOfComponentValuesExpression {
+                                                                css_component_value_list: CssComponentValueList [
+                                                                    CssPercentage {
+                                                                        value_token: CSS_NUMBER_LITERAL@45..46 "0" [] [],
+                                                                        percent_token: PERCENT@46..47 "%" [] [],
+                                                                    },
+                                                                ],
                                                             },
                                                         ],
                                                         r_paren_token: R_PAREN@47..48 ")" [] [],
@@ -168,15 +166,13 @@ CssRoot {
                                                         },
                                                         l_paren_token: L_PAREN@83..84 "(" [] [],
                                                         items: CssParameterList [
-                                                            CssParameter {
-                                                                any_css_expression: CssListOfComponentValuesExpression {
-                                                                    css_component_value_list: CssComponentValueList [
-                                                                        CssPercentage {
-                                                                            value_token: CSS_NUMBER_LITERAL@84..87 "100" [] [],
-                                                                            percent_token: PERCENT@87..88 "%" [] [],
-                                                                        },
-                                                                    ],
-                                                                },
+                                                            CssListOfComponentValuesExpression {
+                                                                css_component_value_list: CssComponentValueList [
+                                                                    CssPercentage {
+                                                                        value_token: CSS_NUMBER_LITERAL@84..87 "100" [] [],
+                                                                        percent_token: PERCENT@87..88 "%" [] [],
+                                                                    },
+                                                                ],
                                                             },
                                                         ],
                                                         r_paren_token: R_PAREN@88..89 ")" [] [],
@@ -225,15 +221,13 @@ CssRoot {
                                                         },
                                                         l_paren_token: L_PAREN@144..145 "(" [] [],
                                                         items: CssParameterList [
-                                                            CssParameter {
-                                                                any_css_expression: CssListOfComponentValuesExpression {
-                                                                    css_component_value_list: CssComponentValueList [
-                                                                        CssPercentage {
-                                                                            value_token: CSS_NUMBER_LITERAL@145..146 "0" [] [],
-                                                                            percent_token: PERCENT@146..147 "%" [] [],
-                                                                        },
-                                                                    ],
-                                                                },
+                                                            CssListOfComponentValuesExpression {
+                                                                css_component_value_list: CssComponentValueList [
+                                                                    CssPercentage {
+                                                                        value_token: CSS_NUMBER_LITERAL@145..146 "0" [] [],
+                                                                        percent_token: PERCENT@146..147 "%" [] [],
+                                                                    },
+                                                                ],
                                                             },
                                                         ],
                                                         r_paren_token: R_PAREN@147..148 ")" [] [],
@@ -290,15 +284,13 @@ CssRoot {
                                                         },
                                                         l_paren_token: L_PAREN@211..212 "(" [] [],
                                                         items: CssParameterList [
-                                                            CssParameter {
-                                                                any_css_expression: CssListOfComponentValuesExpression {
-                                                                    css_component_value_list: CssComponentValueList [
-                                                                        CssPercentage {
-                                                                            value_token: CSS_NUMBER_LITERAL@212..215 "100" [] [],
-                                                                            percent_token: PERCENT@215..216 "%" [] [],
-                                                                        },
-                                                                    ],
-                                                                },
+                                                            CssListOfComponentValuesExpression {
+                                                                css_component_value_list: CssComponentValueList [
+                                                                    CssPercentage {
+                                                                        value_token: CSS_NUMBER_LITERAL@212..215 "100" [] [],
+                                                                        percent_token: PERCENT@215..216 "%" [] [],
+                                                                    },
+                                                                ],
                                                             },
                                                         ],
                                                         r_paren_token: R_PAREN@216..217 ")" [] [],
@@ -354,15 +346,13 @@ CssRoot {
                                                         },
                                                         l_paren_token: L_PAREN@278..279 "(" [] [],
                                                         items: CssParameterList [
-                                                            CssParameter {
-                                                                any_css_expression: CssListOfComponentValuesExpression {
-                                                                    css_component_value_list: CssComponentValueList [
-                                                                        CssPercentage {
-                                                                            value_token: CSS_NUMBER_LITERAL@279..280 "0" [] [],
-                                                                            percent_token: PERCENT@280..281 "%" [] [],
-                                                                        },
-                                                                    ],
-                                                                },
+                                                            CssListOfComponentValuesExpression {
+                                                                css_component_value_list: CssComponentValueList [
+                                                                    CssPercentage {
+                                                                        value_token: CSS_NUMBER_LITERAL@279..280 "0" [] [],
+                                                                        percent_token: PERCENT@280..281 "%" [] [],
+                                                                    },
+                                                                ],
                                                             },
                                                         ],
                                                         r_paren_token: R_PAREN@281..282 ")" [] [],
@@ -417,15 +407,13 @@ CssRoot {
                                                                 },
                                                                 l_paren_token: L_PAREN@342..343 "(" [] [],
                                                                 items: CssParameterList [
-                                                                    CssParameter {
-                                                                        any_css_expression: CssListOfComponentValuesExpression {
-                                                                            css_component_value_list: CssComponentValueList [
-                                                                                CssPercentage {
-                                                                                    value_token: CSS_NUMBER_LITERAL@343..344 "0" [] [],
-                                                                                    percent_token: PERCENT@344..345 "%" [] [],
-                                                                                },
-                                                                            ],
-                                                                        },
+                                                                    CssListOfComponentValuesExpression {
+                                                                        css_component_value_list: CssComponentValueList [
+                                                                            CssPercentage {
+                                                                                value_token: CSS_NUMBER_LITERAL@343..344 "0" [] [],
+                                                                                percent_token: PERCENT@344..345 "%" [] [],
+                                                                            },
+                                                                        ],
                                                                     },
                                                                 ],
                                                                 r_paren_token: R_PAREN@345..346 ")" [] [],
@@ -494,15 +482,13 @@ CssRoot {
                                                             },
                                                             l_paren_token: L_PAREN@443..444 "(" [] [],
                                                             items: CssParameterList [
-                                                                CssParameter {
-                                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                                        css_component_value_list: CssComponentValueList [
-                                                                            CssPercentage {
-                                                                                value_token: CSS_NUMBER_LITERAL@444..445 "0" [] [],
-                                                                                percent_token: PERCENT@445..446 "%" [] [],
-                                                                            },
-                                                                        ],
-                                                                    },
+                                                                CssListOfComponentValuesExpression {
+                                                                    css_component_value_list: CssComponentValueList [
+                                                                        CssPercentage {
+                                                                            value_token: CSS_NUMBER_LITERAL@444..445 "0" [] [],
+                                                                            percent_token: PERCENT@445..446 "%" [] [],
+                                                                        },
+                                                                    ],
                                                                 },
                                                             ],
                                                             r_paren_token: R_PAREN@446..447 ")" [] [],
@@ -541,15 +527,13 @@ CssRoot {
                                                         },
                                                         l_paren_token: L_PAREN@482..483 "(" [] [],
                                                         items: CssParameterList [
-                                                            CssParameter {
-                                                                any_css_expression: CssListOfComponentValuesExpression {
-                                                                    css_component_value_list: CssComponentValueList [
-                                                                        CssPercentage {
-                                                                            value_token: CSS_NUMBER_LITERAL@483..486 "100" [] [],
-                                                                            percent_token: PERCENT@486..487 "%" [] [],
-                                                                        },
-                                                                    ],
-                                                                },
+                                                            CssListOfComponentValuesExpression {
+                                                                css_component_value_list: CssComponentValueList [
+                                                                    CssPercentage {
+                                                                        value_token: CSS_NUMBER_LITERAL@483..486 "100" [] [],
+                                                                        percent_token: PERCENT@486..487 "%" [] [],
+                                                                    },
+                                                                ],
                                                             },
                                                         ],
                                                         r_paren_token: R_PAREN@487..488 ")" [] [],
@@ -602,15 +586,13 @@ CssRoot {
                                                         },
                                                         l_paren_token: L_PAREN@548..549 "(" [] [],
                                                         items: CssParameterList [
-                                                            CssParameter {
-                                                                any_css_expression: CssListOfComponentValuesExpression {
-                                                                    css_component_value_list: CssComponentValueList [
-                                                                        CssPercentage {
-                                                                            value_token: CSS_NUMBER_LITERAL@549..550 "0" [] [],
-                                                                            percent_token: PERCENT@550..551 "%" [] [],
-                                                                        },
-                                                                    ],
-                                                                },
+                                                            CssListOfComponentValuesExpression {
+                                                                css_component_value_list: CssComponentValueList [
+                                                                    CssPercentage {
+                                                                        value_token: CSS_NUMBER_LITERAL@549..550 "0" [] [],
+                                                                        percent_token: PERCENT@550..551 "%" [] [],
+                                                                    },
+                                                                ],
                                                             },
                                                         ],
                                                         r_paren_token: R_PAREN@551..552 ")" [] [],
@@ -648,15 +630,13 @@ CssRoot {
                                                             },
                                                             l_paren_token: L_PAREN@585..586 "(" [] [],
                                                             items: CssParameterList [
-                                                                CssParameter {
-                                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                                        css_component_value_list: CssComponentValueList [
-                                                                            CssPercentage {
-                                                                                value_token: CSS_NUMBER_LITERAL@586..589 "100" [] [],
-                                                                                percent_token: PERCENT@589..590 "%" [] [],
-                                                                            },
-                                                                        ],
-                                                                    },
+                                                                CssListOfComponentValuesExpression {
+                                                                    css_component_value_list: CssComponentValueList [
+                                                                        CssPercentage {
+                                                                            value_token: CSS_NUMBER_LITERAL@586..589 "100" [] [],
+                                                                            percent_token: PERCENT@589..590 "%" [] [],
+                                                                        },
+                                                                    ],
                                                                 },
                                                             ],
                                                             r_paren_token: R_PAREN@590..591 ")" [] [],
@@ -711,15 +691,13 @@ CssRoot {
                                                             },
                                                             l_paren_token: L_PAREN@651..652 "(" [] [],
                                                             items: CssParameterList [
-                                                                CssParameter {
-                                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                                        css_component_value_list: CssComponentValueList [
-                                                                            CssPercentage {
-                                                                                value_token: CSS_NUMBER_LITERAL@652..653 "0" [] [],
-                                                                                percent_token: PERCENT@653..654 "%" [] [],
-                                                                            },
-                                                                        ],
-                                                                    },
+                                                                CssListOfComponentValuesExpression {
+                                                                    css_component_value_list: CssComponentValueList [
+                                                                        CssPercentage {
+                                                                            value_token: CSS_NUMBER_LITERAL@652..653 "0" [] [],
+                                                                            percent_token: PERCENT@653..654 "%" [] [],
+                                                                        },
+                                                                    ],
                                                                 },
                                                             ],
                                                             r_paren_token: R_PAREN@654..655 ")" [] [],
@@ -757,15 +735,13 @@ CssRoot {
                                                             },
                                                             l_paren_token: L_PAREN@690..691 "(" [] [],
                                                             items: CssParameterList [
-                                                                CssParameter {
-                                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                                        css_component_value_list: CssComponentValueList [
-                                                                            CssPercentage {
-                                                                                value_token: CSS_NUMBER_LITERAL@691..694 "100" [] [],
-                                                                                percent_token: PERCENT@694..695 "%" [] [],
-                                                                            },
-                                                                        ],
-                                                                    },
+                                                                CssListOfComponentValuesExpression {
+                                                                    css_component_value_list: CssComponentValueList [
+                                                                        CssPercentage {
+                                                                            value_token: CSS_NUMBER_LITERAL@691..694 "100" [] [],
+                                                                            percent_token: PERCENT@694..695 "%" [] [],
+                                                                        },
+                                                                    ],
                                                                 },
                                                             ],
                                                             r_paren_token: R_PAREN@695..696 ")" [] [],
@@ -917,12 +893,11 @@ CssRoot {
                               0: IDENT@34..44 "translateX" [] []
                             1: L_PAREN@44..45 "(" [] []
                             2: CSS_PARAMETER_LIST@45..47
-                              0: CSS_PARAMETER@45..47
-                                0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@45..47
-                                  0: CSS_COMPONENT_VALUE_LIST@45..47
-                                    0: CSS_PERCENTAGE@45..47
-                                      0: CSS_NUMBER_LITERAL@45..46 "0" [] []
-                                      1: PERCENT@46..47 "%" [] []
+                              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@45..47
+                                0: CSS_COMPONENT_VALUE_LIST@45..47
+                                  0: CSS_PERCENTAGE@45..47
+                                    0: CSS_NUMBER_LITERAL@45..46 "0" [] []
+                                    1: PERCENT@46..47 "%" [] []
                             3: R_PAREN@47..48 ")" [] []
                       1: (empty)
                     1: SEMICOLON@48..49 ";" [] []
@@ -946,12 +921,11 @@ CssRoot {
                               0: IDENT@73..83 "translateX" [] []
                             1: L_PAREN@83..84 "(" [] []
                             2: CSS_PARAMETER_LIST@84..88
-                              0: CSS_PARAMETER@84..88
-                                0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@84..88
-                                  0: CSS_COMPONENT_VALUE_LIST@84..88
-                                    0: CSS_PERCENTAGE@84..88
-                                      0: CSS_NUMBER_LITERAL@84..87 "100" [] []
-                                      1: PERCENT@87..88 "%" [] []
+                              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@84..88
+                                0: CSS_COMPONENT_VALUE_LIST@84..88
+                                  0: CSS_PERCENTAGE@84..88
+                                    0: CSS_NUMBER_LITERAL@84..87 "100" [] []
+                                    1: PERCENT@87..88 "%" [] []
                             3: R_PAREN@88..89 ")" [] []
                       1: (empty)
                     1: SEMICOLON@89..90 ";" [] []
@@ -983,12 +957,11 @@ CssRoot {
                               0: IDENT@134..144 "translateX" [] []
                             1: L_PAREN@144..145 "(" [] []
                             2: CSS_PARAMETER_LIST@145..147
-                              0: CSS_PARAMETER@145..147
-                                0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@145..147
-                                  0: CSS_COMPONENT_VALUE_LIST@145..147
-                                    0: CSS_PERCENTAGE@145..147
-                                      0: CSS_NUMBER_LITERAL@145..146 "0" [] []
-                                      1: PERCENT@146..147 "%" [] []
+                              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@145..147
+                                0: CSS_COMPONENT_VALUE_LIST@145..147
+                                  0: CSS_PERCENTAGE@145..147
+                                    0: CSS_NUMBER_LITERAL@145..146 "0" [] []
+                                    1: PERCENT@146..147 "%" [] []
                             3: R_PAREN@147..148 ")" [] []
                       1: (empty)
                     1: SEMICOLON@148..149 ";" [] []
@@ -1025,12 +998,11 @@ CssRoot {
                               0: IDENT@201..211 "translateX" [] []
                             1: L_PAREN@211..212 "(" [] []
                             2: CSS_PARAMETER_LIST@212..216
-                              0: CSS_PARAMETER@212..216
-                                0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@212..216
-                                  0: CSS_COMPONENT_VALUE_LIST@212..216
-                                    0: CSS_PERCENTAGE@212..216
-                                      0: CSS_NUMBER_LITERAL@212..215 "100" [] []
-                                      1: PERCENT@215..216 "%" [] []
+                              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@212..216
+                                0: CSS_COMPONENT_VALUE_LIST@212..216
+                                  0: CSS_PERCENTAGE@212..216
+                                    0: CSS_NUMBER_LITERAL@212..215 "100" [] []
+                                    1: PERCENT@215..216 "%" [] []
                             3: R_PAREN@216..217 ")" [] []
                       1: (empty)
                     1: SEMICOLON@217..218 ";" [] []
@@ -1065,12 +1037,11 @@ CssRoot {
                               0: IDENT@268..278 "translateX" [] []
                             1: L_PAREN@278..279 "(" [] []
                             2: CSS_PARAMETER_LIST@279..281
-                              0: CSS_PARAMETER@279..281
-                                0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@279..281
-                                  0: CSS_COMPONENT_VALUE_LIST@279..281
-                                    0: CSS_PERCENTAGE@279..281
-                                      0: CSS_NUMBER_LITERAL@279..280 "0" [] []
-                                      1: PERCENT@280..281 "%" [] []
+                              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@279..281
+                                0: CSS_COMPONENT_VALUE_LIST@279..281
+                                  0: CSS_PERCENTAGE@279..281
+                                    0: CSS_NUMBER_LITERAL@279..280 "0" [] []
+                                    1: PERCENT@280..281 "%" [] []
                             3: R_PAREN@281..282 ")" [] []
                       1: (empty)
                     1: SEMICOLON@282..283 ";" [] []
@@ -1104,12 +1075,11 @@ CssRoot {
                               0: IDENT@332..342 "translateX" [] []
                             1: L_PAREN@342..343 "(" [] []
                             2: CSS_PARAMETER_LIST@343..345
-                              0: CSS_PARAMETER@343..345
-                                0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@343..345
-                                  0: CSS_COMPONENT_VALUE_LIST@343..345
-                                    0: CSS_PERCENTAGE@343..345
-                                      0: CSS_NUMBER_LITERAL@343..344 "0" [] []
-                                      1: PERCENT@344..345 "%" [] []
+                              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@343..345
+                                0: CSS_COMPONENT_VALUE_LIST@343..345
+                                  0: CSS_PERCENTAGE@343..345
+                                    0: CSS_NUMBER_LITERAL@343..344 "0" [] []
+                                    1: PERCENT@344..345 "%" [] []
                             3: R_PAREN@345..346 ")" [] []
                       1: (empty)
                     1: SEMICOLON@346..347 ";" [] []
@@ -1153,12 +1123,11 @@ CssRoot {
                               0: IDENT@433..443 "translateX" [] []
                             1: L_PAREN@443..444 "(" [] []
                             2: CSS_PARAMETER_LIST@444..446
-                              0: CSS_PARAMETER@444..446
-                                0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@444..446
-                                  0: CSS_COMPONENT_VALUE_LIST@444..446
-                                    0: CSS_PERCENTAGE@444..446
-                                      0: CSS_NUMBER_LITERAL@444..445 "0" [] []
-                                      1: PERCENT@445..446 "%" [] []
+                              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@444..446
+                                0: CSS_COMPONENT_VALUE_LIST@444..446
+                                  0: CSS_PERCENTAGE@444..446
+                                    0: CSS_NUMBER_LITERAL@444..445 "0" [] []
+                                    1: PERCENT@445..446 "%" [] []
                             3: R_PAREN@446..447 ")" [] []
                       1: (empty)
                     1: SEMICOLON@447..448 ";" [] []
@@ -1182,12 +1151,11 @@ CssRoot {
                               0: IDENT@472..482 "translateX" [] []
                             1: L_PAREN@482..483 "(" [] []
                             2: CSS_PARAMETER_LIST@483..487
-                              0: CSS_PARAMETER@483..487
-                                0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@483..487
-                                  0: CSS_COMPONENT_VALUE_LIST@483..487
-                                    0: CSS_PERCENTAGE@483..487
-                                      0: CSS_NUMBER_LITERAL@483..486 "100" [] []
-                                      1: PERCENT@486..487 "%" [] []
+                              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@483..487
+                                0: CSS_COMPONENT_VALUE_LIST@483..487
+                                  0: CSS_PERCENTAGE@483..487
+                                    0: CSS_NUMBER_LITERAL@483..486 "100" [] []
+                                    1: PERCENT@486..487 "%" [] []
                             3: R_PAREN@487..488 ")" [] []
                       1: (empty)
                     1: SEMICOLON@488..489 ";" [] []
@@ -1221,12 +1189,11 @@ CssRoot {
                               0: IDENT@538..548 "translateX" [] []
                             1: L_PAREN@548..549 "(" [] []
                             2: CSS_PARAMETER_LIST@549..551
-                              0: CSS_PARAMETER@549..551
-                                0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@549..551
-                                  0: CSS_COMPONENT_VALUE_LIST@549..551
-                                    0: CSS_PERCENTAGE@549..551
-                                      0: CSS_NUMBER_LITERAL@549..550 "0" [] []
-                                      1: PERCENT@550..551 "%" [] []
+                              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@549..551
+                                0: CSS_COMPONENT_VALUE_LIST@549..551
+                                  0: CSS_PERCENTAGE@549..551
+                                    0: CSS_NUMBER_LITERAL@549..550 "0" [] []
+                                    1: PERCENT@550..551 "%" [] []
                             3: R_PAREN@551..552 ")" [] []
                       1: (empty)
                     1: SEMICOLON@552..553 ";" [] []
@@ -1249,12 +1216,11 @@ CssRoot {
                               0: IDENT@575..585 "translateX" [] []
                             1: L_PAREN@585..586 "(" [] []
                             2: CSS_PARAMETER_LIST@586..590
-                              0: CSS_PARAMETER@586..590
-                                0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@586..590
-                                  0: CSS_COMPONENT_VALUE_LIST@586..590
-                                    0: CSS_PERCENTAGE@586..590
-                                      0: CSS_NUMBER_LITERAL@586..589 "100" [] []
-                                      1: PERCENT@589..590 "%" [] []
+                              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@586..590
+                                0: CSS_COMPONENT_VALUE_LIST@586..590
+                                  0: CSS_PERCENTAGE@586..590
+                                    0: CSS_NUMBER_LITERAL@586..589 "100" [] []
+                                    1: PERCENT@589..590 "%" [] []
                             3: R_PAREN@590..591 ")" [] []
                       1: (empty)
                     1: SEMICOLON@591..592 ";" [] []
@@ -1288,12 +1254,11 @@ CssRoot {
                               0: IDENT@641..651 "translateX" [] []
                             1: L_PAREN@651..652 "(" [] []
                             2: CSS_PARAMETER_LIST@652..654
-                              0: CSS_PARAMETER@652..654
-                                0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@652..654
-                                  0: CSS_COMPONENT_VALUE_LIST@652..654
-                                    0: CSS_PERCENTAGE@652..654
-                                      0: CSS_NUMBER_LITERAL@652..653 "0" [] []
-                                      1: PERCENT@653..654 "%" [] []
+                              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@652..654
+                                0: CSS_COMPONENT_VALUE_LIST@652..654
+                                  0: CSS_PERCENTAGE@652..654
+                                    0: CSS_NUMBER_LITERAL@652..653 "0" [] []
+                                    1: PERCENT@653..654 "%" [] []
                             3: R_PAREN@654..655 ")" [] []
                       1: (empty)
                     1: SEMICOLON@655..656 ";" [] []
@@ -1317,12 +1282,11 @@ CssRoot {
                               0: IDENT@680..690 "translateX" [] []
                             1: L_PAREN@690..691 "(" [] []
                             2: CSS_PARAMETER_LIST@691..695
-                              0: CSS_PARAMETER@691..695
-                                0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@691..695
-                                  0: CSS_COMPONENT_VALUE_LIST@691..695
-                                    0: CSS_PERCENTAGE@691..695
-                                      0: CSS_NUMBER_LITERAL@691..694 "100" [] []
-                                      1: PERCENT@694..695 "%" [] []
+                              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@691..695
+                                0: CSS_COMPONENT_VALUE_LIST@691..695
+                                  0: CSS_PERCENTAGE@691..695
+                                    0: CSS_NUMBER_LITERAL@691..694 "100" [] []
+                                    1: PERCENT@694..695 "%" [] []
                             3: R_PAREN@695..696 ")" [] []
                       1: (empty)
                     1: SEMICOLON@696..697 ";" [] []

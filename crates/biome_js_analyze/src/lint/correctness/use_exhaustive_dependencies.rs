@@ -1627,11 +1627,12 @@ impl Rule for UseExhaustiveDependencies {
 
         let message = match state {
             Fix::AddDependency {
-                captures: (_, captures),
+                captures,
                 dependencies_array,
                 ..
             } => {
-                let new_elements = captures.first().into_iter().filter_map(|node| {
+                let (capture_text, captures_range) = captures;
+                let new_elements = captures_range.first().into_iter().filter_map(|node| {
                     if let Some(jsx_ref) = JsxReferenceIdentifier::cast_ref(node) {
                         return Some(AnyJsArrayElement::AnyJsExpression(
                             make::js_identifier_expression(make::js_reference_identifier(
@@ -1662,7 +1663,7 @@ impl Rule for UseExhaustiveDependencies {
                     recreate_array(dependencies_array, elements),
                 );
 
-                markup! { "Add the missing dependency to the list." }
+                markup! { "Add the missing dependency "<Emphasis>{capture_text.as_ref()}</Emphasis>" to the list." }
             }
             Fix::RemoveDependency {
                 dependencies,

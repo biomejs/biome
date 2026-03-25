@@ -1,0 +1,32 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "html": {
+    "formatter": {
+      "indentScriptAndStyle": true
+    }
+  }
+}
+```
+
+## `file.vue`
+
+```vue
+<script>
+	const line1 = "fail";
+	console.log(line1);
+</script>
+<template></template>
+
+```
+
+# Emitted Messages
+
+```block
+Checked 2 files in <TIME>. No fixes applied.
+```

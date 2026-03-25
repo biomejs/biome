@@ -135,6 +135,7 @@ impl<'src> HtmlLexer<'src> {
             EXL => self.consume_byte(T![!]),
             // Handle colons as separate tokens for Astro directives
             COL => self.consume_byte(T![:]),
+            PRD => self.consume_byte(T![.]),
             BEO if self.at_svelte_opening_block() => self.consume_svelte_opening_block(),
             BEO => {
                 if self.at_opening_double_text_expression() {
@@ -175,14 +176,24 @@ impl<'src> HtmlLexer<'src> {
 
     /// Consume a token in the [HtmlLexContext::InsideTagWithDirectives] context.
     /// This context is used for Vue files with Vue-specific directives.
-    fn consume_token_inside_tag_directives(&mut self, current: u8) -> HtmlSyntaxKind {
+    /// When `svelte` is `true`, also handles `//` and `/* */` as JS-style comments.
+    fn consume_token_inside_tag_directives(&mut self, current: u8, svelte: bool) -> HtmlSyntaxKind {
         let dispatched = lookup_byte(current);
 
         match dispatched {
             WHS => self.consume_newline_or_whitespaces(),
             LSS => self.consume_l_angle(),
             MOR => self.consume_byte(T![>]),
-            SLH => self.consume_byte(T![/]),
+            SLH => {
+                if svelte {
+                    match self.byte_at(1).map(lookup_byte) {
+                        Some(SLH) => return self.consume_js_line_comment(),
+                        Some(MUL) => return self.consume_js_block_comment(),
+                        _ => {}
+                    }
+                }
+                self.consume_byte(T![/])
+            }
             EQL => self.consume_byte(T![=]),
             EXL => self.consume_byte(T![!]),
             BEO => {
@@ -259,6 +270,23 @@ impl<'src> HtmlLexer<'src> {
         } else {
             ERROR_TOKEN
         }
+    }
+
+    /// Consume a token in the [HtmlLexContext::InsideTagSvelte] context.
+    /// This context is used for Svelte files with JS-style comment support.
+    fn consume_token_inside_tag_svelte(&mut self, current: u8) -> HtmlSyntaxKind {
+        let dispatched = lookup_byte(current);
+
+        match dispatched {
+            SLH => match self.byte_at(1).map(lookup_byte) {
+                Some(SLH) => return self.consume_js_line_comment(),
+                Some(MUL) => return self.consume_js_block_comment(),
+                _ => {}
+            },
+            PRD => return self.consume_byte(T![.]),
+            _ => {}
+        }
+        self.consume_token_inside_tag(current)
     }
 
     /// Consume a token in the [HtmlLexContext::Regular] context.
@@ -538,6 +566,49 @@ impl<'src> HtmlLexer<'src> {
             self.advance_byte_or_char(char);
         }
 
+        COMMENT
+    }
+
+    /// Consumes a `//` single-line comment, returning COMMENT.
+    /// Does NOT consume the terminating newline — it must be emitted as a
+    /// separate NEWLINE trivia token to preserve leading/trailing trivia boundaries.
+    fn consume_js_line_comment(&mut self) -> HtmlSyntaxKind {
+        self.advance(2);
+        while let Some(chr) = self.current_byte() {
+            match chr {
+                b'\n' | b'\r' => break,
+                _ if chr.is_ascii() => self.advance(1),
+                _ => {
+                    let c = self.current_char_unchecked();
+                    if is_linebreak(c) {
+                        break;
+                    }
+                    self.advance(c.len_utf8());
+                }
+            }
+        }
+        COMMENT
+    }
+
+    /// Consumes a `/* */` block comment, returning COMMENT.
+    fn consume_js_block_comment(&mut self) -> HtmlSyntaxKind {
+        self.advance(2);
+        while let Some(chr) = self.current_byte() {
+            let dispatched = lookup_byte(chr);
+            match dispatched {
+                MUL if self.byte_at(1).map(lookup_byte) == Some(SLH) => {
+                    self.advance(2);
+                    return COMMENT;
+                }
+                IDT | ZER | DIG | WHS | COL | SLH | MIN | MUL => self.advance(1),
+                _ if chr.is_ascii() => self.advance(1),
+                _ => self.advance(self.current_char_unchecked().len_utf8()),
+            }
+        }
+        self.push_diagnostic(ParseDiagnostic::new(
+            "Unterminated block comment, expected `*/`",
+            self.current_start..self.text_position(),
+        ));
         COMMENT
     }
 
@@ -1256,6 +1327,7 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
         self.current_kind
     }
 
+    #[inline]
     fn current_start(&self) -> TextSize {
         self.current_start
     }
@@ -1271,10 +1343,13 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
                 Some(current) => match context {
                     HtmlLexContext::Regular => self.consume_token(current),
                     HtmlLexContext::InsideTag => self.consume_token_inside_tag(current),
-                    HtmlLexContext::InsideTagWithDirectives => {
-                        self.consume_token_inside_tag_directives(current)
+                    HtmlLexContext::InsideTagWithDirectives { svelte } => {
+                        self.consume_token_inside_tag_directives(current, svelte)
                     }
                     HtmlLexContext::InsideTagAstro => self.consume_token_inside_tag_astro(current),
+                    HtmlLexContext::InsideTagSvelte => {
+                        self.consume_token_inside_tag_svelte(current)
+                    }
                     HtmlLexContext::VueDirectiveArgument => {
                         self.consume_token_vue_directive_argument()
                     }
@@ -1354,11 +1429,13 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
         self.diagnostics.push(diagnostic);
     }
 
+    #[inline]
     fn advance_char_unchecked(&mut self) {
         let c = self.current_char_unchecked();
         self.position += c.len_utf8();
     }
 
+    #[inline]
     fn advance(&mut self, n: usize) {
         self.position += n;
     }
@@ -1375,6 +1452,7 @@ impl<'src> ReLexer<'src> for HtmlLexer<'src> {
                 HtmlReLexContext::HtmlText => self.consume_html_text(current),
                 HtmlReLexContext::InsideTag => self.consume_token_inside_tag(current),
                 HtmlReLexContext::InsideTagAstro => self.consume_token_inside_tag_astro(current),
+                HtmlReLexContext::InsideTagSvelte => self.consume_token_inside_tag_svelte(current),
             },
             None => EOF,
         };
@@ -1438,6 +1516,11 @@ fn is_vue_directive_prefix_bytes(bytes: &[u8]) -> bool {
     bytes.starts_with(b"v-")
 }
 
+/// Check if a char is a linebreak (for JS-style comments in Svelte)
+fn is_linebreak(chr: char) -> bool {
+    matches!(chr, '\n' | '\r' | '\u{2028}' | '\u{2029}')
+}
+
 /// Identifiers can contain letters, numbers and `_`
 fn is_at_continue_identifier(byte: u8) -> bool {
     byte.is_ascii_alphanumeric() || byte == b'_'
@@ -1475,9 +1558,10 @@ impl<'src> LexerWithCheckpoint<'src> for HtmlLexer<'src> {
     }
 }
 
-/// Tracks whether the lexer is currently inside an open string literal while
-/// scanning Astro frontmatter. Used to determine whether a `---` sequence is
-/// a genuine closing fence or merely three dashes that appear inside a string.
+/// Tracks whether the lexer is currently inside an open string literal, regex
+/// literal, or comment while scanning Astro frontmatter. Used to determine
+/// whether a `---` sequence is a genuine closing fence or merely three dashes
+/// that appear inside a string or regex.
 ///
 /// ## Design
 ///
@@ -1488,6 +1572,11 @@ impl<'src> LexerWithCheckpoint<'src> for HtmlLexer<'src> {
 ///   already open; it closes the string only when it **matches** the opening
 ///   quote. For example, a `'` inside a `"…"` string is treated as a literal
 ///   character, not as a new string opener.
+/// - The **regex flag** (`in_regex`): set when a `/` is encountered in a
+///   position where it starts a regex literal (determined by the previous
+///   non-whitespace byte). While set, all bytes are consumed until an
+///   unescaped `/` closes the regex. Quotes and dashes inside a regex are
+///   not treated as string delimiters or fence markers.
 /// - The **comment state** (`comment`): distinguishes single-line (`//`) from
 ///   multi-line (`/* … */`) comments, so that quote characters inside comments
 ///   are not counted as string delimiters.
@@ -1498,6 +1587,8 @@ impl<'src> LexerWithCheckpoint<'src> for HtmlLexer<'src> {
 struct QuotesSeen {
     /// The quote character that opened the current string, if any.
     current_quote: Option<u8>,
+    /// Whether we are currently inside a regex literal (`/…/`).
+    in_regex: bool,
     /// Current comment state.
     comment: QuotesSeenComment,
     /// Whether the previous byte was an unescaped backslash.
@@ -1505,6 +1596,8 @@ struct QuotesSeen {
     /// The previous byte, needed to detect `//` and `/* */` comment markers
     /// and the `*/` block-comment terminator.
     prev_byte: Option<u8>,
+    /// The previous non-whitespace byte, used for the regex-start heuristic.
+    prev_non_ws_byte: Option<u8>,
 }
 
 /// Distinguishes the kind of comment the lexer is currently inside.
@@ -1522,9 +1615,11 @@ impl QuotesSeen {
     fn new() -> Self {
         Self {
             current_quote: None,
+            in_regex: false,
             comment: QuotesSeenComment::None,
             escaped: false,
             prev_byte: None,
+            prev_non_ws_byte: None,
         }
     }
 
@@ -1537,6 +1632,9 @@ impl QuotesSeen {
                     self.comment = QuotesSeenComment::None;
                 }
                 self.prev_byte = Some(byte);
+                if !byte.is_ascii_whitespace() {
+                    self.prev_non_ws_byte = Some(byte);
+                }
                 // Quotes inside comments are ignored.
                 return;
             }
@@ -1544,6 +1642,11 @@ impl QuotesSeen {
                 // Multi-line comment ends at `*/`.
                 if self.prev_byte == Some(b'*') && byte == b'/' {
                     self.comment = QuotesSeenComment::None;
+                    // Use a neutral prev_byte so the closing `/` of `*/` is
+                    // not mistaken for a potential regex or comment opener.
+                    self.prev_byte = None;
+                    self.prev_non_ws_byte = Some(b'/');
+                    return;
                 }
                 self.prev_byte = Some(byte);
                 // Quotes inside comments are ignored.
@@ -1552,11 +1655,31 @@ impl QuotesSeen {
             QuotesSeenComment::None => {}
         }
 
+        // Inside a regex literal: consume bytes until an unescaped `/` closes it.
+        if self.in_regex {
+            if byte == b'\\' {
+                self.escaped = !self.escaped;
+                self.prev_byte = Some(byte);
+            } else if byte == b'/' && !self.escaped {
+                self.in_regex = false;
+                self.escaped = false;
+                // Use a neutral prev_byte so the closing `/` of the regex is
+                // not mistaken for a deferred slash (comment/regex opener).
+                self.prev_byte = None;
+                self.prev_non_ws_byte = Some(b'/');
+            } else {
+                self.escaped = false;
+                self.prev_byte = Some(byte);
+            }
+            return;
+        }
+
         // Handle escape sequences: a `\` that is not itself escaped toggles the
         // escape flag for the next character.
         if byte == b'\\' {
             self.escaped = !self.escaped;
             self.prev_byte = Some(byte);
+            self.prev_non_ws_byte = Some(byte);
             return;
         }
 
@@ -1567,24 +1690,60 @@ impl QuotesSeen {
 
         if was_escaped {
             self.prev_byte = Some(byte);
+            if !byte.is_ascii_whitespace() {
+                self.prev_non_ws_byte = Some(byte);
+            }
             return;
         }
 
-        // Detect comment openers — only valid outside of open strings.
-        if self.current_quote.is_none() && self.prev_byte == Some(b'/') {
-            match byte {
-                b'/' => {
-                    self.comment = QuotesSeenComment::SingleLine;
-                    self.prev_byte = Some(byte);
-                    return;
-                }
-                b'*' => {
-                    self.comment = QuotesSeenComment::MultiLine;
-                    self.prev_byte = Some(byte);
-                    return;
-                }
-                _ => {}
+        // Detect comment openers and regex literals — only valid outside of open strings.
+        if self.current_quote.is_none() && byte == b'/' {
+            // Check if the previous byte was also `/` → single-line comment.
+            if self.prev_byte == Some(b'/') {
+                self.comment = QuotesSeenComment::SingleLine;
+                self.prev_byte = Some(byte);
+                // Don't update prev_non_ws_byte — it was already preserved
+                // when we deferred the first `/`.
+                return;
             }
+
+            // The `/` might start a comment (if followed by `/` or `*`), a
+            // regex literal, or be a division operator. We defer the decision:
+            // store it as prev_byte and decide on the *next* byte.
+            // Crucially, do NOT update prev_non_ws_byte here — we need to
+            // preserve the byte before the `/` for the regex heuristic.
+            self.prev_byte = Some(byte);
+            return;
+        }
+
+        // If the *previous* byte was `/` (outside a string), decide now whether
+        // it was a comment opener, a regex opener, or plain division.
+        if self.current_quote.is_none() && self.prev_byte == Some(b'/') {
+            if byte == b'*' {
+                self.comment = QuotesSeenComment::MultiLine;
+                self.prev_byte = Some(byte);
+                self.prev_non_ws_byte = Some(byte);
+                return;
+            }
+
+            // Not `//` or `/*`, so the previous `/` was either a regex opener
+            // or a division operator. Use the previous non-whitespace byte
+            // before the `/` to decide.
+            if self.slash_starts_regex() {
+                // The `/` opened a regex. The current byte is the first byte
+                // inside the regex body.
+                self.in_regex = true;
+                if byte == b'\\' {
+                    self.escaped = true;
+                }
+                self.prev_byte = Some(byte);
+                if !byte.is_ascii_whitespace() {
+                    self.prev_non_ws_byte = Some(byte);
+                }
+                return;
+            }
+            // It was division; update prev_non_ws_byte to `/` now.
+            self.prev_non_ws_byte = Some(b'/');
         }
 
         // Track string delimiters.
@@ -1609,13 +1768,42 @@ impl QuotesSeen {
         }
 
         self.prev_byte = Some(byte);
+        if !byte.is_ascii_whitespace() {
+            self.prev_non_ws_byte = Some(byte);
+        }
     }
 
-    /// Returns `true` when the tracker is not currently inside an open string literal
-    /// or a comment. Both states must be absent for a `---` fence to be a valid
-    /// frontmatter closing delimiter.
+    /// Returns whether a deferred `/` starts a regex literal based on
+    /// `prev_non_ws_byte`. After an identifier character, closing
+    /// paren/bracket, number, or `++`/`--` suffix, `/` is division. In all
+    /// other positions `/` starts a regex.
+    fn slash_starts_regex(&self) -> bool {
+        match self.prev_non_ws_byte {
+            None => true,
+            Some(b) => !matches!(
+                b,
+                b'a'..=b'z'
+                    | b'A'..=b'Z'
+                    | b'0'..=b'9'
+                    | b'_'
+                    | b'$'
+                    | b')'
+                    | b']'
+                    | b'+'
+                    | b'-'
+            ),
+        }
+    }
+
+    /// Returns `true` when the tracker is not currently inside an open string
+    /// literal, regex literal, or comment, and there is no pending deferred
+    /// slash that might open a regex. All conditions must be absent for a
+    /// `---` fence to be a valid frontmatter closing delimiter.
     fn is_empty(&self) -> bool {
-        self.current_quote.is_none() && self.comment == QuotesSeenComment::None
+        self.current_quote.is_none()
+            && !self.in_regex
+            && self.comment == QuotesSeenComment::None
+            && self.prev_byte != Some(b'/')
     }
 }
 
@@ -1870,6 +2058,47 @@ const f = "something" "#;
         assert!(
             quotes_seen.is_empty(),
             "double backslash followed by closing quote must close the string"
+        );
+    }
+
+    // --- Tests for issue #9187: regex literals in frontmatter ---
+
+    /// A regex literal containing a single quote must not leave the tracker in a
+    /// non-empty state. The quote inside the regex is not a string delimiter.
+    #[test]
+    fn issue_9187_regex_with_single_quote() {
+        let source = "const test = /'/\n";
+        let mut quotes_seen = QuotesSeen::new();
+        track(source, &mut quotes_seen);
+        assert!(
+            quotes_seen.is_empty(),
+            "regex literal containing single quote must not open a string"
+        );
+    }
+
+    /// A regex literal containing a double quote must not leave the tracker in a
+    /// non-empty state.
+    #[test]
+    fn issue_9187_regex_with_double_quote() {
+        let source = "const test = /\"/\n";
+        let mut quotes_seen = QuotesSeen::new();
+        track(source, &mut quotes_seen);
+        assert!(
+            quotes_seen.is_empty(),
+            "regex literal containing double quote must not open a string"
+        );
+    }
+
+    /// A regex literal containing `---` must not cause the tracker to misidentify
+    /// the fence. The tracker must remain empty after the regex closes.
+    #[test]
+    fn issue_9187_regex_with_dashes() {
+        let source = "const test = /---/\n";
+        let mut quotes_seen = QuotesSeen::new();
+        track(source, &mut quotes_seen);
+        assert!(
+            quotes_seen.is_empty(),
+            "regex literal containing dashes must not confuse the tracker"
         );
     }
 }

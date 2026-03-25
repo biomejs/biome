@@ -120,8 +120,8 @@ invalid.ts:13:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
   
   i Unsafe fix: Add the missing cases to the switch statement.
   
-    15 15 │   		result = 1;
-    16 16 │   		break;
+    15 15 │       result = 1;
+    16 16 │       break;
     17    │ - → }
        17 │ + → }
        18 │ + → case·"Tuesday":·throw·new·Error("TODO:·Not·implemented·yet");
@@ -208,13 +208,13 @@ invalid.ts:29:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
   
   i Unsafe fix: Add the missing cases to the switch statement.
   
-    29 29 │   	switch (value) {
-    30 30 │   		case 'a':
+    29 29 │     switch (value) {
+    30 30 │       case 'a':
     31    │ - → → → return·1;
        31 │ + → → → return·1;
        32 │ + → → case·"b":·throw·new·Error("TODO:·Not·implemented·yet");
        33 │ + → → case·"c":·throw·new·Error("TODO:·Not·implemented·yet");
-    32 34 │   	}
+    32 34 │     }
     33 35 │   }
   
 
@@ -246,13 +246,13 @@ invalid.ts:42:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
   
   i Unsafe fix: Add the missing cases to the switch statement.
   
-    42 42 │   	switch (value) {
-    43 43 │   		case 'a':
+    42 42 │     switch (value) {
+    43 43 │       case 'a':
     44    │ - → → → return·1;
        44 │ + → → → return·1;
        45 │ + → → case·1:·throw·new·Error("TODO:·Not·implemented·yet");
        46 │ + → → case·true:·throw·new·Error("TODO:·Not·implemented·yet");
-    45 47 │   	}
+    45 47 │     }
     46 48 │   }
   
 
@@ -283,12 +283,12 @@ invalid.ts:51:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
   
   i Unsafe fix: Add the missing cases to the switch statement.
   
-    51 51 │   	switch (value.type) {
-    52 52 │   		case 'A':
+    51 51 │     switch (value.type) {
+    52 52 │       case 'A':
     53    │ - → → → return·1;
        53 │ + → → → return·1;
        54 │ + → → case·"B":·throw·new·Error("TODO:·Not·implemented·yet");
-    54 55 │   	}
+    54 55 │     }
     55 56 │   }
   
 
@@ -376,7 +376,7 @@ invalid.ts:66:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
   i Unsafe fix: Add the missing cases to the switch statement.
   
     66 66 │   switch (value3) {
-    67 67 │   	case 'literal':
+    67 67 │     case 'literal':
     68    │ - → → break;
        68 │ + → → break;
        69 │ + → case·1:·throw·new·Error("TODO:·Not·implemented·yet");
@@ -412,7 +412,7 @@ invalid.ts:72:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
   i Unsafe fix: Add the missing cases to the switch statement.
   
     72 72 │   switch (value4) {
-    73 73 │   	case '1':
+    73 73 │     case '1':
     74    │ - → → break;
        74 │ + → → break;
        75 │ + → case·"2":·throw·new·Error("TODO:·Not·implemented·yet");

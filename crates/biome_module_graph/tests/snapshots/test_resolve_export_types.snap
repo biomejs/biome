@@ -44,10 +44,10 @@ export const superComputer = new DeepThought();
 ```
 Exports {
   "theAnswer" => {
-    ExportOwnExport => JsOwnExport::Binding(0)
+    ExportOwnExport => JsOwnExport::Binding(26..35)
   }
   "superComputer" => {
-    ExportOwnExport => JsOwnExport::Binding(3)
+    ExportOwnExport => JsOwnExport::Binding(1077..1090)
   }
 }
 Imports {
@@ -58,16 +58,14 @@ Imports {
 ## Exported Bindings
 
 ```
-BindingId(0) => JsBindingData {
-  Name: theAnswer,
-  Type: Module(0) TypeId(0),
-  Declaration kind: Value
+theAnswer  => BindingTypeData {
+  Types Module(0) TypeId(0),
+  Exported Ranges: (26..35)
 }
 
-BindingId(3) => JsBindingData {
-  Name: superComputer,
-  Type: Module(0) TypeId(5),
-  Declaration kind: Value
+superComputer  => BindingTypeData {
+  Types Module(0) TypeId(5),
+  Exported Ranges: (1077..1090)
 }
 ```
 

@@ -1,7 +1,7 @@
 use std::{collections::HashMap, fs, path::Path};
 
 use biome_diagnostics::{DiagnosticExt, print_diagnostic_to_string};
-use biome_html_parser::{HtmlParseOptions, parse_html, parse_html_with_cache};
+use biome_html_parser::{HtmlParserOptions, parse_html, parse_html_with_cache};
 use biome_html_syntax::HtmlFileSource;
 use biome_rowan::NodeCache;
 use biome_string_case::StrLikeExtension;
@@ -87,7 +87,7 @@ fn bench_parser(criterion: &mut Criterion) {
                     |b, _| {
                         b.iter(|| {
                             let result =
-                                black_box(parse_html(code, HtmlParseOptions::from(&file_source)));
+                                black_box(parse_html(code, HtmlParserOptions::from(&file_source)));
                             if !result.diagnostics().is_empty() {
                                 let truncated = result.into_diagnostics().iter().take(20).cloned().collect::<Vec<_>>();
                                 for diagnostic in truncated {
@@ -111,7 +111,7 @@ fn bench_parser(criterion: &mut Criterion) {
                                 parse_html_with_cache(
                                     code,
                                     &mut cache,
-                                    HtmlParseOptions::from(&file_source),
+                                    HtmlParserOptions::from(&file_source),
                                 );
                                 cache
                             },
@@ -119,7 +119,7 @@ fn bench_parser(criterion: &mut Criterion) {
                                 parse_html_with_cache(
                                     code,
                                     &mut cache,
-                                    HtmlParseOptions::from(&file_source),
+                                    HtmlParserOptions::from(&file_source),
                                 );
                             },
                             BatchSize::SmallInput,
@@ -146,7 +146,7 @@ fn bench_parser(criterion: &mut Criterion) {
         let id = format!("{}/{}", group_name, name);
         group.bench_with_input(BenchmarkId::new(&id, "uncached"), &code, |b, _| {
             b.iter(|| {
-                let result = black_box(parse_html(code, HtmlParseOptions::from(&file_source)));
+                let result = black_box(parse_html(code, HtmlParserOptions::from(&file_source)));
                 diagnostics.extend(result.into_diagnostics());
             })
         });
@@ -160,11 +160,11 @@ fn bench_parser(criterion: &mut Criterion) {
             b.iter_batched(
                 || {
                     let mut cache = NodeCache::default();
-                    parse_html_with_cache(code, &mut cache, HtmlParseOptions::from(&file_source));
+                    parse_html_with_cache(code, &mut cache, HtmlParserOptions::from(&file_source));
                     cache
                 },
                 |mut cache| {
-                    parse_html_with_cache(code, &mut cache, HtmlParseOptions::from(&file_source));
+                    parse_html_with_cache(code, &mut cache, HtmlParserOptions::from(&file_source));
                 },
                 BatchSize::SmallInput,
             )

@@ -1,7 +1,8 @@
 mod utils;
 
+use biome_js_semantic::ScopeId;
 use biome_js_syntax::{AnyJsModuleItem, AnyJsRoot, AnyJsStatement, JsExpressionStatement};
-use biome_js_type_info::{GlobalsResolver, Resolvable, ScopeId, TypeData};
+use biome_js_type_info::{GlobalsResolver, Resolvable, TypeData};
 
 use utils::{
     HardcodedSymbolResolver, assert_type_data_snapshot, assert_typed_bindings_snapshot,

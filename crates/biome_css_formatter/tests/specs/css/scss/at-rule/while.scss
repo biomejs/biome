@@ -1,0 +1,11 @@
+@while $i>0{
+$i:$i - 1;
+}
+
+.stack{
+@while
+$gap  >  0{
+gap:$gap;
+$gap:$gap - 0.25rem;
+}
+}

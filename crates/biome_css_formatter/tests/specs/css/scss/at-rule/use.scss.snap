@@ -1,0 +1,43 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/scss/at-rule/use.scss
+---
+
+# Input
+
+```scss
+@use"sass:math";
+
+@use "theme"as *;
+
+@use
+"library/buttons"
+as
+buttons;
+
+@use "theme"with(
+$primary:blue !default,
+$spacing: 8px
+);
+
+@use "theme" as theme with(
+$primary:blue
+);
+
+```
+
+
+# Formatted
+
+```scss
+@use "sass:math";
+
+@use "theme" as *;
+
+@use "library/buttons" as buttons;
+
+@use "theme" with ($primary: blue !default, $spacing: 8px);
+
+@use "theme" as theme with ($primary: blue);
+
+```

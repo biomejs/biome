@@ -1,0 +1,36 @@
+a {
+  b: 1.2 % 4.7;
+}
+
+div {
+  a: (false and "hey");
+  b: ("hey" and "ho");
+  b: ("hey" or "ho");
+  a: false and "hey";
+  b: "hey" and "ho";
+}
+
+.division {
+  $var: a / b; // division
+  decl: a / b; // not division
+  with-parens: (a / b); // division
+}
+
+/* TODO(scss at-rules):
+@function f() {
+  @return a / b; // division
+}
+@debug 15px / 30px; // not division
+@debug 1 * 2 / 3; // division
+@debug (1 + 2) / 3; // division
+@debug fn() / 3; // division
+@debug $var / 3; // division
+@debug mod.$var / 3; // division
+*/
+
+a {
+  prop: a,-1*b;
+}
+
+
+

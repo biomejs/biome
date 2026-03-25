@@ -32,7 +32,12 @@ MdDocument {
         MdOrderedListItem {
             md_bullet_list: MdBulletList [
                 MdBullet {
-                    bullet: MD_ORDERED_LIST_MARKER@36..38 "1." [] [],
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MD_ORDERED_LIST_MARKER@36..38 "1." [] [],
+                        post_marker_space_token: missing (optional),
+                        content_indent: MdIndentTokenList [],
+                    },
                     content: MdBlockList [
                         MdParagraph {
                             list: MdInlineItemList [
@@ -70,7 +75,11 @@ MdDocument {
     1: MD_ORDERED_LIST_ITEM@36..50
       0: MD_BULLET_LIST@36..50
         0: MD_BULLET@36..50
-          0: MD_ORDERED_LIST_MARKER@36..38 "1." [] []
+          0: MD_LIST_MARKER_PREFIX@36..38
+            0: MD_INDENT_TOKEN_LIST@36..36
+            1: MD_ORDERED_LIST_MARKER@36..38 "1." [] []
+            2: (empty)
+            3: MD_INDENT_TOKEN_LIST@38..38
           1: MD_BLOCK_LIST@38..50
             0: MD_PARAGRAPH@38..50
               0: MD_INLINE_ITEM_LIST@38..50

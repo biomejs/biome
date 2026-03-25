@@ -1,0 +1,108 @@
+---
+source: crates/biome_module_graph/tests/snap/mod.rs
+expression: content
+---
+
+# `/src/index.ts` (Not imported by resolver)
+
+## Source
+
+```ts
+import { foo } from "./foo.ts";
+
+export default foo;
+```
+
+## Module Info
+
+```
+Exports {
+  "default" => {
+    ExportOwnExport => JsOwnExport::Binding(22..25)
+  }
+}
+Imports {
+  "foo" => {
+    Specifier: "./foo.ts"
+    Resolved path: "/src/foo.ts"
+    Import Symbol: foo
+  }
+}
+```
+
+## Exported Bindings
+
+```
+foo  => BindingTypeData {
+  Types Import Symbol: foo from "/src/foo.ts",
+  Exported Ranges: (73..76)(73..76)
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => Import Symbol: foo from "/src/foo.ts"
+```
+
+# `/src/foo.ts` (Module 1)
+
+## Source
+
+```ts
+/**
+ * @returns {number}
+ */
+export function foo(): number {
+	return 42;
+}
+```
+
+## Module Info
+
+```
+Exports {
+  "foo" => {
+    ExportOwnExport => JsOwnExport::Binding(94..97)
+  }
+}
+Imports {
+  No imports
+}
+```
+
+## Exported Bindings
+
+```
+foo => BindingTypeData {
+  Types Module(0) TypeId(1),
+  JsDoc(
+    @returns {number}
+  ),
+  Exported Ranges: (94..97)
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => number: 42
+
+Module TypeId(1) => sync Function "foo" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: number
+}
+```
+
+# Module Resolver
+
+## Registered types
+
+```
+Full TypeId(0) => namespace for ModuleId(1)
+
+Full TypeId(1) => Module(1) TypeId(1)
+```

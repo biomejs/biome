@@ -66,11 +66,13 @@ CssRoot {
                                     value_token: IDENT@86..91 "color" [] [],
                                 },
                                 colon_token: COLON@91..93 ":" [] [Whitespace(" ")],
-                                value: CssGenericComponentValueList [
-                                    CssIdentifier {
-                                        value_token: IDENT@93..96 "red" [] [],
-                                    },
-                                ],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssIdentifier {
+                                            value_token: IDENT@93..96 "red" [] [],
+                                        },
+                                    ],
+                                },
                             },
                             important: missing (optional),
                         },
@@ -105,11 +107,13 @@ CssRoot {
                                     value_token: IDENT@163..173 "background" [] [],
                                 },
                                 colon_token: COLON@173..175 ":" [] [Whitespace(" ")],
-                                value: CssGenericComponentValueList [
-                                    CssIdentifier {
-                                        value_token: IDENT@175..179 "blue" [] [],
-                                    },
-                                ],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssIdentifier {
+                                            value_token: IDENT@175..179 "blue" [] [],
+                                        },
+                                    ],
+                                },
                             },
                             important: missing (optional),
                         },
@@ -127,11 +131,13 @@ CssRoot {
                 },
             },
             colon_token: COLON@237..239 ":" [] [Whitespace(" ")],
-            value: CssGenericComponentValueList [
-                CssIdentifier {
-                    value_token: IDENT@239..244 "value" [] [],
-                },
-            ],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    CssIdentifier {
+                        value_token: IDENT@239..244 "value" [] [],
+                    },
+                ],
+            },
             modifiers: ScssVariableModifierList [],
             semicolon_token: SEMICOLON@244..245 ";" [] [],
         },
@@ -160,11 +166,13 @@ CssRoot {
                                     value_token: IDENT@315..321 "margin" [] [],
                                 },
                                 colon_token: COLON@321..323 ":" [] [Whitespace(" ")],
-                                value: CssGenericComponentValueList [
-                                    CssNumber {
-                                        value_token: CSS_NUMBER_LITERAL@323..324 "0" [] [],
-                                    },
-                                ],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssNumber {
+                                            value_token: CSS_NUMBER_LITERAL@323..324 "0" [] [],
+                                        },
+                                    ],
+                                },
                             },
                             important: missing (optional),
                         },
@@ -204,9 +212,10 @@ CssRoot {
                 0: CSS_IDENTIFIER@86..91
                   0: IDENT@86..91 "color" [] []
                 1: COLON@91..93 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@93..96
-                  0: CSS_IDENTIFIER@93..96
-                    0: IDENT@93..96 "red" [] []
+                2: SCSS_EXPRESSION@93..96
+                  0: SCSS_EXPRESSION_ITEM_LIST@93..96
+                    0: CSS_IDENTIFIER@93..96
+                      0: IDENT@93..96 "red" [] []
               1: (empty)
             1: SEMICOLON@96..98 ";" [] [Whitespace(" ")]
         2: R_CURLY@98..99 "}" [] []
@@ -229,9 +238,10 @@ CssRoot {
                 0: CSS_IDENTIFIER@163..173
                   0: IDENT@163..173 "background" [] []
                 1: COLON@173..175 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@175..179
-                  0: CSS_IDENTIFIER@175..179
-                    0: IDENT@175..179 "blue" [] []
+                2: SCSS_EXPRESSION@175..179
+                  0: SCSS_EXPRESSION_ITEM_LIST@175..179
+                    0: CSS_IDENTIFIER@175..179
+                      0: IDENT@175..179 "blue" [] []
               1: (empty)
             1: SEMICOLON@179..181 ";" [] [Whitespace(" ")]
         2: R_CURLY@181..182 "}" [] []
@@ -241,9 +251,10 @@ CssRoot {
         1: CSS_IDENTIFIER@234..237
           0: IDENT@234..237 "var" [] []
       1: COLON@237..239 ":" [] [Whitespace(" ")]
-      2: CSS_GENERIC_COMPONENT_VALUE_LIST@239..244
-        0: CSS_IDENTIFIER@239..244
-          0: IDENT@239..244 "value" [] []
+      2: SCSS_EXPRESSION@239..244
+        0: SCSS_EXPRESSION_ITEM_LIST@239..244
+          0: CSS_IDENTIFIER@239..244
+            0: IDENT@239..244 "value" [] []
       3: SCSS_VARIABLE_MODIFIER_LIST@244..244
       4: SEMICOLON@244..245 ";" [] []
     3: CSS_QUALIFIED_RULE@245..327
@@ -265,9 +276,10 @@ CssRoot {
                 0: CSS_IDENTIFIER@315..321
                   0: IDENT@315..321 "margin" [] []
                 1: COLON@321..323 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@323..324
-                  0: CSS_NUMBER@323..324
-                    0: CSS_NUMBER_LITERAL@323..324 "0" [] []
+                2: SCSS_EXPRESSION@323..324
+                  0: SCSS_EXPRESSION_ITEM_LIST@323..324
+                    0: CSS_NUMBER@323..324
+                      0: CSS_NUMBER_LITERAL@323..324 "0" [] []
               1: (empty)
             1: SEMICOLON@324..326 ";" [] [Whitespace(" ")]
         2: R_CURLY@326..327 "}" [] []

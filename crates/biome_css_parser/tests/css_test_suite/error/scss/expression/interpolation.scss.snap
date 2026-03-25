@@ -1,0 +1,228 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
+expression: snapshot
+---
+
+## Input
+
+```css
+$unclosed: #{$name;
+$empty: #{};
+$missing-rhs: #{1 + };
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        ScssDeclaration {
+            name: ScssIdentifier {
+                dollar_token: DOLLAR@0..1 "$" [] [],
+                name: CssIdentifier {
+                    value_token: IDENT@1..9 "unclosed" [] [],
+                },
+            },
+            colon_token: COLON@9..11 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    ScssInterpolation {
+                        hash_token: HASH@11..12 "#" [] [],
+                        l_curly_token: L_CURLY@12..13 "{" [] [],
+                        value: ScssExpression {
+                            items: ScssExpressionItemList [
+                                ScssIdentifier {
+                                    dollar_token: DOLLAR@13..14 "$" [] [],
+                                    name: CssIdentifier {
+                                        value_token: IDENT@14..18 "name" [] [],
+                                    },
+                                },
+                            ],
+                        },
+                        r_curly_token: missing (required),
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@18..19 ";" [] [],
+        },
+        ScssDeclaration {
+            name: ScssIdentifier {
+                dollar_token: DOLLAR@19..21 "$" [Newline("\n")] [],
+                name: CssIdentifier {
+                    value_token: IDENT@21..26 "empty" [] [],
+                },
+            },
+            colon_token: COLON@26..28 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    ScssInterpolation {
+                        hash_token: HASH@28..29 "#" [] [],
+                        l_curly_token: L_CURLY@29..30 "{" [] [],
+                        value: missing (required),
+                        r_curly_token: R_CURLY@30..31 "}" [] [],
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@31..32 ";" [] [],
+        },
+        ScssDeclaration {
+            name: ScssIdentifier {
+                dollar_token: DOLLAR@32..34 "$" [Newline("\n")] [],
+                name: CssIdentifier {
+                    value_token: IDENT@34..45 "missing-rhs" [] [],
+                },
+            },
+            colon_token: COLON@45..47 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    ScssInterpolation {
+                        hash_token: HASH@47..48 "#" [] [],
+                        l_curly_token: L_CURLY@48..49 "{" [] [],
+                        value: ScssExpression {
+                            items: ScssExpressionItemList [
+                                ScssBinaryExpression {
+                                    left: CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@49..51 "1" [] [Whitespace(" ")],
+                                    },
+                                    operator: PLUS@51..53 "+" [] [Whitespace(" ")],
+                                    right: missing (required),
+                                },
+                            ],
+                        },
+                        r_curly_token: R_CURLY@53..54 "}" [] [],
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@54..55 ";" [] [],
+        },
+    ],
+    eof_token: EOF@55..56 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..56
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..55
+    0: SCSS_DECLARATION@0..19
+      0: SCSS_IDENTIFIER@0..9
+        0: DOLLAR@0..1 "$" [] []
+        1: CSS_IDENTIFIER@1..9
+          0: IDENT@1..9 "unclosed" [] []
+      1: COLON@9..11 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@11..18
+        0: SCSS_EXPRESSION_ITEM_LIST@11..18
+          0: SCSS_INTERPOLATION@11..18
+            0: HASH@11..12 "#" [] []
+            1: L_CURLY@12..13 "{" [] []
+            2: SCSS_EXPRESSION@13..18
+              0: SCSS_EXPRESSION_ITEM_LIST@13..18
+                0: SCSS_IDENTIFIER@13..18
+                  0: DOLLAR@13..14 "$" [] []
+                  1: CSS_IDENTIFIER@14..18
+                    0: IDENT@14..18 "name" [] []
+            3: (empty)
+      3: SCSS_VARIABLE_MODIFIER_LIST@18..18
+      4: SEMICOLON@18..19 ";" [] []
+    1: SCSS_DECLARATION@19..32
+      0: SCSS_IDENTIFIER@19..26
+        0: DOLLAR@19..21 "$" [Newline("\n")] []
+        1: CSS_IDENTIFIER@21..26
+          0: IDENT@21..26 "empty" [] []
+      1: COLON@26..28 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@28..31
+        0: SCSS_EXPRESSION_ITEM_LIST@28..31
+          0: SCSS_INTERPOLATION@28..31
+            0: HASH@28..29 "#" [] []
+            1: L_CURLY@29..30 "{" [] []
+            2: (empty)
+            3: R_CURLY@30..31 "}" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@31..31
+      4: SEMICOLON@31..32 ";" [] []
+    2: SCSS_DECLARATION@32..55
+      0: SCSS_IDENTIFIER@32..45
+        0: DOLLAR@32..34 "$" [Newline("\n")] []
+        1: CSS_IDENTIFIER@34..45
+          0: IDENT@34..45 "missing-rhs" [] []
+      1: COLON@45..47 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@47..54
+        0: SCSS_EXPRESSION_ITEM_LIST@47..54
+          0: SCSS_INTERPOLATION@47..54
+            0: HASH@47..48 "#" [] []
+            1: L_CURLY@48..49 "{" [] []
+            2: SCSS_EXPRESSION@49..53
+              0: SCSS_EXPRESSION_ITEM_LIST@49..53
+                0: SCSS_BINARY_EXPRESSION@49..53
+                  0: CSS_NUMBER@49..51
+                    0: CSS_NUMBER_LITERAL@49..51 "1" [] [Whitespace(" ")]
+                  1: PLUS@51..53 "+" [] [Whitespace(" ")]
+                  2: (empty)
+            3: R_CURLY@53..54 "}" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@54..54
+      4: SEMICOLON@54..55 ";" [] []
+  2: EOF@55..56 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+interpolation.scss:1:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead found `;`
+  
+  > 1 │ $unclosed: #{$name;
+      │                   ^
+    2 │ $empty: #{};
+    3 │ $missing-rhs: #{1 + };
+  
+  i Remove ;
+  
+interpolation.scss:2:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found '}'.
+  
+    1 │ $unclosed: #{$name;
+  > 2 │ $empty: #{};
+      │           ^
+    3 │ $missing-rhs: #{1 + };
+    4 │ 
+  
+  i Expected a SCSS expression here.
+  
+    1 │ $unclosed: #{$name;
+  > 2 │ $empty: #{};
+      │           ^
+    3 │ $missing-rhs: #{1 + };
+    4 │ 
+  
+interpolation.scss:3:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    1 │ $unclosed: #{$name;
+    2 │ $empty: #{};
+  > 3 │ $missing-rhs: #{1 + };
+      │                     ^
+    4 │ 
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+```

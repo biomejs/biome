@@ -1,0 +1,34 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: custom-order-exports.ts
+---
+# Input
+```ts
+export { O };
+export * as path from "node:path";
+export type { T };
+
+```
+
+# Diagnostics
+```
+custom-order-exports.ts:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The imports and exports are not sorted.
+  
+  > 1 │ export { O };
+      │ ^^^^^^^^^^^^^
+    2 │ export * as path from "node:path";
+    3 │ export type { T };
+  
+  i Safe fix: Organize Imports (Biome)
+  
+    1   │ - export·{·O·};
+      1 │ + export·type·{·T·};
+    2 2 │   export * as path from "node:path";
+    3   │ - export·type·{·T·};
+      3 │ + export·{·O·};
+    4 4 │   
+  
+
+```

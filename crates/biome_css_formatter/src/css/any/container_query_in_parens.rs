@@ -10,6 +10,9 @@ impl FormatRule<AnyCssContainerQueryInParens> for FormatAnyCssContainerQueryInPa
         match node {
             AnyCssContainerQueryInParens::AnyCssValue(node) => node.format().fmt(f),
             AnyCssContainerQueryInParens::CssContainerQueryInParens(node) => node.format().fmt(f),
+            AnyCssContainerQueryInParens::CssContainerScrollStateQueryInParens(node) => {
+                node.format().fmt(f)
+            }
             AnyCssContainerQueryInParens::CssContainerSizeFeatureInParens(node) => {
                 node.format().fmt(f)
             }

@@ -1,11 +1,9 @@
-use biome_formatter_test::check_reformat::CheckReformat;
-use biome_json_formatter::format_node;
-use biome_json_formatter::{JsonFormatLanguage, context::JsonFormatOptions};
-use biome_json_parser::{JsonParserOptions, parse_json};
-
-mod language {
-    include!("language.rs");
-}
+use biome_fs::{BiomePath, MemoryFileSystem};
+use biome_service::workspace::{
+    ChangeFileParams, FileContent, FormatFileParams, GetFormatterIRParams, OpenFileParams,
+    OpenProjectParams, server,
+};
+use std::sync::Arc;
 
 #[ignore]
 #[test]
@@ -15,31 +13,71 @@ fn quick_test() {
  // comment
  { "test": "test"} /** comment **/
 "#;
-    let parse = parse_json(src, JsonParserOptions::default().with_allow_comments());
-    let options = JsonFormatOptions::default();
-    let result = format_node(options.clone(), &parse.syntax())
-        .unwrap()
-        .print()
+    let fs = MemoryFileSystem::default();
+    let workspace = server(Arc::new(fs), None);
+
+    let project = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new(""),
+            open_uninitialized: true,
+        })
         .unwrap();
 
-    let root = &parse.syntax();
-    let language = language::JsonTestFormatLanguage::default();
+    let path = BiomePath::new("test.jsonc");
+    workspace
+        .open_file(OpenFileParams {
+            project_key: project.project_key,
+            path: path.clone(),
+            content: FileContent::FromClient {
+                content: src.to_string(),
+                version: 0,
+            },
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
 
-    let check_reformat = CheckReformat::new(
-        root,
-        result.as_code(),
-        "quick_test",
-        &language,
-        JsonFormatLanguage::new(options),
-    );
-    check_reformat.check_reformat();
+    // Print IR
+    if let Ok(ir) = workspace.get_formatter_ir(GetFormatterIRParams {
+        project_key: project.project_key,
+        path: path.clone(),
+    }) {
+        println!("{ir}");
+    }
 
-    assert_eq!(
-        result.as_code(),
-        r#"// comment
-// comment
-{ "test": "test"}
-// comment
-"#
+    let printed = workspace
+        .format_file(FormatFileParams {
+            project_key: project.project_key,
+            path: path.clone(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    eprintln!("{}", printed.as_code());
+
+    // Idempotency check
+    workspace
+        .change_file(ChangeFileParams {
+            project_key: project.project_key,
+            path: path.clone(),
+            content: printed.as_code().to_string(),
+            version: 1,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let re_printed = workspace
+        .format_file(FormatFileParams {
+            project_key: project.project_key,
+            path: path.clone(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    similar_asserts::assert_eq!(
+        re_printed.as_code(),
+        printed.as_code(),
+        "Formatter is not idempotent"
     );
 }

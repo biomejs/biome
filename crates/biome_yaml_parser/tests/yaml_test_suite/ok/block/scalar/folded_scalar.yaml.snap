@@ -27,78 +27,88 @@ YamlRoot {
             bom_token: missing (optional),
             directives: YamlDirectiveList [],
             dashdashdash_token: missing (optional),
-            node: YamlBlockSequence {
-                sequence_start_token: SEQUENCE_START@0..0 "" [] [],
-                properties: missing (optional),
-                entries: YamlBlockSequenceEntryList [
-                    YamlBlockSequenceEntry {
-                        minus_token: DASH@0..2 "-" [] [Whitespace(" ")],
-                        value: YamlFoldedScalar {
-                            properties: missing (optional),
-                            r_angle_token: R_ANGLE@2..3 ">" [] [],
-                            headers: YamlBlockHeaderList [
-                                YamlBlockStripIndicator {
-                                    minus_token: DASH@3..14 "-" [] [Whitespace(" "), Comments("# comment")],
+            node: YamlBlockInBlockNode {
+                properties: YamlPropertyList [],
+                content: YamlBlockSequence {
+                    sequence_start_token: SEQUENCE_START@0..0 "" [] [],
+                    entries: YamlBlockSequenceEntryList [
+                        YamlBlockSequenceEntry {
+                            minus_token: DASH@0..2 "-" [] [Whitespace(" ")],
+                            value: YamlBlockInBlockNode {
+                                properties: YamlPropertyList [],
+                                content: YamlFoldedScalar {
+                                    r_angle_token: R_ANGLE@2..3 ">" [] [],
+                                    headers: YamlBlockHeaderList [
+                                        YamlBlockStripIndicator {
+                                            minus_token: DASH@3..14 "-" [] [Whitespace(" "), Comments("# comment")],
+                                        },
+                                    ],
+                                    content: YamlBlockContent {
+                                        value_token: BLOCK_CONTENT_LITERAL@14..18 "\n ab" [] [],
+                                    },
                                 },
-                            ],
-                            content: YamlBlockContent {
-                                value_token: BLOCK_CONTENT_LITERAL@14..18 "\n ab" [] [],
                             },
                         },
-                    },
-                    YamlBlockSequenceEntry {
-                        minus_token: DASH@18..22 "-" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
-                        value: YamlFoldedScalar {
-                            properties: missing (optional),
-                            r_angle_token: R_ANGLE@22..23 ">" [] [],
-                            headers: YamlBlockHeaderList [
-                                YamlBlockKeepIndicator {
-                                    plus_token: PLUS@23..24 "+" [] [],
+                        YamlBlockSequenceEntry {
+                            minus_token: DASH@18..22 "-" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+                            value: YamlBlockInBlockNode {
+                                properties: YamlPropertyList [],
+                                content: YamlFoldedScalar {
+                                    r_angle_token: R_ANGLE@22..23 ">" [] [],
+                                    headers: YamlBlockHeaderList [
+                                        YamlBlockKeepIndicator {
+                                            plus_token: PLUS@23..24 "+" [] [],
+                                        },
+                                    ],
+                                    content: YamlBlockContent {
+                                        value_token: BLOCK_CONTENT_LITERAL@24..24 "" [] [],
+                                    },
                                 },
-                            ],
-                            content: YamlBlockContent {
-                                value_token: BLOCK_CONTENT_LITERAL@24..24 "" [] [],
                             },
                         },
-                    },
-                    YamlBlockSequenceEntry {
-                        minus_token: DASH@24..28 "-" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
-                        value: YamlFoldedScalar {
-                            properties: missing (optional),
-                            r_angle_token: R_ANGLE@28..29 ">" [] [],
-                            headers: YamlBlockHeaderList [
-                                YamlBlockStripIndicator {
-                                    minus_token: DASH@29..30 "-" [] [],
+                        YamlBlockSequenceEntry {
+                            minus_token: DASH@24..28 "-" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+                            value: YamlBlockInBlockNode {
+                                properties: YamlPropertyList [],
+                                content: YamlFoldedScalar {
+                                    r_angle_token: R_ANGLE@28..29 ">" [] [],
+                                    headers: YamlBlockHeaderList [
+                                        YamlBlockStripIndicator {
+                                            minus_token: DASH@29..30 "-" [] [],
+                                        },
+                                        YamlIndentationIndicator {
+                                            indentation_indicator_token: INDENTATION_INDICATOR@30..41 "4" [] [Whitespace(" "), Comments("# comment")],
+                                        },
+                                    ],
+                                    content: YamlBlockContent {
+                                        value_token: BLOCK_CONTENT_LITERAL@41..49 "\n    xyz" [] [],
+                                    },
                                 },
-                                YamlIndentationIndicator {
-                                    indentation_indicator_token: INDENTATION_INDICATOR@30..41 "4" [] [Whitespace(" "), Comments("# comment")],
-                                },
-                            ],
-                            content: YamlBlockContent {
-                                value_token: BLOCK_CONTENT_LITERAL@41..49 "\n    xyz" [] [],
                             },
                         },
-                    },
-                    YamlBlockSequenceEntry {
-                        minus_token: DASH@49..53 "-" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
-                        value: YamlFoldedScalar {
-                            properties: missing (optional),
-                            r_angle_token: R_ANGLE@53..54 ">" [] [],
-                            headers: YamlBlockHeaderList [
-                                YamlBlockStripIndicator {
-                                    minus_token: DASH@54..55 "-" [] [],
+                        YamlBlockSequenceEntry {
+                            minus_token: DASH@49..53 "-" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+                            value: YamlBlockInBlockNode {
+                                properties: YamlPropertyList [],
+                                content: YamlFoldedScalar {
+                                    r_angle_token: R_ANGLE@53..54 ">" [] [],
+                                    headers: YamlBlockHeaderList [
+                                        YamlBlockStripIndicator {
+                                            minus_token: DASH@54..55 "-" [] [],
+                                        },
+                                        YamlIndentationIndicator {
+                                            indentation_indicator_token: INDENTATION_INDICATOR@55..56 "2" [] [],
+                                        },
+                                    ],
+                                    content: YamlBlockContent {
+                                        value_token: BLOCK_CONTENT_LITERAL@56..74 "\n  # comment\n  xyz" [] [],
+                                    },
                                 },
-                                YamlIndentationIndicator {
-                                    indentation_indicator_token: INDENTATION_INDICATOR@55..56 "2" [] [],
-                                },
-                            ],
-                            content: YamlBlockContent {
-                                value_token: BLOCK_CONTENT_LITERAL@56..74 "\n  # comment\n  xyz" [] [],
                             },
                         },
-                    },
-                ],
-                sequence_end_token: SEQUENCE_END@74..74 "" [] [],
+                    ],
+                    sequence_end_token: SEQUENCE_END@74..74 "" [] [],
+                },
             },
             dotdotdot_token: missing (optional),
         },
@@ -116,55 +126,60 @@ YamlRoot {
       0: (empty)
       1: YAML_DIRECTIVE_LIST@0..0
       2: (empty)
-      3: YAML_BLOCK_SEQUENCE@0..74
-        0: SEQUENCE_START@0..0 "" [] []
-        1: (empty)
-        2: YAML_BLOCK_SEQUENCE_ENTRY_LIST@0..74
-          0: YAML_BLOCK_SEQUENCE_ENTRY@0..18
-            0: DASH@0..2 "-" [] [Whitespace(" ")]
-            1: YAML_FOLDED_SCALAR@2..18
-              0: (empty)
-              1: R_ANGLE@2..3 ">" [] []
-              2: YAML_BLOCK_HEADER_LIST@3..14
-                0: YAML_BLOCK_STRIP_INDICATOR@3..14
-                  0: DASH@3..14 "-" [] [Whitespace(" "), Comments("# comment")]
-              3: YAML_BLOCK_CONTENT@14..18
-                0: BLOCK_CONTENT_LITERAL@14..18 "\n ab" [] []
-          1: YAML_BLOCK_SEQUENCE_ENTRY@18..24
-            0: DASH@18..22 "-" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
-            1: YAML_FOLDED_SCALAR@22..24
-              0: (empty)
-              1: R_ANGLE@22..23 ">" [] []
-              2: YAML_BLOCK_HEADER_LIST@23..24
-                0: YAML_BLOCK_KEEP_INDICATOR@23..24
-                  0: PLUS@23..24 "+" [] []
-              3: YAML_BLOCK_CONTENT@24..24
-                0: BLOCK_CONTENT_LITERAL@24..24 "" [] []
-          2: YAML_BLOCK_SEQUENCE_ENTRY@24..49
-            0: DASH@24..28 "-" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
-            1: YAML_FOLDED_SCALAR@28..49
-              0: (empty)
-              1: R_ANGLE@28..29 ">" [] []
-              2: YAML_BLOCK_HEADER_LIST@29..41
-                0: YAML_BLOCK_STRIP_INDICATOR@29..30
-                  0: DASH@29..30 "-" [] []
-                1: YAML_INDENTATION_INDICATOR@30..41
-                  0: INDENTATION_INDICATOR@30..41 "4" [] [Whitespace(" "), Comments("# comment")]
-              3: YAML_BLOCK_CONTENT@41..49
-                0: BLOCK_CONTENT_LITERAL@41..49 "\n    xyz" [] []
-          3: YAML_BLOCK_SEQUENCE_ENTRY@49..74
-            0: DASH@49..53 "-" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
-            1: YAML_FOLDED_SCALAR@53..74
-              0: (empty)
-              1: R_ANGLE@53..54 ">" [] []
-              2: YAML_BLOCK_HEADER_LIST@54..56
-                0: YAML_BLOCK_STRIP_INDICATOR@54..55
-                  0: DASH@54..55 "-" [] []
-                1: YAML_INDENTATION_INDICATOR@55..56
-                  0: INDENTATION_INDICATOR@55..56 "2" [] []
-              3: YAML_BLOCK_CONTENT@56..74
-                0: BLOCK_CONTENT_LITERAL@56..74 "\n  # comment\n  xyz" [] []
-        3: SEQUENCE_END@74..74 "" [] []
+      3: YAML_BLOCK_IN_BLOCK_NODE@0..74
+        0: YAML_PROPERTY_LIST@0..0
+        1: YAML_BLOCK_SEQUENCE@0..74
+          0: SEQUENCE_START@0..0 "" [] []
+          1: YAML_BLOCK_SEQUENCE_ENTRY_LIST@0..74
+            0: YAML_BLOCK_SEQUENCE_ENTRY@0..18
+              0: DASH@0..2 "-" [] [Whitespace(" ")]
+              1: YAML_BLOCK_IN_BLOCK_NODE@2..18
+                0: YAML_PROPERTY_LIST@2..2
+                1: YAML_FOLDED_SCALAR@2..18
+                  0: R_ANGLE@2..3 ">" [] []
+                  1: YAML_BLOCK_HEADER_LIST@3..14
+                    0: YAML_BLOCK_STRIP_INDICATOR@3..14
+                      0: DASH@3..14 "-" [] [Whitespace(" "), Comments("# comment")]
+                  2: YAML_BLOCK_CONTENT@14..18
+                    0: BLOCK_CONTENT_LITERAL@14..18 "\n ab" [] []
+            1: YAML_BLOCK_SEQUENCE_ENTRY@18..24
+              0: DASH@18..22 "-" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+              1: YAML_BLOCK_IN_BLOCK_NODE@22..24
+                0: YAML_PROPERTY_LIST@22..22
+                1: YAML_FOLDED_SCALAR@22..24
+                  0: R_ANGLE@22..23 ">" [] []
+                  1: YAML_BLOCK_HEADER_LIST@23..24
+                    0: YAML_BLOCK_KEEP_INDICATOR@23..24
+                      0: PLUS@23..24 "+" [] []
+                  2: YAML_BLOCK_CONTENT@24..24
+                    0: BLOCK_CONTENT_LITERAL@24..24 "" [] []
+            2: YAML_BLOCK_SEQUENCE_ENTRY@24..49
+              0: DASH@24..28 "-" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+              1: YAML_BLOCK_IN_BLOCK_NODE@28..49
+                0: YAML_PROPERTY_LIST@28..28
+                1: YAML_FOLDED_SCALAR@28..49
+                  0: R_ANGLE@28..29 ">" [] []
+                  1: YAML_BLOCK_HEADER_LIST@29..41
+                    0: YAML_BLOCK_STRIP_INDICATOR@29..30
+                      0: DASH@29..30 "-" [] []
+                    1: YAML_INDENTATION_INDICATOR@30..41
+                      0: INDENTATION_INDICATOR@30..41 "4" [] [Whitespace(" "), Comments("# comment")]
+                  2: YAML_BLOCK_CONTENT@41..49
+                    0: BLOCK_CONTENT_LITERAL@41..49 "\n    xyz" [] []
+            3: YAML_BLOCK_SEQUENCE_ENTRY@49..74
+              0: DASH@49..53 "-" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+              1: YAML_BLOCK_IN_BLOCK_NODE@53..74
+                0: YAML_PROPERTY_LIST@53..53
+                1: YAML_FOLDED_SCALAR@53..74
+                  0: R_ANGLE@53..54 ">" [] []
+                  1: YAML_BLOCK_HEADER_LIST@54..56
+                    0: YAML_BLOCK_STRIP_INDICATOR@54..55
+                      0: DASH@54..55 "-" [] []
+                    1: YAML_INDENTATION_INDICATOR@55..56
+                      0: INDENTATION_INDICATOR@55..56 "2" [] []
+                  2: YAML_BLOCK_CONTENT@56..74
+                    0: BLOCK_CONTENT_LITERAL@56..74 "\n  # comment\n  xyz" [] []
+          2: SEQUENCE_END@74..74 "" [] []
       4: (empty)
   1: EOF@74..75 "" [Newline("\n")] []
 

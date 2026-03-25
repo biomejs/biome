@@ -1,0 +1,6 @@
+.test {
+  width: fn((1 2));
+  height: fn((1, 2, 3));
+  colors: fn((primary: red, secondary: blue));
+  empty-map: fn(());
+}

@@ -362,6 +362,9 @@ pub(crate) trait CommandRunner {
             mut loaded_location,
         } = loaded_configuration;
 
+        // Save the config file path for diagnostics before merge_configuration consumes it
+        let config_file_path = file_path.clone();
+
         // Merge the FS configuration with the CLI arguments
         let configuration = self.merge_configuration(
             configuration,
@@ -387,8 +390,14 @@ pub(crate) trait CommandRunner {
             &root_configuration_dir
         };
         if !loaded_location.is_in_project() {
+            let config_file_path = config_file_path
+                .as_ref()
+                .map_or_else(|| "<unknown>".to_string(), |p| p.to_string());
             console.log(markup! {
-                {PrintDiagnostic::simple(&ConfigurationOutsideProject)}
+                {PrintDiagnostic::simple(&ConfigurationOutsideProject {
+                    config_path: config_file_path,
+                    working_directory: working_dir.to_string(),
+                })}
             })
         }
 

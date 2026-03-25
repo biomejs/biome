@@ -24,3 +24,11 @@ describe(`${foo + bar} wroooooooooooooooooooooooooooooong string`,
   () => {}
 );
 
+// TestOptions pattern (Vitest)
+describe("with retry option", { retry: 2 }, () => {
+  it("does something", () => {});
+});
+
+it("with timeout option", { timeout: 5000 }, () => {
+  console.log("test");
+});

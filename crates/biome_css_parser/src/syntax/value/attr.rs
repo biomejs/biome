@@ -3,16 +3,15 @@ use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_lists::ParseSeparatedList;
-use biome_parser::parse_recovery::ParseRecovery;
-use biome_parser::parse_recovery::RecoveryResult;
+use biome_parser::parse_recovery::{ParseRecovery, ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
-use biome_parser::{Parser, prelude::ParsedSyntax};
+use biome_parser::{Parser, prelude::ParsedSyntax, token_set};
 
 use crate::parser::CssParser;
 use crate::syntax::is_at_identifier;
-use crate::syntax::parse_error::expected_identifier;
+use crate::syntax::parse_error::{expected_component_value, expected_identifier};
 use crate::syntax::parse_regular_identifier;
-use crate::syntax::property::GenericComponentValueList;
+use crate::syntax::property::parse_generic_component_value;
 use crate::syntax::value::dimension::is_nth_at_unit;
 use crate::syntax::value::r#type::is_at_type_function;
 use crate::syntax::value::r#type::parse_type_function;
@@ -153,9 +152,38 @@ fn parse_attr_fallback_value(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(T![,]);
-    GenericComponentValueList.parse_list(p);
+    AttrFallbackValueList.parse_list(p);
 
     Present(m.complete(p, CSS_ATTR_FALLBACK_VALUE))
+}
+
+struct AttrFallbackValueList;
+
+impl ParseNodeList for AttrFallbackValueList {
+    type Kind = CssSyntaxKind;
+    type Parser<'source> = CssParser<'source>;
+    const LIST_KIND: Self::Kind = CSS_GENERIC_COMPONENT_VALUE_LIST;
+
+    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        parse_generic_component_value(p)
+    }
+
+    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at(T![')']) || p.at(T![;])
+    }
+
+    fn recover(
+        &mut self,
+        p: &mut Self::Parser<'_>,
+        parsed_element: ParsedSyntax,
+    ) -> RecoveryResult {
+        parsed_element.or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(CSS_BOGUS_PROPERTY_VALUE, token_set!(T![')'], T![;]))
+                .enable_recovery_on_line_break(),
+            expected_component_value,
+        )
+    }
 }
 
 struct AttrNameListParseRecovery;

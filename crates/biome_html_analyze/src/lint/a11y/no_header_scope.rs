@@ -4,6 +4,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_html_syntax::{AnyHtmlElement, HtmlAttribute};
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::no_header_scope::NoHeaderScopeOptions;
 
 use crate::HtmlRuleAction;
 
@@ -52,7 +53,7 @@ impl Rule for NoHeaderScope {
     type Query = Ast<AnyHtmlElement>;
     type State = HtmlAttribute;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoHeaderScopeOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();

@@ -28,6 +28,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::YamlBlockContent::new_unchecked(node) };
                     $body
                 }
+                $crate::YamlSyntaxKind::YAML_BLOCK_IN_BLOCK_NODE => {
+                    let $pattern = unsafe { $crate::YamlBlockInBlockNode::new_unchecked(node) };
+                    $body
+                }
                 $crate::YamlSyntaxKind::YAML_BLOCK_KEEP_INDICATOR => {
                     let $pattern = unsafe { $crate::YamlBlockKeepIndicator::new_unchecked(node) };
                     $body
@@ -114,15 +118,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::YamlPlainScalar::new_unchecked(node) };
                     $body
                 }
-                $crate::YamlSyntaxKind::YAML_PROPERTIES_ANCHOR_FIRST => {
-                    let $pattern =
-                        unsafe { $crate::YamlPropertiesAnchorFirst::new_unchecked(node) };
-                    $body
-                }
-                $crate::YamlSyntaxKind::YAML_PROPERTIES_TAG_FIRST => {
-                    let $pattern = unsafe { $crate::YamlPropertiesTagFirst::new_unchecked(node) };
-                    $body
-                }
                 $crate::YamlSyntaxKind::YAML_ROOT => {
                     let $pattern = unsafe { $crate::YamlRoot::new_unchecked(node) };
                     $body
@@ -183,6 +178,10 @@ macro_rules! map_syntax_node {
                 $crate::YamlSyntaxKind::YAML_FLOW_SEQUENCE_ENTRY_LIST => {
                     let $pattern =
                         unsafe { $crate::YamlFlowSequenceEntryList::new_unchecked(node) };
+                    $body
+                }
+                $crate::YamlSyntaxKind::YAML_PROPERTY_LIST => {
+                    let $pattern = unsafe { $crate::YamlPropertyList::new_unchecked(node) };
                     $body
                 }
                 _ => unreachable!(),

@@ -3,7 +3,10 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid-ignore-cases.vue
 ---
 # Input
-```ts
+```vue
+/* should not generate diagnostics */
+
+<script>
 import { ref, shallowRef } from 'vue'
 
 const foo = ref(true)
@@ -44,5 +47,6 @@ count2++
 const foo5 = ref(0)
 function tag(arr, ...args) {}
 tag`${foo5}` // ignore tagged template
+</script>
 
 ```

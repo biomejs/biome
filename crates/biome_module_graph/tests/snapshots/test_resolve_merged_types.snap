@@ -27,10 +27,10 @@ export { A, B };
 ```
 Exports {
   "Union" => {
-    ExportOwnExport => JsOwnExport::Binding(3)
+    ExportOwnExport => JsOwnExport::Binding(54..59)
   }
   "Union2" => {
-    ExportOwnExport => JsOwnExport::Binding(7)
+    ExportOwnExport => JsOwnExport::Binding(131..137)
   }
   "A" => {
     ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(2))
@@ -47,16 +47,14 @@ Imports {
 ## Exported Bindings
 
 ```
-BindingId(3) => JsBindingData {
-  Name: Union,
-  Type: Module(0) TypeId(5),
-  Declaration kind: Type
+Union  => BindingTypeData {
+  Types Module(0) TypeId(5),
+  Exported Ranges: (54..59)
 }
 
-BindingId(7) => JsBindingData {
-  Name: Union2,
-  Type: Module(0) TypeId(9),
-  Declaration kind: Type
+Union2  => BindingTypeData {
+  Types Module(0) TypeId(9),
+  Exported Ranges: (131..137)
 }
 ```
 

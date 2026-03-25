@@ -54,7 +54,7 @@ issue8883.tsx:18:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━�
   
   i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependency to the list.
+  i Unsafe fix: Add the missing dependency msg to the list.
   
     18 │ ····useEffect(()·=>·console.log(msg),·[msg]);·//·should·trigger·useExhaustiveDependencies
        │                                        +++                                               

@@ -170,6 +170,13 @@ impl<'source> MarkdownTokenSource<'source> {
         self.bump_with_context(MarkdownLexContext::LinkDefinition);
     }
 
+    /// Bump the current token using the ThematicBreakParts context.
+    /// In this context, break markers emit as individual STAR/MINUS/UNDERSCORE
+    /// and whitespace emits as MD_INDENT_CHAR.
+    pub fn bump_thematic_break_parts(&mut self) {
+        self.bump_with_context(MarkdownLexContext::ThematicBreakParts);
+    }
+
     /// Creates a checkpoint to which it can later return using [Self::rewind].
     pub fn checkpoint(&self) -> MarkdownTokenSourceCheckpoint {
         MarkdownTokenSourceCheckpoint {

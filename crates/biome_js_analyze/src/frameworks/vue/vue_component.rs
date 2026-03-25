@@ -754,6 +754,7 @@ impl AnyVueSetupDeclaration {
             && let Some(declarator) = binding
                 .syntax()
                 .ancestors()
+                .skip(1)
                 .find_map(|syntax| JsVariableDeclarator::try_cast(syntax).ok())
             && let Some(initializer) = declarator.initializer()
             && let Some(expression) = initializer
@@ -781,6 +782,7 @@ impl AnyVueSetupDeclaration {
             && let Some(declarator) = binding
                 .syntax()
                 .ancestors()
+                .skip(1)
                 .find_map(|syntax| JsVariableDeclarator::try_cast(syntax).ok())
             && let Some(initializer) = declarator.initializer()
             && let Some(expression) = initializer
@@ -811,6 +813,7 @@ impl AnyVueSetupDeclaration {
                     && let Some(declarator) = binding
                         .syntax()
                         .ancestors()
+                        .skip(1)
                         .find_map(|syntax| JsVariableDeclarator::try_cast(syntax).ok())
                     && let Some(decl_initializer) = declarator.initializer()
                     && let Some(decl_expr) = decl_initializer

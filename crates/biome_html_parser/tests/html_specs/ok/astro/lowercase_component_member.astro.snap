@@ -1,0 +1,231 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```astro
+---
+let Data;
+---
+<Data.Client></Data.Client>
+<form.Field attr="value" />
+<form.Field data-foo.bar="value" />
+<foo.Bar attr.data-foo="value" />
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: AstroFrontmatterElement {
+        l_fence_token: FENCE@0..3 "---" [] [],
+        content: AstroEmbeddedContent {
+            content_token: HTML_LITERAL@3..14 "let Data;\n" [Newline("\n")] [],
+        },
+        r_fence_token: FENCE@14..17 "---" [] [],
+    },
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@17..19 "<" [Newline("\n")] [],
+                name: HtmlMemberName {
+                    object: HtmlComponentName {
+                        value_token: HTML_LITERAL@19..23 "Data" [] [],
+                    },
+                    dot_token: DOT@23..24 "." [] [],
+                    member: HtmlTagName {
+                        value_token: HTML_LITERAL@24..30 "Client" [] [],
+                    },
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@30..31 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@31..32 "<" [] [],
+                slash_token: SLASH@32..33 "/" [] [],
+                name: HtmlComponentName {
+                    value_token: HTML_LITERAL@33..44 "Data.Client" [] [],
+                },
+                r_angle_token: R_ANGLE@44..45 ">" [] [],
+            },
+        },
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@45..47 "<" [Newline("\n")] [],
+            name: HtmlMemberName {
+                object: HtmlComponentName {
+                    value_token: HTML_LITERAL@47..51 "form" [] [],
+                },
+                dot_token: DOT@51..52 "." [] [],
+                member: HtmlTagName {
+                    value_token: HTML_LITERAL@52..58 "Field" [] [Whitespace(" ")],
+                },
+            },
+            attributes: HtmlAttributeList [
+                HtmlAttribute {
+                    name: HtmlAttributeName {
+                        value_token: HTML_LITERAL@58..62 "attr" [] [],
+                    },
+                    initializer: HtmlAttributeInitializerClause {
+                        eq_token: EQ@62..63 "=" [] [],
+                        value: HtmlString {
+                            value_token: HTML_STRING_LITERAL@63..71 "\"value\"" [] [Whitespace(" ")],
+                        },
+                    },
+                },
+            ],
+            slash_token: SLASH@71..72 "/" [] [],
+            r_angle_token: R_ANGLE@72..73 ">" [] [],
+        },
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@73..75 "<" [Newline("\n")] [],
+            name: HtmlMemberName {
+                object: HtmlComponentName {
+                    value_token: HTML_LITERAL@75..79 "form" [] [],
+                },
+                dot_token: DOT@79..80 "." [] [],
+                member: HtmlTagName {
+                    value_token: HTML_LITERAL@80..86 "Field" [] [Whitespace(" ")],
+                },
+            },
+            attributes: HtmlAttributeList [
+                HtmlAttribute {
+                    name: HtmlAttributeName {
+                        value_token: HTML_LITERAL@86..98 "data-foo.bar" [] [],
+                    },
+                    initializer: HtmlAttributeInitializerClause {
+                        eq_token: EQ@98..99 "=" [] [],
+                        value: HtmlString {
+                            value_token: HTML_STRING_LITERAL@99..107 "\"value\"" [] [Whitespace(" ")],
+                        },
+                    },
+                },
+            ],
+            slash_token: SLASH@107..108 "/" [] [],
+            r_angle_token: R_ANGLE@108..109 ">" [] [],
+        },
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@109..111 "<" [Newline("\n")] [],
+            name: HtmlMemberName {
+                object: HtmlComponentName {
+                    value_token: HTML_LITERAL@111..114 "foo" [] [],
+                },
+                dot_token: DOT@114..115 "." [] [],
+                member: HtmlTagName {
+                    value_token: HTML_LITERAL@115..119 "Bar" [] [Whitespace(" ")],
+                },
+            },
+            attributes: HtmlAttributeList [
+                HtmlAttribute {
+                    name: HtmlAttributeName {
+                        value_token: HTML_LITERAL@119..132 "attr.data-foo" [] [],
+                    },
+                    initializer: HtmlAttributeInitializerClause {
+                        eq_token: EQ@132..133 "=" [] [],
+                        value: HtmlString {
+                            value_token: HTML_STRING_LITERAL@133..141 "\"value\"" [] [Whitespace(" ")],
+                        },
+                    },
+                },
+            ],
+            slash_token: SLASH@141..142 "/" [] [],
+            r_angle_token: R_ANGLE@142..143 ">" [] [],
+        },
+    ],
+    eof_token: EOF@143..144 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..144
+  0: (empty)
+  1: ASTRO_FRONTMATTER_ELEMENT@0..17
+    0: FENCE@0..3 "---" [] []
+    1: ASTRO_EMBEDDED_CONTENT@3..14
+      0: HTML_LITERAL@3..14 "let Data;\n" [Newline("\n")] []
+    2: FENCE@14..17 "---" [] []
+  2: (empty)
+  3: HTML_ELEMENT_LIST@17..143
+    0: HTML_ELEMENT@17..45
+      0: HTML_OPENING_ELEMENT@17..31
+        0: L_ANGLE@17..19 "<" [Newline("\n")] []
+        1: HTML_MEMBER_NAME@19..30
+          0: HTML_COMPONENT_NAME@19..23
+            0: HTML_LITERAL@19..23 "Data" [] []
+          1: DOT@23..24 "." [] []
+          2: HTML_TAG_NAME@24..30
+            0: HTML_LITERAL@24..30 "Client" [] []
+        2: HTML_ATTRIBUTE_LIST@30..30
+        3: R_ANGLE@30..31 ">" [] []
+      1: HTML_ELEMENT_LIST@31..31
+      2: HTML_CLOSING_ELEMENT@31..45
+        0: L_ANGLE@31..32 "<" [] []
+        1: SLASH@32..33 "/" [] []
+        2: HTML_COMPONENT_NAME@33..44
+          0: HTML_LITERAL@33..44 "Data.Client" [] []
+        3: R_ANGLE@44..45 ">" [] []
+    1: HTML_SELF_CLOSING_ELEMENT@45..73
+      0: L_ANGLE@45..47 "<" [Newline("\n")] []
+      1: HTML_MEMBER_NAME@47..58
+        0: HTML_COMPONENT_NAME@47..51
+          0: HTML_LITERAL@47..51 "form" [] []
+        1: DOT@51..52 "." [] []
+        2: HTML_TAG_NAME@52..58
+          0: HTML_LITERAL@52..58 "Field" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@58..71
+        0: HTML_ATTRIBUTE@58..71
+          0: HTML_ATTRIBUTE_NAME@58..62
+            0: HTML_LITERAL@58..62 "attr" [] []
+          1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@62..71
+            0: EQ@62..63 "=" [] []
+            1: HTML_STRING@63..71
+              0: HTML_STRING_LITERAL@63..71 "\"value\"" [] [Whitespace(" ")]
+      3: SLASH@71..72 "/" [] []
+      4: R_ANGLE@72..73 ">" [] []
+    2: HTML_SELF_CLOSING_ELEMENT@73..109
+      0: L_ANGLE@73..75 "<" [Newline("\n")] []
+      1: HTML_MEMBER_NAME@75..86
+        0: HTML_COMPONENT_NAME@75..79
+          0: HTML_LITERAL@75..79 "form" [] []
+        1: DOT@79..80 "." [] []
+        2: HTML_TAG_NAME@80..86
+          0: HTML_LITERAL@80..86 "Field" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@86..107
+        0: HTML_ATTRIBUTE@86..107
+          0: HTML_ATTRIBUTE_NAME@86..98
+            0: HTML_LITERAL@86..98 "data-foo.bar" [] []
+          1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@98..107
+            0: EQ@98..99 "=" [] []
+            1: HTML_STRING@99..107
+              0: HTML_STRING_LITERAL@99..107 "\"value\"" [] [Whitespace(" ")]
+      3: SLASH@107..108 "/" [] []
+      4: R_ANGLE@108..109 ">" [] []
+    3: HTML_SELF_CLOSING_ELEMENT@109..143
+      0: L_ANGLE@109..111 "<" [Newline("\n")] []
+      1: HTML_MEMBER_NAME@111..119
+        0: HTML_COMPONENT_NAME@111..114
+          0: HTML_LITERAL@111..114 "foo" [] []
+        1: DOT@114..115 "." [] []
+        2: HTML_TAG_NAME@115..119
+          0: HTML_LITERAL@115..119 "Bar" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@119..141
+        0: HTML_ATTRIBUTE@119..141
+          0: HTML_ATTRIBUTE_NAME@119..132
+            0: HTML_LITERAL@119..132 "attr.data-foo" [] []
+          1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@132..141
+            0: EQ@132..133 "=" [] []
+            1: HTML_STRING@133..141
+              0: HTML_STRING_LITERAL@133..141 "\"value\"" [] [Whitespace(" ")]
+      3: SLASH@141..142 "/" [] []
+      4: R_ANGLE@142..143 ">" [] []
+  4: EOF@143..144 "" [Newline("\n")] []
+
+```

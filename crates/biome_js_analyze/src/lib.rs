@@ -8,8 +8,8 @@ use crate::services::embedded_value_references::EmbeddedValueReferences;
 use crate::suppression_action::JsSuppressionAction;
 use biome_analyze::{
     AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerPluginSlice,
-    AnalyzerSignal, AnalyzerSuppression, ControlFlow, InspectMatcher, LanguageRoot,
-    MatchQueryParams, MetadataRegistry, Phases, PluginTargetLanguage, PluginVisitor, RuleAction,
+    AnalyzerSignal, AnalyzerSuppression, BatchPluginVisitor, ControlFlow, InspectMatcher,
+    LanguageRoot, MatchQueryParams, MetadataRegistry, Phases, PluginTargetLanguage, RuleAction,
     RuleRegistry, to_analyzer_suppressions,
 };
 use biome_aria::AriaRoles;
@@ -204,15 +204,19 @@ where
         analyzer.add_visitor(phase, visitor);
     }
 
-    for plugin in plugins {
-        // SAFETY: The plugin target language is correctly checked here.
+    let js_plugins: Vec<_> = plugins
+        .iter()
+        .filter(|p| p.language() == PluginTargetLanguage::JavaScript)
+        .cloned()
+        .collect();
+
+    if !js_plugins.is_empty() {
+        // SAFETY: All plugins have been verified to target JavaScript above.
         unsafe {
-            if plugin.language() == PluginTargetLanguage::JavaScript {
-                analyzer.add_visitor(
-                    Phases::Syntax,
-                    Box::new(PluginVisitor::new_unchecked(plugin.clone())),
-                )
-            }
+            analyzer.add_visitor(
+                Phases::Syntax,
+                Box::new(BatchPluginVisitor::new_unchecked(&js_plugins)),
+            );
         }
     }
 

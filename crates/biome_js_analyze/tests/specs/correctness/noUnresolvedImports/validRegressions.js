@@ -1,0 +1,13 @@
+/* should not generate diagnostics */
+
+// Regression: named import from an aliased re-export chain must not be flagged.
+// `renamedSymbol` is exported by aliased-reexport-barrel.js as
+// `export { originalName as renamedSymbol }`.
+import { renamedSymbol } from "./aliased-reexport-barrel.js";
+
+// Regression: importing a namespace re-export must not be flagged.
+// `MyNs` is exported by namespace-reexport-barrel.js as
+// `export * as MyNs from "./namespace-reexport-source.js"`.
+import { MyNs } from "./namespace-reexport-barrel.js";
+
+console.log(renamedSymbol, MyNs);

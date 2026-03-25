@@ -1,0 +1,10 @@
+/* should not generate diagnostics */
+
+/* Newly available property - ok with "newly" */
+a { backdrop-filter: auto }
+
+/* Newly available at-rule - ok with "newly" */
+@property --foo {
+    syntax: "*";
+    inherits: false;
+}

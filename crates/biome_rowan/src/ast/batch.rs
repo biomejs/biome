@@ -3,7 +3,7 @@ use crate::{
     AstNode, Language, SyntaxElement, SyntaxNode, SyntaxSlot, SyntaxToken, chain_trivia_pieces,
 };
 use biome_text_edit::{TextEdit, TextEditBuilder};
-use biome_text_size::TextRange;
+use biome_text_size::{TextRange, TextSize};
 use std::{
     cmp,
     collections::BinaryHeap,
@@ -548,7 +548,8 @@ where
                     }
 
                     // Build text range and text edit from the text mutation list
-                    let root_string = document_root.to_string();
+                    // Use SyntaxNodeText instead of String to avoid allocating the entire document upfront
+                    let root_text = document_root.text_with_trivia();
                     let mut text_range = TextRange::default();
                     let mut text_edit_builder = TextEditBuilder::default();
 
@@ -560,23 +561,30 @@ where
                         ) {
                             text_range = text_range.cover(deleted_text_range);
                             if range_start > pointer {
-                                text_edit_builder.equal(&root_string[pointer..range_start]);
+                                // Slice only the needed range instead of using full root_string
+                                let slice = root_text.slice(TextRange::new(
+                                    TextSize::from(pointer as u32),
+                                    TextSize::from(range_start as u32),
+                                ));
+                                text_edit_builder.equal(&slice.to_string());
                             }
 
-                            let old = &root_string[range_start..range_end];
+                            // Slice only the deleted range instead of using full root_string
+                            let old_slice = root_text.slice(deleted_text_range);
+                            let old = old_slice.to_string();
 
                             match optional_inserted_text {
                                 None => {
-                                    text_edit_builder.with_unicode_words_diff(old, "");
+                                    text_edit_builder.with_unicode_words_diff(&old, "");
                                 }
                                 Some(element) => match element {
                                     SyntaxElement::Node(node) => {
                                         text_edit_builder
-                                            .with_unicode_words_diff(old, &node.to_string());
+                                            .with_unicode_words_diff(&old, &node.to_string());
                                     }
                                     SyntaxElement::Token(token) => {
                                         text_edit_builder
-                                            .with_unicode_words_diff(old, token.text());
+                                            .with_unicode_words_diff(&old, token.text());
                                     }
                                 },
                             }
@@ -584,9 +592,12 @@ where
                             pointer = range_end;
                         }
                     }
-                    let end_pos = root_string.len();
-                    if end_pos > pointer {
-                        text_edit_builder.equal(&root_string[pointer..end_pos]);
+                    let end_pos = root_text.len();
+                    if end_pos > TextSize::from(pointer as u32) {
+                        // Slice the remaining range instead of using full root_string
+                        let slice = root_text
+                            .slice(TextRange::new(TextSize::from(pointer as u32), end_pos));
+                        text_edit_builder.equal(&slice.to_string());
                     }
 
                     let text_edit = text_edit_builder.finish();

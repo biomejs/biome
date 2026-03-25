@@ -1,0 +1,656 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
+expression: snapshot
+---
+
+## Input
+
+```css
+@import "theme";
+
+@import "rounded-corners", "text-shadow";
+
+@import "theme.scss";
+
+@import "theme.css", "spacing";
+
+@import "theme.css";
+
+@import "theme.CSS?cache=1#section";
+
+@import "print.css" print;
+
+@import "print.css" print, screen;
+
+@import "print.css" print, "spacing";
+
+@import "http://example.com/theme";
+
+@import url("theme.css");
+
+@import "//example.com/theme";
+
+@import "https://example.com/theme.css";
+
+@mixin plain-import {
+  @import "theme.css";
+}
+
+@mixin dynamic-import {
+  @import "theme";
+}
+
+@if true {
+  @import "theme";
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: ScssImportAtRule {
+                import_token: IMPORT_KW@1..8 "import" [] [Whitespace(" ")],
+                imports: ScssImportItemList [
+                    CssString {
+                        value_token: CSS_STRING_LITERAL@8..15 "\"theme\"" [] [],
+                    },
+                ],
+                semicolon_token: SEMICOLON@15..16 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@16..19 "@" [Newline("\n"), Newline("\n")] [],
+            rule: ScssImportAtRule {
+                import_token: IMPORT_KW@19..26 "import" [] [Whitespace(" ")],
+                imports: ScssImportItemList [
+                    CssString {
+                        value_token: CSS_STRING_LITERAL@26..43 "\"rounded-corners\"" [] [],
+                    },
+                    COMMA@43..45 "," [] [Whitespace(" ")],
+                    CssString {
+                        value_token: CSS_STRING_LITERAL@45..58 "\"text-shadow\"" [] [],
+                    },
+                ],
+                semicolon_token: SEMICOLON@58..59 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@59..62 "@" [Newline("\n"), Newline("\n")] [],
+            rule: ScssImportAtRule {
+                import_token: IMPORT_KW@62..69 "import" [] [Whitespace(" ")],
+                imports: ScssImportItemList [
+                    CssString {
+                        value_token: CSS_STRING_LITERAL@69..81 "\"theme.scss\"" [] [],
+                    },
+                ],
+                semicolon_token: SEMICOLON@81..82 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@82..85 "@" [Newline("\n"), Newline("\n")] [],
+            rule: ScssImportAtRule {
+                import_token: IMPORT_KW@85..92 "import" [] [Whitespace(" ")],
+                imports: ScssImportItemList [
+                    ScssPlainImport {
+                        url: CssString {
+                            value_token: CSS_STRING_LITERAL@92..103 "\"theme.css\"" [] [],
+                        },
+                        layer: missing (optional),
+                        supports: missing (optional),
+                        media: CssMediaQueryList [],
+                    },
+                    COMMA@103..105 "," [] [Whitespace(" ")],
+                    CssString {
+                        value_token: CSS_STRING_LITERAL@105..114 "\"spacing\"" [] [],
+                    },
+                ],
+                semicolon_token: SEMICOLON@114..115 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@115..118 "@" [Newline("\n"), Newline("\n")] [],
+            rule: ScssImportAtRule {
+                import_token: IMPORT_KW@118..125 "import" [] [Whitespace(" ")],
+                imports: ScssImportItemList [
+                    ScssPlainImport {
+                        url: CssString {
+                            value_token: CSS_STRING_LITERAL@125..136 "\"theme.css\"" [] [],
+                        },
+                        layer: missing (optional),
+                        supports: missing (optional),
+                        media: CssMediaQueryList [],
+                    },
+                ],
+                semicolon_token: SEMICOLON@136..137 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@137..140 "@" [Newline("\n"), Newline("\n")] [],
+            rule: ScssImportAtRule {
+                import_token: IMPORT_KW@140..147 "import" [] [Whitespace(" ")],
+                imports: ScssImportItemList [
+                    CssString {
+                        value_token: CSS_STRING_LITERAL@147..174 "\"theme.CSS?cache=1#section\"" [] [],
+                    },
+                ],
+                semicolon_token: SEMICOLON@174..175 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@175..178 "@" [Newline("\n"), Newline("\n")] [],
+            rule: ScssImportAtRule {
+                import_token: IMPORT_KW@178..185 "import" [] [Whitespace(" ")],
+                imports: ScssImportItemList [
+                    ScssPlainImport {
+                        url: CssString {
+                            value_token: CSS_STRING_LITERAL@185..197 "\"print.css\"" [] [Whitespace(" ")],
+                        },
+                        layer: missing (optional),
+                        supports: missing (optional),
+                        media: CssMediaQueryList [
+                            CssMediaTypeQuery {
+                                modifier: missing (optional),
+                                ty: CssMediaType {
+                                    value: CssIdentifier {
+                                        value_token: IDENT@197..202 "print" [] [],
+                                    },
+                                },
+                            },
+                        ],
+                    },
+                ],
+                semicolon_token: SEMICOLON@202..203 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@203..206 "@" [Newline("\n"), Newline("\n")] [],
+            rule: ScssImportAtRule {
+                import_token: IMPORT_KW@206..213 "import" [] [Whitespace(" ")],
+                imports: ScssImportItemList [
+                    ScssPlainImport {
+                        url: CssString {
+                            value_token: CSS_STRING_LITERAL@213..225 "\"print.css\"" [] [Whitespace(" ")],
+                        },
+                        layer: missing (optional),
+                        supports: missing (optional),
+                        media: CssMediaQueryList [
+                            CssMediaTypeQuery {
+                                modifier: missing (optional),
+                                ty: CssMediaType {
+                                    value: CssIdentifier {
+                                        value_token: IDENT@225..230 "print" [] [],
+                                    },
+                                },
+                            },
+                            COMMA@230..232 "," [] [Whitespace(" ")],
+                            CssMediaTypeQuery {
+                                modifier: missing (optional),
+                                ty: CssMediaType {
+                                    value: CssIdentifier {
+                                        value_token: IDENT@232..238 "screen" [] [],
+                                    },
+                                },
+                            },
+                        ],
+                    },
+                ],
+                semicolon_token: SEMICOLON@238..239 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@239..242 "@" [Newline("\n"), Newline("\n")] [],
+            rule: ScssImportAtRule {
+                import_token: IMPORT_KW@242..249 "import" [] [Whitespace(" ")],
+                imports: ScssImportItemList [
+                    ScssPlainImport {
+                        url: CssString {
+                            value_token: CSS_STRING_LITERAL@249..261 "\"print.css\"" [] [Whitespace(" ")],
+                        },
+                        layer: missing (optional),
+                        supports: missing (optional),
+                        media: CssMediaQueryList [
+                            CssMediaTypeQuery {
+                                modifier: missing (optional),
+                                ty: CssMediaType {
+                                    value: CssIdentifier {
+                                        value_token: IDENT@261..266 "print" [] [],
+                                    },
+                                },
+                            },
+                        ],
+                    },
+                    COMMA@266..268 "," [] [Whitespace(" ")],
+                    CssString {
+                        value_token: CSS_STRING_LITERAL@268..277 "\"spacing\"" [] [],
+                    },
+                ],
+                semicolon_token: SEMICOLON@277..278 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@278..281 "@" [Newline("\n"), Newline("\n")] [],
+            rule: ScssImportAtRule {
+                import_token: IMPORT_KW@281..288 "import" [] [Whitespace(" ")],
+                imports: ScssImportItemList [
+                    ScssPlainImport {
+                        url: CssString {
+                            value_token: CSS_STRING_LITERAL@288..314 "\"http://example.com/theme\"" [] [],
+                        },
+                        layer: missing (optional),
+                        supports: missing (optional),
+                        media: CssMediaQueryList [],
+                    },
+                ],
+                semicolon_token: SEMICOLON@314..315 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@315..318 "@" [Newline("\n"), Newline("\n")] [],
+            rule: ScssImportAtRule {
+                import_token: IMPORT_KW@318..325 "import" [] [Whitespace(" ")],
+                imports: ScssImportItemList [
+                    ScssPlainImport {
+                        url: CssUrlFunction {
+                            name: URL_KW@325..328 "url" [] [],
+                            l_paren_token: L_PAREN@328..329 "(" [] [],
+                            value: CssString {
+                                value_token: CSS_STRING_LITERAL@329..340 "\"theme.css\"" [] [],
+                            },
+                            modifiers: CssUrlModifierList [],
+                            r_paren_token: R_PAREN@340..341 ")" [] [],
+                        },
+                        layer: missing (optional),
+                        supports: missing (optional),
+                        media: CssMediaQueryList [],
+                    },
+                ],
+                semicolon_token: SEMICOLON@341..342 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@342..345 "@" [Newline("\n"), Newline("\n")] [],
+            rule: ScssImportAtRule {
+                import_token: IMPORT_KW@345..352 "import" [] [Whitespace(" ")],
+                imports: ScssImportItemList [
+                    ScssPlainImport {
+                        url: CssString {
+                            value_token: CSS_STRING_LITERAL@352..373 "\"//example.com/theme\"" [] [],
+                        },
+                        layer: missing (optional),
+                        supports: missing (optional),
+                        media: CssMediaQueryList [],
+                    },
+                ],
+                semicolon_token: SEMICOLON@373..374 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@374..377 "@" [Newline("\n"), Newline("\n")] [],
+            rule: ScssImportAtRule {
+                import_token: IMPORT_KW@377..384 "import" [] [Whitespace(" ")],
+                imports: ScssImportItemList [
+                    ScssPlainImport {
+                        url: CssString {
+                            value_token: CSS_STRING_LITERAL@384..415 "\"https://example.com/theme.css\"" [] [],
+                        },
+                        layer: missing (optional),
+                        supports: missing (optional),
+                        media: CssMediaQueryList [],
+                    },
+                ],
+                semicolon_token: SEMICOLON@415..416 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@416..419 "@" [Newline("\n"), Newline("\n")] [],
+            rule: ScssMixinAtRule {
+                mixin_token: MIXIN_KW@419..425 "mixin" [] [Whitespace(" ")],
+                name: CssIdentifier {
+                    value_token: IDENT@425..438 "plain-import" [] [Whitespace(" ")],
+                },
+                parameters: missing (optional),
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@438..439 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssAtRule {
+                            at_token: AT@439..443 "@" [Newline("\n"), Whitespace("  ")] [],
+                            rule: ScssImportAtRule {
+                                import_token: IMPORT_KW@443..450 "import" [] [Whitespace(" ")],
+                                imports: ScssImportItemList [
+                                    ScssPlainImport {
+                                        url: CssString {
+                                            value_token: CSS_STRING_LITERAL@450..461 "\"theme.css\"" [] [],
+                                        },
+                                        layer: missing (optional),
+                                        supports: missing (optional),
+                                        media: CssMediaQueryList [],
+                                    },
+                                ],
+                                semicolon_token: SEMICOLON@461..462 ";" [] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@462..464 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@464..467 "@" [Newline("\n"), Newline("\n")] [],
+            rule: ScssMixinAtRule {
+                mixin_token: MIXIN_KW@467..473 "mixin" [] [Whitespace(" ")],
+                name: CssIdentifier {
+                    value_token: IDENT@473..488 "dynamic-import" [] [Whitespace(" ")],
+                },
+                parameters: missing (optional),
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@488..489 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssAtRule {
+                            at_token: AT@489..493 "@" [Newline("\n"), Whitespace("  ")] [],
+                            rule: ScssImportAtRule {
+                                import_token: IMPORT_KW@493..500 "import" [] [Whitespace(" ")],
+                                imports: ScssImportItemList [
+                                    CssString {
+                                        value_token: CSS_STRING_LITERAL@500..507 "\"theme\"" [] [],
+                                    },
+                                ],
+                                semicolon_token: SEMICOLON@507..508 ";" [] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@508..510 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@510..513 "@" [Newline("\n"), Newline("\n")] [],
+            rule: ScssIfAtRule {
+                if_token: IF_KW@513..516 "if" [] [Whitespace(" ")],
+                condition: ScssExpression {
+                    items: ScssExpressionItemList [
+                        CssIdentifier {
+                            value_token: IDENT@516..521 "true" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@521..522 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssAtRule {
+                            at_token: AT@522..526 "@" [Newline("\n"), Whitespace("  ")] [],
+                            rule: ScssImportAtRule {
+                                import_token: IMPORT_KW@526..533 "import" [] [Whitespace(" ")],
+                                imports: ScssImportItemList [
+                                    CssString {
+                                        value_token: CSS_STRING_LITERAL@533..540 "\"theme\"" [] [],
+                                    },
+                                ],
+                                semicolon_token: SEMICOLON@540..541 ";" [] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@541..543 "}" [Newline("\n")] [],
+                },
+                else_clause: missing (optional),
+            },
+        },
+    ],
+    eof_token: EOF@543..544 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..544
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..543
+    0: CSS_AT_RULE@0..16
+      0: AT@0..1 "@" [] []
+      1: SCSS_IMPORT_AT_RULE@1..16
+        0: IMPORT_KW@1..8 "import" [] [Whitespace(" ")]
+        1: SCSS_IMPORT_ITEM_LIST@8..15
+          0: CSS_STRING@8..15
+            0: CSS_STRING_LITERAL@8..15 "\"theme\"" [] []
+        2: SEMICOLON@15..16 ";" [] []
+    1: CSS_AT_RULE@16..59
+      0: AT@16..19 "@" [Newline("\n"), Newline("\n")] []
+      1: SCSS_IMPORT_AT_RULE@19..59
+        0: IMPORT_KW@19..26 "import" [] [Whitespace(" ")]
+        1: SCSS_IMPORT_ITEM_LIST@26..58
+          0: CSS_STRING@26..43
+            0: CSS_STRING_LITERAL@26..43 "\"rounded-corners\"" [] []
+          1: COMMA@43..45 "," [] [Whitespace(" ")]
+          2: CSS_STRING@45..58
+            0: CSS_STRING_LITERAL@45..58 "\"text-shadow\"" [] []
+        2: SEMICOLON@58..59 ";" [] []
+    2: CSS_AT_RULE@59..82
+      0: AT@59..62 "@" [Newline("\n"), Newline("\n")] []
+      1: SCSS_IMPORT_AT_RULE@62..82
+        0: IMPORT_KW@62..69 "import" [] [Whitespace(" ")]
+        1: SCSS_IMPORT_ITEM_LIST@69..81
+          0: CSS_STRING@69..81
+            0: CSS_STRING_LITERAL@69..81 "\"theme.scss\"" [] []
+        2: SEMICOLON@81..82 ";" [] []
+    3: CSS_AT_RULE@82..115
+      0: AT@82..85 "@" [Newline("\n"), Newline("\n")] []
+      1: SCSS_IMPORT_AT_RULE@85..115
+        0: IMPORT_KW@85..92 "import" [] [Whitespace(" ")]
+        1: SCSS_IMPORT_ITEM_LIST@92..114
+          0: SCSS_PLAIN_IMPORT@92..103
+            0: CSS_STRING@92..103
+              0: CSS_STRING_LITERAL@92..103 "\"theme.css\"" [] []
+            1: (empty)
+            2: (empty)
+            3: CSS_MEDIA_QUERY_LIST@103..103
+          1: COMMA@103..105 "," [] [Whitespace(" ")]
+          2: CSS_STRING@105..114
+            0: CSS_STRING_LITERAL@105..114 "\"spacing\"" [] []
+        2: SEMICOLON@114..115 ";" [] []
+    4: CSS_AT_RULE@115..137
+      0: AT@115..118 "@" [Newline("\n"), Newline("\n")] []
+      1: SCSS_IMPORT_AT_RULE@118..137
+        0: IMPORT_KW@118..125 "import" [] [Whitespace(" ")]
+        1: SCSS_IMPORT_ITEM_LIST@125..136
+          0: SCSS_PLAIN_IMPORT@125..136
+            0: CSS_STRING@125..136
+              0: CSS_STRING_LITERAL@125..136 "\"theme.css\"" [] []
+            1: (empty)
+            2: (empty)
+            3: CSS_MEDIA_QUERY_LIST@136..136
+        2: SEMICOLON@136..137 ";" [] []
+    5: CSS_AT_RULE@137..175
+      0: AT@137..140 "@" [Newline("\n"), Newline("\n")] []
+      1: SCSS_IMPORT_AT_RULE@140..175
+        0: IMPORT_KW@140..147 "import" [] [Whitespace(" ")]
+        1: SCSS_IMPORT_ITEM_LIST@147..174
+          0: CSS_STRING@147..174
+            0: CSS_STRING_LITERAL@147..174 "\"theme.CSS?cache=1#section\"" [] []
+        2: SEMICOLON@174..175 ";" [] []
+    6: CSS_AT_RULE@175..203
+      0: AT@175..178 "@" [Newline("\n"), Newline("\n")] []
+      1: SCSS_IMPORT_AT_RULE@178..203
+        0: IMPORT_KW@178..185 "import" [] [Whitespace(" ")]
+        1: SCSS_IMPORT_ITEM_LIST@185..202
+          0: SCSS_PLAIN_IMPORT@185..202
+            0: CSS_STRING@185..197
+              0: CSS_STRING_LITERAL@185..197 "\"print.css\"" [] [Whitespace(" ")]
+            1: (empty)
+            2: (empty)
+            3: CSS_MEDIA_QUERY_LIST@197..202
+              0: CSS_MEDIA_TYPE_QUERY@197..202
+                0: (empty)
+                1: CSS_MEDIA_TYPE@197..202
+                  0: CSS_IDENTIFIER@197..202
+                    0: IDENT@197..202 "print" [] []
+        2: SEMICOLON@202..203 ";" [] []
+    7: CSS_AT_RULE@203..239
+      0: AT@203..206 "@" [Newline("\n"), Newline("\n")] []
+      1: SCSS_IMPORT_AT_RULE@206..239
+        0: IMPORT_KW@206..213 "import" [] [Whitespace(" ")]
+        1: SCSS_IMPORT_ITEM_LIST@213..238
+          0: SCSS_PLAIN_IMPORT@213..238
+            0: CSS_STRING@213..225
+              0: CSS_STRING_LITERAL@213..225 "\"print.css\"" [] [Whitespace(" ")]
+            1: (empty)
+            2: (empty)
+            3: CSS_MEDIA_QUERY_LIST@225..238
+              0: CSS_MEDIA_TYPE_QUERY@225..230
+                0: (empty)
+                1: CSS_MEDIA_TYPE@225..230
+                  0: CSS_IDENTIFIER@225..230
+                    0: IDENT@225..230 "print" [] []
+              1: COMMA@230..232 "," [] [Whitespace(" ")]
+              2: CSS_MEDIA_TYPE_QUERY@232..238
+                0: (empty)
+                1: CSS_MEDIA_TYPE@232..238
+                  0: CSS_IDENTIFIER@232..238
+                    0: IDENT@232..238 "screen" [] []
+        2: SEMICOLON@238..239 ";" [] []
+    8: CSS_AT_RULE@239..278
+      0: AT@239..242 "@" [Newline("\n"), Newline("\n")] []
+      1: SCSS_IMPORT_AT_RULE@242..278
+        0: IMPORT_KW@242..249 "import" [] [Whitespace(" ")]
+        1: SCSS_IMPORT_ITEM_LIST@249..277
+          0: SCSS_PLAIN_IMPORT@249..266
+            0: CSS_STRING@249..261
+              0: CSS_STRING_LITERAL@249..261 "\"print.css\"" [] [Whitespace(" ")]
+            1: (empty)
+            2: (empty)
+            3: CSS_MEDIA_QUERY_LIST@261..266
+              0: CSS_MEDIA_TYPE_QUERY@261..266
+                0: (empty)
+                1: CSS_MEDIA_TYPE@261..266
+                  0: CSS_IDENTIFIER@261..266
+                    0: IDENT@261..266 "print" [] []
+          1: COMMA@266..268 "," [] [Whitespace(" ")]
+          2: CSS_STRING@268..277
+            0: CSS_STRING_LITERAL@268..277 "\"spacing\"" [] []
+        2: SEMICOLON@277..278 ";" [] []
+    9: CSS_AT_RULE@278..315
+      0: AT@278..281 "@" [Newline("\n"), Newline("\n")] []
+      1: SCSS_IMPORT_AT_RULE@281..315
+        0: IMPORT_KW@281..288 "import" [] [Whitespace(" ")]
+        1: SCSS_IMPORT_ITEM_LIST@288..314
+          0: SCSS_PLAIN_IMPORT@288..314
+            0: CSS_STRING@288..314
+              0: CSS_STRING_LITERAL@288..314 "\"http://example.com/theme\"" [] []
+            1: (empty)
+            2: (empty)
+            3: CSS_MEDIA_QUERY_LIST@314..314
+        2: SEMICOLON@314..315 ";" [] []
+    10: CSS_AT_RULE@315..342
+      0: AT@315..318 "@" [Newline("\n"), Newline("\n")] []
+      1: SCSS_IMPORT_AT_RULE@318..342
+        0: IMPORT_KW@318..325 "import" [] [Whitespace(" ")]
+        1: SCSS_IMPORT_ITEM_LIST@325..341
+          0: SCSS_PLAIN_IMPORT@325..341
+            0: CSS_URL_FUNCTION@325..341
+              0: URL_KW@325..328 "url" [] []
+              1: L_PAREN@328..329 "(" [] []
+              2: CSS_STRING@329..340
+                0: CSS_STRING_LITERAL@329..340 "\"theme.css\"" [] []
+              3: CSS_URL_MODIFIER_LIST@340..340
+              4: R_PAREN@340..341 ")" [] []
+            1: (empty)
+            2: (empty)
+            3: CSS_MEDIA_QUERY_LIST@341..341
+        2: SEMICOLON@341..342 ";" [] []
+    11: CSS_AT_RULE@342..374
+      0: AT@342..345 "@" [Newline("\n"), Newline("\n")] []
+      1: SCSS_IMPORT_AT_RULE@345..374
+        0: IMPORT_KW@345..352 "import" [] [Whitespace(" ")]
+        1: SCSS_IMPORT_ITEM_LIST@352..373
+          0: SCSS_PLAIN_IMPORT@352..373
+            0: CSS_STRING@352..373
+              0: CSS_STRING_LITERAL@352..373 "\"//example.com/theme\"" [] []
+            1: (empty)
+            2: (empty)
+            3: CSS_MEDIA_QUERY_LIST@373..373
+        2: SEMICOLON@373..374 ";" [] []
+    12: CSS_AT_RULE@374..416
+      0: AT@374..377 "@" [Newline("\n"), Newline("\n")] []
+      1: SCSS_IMPORT_AT_RULE@377..416
+        0: IMPORT_KW@377..384 "import" [] [Whitespace(" ")]
+        1: SCSS_IMPORT_ITEM_LIST@384..415
+          0: SCSS_PLAIN_IMPORT@384..415
+            0: CSS_STRING@384..415
+              0: CSS_STRING_LITERAL@384..415 "\"https://example.com/theme.css\"" [] []
+            1: (empty)
+            2: (empty)
+            3: CSS_MEDIA_QUERY_LIST@415..415
+        2: SEMICOLON@415..416 ";" [] []
+    13: CSS_AT_RULE@416..464
+      0: AT@416..419 "@" [Newline("\n"), Newline("\n")] []
+      1: SCSS_MIXIN_AT_RULE@419..464
+        0: MIXIN_KW@419..425 "mixin" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@425..438
+          0: IDENT@425..438 "plain-import" [] [Whitespace(" ")]
+        2: (empty)
+        3: CSS_DECLARATION_OR_RULE_BLOCK@438..464
+          0: L_CURLY@438..439 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@439..462
+            0: CSS_AT_RULE@439..462
+              0: AT@439..443 "@" [Newline("\n"), Whitespace("  ")] []
+              1: SCSS_IMPORT_AT_RULE@443..462
+                0: IMPORT_KW@443..450 "import" [] [Whitespace(" ")]
+                1: SCSS_IMPORT_ITEM_LIST@450..461
+                  0: SCSS_PLAIN_IMPORT@450..461
+                    0: CSS_STRING@450..461
+                      0: CSS_STRING_LITERAL@450..461 "\"theme.css\"" [] []
+                    1: (empty)
+                    2: (empty)
+                    3: CSS_MEDIA_QUERY_LIST@461..461
+                2: SEMICOLON@461..462 ";" [] []
+          2: R_CURLY@462..464 "}" [Newline("\n")] []
+    14: CSS_AT_RULE@464..510
+      0: AT@464..467 "@" [Newline("\n"), Newline("\n")] []
+      1: SCSS_MIXIN_AT_RULE@467..510
+        0: MIXIN_KW@467..473 "mixin" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@473..488
+          0: IDENT@473..488 "dynamic-import" [] [Whitespace(" ")]
+        2: (empty)
+        3: CSS_DECLARATION_OR_RULE_BLOCK@488..510
+          0: L_CURLY@488..489 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@489..508
+            0: CSS_AT_RULE@489..508
+              0: AT@489..493 "@" [Newline("\n"), Whitespace("  ")] []
+              1: SCSS_IMPORT_AT_RULE@493..508
+                0: IMPORT_KW@493..500 "import" [] [Whitespace(" ")]
+                1: SCSS_IMPORT_ITEM_LIST@500..507
+                  0: CSS_STRING@500..507
+                    0: CSS_STRING_LITERAL@500..507 "\"theme\"" [] []
+                2: SEMICOLON@507..508 ";" [] []
+          2: R_CURLY@508..510 "}" [Newline("\n")] []
+    15: CSS_AT_RULE@510..543
+      0: AT@510..513 "@" [Newline("\n"), Newline("\n")] []
+      1: SCSS_IF_AT_RULE@513..543
+        0: IF_KW@513..516 "if" [] [Whitespace(" ")]
+        1: SCSS_EXPRESSION@516..521
+          0: SCSS_EXPRESSION_ITEM_LIST@516..521
+            0: CSS_IDENTIFIER@516..521
+              0: IDENT@516..521 "true" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_OR_RULE_BLOCK@521..543
+          0: L_CURLY@521..522 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@522..541
+            0: CSS_AT_RULE@522..541
+              0: AT@522..526 "@" [Newline("\n"), Whitespace("  ")] []
+              1: SCSS_IMPORT_AT_RULE@526..541
+                0: IMPORT_KW@526..533 "import" [] [Whitespace(" ")]
+                1: SCSS_IMPORT_ITEM_LIST@533..540
+                  0: CSS_STRING@533..540
+                    0: CSS_STRING_LITERAL@533..540 "\"theme\"" [] []
+                2: SEMICOLON@540..541 ";" [] []
+          2: R_CURLY@541..543 "}" [Newline("\n")] []
+        3: (empty)
+  2: EOF@543..544 "" [Newline("\n")] []
+
+```

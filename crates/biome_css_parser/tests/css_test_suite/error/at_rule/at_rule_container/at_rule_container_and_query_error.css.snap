@@ -1,6 +1,6 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 179
+assertion_line: 208
 expression: snapshot
 ---
 
@@ -657,6 +657,7 @@ at_rule_container_and_query_error.css:2:32 parse ━━━━━━━━━━�
   
   - ( <container-query> )
   - ( <size-feature> )
+  - scroll-state( <scroll-state-query> )
   - style( <style-query> )
   
 at_rule_container_and_query_error.css:7:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -674,6 +675,7 @@ at_rule_container_and_query_error.css:7:1 parse ━━━━━━━━━━�
   
   - ( <container-query> )
   - ( <size-feature> )
+  - scroll-state( <scroll-state-query> )
   - style( <style-query> )
   
 at_rule_container_and_query_error.css:10:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -690,6 +692,7 @@ at_rule_container_and_query_error.css:10:32 parse ━━━━━━━━━━
   
   - ( <container-query> )
   - ( <size-feature> )
+  - scroll-state( <scroll-state-query> )
   - style( <style-query> )
   
 at_rule_container_and_query_error.css:14:53 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -706,6 +709,7 @@ at_rule_container_and_query_error.css:14:53 parse ━━━━━━━━━━
   
   - ( <container-query> )
   - ( <size-feature> )
+  - scroll-state( <scroll-state-query> )
   - style( <style-query> )
   
 at_rule_container_and_query_error.css:18:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -722,6 +726,7 @@ at_rule_container_and_query_error.css:18:32 parse ━━━━━━━━━━
   
   - ( <container-query> )
   - ( <size-feature> )
+  - scroll-state( <scroll-state-query> )
   - style( <style-query> )
   
 at_rule_container_and_query_error.css:22:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -738,6 +743,7 @@ at_rule_container_and_query_error.css:22:32 parse ━━━━━━━━━━
   
   - ( <container-query> )
   - ( <size-feature> )
+  - scroll-state( <scroll-state-query> )
   - style( <style-query> )
   
 at_rule_container_and_query_error.css:26:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -754,6 +760,7 @@ at_rule_container_and_query_error.css:26:32 parse ━━━━━━━━━━
   
   - ( <container-query> )
   - ( <size-feature> )
+  - scroll-state( <scroll-state-query> )
   - style( <style-query> )
   
 ```

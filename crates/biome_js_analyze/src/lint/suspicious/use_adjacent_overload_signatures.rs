@@ -4,12 +4,13 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsModuleItem, JsClassDeclaration, JsFunctionDeclaration, JsModule, JsModuleItemList,
-    TsDeclarationModule, TsDeclareStatement, TsInterfaceDeclaration, TsTypeAliasDeclaration,
-    TsTypeMemberList,
+    AnyJsModuleItem, ClassMemberName, JsClassDeclaration, JsFunctionDeclaration, JsModule,
+    JsModuleItemList, TsDeclarationModule, TsDeclareStatement, TsInterfaceDeclaration,
+    TsTypeAliasDeclaration, TsTypeMemberList, modifier_ext::Modifier,
 };
 use biome_rowan::{AstNode, TextRange, TokenText, declare_node_union};
 use biome_rule_options::use_adjacent_overload_signatures::UseAdjacentOverloadSignaturesOptions;
+use enumflags2::BitFlags;
 use rustc_hash::FxHashSet;
 
 declare_lint_rule! {
@@ -189,40 +190,64 @@ fn collect_type_member_list(node: &TsTypeMemberList) -> Vec<(TokenText, TextRang
     methods
 }
 
+#[derive(Clone, Eq, PartialEq, Hash)]
+struct ClassMethodKey {
+    name: ClassMemberName,
+    is_static: bool,
+}
+
+impl From<ClassMethodKey> for TokenText {
+    fn from(value: ClassMethodKey) -> Self {
+        value.name.into()
+    }
+}
+
 fn collect_class(node: &JsClassDeclaration) -> Vec<(TokenText, TextRange)> {
     let mut methods: Vec<(TokenText, TextRange)> = Vec::new();
+    // Treat static and instance methods as separate overload groups.
+    // Issue: https://github.com/biomejs/biome/issues/8345
     let mut seen_methods = FxHashSet::default();
     let mut last_method = None;
     let members = node.members();
     for member in members {
-        if let Some(method_class) = member
-            .as_js_method_class_member()
-            .or_else(|| member.as_js_method_class_member())
-        {
+        if let Some(method_class) = member.as_js_method_class_member() {
+            let modifiers: BitFlags<Modifier> = (&method_class.modifiers()).into();
+            let is_static = modifiers.contains(Modifier::Static);
+
             if let Ok(method_member) = method_class.name()
                 && let Some(text) = method_member.name()
             {
                 let range = method_member.range();
                 check_method(
-                    text,
+                    ClassMethodKey {
+                        name: text,
+                        is_static,
+                    },
                     range,
                     &mut methods,
                     &mut seen_methods,
                     &mut last_method,
                 );
             }
-        } else if let Some(method_class) = member.as_ts_method_signature_class_member()
-            && let Ok(method_member) = method_class.name()
-            && let Some(text) = method_member.name()
-        {
-            let range = method_member.range();
-            check_method(
-                text,
-                range,
-                &mut methods,
-                &mut seen_methods,
-                &mut last_method,
-            );
+        } else if let Some(method_class) = member.as_ts_method_signature_class_member() {
+            let modifiers: BitFlags<Modifier> = (&method_class.modifiers()).into();
+            let is_static = modifiers.contains(Modifier::Static);
+
+            if let Ok(method_member) = method_class.name()
+                && let Some(text) = method_member.name()
+            {
+                let range = method_member.range();
+                check_method(
+                    ClassMethodKey {
+                        name: text,
+                        is_static,
+                    },
+                    range,
+                    &mut methods,
+                    &mut seen_methods,
+                    &mut last_method,
+                );
+            }
         }
     }
     methods

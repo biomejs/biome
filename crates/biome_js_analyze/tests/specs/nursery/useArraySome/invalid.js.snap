@@ -1,0 +1,427 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+const items = [1, 2, 3];
+const thisArg = {};
+const cond = true;
+
+items.filter(x => x > 1).length > 0;
+items.filter(function (x) { return x > 1; }, thisArg).length !== 0;
+items.filter(x => x > 1).length >= 1;
+
+0 < items.filter(x => x > 1).length;
+0 !== items.filter(x => x > 1).length;
+0 != items.filter(x => x > 1).length;
+1 <= items.filter(x => x > 1).length;
+
+items.findIndex(x => x > 1) !== -1;
+items.findLastIndex(x => x > 1) !== -1;
+
+if (items.find(x => x > 1)) {}
+if (items.findLast(x => x > 1)) {}
+
+cond ? (items.find(x => x > 1) ? "a" : "b") : "c";
+
+items.find(x => x > 1) !== undefined;
+items.findLast(x => x > 1) !== undefined;
+
+items.find(x => x > 1) != null;
+items.findLast(x => x > 1) != null;
+
+```
+
+# Diagnostics
+```
+invalid.js:5:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer .some() over filter(...).length comparison.
+  
+    3 │ const cond = true;
+    4 │ 
+  > 5 │ items.filter(x => x > 1).length > 0;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ items.filter(function (x) { return x > 1; }, thisArg).length !== 0;
+    7 │ items.filter(x => x > 1).length >= 1;
+  
+  i Using .filter() followed by a length check iterates the entire array unnecessarily. .some() stops at the first match.
+  
+  i Use .some() when you only need to know if any element matches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use .some() instead.
+  
+     3  3 │   const cond = true;
+     4  4 │   
+     5    │ - items.filter(x·=>·x·>·1).length·>·0;
+        5 │ + items.some(x·=>·x·>·1);
+     6  6 │   items.filter(function (x) { return x > 1; }, thisArg).length !== 0;
+     7  7 │   items.filter(x => x > 1).length >= 1;
+  
+
+```
+
+```
+invalid.js:6:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer .some() over filter(...).length comparison.
+  
+    5 │ items.filter(x => x > 1).length > 0;
+  > 6 │ items.filter(function (x) { return x > 1; }, thisArg).length !== 0;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ items.filter(x => x > 1).length >= 1;
+    8 │ 
+  
+  i Using .filter() followed by a length check iterates the entire array unnecessarily. .some() stops at the first match.
+  
+  i Use .some() when you only need to know if any element matches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use .some() instead.
+  
+     4  4 │   
+     5  5 │   items.filter(x => x > 1).length > 0;
+     6    │ - items.filter(function·(x)·{·return·x·>·1;·},·thisArg).length·!==·0;
+        6 │ + items.some(function·(x)·{·return·x·>·1;·},·thisArg);
+     7  7 │   items.filter(x => x > 1).length >= 1;
+     8  8 │   
+  
+
+```
+
+```
+invalid.js:7:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer .some() over filter(...).length comparison.
+  
+    5 │ items.filter(x => x > 1).length > 0;
+    6 │ items.filter(function (x) { return x > 1; }, thisArg).length !== 0;
+  > 7 │ items.filter(x => x > 1).length >= 1;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ 0 < items.filter(x => x > 1).length;
+  
+  i Using .filter() followed by a length check iterates the entire array unnecessarily. .some() stops at the first match.
+  
+  i Use .some() when you only need to know if any element matches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use .some() instead.
+  
+     5  5 │   items.filter(x => x > 1).length > 0;
+     6  6 │   items.filter(function (x) { return x > 1; }, thisArg).length !== 0;
+     7    │ - items.filter(x·=>·x·>·1).length·>=·1;
+        7 │ + items.some(x·=>·x·>·1);
+     8  8 │   
+     9  9 │   0 < items.filter(x => x > 1).length;
+  
+
+```
+
+```
+invalid.js:9:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer .some() over filter(...).length comparison.
+  
+     7 │ items.filter(x => x > 1).length >= 1;
+     8 │ 
+   > 9 │ 0 < items.filter(x => x > 1).length;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 0 !== items.filter(x => x > 1).length;
+    11 │ 0 != items.filter(x => x > 1).length;
+  
+  i Using .filter() followed by a length check iterates the entire array unnecessarily. .some() stops at the first match.
+  
+  i Use .some() when you only need to know if any element matches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use .some() instead.
+  
+     7  7 │   items.filter(x => x > 1).length >= 1;
+     8  8 │   
+     9    │ - 0·<·items.filter(x·=>·x·>·1).length;
+        9 │ + items.some(x·=>·x·>·1);
+    10 10 │   0 !== items.filter(x => x > 1).length;
+    11 11 │   0 != items.filter(x => x > 1).length;
+  
+
+```
+
+```
+invalid.js:10:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer .some() over filter(...).length comparison.
+  
+     9 │ 0 < items.filter(x => x > 1).length;
+  > 10 │ 0 !== items.filter(x => x > 1).length;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 0 != items.filter(x => x > 1).length;
+    12 │ 1 <= items.filter(x => x > 1).length;
+  
+  i Using .filter() followed by a length check iterates the entire array unnecessarily. .some() stops at the first match.
+  
+  i Use .some() when you only need to know if any element matches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use .some() instead.
+  
+     8  8 │   
+     9  9 │   0 < items.filter(x => x > 1).length;
+    10    │ - 0·!==·items.filter(x·=>·x·>·1).length;
+       10 │ + items.some(x·=>·x·>·1);
+    11 11 │   0 != items.filter(x => x > 1).length;
+    12 12 │   1 <= items.filter(x => x > 1).length;
+  
+
+```
+
+```
+invalid.js:11:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer .some() over filter(...).length comparison.
+  
+     9 │ 0 < items.filter(x => x > 1).length;
+    10 │ 0 !== items.filter(x => x > 1).length;
+  > 11 │ 0 != items.filter(x => x > 1).length;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 1 <= items.filter(x => x > 1).length;
+    13 │ 
+  
+  i Using .filter() followed by a length check iterates the entire array unnecessarily. .some() stops at the first match.
+  
+  i Use .some() when you only need to know if any element matches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use .some() instead.
+  
+     9  9 │   0 < items.filter(x => x > 1).length;
+    10 10 │   0 !== items.filter(x => x > 1).length;
+    11    │ - 0·!=·items.filter(x·=>·x·>·1).length;
+       11 │ + items.some(x·=>·x·>·1);
+    12 12 │   1 <= items.filter(x => x > 1).length;
+    13 13 │   
+  
+
+```
+
+```
+invalid.js:12:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer .some() over filter(...).length comparison.
+  
+    10 │ 0 !== items.filter(x => x > 1).length;
+    11 │ 0 != items.filter(x => x > 1).length;
+  > 12 │ 1 <= items.filter(x => x > 1).length;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 
+    14 │ items.findIndex(x => x > 1) !== -1;
+  
+  i Using .filter() followed by a length check iterates the entire array unnecessarily. .some() stops at the first match.
+  
+  i Use .some() when you only need to know if any element matches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use .some() instead.
+  
+    10 10 │   0 !== items.filter(x => x > 1).length;
+    11 11 │   0 != items.filter(x => x > 1).length;
+    12    │ - 1·<=·items.filter(x·=>·x·>·1).length;
+       12 │ + items.some(x·=>·x·>·1);
+    13 13 │   
+    14 14 │   items.findIndex(x => x > 1) !== -1;
+  
+
+```
+
+```
+invalid.js:14:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer .some() over findIndex(...) !== -1.
+  
+    12 │ 1 <= items.filter(x => x > 1).length;
+    13 │ 
+  > 14 │ items.findIndex(x => x > 1) !== -1;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ items.findLastIndex(x => x > 1) !== -1;
+    16 │ 
+  
+  i Use .some() when you only need to know if any element matches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use .some() instead.
+  
+    12 12 │   1 <= items.filter(x => x > 1).length;
+    13 13 │   
+    14    │ - items.findIndex(x·=>·x·>·1)·!==·-1;
+       14 │ + items.some(x·=>·x·>·1);
+    15 15 │   items.findLastIndex(x => x > 1) !== -1;
+    16 16 │   
+  
+
+```
+
+```
+invalid.js:15:1 lint/nursery/useArraySome  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer .some() over findLastIndex(...) !== -1.
+  
+    14 │ items.findIndex(x => x > 1) !== -1;
+  > 15 │ items.findLastIndex(x => x > 1) !== -1;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 
+    17 │ if (items.find(x => x > 1)) {}
+  
+  i Use .some() when you only need to know if any element matches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use .some() instead.
+  
+    13 13 │   
+    14 14 │   items.findIndex(x => x > 1) !== -1;
+    15    │ - items.findLastIndex(x·=>·x·>·1)·!==·-1;
+       15 │ + items.some(x·=>·x·>·1);
+    16 16 │   
+    17 17 │   if (items.find(x => x > 1)) {}
+  
+
+```
+
+```
+invalid.js:17:5 lint/nursery/useArraySome ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer .some() over find-family used as boolean.
+  
+    15 │ items.findLastIndex(x => x > 1) !== -1;
+    16 │ 
+  > 17 │ if (items.find(x => x > 1)) {}
+       │     ^^^^^^^^^^^^^^^^^^^^^^
+    18 │ if (items.findLast(x => x > 1)) {}
+    19 │ 
+  
+  i Use .some() when you only need to know if any element matches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:5 lint/nursery/useArraySome ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer .some() over find-family used as boolean.
+  
+    17 │ if (items.find(x => x > 1)) {}
+  > 18 │ if (items.findLast(x => x > 1)) {}
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ 
+    20 │ cond ? (items.find(x => x > 1) ? "a" : "b") : "c";
+  
+  i Use .some() when you only need to know if any element matches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:9 lint/nursery/useArraySome ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer .some() over find-family used as boolean.
+  
+    18 │ if (items.findLast(x => x > 1)) {}
+    19 │ 
+  > 20 │ cond ? (items.find(x => x > 1) ? "a" : "b") : "c";
+       │         ^^^^^^^^^^^^^^^^^^^^^^
+    21 │ 
+    22 │ items.find(x => x > 1) !== undefined;
+  
+  i Use .some() when you only need to know if any element matches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:1 lint/nursery/useArraySome ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer .some() over find(...) existence comparison.
+  
+    20 │ cond ? (items.find(x => x > 1) ? "a" : "b") : "c";
+    21 │ 
+  > 22 │ items.find(x => x > 1) !== undefined;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ items.findLast(x => x > 1) !== undefined;
+    24 │ 
+  
+  i Use .some() when you only need to know if any element matches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:23:1 lint/nursery/useArraySome ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer .some() over findLast(...) existence comparison.
+  
+    22 │ items.find(x => x > 1) !== undefined;
+  > 23 │ items.findLast(x => x > 1) !== undefined;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ 
+    25 │ items.find(x => x > 1) != null;
+  
+  i Use .some() when you only need to know if any element matches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:25:1 lint/nursery/useArraySome ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer .some() over find(...) existence comparison.
+  
+    23 │ items.findLast(x => x > 1) !== undefined;
+    24 │ 
+  > 25 │ items.find(x => x > 1) != null;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ items.findLast(x => x > 1) != null;
+    27 │ 
+  
+  i Use .some() when you only need to know if any element matches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:26:1 lint/nursery/useArraySome ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer .some() over findLast(...) existence comparison.
+  
+    25 │ items.find(x => x > 1) != null;
+  > 26 │ items.findLast(x => x > 1) != null;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ 
+  
+  i Use .some() when you only need to know if any element matches.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

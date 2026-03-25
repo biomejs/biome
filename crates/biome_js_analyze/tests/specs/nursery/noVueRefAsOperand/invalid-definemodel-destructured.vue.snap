@@ -3,7 +3,10 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid-definemodel-destructured.vue
 ---
 # Input
-```ts
+```vue
+/* should generate diagnostics */
+
+<script setup>
 let [model, mod] = defineModel();
 console.log(model);
 function process() {
@@ -12,21 +15,22 @@ function process() {
 function update(value) {
   model = value;
 }
+</script>
 
 ```
 
 # Diagnostics
 ```
-invalid-definemodel-destructured.vue:4:7 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-definemodel-destructured.vue:7:7 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Ref value is accessed without `.value`.
   
-    2 │ console.log(model);
-    3 │ function process() {
-  > 4 │   if (model) console.log('foo')
+    5 │ console.log(model);
+    6 │ function process() {
+  > 7 │   if (model) console.log('foo')
       │       ^^^^^
-    5 │ }
-    6 │ function update(value) {
+    8 │ }
+    9 │ function update(value) {
   
   i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
   
@@ -38,16 +42,16 @@ invalid-definemodel-destructured.vue:4:7 lint/nursery/noVueRefAsOperand ━━�
 ```
 
 ```
-invalid-definemodel-destructured.vue:7:3 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-definemodel-destructured.vue:10:3 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Ref value is accessed without `.value`.
   
-    5 │ }
-    6 │ function update(value) {
-  > 7 │   model = value;
-      │   ^^^^^
-    8 │ }
-    9 │ 
+     8 │ }
+     9 │ function update(value) {
+  > 10 │   model = value;
+       │   ^^^^^
+    11 │ }
+    12 │ </script>
   
   i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
   

@@ -1,8 +1,8 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
+
 ## Input
 
 ```css
@@ -44,7 +44,9 @@ CssRoot {
                             value_token: IDENT@7..14 "font" [Newline("\n"), Whitespace("  ")] [],
                         },
                         colon_token: COLON@14..16 ":" [] [Whitespace(" ")],
-                        value: CssGenericComponentValueList [],
+                        value: ScssExpression {
+                            items: ScssExpressionItemList [],
+                        },
                         block: CssDeclarationOrRuleBlock {
                             l_curly_token: L_CURLY@16..17 "{" [] [],
                             items: CssDeclarationOrRuleList [
@@ -55,12 +57,14 @@ CssRoot {
                                                 value_token: IDENT@17..26 "size" [Newline("\n"), Whitespace("    ")] [],
                                             },
                                             colon_token: COLON@26..28 ":" [] [Whitespace(" ")],
-                                            value: CssGenericComponentValueList [
-                                                CssRegularDimension {
-                                                    value_token: CSS_NUMBER_LITERAL@28..30 "12" [] [],
-                                                    unit_token: IDENT@30..32 "px" [] [],
-                                                },
-                                            ],
+                                            value: ScssExpression {
+                                                items: ScssExpressionItemList [
+                                                    CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@28..30 "12" [] [],
+                                                        unit_token: IDENT@30..32 "px" [] [],
+                                                    },
+                                                ],
+                                            },
                                         },
                                         important: missing (optional),
                                     },
@@ -102,7 +106,8 @@ CssRoot {
             0: CSS_IDENTIFIER@7..14
               0: IDENT@7..14 "font" [Newline("\n"), Whitespace("  ")] []
             1: COLON@14..16 ":" [] [Whitespace(" ")]
-            2: CSS_GENERIC_COMPONENT_VALUE_LIST@16..16
+            2: SCSS_EXPRESSION@16..16
+              0: SCSS_EXPRESSION_ITEM_LIST@16..16
             3: CSS_DECLARATION_OR_RULE_BLOCK@16..37
               0: L_CURLY@16..17 "{" [] []
               1: CSS_DECLARATION_OR_RULE_LIST@17..33
@@ -112,10 +117,11 @@ CssRoot {
                       0: CSS_IDENTIFIER@17..26
                         0: IDENT@17..26 "size" [Newline("\n"), Whitespace("    ")] []
                       1: COLON@26..28 ":" [] [Whitespace(" ")]
-                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@28..32
-                        0: CSS_REGULAR_DIMENSION@28..32
-                          0: CSS_NUMBER_LITERAL@28..30 "12" [] []
-                          1: IDENT@30..32 "px" [] []
+                      2: SCSS_EXPRESSION@28..32
+                        0: SCSS_EXPRESSION_ITEM_LIST@28..32
+                          0: CSS_REGULAR_DIMENSION@28..32
+                            0: CSS_NUMBER_LITERAL@28..30 "12" [] []
+                            1: IDENT@30..32 "px" [] []
                     1: (empty)
                   1: SEMICOLON@32..33 ";" [] []
               2: R_CURLY@33..37 "}" [Newline("\n"), Whitespace("  ")] []

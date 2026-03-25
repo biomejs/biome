@@ -11,6 +11,10 @@ keywords.workspace   = true
 categories.workspace = true
 publish              = false
 
+[[bench]]
+harness = false
+name    = "grit_query"
+
 [dependencies]
 biome_analyze        = { workspace = true }
 biome_console        = { workspace = true }
@@ -39,8 +43,15 @@ serde_json           = { workspace = true, optional = true }
 
 [dev-dependencies]
 biome_test_utils = { path = "../biome_test_utils" }
+criterion        = { package = "codspeed-criterion-compat", version = "*" }
 insta            = { workspace = true }
 tests_macros     = { path = "../tests_macros" }
+
+[target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
+tikv-jemallocator = { workspace = true }
+
+[target.'cfg(target_os = "windows")'.dev-dependencies]
+mimalloc = { workspace = true }
 
 [features]
 schema = ["biome_js_parser/schema", "dep:schemars", "serde"]

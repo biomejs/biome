@@ -1,0 +1,87 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/scss/at-rule/supports-expression.scss
+---
+
+# Input
+
+```scss
+$base: 10;
+
+@import "theme.css" supports( #{$name}:$base + 1);
+@import "theme.css" supports( margin-#{$side}:$base + 1);
+@import "theme.css" supports(--theme-#{$slot}:red);
+
+.box {
+  @supports not ( #{$name}:$base + 1 ) {
+    width:$base + 1;
+  }
+
+  @supports ( #{$name}:$base + 1 ) and ( display:grid ) {
+    width:$base + 1;
+  }
+
+  @supports ( #{$name}:$base + 1 ) or ( margin-#{$side}:$base + 1 ) {
+    width:$base + 1;
+  }
+
+  @supports (( #{$name}:$base + 1 ) and (--theme-#{$slot}:red)) {
+    color:red;
+  }
+
+  @supports ( margin-#{$side}:$base + 1 ) {
+    width:$base + 1;
+  }
+
+  @supports ( --theme-#{$slot}:red ) {
+    color:red;
+  }
+
+  @supports selector( .foo-#{$name} ) {
+    color:red;
+  }
+}
+
+```
+
+
+# Formatted
+
+```scss
+$base: 10;
+
+@import "theme.css" supports(#{$name}: $base + 1);
+@import "theme.css" supports(margin-#{$side}: $base + 1);
+@import "theme.css" supports(--theme-#{$slot}: red);
+
+.box {
+	@supports not (#{$name}: $base + 1) {
+		width: $base + 1;
+	}
+
+	@supports (#{$name}: $base + 1) and (display: grid) {
+		width: $base + 1;
+	}
+
+	@supports (#{$name}: $base + 1) or (margin-#{$side}: $base + 1) {
+		width: $base + 1;
+	}
+
+	@supports ((#{$name}: $base + 1) and (--theme-#{$slot}: red)) {
+		color: red;
+	}
+
+	@supports (margin-#{$side}: $base + 1) {
+		width: $base + 1;
+	}
+
+	@supports (--theme-#{$slot}: red) {
+		color: red;
+	}
+
+	@supports selector(.foo-#{$name}) {
+		color: red;
+	}
+}
+
+```

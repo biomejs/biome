@@ -1,6 +1,6 @@
 use biome_formatter::Printed;
 use biome_html_formatter::{HtmlFormatOptions, format_node};
-use biome_html_parser::{HtmlParseOptions, parse_html};
+use biome_html_parser::{HtmlParserOptions, parse_html};
 use biome_html_syntax::{HtmlFileSource, HtmlRoot};
 use biome_rowan::AstNode;
 use biome_string_case::StrLikeExtension;
@@ -78,7 +78,7 @@ fn bench_formatter(criterion: &mut Criterion) {
             Ok(test_case) => {
                 let code = test_case.code();
                 let file_source = HtmlFileSource::try_from(test_case.path()).unwrap_or_default();
-                let parsed = parse_html(code, HtmlParseOptions::from(&file_source));
+                let parsed = parse_html(code, HtmlParserOptions::from(&file_source));
                 group.throughput(Throughput::Bytes(code.len() as u64));
                 group.bench_with_input(
                     BenchmarkId::from_parameter(test_case.filename()),
@@ -110,7 +110,7 @@ fn bench_formatter(criterion: &mut Criterion) {
             .unwrap_or_default()
             .to_ascii_lowercase_cow();
         let file_source = HtmlFileSource::try_from_extension(&ext).unwrap_or_default();
-        let parsed = parse_html(code, HtmlParseOptions::from(&file_source));
+        let parsed = parse_html(code, HtmlParserOptions::from(&file_source));
         group.throughput(Throughput::Bytes(code.len() as u64));
         let id = format!("{}/{}", group_name, name);
         group.bench_with_input(BenchmarkId::new(&id, "format"), code, |b, _| {

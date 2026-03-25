@@ -7,6 +7,7 @@ use biome_rowan::TextRange;
 
 use crate::MarkdownParser;
 use crate::lexer::MarkdownLexContext;
+use crate::parser::MarkdownParserCheckpoint;
 use crate::syntax::inline::{parse_inline_item_list_until, parse_inline_item_list_until_no_links};
 use crate::syntax::parse_error::{unclosed_image, unclosed_link};
 use crate::syntax::reference::normalize_reference_label;
@@ -137,18 +138,109 @@ impl LinkParseKind {
     }
 }
 
+// #region Refactored parse_link_or_image types
+
+/// Result of parsing bracketed link/image text (`[text]` or `![alt]`).
+enum BracketedLinkTextResult {
+    /// Bracketed text successfully parsed; `]` was consumed.
+    Parsed { has_nested_link: bool },
+    /// Parsing failed (e.g., `]` not found); coordinator should roll back.
+    Rollback,
+}
+
+/// Result of parsing a link/image tail (inline or reference).
+enum LinkTailResult {
+    Parsed,
+    Rollback,
+}
+
+/// Describes the rollback context for `abort_link_parse`.
+enum RollbackKind {
+    /// Failure occurred before any lex-context switch.
+    /// Only checkpoint rewind and marker abandonment needed.
+    BeforeLexSwitch,
+    /// Failure occurred after switching to LinkDefinition lex context.
+    /// After rewinding, must call `force_relex_regular` so the restored
+    /// current token is re-lexed in Regular context.
+    AfterLexSwitch,
+}
+
+// #endregion
+
+// #region Coordinator
+
 fn parse_link_or_image(p: &mut MarkdownParser, kind: LinkParseKind) -> ParsedSyntax {
     if !kind.starts_here(p) {
         return Absent;
     }
 
+    // Setup: establish parse-attempt state
     let checkpoint = p.checkpoint();
     let m = p.start();
     let opening_range = p.cur_range();
     let reference = kind.lookahead_reference(p);
-    // Clear any cached lookahead tokens before switching lexing context.
     p.reset_lookahead();
 
+    // Phase 1: parse bracketed text
+    let bracketed_result = parse_bracketed_link_text(p, kind);
+    let has_nested_link = match bracketed_result {
+        BracketedLinkTextResult::Parsed { has_nested_link } => has_nested_link,
+        BracketedLinkTextResult::Rollback => {
+            return abort_link_parse(p, checkpoint, m, RollbackKind::BeforeLexSwitch);
+        }
+    };
+
+    // Cross-phase policy: links cannot contain other links (CommonMark)
+    if matches!(kind, LinkParseKind::Link) && has_nested_link {
+        return abort_link_parse(p, checkpoint, m, RollbackKind::BeforeLexSwitch);
+    }
+
+    // Tail dispatch
+    //
+    // Inline link validation is checked here (not in the tail helper) because
+    // when validation fails, the original flow falls through to the reference/shortcut
+    // path rather than rolling back. E.g., `[foo](/url1)(not a link)` — the `(not a link)`
+    // fails inline validation, so `[foo]` is tried as a shortcut reference instead.
+    let inline_validation = if p.at(L_PAREN) {
+        inline_link_is_valid(p)
+    } else {
+        InlineLinkValidation::Invalid
+    };
+
+    if matches!(
+        inline_validation,
+        InlineLinkValidation::Valid | InlineLinkValidation::DepthExceeded
+    ) {
+        // Inline link/image: [text](url) or ![alt](url)
+        match parse_inline_link_tail(p, kind, opening_range) {
+            LinkTailResult::Parsed => Present(m.complete(p, kind.inline_kind())),
+            LinkTailResult::Rollback => {
+                abort_link_parse(p, checkpoint, m, RollbackKind::AfterLexSwitch)
+            }
+        }
+    } else {
+        // Reference or shortcut: [text][label], [text][], or [text]
+        match parse_reference_link_tail(p, reference) {
+            LinkTailResult::Parsed => Present(m.complete(p, kind.reference_kind())),
+            LinkTailResult::Rollback => {
+                abort_link_parse(p, checkpoint, m, RollbackKind::BeforeLexSwitch)
+            }
+        }
+    }
+}
+
+// #endregion
+
+// #region Phase helpers
+
+/// Parse opening bracket(s) through closing `]`, collecting inline content.
+///
+/// Reports factual observations (e.g., whether nested links were found)
+/// but does not enforce cross-phase policy like nested-link rejection.
+fn parse_bracketed_link_text(
+    p: &mut MarkdownParser,
+    kind: LinkParseKind,
+) -> BracketedLinkTextResult {
     kind.bump_opening(p);
 
     // Link text / alt text
@@ -161,92 +253,84 @@ fn parse_link_or_image(p: &mut MarkdownParser, kind: LinkParseKind) -> ParsedSyn
         parse_inline_item_list_until_no_links(p, R_BRACK)
     };
 
-    // ] - if missing, rewind and treat [ as literal text.
-    // Per CommonMark, if there's no valid ] to close the link (e.g., all ]
-    // characters are inside code spans or HTML), the [ is literal text.
-    // NOTE: We intentionally do NOT emit an "unclosed link" diagnostic here.
-    // CommonMark treats unmatched `[` as literal text, not an error.
+    // ] - if missing, signal rollback. Per CommonMark, if there's no valid ]
+    // to close the link (e.g., all ] characters are inside code spans or HTML),
+    // the [ is literal text. We intentionally do NOT emit a diagnostic here.
     if !p.eat(R_BRACK) {
-        m.abandon(p);
-        p.rewind(checkpoint);
-        return Absent;
+        return BracketedLinkTextResult::Rollback;
     }
 
-    // Per CommonMark, a link (not image) whose text contains another link must fail.
-    // The inner link wins and the outer `[` becomes literal text.
-    if matches!(kind, LinkParseKind::Link) && has_nested_link {
-        m.abandon(p);
-        p.rewind(checkpoint);
-        return Absent;
+    BracketedLinkTextResult::Parsed { has_nested_link }
+}
+
+/// Parse inline link tail: `(destination "title")`.
+///
+/// Owns its own `L_PAREN` guard. On guard failure, returns `Rollback`
+/// with no user-facing diagnostic (internal precondition, not user error).
+fn parse_inline_link_tail(
+    p: &mut MarkdownParser,
+    kind: LinkParseKind,
+    opening_range: TextRange,
+) -> LinkTailResult {
+    // Guarded, non-diagnostic consumption of `(` with lex-context switch.
+    // The coordinator has already validated the inline link structure via lookahead.
+    if !p.eat_with_context(L_PAREN, MarkdownLexContext::LinkDefinition) {
+        return LinkTailResult::Rollback;
     }
 
-    // Now decide based on what follows ]
-    let link_validation = if p.at(L_PAREN) {
-        inline_link_is_valid(p)
-    } else {
-        InlineLinkValidation::Invalid
-    };
+    let destination = p.start();
+    let destination_result = parse_inline_link_destination_tokens(p);
 
-    if matches!(
-        link_validation,
-        InlineLinkValidation::Valid | InlineLinkValidation::DepthExceeded
-    ) {
-        // Inline link/image: [text](url) or ![alt](url)
-        // Bump past ( and lex the following tokens in LinkDefinition context
-        // so whitespace separates destination and title.
-        p.expect_with_context(L_PAREN, MarkdownLexContext::LinkDefinition);
-
-        let destination = p.start();
-        let destination_result = parse_inline_link_destination_tokens(p);
-
-        // When depth exceeded, destination is truncated but link is still valid.
-        // Complete the destination and link immediately without looking for closing paren.
-        if destination_result == DestinationScanResult::DepthExceeded {
-            destination.complete(p, MD_INLINE_ITEM_LIST);
-            p.force_relex_regular();
-            return Present(m.complete(p, kind.inline_kind()));
-        }
-
-        let has_title = inline_title_starts_after_whitespace_tokens(p);
-        while is_title_separator_token(p) {
-            bump_link_def_separator(p);
-        }
-        if destination_result == DestinationScanResult::Invalid {
-            destination.abandon(p);
-            m.abandon(p);
-            p.rewind(checkpoint);
-            p.force_relex_regular();
-            return Absent;
-        }
+    // When depth exceeded, destination is truncated but link is still valid.
+    // Complete the destination and link immediately without looking for closing paren.
+    if destination_result == DestinationScanResult::DepthExceeded {
         destination.complete(p, MD_INLINE_ITEM_LIST);
+        p.force_relex_regular();
+        return LinkTailResult::Parsed;
+    }
 
-        if has_title {
-            let title_m = p.start();
-            let list_m = p.start();
-            parse_title_content(p, get_title_close_char(p));
-            list_m.complete(p, MD_INLINE_ITEM_LIST);
-            title_m.complete(p, MD_LINK_TITLE);
+    let has_title = inline_title_starts_after_whitespace_tokens(p);
+    while is_title_separator_token(p) {
+        bump_link_def_separator(p);
+    }
+    if destination_result == DestinationScanResult::Invalid {
+        destination.abandon(p);
+        return LinkTailResult::Rollback;
+    }
+    destination.complete(p, MD_INLINE_ITEM_LIST);
+
+    if has_title {
+        let title_m = p.start();
+        let list_m = p.start();
+        parse_title_content(p, get_title_close_char(p));
+        list_m.complete(p, MD_INLINE_ITEM_LIST);
+        title_m.complete(p, MD_LINK_TITLE);
+    }
+
+    // Skip trailing whitespace/newlines before closing paren without creating nodes
+    // (creating nodes would violate the MD_INLINE_LINK grammar which expects exactly 7 children)
+    while is_title_separator_token(p) {
+        skip_link_def_separator_tokens(p);
+    }
+
+    if !p.eat(R_PAREN) {
+        if p.at_inline_end() {
+            kind.report_unclosed_destination(p, opening_range);
         }
+        return LinkTailResult::Rollback;
+    }
 
-        // Skip trailing whitespace/newlines before closing paren without creating nodes
-        // (creating nodes would violate the MD_INLINE_LINK grammar which expects exactly 7 children)
-        while is_title_separator_token(p) {
-            skip_link_def_separator_tokens(p);
-        }
+    LinkTailResult::Parsed
+}
 
-        if !p.eat(R_PAREN) {
-            if p.at_inline_end() {
-                kind.report_unclosed_destination(p, opening_range);
-            }
-            m.abandon(p);
-            p.rewind(checkpoint);
-            p.force_relex_regular();
-            return Absent;
-        }
-
-        Present(m.complete(p, kind.inline_kind()))
-    } else if p.at(L_BRACK) {
-        // Reference link/image: [text][label] or [text][]
+/// Parse reference link tail: full reference (`[text][label]`), collapsed
+/// reference (`[text][]`), or shortcut reference (`[text]`).
+fn parse_reference_link_tail(
+    p: &mut MarkdownParser,
+    reference: Option<ReferenceLinkLookahead>,
+) -> LinkTailResult {
+    if p.at(L_BRACK) {
+        // Full or collapsed reference: [text][label] or [text][]
         let label = parse_reference_label(p);
         let reference = reference.filter(|reference| {
             if label.is_absent() {
@@ -259,15 +343,10 @@ fn parse_link_or_image(p: &mut MarkdownParser, kind: LinkParseKind) -> ParsedSyn
         if let Some(reference) = reference
             && !reference.is_defined(p)
         {
-            m.abandon(p);
-            p.rewind(checkpoint);
-            // Return Absent - the caller will treat `[` as textual.
-            // Don't consume the whole bracket sequence to avoid consuming
-            // past emphasis closers.
-            return Absent;
+            return LinkTailResult::Rollback;
         }
 
-        Present(m.complete(p, kind.reference_kind()))
+        LinkTailResult::Parsed
     } else {
         // Shortcut reference: [text] or ![alt]
         // No label part - the text/alt IS the label for resolution
@@ -275,16 +354,34 @@ fn parse_link_or_image(p: &mut MarkdownParser, kind: LinkParseKind) -> ParsedSyn
             && reference.is_shortcut
             && !reference.is_defined(p)
         {
-            m.abandon(p);
-            p.rewind(checkpoint);
-            // Return Absent - the caller will treat `[` as textual.
-            // Don't consume the whole bracket sequence to avoid consuming
-            // past emphasis closers.
-            return Absent;
+            return LinkTailResult::Rollback;
         }
-        Present(m.complete(p, kind.reference_kind()))
+
+        // No reference info available — still succeed; the reference may be
+        // defined later or handled downstream.
+        LinkTailResult::Parsed
     }
 }
+
+/// Centralized rollback for all link/image parse failure paths.
+///
+/// Ensures consistent state restoration: marker abandonment, checkpoint
+/// rewind, and conditional re-lex of the restored token in Regular context.
+fn abort_link_parse(
+    p: &mut MarkdownParser,
+    checkpoint: MarkdownParserCheckpoint,
+    marker: biome_parser::prelude::Marker,
+    rollback_kind: RollbackKind,
+) -> ParsedSyntax {
+    marker.abandon(p);
+    p.rewind(checkpoint);
+    if matches!(rollback_kind, RollbackKind::AfterLexSwitch) {
+        p.force_relex_regular();
+    }
+    Absent
+}
+
+// #endregion
 
 struct ReferenceLinkLookahead {
     label_raw: String,
@@ -496,6 +593,7 @@ fn bump_textual_link_def(p: &mut MarkdownParser) {
     p.bump_remap_with_context(MD_TEXTUAL_LITERAL, MarkdownLexContext::LinkDefinition);
     item.complete(p, MD_TEXTUAL);
 }
+
 fn is_whitespace_token(p: &MarkdownParser) -> bool {
     let text = p.cur_text();
     !text.is_empty() && text.chars().all(|c| c == ' ' || c == '\t')
@@ -531,9 +629,14 @@ fn inline_link_is_valid(p: &mut MarkdownParser) -> InlineLinkValidation {
         }
 
         p.bump(L_PAREN);
-        p.re_lex_link_definition();
 
-        let destination_result = scan_inline_link_destination_tokens(p);
+        // Skip leading whitespace before angle bracket check
+        // (parse_inline_link_destination_tokens only skips whitespace in the raw path).
+        while is_title_separator_token(p) {
+            bump_link_def_separator(p);
+        }
+
+        let destination_result = parse_inline_link_destination_tokens(p);
 
         // If depth exceeded, link is valid but truncated - no need to check for closing paren
         if destination_result == DestinationScanResult::DepthExceeded {
@@ -546,20 +649,17 @@ fn inline_link_is_valid(p: &mut MarkdownParser) -> InlineLinkValidation {
 
         let mut saw_separator = false;
         while is_title_separator_token(p) {
-            skip_link_def_separator_tokens(p);
+            bump_link_def_separator(p);
             saw_separator = true;
         }
         let has_title = saw_separator && get_title_close_char(p).is_some();
-        while is_title_separator_token(p) {
-            skip_link_def_separator_tokens(p);
-        }
 
         if has_title {
-            scan_title_content(p, get_title_close_char(p));
+            parse_title_content(p, get_title_close_char(p));
         }
 
         while is_title_separator_token(p) {
-            skip_link_def_separator_tokens(p);
+            bump_link_def_separator(p);
         }
 
         if p.at(R_PAREN) {
@@ -582,146 +682,12 @@ enum DestinationScanResult {
     DepthExceeded,
 }
 
-fn scan_inline_link_destination_tokens(p: &mut MarkdownParser) -> DestinationScanResult {
-    const MAX_PAREN_DEPTH: i32 = MAX_LINK_DESTINATION_PAREN_DEPTH;
-    // Skip leading whitespace to match parse_inline_link_destination_tokens behavior
-    while is_title_separator_token(p) {
-        skip_link_def_separator_tokens(p);
-    }
-    if p.at(L_ANGLE) {
-        p.bump_link_definition();
-        let mut pending_escape = false;
-        loop {
-            if p.at(EOF) || p.at(NEWLINE) {
-                return DestinationScanResult::Invalid;
-            }
-            if p.at(R_ANGLE) {
-                if pending_escape {
-                    if !validate_link_destination_text(
-                        p.cur_text(),
-                        LinkDestinationKind::Enclosed,
-                        &mut pending_escape,
-                    ) {
-                        return DestinationScanResult::Invalid;
-                    }
-                    p.bump_link_definition();
-                    continue;
-                }
-                p.bump_link_definition();
-                return DestinationScanResult::Valid;
-            }
-            if !validate_link_destination_text(
-                p.cur_text(),
-                LinkDestinationKind::Enclosed,
-                &mut pending_escape,
-            ) {
-                return DestinationScanResult::Invalid;
-            }
-            p.bump_link_definition();
-        }
-    }
-
-    let mut paren_depth: i32 = 0;
-    let mut pending_escape = false;
-    while !p.at(EOF) && !p.at(NEWLINE) {
-        if is_whitespace_token(p) {
-            break;
-        }
-        let text = p.cur_text();
-        if !validate_link_destination_text(text, LinkDestinationKind::Raw, &mut pending_escape) {
-            return DestinationScanResult::Invalid;
-        }
-        match try_update_paren_depth(text, paren_depth, MAX_PAREN_DEPTH) {
-            ParenDepthResult::Ok(next_depth) => {
-                paren_depth = next_depth;
-                p.bump_link_definition();
-            }
-            ParenDepthResult::DepthExceeded => {
-                // Paren depth exceeded - destination is truncated at this point.
-                // Per CommonMark/cmark, the link is still valid but closed here.
-                return DestinationScanResult::DepthExceeded;
-            }
-            ParenDepthResult::UnmatchedClose => {
-                // Unmatched closing paren - destination ends here normally.
-                // The `)` belongs to the enclosing construct (inline link closer).
-                break;
-            }
-        }
-    }
-    if p.at(EOF) {
-        return DestinationScanResult::Invalid;
-    }
-    if p.at(NEWLINE) {
-        return if p.at_blank_line() {
-            DestinationScanResult::Invalid
-        } else {
-            DestinationScanResult::Valid
-        };
-    }
-    DestinationScanResult::Valid
-}
-
-fn scan_title_content(p: &mut MarkdownParser, close_char: Option<char>) {
-    let Some(close_char) = close_char else {
-        return;
-    };
-
-    let text = p.cur_text();
-    let is_complete = text.len() >= 2 && ends_with_unescaped_close(text, close_char);
-
-    p.bump_link_definition();
-    if is_complete {
-        return;
-    }
-
-    loop {
-        // Stop on EOF or blank line (titles cannot span blank lines per CommonMark)
-        if p.at(EOF) || p.at_blank_line() {
-            return;
-        }
-
-        // Continue through single newlines (titles can span non-blank lines)
-        if p.at(NEWLINE) {
-            skip_link_def_separator_tokens(p);
-            continue;
-        }
-
-        let text = p.cur_text();
-        if ends_with_unescaped_close(text, close_char) {
-            p.bump_link_definition();
-            return;
-        }
-
-        p.bump_link_definition();
-    }
-}
-
-fn skip_link_def_separator_tokens(p: &mut MarkdownParser) {
-    if p.at(NEWLINE) {
-        p.bump(NEWLINE);
-    } else {
-        p.bump_link_definition();
-    }
-}
-
-fn is_title_separator_token(p: &MarkdownParser) -> bool {
-    is_whitespace_token(p) || (p.at(NEWLINE) && !p.at_blank_line())
-}
-
-fn bump_link_def_separator(p: &mut MarkdownParser) {
-    if p.at(NEWLINE) {
-        let item = p.start();
-        p.bump_remap(MD_TEXTUAL_LITERAL);
-        item.complete(p, MD_TEXTUAL);
-    } else {
-        bump_textual_link_def(p);
-    }
-}
-
 fn parse_inline_link_destination_tokens(p: &mut MarkdownParser) -> DestinationScanResult {
-    p.re_lex_link_definition();
     const MAX_PAREN_DEPTH: i32 = MAX_LINK_DESTINATION_PAREN_DEPTH;
 
+    p.re_lex_link_definition();
+
+    // Enclosed destination: <url>
     if p.at(L_ANGLE) {
         bump_textual_link_def(p);
         let mut pending_escape = false;
@@ -755,16 +721,19 @@ fn parse_inline_link_destination_tokens(p: &mut MarkdownParser) -> DestinationSc
         }
     }
 
+    // Raw destination (no angle brackets)
     let mut paren_depth: i32 = 0;
     let mut pending_escape = false;
+
+    // Skip leading whitespace in raw path.
     while is_title_separator_token(p) {
         bump_link_def_separator(p);
     }
+
     while !p.at(EOF) && !p.at(NEWLINE) {
         if is_whitespace_token(p) {
             break;
         }
-
         let text = p.cur_text();
         if !validate_link_destination_text(text, LinkDestinationKind::Raw, &mut pending_escape) {
             return DestinationScanResult::Invalid;
@@ -775,12 +744,9 @@ fn parse_inline_link_destination_tokens(p: &mut MarkdownParser) -> DestinationSc
                 bump_textual_link_def(p);
             }
             ParenDepthResult::DepthExceeded => {
-                // Paren depth exceeded - destination is truncated at this point.
                 return DestinationScanResult::DepthExceeded;
             }
             ParenDepthResult::UnmatchedClose => {
-                // Unmatched closing paren - destination ends here normally.
-                // The `)` belongs to the enclosing construct (inline link closer).
                 break;
             }
         }
@@ -796,6 +762,28 @@ fn parse_inline_link_destination_tokens(p: &mut MarkdownParser) -> DestinationSc
         };
     }
     DestinationScanResult::Valid
+}
+
+fn skip_link_def_separator_tokens(p: &mut MarkdownParser) {
+    if p.at(NEWLINE) {
+        p.bump(NEWLINE);
+    } else {
+        p.bump_link_definition();
+    }
+}
+
+fn is_title_separator_token(p: &MarkdownParser) -> bool {
+    is_whitespace_token(p) || (p.at(NEWLINE) && !p.at_blank_line())
+}
+
+fn bump_link_def_separator(p: &mut MarkdownParser) {
+    if p.at(NEWLINE) {
+        let item = p.start();
+        p.bump_remap(MD_TEXTUAL_LITERAL);
+        item.complete(p, MD_TEXTUAL);
+    } else {
+        bump_textual_link_def(p);
+    }
 }
 
 fn get_title_close_char(p: &MarkdownParser) -> Option<char> {

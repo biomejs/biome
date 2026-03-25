@@ -1,6 +1,6 @@
 use biome_css_syntax::{
-    AnyCssDeclarationName, AnyCssProperty, AnyCssSelector, CssDeclaration, CssPropertyAtRule,
-    CssRelativeSelector, CssSyntaxKind::*,
+    AnyCssDeclarationName, AnyCssGenericPropertyValueOrExpression, AnyCssProperty, AnyCssSelector,
+    CssDeclaration, CssPropertyAtRule, CssRelativeSelector, CssSyntaxKind::*,
 };
 use biome_rowan::{AstNode, SyntaxNodeOptionExt, TextRange};
 use std::collections::VecDeque;
@@ -121,7 +121,17 @@ impl SemanticEventExtractor {
                             let Ok(name) = generic.name() else {
                                 return;
                             };
-                            let value = CssPropertyInitialValue::from(generic.value());
+                            let value = match generic.value() {
+                                Ok(value) => match value {
+                                    AnyCssGenericPropertyValueOrExpression::CssGenericComponentValueList(
+                                        list,
+                                    ) => CssPropertyInitialValue::from(list),
+                                    AnyCssGenericPropertyValueOrExpression::ScssExpression(expr) => {
+                                        CssPropertyInitialValue::from(expr)
+                                    }
+                                },
+                                Err(_) => return,
+                            };
 
                             let property = match name {
                                 AnyCssDeclarationName::CssDashedIdentifier(name) => {
@@ -135,6 +145,9 @@ impl SemanticEventExtractor {
                                         return;
                                     };
                                     CssProperty::from(ident)
+                                }
+                                AnyCssDeclarationName::ScssInterpolatedIdentifier(_) => {
+                                    return;
                                 }
                             };
 
@@ -215,17 +228,29 @@ impl SemanticEventExtractor {
             {
                 match prop_name.to_trimmed_string().as_str() {
                     "initial-value" => {
-                        initial_value = Some(CssPropertyInitialValue::from(prop.value()));
+                        let Ok(value) = prop.value() else {
+                            continue;
+                        };
+                        initial_value = Some(match value {
+                            AnyCssGenericPropertyValueOrExpression::CssGenericComponentValueList(
+                                list,
+                            ) => CssPropertyInitialValue::from(list),
+                            AnyCssGenericPropertyValueOrExpression::ScssExpression(expr) => {
+                                CssPropertyInitialValue::from(expr)
+                            }
+                        });
                     }
                     "syntax" => {
-                        syntax = Some(prop.value().to_trimmed_string().clone());
+                        let Ok(value) = prop.value() else {
+                            continue;
+                        };
+                        syntax = Some(value.to_trimmed_string().clone());
                     }
                     "inherits" => {
-                        inherits = Some(
-                            prop.value()
-                                .to_trimmed_string()
-                                .eq_ignore_ascii_case("true"),
-                        );
+                        let Ok(value) = prop.value() else {
+                            continue;
+                        };
+                        inherits = Some(value.to_trimmed_string().eq_ignore_ascii_case("true"));
                     }
                     _ => {}
                 }
@@ -249,7 +274,12 @@ impl SemanticEventExtractor {
     pub fn leave(&mut self, node: &biome_css_syntax::CssSyntaxNode) {
         if matches!(
             node.kind(),
-            CSS_QUALIFIED_RULE | CSS_NESTED_QUALIFIED_RULE | CSS_MEDIA_AT_RULE
+            CSS_QUALIFIED_RULE
+                | CSS_NESTED_QUALIFIED_RULE
+                | CSS_CONTAINER_AT_RULE
+                | CSS_MEDIA_AT_RULE
+                | CSS_STARTING_STYLE_AT_RULE
+                | CSS_SUPPORTS_AT_RULE
         ) {
             self.stash.push_back(SemanticEvent::RuleEnd);
             if self.is_in_root_selector {

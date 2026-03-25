@@ -1,0 +1,41 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: bracket-same-line/void_elements.html
+---
+
+# Input
+
+```html
+<img
+  src="test.png"
+  alt="test" />
+<br />
+<input
+  type="text"
+  name="test" />
+<hr>
+
+```
+
+
+# Options
+
+```json
+{
+  "html": {
+    "formatter": {
+      "bracketSameLine": true
+    }
+  }
+}
+```
+
+# Formatted
+
+```html
+<img src="test.png" alt="test">
+<br>
+<input type="text" name="test">
+<hr>
+
+```

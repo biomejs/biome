@@ -3,9 +3,9 @@ source: crates/biome_html_analyze/tests/spec_tests.rs
 expression: valid.astro
 ---
 # Input
-```html
+```astro
 ---
-// Astro valid cases - should NOT trigger the rule
+// should not generate diagnostics
 ---
 
 <a href="/docs">Docs</a>

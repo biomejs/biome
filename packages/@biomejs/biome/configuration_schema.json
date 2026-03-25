@@ -390,6 +390,37 @@
 			"additionalProperties": false
 		},
 		"AttributePosition": { "type": "string", "enum": ["auto", "multiline"] },
+		"AvailabilityNamed": {
+			"description": "Named Baseline availability tiers.",
+			"oneOf": [
+				{
+					"description": "Warn on anything not Baseline widely available (default).",
+					"type": "string",
+					"const": "widely"
+				},
+				{
+					"description": "Warn on anything not at least Baseline newly available.",
+					"type": "string",
+					"const": "newly"
+				}
+			]
+		},
+		"AvailabilityTarget": {
+			"description": "The Baseline availability level to target.\n\n- `\"widely\"` – warn on anything not Baseline widely available.\n- `\"newly\"` – warn on anything not at least Baseline newly available.\n- A year (e.g. `2023`) – warn on anything whose `baseline_low_date` is after\n  that year (i.e. became newly available after that year).",
+			"anyOf": [
+				{
+					"description": "A named tier: `\"widely\"` or `\"newly\"`.",
+					"$ref": "#/$defs/AvailabilityNamed"
+				},
+				{
+					"description": "A year cutoff (e.g. `2023`).",
+					"type": "integer",
+					"format": "uint16",
+					"maximum": 65535,
+					"minimum": 0
+				}
+			]
+		},
 		"Bool": { "type": "boolean" },
 		"BracketSameLine": {
 			"description": "Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).",
@@ -3142,6 +3173,40 @@
 			},
 			"additionalProperties": false
 		},
+		"NoDrizzleDeleteWithoutWhereConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoDrizzleDeleteWithoutWhereOptions" }
+			]
+		},
+		"NoDrizzleDeleteWithoutWhereOptions": {
+			"type": "object",
+			"properties": {
+				"drizzleObjectName": {
+					"description": "List of variable names to consider as Drizzle ORM instances.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
+		"NoDrizzleUpdateWithoutWhereConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoDrizzleUpdateWithoutWhereOptions" }
+			]
+		},
+		"NoDrizzleUpdateWithoutWhereOptions": {
+			"type": "object",
+			"properties": {
+				"drizzleObjectName": {
+					"description": "List of variable names to consider as Drizzle ORM instances.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoDuplicateArgumentNamesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -3354,6 +3419,12 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoDuplicateSelectorsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoDuplicateSelectorsOptions" }
+			]
+		},
 		"NoDuplicateSelectorsKeyframeBlockConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -3361,6 +3432,10 @@
 			]
 		},
 		"NoDuplicateSelectorsKeyframeBlockOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoDuplicateSelectorsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -3438,6 +3513,16 @@
 			]
 		},
 		"NoEmptyInterfaceOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoEmptyObjectKeysConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoEmptyObjectKeysOptions" }
+			]
+		},
+		"NoEmptyObjectKeysOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -3855,6 +3940,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoImpliedEvalConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoImpliedEvalOptions" }
+			]
+		},
+		"NoImpliedEvalOptions": { "type": "object", "additionalProperties": false },
 		"NoImportAssignConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -3924,6 +4016,16 @@
 			]
 		},
 		"NoInferrableTypesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoInlineStylesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoInlineStylesOptions" }
+			]
+		},
+		"NoInlineStylesOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -4982,6 +5084,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoTopLevelLiteralsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoTopLevelLiteralsOptions" }
+			]
+		},
+		"NoTopLevelLiteralsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoTsIgnoreConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5275,6 +5387,40 @@
 		},
 		"NoUnsafeOptionalChainingOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"NoUntrustedLicensesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUntrustedLicensesOptions" }
+			]
+		},
+		"NoUntrustedLicensesOptions": {
+			"type": "object",
+			"properties": {
+				"allow": {
+					"description": "Additional license identifiers to trust, beyond valid SPDX identifiers.\n\nUseful for custom or proprietary licenses that are not part of the SPDX\nstandard but are acceptable in your project.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"deny": {
+					"description": "License identifiers to explicitly deny, even if they are valid SPDX identifiers.\n\nUse this to block specific licenses that your project or organization can't use (e.g.,\ncopyleft licenses in a proprietary project).",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"ignoreDeprecated": {
+					"description": "When `true`, deprecated SPDX license identifiers are accepted.\nWhen `false`, deprecated licenses are flagged as untrusted.\nDefaults to `false`.",
+					"type": ["boolean", "null"]
+				},
+				"requireFsfLibre": {
+					"description": "When `true`, only licenses recognized as free/libre by the Free Software\nFoundation (FSF) are trusted. Licenses in the `allow` list bypass this check.\nDefaults to `false`.",
+					"type": ["boolean", "null"]
+				},
+				"requireOsiApproved": {
+					"description": "When `true`, only licenses approved by the Open Source Initiative (OSI)\nare trusted. Licenses in the `allow` list bypass this check.\nDefaults to `false`.",
+					"type": ["boolean", "null"]
+				}
+			},
 			"additionalProperties": false
 		},
 		"NoUnusedExpressionsConfiguration": {
@@ -5787,6 +5933,20 @@
 						{ "type": "null" }
 					]
 				},
+				"noDrizzleDeleteWithoutWhere": {
+					"description": "Require .where() to be called when using .delete() with Drizzle ORM.\nSee https://biomejs.dev/linter/rules/no-drizzle-delete-without-where",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoDrizzleDeleteWithoutWhereConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noDrizzleUpdateWithoutWhere": {
+					"description": "Require .where() to be called when using .update() with Drizzle ORM.\nSee https://biomejs.dev/linter/rules/no-drizzle-update-without-where",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoDrizzleUpdateWithoutWhereConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateArgumentNames": {
 					"description": "Require all argument names for fields & directives to be unique.\nSee https://biomejs.dev/linter/rules/no-duplicate-argument-names",
 					"anyOf": [
@@ -5836,6 +5996,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDuplicateSelectors": {
+					"description": "Disallow duplicate selectors.\nSee https://biomejs.dev/linter/rules/no-duplicate-selectors",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoDuplicateSelectorsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateVariableNames": {
 					"description": "Require all variable definitions to be unique.\nSee https://biomejs.dev/linter/rules/no-duplicate-variable-names",
 					"anyOf": [
@@ -5847,6 +6014,13 @@
 					"description": "Disallow JSX prop spreading the same identifier multiple times.\nSee https://biomejs.dev/linter/rules/no-duplicated-spread-props",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoDuplicatedSpreadPropsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noEmptyObjectKeys": {
+					"description": "Disallow empty keys in JSON objects.\nSee https://biomejs.dev/linter/rules/no-empty-object-keys",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoEmptyObjectKeysConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5899,10 +6073,24 @@
 						{ "type": "null" }
 					]
 				},
+				"noImpliedEval": {
+					"description": "Disallow the use of eval()-like methods.\nSee https://biomejs.dev/linter/rules/no-implied-eval",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoImpliedEvalConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noIncrementDecrement": {
 					"description": "Disallows the usage of the unary operators ++ and --.\nSee https://biomejs.dev/linter/rules/no-increment-decrement",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoIncrementDecrementConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noInlineStyles": {
+					"description": "Disallow the use of inline styles.\nSee https://biomejs.dev/linter/rules/no-inline-styles",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoInlineStylesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6081,6 +6269,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noTopLevelLiterals": {
+					"description": "Require the JSON top-level value to be an array or object.\nSee https://biomejs.dev/linter/rules/no-top-level-literals",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoTopLevelLiteralsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUndeclaredEnvVars": {
 					"description": "Disallow the use of undeclared environment variables.\nSee https://biomejs.dev/linter/rules/no-undeclared-env-vars",
 					"anyOf": [
@@ -6099,6 +6294,13 @@
 					"description": "Disallow unnecessary type-based conditions that can be statically determined as redundant.\nSee https://biomejs.dev/linter/rules/no-unnecessary-conditions",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnnecessaryConditionsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUntrustedLicenses": {
+					"description": "Disallow dependencies with untrusted licenses.\nSee https://biomejs.dev/linter/rules/no-untrusted-licenses",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUntrustedLicensesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6141,6 +6343,13 @@
 					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
+				"useArraySome": {
+					"description": "Prefer Array.prototype.some() over verbose existence checks.\nSee https://biomejs.dev/linter/rules/use-array-some",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseArraySomeConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useArraySortCompare": {
 					"description": "Require Array#sort and Array#toSorted calls to always provide a compareFunction.\nSee https://biomejs.dev/linter/rules/use-array-sort-compare",
 					"anyOf": [
@@ -6152,6 +6361,13 @@
 					"description": "Enforce that await is only used on Promise values.\nSee https://biomejs.dev/linter/rules/use-await-thenable",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseAwaitThenableConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useBaseline": {
+					"description": "Disallow CSS properties, values, at-rules, functions, and selectors that are not part of the configured Baseline.\nSee https://biomejs.dev/linter/rules/use-baseline",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseBaselineConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6198,7 +6414,7 @@
 					]
 				},
 				"useExpect": {
-					"description": "Ensure that test functions contain at least one expect() assertion.\nSee https://biomejs.dev/linter/rules/use-expect",
+					"description": "Ensure that test functions contain at least one expect() or similar assertion.\nSee https://biomejs.dev/linter/rules/use-expect",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseExpectConfiguration" },
 						{ "type": "null" }
@@ -6222,6 +6438,13 @@
 					"description": "Enforce the use of globalThis over window, self, and global.\nSee https://biomejs.dev/linter/rules/use-global-this",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseGlobalThisConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useImportsFirst": {
+					"description": "Enforce that all imports appear at the top of the module.\nSee https://biomejs.dev/linter/rules/use-imports-first",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseImportsFirstConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6253,6 +6476,20 @@
 						{ "type": "null" }
 					]
 				},
+				"useNamedCaptureGroup": {
+					"description": "Enforce using named capture groups in regular expression.\nSee https://biomejs.dev/linter/rules/use-named-capture-group",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseNamedCaptureGroupConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useNullishCoalescing": {
+					"description": "Enforce using the nullish coalescing operator (??) instead of logical or (||).\nSee https://biomejs.dev/linter/rules/use-nullish-coalescing",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseNullishCoalescingConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"usePlaywrightValidDescribeCallback": {
 					"description": "Enforce valid describe() callback.\nSee https://biomejs.dev/linter/rules/use-playwright-valid-describe-callback",
 					"anyOf": [
@@ -6276,6 +6513,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useScopedStyles": {
+					"description": "Enforce that \\<style> blocks in Vue SFCs have the scoped attribute and that \\<style> blocks in Astro components do not have the is:global directive.\nSee https://biomejs.dev/linter/rules/use-scoped-styles",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseScopedStylesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useSortedClasses": {
 					"description": "Enforce the sorting of CSS utility classes.\nSee https://biomejs.dev/linter/rules/use-sorted-classes",
 					"anyOf": [
@@ -6287,6 +6531,13 @@
 					"description": "Enforce the use of the spread operator over .apply().\nSee https://biomejs.dev/linter/rules/use-spread",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseSpreadConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useUnicodeRegex": {
+					"description": "Enforce the use of the u or v flag for regular expressions.\nSee https://biomejs.dev/linter/rules/use-unicode-regex",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseUnicodeRegexConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6869,6 +7120,11 @@
 		"RuleDomain": {
 			"description": "Rule domains",
 			"oneOf": [
+				{
+					"description": "Drizzle ORM rules",
+					"type": "string",
+					"const": "drizzle"
+				},
 				{
 					"description": "React library rules",
 					"type": "string",
@@ -7473,6 +7729,24 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoDrizzleDeleteWithoutWhereOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoDrizzleDeleteWithoutWhereOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoDrizzleUpdateWithoutWhereOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoDrizzleUpdateWithoutWhereOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoDuplicateArgumentNamesOptions": {
 			"type": "object",
 			"properties": {
@@ -7655,6 +7929,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoDuplicateSelectorsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoDuplicateSelectorsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoDuplicateTestHooksOptions": {
 			"type": "object",
 			"properties": {
@@ -7724,6 +8007,15 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoEmptyInterfaceOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoEmptyObjectKeysOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoEmptyObjectKeysOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -8082,6 +8374,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoImpliedEvalOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoImpliedEvalOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoImportAssignOptions": {
 			"type": "object",
 			"properties": {
@@ -8134,6 +8435,16 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoInferrableTypesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoInlineStylesOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoInlineStylesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -9078,6 +9389,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoTopLevelLiteralsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoTopLevelLiteralsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoTsIgnoreOptions": {
 			"type": "object",
 			"properties": {
@@ -9283,6 +9603,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUnsafeOptionalChainingOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUntrustedLicensesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUntrustedLicensesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -9800,6 +10129,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseArraySomeOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseArraySomeOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseArraySortCompareOptions": {
 			"type": "object",
 			"properties": {
@@ -9853,6 +10192,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseAwaitThenableOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseBaselineOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseBaselineOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -9987,6 +10335,7 @@
 		"RuleWithUseConsistentMethodSignaturesOptions": {
 			"type": "object",
 			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseConsistentMethodSignaturesOptions" }
 			},
@@ -10397,6 +10746,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseImportsFirstOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseImportsFirstOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseIndexOfOptions": {
 			"type": "object",
 			"properties": {
@@ -10546,6 +10904,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseNamedCaptureGroupOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseNamedCaptureGroupOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseNamespaceKeywordOptions": {
 			"type": "object",
 			"properties": {
@@ -10582,6 +10949,16 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseNodejsImportProtocolOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseNullishCoalescingOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseNullishCoalescingOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -10737,6 +11114,16 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseRequiredScriptsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseScopedStylesOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseScopedStylesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -10922,6 +11309,16 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseTrimStartEndOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseUnicodeRegexOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseUnicodeRegexOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -12823,6 +13220,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseArraySomeConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseArraySomeOptions" }
+			]
+		},
+		"UseArraySomeOptions": { "type": "object", "additionalProperties": false },
 		"UseArraySortCompareConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -12875,6 +13279,56 @@
 		},
 		"UseAwaitThenableOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseBaselineConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseBaselineOptions" }
+			]
+		},
+		"UseBaselineOptions": {
+			"description": "Options for the `useBaseline` rule.",
+			"type": "object",
+			"properties": {
+				"allowAtRules": {
+					"description": "CSS at-rules to exclude from checking (without `@`, case-insensitive).",
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"allowFunctions": {
+					"description": "CSS value functions to exclude from checking (case-insensitive).",
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"allowMediaConditions": {
+					"description": "CSS media conditions to exclude from checking (case-insensitive).",
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"allowProperties": {
+					"description": "CSS properties to exclude from checking (case-insensitive).",
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"allowPropertyValues": {
+					"description": "CSS property values to exclude from checking (maps property name to allowed values, case-insensitive).",
+					"type": "object",
+					"additionalProperties": {
+						"type": "array",
+						"items": { "type": "string" }
+					}
+				},
+				"allowSelectors": {
+					"description": "CSS pseudo-selectors to exclude from checking (without `:` or `::`, case-insensitive).",
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"available": {
+					"description": "The availability level to target. Defaults to `\"widely\"`.",
+					"$ref": "#/$defs/AvailabilityTarget"
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseBiomeIgnoreFolderConfiguration": {
@@ -13587,6 +14041,16 @@
 			"type": "string",
 			"enum": ["auto", "inlineType", "separatedType"]
 		},
+		"UseImportsFirstConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseImportsFirstOptions" }
+			]
+		},
+		"UseImportsFirstOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseIndexOfConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -13765,6 +14229,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseNamedCaptureGroupConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseNamedCaptureGroupOptions" }
+			]
+		},
+		"UseNamedCaptureGroupOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseNamespaceKeywordConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -13819,6 +14293,23 @@
 		},
 		"UseNodejsImportProtocolOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseNullishCoalescingConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseNullishCoalescingOptions" }
+			]
+		},
+		"UseNullishCoalescingOptions": {
+			"type": "object",
+			"properties": {
+				"ignoreConditionalTests": {
+					"description": "Whether to ignore `||` expressions in conditional test positions\n(if/while/for/do-while/ternary conditions).\n\nWhen `true` (the default), the rule will not report `||` expressions\nthat appear in places where the falsy-checking behavior may be intentional.\n\nDefault: `true`",
+					"type": ["boolean", "null"],
+					"default": null
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseNumberNamespaceConfiguration": {
@@ -13990,6 +14481,16 @@
 					"items": { "type": "string" }
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseScopedStylesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseScopedStylesOptions" }
+			]
+		},
+		"UseScopedStylesOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseSelfClosingElementsConfiguration": {
@@ -14237,6 +14738,16 @@
 			]
 		},
 		"UseTrimStartEndOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseUnicodeRegexConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseUnicodeRegexOptions" }
+			]
+		},
+		"UseUnicodeRegexOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
