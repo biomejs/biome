@@ -914,22 +914,30 @@ fn parse_embedded_nodes(
                     nodes.push(parsed.node);
                 }
 
-                if let Some(attr) = HtmlAttribute::cast_ref(&element)
-                    && let Some(initializer) = attr.initializer()
-                    && let Some(candidate) = build_attribute_expression_candidate(&initializer)
-                    && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
-                        HostLanguage::Html,
-                        &candidate,
-                        &doc_file_source,
-                    )
-                    && let Some(parsed) = parse_matched_embed(
-                        &candidate,
-                        &embed_match,
-                        &mut ctx,
-                        Some(embedded_file_source),
-                    )
-                {
-                    nodes.push(parsed.node);
+                if let Some(attr) = HtmlAttribute::cast_ref(&element) {
+                    let is_class = attr
+                        .name()
+                        .ok()
+                        .and_then(|n| n.value_token().ok())
+                        .is_some_and(|t| t.text_trimmed() == "class");
+
+                    if let Some(initializer) = attr.initializer()
+                        && let Some(candidate) =
+                            build_attribute_expression_candidate(&initializer, is_class)
+                        && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
+                            HostLanguage::Html,
+                            &candidate,
+                            &doc_file_source,
+                        )
+                        && let Some(parsed) = parse_matched_embed(
+                            &candidate,
+                            &embed_match,
+                            &mut ctx,
+                            Some(embedded_file_source),
+                        )
+                    {
+                        nodes.push(parsed.node);
+                    }
                 }
             }
         }
@@ -1209,8 +1217,10 @@ fn parse_matched_embed(
                     match ctx.host_file_source.variant() {
                         HtmlVariant::Standard(_) => {}
                         HtmlVariant::Astro => {
-                            js_source = js_source
-                                .with_embedding_kind(EmbeddingKind::Astro { frontmatter: false, is_class_attribute: *is_class_attribute  });
+                            js_source = js_source.with_embedding_kind(EmbeddingKind::Astro {
+                                frontmatter: false,
+                                is_class_attribute: *is_class_attribute,
+                            });
                         }
                         HtmlVariant::Vue => {
                             js_source = js_source.with_embedding_kind(EmbeddingKind::Vue {

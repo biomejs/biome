@@ -24,8 +24,7 @@ use biome_module_graph::{HtmlEmbeddedContent, ModuleGraph};
 use biome_package::{Manifest, PackageJson, TsConfigJson, TurboJson};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{Direction, Language, SyntaxKind, SyntaxNode, SyntaxSlot};
-use biome_service::Workspace;
-use biome_service::WorkspaceError;
+use biome_service::{Workspace, WorkspaceError};
 use biome_service::configuration::{LoadedConfiguration, load_configuration};
 use biome_service::file_handlers::DocumentFileSource;
 use biome_service::projects::Projects;
@@ -36,6 +35,7 @@ use biome_service::test_utils::setup_workspace_and_open_project;
 use biome_service::workspace::{
     FileContent, OpenFileParams, PullDiagnosticsParams, ScanKind, ScanProjectParams,
     UpdateSettingsParams,
+    PullDiagnosticsParams, ScanKind, ScanProjectParams, UpdateSettingsParams,
 };
 use biome_string_case::StrLikeExtension;
 use camino::{Utf8Path, Utf8PathBuf};
@@ -1064,11 +1064,17 @@ pub fn analyze_with_workspace(
     fs.insert(virtual_file_path.clone(), input_code.as_bytes());
     let mut files_to_index = vec![virtual_file_path.clone()];
 
-    // Insert sidecar files if they exist on disk
-    files_to_index.extend(insert_sidecar_files(&fs, input_file, &project_root));
+    // Insert sidecar files if they exist on disk.
+    // Returns virtual paths of the inserted source files (CSS, JS, etc.)
+    // so we can index them for the module graph.
+    let sidecar_paths = insert_sidecar_files(&fs, input_file, &project_root);
+    files_to_index.extend(sidecar_paths);
 
-    // Create workspace and open project
-    let (workspace, project_key) = setup_workspace_and_open_project(fs, project_root.as_str());
+    // Create workspace — use WorkspaceServer directly so we can call
+    // index_files_for_test, which opens files with OpenFileReason::Index
+    // and populates the module graph (needed by project-domain rules).
+    let (workspace, project_key) =
+        setup_workspace_and_open_project(fs, project_root.as_str());
 
     // Build configuration: enable full HTML support + merge .options.json if present
     let config = build_test_configuration(input_file);
@@ -1103,20 +1109,18 @@ pub fn analyze_with_workspace(
         }),
     );
 
-    // Open file
-    workspace
-        .open_file(OpenFileParams {
-            project_key,
-            path: BiomePath::new(&virtual_file_path),
-            content: FileContent::FromClient {
-                content: input_code.clone(),
-                version: 0,
-            },
-            document_file_source: Some(document_file_source),
-            persist_node_cache: false,
-            inline_config: None,
-        })
-        .expect("failed to open file");
+    // Index all files through the internal indexing path so that:
+    // - Embedded CSS/JS blocks are parsed and stored
+    // - The module graph is populated with CSS classes and import edges
+    // This is required for project-domain rules like noUndeclaredClasses.
+    let mut all_virtual_files = sidecar_paths;
+    all_virtual_files.push(virtual_file_path.clone());
+    let files_with_sources = all_virtual_files.iter().map(|path| {
+        let biome_path = BiomePath::new(path.clone());
+        let doc_source = DocumentFileSource::from_well_known(path.as_path(), true);
+        (biome_path, doc_source)
+    });
+    workspace.index_files_for_test(project_key, files_with_sources);
 
     // Build rule selector
     let rule_selector = format!("{group}/{rule}")
@@ -1205,13 +1209,15 @@ fn build_test_configuration(input_file: &Utf8Path) -> Configuration {
 
 /// Inserts sidecar files (package.json, tsconfig.json, etc.) and peer source
 /// files into the `MemoryFileSystem` for workspace-based tests.
+///
+/// Returns the list of virtual paths that were inserted (excluding config sidecars
+/// like package.json/tsconfig.json, which don't need indexing).
 fn insert_sidecar_files(
     fs: &MemoryFileSystem,
     input_file: &Utf8Path,
     project_root: &Utf8Path,
 ) -> Vec<Utf8PathBuf> {
-    let mut inserted_files = Vec::new();
-
+    let mut inserted_paths = Vec::new();
     // Insert package.json sidecar
     let package_json_sidecar = input_file.with_extension("package.json");
     if let Ok(content) = std::fs::read_to_string(&package_json_sidecar) {
@@ -1267,6 +1273,7 @@ fn insert_sidecar_files(
                 | "mts"
                 | "cts"
                 | "tsx"
+                | "css"
                 | "vue"
                 | "svelte"
                 | "astro"
@@ -1274,11 +1281,7 @@ fn insert_sidecar_files(
         ) && let Ok(content) = std::fs::read_to_string(&path)
         {
             let target_name = path.file_name().unwrap();
-            let target_path = project_root.join(target_name);
-            fs.insert(target_path.clone(), content.as_bytes());
-            inserted_files.push(target_path);
+            fs.insert(project_root.join(target_name), content.as_bytes());
         }
     }
-
-    inserted_files
 }
