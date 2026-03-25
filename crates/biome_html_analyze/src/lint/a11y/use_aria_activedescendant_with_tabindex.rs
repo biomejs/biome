@@ -65,13 +65,8 @@ fn is_interactive_element(element_name: &str) -> bool {
 }
 
 /// Check if the element is an anchor with an href (which is natively focusable).
-fn is_anchor_with_href(element: &AnyHtmlElement) -> bool {
-    let name = element.name().ok();
-    let name_text = name.as_ref().and_then(|n| n.value_token().ok());
-    let Some(name_str) = name_text.as_ref().map(|t| t.text_trimmed()) else {
-        return false;
-    };
-    name_str == "a" && element.find_attribute_by_name("href").is_some()
+fn is_anchor_with_href(element: &AnyHtmlElement, element_name: &str) -> bool {
+    element_name == "a" && element.find_attribute_by_name("href").is_some()
 }
 
 impl Rule for UseAriaActivedescendantWithTabindex {
@@ -99,7 +94,7 @@ impl Rule for UseAriaActivedescendantWithTabindex {
         }
 
         // Skip anchor elements with href (natively focusable)
-        if is_anchor_with_href(element) {
+        if is_anchor_with_href(element, element_name) {
             return None;
         }
 
