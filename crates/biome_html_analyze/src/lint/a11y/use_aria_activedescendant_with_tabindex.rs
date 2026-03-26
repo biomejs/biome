@@ -76,9 +76,7 @@ impl Rule for UseAriaActivedescendantWithTabindex {
         let element = ctx.query();
 
         // Must have aria-activedescendant attribute
-        if element.find_attribute_by_name("aria-activedescendant").is_none() {
-            return None;
-        }
+        element.find_attribute_by_name("aria-activedescendant")?;
 
         // Get element name
         let element_name = element.name()?;
