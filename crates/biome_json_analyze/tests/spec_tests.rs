@@ -217,7 +217,7 @@ pub(crate) fn analyze_and_snap(
     let (_, errors) =
         biome_json_analyze::analyze(&root, filter, &options, services, &[], |event| {
             if let Some(mut diag) = event.diagnostic() {
-                for action in event.actions() {
+                for action in event.actions(biome_analyze::ActionFilter::ALL) {
                     if action.is_suppression() {
                         if action_type.is_suppression() {
                             check_code_action(input_file, input_code, &action, parser_options);
@@ -233,7 +233,7 @@ pub(crate) fn analyze_and_snap(
                 return ControlFlow::Continue(());
             }
 
-            for action in event.actions() {
+            for action in event.actions(biome_analyze::ActionFilter::ALL) {
                 if !action.is_suppression() {
                     check_code_action(input_file, input_code, &action, parser_options);
                     code_fixes.push(code_fix_to_string(input_code, action));

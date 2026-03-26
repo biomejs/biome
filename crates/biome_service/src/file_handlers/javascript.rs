@@ -23,6 +23,7 @@ use crate::{
     settings::{FormatSettings, LanguageListSettings, LanguageSettings, ServiceLanguage},
     workspace::{CodeAction, FixFileResult, GetSyntaxTreeResult, PullActionsResult, RenameResult},
 };
+use biome_analyze::ActionFilter;
 use biome_analyze::options::{PreferredIndentation, PreferredQuote};
 use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, QueryMatch,
@@ -1071,17 +1072,22 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         &plugins,
         services,
         |signal| {
-            actions.extend(signal.actions().into_code_action_iter().map(|item| {
-                debug!("Pulled action category {:?}", item.category);
-                CodeAction {
-                    category: item.category.clone(),
-                    rule_name: item
-                        .rule_name
-                        .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
-                    suggestion: item.suggestion,
-                    offset: action_offset,
-                }
-            }));
+            actions.extend(
+                signal
+                    .actions(ActionFilter::ALL)
+                    .into_code_action_iter()
+                    .map(|item| {
+                        debug!("Pulled action category {:?}", item.category);
+                        CodeAction {
+                            category: item.category.clone(),
+                            rule_name: item
+                                .rule_name
+                                .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
+                            suggestion: item.suggestion,
+                            offset: action_offset,
+                        }
+                    }),
+            );
 
             ControlFlow::<Never>::Continue(())
         },

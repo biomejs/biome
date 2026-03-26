@@ -530,16 +530,19 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     info!("GraphQL runs the analyzer");
 
     analyze(&tree, filter, &analyzer_options, |signal| {
-        actions.extend(signal.actions().into_code_action_iter().map(|item| {
-            CodeAction {
-                category: item.category.clone(),
-                rule_name: item
-                    .rule_name
-                    .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
-                suggestion: item.suggestion,
-                offset: action_offset,
-            }
-        }));
+        actions.extend(
+            signal
+                .actions(biome_analyze::ActionFilter::ALL)
+                .into_code_action_iter()
+                .map(|item| CodeAction {
+                    category: item.category.clone(),
+                    rule_name: item
+                        .rule_name
+                        .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
+                    suggestion: item.suggestion,
+                    offset: action_offset,
+                }),
+        );
 
         ControlFlow::<Never>::Continue(())
     });

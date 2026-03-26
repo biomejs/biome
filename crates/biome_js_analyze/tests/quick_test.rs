@@ -86,7 +86,7 @@ export function f(options: PostcssOptions) {
                 eprintln!("{text}");
             }
 
-            for action in signal.actions() {
+            for action in signal.actions(biome_analyze::ActionFilter::ALL) {
                 let new_code = action.mutation.commit();
                 eprintln!("new code!!!");
                 eprintln!("{new_code}");

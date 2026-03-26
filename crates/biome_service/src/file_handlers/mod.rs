@@ -17,9 +17,9 @@ use crate::workspace::{
     GetSyntaxTreeResult, PullActionsResult, PullDiagnosticsAndActionsResult, RenameResult,
 };
 use biome_analyze::{
-    AnalyzerAction, AnalyzerDiagnostic, AnalyzerOptions, AnalyzerPluginVec, AnalyzerSignal,
-    ControlFlow, GroupCategory, Never, Queryable, RegistryVisitor, Rule, RuleCategories,
-    RuleCategory, RuleError, RuleFilter, RuleGroup,
+    ActionFilter, AnalyzerAction, AnalyzerDiagnostic, AnalyzerOptions, AnalyzerPluginVec,
+    AnalyzerSignal, ControlFlow, GroupCategory, Never, Queryable, RegistryVisitor, Rule,
+    RuleCategories, RuleCategory, RuleError, RuleFilter, RuleGroup,
 };
 use biome_configuration::Rules;
 use biome_configuration::analyzer::{AnalyzerSelector, RuleDomainValue};
@@ -620,6 +620,8 @@ pub(crate) struct DiagnosticsAndActionsParams<'a> {
 pub(crate) struct LintResults {
     pub(crate) diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
     pub(crate) errors: usize,
+    pub(crate) warnings: usize,
+    pub(crate) infos: usize,
     pub(crate) skipped_diagnostics: u32,
 }
 
@@ -686,10 +688,8 @@ impl<'a> ProcessLint<'a> {
             }
 
             if self.pull_code_actions {
-                for action in signal.actions() {
-                    if !action.is_suppression() {
-                        diagnostic = diagnostic.add_code_suggestion(action.into());
-                    }
+                for action in signal.actions(ActionFilter::RULE_FIX_ONLY) {
+                    diagnostic = diagnostic.add_code_suggestion(action.into());
                 }
             }
             if let Some(offset) = &self.diagnostic_offset {
@@ -776,7 +776,11 @@ impl<'a> ProcessFixAll<'a> {
             self.errors += 1;
         }
 
-        for action in signal.actions() {
+        let action_filter = match self.fix_file_mode {
+            FixFileMode::ApplySuppressions => ActionFilter::SUPPRESSIONS_ONLY,
+            FixFileMode::SafeFixes | FixFileMode::SafeAndUnsafeFixes => ActionFilter::RULE_FIX_ONLY,
+        };
+        for action in signal.actions(action_filter) {
             match self.fix_file_mode {
                 FixFileMode::ApplySuppressions => {
                     if action.is_suppression() {
@@ -784,10 +788,6 @@ impl<'a> ProcessFixAll<'a> {
                     }
                 }
                 FixFileMode::SafeFixes => {
-                    // suppression actions should not be part of safe fixes
-                    if action.is_suppression() {
-                        continue;
-                    }
                     if action.applicability == Applicability::MaybeIncorrect {
                         self.skipped_suggested_fixes += 1;
                     }
@@ -797,9 +797,6 @@ impl<'a> ProcessFixAll<'a> {
                     }
                 }
                 FixFileMode::SafeAndUnsafeFixes => {
-                    if action.is_suppression() {
-                        continue;
-                    }
                     if matches!(
                         action.applicability,
                         Applicability::Always | Applicability::MaybeIncorrect
@@ -933,7 +930,7 @@ impl ProcessDiagnosticsAndActions {
 
         if let Some(mut diagnostic) = diagnostic {
             let actions: Vec<_> = signal
-                .actions()
+                .actions(ActionFilter::ALL)
                 .into_code_action_iter()
                 .map(|item| CodeAction {
                     category: item.category.clone(),

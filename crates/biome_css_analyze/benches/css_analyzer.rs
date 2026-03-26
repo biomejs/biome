@@ -74,7 +74,7 @@ fn bench_analyzer(criterion: &mut Criterion) {
                                 &[],
                                 |event| {
                                     black_box(event.diagnostic());
-                                    black_box(event.actions());
+                                    black_box(event.actions(biome_analyze::ActionFilter::ALL));
                                     ControlFlow::<Never>::Continue(())
                                 },
                             );

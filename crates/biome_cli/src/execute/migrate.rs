@@ -375,7 +375,10 @@ fn migrate_file(payload: MigrateFile) -> Result<MigrationFileResult, CliDiagnost
                     configuration_file_path.as_path(),
                     is_root,
                     |signal| {
-                        if let Some(action) = signal.actions().next() {
+                        if let Some(action) = signal
+                            .actions(biome_analyze::ActionFilter::RULE_FIX_ONLY)
+                            .next()
+                        {
                             return ControlFlow::Break(action);
                         }
                         ControlFlow::Continue(())

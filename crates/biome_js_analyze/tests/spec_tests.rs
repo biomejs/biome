@@ -221,7 +221,7 @@ pub(crate) fn analyze_and_snap(
     let (_, errors) =
         biome_js_analyze::analyze(&root, filter, &options, plugins, services, |event| {
             if let Some(mut diag) = event.diagnostic() {
-                for action in event.actions() {
+                for action in event.actions(biome_analyze::ActionFilter::ALL) {
                     if check_action_type.is_suppression() {
                         if action.is_suppression() {
                             check_code_action(
@@ -251,7 +251,7 @@ pub(crate) fn analyze_and_snap(
                 return ControlFlow::Continue(());
             }
 
-            for action in event.actions() {
+            for action in event.actions(biome_analyze::ActionFilter::ALL) {
                 if check_action_type.is_suppression() {
                     if action.category.matches("quickfix.suppressRule") {
                         check_code_action(
