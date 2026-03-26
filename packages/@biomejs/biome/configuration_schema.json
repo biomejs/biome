@@ -215,7 +215,7 @@
 					]
 				},
 				"useAriaActivedescendantWithTabindex": {
-					"description": "Enforce that tabIndex is assigned to non-interactive HTML elements with aria-activedescendant.\nSee https://biomejs.dev/linter/rules/use-aria-activedescendant-with-tabindex",
+					"description": "Enforce that tabindex is assigned to non-interactive HTML elements with aria-activedescendant.\nSee https://biomejs.dev/linter/rules/use-aria-activedescendant-with-tabindex",
 					"anyOf": [
 						{
 							"$ref": "#/$defs/UseAriaActivedescendantWithTabindexConfiguration"
@@ -10207,7 +10207,6 @@
 		"RuleWithUseAriaActivedescendantWithTabindexOptions": {
 			"type": "object",
 			"properties": {
-				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": {
 					"$ref": "#/$defs/UseAriaActivedescendantWithTabindexOptions"

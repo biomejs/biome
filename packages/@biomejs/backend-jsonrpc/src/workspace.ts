@@ -1340,7 +1340,7 @@ See https://biomejs.dev/linter/rules/use-anchor-content
 	 */
 	useAnchorContent?: UseAnchorContentConfiguration;
 	/**
-	* Enforce that tabIndex is assigned to non-interactive HTML elements with aria-activedescendant.
+	* Enforce that tabindex is assigned to non-interactive HTML elements with aria-activedescendant.
 See https://biomejs.dev/linter/rules/use-aria-activedescendant-with-tabindex 
 	 */
 	useAriaActivedescendantWithTabindex?: UseAriaActivedescendantWithTabindexConfiguration;
@@ -5196,7 +5196,6 @@ export interface RuleWithUseAnchorContentOptions {
 	options?: UseAnchorContentOptions;
 }
 export interface RuleWithUseAriaActivedescendantWithTabindexOptions {
-	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseAriaActivedescendantWithTabindexOptions;
 }
