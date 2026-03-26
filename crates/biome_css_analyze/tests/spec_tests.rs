@@ -1,5 +1,6 @@
 use biome_analyze::{
-    AnalysisFilter, AnalyzerAction, AnalyzerPluginSlice, ControlFlow, Never, RuleFilter,
+    ActionFilter, AnalysisFilter, AnalyzerAction, AnalyzerPluginSlice, ControlFlow, Never,
+    RuleFilter,
 };
 use biome_css_analyze::CssAnalyzerServices;
 use biome_css_parser::{CssParserOptions, parse_css};
@@ -129,7 +130,7 @@ pub(crate) fn analyze_and_snap(
     let (_, errors) =
         biome_css_analyze::analyze(&root, filter, &options, services, plugins, |event| {
             if let Some(mut diag) = event.diagnostic() {
-                for action in event.actions(biome_analyze::ActionFilter::ALL) {
+                for action in event.actions(ActionFilter::all()) {
                     if check_action_type.is_suppression() {
                         if action.is_suppression() {
                             check_code_action(
@@ -157,7 +158,7 @@ pub(crate) fn analyze_and_snap(
                 return ControlFlow::Continue(());
             }
 
-            for action in event.actions(biome_analyze::ActionFilter::ALL) {
+            for action in event.actions(ActionFilter::all()) {
                 if check_action_type.is_suppression() {
                     if action.category.matches("quickfix.suppressRule") {
                         check_code_action(

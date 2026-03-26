@@ -598,6 +598,10 @@ pub(crate) struct LintParams<'a> {
     pub(crate) diagnostic_offset: Option<TextSize>,
     pub(crate) document_services: &'a DocumentServices,
     pub(crate) snippet_services: Option<&'a DocumentServices>,
+    pub(crate) max_diagnostics: Option<u32>,
+    pub(crate) diagnostic_level: Severity,
+    /// When true, promote assist diagnostics (`assist/*`) to error severity.
+    pub(crate) enforce_assist: bool,
 }
 
 pub(crate) struct DiagnosticsAndActionsParams<'a> {
@@ -617,20 +621,28 @@ pub(crate) struct DiagnosticsAndActionsParams<'a> {
     pub(crate) document_services: &'a DocumentServices,
 }
 
+#[derive(Debug, Default)]
 pub(crate) struct LintResults {
     pub(crate) diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
     pub(crate) errors: usize,
     pub(crate) skipped_diagnostics: u32,
+    pub(crate) infos: usize,
+    pub(crate) warnings: usize,
 }
 
 pub(crate) struct ProcessLint<'a> {
     diagnostic_count: u32,
     errors: usize,
+    warnings: usize,
+    infos: usize,
     diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
     ignores_suppression_comment: bool,
     rules: Option<Cow<'a, Rules>>,
     pull_code_actions: bool,
     diagnostic_offset: Option<TextSize>,
+    max_diagnostics: Option<u32>,
+    diagnostic_level: Severity,
+    enforce_assist: bool,
 }
 
 impl<'a> ProcessLint<'a> {
@@ -638,6 +650,8 @@ impl<'a> ProcessLint<'a> {
         Self {
             diagnostic_count: params.parse.diagnostics().len() as u32,
             errors: Default::default(),
+            warnings: Default::default(),
+            infos: Default::default(),
             diagnostics: Default::default(),
             // Do not report unused suppression comment diagnostics if:
             // - it is a syntax-only analyzer pass, or
@@ -652,6 +666,9 @@ impl<'a> ProcessLint<'a> {
                 .as_linter_rules(params.path.as_path()),
             pull_code_actions: params.pull_code_actions,
             diagnostic_offset: params.diagnostic_offset,
+            max_diagnostics: params.max_diagnostics,
+            diagnostic_level: params.diagnostic_level,
+            enforce_assist: params.enforce_assist,
         }
     }
 
@@ -666,38 +683,59 @@ impl<'a> ProcessLint<'a> {
                 return ControlFlow::<Never>::Continue(());
             }
 
-            self.diagnostic_count += 1;
-
-            // We do now check if the severity of the diagnostics should be changed.
-            // The configuration allows to change the severity of the diagnostics emitted by rules.
-            let severity = diagnostic
-                .category()
-                .filter(|category| category.name().starts_with("lint/"))
-                .and_then(|category| {
+            // Resolve the final severity for this diagnostic:
+            // 1. Lint rules may have configured severity overrides.
+            // 2. Assist diagnostics are promoted to Error when enforce_assist is set.
+            let category = diagnostic.category();
+            let mut severity = category
+                .filter(|cat| cat.name().starts_with("lint/"))
+                .and_then(|cat| {
                     self.rules.as_ref().and_then(|rules| {
-                        rules.get_severity_from_category(category, diagnostic.severity())
+                        rules.get_severity_from_category(cat, diagnostic.severity())
                     })
                 })
                 .or_else(|| Some(diagnostic.severity()))
                 .unwrap_or(Severity::Warning);
 
-            if severity >= Severity::Error {
-                self.errors += 1;
+            if self.enforce_assist && category.is_some_and(|cat| cat.name().starts_with("assist/"))
+            {
+                severity = Severity::Error;
             }
 
-            if self.pull_code_actions {
-                for action in signal.actions(ActionFilter::RULE_FIX_ONLY) {
-                    diagnostic = diagnostic.add_code_suggestion(action.into());
+            if severity < self.diagnostic_level {
+                return ControlFlow::<Never>::Continue(());
+            }
+
+            match severity {
+                Severity::Error | Severity::Fatal => {
+                    self.errors += 1;
                 }
-            }
-            if let Some(offset) = &self.diagnostic_offset {
-                diagnostic.add_diagnostic_offset(*offset);
+                Severity::Information => {
+                    self.infos += 1;
+                }
+                Severity::Warning => self.warnings += 1,
+                Severity::Hint => {}
             }
 
-            let error = diagnostic.with_severity(severity);
+            if self
+                .max_diagnostics
+                .is_none_or(|max_diagnostics| self.diagnostic_count <= max_diagnostics)
+            {
+                if self.pull_code_actions {
+                    for action in signal.actions(ActionFilter::rule_fix()) {
+                        diagnostic = diagnostic.add_code_suggestion(action.into());
+                    }
+                }
+                if let Some(offset) = &self.diagnostic_offset {
+                    diagnostic.add_diagnostic_offset(*offset);
+                }
 
-            self.diagnostics
-                .push(biome_diagnostics::serde::Diagnostic::new(error));
+                let error = diagnostic.with_severity(severity);
+
+                self.diagnostics
+                    .push(biome_diagnostics::serde::Diagnostic::new(error));
+            }
+            self.diagnostic_count += 1;
         }
 
         ControlFlow::<Never>::Continue(())
@@ -709,10 +747,17 @@ impl<'a> ProcessLint<'a> {
         analyzer_diagnostics: Vec<biome_diagnostics::Error>,
     ) -> LintResults {
         let mut diagnostics = parse_diagnostics;
-        let errors = diagnostics
-            .iter()
-            .filter(|diag| diag.severity() <= Severity::Error)
-            .count();
+        let mut parse_errors = 0usize;
+        let mut parse_warnings = 0usize;
+        let mut parse_infos = 0usize;
+        for diag in &diagnostics {
+            match diag.severity() {
+                Severity::Error | Severity::Fatal => parse_errors += 1,
+                Severity::Warning => parse_warnings += 1,
+                Severity::Information => parse_infos += 1,
+                Severity::Hint => {}
+            }
+        }
 
         diagnostics.extend(self.diagnostics);
 
@@ -720,6 +765,7 @@ impl<'a> ProcessLint<'a> {
             analyzer_diagnostics
                 .into_iter()
                 .map(biome_diagnostics::serde::Diagnostic::new)
+                .filter(|diag| diag.severity() >= self.diagnostic_level)
                 .collect::<Vec<_>>(),
         );
         let skipped_diagnostics = self
@@ -727,9 +773,11 @@ impl<'a> ProcessLint<'a> {
             .saturating_sub(diagnostics.len() as u32);
 
         LintResults {
-            errors,
+            errors: parse_errors + self.errors,
             skipped_diagnostics,
             diagnostics,
+            infos: parse_infos + self.infos,
+            warnings: parse_warnings + self.warnings,
         }
     }
 }
@@ -776,8 +824,8 @@ impl<'a> ProcessFixAll<'a> {
         }
 
         let action_filter = match self.fix_file_mode {
-            FixFileMode::ApplySuppressions => ActionFilter::SUPPRESSIONS_ONLY,
-            FixFileMode::SafeFixes | FixFileMode::SafeAndUnsafeFixes => ActionFilter::RULE_FIX_ONLY,
+            FixFileMode::ApplySuppressions => ActionFilter::inline_suppression(),
+            FixFileMode::SafeFixes | FixFileMode::SafeAndUnsafeFixes => ActionFilter::rule_fix(),
         };
         for action in signal.actions(action_filter) {
             match self.fix_file_mode {
@@ -945,7 +993,7 @@ impl ProcessDiagnosticsAndActions {
 
         if let Some(mut diagnostic) = diagnostic {
             let actions: Vec<_> = signal
-                .actions(ActionFilter::ALL)
+                .actions(ActionFilter::all())
                 .into_code_action_iter()
                 .map(|item| CodeAction {
                     category: item.category.clone(),

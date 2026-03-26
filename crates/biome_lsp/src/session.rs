@@ -7,7 +7,7 @@ use biome_analyze::RuleCategoriesBuilder;
 use biome_configuration::{Configuration, ConfigurationPathHint};
 use biome_console::markup;
 use biome_deserialize::Merge;
-use biome_diagnostics::PrintDescription;
+use biome_diagnostics::{PrintDescription, Severity};
 use biome_fs::{BiomePath, normalize_path};
 use biome_line_index::WideEncoding;
 use biome_lsp_converters::{PositionEncoding, negotiated_encoding};
@@ -489,6 +489,9 @@ impl Session {
                 enabled_rules: Vec::new(),
                 pull_code_actions: false,
                 inline_config: self.inline_config(),
+                max_diagnostics: None,
+                diagnostic_level: Severity::Information,
+                enforce_assist: false,
             })?;
 
             let offset = if file_features.supports_full_html_support() {

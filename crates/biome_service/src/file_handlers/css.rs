@@ -16,7 +16,9 @@ use crate::workspace::{
     CodeAction, DocumentFileSource, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
 };
 use biome_analyze::options::PreferredQuote;
-use biome_analyze::{AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never};
+use biome_analyze::{
+    ActionFilter, AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
+};
 use biome_configuration::css::{
     CssAllowWrongLineCommentsEnabled, CssAssistConfiguration, CssAssistEnabled,
     CssFormatterConfiguration, CssFormatterEnabled, CssLinterConfiguration, CssLinterEnabled,
@@ -537,6 +539,8 @@ fn lint(params: LintParams) -> LintResults {
             diagnostics: vec![],
             errors: 0,
             skipped_diagnostics: 0,
+            infos: 0,
+            warnings: 0,
         };
     };
 
@@ -654,7 +658,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             if compute_actions {
                 actions.extend(
                     signal
-                        .actions(biome_analyze::ActionFilter::ALL)
+                        .actions(ActionFilter::all())
                         .into_code_action_iter()
                         .map(|item| CodeAction {
                             category: item.category.clone(),

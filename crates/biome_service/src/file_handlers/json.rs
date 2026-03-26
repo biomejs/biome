@@ -15,7 +15,9 @@ use crate::settings::{
 use crate::workspace::{CodeAction, FixFileResult, GetSyntaxTreeResult, PullActionsResult};
 use crate::{WorkspaceError, extension_error};
 use biome_analyze::options::PreferredQuote;
-use biome_analyze::{AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never};
+use biome_analyze::{
+    ActionFilter, AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
+};
 use biome_configuration::Configuration;
 use biome_configuration::json::{
     JsonAllowCommentsEnabled, JsonAllowTrailingCommasEnabled, JsonAssistConfiguration,
@@ -509,11 +511,7 @@ fn lint(params: LintParams) -> LintResults {
         .to_json_file_source()
         .or(JsonFileSource::try_from(params.path.as_path()).ok())
     else {
-        return LintResults {
-            errors: 0,
-            diagnostics: vec![],
-            skipped_diagnostics: 0,
-        };
+        return LintResults::default();
     };
     let root: JsonRoot = params.parse.tree();
 
@@ -644,7 +642,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             if compute_actions {
                 actions.extend(
                     signal
-                        .actions(biome_analyze::ActionFilter::ALL)
+                        .actions(ActionFilter::all())
                         .into_code_action_iter()
                         .map(|item| CodeAction {
                             category: item.category.clone(),

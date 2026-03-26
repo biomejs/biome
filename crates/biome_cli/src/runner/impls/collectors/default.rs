@@ -220,7 +220,13 @@ impl Collector for DefaultCollector {
                     content,
                     diagnostics,
                     skipped_diagnostics,
+                    errors,
+                    warnings,
+                    infos,
                 } => {
+                    self.errors.fetch_add(errors as u32, Ordering::Relaxed);
+                    self.warnings.fetch_add(warnings as u32, Ordering::Relaxed);
+                    self.infos.fetch_add(infos as u32, Ordering::Relaxed);
                     // we transform the file string into a path object so we can correctly strip
                     // the working directory without having leading slash in the file name
                     let file_path = self.to_relative_file_path(&file_path);
@@ -230,15 +236,6 @@ impl Collector for DefaultCollector {
                         let severity = diag.severity();
                         if self.should_skip_diagnostic(severity, diag.tags()) {
                             continue;
-                        }
-                        if severity == Severity::Error {
-                            self.errors.fetch_add(1, Ordering::Relaxed);
-                        }
-                        if severity == Severity::Warning {
-                            self.warnings.fetch_add(1, Ordering::Relaxed);
-                        }
-                        if severity == Severity::Information {
-                            self.infos.fetch_add(1, Ordering::Relaxed);
                         }
 
                         let should_collect = self.should_collect();

@@ -954,6 +954,9 @@ pub fn analyze_with_workspace(
             enabled_rules: vec![],
             pull_code_actions: true,
             inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: biome_diagnostics::Severity::Hint,
+            enforce_assist: false,
         })
         .expect("failed to pull diagnostics");
 

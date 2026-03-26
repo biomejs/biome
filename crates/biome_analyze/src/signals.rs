@@ -12,54 +12,62 @@ use crate::{
 use biome_console::{MarkupBuf, markup};
 use biome_diagnostics::{Applicability, CodeSuggestion, Error, advice::CodeSuggestionAdvice};
 use biome_rowan::{BatchMutation, Language};
+use enumflags2::{BitFlag, BitFlags, bitflags};
 use std::iter::FusedIterator;
 use std::marker::PhantomData;
 use std::vec::IntoIter;
 
-/// Controls which action categories [`AnalyzerSignal::actions`] computes.
-///
-/// Each action category (rule fix, inline suppression, top-level suppression)
-/// may create a [`BatchMutation`] that clones the syntax tree root. On large
-/// files with many diagnostics, skipping unneeded categories avoids expensive
-/// allocations.
-#[derive(Debug, Clone, Copy)]
-pub struct ActionFilter {
-    /// Include the rule's own fix action (quickfix/refactor).
-    pub rule_fix: bool,
-    /// Include inline suppression comments (`biome-ignore`).
-    pub inline_suppression: bool,
-    /// Include file-level suppression comments (`biome-ignore-all`).
-    pub top_level_suppression: bool,
+/// Select which action categories should be computed by the analyzer.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub struct ActionFilter(pub BitFlags<ActionKind>);
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[bitflags]
+#[repr(u8)]
+pub enum ActionKind {
+    RuleFix = 1 << 0,
+    InlineSuppression = 1 << 1,
+    ToplevelSuppression = 1 << 2,
 }
 
 impl ActionFilter {
-    /// Include all action types.
-    pub const ALL: Self = Self {
-        rule_fix: true,
-        inline_suppression: true,
-        top_level_suppression: true,
-    };
+    pub fn all() -> Self {
+        let all: BitFlags<ActionKind> = ActionKind::all();
+        Self(all)
+    }
 
-    /// Include only the rule's own fix action (no suppressions).
-    pub const RULE_FIX_ONLY: Self = Self {
-        rule_fix: true,
-        inline_suppression: false,
-        top_level_suppression: false,
-    };
+    pub fn rule_fix() -> Self {
+        let mut filter = ActionKind::empty();
+        filter.insert(ActionKind::RuleFix);
+        Self(filter)
+    }
 
-    /// Include only suppression actions.
-    pub const SUPPRESSIONS_ONLY: Self = Self {
-        rule_fix: false,
-        inline_suppression: true,
-        top_level_suppression: true,
-    };
+    pub fn inline_suppression() -> Self {
+        let mut filter = ActionKind::empty();
+        filter.insert(ActionKind::InlineSuppression);
+        Self(filter)
+    }
 
-    /// No actions at all.
-    pub const NONE: Self = Self {
-        rule_fix: false,
-        inline_suppression: false,
-        top_level_suppression: false,
-    };
+    pub fn toplevel_suppression() -> Self {
+        let mut filter = ActionKind::empty();
+        filter.insert(ActionKind::ToplevelSuppression);
+        Self(filter)
+    }
+
+    pub fn has_actions(&self) -> bool {
+        !self.0.is_empty()
+    }
+
+    pub fn is_rule_fix(&self) -> bool {
+        self.0.contains(ActionKind::RuleFix)
+    }
+
+    pub fn is_inline_suppression(&self) -> bool {
+        self.0.contains(ActionKind::InlineSuppression)
+    }
+    pub fn is_toplevel_suppression(&self) -> bool {
+        self.0.contains(ActionKind::ToplevelSuppression)
+    }
 }
 
 /// Lightweight description of an available action, without the expensive
@@ -143,7 +151,7 @@ where
     }
 
     fn actions(&self, filter: ActionFilter) -> AnalyzerActionIter<L> {
-        if filter.rule_fix
+        if filter.is_rule_fix()
             && let Some(action) = (self.action)()
         {
             return AnalyzerActionIter::new([action]);
@@ -499,7 +507,7 @@ where
     fn actions(&self, filter: ActionFilter) -> AnalyzerActionIter<RuleLanguage<R>> {
         let globals = self.options.globals();
 
-        let configured_applicability = if filter.rule_fix {
+        let configured_applicability = if filter.is_rule_fix() {
             if let Some(fix_kind) = self.options.rule_fix_kind::<R>() {
                 match fix_kind {
                     FixKind::None => None,
@@ -530,7 +538,7 @@ where
         .ok();
         let mut actions = Vec::new();
         if let Some(ctx) = ctx {
-            if filter.rule_fix
+            if filter.is_rule_fix()
                 && let Some(action) = R::action(&ctx, &self.state)
             {
                 actions.push(AnalyzerAction {
@@ -542,7 +550,7 @@ where
                 });
             }
 
-            if filter.inline_suppression
+            if filter.is_inline_suppression()
                 && let Some(text_range) = R::text_range(&ctx, &self.state)
                 && let Some(suppression_action) = R::inline_suppression(
                     &ctx,
@@ -561,7 +569,7 @@ where
                 actions.push(action);
             }
 
-            if filter.top_level_suppression
+            if filter.is_toplevel_suppression()
                 && let Some(suppression_action) =
                     R::top_level_suppression(&ctx, self.suppression_action)
             {

@@ -21,7 +21,9 @@ use crate::{
     settings::{ServiceLanguage, Settings},
     workspace::GetSyntaxTreeResult,
 };
-use biome_analyze::{AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never};
+use biome_analyze::{
+    ActionFilter, AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
+};
 use biome_configuration::html::{
     HtmlAssistConfiguration, HtmlAssistEnabled, HtmlFormatterConfiguration, HtmlFormatterEnabled,
     HtmlLinterConfiguration, HtmlLinterEnabled, HtmlParseInterpolation, HtmlParserConfiguration,
@@ -1541,7 +1543,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         if compute_actions {
             actions.extend(
                 signal
-                    .actions(biome_analyze::ActionFilter::ALL)
+                    .actions(ActionFilter::all())
                     .into_code_action_iter()
                     .map(|item| CodeAction {
                         category: item.category.clone(),

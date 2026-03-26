@@ -14,7 +14,9 @@ use crate::settings::{
     Settings, SettingsWithEditor, check_feature_activity, check_override_feature_activity,
 };
 use crate::workspace::{CodeAction, FixFileResult, GetSyntaxTreeResult, PullActionsResult};
-use biome_analyze::{AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never};
+use biome_analyze::{
+    ActionFilter, AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
+};
 use biome_configuration::graphql::{
     GraphqlAssistConfiguration, GraphqlAssistEnabled, GraphqlFormatterConfiguration,
     GraphqlFormatterEnabled, GraphqlLinterConfiguration, GraphqlLinterEnabled,
@@ -534,7 +536,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         if compute_actions {
             actions.extend(
                 signal
-                    .actions(biome_analyze::ActionFilter::ALL)
+                    .actions(ActionFilter::all())
                     .into_code_action_iter()
                     .map(|item| CodeAction {
                         category: item.category.clone(),

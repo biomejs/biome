@@ -12,7 +12,6 @@ use biome_fs::BiomePath;
 use biome_line_index::LineIndex;
 use biome_lsp_converters::from_proto;
 use biome_rowan::{TextRange, TextSize};
-use biome_service::WorkspaceError;
 use biome_service::file_handlers::astro::AstroFileHandler;
 use biome_service::file_handlers::svelte::SvelteFileHandler;
 use biome_service::file_handlers::vue::VueFileHandler;
@@ -21,6 +20,8 @@ use biome_service::workspace::{
     GetFileContentParams, IgnoreKind, PathIsIgnoredParams, PullActionsParams,
     SupportsFeatureParams,
 };
+use biome_service::{WorkspaceError, extension_error};
+use serde_json::Value;
 use std::borrow::Cow;
 use std::collections::HashMap;
 use std::ops::Sub;
@@ -205,12 +206,11 @@ pub(crate) fn code_actions(
                 group: String::new(),
                 rule: String::new(),
                 kind: CodeActionResolveKind::FixAll,
-                range_start: cursor_range.start().into(),
-                range_end: cursor_range.end().into(),
+                range: cursor_range,
                 project_key: doc.project_key,
             };
             Some(CodeActionOrCommand::CodeAction(lsp::CodeAction {
-                title: String::from("Apply all safe fixes"),
+                title: String::from("Apply all safe fixes in the document."),
                 kind: Some(fix_all_kind()),
                 diagnostics: None,
                 edit: None,
@@ -302,8 +302,7 @@ pub(crate) fn code_actions(
                     group: group.to_string(),
                     rule: rule.to_string(),
                     kind,
-                    range_start: cursor_range.start().into(),
-                    range_end: cursor_range.end().into(),
+                    range: cursor_range,
                     project_key: doc.project_key,
                 })
             } else {
@@ -317,7 +316,7 @@ pub(crate) fn code_actions(
                 &diagnostics,
                 action,
             )
-            .ok()?;
+            .ok()??;
 
             if let Some(data) = resolve_data {
                 lsp_action.data = serde_json::to_value(data).ok();
@@ -371,9 +370,24 @@ pub(crate) struct CodeActionResolveData {
     pub group: String,
     pub rule: String,
     pub kind: CodeActionResolveKind,
-    pub range_start: u32,
-    pub range_end: u32,
+    pub range: TextRange,
     pub project_key: biome_service::projects::ProjectKey,
+}
+
+fn resolve_code_action_data(data: Option<Value>) -> Result<(CodeActionResolveData, Uri)> {
+    let data = data
+        .as_ref()
+        .context("Missing code action data. This is usually caused by the client not supporting codeAction/resolve.")?;
+
+    let resolve_data: CodeActionResolveData = serde_json::from_value(data.clone())
+        .context("Failed to deserialize code action resolve data. This is an internal error, please report it.")?;
+
+    let url: Uri = resolve_data
+        .url
+        .parse()
+        .map_err(|e| anyhow::anyhow!("Failed to parse URI {}: {e}", resolve_data.url))?;
+
+    Ok((resolve_data, url))
 }
 
 /// Resolve a code action by computing the actual text edit.
@@ -385,22 +399,12 @@ pub(crate) fn code_action_resolve(
     session: &Session,
     params: lsp::CodeAction,
 ) -> Result<lsp::CodeAction, LspError> {
-    let data = params
-        .data
-        .as_ref()
-        .ok_or_else(|| LspError::from(WorkspaceError::not_found("")))?;
+    let (resolve_data, url) = resolve_code_action_data(params.data.clone())?;
 
-    let resolve_data: CodeActionResolveData = serde_json::from_value(data.clone())
-        .map_err(|_| LspError::from(WorkspaceError::not_found("")))?;
-
-    let url: Uri = resolve_data
-        .url
-        .parse()
-        .map_err(|_| LspError::from(WorkspaceError::not_found("")))?;
     let path = session.file_path(&url)?;
-    let doc = session
-        .document(&url)
-        .ok_or_else(|| LspError::from(WorkspaceError::not_found("")))?;
+    let Some(doc) = session.document(&url) else {
+        return Err(extension_error(&path).into());
+    };
     let position_encoding = session.position_encoding();
 
     // Handle fix_all resolve
@@ -421,11 +425,6 @@ pub(crate) fn code_action_resolve(
         return Ok(resolved);
     }
 
-    let range = TextRange::new(
-        TextSize::from(resolve_data.range_start),
-        TextSize::from(resolve_data.range_end),
-    );
-
     let rule_selector = AnalyzerSelector::from(RuleSelector::Rule(
         // SAFETY: these strings are serialized from `&'static str` rule metadata
         // and are valid for the lifetime of the process. We leak them to get 'static.
@@ -436,7 +435,7 @@ pub(crate) fn code_action_resolve(
     let result = session.workspace.pull_actions(PullActionsParams {
         project_key: resolve_data.project_key,
         path: path.clone(),
-        range: Some(range),
+        range: Some(resolve_data.range),
         suppression_reason: None,
         only: vec![rule_selector],
         skip: vec![],

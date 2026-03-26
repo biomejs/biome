@@ -100,7 +100,7 @@ pub(crate) fn code_fix_to_lsp(
     position_encoding: PositionEncoding,
     diagnostics: &[lsp::Diagnostic],
     action: CodeAction,
-) -> Result<lsp::CodeAction> {
+) -> Result<Option<lsp::CodeAction>> {
     // Mark diagnostics emitted by the same rule as resolved by this action
     let diagnostics: Vec<_> = action
         .rule_name
@@ -149,7 +149,7 @@ pub(crate) fn code_fix_to_lsp(
             || matches!(suggestion.applicability, Applicability::Always)
                 && !action.category.matches("quickfix.suppressRule");
 
-        Ok(lsp::CodeAction {
+        Ok(Some(lsp::CodeAction {
             title: print_markup(&suggestion.msg),
             kind: Some(lsp::CodeActionKind::from(kind)),
             diagnostics: if !diagnostics.is_empty() {
@@ -162,7 +162,7 @@ pub(crate) fn code_fix_to_lsp(
             is_preferred: is_preferred.then_some(true),
             disabled: None,
             data: None,
-        })
+        }))
     } else {
         // Unresolved action — no edit computed yet (for codeAction/resolve).
         // Build a title using the same patterns as rule.rs suppression messages.
@@ -194,9 +194,12 @@ pub(crate) fn code_fix_to_lsp(
             // For rule fixes, we can't get the exact action message without
             // running R::action(). Use the applicability to distinguish safe/unsafe.
             let fix_label = match action.applicability {
-                Some(Applicability::Always) => "Apply safe fix",
-                Some(Applicability::MaybeIncorrect) => "Apply unsafe fix",
-                _ => "Apply fix",
+                Some(applicability) => match applicability {
+                    Applicability::Always => "Apply safe fix",
+                    Applicability::MaybeIncorrect => "Apply unsafe fix",
+                },
+                // An action that doesn't have applicability can't emit a code action to the LSP
+                None => return Ok(None),
             };
             match &action.rule_name {
                 Some((_group, rule)) => format!("{fix_label} for {rule}"),
@@ -204,7 +207,7 @@ pub(crate) fn code_fix_to_lsp(
             }
         };
 
-        Ok(lsp::CodeAction {
+        Ok(Some(lsp::CodeAction {
             title,
             kind: Some(lsp::CodeActionKind::from(kind)),
             diagnostics: if !diagnostics.is_empty() {
@@ -217,7 +220,7 @@ pub(crate) fn code_fix_to_lsp(
             is_preferred: None,
             disabled: None,
             data: None,
-        })
+        }))
     }
 }
 

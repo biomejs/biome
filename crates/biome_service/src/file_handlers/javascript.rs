@@ -949,6 +949,8 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
             errors: 0,
             diagnostics: Vec::new(),
             skipped_diagnostics: 0,
+            warnings: 0,
+            infos: 0,
         };
     };
     let tree = params.parse.tree();
@@ -1076,7 +1078,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             if compute_actions {
                 actions.extend(
                     signal
-                        .actions(ActionFilter::ALL)
+                        .actions(ActionFilter::all())
                         .into_code_action_iter()
                         .map(|item| {
                             debug!("Pulled action category {:?}", item.category);

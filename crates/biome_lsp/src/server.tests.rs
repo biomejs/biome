@@ -3714,6 +3714,9 @@ export function bar() {
                 enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles").into()],
                 pull_code_actions: false,
                 inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: biome_diagnostics::Severity::Hint,
+                enforce_assist: false,
             },
         )
         .await?
@@ -3745,6 +3748,9 @@ export function bar() {
                 enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles").into()],
                 pull_code_actions: false,
                 inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: biome_diagnostics::Severity::Hint,
+                enforce_assist: false,
             },
         )
         .await?
@@ -3772,6 +3778,9 @@ export function bar() {
                 enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles").into()],
                 pull_code_actions: false,
                 inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: biome_diagnostics::Severity::Hint,
+                enforce_assist: false,
             },
         )
         .await?
@@ -3803,6 +3812,9 @@ export function bar() {
                 enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles").into()],
                 pull_code_actions: false,
                 inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: biome_diagnostics::Severity::Hint,
+                enforce_assist: false,
             },
         )
         .await?
@@ -3930,6 +3942,9 @@ export function bar() {
                 enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles").into()],
                 pull_code_actions: false,
                 inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: biome_diagnostics::Severity::Hint,
+                enforce_assist: false,
             },
         )
         .await?
@@ -3965,6 +3980,9 @@ export function bar() {
                 enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles").into()],
                 pull_code_actions: false,
                 inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: biome_diagnostics::Severity::Hint,
+                enforce_assist: false,
             },
         )
         .await?
@@ -3997,6 +4015,9 @@ export function bar() {
                 enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles").into()],
                 pull_code_actions: false,
                 inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: biome_diagnostics::Severity::Hint,
+                enforce_assist: false,
             },
         )
         .await?

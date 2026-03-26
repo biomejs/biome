@@ -2,7 +2,7 @@ use crate::commands::MigrateSubCommand;
 use crate::diagnostics::MigrationDiagnostic;
 use crate::runner::diagnostics::{ContentDiffAdvice, MigrateDiffDiagnostic};
 use crate::{CliDiagnostic, CliSession};
-use biome_analyze::AnalysisFilter;
+use biome_analyze::{ActionFilter, AnalysisFilter};
 use biome_configuration::Configuration;
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{Console, ConsoleExt, markup};
@@ -375,10 +375,7 @@ fn migrate_file(payload: MigrateFile) -> Result<MigrationFileResult, CliDiagnost
                     configuration_file_path.as_path(),
                     is_root,
                     |signal| {
-                        if let Some(action) = signal
-                            .actions(biome_analyze::ActionFilter::RULE_FIX_ONLY)
-                            .next()
-                        {
+                        if let Some(action) = signal.actions(ActionFilter::rule_fix()).next() {
                             return ControlFlow::Break(action);
                         }
                         ControlFlow::Continue(())

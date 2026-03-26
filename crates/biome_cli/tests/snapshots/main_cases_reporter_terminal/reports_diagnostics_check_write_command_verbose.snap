@@ -139,34 +139,31 @@ index.css:6:9 lint/correctness/noUnknownFunction ━━━━━━━━━━�
 ```
 
 ```block
-index.css:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+index.css format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a declaration item but instead found '}'.
-  
-    1 │ .brokenStyle {
-    2 │ 	color: f(
-  > 3 │ }
-      │ ^
-    4 │ 
-    5 │ .style {
-  
-  i Expected a declaration item here.
-  
-    1 │ .brokenStyle {
-    2 │ 	color: f(
-  > 3 │ }
-      │ ^
-    4 │ 
-    5 │ .style {
+  × Code formatting aborted due to parsing errors. To format code with errors, enable the 'formatter.formatWithErrors' option.
   
 
 ```
 
 ```block
-index.css format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+index.ts:4:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Code formatting aborted due to parsing errors. To format code with errors, enable the 'formatter.formatWithErrors' option.
+  × Using == may be unsafe if you are relying on type coercion.
   
+    2 │ import { z } from "z";
+    3 │ 
+  > 4 │ a == b;
+      │   ^^
+    5 │ a == b;
+    6 │ a == b;
+  
+  i == is only allowed when comparing against null.
+  
+  i Unsafe fix: Use === instead.
+  
+    4 │ a·===·b;
+      │     +   
 
 ```
 
@@ -201,12 +198,12 @@ If you wish to apply the suggested (unsafe) fixes, use the command biome check -
 
 ```block
 The number of diagnostics exceeds the limit allowed. Use --max-diagnostics to increase it.
-Diagnostics not shown: 56.
+Diagnostics not shown: 55.
 ```
 
 ```block
 Scanned project folder in <TIME>.
 Checked 3 files in <TIME>. Fixed 2 files.
-Found 45 errors.
+Found 44 errors.
 Found 16 warnings.
 ```

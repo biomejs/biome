@@ -58,7 +58,7 @@ mod server;
 use biome_analyze::{ActionCategory, RuleCategories};
 use biome_configuration::{Configuration, analyzer::AnalyzerSelector};
 use biome_console::{Markup, MarkupBuf, markup};
-use biome_diagnostics::{Applicability, CodeSuggestion, serde::Diagnostic};
+use biome_diagnostics::{Applicability, CodeSuggestion, Severity, serde::Diagnostic};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_grit_patterns::GritTargetLanguage;
@@ -1031,6 +1031,27 @@ pub struct PullDiagnosticsParams {
     pub pull_code_actions: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub inline_config: Option<Configuration>,
+
+    /// Max limit of diagnostics types to pull. This limit is meant to cap the number of [Diagnostic] to pull.
+    /// However, the workspace still processes ALL diagnostics coming from the analyzer to compute their severity.
+    /// If no value is provided, the workspace will pull all diagnostics.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub max_diagnostics: Option<u32>,
+
+    /// Minimum severity for a diagnostic to be included. Diagnostics with a
+    /// severity below this threshold are ignored entirely (not counted, not
+    /// serialized). Defaults to [`Severity::Hint`] (include everything).
+    #[serde(default = "default_diagnostic_level")]
+    pub diagnostic_level: Severity,
+
+    /// When true, promote assist diagnostics (`assist/*`) to error severity
+    /// before applying the diagnostic_level filter.
+    #[serde(default)]
+    pub enforce_assist: bool,
+}
+
+fn default_diagnostic_level() -> Severity {
+    Severity::Hint
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1039,6 +1060,11 @@ pub struct PullDiagnosticsParams {
 pub struct PullDiagnosticsResult {
     pub diagnostics: Vec<Diagnostic>,
     pub errors: usize,
+    pub warnings: usize,
+    pub infos: usize,
+    /// Number of parse errors (subset of `errors`). Used by `--skip-parse-errors`
+    /// to distinguish parse errors from analyzer errors.
+    pub parse_errors: usize,
     pub skipped_diagnostics: u64,
 }
 
@@ -1797,12 +1823,16 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         })
     }
 
+    #[expect(clippy::too_many_arguments)]
     pub fn pull_diagnostics(
         &self,
         categories: RuleCategories,
         only: Vec<AnalyzerSelector>,
         skip: Vec<AnalyzerSelector>,
         pull_code_actions: bool,
+        max_diagnostics: Option<u32>,
+        diagnostic_level: Severity,
+        enforce_assist: bool,
     ) -> Result<PullDiagnosticsResult, WorkspaceError> {
         self.workspace.pull_diagnostics(PullDiagnosticsParams {
             project_key: self.project_key,
@@ -1813,6 +1843,9 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             enabled_rules: vec![],
             pull_code_actions,
             inline_config: None,
+            max_diagnostics,
+            diagnostic_level,
+            enforce_assist,
         })
     }
 

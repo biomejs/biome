@@ -9,8 +9,8 @@ use std::{mem, slice};
 
 use anyhow::bail;
 use biome_analyze::{
-    AnalysisFilter, ControlFlow, GroupCategory, Queryable, RegistryVisitor, Rule, RuleCategory,
-    RuleFilter, RuleGroup, RuleMetadata,
+    ActionFilter, AnalysisFilter, ControlFlow, GroupCategory, Queryable, RegistryVisitor, Rule,
+    RuleCategory, RuleFilter, RuleGroup, RuleMetadata,
 };
 use biome_configuration::Configuration;
 use biome_console::{Console, markup};
@@ -353,7 +353,7 @@ fn assert_lint(
 
                 biome_js_analyze::analyze(&root, filter, &options, &[], services, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
-                        for action in signal.actions(biome_analyze::ActionFilter::RULE_FIX_ONLY) {
+                        for action in signal.actions(ActionFilter::rule_fix()) {
                             diag = diag.add_code_suggestion(action.into());
                         }
 
@@ -400,8 +400,7 @@ fn assert_lint(
                     &[],
                     |signal| {
                         if let Some(mut diag) = signal.diagnostic() {
-                            for action in signal.actions(biome_analyze::ActionFilter::RULE_FIX_ONLY)
-                            {
+                            for action in signal.actions(ActionFilter::rule_fix()) {
                                 if !action.is_suppression() {
                                     diag = diag.add_code_suggestion(action.into());
                                 }
@@ -446,7 +445,7 @@ fn assert_lint(
                     .with_semantic_model(&semantic_model);
                 biome_css_analyze::analyze(&root, filter, &options, services, &[], |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
-                        for action in signal.actions(biome_analyze::ActionFilter::RULE_FIX_ONLY) {
+                        for action in signal.actions(ActionFilter::rule_fix()) {
                             diag = diag.add_code_suggestion(action.into());
                         }
 
@@ -483,7 +482,7 @@ fn assert_lint(
 
                 biome_graphql_analyze::analyze(&root, filter, &options, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
-                        for action in signal.actions(biome_analyze::ActionFilter::RULE_FIX_ONLY) {
+                        for action in signal.actions(ActionFilter::rule_fix()) {
                             diag = diag.add_code_suggestion(action.into());
                         }
 
@@ -520,7 +519,7 @@ fn assert_lint(
 
                 biome_html_analyze::analyze(&root, filter, &options, source, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
-                        for action in signal.actions(biome_analyze::ActionFilter::RULE_FIX_ONLY) {
+                        for action in signal.actions(ActionFilter::rule_fix()) {
                             diag = diag.add_code_suggestion(action.into());
                         }
 
