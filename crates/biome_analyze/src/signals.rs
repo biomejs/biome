@@ -2,8 +2,8 @@ use crate::categories::{
     SUPPRESSION_INLINE_ACTION_CATEGORY, SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY,
 };
 use crate::{
-    AnalyzerDiagnostic, AnalyzerOptions, OtherActionCategory, Queryable, RuleDiagnostic, RuleGroup,
-    ServiceBag, SuppressionAction,
+    AnalyzerDiagnostic, AnalyzerOptions, FixKind, GroupCategory, OtherActionCategory, Queryable,
+    RuleCategory, RuleDiagnostic, RuleGroup, ServiceBag, SuppressionAction,
     categories::ActionCategory,
     context::RuleContext,
     registry::{RuleLanguage, RuleRoot},
@@ -62,11 +62,23 @@ impl ActionFilter {
     };
 }
 
+/// Lightweight description of an available action, without the expensive
+/// [`BatchMutation`]. Used by `codeAction/resolve` to defer edit computation.
+#[derive(Debug, Clone)]
+pub struct ActionMetadata {
+    pub rule_name: Option<(&'static str, &'static str)>,
+    pub category: ActionCategory,
+    pub applicability: Applicability,
+}
+
 /// Event raised by the analyzer when a [Rule](crate::Rule)
 /// emits a diagnostic, a code action, or both
 pub trait AnalyzerSignal<L: Language> {
     fn diagnostic(&self) -> Option<AnalyzerDiagnostic>;
     fn actions(&self, filter: ActionFilter) -> AnalyzerActionIter<L>;
+    /// Returns lightweight metadata about available actions without computing
+    /// mutations. This is cheap — no [`BatchMutation`] or tree clones.
+    fn actions_metadata(&self) -> Vec<ActionMetadata>;
     fn transformations(&self) -> AnalyzerTransformationIter<L>;
 }
 
@@ -139,6 +151,10 @@ where
         AnalyzerActionIter::new(vec![])
     }
 
+    fn actions_metadata(&self) -> Vec<ActionMetadata> {
+        Vec::new()
+    }
+
     fn transformations(&self) -> AnalyzerTransformationIter<L> {
         if let Some(transformation) = (self.transformation)() {
             AnalyzerTransformationIter::new([transformation])
@@ -177,6 +193,10 @@ impl<L: Language> AnalyzerSignal<L> for PluginSignal<L> {
 
     fn actions(&self, _filter: ActionFilter) -> AnalyzerActionIter<L> {
         AnalyzerActionIter::new(vec![])
+    }
+
+    fn actions_metadata(&self) -> Vec<ActionMetadata> {
+        Vec::new()
     }
 
     fn transformations(&self) -> AnalyzerTransformationIter<L> {
@@ -482,9 +502,9 @@ where
         let configured_applicability = if filter.rule_fix {
             if let Some(fix_kind) = self.options.rule_fix_kind::<R>() {
                 match fix_kind {
-                    crate::FixKind::None => None,
-                    crate::FixKind::Safe => Some(Applicability::Always),
-                    crate::FixKind::Unsafe => Some(Applicability::MaybeIncorrect),
+                    FixKind::None => None,
+                    FixKind::Safe => Some(Applicability::Always),
+                    FixKind::Unsafe => Some(Applicability::MaybeIncorrect),
                 }
             } else {
                 None
@@ -559,6 +579,54 @@ where
         } else {
             AnalyzerActionIter::new(vec![])
         }
+    }
+
+    fn actions_metadata(&self) -> Vec<ActionMetadata> {
+        let rule_name = Some((<R::Group as RuleGroup>::NAME, R::METADATA.name));
+        let rule_category = <<R::Group as RuleGroup>::Category as GroupCategory>::CATEGORY;
+        let has_suppression = matches!(
+            rule_category,
+            RuleCategory::Lint | RuleCategory::Action | RuleCategory::Syntax
+        );
+
+        let mut metadata = Vec::new();
+
+        // Rule fix metadata — only if the rule declares a fix
+        let fix_kind = self.options.rule_fix_kind::<R>();
+        let is_disabled = matches!(fix_kind, Some(FixKind::None));
+        if !is_disabled && R::METADATA.fix_kind != FixKind::None {
+            let applicability = match fix_kind {
+                Some(FixKind::Safe) => Applicability::Always,
+                Some(FixKind::Unsafe) => Applicability::MaybeIncorrect,
+                _ => match R::METADATA.fix_kind {
+                    FixKind::Safe => Applicability::Always,
+                    _ => Applicability::MaybeIncorrect,
+                },
+            };
+            let action_category =
+                R::METADATA.action_category(rule_category, <R::Group as RuleGroup>::NAME);
+            metadata.push(ActionMetadata {
+                rule_name,
+                category: action_category,
+                applicability,
+            });
+        }
+
+        // Suppression metadata
+        if has_suppression {
+            metadata.push(ActionMetadata {
+                rule_name,
+                category: ActionCategory::Other(OtherActionCategory::InlineSuppression),
+                applicability: Applicability::Always,
+            });
+            metadata.push(ActionMetadata {
+                rule_name,
+                category: ActionCategory::Other(OtherActionCategory::ToplevelSuppression),
+                applicability: Applicability::Always,
+            });
+        }
+
+        metadata
     }
 
     fn transformations(&self) -> AnalyzerTransformationIter<RuleLanguage<R>> {

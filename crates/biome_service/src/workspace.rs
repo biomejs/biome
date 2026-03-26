@@ -58,7 +58,7 @@ mod server;
 use biome_analyze::{ActionCategory, RuleCategories};
 use biome_configuration::{Configuration, analyzer::AnalyzerSelector};
 use biome_console::{Markup, MarkupBuf, markup};
-use biome_diagnostics::{CodeSuggestion, serde::Diagnostic};
+use biome_diagnostics::{Applicability, CodeSuggestion, serde::Diagnostic};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_grit_patterns::GritTargetLanguage;
@@ -1060,6 +1060,14 @@ pub struct PullActionsParams {
     pub categories: RuleCategories,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub inline_config: Option<Configuration>,
+    /// When `false`, returned actions have `suggestion: None` (no `BatchMutation`
+    /// computed). Used by `codeAction/resolve` to defer edit computation.
+    #[serde(default = "default_true")]
+    pub compute_actions: bool,
+}
+
+fn default_true() -> bool {
+    true
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1100,7 +1108,10 @@ pub struct PullActionsResult {
 pub struct CodeAction {
     pub category: ActionCategory,
     pub rule_name: Option<(Cow<'static, str>, Cow<'static, str>)>,
-    pub suggestion: CodeSuggestion,
+    /// The computed code suggestion with text edit. `None` when the action was
+    /// returned without computing edits (deferred for `codeAction/resolve`).
+    pub suggestion: Option<CodeSuggestion>,
+    pub applicability: Option<Applicability>,
     pub offset: Option<TextSize>,
 }
 
@@ -1824,6 +1835,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             enabled_rules,
             categories,
             inline_config: None,
+            compute_actions: true,
         })
     }
 

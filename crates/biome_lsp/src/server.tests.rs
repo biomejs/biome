@@ -215,6 +215,43 @@ impl Server {
         Ok(())
     }
 
+    /// Like [`Self::initialize`] but advertises `codeAction/resolve` support.
+    #[expect(deprecated)]
+    async fn initialize_with_resolve_support(&mut self) -> Result<()> {
+        let _res: InitializeResult = self
+            .request(
+                "initialize",
+                "_init",
+                InitializeParams {
+                    process_id: None,
+                    root_path: None,
+                    root_uri: Some(uri!("")),
+                    initialization_options: None,
+                    capabilities: ClientCapabilities {
+                        text_document: Some(TextDocumentClientCapabilities {
+                            code_action: Some(CodeActionClientCapabilities {
+                                resolve_support: Some(CodeActionCapabilityResolveSupport {
+                                    properties: vec!["edit".to_string()],
+                                }),
+                                ..Default::default()
+                            }),
+                            ..Default::default()
+                        }),
+                        ..Default::default()
+                    },
+                    trace: None,
+                    workspace_folders: None,
+                    client_info: None,
+                    locale: None,
+                    work_done_progress_params: Default::default(),
+                },
+            )
+            .await?
+            .context("initialize returned None")?;
+
+        Ok(())
+    }
+
     /// It creates two projects, one at folder `test_one` and the other in `test_two`.
     ///
     /// Hence, the two roots will be `/workspace/test_one` and `/workspace/test_two`
@@ -1412,6 +1449,110 @@ async fn pull_quick_fixes() -> Result<()> {
             expected_top_level_suppression_action,
         ]
     );
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn pull_quick_fixes_with_resolve() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize_with_resolve_support().await?;
+    server.initialized().await?;
+
+    server.open_document("if(a === -0) {}").await?;
+
+    // Phase 1: request code actions — should return unresolved actions (no edit)
+    let res: CodeActionResponse = server
+        .request(
+            "textDocument/codeAction",
+            "pull_code_actions",
+            CodeActionParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("document.js"),
+                },
+                range: Range {
+                    start: Position {
+                        line: 0,
+                        character: 6,
+                    },
+                    end: Position {
+                        line: 0,
+                        character: 6,
+                    },
+                },
+                context: CodeActionContext {
+                    diagnostics: vec![fixable_diagnostic(0)?],
+                    only: Some(vec![CodeActionKind::QUICKFIX]),
+                    ..Default::default()
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+                partial_result_params: PartialResultParams {
+                    partial_result_token: None,
+                },
+            },
+        )
+        .await?
+        .context("codeAction returned None")?;
+
+    // All actions should have data (resolve token) and no edit
+    assert!(!res.is_empty(), "expected at least one code action");
+    for action_or_command in &res {
+        let CodeActionOrCommand::CodeAction(action) = action_or_command else {
+            panic!("expected CodeAction, got Command");
+        };
+        assert!(
+            action.edit.is_none(),
+            "expected no edit in unresolved action, got edit in: {}",
+            action.title
+        );
+        assert!(
+            action.data.is_some(),
+            "expected resolve data in action: {}",
+            action.title
+        );
+    }
+
+    // Phase 2: resolve the first action (the quickfix)
+    let first_action = match &res[0] {
+        CodeActionOrCommand::CodeAction(action) => action.clone(),
+        _ => panic!("expected CodeAction"),
+    };
+
+    let resolved: CodeAction = server
+        .request(
+            "codeAction/resolve",
+            "resolve_code_action",
+            first_action,
+        )
+        .await?
+        .context("codeAction/resolve returned None")?;
+
+    // The resolved action should now have an edit
+    assert!(
+        resolved.edit.is_some(),
+        "expected edit in resolved action"
+    );
+
+    // Verify it's the correct fix (replace -0 with 0)
+    let edit = resolved.edit.unwrap();
+    let changes = edit.changes.unwrap();
+    let edits = &changes[&uri!("document.js")];
+    assert_eq!(edits.len(), 1);
+    assert_eq!(edits[0].new_text, "");
 
     server.close_document().await?;
 

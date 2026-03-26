@@ -1,5 +1,7 @@
 use anyhow::{Context, Result, ensure};
-use biome_analyze::ActionCategory;
+use biome_analyze::{
+    ActionCategory, SUPPRESSION_INLINE_ACTION_CATEGORY, SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY,
+};
 use biome_console::fmt::Termcolor;
 use biome_console::fmt::{self, Formatter};
 use biome_console::{MarkupBuf, markup};
@@ -129,38 +131,91 @@ pub(crate) fn code_fix_to_lsp(
         .unwrap_or_default();
 
     let kind = action.category.to_str().into_owned();
-    let suggestion = action.suggestion;
 
-    let mut changes = HashMap::new();
-    let offset = action.offset.map(u32::from);
-    let edits = text_edit(line_index, suggestion.suggestion, position_encoding, offset)?;
+    if let Some(suggestion) = action.suggestion {
+        let mut changes = HashMap::new();
+        let offset = action.offset.map(u32::from);
+        let edits = text_edit(line_index, suggestion.suggestion, position_encoding, offset)?;
 
-    changes.insert(url.clone(), edits);
+        changes.insert(url.clone(), edits);
 
-    let edit = lsp::WorkspaceEdit {
-        changes: Some(changes),
-        document_changes: None,
-        change_annotations: None,
-    };
+        let edit = lsp::WorkspaceEdit {
+            changes: Some(changes),
+            document_changes: None,
+            change_annotations: None,
+        };
 
-    let is_preferred = matches!(action.category, ActionCategory::Source(_))
-        || matches!(suggestion.applicability, Applicability::Always)
-            && !action.category.matches("quickfix.suppressRule");
+        let is_preferred = matches!(action.category, ActionCategory::Source(_))
+            || matches!(suggestion.applicability, Applicability::Always)
+                && !action.category.matches("quickfix.suppressRule");
 
-    Ok(lsp::CodeAction {
-        title: print_markup(&suggestion.msg),
-        kind: Some(lsp::CodeActionKind::from(kind)),
-        diagnostics: if !diagnostics.is_empty() {
-            Some(diagnostics)
+        Ok(lsp::CodeAction {
+            title: print_markup(&suggestion.msg),
+            kind: Some(lsp::CodeActionKind::from(kind)),
+            diagnostics: if !diagnostics.is_empty() {
+                Some(diagnostics)
+            } else {
+                None
+            },
+            edit: Some(edit),
+            command: None,
+            is_preferred: is_preferred.then_some(true),
+            disabled: None,
+            data: None,
+        })
+    } else {
+        // Unresolved action — no edit computed yet (for codeAction/resolve).
+        // Build a title using the same patterns as rule.rs suppression messages.
+        let (message_kind, rule_category) = match &action.rule_name {
+            Some((group, rule)) => {
+                // Match the category prefix logic from RuleCategory::as_suppression_category()
+                let prefix = if action.category.matches("source") {
+                    "assist"
+                } else {
+                    "lint"
+                };
+                let kind_label = if action.category.matches("source") {
+                    "action"
+                } else {
+                    "rule"
+                };
+                (kind_label, format!("{prefix}/{group}/{rule}"))
+            }
+            None => ("rule", String::new()),
+        };
+        let title = if action.category.matches(SUPPRESSION_INLINE_ACTION_CATEGORY) {
+            format!("Suppress {message_kind} {rule_category} for this line.")
+        } else if action.category.matches(SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY) {
+            format!("Suppress {message_kind} {rule_category} for the whole file.")
         } else {
-            None
-        },
-        edit: Some(edit),
-        command: None,
-        is_preferred: is_preferred.then_some(true),
-        disabled: None,
-        data: None,
-    })
+            // For rule fixes, we can't get the exact action message without
+            // running R::action(). Use the applicability to distinguish safe/unsafe.
+            let fix_label = match action.applicability {
+                Some(Applicability::Always) => "Apply safe fix",
+                Some(Applicability::MaybeIncorrect) => "Apply unsafe fix",
+                _ => "Apply fix",
+            };
+            match &action.rule_name {
+                Some((_group, rule)) => format!("{fix_label} for {rule}"),
+                None => kind.clone(),
+            }
+        };
+
+        Ok(lsp::CodeAction {
+            title,
+            kind: Some(lsp::CodeActionKind::from(kind)),
+            diagnostics: if !diagnostics.is_empty() {
+                Some(diagnostics)
+            } else {
+                None
+            },
+            edit: None,
+            command: None,
+            is_preferred: None,
+            disabled: None,
+            data: None,
+        })
+    }
 }
 
 /// Convert an [biome_diagnostics::Diagnostic] to a [lsp::Diagnostic], using the span

@@ -1973,6 +1973,7 @@ impl Workspace for WorkspaceServer {
             enabled_rules,
             categories,
             inline_config,
+            compute_actions,
         } = params;
         let settings = self
             .projects
@@ -2007,6 +2008,7 @@ impl Workspace for WorkspaceServer {
             categories,
             action_offset: None,
             document_services: &services,
+            compute_actions,
         });
 
         for embedded_snippet in embedded_snippets {
@@ -2034,6 +2036,7 @@ impl Workspace for WorkspaceServer {
                 categories,
                 action_offset: Some(embedded_snippet.content_offset()),
                 document_services: &services,
+                compute_actions,
             });
 
             result.actions.extend(embedded_actions_result.actions);

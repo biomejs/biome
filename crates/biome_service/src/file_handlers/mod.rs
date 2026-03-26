@@ -48,7 +48,7 @@ use biome_module_graph::ModuleGraph;
 use biome_package::PackageJson;
 use biome_parser::AnyParse;
 use biome_project_layout::ProjectLayout;
-use biome_rowan::{FileSourceError, NodeCache, SendNode, SyntaxNode, TokenText};
+use biome_rowan::{BatchMutation, FileSourceError, NodeCache, SendNode, SyntaxNode, TokenText};
 use biome_string_case::StrLikeExtension;
 use camino::Utf8Path;
 use either::Either;
@@ -620,8 +620,6 @@ pub(crate) struct DiagnosticsAndActionsParams<'a> {
 pub(crate) struct LintResults {
     pub(crate) diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
     pub(crate) errors: usize,
-    pub(crate) warnings: usize,
-    pub(crate) infos: usize,
     pub(crate) skipped_diagnostics: u32,
 }
 
@@ -762,12 +760,13 @@ impl<'a> ProcessFixAll<'a> {
         }
     }
 
-    /// Process the incoming signal from the analyzer. Tracks errors and actions based on the type of
-    /// fix have been provided.
-    pub(crate) fn process_signal<L: biome_rowan::Language>(
+    /// Collects all applicable actions from the signal instead of
+    /// breaking on the first one. The analyzer runs to completion, processing every signal.
+    pub(crate) fn collect_signal<L: biome_rowan::Language>(
         &mut self,
         signal: &dyn AnalyzerSignal<L>,
-    ) -> ControlFlow<AnalyzerAction<L>> {
+        pending: &mut Vec<AnalyzerAction<L>>,
+    ) -> ControlFlow<Never> {
         let current_diagnostic = signal.diagnostic();
 
         if let Some(diagnostic) = current_diagnostic.as_ref()
@@ -784,7 +783,10 @@ impl<'a> ProcessFixAll<'a> {
             match self.fix_file_mode {
                 FixFileMode::ApplySuppressions => {
                     if action.is_suppression() {
-                        return ControlFlow::Break(action);
+                        pending.push(action);
+                        // Take only the first suppression action per signal
+                        // (inline), not the top-level one as well.
+                        break;
                     }
                 }
                 FixFileMode::SafeFixes => {
@@ -793,7 +795,7 @@ impl<'a> ProcessFixAll<'a> {
                     }
                     if action.applicability == Applicability::Always {
                         self.errors = self.errors.saturating_sub(1);
-                        return ControlFlow::Break(action);
+                        pending.push(action);
                     }
                 }
                 FixFileMode::SafeAndUnsafeFixes => {
@@ -802,7 +804,7 @@ impl<'a> ProcessFixAll<'a> {
                         Applicability::Always | Applicability::MaybeIncorrect
                     ) {
                         self.errors = self.errors.saturating_sub(1);
-                        return ControlFlow::Break(action);
+                        pending.push(action);
                     }
                 }
             }
@@ -811,66 +813,81 @@ impl<'a> ProcessFixAll<'a> {
         ControlFlow::Continue(())
     }
 
-    /// Applies the mutation of the `action`. The closure returns the new root and must return
-    /// the length of the text that was replaced by the mutation.
+    /// Merge pending actions from the same rule into one mutation and commit.
     ///
-    /// If `None` is returned, it means that there aren't any more mutations to apply.
-    pub(crate) fn process_action<T, L>(
+    /// Only actions matching the first rule are merged and applied. Remaining
+    /// rules are handled in subsequent iterations of the `fix_all` loop. This
+    /// avoids merging mutations from different rules which may conflict.
+    ///
+    /// Returns `Some(())` if any fixes were applied, `None` if pending was empty.
+    pub(crate) fn process_batch_actions<T, L>(
         &mut self,
-        action: Option<AnalyzerAction<L>>,
+        pending: Vec<AnalyzerAction<L>>,
         mut update_tree_return_text_len: T,
     ) -> Result<Option<()>, WorkspaceError>
     where
         T: FnMut(SyntaxNode<L>) -> Option<u32>,
         L: biome_rowan::Language,
     {
-        match action {
-            Some(action) => {
-                if let (root, Some((range, _))) =
-                    action.mutation.commit_with_text_range_and_edit(true)
-                {
-                    let Some(curr_len) = update_tree_return_text_len(root) else {
-                        return Err(WorkspaceError::RuleError(
-                            RuleError::ReplacedRootWithNonRootError {
-                                rule_name: action.rule_name.map(|(group, rule)| {
-                                    (Cow::Borrowed(group), Cow::Borrowed(rule))
-                                }),
-                            },
-                        ));
-                    };
-
-                    self.actions.push(FixAction {
-                        rule_name: action
-                            .rule_name
-                            .map(|(group, rule)| (Cow::Borrowed(group), Cow::Borrowed(rule))),
-                        range,
-                    });
-
-                    // Check for runaway edit growth
-                    if !self.growth_guard.check(curr_len) {
-                        // In order to provide a useful diagnostic, we want to flag the rules that caused the conflict.
-                        // We can do this by inspecting the last few fixes that were applied.
-                        // We limit it to the last 10 fixes. If there is a chain of conflicting fixes longer than that, something is **really** fucked up.
-
-                        let mut seen_rules = HashSet::new();
-                        for action in self.actions.iter().rev().take(10) {
-                            if let Some((group, rule)) = action.rule_name.as_ref() {
-                                seen_rules.insert((group.clone(), rule.clone()));
-                            }
-                        }
-
-                        return Err(WorkspaceError::RuleError(
-                            RuleError::ConflictingRuleFixesError {
-                                rules: seen_rules.into_iter().collect(),
-                            },
-                        ));
-                    };
-                };
-
-                Ok(Some(()))
-            }
-            None => Ok(None),
+        if pending.is_empty() {
+            return Ok(None);
         }
+
+        let target_rule = pending[0].rule_name;
+        let mut master: Option<BatchMutation<L>> = None;
+        let mut count = 0usize;
+
+        for action in pending {
+            if action.rule_name != target_rule {
+                continue;
+            }
+            match &mut master {
+                Some(m) => m.merge(action.mutation),
+                None => master = Some(action.mutation),
+            }
+            count += 1;
+        }
+
+        let Some(master) = master else {
+            return Ok(None);
+        };
+
+        let (root, text_range_and_edit) = master.commit_with_text_range_and_edit(true);
+        if let Some((range, _)) = text_range_and_edit {
+            let Some(curr_len) = update_tree_return_text_len(root) else {
+                return Err(WorkspaceError::RuleError(
+                    RuleError::ReplacedRootWithNonRootError {
+                        rule_name: target_rule
+                            .map(|(g, r)| (Cow::Borrowed(g), Cow::Borrowed(r))),
+                    },
+                ));
+            };
+
+            for _ in 0..count {
+                self.actions.push(FixAction {
+                    rule_name: target_rule
+                        .map(|(g, r)| (Cow::Borrowed(g), Cow::Borrowed(r))),
+                    range,
+                });
+            }
+
+            if !self.growth_guard.check(curr_len) {
+                let seen_rules: HashSet<_> = self
+                    .actions
+                    .iter()
+                    .rev()
+                    .take(10)
+                    .filter_map(|a| a.rule_name.clone())
+                    .collect();
+                return Err(WorkspaceError::RuleError(
+                    RuleError::ConflictingRuleFixesError {
+                        rules: seen_rules.into_iter().collect(),
+                    },
+                ));
+            }
+        }
+
+        Ok(Some(()))
     }
 
     /// Finish processing the fix all actions. Returns the result of the fix-all actions. The `format_tree`
@@ -937,7 +954,8 @@ impl ProcessDiagnosticsAndActions {
                     rule_name: item
                         .rule_name
                         .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
-                    suggestion: item.suggestion,
+                    applicability: Some(item.suggestion.applicability),
+                    suggestion: Some(item.suggestion),
                     offset: None,
                 })
                 .collect();
@@ -978,6 +996,8 @@ pub(crate) struct CodeActionsParams<'a> {
     pub(crate) categories: RuleCategories,
     pub(crate) action_offset: Option<TextSize>,
     pub(crate) document_services: &'a DocumentServices,
+    /// When `false`, actions are returned with `suggestion: None` (no mutations computed).
+    pub(crate) compute_actions: bool,
 }
 
 pub(crate) struct UpdateSnippetsNodes {

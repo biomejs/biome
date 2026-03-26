@@ -194,7 +194,7 @@ index.css format ━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ```block
-Skipped 32 suggested fixes.
+Skipped 64 suggested fixes.
 If you wish to apply the suggested (unsafe) fixes, use the command biome check --write --unsafe
 
 ```
