@@ -857,16 +857,14 @@ impl<'a> ProcessFixAll<'a> {
             let Some(curr_len) = update_tree_return_text_len(root) else {
                 return Err(WorkspaceError::RuleError(
                     RuleError::ReplacedRootWithNonRootError {
-                        rule_name: target_rule
-                            .map(|(g, r)| (Cow::Borrowed(g), Cow::Borrowed(r))),
+                        rule_name: target_rule.map(|(g, r)| (Cow::Borrowed(g), Cow::Borrowed(r))),
                     },
                 ));
             };
 
             for _ in 0..count {
                 self.actions.push(FixAction {
-                    rule_name: target_rule
-                        .map(|(g, r)| (Cow::Borrowed(g), Cow::Borrowed(r))),
+                    rule_name: target_rule.map(|(g, r)| (Cow::Borrowed(g), Cow::Borrowed(r))),
                     range,
                 });
             }

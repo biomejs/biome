@@ -117,7 +117,6 @@ pub(crate) struct Session {
     /// Paths currently being linted. If a path is in this set, concurrent
     /// `update_diagnostics_for_document` calls for the same path will be skipped.
     diagnostics_in_flight: TokioRwLock<FxHashSet<BiomePath>>,
-
 }
 
 /// The parameters provided by the client in the "initialize" request

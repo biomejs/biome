@@ -1533,19 +1533,12 @@ async fn pull_quick_fixes_with_resolve() -> Result<()> {
     };
 
     let resolved: CodeAction = server
-        .request(
-            "codeAction/resolve",
-            "resolve_code_action",
-            first_action,
-        )
+        .request("codeAction/resolve", "resolve_code_action", first_action)
         .await?
         .context("codeAction/resolve returned None")?;
 
     // The resolved action should now have an edit
-    assert!(
-        resolved.edit.is_some(),
-        "expected edit in resolved action"
-    );
+    assert!(resolved.edit.is_some(), "expected edit in resolved action");
 
     // Verify it's the correct fix (replace -0 with 0)
     let edit = resolved.edit.unwrap();

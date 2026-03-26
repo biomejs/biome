@@ -538,9 +538,9 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
                     .into_code_action_iter()
                     .map(|item| CodeAction {
                         category: item.category.clone(),
-                        rule_name: item.rule_name.map(|(group, name)| {
-                            (Cow::Borrowed(group), Cow::Borrowed(name))
-                        }),
+                        rule_name: item
+                            .rule_name
+                            .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
                         applicability: Some(item.suggestion.applicability),
                         suggestion: Some(item.suggestion),
                         offset: action_offset,

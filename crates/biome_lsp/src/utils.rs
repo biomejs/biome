@@ -185,7 +185,10 @@ pub(crate) fn code_fix_to_lsp(
         };
         let title = if action.category.matches(SUPPRESSION_INLINE_ACTION_CATEGORY) {
             format!("Suppress {message_kind} {rule_category} for this line.")
-        } else if action.category.matches(SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY) {
+        } else if action
+            .category
+            .matches(SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY)
+        {
             format!("Suppress {message_kind} {rule_category} for the whole file.")
         } else {
             // For rule fixes, we can't get the exact action message without

@@ -262,9 +262,7 @@ impl LSPServer {
                                 .map(|item| CodeActionKind::from(*item))
                                 .collect::<Vec<_>>(),
                         ),
-                        resolve_provider: Some(
-                            self.session.supports_code_action_resolve()
-                        ),
+                        resolve_provider: Some(self.session.supports_code_action_resolve()),
                         ..Default::default()
                     }
                 ))))
@@ -459,10 +457,7 @@ impl LanguageServer for LSPServer {
         self.map_op_error(result).await
     }
 
-    async fn code_action_resolve(
-        &self,
-        params: CodeAction,
-    ) -> LspResult<CodeAction> {
+    async fn code_action_resolve(&self, params: CodeAction) -> LspResult<CodeAction> {
         let result = biome_diagnostics::panic::catch_unwind(move || {
             handlers::analysis::code_action_resolve(&self.session, params)
         });
