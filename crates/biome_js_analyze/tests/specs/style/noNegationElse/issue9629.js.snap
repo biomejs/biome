@@ -1,0 +1,37 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue9629.js
+---
+# Input
+```js
+/*before-not*/!/*after-not*/condition/*after-test*/
+	? /*consequent-leading*/ consequent /*consequent-trailing*/
+	: /*alternate-leading*/ alternate /*alternate-trailing*/;
+
+```
+
+# Diagnostics
+```
+issue9629.js:1:15 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Invert blocks when performing a negation test.
+  
+  > 1 │ /*before-not*/!/*after-not*/condition/*after-test*/
+      │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 2 │ 	? /*consequent-leading*/ consequent /*consequent-trailing*/
+  > 3 │ 	: /*alternate-leading*/ alternate /*alternate-trailing*/;
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i Safe fix: Invert the condition and the blocks.
+  
+    1   │ - /*before-not*/!/*after-not*/condition/*after-test*/
+    2   │ - → ?·/*consequent-leading*/·consequent·/*consequent-trailing*/
+    3   │ - → :·/*alternate-leading*/·alternate·/*alternate-trailing*/;
+      1 │ + /*before-not*//*after-not*/condition/*after-test*/
+      2 │ + → ?·/*alternate-leading*/·alternate·/*alternate-trailing*/
+      3 │ + → :·/*consequent-leading*/·consequent·/*consequent-trailing*/;
+    4 4 │   
+  
+
+```

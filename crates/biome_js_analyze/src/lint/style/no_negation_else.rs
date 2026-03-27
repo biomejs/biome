@@ -101,6 +101,12 @@ impl Rule for NoNegationElse {
             AnyJsCondition::JsConditionalExpression(node) => {
                 let test = node.test().ok()?;
                 let negated_test = replace_negation(&test)?;
+                let test_leading_trivia: Vec<_> = negated_test
+                    .syntax()
+                    .first_token()?
+                    .leading_trivia()
+                    .pieces()
+                    .collect();
                 let consequent = node.consequent().ok()?;
                 let alternate = node.alternate().ok()?;
                 let question_mark_token = node.question_mark_token().ok()?;
@@ -138,7 +144,7 @@ impl Rule for NoNegationElse {
                         consequent,
                         new_alternate_trailing.clone(),
                     )?)
-                    .with_leading_trivia_pieces(node.syntax().first_token()?.leading_trivia().pieces())?
+                    .with_leading_trivia_pieces(test_leading_trivia)?
                     .with_trailing_trivia_pieces(new_alternate_trailing)?;
 
                 mutation.replace_node_discard_trivia(node, new_node);
@@ -197,7 +203,14 @@ fn is_negation(node: &AnyJsExpression) -> bool {
 
 fn replace_negation(node: &AnyJsExpression) -> Option<AnyJsExpression> {
     match node {
-        AnyJsExpression::JsUnaryExpression(unary_expr) => unary_expr.argument().ok(),
+        AnyJsExpression::JsUnaryExpression(unary_expr) => {
+            let argument = unary_expr.argument().ok()?;
+            let operator_token = unary_expr.operator_token().ok()?;
+            let mut leading_trivia: Vec<_> = operator_token.leading_trivia().pieces().collect();
+            leading_trivia.extend(operator_token.trailing_trivia().pieces());
+            leading_trivia.extend(argument.syntax().first_token()?.leading_trivia().pieces());
+            argument.with_leading_trivia_pieces(leading_trivia)
+        }
         AnyJsExpression::JsBinaryExpression(binary_expr) => {
             let operator = binary_expr.operator().ok()?;
 
