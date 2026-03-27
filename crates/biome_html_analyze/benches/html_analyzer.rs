@@ -5,6 +5,7 @@ use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
     RuleCategoriesBuilder,
 };
+use biome_html_analyze::HtmlAnalyzerServices;
 use biome_html_parser::{HtmlParserOptions, parse_html};
 use biome_html_syntax::HtmlFileSource;
 use biome_test_utils::BenchCase;
@@ -157,6 +158,7 @@ fn bench_analyzer(criterion: &mut Criterion) {
                     filter,
                     &options,
                     file_source,
+                    HtmlAnalyzerServices::default(),
                     |event| {
                         black_box(event.diagnostic());
                         black_box(event.actions());
