@@ -631,6 +631,75 @@ const Bar = styled(Component)`
 }
 
 #[test]
+fn issue_9625() {
+    const FILE_PATH: &str = "/project/file.js";
+    const FILE_CONTENT: &str = r#"const Portfolio = styled.div`
+    display: flex;
+  align-items: center;
+`;
+
+const PortfolioIcon = styled.div`
+  ${({ theme }) => css``
+  };
+`;"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                formatter: Some(FormatterConfiguration {
+                    indent_style: Some(IndentStyle::Space),
+                    ..Default::default()
+                }),
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: Utf8PathBuf::from(FILE_PATH).into(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    insta::assert_snapshot!(result.as_code(), @r"
+    const Portfolio = styled.div`
+      display: flex;
+      align-items: center;
+    `;
+
+    const PortfolioIcon = styled.div`
+      ${({ theme }) => css``};
+    `;
+    ");
+}
+
+#[test]
 fn format_js_with_embedded_graphql() {
     const FILE_PATH: &str = "/project/file.js";
     const FILE_CONTENT: &str = r#"const Foo = gql`

@@ -67,6 +67,13 @@ const KNOWN_EMBED_OBJECTS: &[&str] = &["styled", "graphql"];
 ///
 /// Returns `None` when the AST is malformed.
 fn is_plausible_embed_template(expr: &JsTemplateExpression) -> Option<bool> {
+    // The service currently only extracts embedded snippets from single-chunk
+    // templates. Keep the formatter in sync so it doesn't emit StartEmbedded /
+    // EndEmbedded tags for ranges that won't be resolved later.
+    if expr.elements().len() != 1 {
+        return Some(false);
+    }
+
     if let Some(tag) = expr.tag() {
         return Some(match tag {
             // css``, gql``, graphql``
