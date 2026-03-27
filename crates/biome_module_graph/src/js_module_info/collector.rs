@@ -959,7 +959,7 @@ impl JsModuleInfoCollector {
     }
 
     fn collect_member_exports_for_resolved_type(
-        &mut self,
+        &self,
         mut resolved: ResolvedTypeId,
         finalised_exports: &mut IndexMap<Text, JsExport>,
     ) {
