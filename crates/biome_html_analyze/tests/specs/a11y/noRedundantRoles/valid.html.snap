@@ -4,6 +4,7 @@ expression: valid.html
 ---
 # Input
 ```html
+<!-- should not generate diagnostics -->
 <article role="presentation"></article>
 <span></span>
 <div></div>

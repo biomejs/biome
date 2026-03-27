@@ -1,3 +1,4 @@
+<!-- should not generate diagnostics -->
 <!-- Custom components should not trigger the rule -->
 <Button role="button"></Button>
 <Nav role="navigation"></Nav>

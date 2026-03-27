@@ -34,8 +34,8 @@ use biome_service::settings::{
 };
 use biome_service::test_utils::setup_workspace_and_open_project;
 use biome_service::workspace::{
-    FileContent, OpenFileParams, OpenProjectParams, PullDiagnosticsParams, ScanKind,
-    ScanProjectParams, UpdateSettingsParams, server,
+    FileContent, OpenFileParams, PullDiagnosticsParams, ScanKind, ScanProjectParams,
+    UpdateSettingsParams,
 };
 use biome_string_case::StrLikeExtension;
 use camino::{Utf8Path, Utf8PathBuf};
@@ -1062,21 +1062,13 @@ pub fn analyze_with_workspace(
     // Set up in-memory filesystem
     let fs = MemoryFileSystem::default();
     fs.insert(virtual_file_path.clone(), input_code.as_bytes());
+    let mut files_to_index = vec![virtual_file_path.clone()];
 
     // Insert sidecar files if they exist on disk
-    insert_sidecar_files(&fs, input_file, &project_root);
+    files_to_index.extend(insert_sidecar_files(&fs, input_file, &project_root));
 
-    // Create workspace
-    let workspace = server(Arc::new(fs), None);
-
-    // Open project
-    let project_result = workspace
-        .open_project(OpenProjectParams {
-            path: BiomePath::new(&project_root),
-            open_uninitialized: true,
-        })
-        .expect("failed to open project");
-    let project_key = project_result.project_key;
+    // Create workspace and open project
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, project_root.as_str());
 
     // Build configuration: enable full HTML support + merge .options.json if present
     let config = build_test_configuration(input_file);
@@ -1088,7 +1080,7 @@ pub fn analyze_with_workspace(
             configuration: config,
             workspace_directory: Some(BiomePath::new(&project_root)),
             extended_configurations: vec![],
-            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+            module_graph_resolution_kind: ModuleGraphResolutionKind::Modules,
         })
         .expect("failed to update settings");
 
@@ -1102,6 +1094,14 @@ pub fn analyze_with_workspace(
             verbose: false,
         })
         .expect("failed to scan project");
+
+    workspace.index_files_for_test(
+        project_key,
+        files_to_index.into_iter().map(|path| {
+            let document_file_source = DocumentFileSource::from_well_known(path.as_path(), true);
+            (BiomePath::new(path), document_file_source)
+        }),
+    );
 
     // Open file
     workspace
@@ -1205,34 +1205,48 @@ fn build_test_configuration(input_file: &Utf8Path) -> Configuration {
 
 /// Inserts sidecar files (package.json, tsconfig.json, etc.) and peer source
 /// files into the `MemoryFileSystem` for workspace-based tests.
-fn insert_sidecar_files(fs: &MemoryFileSystem, input_file: &Utf8Path, project_root: &Utf8Path) {
+fn insert_sidecar_files(
+    fs: &MemoryFileSystem,
+    input_file: &Utf8Path,
+    project_root: &Utf8Path,
+) -> Vec<Utf8PathBuf> {
+    let mut inserted_files = Vec::new();
+
     // Insert package.json sidecar
     let package_json_sidecar = input_file.with_extension("package.json");
     if let Ok(content) = std::fs::read_to_string(&package_json_sidecar) {
-        fs.insert(project_root.join("package.json"), content.as_bytes());
+        let target_path = project_root.join("package.json");
+        fs.insert(target_path.clone(), content.as_bytes());
+        inserted_files.push(target_path);
     }
 
     // Insert tsconfig.json sidecar
     let tsconfig_sidecar = input_file.with_extension("tsconfig.json");
     if let Ok(content) = std::fs::read_to_string(&tsconfig_sidecar) {
-        fs.insert(project_root.join("tsconfig.json"), content.as_bytes());
+        let target_path = project_root.join("tsconfig.json");
+        fs.insert(target_path.clone(), content.as_bytes());
+        inserted_files.push(target_path);
     }
 
     // Insert turbo.json sidecar
     let turbo_json_sidecar = input_file.with_extension("turbo.json");
     let turbo_jsonc_sidecar = input_file.with_extension("turbo.jsonc");
     if let Ok(content) = std::fs::read_to_string(&turbo_json_sidecar) {
-        fs.insert(project_root.join("turbo.json"), content.as_bytes());
+        let target_path = project_root.join("turbo.json");
+        fs.insert(target_path.clone(), content.as_bytes());
+        inserted_files.push(target_path);
     } else if let Ok(content) = std::fs::read_to_string(&turbo_jsonc_sidecar) {
-        fs.insert(project_root.join("turbo.jsonc"), content.as_bytes());
+        let target_path = project_root.join("turbo.jsonc");
+        fs.insert(target_path.clone(), content.as_bytes());
+        inserted_files.push(target_path);
     }
 
     // Insert additional source files from the same directory for module graph rules
     let Some(parent_dir) = input_file.parent() else {
-        return;
+        return inserted_files;
     };
     let Ok(entries) = std::fs::read_dir(parent_dir) else {
-        return;
+        return inserted_files;
     };
     for entry in entries.flatten() {
         let Ok(path) = Utf8PathBuf::try_from(entry.path()) else {
@@ -1248,6 +1262,7 @@ fn insert_sidecar_files(fs: &MemoryFileSystem, input_file: &Utf8Path, project_ro
             "js" | "mjs"
                 | "cjs"
                 | "jsx"
+                | "css"
                 | "ts"
                 | "mts"
                 | "cts"
@@ -1259,7 +1274,11 @@ fn insert_sidecar_files(fs: &MemoryFileSystem, input_file: &Utf8Path, project_ro
         ) && let Ok(content) = std::fs::read_to_string(&path)
         {
             let target_name = path.file_name().unwrap();
-            fs.insert(project_root.join(target_name), content.as_bytes());
+            let target_path = project_root.join(target_name);
+            fs.insert(target_path.clone(), content.as_bytes());
+            inserted_files.push(target_path);
         }
     }
+
+    inserted_files
 }
