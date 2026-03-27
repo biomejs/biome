@@ -1677,6 +1677,82 @@ fn test_react_named_exports_are_visible_without_type_inference() {
 }
 
 #[test]
+fn test_export_equals_named_exports_are_visible_without_type_inference() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/node_modules/shared/dist/index.js".into(),
+        r#"
+            export function useState() {}
+        "#,
+    );
+    fs.insert(
+        "/node_modules/shared/dist/index.d.ts".into(),
+        r#"
+            declare namespace shared {
+                type State = string;
+            }
+
+            declare const shared: {
+                useState(): shared.State;
+            }
+
+            export = shared;
+        "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"import { useState } from "shared";
+
+        export const state = useState;
+        "#,
+    );
+
+    let added_paths = [
+        BiomePath::new("/node_modules/shared/dist/index.js"),
+        BiomePath::new("/node_modules/shared/dist/index.d.ts"),
+        BiomePath::new("/src/index.ts"),
+    ];
+    let added_paths = get_added_js_paths(&fs, &added_paths);
+
+    let project_layout = ProjectLayout::default();
+    project_layout.insert_node_manifest(
+        "/".into(),
+        PackageJson::new("frontend")
+            .with_version("0.0.0")
+            .with_dependencies(Dependencies(Box::new([(
+                "shared".into(),
+                "link:./node_modules/shared".into(),
+            )]))),
+    );
+    project_layout.insert_node_manifest(
+        "/node_modules/shared".into(),
+        PackageJson::new("shared")
+            .with_exports(JsonObject::from([
+                ("types".into(), JsonString::from("./dist/index.d.ts").into()),
+                ("default".into(), JsonString::from("./dist/index.js").into()),
+            ]))
+            .with_version("0.0.1"),
+    );
+
+    let tsconfig_json = parse_json(r#"{}"#, JsonParserOptions::default());
+    project_layout
+        .insert_serialized_tsconfig("/".into(), &tsconfig_json.syntax().as_send().unwrap());
+
+    let module_graph = ModuleGraph::default();
+    module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, false);
+
+    let export_equals_module = module_graph
+        .js_module_info_for_path(Utf8Path::new("/node_modules/shared/dist/index.d.ts"))
+        .expect("export-equals typings module must exist");
+    assert!(
+        export_equals_module
+            .find_js_exported_symbol(&module_graph, "useState")
+            .is_some(),
+        "`useState` should stay visible for identifier-based `export =` bindings during project scans without type inference"
+    );
+}
+
+#[test]
 fn test_resolve_redis_commander_types() {
     let fs = MemoryFileSystem::default();
     fs.insert(

@@ -554,7 +554,7 @@ impl JsModuleInfoCollector {
             self.purge_redundant_types();
         }
 
-        let exports = self.collect_exports();
+        let exports = self.collect_exports(semantic_model);
         let binding_type_data = self.build_binding_type_data(semantic_model);
 
         (exports, binding_type_data)
@@ -879,7 +879,10 @@ impl JsModuleInfoCollector {
         }
     }
 
-    fn collect_exports(&mut self) -> IndexMap<Text, JsExport> {
+    fn collect_exports(
+        &mut self,
+        semantic_model: &biome_js_semantic::SemanticModel,
+    ) -> IndexMap<Text, JsExport> {
         let mut finalised_exports = IndexMap::new();
 
         let exports = std::mem::take(&mut self.exports);
@@ -907,6 +910,9 @@ impl JsModuleInfoCollector {
                 }
                 JsCollectedExport::ExportDefaultAssignment { ty, local_name } => {
                     let resolved = self.resolve_reference(&ty).unwrap_or(GLOBAL_UNKNOWN_ID);
+                    let local_resolved = local_name.as_ref().and_then(|local_name| {
+                        self.resolve_local_value_binding(local_name, semantic_model)
+                    });
 
                     if let Some(local_name) = local_name.as_ref() {
                         self.collect_namespace_exports_for_local_name(
@@ -915,26 +921,10 @@ impl JsModuleInfoCollector {
                         );
                     }
 
-                    if let Some(data) = self.get_by_resolved_id(resolved) {
-                        for member in data.as_raw_data().own_members() {
-                            let Some(name) = member.name() else {
-                                continue;
-                            };
-
-                            // DANGER: Normally, when resolving a type reference
-                            //         retrieved through `as_raw_data()`, we
-                            //         should call
-                            //         `apply_module_id_to_reference()` on the
-                            //         reference first. But because we know we
-                            //         are resolving inside the collector,
-                            //         before any module IDs _could_ be applied,
-                            //         we can omit this here.
-                            if let Some(resolved_member) = self.resolve_reference(&member.ty) {
-                                let export = JsExport::Own(JsOwnExport::Type(resolved_member));
-                                finalised_exports.insert(name, export);
-                            }
-                        }
-                    }
+                    self.collect_member_exports_for_resolved_type(
+                        local_resolved.unwrap_or(resolved),
+                        &mut finalised_exports,
+                    );
 
                     let export = local_name
                         .as_ref()
@@ -966,6 +956,50 @@ impl JsModuleInfoCollector {
         }
 
         finalised_exports
+    }
+
+    fn collect_member_exports_for_resolved_type(
+        &mut self,
+        mut resolved: ResolvedTypeId,
+        finalised_exports: &mut IndexMap<Text, JsExport>,
+    ) {
+        let mut seen_types = Vec::new();
+
+        loop {
+            if seen_types.contains(&resolved) {
+                return;
+            }
+            seen_types.push(resolved);
+
+            let Some(data) = self.get_by_resolved_id(resolved) else {
+                return;
+            };
+
+            match data.as_raw_data() {
+                TypeData::InstanceOf(instance) => {
+                    let instance_ty = data.apply_module_id_to_reference(&instance.ty);
+                    let Some(next) = self.resolve_reference(&instance_ty) else {
+                        return;
+                    };
+                    resolved = next;
+                }
+                _ => {
+                    for member in data.as_raw_data().own_members() {
+                        let Some(name) = member.name() else {
+                            continue;
+                        };
+
+                        let member_ty = data.apply_module_id_to_reference(&member.ty);
+                        if let Some(resolved_member) = self.resolve_reference(&member_ty) {
+                            let export = JsExport::Own(JsOwnExport::Type(resolved_member));
+                            finalised_exports.insert(name, export);
+                        }
+                    }
+
+                    return;
+                }
+            }
+        }
     }
 
     fn get_export_for_local_name(&mut self, local_name: TokenText) -> Option<JsOwnExport> {
@@ -1044,6 +1078,41 @@ impl JsModuleInfoCollector {
                 .entry(binding.name.clone())
                 .or_insert_with(|| JsExport::Own(JsOwnExport::Binding(binding.range)));
         }
+    }
+
+    fn resolve_local_value_binding(
+        &mut self,
+        local_name: &TokenText,
+        semantic_model: &biome_js_semantic::SemanticModel,
+    ) -> Option<ResolvedTypeId> {
+        let binding_ref = self.scopes[0].bindings_by_name.get(local_name).copied()?;
+        let binding_id = binding_ref.value_ty_or_ty();
+
+        self.ensure_binding_type(binding_id, semantic_model);
+        self.resolve_reference(&self.bindings[binding_id.index()].ty)
+    }
+
+    fn ensure_binding_type(
+        &mut self,
+        binding_id: BindingId,
+        semantic_model: &biome_js_semantic::SemanticModel,
+    ) {
+        if self.bindings[binding_id.index()].ty.is_known() {
+            return;
+        }
+
+        let binding = self.bindings[binding_id.index()].clone();
+        let Some(node) = self
+            .binding_node_by_start
+            .get(&binding.range.start())
+            .cloned()
+        else {
+            return;
+        };
+
+        let scope_id = semantic_model.scope_for_range(binding.range).id();
+        let ty = self.infer_type(&node, binding, scope_id, semantic_model);
+        self.bindings[binding_id.index()].ty = ty;
     }
 }
 
