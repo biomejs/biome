@@ -1,6 +1,7 @@
 use crate::diagnostics::LspError;
 use crate::session::Session;
 use crate::utils;
+use crate::utils::text_edit;
 use anyhow::{Context, Result};
 use biome_analyze::{
     ActionCategory, RuleCategoriesBuilder, SUPPRESSION_INLINE_ACTION_CATEGORY,
@@ -17,7 +18,7 @@ use biome_service::file_handlers::svelte::SvelteFileHandler;
 use biome_service::file_handlers::vue::VueFileHandler;
 use biome_service::workspace::{
     CheckFileSizeParams, FeaturesBuilder, FileFeaturesResult, FixFileMode, FixFileParams,
-    GetFileContentParams, IgnoreKind, PathIsIgnoredParams, PullActionsParams,
+    GetFileContentParams, IgnoreKind, PathIsIgnoredParams, ProjectKey, PullActionsParams,
     SupportsFeatureParams,
 };
 use biome_service::{WorkspaceError, extension_error};
@@ -203,8 +204,7 @@ pub(crate) fn code_actions(
             // Defer fix_all to codeAction/resolve
             let data = CodeActionResolveData {
                 url: url.to_string(),
-                group: String::new(),
-                rule: String::new(),
+                rule: None,
                 kind: CodeActionResolveKind::FixAll,
                 range: cursor_range,
                 project_key: doc.project_key,
@@ -299,8 +299,7 @@ pub(crate) fn code_actions(
                 };
                 Some(CodeActionResolveData {
                     url: url.to_string(),
-                    group: group.to_string(),
-                    rule: rule.to_string(),
+                    rule: RuleSelector::from_group_and_rule(group, rule),
                     kind,
                     range: cursor_range,
                     project_key: doc.project_key,
@@ -367,11 +366,10 @@ pub(crate) enum CodeActionResolveKind {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub(crate) struct CodeActionResolveData {
     pub url: String,
-    pub group: String,
-    pub rule: String,
+    pub rule: Option<RuleSelector>,
     pub kind: CodeActionResolveKind,
     pub range: TextRange,
-    pub project_key: biome_service::projects::ProjectKey,
+    pub project_key: ProjectKey,
 }
 
 fn resolve_code_action_data(data: Option<Value>) -> Result<(CodeActionResolveData, Uri)> {
@@ -425,12 +423,9 @@ pub(crate) fn code_action_resolve(
         return Ok(resolved);
     }
 
-    let rule_selector = AnalyzerSelector::from(RuleSelector::Rule(
-        // SAFETY: these strings are serialized from `&'static str` rule metadata
-        // and are valid for the lifetime of the process. We leak them to get 'static.
-        Box::leak(resolve_data.group.into_boxed_str()),
-        Box::leak(resolve_data.rule.into_boxed_str()),
-    ));
+    // TODO: handle this error in a better way
+    let rule_selector =
+        AnalyzerSelector::Rule(resolve_data.rule.context("The rule doesn't exist")?);
 
     let result = session.workspace.pull_actions(PullActionsParams {
         project_key: resolve_data.project_key,
@@ -478,15 +473,14 @@ pub(crate) fn code_action_resolve(
     // LSP spec (codeAction/resolve must return the same object enriched).
     let suggestion = action
         .suggestion
-        .ok_or_else(|| LspError::from(WorkspaceError::not_found("")))?;
+        .context("Expected a valid suggestion, but none was found. This is an internal error, please report it.")?;
     let offset = action.offset.map(u32::from);
-    let edits = utils::text_edit(
+    let edits = text_edit(
         &doc.line_index,
         suggestion.suggestion,
         position_encoding,
         offset,
-    )
-    .map_err(|_| LspError::from(WorkspaceError::not_found("")))?;
+    )?;
 
     let mut changes = HashMap::new();
     changes.insert(url.clone(), edits);

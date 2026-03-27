@@ -761,11 +761,20 @@ impl<'a> ProcessLint<'a> {
 
         diagnostics.extend(self.diagnostics);
 
+        let mut analyzer_errors = 0usize;
+        let mut analyzer_warnings = 0usize;
+        let mut analyzer_infos = 0usize;
         diagnostics.extend(
             analyzer_diagnostics
                 .into_iter()
                 .map(biome_diagnostics::serde::Diagnostic::new)
                 .filter(|diag| diag.severity() >= self.diagnostic_level)
+                .inspect(|diag| match diag.severity() {
+                    Severity::Error | Severity::Fatal => analyzer_errors += 1,
+                    Severity::Warning => analyzer_warnings += 1,
+                    Severity::Information => analyzer_infos += 1,
+                    Severity::Hint => {}
+                })
                 .collect::<Vec<_>>(),
         );
         let skipped_diagnostics = self
@@ -773,11 +782,11 @@ impl<'a> ProcessLint<'a> {
             .saturating_sub(diagnostics.len() as u32);
 
         LintResults {
-            errors: parse_errors + self.errors,
+            errors: parse_errors + self.errors + analyzer_errors,
             skipped_diagnostics,
             diagnostics,
-            infos: parse_infos + self.infos,
-            warnings: parse_warnings + self.warnings,
+            infos: parse_infos + self.infos + analyzer_infos,
+            warnings: parse_warnings + self.warnings + analyzer_warnings,
         }
     }
 }

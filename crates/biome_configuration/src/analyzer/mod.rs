@@ -715,6 +715,16 @@ impl RuleSelector {
         }
     }
 
+    pub fn from_group_and_rule(group: &str, rule: &str) -> Option<Self> {
+        if let Ok(group) = linter::RuleGroup::from_str(group) {
+            if let Some(rule) = Rules::has_rule(group, rule) {
+                return Some(Self::Rule(group.as_str(), rule));
+            }
+        }
+
+        None
+    }
+
     pub fn match_rule<R>(&self) -> bool
     where
         R: Rule,

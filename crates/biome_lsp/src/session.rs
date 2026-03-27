@@ -34,7 +34,7 @@ use camino::Utf8PathBuf;
 use futures::StreamExt;
 use futures::stream::futures_unordered::FuturesUnordered;
 use papaya::HashMap;
-use rustc_hash::{FxBuildHasher, FxHashMap, FxHashSet};
+use rustc_hash::{FxBuildHasher, FxHashMap};
 use serde_json::Value;
 use std::sync::Arc;
 use std::sync::RwLock;
@@ -113,10 +113,6 @@ pub(crate) struct Session {
     /// Lock used to synchronize multiple atomic operations to load the configuration file
     loading_operations:
         TokioRwLock<FxHashMap<Utf8PathBuf, tokio::sync::broadcast::Sender<ConfigurationStatus>>>,
-
-    /// Paths currently being linted. If a path is in this set, concurrent
-    /// `update_diagnostics_for_document` calls for the same path will be skipped.
-    diagnostics_in_flight: TokioRwLock<FxHashSet<BiomePath>>,
 }
 
 /// The parameters provided by the client in the "initialize" request
@@ -230,7 +226,6 @@ impl Session {
             service_rx,
             loading_operations: Default::default(),
             workspace_folders: Default::default(),
-            diagnostics_in_flight: Default::default(),
         }
     }
 
@@ -396,7 +391,7 @@ impl Session {
         let Some(doc) = self.document(&url) else {
             return Ok(());
         };
-        self.update_diagnostics_for_document(url, doc).await
+        self.update_diagnostics_for_document(url.clone(), doc).await
     }
 
     /// Computes diagnostics for the file matching the provided url and publishes
@@ -410,31 +405,6 @@ impl Session {
     ) -> Result<(), LspError> {
         let biome_path = self.file_path(&url)?;
 
-        // Skip if this path is already being linted by another concurrent task.
-        if !self
-            .diagnostics_in_flight
-            .write()
-            .await
-            .insert(biome_path.clone())
-        {
-            return Ok(());
-        }
-
-        let result = self
-            .update_diagnostics_for_document_inner(&url, &biome_path, doc)
-            .await;
-
-        self.diagnostics_in_flight.write().await.remove(&biome_path);
-
-        result
-    }
-
-    async fn update_diagnostics_for_document_inner(
-        &self,
-        url: &Uri,
-        biome_path: &BiomePath,
-        doc: Document,
-    ) -> Result<(), LspError> {
         if !self.notified_broken_configuration() {
             if self.configuration_status().is_editorconfig_error() {
                 self.set_notified_broken_configuration();
@@ -521,7 +491,7 @@ impl Session {
                 .filter_map(|d| {
                     match utils::diagnostic_to_lsp(
                         d,
-                        url,
+                        &url,
                         &doc.line_index,
                         self.position_encoding(),
                         offset,

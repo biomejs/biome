@@ -168,17 +168,12 @@ pub(crate) fn code_fix_to_lsp(
         // Build a title using the same patterns as rule.rs suppression messages.
         let (message_kind, rule_category) = match &action.rule_name {
             Some((group, rule)) => {
-                // Match the category prefix logic from RuleCategory::as_suppression_category()
-                let prefix = if action.category.matches("source") {
-                    "assist"
-                } else {
-                    "lint"
-                };
-                let kind_label = if action.category.matches("source") {
-                    "action"
-                } else {
-                    "rule"
-                };
+                // Use the group name to determine if this is an assist or lint rule.
+                // The action category can be "quickfix.suppressRule.*" for suppressions,
+                // which doesn't tell us the rule type.
+                let is_assist = *group == "source";
+                let prefix = if is_assist { "assist" } else { "lint" };
+                let kind_label = if is_assist { "action" } else { "rule" };
                 (kind_label, format!("{prefix}/{group}/{rule}"))
             }
             None => ("rule", String::new()),
@@ -207,6 +202,10 @@ pub(crate) fn code_fix_to_lsp(
             }
         };
 
+        let is_preferred = matches!(action.category, ActionCategory::Source(_))
+            || matches!(action.applicability, Some(Applicability::Always))
+                && !action.category.matches("quickfix.suppressRule");
+
         Ok(Some(lsp::CodeAction {
             title,
             kind: Some(lsp::CodeActionKind::from(kind)),
@@ -217,7 +216,7 @@ pub(crate) fn code_fix_to_lsp(
             },
             edit: None,
             command: None,
-            is_preferred: None,
+            is_preferred: is_preferred.then_some(true),
             disabled: None,
             data: None,
         }))
