@@ -239,9 +239,7 @@ impl Collector for DefaultCollector {
                             // by the verbose filter (diagnostic_level filtering
                             // is already handled in the workspace).
                             match severity {
-                                Severity::Error => {
-                                    actual_errors = actual_errors.saturating_sub(1)
-                                }
+                                Severity::Error => actual_errors = actual_errors.saturating_sub(1),
                                 Severity::Warning => {
                                     actual_warnings = actual_warnings.saturating_sub(1)
                                 }

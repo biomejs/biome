@@ -9418,6 +9418,10 @@ serialized). Defaults to [`Severity::Hint`] (include everything).
 before applying the diagnostic_level filter. 
 	 */
 	enforceAssist?: boolean;
+	/**
+	 * When `true`, diagnostics include code suggestions for rule fixes.
+	 */
+	includeCodeFix: boolean;
 	inlineConfig?: Configuration;
 	/**
 	* Max limit of diagnostics types to pull. This limit is meant to cap the number of [Diagnostic] to pull.
@@ -9428,10 +9432,6 @@ If no value is provided, the workspace will pull all diagnostics.
 	only?: AnalyzerSelector[];
 	path: BiomePath;
 	projectKey: ProjectKey;
-	/**
-	 * When `false` the diagnostics, don't have code frames of the code actions (fixes, suppressions, etc.)
-	 */
-	pullCodeActions: boolean;
 	skip?: AnalyzerSelector[];
 }
 export type RuleCategories = RuleCategory[];
