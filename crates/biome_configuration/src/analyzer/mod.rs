@@ -716,10 +716,10 @@ impl RuleSelector {
     }
 
     pub fn from_group_and_rule(group: &str, rule: &str) -> Option<Self> {
-        if let Ok(group) = linter::RuleGroup::from_str(group) {
-            if let Some(rule) = Rules::has_rule(group, rule) {
-                return Some(Self::Rule(group.as_str(), rule));
-            }
+        if let Ok(group) = linter::RuleGroup::from_str(group)
+            && let Some(rule) = Rules::has_rule(group, rule)
+        {
+            return Some(Self::Rule(group.as_str(), rule));
         }
 
         None
@@ -1178,6 +1178,25 @@ impl<G: Deserializable> Deserializable for SeverityOrGroup<G> {
 mod test {
     use crate::analyzer::RuleSelector;
     use std::str::FromStr;
+
+    #[test]
+    fn from_group_and_rule_valid() {
+        let selector = RuleSelector::from_group_and_rule("style", "useConst");
+        assert_eq!(selector, Some(RuleSelector::Rule("style", "useConst")));
+    }
+
+    #[test]
+    fn from_group_and_rule_invalid_rule() {
+        assert_eq!(RuleSelector::from_group_and_rule("style", "notARule"), None);
+    }
+
+    #[test]
+    fn from_group_and_rule_invalid_group() {
+        assert_eq!(
+            RuleSelector::from_group_and_rule("notAGroup", "useConst"),
+            None
+        );
+    }
 
     #[test]
     fn lsp_filter_to_rule_selector() {

@@ -1732,7 +1732,7 @@ impl Workspace for WorkspaceServer {
             only,
             skip,
             enabled_rules,
-            pull_code_actions,
+            include_code_fix: pull_code_actions,
             inline_config,
             max_diagnostics,
             diagnostic_level,

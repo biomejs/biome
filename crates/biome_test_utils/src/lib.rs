@@ -952,7 +952,7 @@ pub fn analyze_with_workspace(
             only: vec![rule_selector],
             skip: vec![],
             enabled_rules: vec![],
-            pull_code_actions: true,
+            include_code_fix: true,
             inline_config: None,
             max_diagnostics: None,
             diagnostic_level: biome_diagnostics::Severity::Hint,

@@ -746,18 +746,19 @@ impl<'a> ProcessLint<'a> {
         parse_diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
         analyzer_diagnostics: Vec<biome_diagnostics::Error>,
     ) -> LintResults {
-        let mut diagnostics = parse_diagnostics;
         let mut parse_errors = 0usize;
         let mut parse_warnings = 0usize;
         let mut parse_infos = 0usize;
-        for diag in &diagnostics {
-            match diag.severity() {
+        let mut diagnostics: Vec<_> = parse_diagnostics
+            .into_iter()
+            .filter(|diag| diag.severity() >= self.diagnostic_level)
+            .inspect(|diag| match diag.severity() {
                 Severity::Error | Severity::Fatal => parse_errors += 1,
                 Severity::Warning => parse_warnings += 1,
                 Severity::Information => parse_infos += 1,
                 Severity::Hint => {}
-            }
-        }
+            })
+            .collect();
 
         diagnostics.extend(self.diagnostics);
 

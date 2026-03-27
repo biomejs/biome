@@ -457,7 +457,7 @@ impl Session {
                 only: Vec::new(),
                 skip: Vec::new(),
                 enabled_rules: Vec::new(),
-                pull_code_actions: false,
+                include_code_fix: false,
                 inline_config: self.inline_config(),
                 max_diagnostics: None,
                 diagnostic_level: Severity::Information,
@@ -604,13 +604,17 @@ impl Session {
     }
 
     /// Whether the client supports `codeAction/resolve` for deferred edit computation.
+    /// Whether the client supports `codeAction/resolve` for deferred edit computation.
+    ///
+    /// Per LSP spec, `resolveSupport.properties` lists which specific properties
+    /// the client can resolve. We only defer when `"edit"` is in that list.
     pub(crate) fn supports_code_action_resolve(&self) -> bool {
         self.initialize_params
             .get()
             .and_then(|c| c.client_capabilities.text_document.as_ref())
             .and_then(|c| c.code_action.as_ref())
             .and_then(|c| c.resolve_support.as_ref())
-            .is_some()
+            .is_some_and(|support| support.properties.iter().any(|p| p == "edit"))
     }
 
     #[instrument(level = "info", skip(self))]

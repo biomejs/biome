@@ -1027,8 +1027,8 @@ pub struct PullDiagnosticsParams {
     /// Rules to apply on top of the configuration
     #[serde(default)]
     pub enabled_rules: Vec<AnalyzerSelector>,
-    /// When `false` the diagnostics, don't have code frames of the code actions (fixes, suppressions, etc.)
-    pub pull_code_actions: bool,
+    /// When `true`, diagnostics include code suggestions for rule fixes.
+    pub include_code_fix: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub inline_config: Option<Configuration>,
 
@@ -1841,7 +1841,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             only,
             skip,
             enabled_rules: vec![],
-            pull_code_actions,
+            include_code_fix: pull_code_actions,
             inline_config: None,
             max_diagnostics,
             diagnostic_level,

@@ -117,6 +117,10 @@ where
     /// same slot of the same parent, the existing last-write-wins semantics
     /// apply.
     pub fn merge(&mut self, other: Self) {
+        debug_assert!(
+            self.root == other.root,
+            "Cannot merge mutations from different trees"
+        );
         self.changes.extend(other.changes);
     }
 
