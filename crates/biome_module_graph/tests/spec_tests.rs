@@ -1598,6 +1598,16 @@ fn test_resolve_react_types() {
     let module_graph = Arc::new(ModuleGraph::default());
     module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, true);
 
+    let react_module = module_graph
+        .js_module_info_for_path(Utf8Path::new("/node_modules/@types/react/index.d.ts"))
+        .expect("react typings module must exist");
+    assert!(
+        react_module
+            .find_js_exported_symbol(module_graph.as_ref(), "useCallback")
+            .is_some(),
+        "`useCallback` should be visible as a named export from `export = React` typings"
+    );
+
     let index_module = module_graph
         .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
         .expect("module must exist");
@@ -1617,6 +1627,53 @@ fn test_resolve_react_types() {
         .expect("promise variable not found");
     let promise_ty = resolver.resolved_type_for_id(promise_id);
     assert!(promise_ty.is_promise_instance());
+}
+
+#[test]
+fn test_react_named_exports_are_visible_without_type_inference() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/node_modules/@types/react/index.d.ts".into(),
+        include_bytes!("../../biome_resolver/tests/fixtures/resolver_cases_5/node_modules/@types/react/index.d.ts")
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"import { useState } from "react";
+
+        export const x = useState;
+        "#,
+    );
+
+    let added_paths = [
+        BiomePath::new("/node_modules/@types/react/index.d.ts"),
+        BiomePath::new("/src/index.ts"),
+    ];
+    let added_paths = get_added_js_paths(&fs, &added_paths);
+
+    let project_layout = ProjectLayout::default();
+    project_layout.insert_node_manifest(
+        "/".into(),
+        PackageJson::new("frontend")
+            .with_version("0.0.0")
+            .with_dependencies(Dependencies(Box::new([("react".into(), "19.0.0".into())]))),
+    );
+
+    let tsconfig_json = parse_json(r#"{}"#, JsonParserOptions::default());
+    project_layout
+        .insert_serialized_tsconfig("/".into(), &tsconfig_json.syntax().as_send().unwrap());
+
+    let module_graph = ModuleGraph::default();
+    module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, false);
+
+    let react_module = module_graph
+        .js_module_info_for_path(Utf8Path::new("/node_modules/@types/react/index.d.ts"))
+        .expect("react typings module must exist");
+    assert!(
+        react_module
+            .find_js_exported_symbol(&module_graph, "useState")
+            .is_some(),
+        "`useState` should stay visible to noUnresolvedImports during project scans without type inference"
+    );
 }
 
 #[test]

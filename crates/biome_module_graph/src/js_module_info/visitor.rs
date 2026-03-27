@@ -168,10 +168,15 @@ impl<'a> JsModuleVisitor<'a> {
         node: TsExportAssignmentClause,
         collector: &mut JsModuleInfoCollector,
     ) -> Option<()> {
-        let type_data =
-            TypeData::from_any_js_expression(collector, ScopeId::GLOBAL, &node.expression().ok()?);
+        let expression = node.expression().ok()?;
+        let local_name = expression
+            .as_js_identifier_expression()
+            .and_then(|ident| ident.name().ok())
+            .and_then(|name| name.value_token().ok())
+            .map(|token| token.token_text_trimmed());
+        let type_data = TypeData::from_any_js_expression(collector, ScopeId::GLOBAL, &expression);
         let ty = TypeReference::from(collector.register_and_resolve(type_data));
-        collector.register_export(JsCollectedExport::ExportDefaultAssignment { ty });
+        collector.register_export(JsCollectedExport::ExportDefaultAssignment { ty, local_name });
 
         Some(())
     }

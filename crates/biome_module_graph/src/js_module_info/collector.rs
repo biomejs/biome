@@ -122,6 +122,8 @@ pub(super) enum JsCollectedExport {
     ExportDefaultAssignment {
         /// Reference to the type assigned to the export.
         ty: TypeReference,
+        /// Local identifier assigned to the export, if the expression is a plain identifier.
+        local_name: Option<TokenText>,
     },
     Reexport {
         /// Name under which the import will be re-exported.
@@ -861,7 +863,7 @@ impl JsModuleInfoCollector {
         for collected_export in &mut self.exports {
             match collected_export {
                 JsCollectedExport::ExportDefault { ty }
-                | JsCollectedExport::ExportDefaultAssignment { ty } => {
+                | JsCollectedExport::ExportDefaultAssignment { ty, .. } => {
                     if let TypeReference::Resolved(resolved_id) = ty {
                         update_resolved_id(resolved_id);
                     }
@@ -903,8 +905,15 @@ impl JsModuleInfoCollector {
                     let export = JsExport::Own(JsOwnExport::Type(resolved));
                     finalised_exports.insert(Text::new_static("default"), export);
                 }
-                JsCollectedExport::ExportDefaultAssignment { ty } => {
+                JsCollectedExport::ExportDefaultAssignment { ty, local_name } => {
                     let resolved = self.resolve_reference(&ty).unwrap_or(GLOBAL_UNKNOWN_ID);
+
+                    if let Some(local_name) = local_name.as_ref() {
+                        self.collect_namespace_exports_for_local_name(
+                            local_name,
+                            &mut finalised_exports,
+                        );
+                    }
 
                     if let Some(data) = self.get_by_resolved_id(resolved) {
                         for member in data.as_raw_data().own_members() {
@@ -927,7 +936,13 @@ impl JsModuleInfoCollector {
                         }
                     }
 
-                    let export = JsExport::Own(JsOwnExport::Type(resolved));
+                    let export = local_name
+                        .as_ref()
+                        .and_then(|local_name| {
+                            self.get_export_for_local_name(local_name.clone())
+                                .map(JsExport::Own)
+                        })
+                        .unwrap_or_else(|| JsExport::Own(JsOwnExport::Type(resolved)));
                     finalised_exports.insert(Text::new_static("default"), export);
                 }
                 JsCollectedExport::Reexport {
@@ -999,6 +1014,36 @@ impl JsModuleInfoCollector {
         };
 
         Some(export)
+    }
+
+    fn collect_namespace_exports_for_local_name(
+        &self,
+        local_name: &TokenText,
+        finalised_exports: &mut IndexMap<Text, JsExport>,
+    ) {
+        let Some(binding_ref) = self.scopes[0].bindings_by_name.get(local_name).copied() else {
+            return;
+        };
+        let Some(namespace_binding_id) = binding_ref.namespace_ty_or_ty() else {
+            return;
+        };
+        let namespace_binding = &self.bindings[namespace_binding_id.index()];
+        let namespace_scope_id = namespace_binding.scope_id;
+
+        for binding in &self.bindings {
+            if binding.name.text().is_empty() {
+                continue;
+            }
+
+            let scope = &self.scopes[binding.scope_id.index()];
+            if scope.parent != Some(namespace_scope_id) {
+                continue;
+            }
+
+            finalised_exports
+                .entry(binding.name.clone())
+                .or_insert_with(|| JsExport::Own(JsOwnExport::Binding(binding.range)));
+        }
     }
 }
 

@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: export-equals-react.d.ts
+---
+# Input
+```ts
+declare namespace ReactExportEquals {
+	function useState(): void;
+}
+
+export = ReactExportEquals;
+
+```
