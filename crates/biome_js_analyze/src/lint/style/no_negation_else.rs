@@ -97,16 +97,26 @@ impl Rule for NoNegationElse {
         match node.clone() {
             AnyJsCondition::JsConditionalExpression(node) => {
                 let test = node.test().ok()?;
-
                 let negated_test = replace_negation(&test)?;
+                let consequent = node.consequent().ok()?;
+                let alternate = node.alternate().ok()?;
+                let trimmed_consequent = trim_branch_trailing_whitespace(consequent.clone())?;
+                let question_mark_token = node.question_mark_token().ok()?;
+                let colon_token = node.colon_token().ok()?;
 
-                let new_node = node
+                // Update the ternary in-place so comments stored on `?` / `:`
+                // stay attached to the branch they describe after the swap.
+                let new_question_mark_token = question_mark_token
                     .clone()
-                    .with_test(negated_test)
-                    .with_consequent(node.alternate().ok()?)
-                    .with_colon_token(make::token_decorated_with_space(T![:]))
-                    .with_alternate(node.consequent().ok()?);
-                mutation.replace_node(node, new_node);
+                    .with_trailing_trivia_pieces(colon_token.trailing_trivia().pieces());
+                let new_colon_token = make::token_decorated_with_space(T![:])
+                    .with_trailing_trivia_pieces(question_mark_token.trailing_trivia().pieces());
+
+                mutation.replace_node(test, negated_test);
+                mutation.replace_token_discard_trivia(question_mark_token, new_question_mark_token);
+                mutation.replace_node_discard_trivia(consequent.clone(), alternate.clone());
+                mutation.replace_token_discard_trivia(colon_token, new_colon_token);
+                mutation.replace_node_discard_trivia(alternate, trimmed_consequent);
             }
             AnyJsCondition::JsIfStatement(node) => {
                 let test = node.test().ok()?;
@@ -193,4 +203,24 @@ fn replace_negation(node: &AnyJsExpression) -> Option<AnyJsExpression> {
         }
         _ => None,
     }
+}
+
+fn trim_branch_trailing_whitespace(node: AnyJsExpression) -> Option<AnyJsExpression> {
+    let trailing: Vec<_> = node
+        .syntax()
+        .last_token()?
+        .trailing_trivia()
+        .pieces()
+        .collect();
+
+    if trailing.iter().any(|piece| piece.is_newline()) {
+        return Some(node);
+    }
+
+    let keep_count = trailing
+        .iter()
+        .rposition(|piece| !piece.is_whitespace())
+        .map_or(0, |index| index + 1);
+
+    node.with_trailing_trivia_pieces(trailing.into_iter().take(keep_count))
 }
