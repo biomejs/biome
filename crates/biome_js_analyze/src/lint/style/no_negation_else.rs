@@ -8,7 +8,10 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsStatement, JsBinaryOperator, JsConditionalExpression, JsIfStatement,
     JsUnaryOperator, T,
 };
-use biome_rowan::{AstNode, BatchMutationExt, declare_node_union};
+use biome_rowan::{
+    AstNode, AstNodeExt, BatchMutationExt, Language, SyntaxTriviaPiece, declare_node_union,
+    trim_trailing_trivia_pieces,
+};
 use biome_rule_options::no_negation_else::NoNegationElseOptions;
 
 use crate::JsRuleAction;
@@ -100,23 +103,37 @@ impl Rule for NoNegationElse {
                 let negated_test = replace_negation(&test)?;
                 let consequent = node.consequent().ok()?;
                 let alternate = node.alternate().ok()?;
-                let trimmed_consequent = trim_branch_trailing_whitespace(consequent.clone())?;
                 let question_mark_token = node.question_mark_token().ok()?;
                 let colon_token = node.colon_token().ok()?;
+                let (consequent_trailing, consequent_suffix) = split_trailing_trivia(
+                    consequent.syntax().last_token()?.trailing_trivia().pieces(),
+                );
+                let (alternate_trailing, _) = split_trailing_trivia(
+                    alternate.syntax().last_token()?.trailing_trivia().pieces(),
+                );
 
                 // Update the ternary in-place so comments stored on `?` / `:`
                 // stay attached to the branch they describe after the swap.
+                let mut new_consequent_trailing = alternate_trailing;
+                new_consequent_trailing.extend(consequent_suffix);
                 let new_question_mark_token = question_mark_token
                     .clone()
                     .with_trailing_trivia_pieces(colon_token.trailing_trivia().pieces());
-                let new_colon_token = make::token_decorated_with_space(T![:])
+                let new_colon_token = colon_token
+                    .clone()
                     .with_trailing_trivia_pieces(question_mark_token.trailing_trivia().pieces());
 
                 mutation.replace_node(test, negated_test);
                 mutation.replace_token_discard_trivia(question_mark_token, new_question_mark_token);
-                mutation.replace_node_discard_trivia(consequent.clone(), alternate.clone());
+                mutation.replace_node_discard_trivia(
+                    consequent.clone(),
+                    with_trailing_trivia_pieces(alternate.clone(), new_consequent_trailing)?,
+                );
                 mutation.replace_token_discard_trivia(colon_token, new_colon_token);
-                mutation.replace_node_discard_trivia(alternate, trimmed_consequent);
+                mutation.replace_node_discard_trivia(
+                    alternate,
+                    with_trailing_trivia_pieces(consequent, consequent_trailing)?,
+                );
             }
             AnyJsCondition::JsIfStatement(node) => {
                 let test = node.test().ok()?;
@@ -205,22 +222,27 @@ fn replace_negation(node: &AnyJsExpression) -> Option<AnyJsExpression> {
     }
 }
 
-fn trim_branch_trailing_whitespace(node: AnyJsExpression) -> Option<AnyJsExpression> {
-    let trailing: Vec<_> = node
-        .syntax()
-        .last_token()?
-        .trailing_trivia()
-        .pieces()
-        .collect();
+fn split_trailing_trivia<L: Language>(
+    trivia: impl ExactSizeIterator<Item = SyntaxTriviaPiece<L>> + DoubleEndedIterator,
+) -> (Vec<SyntaxTriviaPiece<L>>, Vec<SyntaxTriviaPiece<L>>) {
+    let pieces: Vec<_> = trivia.collect();
+    let trimmed_len = trim_trailing_trivia_pieces(pieces.clone().into_iter()).len();
+    (
+        pieces[..trimmed_len].to_vec(),
+        pieces[trimmed_len..].to_vec(),
+    )
+}
 
-    if trailing.iter().any(|piece| piece.is_newline()) {
-        return Some(node);
-    }
-
-    let keep_count = trailing
-        .iter()
-        .rposition(|piece| !piece.is_whitespace())
-        .map_or(0, |index| index + 1);
-
-    node.with_trailing_trivia_pieces(trailing.into_iter().take(keep_count))
+fn with_trailing_trivia_pieces<N>(
+    node: N,
+    trailing_trivia: Vec<SyntaxTriviaPiece<N::Language>>,
+) -> Option<N>
+where
+    N: AstNode,
+{
+    let last_token = node.syntax().last_token()?;
+    node.replace_token_discard_trivia(
+        last_token.clone(),
+        last_token.with_trailing_trivia_pieces(trailing_trivia),
+    )
 }

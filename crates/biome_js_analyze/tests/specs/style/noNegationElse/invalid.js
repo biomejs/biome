@@ -20,6 +20,7 @@ if (a !== b) {
 !condition ? consequent : alternate;
 a != b ? consequent : alternate;
 a !== b ? consequent : alternate;
+!spaced ? left   : right;
 
 let a = !test ? c : d;
 
