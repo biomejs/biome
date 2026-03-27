@@ -507,7 +507,10 @@ where
     fn actions(&self, filter: ActionFilter) -> AnalyzerActionIter<RuleLanguage<R>> {
         let globals = self.options.globals();
 
-        let configured_applicability = if filter.is_rule_fix() {
+        // When fix is set to "none", disable the rule fix but still allow
+        // suppression actions.
+        let fix_disabled = matches!(self.options.rule_fix_kind::<R>(), Some(FixKind::None));
+        let configured_applicability = if filter.is_rule_fix() && !fix_disabled {
             if let Some(fix_kind) = self.options.rule_fix_kind::<R>() {
                 match fix_kind {
                     FixKind::None => None,
@@ -539,6 +542,7 @@ where
         let mut actions = Vec::new();
         if let Some(ctx) = ctx {
             if filter.is_rule_fix()
+                && !fix_disabled
                 && let Some(action) = R::action(&ctx, &self.state)
             {
                 actions.push(AnalyzerAction {
