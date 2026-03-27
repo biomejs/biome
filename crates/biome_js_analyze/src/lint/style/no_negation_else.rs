@@ -108,7 +108,7 @@ impl Rule for NoNegationElse {
                 let (consequent_trailing, consequent_suffix) = split_trailing_trivia(
                     consequent.syntax().last_token()?.trailing_trivia().pieces(),
                 );
-                let (alternate_trailing, _) = split_trailing_trivia(
+                let (alternate_trailing, alternate_suffix) = split_trailing_trivia(
                     alternate.syntax().last_token()?.trailing_trivia().pieces(),
                 );
 
@@ -116,6 +116,8 @@ impl Rule for NoNegationElse {
                 // stay attached to the branch they describe after the swap.
                 let mut new_consequent_trailing = alternate_trailing;
                 new_consequent_trailing.extend(consequent_suffix);
+                let mut new_alternate_trailing = consequent_trailing;
+                new_alternate_trailing.extend(alternate_suffix);
                 let new_question_mark_token = question_mark_token
                     .clone()
                     .with_trailing_trivia_pieces(colon_token.trailing_trivia().pieces());
@@ -123,17 +125,23 @@ impl Rule for NoNegationElse {
                     .clone()
                     .with_trailing_trivia_pieces(question_mark_token.trailing_trivia().pieces());
 
-                mutation.replace_node(test, negated_test);
-                mutation.replace_token_discard_trivia(question_mark_token, new_question_mark_token);
-                mutation.replace_node_discard_trivia(
-                    consequent.clone(),
-                    with_trailing_trivia_pieces(alternate.clone(), new_consequent_trailing)?,
-                );
-                mutation.replace_token_discard_trivia(colon_token, new_colon_token);
-                mutation.replace_node_discard_trivia(
-                    alternate,
-                    with_trailing_trivia_pieces(consequent, consequent_trailing)?,
-                );
+                let new_node = node
+                    .clone()
+                    .with_test(negated_test)
+                    .with_question_mark_token(new_question_mark_token)
+                    .with_consequent(with_trailing_trivia_pieces(
+                        alternate.clone(),
+                        new_consequent_trailing,
+                    )?)
+                    .with_colon_token(new_colon_token)
+                    .with_alternate(with_trailing_trivia_pieces(
+                        consequent,
+                        new_alternate_trailing.clone(),
+                    )?)
+                    .with_leading_trivia_pieces(node.syntax().first_token()?.leading_trivia().pieces())?
+                    .with_trailing_trivia_pieces(new_alternate_trailing)?;
+
+                mutation.replace_node_discard_trivia(node, new_node);
             }
             AnyJsCondition::JsIfStatement(node) => {
                 let test = node.test().ok()?;
