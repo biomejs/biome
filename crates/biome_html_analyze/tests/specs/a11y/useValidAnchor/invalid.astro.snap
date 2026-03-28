@@ -3,7 +3,7 @@ source: crates/biome_html_analyze/tests/spec_tests.rs
 expression: invalid.astro
 ---
 # Input
-```html
+```astro
 <!-- should generate diagnostics -->
 <a href="javascript:void(0)">invalid</a>
 <a href>invalid</a>

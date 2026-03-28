@@ -3,16 +3,14 @@ source: crates/biome_html_analyze/tests/spec_tests.rs
 expression: invalid.vue
 ---
 # Input
-```html
+```vue
 <!-- should generate diagnostics -->
 <a href="javascript:void(0)">invalid</a>
 <a href>invalid</a>
-<a onclick={something}>invalid</a>
+<a @click="count++">invalid</a>
 <a>invalid</a>
 
 ```
-
-_Note: The parser emitted 2 diagnostics which are not shown here._
 
 # Diagnostics
 ```
@@ -24,7 +22,7 @@ invalid.vue:2:4 lint/a11y/useValidAnchor ━━━━━━━━━━━━━
   > 2 │ <a href="javascript:void(0)">invalid</a>
       │    ^^^^^^^^^^^^^^^^^^^^^^^^^
     3 │ <a href>invalid</a>
-    4 │ <a onclick={something}>invalid</a>
+    4 │ <a @click="count++">invalid</a>
   
   i The href attribute should be a valid URL
   
@@ -42,7 +40,7 @@ invalid.vue:3:4 lint/a11y/useValidAnchor ━━━━━━━━━━━━━
     2 │ <a href="javascript:void(0)">invalid</a>
   > 3 │ <a href>invalid</a>
       │    ^^^^
-    4 │ <a onclick={something}>invalid</a>
+    4 │ <a @click="count++">invalid</a>
     5 │ <a>invalid</a>
   
   i The href attribute should be a valid URL
@@ -59,8 +57,8 @@ invalid.vue:4:1 lint/a11y/useValidAnchor ━━━━━━━━━━━━━
   
     2 │ <a href="javascript:void(0)">invalid</a>
     3 │ <a href>invalid</a>
-  > 4 │ <a onclick={something}>invalid</a>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 4 │ <a @click="count++">invalid</a>
+      │ ^^^^^^^^^^^^^^^^^^^^
     5 │ <a>invalid</a>
     6 │ 
   
@@ -77,7 +75,7 @@ invalid.vue:5:1 lint/a11y/useValidAnchor ━━━━━━━━━━━━━
   × Provide a href attribute for the a element.
   
     3 │ <a href>invalid</a>
-    4 │ <a onclick={something}>invalid</a>
+    4 │ <a @click="count++">invalid</a>
   > 5 │ <a>invalid</a>
       │ ^^^
     6 │ 
