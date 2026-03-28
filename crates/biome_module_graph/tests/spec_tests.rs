@@ -458,6 +458,56 @@ fn test_export_const_type_declaration_with_namespace() {
 }
 
 #[test]
+fn test_find_jsdoc_for_declared_exports() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/source.ts".into(),
+        r#"
+            /** @deprecated Use modernDeclared instead. */
+            export declare const declaredExport: string;
+
+            /** @deprecated Use modernReexported instead. */
+            declare const reexportedDeclare: string;
+            export { reexportedDeclare };
+
+            export declare const modernDeclared: string;
+
+            declare const modernReexported: string;
+            export { modernReexported };
+        "#,
+    );
+
+    let project_layout = ProjectLayout::default();
+    project_layout.insert_node_manifest(
+        "/".into(),
+        PackageJson::new("test-pkg").with_version("0.0.0"),
+    );
+
+    let added_paths = [BiomePath::new("/src/source.ts")];
+    let added_paths = get_added_js_paths(&fs, &added_paths);
+
+    let module_graph = Arc::new(ModuleGraph::default());
+    module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, true);
+
+    let source = module_graph
+        .js_module_info_for_path(Utf8Path::new("/src/source.ts"))
+        .expect("module must exist");
+
+    assert_eq!(
+        source.find_jsdoc_for_exported_symbol(module_graph.as_ref(), "declaredExport"),
+        Some(JsdocComment::from_comment_text(
+            "/** @deprecated Use modernDeclared instead. */",
+        )),
+    );
+    assert_eq!(
+        source.find_jsdoc_for_exported_symbol(module_graph.as_ref(), "reexportedDeclare"),
+        Some(JsdocComment::from_comment_text(
+            "/** @deprecated Use modernReexported instead. */",
+        )),
+    );
+}
+
+#[test]
 fn test_resolve_exports() {
     let fs = MemoryFileSystem::default();
     fs.insert(
