@@ -1,7 +1,7 @@
 use crate::token_source::{TailwindTokenSource, TailwindTokenSourceCheckpoint};
 use biome_parser::diagnostic::{ParseDiagnostic, merge_diagnostics};
 use biome_parser::event::Event;
-use biome_parser::tree_sink::LosslessTreeSink;
+use biome_parser::tree_sink::{LosslessTreeSink, OffsetLosslessTreeSink};
 use biome_parser::{Parser, ParserContext};
 use biome_parser::{ParserContextCheckpoint, prelude::*};
 use biome_tailwind_factory::TailwindSyntaxFactory;
@@ -9,6 +9,9 @@ use biome_tailwind_syntax::{TailwindLanguage, TailwindSyntaxKind};
 
 pub(crate) type TailwindLosslessTreeSink<'source> =
     LosslessTreeSink<'source, TailwindLanguage, TailwindSyntaxFactory>;
+
+pub(crate) type TailwindOffsetLosslessTreeSink<'source> =
+    OffsetLosslessTreeSink<'source, TailwindLanguage, TailwindSyntaxFactory>;
 
 pub(crate) struct TailwindParser<'source> {
     context: ParserContext<TailwindSyntaxKind>,

@@ -68,7 +68,8 @@ fn generate_group_code(category: &str, group: &str) -> Result<TokenStream> {
     // Use CARGO_MANIFEST_DIR to get the base path since proc_macro::Span::source_file
     // is not available on stable Rust
     let manifest_dir = std::env::var("CARGO_MANIFEST_DIR").context("CARGO_MANIFEST_DIR not set")?;
-    let base_path = Utf8PathBuf::from(manifest_dir).join("src").join(category);
+    let manifest_path = Utf8PathBuf::from(&manifest_dir);
+    let base_path = manifest_path.join("src").join(category);
 
     // Discover all rules in the group directory
     let group_dir = base_path.join(group);
@@ -116,11 +117,37 @@ fn generate_group_code(category: &str, group: &str) -> Result<TokenStream> {
         );
     }
 
-    if rules.is_empty() {
-        bail!("No rules found in directory: {}", group_dir);
-    }
-
     let group_name = format_ident!("{}", Case::Pascal.convert(group));
+
+    if rules.is_empty() {
+        // fallback, if there are no rules, still generate the group anyway to avoid breaking the build
+        let crate_name = manifest_path
+            .file_name()
+            .context("Failed to determine analyzer crate name")?;
+        let language = analyzer_language(crate_name)?;
+
+        let tokens = quote! {
+            pub enum #group_name {}
+
+            impl biome_analyze::RuleGroup for #group_name {
+                type Language = #language;
+                type Category = super::Category;
+
+                const NAME: &'static str = #group;
+
+                fn record_rules<V: biome_analyze::RegistryVisitor<Self::Language> + ?Sized>(_: &mut V) {}
+            }
+
+            pub(self) use #group_name as Group;
+        };
+
+        let formatted = format_code(tokens)?;
+        let token_stream = formatted
+            .parse::<proc_macro2::TokenStream>()
+            .map_err(|e| anyhow::anyhow!("Failed to parse formatted code as TokenStream: {}", e))?;
+
+        return Ok(token_stream.into());
+    }
 
     let (rule_imports, rule_names): (Vec<_>, Vec<_>) = rules.into_values().unzip();
 
@@ -172,6 +199,18 @@ fn generate_group_code(category: &str, group: &str) -> Result<TokenStream> {
         .map_err(|e| anyhow::anyhow!("Failed to parse formatted code as TokenStream: {}", e))?;
 
     Ok(token_stream.into())
+}
+
+fn analyzer_language(crate_name: &str) -> Result<proc_macro2::TokenStream> {
+    Ok(match crate_name {
+        "biome_css_analyze" => quote!(biome_css_syntax::CssLanguage),
+        "biome_graphql_analyze" => quote!(biome_graphql_syntax::GraphqlLanguage),
+        "biome_html_analyze" => quote!(biome_html_syntax::HtmlLanguage),
+        "biome_js_analyze" => quote!(biome_js_syntax::JsLanguage),
+        "biome_json_analyze" => quote!(biome_json_syntax::JsonLanguage),
+        "biome_tailwind_analyze" => quote!(biome_tailwind_syntax::TailwindLanguage),
+        _ => bail!("Unsupported analyzer crate: {}", crate_name),
+    })
 }
 
 fn format_code(tokens: proc_macro2::TokenStream) -> Result<String> {

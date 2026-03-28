@@ -1,209 +1,166 @@
 pub(crate) mod services;
 
 use crate::diagnostics::FileTooLarge;
+use crate::embed::languages::EmbeddedLanguageId;
 use crate::file_handlers::FormatEmbedNode;
-use crate::settings::ServiceLanguage;
 use crate::workspace::DocumentFileSource;
 use crate::workspace::document::services::embedded_bindings::EmbeddedExportedBindings;
 use crate::workspace::document::services::embedded_value_references::EmbeddedValueReferences;
 use biome_css_syntax::{AnyCssRoot, CssLanguage};
 use biome_diagnostics::Error;
 use biome_diagnostics::serde::Diagnostic as SerdeDiagnostic;
+use biome_graphql_syntax::GraphqlLanguage;
 use biome_js_semantic::SemanticModelOptions;
 use biome_js_syntax::{AnyJsRoot, JsLanguage};
 use biome_json_syntax::JsonLanguage;
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, SyntaxNodeWithOffset, TextRange, TextSize};
+use biome_tailwind_syntax::TailwindLanguage;
 use std::marker::PhantomData;
 
+/// Marks syntax languages that are allowed to be stored as embedded snippets.
+///
+/// The associated `ID` provides the erased runtime identity used by workspace code
+/// to dispatch snippet operations without depending on `DocumentFileSource`.
+pub trait EmbeddedSnippetLanguage: biome_rowan::Language + 'static {
+    const ID: EmbeddedLanguageId;
+}
+
+impl EmbeddedSnippetLanguage for JsLanguage {
+    const ID: EmbeddedLanguageId = EmbeddedLanguageId::Js;
+}
+
+impl EmbeddedSnippetLanguage for CssLanguage {
+    const ID: EmbeddedLanguageId = EmbeddedLanguageId::Css;
+}
+
+impl EmbeddedSnippetLanguage for JsonLanguage {
+    const ID: EmbeddedLanguageId = EmbeddedLanguageId::Json;
+}
+
+impl EmbeddedSnippetLanguage for GraphqlLanguage {
+    const ID: EmbeddedLanguageId = EmbeddedLanguageId::Graphql;
+}
+
+impl EmbeddedSnippetLanguage for TailwindLanguage {
+    const ID: EmbeddedLanguageId = EmbeddedLanguageId::Tailwind;
+}
+
+/// Type-erased representation of an embedded snippet stored on a document.
+///
+/// This is the generic runtime form used by the workspace once a snippet has been
+/// extracted and parsed. It carries the snippet language id, parse, source ranges,
+/// and any snippet-scoped semantic services.
 #[derive(Debug, Clone)]
-pub enum AnyEmbeddedSnippet {
-    Js(EmbeddedSnippet<JsLanguage>, DocumentServices),
-    Css(EmbeddedSnippet<CssLanguage>, DocumentServices),
-    Json(EmbeddedSnippet<JsonLanguage>, DocumentServices),
+pub struct AnyEmbeddedSnippet {
+    embedded_language: EmbeddedLanguageId,
+    file_source: Option<DocumentFileSource>,
+    parse: AnyParse,
+    element_range: TextRange,
+    content_range: TextRange,
+    content_offset: TextSize,
+    services: DocumentServices,
 }
 
 impl From<(EmbeddedSnippet<JsLanguage>, DocumentServices)> for AnyEmbeddedSnippet {
     fn from(content: (EmbeddedSnippet<JsLanguage>, DocumentServices)) -> Self {
-        Self::Js(content.0, content.1)
+        Self::new(content.0, content.1)
     }
 }
 
 impl From<EmbeddedSnippet<JsLanguage>> for AnyEmbeddedSnippet {
     fn from(content: EmbeddedSnippet<JsLanguage>) -> Self {
-        Self::Js(content, DocumentServices::none())
+        Self::new(content, DocumentServices::none())
     }
 }
 
 impl From<(EmbeddedSnippet<CssLanguage>, DocumentServices)> for AnyEmbeddedSnippet {
     fn from(content: (EmbeddedSnippet<CssLanguage>, DocumentServices)) -> Self {
-        Self::Css(content.0, content.1)
+        Self::new(content.0, content.1)
+    }
+}
+
+impl From<EmbeddedSnippet<CssLanguage>> for AnyEmbeddedSnippet {
+    fn from(content: EmbeddedSnippet<CssLanguage>) -> Self {
+        Self::new(content, DocumentServices::none())
     }
 }
 
 impl From<EmbeddedSnippet<JsonLanguage>> for AnyEmbeddedSnippet {
     fn from(content: EmbeddedSnippet<JsonLanguage>) -> Self {
-        Self::Json(content, DocumentServices::none())
+        Self::new(content, DocumentServices::none())
+    }
+}
+
+impl From<EmbeddedSnippet<GraphqlLanguage>> for AnyEmbeddedSnippet {
+    fn from(content: EmbeddedSnippet<GraphqlLanguage>) -> Self {
+        Self::new(content, DocumentServices::none())
+    }
+}
+
+impl From<(EmbeddedSnippet<TailwindLanguage>, DocumentServices)> for AnyEmbeddedSnippet {
+    fn from(content: (EmbeddedSnippet<TailwindLanguage>, DocumentServices)) -> Self {
+        Self::new(content.0, content.1)
+    }
+}
+
+impl From<EmbeddedSnippet<TailwindLanguage>> for AnyEmbeddedSnippet {
+    fn from(content: EmbeddedSnippet<TailwindLanguage>) -> Self {
+        Self::new(content, DocumentServices::none())
     }
 }
 
 impl AnyEmbeddedSnippet {
-    pub const fn is_js(&self) -> bool {
-        matches!(self, Self::Js(..))
-    }
-
-    pub const fn is_css(&self) -> bool {
-        matches!(self, Self::Css(..))
-    }
-
-    pub fn as_js_embedded_snippet(&self) -> Option<&EmbeddedSnippet<JsLanguage>> {
-        if let Self::Js(content, _) = self {
-            Some(content)
-        } else {
-            None
-        }
-    }
-
-    pub fn as_css_embedded_snippet(&self) -> Option<&EmbeddedSnippet<CssLanguage>> {
-        if let Self::Css(content, _) = self {
-            Some(content)
-        } else {
-            None
-        }
-    }
-
-    pub fn as_json_embedded_snippet(&self) -> Option<&EmbeddedSnippet<JsonLanguage>> {
-        if let Self::Json(content, _) = self {
-            Some(content)
-        } else {
-            None
-        }
-    }
-
-    pub fn content_range(&self) -> TextRange {
-        match self {
-            Self::Js(node, _) => node.content_range,
-            Self::Css(node, _) => node.content_range,
-            Self::Json(node, _) => node.content_range,
-        }
-    }
-
-    pub fn element_range(&self) -> TextRange {
-        match self {
-            Self::Js(node, _) => node.element_range,
-            Self::Css(node, _) => node.element_range,
-            Self::Json(node, _) => node.element_range,
-        }
-    }
-
-    pub fn parse(&self) -> AnyParse {
-        match self {
-            Self::Js(node, _) => node.parse.clone(),
-            Self::Css(node, _) => node.parse.clone(),
-            Self::Json(node, _) => node.parse.clone(),
-        }
-    }
-
-    pub fn file_source_index(&self) -> usize {
-        match self {
-            Self::Js(node, _) => node.file_source_index,
-            Self::Css(node, _) => node.file_source_index,
-            Self::Json(node, _) => node.file_source_index,
-        }
-    }
-
-    pub fn set_file_source_index(&mut self, index: usize) {
-        match self {
-            Self::Js(node, _) => node.file_source_index = index,
-            Self::Css(node, _) => node.file_source_index = index,
-            Self::Json(node, _) => node.file_source_index = index,
-        }
-    }
-
-    pub fn content_offset(&self) -> TextSize {
-        match self {
-            Self::Js(node, _) => node.content_offset,
-            Self::Css(node, _) => node.content_offset,
-            Self::Json(node, _) => node.content_offset,
-        }
-    }
-
-    pub fn into_serde_diagnostics(self) -> Vec<SerdeDiagnostic> {
-        match self {
-            Self::Js(node, _) => node.into_serde_diagnostics(),
-            Self::Css(node, _) => node.into_serde_diagnostics(),
-            Self::Json(node, _) => node.into_serde_diagnostics(),
-        }
-    }
-
-    pub fn as_snippet_services(&self) -> &DocumentServices {
-        match self {
-            Self::Js(_, services) => services,
-            Self::Css(_, services) => services,
-            Self::Json(_, services) => services,
-        }
-    }
-}
-
-/// Represents embedded content extracted from HTML documents.
-///
-/// This struct stores parsing metadata and provides access to the parsed
-/// content with offset-aware positioning to maintain correct source locations.
-#[derive(Clone, Debug)]
-pub struct EmbeddedSnippet<L: ServiceLanguage + 'static> {
-    /// The JavaScript source code extracted from the script element.
-    pub parse: AnyParse,
-
-    /// The range of the entire script element in the HTML document,
-    /// including the opening and closing tags.
-    pub element_range: TextRange,
-
-    /// The range of just the JavaScript content within the script element,
-    /// excluding the script tags themselves.
-    pub content_range: TextRange,
-
-    /// The offset where the JavaScript content starts in the parent document.
-    /// This is used for offset-aware parsing.
-    pub content_offset: TextSize,
-
-    /// The file source of the document
-    pub file_source_index: usize,
-
-    _phantom: PhantomData<L>,
-}
-
-impl<L: ServiceLanguage + 'static> EmbeddedSnippet<L> {
-    /// Constructs new embedded content for a specific language.
-    pub fn new(
-        parse: AnyParse,
-        element_range: TextRange,
-        content_range: TextRange,
-        content_offset: TextSize,
+    fn new<L: EmbeddedSnippetLanguage>(
+        content: EmbeddedSnippet<L>,
+        services: DocumentServices,
     ) -> Self {
         Self {
-            parse,
-            element_range,
-            content_range,
-            content_offset,
-            file_source_index: Default::default(),
-            _phantom: PhantomData,
+            embedded_language: L::ID,
+            file_source: L::ID.document_file_source(),
+            parse: content.parse,
+            element_range: content.element_range,
+            content_range: content.content_range,
+            content_offset: content.content_offset,
+            services,
         }
     }
 
-    /// Returns a syntax node.
-    pub fn node(&self) -> SyntaxNodeWithOffset<L> {
-        self.parse.unwrap_as_embedded_syntax_node().into_node::<L>()
+    /// Returns the embedded language identity used for snippet dispatch.
+    pub(crate) const fn language(&self) -> EmbeddedLanguageId {
+        self.embedded_language
     }
 
-    pub fn tree<N>(&self) -> N
-    where
-        N: AstNode,
-        N::Language: 'static,
-    {
-        self.parse.tree()
+    pub(crate) const fn file_source(&self) -> Option<DocumentFileSource> {
+        self.file_source
     }
 
-    /// This function transforms diagnostics coming from the parser into serializable diagnostics
+    pub(crate) fn with_file_source(mut self, file_source: DocumentFileSource) -> Self {
+        self.file_source = Some(file_source);
+        self
+    }
+
+    /// Returns the source range of the snippet contents inside the host document.
+    pub fn content_range(&self) -> TextRange {
+        self.content_range
+    }
+
+    /// Returns the source range of the full embed site inside the host document.
+    pub fn element_range(&self) -> TextRange {
+        self.element_range
+    }
+
+    /// Returns the parsed representation of the embedded snippet.
+    pub fn parse(&self) -> AnyParse {
+        self.parse.clone()
+    }
+
+    /// Returns the offset used to translate snippet diagnostics back to the host document.
+    pub fn content_offset(&self) -> TextSize {
+        self.content_offset
+    }
+
+    /// Converts parser diagnostics for this snippet into host-document-relative diagnostics.
     pub fn into_serde_diagnostics(self) -> Vec<SerdeDiagnostic> {
         self.parse
             .into_diagnostics()
@@ -215,8 +172,75 @@ impl<L: ServiceLanguage + 'static> EmbeddedSnippet<L> {
             .collect::<Vec<_>>()
     }
 
-    pub fn set_file_source_index(&mut self, index: usize) {
-        self.file_source_index = index;
+    /// Returns the snippet-local services collected while processing this embed.
+    pub fn as_snippet_services(&self) -> &DocumentServices {
+        &self.services
+    }
+}
+
+/// Typed representation of an extracted embedded snippet before type erasure.
+///
+/// This struct keeps the concrete syntax language for the snippet so parser results,
+/// tree access, and root replacement can remain strongly typed until the snippet is
+/// stored as `AnyEmbeddedSnippet`.
+#[derive(Clone, Debug)]
+pub struct EmbeddedSnippet<L: EmbeddedSnippetLanguage> {
+    /// The parsed syntax tree for the snippet contents.
+    pub parse: AnyParse,
+
+    /// The range of the full embed site in the host document.
+    pub element_range: TextRange,
+
+    /// The range of the snippet contents within the host document.
+    pub content_range: TextRange,
+
+    /// The offset where the snippet contents start in the parent document.
+    pub content_offset: TextSize,
+
+    _phantom: PhantomData<L>,
+}
+
+impl<L: EmbeddedSnippetLanguage> EmbeddedSnippet<L> {
+    /// Constructs a typed embedded snippet for a specific language.
+    pub fn new(
+        parse: AnyParse,
+        element_range: TextRange,
+        content_range: TextRange,
+        content_offset: TextSize,
+    ) -> Self {
+        Self {
+            parse,
+            element_range,
+            content_range,
+            content_offset,
+            _phantom: PhantomData,
+        }
+    }
+
+    /// Returns the embedded snippet as a syntax node with its original source offset.
+    pub fn node(&self) -> SyntaxNodeWithOffset<L> {
+        self.parse.unwrap_as_embedded_syntax_node().into_node::<L>()
+    }
+
+    /// Returns the typed AST root for this snippet.
+    pub fn tree<N>(&self) -> N
+    where
+        N: AstNode,
+        N::Language: 'static,
+    {
+        self.parse.tree()
+    }
+
+    /// Converts parser diagnostics for this snippet into host-document-relative diagnostics.
+    pub fn into_serde_diagnostics(self) -> Vec<SerdeDiagnostic> {
+        self.parse
+            .into_diagnostics()
+            .into_iter()
+            .map(|mut diagnostic| {
+                diagnostic.set_location_offset(self.content_offset);
+                SerdeDiagnostic::new(Error::from(diagnostic))
+            })
+            .collect::<Vec<_>>()
     }
 }
 
@@ -253,16 +277,15 @@ pub(crate) struct Document {
 }
 
 impl Document {
-    pub fn get_embedded_snippets_format_nodes(
-        &self,
-        get_file_source: impl Fn(usize) -> DocumentFileSource,
-    ) -> Vec<FormatEmbedNode> {
+    pub fn get_embedded_snippets_format_nodes(&self) -> Vec<FormatEmbedNode> {
         self.embedded_snippets
             .iter()
-            .map(|node| FormatEmbedNode {
-                range: node.content_range(),
-                source: get_file_source(node.file_source_index()),
-                node: node.parse().clone(),
+            .filter_map(|node| {
+                Some(FormatEmbedNode {
+                    range: node.content_range(),
+                    source: node.file_source()?,
+                    node: node.parse().clone(),
+                })
             })
             .collect()
     }
