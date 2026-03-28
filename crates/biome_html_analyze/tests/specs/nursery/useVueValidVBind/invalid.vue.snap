@@ -1,5 +1,6 @@
 ---
 source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 77
 expression: invalid.vue
 ---
 # Input
@@ -7,16 +8,11 @@ expression: invalid.vue
 <!-- should generate diagnostics -->
 
 <template>
-  <!-- Missing argument: long-form without an argument -->
-  <div v-bind></div>
-  <div v-bind />
-  <Foo v-bind />
-
   <!-- Missing value -->
   <Foo v-bind:foo />
   <Foo :foo />
 
-  <!-- Missing argument with modifier -->
+  <!-- Missing value with modifier -->
   <div v-bind.prop></div>
 
   <!-- Invalid single modifier on long-form -->
@@ -47,11 +43,11 @@ invalid.vue:5:8 lint/nursery/useVueValidVBind ━━━━━━━━━━━�
   i This v-bind directive is missing a value.
   
     3 │ <template>
-    4 │   <!-- Missing argument: long-form without an argument -->
-  > 5 │   <div v-bind></div>
-      │        ^^^^^^
-    6 │   <div v-bind />
-    7 │   <Foo v-bind />
+    4 │   <!-- Missing value -->
+  > 5 │   <Foo v-bind:foo />
+      │        ^^^^^^^^^^
+    6 │   <Foo :foo />
+    7 │ 
   
   i v-bind directives require a value.
   
@@ -67,12 +63,12 @@ invalid.vue:6:8 lint/nursery/useVueValidVBind ━━━━━━━━━━━�
 
   i This v-bind directive is missing a value.
   
-    4 │   <!-- Missing argument: long-form without an argument -->
-    5 │   <div v-bind></div>
-  > 6 │   <div v-bind />
-      │        ^^^^^^
-    7 │   <Foo v-bind />
-    8 │ 
+    4 │   <!-- Missing value -->
+    5 │   <Foo v-bind:foo />
+  > 6 │   <Foo :foo />
+      │        ^^^^
+    7 │ 
+    8 │   <!-- Missing value with modifier -->
   
   i v-bind directives require a value.
   
@@ -84,77 +80,15 @@ invalid.vue:6:8 lint/nursery/useVueValidVBind ━━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:7:8 lint/nursery/useVueValidVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:9:8 lint/nursery/useVueValidVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This v-bind directive is missing a value.
   
-    5 │   <div v-bind></div>
-    6 │   <div v-bind />
-  > 7 │   <Foo v-bind />
-      │        ^^^^^^
-    8 │ 
-    9 │   <!-- Missing value -->
-  
-  i v-bind directives require a value.
-  
-  i Add a value to the directive, e.g. v-bind:foo="bar".
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.vue:10:8 lint/nursery/useVueValidVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This v-bind directive is missing a value.
-  
-     9 │   <!-- Missing value -->
-  > 10 │   <Foo v-bind:foo />
-       │        ^^^^^^^^^^
-    11 │   <Foo :foo />
-    12 │ 
-  
-  i v-bind directives require a value.
-  
-  i Add a value to the directive, e.g. v-bind:foo="bar".
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.vue:11:8 lint/nursery/useVueValidVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This v-bind directive is missing a value.
-  
-     9 │   <!-- Missing value -->
-    10 │   <Foo v-bind:foo />
-  > 11 │   <Foo :foo />
-       │        ^^^^
-    12 │ 
-    13 │   <!-- Missing argument with modifier -->
-  
-  i v-bind directives require a value.
-  
-  i Add a value to the directive, e.g. v-bind:foo="bar".
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.vue:14:8 lint/nursery/useVueValidVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This v-bind directive is missing a value.
-  
-    13 │   <!-- Missing argument with modifier -->
-  > 14 │   <div v-bind.prop></div>
+     8 │   <!-- Missing value with modifier -->
+   > 9 │   <div v-bind.prop></div>
        │        ^^^^^^^^^^^
-    15 │ 
-    16 │   <!-- Invalid single modifier on long-form -->
+    10 │ 
+    11 │   <!-- Invalid single modifier on long-form -->
   
   i v-bind directives require a value.
   
@@ -166,15 +100,15 @@ invalid.vue:14:8 lint/nursery/useVueValidVBind ━━━━━━━━━━━
 ```
 
 ```
-invalid.vue:17:18 lint/nursery/useVueValidVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:12:18 lint/nursery/useVueValidVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This v-bind directive has an invalid modifier.
   
-    16 │   <!-- Invalid single modifier on long-form -->
-  > 17 │   <div v-bind:foo.invalid="bar"></div>
+    11 │   <!-- Invalid single modifier on long-form -->
+  > 12 │   <div v-bind:foo.invalid="bar"></div>
        │                  ^^^^^^^^
-    18 │ 
-    19 │   <!-- Invalid modifier on shorthand -->
+    13 │ 
+    14 │   <!-- Invalid modifier on shorthand -->
   
   i Only the following modifiers are allowed on v-bind directives: prop, camel, sync, and attr.
   
@@ -186,15 +120,15 @@ invalid.vue:17:18 lint/nursery/useVueValidVBind ━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:20:13 lint/nursery/useVueValidVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:15:13 lint/nursery/useVueValidVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This v-bind directive has an invalid modifier.
   
-    19 │   <!-- Invalid modifier on shorthand -->
-  > 20 │   <span :bar.badModifier="baz"></span>
+    14 │   <!-- Invalid modifier on shorthand -->
+  > 15 │   <span :bar.badModifier="baz"></span>
        │             ^^^^^^^^^^^^
-    21 │ 
-    22 │   <!-- Mixed valid and invalid modifiers: 'prop' is valid, 'wrong' is not -->
+    16 │ 
+    17 │   <!-- Mixed valid and invalid modifiers: 'prop' is valid, 'wrong' is not -->
   
   i Only the following modifiers are allowed on v-bind directives: prop, camel, sync, and attr.
   
@@ -206,15 +140,15 @@ invalid.vue:20:13 lint/nursery/useVueValidVBind ━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:23:15 lint/nursery/useVueValidVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:18:15 lint/nursery/useVueValidVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This v-bind directive has an invalid modifier.
   
-    22 │   <!-- Mixed valid and invalid modifiers: 'prop' is valid, 'wrong' is not -->
-  > 23 │   <p :baz.prop.wrong="value"></p>
+    17 │   <!-- Mixed valid and invalid modifiers: 'prop' is valid, 'wrong' is not -->
+  > 18 │   <p :baz.prop.wrong="value"></p>
        │               ^^^^^^
-    24 │ 
-    25 │   <!-- Dynamic argument is present but modifier is invalid -->
+    19 │ 
+    20 │   <!-- Dynamic argument is present but modifier is invalid -->
   
   i Only the following modifiers are allowed on v-bind directives: prop, camel, sync, and attr.
   
@@ -226,15 +160,15 @@ invalid.vue:23:15 lint/nursery/useVueValidVBind ━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:26:22 lint/nursery/useVueValidVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:21:22 lint/nursery/useVueValidVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This v-bind directive has an invalid modifier.
   
-    25 │   <!-- Dynamic argument is present but modifier is invalid -->
-  > 26 │   <p v-bind:[dynamic].notAValidModifier="value"></p>
+    20 │   <!-- Dynamic argument is present but modifier is invalid -->
+  > 21 │   <p v-bind:[dynamic].notAValidModifier="value"></p>
        │                      ^^^^^^^^^^^^^^^^^^
-    27 │ 
-    28 │   <!-- Multiple invalid modifiers -->
+    22 │ 
+    23 │   <!-- Multiple invalid modifiers -->
   
   i Only the following modifiers are allowed on v-bind directives: prop, camel, sync, and attr.
   
@@ -246,15 +180,15 @@ invalid.vue:26:22 lint/nursery/useVueValidVBind ━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:29:20 lint/nursery/useVueValidVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:24:20 lint/nursery/useVueValidVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This v-bind directive has an invalid modifier.
   
-    28 │   <!-- Multiple invalid modifiers -->
-  > 29 │   <button :disabled.once="true"></button>
+    23 │   <!-- Multiple invalid modifiers -->
+  > 24 │   <button :disabled.once="true"></button>
        │                    ^^^^^
-    30 │ 
-    31 │   <!-- Component binding with unknown modifier -->
+    25 │ 
+    26 │   <!-- Component binding with unknown modifier -->
   
   i Only the following modifiers are allowed on v-bind directives: prop, camel, sync, and attr.
   
@@ -266,15 +200,15 @@ invalid.vue:29:20 lint/nursery/useVueValidVBind ━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:32:31 lint/nursery/useVueValidVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:27:31 lint/nursery/useVueValidVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This v-bind directive has an invalid modifier.
   
-    31 │   <!-- Component binding with unknown modifier -->
-  > 32 │   <MyComponent v-bind:propName.weird="someValue"></MyComponent>
+    26 │   <!-- Component binding with unknown modifier -->
+  > 27 │   <MyComponent v-bind:propName.weird="someValue"></MyComponent>
        │                               ^^^^^^
-    33 │ </template>
-    34 │ 
+    28 │ </template>
+    29 │ 
   
   i Only the following modifiers are allowed on v-bind directives: prop, camel, sync, and attr.
   
