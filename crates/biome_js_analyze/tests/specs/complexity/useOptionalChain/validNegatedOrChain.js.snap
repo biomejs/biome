@@ -1,0 +1,23 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validNegatedOrChain.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+
+// Different identifiers - not the same chain
+!foo || !bar;
+!a || !b;
+
+// Mixed negation - not all operands negated
+!a || a.b;
+a || !a.b;
+
+// Wrong operator - && instead of ||
+!a && !a.b;
+
+// Mixed operators
+!a || !a.b && !a.b.c;
+
+```

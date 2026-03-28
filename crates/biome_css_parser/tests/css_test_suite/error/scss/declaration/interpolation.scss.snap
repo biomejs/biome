@@ -1,0 +1,262 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
+expression: snapshot
+---
+
+## Input
+
+```css
+.empty {
+  #{}: 1px;
+}
+
+.unclosed {
+  margin-#{$side: 1px;
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..1 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@1..7 "empty" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@7..8 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: ScssInterpolatedIdentifier {
+                                    items: ScssInterpolatedIdentifierPartList [
+                                        ScssInterpolation {
+                                            hash_token: HASH@8..12 "#" [Newline("\n"), Whitespace("  ")] [],
+                                            l_curly_token: L_CURLY@12..13 "{" [] [],
+                                            value: missing (required),
+                                            r_curly_token: R_CURLY@13..14 "}" [] [],
+                                        },
+                                    ],
+                                },
+                                colon_token: COLON@14..16 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssRegularDimension {
+                                            value_token: CSS_NUMBER_LITERAL@16..17 "1" [] [],
+                                            unit_token: IDENT@17..19 "px" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@19..20 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@20..22 "}" [Newline("\n")] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@22..25 "." [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@25..34 "unclosed" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@34..35 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: ScssInterpolatedIdentifier {
+                                    items: ScssInterpolatedIdentifierPartList [
+                                        CssIdentifier {
+                                            value_token: IDENT@35..45 "margin-" [Newline("\n"), Whitespace("  ")] [],
+                                        },
+                                        ScssInterpolation {
+                                            hash_token: HASH@45..46 "#" [] [],
+                                            l_curly_token: L_CURLY@46..47 "{" [] [],
+                                            value: ScssExpression {
+                                                items: ScssExpressionItemList [
+                                                    ScssIdentifier {
+                                                        dollar_token: DOLLAR@47..48 "$" [] [],
+                                                        name: CssIdentifier {
+                                                            value_token: IDENT@48..52 "side" [] [],
+                                                        },
+                                                    },
+                                                ],
+                                            },
+                                            r_curly_token: missing (required),
+                                        },
+                                    ],
+                                },
+                                colon_token: COLON@52..54 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssRegularDimension {
+                                            value_token: CSS_NUMBER_LITERAL@54..55 "1" [] [],
+                                            unit_token: IDENT@55..57 "px" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@57..58 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@58..60 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@60..61 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..61
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..60
+    0: CSS_QUALIFIED_RULE@0..22
+      0: CSS_SELECTOR_LIST@0..7
+        0: CSS_COMPOUND_SELECTOR@0..7
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..7
+            0: CSS_CLASS_SELECTOR@0..7
+              0: DOT@0..1 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@1..7
+                0: IDENT@1..7 "empty" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@7..22
+        0: L_CURLY@7..8 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@8..20
+          0: CSS_DECLARATION_WITH_SEMICOLON@8..20
+            0: CSS_DECLARATION@8..19
+              0: CSS_GENERIC_PROPERTY@8..19
+                0: SCSS_INTERPOLATED_IDENTIFIER@8..14
+                  0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@8..14
+                    0: SCSS_INTERPOLATION@8..14
+                      0: HASH@8..12 "#" [Newline("\n"), Whitespace("  ")] []
+                      1: L_CURLY@12..13 "{" [] []
+                      2: (empty)
+                      3: R_CURLY@13..14 "}" [] []
+                1: COLON@14..16 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@16..19
+                  0: SCSS_EXPRESSION_ITEM_LIST@16..19
+                    0: CSS_REGULAR_DIMENSION@16..19
+                      0: CSS_NUMBER_LITERAL@16..17 "1" [] []
+                      1: IDENT@17..19 "px" [] []
+              1: (empty)
+            1: SEMICOLON@19..20 ";" [] []
+        2: R_CURLY@20..22 "}" [Newline("\n")] []
+    1: CSS_QUALIFIED_RULE@22..60
+      0: CSS_SELECTOR_LIST@22..34
+        0: CSS_COMPOUND_SELECTOR@22..34
+          0: CSS_NESTED_SELECTOR_LIST@22..22
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@22..34
+            0: CSS_CLASS_SELECTOR@22..34
+              0: DOT@22..25 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@25..34
+                0: IDENT@25..34 "unclosed" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@34..60
+        0: L_CURLY@34..35 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@35..58
+          0: CSS_DECLARATION_WITH_SEMICOLON@35..58
+            0: CSS_DECLARATION@35..57
+              0: CSS_GENERIC_PROPERTY@35..57
+                0: SCSS_INTERPOLATED_IDENTIFIER@35..52
+                  0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@35..52
+                    0: CSS_IDENTIFIER@35..45
+                      0: IDENT@35..45 "margin-" [Newline("\n"), Whitespace("  ")] []
+                    1: SCSS_INTERPOLATION@45..52
+                      0: HASH@45..46 "#" [] []
+                      1: L_CURLY@46..47 "{" [] []
+                      2: SCSS_EXPRESSION@47..52
+                        0: SCSS_EXPRESSION_ITEM_LIST@47..52
+                          0: SCSS_IDENTIFIER@47..52
+                            0: DOLLAR@47..48 "$" [] []
+                            1: CSS_IDENTIFIER@48..52
+                              0: IDENT@48..52 "side" [] []
+                      3: (empty)
+                1: COLON@52..54 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@54..57
+                  0: SCSS_EXPRESSION_ITEM_LIST@54..57
+                    0: CSS_REGULAR_DIMENSION@54..57
+                      0: CSS_NUMBER_LITERAL@54..55 "1" [] []
+                      1: IDENT@55..57 "px" [] []
+              1: (empty)
+            1: SEMICOLON@57..58 ";" [] []
+        2: R_CURLY@58..60 "}" [Newline("\n")] []
+  2: EOF@60..61 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+interpolation.scss:2:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found '}'.
+  
+    1 │ .empty {
+  > 2 │   #{}: 1px;
+      │     ^
+    3 │ }
+    4 │ 
+  
+  i Expected a SCSS expression here.
+  
+    1 │ .empty {
+  > 2 │   #{}: 1px;
+      │     ^
+    3 │ }
+    4 │ 
+  
+interpolation.scss:6:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found ':'.
+  
+    5 │ .unclosed {
+  > 6 │   margin-#{$side: 1px;
+      │                 ^
+    7 │ }
+    8 │ 
+  
+  i Expected a SCSS expression here.
+  
+    5 │ .unclosed {
+  > 6 │   margin-#{$side: 1px;
+      │                 ^
+    7 │ }
+    8 │ 
+  
+```

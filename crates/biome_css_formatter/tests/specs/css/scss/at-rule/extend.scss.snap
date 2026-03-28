@@ -1,0 +1,48 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/scss/at-rule/extend.scss
+---
+
+# Input
+
+```scss
+%toolbelt{
+border:1px solid black;
+}
+
+.action-buttons{
+  @extend
+%toolbelt
+!optional;
+}
+
+.alert{
+  @extend
+.message,.info;
+  @extend
+a:hover;
+  @extend
+.icon-#{$name};
+}
+
+```
+
+
+# Formatted
+
+```scss
+%toolbelt {
+	border: 1px solid black;
+}
+
+.action-buttons {
+	@extend %toolbelt !optional;
+}
+
+.alert {
+	@extend .message, .info;
+	@extend a:hover;
+	@extend .icon-#{$name};
+}
+
+```

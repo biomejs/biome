@@ -1,9 +1,14 @@
+use crate::JsRuleAction;
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_js_syntax::{TsMethodSignatureTypeMember, TsPropertySignatureTypeMember};
-use biome_rowan::{AstNode, declare_node_union};
+use biome_js_factory::make;
+use biome_js_syntax::{
+    AnyTsType, AnyTsTypeMember, T, TsMethodSignatureTypeMember, TsPropertySignatureTypeMember,
+    TsTypeMemberList,
+};
+use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind, declare_node_union};
 use biome_rule_options::use_consistent_method_signatures::{
     MethodSignatureStyle, UseConsistentMethodSignaturesOptions,
 };
@@ -181,11 +186,8 @@ declare_lint_rule! {
         name: "useConsistentMethodSignatures",
         language: "ts",
         recommended: false,
-        issue_number: Some("8780"),
         sources: &[RuleSource::EslintTypeScript("method-signature-style").same()],
-        // TODO: Implement fix to convert between method/property
-        // This will need to handle transforming overloads into intersections of function properties
-        // fix_kind: FixKind::Unsafe,
+        fix_kind: FixKind::Unsafe,
     }
 }
 
@@ -247,6 +249,157 @@ impl Rule for UseConsistentMethodSignatures {
 
         Some(diagnostic)
     }
+
+    fn action(
+        ctx: &RuleContext<Self>,
+        state: &Self::State,
+    ) -> Option<JsRuleAction> {
+        let node = ctx.query();
+        let mut mutation = ctx.root().begin();
+
+        let (prev, next) = match node {
+            AnyTsMethodSignatureLike::TsMethodSignatureTypeMember(method) => {
+                let new_node = method_to_property(method)?;
+                (
+                    AnyTsTypeMember::from(method.clone()),
+                    AnyTsTypeMember::from(new_node),
+                )
+            }
+            AnyTsMethodSignatureLike::TsPropertySignatureTypeMember(prop) => {
+                let new_node = property_to_method(prop)?;
+                (
+                    AnyTsTypeMember::from(prop.clone()),
+                    AnyTsTypeMember::from(new_node),
+                )
+            }
+        };
+
+        mutation.replace_node(prev, next);
+
+        Some(JsRuleAction::new(
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
+            ctx.metadata().applicability(),
+            markup! { "Convert to "<Emphasis>{state.target_style}</Emphasis>"-style signature." }
+                .to_owned(),
+            mutation,
+        ))
+    }
+}
+
+/// Converts a method-style signature into a property-style one.
+///
+/// Returns `None` if:
+/// - The method has no explicit return type annotation (can't build a valid function type).
+/// - The method is one of several overloads (would need intersection types — handled separately).
+fn method_to_property(
+    node: &TsMethodSignatureTypeMember,
+) -> Option<TsPropertySignatureTypeMember> {
+    let return_type_annotation = node.return_type_annotation()?;
+
+    if has_method_overloads(node) {
+        return None;
+    }
+
+    let name = node.name().ok()?;
+    let orig_params = node.parameters().ok()?;
+    // Rebuild parameters with a `)` that has trailing whitespace so the output is
+    // `(arg: string) => void` instead of `(arg: string)=> void`.
+    let parameters = make::js_parameters(
+        orig_params.l_paren_token().ok()?,
+        orig_params.items(),
+        make::token(T![')']).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+    );
+    let return_type = return_type_annotation.ty().ok()?;
+
+    let function_type = make::ts_function_type(
+        parameters,
+        make::token(T![=>]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+        return_type,
+    )
+    .build()
+    .with_type_parameters(node.type_parameters());
+
+    let type_annotation = make::ts_type_annotation(
+        make::token(T![:]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+        AnyTsType::from(function_type),
+    );
+
+    let mut builder = make::ts_property_signature_type_member(name)
+        .with_type_annotation(type_annotation);
+
+    if let Some(opt) = node.optional_token() {
+        builder = builder.with_optional_token(opt);
+    }
+    if let Some(sep) = node.separator_token() {
+        builder = builder.with_separator_token_token(sep);
+    }
+
+    Some(builder.build())
+}
+
+/// Converts a property-style signature into a method-style one.
+///
+/// Returns `None` if the property has a `readonly` modifier (methods can't be readonly).
+fn property_to_method(
+    node: &TsPropertySignatureTypeMember,
+) -> Option<TsMethodSignatureTypeMember> {
+    if node.readonly_token().is_some() {
+        return None;
+    }
+
+    let name = node.name().ok()?;
+    let type_annotation = node.type_annotation()?;
+    let function_type = type_annotation.ty().ok()?.as_ts_function_type()?.clone();
+
+    let orig_params = function_type.parameters().ok()?;
+    // Rebuild parameters with a clean `)` — the original `)` carries trailing whitespace
+    // from the source (e.g. the space before `=>` in `(arg: string) => void`), which would
+    // produce `method() : void` instead of the desired `method(): void`.
+    let parameters = make::js_parameters(
+        orig_params.l_paren_token().ok()?,
+        orig_params.items(),
+        make::token(T![')']),
+    );
+    let return_type = function_type.return_type().ok()?;
+
+    let return_type_annotation = make::ts_return_type_annotation(
+        make::token(T![:]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+        return_type,
+    );
+
+    let mut builder = make::ts_method_signature_type_member(name, parameters)
+        .with_return_type_annotation(return_type_annotation);
+
+    if let Some(opt) = node.optional_token() {
+        builder = builder.with_optional_token(opt);
+    }
+    if let Some(type_params) = function_type.type_parameters() {
+        builder = builder.with_type_parameters(type_params);
+    }
+    if let Some(sep) = node.separator_token() {
+        builder = builder.with_separator_token_token(sep);
+    }
+
+    Some(builder.build())
+}
+
+/// Returns `true` if `node` is one of multiple overloads — i.e. the parent type member list
+/// contains more than one method signature with the same name.
+fn has_method_overloads(node: &TsMethodSignatureTypeMember) -> bool {
+    check_method_overloads(node).unwrap_or(false)
+}
+
+fn check_method_overloads(node: &TsMethodSignatureTypeMember) -> Option<bool> {
+    let name_text = node.name().ok()?.name()?;
+    let member_list = node.parent::<TsTypeMemberList>()?;
+
+    let overload_count = member_list
+        .into_iter()
+        .filter_map(|m| m.as_ts_method_signature_type_member().cloned())
+        .filter(|m| m.name().ok().and_then(|n| n.name()).is_some_and(|n| n == name_text))
+        .count();
+
+    Some(overload_count > 1)
 }
 
 declare_node_union! {

@@ -44,8 +44,8 @@ with-comments.jsx:1:1 assist/source/useSortedAttributes  FIXABLE  ━━━━�
         2 │ + → address="NY"
         3 │ + → //·Simple·comment
         4 │ + → tel={5555555}
-     5  5 │   	{...this.props}
-     6  6 │   	// Another simple comment
+     5  5 │     {...this.props}
+     6  6 │     // Another simple comment
   
 
 ```
@@ -70,8 +70,8 @@ with-comments.jsx:1:1 assist/source/useSortedAttributes  FIXABLE  ━━━━�
   
   i Safe fix: Sort the JSX props.
   
-     4  4 │   	address="NY"
-     5  5 │   	{...this.props}
+     4  4 │     address="NY"
+     5  5 │     {...this.props}
      6    │ - → //·Another·simple·comment
      7    │ - → lastName="Smith"
      8    │ - → firstName="John"·//·Inline·comment

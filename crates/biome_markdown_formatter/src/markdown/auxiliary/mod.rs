@@ -38,3 +38,4 @@ pub(crate) mod setext_header;
 pub(crate) mod soft_break;
 pub(crate) mod textual;
 pub(crate) mod thematic_break_block;
+pub(crate) mod thematic_break_char;

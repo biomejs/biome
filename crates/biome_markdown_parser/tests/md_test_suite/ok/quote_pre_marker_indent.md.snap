@@ -156,8 +156,11 @@ MdDocument {
         },
         MdIndentCodeBlock {
             content: MdInlineItemList [
+                MdIndentToken {
+                    md_indent_char_token: MD_INDENT_CHAR@100..101 "\t" [] [],
+                },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@100..102 ">" [Skipped("\t")] [],
+                    value_token: MD_TEXTUAL_LITERAL@101..102 ">" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@102..120 " tab before marker" [] [],
@@ -259,9 +262,11 @@ MdDocument {
       0: NEWLINE@99..100 "\n" [] []
     8: MD_INDENT_CODE_BLOCK@100..120
       0: MD_INLINE_ITEM_LIST@100..120
-        0: MD_TEXTUAL@100..102
-          0: MD_TEXTUAL_LITERAL@100..102 ">" [Skipped("\t")] []
-        1: MD_TEXTUAL@102..120
+        0: MD_INDENT_TOKEN@100..101
+          0: MD_INDENT_CHAR@100..101 "\t" [] []
+        1: MD_TEXTUAL@101..102
+          0: MD_TEXTUAL_LITERAL@101..102 ">" [] []
+        2: MD_TEXTUAL@102..120
           0: MD_TEXTUAL_LITERAL@102..120 " tab before marker" [] []
   2: EOF@120..120 "" [] []
 

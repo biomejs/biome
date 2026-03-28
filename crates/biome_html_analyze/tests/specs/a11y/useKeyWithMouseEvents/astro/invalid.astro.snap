@@ -1,0 +1,142 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.astro
+---
+# Input
+```astro
+---
+---
+<!-- should generate diagnostics -->
+
+<!-- onmouseover without onfocus -->
+<div onmouseover="handleMouseOver()"></div>
+
+<!-- onmouseout without onblur -->
+<div onmouseout="handleMouseOut()"></div>
+
+<!-- has wrong keyboard pair -->
+<div onmouseover="handleMouseOver()" onblur="handleBlur()"></div>
+<div onmouseout="handleMouseOut()" onfocus="handleFocus()"></div>
+
+<!-- self-closing elements -->
+<input onmouseover="handleMouseOver()" />
+
+<!-- different element types -->
+<a onmouseover="handleMouseOver()">link</a>
+<button onmouseout="handleMouseOut()">button</button>
+
+```
+
+# Diagnostics
+```
+invalid.astro:6:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × onmouseover must be accompanied by onfocus.
+  
+    5 │ <!-- onmouseover without onfocus -->
+  > 6 │ <div onmouseover="handleMouseOver()"></div>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ <!-- onmouseout without onblur -->
+  
+  i Users who navigate via keyboard cannot interact with elements that only have mouse event handlers. Add an onfocus attribute to ensure keyboard accessibility.
+  
+
+```
+
+```
+invalid.astro:9:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × onmouseout must be accompanied by onblur.
+  
+     8 │ <!-- onmouseout without onblur -->
+   > 9 │ <div onmouseout="handleMouseOut()"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+    11 │ <!-- has wrong keyboard pair -->
+  
+  i Users who navigate via keyboard cannot interact with elements that only have mouse event handlers. Add an onblur attribute to ensure keyboard accessibility.
+  
+
+```
+
+```
+invalid.astro:12:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × onmouseover must be accompanied by onfocus.
+  
+    11 │ <!-- has wrong keyboard pair -->
+  > 12 │ <div onmouseover="handleMouseOver()" onblur="handleBlur()"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ <div onmouseout="handleMouseOut()" onfocus="handleFocus()"></div>
+    14 │ 
+  
+  i Users who navigate via keyboard cannot interact with elements that only have mouse event handlers. Add an onfocus attribute to ensure keyboard accessibility.
+  
+
+```
+
+```
+invalid.astro:13:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × onmouseout must be accompanied by onblur.
+  
+    11 │ <!-- has wrong keyboard pair -->
+    12 │ <div onmouseover="handleMouseOver()" onblur="handleBlur()"></div>
+  > 13 │ <div onmouseout="handleMouseOut()" onfocus="handleFocus()"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 
+    15 │ <!-- self-closing elements -->
+  
+  i Users who navigate via keyboard cannot interact with elements that only have mouse event handlers. Add an onblur attribute to ensure keyboard accessibility.
+  
+
+```
+
+```
+invalid.astro:16:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × onmouseover must be accompanied by onfocus.
+  
+    15 │ <!-- self-closing elements -->
+  > 16 │ <input onmouseover="handleMouseOver()" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ 
+    18 │ <!-- different element types -->
+  
+  i Users who navigate via keyboard cannot interact with elements that only have mouse event handlers. Add an onfocus attribute to ensure keyboard accessibility.
+  
+
+```
+
+```
+invalid.astro:19:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × onmouseover must be accompanied by onfocus.
+  
+    18 │ <!-- different element types -->
+  > 19 │ <a onmouseover="handleMouseOver()">link</a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ <button onmouseout="handleMouseOut()">button</button>
+    21 │ 
+  
+  i Users who navigate via keyboard cannot interact with elements that only have mouse event handlers. Add an onfocus attribute to ensure keyboard accessibility.
+  
+
+```
+
+```
+invalid.astro:20:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × onmouseout must be accompanied by onblur.
+  
+    18 │ <!-- different element types -->
+    19 │ <a onmouseover="handleMouseOver()">link</a>
+  > 20 │ <button onmouseout="handleMouseOut()">button</button>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ 
+  
+  i Users who navigate via keyboard cannot interact with elements that only have mouse event handlers. Add an onblur attribute to ensure keyboard accessibility.
+  
+
+```

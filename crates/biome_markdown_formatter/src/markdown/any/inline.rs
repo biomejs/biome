@@ -5,7 +5,7 @@ use biome_markdown_syntax::AnyMdInline;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatAnyMdInline;
 impl FormatRule<AnyMdInline> for FormatAnyMdInline {
-    type Context = MarkdownFormatContext;
+    type Context = MdFormatContext;
     fn fmt(&self, node: &AnyMdInline, f: &mut MarkdownFormatter) -> FormatResult<()> {
         match node {
             AnyMdInline::MdAutolink(node) => node.format().fmt(f),

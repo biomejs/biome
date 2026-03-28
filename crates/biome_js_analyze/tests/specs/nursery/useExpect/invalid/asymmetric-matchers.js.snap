@@ -1,0 +1,99 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: asymmetric-matchers.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+test("only asymmetric matcher, not an assertion", () => {
+    const matcher = expect.stringContaining("foo");
+});
+
+test("expect.extend is not an assertion", () => {
+    expect.extend({
+        toBeWithinRange(received, floor, ceiling) {
+            return { pass: received >= floor && received <= ceiling };
+        },
+    });
+});
+
+it("negated asymmetric matcher is not an assertion", () => {
+    const matcher = expect.not.objectContaining({ secret: expect.any(String) });
+});
+
+```
+
+# Diagnostics
+```
+asymmetric-matchers.js:3:1 lint/nursery/useExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Test callback is missing an expect() assertion.
+  
+    1 │ /* should generate diagnostics */
+    2 │ 
+  > 3 │ test("only asymmetric matcher, not an assertion", () => {
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 4 │     const matcher = expect.stringContaining("foo");
+  > 5 │ });
+      │ ^^
+    6 │ 
+    7 │ test("expect.extend is not an assertion", () => {
+  
+  i Tests without assertions may pass even when the behavior is broken.
+  
+  i Add an assertion using expect() to verify the expected behavior.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+asymmetric-matchers.js:7:1 lint/nursery/useExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Test callback is missing an expect() assertion.
+  
+     5 │ });
+     6 │ 
+   > 7 │ test("expect.extend is not an assertion", () => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 8 │     expect.extend({
+        ...
+  > 12 │     });
+  > 13 │ });
+       │ ^^
+    14 │ 
+    15 │ it("negated asymmetric matcher is not an assertion", () => {
+  
+  i Tests without assertions may pass even when the behavior is broken.
+  
+  i Add an assertion using expect() to verify the expected behavior.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+asymmetric-matchers.js:15:1 lint/nursery/useExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Test callback is missing an expect() assertion.
+  
+    13 │ });
+    14 │ 
+  > 15 │ it("negated asymmetric matcher is not an assertion", () => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 16 │     const matcher = expect.not.objectContaining({ secret: expect.any(String) });
+  > 17 │ });
+       │ ^^
+    18 │ 
+  
+  i Tests without assertions may pass even when the behavior is broken.
+  
+  i Add an assertion using expect() to verify the expected behavior.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

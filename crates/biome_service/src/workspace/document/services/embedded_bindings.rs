@@ -1,7 +1,8 @@
 use biome_js_syntax::{
-    AnyJsArrayBindingPatternElement, AnyJsBindingPattern, AnyJsModuleItem,
-    AnyJsObjectBindingPatternMember, AnyJsRoot, AnyJsStatement, AnyTsIdentifierBinding, JsImport,
-    JsModuleItemList, JsVariableStatement,
+    AnyJsArrayBindingPatternElement, AnyJsBindingPattern, AnyJsExpression, AnyJsModuleItem,
+    AnyJsObjectBindingPatternMember, AnyJsObjectMember, AnyJsRoot, AnyJsStatement,
+    AnyTsIdentifierBinding, AnyTsType, JsCallExpression, JsExport, JsImport, JsModuleItemList,
+    JsVariableStatement,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange, TokenText, WalkEvent};
 use rustc_hash::FxHashMap;
@@ -41,8 +42,10 @@ impl EmbeddedBuilder {
         for event in preorder {
             match event {
                 WalkEvent::Enter(node) => {
-                    if let Some(module_item) = JsModuleItemList::cast(node) {
+                    if let Some(module_item) = JsModuleItemList::cast_ref(&node) {
                         self.visit_module_item_list(module_item);
+                    } else if let Some(expr) = JsCallExpression::cast_ref(&node) {
+                        self.visit_define_props_call(&expr);
                     }
                 }
                 WalkEvent::Leave(_) => {}
@@ -56,6 +59,9 @@ impl EmbeddedBuilder {
                 AnyJsModuleItem::AnyJsStatement(statement) => match statement {
                     AnyJsStatement::JsVariableStatement(variable_statement) => {
                         self.visit_js_variable_statement(variable_statement.clone());
+                    }
+                    AnyJsStatement::JsExpressionStatement(expr_statement) => {
+                        self.visit_js_expression_statement(expr_statement.clone());
                     }
                     AnyJsStatement::JsFunctionDeclaration(decl) => {
                         self.register_js_binding(decl.id());
@@ -77,7 +83,9 @@ impl EmbeddedBuilder {
                     }
                     _ => {}
                 },
-                AnyJsModuleItem::JsExport(_) => {}
+                AnyJsModuleItem::JsExport(export) => {
+                    self.visit_js_export(export);
+                }
                 AnyJsModuleItem::JsImport(import) => {
                     self.visit_js_import(import);
                 }
@@ -128,6 +136,78 @@ impl EmbeddedBuilder {
         Some(())
     }
 
+    /// Handles `export default { props: { ... } }` patterns from Vue Options API.
+    /// Extracts prop names from the `props` object and registers them as bindings.
+    fn visit_js_export(&mut self, export: JsExport) -> Option<()> {
+        // You may be confused as to why we don't use our existing helpers for dealing with vue components from crates/biome_js_analyze/src/frameworks/vue/vue_component.rs
+        // The reason is that we don't have access to the semantic model, nor the snippet's file source here, which is required for those helpers. However, using those helpers
+        // would be preferable since they could help reduce the duplicated logic for this.
+
+        let clause = export.export_clause().ok()?;
+
+        // Only handle `export default { ... }` patterns
+        let default_clause = clause.as_js_export_default_expression_clause()?;
+        let expression = default_clause.expression().ok()?;
+
+        // Must be an object expression
+        let object_expr = expression.as_js_object_expression()?;
+
+        // Find the "props" property
+        for member in object_expr.members() {
+            let props_value = if let Ok(AnyJsObjectMember::JsPropertyObjectMember(prop)) = member
+                && let Ok(name) = prop.name()
+                && name.name().as_deref() == Some("props")
+                && let Ok(props_value) = prop.value()
+            {
+                props_value
+            } else {
+                continue;
+            };
+
+            match props_value {
+                // `props: { loading: Boolean, ... }` — extract keys
+                AnyJsExpression::JsObjectExpression(props_object) => {
+                    for props_member in props_object.members() {
+                        let Ok(AnyJsObjectMember::JsPropertyObjectMember(prop_entry)) =
+                            props_member
+                        else {
+                            continue;
+                        };
+                        if let Ok(prop_name) = prop_entry.name()
+                            && let Some(literal_name) = prop_name.as_js_literal_member_name()
+                            && let Ok(token) = literal_name.value()
+                        {
+                            self.js_bindings
+                                .insert(token.text_trimmed_range(), token.token_text_trimmed());
+                        }
+                    }
+                }
+                // `props: ['loading', 'disabled']` — extract string literal values
+                AnyJsExpression::JsArrayExpression(props_array) => {
+                    use biome_js_syntax::{AnyJsArrayElement, AnyJsLiteralExpression};
+                    for element in props_array.elements() {
+                        let Ok(AnyJsArrayElement::AnyJsExpression(
+                            AnyJsExpression::AnyJsLiteralExpression(
+                                AnyJsLiteralExpression::JsStringLiteralExpression(string_lit),
+                            ),
+                        )) = element
+                        else {
+                            continue;
+                        };
+                        if let Ok(inner) = string_lit.inner_string_text() {
+                            // Use the string literal's range as a unique key;
+                            // only the value (prop name) matters for binding lookups.
+                            self.js_bindings.insert(string_lit.range(), inner);
+                        }
+                    }
+                }
+                _ => {}
+            }
+        }
+
+        Some(())
+    }
+
     /// Registers the name binding from a `SyntaxResult<AnyJsBinding>`.
     /// Used for `JsFunctionDeclaration::id()`, `JsClassDeclaration::id()`,
     /// `TsEnumDeclaration::id()`, and `TsDeclareFunctionDeclaration::id()`.
@@ -160,6 +240,13 @@ impl EmbeddedBuilder {
     fn visit_js_variable_statement(&mut self, statement: JsVariableStatement) -> Option<()> {
         let declaration = statement.declaration().ok()?;
         for declarator in declaration.declarators().iter().flatten() {
+            // If the initializer is a defineProps(...) call, extract prop names from it.
+            if let Some(initializer) = declarator.initializer()
+                && let Ok(AnyJsExpression::JsCallExpression(call)) = initializer.expression()
+            {
+                self.visit_define_props_call(&call);
+            }
+
             let id = declarator.id().ok()?;
 
             match id {
@@ -199,6 +286,98 @@ impl EmbeddedBuilder {
         }
 
         Some(())
+    }
+
+    fn visit_js_expression_statement(&mut self, statement: biome_js_syntax::JsExpressionStatement) {
+        let Ok(AnyJsExpression::JsCallExpression(call_expression)) = statement.expression() else {
+            return;
+        };
+        self.visit_define_props_call(&call_expression);
+    }
+
+    /// Extracts prop name bindings from a `defineProps(...)` call expression.
+    ///
+    /// Handles three forms used in Vue `<script setup>`:
+    /// - Type-argument: `defineProps<{ title: String }>()`
+    /// - Runtime object: `defineProps({ title: String })`
+    /// - Runtime array:  `defineProps(['title'])`
+    fn visit_define_props_call(&mut self, call_expression: &biome_js_syntax::JsCallExpression) {
+        let Ok(callee) = call_expression.callee() else {
+            return;
+        };
+
+        let callee_text = callee.syntax().text_trimmed();
+        // defineProps is a macro used in Vue SFCs to define component props.
+        // TODO: only bother with this check in Vue files. Currently, this check applies to all html-ish files.
+        if callee_text != "defineProps" {
+            return;
+        }
+
+        // Type-argument form: defineProps<{ title: String }>()
+        if let Some(type_arguments) = call_expression.type_arguments()
+            && let Some(Ok(AnyTsType::TsObjectType(object_type))) =
+                type_arguments.ts_type_argument_list().iter().next()
+        {
+            for member in object_type.members() {
+                if let biome_js_syntax::AnyTsTypeMember::TsPropertySignatureTypeMember(property) =
+                    member
+                    && let Ok(name) = property.name()
+                    && let Some(literal_name) = name.as_js_literal_member_name()
+                    && let Ok(value) = literal_name.value()
+                {
+                    self.js_bindings
+                        .insert(value.text_trimmed_range(), value.token_text_trimmed());
+                }
+            }
+            return;
+        }
+
+        // Runtime argument forms: defineProps({ ... }) or defineProps([...])
+        let Ok(arguments) = call_expression.arguments() else {
+            return;
+        };
+        let Some(Ok(first_arg)) = arguments.args().iter().next() else {
+            return;
+        };
+        let Some(first_expr) = first_arg.as_any_js_expression() else {
+            return;
+        };
+
+        match first_expr {
+            // defineProps({ title: String, likes: Number })
+            AnyJsExpression::JsObjectExpression(obj) => {
+                for member in obj.members() {
+                    let Ok(AnyJsObjectMember::JsPropertyObjectMember(prop)) = member else {
+                        continue;
+                    };
+                    if let Ok(name) = prop.name()
+                        && let Some(literal_name) = name.as_js_literal_member_name()
+                        && let Ok(token) = literal_name.value()
+                    {
+                        self.js_bindings
+                            .insert(token.text_trimmed_range(), token.token_text_trimmed());
+                    }
+                }
+            }
+            // defineProps(['title', 'likes'])
+            AnyJsExpression::JsArrayExpression(arr) => {
+                use biome_js_syntax::{AnyJsArrayElement, AnyJsLiteralExpression};
+                for element in arr.elements() {
+                    let Ok(AnyJsArrayElement::AnyJsExpression(
+                        AnyJsExpression::AnyJsLiteralExpression(
+                            AnyJsLiteralExpression::JsStringLiteralExpression(string_lit),
+                        ),
+                    )) = element
+                    else {
+                        continue;
+                    };
+                    if let Ok(inner) = string_lit.inner_string_text() {
+                        self.js_bindings.insert(string_lit.range(), inner);
+                    }
+                }
+            }
+            _ => {}
+        }
     }
 
     fn visit_object_binding_pattern_member(
@@ -427,5 +606,68 @@ enum Direction { Up, Down }
         visit_js_root(&mut builder, &parse_js(source));
         service.finish(builder);
         assert!(contains_binding(&service, "Vue"));
+    }
+
+    #[test]
+    fn tracks_vue_options_api_props_object() {
+        let source = r#"
+export default {
+  props: {
+    loading: Boolean,
+    disabled: Boolean,
+  },
+}
+"#;
+        let mut service = EmbeddedExportedBindings::default();
+        let mut builder = service.builder();
+        visit_js_root(&mut builder, &parse_js(source));
+        service.finish(builder);
+        assert!(contains_binding(&service, "loading"));
+        assert!(contains_binding(&service, "disabled"));
+    }
+
+    #[test]
+    fn tracks_vue_options_api_props_array() {
+        let source = r#"
+export default {
+  props: ['loading', 'disabled'],
+}
+"#;
+        let mut service = EmbeddedExportedBindings::default();
+        let mut builder = service.builder();
+        visit_js_root(&mut builder, &parse_js(source));
+        service.finish(builder);
+        assert!(contains_binding(&service, "loading"));
+        assert!(contains_binding(&service, "disabled"));
+    }
+
+    #[test]
+    fn tracks_define_props_runtime_object() {
+        // defineProps({ title: String, likes: Number })
+        let source = r#"
+defineProps({
+  title: String,
+  likes: Number,
+})
+"#;
+        let mut service = EmbeddedExportedBindings::default();
+        let mut builder = service.builder();
+        visit_js_root(&mut builder, &parse_js(source));
+        service.finish(builder);
+        assert!(contains_binding(&service, "title"));
+        assert!(contains_binding(&service, "likes"));
+    }
+
+    #[test]
+    fn tracks_define_props_runtime_array() {
+        // const props = defineProps(['foo'])
+        let source = r#"
+const props = defineProps(['foo'])
+"#;
+        let mut service = EmbeddedExportedBindings::default();
+        let mut builder = service.builder();
+        visit_js_root(&mut builder, &parse_js(source));
+        service.finish(builder);
+        assert!(contains_binding(&service, "foo"));
     }
 }

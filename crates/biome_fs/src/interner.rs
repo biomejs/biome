@@ -29,9 +29,14 @@ impl PathInterner {
     ///
     /// Returns `true` if the path was not previously inserted.
     pub fn intern_path(&self, path: Utf8PathBuf) -> bool {
-        let result = self.storage.pin().insert(path.clone());
+        let guard = self.storage.pin();
+        if guard.contains(&path) {
+            return false;
+        }
+        let owned = path.to_path_buf();
+        let result = guard.insert(owned.clone());
         if result {
-            self.handler.send(path).ok();
+            self.handler.send(owned).ok();
         }
         result
     }

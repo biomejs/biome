@@ -1,0 +1,72 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 77
+expression: invalid.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<div aria-activedescendant="some-id"></div>
+<span aria-activedescendant="some-id"></span>
+<a aria-activedescendant="some-id"></a>
+
+```
+
+# Diagnostics
+```
+invalid.html:2:1 lint/a11y/useAriaActivedescendantWithTabindex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Enforce elements with aria-activedescendant are tabbable.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <div aria-activedescendant="some-id"></div>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <span aria-activedescendant="some-id"></span>
+    4 │ <a aria-activedescendant="some-id"></a>
+  
+  i aria-activedescendant is used to manage focus within a composite widget.
+    The element with the attribute aria-activedescendant retains the active document focus.
+  
+  i Add the tabindex attribute to the element with a value greater than or equal to -1.
+  
+
+```
+
+```
+invalid.html:3:1 lint/a11y/useAriaActivedescendantWithTabindex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Enforce elements with aria-activedescendant are tabbable.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <div aria-activedescendant="some-id"></div>
+  > 3 │ <span aria-activedescendant="some-id"></span>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ <a aria-activedescendant="some-id"></a>
+    5 │ 
+  
+  i aria-activedescendant is used to manage focus within a composite widget.
+    The element with the attribute aria-activedescendant retains the active document focus.
+  
+  i Add the tabindex attribute to the element with a value greater than or equal to -1.
+  
+
+```
+
+```
+invalid.html:4:1 lint/a11y/useAriaActivedescendantWithTabindex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Enforce elements with aria-activedescendant are tabbable.
+  
+    2 │ <div aria-activedescendant="some-id"></div>
+    3 │ <span aria-activedescendant="some-id"></span>
+  > 4 │ <a aria-activedescendant="some-id"></a>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+  
+  i aria-activedescendant is used to manage focus within a composite widget.
+    The element with the attribute aria-activedescendant retains the active document focus.
+  
+  i Add the tabindex attribute to the element with a value greater than or equal to -1.
+  
+
+```

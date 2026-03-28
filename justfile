@@ -56,6 +56,9 @@ gen-analyzer:
 gen-rules:
   cargo run -p xtask_codegen -- analyzer
 
+# Generates Baseline data for CSS features from web-features
+gen-css-baseline:
+  cargo run -p xtask_codegen --features xtask_codegen/external_data -- css-baseline
 
 gen-configuration:
   cargo run -p xtask_codegen --features configuration -- configuration
@@ -222,7 +225,7 @@ _touch file:
 test:
 	cargo test --no-fail-fast
 
-# Run tests for the crate passed as argument e.g. just test-create biome_cli
+# Run tests for the crate passed as argument e.g. just test-crate biome_cli
 test-crate name:
 	cargo test -p {{name}} --no-fail-fast
 
@@ -282,6 +285,10 @@ ready:
 # Creates a new changeset for the final changelog
 new-changeset:
   pnpm changeset
+
+# Creates a new changeset without interaction
+new-changeset-empty:
+  pnpm changeset --empty
 
 # Create new crate
 new-crate name:

@@ -1,0 +1,143 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<template>
+  <!-- should generate diagnostics -->
+
+  <!-- onmouseover without onfocus -->
+  <div onmouseover="handleMouseOver()"></div>
+
+  <!-- onmouseout without onblur -->
+  <div onmouseout="handleMouseOut()"></div>
+
+  <!-- has wrong keyboard pair -->
+  <div onmouseover="handleMouseOver()" onblur="handleBlur()"></div>
+  <div onmouseout="handleMouseOut()" onfocus="handleFocus()"></div>
+
+  <!-- self-closing elements -->
+  <input onmouseover="handleMouseOver()" />
+
+  <!-- different element types -->
+  <a onmouseover="handleMouseOver()">link</a>
+  <button onmouseout="handleMouseOut()">button</button>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:5:3 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × onmouseover must be accompanied by onfocus.
+  
+    4 │   <!-- onmouseover without onfocus -->
+  > 5 │   <div onmouseover="handleMouseOver()"></div>
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │   <!-- onmouseout without onblur -->
+  
+  i Users who navigate via keyboard cannot interact with elements that only have mouse event handlers. Add an onfocus attribute to ensure keyboard accessibility.
+  
+
+```
+
+```
+invalid.vue:8:3 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × onmouseout must be accompanied by onblur.
+  
+     7 │   <!-- onmouseout without onblur -->
+   > 8 │   <div onmouseout="handleMouseOut()"></div>
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │   <!-- has wrong keyboard pair -->
+  
+  i Users who navigate via keyboard cannot interact with elements that only have mouse event handlers. Add an onblur attribute to ensure keyboard accessibility.
+  
+
+```
+
+```
+invalid.vue:11:3 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × onmouseover must be accompanied by onfocus.
+  
+    10 │   <!-- has wrong keyboard pair -->
+  > 11 │   <div onmouseover="handleMouseOver()" onblur="handleBlur()"></div>
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │   <div onmouseout="handleMouseOut()" onfocus="handleFocus()"></div>
+    13 │ 
+  
+  i Users who navigate via keyboard cannot interact with elements that only have mouse event handlers. Add an onfocus attribute to ensure keyboard accessibility.
+  
+
+```
+
+```
+invalid.vue:12:3 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × onmouseout must be accompanied by onblur.
+  
+    10 │   <!-- has wrong keyboard pair -->
+    11 │   <div onmouseover="handleMouseOver()" onblur="handleBlur()"></div>
+  > 12 │   <div onmouseout="handleMouseOut()" onfocus="handleFocus()"></div>
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 
+    14 │   <!-- self-closing elements -->
+  
+  i Users who navigate via keyboard cannot interact with elements that only have mouse event handlers. Add an onblur attribute to ensure keyboard accessibility.
+  
+
+```
+
+```
+invalid.vue:15:3 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × onmouseover must be accompanied by onfocus.
+  
+    14 │   <!-- self-closing elements -->
+  > 15 │   <input onmouseover="handleMouseOver()" />
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 
+    17 │   <!-- different element types -->
+  
+  i Users who navigate via keyboard cannot interact with elements that only have mouse event handlers. Add an onfocus attribute to ensure keyboard accessibility.
+  
+
+```
+
+```
+invalid.vue:18:3 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × onmouseover must be accompanied by onfocus.
+  
+    17 │   <!-- different element types -->
+  > 18 │   <a onmouseover="handleMouseOver()">link</a>
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │   <button onmouseout="handleMouseOut()">button</button>
+    20 │ </template>
+  
+  i Users who navigate via keyboard cannot interact with elements that only have mouse event handlers. Add an onfocus attribute to ensure keyboard accessibility.
+  
+
+```
+
+```
+invalid.vue:19:3 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × onmouseout must be accompanied by onblur.
+  
+    17 │   <!-- different element types -->
+    18 │   <a onmouseover="handleMouseOver()">link</a>
+  > 19 │   <button onmouseout="handleMouseOut()">button</button>
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ </template>
+    21 │ 
+  
+  i Users who navigate via keyboard cannot interact with elements that only have mouse event handlers. Add an onblur attribute to ensure keyboard accessibility.
+  
+
+```

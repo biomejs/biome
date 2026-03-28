@@ -18,8 +18,8 @@
   [ci-url]: https://github.com/biomejs/biome/actions/workflows/main.yml
   [discord-badge]: https://badgen.net/discord/online-members/BypW39g6Yc?icon=discord&label=discord&color=60a5fa
   [discord-url]: https://biomejs.dev/chat
-  [npm-badge]: https://badgen.net/npm/v/@biomejs/biome?icon=npm&color=60a5fa&label=%40biomejs%2Fbiome
-  [npm-url]: https://www.npmjs.com/package/@biomejs/biome/v/latest
+  [npm-badge]: https://npmx.dev/api/registry/badge/version/@biomejs/biome?color=60a5fa&style=shieldsio&label=%40biomejs%2Fbiome
+  [npm-url]: https://npmx.dev/package/@biomejs/biome
   [vscode-badge]: https://img.shields.io/visual-studio-marketplace/v/biomejs.biome?label=Visual%20Studio%20Marketplace&labelColor=374151&color=60a5fa
   [vscode-url]: https://marketplace.visualstudio.com/items?itemName=biomejs.biome
   [open-vsx-badge]: https://img.shields.io/visual-studio-marketplace/v/biomejs.biome?label=Open%20VSX%20Registry&logo=data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHN2ZyB2aWV3Qm94PSI0LjYgNSA5Ni4yIDEyMi43IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogIDxwYXRoIGQ9Ik0zMCA0NC4yTDUyLjYgNUg3LjN6TTQuNiA4OC41aDQ1LjNMMjcuMiA0OS40em01MSAwbDIyLjYgMzkuMiAyMi42LTM5LjJ6IiBmaWxsPSIjYzE2MGVmIi8+CiAgPHBhdGggZD0iTTUyLjYgNUwzMCA0NC4yaDQ1LjJ6TTI3LjIgNDkuNGwyMi43IDM5LjEgMjIuNi0zOS4xem01MSAwTDU1LjYgODguNWg0NS4yeiIgZmlsbD0iI2E2MGVlNSIvPgo8L3N2Zz4=&labelColor=374151&color=60a5fa
@@ -38,7 +38,7 @@
 
 **Biome to [szybki formater](./benchmark#formatting)** dla _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_ i _GraphQL_, który osiąga **[97% kompatybilności z _Prettier_](https://console.algora.io/challenges/prettier)**.
 
-**Biome to [wydajny linter](https://github.com/biomejs/biome/tree/main/benchmark#linting)** dla _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_ i _GraphQL_, który zawiera **[ponad 340 reguł](https://biomejs.dev/linter/javascript/rules/)** z ESLint, typescript-eslint i [innych źródeł](https://github.com/biomejs/biome/discussions/3).
+**Biome to [wydajny linter](https://github.com/biomejs/biome/tree/main/benchmark#linting)** dla _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_ i _GraphQL_, który zawiera **[ponad 450 reguł](https://biomejs.dev/linter/javascript/rules/)** z ESLint, typescript-eslint i [innych źródeł](https://github.com/biomejs/biome/discussions/3).
 **Wyprowadza szczegółowe i skontekstualizowane diagnostyki**, które pomagają Ci ulepszyć kod i zostać lepszym programistą!
 
 **Biome** jest zaprojektowany od początku do używania [interaktywnie w edytorze](https://biomejs.dev/guides/editors/first-party-extensions/).

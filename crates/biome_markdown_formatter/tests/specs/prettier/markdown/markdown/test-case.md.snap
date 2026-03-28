@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: markdown/markdown/test-case.md
 ---
+
 # Input
 
 ```md
@@ -241,10 +242,10 @@ This paragraph has some `code` in it.
  
 -# Header 1
  
--## Header 2
- 
++
 +# Header 1
-+## Header 2
+ ## Header 2
+-
  ### Header 3
 -
  #### Header 4
@@ -254,30 +255,25 @@ This paragraph has some `code` in it.
  ###### Header 6
  
      # Header 1
-@@ -33,17 +34,14 @@
+@@ -33,16 +34,13 @@
      ##### Header 5
      ###### Header 6
  
--# Header 1
- 
--## Header 2
- 
--### Header 3
++
++
+ # Header 1
 -
--#### Header 4
+ ## Header 2
 -
--##### Header 5
+ ### Header 3
 -
--###### Header 6
-+# Header 1 #
-+## Header 2 ##
-+### Header 3 ###
-+#### Header 4 ####
-+##### Header 5 #####
-+###### Header 6 ######
+ #### Header 4
+-
+ ##### Header 5
+-
+ ###### Header 6
  
      # Header 1 #
-     ## Header 2 ##
 @@ -52,12 +50,15 @@
      ##### Header 5 #####
      ###### Header 6 ######
@@ -340,7 +336,7 @@ This paragraph has some `code` in it.
  Paragraph:
  
      Code
-@@ -119,16 +130,18 @@
+@@ -119,15 +130,17 @@
  
          Code
  
@@ -356,14 +352,13 @@ This paragraph has some `code` in it.
  
 ----
 +*****
- 
++
 +- - -
 +
 +---------------------------------------
-+
+ 
      * * *
  
-     ***
 @@ -139,6 +152,8 @@
  
      ---------------------------------------
@@ -449,12 +444,12 @@ Header 2
 
 
 
-# Header 1 #
-## Header 2 ##
-### Header 3 ###
-#### Header 4 ####
-##### Header 5 #####
-###### Header 6 ######
+# Header 1
+## Header 2
+### Header 3
+#### Header 4
+##### Header 5
+###### Header 6
 
     # Header 1 #
     ## Header 2 ##

@@ -1,0 +1,38 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/scss/at-rule/while.scss
+---
+
+# Input
+
+```scss
+@while $i>0{
+$i:$i - 1;
+}
+
+.stack{
+@while
+$gap  >  0{
+gap:$gap;
+$gap:$gap - 0.25rem;
+}
+}
+
+```
+
+
+# Formatted
+
+```scss
+@while $i > 0 {
+	$i: $i - 1;
+}
+
+.stack {
+	@while $gap > 0 {
+		gap: $gap;
+		$gap: $gap - 0.25rem;
+	}
+}
+
+```

@@ -51,6 +51,7 @@ pub(crate) mod generic_delimiter;
 pub(crate) mod if_branch;
 pub(crate) mod if_function;
 pub(crate) mod if_media_test;
+pub(crate) mod if_sass_test;
 pub(crate) mod if_style_test;
 pub(crate) mod if_supports_identifier_test;
 pub(crate) mod if_supports_test;

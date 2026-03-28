@@ -1,0 +1,177 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+$with-important: (red !important, blue);
+$with-important-unwrapped: red !important, blue;
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        ScssDeclaration {
+            name: ScssIdentifier {
+                dollar_token: DOLLAR@0..1 "$" [] [],
+                name: CssIdentifier {
+                    value_token: IDENT@1..15 "with-important" [] [],
+                },
+            },
+            colon_token: COLON@15..17 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    ScssParenthesizedExpression {
+                        l_paren_token: L_PAREN@17..18 "(" [] [],
+                        expression: ScssListExpression {
+                            elements: ScssListExpressionElementList [
+                                ScssListExpressionElement {
+                                    value: ScssExpression {
+                                        items: ScssExpressionItemList [
+                                            CssIdentifier {
+                                                value_token: IDENT@18..22 "red" [] [Whitespace(" ")],
+                                            },
+                                            CssDeclarationImportant {
+                                                excl_token: BANG@22..23 "!" [] [],
+                                                important_token: IMPORTANT_KW@23..32 "important" [] [],
+                                            },
+                                        ],
+                                    },
+                                },
+                                COMMA@32..34 "," [] [Whitespace(" ")],
+                                ScssListExpressionElement {
+                                    value: ScssExpression {
+                                        items: ScssExpressionItemList [
+                                            CssIdentifier {
+                                                value_token: IDENT@34..38 "blue" [] [],
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                        r_paren_token: R_PAREN@38..39 ")" [] [],
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@39..40 ";" [] [],
+        },
+        ScssDeclaration {
+            name: ScssIdentifier {
+                dollar_token: DOLLAR@40..42 "$" [Newline("\n")] [],
+                name: CssIdentifier {
+                    value_token: IDENT@42..66 "with-important-unwrapped" [] [],
+                },
+            },
+            colon_token: COLON@66..68 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    ScssListExpression {
+                        elements: ScssListExpressionElementList [
+                            ScssListExpressionElement {
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssIdentifier {
+                                            value_token: IDENT@68..72 "red" [] [Whitespace(" ")],
+                                        },
+                                        CssDeclarationImportant {
+                                            excl_token: BANG@72..73 "!" [] [],
+                                            important_token: IMPORTANT_KW@73..82 "important" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            COMMA@82..84 "," [] [Whitespace(" ")],
+                            ScssListExpressionElement {
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssIdentifier {
+                                            value_token: IDENT@84..88 "blue" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                        ],
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@88..89 ";" [] [],
+        },
+    ],
+    eof_token: EOF@89..90 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..90
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..89
+    0: SCSS_DECLARATION@0..40
+      0: SCSS_IDENTIFIER@0..15
+        0: DOLLAR@0..1 "$" [] []
+        1: CSS_IDENTIFIER@1..15
+          0: IDENT@1..15 "with-important" [] []
+      1: COLON@15..17 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@17..39
+        0: SCSS_EXPRESSION_ITEM_LIST@17..39
+          0: SCSS_PARENTHESIZED_EXPRESSION@17..39
+            0: L_PAREN@17..18 "(" [] []
+            1: SCSS_LIST_EXPRESSION@18..38
+              0: SCSS_LIST_EXPRESSION_ELEMENT_LIST@18..38
+                0: SCSS_LIST_EXPRESSION_ELEMENT@18..32
+                  0: SCSS_EXPRESSION@18..32
+                    0: SCSS_EXPRESSION_ITEM_LIST@18..32
+                      0: CSS_IDENTIFIER@18..22
+                        0: IDENT@18..22 "red" [] [Whitespace(" ")]
+                      1: CSS_DECLARATION_IMPORTANT@22..32
+                        0: BANG@22..23 "!" [] []
+                        1: IMPORTANT_KW@23..32 "important" [] []
+                1: COMMA@32..34 "," [] [Whitespace(" ")]
+                2: SCSS_LIST_EXPRESSION_ELEMENT@34..38
+                  0: SCSS_EXPRESSION@34..38
+                    0: SCSS_EXPRESSION_ITEM_LIST@34..38
+                      0: CSS_IDENTIFIER@34..38
+                        0: IDENT@34..38 "blue" [] []
+            2: R_PAREN@38..39 ")" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@39..39
+      4: SEMICOLON@39..40 ";" [] []
+    1: SCSS_DECLARATION@40..89
+      0: SCSS_IDENTIFIER@40..66
+        0: DOLLAR@40..42 "$" [Newline("\n")] []
+        1: CSS_IDENTIFIER@42..66
+          0: IDENT@42..66 "with-important-unwrapped" [] []
+      1: COLON@66..68 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@68..88
+        0: SCSS_EXPRESSION_ITEM_LIST@68..88
+          0: SCSS_LIST_EXPRESSION@68..88
+            0: SCSS_LIST_EXPRESSION_ELEMENT_LIST@68..88
+              0: SCSS_LIST_EXPRESSION_ELEMENT@68..82
+                0: SCSS_EXPRESSION@68..82
+                  0: SCSS_EXPRESSION_ITEM_LIST@68..82
+                    0: CSS_IDENTIFIER@68..72
+                      0: IDENT@68..72 "red" [] [Whitespace(" ")]
+                    1: CSS_DECLARATION_IMPORTANT@72..82
+                      0: BANG@72..73 "!" [] []
+                      1: IMPORTANT_KW@73..82 "important" [] []
+              1: COMMA@82..84 "," [] [Whitespace(" ")]
+              2: SCSS_LIST_EXPRESSION_ELEMENT@84..88
+                0: SCSS_EXPRESSION@84..88
+                  0: SCSS_EXPRESSION_ITEM_LIST@84..88
+                    0: CSS_IDENTIFIER@84..88
+                      0: IDENT@84..88 "blue" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@88..88
+      4: SEMICOLON@88..89 ";" [] []
+  2: EOF@89..90 "" [Newline("\n")] []
+
+```

@@ -1,6 +1,7 @@
 ---
 name: biome-developer
-description: General development best practices and common gotchas when working on Biome. Use for avoiding common mistakes, understanding Biome-specific patterns, and learning technical tips. Examples:<example>Working with Biome's AST and syntax nodes</example><example>Understanding string extraction methods</example><example>Handling embedded languages and directives</example>
+description: General development best practices and common gotchas when working on Biome. Use for avoiding common mistakes, understanding Biome-specific patterns (AST, syntax nodes, string extraction, embedded languages), and learning technical tips.
+compatibility: Designed for coding agents working on the Biome codebase (github.com/biomejs/biome).
 ---
 
 ## Purpose
@@ -69,9 +70,8 @@ markup! { "This syntax is not allowed." }
 - Extract helper functions that return `Option<T>` or `SyntaxResult<T>` instead of scattering early returns throughout the caller — this makes code more readable and composable
 
 **DON'T:**
-- Build the full Biome binary just to inspect syntax (expensive) - use parser crate's `quick_test` instead
-- Assume syntax patterns without inspecting the AST first
-- Write functions with many `let Ok(...) else { return }` scattered throughout when you can extract a helper that returns `Option<T>` instead
+- Do NOT build the full Biome binary just to inspect syntax (expensive) - use parser crate's `quick_test` instead
+- Do NOT assume syntax patterns without inspecting the AST first
 
 **Example - Inspecting AST:**
 ```rust
@@ -219,8 +219,8 @@ Key points:
 - Calculate offsets correctly: token start + 1 for opening quote, or use `text_range().start()` for text expressions
 
 **DON'T:**
-- Assume all frameworks use the same syntax (Vue uses quotes, Svelte uses curly braces)
-- Implement features for "widely used" patterns without evidence - ask the user first
+- Do NOT assume all frameworks use the same syntax (Vue uses quotes, Svelte uses curly braces)
+- Do NOT implement features for "widely used" patterns without evidence - ask the user first
 
 **Example - Different Value Formats:**
 ```rust
@@ -240,7 +240,7 @@ let expression = text_expression.expression().ok()?;
 - Store method results that return owned values before calling methods on them
 
 **DON'T:**
-- Create temporary value borrows that get dropped before use
+- Do NOT create temporary value borrows that get dropped before use
 
 **Example - Avoiding Borrow Issues:**
 ```rust
@@ -262,7 +262,7 @@ let token = html_string.value_token().ok()?; // OK
 - Fix clippy suggestions unless there's a good reason not to
 
 **DON'T:**
-- Ignore clippy warnings - they often catch real issues or suggest better patterns
+- Do NOT ignore clippy warnings - they often catch real issues or suggest better patterns
 
 **Example - Collapsible If:**
 ```rust
@@ -281,6 +281,74 @@ if let Some(directive) = VueDirective::cast_ref(&element)
 }
 ```
 
+### Code Comments
+
+Comments exist for the next developer who reads this code, not for the developer currently writing it.
+
+**DO:**
+- Explain code that is hard to read, or document exceptions and edge cases
+- Provide context when names alone are not descriptive enough
+- Describe the business logic a function implements
+- Clarify contextual words like "normalize" — e.g., "normalize a file path" and "normalize a URL" mean different things; spell out what normalization means here
+
+**DON'T:**
+- Do NOT embed the context of the current work into comments. A comment like `// As per issue #1234, we skip this case` ties the code to a transient artifact. Instead, explain *why* the case is skipped in terms any future reader would understand.
+- Do NOT scope comments to the specific trigger that prompted the change. For example, if a bug was reported for Astro but the fix applies broadly, do NOT write `// Fix for Astro embedding`. Write a comment that describes the general condition being handled.
+
+**Think big picture, not current task.** Before writing a comment, ask: "If someone reads this a year from now with no knowledge of the issue or PR, does this comment give them the context they need?"
+
+**Example:**
+```rust
+// WRONG: Carries issue/task context
+// Fix for #5678: Astro files need special handling here
+if is_embedded_script(node) {
+    return normalize_offset(node);
+}
+
+// WRONG: Describes what the code does (the code already says that)
+// Check if the node is an embedded script and normalize the offset
+if is_embedded_script(node) {
+    return normalize_offset(node);
+}
+
+// CORRECT: Explains why and clarifies "normalize"
+// Embedded script blocks (e.g. <script> inside .vue/.svelte/.astro files)
+// report offsets relative to the embedding document, not the script itself.
+// Normalize here means: subtract the script block's start position so the
+// offset is relative to the script content.
+if is_embedded_script(node) {
+    return normalize_offset(node);
+}
+```
+
+### Cargo Dependencies: `workspace = true` vs `path = "..."`
+
+Internal `biome_*` crates listed under `[dev-dependencies]` **MUST** use `path = "../<crate_name>"`, not `workspace = true`. Using `workspace = true` for dev-dependencies can cause Cargo to resolve the crate from the registry instead of the local workspace, which is incorrect.
+
+Regular `[dependencies]` still use `workspace = true` as normal — this rule only applies to `[dev-dependencies]`.
+
+**DO:**
+- Use `path = "../biome_foo"` for all `biome_*` dev-dependencies
+- Preserve any extra attributes like `features` when converting
+
+**DON'T:**
+- Do NOT use `workspace = true` for `biome_*` crates in `[dev-dependencies]`
+
+**Example:**
+```toml
+# WRONG: may resolve from registry
+[dev-dependencies]
+biome_js_parser = { workspace = true }
+biome_formatter = { workspace = true, features = ["countme"] }
+
+# CORRECT: always resolves locally
+[dev-dependencies]
+biome_js_parser = { path = "../biome_js_parser" }
+biome_formatter = { path = "../biome_formatter", features = ["countme"] }
+```
+
+All crates live as siblings under `crates/`, so the relative path is always `../biome_<name>`.
+
 ### Legacy and Deprecated Syntax
 
 **DO:**
@@ -289,24 +357,21 @@ if let Some(directive) = VueDirective::cast_ref(&element)
 - Document when features are intentionally not supported due to being legacy
 
 **DON'T:**
-- Implement legacy/deprecated syntax without checking with the user first
-- Claim patterns are "widely used" or "common" without evidence
+- Do NOT implement legacy/deprecated syntax without checking with the user first
+- Do NOT claim patterns are "widely used" or "common" without evidence
 
 **Example:**
 Svelte's `on:click` event handler syntax is legacy (Svelte 3/4). Modern Svelte 5 runes mode uses regular attributes. Unless users specifically request it, don't implement legacy syntax support.
 
 ### Testing and Development
 
-**DO:**
-- Use `just qt <package>` to run quick tests (handles test execution automatically)
-- Review snapshot changes carefully - don't blindly accept
-- Test with multiple variants when working with enums (e.g., all `VueV*ShorthandDirective` types)
-- Add tests for both valid and invalid cases
-- Use CLI tests for testing embedded languages (Vue/Svelte directives, etc.)
+For testing commands, snapshot workflows, and code generation, see the
+[testing-codegen](../testing-codegen/SKILL.md) skill. Key reminders specific to
+Biome development patterns:
 
-**DON'T:**
-- Blindly accept all snapshot changes
-- Try to test embedded languages in analyzer packages (they don't have embedding capabilities)
+- Test with multiple variants when working with enums (e.g., all `VueV*ShorthandDirective` types)
+- Use CLI tests for testing embedded languages (Vue/Svelte directives, etc.)
+- Do NOT try to test embedded languages in analyzer packages (they don't have embedding capabilities)
 
 ## Pattern Matching Tips
 
@@ -392,7 +457,7 @@ if let Some(directive) = VueDirective::cast_ref(&element) {
 - Test documentation changes with markdown linters before committing
 
 **DON'T:**
-- Use compact table separators without spaces (causes CI linting failures)
+- Do NOT use compact table separators without spaces (causes CI linting failures)
 
 **Example - Table Formatting:**
 ```markdown

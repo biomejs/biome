@@ -13,68 +13,20 @@ const foo = bar => `This is a string that's long enough to wrap and contains an 
 ```
 
 
-=============================
+# Options
 
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: Always
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
-Trailing newline: true
------
-
-```js
-const foo = (
-	bar,
-) => `This is a string that's long enough to wrap and contains an interpolated value ${bar}
-and then a newline`;
-
-const foo = (bar) =>
-	`This is a string that's long enough to wrap and contains an interpolated value ${bar} and then a newline`;
-
+```json
+{
+  "$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "javascript": {
+    "formatter": {
+      "arrowParentheses": "asNeeded"
+    }
+  }
+}
 ```
 
-# Lines exceeding max width of 80 characters
-```
-    3: ) => `This is a string that's long enough to wrap and contains an interpolated value ${bar}
-    7: 	`This is a string that's long enough to wrap and contains an interpolated value ${bar} and then a newline`;
-```
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-JSX quote style: Double Quotes
-Quote properties: As needed
-Trailing commas: All
-Semicolons: Always
-Arrow parentheses: As needed
-Bracket spacing: true
-Bracket same line: false
-Attribute Position: Auto
-Expand lists: Auto
-Operator linebreak: After
-Trailing newline: true
------
+# Formatted
 
 ```js
 const foo =

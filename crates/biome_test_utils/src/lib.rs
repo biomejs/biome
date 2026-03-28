@@ -4,8 +4,9 @@ mod bench_case;
 
 pub use bench_case::BenchCase;
 use biome_analyze::options::{JsxRuntime, PreferredQuote};
-use biome_analyze::{AnalyzerAction, AnalyzerConfiguration, AnalyzerOptions};
+use biome_analyze::{AnalyzerAction, AnalyzerConfiguration, AnalyzerOptions, RuleCategories};
 use biome_configuration::HtmlConfiguration;
+use biome_configuration::analyzer::AnalyzerSelector;
 use biome_configuration::{Configuration, ConfigurationPathHint};
 use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
@@ -13,8 +14,7 @@ use biome_css_parser::CssParserOptions;
 use biome_css_syntax::AnyCssRoot;
 use biome_diagnostics::termcolor::Buffer;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
-use biome_fs::MemoryFileSystem;
-use biome_fs::{BiomePath, FileSystem, OsFileSystem};
+use biome_fs::{BiomePath, FileSystem, MemoryFileSystem, OsFileSystem};
 use biome_html_parser::HtmlParserOptions;
 use biome_html_syntax::HtmlRoot;
 use biome_js_parser::{AnyJsRoot, JsParserOptions};
@@ -29,10 +29,14 @@ use biome_service::WorkspaceError;
 use biome_service::configuration::{LoadedConfiguration, load_configuration};
 use biome_service::file_handlers::DocumentFileSource;
 use biome_service::projects::Projects;
-use biome_service::settings::ModuleGraphResolutionKind;
-use biome_service::settings::{ServiceLanguage, Settings, SettingsHandle};
+use biome_service::settings::{
+    ModuleGraphResolutionKind, ServiceLanguage, Settings, SettingsHandle,
+};
 use biome_service::test_utils::setup_workspace_and_open_project;
-use biome_service::workspace::UpdateSettingsParams;
+use biome_service::workspace::{
+    FileContent, OpenFileParams, PullDiagnosticsParams, ScanKind, ScanProjectParams,
+    UpdateSettingsParams,
+};
 use biome_string_case::StrLikeExtension;
 use camino::{Utf8Path, Utf8PathBuf};
 use json_comments::StripComments;
@@ -967,4 +971,314 @@ pub fn assert_diagnostics_expectation_comment<L: Language>(
             }
         }
     }
+}
+
+/// Asserts diagnostic expectations by scanning the raw file content for comments.
+///
+/// This is the content-based equivalent of [`assert_diagnostics_expectation_comment`],
+/// used for HTML-ish files (Vue, Svelte, Astro, HTML) where we don't have access
+/// to the parsed syntax tree from the workspace.
+///
+/// Looks for both HTML comments (`<!-- should not generate diagnostics -->`) and
+/// JS comments (`// should not generate diagnostics`) in the raw text.
+pub fn assert_diagnostics_expectation_from_content(
+    file_path: &Utf8Path,
+    content: &str,
+    diagnostics: Vec<String>,
+) {
+    let no_diagnostics_comment_text = "should not generate diagnostics";
+    let diagnostics_comment_text = "should generate diagnostics";
+
+    let is_valid_test_file = {
+        let name = file_path.file_name().unwrap().to_ascii_lowercase_cow();
+        name.contains("valid") && !name.contains("invalid")
+    };
+
+    enum Diagnostics {
+        ShouldGenerateDiagnostics,
+        ShouldNotGenerateDiagnostics,
+    }
+
+    // Search the raw content for the expectation comment
+    let diagnostic_comment = if content.contains(no_diagnostics_comment_text) {
+        Some(Diagnostics::ShouldNotGenerateDiagnostics)
+    } else if content.contains(diagnostics_comment_text) {
+        Some(Diagnostics::ShouldGenerateDiagnostics)
+    } else {
+        None
+    };
+
+    let has_diagnostics = !diagnostics.is_empty();
+    match diagnostic_comment {
+        Some(Diagnostics::ShouldNotGenerateDiagnostics) => {
+            if has_diagnostics {
+                panic!(
+                    "This test should not generate diagnostics\nFile: {file_path}\n\nDiagnostics: {}",
+                    diagnostics.join("\n")
+                );
+            }
+        }
+        Some(Diagnostics::ShouldGenerateDiagnostics) => {
+            if !has_diagnostics {
+                panic!("This test should generate diagnostics\nFile: {file_path}");
+            }
+        }
+        None => {
+            if is_valid_test_file {
+                panic!(
+                    "Valid test files should contain comment `{no_diagnostics_comment_text}`\nFile: {file_path}",
+                );
+            }
+        }
+    }
+}
+
+/// Runs lint analysis on a test file using the Workspace API.
+///
+/// This uses `WorkspaceServer` internally, which properly handles embedded
+/// languages (e.g., JS inside Vue/Svelte/Astro/HTML files) through the full
+/// HTML parser pipeline with correct offset mapping.
+///
+/// Returns a snapshot string in the standard analyzer snapshot format
+/// (`# Input` / `# Diagnostics`).
+pub fn analyze_with_workspace(
+    input_file: &Utf8Path,
+    input_code: String,
+    group: &str,
+    rule: &str,
+) -> String {
+    let document_file_source = DocumentFileSource::from_well_known(input_file, true);
+
+    if document_file_source == DocumentFileSource::Unknown {
+        panic!(
+            "Invalid document file source: {:?}. Make sure the document is supported by Biome.",
+            input_file
+        );
+    };
+    let file_name = input_file.file_name().unwrap();
+    let project_root = Utf8PathBuf::from("/test-project");
+    let virtual_file_path = project_root.join(file_name);
+
+    // Set up in-memory filesystem
+    let fs = MemoryFileSystem::default();
+    fs.insert(virtual_file_path.clone(), input_code.as_bytes());
+    let mut files_to_index = vec![virtual_file_path.clone()];
+
+    // Insert sidecar files if they exist on disk
+    files_to_index.extend(insert_sidecar_files(&fs, input_file, &project_root));
+
+    // Create workspace and open project
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, project_root.as_str());
+
+    // Build configuration: enable full HTML support + merge .options.json if present
+    let config = build_test_configuration(input_file);
+
+    // Push configuration into the workspace
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            configuration: config,
+            workspace_directory: Some(BiomePath::new(&project_root)),
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::Modules,
+        })
+        .expect("failed to update settings");
+
+    // Scan project so package.json/tsconfig.json are discovered
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::NoScanner,
+            verbose: false,
+        })
+        .expect("failed to scan project");
+
+    workspace.index_files_for_test(
+        project_key,
+        files_to_index.into_iter().map(|path| {
+            let document_file_source = DocumentFileSource::from_well_known(path.as_path(), true);
+            (BiomePath::new(path), document_file_source)
+        }),
+    );
+
+    // Open file
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(&virtual_file_path),
+            content: FileContent::FromClient {
+                content: input_code.clone(),
+                version: 0,
+            },
+            document_file_source: Some(document_file_source),
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .expect("failed to open file");
+
+    // Build rule selector
+    let rule_selector = format!("{group}/{rule}")
+        .parse::<AnalyzerSelector>()
+        .unwrap_or_else(|err| panic!("failed to parse rule selector {group}/{rule}: {err}"));
+
+    // Pull diagnostics with code actions embedded
+    let result = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            project_key,
+            path: BiomePath::new(&virtual_file_path),
+            categories: RuleCategories::default(),
+            only: vec![rule_selector],
+            skip: vec![],
+            enabled_rules: vec![],
+            pull_code_actions: true,
+            inline_config: None,
+        })
+        .expect("failed to pull diagnostics");
+
+    // Convert serde::Diagnostics to rendered strings
+    let diagnostics: Vec<String> = result
+        .diagnostics
+        .into_iter()
+        .map(|diag| {
+            let error = Error::from(diag);
+            diagnostic_to_string(file_name, &input_code, error)
+        })
+        .collect();
+
+    let extension = input_file.extension().unwrap_or_default();
+
+    let mut snapshot = String::new();
+    write_analyzer_snapshot(
+        &mut snapshot,
+        &input_code,
+        diagnostics.as_slice(),
+        &[],
+        extension,
+        0,
+    );
+
+    assert_diagnostics_expectation_from_content(input_file, &input_code, diagnostics);
+
+    snapshot
+}
+
+/// Builds a `Configuration` for workspace-based tests.
+///
+/// Enables full HTML support and merges in `.options.json` if present.
+fn build_test_configuration(input_file: &Utf8Path) -> Configuration {
+    let html_full_support = HtmlConfiguration {
+        experimental_full_support_enabled: Some(biome_configuration::bool::Bool(true)),
+        ..Default::default()
+    };
+    let mut config = Configuration {
+        html: Some(html_full_support),
+        ..Default::default()
+    };
+
+    // Load and merge .options.json if present
+    let options_path = input_file.with_extension("options.json");
+    if let Ok(options_content) = std::fs::read_to_string(&options_path) {
+        match serde_json::from_str::<Configuration>(&options_content) {
+            Ok(options_config) => {
+                // Preserve our HTML full support setting, merge everything else
+                let html_setting = config.html.clone();
+                config = options_config;
+                if config.html.is_none() {
+                    config.html = html_setting;
+                } else if let Some(ref mut html) = config.html
+                    && html.experimental_full_support_enabled.is_none()
+                {
+                    html.experimental_full_support_enabled =
+                        html_setting.and_then(|h| h.experimental_full_support_enabled);
+                }
+            }
+            Err(err) => {
+                panic!("failed to parse {options_path}: {err}");
+            }
+        }
+    }
+
+    config
+}
+
+/// Inserts sidecar files (package.json, tsconfig.json, etc.) and peer source
+/// files into the `MemoryFileSystem` for workspace-based tests.
+fn insert_sidecar_files(
+    fs: &MemoryFileSystem,
+    input_file: &Utf8Path,
+    project_root: &Utf8Path,
+) -> Vec<Utf8PathBuf> {
+    let mut inserted_files = Vec::new();
+
+    // Insert package.json sidecar
+    let package_json_sidecar = input_file.with_extension("package.json");
+    if let Ok(content) = std::fs::read_to_string(&package_json_sidecar) {
+        let target_path = project_root.join("package.json");
+        fs.insert(target_path.clone(), content.as_bytes());
+        inserted_files.push(target_path);
+    }
+
+    // Insert tsconfig.json sidecar
+    let tsconfig_sidecar = input_file.with_extension("tsconfig.json");
+    if let Ok(content) = std::fs::read_to_string(&tsconfig_sidecar) {
+        let target_path = project_root.join("tsconfig.json");
+        fs.insert(target_path.clone(), content.as_bytes());
+        inserted_files.push(target_path);
+    }
+
+    // Insert turbo.json sidecar
+    let turbo_json_sidecar = input_file.with_extension("turbo.json");
+    let turbo_jsonc_sidecar = input_file.with_extension("turbo.jsonc");
+    if let Ok(content) = std::fs::read_to_string(&turbo_json_sidecar) {
+        let target_path = project_root.join("turbo.json");
+        fs.insert(target_path.clone(), content.as_bytes());
+        inserted_files.push(target_path);
+    } else if let Ok(content) = std::fs::read_to_string(&turbo_jsonc_sidecar) {
+        let target_path = project_root.join("turbo.jsonc");
+        fs.insert(target_path.clone(), content.as_bytes());
+        inserted_files.push(target_path);
+    }
+
+    // Insert additional source files from the same directory for module graph rules
+    let Some(parent_dir) = input_file.parent() else {
+        return inserted_files;
+    };
+    let Ok(entries) = std::fs::read_dir(parent_dir) else {
+        return inserted_files;
+    };
+    for entry in entries.flatten() {
+        let Ok(path) = Utf8PathBuf::try_from(entry.path()) else {
+            continue;
+        };
+        // Skip the main test file (already inserted), sidecars, and snapshots
+        if path == input_file {
+            continue;
+        }
+        let ext = path.extension().unwrap_or_default();
+        if matches!(
+            ext,
+            "js" | "mjs"
+                | "cjs"
+                | "jsx"
+                | "css"
+                | "ts"
+                | "mts"
+                | "cts"
+                | "tsx"
+                | "vue"
+                | "svelte"
+                | "astro"
+                | "html"
+        ) && let Ok(content) = std::fs::read_to_string(&path)
+        {
+            let target_name = path.file_name().unwrap();
+            let target_path = project_root.join(target_name);
+            fs.insert(target_path.clone(), content.as_bytes());
+            inserted_files.push(target_path);
+        }
+    }
+
+    inserted_files
 }

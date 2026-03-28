@@ -3,9 +3,13 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid-ignore-unknown-import.vue
 ---
 # Input
-```ts
+```vue
+/* should not generate diagnostics */
+
+<script>
 import { ref } from 'unknown'
 const count = ref(0)
 count++
+</script>
 
 ```

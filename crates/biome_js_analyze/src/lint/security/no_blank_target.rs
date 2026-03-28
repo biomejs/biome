@@ -160,14 +160,15 @@ impl Rule for NoBlankTarget {
                     .then(|| node.find_attribute_by_name(attr_name))
                     .flatten()
             })?;
-        let href = href.as_static_value()?;
 
         let target_attribute = node.find_attribute_by_name("target")?;
         if target_attribute.as_static_value()?.text() != "_blank" {
             return None;
         }
 
-        if !ctx.options().allow_domains.is_empty() {
+        if let Some(href) = href.as_static_value()
+            && !ctx.options().allow_domains.is_empty()
+        {
             let allow_domains: Vec<&str> = ctx
                 .options()
                 .allow_domains

@@ -6,7 +6,7 @@ use biome_formatter::{
 use biome_markdown_syntax::MarkdownLanguage;
 use biome_rowan::SyntaxTriviaPieceComments;
 
-use crate::MarkdownFormatContext;
+use crate::MdFormatContext;
 
 #[derive(Eq, PartialEq, Copy, Clone, Debug, Default)]
 pub struct MarkdownCommentStyle;
@@ -34,7 +34,7 @@ impl CommentStyle for MarkdownCommentStyle {
 pub struct FormatMarkdownLeadingComment;
 
 impl FormatRule<SourceComment<MarkdownLanguage>> for FormatMarkdownLeadingComment {
-    type Context = MarkdownFormatContext;
+    type Context = MdFormatContext;
 
     fn fmt(
         &self,

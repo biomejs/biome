@@ -57,8 +57,20 @@ MdDocument {
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@12..13 "\n" [] [],
                 },
+                MdIndentToken {
+                    md_indent_char_token: MD_INDENT_CHAR@13..14 " " [] [],
+                },
+                MdIndentToken {
+                    md_indent_char_token: MD_INDENT_CHAR@14..15 " " [] [],
+                },
+                MdIndentToken {
+                    md_indent_char_token: MD_INDENT_CHAR@15..16 " " [] [],
+                },
+                MdIndentToken {
+                    md_indent_char_token: MD_INDENT_CHAR@16..17 " " [] [],
+                },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@13..20 "---" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] [],
+                    value_token: MD_TEXTUAL_LITERAL@17..20 "---" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@20..21 "\n" [] [],
@@ -161,9 +173,17 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@9..12 "Foo" [] []
         1: MD_TEXTUAL@12..13
           0: MD_TEXTUAL_LITERAL@12..13 "\n" [] []
-        2: MD_TEXTUAL@13..20
-          0: MD_TEXTUAL_LITERAL@13..20 "---" [Skipped(" "), Skipped(" "), Skipped(" "), Skipped(" ")] []
-        3: MD_TEXTUAL@20..21
+        2: MD_INDENT_TOKEN@13..14
+          0: MD_INDENT_CHAR@13..14 " " [] []
+        3: MD_INDENT_TOKEN@14..15
+          0: MD_INDENT_CHAR@14..15 " " [] []
+        4: MD_INDENT_TOKEN@15..16
+          0: MD_INDENT_CHAR@15..16 " " [] []
+        5: MD_INDENT_TOKEN@16..17
+          0: MD_INDENT_CHAR@16..17 " " [] []
+        6: MD_TEXTUAL@17..20
+          0: MD_TEXTUAL_LITERAL@17..20 "---" [] []
+        7: MD_TEXTUAL@20..21
           0: MD_TEXTUAL_LITERAL@20..21 "\n" [] []
       1: (empty)
     3: MD_NEWLINE@21..22

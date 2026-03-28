@@ -11,36 +11,19 @@ info: css/atrule/tailwind/source-not.css
 ```
 
 
-=============================
+# Options
 
-# Outputs
-
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-Trailing newline: true
------
-
-```css
-@source not "../routes/utils/ds.tsx";
-
+```json
+{
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  }
+}
 ```
 
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Quote style: Double Quotes
-Trailing newline: true
------
+# Formatted
 
 ```css
 @source not "../routes/utils/ds.tsx";

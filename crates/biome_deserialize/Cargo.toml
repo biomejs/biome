@@ -28,7 +28,7 @@ serde_json        = { workspace = true, optional = true }
 smallvec          = { workspace = true, optional = true }
 
 [dev-dependencies]
-biome_deserialize_macros = { workspace = true }
+biome_deserialize_macros = { path = "../biome_deserialize_macros" }
 
 [features]
 camino   = ["dep:camino"]

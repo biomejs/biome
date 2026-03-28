@@ -32,7 +32,7 @@ interface OverloadedProps {
 
 # Diagnostics
 ```
-invalid-methods.ts:4:3 lint/nursery/useConsistentMethodSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-methods.ts:4:3 lint/nursery/useConsistentMethodSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer using method-style over property-style method signatures.
   
@@ -46,15 +46,22 @@ invalid-methods.ts:4:3 lint/nursery/useConsistentMethodSignatures ━━━━�
   
   i If this isn't what you want, consider changing the style option in the rule's settings.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8780 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Unsafe fix: Convert to method-style signature.
+  
+     2  2 │   
+     3  3 │   interface PropIface {
+     4    │ - ··propFunc:·(arg:·string)·=>·number;
+        4 │ + ··propFunc(arg:·string):·number;
+     5  5 │   }
+     6  6 │   
+  
 
 ```
 
 ```
-invalid-methods.ts:8:3 lint/nursery/useConsistentMethodSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-methods.ts:8:3 lint/nursery/useConsistentMethodSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer using method-style over property-style method signatures.
   
@@ -68,15 +75,22 @@ invalid-methods.ts:8:3 lint/nursery/useConsistentMethodSignatures ━━━━�
   
   i If this isn't what you want, consider changing the style option in the rule's settings.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8780 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Unsafe fix: Convert to method-style signature.
+  
+     6  6 │   
+     7  7 │   type GenericProp<T, U> = {
+     8    │ - ··p:·(arg:·T)·=>·U;
+        8 │ + ··p(arg:·T):·U;
+     9  9 │   };
+    10 10 │   
+  
 
 ```
 
 ```
-invalid-methods.ts:13:7 lint/nursery/useConsistentMethodSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-methods.ts:13:7 lint/nursery/useConsistentMethodSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer using method-style over property-style method signatures.
   
@@ -91,15 +105,22 @@ invalid-methods.ts:13:7 lint/nursery/useConsistentMethodSignatures ━━━━�
   
   i If this isn't what you want, consider changing the style option in the rule's settings.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8780 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Unsafe fix: Convert to method-style signature.
+  
+    11 11 │   type PropUnion =
+    12 12 │     | {
+    13    │ - ······foo:·(bar:·number)·=>·number;
+       13 │ + ······foo(bar:·number):·number;
+    14 14 │       }
+    15 15 │     | 4;
+  
 
 ```
 
 ```
-invalid-methods.ts:18:3 lint/nursery/useConsistentMethodSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-methods.ts:18:3 lint/nursery/useConsistentMethodSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
   i Prefer using method-style over property-style method signatures.
   
@@ -113,9 +134,16 @@ invalid-methods.ts:18:3 lint/nursery/useConsistentMethodSignatures ━━━━�
   
   i If this isn't what you want, consider changing the style option in the rule's settings.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8780 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Convert to method-style signature.
+  
+    16 16 │   
+    17 17 │   type bad = {
+    18    │ - ··qux:·(quux:·number)·=>·"quuux";
+       18 │ + ··qux(quux:·number):·"quuux";
+    19 19 │   } & { foo: string };
+    20 20 │   
   
 
 ```

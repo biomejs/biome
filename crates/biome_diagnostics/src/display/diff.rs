@@ -7,8 +7,8 @@ use biome_console::{MarkupElement, fmt, markup};
 use biome_text_edit::{ChangeTag, CompressedOp, TextEdit};
 
 use super::frame::{
-    CODE_FRAME_CONTEXT_LINES, IntoIter, OneIndexed, PrintInvisiblesOptions, calculate_print_width,
-    print_invisibles, text_width,
+    CODE_FRAME_CONTEXT_LINES, IntoIter, OneIndexed, PrintInvisiblesOptions, TAB_WIDTH,
+    calculate_print_width, print_invisibles, text_width,
 };
 
 const MAX_PATCH_LINES: usize = 150;
@@ -478,6 +478,21 @@ fn print_full_diff(
     // Skip displaying the gutter if the file only has a single line
     let single_line = before_line_count == OneIndexed::MIN && after_line_count == OneIndexed::MIN;
 
+    // Check if any visible changed line has leading tabs. If so, context
+    // lines need their leading tabs normalized to TAB_WIDTH spaces to
+    // match the "→ " rendering on changed lines (see #5279).
+    let has_changed_lines_with_leading_tabs = diffs_by_line.iter().enumerate().any(|(i, line)| {
+        if !shown_line_indexes.contains(&i) {
+            return false;
+        }
+        let is_changed = line.before_line.is_none() || line.after_line.is_none();
+        is_changed
+            && line
+                .diffs
+                .first()
+                .is_some_and(|(_, text)| text.starts_with('\t'))
+    });
+
     let mut displayed_lines = 0;
     let mut truncated = false;
     let mut last_displayed_line = None;
@@ -521,6 +536,7 @@ fn print_full_diff(
         if single_line {
             let line = FormatDiffLine {
                 is_equal: line_type == ChangeTag::Equal,
+                normalize_context_tabs: has_changed_lines_with_leading_tabs,
                 ops: &line.diffs,
             };
 
@@ -570,6 +586,7 @@ fn print_full_diff(
 
             let line = FormatDiffLine {
                 is_equal: line_type == ChangeTag::Equal,
+                normalize_context_tabs: has_changed_lines_with_leading_tabs,
                 ops: &line.diffs,
             };
 
@@ -596,8 +613,23 @@ fn print_full_diff(
     fmt.write_str("\n")
 }
 
+/// Replace leading tab characters with `TAB_WIDTH` spaces each, so that the
+/// display width of leading indentation on context lines matches the width of
+/// the `→ ` visible tab rendering used on changed lines.
+fn replace_leading_tabs(text: &str) -> String {
+    let leading_tabs = text.len() - text.trim_start_matches('\t').len();
+    if leading_tabs == 0 {
+        return text.to_string();
+    }
+    let spaces = " ".repeat(TAB_WIDTH * leading_tabs);
+    format!("{spaces}{}", &text[leading_tabs..])
+}
+
 struct FormatDiffLine<'a> {
     is_equal: bool,
+    /// When true, replace leading tabs on context lines with `TAB_WIDTH`
+    /// spaces so they align with the `→ ` rendering on changed lines.
+    normalize_context_tabs: bool,
     ops: &'a [(ChangeTag, &'a str)],
 }
 
@@ -608,8 +640,26 @@ impl fmt::Display for FormatDiffLine<'_> {
 
         for (i, (tag, text)) in self.ops.iter().enumerate() {
             let is_changed = *tag != ChangeTag::Equal;
+
+            // For context (equal) lines, replace leading tabs with
+            // TAB_WIDTH spaces so their display width matches the "→ "
+            // rendering used on changed lines, avoiding misalignment.
+            let replaced;
+            let text = if self.is_equal && self.normalize_context_tabs && at_line_start {
+                replaced = replace_leading_tabs(text);
+                replaced.as_str()
+            } else {
+                text
+            };
+
+            let ignore_leading_tabs = if self.normalize_context_tabs {
+                false
+            } else {
+                self.is_equal
+            };
+
             let options = PrintInvisiblesOptions {
-                ignore_leading_tabs: self.is_equal,
+                ignore_leading_tabs,
                 ignore_lone_spaces: self.is_equal,
                 ignore_trailing_carriage_return: is_changed,
                 at_line_start,

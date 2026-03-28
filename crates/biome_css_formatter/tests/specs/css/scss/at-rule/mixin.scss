@@ -1,0 +1,14 @@
+@mixin button{
+border-radius:4px;
+}
+
+@mixin size(
+$width,
+$height:$width,
+$args...
+){
+width:$width;
+@if $height > 0{
+height:$height;
+}
+}

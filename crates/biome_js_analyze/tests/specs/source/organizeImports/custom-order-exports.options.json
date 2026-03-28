@@ -1,0 +1,19 @@
+{
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": {
+          "level": "on",
+          "options": {
+            "groups": [
+              {
+                "type": true
+              },
+              ":NODE:"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

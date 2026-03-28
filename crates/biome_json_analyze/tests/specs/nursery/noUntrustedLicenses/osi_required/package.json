@@ -1,0 +1,6 @@
+{
+    "dependencies": {
+        "osi-pkg": "^1.0.0",
+        "non-osi-pkg": "^1.0.0"
+    }
+}

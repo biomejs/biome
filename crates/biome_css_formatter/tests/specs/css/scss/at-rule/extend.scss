@@ -1,0 +1,18 @@
+%toolbelt{
+border:1px solid black;
+}
+
+.action-buttons{
+  @extend
+%toolbelt
+!optional;
+}
+
+.alert{
+  @extend
+.message,.info;
+  @extend
+a:hover;
+  @extend
+.icon-#{$name};
+}

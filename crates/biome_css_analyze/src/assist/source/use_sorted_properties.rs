@@ -270,6 +270,13 @@ impl RecessOrderMember {
                                 NodeKindOrder::CustomProperty
                             }
                             AnyCssDeclarationName::CssIdentifier(_) => NodeKindOrder::Declaration,
+                            AnyCssDeclarationName::ScssInterpolatedIdentifier(name) => {
+                                if name.syntax().text_trimmed().starts_with("--") {
+                                    NodeKindOrder::CustomProperty
+                                } else {
+                                    NodeKindOrder::Declaration
+                                }
+                            }
                             AnyCssDeclarationName::TwValueThemeReference(_) => {
                                 NodeKindOrder::Declaration
                             }

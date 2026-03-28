@@ -4,18 +4,25 @@ mod pseudo_class;
 mod pseudo_element;
 pub(crate) mod relative_selector;
 
+use super::{is_nth_at_metavariable, parse_metavariable};
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::parse_error::{
     expected_any_sub_selector, expected_compound_selector, expected_identifier, expected_selector,
+};
+use crate::syntax::scss::{
+    is_at_scss_interpolated_identifier, is_nth_at_scss_interpolated_identifier,
+    is_nth_at_scss_placeholder_selector, parse_scss_placeholder_selector,
+    parse_scss_selector_custom_interpolated_identifier,
+    parse_scss_selector_interpolated_identifier,
 };
 use crate::syntax::selector::attribute::parse_attribute_selector;
 use crate::syntax::selector::nested_selector::NestedSelectorList;
 use crate::syntax::selector::pseudo_class::parse_pseudo_class_selector;
 use crate::syntax::selector::pseudo_element::parse_pseudo_element_selector;
 use crate::syntax::{
-    is_at_identifier, is_nth_at_identifier, parse_custom_identifier_with_keywords,
-    parse_identifier, parse_regular_identifier,
+    CssSyntaxFeatures, is_at_identifier, is_nth_at_identifier,
+    parse_custom_identifier_with_keywords, parse_identifier, parse_regular_identifier,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T, TextRange};
@@ -26,9 +33,7 @@ use biome_parser::parse_recovery::{
 };
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::{CompletedMarker, Parser, ParserProgress, TokenSet, token_set};
-
-use super::{is_nth_at_metavariable, parse_metavariable};
+use biome_parser::{CompletedMarker, Parser, ParserProgress, SyntaxFeature, TokenSet, token_set};
 
 /// Determines the lexical context for parsing CSS selectors.
 ///
@@ -37,9 +42,9 @@ use super::{is_nth_at_metavariable, parse_metavariable};
 /// context. The distinction is important for handling whitespaces, especially
 /// around combinators in CSS selectors.
 const SELECTOR_LEX_SET: TokenSet<CssSyntaxKind> =
-    COMPLEX_SELECTOR_COMBINATOR_SET.union(token_set![T!['{'], T![,], T![')']]);
+    COMPLEX_SELECTOR_COMBINATOR_SET.union(token_set![T!['{'], T![,], T![')'], T![!], T![;], EOF]);
 #[inline]
-fn selector_lex_context(p: &mut CssParser) -> CssLexContext {
+pub(crate) fn selector_lex_context(p: &mut CssParser) -> CssLexContext {
     // It's an inverted logic for `is_nth_at_selector(p, 1)`.
     if p.nth_at_ts(1, SELECTOR_LEX_SET) {
         CssLexContext::Regular
@@ -107,7 +112,7 @@ impl ParseSeparatedList for SelectorList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at_ts(self.end_kind_ts)
+        p.at_ts(self.end_kind_ts) || p.at(CSS_SPACE_LITERAL) && p.nth_at_ts(1, self.end_kind_ts)
     }
 
     fn recover(
@@ -306,7 +311,11 @@ fn parse_compound_selector(p: &mut CssParser) -> ParsedSyntax {
 /// including type selectors, universal selectors, and attribute selectors.
 #[inline]
 fn is_nth_at_simple_selector(p: &mut CssParser, n: usize) -> bool {
-    is_nth_at_namespace(p, n) || p.nth_at(n, T![*]) || is_nth_at_identifier(p, n)
+    is_nth_at_namespace(p, n)
+        || p.nth_at(n, T![*])
+        || is_nth_at_identifier(p, n)
+        || is_nth_at_scss_interpolated_identifier(p, n)
+        || is_nth_at_scss_placeholder_selector(p, n)
 }
 
 /// Parses a simple selector in CSS.
@@ -318,6 +327,10 @@ fn is_nth_at_simple_selector(p: &mut CssParser, n: usize) -> bool {
 fn parse_simple_selector(p: &mut CssParser) -> ParsedSyntax {
     if !is_nth_at_simple_selector(p, 0) {
         return Absent;
+    }
+
+    if is_nth_at_scss_placeholder_selector(p, 0) {
+        return parse_scss_placeholder_selector(p);
     }
 
     let namespace = parse_namespace(p);
@@ -502,15 +515,24 @@ pub(crate) fn parse_universal_selector(p: &mut CssParser, namespace: ParsedSynta
 /// representing an HTML element type.
 #[inline]
 fn parse_type_selector(p: &mut CssParser, namespace: ParsedSyntax) -> ParsedSyntax {
-    if !is_at_identifier(p) {
+    if !is_at_type_selector_identifier(p) {
         return Absent;
     }
 
     let m = namespace.precede(p);
-
     parse_selector_identifier(p).or_add_diagnostic(p, expected_identifier);
-
     Present(m.complete(p, CSS_TYPE_SELECTOR))
+}
+
+/// Returns `true` when the current token can start the identifier portion of a
+/// type selector.
+///
+/// SCSS needs the interpolated-identifier branch here because selectors such as
+/// `#{$tag}` and `ns|#{$tag}` are still parsed as `CssTypeSelector`; only the
+/// `ident` field changes from `CssIdentifier` to `ScssInterpolatedIdentifier`.
+#[inline]
+fn is_at_type_selector_identifier(p: &mut CssParser) -> bool {
+    is_at_identifier(p) || is_at_scss_interpolated_identifier(p)
 }
 
 /// Parses an identifier within a selector context in CSS.
@@ -520,6 +542,15 @@ fn parse_type_selector(p: &mut CssParser, namespace: ParsedSyntax) -> ParsedSynt
 /// interprets tokens, particularly with respect to whitespace handling and combinator parsing.
 #[inline]
 fn parse_selector_identifier(p: &mut CssParser) -> ParsedSyntax {
+    if CssSyntaxFeatures::Scss.is_supported(p) {
+        parse_scss_selector_interpolated_identifier(p)
+    } else {
+        parse_selector_identifier_fragment(p)
+    }
+}
+
+#[inline]
+pub(crate) fn parse_selector_identifier_fragment(p: &mut CssParser) -> ParsedSyntax {
     let context = selector_lex_context(p);
     parse_identifier(p, context)
 }
@@ -528,7 +559,16 @@ fn parse_selector_identifier(p: &mut CssParser) -> ParsedSyntax {
 /// case-sensitive. These are distinguished from regular identifiers in
 /// selectors that are case-insensitive for safety in preserving the casing.
 #[inline]
-fn parse_selector_custom_identifier(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_selector_custom_identifier(p: &mut CssParser) -> ParsedSyntax {
+    if CssSyntaxFeatures::Scss.is_supported(p) {
+        parse_scss_selector_custom_interpolated_identifier(p)
+    } else {
+        parse_selector_custom_identifier_fragment(p)
+    }
+}
+
+#[inline]
+pub(crate) fn parse_selector_custom_identifier_fragment(p: &mut CssParser) -> ParsedSyntax {
     let context = selector_lex_context(p);
     // Class and ID selectors are technically `<ident>` _and_ case-sensitive.
     // To handle this, we use `<custom-ident>` instead, but also have to allow

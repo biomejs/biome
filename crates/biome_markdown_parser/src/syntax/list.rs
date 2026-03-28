@@ -50,7 +50,7 @@ use crate::syntax::parse_any_block_with_indent_code_policy;
 use crate::syntax::parse_error::list_nesting_too_deep;
 use crate::syntax::quote::{
     at_quote_indented_code_start, consume_quote_prefix, consume_quote_prefix_without_virtual,
-    has_quote_prefix, parse_quote, parse_quote_block_list, skip_optional_marker_space,
+    emit_optional_marker_space, has_quote_prefix, parse_quote, parse_quote_block_list,
 };
 use crate::syntax::thematic_break_block::parse_thematic_break_block;
 use crate::syntax::with_virtual_line_start;
@@ -1265,6 +1265,33 @@ enum LoopAction {
     FallThrough,
 }
 
+/// Result of blank-line handling in the list-item loop.
+///
+/// Replaces a raw `(LoopAction, bool)` tuple so the meaning of each field
+/// is self-documenting at every call site.
+struct BlankLineOutcome {
+    action: LoopAction,
+    /// Whether the current line started with a block-quote prefix (`>`).
+    /// The orchestrator needs this to consume the prefix after fall-through.
+    line_has_quote_prefix: bool,
+}
+
+impl BlankLineOutcome {
+    fn resolved(action: LoopAction) -> Self {
+        Self {
+            action,
+            line_has_quote_prefix: false,
+        }
+    }
+
+    fn with_prefix(action: LoopAction, has_prefix: bool) -> Self {
+        Self {
+            action,
+            line_has_quote_prefix: has_prefix,
+        }
+    }
+}
+
 /// Whether `virtual_line_start` needs to be restored after parsing a block.
 enum VirtualLineRestore {
     /// No restore needed.
@@ -1328,23 +1355,21 @@ enum NestedListMarker {
 
 /// Handle all blank-line detection and classification (phases 1-5).
 ///
-/// Returns `(action, line_has_quote_prefix)`. The boolean is needed by the
-/// orchestrator for quote prefix consumption afterward.
-///
-/// May return any `LoopAction` variant. `FallThrough` means no blank-line
-/// handling applied and the caller should proceed to subsequent phases.
-fn handle_blank_lines(p: &mut MarkdownParser, state: &mut ListItemLoopState) -> (LoopAction, bool) {
+/// Orchestrates five phase-specific helpers, returning early when any phase
+/// produces a decisive `Break` or `Continue`. `FallThrough` means no
+/// blank-line handling applied and the caller should proceed to subsequent
+/// phases.
+fn handle_blank_lines(p: &mut MarkdownParser, state: &mut ListItemLoopState) -> BlankLineOutcome {
     let quote_depth = p.state().block_quote_depth;
 
-    // Phase 1: Quote depth early exit — if we're past the first line and the
-    // next quoted content has insufficient indent, break.
-    if !state.first_line
-        && quote_depth > 0
-        && quote_only_line_indent_at_current(p, quote_depth).is_some()
-        && let Some(next_indent) = next_quote_content_indent(p, quote_depth)
-        && next_indent < state.required_indent
-    {
-        return (LoopAction::Break, false);
+    // Phase 1: Quote depth early exit.
+    if let Some(outcome) = blank_line_phase_quote_depth_exit(p, state, quote_depth) {
+        return outcome;
+    }
+
+    // Phase 2: Quote-only blank line (e.g., ">>").
+    if let Some(outcome) = blank_line_phase_quote_only_blank(p, state, quote_depth) {
+        return outcome;
     }
 
     let newline_has_quote_prefix = quote_depth > 0
@@ -1352,68 +1377,152 @@ fn handle_blank_lines(p: &mut MarkdownParser, state: &mut ListItemLoopState) -> 
         && (p.at_line_start() || p.has_preceding_line_break())
         && has_quote_prefix(p, quote_depth);
 
-    // Phase 2: Quote-only blank line detection (e.g., ">>").
-    if !state.first_line && quote_depth > 0 && p.at(NEWLINE) {
-        let is_quote_blank_line = p.lookahead(|p| {
-            p.bump(NEWLINE);
-            if !has_quote_prefix(p, quote_depth) {
-                return false;
-            }
-            consume_quote_prefix_without_virtual(p, quote_depth);
-            while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
-                p.bump(MD_TEXTUAL_LITERAL);
-            }
-            p.at(NEWLINE) || p.at(T![EOF])
-        });
-
-        if is_quote_blank_line {
-            let m = p.start();
-            p.bump(NEWLINE);
-            m.complete(p, MD_NEWLINE);
-            consume_quote_prefix(p, quote_depth);
-            consume_blank_line(p);
-            state.record_blank();
-            state.first_line = false;
-            return (LoopAction::Continue, false);
-        }
-    }
-
     // Phase 3: Non-quote blank line classification.
-    if !state.first_line && p.at(NEWLINE) && !p.at_blank_line() && !newline_has_quote_prefix {
-        let action = classify_blank_line(p, state.required_indent, state.marker_indent);
-        let is_blank = list_newline_is_blank_line(p);
-        let result = apply_blank_line_action(p, state, action, is_blank);
-        return (result, false);
+    if let Some(outcome) = blank_line_phase_non_quote_classify(p, state, newline_has_quote_prefix) {
+        return outcome;
     }
 
-    // Phase 4: Quote-only line after prefix.
+    // Phases 4-5 share a quote-prefix check.
     let line_has_quote_prefix = quote_depth > 0
         && (p.at_line_start() || p.has_preceding_line_break())
         && (has_quote_prefix(p, quote_depth)
             || quote_only_line_indent_at_current(p, quote_depth).is_some());
 
-    if line_has_quote_prefix {
-        let is_quote_only_line = p.lookahead(|p| {
-            consume_quote_prefix_without_virtual(p, quote_depth);
-            while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
-                p.bump(MD_TEXTUAL_LITERAL);
-            }
-            p.at(NEWLINE) || p.at(T![EOF])
-        });
-
-        if is_quote_only_line {
-            consume_quote_prefix(p, quote_depth);
-            consume_blank_line(p);
-            if !state.first_line {
-                state.has_blank_line = true;
-            }
-            state.last_was_blank = true;
-            state.first_line = false;
-            return (LoopAction::Continue, line_has_quote_prefix);
-        }
+    // Phase 4: Quote-only line after prefix.
+    if let Some(outcome) =
+        blank_line_phase_quote_only_after_prefix(p, state, quote_depth, line_has_quote_prefix)
+    {
+        return outcome;
     }
 
     // Phase 5: Blank line after prefix with indent checks.
+    blank_line_phase_after_prefix(p, state, quote_depth, line_has_quote_prefix)
+}
+
+/// Phase 1: If past the first line and the next quoted content has
+/// insufficient indent, break out of the list item.
+fn blank_line_phase_quote_depth_exit(
+    p: &mut MarkdownParser,
+    state: &ListItemLoopState,
+    quote_depth: usize,
+) -> Option<BlankLineOutcome> {
+    if !state.first_line
+        && quote_depth > 0
+        && quote_only_line_indent_at_current(p, quote_depth).is_some()
+        && let Some(next_indent) = next_quote_content_indent(p, quote_depth)
+        && next_indent < state.required_indent
+    {
+        return Some(BlankLineOutcome::resolved(LoopAction::Break));
+    }
+    None
+}
+
+/// Phase 2: Detect quote-only blank lines (e.g., a line that is just `>>`).
+///
+/// Bumps the newline, consumes the quote prefix and trailing whitespace,
+/// then records a blank line in `state`.
+fn blank_line_phase_quote_only_blank(
+    p: &mut MarkdownParser,
+    state: &mut ListItemLoopState,
+    quote_depth: usize,
+) -> Option<BlankLineOutcome> {
+    if state.first_line || quote_depth == 0 || !p.at(NEWLINE) {
+        return None;
+    }
+
+    let is_quote_blank_line = p.lookahead(|p| {
+        p.bump(NEWLINE);
+        if !has_quote_prefix(p, quote_depth) {
+            return false;
+        }
+        consume_quote_prefix_without_virtual(p, quote_depth);
+        while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
+            p.bump(MD_TEXTUAL_LITERAL);
+        }
+        p.at(NEWLINE) || p.at(T![EOF])
+    });
+
+    if is_quote_blank_line {
+        let m = p.start();
+        p.bump(NEWLINE);
+        m.complete(p, MD_NEWLINE);
+        consume_quote_prefix(p, quote_depth);
+        consume_blank_line(p);
+        state.record_blank();
+        state.first_line = false;
+        return Some(BlankLineOutcome::resolved(LoopAction::Continue));
+    }
+
+    None
+}
+
+/// Phase 3: Classify a non-quote blank line.
+///
+/// Only applies when past the first line, at a newline that is not a
+/// document-level blank line and has no quote prefix.
+fn blank_line_phase_non_quote_classify(
+    p: &mut MarkdownParser,
+    state: &mut ListItemLoopState,
+    newline_has_quote_prefix: bool,
+) -> Option<BlankLineOutcome> {
+    if state.first_line || !p.at(NEWLINE) || p.at_blank_line() || newline_has_quote_prefix {
+        return None;
+    }
+
+    let action = classify_blank_line(p, state.required_indent, state.marker_indent);
+    let is_blank = list_newline_is_blank_line(p);
+    let result = apply_blank_line_action(p, state, action, is_blank);
+    Some(BlankLineOutcome::resolved(result))
+}
+
+/// Phase 4: Handle a quote-only line (only whitespace after the quote prefix).
+///
+/// Consumes the prefix and blank content, then records a blank in `state`.
+fn blank_line_phase_quote_only_after_prefix(
+    p: &mut MarkdownParser,
+    state: &mut ListItemLoopState,
+    quote_depth: usize,
+    line_has_quote_prefix: bool,
+) -> Option<BlankLineOutcome> {
+    if !line_has_quote_prefix {
+        return None;
+    }
+
+    let is_quote_only_line = p.lookahead(|p| {
+        consume_quote_prefix_without_virtual(p, quote_depth);
+        while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
+            p.bump(MD_TEXTUAL_LITERAL);
+        }
+        p.at(NEWLINE) || p.at(T![EOF])
+    });
+
+    if is_quote_only_line {
+        consume_quote_prefix(p, quote_depth);
+        consume_blank_line(p);
+        if !state.first_line {
+            state.has_blank_line = true;
+        }
+        state.last_was_blank = true;
+        state.first_line = false;
+        return Some(BlankLineOutcome::with_prefix(
+            LoopAction::Continue,
+            line_has_quote_prefix,
+        ));
+    }
+
+    None
+}
+
+/// Phase 5: Blank line after prefix with indent checks.
+///
+/// Handles first-line fall-through, quoted indent sufficiency checks,
+/// and classification via `classify_blank_line` / `classify_blank_line_in_quote`.
+fn blank_line_phase_after_prefix(
+    p: &mut MarkdownParser,
+    state: &mut ListItemLoopState,
+    quote_depth: usize,
+    line_has_quote_prefix: bool,
+) -> BlankLineOutcome {
     let blank_line_after_prefix = if line_has_quote_prefix {
         p.lookahead(|p| {
             consume_quote_prefix_without_virtual(p, quote_depth);
@@ -1427,7 +1536,7 @@ fn handle_blank_lines(p: &mut MarkdownParser, state: &mut ListItemLoopState) -> 
     // which is spaces+newline), fall through to handle_first_line_marker_only.
     if state.first_line && blank_line_after_prefix && (p.at(NEWLINE) || p.at(MD_HARD_LINE_LITERAL))
     {
-        return (LoopAction::FallThrough, line_has_quote_prefix);
+        return BlankLineOutcome::with_prefix(LoopAction::FallThrough, line_has_quote_prefix);
     }
 
     if (p.at_line_start() || line_has_quote_prefix) && blank_line_after_prefix {
@@ -1443,9 +1552,9 @@ fn handle_blank_lines(p: &mut MarkdownParser, state: &mut ListItemLoopState) -> 
                 }
                 state.last_was_blank = true;
                 state.first_line = false;
-                return (LoopAction::Continue, line_has_quote_prefix);
+                return BlankLineOutcome::with_prefix(LoopAction::Continue, line_has_quote_prefix);
             } else {
-                return (LoopAction::Break, line_has_quote_prefix);
+                return BlankLineOutcome::with_prefix(LoopAction::Break, line_has_quote_prefix);
             }
         }
         let marker_line_break = state.first_line;
@@ -1462,10 +1571,10 @@ fn handle_blank_lines(p: &mut MarkdownParser, state: &mut ListItemLoopState) -> 
             quote_depth,
             marker_line_break,
         );
-        return (result, line_has_quote_prefix);
+        return BlankLineOutcome::with_prefix(result, line_has_quote_prefix);
     }
 
-    (LoopAction::FallThrough, line_has_quote_prefix)
+    BlankLineOutcome::with_prefix(LoopAction::FallThrough, line_has_quote_prefix)
 }
 
 /// Apply a `BlankLineAction` from phase 3 (non-quote blank line classification).
@@ -1672,10 +1781,8 @@ fn parse_first_line_blocks(
         is_thematic_break_pattern(p)
     });
 
-    if is_thematic_break {
-        if parse_thematic_break_block(p).is_present() {
-            state.record_first_line_block();
-        }
+    if is_thematic_break && parse_thematic_break_block(p).is_present() {
+        state.record_first_line_block();
         return LoopAction::Continue;
     }
 
@@ -1834,11 +1941,17 @@ fn parse_first_line_blockquote(p: &mut MarkdownParser, state: &mut ListItemLoopS
 
     let parsed = if p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == ">" {
         let quote_m = p.start();
+
+        // Wrap `>` and optional space in a proper MdQuotePrefix node
+        let prefix_m = p.start();
+        let indent_m = p.start();
+        indent_m.complete(p, MD_QUOTE_INDENT_LIST);
         p.bump_remap(T![>]);
         p.state_mut().block_quote_depth += 1;
 
         let has_indented_code = at_quote_indented_code_start(p);
-        let marker_space = skip_optional_marker_space(p, has_indented_code);
+        let marker_space = emit_optional_marker_space(p, has_indented_code);
+        prefix_m.complete(p, MD_QUOTE_PREFIX);
         p.set_virtual_line_start();
 
         parse_quote_block_list(p);
@@ -1902,6 +2015,8 @@ fn check_continuation_indent(
             allow_indent_code_block && indent >= state.required_indent + INDENT_CODE_BLOCK_SPACES;
         if !is_indent_code_block {
             // Sufficient indentation - skip it and continue
+            // (emitting indent tokens here is not possible because MdIndentToken
+            // is not a valid child of MdBlockList — leave as trivia)
             p.skip_line_indent(state.required_indent);
             let prev_virtual = p.state().virtual_line_start;
             p.state_mut().virtual_line_start = Some(p.cur_range().start());
@@ -2022,12 +2137,13 @@ fn parse_list_item_block_content(
         }
 
         // Blank line handling (phases 1-5)
-        let (action, line_has_quote_prefix) = handle_blank_lines(p, &mut state);
-        match action {
+        let blank = handle_blank_lines(p, &mut state);
+        match blank.action {
             LoopAction::Break => break,
             LoopAction::Continue => continue,
             LoopAction::FallThrough => {}
         }
+        let line_has_quote_prefix = blank.line_has_quote_prefix;
 
         // Consume quote prefix if present
         let quote_depth = p.state().block_quote_depth;

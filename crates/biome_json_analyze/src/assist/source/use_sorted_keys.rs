@@ -2,7 +2,7 @@ use crate::JsonRuleAction;
 use crate::utils::is_package_json;
 use biome_analyze::utils::{is_separated_list_sorted_by, sorted_separated_list_by};
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, context::RuleContext, declare_source_rule,
+    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, context::RuleContext, declare_source_rule, RuleSource
 };
 use biome_console::markup;
 use biome_diagnostics::category;
@@ -111,6 +111,7 @@ declare_source_rule! {
         name: "useSortedKeys",
         language: "json",
         fix_kind: FixKind::Safe,
+        sources: &[RuleSource::EslintJson("sort-keys").same()],
     }
 }
 

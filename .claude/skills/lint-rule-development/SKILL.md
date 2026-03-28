@@ -1,6 +1,7 @@
 ---
 name: lint-rule-development
-description: Step-by-step guide for creating and implementing lint rules in Biome's analyzer. Use when implementing rules like noVar, useConst, or any custom lint/assist rule. Examples:<example>User wants to create a rule that detects unused variables</example><example>User needs to add code actions to fix diagnostic issues</example><example>User is implementing semantic analysis for binding references</example>
+description: Step-by-step guide for creating and implementing lint rules in Biome's analyzer. Use when implementing rules like noVar, useConst, or any custom lint/assist rule, adding code actions to fix diagnostics, implementing semantic analysis for binding references, or adding configurable options to rules.
+compatibility: Designed for coding agents working on the Biome codebase (github.com/biomejs/biome).
 ---
 
 ## Purpose
@@ -144,7 +145,7 @@ RuleDiagnostic::new(
 For rules that need binding analysis:
 
 ```rust
-use biome_analyze::Semantic;
+use crate::services::semantic::Semantic;
 
 impl Rule for MySemanticRule {
     type Query = Semantic<JsReferenceIdentifier>;
@@ -199,7 +200,7 @@ impl Rule for UseMyRuleName {
         );
 
         Some(JsRuleAction::new(
-            ctx.action_category(ctx.category(), ctx.group()),
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Use 'replacement' instead" }.to_owned(),
             mutation,
@@ -309,17 +310,22 @@ cargo insta review
 
 ### Generate Analyzer Code
 
-After modifying rules, generate updated boilerplate:
+During development, use the lightweight codegen commands:
+
+```shell
+just gen-rules          # Updates rule registrations in *_analyze crates
+just gen-configuration  # Updates configuration schemas
+```
+
+These generate enough code to compile and test your rule without errors.
+
+For full codegen (migrations, schema, bindings, formatting), run:
 
 ```shell
 just gen-analyzer
 ```
 
-This updates:
-- Rule registrations
-- Configuration schemas
-- Documentation exports
-- Type bindings
+**Note:** The CI autofix job runs `gen-analyzer` automatically when you open a PR, so running it locally is optional.
 
 ### Format and Lint
 
@@ -329,70 +335,54 @@ just f  # Format code
 just l  # Lint code
 ```
 
-## Documenting Rules
+### Adding Configurable Options
 
-### Multi-File Examples
+When a rule needs user-configurable behavior, add options via the `biome_rule_options` crate.
+For the full reference (merge strategies, design guidelines, common patterns), see
+[references/OPTIONS.md](references/OPTIONS.md).
 
-For rules that analyze relationships between multiple files (e.g., import cycles, cross-file dependencies, CSS class references), use the `file=<path>` property:
+**Quick workflow:**
 
-```rust
-/// ### Invalid
-///
-/// ```js,expect_diagnostic,file=foo.js
-/// import { bar } from "./bar.js";
-/// export function foo() {
-///     return bar();
-/// }
-/// ```
-///
-/// ```js,expect_diagnostic,file=bar.js
-/// import { foo } from "./foo.js";
-/// export function bar() {
-///     return foo();
-/// }
-/// ```
-```
-
-**How it works:**
-- All files in a documentation section (`### Invalid` or `### Valid`) are collected into an in-memory file system
-- The module graph is automatically populated from these files
-- Each file with `expect_diagnostic` must emit exactly one diagnostic
-- Files without `expect_diagnostic` provide context but aren't expected to trigger the rule
-
-**Supported languages:**
-- Supported: JavaScript/TypeScript/JSX/TSX
-- Supported: CSS (module graph automatically populated from `file=` blocks)
-- Not supported: HTML with `<style>` blocks (requires embedded snippet parsing - not yet implemented)
-
-### The `ignore` Directive
-
-Use `ignore` to exclude code blocks from automatic validation:
+**Step 1.** Define the options type in `biome_rule_options/src/<snake_case_rule_name>.rs`:
 
 ```rust
-/// ```html,expect_diagnostic,ignore
-/// <style>.card { border: 1px solid; }</style>
-/// <div class="header">Content</div>
-/// ```
+use biome_deserialize_macros::{Deserializable, Merge};
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Default, Clone, Serialize, Deserialize, Deserializable, Merge)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
+pub struct UseMyRuleNameOptions {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub behavior: Option<MyBehavior>,
+}
 ```
 
-**When to use `ignore`:**
-- Rules that require features not yet available in rustdoc context (e.g., HTML embedded snippets)
-- Examples that need special parser configuration
-- Illustrative examples where automatic validation isn't critical
+**Step 2.** Wire it into the rule:
 
-**Important:** Even with `ignore`, you should have comprehensive snapshot tests in `tests/specs/`.
-
-### Code Block Property Order
-
-For consistency, properties should be ordered:
 ```rust
-/// ```<language>[,expect_diagnostic][,(options|full_options|use_options)][,ignore][,file=path]
+use biome_rule_options::use_my_rule_name::UseMyRuleNameOptions;
+
+impl Rule for UseMyRuleName {
+    type Options = UseMyRuleNameOptions;
+
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let options = ctx.options();
+        let behavior = options.behavior.unwrap_or_default();
+        // ...
+    }
+}
 ```
 
-Examples:
-- `css,expect_diagnostic,file=styles.css`
-- `jsx,file=App.jsx`
-- `html,expect_diagnostic,ignore`
+**Step 3.** Test with `options.json` in the test directory (see [references/OPTIONS.md](references/OPTIONS.md) for examples).
+
+**Step 4.** Run codegen: `just gen-rules && just gen-configuration`
+
+**Key rules:**
+- All fields must be `Option<T>` for config merging to work
+- Use `Box<[Box<str>]>` instead of `Vec<String>` for collection fields
+- Use `#[derive(Merge)]` for simple cases, implement `Merge` manually for collections
+- Only add options when truly needed (conflicting community preferences, multiple valid interpretations)
 
 ## Tips
 

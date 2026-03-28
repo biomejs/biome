@@ -175,9 +175,11 @@ pub(crate) fn at_fenced_code_block(p: &mut MarkdownParser) -> bool {
 ///
 /// Grammar:
 /// MdFencedCodeBlock =
+///   indent: MdIndentTokenList
 ///   l_fence: ('```' | '~~~')
 ///   code_list: MdCodeNameList
 ///   content: MdInlineItemList
+///   r_fence_indent: MdIndentTokenList
 ///   r_fence: ('```' | '~~~')
 pub(crate) fn parse_fenced_code_block(p: &mut MarkdownParser) -> ParsedSyntax {
     parse_fenced_code_block_impl(p, false)
@@ -200,7 +202,7 @@ fn parse_fenced_code_block_impl(p: &mut MarkdownParser, force: bool) -> ParsedSy
     {
         fence_indent += p.state().list_item_required_indent;
     }
-    p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
+    p.emit_line_indent(MAX_BLOCK_PREFIX_INDENT);
 
     // Detect fence type and length (must close with same type and >= length per CommonMark §4.5)
     let text = p.cur_text();
@@ -225,14 +227,21 @@ fn parse_fenced_code_block_impl(p: &mut MarkdownParser, force: bool) -> ParsedSy
     let has_closing = at_closing_fence(p, is_tilde_fence, fence_len);
 
     if has_closing {
-        if p.state().list_item_required_indent > 0 && p.at_line_start() {
-            p.skip_line_indent(p.state().list_item_required_indent);
-        }
-        p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
+        // Closing fence indent: in a list context, strip up to list_item_required_indent;
+        // otherwise strip up to MAX_BLOCK_PREFIX_INDENT (0-3 spaces).
+        let max = if p.state().list_item_required_indent > 0 {
+            p.state().list_item_required_indent
+        } else {
+            MAX_BLOCK_PREFIX_INDENT
+        };
+        p.emit_line_indent(max);
         bump_fence(p, is_tilde_fence);
     } else {
         // Emit diagnostic for unterminated code block
         p.error(unterminated_fenced_code(p, opening_range, fence_type));
+        // Emit empty r_fence_indent list to satisfy grammar slot
+        let empty_m = p.start();
+        empty_m.complete(p, MD_INDENT_TOKEN_LIST);
     }
 
     Present(m.complete(p, MD_FENCED_CODE_BLOCK))
@@ -388,7 +397,7 @@ fn consume_quote_prefixes_in_code_content(p: &mut MarkdownParser, quote_depth: u
 
     let prev_virtual = p.state().virtual_line_start;
     p.state_mut().virtual_line_start = Some(p.cur_range().start());
-    p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
+    p.emit_indent_tokens(MAX_BLOCK_PREFIX_INDENT);
     p.state_mut().virtual_line_start = prev_virtual;
 
     for _ in 0..quote_depth {

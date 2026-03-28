@@ -144,6 +144,11 @@ expression: snapshot
 	}
 }
 
+.scss-only-test {
+	color: if(sass(true):black;else: white;);
+}
+
+
 ```
 
 
@@ -3067,17 +3072,97 @@ CssRoot {
                 r_curly_token: R_CURLY@2564..2566 "}" [Newline("\n")] [],
             },
         },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@2566..2569 "." [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@2569..2584 "scss-only-test" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@2584..2585 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@2585..2592 "color" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@2592..2594 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIfFunction {
+                                        if_token: IF_KW@2594..2596 "if" [] [],
+                                        l_paren_token: L_PAREN@2596..2597 "(" [] [],
+                                        css_if_branch_list: CssIfBranchList [
+                                            CssIfBranch {
+                                                condition: CssBogusIfTest {
+                                                    items: [
+                                                        SASS_KW@2597..2601 "sass" [] [],
+                                                        L_PAREN@2601..2602 "(" [] [],
+                                                        CssBogus {
+                                                            items: [
+                                                                ScssExpressionItemList [
+                                                                    CssIdentifier {
+                                                                        value_token: IDENT@2602..2606 "true" [] [],
+                                                                    },
+                                                                ],
+                                                            ],
+                                                        },
+                                                        R_PAREN@2606..2607 ")" [] [],
+                                                    ],
+                                                },
+                                                colon_token: COLON@2607..2608 ":" [] [],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@2608..2613 "black" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            SEMICOLON@2613..2614 ";" [] [],
+                                            CssIfBranch {
+                                                condition: CssElseKeyword {
+                                                    else_token: ELSE_KW@2614..2618 "else" [] [],
+                                                },
+                                                colon_token: COLON@2618..2620 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@2620..2625 "white" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            SEMICOLON@2625..2626 ";" [] [],
+                                        ],
+                                        r_paren_token: R_PAREN@2626..2627 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@2627..2628 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@2628..2630 "}" [Newline("\n")] [],
+            },
+        },
     ],
-    eof_token: EOF@2566..2567 "" [Newline("\n")] [],
+    eof_token: EOF@2630..2632 "" [Newline("\n"), Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..2567
+0: CSS_ROOT@0..2632
   0: (empty)
-  1: CSS_ROOT_ITEM_LIST@0..2566
+  1: CSS_ROOT_ITEM_LIST@0..2630
     0: CSS_QUALIFIED_RULE@0..55
       0: CSS_SELECTOR_LIST@0..15
         0: CSS_COMPOUND_SELECTOR@0..15
@@ -4931,7 +5016,57 @@ CssRoot {
                     2: R_CURLY@2557..2561 "}" [Newline("\n"), Whitespace("\t\t")] []
               2: R_CURLY@2561..2564 "}" [Newline("\n"), Whitespace("\t")] []
         2: R_CURLY@2564..2566 "}" [Newline("\n")] []
-  2: EOF@2566..2567 "" [Newline("\n")] []
+    31: CSS_QUALIFIED_RULE@2566..2630
+      0: CSS_SELECTOR_LIST@2566..2584
+        0: CSS_COMPOUND_SELECTOR@2566..2584
+          0: CSS_NESTED_SELECTOR_LIST@2566..2566
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@2566..2584
+            0: CSS_CLASS_SELECTOR@2566..2584
+              0: DOT@2566..2569 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@2569..2584
+                0: IDENT@2569..2584 "scss-only-test" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@2584..2630
+        0: L_CURLY@2584..2585 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@2585..2628
+          0: CSS_DECLARATION_WITH_SEMICOLON@2585..2628
+            0: CSS_DECLARATION@2585..2627
+              0: CSS_GENERIC_PROPERTY@2585..2627
+                0: CSS_IDENTIFIER@2585..2592
+                  0: IDENT@2585..2592 "color" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@2592..2594 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@2594..2627
+                  0: CSS_IF_FUNCTION@2594..2627
+                    0: IF_KW@2594..2596 "if" [] []
+                    1: L_PAREN@2596..2597 "(" [] []
+                    2: CSS_IF_BRANCH_LIST@2597..2626
+                      0: CSS_IF_BRANCH@2597..2613
+                        0: CSS_BOGUS_IF_TEST@2597..2607
+                          0: SASS_KW@2597..2601 "sass" [] []
+                          1: L_PAREN@2601..2602 "(" [] []
+                          2: CSS_BOGUS@2602..2606
+                            0: SCSS_EXPRESSION_ITEM_LIST@2602..2606
+                              0: CSS_IDENTIFIER@2602..2606
+                                0: IDENT@2602..2606 "true" [] []
+                          3: R_PAREN@2606..2607 ")" [] []
+                        1: COLON@2607..2608 ":" [] []
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@2608..2613
+                          0: CSS_IDENTIFIER@2608..2613
+                            0: IDENT@2608..2613 "black" [] []
+                      1: SEMICOLON@2613..2614 ";" [] []
+                      2: CSS_IF_BRANCH@2614..2625
+                        0: CSS_ELSE_KEYWORD@2614..2618
+                          0: ELSE_KW@2614..2618 "else" [] []
+                        1: COLON@2618..2620 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@2620..2625
+                          0: CSS_IDENTIFIER@2620..2625
+                            0: IDENT@2620..2625 "white" [] []
+                      3: SEMICOLON@2625..2626 ";" [] []
+                    3: R_PAREN@2626..2627 ")" [] []
+              1: (empty)
+            1: SEMICOLON@2627..2628 ";" [] []
+        2: R_CURLY@2628..2630 "}" [Newline("\n")] []
+  2: EOF@2630..2632 "" [Newline("\n"), Newline("\n")] []
 
 ```
 
@@ -5904,5 +6039,15 @@ if.css:133:36 parse ━━━━━━━━━━━━━━━━━━━━
         │ 			                                ^^^
     134 │ 			b: if(style(--valid: false): green; else: yellow);
     135 │ 		}
+  
+if.css:140:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Sass if() tests are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  
+    139 │ .scss-only-test {
+  > 140 │ 	color: if(sass(true):black;else: white;);
+        │ 	               ^^^^
+    141 │ }
+    142 │ 
   
 ```

@@ -1,0 +1,45 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/scss/at-rule/for.scss
+---
+
+# Input
+
+```scss
+.a{
+@for $i from 1 through 3{
+width:$i * 1px;
+}
+}
+
+.b{
+@for
+$step
+from
+$start+1
+to
+$end - 1
+{
+margin:$step;
+}
+}
+
+```
+
+
+# Formatted
+
+```scss
+.a {
+	@for $i from 1 through 3 {
+		width: $i * 1px;
+	}
+}
+
+.b {
+	@for $step from $start + 1 to $end - 1 {
+		margin: $step;
+	}
+}
+
+```

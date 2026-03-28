@@ -276,6 +276,7 @@ fn handle_any_file<'scope>(
     // The unresolved origin path in case the directory is behind a symbolic link
     mut origin_path: Option<Utf8PathBuf>,
 ) {
+    let origin_path_exist = origin_path.is_some();
     if !ctx.interner().intern_path(path.clone()) {
         // If the path was already inserted, it could have been pointed at by
         // multiple symlinks. No need to traverse again.
@@ -283,7 +284,10 @@ fn handle_any_file<'scope>(
     }
 
     if file_type.is_symlink() {
-        if !ctx.can_handle(&BiomePath::new(path.clone())) {
+        // Here we don't care if it's a file or not. We care only about the the is_symlink flag being true
+        let path_to_check =
+            BiomePath::new_with_kind(path.clone(), PathKind::File { is_symlink: true });
+        if !ctx.can_handle(&path_to_check) {
             return;
         }
 
@@ -312,6 +316,15 @@ fn handle_any_file<'scope>(
         file_type = target_file_type;
     }
 
+    let path_kind = if file_type.is_dir() {
+        PathKind::Directory {
+            is_symlink: origin_path_exist,
+        }
+    } else {
+        PathKind::File {
+            is_symlink: origin_path_exist,
+        }
+    };
     // In case the file is inside a directory that is behind a symbolic link,
     // the unresolved origin path is used to construct a new path.
     // This is required to support ignore patterns to symbolic links.
@@ -319,7 +332,7 @@ fn handle_any_file<'scope>(
         if let Some(file_name) = path.file_name() {
             let new_origin_path = old_origin_path.join(file_name);
             origin_path = Some(new_origin_path.clone());
-            BiomePath::new(new_origin_path)
+            BiomePath::new_with_kind(new_origin_path, path_kind)
         } else {
             ctx.push_diagnostic(Error::from(FileSystemDiagnostic {
                 path: path.to_string(),
@@ -330,7 +343,7 @@ fn handle_any_file<'scope>(
             return;
         }
     } else {
-        BiomePath::new(&path)
+        BiomePath::new_with_kind(&path, path_kind)
     };
 
     // Performing this check here let's us skip unsupported
@@ -348,13 +361,23 @@ fn handle_any_file<'scope>(
             handle_dir(scope, ctx, &path_buf, origin_path);
         });
         if ctx.should_store_dirs() {
-            ctx.store_path(BiomePath::new(path));
+            ctx.store_path(BiomePath::new_with_kind(
+                path,
+                PathKind::Directory {
+                    is_symlink: origin_path_exist,
+                },
+            ));
         }
         return;
     }
 
     if file_type.is_file() {
-        ctx.store_path(BiomePath::new(path));
+        ctx.store_path(BiomePath::new_with_kind(
+            path,
+            PathKind::File {
+                is_symlink: origin_path_exist,
+            },
+        ));
         return;
     }
 
@@ -467,7 +490,8 @@ impl TemporaryFs {
     /// will be stripped of the working directory path, making snapshots predictable.
     pub fn create_mem(&self) -> MemoryFileSystem {
         let fs = MemoryFileSystem::default();
-        for (path, content) in self.files.iter() {
+        for (path, _) in self.files.iter() {
+            let content = fs::read_to_string(path.as_std_path()).expect("File to exist");
             fs.insert(
                 path.clone()
                     .strip_prefix(self.project_directory.as_str())

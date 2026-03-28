@@ -5,7 +5,7 @@ use biome_markdown_syntax::AnyMdCodeBlock;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatAnyMdCodeBlock;
 impl FormatRule<AnyMdCodeBlock> for FormatAnyMdCodeBlock {
-    type Context = MarkdownFormatContext;
+    type Context = MdFormatContext;
     fn fmt(&self, node: &AnyMdCodeBlock, f: &mut MarkdownFormatter) -> FormatResult<()> {
         match node {
             AnyMdCodeBlock::MdFencedCodeBlock(node) => node.format().fmt(f),

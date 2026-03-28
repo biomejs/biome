@@ -1,0 +1,7 @@
+/* should not generate diagnostics */
+
+/* overscroll-behavior became newly available in 2022 - ok */
+.messages { overscroll-behavior: contain; }
+
+/* @container is widely available */
+@container (min-width: 800px) { a { color: red; } }

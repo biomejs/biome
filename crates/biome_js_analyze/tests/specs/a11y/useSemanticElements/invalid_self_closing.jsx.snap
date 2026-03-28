@@ -42,7 +42,6 @@ expression: invalid_self_closing.jsx
     <div role="paragraph" />
     <div role="complementary" />
     <div role="blockquote" />
-    <div role="status" />
     <div role="contentinfo" />
     <div role="region" />
 </>
@@ -505,25 +504,6 @@ invalid_self_closing.jsx:31:10 lint/a11y/useSemanticElements ━━━━━━�
 ```
 
 ```
-invalid_self_closing.jsx:32:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The elements with this role can be changed to the following elements:
-    <div>
-    <span>
-  
-    30 │     <div role="term" />
-    31 │     <div role="textbox" />
-  > 32 │     <div role="generic" />
-       │          ^^^^^^^^^^^^^^
-    33 │     <div role="caption" />
-    34 │     <div role="main" />
-  
-  i For examples and more information, see WAI-ARIA Roles
-  
-
-```
-
-```
 invalid_self_closing.jsx:33:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The elements with this role can be changed to the following elements:
@@ -608,7 +588,7 @@ invalid_self_closing.jsx:37:10 lint/a11y/useSemanticElements ━━━━━━�
   > 37 │     <div role="complementary" />
        │          ^^^^^^^^^^^^^^^^^^^^
     38 │     <div role="blockquote" />
-    39 │     <div role="status" />
+    39 │     <div role="contentinfo" />
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -625,8 +605,8 @@ invalid_self_closing.jsx:38:10 lint/a11y/useSemanticElements ━━━━━━�
     37 │     <div role="complementary" />
   > 38 │     <div role="blockquote" />
        │          ^^^^^^^^^^^^^^^^^
-    39 │     <div role="status" />
-    40 │     <div role="contentinfo" />
+    39 │     <div role="contentinfo" />
+    40 │     <div role="region" />
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -637,14 +617,14 @@ invalid_self_closing.jsx:38:10 lint/a11y/useSemanticElements ━━━━━━�
 invalid_self_closing.jsx:39:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The elements with this role can be changed to the following elements:
-    <output>
+    <footer>
   
     37 │     <div role="complementary" />
     38 │     <div role="blockquote" />
-  > 39 │     <div role="status" />
-       │          ^^^^^^^^^^^^^
-    40 │     <div role="contentinfo" />
-    41 │     <div role="region" />
+  > 39 │     <div role="contentinfo" />
+       │          ^^^^^^^^^^^^^^^^^^
+    40 │     <div role="region" />
+    41 │ </>
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -655,32 +635,14 @@ invalid_self_closing.jsx:39:10 lint/a11y/useSemanticElements ━━━━━━�
 invalid_self_closing.jsx:40:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The elements with this role can be changed to the following elements:
-    <footer>
-  
-    38 │     <div role="blockquote" />
-    39 │     <div role="status" />
-  > 40 │     <div role="contentinfo" />
-       │          ^^^^^^^^^^^^^^^^^^
-    41 │     <div role="region" />
-    42 │ </>
-  
-  i For examples and more information, see WAI-ARIA Roles
-  
-
-```
-
-```
-invalid_self_closing.jsx:41:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The elements with this role can be changed to the following elements:
     <section>
   
-    39 │     <div role="status" />
-    40 │     <div role="contentinfo" />
-  > 41 │     <div role="region" />
+    38 │     <div role="blockquote" />
+    39 │     <div role="contentinfo" />
+  > 40 │     <div role="region" />
        │          ^^^^^^^^^^^^^
-    42 │ </>
-    43 │ 
+    41 │ </>
+    42 │ 
   
   i For examples and more information, see WAI-ARIA Roles
   

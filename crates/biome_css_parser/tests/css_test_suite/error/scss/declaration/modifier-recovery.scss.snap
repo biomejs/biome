@@ -1,0 +1,152 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+// Unexpected token between modifiers should still allow following modifiers
+$color: red foo !global;
+
+// Unexpected token between modifiers should not stop parsing later modifiers
+$gap: 1 !default bar !global;
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        ScssDeclaration {
+            name: ScssIdentifier {
+                dollar_token: DOLLAR@0..78 "$" [Comments("// Unexpected token b ..."), Newline("\n")] [],
+                name: CssIdentifier {
+                    value_token: IDENT@78..83 "color" [] [],
+                },
+            },
+            colon_token: COLON@83..85 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    CssIdentifier {
+                        value_token: IDENT@85..89 "red" [] [Whitespace(" ")],
+                    },
+                    CssIdentifier {
+                        value_token: IDENT@89..93 "foo" [] [Whitespace(" ")],
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [
+                ScssVariableModifier {
+                    excl_token: BANG@93..94 "!" [] [],
+                    value: GLOBAL_KW@94..100 "global" [] [],
+                },
+            ],
+            semicolon_token: SEMICOLON@100..101 ";" [] [],
+        },
+        CssBogus {
+            items: [
+                ScssIdentifier {
+                    dollar_token: DOLLAR@101..182 "$" [Newline("\n"), Newline("\n"), Comments("// Unexpected token b ..."), Newline("\n")] [],
+                    name: CssIdentifier {
+                        value_token: IDENT@182..185 "gap" [] [],
+                    },
+                },
+                COLON@185..187 ":" [] [Whitespace(" ")],
+                ScssExpression {
+                    items: ScssExpressionItemList [
+                        CssNumber {
+                            value_token: CSS_NUMBER_LITERAL@187..189 "1" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
+                CssBogus {
+                    items: [
+                        ScssVariableModifier {
+                            excl_token: BANG@189..190 "!" [] [],
+                            value: DEFAULT_KW@190..198 "default" [] [Whitespace(" ")],
+                        },
+                        CssBogus {
+                            items: [
+                                IDENT@198..202 "bar" [] [Whitespace(" ")],
+                            ],
+                        },
+                        ScssVariableModifier {
+                            excl_token: BANG@202..203 "!" [] [],
+                            value: GLOBAL_KW@203..209 "global" [] [],
+                        },
+                    ],
+                },
+                SEMICOLON@209..210 ";" [] [],
+            ],
+        },
+    ],
+    eof_token: EOF@210..211 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..211
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..210
+    0: SCSS_DECLARATION@0..101
+      0: SCSS_IDENTIFIER@0..83
+        0: DOLLAR@0..78 "$" [Comments("// Unexpected token b ..."), Newline("\n")] []
+        1: CSS_IDENTIFIER@78..83
+          0: IDENT@78..83 "color" [] []
+      1: COLON@83..85 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@85..93
+        0: SCSS_EXPRESSION_ITEM_LIST@85..93
+          0: CSS_IDENTIFIER@85..89
+            0: IDENT@85..89 "red" [] [Whitespace(" ")]
+          1: CSS_IDENTIFIER@89..93
+            0: IDENT@89..93 "foo" [] [Whitespace(" ")]
+      3: SCSS_VARIABLE_MODIFIER_LIST@93..100
+        0: SCSS_VARIABLE_MODIFIER@93..100
+          0: BANG@93..94 "!" [] []
+          1: GLOBAL_KW@94..100 "global" [] []
+      4: SEMICOLON@100..101 ";" [] []
+    1: CSS_BOGUS@101..210
+      0: SCSS_IDENTIFIER@101..185
+        0: DOLLAR@101..182 "$" [Newline("\n"), Newline("\n"), Comments("// Unexpected token b ..."), Newline("\n")] []
+        1: CSS_IDENTIFIER@182..185
+          0: IDENT@182..185 "gap" [] []
+      1: COLON@185..187 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@187..189
+        0: SCSS_EXPRESSION_ITEM_LIST@187..189
+          0: CSS_NUMBER@187..189
+            0: CSS_NUMBER_LITERAL@187..189 "1" [] [Whitespace(" ")]
+      3: CSS_BOGUS@189..209
+        0: SCSS_VARIABLE_MODIFIER@189..198
+          0: BANG@189..190 "!" [] []
+          1: DEFAULT_KW@190..198 "default" [] [Whitespace(" ")]
+        1: CSS_BOGUS@198..202
+          0: IDENT@198..202 "bar" [] [Whitespace(" ")]
+        2: SCSS_VARIABLE_MODIFIER@202..209
+          0: BANG@202..203 "!" [] []
+          1: GLOBAL_KW@203..209 "global" [] []
+      4: SEMICOLON@209..210 ";" [] []
+  2: EOF@210..211 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+modifier-recovery.scss:5:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    4 │ // Unexpected token between modifiers should not stop parsing later modifiers
+  > 5 │ $gap: 1 !default bar !global;
+      │                  ^^^
+    6 │ 
+  
+  i Expected a variable modifier or the end of the declaration.
+  
+```

@@ -3,7 +3,10 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid-definemodel-destructured.vue
 ---
 # Input
-```ts
+```vue
+/* should not generate diagnostics */
+
+<script setup>
 const [model, mod] = defineModel();
 console.log(model);
 function process() {
@@ -12,5 +15,6 @@ function process() {
 function update(value) {
   model.value = value;
 }
+</script>
 
 ```

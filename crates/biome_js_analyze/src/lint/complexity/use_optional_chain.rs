@@ -6,7 +6,8 @@ use biome_js_factory::make;
 use biome_js_semantic::{BindingExtensions, SemanticModel};
 use biome_js_syntax::{
     AnyJsExpression, AnyJsMemberExpression, AnyJsName, JsBinaryExpression, JsBinaryOperator,
-    JsLogicalExpression, JsLogicalOperator, JsUnaryOperator, OperatorPrecedence, T,
+    JsLogicalExpression, JsLogicalOperator, JsUnaryExpression, JsUnaryOperator, OperatorPrecedence,
+    T,
 };
 use biome_rowan::{AstNode, AstNodeExt, BatchMutationExt, SyntaxResult};
 use biome_rule_options::use_optional_chain::UseOptionalChainOptions;
@@ -53,6 +54,10 @@ declare_lint_rule! {
     /// (((typeof x) as string) || {}).bar;
     /// ```
     ///
+    /// ```js,expect_diagnostic
+    /// !foo || !foo.bar
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```js
@@ -85,8 +90,22 @@ declare_lint_rule! {
     }
 }
 
+/// Result of analyzing a logical AND chain for optional chain conversion.
+pub struct LogicalAndChainNodes {
+    /// The expression nodes that need `?.` conversion.
+    nodes: VecDeque<AnyJsExpression>,
+    /// When the chain doesn't start at the beginning of the `&&` expression,
+    /// this holds the prefix expression that should be preserved.
+    /// E.g. in `bar && foo && foo.length`, the prefix is `bar` and the chain
+    /// produces `foo?.length`, so the final result is `bar && foo?.length`.
+    prefix: Option<AnyJsExpression>,
+    /// Whether this chain was derived from a negated `||` chain like `!foo || !foo.bar`.
+    /// When true, the fix wraps the result in `!` and uses `||` for prefix joining.
+    negated: bool,
+}
+
 pub enum UseOptionalChainState {
-    LogicalAnd(VecDeque<AnyJsExpression>),
+    LogicalAnd(LogicalAndChainNodes),
     LogicalOrLike(LogicalOrLikeChain),
 }
 
@@ -114,6 +133,20 @@ impl Rule for UseOptionalChain {
                 ))
             }
             JsLogicalOperator::NullishCoalescing | JsLogicalOperator::LogicalOr => {
+                // Check for negated || chains like `!foo || !foo.bar`
+                if matches!(operator, JsLogicalOperator::LogicalOr) && is_negated_or_chain(logical)
+                {
+                    let right = logical.right().ok()?;
+                    let stripped_right = strip_negation(&right)?;
+                    let chain = LogicalAndChain::from_expression(stripped_right).ok()?;
+                    if chain.is_inside_another_negated_chain().unwrap_or(false) {
+                        return None;
+                    }
+                    let chain_nodes =
+                        chain.optional_chain_expression_nodes_from_negated_or(logical, model)?;
+                    return Some(UseOptionalChainState::LogicalAnd(chain_nodes));
+                }
+
                 let chain = LogicalOrLikeChain::from_expression(logical)?;
 
                 if chain.is_inside_another_chain() {
@@ -141,13 +174,13 @@ impl Rule for UseOptionalChain {
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         match state {
-            UseOptionalChainState::LogicalAnd(optional_chain_expression_nodes) => {
+            UseOptionalChainState::LogicalAnd(chain_nodes) => {
                 let mut chain_with_replacement = None;
                 // We process the expression nodes in order to find the
                 // outermost expression node that needs replacement
                 // (the subject), while iteratively constructing the replacement
                 // for the chain as a whole.
-                for subject in optional_chain_expression_nodes {
+                for subject in &chain_nodes.nodes {
                     // For longer chains, we need to update the subject to take
                     // previous replacements into account. Otherwise, the new
                     // replacement would discard the previous ones.
@@ -201,6 +234,29 @@ impl Rule for UseOptionalChain {
                         .ok()?
                         .replace_node(chain, chain_replacement.clone())
                         .unwrap_or(chain_replacement)
+                };
+
+                // If there's a prefix (the chain doesn't start at the beginning
+                // of the expression), wrap the replacement in a logical expression
+                // with the prefix on the left.
+                // E.g. `bar && foo && foo.length` → `bar && foo?.length`
+                // E.g. `!bar || !foo || !foo.length` → `!bar || !foo?.length`
+                let replacement = if let Some(prefix) = &chain_nodes.prefix {
+                    let op_token = logical.operator_token().ok()?;
+                    let join_token = if chain_nodes.negated {
+                        make::token(T![||])
+                    } else {
+                        make::token(T![&&])
+                    };
+                    AnyJsExpression::from(make::js_logical_expression(
+                        prefix.clone(),
+                        join_token
+                            .with_leading_trivia_pieces(op_token.leading_trivia().pieces())
+                            .with_trailing_trivia_pieces(op_token.trailing_trivia().pieces()),
+                        replacement,
+                    ))
+                } else {
+                    replacement
                 };
 
                 let mut mutation = ctx.root().begin();
@@ -429,6 +485,55 @@ fn extract_optional_chain_like_typeof(
     Ok(None)
 }
 
+/// If the expression is `!expr` (possibly parenthesized), returns the inner expression.
+fn strip_negation(expression: &AnyJsExpression) -> Option<AnyJsExpression> {
+    let expr = expression.clone().omit_parentheses();
+    let unary = expr.as_js_unary_expression()?;
+    if unary.operator().ok()? == JsUnaryOperator::LogicalNot {
+        Some(unary.argument().ok()?.omit_parentheses())
+    } else {
+        None
+    }
+}
+
+/// Walks a `||` chain and verifies ALL leaf operands are `!expr`.
+/// Returns `false` if any operand is not negated or if mixed operators are found.
+fn is_negated_or_chain(logical: &JsLogicalExpression) -> bool {
+    if logical
+        .right()
+        .ok()
+        .as_ref()
+        .and_then(strip_negation)
+        .is_none()
+    {
+        return false;
+    }
+    let mut current = logical.left().ok();
+    while let Some(expr) = current.take() {
+        match expr {
+            AnyJsExpression::JsLogicalExpression(inner) => {
+                if !matches!(inner.operator(), Ok(JsLogicalOperator::LogicalOr)) {
+                    return false;
+                }
+                if inner
+                    .right()
+                    .ok()
+                    .as_ref()
+                    .and_then(strip_negation)
+                    .is_none()
+                {
+                    return false;
+                }
+                current = inner.left().ok();
+            }
+            other => {
+                return strip_negation(&other).is_some();
+            }
+        }
+    }
+    false
+}
+
 /// `LogicalAndChainOrdering` is the result of a comparison between two logical
 /// AND chains.
 enum LogicalAndChainOrdering {
@@ -600,10 +705,41 @@ impl LogicalAndChain {
         Ok(false)
     }
 
+    /// Like `is_inside_another_chain`, but for negated `||` chains.
+    /// Navigates: head -> parent `!` -> parent `||` -> grandparent `||`.
+    /// Returns `None` when the parent structure doesn't exist (no grandparent),
+    /// which means the chain is NOT inside another chain.
+    fn is_inside_another_negated_chain(&self) -> Option<bool> {
+        let unary = self.head.parent::<JsUnaryExpression>()?;
+        let parent = unary.parent::<JsLogicalExpression>()?;
+        let grand_parent = parent.parent::<JsLogicalExpression>()?;
+        if !matches!(grand_parent.operator().ok()?, JsLogicalOperator::LogicalOr) {
+            return Some(false);
+        }
+        if grand_parent
+            .left()
+            .ok()
+            .as_ref()
+            .and_then(|e| e.as_js_logical_expression())
+            == Some(&parent)
+        {
+            let stripped = strip_negation(&grand_parent.right().ok()?)?;
+            let gp_right_chain = Self::from_expression(stripped).ok()?;
+            return match gp_right_chain.cmp_chain(self).ok()? {
+                LogicalAndChainOrdering::SubChain | LogicalAndChainOrdering::Equal => Some(true),
+                LogicalAndChainOrdering::Different => Some(false),
+            };
+        }
+        Some(false)
+    }
+
     /// This function compares two `LogicalAndChain` and returns
     /// `LogicalAndChainOrdering` by comparing their `token_text_trimmed` for
     /// every `JsAnyExpression` node.
     fn cmp_chain(&self, other: &Self) -> SyntaxResult<LogicalAndChainOrdering> {
+        if other.buf.is_empty() {
+            return Ok(LogicalAndChainOrdering::Different);
+        }
         let chain_ordering = match self.buf.len().cmp(&other.buf.len()) {
             Ordering::Less => return Ok(LogicalAndChainOrdering::Different),
             Ordering::Equal => LogicalAndChainOrdering::Equal,
@@ -697,11 +833,12 @@ impl LogicalAndChain {
     }
 
     /// This function returns a list of `JsAnyExpression` which we need to
-    /// transform into an optional chain expression.
+    /// transform into an optional chain expression, along with an optional
+    /// prefix expression that precedes the chain.
     fn optional_chain_expression_nodes(
         mut self,
         model: &SemanticModel,
-    ) -> Option<VecDeque<AnyJsExpression>> {
+    ) -> Option<LogicalAndChainNodes> {
         let mut optional_chain_expression_nodes = VecDeque::with_capacity(self.buf.len());
         // Take a head of a next sub-chain
         // E.g. `foo && foo.bar && foo.bar.baz`
@@ -712,6 +849,11 @@ impl LogicalAndChain {
         // Keep track of previous branches, so we can inspect them for optional
         // chains that were already present in said branches.
         let mut prev_branch: Option<Self> = None;
+        // Track the prefix expression for chains that don't start at the
+        // beginning of the `&&` expression. When we encounter a `Different`
+        // branch, we store the original expression (before destructuring) as
+        // the prefix.
+        let mut prefix = None;
         while let Some(expression) = next_chain_head.take() {
             let expression = match expression {
                 // Extract a left `JsAnyExpression` from `JsBinaryExpression` if
@@ -728,6 +870,10 @@ impl LogicalAndChain {
                 }
                 expression => expression,
             };
+            // Save the original expression before destructuring. If this branch
+            // turns out to be `Different`, this is the prefix we need to
+            // preserve.
+            let original_expression = expression.clone();
             let head = match expression {
                 AnyJsExpression::JsLogicalExpression(logical) => {
                     if matches!(logical.operator().ok()?, JsLogicalOperator::LogicalAnd) {
@@ -797,7 +943,13 @@ impl LogicalAndChain {
                     prev_branch = Some(branch);
                 }
                 LogicalAndChainOrdering::Equal => {}
-                LogicalAndChainOrdering::Different => return None,
+                LogicalAndChainOrdering::Different => {
+                    // The chain doesn't span the entire `&&` expression.
+                    // Store the unmatched expression as the prefix and stop
+                    // the leftward traversal.
+                    prefix = Some(original_expression);
+                    break;
+                }
             }
         }
 
@@ -833,7 +985,121 @@ impl LogicalAndChain {
         if optional_chain_expression_nodes.is_empty() {
             return None;
         }
-        Some(optional_chain_expression_nodes)
+        Some(LogicalAndChainNodes {
+            nodes: optional_chain_expression_nodes,
+            prefix,
+            negated: false,
+        })
+    }
+
+    /// Like `optional_chain_expression_nodes`, but for negated `||` chains.
+    /// Walks `!a || !a.b || !a.b.c` by stripping `!` from each operand
+    /// before comparing chains.
+    fn optional_chain_expression_nodes_from_negated_or(
+        mut self,
+        logical: &JsLogicalExpression,
+        model: &SemanticModel,
+    ) -> Option<LogicalAndChainNodes> {
+        let mut optional_chain_expression_nodes = VecDeque::with_capacity(self.buf.len());
+        let mut next_chain_head = logical.left().ok();
+        let mut prev_branch: Option<Self> = None;
+        let mut prefix = None;
+        while let Some(expression) = next_chain_head.take() {
+            let original_expression = expression.clone();
+            let head = match expression {
+                AnyJsExpression::JsLogicalExpression(inner_logical) => {
+                    if matches!(inner_logical.operator().ok()?, JsLogicalOperator::LogicalOr) {
+                        next_chain_head = inner_logical.left().ok();
+                        strip_negation(&inner_logical.right().ok()?)?
+                    } else {
+                        return None;
+                    }
+                }
+                other => strip_negation(&other)?,
+            };
+            let branch =
+                Self::from_expression(normalized_optional_chain_like(head, model).ok()?).ok()?;
+            match self.cmp_chain(&branch).ok()? {
+                LogicalAndChainOrdering::SubChain => {
+                    if let Some(mut prev_branch) = prev_branch {
+                        let mut parts_to_pop = prev_branch.buf.len() - branch.buf.len() - 1;
+                        while parts_to_pop > 0 {
+                            if let (Some(left_part), Some(right_part)) =
+                                (prev_branch.buf.pop_back(), self.buf.pop_back())
+                            {
+                                match left_part {
+                                    AnyJsExpression::JsStaticMemberExpression(ref expr)
+                                        if expr
+                                            .operator_token()
+                                            .is_ok_and(|token| token.kind() == T![?.]) =>
+                                    {
+                                        optional_chain_expression_nodes.push_front(right_part);
+                                    }
+                                    AnyJsExpression::JsComputedMemberExpression(ref expr)
+                                        if expr.optional_chain_token().is_some() =>
+                                    {
+                                        optional_chain_expression_nodes.push_front(right_part);
+                                    }
+                                    AnyJsExpression::JsCallExpression(ref expr)
+                                        if expr.optional_chain_token().is_some() =>
+                                    {
+                                        optional_chain_expression_nodes.push_front(right_part);
+                                    }
+                                    _ => {}
+                                }
+                            }
+                            parts_to_pop -= 1;
+                        }
+                    }
+                    let mut tail = self.buf.split_off(branch.buf.len());
+                    if let Some(part) = tail.pop_front() {
+                        optional_chain_expression_nodes.push_front(part);
+                    }
+                    prev_branch = Some(branch);
+                }
+                LogicalAndChainOrdering::Equal => {}
+                LogicalAndChainOrdering::Different => {
+                    prefix = Some(original_expression);
+                    break;
+                }
+            }
+        }
+
+        if let Some(mut prev_branch) = prev_branch {
+            while let (Some(left_part), Some(right_part)) =
+                (prev_branch.buf.pop_back(), self.buf.pop_back())
+            {
+                match left_part {
+                    AnyJsExpression::JsStaticMemberExpression(ref expr)
+                        if expr
+                            .operator_token()
+                            .is_ok_and(|token| token.kind() == T![?.]) =>
+                    {
+                        optional_chain_expression_nodes.push_front(right_part);
+                    }
+                    AnyJsExpression::JsComputedMemberExpression(ref expr)
+                        if expr.optional_chain_token().is_some() =>
+                    {
+                        optional_chain_expression_nodes.push_front(right_part);
+                    }
+                    AnyJsExpression::JsCallExpression(ref expr)
+                        if expr.optional_chain_token().is_some() =>
+                    {
+                        optional_chain_expression_nodes.push_front(right_part);
+                    }
+                    _ => {}
+                }
+            }
+        }
+
+        if optional_chain_expression_nodes.is_empty() {
+            return None;
+        }
+        Some(LogicalAndChainNodes {
+            nodes: optional_chain_expression_nodes,
+            prefix,
+            negated: true,
+        })
     }
 }
 

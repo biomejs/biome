@@ -1,5 +1,6 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
 expression: snapshot
 ---
 
@@ -232,11 +233,14 @@ CssRoot {
                                 colon_token: COLON@14..16 ":" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
-                                        CssNumber {
-                                            value_token: CSS_NUMBER_LITERAL@16..18 "10" [] [],
-                                        },
-                                        CssNumber {
-                                            value_token: CSS_NUMBER_LITERAL@18..21 "+10" [] [],
+                                        ScssBinaryExpression {
+                                            left: CssNumber {
+                                                value_token: CSS_NUMBER_LITERAL@16..18 "10" [] [],
+                                            },
+                                            operator: PLUS@18..19 "+" [] [],
+                                            right: CssNumber {
+                                                value_token: CSS_NUMBER_LITERAL@19..21 "10" [] [],
+                                            },
                                         },
                                     ],
                                 },
@@ -254,11 +258,14 @@ CssRoot {
                                 colon_token: COLON@31..33 ":" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
-                                        CssNumber {
-                                            value_token: CSS_NUMBER_LITERAL@33..36 "10" [] [Whitespace(" ")],
-                                        },
-                                        CssNumber {
-                                            value_token: CSS_NUMBER_LITERAL@36..39 "+10" [] [],
+                                        ScssBinaryExpression {
+                                            left: CssNumber {
+                                                value_token: CSS_NUMBER_LITERAL@33..36 "10" [] [Whitespace(" ")],
+                                            },
+                                            operator: PLUS@36..37 "+" [] [],
+                                            right: CssNumber {
+                                                value_token: CSS_NUMBER_LITERAL@37..39 "10" [] [],
+                                            },
                                         },
                                     ],
                                 },
@@ -346,12 +353,15 @@ CssRoot {
                                 colon_token: COLON@2106..2108 ":" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
-                                        CssNumber {
-                                            value_token: CSS_NUMBER_LITERAL@2108..2110 "10" [] [],
-                                        },
-                                        CssRegularDimension {
-                                            value_token: CSS_NUMBER_LITERAL@2110..2113 "+10" [] [],
-                                            unit_token: IDENT@2113..2115 "px" [] [],
+                                        ScssBinaryExpression {
+                                            left: CssNumber {
+                                                value_token: CSS_NUMBER_LITERAL@2108..2110 "10" [] [],
+                                            },
+                                            operator: PLUS@2110..2111 "+" [] [],
+                                            right: CssRegularDimension {
+                                                value_token: CSS_NUMBER_LITERAL@2111..2113 "10" [] [],
+                                                unit_token: IDENT@2113..2115 "px" [] [],
+                                            },
                                         },
                                     ],
                                 },
@@ -369,12 +379,15 @@ CssRoot {
                                 colon_token: COLON@2125..2127 ":" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
-                                        CssNumber {
-                                            value_token: CSS_NUMBER_LITERAL@2127..2130 "10" [] [Whitespace(" ")],
-                                        },
-                                        CssRegularDimension {
-                                            value_token: CSS_NUMBER_LITERAL@2130..2133 "+10" [] [],
-                                            unit_token: IDENT@2133..2135 "px" [] [],
+                                        ScssBinaryExpression {
+                                            left: CssNumber {
+                                                value_token: CSS_NUMBER_LITERAL@2127..2130 "10" [] [Whitespace(" ")],
+                                            },
+                                            operator: PLUS@2130..2131 "+" [] [],
+                                            right: CssRegularDimension {
+                                                value_token: CSS_NUMBER_LITERAL@2131..2133 "10" [] [],
+                                                unit_token: IDENT@2133..2135 "px" [] [],
+                                            },
                                         },
                                     ],
                                 },
@@ -444,13 +457,16 @@ CssRoot {
                                 colon_token: COLON@3082..3084 ":" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
-                                        CssRegularDimension {
-                                            value_token: CSS_NUMBER_LITERAL@3084..3086 "10" [] [],
-                                            unit_token: IDENT@3086..3088 "px" [] [],
-                                        },
-                                        CssRegularDimension {
-                                            value_token: CSS_NUMBER_LITERAL@3088..3091 "+10" [] [],
-                                            unit_token: IDENT@3091..3093 "px" [] [],
+                                        ScssBinaryExpression {
+                                            left: CssRegularDimension {
+                                                value_token: CSS_NUMBER_LITERAL@3084..3086 "10" [] [],
+                                                unit_token: IDENT@3086..3088 "px" [] [],
+                                            },
+                                            operator: PLUS@3088..3089 "+" [] [],
+                                            right: CssRegularDimension {
+                                                value_token: CSS_NUMBER_LITERAL@3089..3091 "10" [] [],
+                                                unit_token: IDENT@3091..3093 "px" [] [],
+                                            },
                                         },
                                     ],
                                 },
@@ -468,13 +484,16 @@ CssRoot {
                                 colon_token: COLON@3104..3106 ":" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
-                                        CssRegularDimension {
-                                            value_token: CSS_NUMBER_LITERAL@3106..3108 "10" [] [],
-                                            unit_token: IDENT@3108..3111 "px" [] [Whitespace(" ")],
-                                        },
-                                        CssRegularDimension {
-                                            value_token: CSS_NUMBER_LITERAL@3111..3114 "+10" [] [],
-                                            unit_token: IDENT@3114..3116 "px" [] [],
+                                        ScssBinaryExpression {
+                                            left: CssRegularDimension {
+                                                value_token: CSS_NUMBER_LITERAL@3106..3108 "10" [] [],
+                                                unit_token: IDENT@3108..3111 "px" [] [Whitespace(" ")],
+                                            },
+                                            operator: PLUS@3111..3112 "+" [] [],
+                                            right: CssRegularDimension {
+                                                value_token: CSS_NUMBER_LITERAL@3112..3114 "10" [] [],
+                                                unit_token: IDENT@3114..3116 "px" [] [],
+                                            },
                                         },
                                     ],
                                 },
@@ -892,10 +911,12 @@ CssRoot {
                 1: COLON@14..16 ":" [] [Whitespace(" ")]
                 2: SCSS_EXPRESSION@16..21
                   0: SCSS_EXPRESSION_ITEM_LIST@16..21
-                    0: CSS_NUMBER@16..18
-                      0: CSS_NUMBER_LITERAL@16..18 "10" [] []
-                    1: CSS_NUMBER@18..21
-                      0: CSS_NUMBER_LITERAL@18..21 "+10" [] []
+                    0: SCSS_BINARY_EXPRESSION@16..21
+                      0: CSS_NUMBER@16..18
+                        0: CSS_NUMBER_LITERAL@16..18 "10" [] []
+                      1: PLUS@18..19 "+" [] []
+                      2: CSS_NUMBER@19..21
+                        0: CSS_NUMBER_LITERAL@19..21 "10" [] []
               1: (empty)
             1: SEMICOLON@21..22 ";" [] []
           1: CSS_DECLARATION_WITH_SEMICOLON@22..40
@@ -906,10 +927,12 @@ CssRoot {
                 1: COLON@31..33 ":" [] [Whitespace(" ")]
                 2: SCSS_EXPRESSION@33..39
                   0: SCSS_EXPRESSION_ITEM_LIST@33..39
-                    0: CSS_NUMBER@33..36
-                      0: CSS_NUMBER_LITERAL@33..36 "10" [] [Whitespace(" ")]
-                    1: CSS_NUMBER@36..39
-                      0: CSS_NUMBER_LITERAL@36..39 "+10" [] []
+                    0: SCSS_BINARY_EXPRESSION@33..39
+                      0: CSS_NUMBER@33..36
+                        0: CSS_NUMBER_LITERAL@33..36 "10" [] [Whitespace(" ")]
+                      1: PLUS@36..37 "+" [] []
+                      2: CSS_NUMBER@37..39
+                        0: CSS_NUMBER_LITERAL@37..39 "10" [] []
               1: (empty)
             1: SEMICOLON@39..40 ";" [] []
           2: CSS_DECLARATION_WITH_SEMICOLON@40..58
@@ -965,11 +988,13 @@ CssRoot {
                 1: COLON@2106..2108 ":" [] [Whitespace(" ")]
                 2: SCSS_EXPRESSION@2108..2115
                   0: SCSS_EXPRESSION_ITEM_LIST@2108..2115
-                    0: CSS_NUMBER@2108..2110
-                      0: CSS_NUMBER_LITERAL@2108..2110 "10" [] []
-                    1: CSS_REGULAR_DIMENSION@2110..2115
-                      0: CSS_NUMBER_LITERAL@2110..2113 "+10" [] []
-                      1: IDENT@2113..2115 "px" [] []
+                    0: SCSS_BINARY_EXPRESSION@2108..2115
+                      0: CSS_NUMBER@2108..2110
+                        0: CSS_NUMBER_LITERAL@2108..2110 "10" [] []
+                      1: PLUS@2110..2111 "+" [] []
+                      2: CSS_REGULAR_DIMENSION@2111..2115
+                        0: CSS_NUMBER_LITERAL@2111..2113 "10" [] []
+                        1: IDENT@2113..2115 "px" [] []
               1: (empty)
             1: SEMICOLON@2115..2116 ";" [] []
           1: CSS_DECLARATION_WITH_SEMICOLON@2116..2136
@@ -980,11 +1005,13 @@ CssRoot {
                 1: COLON@2125..2127 ":" [] [Whitespace(" ")]
                 2: SCSS_EXPRESSION@2127..2135
                   0: SCSS_EXPRESSION_ITEM_LIST@2127..2135
-                    0: CSS_NUMBER@2127..2130
-                      0: CSS_NUMBER_LITERAL@2127..2130 "10" [] [Whitespace(" ")]
-                    1: CSS_REGULAR_DIMENSION@2130..2135
-                      0: CSS_NUMBER_LITERAL@2130..2133 "+10" [] []
-                      1: IDENT@2133..2135 "px" [] []
+                    0: SCSS_BINARY_EXPRESSION@2127..2135
+                      0: CSS_NUMBER@2127..2130
+                        0: CSS_NUMBER_LITERAL@2127..2130 "10" [] [Whitespace(" ")]
+                      1: PLUS@2130..2131 "+" [] []
+                      2: CSS_REGULAR_DIMENSION@2131..2135
+                        0: CSS_NUMBER_LITERAL@2131..2133 "10" [] []
+                        1: IDENT@2133..2135 "px" [] []
               1: (empty)
             1: SEMICOLON@2135..2136 ";" [] []
           2: CSS_DECLARATION_WITH_SEMICOLON@2136..2156
@@ -1029,12 +1056,14 @@ CssRoot {
                 1: COLON@3082..3084 ":" [] [Whitespace(" ")]
                 2: SCSS_EXPRESSION@3084..3093
                   0: SCSS_EXPRESSION_ITEM_LIST@3084..3093
-                    0: CSS_REGULAR_DIMENSION@3084..3088
-                      0: CSS_NUMBER_LITERAL@3084..3086 "10" [] []
-                      1: IDENT@3086..3088 "px" [] []
-                    1: CSS_REGULAR_DIMENSION@3088..3093
-                      0: CSS_NUMBER_LITERAL@3088..3091 "+10" [] []
-                      1: IDENT@3091..3093 "px" [] []
+                    0: SCSS_BINARY_EXPRESSION@3084..3093
+                      0: CSS_REGULAR_DIMENSION@3084..3088
+                        0: CSS_NUMBER_LITERAL@3084..3086 "10" [] []
+                        1: IDENT@3086..3088 "px" [] []
+                      1: PLUS@3088..3089 "+" [] []
+                      2: CSS_REGULAR_DIMENSION@3089..3093
+                        0: CSS_NUMBER_LITERAL@3089..3091 "10" [] []
+                        1: IDENT@3091..3093 "px" [] []
               1: (empty)
             1: SEMICOLON@3093..3094 ";" [] []
           5: CSS_DECLARATION_WITH_SEMICOLON@3094..3117
@@ -1045,12 +1074,14 @@ CssRoot {
                 1: COLON@3104..3106 ":" [] [Whitespace(" ")]
                 2: SCSS_EXPRESSION@3106..3116
                   0: SCSS_EXPRESSION_ITEM_LIST@3106..3116
-                    0: CSS_REGULAR_DIMENSION@3106..3111
-                      0: CSS_NUMBER_LITERAL@3106..3108 "10" [] []
-                      1: IDENT@3108..3111 "px" [] [Whitespace(" ")]
-                    1: CSS_REGULAR_DIMENSION@3111..3116
-                      0: CSS_NUMBER_LITERAL@3111..3114 "+10" [] []
-                      1: IDENT@3114..3116 "px" [] []
+                    0: SCSS_BINARY_EXPRESSION@3106..3116
+                      0: CSS_REGULAR_DIMENSION@3106..3111
+                        0: CSS_NUMBER_LITERAL@3106..3108 "10" [] []
+                        1: IDENT@3108..3111 "px" [] [Whitespace(" ")]
+                      1: PLUS@3111..3112 "+" [] []
+                      2: CSS_REGULAR_DIMENSION@3112..3116
+                        0: CSS_NUMBER_LITERAL@3112..3114 "10" [] []
+                        1: IDENT@3114..3116 "px" [] []
               1: (empty)
             1: SEMICOLON@3116..3117 ";" [] []
           6: CSS_DECLARATION_WITH_SEMICOLON@3117..3140

@@ -1,6 +1,7 @@
 ---
 name: prettier-compare
-description: Compares code formatting and formatting IR between Biome and Prettier to ensure that Biome's formatting is consistent and correct.
+description: Compares code formatting and formatting IR between Biome and Prettier to ensure that Biome's formatting is consistent and correct. Use when validating formatter changes, debugging formatting differences, or comparing output for JavaScript, TypeScript, CSS, or other languages.
+compatibility: Designed for coding agents working on the Biome codebase (github.com/biomejs/biome). Requires bun and wasm-bindgen-cli.
 ---
 
 ## Purpose

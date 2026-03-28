@@ -4,6 +4,7 @@ pub mod file_source;
 #[macro_use]
 mod generated;
 mod syntax_node;
+pub mod text_ext;
 
 pub use file_source::MdFileSource;
 pub use syntax_node::*;

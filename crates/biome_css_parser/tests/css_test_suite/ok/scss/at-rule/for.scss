@@ -1,0 +1,13 @@
+@for $i from 1 through 3 {
+  width: $i * 1px;
+}
+
+@for $step from $start + 1 to $end - 1 {
+  margin: $step;
+}
+
+.grid {
+  @for $column from 1 through 4 {
+    order: $column;
+  }
+}

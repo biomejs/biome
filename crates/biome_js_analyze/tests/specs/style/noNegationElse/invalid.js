@@ -5,7 +5,21 @@ if (!true) { // a
 	alternate;
 }
 
+if (a != b) {
+	consequent;
+} else {
+	alternate;
+}
+
+if (a !== b) {
+	consequent;
+} else {
+	alternate;
+}
+
 !condition ? consequent : alternate;
+a != b ? consequent : alternate;
+a !== b ? consequent : alternate;
 
 let a = !test ? c : d;
 

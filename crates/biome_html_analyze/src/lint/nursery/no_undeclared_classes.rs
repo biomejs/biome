@@ -7,6 +7,7 @@ use biome_html_syntax::{
 };
 use biome_module_graph::{ImportTreeDisplay, ImportTreeNode};
 use biome_rowan::{AstNode, TextRange, TextSize};
+use biome_rule_options::no_undeclared_classes::NoUndeclaredClassesOptions;
 use biome_string_case::StrOnlyExtension;
 
 declare_lint_rule! {
@@ -84,7 +85,7 @@ impl Rule for NoUndeclaredClasses {
     type Query = HtmlModuleGraph<HtmlAttribute>;
     type State = UndeclaredClass;
     type Signals = Vec<Self::State>;
-    type Options = ();
+    type Options = NoUndeclaredClassesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let attr = ctx.query();
