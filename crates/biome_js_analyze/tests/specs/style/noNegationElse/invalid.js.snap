@@ -26,7 +26,7 @@ if (a !== b) {
 !condition ? consequent : alternate;
 a != b ? consequent : alternate;
 a !== b ? consequent : alternate;
-!spaced ? /*left-leading*/ left /*left-trailing*/   : /*right-leading*/ right /*right-trailing*/;
+/*before-not*/!/*after-not*/spaced/*after-test*/ ? /*left-leading*/ left /*left-trailing*/   : /*right-leading*/ right /*right-trailing*/;
 
 let a = !test ? c : d;
 
@@ -179,7 +179,7 @@ invalid.js:21:1 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━�
   > 21 │ a != b ? consequent : alternate;
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     22 │ a !== b ? consequent : alternate;
-    23 │ !spaced ? /*left-leading*/ left /*left-trailing*/   : /*right-leading*/ right /*right-trailing*/;
+    23 │ /*before-not*/!/*after-not*/spaced/*after-test*/ ? /*left-leading*/ left /*left-trailing*/   : /*right-leading*/ right /*right-trailing*/;
   
   i Safe fix: Invert the condition and the blocks.
   
@@ -188,7 +188,7 @@ invalid.js:21:1 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━�
     21    │ - a·!=·b·?·consequent·:·alternate;
        21 │ + a·==·b·?·alternate·:·consequent;
     22 22 │   a !== b ? consequent : alternate;
-    23 23 │   !spaced ? /*left-leading*/ left /*left-trailing*/   : /*right-leading*/ right /*right-trailing*/;
+    23 23 │   /*before-not*/!/*after-not*/spaced/*after-test*/ ? /*left-leading*/ left /*left-trailing*/   : /*right-leading*/ right /*right-trailing*/;
   
 
 ```
@@ -202,7 +202,7 @@ invalid.js:22:1 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━�
     21 │ a != b ? consequent : alternate;
   > 22 │ a !== b ? consequent : alternate;
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    23 │ !spaced ? /*left-leading*/ left /*left-trailing*/   : /*right-leading*/ right /*right-trailing*/;
+    23 │ /*before-not*/!/*after-not*/spaced/*after-test*/ ? /*left-leading*/ left /*left-trailing*/   : /*right-leading*/ right /*right-trailing*/;
     24 │ 
   
   i Safe fix: Invert the condition and the blocks.
@@ -211,21 +211,21 @@ invalid.js:22:1 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━�
     21 21 │   a != b ? consequent : alternate;
     22    │ - a·!==·b·?·consequent·:·alternate;
        22 │ + a·===·b·?·alternate·:·consequent;
-    23 23 │   !spaced ? /*left-leading*/ left /*left-trailing*/   : /*right-leading*/ right /*right-trailing*/;
+    23 23 │   /*before-not*/!/*after-not*/spaced/*after-test*/ ? /*left-leading*/ left /*left-trailing*/   : /*right-leading*/ right /*right-trailing*/;
     24 24 │   
   
 
 ```
 
 ```
-invalid.js:23:1 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:23:15 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Invert blocks when performing a negation test.
   
     21 │ a != b ? consequent : alternate;
     22 │ a !== b ? consequent : alternate;
-  > 23 │ !spaced ? /*left-leading*/ left /*left-trailing*/   : /*right-leading*/ right /*right-trailing*/;
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 23 │ /*before-not*/!/*after-not*/spaced/*after-test*/ ? /*left-leading*/ left /*left-trailing*/   : /*right-leading*/ right /*right-trailing*/;
+       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     24 │ 
     25 │ let a = !test ? c : d;
   
@@ -233,8 +233,8 @@ invalid.js:23:1 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━�
   
     21 21 │   a != b ? consequent : alternate;
     22 22 │   a !== b ? consequent : alternate;
-    23    │ - !spaced·?·/*left-leading*/·left·/*left-trailing*/···:·/*right-leading*/·right·/*right-trailing*/;
-       23 │ + spaced·?·/*right-leading*/·right·/*right-trailing*/···:·/*left-leading*/·left·/*left-trailing*/;
+    23    │ - /*before-not*/!/*after-not*/spaced/*after-test*/·?·/*left-leading*/·left·/*left-trailing*/···:·/*right-leading*/·right·/*right-trailing*/;
+       23 │ + /*before-not*//*after-not*/spaced/*after-test*/·?·/*right-leading*/·right·/*right-trailing*/···:·/*left-leading*/·left·/*left-trailing*/;
     24 24 │   
     25 25 │   let a = !test ? c : d;
   
@@ -246,7 +246,7 @@ invalid.js:25:9 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━�
 
   i Invert blocks when performing a negation test.
   
-    23 │ !spaced ? /*left-leading*/ left /*left-trailing*/   : /*right-leading*/ right /*right-trailing*/;
+    23 │ /*before-not*/!/*after-not*/spaced/*after-test*/ ? /*left-leading*/ left /*left-trailing*/   : /*right-leading*/ right /*right-trailing*/;
     24 │ 
   > 25 │ let a = !test ? c : d;
        │         ^^^^^^^^^^^^^
@@ -255,7 +255,7 @@ invalid.js:25:9 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━�
   
   i Safe fix: Invert the condition and the blocks.
   
-    23 23 │   !spaced ? /*left-leading*/ left /*left-trailing*/   : /*right-leading*/ right /*right-trailing*/;
+    23 23 │   /*before-not*/!/*after-not*/spaced/*after-test*/ ? /*left-leading*/ left /*left-trailing*/   : /*right-leading*/ right /*right-trailing*/;
     24 24 │   
     25    │ - let·a·=·!test·?·c·:·d;
        25 │ + let·a·=·test·?·d·:·c;
