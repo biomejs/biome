@@ -1,8 +1,9 @@
 use biome_js_syntax::{
-    AnyJsArrayBindingPatternElement, AnyJsBindingPattern, AnyJsExpression, AnyJsModuleItem,
+    AnyJsArrayBindingPatternElement, AnyJsBinding, AnyJsBindingPattern, AnyJsDeclarationClause,
+    AnyJsExportClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsModuleItem,
     AnyJsObjectBindingPatternMember, AnyJsObjectMember, AnyJsRoot, AnyJsStatement,
     AnyTsIdentifierBinding, AnyTsType, JsCallExpression, JsExport, JsImport, JsModuleItemList,
-    JsVariableStatement,
+    JsVariableDeclaration, JsVariableDeclarationClause, JsVariableStatement,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange, TokenText, WalkEvent};
 use rustc_hash::FxHashMap;
@@ -93,6 +94,36 @@ impl EmbeddedBuilder {
         }
     }
 
+    fn visit_declaration_clause(&mut self, declaration: AnyJsDeclarationClause) {
+        match declaration {
+            AnyJsDeclarationClause::JsVariableDeclarationClause(variable_clause) => {
+                self.visit_js_variable_declaration_clause(variable_clause);
+            }
+            AnyJsDeclarationClause::JsFunctionDeclaration(decl) => {
+                self.register_js_binding(decl.id());
+            }
+            AnyJsDeclarationClause::JsClassDeclaration(decl) => {
+                self.register_js_binding(decl.id());
+            }
+            AnyJsDeclarationClause::TsEnumDeclaration(decl) => {
+                self.register_js_binding(decl.id());
+            }
+            AnyJsDeclarationClause::TsInterfaceDeclaration(decl) => {
+                self.register_ts_identifier_binding(decl.id());
+            }
+            AnyJsDeclarationClause::TsTypeAliasDeclaration(decl) => {
+                self.register_ts_identifier_binding(decl.binding_identifier());
+            }
+            AnyJsDeclarationClause::TsDeclareFunctionDeclaration(decl) => {
+                self.register_js_binding(decl.id());
+            }
+            AnyJsDeclarationClause::TsExternalModuleDeclaration(_)
+            | AnyJsDeclarationClause::TsGlobalDeclaration(_)
+            | AnyJsDeclarationClause::TsImportEqualsDeclaration(_)
+            | AnyJsDeclarationClause::TsModuleDeclaration(_) => {}
+        }
+    }
+
     fn visit_js_import(&mut self, import: JsImport) -> Option<()> {
         let clause = import.import_clause().ok()?;
         if let Some(named_specifiers) = clause.named_specifiers() {
@@ -144,6 +175,46 @@ impl EmbeddedBuilder {
         // would be preferable since they could help reduce the duplicated logic for this.
 
         let clause = export.export_clause().ok()?;
+
+        match &clause {
+            AnyJsExportClause::AnyJsDeclarationClause(declaration) => {
+                self.visit_declaration_clause(declaration.clone());
+                return Some(());
+            }
+            AnyJsExportClause::JsExportDefaultDeclarationClause(default_clause) => {
+                let declaration = default_clause.declaration().ok()?;
+                match declaration {
+                    AnyJsExportDefaultDeclaration::JsClassExportDefaultDeclaration(decl) => {
+                        if let Some(binding) = decl.id() {
+                            self.register_any_js_binding(binding);
+                        }
+                    }
+                    AnyJsExportDefaultDeclaration::JsFunctionExportDefaultDeclaration(decl) => {
+                        if let Some(binding) = decl.id() {
+                            self.register_any_js_binding(binding);
+                        }
+                    }
+                    AnyJsExportDefaultDeclaration::TsDeclareFunctionExportDefaultDeclaration(
+                        decl,
+                    ) => {
+                        if let Some(binding) = decl.id() {
+                            self.register_any_js_binding(binding);
+                        }
+                    }
+                    AnyJsExportDefaultDeclaration::TsInterfaceDeclaration(decl) => {
+                        self.register_ts_identifier_binding(decl.id());
+                    }
+                }
+                return Some(());
+            }
+            AnyJsExportClause::JsExportDefaultExpressionClause(_) => {}
+            AnyJsExportClause::JsExportFromClause(_)
+            | AnyJsExportClause::JsExportNamedClause(_)
+            | AnyJsExportClause::JsExportNamedFromClause(_)
+            | AnyJsExportClause::TsExportAsNamespaceClause(_)
+            | AnyJsExportClause::TsExportAssignmentClause(_)
+            | AnyJsExportClause::TsExportDeclareClause(_) => return Some(()),
+        }
 
         // Only handle `export default { ... }` patterns
         let default_clause = clause.as_js_export_default_expression_clause()?;
@@ -213,9 +284,13 @@ impl EmbeddedBuilder {
     /// `TsEnumDeclaration::id()`, and `TsDeclareFunctionDeclaration::id()`.
     fn register_js_binding(
         &mut self,
-        result: biome_rowan::SyntaxResult<biome_js_syntax::AnyJsBinding>,
+        result: biome_rowan::SyntaxResult<AnyJsBinding>,
     ) -> Option<()> {
         let binding = result.ok()?;
+        self.register_any_js_binding(binding)
+    }
+
+    fn register_any_js_binding(&mut self, binding: AnyJsBinding) -> Option<()> {
         let identifier = binding.as_js_identifier_binding()?;
         let token = identifier.name_token().ok()?;
         self.js_bindings
@@ -239,6 +314,18 @@ impl EmbeddedBuilder {
 
     fn visit_js_variable_statement(&mut self, statement: JsVariableStatement) -> Option<()> {
         let declaration = statement.declaration().ok()?;
+        self.visit_js_variable_declaration(declaration)
+    }
+
+    fn visit_js_variable_declaration_clause(
+        &mut self,
+        clause: JsVariableDeclarationClause,
+    ) -> Option<()> {
+        let declaration = clause.declaration().ok()?;
+        self.visit_js_variable_declaration(declaration)
+    }
+
+    fn visit_js_variable_declaration(&mut self, declaration: JsVariableDeclaration) -> Option<()> {
         for declarator in declaration.declarators().iter().flatten() {
             // If the initializer is a defineProps(...) call, extract prop names from it.
             if let Some(initializer) = declarator.initializer()
@@ -669,5 +756,32 @@ const props = defineProps(['foo'])
         visit_js_root(&mut builder, &parse_js(source));
         service.finish(builder);
         assert!(contains_binding(&service, "foo"));
+    }
+
+    #[test]
+    fn tracks_exported_declarations() {
+        let source = r#"
+export const someFunction = () => {};
+export function someOtherFunction() {}
+export class SomeService {}
+export type UserId = string;
+export interface UserProfile {
+	name: string;
+}
+export enum Direction {
+	Up,
+	Down,
+}
+"#;
+        let mut service = EmbeddedExportedBindings::default();
+        let mut builder = service.builder();
+        visit_js_root(&mut builder, &parse_js(source));
+        service.finish(builder);
+        assert!(contains_binding(&service, "someFunction"));
+        assert!(contains_binding(&service, "someOtherFunction"));
+        assert!(contains_binding(&service, "SomeService"));
+        assert!(contains_binding(&service, "UserId"));
+        assert!(contains_binding(&service, "UserProfile"));
+        assert!(contains_binding(&service, "Direction"));
     }
 }

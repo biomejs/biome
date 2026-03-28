@@ -1,0 +1,41 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "html": {
+    "linter": { "enabled": true },
+    "experimentalFullSupportEnabled": true
+  }
+}
+```
+
+## `file.svelte`
+
+```svelte
+
+<script lang="ts" module>
+	export const someFunction = () => {
+		console.log("hai!");
+	};
+
+	const someOtherFunction = () => {
+		console.log("heyyy");
+	};
+</script>
+
+<script lang="ts">
+	someFunction();
+	someOtherFunction();
+</script>
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```
