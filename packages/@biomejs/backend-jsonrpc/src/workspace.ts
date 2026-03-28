@@ -9421,7 +9421,7 @@ before applying the diagnostic_level filter.
 	/**
 	 * When `true`, diagnostics include code suggestions for rule fixes.
 	 */
-	includeCodeFix: boolean;
+	includeCodeFix?: boolean;
 	inlineConfig?: Configuration;
 	/**
 	* Max limit of diagnostics types to pull. This limit is meant to cap the number of [Diagnostic] to pull.
