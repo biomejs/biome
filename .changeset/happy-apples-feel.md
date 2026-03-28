@@ -1,6 +1,4 @@
 ---
----
----
 "@biomejs/biome": patch
 ---
 
