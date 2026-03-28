@@ -9,7 +9,7 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsName, AnyTsName, AnyTsReturnType, AnyTsType, JsExport,
     JsExpressionStatement, JsFunctionDeclaration, JsFunctionExportDefaultDeclaration, JsSyntaxKind,
     JsSyntaxNode, T, TsDeclareFunctionDeclaration, TsDeclareFunctionExportDefaultDeclaration,
-    TsDeclareStatement, TsNumberLiteralType,
+    TsDeclareStatement, TsIdentifierBinding, TsNumberLiteralType, TsTypeAliasDeclaration,
     binding_ext::AnyJsBindingDeclaration,
     parameter_ext::{AnyJsParameterList, AnyParameter},
 };
@@ -570,9 +570,14 @@ fn argument_matches_parameter(
         let AnyJsCallArgument::AnyJsExpression(argument) = argument else {
             return None;
         };
+        let model = ctx.get_service::<SemanticModel>()?;
 
-        return match ts_type_matches_argument_type(&ctx.type_of_expression(argument), parameter_type)
-        {
+        return match ts_type_matches_argument_type(
+            &ctx.type_of_expression(argument),
+            parameter_type,
+            model,
+            0,
+        ) {
             Some(true) => Some(ParameterMatch::NonCallback),
             Some(false) => None,
             None => Some(ParameterMatch::Unknown),
@@ -632,13 +637,22 @@ fn parameter_type_annotation(parameter: &AnyParameter) -> Option<AnyTsType> {
     parameter.type_annotation()?.ty().ok()
 }
 
-fn ts_type_matches_argument_type(argument_ty: &Type, parameter_ty: AnyTsType) -> Option<bool> {
+fn ts_type_matches_argument_type(
+    argument_ty: &Type,
+    parameter_ty: AnyTsType,
+    model: &SemanticModel,
+    depth: usize,
+) -> Option<bool> {
+    if depth > 8 {
+        return None;
+    }
+
     match parameter_ty.omit_parentheses() {
         AnyTsType::TsUnionType(union) => {
             let mut saw_unknown_branch = false;
 
             for parameter_ty in union.types().into_iter().filter_map(|ty| ty.ok()) {
-                match ts_type_matches_argument_type(argument_ty, parameter_ty) {
+                match ts_type_matches_argument_type(argument_ty, parameter_ty, model, depth + 1) {
                     Some(true) => return Some(true),
                     Some(false) => {}
                     None => saw_unknown_branch = true,
@@ -682,8 +696,29 @@ fn ts_type_matches_argument_type(argument_ty: &Type, parameter_ty: AnyTsType) ->
         AnyTsType::TsUndefinedType(_) => Some(type_matches_variant(argument_ty, |ty| {
             matches!(&**ty, TypeData::Undefined)
         })),
+        AnyTsType::TsReferenceType(reference) => {
+            let aliased_type = resolve_reference_type_alias(&reference, model)?;
+            ts_type_matches_argument_type(argument_ty, aliased_type, model, depth + 1)
+        }
         _ => None,
     }
+}
+
+fn resolve_reference_type_alias(
+    reference: &biome_js_syntax::TsReferenceType,
+    model: &SemanticModel,
+) -> Option<AnyTsType> {
+    let name = reference.name().ok()?;
+    let reference_identifier = name.as_js_reference_identifier()?;
+    let binding = model.binding(reference_identifier)?;
+    let identifier_binding = TsIdentifierBinding::cast_ref(&binding.syntax())?;
+    let type_alias = identifier_binding.parent::<TsTypeAliasDeclaration>()?;
+
+    if reference.type_arguments().is_some() || type_alias.type_parameters().is_some() {
+        return None;
+    }
+
+    type_alias.ty().ok()
 }
 
 fn ts_number_literal_type_value(literal: &TsNumberLiteralType) -> Option<f64> {
