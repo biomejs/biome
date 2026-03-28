@@ -764,7 +764,6 @@ fn parse_inline_link_destination_tokens(p: &mut MarkdownParser) -> DestinationSc
     DestinationScanResult::Valid
 }
 
-
 fn is_title_separator_token(p: &MarkdownParser) -> bool {
     is_whitespace_token(p) || (p.at(NEWLINE) && !p.at_blank_line())
 }
