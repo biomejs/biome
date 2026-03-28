@@ -66,6 +66,15 @@ npx @biomejs/biome check --write
 npx @biomejs/biome ci
 ```
 
+If `biome version` or `biome --version` doesn't match the version in your project's `package.json`, you're probably invoking a global installation. Use the project-local binary through your package manager instead:
+
+```shell
+npm exec biome -- version
+pnpm exec biome version
+```
+
+Editor integrations can also bundle a different Biome version. Configure them to use the workspace binary if you want them to match your project dependency.
+
 If you want to give Biome a run without installing it, use the [online playground](https://biomejs.dev/playground/), compiled to WebAssembly.
 
 ## Documentation
