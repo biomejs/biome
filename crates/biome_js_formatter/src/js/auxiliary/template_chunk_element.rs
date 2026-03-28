@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use biome_formatter::write;
+use biome_formatter::{FormatContext, write};
 
 use biome_js_syntax::{
     AnyJsExpression, JsCallArgumentList, JsCallArguments, JsCallExpression, JsSyntaxToken,
@@ -25,27 +25,40 @@ impl FormatNodeRule<JsTemplateChunkElement> for FormatJsTemplateChunkElement {
         node: &JsTemplateChunkElement,
         f: &mut JsFormatter,
     ) -> Option<TextRange> {
-        if !f.context().should_delegate_fmt_embedded_nodes() {
-            return None;
-        }
-
-        // Only mark template chunks that belong to a plausible embed candidate.
-        // A template is a candidate when it has a tag (e.g. css``, gql``, styled.div``)
-        // or is an argument to a simple call expression (e.g. graphql(`...`)).
-        // Plain templates like console.log(`test`) must NOT be marked, otherwise
-        // the formatter emits StartEmbedded/EndEmbedded tags that never get resolved
-        // and corrupt the printer's tag stack.
-        let template = node
-            .syntax()
-            .ancestors()
-            .find_map(JsTemplateExpression::cast)?;
-
-        if !is_plausible_embed_template(&template)? {
-            return None;
-        }
-
-        Some(node.template_chunk_token().ok()?.text_range())
+        embedded_template_chunk_range(&AnyTemplateChunkElement::from(node.clone()), f)
     }
+}
+
+pub(crate) fn embedded_template_chunk_range(
+    node: &AnyTemplateChunkElement,
+    f: &mut JsFormatter,
+) -> Option<TextRange> {
+    if !f.context().should_delegate_fmt_embedded_nodes() {
+        return None;
+    }
+
+    // Only mark template chunks that belong to a plausible embed candidate.
+    // A template is a candidate when it has a tag (e.g. css``, gql``, styled.div``)
+    // or is an argument to a simple call expression (e.g. graphql(`...`)).
+    // Plain templates like console.log(`test`) must NOT be marked, otherwise
+    // the formatter emits StartEmbedded/EndEmbedded tags that never get resolved
+    // and corrupt the printer's tag stack.
+    let template = node
+        .syntax()
+        .ancestors()
+        .find_map(JsTemplateExpression::cast)?;
+
+    if !is_plausible_embed_template(&template)? {
+        return None;
+    }
+
+    let range = node.template_chunk_token().ok()?.text_range();
+
+    Some(
+        f.context()
+            .source_map()
+            .map_or(range, |source_map| source_map.source_range(range)),
+    )
 }
 
 /// Known identifier tag names that produce embedded languages.
