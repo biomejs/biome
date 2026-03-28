@@ -3,10 +3,19 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_factory::make;
+use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsCallArgument, AnyJsExpression, AnyJsName, JsExpressionStatement, JsSyntaxKind, T,
+    AnyJsCallArgument, AnyJsDeclarationClause, AnyJsExportClause, AnyJsExportDefaultDeclaration,
+    AnyJsExpression, AnyJsName, AnyTsName, AnyTsReturnType, AnyTsType, JsExport,
+    JsExpressionStatement, JsFunctionDeclaration, JsFunctionExportDefaultDeclaration, JsSyntaxKind,
+    JsSyntaxNode, T, TsDeclareFunctionDeclaration, TsDeclareFunctionExportDefaultDeclaration,
+    TsDeclareStatement,
+    binding_ext::AnyJsBindingDeclaration,
+    parameter_ext::{AnyJsParameterList, AnyParameter},
 };
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
+use biome_rowan::{
+    AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind, declare_node_union,
+};
 use biome_rule_options::no_floating_promises::NoFloatingPromisesOptions;
 
 use crate::{JsRuleAction, ast_utils::is_in_async_function, services::typed::Typed};
@@ -178,8 +187,6 @@ impl Rule for NoFloatingPromises {
         let expression = node.expression().ok()?;
         let ty = ctx.type_of_expression(&expression);
 
-        // Uncomment the following line for debugging convenience:
-        //let printed = format!("type of {expression:?} = {ty:?}");
         if ty.is_array_of(|ty| ty.is_promise_instance()) {
             return Some(NoFloatingPromisesState::ArrayOfPromises);
         }
@@ -187,6 +194,14 @@ impl Rule for NoFloatingPromises {
         let is_maybe_promise =
             ty.is_promise_instance() || ty.has_variant(|ty| ty.is_promise_instance());
         if !is_maybe_promise {
+            return None;
+        }
+
+        if expression
+            .as_js_call_expression()
+            .and_then(|call| matching_overload_returns_promise_like(ctx, &call))
+            .is_some_and(|returns_promise| !returns_promise)
+        {
             return None;
         }
 
@@ -363,4 +378,413 @@ fn is_handled_promise(expression: AnyJsExpression) -> Option<bool> {
     }
 
     Some(false)
+}
+
+fn matching_overload_returns_promise_like(
+    ctx: &RuleContext<NoFloatingPromises>,
+    call: &biome_js_syntax::JsCallExpression,
+) -> Option<bool> {
+    let model = ctx.get_service::<SemanticModel>()?;
+    let reference = call
+        .callee()
+        .ok()?
+        .omit_parentheses()
+        .as_js_identifier_expression()?
+        .name()
+        .ok()?;
+    let declaration = model.binding(&reference)?.tree().declaration()?;
+    let overloads = collect_adjacent_function_overloads(&declaration)?;
+
+    overloads
+        .into_iter()
+        .filter(|overload| !overload.has_body())
+        .find(|overload| function_overload_matches_call(ctx, call, overload))
+        .and_then(|overload| overload.return_type_annotation())
+        .and_then(|return_type| return_type.as_any_ts_type().cloned())
+        .map(ts_type_is_promise_like)
+}
+
+fn collect_adjacent_function_overloads(
+    declaration: &AnyJsBindingDeclaration,
+) -> Option<Vec<AnyPotentialFunctionOverloadSignature>> {
+    let declaration = AnyPotentialFunctionOverloadSignature::from_binding_declaration(declaration)?;
+    let name = declaration.name()?;
+
+    let mut first = declaration.clone();
+    while let Some(previous) = first
+        .prev_sibling()
+        .and_then(AnyPotentialFunctionOverloadSignature::cast)
+    {
+        if previous.name().as_deref() != Some(name.as_str()) {
+            break;
+        }
+        first = previous;
+    }
+
+    let mut overloads = vec![first.clone()];
+    let mut next_sibling = first.next_sibling();
+    while let Some(next) = next_sibling {
+        let Some(overload) = AnyPotentialFunctionOverloadSignature::cast(next.clone()) else {
+            break;
+        };
+        if overload.name().as_deref() != Some(name.as_str()) {
+            break;
+        }
+        next_sibling = overload.next_sibling();
+        overloads.push(overload);
+    }
+
+    (overloads.len() > 1 && overloads.iter().any(|overload| !overload.has_body()))
+        .then_some(overloads)
+}
+
+fn function_overload_matches_call(
+    ctx: &RuleContext<NoFloatingPromises>,
+    call: &biome_js_syntax::JsCallExpression,
+    overload: &AnyPotentialFunctionOverloadSignature,
+) -> bool {
+    let Ok(arguments) = call.arguments() else {
+        return false;
+    };
+    let Some(parameters) = overload.parameters() else {
+        return false;
+    };
+
+    let parameters: Vec<_> = parameters
+        .iter()
+        .filter_map(|parameter| parameter.ok())
+        .filter(|parameter| {
+            !matches!(
+                parameter,
+                AnyParameter::AnyJsParameter(biome_js_syntax::AnyJsParameter::TsThisParameter(_))
+            )
+        })
+        .collect();
+
+    let required_parameter_count = parameters
+        .iter()
+        .filter(|parameter| !parameter_is_optional(parameter) && !parameter_is_rest(parameter))
+        .count();
+    if arguments.args().len() < required_parameter_count {
+        return false;
+    }
+
+    let rest_parameter = parameters
+        .last()
+        .filter(|parameter| parameter_is_rest(parameter));
+    if rest_parameter.is_none() && arguments.args().len() > parameters.len() {
+        return false;
+    }
+
+    arguments
+        .args()
+        .iter()
+        .enumerate()
+        .all(|(index, argument)| {
+            let Ok(argument) = argument else {
+                return false;
+            };
+            parameters
+                .get(index)
+                .or(rest_parameter)
+                .is_some_and(|parameter| argument_matches_parameter(ctx, &argument, parameter))
+        })
+}
+
+fn parameter_is_optional(parameter: &AnyParameter) -> bool {
+    match parameter {
+        AnyParameter::AnyJsConstructorParameter(parameter) => match parameter {
+            biome_js_syntax::AnyJsConstructorParameter::AnyJsFormalParameter(parameter) => {
+                parameter.as_js_formal_parameter().is_some_and(|parameter| {
+                    parameter.question_mark_token().is_some() || parameter.initializer().is_some()
+                })
+            }
+            biome_js_syntax::AnyJsConstructorParameter::JsRestParameter(_) => false,
+            biome_js_syntax::AnyJsConstructorParameter::TsPropertyParameter(parameter) => parameter
+                .formal_parameter()
+                .ok()
+                .and_then(|parameter| parameter.as_js_formal_parameter().cloned())
+                .is_some_and(|parameter| {
+                    parameter.question_mark_token().is_some() || parameter.initializer().is_some()
+                }),
+        },
+        AnyParameter::AnyJsParameter(parameter) => match parameter {
+            biome_js_syntax::AnyJsParameter::AnyJsFormalParameter(parameter) => {
+                parameter.as_js_formal_parameter().is_some_and(|parameter| {
+                    parameter.question_mark_token().is_some() || parameter.initializer().is_some()
+                })
+            }
+            biome_js_syntax::AnyJsParameter::JsRestParameter(_) => false,
+            biome_js_syntax::AnyJsParameter::TsThisParameter(_) => false,
+        },
+    }
+}
+
+fn parameter_is_rest(parameter: &AnyParameter) -> bool {
+    matches!(
+        parameter,
+        AnyParameter::AnyJsConstructorParameter(
+            biome_js_syntax::AnyJsConstructorParameter::JsRestParameter(_)
+        ) | AnyParameter::AnyJsParameter(biome_js_syntax::AnyJsParameter::JsRestParameter(_))
+    )
+}
+
+fn argument_matches_parameter(
+    ctx: &RuleContext<NoFloatingPromises>,
+    argument: &AnyJsCallArgument,
+    parameter: &AnyParameter,
+) -> bool {
+    let Some(expected_callback_returns_promise) = parameter_callback_returns_promise(parameter)
+    else {
+        return true;
+    };
+    let AnyJsCallArgument::AnyJsExpression(argument) = argument else {
+        return false;
+    };
+    let Some(actual_callback_returns_promise) =
+        expression_function_returns_promise_like(ctx, argument)
+    else {
+        return false;
+    };
+
+    expected_callback_returns_promise == actual_callback_returns_promise
+}
+
+fn expression_function_returns_promise_like(
+    ctx: &RuleContext<NoFloatingPromises>,
+    expression: &AnyJsExpression,
+) -> Option<bool> {
+    let expression_type = ctx.type_of_expression(expression);
+    let function = expression_type.as_function()?;
+    let return_type = function.return_type.as_type()?;
+    let return_type = expression_type.resolve(return_type)?;
+
+    Some(
+        return_type.is_promise_instance() || return_type.has_variant(|ty| ty.is_promise_instance()),
+    )
+}
+
+fn parameter_callback_returns_promise(parameter: &AnyParameter) -> Option<bool> {
+    let annotation = parameter.type_annotation()?.ty().ok()?;
+    callback_type_returns_promise(annotation)
+}
+
+fn callback_type_returns_promise(ty: AnyTsType) -> Option<bool> {
+    let ty = ty.omit_parentheses();
+    let function = ty.as_ts_function_type()?;
+    let return_type = function.return_type().ok()?;
+    let return_type = return_type.as_any_ts_type()?.clone();
+    Some(ts_type_is_promise_like(return_type))
+}
+
+fn ts_type_is_promise_like(ty: AnyTsType) -> bool {
+    match ty.omit_parentheses() {
+        AnyTsType::TsReferenceType(reference) => reference
+            .name()
+            .ok()
+            .is_some_and(|name| ts_name_is_promise(&name)),
+        AnyTsType::TsUnionType(union) => union
+            .types()
+            .into_iter()
+            .filter_map(|ty| ty.ok())
+            .any(ts_type_is_promise_like),
+        _ => false,
+    }
+}
+
+fn ts_name_is_promise(name: &AnyTsName) -> bool {
+    name.as_js_reference_identifier().is_some_and(|name| {
+        name.value_token()
+            .ok()
+            .is_some_and(|token| token.text_trimmed() == "Promise")
+    })
+}
+
+declare_node_union! {
+    AnyPotentialFunctionOverloadSignature =
+        JsFunctionDeclaration
+        | JsFunctionExportDefaultDeclaration
+        | TsDeclareFunctionDeclaration
+        | TsDeclareFunctionExportDefaultDeclaration
+}
+
+impl AnyPotentialFunctionOverloadSignature {
+    fn from_binding_declaration(declaration: &AnyJsBindingDeclaration) -> Option<Self> {
+        match declaration {
+            AnyJsBindingDeclaration::JsFunctionDeclaration(declaration) => {
+                Some(Self::JsFunctionDeclaration(declaration.clone()))
+            }
+            AnyJsBindingDeclaration::JsFunctionExportDefaultDeclaration(declaration) => Some(
+                Self::JsFunctionExportDefaultDeclaration(declaration.clone()),
+            ),
+            AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(declaration) => {
+                Some(Self::TsDeclareFunctionDeclaration(declaration.clone()))
+            }
+            AnyJsBindingDeclaration::TsDeclareFunctionExportDefaultDeclaration(declaration) => {
+                Some(Self::TsDeclareFunctionExportDefaultDeclaration(
+                    declaration.clone(),
+                ))
+            }
+            _ => None,
+        }
+    }
+
+    fn name(&self) -> Option<String> {
+        match self {
+            Self::JsFunctionDeclaration(declaration) => {
+                function_binding_name(declaration.id().ok()?)
+            }
+            Self::JsFunctionExportDefaultDeclaration(declaration) => {
+                function_binding_name(declaration.id()?)
+            }
+            Self::TsDeclareFunctionDeclaration(declaration) => {
+                function_binding_name(declaration.id().ok()?)
+            }
+            Self::TsDeclareFunctionExportDefaultDeclaration(declaration) => {
+                function_binding_name(declaration.id()?)
+            }
+        }
+    }
+
+    fn parameters(&self) -> Option<AnyJsParameterList> {
+        Some(match self {
+            Self::JsFunctionDeclaration(function) => function.parameters().ok()?.items().into(),
+            Self::JsFunctionExportDefaultDeclaration(function) => {
+                function.parameters().ok()?.items().into()
+            }
+            Self::TsDeclareFunctionDeclaration(function) => {
+                function.parameters().ok()?.items().into()
+            }
+            Self::TsDeclareFunctionExportDefaultDeclaration(function) => {
+                function.parameters().ok()?.items().into()
+            }
+        })
+    }
+
+    fn return_type_annotation(&self) -> Option<AnyTsReturnType> {
+        match self {
+            Self::JsFunctionDeclaration(function) => function
+                .return_type_annotation()
+                .and_then(|annotation| annotation.ty().ok()),
+            Self::JsFunctionExportDefaultDeclaration(function) => function
+                .return_type_annotation()
+                .and_then(|annotation| annotation.ty().ok()),
+            Self::TsDeclareFunctionDeclaration(function) => function
+                .return_type_annotation()
+                .and_then(|annotation| annotation.ty().ok()),
+            Self::TsDeclareFunctionExportDefaultDeclaration(function) => function
+                .return_type_annotation()
+                .and_then(|annotation| annotation.ty().ok()),
+        }
+    }
+
+    fn has_body(&self) -> bool {
+        match self {
+            Self::JsFunctionDeclaration(function) => function.body().ok().is_some(),
+            Self::JsFunctionExportDefaultDeclaration(function) => function.body().ok().is_some(),
+            Self::TsDeclareFunctionDeclaration(_)
+            | Self::TsDeclareFunctionExportDefaultDeclaration(_) => false,
+        }
+    }
+
+    fn wrapper_syntax(&self) -> JsSyntaxNode {
+        match self {
+            Self::JsFunctionDeclaration(function) => {
+                if let Some(parent) = function.syntax().parent()
+                    && matches!(parent.kind(), JsSyntaxKind::JS_EXPORT)
+                {
+                    return parent;
+                }
+            }
+            Self::JsFunctionExportDefaultDeclaration(function) => {
+                if let Some(parent) = function.syntax().parent()
+                    && matches!(
+                        parent.kind(),
+                        JsSyntaxKind::JS_EXPORT_DEFAULT_DECLARATION_CLAUSE
+                    )
+                    && let Some(export) = parent.parent()
+                {
+                    return export;
+                }
+            }
+            Self::TsDeclareFunctionDeclaration(function) => {
+                if let Some(parent) = function.syntax().parent()
+                    && matches!(
+                        parent.kind(),
+                        JsSyntaxKind::JS_EXPORT | JsSyntaxKind::TS_DECLARE_STATEMENT
+                    )
+                {
+                    return parent;
+                }
+            }
+            Self::TsDeclareFunctionExportDefaultDeclaration(function) => {
+                if let Some(parent) = function.syntax().parent()
+                    && matches!(
+                        parent.kind(),
+                        JsSyntaxKind::JS_EXPORT_DEFAULT_DECLARATION_CLAUSE
+                    )
+                    && let Some(export) = parent.parent()
+                {
+                    return export;
+                }
+            }
+        }
+
+        self.syntax().clone()
+    }
+
+    fn get_sibling_syntax(syntax: JsSyntaxNode) -> Option<JsSyntaxNode> {
+        if let Some(export) = JsExport::cast_ref(&syntax) {
+            return match export.export_clause().ok()? {
+                AnyJsExportClause::AnyJsDeclarationClause(declaration) => match declaration {
+                    AnyJsDeclarationClause::JsFunctionDeclaration(function) => {
+                        Some(function.syntax().clone())
+                    }
+                    AnyJsDeclarationClause::TsDeclareFunctionDeclaration(function) => {
+                        Some(function.syntax().clone())
+                    }
+                    _ => None,
+                },
+                AnyJsExportClause::JsExportDefaultDeclarationClause(default_clause) => {
+                    match default_clause.declaration().ok()? {
+                        AnyJsExportDefaultDeclaration::JsFunctionExportDefaultDeclaration(
+                            function,
+                        ) => Some(function.syntax().clone()),
+                        AnyJsExportDefaultDeclaration::TsDeclareFunctionExportDefaultDeclaration(
+                            function,
+                        ) => Some(function.syntax().clone()),
+                        _ => None,
+                    }
+                }
+                _ => None,
+            };
+        }
+
+        if let Some(declare_statement) = TsDeclareStatement::cast_ref(&syntax) {
+            return match declare_statement.declaration().ok()? {
+                AnyJsDeclarationClause::TsDeclareFunctionDeclaration(function) => {
+                    Some(function.syntax().clone())
+                }
+                _ => None,
+            };
+        }
+
+        Some(syntax)
+    }
+
+    fn prev_sibling(&self) -> Option<JsSyntaxNode> {
+        Self::get_sibling_syntax(self.wrapper_syntax().prev_sibling()?)
+    }
+
+    fn next_sibling(&self) -> Option<JsSyntaxNode> {
+        Self::get_sibling_syntax(self.wrapper_syntax().next_sibling()?)
+    }
+}
+
+fn function_binding_name(binding: biome_js_syntax::AnyJsBinding) -> Option<String> {
+    binding
+        .as_js_identifier_binding()?
+        .name_token()
+        .ok()
+        .map(|token| token.text_trimmed().to_string())
 }
