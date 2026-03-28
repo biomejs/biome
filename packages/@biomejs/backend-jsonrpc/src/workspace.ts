@@ -2541,7 +2541,7 @@ See https://biomejs.dev/linter/rules/use-vue-valid-template-root
 	 */
 	useVueValidTemplateRoot?: UseVueValidTemplateRootConfiguration;
 	/**
-	* Forbids v-bind directives with missing arguments or invalid modifiers.
+	* Forbids v-bind directives with missing values or invalid modifiers.
 See https://biomejs.dev/linter/rules/use-vue-valid-v-bind 
 	 */
 	useVueValidVBind?: UseVueValidVBindConfiguration;

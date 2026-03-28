@@ -6600,7 +6600,7 @@
 					]
 				},
 				"useVueValidVBind": {
-					"description": "Forbids v-bind directives with missing arguments or invalid modifiers.\nSee https://biomejs.dev/linter/rules/use-vue-valid-v-bind",
+					"description": "Forbids v-bind directives with missing values or invalid modifiers.\nSee https://biomejs.dev/linter/rules/use-vue-valid-v-bind",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseVueValidVBindConfiguration" },
 						{ "type": "null" }
