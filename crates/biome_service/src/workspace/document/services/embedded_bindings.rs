@@ -96,19 +96,19 @@ impl EmbeddedBuilder {
     fn visit_js_import(&mut self, import: JsImport) -> Option<()> {
         let clause = import.import_clause().ok()?;
         if let Some(named_specifiers) = clause.named_specifiers() {
-            let imported_names = named_specifiers
-                .specifiers()
-                .iter()
-                .flatten()
-                .map(|specifier| specifier.imported_name());
-
-            for imported_name in imported_names {
-                let Some(imported_name) = imported_name else {
+            for specifier in named_specifiers.specifiers().iter().flatten() {
+                let Some(local_name) = specifier.local_name() else {
+                    continue;
+                };
+                let Some(local_name) = local_name.as_js_identifier_binding() else {
+                    continue;
+                };
+                let Ok(local_name) = local_name.name_token() else {
                     continue;
                 };
                 self.js_bindings.insert(
-                    imported_name.text_trimmed_range(),
-                    imported_name.token_text_trimmed(),
+                    local_name.text_trimmed_range(),
+                    local_name.token_text_trimmed(),
                 );
             }
         }
@@ -495,6 +495,20 @@ let variable = "salut";
         assert!(contains_binding(&service, "Component"));
         assert!(contains_binding(&service, "Component2"));
         assert!(contains_binding(&service, "variable"));
+    }
+
+    #[test]
+    fn tracks_renamed_named_imports_by_local_name() {
+        let source = r#"import { Thing as Something } from "somewhere";"#;
+
+        let mut service = EmbeddedExportedBindings::default();
+        let mut builder = service.builder();
+        visit_js_root(&mut builder, &parse_js(source));
+
+        service.finish(builder);
+
+        assert!(contains_binding(&service, "Something"));
+        assert!(!contains_binding(&service, "Thing"));
     }
 
     #[test]

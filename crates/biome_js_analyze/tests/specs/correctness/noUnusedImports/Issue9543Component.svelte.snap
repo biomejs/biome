@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: Issue9543Component.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+<script>
+export let value = "ok";
+</script>
+
+<div>{value}</div>
+
+```

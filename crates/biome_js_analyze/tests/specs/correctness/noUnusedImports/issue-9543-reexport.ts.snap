@@ -1,0 +1,9 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue-9543-reexport.ts
+---
+# Input
+```ts
+export { default as Thing } from "./Issue9543Component.svelte";
+
+```
