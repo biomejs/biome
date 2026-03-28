@@ -8,6 +8,12 @@ expression: issue9629.js
 	? /*consequent-leading*/ consequent /*consequent-trailing*/
 	: /*alternate-leading*/ alternate /*alternate-trailing*/;
 
+call(
+	!condition
+		? consequent /*consequent-trailing*/
+		: alternate
+);
+
 ```
 
 # Diagnostics
@@ -22,16 +28,48 @@ issue9629.js:1:15 lint/style/noNegationElse  FIXABLE  ━━━━━━━━�
   > 3 │ 	: /*alternate-leading*/ alternate /*alternate-trailing*/;
       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     4 │ 
+    5 │ call(
   
   i Safe fix: Invert the condition and the blocks.
   
-    1   │ - /*before-not*/!/*after-not*/condition/*after-test*/
-    2   │ - → ?·/*consequent-leading*/·consequent·/*consequent-trailing*/
-    3   │ - → :·/*alternate-leading*/·alternate·/*alternate-trailing*/;
-      1 │ + /*before-not*//*after-not*/condition/*after-test*/
-      2 │ + → ?·/*alternate-leading*/·alternate·/*alternate-trailing*/
-      3 │ + → :·/*consequent-leading*/·consequent·/*consequent-trailing*/;
-    4 4 │   
+     1    │ - /*before-not*/!/*after-not*/condition/*after-test*/
+     2    │ - → ?·/*consequent-leading*/·consequent·/*consequent-trailing*/
+     3    │ - → :·/*alternate-leading*/·alternate·/*alternate-trailing*/;
+        1 │ + /*before-not*//*after-not*/condition/*after-test*/
+        2 │ + → ?·/*alternate-leading*/·alternate·/*alternate-trailing*/
+        3 │ + → :·/*consequent-leading*/·consequent·/*consequent-trailing*/;
+     4  4 │   
+     5  5 │   call(
+  
+
+```
+
+```
+issue9629.js:6:2 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Invert blocks when performing a negation test.
+  
+     5 │ call(
+   > 6 │ 	!condition
+       │ 	^^^^^^^^^^
+   > 7 │ 		? consequent /*consequent-trailing*/
+   > 8 │ 		: alternate
+       │ 		^^^^^^^^^^^
+     9 │ );
+    10 │ 
+  
+  i Safe fix: Invert the condition and the blocks.
+  
+     4  4 │   
+     5  5 │   call(
+     6    │ - → !condition
+     7    │ - → → ?·consequent·/*consequent-trailing*/
+     8    │ - → → :·alternate
+        6 │ + → condition
+        7 │ + → → ?·alternate
+        8 │ + → → :·consequent·/*consequent-trailing*/
+     9  9 │   );
+    10 10 │   
   
 
 ```
