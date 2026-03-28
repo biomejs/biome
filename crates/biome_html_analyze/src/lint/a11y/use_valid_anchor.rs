@@ -129,36 +129,33 @@ impl Rule for UseValidAnchor {
             state.range(),
             match state {
                 Self::State::MissingHrefAttribute(_) => {
-                    (markup! {
+                    markup! {
                         "Provide a "<Emphasis>"href"</Emphasis>" attribute for the "<Emphasis>"a"</Emphasis>" element."
-                    }).to_owned()
+                    }
                 },
                 Self::State::IncorrectHref(_) => {
-                    (markup! {
+                    markup! {
                         "Provide a valid value for the attribute "<Emphasis>"href"</Emphasis>"."
-                    }).to_owned()
+                    }
                 }
                 Self::State::CantBeAnchor(_) => {
-                    (markup! {
+                    markup! {
                         "Use a "<Emphasis>"button"</Emphasis>" element instead of an "<Emphasis>"a"</Emphasis>" element."
-                    }).to_owned()
+                    }
                 }
             }
             )
             .note(
                 match state {
-                    Self::State::MissingHrefAttribute(_) => (markup! {
+                    Self::State::MissingHrefAttribute(_) => markup! {
                         "An anchor element should always have a "<Emphasis>"href"</Emphasis>""
-                    })
-                    .to_owned(),
-                    Self::State::IncorrectHref(_) => (markup! {
+                    },
+                    Self::State::IncorrectHref(_) => markup! {
                         "The href attribute should be a valid URL"
-                    })
-                    .to_owned(),
-                    Self::State::CantBeAnchor(_) => (markup! {
+                    },
+                    Self::State::CantBeAnchor(_) => markup! {
                         "Anchor elements should only be used for default sections or page navigation"
-                    })
-                    .to_owned(),
+                    },
                 }
             )
             .note(
