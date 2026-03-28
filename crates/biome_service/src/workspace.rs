@@ -1028,6 +1028,7 @@ pub struct PullDiagnosticsParams {
     #[serde(default)]
     pub enabled_rules: Vec<AnalyzerSelector>,
     /// When `true`, diagnostics include code suggestions for rule fixes.
+    #[serde(default)]
     pub include_code_fix: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub inline_config: Option<Configuration>,
