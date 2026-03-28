@@ -303,14 +303,14 @@ fn parse_inline_link_tail(
         let title_m = p.start();
         let list_m = p.start();
         parse_title_content(p, get_title_close_char(p));
+        // Consume trailing whitespace/newlines into the title's content list so the
+        // bytes are properly accounted for in the tree. Without this, the whitespace
+        // would be absorbed into the R_PAREN token range (see #9640).
+        while is_title_separator_token(p) {
+            bump_link_def_separator(p);
+        }
         list_m.complete(p, MD_INLINE_ITEM_LIST);
         title_m.complete(p, MD_LINK_TITLE);
-    }
-
-    // Skip trailing whitespace/newlines before closing paren without creating nodes
-    // (creating nodes would violate the MD_INLINE_LINK grammar which expects exactly 7 children)
-    while is_title_separator_token(p) {
-        skip_link_def_separator_tokens(p);
     }
 
     if !p.eat(R_PAREN) {
@@ -764,13 +764,6 @@ fn parse_inline_link_destination_tokens(p: &mut MarkdownParser) -> DestinationSc
     DestinationScanResult::Valid
 }
 
-fn skip_link_def_separator_tokens(p: &mut MarkdownParser) {
-    if p.at(NEWLINE) {
-        p.bump(NEWLINE);
-    } else {
-        p.bump_link_definition();
-    }
-}
 
 fn is_title_separator_token(p: &MarkdownParser) -> bool {
     is_whitespace_token(p) || (p.at(NEWLINE) && !p.at_blank_line())
