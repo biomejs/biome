@@ -9,10 +9,11 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsName, AnyTsName, AnyTsReturnType, AnyTsType, JsExport,
     JsExpressionStatement, JsFunctionDeclaration, JsFunctionExportDefaultDeclaration, JsSyntaxKind,
     JsSyntaxNode, T, TsDeclareFunctionDeclaration, TsDeclareFunctionExportDefaultDeclaration,
-    TsDeclareStatement,
+    TsDeclareStatement, TsNumberLiteralType,
     binding_ext::AnyJsBindingDeclaration,
     parameter_ext::{AnyJsParameterList, AnyParameter},
 };
+use biome_js_type_info::{Type, TypeData};
 use biome_rowan::{
     AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind, declare_node_union,
 };
@@ -199,7 +200,7 @@ impl Rule for NoFloatingPromises {
 
         if expression
             .as_js_call_expression()
-            .and_then(|call| matching_overload_returns_promise_like(ctx, &call))
+            .and_then(|call| matching_overload_returns_promise_like(ctx, call))
             .is_some_and(|returns_promise| !returns_promise)
         {
             return None;
@@ -395,13 +396,32 @@ fn matching_overload_returns_promise_like(
     let declaration = model.binding(&reference)?.tree().declaration()?;
     let overloads = collect_adjacent_function_overloads(&declaration)?;
 
-    overloads
+    let matching_overloads: Vec<_> = overloads
         .into_iter()
         .filter(|overload| !overload.has_body())
-        .find(|overload| function_overload_matches_call(ctx, call, overload))
-        .and_then(|overload| overload.return_type_annotation())
-        .and_then(|return_type| return_type.as_any_ts_type().cloned())
-        .map(ts_type_is_promise_like)
+        .filter_map(|overload| {
+            let matched = function_overload_matches_call(ctx, call, &overload)?;
+            let returns_promise = overload
+                .return_type_annotation()
+                .and_then(|return_type| return_type.as_any_ts_type().cloned())
+                .map(ts_type_is_promise_like)?;
+            Some((matched, returns_promise))
+        })
+        .collect();
+
+    let best_specificity = matching_overloads
+        .iter()
+        .map(|(matched, _)| matched.specificity())
+        .max()?;
+
+    let mut best_returns = matching_overloads
+        .into_iter()
+        .filter(|(matched, _)| matched.specificity() == best_specificity)
+        .map(|(_, returns_promise)| returns_promise);
+
+    let returns_promise = best_returns.next()?;
+    best_returns.all(|best_return| best_return == returns_promise)
+        .then_some(returns_promise)
 }
 
 fn collect_adjacent_function_overloads(
@@ -442,13 +462,11 @@ fn function_overload_matches_call(
     ctx: &RuleContext<NoFloatingPromises>,
     call: &biome_js_syntax::JsCallExpression,
     overload: &AnyPotentialFunctionOverloadSignature,
-) -> bool {
+) -> Option<OverloadMatch> {
     let Ok(arguments) = call.arguments() else {
-        return false;
+        return None;
     };
-    let Some(parameters) = overload.parameters() else {
-        return false;
-    };
+    let parameters = overload.parameters()?;
 
     let parameters: Vec<_> = parameters
         .iter()
@@ -466,29 +484,38 @@ fn function_overload_matches_call(
         .filter(|parameter| !parameter_is_optional(parameter) && !parameter_is_rest(parameter))
         .count();
     if arguments.args().len() < required_parameter_count {
-        return false;
+        return None;
     }
 
     let rest_parameter = parameters
         .last()
         .filter(|parameter| parameter_is_rest(parameter));
     if rest_parameter.is_none() && arguments.args().len() > parameters.len() {
-        return false;
+        return None;
     }
 
-    arguments
-        .args()
-        .iter()
-        .enumerate()
-        .all(|(index, argument)| {
-            let Ok(argument) = argument else {
-                return false;
-            };
-            parameters
-                .get(index)
-                .or(rest_parameter)
-                .is_some_and(|parameter| argument_matches_parameter(ctx, &argument, parameter))
-        })
+    let mut matched_callback_parameters = 0;
+    let mut matched_non_callback_parameters = 0;
+    let mut unknown_non_callback_parameters = 0;
+
+    for (index, argument) in arguments.args().iter().enumerate() {
+        let Ok(argument) = argument else {
+            return None;
+        };
+        let parameter = parameters.get(index).or(rest_parameter)?;
+
+        match argument_matches_parameter(ctx, &argument, parameter)? {
+            ParameterMatch::Callback => matched_callback_parameters += 1,
+            ParameterMatch::NonCallback => matched_non_callback_parameters += 1,
+            ParameterMatch::Unknown => unknown_non_callback_parameters += 1,
+        }
+    }
+
+    (matched_callback_parameters > 0).then_some(OverloadMatch {
+        matched_callback_parameters,
+        matched_non_callback_parameters,
+        unknown_non_callback_parameters,
+    })
 }
 
 fn parameter_is_optional(parameter: &AnyParameter) -> bool {
@@ -533,21 +560,31 @@ fn argument_matches_parameter(
     ctx: &RuleContext<NoFloatingPromises>,
     argument: &AnyJsCallArgument,
     parameter: &AnyParameter,
-) -> bool {
-    let Some(expected_callback_returns_promise) = parameter_callback_returns_promise(parameter)
-    else {
-        return true;
-    };
-    let AnyJsCallArgument::AnyJsExpression(argument) = argument else {
-        return false;
-    };
-    let Some(actual_callback_returns_promise) =
-        expression_function_returns_promise_like(ctx, argument)
-    else {
-        return false;
+) -> Option<ParameterMatch> {
+    let Some(parameter_type) = parameter_type_annotation(parameter) else {
+        return Some(ParameterMatch::Unknown);
     };
 
-    expected_callback_returns_promise == actual_callback_returns_promise
+    let Some(expected_callback_returns_promise) = parameter_callback_returns_promise(parameter)
+    else {
+        let AnyJsCallArgument::AnyJsExpression(argument) = argument else {
+            return None;
+        };
+
+        return match ts_type_matches_argument_type(&ctx.type_of_expression(argument), parameter_type)
+        {
+            Some(true) => Some(ParameterMatch::NonCallback),
+            Some(false) => None,
+            None => Some(ParameterMatch::Unknown),
+        };
+    };
+    let AnyJsCallArgument::AnyJsExpression(argument) = argument else {
+        return None;
+    };
+    let actual_callback_returns_promise = expression_function_returns_promise_like(ctx, argument)?;
+
+    (expected_callback_returns_promise == actual_callback_returns_promise)
+        .then_some(ParameterMatch::Callback)
 }
 
 fn expression_function_returns_promise_like(
@@ -565,8 +602,7 @@ fn expression_function_returns_promise_like(
 }
 
 fn parameter_callback_returns_promise(parameter: &AnyParameter) -> Option<bool> {
-    let annotation = parameter.type_annotation()?.ty().ok()?;
-    callback_type_returns_promise(annotation)
+    callback_type_returns_promise(parameter_type_annotation(parameter)?)
 }
 
 fn callback_type_returns_promise(ty: AnyTsType) -> Option<bool> {
@@ -592,12 +628,111 @@ fn ts_type_is_promise_like(ty: AnyTsType) -> bool {
     }
 }
 
+fn parameter_type_annotation(parameter: &AnyParameter) -> Option<AnyTsType> {
+    parameter.type_annotation()?.ty().ok()
+}
+
+fn ts_type_matches_argument_type(argument_ty: &Type, parameter_ty: AnyTsType) -> Option<bool> {
+    match parameter_ty.omit_parentheses() {
+        AnyTsType::TsUnionType(union) => {
+            let mut saw_unknown_branch = false;
+
+            for parameter_ty in union.types().into_iter().filter_map(|ty| ty.ok()) {
+                match ts_type_matches_argument_type(argument_ty, parameter_ty) {
+                    Some(true) => return Some(true),
+                    Some(false) => {}
+                    None => saw_unknown_branch = true,
+                }
+            }
+
+            if saw_unknown_branch {
+                None
+            } else {
+                Some(false)
+            }
+        }
+        AnyTsType::TsStringType(_) => Some(type_matches_variant(argument_ty, |ty| {
+            ty.is_string_or_string_literal()
+        })),
+        AnyTsType::TsStringLiteralType(literal) => Some(type_matches_variant(argument_ty, |ty| {
+            literal
+                .inner_string_text()
+                .ok()
+                .is_some_and(|text| ty.is_string_literal(text.text()))
+        })),
+        AnyTsType::TsNumberType(_) => Some(type_matches_variant(argument_ty, |ty| {
+            ty.is_number_or_number_literal()
+        })),
+        AnyTsType::TsNumberLiteralType(literal) => ts_number_literal_type_value(&literal).map(
+            |value| type_matches_variant(argument_ty, |ty| ty.is_number_literal(value)),
+        ),
+        AnyTsType::TsBooleanType(_) => Some(type_matches_variant(argument_ty, type_is_booleanish)),
+        AnyTsType::TsBooleanLiteralType(literal) => {
+            let value = match literal.literal().ok()?.text_trimmed() {
+                "true" => true,
+                "false" => false,
+                _ => return None,
+            };
+
+            Some(type_matches_variant(argument_ty, |ty| ty.is_boolean_literal(value)))
+        }
+        AnyTsType::TsNullLiteralType(_) => Some(type_matches_variant(argument_ty, |ty| {
+            matches!(&**ty, TypeData::Null)
+        })),
+        AnyTsType::TsUndefinedType(_) => Some(type_matches_variant(argument_ty, |ty| {
+            matches!(&**ty, TypeData::Undefined)
+        })),
+        _ => None,
+    }
+}
+
+fn ts_number_literal_type_value(literal: &TsNumberLiteralType) -> Option<f64> {
+    let magnitude = literal.literal_token().ok()?.text_trimmed().parse::<f64>().ok()?;
+    Some(if literal.minus_token().is_some() {
+        -magnitude
+    } else {
+        magnitude
+    })
+}
+
+fn type_matches_variant(argument_ty: &Type, predicate: impl Fn(&Type) -> bool + Copy) -> bool {
+    predicate(argument_ty) || argument_ty.flattened_union_variants().any(|ty| predicate(&ty))
+}
+
+fn type_is_booleanish(ty: &Type) -> bool {
+    matches!(&**ty, TypeData::Boolean) || ty.is_boolean_literal(true) || ty.is_boolean_literal(false)
+}
+
 fn ts_name_is_promise(name: &AnyTsName) -> bool {
     name.as_js_reference_identifier().is_some_and(|name| {
         name.value_token()
             .ok()
             .is_some_and(|token| token.text_trimmed() == "Promise")
     })
+}
+
+#[derive(Clone, Copy, Debug)]
+struct OverloadMatch {
+    matched_callback_parameters: usize,
+    matched_non_callback_parameters: usize,
+    unknown_non_callback_parameters: usize,
+}
+
+impl OverloadMatch {
+    fn specificity(self) -> (usize, usize, usize) {
+        (
+            self.matched_callback_parameters,
+            self.matched_non_callback_parameters,
+            usize::MAX - self.unknown_non_callback_parameters,
+        )
+    }
+}
+
+#[derive(Clone, Copy, Debug)]
+enum ParameterMatch {
+    Callback,
+    NonCallback,
+    Unknown,
 }
 
 declare_node_union! {
@@ -632,16 +767,16 @@ impl AnyPotentialFunctionOverloadSignature {
     fn name(&self) -> Option<String> {
         match self {
             Self::JsFunctionDeclaration(declaration) => {
-                function_binding_name(declaration.id().ok()?)
+                function_binding_name(&declaration.id().ok()?)
             }
             Self::JsFunctionExportDefaultDeclaration(declaration) => {
-                function_binding_name(declaration.id()?)
+                function_binding_name(&declaration.id()?)
             }
             Self::TsDeclareFunctionDeclaration(declaration) => {
-                function_binding_name(declaration.id().ok()?)
+                function_binding_name(&declaration.id().ok()?)
             }
             Self::TsDeclareFunctionExportDefaultDeclaration(declaration) => {
-                function_binding_name(declaration.id()?)
+                function_binding_name(&declaration.id()?)
             }
         }
     }
@@ -781,7 +916,7 @@ impl AnyPotentialFunctionOverloadSignature {
     }
 }
 
-fn function_binding_name(binding: biome_js_syntax::AnyJsBinding) -> Option<String> {
+fn function_binding_name(binding: &biome_js_syntax::AnyJsBinding) -> Option<String> {
     binding
         .as_js_identifier_binding()?
         .name_token()
