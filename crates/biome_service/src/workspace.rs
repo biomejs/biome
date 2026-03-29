@@ -839,6 +839,10 @@ pub struct OpenFileParams {
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub inline_config: Option<Configuration>,
+
+    /// Used to enable further document services e.g. semantic model
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub needs_document_services: Option<bool>,
 }
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -1257,6 +1261,37 @@ pub struct RenameResult {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
+pub struct GoToDefinitionParams {
+    pub project_key: ProjectKey,
+    pub path: BiomePath,
+    pub cursor_range: TextRange,
+    pub enabled: bool,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct GoToDefinitionResult {
+    pub path: BiomePath,
+    pub range: TextRange,
+}
+
+/// The definition kind of definition
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub enum DefinitionReference {
+    /// The binding is in the same file at this range.
+    Local { range: TextRange },
+    /// Imported symbol — needs module graph resolution.
+    Import { local_name: String },
+    /// A CSS class name from a JSX className/class attribute or a CSS-in-JS snippet (not yet supported)
+    CssClass { class_name: String },
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct ScanProjectResult {
     /// Diagnostics reported while scanning the project.
     pub diagnostics: Vec<Diagnostic>,
@@ -1635,6 +1670,15 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
 
     /// Returns the content of the file after renaming a symbol.
     fn rename(&self, params: RenameParams) -> Result<RenameResult, WorkspaceError>;
+
+    /// Navigates to the definition of the symbol at the given cursor position.
+    ///
+    /// Returns `None` if the symbol cannot be resolved (e.g., external
+    /// dependency, cursor not on an identifier, or no definition found).
+    fn go_to_definition(
+        &self,
+        params: GoToDefinitionParams,
+    ) -> Result<Option<GoToDefinitionResult>, WorkspaceError>;
 
     /// Closes a file that is opened in the workspace.
     ///

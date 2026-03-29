@@ -310,6 +310,10 @@ impl ExtensionHandler for GraphqlFileHandler {
                 format_embedded: None,
             },
             search: SearchCapabilities { search: None },
+            editors: EditorCapabilities {
+                resolve_binding: None,
+                resolve_definition: None,
+            },
         }
     }
 }

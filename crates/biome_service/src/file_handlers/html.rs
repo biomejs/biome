@@ -2,9 +2,10 @@ mod parse_embedded_nodes;
 
 use super::{
     AnalyzerCapabilities, AnalyzerVisitorBuilder, AnalyzerVisitorResult, Capabilities,
-    CodeActionsParams, DebugCapabilities, DocumentFileSource, EnabledForPath, ExtensionHandler,
-    FixAllParams, FormatEmbedNode, FormatterCapabilities, LintParams, LintResults, ParseResult,
-    ParserCapabilities, ProcessFixAll, ProcessLint, SearchCapabilities, UpdateSnippetsNodes,
+    CodeActionsParams, DebugCapabilities, DocumentFileSource, EditorCapabilities, EnabledForPath, ExtensionHandler,
+    FixAllParams, FormatEmbedNode, FormatterCapabilities, LintParams, LintResults,
+     ParseResult, ParserCapabilities, ProcessFixAll, ProcessLint,
+    ResolveBindingParams, SearchCapabilities, UpdateSnippetsNodes,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::html::parse_embedded_nodes::parse_embedded_nodes;
@@ -15,6 +16,10 @@ use crate::workspace::CodeAction;
 use crate::workspace::FixFileMode;
 use crate::workspace::document::AnyEmbeddedSnippet;
 use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
+use crate::workspace::{
+    CodeAction, CssDocumentServices, DefinitionReference, DocumentServices, EmbeddedSnippet,
+    JsDocumentServices,
+};
 use crate::workspace::{FixFileResult, PullActionsResult};
 use crate::{
     WorkspaceError,
@@ -47,11 +52,24 @@ use biome_html_formatter::{
 };
 use biome_html_parser::{HtmlParserOptions, parse_html_with_cache};
 use biome_html_syntax::element_ext::AnyEmbeddedContent;
-use biome_html_syntax::{HtmlFileSource, HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
-use biome_js_syntax::{JsFileSource, JsLanguage};
-use biome_json_syntax::JsonLanguage;
+use biome_html_syntax::{
+    AnyAstroDirective, AnyHtmlAttributeInitializer, AnyHtmlTagName, AnySvelteDirective,
+    AstroEmbeddedContent, HtmlAttribute, HtmlAttributeInitializerClause, HtmlDoubleTextExpression,
+    HtmlElement, HtmlFileSource, HtmlLanguage, HtmlOpeningElement, HtmlRoot,
+    HtmlSelfClosingElement, HtmlSingleTextExpression, HtmlSyntaxNode, HtmlTextExpression,
+    HtmlTextExpressions, HtmlVariant, SvelteAwaitBlock, SvelteEachBlock, SvelteIfBlock,
+    SvelteKeyBlock, VueDirective, VueVBindShorthandDirective, VueVOnShorthandDirective,
+    VueVSlotShorthandDirective,
+};
+use biome_js_parser::parse_js_with_offset_and_cache;
+use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage};
+use biome_json_parser::parse_json_with_offset_and_cache;
+use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_parser::AnyParse;
-use biome_rowan::{AstNode, BatchMutation, NodeCache, SendNode};
+use biome_rowan::{
+    AstNode, AstNodeList, BatchMutation, NodeCache, SendNode, SyntaxNodeCast, TextSize,
+    TokenAtOffset,
+};
 use camino::Utf8Path;
 use either::Either;
 use std::borrow::Cow;
@@ -367,6 +385,10 @@ impl ExtensionHandler for HtmlFileHandler {
                 format_embedded: Some(format_embedded),
             },
             search: SearchCapabilities { search: None },
+            editors: EditorCapabilities {
+                resolve_binding: Some(resolve_binding_html),
+                resolve_definition: None,
+            },
         }
     }
 }
@@ -1013,6 +1035,101 @@ fn reindent_embedded_code(code: &str, indent: &str) -> String {
         out.push_str(line);
     }
     out
+}
+
+
+/// Checks if the attribute belongs to a component element rather than a
+/// regular HTML tag. Components are identified by uppercase-starting tag
+/// names, hyphenated names, member expressions, or explicit component nodes.
+fn is_component_element(attr: &HtmlAttribute) -> bool {
+    let tag_name = attr.syntax().ancestors().skip(1).find_map(|ancestor| {
+        if let Some(opening) = HtmlOpeningElement::cast_ref(&ancestor) {
+            opening.name().ok()
+        } else if let Some(self_closing) = HtmlSelfClosingElement::cast_ref(&ancestor) {
+            self_closing.name().ok()
+        } else {
+            None
+        }
+    });
+
+    let Some(tag_name) = tag_name else {
+        return false;
+    };
+
+    match tag_name {
+        AnyHtmlTagName::HtmlComponentName(_) | AnyHtmlTagName::HtmlMemberName(_) => true,
+        AnyHtmlTagName::HtmlTagName(name) => {
+            let Ok(token) = name.value_token() else {
+                return false;
+            };
+            let text = token.text_trimmed();
+            text.chars().next().is_some_and(|c| c.is_uppercase()) || text.contains('-')
+        }
+    }
+}
+
+/// Source-side capability for HTML: detects a CSS class name at the cursor
+/// position inside a `class` attribute.
+pub(crate) fn resolve_binding_html(params: ResolveBindingParams) -> Option<DefinitionReference> {
+    let root: HtmlRoot = params.parse.tree();
+
+    let token = match root.syntax().token_at_offset(params.cursor_offset) {
+        TokenAtOffset::Single(token) => token,
+        TokenAtOffset::Between(_, right) => right,
+        TokenAtOffset::None => return None,
+    };
+
+    // Walk up to find an HtmlAttribute ancestor
+    let html_attribute = token.ancestors().find_map(|n| n.cast::<HtmlAttribute>())?;
+
+    let name_token = html_attribute.name().ok()?.value_token().ok()?;
+    if !name_token.text_trimmed().eq_ignore_ascii_case("class") {
+        return None;
+    }
+
+    // Skip component elements — class on a component is a prop, not a CSS class
+    if is_component_element(&html_attribute) {
+        return None;
+    }
+
+    let initializer = html_attribute.initializer()?;
+    let value = initializer.value().ok()?;
+
+    let html_string = match value {
+        AnyHtmlAttributeInitializer::HtmlString(s) => s,
+        _ => return None,
+    };
+
+    let value_token = html_string.value_token().ok()?;
+    let inner_text = html_string.inner_string_text().ok()?;
+    let inner_source_range = inner_text.source_range(value_token.text_trimmed_range());
+
+    let relative_offset = params
+        .cursor_offset
+        .checked_sub(inner_source_range.start())?;
+    let relative_offset: usize = relative_offset.into();
+
+    let text = inner_text.text();
+    if relative_offset > text.len() {
+        return None;
+    }
+
+    // Find which whitespace-separated class name the cursor falls within
+    let mut pos = 0usize;
+    for class_name in text.split_ascii_whitespace() {
+        let start = text[pos..].find(class_name).map(|i| i + pos)?;
+        let end = start + class_name.len();
+
+        if relative_offset >= start && relative_offset <= end {
+            return Some(DefinitionReference::CssClass {
+                class_name: class_name.to_string(),
+            });
+        }
+
+        pos = end;
+    }
+
+    None
 }
 
 #[cfg(test)]

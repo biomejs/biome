@@ -1,5 +1,5 @@
 use super::{
-    AnalyzerVisitorBuilder, AnalyzerVisitorResult, CodeActionsParams, DocumentFileSource,
+    AnalyzerVisitorBuilder, CodeActionsParams, DocumentFileSource, EditorCapabilities,
     EnabledForPath, ExtensionHandler, ParseResult, ProcessFixAll, ProcessLint, SearchCapabilities,
     search,
 };
@@ -382,6 +382,10 @@ impl ExtensionHandler for JsonFileHandler {
             },
             search: SearchCapabilities {
                 search: Some(search),
+            },
+            editors: EditorCapabilities {
+                resolve_binding: None,
+                resolve_definition: None,
             },
         }
     }

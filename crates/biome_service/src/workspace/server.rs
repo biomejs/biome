@@ -6,14 +6,17 @@ use crate::file_handlers::svelte::SvelteFileHandler;
 use crate::file_handlers::{
     AnalyzerVisitorCache, Capabilities, CodeActionsParams, DiagnosticsAndActionsParams,
     DocumentFileSource, Features, FixAllParams, FormatEmbedNode, LintParams, LintResults,
-    ParseResult, UpdateSnippetsNodes,
+    ParseResult, ResolveBindingParams,
+    ResolveDefinitionParams, UpdateSnippetsNodes,
 };
 use crate::projects::{GetFileFeaturesParams, ProjectKey, Projects};
 use crate::scanner::{
     IndexRequestKind, IndexTrigger, ScanOptions, Scanner, ScannerWatcherBridge, WatcherInstruction,
     WorkspaceScannerBridge,
 };
-use crate::settings::{ModuleGraphResolutionKind, SettingsHandle, SettingsWithEditor};
+use crate::settings::{
+    ModuleGraphResolutionKind, SettingsHandle, SettingsWithCapability, SettingsWithEditor,
+};
 use crate::workspace::document::services::embedded_bindings::{
     EmbeddedBuilder, EmbeddedExportedBindings,
 };
@@ -26,13 +29,14 @@ use crate::workspace::{
     FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFileContentParams,
     GetFormatterIRParams, GetModuleGraphParams, GetModuleGraphResult, GetRegisteredTypesParams,
     GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult, GetTypeInfoParams,
-    IgnoreKind, OpenFileParams, OpenFileResult, OpenProjectParams, OpenProjectResult,
-    ParsePatternParams, ParsePatternResult, PathIsIgnoredParams, PatternId, PullActionsParams,
-    PullActionsResult, PullDiagnosticsAndActionsParams, PullDiagnosticsAndActionsResult,
-    PullDiagnosticsParams, PullDiagnosticsResult, RageEntry, RageParams, RageResult, RenameParams,
-    RenameResult, ScanKind, ScanProjectParams, ScanProjectResult, SearchPatternParams,
-    SearchResults, ServerInfo, ServiceNotification, Settings, SupportsFeatureParams,
-    UpdateModuleGraphParams, UpdateSettingsParams, UpdateSettingsResult,
+    GoToDefinitionParams, GoToDefinitionResult, IgnoreKind, OpenFileParams, OpenFileResult,
+    OpenProjectParams, OpenProjectResult, ParsePatternParams, ParsePatternResult,
+    PathIsIgnoredParams, PatternId, PullActionsParams, PullActionsResult,
+    PullDiagnosticsAndActionsParams, PullDiagnosticsAndActionsResult, PullDiagnosticsParams,
+    PullDiagnosticsResult, RageEntry, RageParams, RageResult, RenameParams, RenameResult, ScanKind,
+    ScanProjectParams, ScanProjectResult, SearchPatternParams, SearchResults, ServerInfo,
+    ServiceNotification, Settings, SupportsFeatureParams, UpdateModuleGraphParams,
+    UpdateSettingsParams, UpdateSettingsResult,
 };
 use crate::{Workspace, WorkspaceError};
 use biome_analyze::{AnalyzerPluginVec, RuleCategory};
@@ -40,7 +44,7 @@ use biome_configuration::bool::Bool;
 use biome_configuration::max_size::MaxSize;
 use biome_configuration::vcs::VcsClientKind;
 use biome_configuration::{BiomeDiagnostic, Configuration, ConfigurationPathHint};
-use biome_css_syntax::{AnyCssRoot, CssVariant};
+use biome_css_syntax::{AnyCssRoot, CssFileSource, CssVariant};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, Merge};
 use biome_diagnostics::print_diagnostic_to_string;
@@ -198,6 +202,7 @@ impl WorkspaceServer {
                     document_file_source: Some(document_file_source),
                     persist_node_cache: false,
                     inline_config: None,
+                    needs_document_services: None,
                 },
             );
         }
@@ -208,6 +213,14 @@ impl WorkspaceServer {
         settings: &'a Settings,
         editor: Option<Configuration>,
     ) -> SettingsWithEditor<'a> {
+        SettingsHandle::new(settings, editor)
+    }
+
+    fn settings_handle_with_capability<'a>(
+        &self,
+        settings: &'a Settings,
+        editor: bool,
+    ) -> SettingsWithCapability<'a> {
         SettingsHandle::new(settings, editor)
     }
 
@@ -376,6 +389,7 @@ impl WorkspaceServer {
             document_file_source,
             persist_node_cache,
             inline_config,
+            needs_document_services,
         } = params;
         let path: Utf8PathBuf = biome_path.clone().into();
 
@@ -502,7 +516,10 @@ impl WorkspaceServer {
             if let Some(language) = language {
                 file_source_index = self.insert_source(language);
 
-                if settings.is_linter_enabled() || settings.is_assist_enabled() {
+                if settings.is_linter_enabled()
+                    || settings.is_assist_enabled()
+                    || needs_document_services.unwrap_or_default()
+                {
                     if language.is_css_like() {
                         services = CssDocumentServices::default()
                             .with_css_semantic_model(&any_parse.tree())
@@ -778,6 +795,91 @@ impl WorkspaceServer {
                 },
                 None => Err(WorkspaceError::not_found(path.to_string())),
             })
+    }
+
+    /// Tries to resolve a binding reference at the given cursor offset.
+    ///
+    /// First checks if checks if the binding is inside its main parsed root, then it
+    /// checks if it's inside its snippets.
+    ///
+    /// Returns the definition reference (if found), the effective path for the binding,
+    /// the capabilities that produced it (needed for calling `resolve_definition`).
+    fn resolve_binding_in_document_or_snippets(
+        &self,
+        path: &BiomePath,
+        cursor_offset: TextSize,
+        parse: &AnyParse,
+        services: &DocumentServices,
+        embedded_snippets: &[AnyEmbeddedSnippet],
+        language: DocumentFileSource,
+    ) -> Result<(Option<DefinitionReference>, BiomePath, Capabilities), WorkspaceError> {
+        let capabilities = self.features.get_capabilities(language);
+
+        // Resolve the correct capabilities for the definition side based on
+        // the definition reference kind (e.g., CssClass → CSS handler).
+        let resolve_capabilities =
+            |def_ref: &Option<DefinitionReference>, default_caps: Capabilities| -> Capabilities {
+                match def_ref {
+                    None => default_caps,
+                    Some(def_ref) => match def_ref {
+                        DefinitionReference::Local { .. } | DefinitionReference::Import { .. } => {
+                            default_caps
+                        }
+                        DefinitionReference::CssClass { .. } => self
+                            .features
+                            .get_capabilities(DocumentFileSource::Css(CssFileSource::css())),
+                    },
+                }
+            };
+
+        if let Some(resolve) = capabilities.editors.resolve_binding {
+            let result = resolve(ResolveBindingParams {
+                parse: parse.clone(),
+                cursor_offset,
+                services,
+            });
+            let caps = resolve_capabilities(&result, capabilities);
+            return Ok((result, path.clone(), caps));
+        }
+
+        // Check if cursor falls within an embedded snippet
+        for snippet in embedded_snippets {
+            let content_range = snippet.content_range();
+            if !content_range.contains(cursor_offset) {
+                continue;
+            }
+
+            let snippet_offset = snippet.content_offset();
+            let local_cursor = cursor_offset - snippet_offset;
+
+            let Some(file_source) = self.get_source(snippet.file_source_index()) else {
+                continue;
+            };
+            let snippet_caps = self.features.get_capabilities(file_source);
+            let Some(resolve) = snippet_caps.editors.resolve_binding else {
+                continue;
+            };
+
+            let snippet_services = snippet.as_snippet_services();
+            let result = resolve(ResolveBindingParams {
+                parse: snippet.parse(),
+                cursor_offset: local_cursor,
+                services: snippet_services,
+            });
+
+            // If binding is Local, adjust range back to parent document coordinates
+            let adjusted = result.map(|b| match b {
+                DefinitionReference::Local { range } => DefinitionReference::Local {
+                    range: range + snippet_offset,
+                },
+                other => other,
+            });
+
+            let capabilities = resolve_capabilities(&adjusted, snippet_caps);
+            return Ok((adjusted, path.clone(), capabilities));
+        }
+
+        Ok((None, path.clone(), capabilities))
     }
 
     fn get_parse_with_embedded_format_nodes(
@@ -1252,7 +1354,11 @@ impl WorkspaceServer {
                                         let css_source = self
                                             .get_source(css.file_source_index)
                                             .and_then(|src| src.to_css_file_source())?;
-                                        Some(HtmlEmbeddedContent::Css(css.parse.tree(), css_source))
+                                        Some(HtmlEmbeddedContent::Css(
+                                            css.parse.tree(),
+                                            css_source,
+                                            css.content_offset,
+                                        ))
                                     } else {
                                         s.as_js_embedded_snippet()
                                             .map(|js| HtmlEmbeddedContent::Js(js.parse.tree()))
@@ -2620,7 +2726,64 @@ impl Workspace for WorkspaceServer {
         Ok(result)
     }
 
-    /// Closes a file that is opened in the workspace.
+    fn go_to_definition(
+        &self,
+        params: GoToDefinitionParams,
+    ) -> Result<Option<GoToDefinitionResult>, WorkspaceError> {
+        let path = &params.path;
+        let cursor_offset = params.cursor_range.start();
+
+        let settings = self
+            .projects
+            .get_settings_based_on_path(params.project_key, path)
+            .ok_or_else(WorkspaceError::no_project)?;
+
+        let settings = self.settings_handle_with_capability(&settings, params.enabled);
+
+        let has_document_services = settings.is_capability_enabled()
+            || settings.as_ref().is_linter_enabled()
+            || settings.as_ref().is_assist_enabled();
+        if !has_document_services {
+            return Ok(None);
+        }
+
+        let (parse, embedded_snippets, services) =
+            self.get_parse_with_snippets_and_services(path.as_path())?;
+
+        let language = self.get_file_source(
+            path,
+            settings.as_ref().experimental_full_html_support_enabled(),
+        );
+
+        // Try to resolve the binding, checking embedded snippets first
+        let (definition_ref, effective_path, capabilities) = self
+            .resolve_binding_in_document_or_snippets(
+                path,
+                cursor_offset,
+                &parse,
+                &services,
+                &embedded_snippets,
+                language,
+            )?;
+
+        let Some(definition_ref) = definition_ref else {
+            return Ok(None);
+        };
+
+        let resolve_definition = capabilities
+            .editors
+            .resolve_definition
+            // NOTE: here we might want to silent the error because it could be noisy
+            .ok_or_else(self.build_capability_error(path))?;
+
+        Ok(resolve_definition(ResolveDefinitionParams {
+            path: &effective_path,
+            definition_ref: &definition_ref,
+            module_graph: &self.module_graph,
+        }))
+    }
+
+    /// Closes a file opened in the workspace.
     ///
     /// This only unloads the document from the workspace if the file is NOT
     /// indexed by the scanner. If the scanner has the file indexed, it may
@@ -2813,6 +2976,7 @@ impl WorkspaceScannerBridge for WorkspaceServer {
                 persist_node_cache: false,
                 // TODO: review here, it feels wrong that we can't pass the inline config
                 inline_config: None,
+                needs_document_services: None,
             },
         )
         .map(|result| (result.dependencies, result.diagnostics))

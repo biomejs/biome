@@ -53,6 +53,7 @@ fn debug_control_flow() {
             document_file_source: Some(DocumentFileSource::from(JsFileSource::default())),
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .unwrap();
 
@@ -76,6 +77,7 @@ fn recognize_typescript_definition_file() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .unwrap();
 
@@ -98,6 +100,7 @@ fn correctly_handle_json_files() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .unwrap();
 
@@ -114,6 +117,7 @@ fn correctly_handle_json_files() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .unwrap();
 
@@ -130,6 +134,7 @@ fn correctly_handle_json_files() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .unwrap();
 
@@ -146,6 +151,7 @@ fn correctly_handle_json_files() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .unwrap();
 
@@ -162,6 +168,7 @@ fn correctly_handle_json_files() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .unwrap();
 
@@ -178,6 +185,7 @@ fn correctly_handle_json_files() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .unwrap();
 
@@ -198,6 +206,7 @@ fn correctly_handle_json_files() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .unwrap();
 
@@ -218,6 +227,7 @@ fn correctly_handle_json_files() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .unwrap();
 
@@ -242,6 +252,7 @@ fn correctly_handle_json_files() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .unwrap();
 
@@ -279,6 +290,7 @@ type User {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .unwrap();
 
@@ -311,6 +323,7 @@ fn correctly_pulls_lint_diagnostics() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .unwrap();
 
@@ -350,6 +363,7 @@ fn pull_grit_debug_info() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .unwrap();
 
@@ -422,6 +436,7 @@ fn files_loaded_by_the_scanner_are_only_unloaded_when_the_project_is_unregistere
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .unwrap();
 
@@ -486,6 +501,7 @@ fn too_large_files_are_tracked_but_not_parsed() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .unwrap();
 
@@ -547,6 +563,7 @@ fn plugins_are_loaded_and_used_during_analysis() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .unwrap();
 
@@ -621,6 +638,7 @@ language css;
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .unwrap();
 
@@ -691,6 +709,7 @@ fn plugins_may_use_invalid_span() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .unwrap();
 
@@ -826,6 +845,7 @@ const hasOwn = Object.hasOwn({ foo: 'bar' }, 'foo');"#,
                 document_file_source: None,
                 persist_node_cache: false,
                 inline_config: None,
+                needs_document_services: None,
             })
             .unwrap();
 
@@ -942,6 +962,7 @@ fn correctly_scope_plugin_with_includes() {
                 document_file_source: None,
                 persist_node_cache: false,
                 inline_config: None,
+                needs_document_services: None,
             })
             .unwrap();
 
@@ -1014,6 +1035,7 @@ class Person {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .unwrap();
 
@@ -1049,6 +1071,7 @@ class Person {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .unwrap();
 
@@ -1084,6 +1107,7 @@ class Person {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .unwrap();
 
@@ -1132,6 +1156,7 @@ fn debug_module_graph_mixed_project() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .unwrap();
 
@@ -1145,6 +1170,7 @@ fn debug_module_graph_mixed_project() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .unwrap();
 
@@ -1158,6 +1184,7 @@ fn debug_module_graph_mixed_project() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .unwrap();
 
@@ -1220,6 +1247,7 @@ async function test() {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .unwrap();
 
@@ -1238,6 +1266,7 @@ export const debounce = function debounce() {};
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .unwrap();
 
@@ -1254,6 +1283,7 @@ export const squash = function squash() {};
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })
         .unwrap();
 

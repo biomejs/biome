@@ -13,8 +13,9 @@ use crate::settings::{Settings, SettingsWithEditor};
 use crate::utils::growth_guard::GrowthGuard;
 use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
 use crate::workspace::{
-    AnyEmbeddedSnippet, CodeAction, DocumentServices, FixAction, FixFileMode, FixFileResult,
-    GetSyntaxTreeResult, PullActionsResult, PullDiagnosticsAndActionsResult, RenameResult,
+    AnyEmbeddedSnippet, CodeAction, DefinitionReference, DocumentServices, FixAction, FixFileMode,
+    FixFileResult, GetSyntaxTreeResult, GoToDefinitionResult, PullActionsResult,
+    PullDiagnosticsAndActionsResult, RenameResult,
 };
 use biome_analyze::options::JsxRuntime;
 use biome_analyze::{
@@ -529,6 +530,7 @@ pub struct Capabilities {
     pub(crate) formatter: FormatterCapabilities,
     pub(crate) search: SearchCapabilities,
     pub(crate) enabled_for_path: EnabledForPath,
+    pub(crate) editors: EditorCapabilities,
 }
 
 #[derive(Clone)]
@@ -1280,6 +1282,27 @@ pub(crate) struct EnabledForPath {
     pub(crate) assist: Option<Enabled>,
     pub(crate) search: Option<Enabled>,
 }
+
+#[derive(Default)]
+pub(crate) struct EditorCapabilities {
+    pub(crate) resolve_binding: Option<ResolveBinding>,
+    pub(crate) resolve_definition: Option<ResolveDefinition>,
+}
+
+pub(crate) struct ResolveBindingParams<'a> {
+    pub(crate) parse: AnyParse,
+    pub(crate) cursor_offset: TextSize,
+    pub(crate) services: &'a DocumentServices,
+}
+
+pub(crate) struct ResolveDefinitionParams<'a> {
+    pub(crate) path: &'a BiomePath,
+    pub(crate) definition_ref: &'a DefinitionReference,
+    pub(crate) module_graph: &'a ModuleGraph,
+}
+
+type ResolveBinding = fn(ResolveBindingParams) -> Option<DefinitionReference>;
+type ResolveDefinition = fn(ResolveDefinitionParams) -> Option<GoToDefinitionResult>;
 
 /// Main trait to use to add a new language to Biome
 pub(crate) trait ExtensionHandler {

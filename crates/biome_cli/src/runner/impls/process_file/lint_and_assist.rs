@@ -193,6 +193,7 @@ impl ProcessFile for LintAssistProcessFile {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            needs_document_services: None,
         })?;
 
         // apply fix file of the linter

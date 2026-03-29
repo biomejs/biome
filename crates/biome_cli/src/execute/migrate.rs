@@ -201,6 +201,7 @@ fn migrate_file(payload: MigrateFile) -> Result<MigrationFileResult, CliDiagnost
         ),
         persist_node_cache: false,
         inline_config: None,
+        needs_document_services: None,
     })?;
     let parsed = parse_json_with_cache(&biome_config_content, &mut cache, parse_options);
 

@@ -88,6 +88,7 @@ web-time                 = { workspace = true }
 
 [dev-dependencies]
 biome_configuration = { path = "../biome_configuration", features = ["test-utils"] }
+biome_service       = { path = ".", features = ["testing"] }
 insta               = { workspace = true }
 
 [features]

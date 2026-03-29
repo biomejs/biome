@@ -209,6 +209,7 @@ impl ProcessFile for FormatProcessFile {
                 document_file_source: None,
                 persist_node_cache: false,
                 inline_config: None,
+                needs_document_services: None,
             })?;
             let printed = workspace.format_file(FormatFileParams {
                 project_key,
