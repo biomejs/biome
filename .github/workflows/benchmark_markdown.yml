@@ -9,6 +9,7 @@ on:
       - next
     paths:
       - 'Cargo.lock'
+      - 'crates/biome_markdown_parser/benches/**/*.md'
       - 'crates/biome_markdown_parser/**/*.rs'
       - 'crates/biome_markdown_*/**/*.rs'
       - 'crates/biome_rowan/**/*.rs'
@@ -19,6 +20,7 @@ on:
       - next
     paths:
       - 'Cargo.lock'
+      - 'crates/biome_markdown_parser/benches/**/*.md'
       - 'crates/biome_markdown_parser/**/*.rs'
       - 'crates/biome_markdown_*/**/*.rs'
       - 'crates/biome_rowan/**/*.rs'
