@@ -6308,7 +6308,7 @@
 					]
 				},
 				"noUnsafePlusOperands": {
-					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/no-unsafe-plus-operands",
+					"description": "Disallow + operations with operands that are known to be unsafe.\nSee https://biomejs.dev/linter/rules/no-unsafe-plus-operands",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnsafePlusOperandsConfiguration" },
 						{ "type": "null" }

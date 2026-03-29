@@ -28,31 +28,30 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```ts,expect_diagnostic
+    /// ```ts,expect_diagnostic,file=invalid-bigint-plus-number.ts
     /// const value = 1n + 1;
     /// ```
     ///
-    /// ```ts,expect_diagnostic
-    /// declare const obj: { value: number };
-    /// const text = obj + "!";
+    /// ```ts,expect_diagnostic,file=invalid-number-plus-bigint.ts
+    /// const value = 1 + 1n;
     /// ```
     ///
-    /// ```ts,expect_diagnostic
+    /// ```ts,expect_diagnostic,file=invalid-bigint-add-assign.ts
     /// declare let count: number;
     /// count += 1n;
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```ts
+    /// ```ts,file=valid-number-plus-number.ts
     /// const sum = 1 + 2;
     /// ```
     ///
-    /// ```ts
+    /// ```ts,file=valid-string-plus-number.ts
     /// const message = "value: " + 1;
     /// ```
     ///
-    /// ```ts
+    /// ```ts,file=valid-bigint-add-assign.ts
     /// let total = 1n;
     /// total += 2n;
     /// ```
@@ -182,17 +181,16 @@ fn run_assignment(
 
     let right_ty = ctx.type_of_expression(&right);
 
-    Some(analyze_pair(
-        assignment.range(),
-        OperandInfo {
-            range: left.range(),
-            ty: left_ty,
-        },
-        OperandInfo {
-            range: right.range(),
-            ty: right_ty,
-        },
-    ))
+    let left = OperandInfo {
+        range: left.range(),
+        ty: left_ty,
+    };
+    let right = OperandInfo {
+        range: right.range(),
+        ty: right_ty,
+    };
+
+    Some(analyze_pair(assignment.range(), &left, &right))
 }
 
 fn type_of_assignment_target(
@@ -266,6 +264,9 @@ fn is_invalid_variant(ty: &Type) -> bool {
     match data {
         TypeData::NeverKeyword | TypeData::Symbol | TypeData::UnknownKeyword => true,
         TypeData::Literal(literal) => matches!(literal.as_ref(), Literal::Object(_)),
+        TypeData::Reference(reference) => ty
+            .resolve(reference)
+            .is_some_and(|resolved| is_invalid_variant(&resolved)),
         TypeData::Intersection(intersection) => intersection.types().iter().all(|reference| {
             ty.resolve(reference)
                 .is_some_and(|ty| is_object_like_variant(&ty))
@@ -289,7 +290,12 @@ fn is_object_like_variant(ty: &Type) -> bool {
         | TypeData::Object(_)
         | TypeData::ObjectKeyword
         | TypeData::Tuple(_) => true,
-        TypeData::InstanceOf(_) => false,
+        TypeData::Reference(reference) => ty
+            .resolve(reference)
+            .is_some_and(|resolved| is_object_like_variant(&resolved)),
+        TypeData::InstanceOf(instance) => ty
+            .resolve(&instance.ty)
+            .is_some_and(|resolved| is_object_like_variant(&resolved)),
         _ => false,
     }
 }
@@ -472,8 +478,8 @@ fn analyze_expression(
 
 fn analyze_pair(
     range: TextRange,
-    left: OperandInfo,
-    right: OperandInfo,
+    left: &OperandInfo,
+    right: &OperandInfo,
 ) -> Option<NoUnsafePlusOperandsState> {
     if has_invalid_variant(&left.ty) {
         return Some(NoUnsafePlusOperandsState::InvalidOperand { range: left.range });

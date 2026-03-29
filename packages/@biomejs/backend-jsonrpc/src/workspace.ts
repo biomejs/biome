@@ -2327,7 +2327,7 @@ See https://biomejs.dev/linter/rules/no-unnecessary-conditions
 	 */
 	noUnnecessaryConditions?: NoUnnecessaryConditionsConfiguration;
 	/**
-	* Succinct description of the rule.
+	* Disallow + operations with operands that are known to be unsafe.
 See https://biomejs.dev/linter/rules/no-unsafe-plus-operands 
 	 */
 	noUnsafePlusOperands?: NoUnsafePlusOperandsConfiguration;
