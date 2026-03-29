@@ -176,7 +176,7 @@ impl AnyJsFunctionOrMethod {
             else {
                 return false;
             };
-            let Ok(callee) = call_expression.callee() else {
+            let Ok(callee): Result<AnyJsExpression, _> = call_expression.callee() else {
                 return false;
             };
 
