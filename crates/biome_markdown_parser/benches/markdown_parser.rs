@@ -67,6 +67,7 @@ fn load_fixtures() -> Vec<(String, String, String)> {
         !cases.is_empty(),
         "no markdown benchmark fixtures found in {fixtures_root:?}"
     );
+    cases.sort_unstable_by(|left, right| left.0.cmp(&right.0).then_with(|| left.1.cmp(&right.1)));
     cases
 }
 
