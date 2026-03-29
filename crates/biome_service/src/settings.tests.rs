@@ -1,6 +1,6 @@
 use crate::scanner::ScanKind;
 use crate::settings::{
-    LanguageSettings, ModuleGraphResolutionKind, ServiceLanguage, Settings,
+    LanguageSettings, ModuleGraphResolutionKind, ServiceLanguage, Settings, VcsIgnoredPatterns,
     to_json_language_settings,
 };
 use crate::workspace::DocumentFileSource;
@@ -293,5 +293,34 @@ fn test_project_scan_disables_module_graph_type_inference() {
     assert!(
         !project_kind.is_modules_and_types(),
         "Project scan should NOT enable type inference"
+    );
+}
+
+#[test]
+fn vcs_ignore_whitelist_patterns_are_respected_for_child_paths() {
+    let ignored_patterns = VcsIgnoredPatterns::Git {
+        root: VcsIgnoredPatterns::git_ignore(
+            Utf8Path::new("repo"),
+            &["/*", "!/src", "!/biome.jsonc", "!/.gitignore"],
+        )
+        .unwrap(),
+        nested: vec![],
+    };
+
+    assert!(
+        !ignored_patterns.is_ignored(
+            Utf8Path::new("repo/src/file.js"),
+            false,
+            Some(Utf8Path::new("repo"))
+        ),
+        "whitelisted directories should keep their children visible to VCS ignore checks"
+    );
+    assert!(
+        ignored_patterns.is_ignored(
+            Utf8Path::new("repo/tests/file.js"),
+            false,
+            Some(Utf8Path::new("repo"))
+        ),
+        "non-whitelisted directories should still be ignored"
     );
 }
