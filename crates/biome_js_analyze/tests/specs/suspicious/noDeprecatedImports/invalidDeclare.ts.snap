@@ -1,0 +1,49 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: invalidDeclare.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+import { Grid } from "./declare";
+import { GridValid } from "./declare";
+
+```
+
+# Diagnostics
+```
+invalidDeclare.ts:2:10 lint/suspicious/noDeprecatedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Deprecated import: Use Grid2 instead.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ import { Grid } from "./declare";
+      │          ^^^^
+    3 │ import { GridValid } from "./declare";
+    4 │ 
+  
+  i An @deprecated annotation indicates the author doesn't want you to rely on this import anymore.
+  
+  i You should probably import a different symbol instead.
+  
+
+```
+
+```
+invalidDeclare.ts:3:10 lint/suspicious/noDeprecatedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Deprecated import: Use Grid2 instead.
+  
+    1 │ /* should generate diagnostics */
+    2 │ import { Grid } from "./declare";
+  > 3 │ import { GridValid } from "./declare";
+      │          ^^^^^^^^^
+    4 │ 
+  
+  i An @deprecated annotation indicates the author doesn't want you to rely on this import anymore.
+  
+  i You should probably import a different symbol instead.
+  
+
+```

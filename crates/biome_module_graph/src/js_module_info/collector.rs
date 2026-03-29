@@ -4,11 +4,11 @@ use biome_js_semantic::{
     BindingId, ScopeId, SemanticEvent, SemanticEventExtractor, TsBindingReference,
 };
 use biome_js_syntax::{
-    AnyJsCombinedSpecifier, AnyJsDeclaration, AnyJsExportDefaultDeclaration, AnyJsExpression,
-    AnyJsImportClause, JsAssignmentExpression, JsForVariableDeclaration, JsFormalParameter,
-    JsIdentifierBinding, JsRestParameter, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
-    JsVariableDeclaration, TsIdentifierBinding, TsTypeParameter, TsTypeParameterName,
-    inner_string_text,
+    AnyJsCombinedSpecifier, AnyJsDeclaration, AnyJsDeclarationClause,
+    AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportClause, JsAssignmentExpression,
+    JsForVariableDeclaration, JsFormalParameter, JsIdentifierBinding, JsRestParameter,
+    JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsVariableDeclaration, TsIdentifierBinding,
+    TsTypeParameter, TsTypeParameterName, inner_string_text,
 };
 use biome_js_type_info::{
     FunctionParameter, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, GenericTypeParameter, MAX_FLATTEN_DEPTH,
@@ -1192,7 +1192,9 @@ impl JsModuleInfo {
 
 fn find_jsdoc(node: &JsSyntaxNode) -> Option<JsdocComment> {
     node.ancestors().find_map(|ancestor| {
-        if let Some(export) = biome_js_syntax::JsExport::cast_ref(&ancestor) {
+        if let Some(decl) = AnyJsDeclarationClause::cast_ref(&ancestor) {
+            JsdocComment::try_from(decl.syntax()).ok()
+        } else if let Some(export) = biome_js_syntax::JsExport::cast_ref(&ancestor) {
             JsdocComment::try_from(export.syntax()).ok()
         } else if let Some(decl) = AnyJsDeclaration::cast(ancestor) {
             JsdocComment::try_from(decl.syntax()).ok()
