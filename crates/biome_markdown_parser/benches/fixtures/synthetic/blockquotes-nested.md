@@ -1,5 +1,3 @@
-<!-- markdownlint-disable -->
-
 > This is a simple single-level blockquote.
 > It spans multiple lines and contains regular text.
 > The parser should handle this without difficulty.

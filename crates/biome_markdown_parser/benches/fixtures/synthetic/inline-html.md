@@ -1,5 +1,3 @@
-<!-- markdownlint-disable -->
-
 This paragraph has <span>inline HTML</span> mixed with regular text.
 And here is <em>emphasis via HTML</em> and <strong>strong via HTML</strong>.
 

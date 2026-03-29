@@ -1,5 +1,3 @@
-<!-- markdownlint-disable -->
-
 A paragraph
 with two lines.
 

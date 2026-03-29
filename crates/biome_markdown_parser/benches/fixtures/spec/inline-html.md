@@ -1,5 +1,3 @@
-<!-- markdownlint-disable -->
-
 <table><tr><td>
 <pre>
 **Hello**,

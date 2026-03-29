@@ -1,5 +1,3 @@
-<!-- markdownlint-disable -->
-
 # Building a Compile-Time Query Engine: Lessons from Three Years of Rust
 
 *Published on February 18, 2026 by Sarah Chen*

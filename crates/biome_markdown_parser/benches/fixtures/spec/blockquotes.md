@@ -1,5 +1,3 @@
-<!-- markdownlint-disable -->
-
 > # Foo
 > bar
 > baz

@@ -1,5 +1,3 @@
-<!-- markdownlint-disable -->
-
 <http://foo.bar.baz>
 
 

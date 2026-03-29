@@ -1,5 +1,3 @@
-<!-- markdownlint-disable -->
-
 ***deeply ***nested ***emphasis*** here*** done***
 
 *a **b *c **d *e** f* g** h* i**
