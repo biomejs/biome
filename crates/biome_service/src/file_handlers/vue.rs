@@ -24,7 +24,10 @@ pub struct VueFileHandler;
 
 // https://regex101.com/r/E4n4hh/6
 pub static VUE_FENCE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r#"(?ixs)(?<opening><script(?:\s.*?)?>)\r?\n(?<script>(?U:.*))</script>"#).unwrap()
+    Regex::new(
+        r#"(?ixs)(?<opening><script\b(?:\s+(?:"[^"]*"|'[^']*'|[^'">])*)?\s*>)\r?\n(?<script>(?U:.*))</script>"#,
+    )
+    .unwrap()
 });
 
 impl VueFileHandler {
