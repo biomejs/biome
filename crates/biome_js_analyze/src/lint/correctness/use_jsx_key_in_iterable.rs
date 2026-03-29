@@ -593,6 +593,14 @@ mod tests {
     }
 
     #[test]
+    fn astro_template_expression_arrays_do_not_require_keys() {
+        let source_type =
+            JsFileSource::tsx().with_embedding_kind(EmbeddingKind::Astro { frontmatter: false });
+
+        assert_eq!(run_rule("[<div />]", source_type), 0);
+    }
+
+    #[test]
     fn jsx_iterables_still_require_keys() {
         assert_eq!(run_rule("[1, 2].map((item) => <div>{item}</div>)", JsFileSource::tsx()), 1);
     }
