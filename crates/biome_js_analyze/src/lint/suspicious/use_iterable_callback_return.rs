@@ -107,7 +107,31 @@ declare_lint_rule! {
     /// });
     /// ```
     ///
-    /// When `checkForEach` is `false` (default), the above code will not trigger any diagnostic.
+    /// When `checkForEach` is `false`, the above code will not trigger any diagnostic.
+    ///
+    /// ### `allowImplicit`
+    ///
+    /// Default: `false`
+    ///
+    /// When set to `true`, the rule allows callbacks of methods that require a return value to
+    /// use `return;`.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "allowImplicit": true
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```js,use_options
+    /// [1, 2, 3].map((el) => {
+    ///     if (el % 2 === 0) {
+    ///         return el;
+    ///     }
+    ///     return;
+    /// });
+    /// ```
     ///
     pub UseIterableCallbackReturn {
         version: "2.0.0",
@@ -179,17 +203,20 @@ impl Rule for UseIterableCallbackReturn {
         }
 
         let returns_info = get_function_returns_info(cfg);
+        let allow_implicit = ctx.options().allow_implicit();
 
         let mut problems: Vec<RuleProblemKind> = Vec::new();
         let member_range = member_expression.member().ok()?.range();
         if method_config.return_value_required {
             if returns_info.has_paths_without_returns {
-                if returns_info.returns_with_value.is_empty() {
+                if returns_info.returns_with_value.is_empty()
+                    && (!allow_implicit || returns_info.returns_without_value.is_empty())
+                {
                     problems.push(RuleProblemKind::MissingReturnWithValue);
                 } else {
                     problems.push(RuleProblemKind::NotAllPathsReturnValue);
                 }
-            } else if !returns_info.returns_without_value.is_empty() {
+            } else if !allow_implicit && !returns_info.returns_without_value.is_empty() {
                 if !returns_info.returns_with_value.is_empty() {
                     for return_range in returns_info.returns_without_value {
                         problems.push(RuleProblemKind::UnexpectedEmptyReturn(return_range));
@@ -197,6 +224,8 @@ impl Rule for UseIterableCallbackReturn {
                 } else {
                     problems.push(RuleProblemKind::MissingReturnWithValue);
                 }
+            } else if returns_info.returns_with_void_expression {
+                problems.push(RuleProblemKind::MissingReturnWithValue);
             }
         } else {
             for return_range in returns_info.returns_with_value {
@@ -297,6 +326,8 @@ struct FunctionReturnsInfo {
     returns_with_value: Vec<TextRange>,
     /// The ranges of return keywords that do not return a value.
     returns_without_value: Vec<TextRange>,
+    /// Whether the function returns a `void` expression from a concise arrow body.
+    returns_with_void_expression: bool,
 }
 
 /// This function analyzes the control flow graph of a function and collects information about
@@ -307,6 +338,7 @@ fn get_function_returns_info(cfg: &JsControlFlowGraph) -> FunctionReturnsInfo {
         has_paths_without_returns: false,
         returns_with_value: Vec::new(),
         returns_without_value: Vec::new(),
+        returns_with_void_expression: false,
     };
 
     if let Some(arrow_expression) = JsArrowFunctionExpression::cast_ref(&cfg.node)
@@ -318,9 +350,7 @@ fn get_function_returns_info(cfg: &JsControlFlowGraph) -> FunctionReturnsInfo {
             .unwrap_or(false);
 
         if is_void_expression {
-            function_returns_info
-                .returns_without_value
-                .push(expression.range())
+            function_returns_info.returns_with_void_expression = true;
         } else {
             function_returns_info
                 .returns_with_value

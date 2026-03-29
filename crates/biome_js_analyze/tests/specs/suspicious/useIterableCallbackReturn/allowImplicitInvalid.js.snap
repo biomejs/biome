@@ -1,0 +1,70 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: allowImplicitInvalid.js
+---
+# Input
+```js
+// should generate diagnostics
+[1, 2, 3].map((item) => {
+    if (item % 2 === 0) {
+        return;
+    }
+});
+
+[1, 2, 3].filter((item) => {
+    if (item > 1) {
+        return true;
+    }
+});
+
+[1, 2, 3].map(() => void null);
+
+```
+
+# Diagnostics
+```
+allowImplicitInvalid.js:2:11 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to map() iterable method should always return a value.
+  
+    1 │ // should generate diagnostics
+  > 2 │ [1, 2, 3].map((item) => {
+      │           ^^^
+    3 │     if (item % 2 === 0) {
+    4 │         return;
+  
+  i Add missing return statements so that this callback returns a value on all execution paths.
+  
+
+```
+
+```
+allowImplicitInvalid.js:8:11 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to filter() iterable method should always return a value.
+  
+    7 │ 
+  > 8 │ [1, 2, 3].filter((item) => {
+      │           ^^^^^^
+    9 │     if (item > 1) {
+   10 │         return true;
+  
+  i Add missing return statements so that this callback returns a value on all execution paths.
+  
+
+```
+
+```
+allowImplicitInvalid.js:14:11 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to map() iterable method should always return a value.
+  
+    12 │ });
+    13 │ 
+  > 14 │ [1, 2, 3].map(() => void null);
+       │           ^^^
+  
+  i Add a return with a value to this callback.
+  
+
+```

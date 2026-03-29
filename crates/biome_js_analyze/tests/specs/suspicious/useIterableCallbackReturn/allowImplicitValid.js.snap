@@ -1,0 +1,29 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: allowImplicitValid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+[1, 2, 3].map((item) => {
+    if (item % 2 === 0) {
+        return item;
+    }
+    return;
+});
+
+[1, 2, 3].filter((item) => {
+    if (item > 1) {
+        return true;
+    }
+    return;
+});
+
+Array.from([1, 2, 3], (item) => {
+    if (item > 1) {
+        return item;
+    }
+    return;
+});
+
+```

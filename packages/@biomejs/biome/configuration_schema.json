@@ -14107,6 +14107,10 @@
 		"UseIterableCallbackReturnOptions": {
 			"type": "object",
 			"properties": {
+				"allowImplicit": {
+					"description": "When `true`, callbacks of methods that require a return value may use `return;`.",
+					"type": ["boolean", "null"]
+				},
 				"checkForEach": {
 					"description": "When `true`, the rule reports `forEach` callbacks that return a value (default behaviour).\nWhen `false` or unset, such callbacks are ignored.",
 					"type": ["boolean", "null"]
