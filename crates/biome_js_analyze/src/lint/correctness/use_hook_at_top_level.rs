@@ -1,4 +1,5 @@
 use crate::react::hooks::{is_react_hook_call, is_react_hook_name};
+use crate::react::{ReactLibrary, is_react_call_api};
 use crate::services::semantic::{SemanticModelBuilderVisitor, SemanticServices};
 use biome_analyze::{
     AddVisitor, FromServices, Phase, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleKey,
@@ -9,12 +10,13 @@ use biome_analyze::{RuleDomain, RuleSource};
 use biome_console::markup;
 use biome_js_semantic::{CallsExtensions, SemanticModel};
 use biome_js_syntax::{
-    AnyFunctionLike, AnyJsBinding, AnyJsClassMemberName, AnyJsExpression, AnyJsFunction,
-    AnyJsObjectMemberName, JsArrayAssignmentPatternElement, JsArrayBindingPatternElement,
-    JsCallExpression, JsConditionalExpression, JsGetterClassMember, JsGetterObjectMember,
-    JsIfStatement, JsLanguage, JsLogicalExpression, JsMethodClassMember, JsMethodObjectMember,
-    JsObjectBindingPatternShorthandProperty, JsReturnStatement, JsSetterClassMember,
-    JsSetterObjectMember, JsSyntaxKind, JsSyntaxNode, JsTryFinallyStatement, TextRange,
+    AnyFunctionLike, AnyJsBinding, AnyJsCallArgument, AnyJsClassMemberName, AnyJsExpression,
+    AnyJsFunction, AnyJsObjectMemberName, JsArrayAssignmentPatternElement,
+    JsArrayBindingPatternElement, JsCallExpression, JsConditionalExpression, JsGetterClassMember,
+    JsGetterObjectMember, JsIfStatement, JsLanguage, JsLogicalExpression, JsMethodClassMember,
+    JsMethodObjectMember, JsObjectBindingPatternShorthandProperty, JsReturnStatement,
+    JsSetterClassMember, JsSetterObjectMember, JsSyntaxKind, JsSyntaxNode, JsTryFinallyStatement,
+    TextRange,
 };
 use biome_rowan::{AstNode, Language, SyntaxNode, Text, WalkEvent, declare_node_union};
 use rustc_hash::FxHashMap;
@@ -89,8 +91,11 @@ declare_node_union! {
 }
 
 impl AnyJsFunctionOrMethod {
-    fn is_react_component_or_hook(&self) -> bool {
+    fn is_react_component_or_hook(&self, model: &SemanticModel) -> bool {
         if ReactComponentInfo::from_function(self.syntax()).is_some() {
+            return true;
+        }
+        if self.is_forward_ref_render_function(model) {
             return true;
         }
         if let Some(name) = self.name() {
@@ -127,6 +132,61 @@ impl AnyJsFunctionOrMethod {
                 .as_ref()
                 .map(AnyJsObjectMemberName::to_trimmed_text),
         }
+    }
+
+    fn is_forward_ref_render_function(&self, model: &SemanticModel) -> bool {
+        let Self::AnyJsFunction(function) = self else {
+            return false;
+        };
+        let Ok(binding) = function.binding() else {
+            return false;
+        };
+        let Some(binding) = binding.as_js_identifier_binding() else {
+            return false;
+        };
+
+        model.as_binding(binding).all_references().any(|reference| {
+            let Some(expression) = reference
+                .syntax()
+                .ancestors()
+                .find_map(AnyJsExpression::cast)
+                .map(AnyJsExpression::omit_parentheses)
+            else {
+                return false;
+            };
+
+            if !matches!(expression, AnyJsExpression::JsIdentifierExpression(_)) {
+                return false;
+            }
+
+            let Some(argument) = expression.syntax().parent::<AnyJsCallArgument>() else {
+                return false;
+            };
+            let Some(argument_expression) = argument.as_any_js_expression() else {
+                return false;
+            };
+            if argument_expression.omit_parentheses().syntax() != expression.syntax() {
+                return false;
+            }
+
+            let Some(call_expression) = argument
+                .syntax()
+                .ancestors()
+                .find_map(JsCallExpression::cast)
+            else {
+                return false;
+            };
+            let Ok(callee) = call_expression.callee() else {
+                return false;
+            };
+
+            is_react_call_api(
+                &callee.omit_parentheses(),
+                model,
+                ReactLibrary::React,
+                "forwardRef",
+            )
+        })
     }
 }
 
@@ -254,8 +314,11 @@ fn is_conditional_expression(parent_node: &JsSyntaxNode, node: &JsSyntaxNode) ->
     )
 }
 
-fn is_nested_function_inside_component_or_hook(function: &AnyJsFunctionOrMethod) -> bool {
-    if function.is_react_component_or_hook() {
+fn is_nested_function_inside_component_or_hook(
+    function: &AnyJsFunctionOrMethod,
+    model: &SemanticModel,
+) -> bool {
+    if function.is_react_component_or_hook(model) {
         return false;
     }
 
@@ -265,7 +328,7 @@ fn is_nested_function_inside_component_or_hook(function: &AnyJsFunctionOrMethod)
 
     parent.ancestors().any(|node| {
         AnyJsFunctionOrMethod::cast(node)
-            .is_some_and(|enclosing_function| enclosing_function.is_react_component_or_hook())
+            .is_some_and(|enclosing_function| enclosing_function.is_react_component_or_hook(model))
     })
 }
 
@@ -541,7 +604,7 @@ impl Rule for UseHookAtTopLevel {
             path.push(range);
 
             if let Some(enclosing_function) = enclosing_function_if_call_is_at_top_level(&call) {
-                if is_nested_function_inside_component_or_hook(&enclosing_function) {
+                if is_nested_function_inside_component_or_hook(&enclosing_function, model) {
                     // We cannot allow nested functions inside hooks and
                     // components, since it would break the requirement for
                     // hooks to be called from the top-level.
@@ -561,7 +624,7 @@ impl Rule for UseHookAtTopLevel {
                 }
 
                 let enclosed = is_enclosed_in_component_or_hook
-                    || enclosing_function.is_react_component_or_hook();
+                    || enclosing_function.is_react_component_or_hook(model);
 
                 if let AnyJsFunctionOrMethod::AnyJsFunction(function) = enclosing_function
                     && let Some(calls_iter) = function.all_calls(model)
@@ -590,7 +653,7 @@ impl Rule for UseHookAtTopLevel {
         }
 
         if enclosing_function_if_call_is_at_top_level(call).is_some_and(|function| {
-            !function.is_react_component_or_hook() && !function.is_function_expression()
+            !function.is_react_component_or_hook(model) && !function.is_function_expression()
         }) {
             return Some(Suggestion {
                 hook_name_range: get_hook_name_range()?,

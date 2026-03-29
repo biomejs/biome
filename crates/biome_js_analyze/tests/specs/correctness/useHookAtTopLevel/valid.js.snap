@@ -100,6 +100,20 @@ function Component7() {
     useEffect();
 };
 
+function ForwardRefComponent(props, ref) {
+    const forwardedRef = useRef();
+    return <div ref={forwardedRef} />;
+}
+
+const WrappedForwardRefComponent = forwardRef(ForwardRefComponent);
+
+function ReactForwardRefComponent(props, ref) {
+    const forwardedRef = useRef();
+    return <div ref={forwardedRef} />;
+}
+
+const WrappedReactForwardRefComponent = React.forwardRef(ReactForwardRefComponent);
+
 test('a', () => {
     function TestComponent() {
         useState();
