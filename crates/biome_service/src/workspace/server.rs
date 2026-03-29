@@ -2725,7 +2725,6 @@ pub(super) struct InternalOpenFileResult {
     /// Dependencies we discovered of the opened file.
     pub dependencies: ModuleDependencies,
 
-    ///
     pub diagnostics: Vec<ModuleDiagnostic>,
 }
 

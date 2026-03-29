@@ -1,7 +1,5 @@
 [workspace]
 resolver = "2"
-# Use the newer version of the cargo resolver
-# https://doc.rust-lang.org/cargo/reference/resolver.html#resolver-versions
 members  = ["crates/*", "xtask/codegen", "xtask/coverage", "xtask/glue", "xtask/rules_check"]
 
 [workspace.package]
@@ -14,15 +12,12 @@ keywords   = ["formatter", "linter", "parser"]
 categories = ["development-tools", "web-programming"]
 
 [workspace.dependencies]
-# Crates needed in the workspace
 anyhow                       = "1.0.102"
-# publish
 biome_analyze                = { path = "./crates/biome_analyze", version = "0.5.7" }
 biome_analyze_macros         = { path = "./crates/biome_analyze_macros" }
 biome_aria                   = { path = "./crates/biome_aria", version = "0.5.7" }
 biome_aria_metadata          = { path = "./crates/biome_aria_metadata", version = "0.5.7" }
 biome_bench_utils            = { path = "./crates/biome_bench_utils" }
-# not publish
 biome_cli                    = { path = "./crates/biome_cli" }
 biome_configuration          = { path = "./crates/biome_configuration" }
 biome_configuration_macros   = { path = "./crates/biome_configuration_macros" }
@@ -174,18 +169,15 @@ xtask_coverage               = { path = "xtask/coverage" }
 xtask_glue                   = { path = "xtask/glue" }
 
 [workspace.lints.clippy]
+# https://rust-lang.github.io/rust-clippy/rust-1.88.0/index.html
 allow_attributes                  = "deny"
-# pedantic
 assigning_clones                  = "warn"
-cargo_common_metadata             = "allow"
-# restriction
 cfg_not_test                      = "warn"
 checked_conversions               = "warn"
 cloned_instead_of_copied          = "warn"
 copy_iterator                     = "warn"
 dbg_macro                         = "warn"
 doc_link_with_quotes              = "warn"
-empty_docs                        = "allow"  # there are some false positives inside biome_wasm
 empty_drop                        = "warn"
 empty_enum_variants_with_brackets = "warn"
 empty_enums                       = "warn"
@@ -214,8 +206,8 @@ manual_ok_or                      = "warn"
 manual_string_new                 = "warn"
 map_flatten                       = "warn"
 map_unwrap_or                     = "warn"
+mem_forget                        = "warn"
 mismatching_type_param_order      = "warn"
-multiple_crate_versions           = "allow"
 mut_mut                           = "warn"
 naive_bytecount                   = "warn"
 needless_bitwise_bool             = "warn"
@@ -239,8 +231,6 @@ unreadable_literal                = "warn"
 verbose_bit_mask                  = "warn"
 verbose_file_reads                = "warn"
 zero_sized_map_values             = "warn"
-# https://github.com/rustwasm/wasm-bindgen/issues/3944
-# mem_forget                      = "warn"
 
 [workspace.lints.rust]
 # https://doc.rust-lang.org/rustc/lints/listing/allowed-by-default.html
@@ -268,6 +258,14 @@ debug = false
 [profile.dev.package.biome_wasm]
 opt-level = "s"
 debug     = true
+
+[profile.dev.package.insta]
+# https://insta.rs/docs/quickstart/#optional-faster-runs
+opt-level = 3
+
+[profile.dev.package.similar]
+# https://insta.rs/docs/quickstart/#optional-faster-runs
+opt-level = 3
 
 [profile.release.package.biome_wasm]
 opt-level = 3
