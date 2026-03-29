@@ -40,6 +40,32 @@ var foo: string = "";
 </script>
 <div></div>"#;
 
+const SVELTE_FILE_REEXPORTED_COMPONENT_ALIAS: &str = r#"<script lang="ts">
+import { Thing as Something, Thing } from "./file";
+</script>
+
+<Something />
+<Thing />
+"#;
+
+const SVELTE_REEXPORTED_COMPONENT_MODULE: &str =
+    r#"export { default as Thing } from "./AnotherComponent.svelte";"#;
+
+const SVELTE_COMPONENT_WITH_NAMED_EXPORT: &str = r#"<script context="module" lang="ts">
+export const someConstant = Symbol();
+</script>
+
+<div></div>
+"#;
+
+const SVELTE_FILE_COMPONENT_DEFAULT_AND_NAMED_IMPORTS: &str = r#"<script lang="ts">
+import AnotherComponent, { someConstant } from "./AnotherComponent.svelte";
+</script>
+
+<AnotherComponent {someConstant} />
+<AnotherComponent someConstant={someConstant} />
+"#;
+
 #[test]
 fn sorts_imports_check() {
     let fs = MemoryFileSystem::default();
@@ -311,6 +337,97 @@ const props: Props = { title: "Hello" };
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "full_support_ts",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn no_unused_imports_not_triggered_for_reexported_component_aliases() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "experimentalFullSupportEnabled": true, "linter": { "enabled": true } } }"#
+            .as_bytes(),
+    );
+
+    let svelte_file_path = Utf8Path::new("file.svelte");
+    fs.insert(
+        svelte_file_path.into(),
+        SVELTE_FILE_REEXPORTED_COMPONENT_ALIAS.as_bytes(),
+    );
+    fs.insert(
+        "file.ts".into(),
+        SVELTE_REEXPORTED_COMPONENT_MODULE.as_bytes(),
+    );
+    fs.insert("AnotherComponent.svelte".into(), "<div></div>".as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "lint",
+                "--only=correctness/noUnusedImports",
+                svelte_file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_unused_imports_not_triggered_for_reexported_component_aliases",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn no_unused_imports_not_triggered_for_default_and_named_component_imports() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "experimentalFullSupportEnabled": true, "linter": { "enabled": true } } }"#
+            .as_bytes(),
+    );
+
+    let svelte_file_path = Utf8Path::new("file.svelte");
+    fs.insert(
+        svelte_file_path.into(),
+        SVELTE_FILE_COMPONENT_DEFAULT_AND_NAMED_IMPORTS.as_bytes(),
+    );
+    fs.insert(
+        "AnotherComponent.svelte".into(),
+        SVELTE_COMPONENT_WITH_NAMED_EXPORT.as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "lint",
+                "--only=correctness/noUnusedImports",
+                svelte_file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_unused_imports_not_triggered_for_default_and_named_component_imports",
         fs,
         console,
         result,
