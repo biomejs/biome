@@ -69,9 +69,11 @@ impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
                     joiner.entry(&format_with(|f| {
                         write!(
                             f,
-                            [hard_line.format().with_options(FormatMdFormatHardLineOptions {
-                                print_mode: self.print_mode,
-                            })]
+                            [hard_line
+                                .format()
+                                .with_options(FormatMdFormatHardLineOptions {
+                                    print_mode: self.print_mode,
+                                })]
                         )
                     }));
                 }
