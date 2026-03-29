@@ -65,3 +65,16 @@ const needsParentheses1 = function () {
 const needsParentheses2 = function () {
 	return { foo: "bar" }.foo;
 }
+
+// https://github.com/biomejs/biome/issues/9585
+const Constructor = function () {
+	return { id: "test" };
+}
+
+const instance = new Constructor();
+
+vi.mock("firebase/auth", () => ({
+	GoogleAuthProvider: vi.fn(function () {
+		return { providerId: "google.com" };
+	}),
+}));

@@ -27,7 +27,7 @@ invalid.cjs:1:28 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━�
   
   i Function expressions that don't use this can be turned into arrow functions.
   
-  i Safe fix: Use an arrow function instead.
+  i Unsafe fix: Use an arrow function instead.
   
     1   │ - const·withBoundArguments·=·function()·{
       1 │ + const·withBoundArguments·=·()·=>·{

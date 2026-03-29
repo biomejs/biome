@@ -28,6 +28,8 @@ declare_lint_rule! {
     ///
     /// This rule proposes turning all function expressions that are not generators (`function*`) and don't use `this` into arrow functions.
     ///
+    /// Its fix is unsafe because arrow functions cannot be used as constructors.
+    ///
     /// This rule does not modify top-level function declarations ([discuss here](https://github.com/biomejs/biome/discussions/7108)).
     ///
     /// ## Examples
@@ -87,7 +89,7 @@ declare_lint_rule! {
         sources: &[RuleSource::Eslint("prefer-arrow-callback").inspired()],
         recommended: true,
         severity: Severity::Warning,
-        fix_kind: FixKind::Safe,
+        fix_kind: FixKind::Unsafe,
     }
 }
 
