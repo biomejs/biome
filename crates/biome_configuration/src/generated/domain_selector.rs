@@ -3,12 +3,6 @@
 use crate::analyzer::DomainSelector;
 use biome_analyze::{Rule, RuleFilter};
 use std::sync::LazyLock;
-static DRIZZLE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
-    vec![
-        RuleFilter::Rule("nursery", "noDrizzleDeleteWithoutWhere"),
-        RuleFilter::Rule("nursery", "noDrizzleUpdateWithoutWhere"),
-    ]
-});
 static NEXT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("correctness", "noNextAsyncClientComponent"),
@@ -59,7 +53,6 @@ static QWIK_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("correctness", "useQwikClasslist"),
         RuleFilter::Rule("correctness", "useQwikMethodUsage"),
         RuleFilter::Rule("correctness", "useQwikValidLexicalScope"),
-        RuleFilter::Rule("nursery", "useQwikLoaderLocation"),
         RuleFilter::Rule("suspicious", "noReactSpecificProps"),
     ]
 });
@@ -73,14 +66,11 @@ static REACT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("correctness", "useHookAtTopLevel"),
         RuleFilter::Rule("correctness", "useJsxKeyInIterable"),
         RuleFilter::Rule("correctness", "useUniqueElementIds"),
-        RuleFilter::Rule("nursery", "noComponentHookFactories"),
         RuleFilter::Rule("nursery", "noDuplicatedSpreadProps"),
-        RuleFilter::Rule("nursery", "noJsxNamespace"),
         RuleFilter::Rule("nursery", "noJsxPropsBind"),
         RuleFilter::Rule("nursery", "noLeakedRender"),
         RuleFilter::Rule("nursery", "noSyncScripts"),
         RuleFilter::Rule("nursery", "noUnknownAttribute"),
-        RuleFilter::Rule("nursery", "useReactAsyncServerFunction"),
         RuleFilter::Rule("security", "noDangerouslySetInnerHtml"),
         RuleFilter::Rule("security", "noDangerouslySetInnerHtmlWithChildren"),
         RuleFilter::Rule("style", "useComponentExportOnlyModules"),
@@ -101,8 +91,6 @@ static TEST_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("complexity", "noExcessiveNestedTestSuites"),
         RuleFilter::Rule("nursery", "noConditionalExpect"),
-        RuleFilter::Rule("nursery", "noIdenticalTestTitle"),
-        RuleFilter::Rule("nursery", "useConsistentTestIt"),
         RuleFilter::Rule("nursery", "useExpect"),
         RuleFilter::Rule("suspicious", "noDuplicateTestHooks"),
         RuleFilter::Rule("suspicious", "noExportsInTest"),
@@ -115,20 +103,16 @@ static TURBOREPO_FILTERS: LazyLock<Vec<RuleFilter<'static>>> =
 static TYPES_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("nursery", "noFloatingPromises"),
-        RuleFilter::Rule("nursery", "noMisleadingReturnType"),
         RuleFilter::Rule("nursery", "noMisusedPromises"),
         RuleFilter::Rule("nursery", "noUnnecessaryConditions"),
-        RuleFilter::Rule("nursery", "noUnsafePlusOperands"),
-        RuleFilter::Rule("nursery", "noUselessTypeConversion"),
         RuleFilter::Rule("nursery", "useArraySortCompare"),
         RuleFilter::Rule("nursery", "useAwaitThenable"),
         RuleFilter::Rule("nursery", "useConsistentEnumValueType"),
-        RuleFilter::Rule("nursery", "useDisposables"),
         RuleFilter::Rule("nursery", "useExhaustiveSwitchCases"),
         RuleFilter::Rule("nursery", "useFind"),
         RuleFilter::Rule("nursery", "useNullishCoalescing"),
         RuleFilter::Rule("nursery", "useRegexpExec"),
-        RuleFilter::Rule("nursery", "useStringStartsEndsWith"),
+        RuleFilter::Rule("nursery", "useRegexpTest"),
     ]
 });
 static VUE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
@@ -149,7 +133,6 @@ static VUE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
 impl DomainSelector {
     pub fn as_rule_filters(&self) -> Vec<RuleFilter<'static>> {
         match self.0 {
-            "drizzle" => DRIZZLE_FILTERS.clone(),
             "next" => NEXT_FILTERS.clone(),
             "playwright" => PLAYWRIGHT_FILTERS.clone(),
             "project" => PROJECT_FILTERS.clone(),
@@ -168,9 +151,6 @@ impl DomainSelector {
         R: Rule,
     {
         match self.0 {
-            "drizzle" => DRIZZLE_FILTERS
-                .iter()
-                .any(|filter| filter.match_rule::<R>()),
             "next" => NEXT_FILTERS.iter().any(|filter| filter.match_rule::<R>()),
             "playwright" => PLAYWRIGHT_FILTERS
                 .iter()

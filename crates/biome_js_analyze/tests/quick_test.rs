@@ -27,17 +27,33 @@ fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc
 }
 
 // use this test check if your snippet produces the diagnostics you wish, without using a snapshot
-#[ignore]
+// #[ignore]
 #[test]
 fn quick_test() {
     const FILENAME: &str = "dummyFile.ts";
-    const SOURCE: &str = r#"import * as postcssModules from "postcss-modules"
+    const SOURCE: &str = r#"
+// not used in a conditional
+const result = str.match(/test/);
+const result = /test/.exec(str);
+const matches = str.match(/test/g);
 
-type PostcssOptions = Parameters<postcssModules>[0]
+// .test() already used
+if (/test/.test(str)) {}
+if (regex.test(str)) {}
 
-export function f(options: PostcssOptions) {
-	console.log(options)
-}
+// can't resolve to regex
+if (str.match(pattern)) {}
+if (pattern.exec(str)) {}
+
+// no arguments
+if (str.match()) {}
+
+// multiple arguments
+if (str.match(/test/, 'extra')) {}
+
+// unrelated method calls
+if (str.includes('test')) {}
+if (str.indexOf('test')) {}
 "#;
 
     let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
@@ -54,7 +70,7 @@ export function f(options: PostcssOptions) {
         .with_configuration(
             AnalyzerConfiguration::default().with_jsx_runtime(JsxRuntime::ReactClassic),
         );
-    let rule_filter = RuleFilter::Rule("correctness", "noUnusedImports");
+    let rule_filter = RuleFilter::Rule("nursery", "useRegexpTest");
 
     let dependencies = Dependencies(Box::new([("buffer".into(), "latest".into())]));
 

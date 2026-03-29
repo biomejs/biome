@@ -6683,6 +6683,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useRegexpTest": {
+					"description": "Enforce the use of RegExp.prototype.test() over String.prototype.match() and RegExp.prototype.exec() in boolean contexts.\nSee https://biomejs.dev/linter/rules/use-regexp-test",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseRegexpTestConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useRequiredScripts": {
 					"description": "Enforce the presence of required scripts in package.json.\nSee https://biomejs.dev/linter/rules/use-required-scripts",
 					"anyOf": [
@@ -11430,6 +11437,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseRegexpTestOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseRegexpTestOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseRequiredScriptsOptions": {
 			"type": "object",
 			"properties": {
@@ -14922,6 +14939,13 @@
 			]
 		},
 		"UseRegexpExecOptions": { "type": "object", "additionalProperties": false },
+		"UseRegexpTestConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseRegexpTestOptions" }
+			]
+		},
+		"UseRegexpTestOptions": { "type": "object", "additionalProperties": false },
 		"UseRequiredScriptsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },

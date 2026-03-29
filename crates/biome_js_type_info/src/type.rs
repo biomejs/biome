@@ -13,6 +13,7 @@ use std::fmt::Debug;
 use std::{ops::Deref, sync::Arc};
 
 use crate::conditionals::ConditionalType;
+use crate::globals::GLOBAL_REGEXP_ID;
 use crate::{
     GLOBAL_RESOLVER, Literal, ResolvedTypeData, ResolvedTypeId, ResolvedTypeMember, TypeData,
     TypeId, TypeReference, TypeResolver, UNKNOWN_DATA,
@@ -226,6 +227,20 @@ impl Type {
     pub fn is_promise_instance(&self) -> bool {
         self.resolved_data()
             .is_some_and(|ty| ty.is_instance_of(self.resolver.as_ref(), GLOBAL_PROMISE_ID))
+    }
+
+    /// Returns whether this type is an instance of `RegExp`.
+    pub fn is_regexp_instance(&self) -> bool {
+        self.resolved_data()
+            .is_some_and(|ty| ty.is_instance_of(self.resolver.as_ref(), GLOBAL_REGEXP_ID))
+    }
+
+    /// Returns whether this type is a regexp literal such as `/test/`
+    pub fn is_regexp_literal(&self) -> bool {
+        self.as_raw_data().is_some_and(|ty| match ty {
+            TypeData::Literal(literal) => matches!(literal.as_ref(), Literal::RegExp(_)),
+            _ => false,
+        })
     }
 
     /// Returns whether this type is a string.

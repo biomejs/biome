@@ -430,6 +430,7 @@ pub mod use_readonly_class_properties;
 pub mod use_reduce_type_parameter;
 pub mod use_regex_literals;
 pub mod use_regexp_exec;
+pub mod use_regexp_test;
 pub mod use_required_scripts;
 pub mod use_scoped_styles;
 pub mod use_self_closing_elements;
