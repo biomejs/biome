@@ -71,8 +71,14 @@ declare_node_union! {
 }
 
 pub enum NoUnsafePlusOperandsState {
-    InvalidOperand { range: TextRange },
-    MixedBigIntAndNumber { range: TextRange },
+    InvalidOperand {
+        range: TextRange,
+    },
+    MixedBigIntAndNumber {
+        range: TextRange,
+        left_range: TextRange,
+        right_range: TextRange,
+    },
 }
 
 struct OperandInfo {
@@ -83,16 +89,16 @@ struct OperandInfo {
 impl Rule for NoUnsafePlusOperands {
     type Query = Typed<NoUnsafePlusOperandsQuery>;
     type State = NoUnsafePlusOperandsState;
-    type Signals = Vec<Self::State>;
+    type Signals = Option<Self::State>;
     type Options = NoUnsafePlusOperandsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         match ctx.query() {
             NoUnsafePlusOperandsQuery::JsBinaryExpression(binary) => {
-                run_binary(ctx, binary).unwrap_or_default()
+                run_binary(ctx, binary).flatten()
             }
             NoUnsafePlusOperandsQuery::JsAssignmentExpression(assignment) => {
-                run_assignment(ctx, assignment).unwrap_or_default()
+                run_assignment(ctx, assignment).flatten()
             }
         }
     }
@@ -102,18 +108,14 @@ impl Rule for NoUnsafePlusOperands {
 
         match state {
             NoUnsafePlusOperandsState::InvalidOperand { range } => {
-                let operands = operand_infos(ctx);
-                let ty = operands
-                    .iter()
-                    .find(|operand| operand.range == *range)
-                    .map(|operand| &operand.ty)?;
+                let ty = type_for_range(ctx, *range)?;
 
                 Some(
                 RuleDiagnostic::new(
                     rule_category!(),
                     range,
                     markup! {
-                        "Invalid operand for a "<Emphasis>"+"</Emphasis>" operation: "<Emphasis>{TypeDescription(ty)}</Emphasis>"."
+                        "Invalid operand for a "<Emphasis>"+"</Emphasis>" operation: "<Emphasis>{TypeDescription(&ty)}</Emphasis>"."
                     },
                 )
                 .detail(node.range(), markup! {
@@ -124,16 +126,13 @@ impl Rule for NoUnsafePlusOperands {
                 }),
             )
             }
-            NoUnsafePlusOperandsState::MixedBigIntAndNumber { range } => {
-                let operands = operand_infos(ctx);
-                let left = operands
-                    .iter()
-                    .find(|operand| has_number_like(&operand.ty))
-                    .map(|operand| &operand.ty)?;
-                let right = operands
-                    .iter()
-                    .find(|operand| has_bigint_like(&operand.ty))
-                    .map(|operand| &operand.ty)?;
+            NoUnsafePlusOperandsState::MixedBigIntAndNumber {
+                range,
+                left_range,
+                right_range,
+            } => {
+                let left = type_for_range(ctx, *left_range)?;
+                let right = type_for_range(ctx, *right_range)?;
 
                 Some(
                 RuleDiagnostic::new(
@@ -144,7 +143,7 @@ impl Rule for NoUnsafePlusOperands {
                     },
                 )
                 .detail(range, markup! {
-                    "This operation mixes "<Emphasis>{TypeDescription(left)}</Emphasis>" with "<Emphasis>{TypeDescription(right)}</Emphasis>"."
+                    "This operation mixes "<Emphasis>{TypeDescription(&left)}</Emphasis>" with "<Emphasis>{TypeDescription(&right)}</Emphasis>"."
                 })
                 .note(markup! {
                     "Convert one side so both operands use the same numeric type before applying "<Emphasis>"+"</Emphasis>" or "<Emphasis>"+="</Emphasis>"."
@@ -158,33 +157,21 @@ impl Rule for NoUnsafePlusOperands {
 fn run_binary(
     ctx: &RuleContext<NoUnsafePlusOperands>,
     binary: &JsBinaryExpression,
-) -> Option<Vec<NoUnsafePlusOperandsState>> {
+) -> Option<Option<NoUnsafePlusOperandsState>> {
     if binary.operator() != Ok(JsBinaryOperator::Plus) || has_parent_plus_expression(binary) {
         return None;
     }
 
-    let mut expressions = Vec::new();
     let left = binary.left().ok()?;
     let right = binary.right().ok()?;
 
-    collect_plus_operands(left, &mut expressions)?;
-    collect_plus_operands(right, &mut expressions)?;
-
-    let operands: Vec<_> = expressions
-        .into_iter()
-        .map(|expression| OperandInfo {
-            range: expression.range(),
-            ty: ctx.type_of_expression(&expression),
-        })
-        .collect();
-
-    Some(analyze_operands(binary.range(), &operands))
+    Some(analyze_binary_operands(ctx, binary.range(), left, right))
 }
 
 fn run_assignment(
     ctx: &RuleContext<NoUnsafePlusOperands>,
     assignment: &JsAssignmentExpression,
-) -> Option<Vec<NoUnsafePlusOperandsState>> {
+) -> Option<Option<NoUnsafePlusOperandsState>> {
     if assignment.operator() != Ok(JsAssignmentOperator::AddAssign) {
         return None;
     }
@@ -193,44 +180,19 @@ fn run_assignment(
     let right = assignment.right().ok()?;
     let left_ty = type_of_assignment_target(ctx, assignment, &left)?;
 
-    Some(analyze_operands(
+    let right_ty = ctx.type_of_expression(&right);
+
+    Some(analyze_pair(
         assignment.range(),
-        &[
-            OperandInfo {
-                range: left.range(),
-                ty: left_ty,
-            },
-            OperandInfo {
-                range: right.range(),
-                ty: ctx.type_of_expression(&right),
-            },
-        ],
+        OperandInfo {
+            range: left.range(),
+            ty: left_ty,
+        },
+        OperandInfo {
+            range: right.range(),
+            ty: right_ty,
+        },
     ))
-}
-
-fn analyze_operands(range: TextRange, operands: &[OperandInfo]) -> Vec<NoUnsafePlusOperandsState> {
-    let mut signals = Vec::new();
-
-    for operand in operands {
-        if has_invalid_variant(&operand.ty) {
-            signals.push(NoUnsafePlusOperandsState::InvalidOperand {
-                range: operand.range,
-            });
-        }
-    }
-
-    if !signals.is_empty() {
-        return signals;
-    }
-
-    let has_number = operands.iter().any(|operand| has_number_like(&operand.ty));
-    let has_bigint = operands.iter().any(|operand| has_bigint_like(&operand.ty));
-
-    if has_number && has_bigint {
-        signals.push(NoUnsafePlusOperandsState::MixedBigIntAndNumber { range });
-    }
-
-    signals
 }
 
 fn type_of_assignment_target(
@@ -276,25 +238,6 @@ fn type_of_assignment(
         | AnyJsAssignment::JsComputedMemberAssignment(_)
         | AnyJsAssignment::JsStaticMemberAssignment(_) => None,
     }
-}
-
-fn collect_plus_operands(
-    expression: AnyJsExpression,
-    operands: &mut Vec<AnyJsExpression>,
-) -> Option<()> {
-    let expression = expression.omit_parentheses();
-
-    if let AnyJsExpression::JsBinaryExpression(binary) = &expression
-        && binary.operator().ok()? == JsBinaryOperator::Plus
-    {
-        collect_plus_operands(binary.left().ok()?, operands)?;
-        collect_plus_operands(binary.right().ok()?, operands)?;
-        return Some(());
-    }
-
-    operands.push(expression);
-
-    Some(())
 }
 
 fn has_parent_plus_expression(node: &JsBinaryExpression) -> bool {
@@ -451,55 +394,164 @@ impl TypeDescription<'_> {
     }
 }
 
-fn operand_infos(ctx: &RuleContext<NoUnsafePlusOperands>) -> Vec<OperandInfo> {
+fn analyze_binary_operands(
+    ctx: &RuleContext<NoUnsafePlusOperands>,
+    range: TextRange,
+    left: AnyJsExpression,
+    right: AnyJsExpression,
+) -> Option<NoUnsafePlusOperandsState> {
+    let mut first_number_range = None;
+    let mut first_bigint_range = None;
+
+    analyze_expression(ctx, left, &mut first_number_range, &mut first_bigint_range)?;
+    analyze_expression(ctx, right, &mut first_number_range, &mut first_bigint_range)?;
+
+    if let (Some(left_range), Some(right_range)) = (first_number_range, first_bigint_range) {
+        return Some(NoUnsafePlusOperandsState::MixedBigIntAndNumber {
+            range,
+            left_range,
+            right_range,
+        });
+    }
+
+    None
+}
+
+fn analyze_expression(
+    ctx: &RuleContext<NoUnsafePlusOperands>,
+    expression: AnyJsExpression,
+    first_number_range: &mut Option<TextRange>,
+    first_bigint_range: &mut Option<TextRange>,
+) -> Option<Option<NoUnsafePlusOperandsState>> {
+    let expression = expression.omit_parentheses();
+
+    if let AnyJsExpression::JsBinaryExpression(binary) = &expression
+        && binary.operator().ok()? == JsBinaryOperator::Plus
+    {
+        if let Some(state) = analyze_expression(
+            ctx,
+            binary.left().ok()?,
+            first_number_range,
+            first_bigint_range,
+        )? {
+            return Some(Some(state));
+        }
+
+        if let Some(state) = analyze_expression(
+            ctx,
+            binary.right().ok()?,
+            first_number_range,
+            first_bigint_range,
+        )? {
+            return Some(Some(state));
+        }
+
+        return Some(None);
+    }
+
+    let operand = OperandInfo {
+        range: expression.range(),
+        ty: ctx.type_of_expression(&expression),
+    };
+
+    if has_invalid_variant(&operand.ty) {
+        return Some(Some(NoUnsafePlusOperandsState::InvalidOperand {
+            range: operand.range,
+        }));
+    }
+
+    if has_number_like(&operand.ty) {
+        first_number_range.get_or_insert(operand.range);
+    }
+    if has_bigint_like(&operand.ty) {
+        first_bigint_range.get_or_insert(operand.range);
+    }
+
+    Some(None)
+}
+
+fn analyze_pair(
+    range: TextRange,
+    left: OperandInfo,
+    right: OperandInfo,
+) -> Option<NoUnsafePlusOperandsState> {
+    if has_invalid_variant(&left.ty) {
+        return Some(NoUnsafePlusOperandsState::InvalidOperand { range: left.range });
+    }
+
+    if has_invalid_variant(&right.ty) {
+        return Some(NoUnsafePlusOperandsState::InvalidOperand { range: right.range });
+    }
+
+    if (has_number_like(&left.ty) && has_bigint_like(&right.ty))
+        || (has_bigint_like(&left.ty) && has_number_like(&right.ty))
+    {
+        return Some(NoUnsafePlusOperandsState::MixedBigIntAndNumber {
+            range,
+            left_range: left.range,
+            right_range: right.range,
+        });
+    }
+
+    None
+}
+
+fn type_for_range(ctx: &RuleContext<NoUnsafePlusOperands>, range: TextRange) -> Option<Type> {
     match ctx.query() {
         NoUnsafePlusOperandsQuery::JsBinaryExpression(binary) => {
-            binary_operand_infos(ctx, binary).unwrap_or_default()
+            type_for_range_in_binary(ctx, binary, range)
         }
         NoUnsafePlusOperandsQuery::JsAssignmentExpression(assignment) => {
-            assignment_operand_infos(ctx, assignment).unwrap_or_default()
+            type_for_range_in_assignment(ctx, assignment, range)
         }
     }
 }
 
-fn binary_operand_infos(
+fn type_for_range_in_binary(
     ctx: &RuleContext<NoUnsafePlusOperands>,
     binary: &JsBinaryExpression,
-) -> Option<Vec<OperandInfo>> {
-    let mut expressions = Vec::new();
-    let left = binary.left().ok()?;
-    let right = binary.right().ok()?;
-
-    collect_plus_operands(left, &mut expressions)?;
-    collect_plus_operands(right, &mut expressions)?;
-
-    Some(
-        expressions
-            .into_iter()
-            .map(|expression| OperandInfo {
-                range: expression.range(),
-                ty: ctx.type_of_expression(&expression),
-            })
-            .collect(),
-    )
+    range: TextRange,
+) -> Option<Type> {
+    type_for_range_in_expression(ctx, binary.left().ok()?, range)
+        .or_else(|| type_for_range_in_expression(ctx, binary.right().ok()?, range))
 }
 
-fn assignment_operand_infos(
+fn type_for_range_in_expression(
+    ctx: &RuleContext<NoUnsafePlusOperands>,
+    expression: AnyJsExpression,
+    range: TextRange,
+) -> Option<Type> {
+    let expression = expression.omit_parentheses();
+
+    if expression.range() == range {
+        return Some(ctx.type_of_expression(&expression));
+    }
+
+    if let AnyJsExpression::JsBinaryExpression(binary) = &expression
+        && binary.operator().ok()? == JsBinaryOperator::Plus
+    {
+        return type_for_range_in_expression(ctx, binary.left().ok()?, range)
+            .or_else(|| type_for_range_in_expression(ctx, binary.right().ok()?, range));
+    }
+
+    None
+}
+
+fn type_for_range_in_assignment(
     ctx: &RuleContext<NoUnsafePlusOperands>,
     assignment: &JsAssignmentExpression,
-) -> Option<Vec<OperandInfo>> {
+    range: TextRange,
+) -> Option<Type> {
     let left = assignment.left().ok()?;
     let right = assignment.right().ok()?;
-    let left_ty = type_of_assignment_target(ctx, assignment, &left)?;
 
-    Some(vec![
-        OperandInfo {
-            range: left.range(),
-            ty: left_ty,
-        },
-        OperandInfo {
-            range: right.range(),
-            ty: ctx.type_of_expression(&right),
-        },
-    ])
+    if left.range() == range {
+        return type_of_assignment_target(ctx, assignment, &left);
+    }
+
+    if right.range() == range {
+        return Some(ctx.type_of_expression(&right));
+    }
+
+    None
 }
