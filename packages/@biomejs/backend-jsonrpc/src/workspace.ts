@@ -2327,6 +2327,11 @@ See https://biomejs.dev/linter/rules/no-unnecessary-conditions
 	 */
 	noUnnecessaryConditions?: NoUnnecessaryConditionsConfiguration;
 	/**
+	* Succinct description of the rule.
+See https://biomejs.dev/linter/rules/no-unsafe-plus-operands 
+	 */
+	noUnsafePlusOperands?: NoUnsafePlusOperandsConfiguration;
+	/**
 	* Disallow dependencies with untrusted licenses.
 See https://biomejs.dev/linter/rules/no-untrusted-licenses 
 	 */
@@ -4282,6 +4287,9 @@ export type NoUnknownAttributeConfiguration =
 export type NoUnnecessaryConditionsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnnecessaryConditionsOptions;
+export type NoUnsafePlusOperandsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUnsafePlusOperandsOptions;
 export type NoUntrustedLicensesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUntrustedLicensesOptions;
@@ -6005,6 +6013,10 @@ export interface RuleWithNoUnnecessaryConditionsOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnnecessaryConditionsOptions;
 }
+export interface RuleWithNoUnsafePlusOperandsOptions {
+	level: RulePlainConfiguration;
+	options?: NoUnsafePlusOperandsOptions;
+}
 export interface RuleWithNoUntrustedLicensesOptions {
 	level: RulePlainConfiguration;
 	options?: NoUntrustedLicensesOptions;
@@ -7534,6 +7546,7 @@ export interface NoUnknownAttributeOptions {
 	ignore?: string[];
 }
 export type NoUnnecessaryConditionsOptions = {};
+export type NoUnsafePlusOperandsOptions = {};
 export interface NoUntrustedLicensesOptions {
 	/**
 	* Additional license identifiers to trust, beyond valid SPDX identifiers.
@@ -8575,6 +8588,8 @@ export type Category =
 	| "lint/nursery/noContinue"
 	| "lint/nursery/noDeprecatedMediaType"
 	| "lint/nursery/noDivRegex"
+	| "lint/nursery/noDrizzleDeleteWithoutWhere"
+	| "lint/nursery/noDrizzleUpdateWithoutWhere"
 	| "lint/nursery/noDuplicateArgumentNames"
 	| "lint/nursery/noDuplicateAttributes"
 	| "lint/nursery/noDuplicateEnumValueNames"
@@ -8605,8 +8620,6 @@ export type Category =
 	| "lint/nursery/noMultiStr"
 	| "lint/nursery/noNestedPromises"
 	| "lint/nursery/noParametersOnlyUsedInRecursion"
-	| "lint/nursery/noDrizzleDeleteWithoutWhere"
-	| "lint/nursery/noDrizzleUpdateWithoutWhere"
 	| "lint/nursery/noPlaywrightElementHandle"
 	| "lint/nursery/noPlaywrightEval"
 	| "lint/nursery/noPlaywrightForceOption"
@@ -8629,6 +8642,7 @@ export type Category =
 	| "lint/nursery/noUndeclaredEnvVars"
 	| "lint/nursery/noUnknownAttribute"
 	| "lint/nursery/noUnnecessaryConditions"
+	| "lint/nursery/noUnsafePlusOperands"
 	| "lint/nursery/noUntrustedLicenses"
 	| "lint/nursery/noUnwantedPolyfillio"
 	| "lint/nursery/noUselessBackrefInRegex"

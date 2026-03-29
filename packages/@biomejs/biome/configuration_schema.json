@@ -5389,6 +5389,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUnsafePlusOperandsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUnsafePlusOperandsOptions" }
+			]
+		},
+		"NoUnsafePlusOperandsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUntrustedLicensesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6294,6 +6304,13 @@
 					"description": "Disallow unnecessary type-based conditions that can be statically determined as redundant.\nSee https://biomejs.dev/linter/rules/no-unnecessary-conditions",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnnecessaryConditionsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnsafePlusOperands": {
+					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/no-unsafe-plus-operands",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUnsafePlusOperandsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9603,6 +9620,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUnsafeOptionalChainingOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUnsafePlusOperandsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUnsafePlusOperandsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
