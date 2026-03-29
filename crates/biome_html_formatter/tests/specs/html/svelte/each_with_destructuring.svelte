@@ -13,3 +13,7 @@
 {#each items as { id, ...rest }}
   <div>{id}</div>
 {/each}
+
+{#each Object.entries(foo) as [key, { a, b }]}
+  {a} {b}
+{/each}

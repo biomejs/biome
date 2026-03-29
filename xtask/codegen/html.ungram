@@ -413,6 +413,7 @@ SvelteBindingAssignmentBindingList = (AnySvelteBindingAssignmentBinding (',' Any
 
 AnySvelteBindingAssignmentBinding =
 	SvelteName
+	| AnySvelteDestructuredName
 	| SvelteRestBinding
 
 /// { ...rest }

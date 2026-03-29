@@ -761,7 +761,7 @@ fn parse_square_destructured_name(p: &mut HtmlParser) -> ParsedSyntax {
 
     SvelteBindingAssignmentBindingList.parse_list(p);
 
-    p.expect(T![']']);
+    p.expect_with_context(T![']'], HtmlLexContext::Svelte);
 
     Present(m.complete(p, SVELTE_SQUARE_DESTRUCTURED_NAME))
 }
@@ -1072,6 +1072,14 @@ impl ParseSeparatedList for SvelteBindingAssignmentBindingList {
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         if p.at(T![...]) {
             parse_rest_name(p)
+        } else if p.at(T!['{']) {
+            let result = parse_curly_destructured_name(p);
+            p.re_lex(HtmlReLexContext::Svelte);
+            result
+        } else if p.at(T!['[']) {
+            let result = parse_square_destructured_name(p);
+            p.re_lex(HtmlReLexContext::Svelte);
+            result
         } else {
             parse_svelte_name(p)
         }
