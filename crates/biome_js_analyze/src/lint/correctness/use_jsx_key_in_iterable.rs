@@ -7,9 +7,10 @@ use biome_diagnostics::Severity;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsFunctionBody, AnyJsMemberExpression, AnyJsObjectMember, AnyJsStatement,
-    AnyJsSwitchClause, AnyJsxAttribute, AnyJsxChild, JsArrayElementList, JsArrayExpression,
-    JsCallArgumentList, JsCallArguments, JsCallExpression, JsFunctionBody, JsNewExpression,
-    JsObjectExpression, JsStatementList, JsxAttributeList, JsxExpressionChild, JsxTagExpression,
+    AnyJsSwitchClause, AnyJsxAttribute, AnyJsxChild, EmbeddingKind, JsArrayElementList,
+    JsArrayExpression, JsCallArgumentList, JsCallArguments, JsCallExpression, JsFileSource,
+    JsFunctionBody, JsNewExpression, JsObjectExpression, JsStatementList, JsxAttributeList,
+    JsxExpressionChild, JsxTagExpression,
 };
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, TextRange, declare_node_union};
 use biome_rule_options::use_jsx_key_in_iterable::UseJsxKeyInIterableOptions;
@@ -84,6 +85,13 @@ impl Rule for UseJsxKeyInIterable {
     type Options = UseJsxKeyInIterableOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        if matches!(
+            ctx.source_type::<JsFileSource>().as_embedding_kind(),
+            EmbeddingKind::Astro { .. }
+        ) {
+            return Vec::new().into_boxed_slice();
+        }
+
         let node = ctx.query();
         let model = ctx.model();
         let options = ctx.options();

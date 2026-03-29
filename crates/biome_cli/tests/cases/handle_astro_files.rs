@@ -75,6 +75,13 @@ const title = "My Page";
 </body>
 </html>"#;
 
+const ASTRO_FILE_USE_JSX_KEY_IN_ITERABLE: &str = r#"---
+const items = ["one", "two", "three"];
+---
+<ul>
+    {items.map((item) => <li>{item}</li>)}
+</ul>"#;
+
 #[test]
 fn format_astro_files() {
     let fs = MemoryFileSystem::default();
@@ -285,6 +292,52 @@ schema + sure()
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "full_support",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn use_jsx_key_in_iterable_is_ignored_for_astro_files() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+    "linter": {
+        "domains": {
+            "react": "recommended"
+        }
+    },
+    "html": {
+        "linter": {
+            "enabled": true
+        },
+        "experimentalFullSupportEnabled": true
+    }
+}"#
+        .as_bytes(),
+    );
+
+    let astro_file_path = Utf8Path::new("file.astro");
+    fs.insert(
+        astro_file_path.into(),
+        ASTRO_FILE_USE_JSX_KEY_IN_ITERABLE.as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", astro_file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "use_jsx_key_in_iterable_is_ignored_for_astro_files",
         fs,
         console,
         result,

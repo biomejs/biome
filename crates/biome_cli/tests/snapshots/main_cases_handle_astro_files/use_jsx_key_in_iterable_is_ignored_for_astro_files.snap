@@ -1,0 +1,36 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "domains": {
+      "react": "recommended"
+    }
+  },
+  "html": {
+    "linter": { "enabled": true },
+    "experimentalFullSupportEnabled": true
+  }
+}
+```
+
+## `file.astro`
+
+```astro
+---
+const items = ["one", "two", "three"];
+---
+<ul>
+    {items.map((item) => <li>{item}</li>)}
+</ul>
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```
