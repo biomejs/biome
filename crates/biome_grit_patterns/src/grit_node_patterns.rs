@@ -10,7 +10,7 @@ use grit_pattern_matcher::pattern::{
     ResolvedPattern, State,
 };
 use grit_util::error::GritResult;
-use grit_util::{AnalysisLogs, AstNode, Language};
+use grit_util::{AnalysisLogs, Language};
 
 /// Check if two syntax kinds are compatible for import pattern matching
 fn are_import_kinds_compatible(
@@ -26,26 +26,32 @@ fn are_import_kinds_compatible(
 
     use biome_js_syntax::JsSyntaxKind::*;
 
-    // Only allow specific import transformations to avoid over-matching
+    // Only allow specific import transformations to avoid over-matching.
     match (pattern_js_kind, node_js_kind) {
-        // Default import pattern can match named import
-        (JS_IMPORT_DEFAULT_CLAUSE, JS_IMPORT_NAMED_CLAUSE) => true,
-        // Named import pattern can match default import
-        (JS_IMPORT_NAMED_CLAUSE, JS_IMPORT_DEFAULT_CLAUSE) => true,
-        // Default import specifier can match individual named specifiers
-        (JS_DEFAULT_IMPORT_SPECIFIER, JS_SHORTHAND_NAMED_IMPORT_SPECIFIER) => true,
-        (JS_DEFAULT_IMPORT_SPECIFIER, JS_NAMED_IMPORT_SPECIFIER) => true,
-        (JS_DEFAULT_IMPORT_SPECIFIER, JS_NAMESPACE_IMPORT_SPECIFIER) => true,
-        // Named specifiers can match default specifier
-        (JS_SHORTHAND_NAMED_IMPORT_SPECIFIER, JS_DEFAULT_IMPORT_SPECIFIER) => true,
-        (JS_NAMED_IMPORT_SPECIFIER, JS_DEFAULT_IMPORT_SPECIFIER) => true,
-        (JS_NAMESPACE_IMPORT_SPECIFIER, JS_DEFAULT_IMPORT_SPECIFIER) => true,
         // Import clauses can match each other
         (JS_IMPORT_DEFAULT_CLAUSE, JS_IMPORT_DEFAULT_CLAUSE) => true,
         (JS_IMPORT_NAMED_CLAUSE, JS_IMPORT_NAMED_CLAUSE) => true,
         (JS_IMPORT_NAMESPACE_CLAUSE, JS_IMPORT_NAMESPACE_CLAUSE) => true,
         (JS_IMPORT_COMBINED_CLAUSE, JS_IMPORT_COMBINED_CLAUSE) => true,
         (JS_IMPORT_BARE_CLAUSE, JS_IMPORT_BARE_CLAUSE) => true,
+        (JS_IMPORT_DEFAULT_CLAUSE, JS_IMPORT_NAMED_CLAUSE) => true,
+        (JS_IMPORT_NAMED_CLAUSE, JS_IMPORT_DEFAULT_CLAUSE) => true,
+        (JS_IMPORT_DEFAULT_CLAUSE, JS_IMPORT_NAMESPACE_CLAUSE) => true,
+        (JS_IMPORT_NAMESPACE_CLAUSE, JS_IMPORT_DEFAULT_CLAUSE) => true,
+        (JS_IMPORT_NAMED_CLAUSE, JS_IMPORT_NAMESPACE_CLAUSE) => true,
+        (JS_IMPORT_NAMESPACE_CLAUSE, JS_IMPORT_NAMED_CLAUSE) => true,
+        // Import specifier wrappers can match the equivalent binding forms
+        (JS_DEFAULT_IMPORT_SPECIFIER, JS_NAMED_IMPORT_SPECIFIERS) => true,
+        (JS_NAMED_IMPORT_SPECIFIERS, JS_DEFAULT_IMPORT_SPECIFIER) => true,
+        (JS_DEFAULT_IMPORT_SPECIFIER, JS_NAMESPACE_IMPORT_SPECIFIER) => true,
+        (JS_NAMESPACE_IMPORT_SPECIFIER, JS_DEFAULT_IMPORT_SPECIFIER) => true,
+        (JS_NAMED_IMPORT_SPECIFIERS, JS_NAMESPACE_IMPORT_SPECIFIER) => true,
+        (JS_NAMESPACE_IMPORT_SPECIFIER, JS_NAMED_IMPORT_SPECIFIERS) => true,
+        // Default import specifiers may also line up with a single named specifier
+        (JS_DEFAULT_IMPORT_SPECIFIER, JS_SHORTHAND_NAMED_IMPORT_SPECIFIER) => true,
+        (JS_DEFAULT_IMPORT_SPECIFIER, JS_NAMED_IMPORT_SPECIFIER) => true,
+        (JS_SHORTHAND_NAMED_IMPORT_SPECIFIER, JS_DEFAULT_IMPORT_SPECIFIER) => true,
+        (JS_NAMED_IMPORT_SPECIFIER, JS_DEFAULT_IMPORT_SPECIFIER) => true,
         _ => false,
     }
 }
@@ -151,14 +157,17 @@ impl Matcher<GritQueryContext> for GritNodePattern {
 
                 // Import slot mapping table
                 let source_slot = match (pattern_js_kind, node_js_kind, slot_index) {
-                    // type_token, phase_token
-                    (JS_IMPORT_DEFAULT_CLAUSE, JS_IMPORT_NAMED_CLAUSE, 0 | 1) => None,
-                    // default_specifier -> first named specifier
+                    // type_token -> type_token, phase_token is absent on named clauses
+                    (JS_IMPORT_DEFAULT_CLAUSE, JS_IMPORT_NAMED_CLAUSE, 0) => Some(0),
+                    (JS_IMPORT_DEFAULT_CLAUSE, JS_IMPORT_NAMED_CLAUSE, 1) => None,
+                    // default_specifier -> named_specifiers
                     (JS_IMPORT_DEFAULT_CLAUSE, JS_IMPORT_NAMED_CLAUSE, 2) => Some(1),
                     // from_token, source, assertion
                     (JS_IMPORT_DEFAULT_CLAUSE, JS_IMPORT_NAMED_CLAUSE, 3..=5) => {
                         Some(slot_index - 1)
                     }
+                    // default and namespace clauses have the same outer slot layout
+                    (JS_IMPORT_DEFAULT_CLAUSE, JS_IMPORT_NAMESPACE_CLAUSE, _) => Some(*slot_index),
                     // type_token
                     (JS_IMPORT_NAMED_CLAUSE, JS_IMPORT_DEFAULT_CLAUSE, 0) => Some(0),
                     // named_specifiers -> default specifier
@@ -167,24 +176,31 @@ impl Matcher<GritQueryContext> for GritNodePattern {
                     (JS_IMPORT_NAMED_CLAUSE, JS_IMPORT_DEFAULT_CLAUSE, 2..=4) => {
                         Some(slot_index + 1)
                     }
+                    // type_token
+                    (JS_IMPORT_NAMED_CLAUSE, JS_IMPORT_NAMESPACE_CLAUSE, 0) => Some(0),
+                    // named_specifiers -> namespace specifier
+                    (JS_IMPORT_NAMED_CLAUSE, JS_IMPORT_NAMESPACE_CLAUSE, 1) => Some(2),
+                    // from_token, source, assertion
+                    (JS_IMPORT_NAMED_CLAUSE, JS_IMPORT_NAMESPACE_CLAUSE, 2..=4) => {
+                        Some(slot_index + 1)
+                    }
+                    // default and namespace clauses have the same outer slot layout
+                    (JS_IMPORT_NAMESPACE_CLAUSE, JS_IMPORT_DEFAULT_CLAUSE, _) => Some(*slot_index),
+                    // type_token -> type_token, phase_token is absent on named clauses
+                    (JS_IMPORT_NAMESPACE_CLAUSE, JS_IMPORT_NAMED_CLAUSE, 0) => Some(0),
+                    (JS_IMPORT_NAMESPACE_CLAUSE, JS_IMPORT_NAMED_CLAUSE, 1) => None,
+                    // namespace specifier -> named_specifiers
+                    (JS_IMPORT_NAMESPACE_CLAUSE, JS_IMPORT_NAMED_CLAUSE, 2) => Some(1),
+                    // from_token, source, assertion
+                    (JS_IMPORT_NAMESPACE_CLAUSE, JS_IMPORT_NAMED_CLAUSE, 3..=5) => {
+                        Some(slot_index - 1)
+                    }
                     // normal case
                     _ => Some(*slot_index),
                 };
 
                 match source_slot {
                     None => GritResolvedPattern::from_empty_binding(node.clone(), *slot_index),
-                    Some(1)
-                        if pattern_js_kind == JS_IMPORT_DEFAULT_CLAUSE
-                            && node_js_kind == JS_IMPORT_NAMED_CLAUSE =>
-                    {
-                        // Special case: default_specifier -> first named specifier
-                        node.child_by_slot_index(1)
-                            .and_then(|specifiers| specifiers.children().next())
-                            .map_or(
-                                GritResolvedPattern::from_empty_binding(node.clone(), *slot_index),
-                                GritResolvedPattern::from_node_binding,
-                            )
-                    }
                     Some(source) => get_child(source),
                 }
             } else {
@@ -228,6 +244,10 @@ impl GritNodePattern {
             (pattern_js_kind, node_js_kind),
             (JS_IMPORT_DEFAULT_CLAUSE, JS_IMPORT_NAMED_CLAUSE)
                 | (JS_IMPORT_NAMED_CLAUSE, JS_IMPORT_DEFAULT_CLAUSE)
+                | (JS_IMPORT_DEFAULT_CLAUSE, JS_IMPORT_NAMESPACE_CLAUSE)
+                | (JS_IMPORT_NAMESPACE_CLAUSE, JS_IMPORT_DEFAULT_CLAUSE)
+                | (JS_IMPORT_NAMED_CLAUSE, JS_IMPORT_NAMESPACE_CLAUSE)
+                | (JS_IMPORT_NAMESPACE_CLAUSE, JS_IMPORT_NAMED_CLAUSE)
         )
     }
 }

@@ -43,11 +43,17 @@ impl Matcher<GritQueryContext> for GritCodeSnippet {
             return Ok(false);
         };
 
-        // First, try to match with the exact kind (fast path)
-        if let Some((_, pattern)) = self.patterns.iter().find(|(kind, _)| *kind == node.kind())
-            && pattern.execute(resolved, state, context, logs)?
+        // Try every parse of the snippet with the same outer kind.
+        for (_, pattern) in self
+            .patterns
+            .iter()
+            .filter(|(kind, _)| *kind == node.kind())
         {
-            return Ok(true);
+            let mut candidate_state = state.clone();
+            if pattern.execute(resolved, &mut candidate_state, context, logs)? {
+                *state = candidate_state;
+                return Ok(true);
+            }
         }
 
         // If node has a single child, try matching against the child
@@ -58,7 +64,9 @@ impl Matcher<GritQueryContext> for GritCodeSnippet {
         {
             let child_binding = GritResolvedPattern::from_node_binding(child);
             for (_, pattern) in &self.patterns {
-                if pattern.execute(&child_binding, state, context, logs)? {
+                let mut candidate_state = state.clone();
+                if pattern.execute(&child_binding, &mut candidate_state, context, logs)? {
+                    *state = candidate_state;
                     return Ok(true);
                 }
             }

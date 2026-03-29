@@ -5,7 +5,13 @@ expression: import_patterns
 SnapshotResult {
     messages: [],
     matched_ranges: [
-        "2:1-2:27",
+        "2:1-2:24",
+        "5:1-5:20",
+        "8:1-8:25",
+        "11:1-11:29",
+        "14:1-14:27",
+        "17:1-17:32",
+        "18:1-18:32",
     ],
     rewritten_files: [],
     created_files: [],
