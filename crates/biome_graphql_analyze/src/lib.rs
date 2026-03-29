@@ -2,9 +2,11 @@
 
 mod lint;
 mod registry;
+mod services;
 mod suppression_action;
 
 pub use crate::registry::visit_registry;
+pub use crate::services::{GraphqlAnalyzerServices, GraphqlProjectIndex};
 use crate::suppression_action::GraphqlSuppressionAction;
 use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, AnalyzerSignal, AnalyzerSuppression, ControlFlow,
@@ -42,6 +44,21 @@ where
     analyze_with_inspect_matcher(root, filter, |_| {}, options, emit_signal)
 }
 
+/// Run the analyzer with project-scoped GraphQL services.
+pub fn analyze_with_services<'a, F, B>(
+    root: &LanguageRoot<GraphqlLanguage>,
+    filter: AnalysisFilter,
+    options: &'a AnalyzerOptions,
+    services: GraphqlAnalyzerServices,
+    emit_signal: F,
+) -> (Option<B>, Vec<Error>)
+where
+    F: FnMut(&dyn AnalyzerSignal<GraphqlLanguage>) -> ControlFlow<B> + 'a,
+    B: 'a,
+{
+    analyze_with_services_and_inspect_matcher(root, filter, |_| {}, options, services, emit_signal)
+}
+
 /// Run the analyzer on the provided `root`: this process will use the given `filter`
 /// to selectively restrict analysis to specific rules / a specific source range,
 /// then call `emit_signal` when an analysis rule emits a diagnostic or action.
@@ -53,6 +70,30 @@ pub fn analyze_with_inspect_matcher<'a, V, F, B>(
     filter: AnalysisFilter,
     inspect_matcher: V,
     options: &'a AnalyzerOptions,
+    mut emit_signal: F,
+) -> (Option<B>, Vec<Error>)
+where
+    V: FnMut(&MatchQueryParams<GraphqlLanguage>) + 'a,
+    F: FnMut(&dyn AnalyzerSignal<GraphqlLanguage>) -> ControlFlow<B> + 'a,
+    B: 'a,
+{
+    analyze_with_services_and_inspect_matcher(
+        root,
+        filter,
+        inspect_matcher,
+        options,
+        GraphqlAnalyzerServices::default(),
+        emit_signal,
+    )
+}
+
+/// Run the analyzer with project-scoped GraphQL services and matcher inspection.
+pub fn analyze_with_services_and_inspect_matcher<'a, V, F, B>(
+    root: &LanguageRoot<GraphqlLanguage>,
+    filter: AnalysisFilter,
+    inspect_matcher: V,
+    options: &'a AnalyzerOptions,
+    services: GraphqlAnalyzerServices,
     mut emit_signal: F,
 ) -> (Option<B>, Vec<Error>)
 where
@@ -89,7 +130,8 @@ where
     let mut registry = RuleRegistry::builder(&filter, root);
     visit_registry(&mut registry);
 
-    let (registry, services, diagnostics, visitors) = registry.build();
+    let project_index = services.project_index();
+    let (registry, mut services, diagnostics, visitors) = registry.build();
 
     // Bail if we can't parse a rule option
     if !diagnostics.is_empty() {
@@ -107,6 +149,8 @@ where
     for ((phase, _), visitor) in visitors {
         analyzer.add_visitor(phase, visitor);
     }
+
+    services.insert_service(project_index);
 
     (
         analyzer.run(biome_analyze::AnalyzerContext {
