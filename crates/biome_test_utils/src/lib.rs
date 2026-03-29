@@ -32,8 +32,6 @@ use biome_service::settings::{
 };
 use biome_service::test_utils::setup_workspace_and_open_project;
 use biome_service::workspace::{
-    FileContent, OpenFileParams, PullDiagnosticsParams, ScanKind, ScanProjectParams,
-    UpdateSettingsParams,
     PullDiagnosticsParams, ScanKind, ScanProjectParams, UpdateSettingsParams,
 };
 use biome_service::{Workspace, WorkspaceError};
@@ -1068,7 +1066,7 @@ pub fn analyze_with_workspace(
     // Returns virtual paths of the inserted source files (CSS, JS, etc.)
     // so we can index them for the module graph.
     let sidecar_paths = insert_sidecar_files(&fs, input_file, &project_root);
-    files_to_index.extend(sidecar_paths);
+    files_to_index.extend(sidecar_paths.clone());
 
     // Create workspace — use WorkspaceServer directly so we can call
     // index_files_for_test, which opens files with OpenFileReason::Index
@@ -1216,7 +1214,7 @@ fn insert_sidecar_files(
     input_file: &Utf8Path,
     project_root: &Utf8Path,
 ) -> Vec<Utf8PathBuf> {
-    let mut inserted_paths = Vec::new();
+    let mut inserted_files = Vec::new();
     // Insert package.json sidecar
     let package_json_sidecar = input_file.with_extension("package.json");
     if let Ok(content) = std::fs::read_to_string(&package_json_sidecar) {
@@ -1272,7 +1270,6 @@ fn insert_sidecar_files(
                 | "mts"
                 | "cts"
                 | "tsx"
-                | "css"
                 | "vue"
                 | "svelte"
                 | "astro"
@@ -1280,7 +1277,11 @@ fn insert_sidecar_files(
         ) && let Ok(content) = std::fs::read_to_string(&path)
         {
             let target_name = path.file_name().unwrap();
-            fs.insert(project_root.join(target_name), content.as_bytes());
+            let target_path = project_root.join(target_name);
+            fs.insert(target_path.clone(), content.as_bytes());
+            inserted_files.push(target_path);
         }
     }
+
+    inserted_files
 }

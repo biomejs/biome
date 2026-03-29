@@ -4,7 +4,7 @@ expression: invalid.svelte
 ---
 # Input
 ```svelte
-<!-- Native elements with redundant roles should still trigger -->
+<!-- should generate diagnostics -->
 <article role="article"></article>
 <button role="button"></button>
 <h1 role="heading" aria-level="1">title</h1>
@@ -18,7 +18,7 @@ invalid.svelte:2:10 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━�
 
   × Using the role attribute 'article' on the 'article' element is redundant, because it is implied by its semantics.
   
-    1 │ <!-- Native elements with redundant roles should still trigger -->
+    1 │ <!-- should generate diagnostics -->
   > 2 │ <article role="article"></article>
       │          ^^^^^^^^^^^^^^
     3 │ <button role="button"></button>
@@ -36,7 +36,7 @@ invalid.svelte:3:9 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━
 
   × Using the role attribute 'button' on the 'button' element is redundant, because it is implied by its semantics.
   
-    1 │ <!-- Native elements with redundant roles should still trigger -->
+    1 │ <!-- should generate diagnostics -->
     2 │ <article role="article"></article>
   > 3 │ <button role="button"></button>
       │         ^^^^^^^^^^^^^
