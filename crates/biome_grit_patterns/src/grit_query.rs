@@ -555,7 +555,24 @@ fn extract_anchor_kinds(pattern: &Pattern<GritQueryContext>) -> Vec<GritTargetSy
         // multiple Contains branches with different kind sets, we may run the
         // inner pattern on extra nodes. This is harmless — the inner pattern
         // simply won't match — but causes unnecessary evaluations.
-        Pattern::And(and) => and.patterns.iter().flat_map(extract_anchor_kinds).collect(),
+        Pattern::And(and) => {
+            let mut kinds = and.patterns.iter().map(extract_anchor_kinds);
+            let Some(first) = kinds.find(|kinds| !kinds.is_empty()) else {
+                return vec![];
+            };
+
+            kinds
+                .fold(first.into_iter().collect::<BTreeSet<_>>(), |acc, kinds| {
+                    if kinds.is_empty() {
+                        return acc;
+                    }
+
+                    let kinds = kinds.into_iter().collect::<BTreeSet<_>>();
+                    acc.intersection(&kinds).copied().collect()
+                })
+                .into_iter()
+                .collect()
+        }
         // For Or/Any: if ANY branch is universal (returns []), the whole
         // pattern is universal — we can't restrict to specific kinds.
         Pattern::Or(or) => {
@@ -705,6 +722,26 @@ mod tests {
         assert!(
             !kinds.is_empty(),
             "Or with all specific branches should return anchor kinds"
+        );
+    }
+
+    #[test]
+    fn anchor_kinds_and_with_incompatible_branches_returns_empty() {
+        let query = compile_js_query("and { `console.log($x)`, `const $name = $value` }");
+        let kinds = query.anchor_kinds();
+        assert!(
+            kinds.is_empty(),
+            "And with incompatible branches should return empty anchor kinds"
+        );
+    }
+
+    #[test]
+    fn anchor_kinds_and_with_shared_kind_branches_returns_anchor_kinds() {
+        let query = compile_js_query("and { `console.log($x)`, `console.warn($x)` }");
+        let kinds = query.anchor_kinds();
+        assert!(
+            !kinds.is_empty(),
+            "And with compatible branches should return anchor kinds"
         );
     }
 
