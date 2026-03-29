@@ -1072,6 +1072,10 @@ impl ParseSeparatedList for SvelteBindingAssignmentBindingList {
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         if p.at(T![...]) {
             parse_rest_name(p)
+        } else if p.at(T!['{']) {
+            parse_curly_destructured_name(p)
+        } else if p.at(T!['[']) {
+            parse_square_destructured_name(p)
         } else {
             parse_svelte_name(p)
         }
