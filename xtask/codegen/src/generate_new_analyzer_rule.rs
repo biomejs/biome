@@ -1,6 +1,9 @@
 use biome_string_case::Case;
 use bpaf::Bpaf;
-use std::str::FromStr;
+use std::{
+    path::{Path, PathBuf},
+    str::FromStr,
+};
 use xtask_glue::project_root;
 
 #[derive(Debug, Clone, Bpaf)]
@@ -60,6 +63,47 @@ impl FromStr for Category {
             "assist" => Ok(Self::Assist),
             _ => Err("Not supported"),
         }
+    }
+}
+
+fn test_group_name(category: &Category) -> &'static str {
+    match category {
+        Category::Assist => "source",
+        Category::Lint | Category::Syntax => "nursery",
+    }
+}
+
+fn rule_folder(crate_folder: &Path, category: &Category) -> PathBuf {
+    match category {
+        Category::Lint => crate_folder.join("src/lint/nursery"),
+        Category::Assist => crate_folder.join("src/assist/source"),
+        Category::Syntax => crate_folder.join("src/syntax/nursery"),
+    }
+}
+
+fn category_entry(category: &Category, rule_name_camel: &str, kebab_case_rule: &str) -> String {
+    match category {
+        Category::Lint => format!(
+            r#"    "lint/nursery/{rule_name_camel}": "https://biomejs.dev/linter/rules/{kebab_case_rule}","#
+        ),
+        Category::Assist => format!(
+            r#"    "assist/source/{rule_name_camel}": "https://biomejs.dev/assist/actions/{kebab_case_rule}","#
+        ),
+        Category::Syntax => format!(r#"    "syntax/nursery/{rule_name_camel}","#),
+    }
+}
+
+fn category_markers(category: &Category) -> (&'static str, &'static str) {
+    match category {
+        Category::Lint => ("define_categories! {\n", "\n    // end lint rules\n"),
+        Category::Assist => (
+            "    // start assist actions\n",
+            "\n    // end assist actions\n",
+        ),
+        Category::Syntax => (
+            "    // start syntax rules\n",
+            "\n  ;  // end syntax rules\n",
+        ),
     }
 }
 
@@ -561,8 +605,19 @@ impl Rule for {rule_name_upper_camel} {{
 }
 
 pub fn generate_new_analyzer_rule(kind: LanguageKind, category: Category, rule_name: &str) {
+    let root = project_root();
+    generate_new_analyzer_rule_at(root.as_path(), kind, category, rule_name);
+}
+
+fn generate_new_analyzer_rule_at(
+    root: &Path,
+    kind: LanguageKind,
+    category: Category,
+    rule_name: &str,
+) {
     let rule_name_camel = Case::Camel.convert(rule_name);
     let rule_kind = kind.as_str();
+    let test_group = test_group_name(&category);
     let test_extension = if matches!(kind, LanguageKind::HtmlVue) {
         "vue"
     } else {
@@ -586,13 +641,9 @@ pub fn generate_new_analyzer_rule(kind: LanguageKind, category: Category, rule_n
         }
         _ => "/* should generate diagnostics */\nvar a = 1;\na = 2;\na = 3;",
     };
-    let crate_folder = project_root().join(format!("crates/biome_{rule_kind}_analyze"));
-    let test_folder = crate_folder.join("tests/specs/nursery");
-    let rule_folder = match &category {
-        Category::Lint => crate_folder.join("src/lint/nursery"),
-        Category::Assist => crate_folder.join("src/assists/nursery"),
-        Category::Syntax => crate_folder.join("src/syntax/nursery"),
-    };
+    let crate_folder = root.join(format!("crates/biome_{rule_kind}_analyze"));
+    let test_folder = crate_folder.join(format!("tests/specs/{test_group}"));
+    let rule_folder = rule_folder(&crate_folder, &category);
     // Generate rule code
     let code = generate_rule_template(
         &kind,
@@ -602,7 +653,7 @@ pub fn generate_new_analyzer_rule(kind: LanguageKind, category: Category, rule_n
         Case::Snake.convert(rule_name).as_str(),
     );
     if !rule_folder.exists() {
-        std::fs::create_dir(rule_folder.clone()).expect("To create the rule folder");
+        std::fs::create_dir_all(rule_folder.clone()).expect("To create the rule folder");
     }
     let file_name = format!(
         "{}/{}.rs",
@@ -611,40 +662,29 @@ pub fn generate_new_analyzer_rule(kind: LanguageKind, category: Category, rule_n
     );
     std::fs::write(file_name.clone(), code).unwrap_or_else(|_| panic!("To write {}", &file_name));
 
-    let categories_path = "crates/biome_diagnostics_categories/src/categories.rs";
-    let mut categories = std::fs::read_to_string(categories_path).unwrap();
+    let categories_path = root.join("crates/biome_diagnostics_categories/src/categories.rs");
+    let mut categories = std::fs::read_to_string(&categories_path).unwrap();
 
     if !categories.contains(&rule_name_camel) {
         let kebab_case_rule = Case::Kebab.convert(&rule_name_camel);
         // We sort rules to reduce conflicts between contributions made in parallel.
-        let rule_line = match category {
-            Category::Lint => format!(
-                r#"    "lint/nursery/{rule_name_camel}": "https://biomejs.dev/linter/rules/{kebab_case_rule}","#
-            ),
-            Category::Assist => format!(
-                r#"    "assists/nursery/{rule_name_camel}": "https://biomejs.dev/assists/{kebab_case_rule}","#
-            ),
-            Category::Syntax => format!(r#"    "syntax/nursery/{rule_name_camel}","#),
-        };
-        let lint_start = match category {
-            Category::Lint => "define_categories! {\n",
-            Category::Assist => "    // start assist actions\n",
-            Category::Syntax => "    // start syntax rules\n",
-        };
-        let lint_end = match category {
-            Category::Lint => "\n    // end lint rules\n",
-            Category::Assist => "\n    // end assist actions\n",
-            Category::Syntax => "\n  ;  // end syntax rules\n",
-        };
-        debug_assert!(categories.contains(lint_start), "{}", lint_start);
-        debug_assert!(categories.contains(lint_end), "{}", lint_end);
-        let lint_start_index = categories.find(lint_start).unwrap() + lint_start.len();
-        let lint_end_index = categories.find(lint_end).unwrap();
-        let lint_rule_text = &categories[lint_start_index..lint_end_index];
-        let mut lint_rules: Vec<_> = lint_rule_text.lines().chain(Some(&rule_line[..])).collect();
-        lint_rules.sort_unstable();
-        let new_lint_rule_text = lint_rules.join("\n");
-        categories.replace_range(lint_start_index..lint_end_index, &new_lint_rule_text);
+        let rule_line = category_entry(&category, &rule_name_camel, &kebab_case_rule);
+        let (category_start, category_end) = category_markers(&category);
+        debug_assert!(categories.contains(category_start), "{}", category_start);
+        debug_assert!(categories.contains(category_end), "{}", category_end);
+        let category_start_index = categories.find(category_start).unwrap() + category_start.len();
+        let category_end_index = categories.find(category_end).unwrap();
+        let category_rule_text = &categories[category_start_index..category_end_index];
+        let mut category_rules: Vec<_> = category_rule_text
+            .lines()
+            .chain(Some(&rule_line[..]))
+            .collect();
+        category_rules.sort_unstable();
+        let new_category_rule_text = category_rules.join("\n");
+        categories.replace_range(
+            category_start_index..category_end_index,
+            &new_category_rule_text,
+        );
         std::fs::write(categories_path, categories).unwrap();
     }
 
@@ -666,5 +706,99 @@ pub fn generate_new_analyzer_rule(kind: LanguageKind, category: Category, rule_n
     );
     if std::fs::File::open(&test_file).is_err() {
         let _ = std::fs::write(test_file, invalid_contents);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::{
+        fs,
+        sync::atomic::{AtomicU64, Ordering},
+    };
+
+    static NEXT_ID: AtomicU64 = AtomicU64::new(0);
+
+    struct TestDir(PathBuf);
+
+    impl TestDir {
+        fn new(name: &str) -> Self {
+            let id = NEXT_ID.fetch_add(1, Ordering::Relaxed);
+            let path = std::env::temp_dir().join(format!("biome-codegen-{name}-{id}"));
+            if path.exists() {
+                let _ = fs::remove_dir_all(&path);
+            }
+            fs::create_dir_all(&path).unwrap();
+            Self(path)
+        }
+
+        fn path(&self) -> &Path {
+            &self.0
+        }
+    }
+
+    impl Drop for TestDir {
+        fn drop(&mut self) {
+            let _ = fs::remove_dir_all(&self.0);
+        }
+    }
+
+    fn write_categories_fixture(root: &Path) {
+        let categories_dir = root.join("crates/biome_diagnostics_categories/src");
+        fs::create_dir_all(&categories_dir).unwrap();
+        fs::write(
+            categories_dir.join("categories.rs"),
+            r#"define_categories! {
+    // start assist actions
+
+    // end assist actions
+    // start syntax rules
+
+  ;  // end syntax rules
+    // end lint rules
+}
+"#,
+        )
+        .unwrap();
+    }
+
+    fn write_html_analyzer_fixture(root: &Path) {
+        fs::create_dir_all(root.join("crates/biome_html_analyze/src/assist")).unwrap();
+        fs::create_dir_all(root.join("crates/biome_html_analyze/tests/specs")).unwrap();
+    }
+
+    #[test]
+    fn html_assist_rules_use_the_source_group() {
+        let temp = TestDir::new("html-assist");
+        write_categories_fixture(temp.path());
+        write_html_analyzer_fixture(temp.path());
+
+        generate_new_analyzer_rule_at(
+            temp.path(),
+            LanguageKind::Html,
+            Category::Assist,
+            "useSortedAttributes",
+        );
+
+        assert!(
+            temp.path()
+                .join("crates/biome_html_analyze/src/assist/source/use_sorted_attributes.rs")
+                .exists()
+        );
+        assert!(
+            temp.path()
+                .join("crates/biome_html_analyze/tests/specs/source/useSortedAttributes/valid.html")
+                .exists()
+        );
+
+        let categories = fs::read_to_string(
+            temp.path()
+                .join("crates/biome_diagnostics_categories/src/categories.rs"),
+        )
+        .unwrap();
+        assert!(categories.contains(
+            r#""assist/source/useSortedAttributes": "https://biomejs.dev/assist/actions/use-sorted-attributes","#,
+        ));
+        assert!(!categories.contains("assists/nursery/useSortedAttributes"));
     }
 }
