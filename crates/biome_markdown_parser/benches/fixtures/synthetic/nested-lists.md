@@ -1,3 +1,5 @@
+<!-- markdownlint-disable -->
+
 - Level 1 item A
   - Level 2 item A
     - Level 3 item A

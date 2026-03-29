@@ -1,3 +1,5 @@
+<!-- markdownlint-disable -->
+
 When building a modern compiler, one of the first decisions you need to make is how to
 represent the source code internally. Most compilers use an **abstract syntax tree** (AST)
 to capture the hierarchical structure of the program. The AST strips away syntactic sugar

@@ -1,3 +1,5 @@
+<!-- markdownlint-disable -->
+
 *foo bar*
 
 

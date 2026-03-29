@@ -1,3 +1,5 @@
+<!-- markdownlint-disable -->
+
 This paragraph has [an inline link](https://example.com) and [another link](https://example.org "Example Org") with a title.
 
 Here is [a reference link][example] and [another one][docs] and [a collapsed ref][] and [a shortcut ref].

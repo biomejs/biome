@@ -1,3 +1,5 @@
+<!-- markdownlint-disable -->
+
 # Vortex
 
 [![CI Status](https://img.shields.io/github/actions/workflow/status/vortex-org/vortex/ci.yml?branch=main)](https://github.com/vortex-org/vortex/actions)
