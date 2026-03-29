@@ -77,3 +77,11 @@ export class FooBar {
 class FooBarPrivate {
   private constructor() { }
 }
+
+interface Connection {
+  connect(): void;
+}
+
+class MockConnection implements Connection {
+  connect() {}
+}

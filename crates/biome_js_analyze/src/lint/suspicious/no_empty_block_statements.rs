@@ -4,8 +4,9 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsConstructorParameter, JsBlockStatement, JsConstructorClassMember, JsFunctionBody,
-    JsStaticInitializationBlockClassMember, JsSwitchStatement,
+    AnyJsClass, AnyJsConstructorParameter, JsBlockStatement, JsConstructorClassMember,
+    JsFunctionBody, JsMethodClassMember, JsStaticInitializationBlockClassMember,
+    JsSwitchStatement,
 };
 use biome_rowan::{AstNode, AstNodeList, SyntaxNodeCast, declare_node_union};
 use biome_rule_options::no_empty_block_statements::NoEmptyBlockStatementsOptions;
@@ -86,7 +87,9 @@ impl Rule for NoEmptyBlockStatements {
         if !is_empty(query) {
             return None;
         }
-        if is_constructor_with_ts_param_props_or_private(query) {
+        if is_constructor_with_ts_param_props_or_private(query)
+            || is_method_in_class_with_implements_clause(query)
+        {
             return None;
         }
         if query.syntax().has_comments_descendants() {
@@ -153,4 +156,26 @@ fn is_constructor_with_ts_param_props_or_private(query: &Query) -> bool {
         .modifiers()
         .into_iter()
         .any(|modifier| modifier.is_private() || modifier.is_protected())
+}
+
+fn is_method_in_class_with_implements_clause(query: &Query) -> bool {
+    let Query::JsFunctionBody(body) = query else {
+        return false;
+    };
+
+    let Some(method) = body
+        .syntax()
+        .parent()
+        .and_then(|node| node.cast::<JsMethodClassMember>())
+    else {
+        return false;
+    };
+
+    method
+        .syntax()
+        .ancestors()
+        .skip(1)
+        .find_map(AnyJsClass::cast)
+        .and_then(|class| class.implements_clause())
+        .is_some()
 }
