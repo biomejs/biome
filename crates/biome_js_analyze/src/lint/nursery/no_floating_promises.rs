@@ -420,7 +420,8 @@ fn matching_overload_returns_promise_like(
         .map(|(_, returns_promise)| returns_promise);
 
     let returns_promise = best_returns.next()?;
-    best_returns.all(|best_return| best_return == returns_promise)
+    best_returns
+        .all(|best_return| best_return == returns_promise)
         .then_some(returns_promise)
 }
 
@@ -511,11 +512,13 @@ fn function_overload_matches_call(
         }
     }
 
-    (matched_callback_parameters > 0).then_some(OverloadMatch {
-        matched_callback_parameters,
-        matched_non_callback_parameters,
-        unknown_non_callback_parameters,
-    })
+    (matched_callback_parameters > 0 || matched_non_callback_parameters > 0).then_some(
+        OverloadMatch {
+            matched_callback_parameters,
+            matched_non_callback_parameters,
+            unknown_non_callback_parameters,
+        },
+    )
 }
 
 fn parameter_is_optional(parameter: &AnyParameter) -> bool {
@@ -677,9 +680,8 @@ fn ts_type_matches_argument_type(
         AnyTsType::TsNumberType(_) => Some(type_matches_variant(argument_ty, |ty| {
             ty.is_number_or_number_literal()
         })),
-        AnyTsType::TsNumberLiteralType(literal) => ts_number_literal_type_value(&literal).map(
-            |value| type_matches_variant(argument_ty, |ty| ty.is_number_literal(value)),
-        ),
+        AnyTsType::TsNumberLiteralType(literal) => ts_number_literal_type_value(&literal)
+            .map(|value| type_matches_variant(argument_ty, |ty| ty.is_number_literal(value))),
         AnyTsType::TsBooleanType(_) => Some(type_matches_variant(argument_ty, type_is_booleanish)),
         AnyTsType::TsBooleanLiteralType(literal) => {
             let value = match literal.literal().ok()?.text_trimmed() {
@@ -688,7 +690,9 @@ fn ts_type_matches_argument_type(
                 _ => return None,
             };
 
-            Some(type_matches_variant(argument_ty, |ty| ty.is_boolean_literal(value)))
+            Some(type_matches_variant(argument_ty, |ty| {
+                ty.is_boolean_literal(value)
+            }))
         }
         AnyTsType::TsNullLiteralType(_) => Some(type_matches_variant(argument_ty, |ty| {
             matches!(&**ty, TypeData::Null)
@@ -722,7 +726,12 @@ fn resolve_reference_type_alias(
 }
 
 fn ts_number_literal_type_value(literal: &TsNumberLiteralType) -> Option<f64> {
-    let magnitude = literal.literal_token().ok()?.text_trimmed().parse::<f64>().ok()?;
+    let magnitude = literal
+        .literal_token()
+        .ok()?
+        .text_trimmed()
+        .parse::<f64>()
+        .ok()?;
     Some(if literal.minus_token().is_some() {
         -magnitude
     } else {
@@ -731,11 +740,16 @@ fn ts_number_literal_type_value(literal: &TsNumberLiteralType) -> Option<f64> {
 }
 
 fn type_matches_variant(argument_ty: &Type, predicate: impl Fn(&Type) -> bool + Copy) -> bool {
-    predicate(argument_ty) || argument_ty.flattened_union_variants().any(|ty| predicate(&ty))
+    predicate(argument_ty)
+        || argument_ty
+            .flattened_union_variants()
+            .any(|ty| predicate(&ty))
 }
 
 fn type_is_booleanish(ty: &Type) -> bool {
-    matches!(&**ty, TypeData::Boolean) || ty.is_boolean_literal(true) || ty.is_boolean_literal(false)
+    matches!(&**ty, TypeData::Boolean)
+        || ty.is_boolean_literal(true)
+        || ty.is_boolean_literal(false)
 }
 
 fn ts_name_is_promise(name: &AnyTsName) -> bool {

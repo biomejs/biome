@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: issue9568_non_callback_only_valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+export function schedule(mode: "sync"): void;
+export function schedule(mode: "async"): Promise<void>;
+export function schedule(mode: "sync" | "async") {
+	return Promise.resolve();
+}
+
+schedule("sync");
+
+```
