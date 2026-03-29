@@ -7,16 +7,16 @@ expression: invalid.vue
 <!-- should generate diagnostics -->
 
 <template>
-  <!-- Missing argument: long-form without an argument -->
+  <!-- Missing value: long-form without a value -->
   <div v-bind></div>
   <div v-bind />
   <Foo v-bind />
 
-  <!-- Missing value -->
+  <!-- Missing value with an argument -->
   <Foo v-bind:foo />
   <Foo :foo />
 
-  <!-- Missing argument with modifier -->
+  <!-- Missing value with a modifier -->
   <div v-bind.prop></div>
 
   <!-- Invalid single modifier on long-form -->
@@ -47,7 +47,7 @@ invalid.vue:5:8 lint/nursery/useVueValidVBind ━━━━━━━━━━━�
   i This v-bind directive is missing a value.
   
     3 │ <template>
-    4 │   <!-- Missing argument: long-form without an argument -->
+    4 │   <!-- Missing value: long-form without a value -->
   > 5 │   <div v-bind></div>
       │        ^^^^^^
     6 │   <div v-bind />
@@ -67,7 +67,7 @@ invalid.vue:6:8 lint/nursery/useVueValidVBind ━━━━━━━━━━━�
 
   i This v-bind directive is missing a value.
   
-    4 │   <!-- Missing argument: long-form without an argument -->
+    4 │   <!-- Missing value: long-form without a value -->
     5 │   <div v-bind></div>
   > 6 │   <div v-bind />
       │        ^^^^^^
@@ -93,7 +93,7 @@ invalid.vue:7:8 lint/nursery/useVueValidVBind ━━━━━━━━━━━�
   > 7 │   <Foo v-bind />
       │        ^^^^^^
     8 │ 
-    9 │   <!-- Missing value -->
+    9 │   <!-- Missing value with an argument -->
   
   i v-bind directives require a value.
   
@@ -109,7 +109,7 @@ invalid.vue:10:8 lint/nursery/useVueValidVBind ━━━━━━━━━━━
 
   i This v-bind directive is missing a value.
   
-     9 │   <!-- Missing value -->
+     9 │   <!-- Missing value with an argument -->
   > 10 │   <Foo v-bind:foo />
        │        ^^^^^^^^^^
     11 │   <Foo :foo />
@@ -129,12 +129,12 @@ invalid.vue:11:8 lint/nursery/useVueValidVBind ━━━━━━━━━━━
 
   i This v-bind directive is missing a value.
   
-     9 │   <!-- Missing value -->
+     9 │   <!-- Missing value with an argument -->
     10 │   <Foo v-bind:foo />
   > 11 │   <Foo :foo />
        │        ^^^^
     12 │ 
-    13 │   <!-- Missing argument with modifier -->
+    13 │   <!-- Missing value with a modifier -->
   
   i v-bind directives require a value.
   
@@ -150,7 +150,7 @@ invalid.vue:14:8 lint/nursery/useVueValidVBind ━━━━━━━━━━━
 
   i This v-bind directive is missing a value.
   
-    13 │   <!-- Missing argument with modifier -->
+    13 │   <!-- Missing value with a modifier -->
   > 14 │   <div v-bind.prop></div>
        │        ^^^^^^^^^^^
     15 │ 

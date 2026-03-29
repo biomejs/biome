@@ -16,6 +16,10 @@
 <!-- Dynamic argument (bracketed) is an argument, not a missing one -->
 <div v-bind:[dynamicName]="value"></div>
 
+<!-- Object syntax without an argument is valid -->
+<div v-bind="props"></div>
+<MyComponent v-bind="{ disabled: isDisabled, title: tooltip }"></MyComponent>
+
 <!-- Template-level binding -->
 <template v-bind:id="componentId"></template>
 
