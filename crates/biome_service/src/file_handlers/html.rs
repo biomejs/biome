@@ -1233,10 +1233,13 @@ fn parse_matched_embed(
                 content.content_offset,
             );
 
-            // Source-level embeds get full services; expression-level don't
-            let js_services = if is_source_level
-                && (ctx.settings.as_ref().is_linter_enabled()
-                    || ctx.settings.as_ref().is_assist_enabled())
+            let should_build_semantic_model = ctx.settings.as_ref().is_linter_enabled()
+                || ctx.settings.as_ref().is_assist_enabled();
+
+            // Astro template expressions need semantic services for JS rules such as
+            // `useOptionalChain`, even though they aren't source-level snippets.
+            let js_services = if should_build_semantic_model
+                && (is_source_level || ctx.host_file_source.is_astro())
             {
                 JsDocumentServices::default()
                     .with_js_semantic_model(&snippet.tree())
