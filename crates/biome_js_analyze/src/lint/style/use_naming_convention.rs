@@ -815,6 +815,16 @@ impl Rule for UseNamingConvention {
                 }
             }
             if !convention.formats.is_empty() {
+                if is_not_trimmed {
+                    let (prefix_len, trimmed_name) = trim_underscore_dollar(name);
+                    name_range_start += prefix_len;
+                    name = trimmed_name;
+                    is_not_trimmed = false;
+                }
+                if name.is_empty() {
+                    // Empty strings are always valid.
+                    return None;
+                }
                 let actual_case = Case::identify(name, options.strict_case());
                 if (*convention.formats | Case::Uni).contains(actual_case) {
                     // Valid case

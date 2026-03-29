@@ -1,0 +1,16 @@
+/* should not generate diagnostics */
+const values = {
+    a: 1,
+    b: 2,
+    c: 3,
+    d: 4,
+};
+
+const {
+    a: _snake_case,
+    b: snake_case_,
+    c: $snake_case,
+    d: snake_case$,
+} = values;
+
+console.log(_snake_case, snake_case_, $snake_case, snake_case$);
