@@ -318,6 +318,38 @@ const props: Props = { title: "Hello" };
 }
 
 #[test]
+fn namespace_imports_used_in_svelte_templates_are_not_reported_as_unused() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let svelte_file_path = Utf8Path::new("file.svelte");
+    fs.insert(
+        svelte_file_path.into(),
+        r#"<script lang="ts">
+import * as Tabs from "tabs";
+</script>
+
+<Tabs.Root />
+"#
+        .as_bytes(),
+    );
+
+    let (_fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", svelte_file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+}
+
+#[test]
 fn format_stdin_successfully() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

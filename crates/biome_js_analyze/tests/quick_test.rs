@@ -12,8 +12,10 @@ use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_js_syntax::JsFileSource;
 use biome_package::{Dependencies, PackageJson};
 use biome_project_layout::ProjectLayout;
+use biome_rowan::{RawSyntaxKind, TextRange as RowanTextRange, TextSize, TokenText};
 use biome_test_utils::module_graph_for_test_file;
 use camino::Utf8PathBuf;
+use rustc_hash::FxHashMap;
 use std::slice;
 use std::sync::Arc;
 
@@ -156,5 +158,54 @@ function App() {
     );
 
     // Should not report any errors because h and Fragment are used as JSX factory functions
+    assert_eq!(error_ranges.as_slice(), &[]);
+}
+
+#[test]
+fn no_unused_imports_respects_embedded_value_references() {
+    const FILENAME: &str = "file.ts";
+    const SOURCE: &str = r#"import * as Tabs from "tabs";"#;
+
+    let parsed = parse(SOURCE, JsFileSource::ts(), JsParserOptions::default());
+    let file_path = Utf8PathBuf::from(FILENAME);
+
+    let mut error_ranges: Vec<TextRange> = Vec::new();
+    let options = AnalyzerOptions::default().with_file_path(file_path.clone());
+    let rule_filter = RuleFilter::Rule("correctness", "noUnusedImports");
+
+    let project_layout = Arc::new(ProjectLayout::default());
+    let semantic_model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
+    let mut services = JsAnalyzerServices::from((
+        module_graph_for_test_file(file_path.as_path(), project_layout.as_ref()),
+        project_layout,
+        JsFileSource::ts(),
+        Some(semantic_model),
+    ));
+
+    let mut embedded_references = FxHashMap::default();
+    embedded_references.insert(
+        RowanTextRange::new(TextSize::from(0), TextSize::from(4)),
+        TokenText::new_raw(RawSyntaxKind(0), "Tabs"),
+    );
+    services.set_embedded_value_references(vec![embedded_references]);
+
+    analyze(
+        &parsed.tree(),
+        AnalysisFilter {
+            enabled_rules: Some(slice::from_ref(&rule_filter)),
+            ..AnalysisFilter::default()
+        },
+        &options,
+        &[],
+        services,
+        |signal| {
+            if let Some(diag) = signal.diagnostic() {
+                error_ranges.push(diag.location().span.unwrap());
+            }
+
+            ControlFlow::<Never>::Continue(())
+        },
+    );
+
     assert_eq!(error_ranges.as_slice(), &[]);
 }
