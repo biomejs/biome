@@ -84,14 +84,14 @@ impl Rule for UseSimplifiedLogicExpression {
                     AnyJsLiteralExpression::JsBooleanLiteralExpression(literal),
                 ) = left
                 {
-                    return simplify_or_expression(literal, right).map(|expr| (false, expr));
+                    return simplify_or_expression(literal, right, true).map(|expr| (false, expr));
                 }
 
                 if let AnyJsExpression::AnyJsLiteralExpression(
                     AnyJsLiteralExpression::JsBooleanLiteralExpression(literal),
                 ) = right
                 {
-                    return simplify_or_expression(literal, left).map(|expr| (false, expr));
+                    return simplify_or_expression(literal, left, false).map(|expr| (false, expr));
                 }
 
                 if could_apply_de_morgan(node).unwrap_or(false) {
@@ -104,14 +104,14 @@ impl Rule for UseSimplifiedLogicExpression {
                     AnyJsLiteralExpression::JsBooleanLiteralExpression(literal),
                 ) = left
                 {
-                    return simplify_and_expression(literal, right).map(|expr| (false, expr));
+                    return simplify_and_expression(literal, right, true).map(|expr| (false, expr));
                 }
 
                 if let AnyJsExpression::AnyJsLiteralExpression(
                     AnyJsLiteralExpression::JsBooleanLiteralExpression(literal),
                 ) = right
                 {
-                    return simplify_and_expression(literal, left).map(|expr| (false, expr));
+                    return simplify_and_expression(literal, left, false).map(|expr| (false, expr));
                 }
 
                 if could_apply_de_morgan(node).unwrap_or(false) {
@@ -186,33 +186,65 @@ fn could_apply_de_morgan(node: &JsLogicalExpression) -> Option<bool> {
 fn simplify_and_expression(
     literal: JsBooleanLiteralExpression,
     expression: AnyJsExpression,
+    literal_on_left: bool,
 ) -> Option<AnyJsExpression> {
-    keep_expression_if_literal(literal, expression, true)
+    keep_expression_if_literal(literal, expression, true, literal_on_left)
 }
 
 fn simplify_or_expression(
     literal: JsBooleanLiteralExpression,
     expression: AnyJsExpression,
+    literal_on_left: bool,
 ) -> Option<AnyJsExpression> {
-    keep_expression_if_literal(literal, expression, false)
+    keep_expression_if_literal(literal, expression, false, literal_on_left)
 }
 
 fn keep_expression_if_literal(
     literal: JsBooleanLiteralExpression,
     expression: AnyJsExpression,
     expected_value: bool,
+    literal_on_left: bool,
 ) -> Option<AnyJsExpression> {
     let eval_value = match literal.value_token().ok()?.kind() {
         T![true] => true,
         T![false] => false,
         _ => return None,
     };
+
     if eval_value == expected_value {
-        Some(expression)
+        (literal_on_left || is_boolean_expression(&expression)).then_some(expression)
     } else {
         Some(AnyJsExpression::AnyJsLiteralExpression(
             AnyJsLiteralExpression::JsBooleanLiteralExpression(literal),
         ))
+    }
+}
+
+fn is_boolean_expression(expression: &AnyJsExpression) -> bool {
+    match expression.clone().omit_parentheses() {
+        AnyJsExpression::AnyJsLiteralExpression(
+            AnyJsLiteralExpression::JsBooleanLiteralExpression(_),
+        )
+        | AnyJsExpression::JsInExpression(_)
+        | AnyJsExpression::JsInstanceofExpression(_) => true,
+        AnyJsExpression::JsBinaryExpression(expr) => expr.is_comparison_operator(),
+        AnyJsExpression::JsUnaryExpression(expr) => {
+            matches!(expr.operator(), Ok(JsUnaryOperator::LogicalNot))
+        }
+        AnyJsExpression::JsLogicalExpression(expr) => {
+            matches!(
+                expr.operator(),
+                Ok(biome_js_syntax::JsLogicalOperator::LogicalAnd
+                    | biome_js_syntax::JsLogicalOperator::LogicalOr)
+            ) && expr
+                .left()
+                .ok()
+                .zip(expr.right().ok())
+                .is_some_and(|(left, right)| {
+                    is_boolean_expression(&left) && is_boolean_expression(&right)
+                })
+        }
+        _ => false,
     }
 }
 

@@ -6,3 +6,5 @@ const boolExpr5 = true;
 const boolExpr6 = false;
 const r6 = !!boolExpr1 || !!boolExpr2;
 !!x;
+const account = { test: 1 };
+const foo = { bar: account?.test || false };
