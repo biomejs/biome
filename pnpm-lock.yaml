@@ -158,9 +158,31 @@ importers:
         specifier: '*'
         version: link:../biome
 
+  packages/@biomejs/resolver:
+    devDependencies:
+      '@biomejs/wasm-resolver-nodejs':
+        specifier: workspace:*
+        version: link:../wasm-resolver-nodejs
+      '@biomejs/wasm-resolver-web':
+        specifier: workspace:*
+        version: link:../wasm-resolver-web
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+      vite:
+        specifier: 7.3.1
+        version: 7.3.1(@types/node@24.10.13)(jiti@2.6.1)(yaml@2.8.2)
+      vitest:
+        specifier: 4.0.18
+        version: 4.0.18(@types/node@24.10.13)(happy-dom@20.7.0)(jiti@2.6.1)(yaml@2.8.2)
+
   packages/@biomejs/wasm-bundler: {}
 
   packages/@biomejs/wasm-nodejs: {}
+
+  packages/@biomejs/wasm-resolver-nodejs: {}
+
+  packages/@biomejs/wasm-resolver-web: {}
 
   packages/@biomejs/wasm-web: {}
 

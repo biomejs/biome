@@ -1,0 +1,33 @@
+{
+  "name": "@biomejs/wasm-resolver-web",
+  "type": "module",
+  "collaborators": [
+    "Biome Developers and Contributors"
+  ],
+  "description": "WebAssembly bindings to the Biome resolver API (web target)",
+  "version": "0.1.0",
+  "license": "MIT OR Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/biomejs/biome"
+  },
+  "files": [
+    "biome_resolver_wasm_bg.wasm",
+    "biome_resolver_wasm.js",
+    "biome_resolver_wasm.d.ts"
+  ],
+  "main": "biome_resolver_wasm.js",
+  "homepage": "https://biomejs.dev/",
+  "types": "biome_resolver_wasm.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ],
+  "keywords": [
+    "resolver",
+    "module-resolution",
+    "wasm"
+  ],
+  "publishConfig": {
+    "provenance": true
+  }
+}
