@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validNamespaceDeclarationMergingPropertyAccess.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+function registry() {}
+namespace registry {
+    export const item = 1;
+}
+console.log(registry.item);
+
+```
