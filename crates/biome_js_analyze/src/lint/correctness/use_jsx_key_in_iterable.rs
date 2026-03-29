@@ -8,8 +8,9 @@ use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsFunctionBody, AnyJsMemberExpression, AnyJsObjectMember, AnyJsStatement,
     AnyJsSwitchClause, AnyJsxAttribute, AnyJsxChild, JsArrayElementList, JsArrayExpression,
-    JsCallArgumentList, JsCallArguments, JsCallExpression, JsFunctionBody, JsNewExpression,
-    JsObjectExpression, JsStatementList, JsxAttributeList, JsxExpressionChild, JsxTagExpression,
+    JsCallArgumentList, JsCallArguments, JsCallExpression, JsFileSource, JsFunctionBody,
+    JsNewExpression, JsObjectExpression, JsStatementList, JsxAttributeList, JsxExpressionChild,
+    JsxTagExpression,
 };
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, TextRange, declare_node_union};
 use biome_rule_options::use_jsx_key_in_iterable::UseJsxKeyInIterableOptions;
@@ -84,6 +85,11 @@ impl Rule for UseJsxKeyInIterable {
     type Options = UseJsxKeyInIterableOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let file_source = ctx.source_type::<JsFileSource>();
+        if file_source.is_template_expression() && file_source.as_embedding_kind().is_astro() {
+            return Vec::new().into_boxed_slice();
+        }
+
         let node = ctx.query();
         let model = ctx.model();
         let options = ctx.options();
@@ -533,4 +539,61 @@ fn unwrap_parenthesis(expr: AnyJsExpression) -> Option<AnyJsExpression> {
         inner_expr = parenthesized_expr.expression().ok()?;
     }
     Some(inner_expr)
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::JsAnalyzerServices;
+    use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleFilter};
+    use biome_js_parser::{JsParserOptions, parse};
+    use biome_js_semantic::{SemanticModelOptions, semantic_model};
+    use biome_js_syntax::{EmbeddingKind, JsFileSource};
+    use std::slice;
+
+    fn run_rule(source: &str, source_type: JsFileSource) -> usize {
+        let parsed = parse(source, source_type, JsParserOptions::default());
+        let rule_filter = RuleFilter::Rule("correctness", "useJsxKeyInIterable");
+        let options = AnalyzerOptions::default();
+        let semantic_model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
+        let services = JsAnalyzerServices::from((
+            Default::default(),
+            Default::default(),
+            source_type,
+            Some(semantic_model),
+        ));
+        let mut diagnostics = 0;
+
+        crate::analyze(
+            &parsed.tree(),
+            AnalysisFilter {
+                enabled_rules: Some(slice::from_ref(&rule_filter)),
+                ..AnalysisFilter::default()
+            },
+            &options,
+            &[],
+            services,
+            |signal| {
+                if signal.diagnostic().is_some() {
+                    diagnostics += 1;
+                }
+
+                ControlFlow::<Never>::Continue(())
+            },
+        );
+
+        diagnostics
+    }
+
+    #[test]
+    fn astro_template_expressions_do_not_require_keys() {
+        let source_type =
+            JsFileSource::tsx().with_embedding_kind(EmbeddingKind::Astro { frontmatter: false });
+
+        assert_eq!(run_rule("[1, 2].map((item) => <div>{item}</div>)", source_type), 0);
+    }
+
+    #[test]
+    fn jsx_iterables_still_require_keys() {
+        assert_eq!(run_rule("[1, 2].map((item) => <div>{item}</div>)", JsFileSource::tsx()), 1);
+    }
 }

@@ -1,0 +1,10 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid_issue_9572.astro
+---
+# Input
+```astro
+<!-- should not generate diagnostics -->
+{[1, 2].map((item) => <div>{item}</div>)}
+
+```
