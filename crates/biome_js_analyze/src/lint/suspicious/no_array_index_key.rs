@@ -9,7 +9,7 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsFunction, AnyJsMemberExpression, AnyJsObjectMember, AnyJsTemplateElement,
     JsCallArgumentList, JsCallArguments, JsCallExpression, JsFormalParameter, JsObjectExpression,
     JsObjectMemberList, JsParameterList, JsParameters, JsPropertyObjectMember,
-    JsReferenceIdentifier, JsxAttribute,
+    JsReferenceIdentifier, JsxAttribute, JsxOpeningElement, JsxSelfClosingElement,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange, declare_node_union};
 use biome_rule_options::no_array_index_key::NoArrayIndexKeyOptions;
@@ -236,6 +236,26 @@ impl Rule for NoArrayIndexKey {
         );
 
         Some(diagnostic)
+    }
+
+    fn text_range(ctx: &RuleContext<Self>, state: &Self::State) -> Option<TextRange> {
+        match ctx.query() {
+            NoArrayIndexKeyQuery::JsxAttribute(attribute) => attribute
+                .syntax()
+                .ancestors()
+                .skip(1)
+                .find_map(|node| {
+                    JsxOpeningElement::cast_ref(&node)
+                        .map(|element| element.range())
+                        .or_else(|| {
+                            JsxSelfClosingElement::cast_ref(&node).map(|element| element.range())
+                        })
+                })
+                .or(Some(state.incorrect_prop)),
+            NoArrayIndexKeyQuery::JsPropertyObjectMember(object_member) => {
+                Some(object_member.range())
+            }
+        }
     }
 }
 

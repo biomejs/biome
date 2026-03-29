@@ -1,0 +1,74 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: multiline.jsx
+---
+# Input
+```jsx
+function suppressedMultiline() {
+	return Array.from(things, (thing, index) => (
+		// biome-ignore lint/suspicious/noArrayIndexKey: static placeholder
+		<div
+			key={index}
+			className="placeholder"
+		>
+			{thing}
+		</div>
+	));
+}
+
+function unsuppressedMultiline() {
+	return Array.from(things, (thing, index) => (
+		<div
+			key={index}
+			className="placeholder"
+		>
+			{thing}
+		</div>
+	));
+}
+```
+
+# Diagnostics
+```
+multiline.jsx:16:9 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the index of an array as key property in an element.
+  
+    14 │ 	return Array.from(things, (thing, index) => (
+    15 │ 		<div
+  > 16 │ 			key={index}
+       │ 			     ^^^^^
+    17 │ 			className="placeholder"
+    18 │ 		>
+  
+  i This is the source of the key value.
+  
+    12 │ 
+    13 │ function unsuppressedMultiline() {
+  > 14 │ 	return Array.from(things, (thing, index) => (
+       │ 	                                  ^^^^^
+    15 │ 		<div
+    16 │ 			key={index}
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
+  
+     13  13 │   function unsuppressedMultiline() {
+     14  14 │   	return Array.from(things, (thing, index) => (
+     15     │ - → → <div
+         15 │ + → → //·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>
+         16 │ + → → <div
+     16  17 │   			key={index}
+     17  18 │   			className="placeholder"
+  
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
+  
+          1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+      1   2 │   function suppressedMultiline() {
+      2   3 │   	return Array.from(things, (thing, index) => (
+  
+
+```
