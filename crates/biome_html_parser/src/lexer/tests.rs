@@ -223,6 +223,43 @@ fn element_with_dashed_attributes() {
 }
 
 #[test]
+fn element_with_angular_attributes() {
+    assert_lex! {
+        HtmlLexContext::InsideTagAngular,
+        "<input (keyup)=\"x\" [disabled]=\"y\" [(ngModel)]=\"z\" *ngIf=\"c\" #tpl>",
+        L_ANGLE: 1,
+        HTML_LITERAL: 5,
+        WHITESPACE: 1,
+        L_PAREN: 1,
+        HTML_LITERAL: 5,
+        R_PAREN: 1,
+        EQ: 1,
+        HTML_STRING_LITERAL: 3,
+        WHITESPACE: 1,
+        L_BRACKET: 1,
+        HTML_LITERAL: 8,
+        R_BRACKET: 1,
+        EQ: 1,
+        HTML_STRING_LITERAL: 3,
+        WHITESPACE: 1,
+        L_BRACKET_PAREN: 2,
+        HTML_LITERAL: 7,
+        R_BRACKET_PAREN: 2,
+        EQ: 1,
+        HTML_STRING_LITERAL: 3,
+        WHITESPACE: 1,
+        STAR: 1,
+        HTML_LITERAL: 4,
+        EQ: 1,
+        HTML_STRING_LITERAL: 3,
+        WHITESPACE: 1,
+        HASH: 1,
+        HTML_LITERAL: 3,
+        R_ANGLE: 1,
+    }
+}
+
+#[test]
 fn html_element() {
     assert_lex! {
         HtmlLexContext::InsideTag,

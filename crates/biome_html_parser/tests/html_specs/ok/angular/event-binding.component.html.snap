@@ -1,0 +1,94 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```angular
+<input type="text" (keyup)="updateField()" />
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@0..1 "<" [] [],
+            name: HtmlTagName {
+                value_token: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [
+                HtmlAttribute {
+                    name: HtmlAttributeName {
+                        value_token: HTML_LITERAL@7..11 "type" [] [],
+                    },
+                    initializer: HtmlAttributeInitializerClause {
+                        eq_token: EQ@11..12 "=" [] [],
+                        value: HtmlString {
+                            value_token: HTML_STRING_LITERAL@12..19 "\"text\"" [] [Whitespace(" ")],
+                        },
+                    },
+                },
+                AngularEventBinding {
+                    l_paren_token: L_PAREN@19..20 "(" [] [],
+                    name: AngularBindingName {
+                        value_token: HTML_LITERAL@20..25 "keyup" [] [],
+                    },
+                    r_paren_token: R_PAREN@25..26 ")" [] [],
+                    initializer: HtmlAttributeInitializerClause {
+                        eq_token: EQ@26..27 "=" [] [],
+                        value: HtmlString {
+                            value_token: HTML_STRING_LITERAL@27..43 "\"updateField()\"" [] [Whitespace(" ")],
+                        },
+                    },
+                },
+            ],
+            slash_token: SLASH@43..44 "/" [] [],
+            r_angle_token: R_ANGLE@44..45 ">" [] [],
+        },
+    ],
+    eof_token: EOF@45..46 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..46
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..45
+    0: HTML_SELF_CLOSING_ELEMENT@0..45
+      0: L_ANGLE@0..1 "<" [] []
+      1: HTML_TAG_NAME@1..7
+        0: HTML_LITERAL@1..7 "input" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@7..43
+        0: HTML_ATTRIBUTE@7..19
+          0: HTML_ATTRIBUTE_NAME@7..11
+            0: HTML_LITERAL@7..11 "type" [] []
+          1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@11..19
+            0: EQ@11..12 "=" [] []
+            1: HTML_STRING@12..19
+              0: HTML_STRING_LITERAL@12..19 "\"text\"" [] [Whitespace(" ")]
+        1: ANGULAR_EVENT_BINDING@19..43
+          0: L_PAREN@19..20 "(" [] []
+          1: ANGULAR_BINDING_NAME@20..25
+            0: HTML_LITERAL@20..25 "keyup" [] []
+          2: R_PAREN@25..26 ")" [] []
+          3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@26..43
+            0: EQ@26..27 "=" [] []
+            1: HTML_STRING@27..43
+              0: HTML_STRING_LITERAL@27..43 "\"updateField()\"" [] [Whitespace(" ")]
+      3: SLASH@43..44 "/" [] []
+      4: R_ANGLE@44..45 ">" [] []
+  4: EOF@45..46 "" [Newline("\n")] []
+
+```

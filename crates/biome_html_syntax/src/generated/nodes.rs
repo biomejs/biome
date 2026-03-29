@@ -20,6 +20,276 @@ use std::fmt::{Debug, Formatter};
 #[doc = r" the slots are not statically known."]
 pub(crate) const SLOT_MAP_EMPTY_VALUE: u8 = u8::MAX;
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularBindingName {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularBindingName {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularBindingNameFields {
+        AngularBindingNameFields {
+            value_token: self.value_token(),
+        }
+    }
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for AngularBindingName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularBindingNameFields {
+    pub value_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularEventBinding {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularEventBinding {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularEventBindingFields {
+        AngularEventBindingFields {
+            l_paren_token: self.l_paren_token(),
+            name: self.name(),
+            r_paren_token: self.r_paren_token(),
+            initializer: self.initializer(),
+        }
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn name(&self) -> SyntaxResult<AngularBindingName> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+    pub fn initializer(&self) -> Option<HtmlAttributeInitializerClause> {
+        support::node(&self.syntax, 3usize)
+    }
+}
+impl Serialize for AngularEventBinding {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularEventBindingFields {
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub name: SyntaxResult<AngularBindingName>,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+    pub initializer: Option<HtmlAttributeInitializerClause>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularPropertyBinding {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularPropertyBinding {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularPropertyBindingFields {
+        AngularPropertyBindingFields {
+            l_brack_token: self.l_brack_token(),
+            name: self.name(),
+            r_brack_token: self.r_brack_token(),
+            initializer: self.initializer(),
+        }
+    }
+    pub fn l_brack_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn name(&self) -> SyntaxResult<AngularBindingName> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn r_brack_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+    pub fn initializer(&self) -> Option<HtmlAttributeInitializerClause> {
+        support::node(&self.syntax, 3usize)
+    }
+}
+impl Serialize for AngularPropertyBinding {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularPropertyBindingFields {
+    pub l_brack_token: SyntaxResult<SyntaxToken>,
+    pub name: SyntaxResult<AngularBindingName>,
+    pub r_brack_token: SyntaxResult<SyntaxToken>,
+    pub initializer: Option<HtmlAttributeInitializerClause>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularStructuralDirective {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularStructuralDirective {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularStructuralDirectiveFields {
+        AngularStructuralDirectiveFields {
+            star_token: self.star_token(),
+            name: self.name(),
+            initializer: self.initializer(),
+        }
+    }
+    pub fn star_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn name(&self) -> SyntaxResult<AngularBindingName> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn initializer(&self) -> Option<HtmlAttributeInitializerClause> {
+        support::node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for AngularStructuralDirective {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularStructuralDirectiveFields {
+    pub star_token: SyntaxResult<SyntaxToken>,
+    pub name: SyntaxResult<AngularBindingName>,
+    pub initializer: Option<HtmlAttributeInitializerClause>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularTemplateRefVariable {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularTemplateRefVariable {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularTemplateRefVariableFields {
+        AngularTemplateRefVariableFields {
+            hash_token: self.hash_token(),
+            name: self.name(),
+        }
+    }
+    pub fn hash_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn name(&self) -> SyntaxResult<AngularBindingName> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for AngularTemplateRefVariable {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularTemplateRefVariableFields {
+    pub hash_token: SyntaxResult<SyntaxToken>,
+    pub name: SyntaxResult<AngularBindingName>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AngularTwoWayBinding {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AngularTwoWayBinding {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AngularTwoWayBindingFields {
+        AngularTwoWayBindingFields {
+            l_bracket_paren_token: self.l_bracket_paren_token(),
+            name: self.name(),
+            r_bracket_paren_token: self.r_bracket_paren_token(),
+            initializer: self.initializer(),
+        }
+    }
+    pub fn l_bracket_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn name(&self) -> SyntaxResult<AngularBindingName> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn r_bracket_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+    pub fn initializer(&self) -> Option<HtmlAttributeInitializerClause> {
+        support::node(&self.syntax, 3usize)
+    }
+}
+impl Serialize for AngularTwoWayBinding {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AngularTwoWayBindingFields {
+    pub l_bracket_paren_token: SyntaxResult<SyntaxToken>,
+    pub name: SyntaxResult<AngularBindingName>,
+    pub r_bracket_paren_token: SyntaxResult<SyntaxToken>,
+    pub initializer: Option<HtmlAttributeInitializerClause>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct AstroClassDirective {
     pub(crate) syntax: SyntaxNode,
 }
@@ -3775,6 +4045,46 @@ pub struct VueVSlotShorthandDirectiveFields {
     pub initializer: Option<HtmlAttributeInitializerClause>,
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyAngularAttribute {
+    AngularEventBinding(AngularEventBinding),
+    AngularPropertyBinding(AngularPropertyBinding),
+    AngularStructuralDirective(AngularStructuralDirective),
+    AngularTemplateRefVariable(AngularTemplateRefVariable),
+    AngularTwoWayBinding(AngularTwoWayBinding),
+}
+impl AnyAngularAttribute {
+    pub fn as_angular_event_binding(&self) -> Option<&AngularEventBinding> {
+        match &self {
+            Self::AngularEventBinding(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_angular_property_binding(&self) -> Option<&AngularPropertyBinding> {
+        match &self {
+            Self::AngularPropertyBinding(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_angular_structural_directive(&self) -> Option<&AngularStructuralDirective> {
+        match &self {
+            Self::AngularStructuralDirective(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_angular_template_ref_variable(&self) -> Option<&AngularTemplateRefVariable> {
+        match &self {
+            Self::AngularTemplateRefVariable(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_angular_two_way_binding(&self) -> Option<&AngularTwoWayBinding> {
+        match &self {
+            Self::AngularTwoWayBinding(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyAstroDirective {
     AstroClassDirective(AstroClassDirective),
     AstroClientDirective(AstroClientDirective),
@@ -3842,6 +4152,7 @@ impl AnyAstroFrontmatterElement {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyHtmlAttribute {
+    AnyAngularAttribute(AnyAngularAttribute),
     AnyAstroDirective(AnyAstroDirective),
     AnySvelteDirective(AnySvelteDirective),
     AnyVueDirective(AnyVueDirective),
@@ -3853,6 +4164,12 @@ pub enum AnyHtmlAttribute {
     SvelteAttachAttribute(SvelteAttachAttribute),
 }
 impl AnyHtmlAttribute {
+    pub fn as_any_angular_attribute(&self) -> Option<&AnyAngularAttribute> {
+        match &self {
+            Self::AnyAngularAttribute(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_any_astro_directive(&self) -> Option<&AnyAstroDirective> {
         match &self {
             Self::AnyAstroDirective(item) => Some(item),
@@ -4412,6 +4729,333 @@ impl AnyVueDirectiveArgument {
             Self::VueStaticArgument(item) => Some(item),
             _ => None,
         }
+    }
+}
+impl AstNode for AngularBindingName {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_BINDING_NAME as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_BINDING_NAME
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularBindingName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularBindingName")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("AngularBindingName").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularBindingName> for SyntaxNode {
+    fn from(n: AngularBindingName) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularBindingName> for SyntaxElement {
+    fn from(n: AngularBindingName) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularEventBinding {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_EVENT_BINDING as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_EVENT_BINDING
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularEventBinding {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularEventBinding")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .field(
+                    "initializer",
+                    &support::DebugOptionalElement(self.initializer()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("AngularEventBinding").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularEventBinding> for SyntaxNode {
+    fn from(n: AngularEventBinding) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularEventBinding> for SyntaxElement {
+    fn from(n: AngularEventBinding) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularPropertyBinding {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_PROPERTY_BINDING as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_PROPERTY_BINDING
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularPropertyBinding {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularPropertyBinding")
+                .field(
+                    "l_brack_token",
+                    &support::DebugSyntaxResult(self.l_brack_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "r_brack_token",
+                    &support::DebugSyntaxResult(self.r_brack_token()),
+                )
+                .field(
+                    "initializer",
+                    &support::DebugOptionalElement(self.initializer()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("AngularPropertyBinding").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularPropertyBinding> for SyntaxNode {
+    fn from(n: AngularPropertyBinding) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularPropertyBinding> for SyntaxElement {
+    fn from(n: AngularPropertyBinding) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularStructuralDirective {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_STRUCTURAL_DIRECTIVE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_STRUCTURAL_DIRECTIVE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularStructuralDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularStructuralDirective")
+                .field("star_token", &support::DebugSyntaxResult(self.star_token()))
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "initializer",
+                    &support::DebugOptionalElement(self.initializer()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("AngularStructuralDirective").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularStructuralDirective> for SyntaxNode {
+    fn from(n: AngularStructuralDirective) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularStructuralDirective> for SyntaxElement {
+    fn from(n: AngularStructuralDirective) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularTemplateRefVariable {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_TEMPLATE_REF_VARIABLE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_TEMPLATE_REF_VARIABLE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularTemplateRefVariable {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularTemplateRefVariable")
+                .field("hash_token", &support::DebugSyntaxResult(self.hash_token()))
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .finish()
+        } else {
+            f.debug_struct("AngularTemplateRefVariable").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularTemplateRefVariable> for SyntaxNode {
+    fn from(n: AngularTemplateRefVariable) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularTemplateRefVariable> for SyntaxElement {
+    fn from(n: AngularTemplateRefVariable) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for AngularTwoWayBinding {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ANGULAR_TWO_WAY_BINDING as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ANGULAR_TWO_WAY_BINDING
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AngularTwoWayBinding {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AngularTwoWayBinding")
+                .field(
+                    "l_bracket_paren_token",
+                    &support::DebugSyntaxResult(self.l_bracket_paren_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "r_bracket_paren_token",
+                    &support::DebugSyntaxResult(self.r_bracket_paren_token()),
+                )
+                .field(
+                    "initializer",
+                    &support::DebugOptionalElement(self.initializer()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("AngularTwoWayBinding").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AngularTwoWayBinding> for SyntaxNode {
+    fn from(n: AngularTwoWayBinding) -> Self {
+        n.syntax
+    }
+}
+impl From<AngularTwoWayBinding> for SyntaxElement {
+    fn from(n: AngularTwoWayBinding) -> Self {
+        n.syntax.into()
     }
 }
 impl AstNode for AstroClassDirective {
@@ -8939,6 +9583,112 @@ impl From<VueVSlotShorthandDirective> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl From<AngularEventBinding> for AnyAngularAttribute {
+    fn from(node: AngularEventBinding) -> Self {
+        Self::AngularEventBinding(node)
+    }
+}
+impl From<AngularPropertyBinding> for AnyAngularAttribute {
+    fn from(node: AngularPropertyBinding) -> Self {
+        Self::AngularPropertyBinding(node)
+    }
+}
+impl From<AngularStructuralDirective> for AnyAngularAttribute {
+    fn from(node: AngularStructuralDirective) -> Self {
+        Self::AngularStructuralDirective(node)
+    }
+}
+impl From<AngularTemplateRefVariable> for AnyAngularAttribute {
+    fn from(node: AngularTemplateRefVariable) -> Self {
+        Self::AngularTemplateRefVariable(node)
+    }
+}
+impl From<AngularTwoWayBinding> for AnyAngularAttribute {
+    fn from(node: AngularTwoWayBinding) -> Self {
+        Self::AngularTwoWayBinding(node)
+    }
+}
+impl AstNode for AnyAngularAttribute {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = AngularEventBinding::KIND_SET
+        .union(AngularPropertyBinding::KIND_SET)
+        .union(AngularStructuralDirective::KIND_SET)
+        .union(AngularTemplateRefVariable::KIND_SET)
+        .union(AngularTwoWayBinding::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            ANGULAR_EVENT_BINDING
+                | ANGULAR_PROPERTY_BINDING
+                | ANGULAR_STRUCTURAL_DIRECTIVE
+                | ANGULAR_TEMPLATE_REF_VARIABLE
+                | ANGULAR_TWO_WAY_BINDING
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            ANGULAR_EVENT_BINDING => Self::AngularEventBinding(AngularEventBinding { syntax }),
+            ANGULAR_PROPERTY_BINDING => {
+                Self::AngularPropertyBinding(AngularPropertyBinding { syntax })
+            }
+            ANGULAR_STRUCTURAL_DIRECTIVE => {
+                Self::AngularStructuralDirective(AngularStructuralDirective { syntax })
+            }
+            ANGULAR_TEMPLATE_REF_VARIABLE => {
+                Self::AngularTemplateRefVariable(AngularTemplateRefVariable { syntax })
+            }
+            ANGULAR_TWO_WAY_BINDING => Self::AngularTwoWayBinding(AngularTwoWayBinding { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::AngularEventBinding(it) => it.syntax(),
+            Self::AngularPropertyBinding(it) => it.syntax(),
+            Self::AngularStructuralDirective(it) => it.syntax(),
+            Self::AngularTemplateRefVariable(it) => it.syntax(),
+            Self::AngularTwoWayBinding(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::AngularEventBinding(it) => it.into_syntax(),
+            Self::AngularPropertyBinding(it) => it.into_syntax(),
+            Self::AngularStructuralDirective(it) => it.into_syntax(),
+            Self::AngularTemplateRefVariable(it) => it.into_syntax(),
+            Self::AngularTwoWayBinding(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyAngularAttribute {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::AngularEventBinding(it) => std::fmt::Debug::fmt(it, f),
+            Self::AngularPropertyBinding(it) => std::fmt::Debug::fmt(it, f),
+            Self::AngularStructuralDirective(it) => std::fmt::Debug::fmt(it, f),
+            Self::AngularTemplateRefVariable(it) => std::fmt::Debug::fmt(it, f),
+            Self::AngularTwoWayBinding(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyAngularAttribute> for SyntaxNode {
+    fn from(n: AnyAngularAttribute) -> Self {
+        match n {
+            AnyAngularAttribute::AngularEventBinding(it) => it.into_syntax(),
+            AnyAngularAttribute::AngularPropertyBinding(it) => it.into_syntax(),
+            AnyAngularAttribute::AngularStructuralDirective(it) => it.into_syntax(),
+            AnyAngularAttribute::AngularTemplateRefVariable(it) => it.into_syntax(),
+            AnyAngularAttribute::AngularTwoWayBinding(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyAngularAttribute> for SyntaxElement {
+    fn from(n: AnyAngularAttribute) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<AstroClassDirective> for AnyAstroDirective {
     fn from(node: AstroClassDirective) -> Self {
         Self::AstroClassDirective(node)
@@ -9147,7 +9897,8 @@ impl From<SvelteAttachAttribute> for AnyHtmlAttribute {
 }
 impl AstNode for AnyHtmlAttribute {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = AnyAstroDirective::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = AnyAngularAttribute::KIND_SET
+        .union(AnyAstroDirective::KIND_SET)
         .union(AnySvelteDirective::KIND_SET)
         .union(AnyVueDirective::KIND_SET)
         .union(HtmlAttribute::KIND_SET)
@@ -9164,6 +9915,7 @@ impl AstNode for AnyHtmlAttribute {
             | HTML_BOGUS_ATTRIBUTE
             | HTML_SPREAD_ATTRIBUTE
             | SVELTE_ATTACH_ATTRIBUTE => true,
+            k if AnyAngularAttribute::can_cast(k) => true,
             k if AnyAstroDirective::can_cast(k) => true,
             k if AnySvelteDirective::can_cast(k) => true,
             k if AnyVueDirective::can_cast(k) => true,
@@ -9189,6 +9941,12 @@ impl AstNode for AnyHtmlAttribute {
                 Self::SvelteAttachAttribute(SvelteAttachAttribute { syntax })
             }
             _ => {
+                let syntax = match AnyAngularAttribute::try_cast(syntax) {
+                    Ok(any_angular_attribute) => {
+                        return Some(Self::AnyAngularAttribute(any_angular_attribute));
+                    }
+                    Err(syntax) => syntax,
+                };
                 let syntax = match AnyAstroDirective::try_cast(syntax) {
                     Ok(any_astro_directive) => {
                         return Some(Self::AnyAstroDirective(any_astro_directive));
@@ -9217,6 +9975,7 @@ impl AstNode for AnyHtmlAttribute {
             Self::HtmlBogusAttribute(it) => it.syntax(),
             Self::HtmlSpreadAttribute(it) => it.syntax(),
             Self::SvelteAttachAttribute(it) => it.syntax(),
+            Self::AnyAngularAttribute(it) => it.syntax(),
             Self::AnyAstroDirective(it) => it.syntax(),
             Self::AnySvelteDirective(it) => it.syntax(),
             Self::AnyVueDirective(it) => it.syntax(),
@@ -9230,6 +9989,7 @@ impl AstNode for AnyHtmlAttribute {
             Self::HtmlBogusAttribute(it) => it.into_syntax(),
             Self::HtmlSpreadAttribute(it) => it.into_syntax(),
             Self::SvelteAttachAttribute(it) => it.into_syntax(),
+            Self::AnyAngularAttribute(it) => it.into_syntax(),
             Self::AnyAstroDirective(it) => it.into_syntax(),
             Self::AnySvelteDirective(it) => it.into_syntax(),
             Self::AnyVueDirective(it) => it.into_syntax(),
@@ -9239,6 +9999,7 @@ impl AstNode for AnyHtmlAttribute {
 impl std::fmt::Debug for AnyHtmlAttribute {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::AnyAngularAttribute(it) => std::fmt::Debug::fmt(it, f),
             Self::AnyAstroDirective(it) => std::fmt::Debug::fmt(it, f),
             Self::AnySvelteDirective(it) => std::fmt::Debug::fmt(it, f),
             Self::AnyVueDirective(it) => std::fmt::Debug::fmt(it, f),
@@ -9254,6 +10015,7 @@ impl std::fmt::Debug for AnyHtmlAttribute {
 impl From<AnyHtmlAttribute> for SyntaxNode {
     fn from(n: AnyHtmlAttribute) -> Self {
         match n {
+            AnyHtmlAttribute::AnyAngularAttribute(it) => it.into_syntax(),
             AnyHtmlAttribute::AnyAstroDirective(it) => it.into_syntax(),
             AnyHtmlAttribute::AnySvelteDirective(it) => it.into_syntax(),
             AnyHtmlAttribute::AnyVueDirective(it) => it.into_syntax(),
@@ -10628,6 +11390,11 @@ impl From<AnyVueDirectiveArgument> for SyntaxElement {
         node.into()
     }
 }
+impl std::fmt::Display for AnyAngularAttribute {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyAstroDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -10719,6 +11486,36 @@ impl std::fmt::Display for AnyVueDirective {
     }
 }
 impl std::fmt::Display for AnyVueDirectiveArgument {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularBindingName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularEventBinding {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularPropertyBinding {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularStructuralDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularTemplateRefVariable {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AngularTwoWayBinding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

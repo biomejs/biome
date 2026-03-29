@@ -705,6 +705,8 @@ impl Field {
                     ("{#", LanguageKind::Html) => "sv_curly_hash",
                     ("{/", LanguageKind::Html) => "sv_curly_slash",
                     ("{:", LanguageKind::Html) => "sv_curly_colon",
+                    ("[(", LanguageKind::Html) => "l_bracket_paren",
+                    (")]", LanguageKind::Html) => "r_bracket_paren",
                     _ => name,
                 };
 

@@ -918,6 +918,9 @@ fn parse_embedded_nodes(
                 }
             }
         }
+        HtmlVariant::Angular => {
+            // TODO
+        }
     }
 
     ParseEmbedResult { nodes }
@@ -1200,6 +1203,7 @@ fn parse_matched_embed(
                             js_source = js_source
                                 .with_embedding_kind(EmbeddingKind::Svelte { is_source: false });
                         }
+                        HtmlVariant::Angular => {}
                     }
 
                     false

@@ -1,0 +1,123 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```angular
+<ng-template #myFragment>
+	<p>This is a template fragment</p>
+</ng-template>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..13 "ng-template" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    AngularTemplateRefVariable {
+                        hash_token: HASH@13..14 "#" [] [],
+                        name: AngularBindingName {
+                            value_token: HTML_LITERAL@14..24 "myFragment" [] [],
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@24..25 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@25..28 "<" [Newline("\n"), Whitespace("\t")] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@28..29 "p" [] [],
+                        },
+                        attributes: HtmlAttributeList [],
+                        r_angle_token: R_ANGLE@29..30 ">" [] [],
+                    },
+                    children: HtmlElementList [
+                        HtmlContent {
+                            value_token: HTML_LITERAL@30..57 "This is a template fragment" [] [],
+                        },
+                    ],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@57..58 "<" [] [],
+                        slash_token: SLASH@58..59 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@59..60 "p" [] [],
+                        },
+                        r_angle_token: R_ANGLE@60..61 ">" [] [],
+                    },
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@61..63 "<" [Newline("\n")] [],
+                slash_token: SLASH@63..64 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@64..75 "ng-template" [] [],
+                },
+                r_angle_token: R_ANGLE@75..76 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@76..77 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..77
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..76
+    0: HTML_ELEMENT@0..76
+      0: HTML_OPENING_ELEMENT@0..25
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..13
+          0: HTML_LITERAL@1..13 "ng-template" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@13..24
+          0: ANGULAR_TEMPLATE_REF_VARIABLE@13..24
+            0: HASH@13..14 "#" [] []
+            1: ANGULAR_BINDING_NAME@14..24
+              0: HTML_LITERAL@14..24 "myFragment" [] []
+        3: R_ANGLE@24..25 ">" [] []
+      1: HTML_ELEMENT_LIST@25..61
+        0: HTML_ELEMENT@25..61
+          0: HTML_OPENING_ELEMENT@25..30
+            0: L_ANGLE@25..28 "<" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_TAG_NAME@28..29
+              0: HTML_LITERAL@28..29 "p" [] []
+            2: HTML_ATTRIBUTE_LIST@29..29
+            3: R_ANGLE@29..30 ">" [] []
+          1: HTML_ELEMENT_LIST@30..57
+            0: HTML_CONTENT@30..57
+              0: HTML_LITERAL@30..57 "This is a template fragment" [] []
+          2: HTML_CLOSING_ELEMENT@57..61
+            0: L_ANGLE@57..58 "<" [] []
+            1: SLASH@58..59 "/" [] []
+            2: HTML_TAG_NAME@59..60
+              0: HTML_LITERAL@59..60 "p" [] []
+            3: R_ANGLE@60..61 ">" [] []
+      2: HTML_CLOSING_ELEMENT@61..76
+        0: L_ANGLE@61..63 "<" [Newline("\n")] []
+        1: SLASH@63..64 "/" [] []
+        2: HTML_TAG_NAME@64..75
+          0: HTML_LITERAL@64..75 "ng-template" [] []
+        3: R_ANGLE@75..76 ">" [] []
+  4: EOF@76..77 "" [Newline("\n")] []
+
+```

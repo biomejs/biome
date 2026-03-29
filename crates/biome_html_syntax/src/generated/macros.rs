@@ -16,6 +16,32 @@ macro_rules! map_syntax_node {
     ($ node : expr , $ pattern : pat => $ body : expr) => {
         match $node {
             node => match $crate::HtmlSyntaxNode::kind(&node) {
+                $crate::HtmlSyntaxKind::ANGULAR_BINDING_NAME => {
+                    let $pattern = unsafe { $crate::AngularBindingName::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ANGULAR_EVENT_BINDING => {
+                    let $pattern = unsafe { $crate::AngularEventBinding::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ANGULAR_PROPERTY_BINDING => {
+                    let $pattern = unsafe { $crate::AngularPropertyBinding::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ANGULAR_STRUCTURAL_DIRECTIVE => {
+                    let $pattern =
+                        unsafe { $crate::AngularStructuralDirective::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ANGULAR_TEMPLATE_REF_VARIABLE => {
+                    let $pattern =
+                        unsafe { $crate::AngularTemplateRefVariable::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ANGULAR_TWO_WAY_BINDING => {
+                    let $pattern = unsafe { $crate::AngularTwoWayBinding::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::ASTRO_CLASS_DIRECTIVE => {
                     let $pattern = unsafe { $crate::AstroClassDirective::new_unchecked(node) };
                     $body

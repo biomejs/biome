@@ -1,0 +1,99 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```angular
+<button [disabled]="isFormValid()">Save</button>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..8 "button" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    AngularPropertyBinding {
+                        l_brack_token: L_BRACKET@8..9 "[" [] [],
+                        name: AngularBindingName {
+                            value_token: HTML_LITERAL@9..17 "disabled" [] [],
+                        },
+                        r_brack_token: R_BRACKET@17..18 "]" [] [],
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@18..19 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@19..34 "\"isFormValid()\"" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@34..35 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@35..39 "Save" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@39..40 "<" [] [],
+                slash_token: SLASH@40..41 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@41..47 "button" [] [],
+                },
+                r_angle_token: R_ANGLE@47..48 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@48..49 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..49
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..48
+    0: HTML_ELEMENT@0..48
+      0: HTML_OPENING_ELEMENT@0..35
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..8
+          0: HTML_LITERAL@1..8 "button" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@8..34
+          0: ANGULAR_PROPERTY_BINDING@8..34
+            0: L_BRACKET@8..9 "[" [] []
+            1: ANGULAR_BINDING_NAME@9..17
+              0: HTML_LITERAL@9..17 "disabled" [] []
+            2: R_BRACKET@17..18 "]" [] []
+            3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@18..34
+              0: EQ@18..19 "=" [] []
+              1: HTML_STRING@19..34
+                0: HTML_STRING_LITERAL@19..34 "\"isFormValid()\"" [] []
+        3: R_ANGLE@34..35 ">" [] []
+      1: HTML_ELEMENT_LIST@35..39
+        0: HTML_CONTENT@35..39
+          0: HTML_LITERAL@35..39 "Save" [] []
+      2: HTML_CLOSING_ELEMENT@39..48
+        0: L_ANGLE@39..40 "<" [] []
+        1: SLASH@40..41 "/" [] []
+        2: HTML_TAG_NAME@41..47
+          0: HTML_LITERAL@41..47 "button" [] []
+        3: R_ANGLE@47..48 ">" [] []
+  4: EOF@48..49 "" [Newline("\n")] []
+
+```

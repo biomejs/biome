@@ -51,6 +51,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
         HtmlVariant::Astro => "astro",
         HtmlVariant::Vue => "vue",
         HtmlVariant::Svelte => "svelte",
+        HtmlVariant::Angular => "angular",
     };
     writeln!(
         snapshot,
