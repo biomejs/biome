@@ -4,13 +4,14 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
+use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsFunction, AnyJsMemberExpression, AnyJsTemplateElement,
+    AnyJsExpression, AnyJsFunction, AnyJsMemberExpression, AnyJsObjectMember, AnyJsTemplateElement,
     JsCallArgumentList, JsCallArguments, JsCallExpression, JsFormalParameter, JsObjectExpression,
-    JsObjectMemberList, JsParameterList, JsParameters, JsPropertyObjectMember, JsReferenceIdentifier,
-    JsxAttribute,
+    JsObjectMemberList, JsParameterList, JsParameters, JsPropertyObjectMember,
+    JsReferenceIdentifier, JsxAttribute,
 };
-use biome_rowan::{AstNode, TextRange, declare_node_union};
+use biome_rowan::{AstNode, AstSeparatedList, TextRange, declare_node_union};
 use biome_rule_options::no_array_index_key::NoArrayIndexKeyOptions;
 
 declare_lint_rule! {
@@ -176,6 +177,10 @@ impl Rule for NoArrayIndexKey {
                 continue;
             }
 
+            if is_static_iterable_call(&call_expression, model)? {
+                continue;
+            }
+
             if node.is_property_object_member() {
                 let object_expression = node
                     .parent::<JsObjectMemberList>()
@@ -266,7 +271,86 @@ fn is_array_method_index(
     }
 }
 
-fn collect_reference_identifiers(expression: AnyJsExpression, references: &mut Vec<JsReferenceIdentifier>) {
+fn is_static_iterable_call(
+    call_expression: &JsCallExpression,
+    model: &SemanticModel,
+) -> Option<bool> {
+    let member_expression =
+        AnyJsMemberExpression::cast(call_expression.callee().ok()?.into_syntax())?;
+    let method_name = member_expression.member_name()?.text();
+
+    if method_name == "from" {
+        let Some(array_identifier) = member_expression
+            .object()
+            .ok()?
+            .omit_parentheses()
+            .as_js_reference_identifier()
+        else {
+            return Some(false);
+        };
+
+        if !array_identifier.has_name("Array") {
+            return Some(false);
+        }
+
+        let [Some(source)] = call_expression
+            .arguments()
+            .ok()?
+            .get_arguments_by_index([0])
+        else {
+            return Some(false);
+        };
+
+        let Some(source) = source.as_any_js_expression() else {
+            return Some(false);
+        };
+
+        return Some(is_static_array_from_source(
+            &source.omit_parentheses(),
+            model,
+        ));
+    }
+
+    Some(
+        member_expression
+            .object()
+            .ok()?
+            .omit_parentheses()
+            .as_js_array_expression()
+            .is_some(),
+    )
+}
+
+fn is_static_array_from_source(source: &AnyJsExpression, model: &SemanticModel) -> bool {
+    if source.as_js_array_expression().is_some() {
+        return true;
+    }
+
+    let Some(object_expression) = source.as_js_object_expression() else {
+        return false;
+    };
+
+    let mut members = object_expression.members().iter();
+    let Some(Ok(AnyJsObjectMember::JsPropertyObjectMember(length_property))) = members.next()
+    else {
+        return false;
+    };
+
+    if members.next().is_some() {
+        return false;
+    }
+
+    length_property.name().ok().and_then(|name| name.name()) == Some("length")
+        && length_property
+            .value()
+            .ok()
+            .is_some_and(|value| model.is_constant(&value.omit_parentheses()))
+}
+
+fn collect_reference_identifiers(
+    expression: AnyJsExpression,
+    references: &mut Vec<JsReferenceIdentifier>,
+) {
     match expression {
         AnyJsExpression::JsIdentifierExpression(identifier_expression) => {
             if let Ok(reference) = identifier_expression.name() {
@@ -276,9 +360,10 @@ fn collect_reference_identifiers(expression: AnyJsExpression, references: &mut V
         AnyJsExpression::JsTemplateExpression(template_expression) => {
             for element in template_expression.elements() {
                 if let AnyJsTemplateElement::JsTemplateElement(template_element) = element
-                    && let Ok(expression) = template_element.expression() {
-                        collect_reference_identifiers(expression, references);
-                    }
+                    && let Ok(expression) = template_element.expression()
+                {
+                    collect_reference_identifiers(expression, references);
+                }
             }
         }
         AnyJsExpression::JsBinaryExpression(binary_expression) => {

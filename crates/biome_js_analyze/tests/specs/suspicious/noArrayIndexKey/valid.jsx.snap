@@ -74,6 +74,12 @@ function Component15() {
     }
 }
 
+Array.from({ length: 5 }, (_, index) => {
+    return <Component key={index} />;
+});
+
+[foo, bar, baz].map((item, index) => <Component key={index} />);
+
 ```
 
 _Note: The parser emitted 2 diagnostics which are not shown here._

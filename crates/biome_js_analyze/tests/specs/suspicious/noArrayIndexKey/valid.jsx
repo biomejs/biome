@@ -67,3 +67,9 @@ function Component15() {
         return <Component key={id} />
     }
 }
+
+Array.from({ length: 5 }, (_, index) => {
+    return <Component key={index} />;
+});
+
+[foo, bar, baz].map((item, index) => <Component key={index} />);
