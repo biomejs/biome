@@ -29,7 +29,7 @@ impl FormatNodeRule<MdFencedCodeBlock> for FormatMdFencedCodeBlock {
         // the outer fence needs at least 4.
         let max_inner = longest_fence_char_sequence(node, fence_char);
         let fence_len = (max_inner + 1).max(3);
-        let normalized_fence: String = std::iter::repeat(fence_char).take(fence_len).collect();
+        let normalized_fence: String = std::iter::repeat_n(fence_char, fence_len).collect();
 
         write!(
             f,
@@ -71,16 +71,16 @@ fn longest_fence_char_sequence(node: &MdFencedCodeBlock, fence_char: char) -> us
     let mut max_len = 0usize;
 
     for item in content.iter() {
-        if let Some(textual) = item.as_md_textual() {
-            if let Ok(token) = textual.value_token() {
-                let mut consecutive_count = 0usize;
-                for ch in token.text().chars() {
-                    if ch == fence_char {
-                        consecutive_count += 1;
-                        max_len = max_len.max(consecutive_count);
-                    } else {
-                        consecutive_count = 0;
-                    }
+        if let Some(textual) = item.as_md_textual()
+            && let Ok(token) = textual.value_token()
+        {
+            let mut consecutive_count = 0usize;
+            for ch in token.text().chars() {
+                if ch == fence_char {
+                    consecutive_count += 1;
+                    max_len = max_len.max(consecutive_count);
+                } else {
+                    consecutive_count = 0;
                 }
             }
         }

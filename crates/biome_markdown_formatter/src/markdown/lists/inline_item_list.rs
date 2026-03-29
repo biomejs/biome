@@ -103,13 +103,13 @@ impl FormatMdInlineItemList {
         };
 
         // Find the first non-empty item from the left.
-        let first_content = items.iter().position(|item| is_content(item));
+        let first_content = items.iter().position(&is_content);
 
         // Find the first non-empty item from the right.
         let last_content = items
             .iter()
             .rev()
-            .position(|item| is_content(item))
+            .position(is_content)
             .map(|pos| items.len() - 1 - pos);
 
         for (index, item) in items.iter().enumerate() {

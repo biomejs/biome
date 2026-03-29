@@ -47,8 +47,8 @@ use biome_markdown_syntax::{
     MarkdownLanguage, MdAutolink, MdBlockList, MdBullet, MdBulletListItem, MdDocument,
     MdEntityReference, MdFencedCodeBlock, MdHardLine, MdHeader, MdHtmlBlock, MdIndentCodeBlock,
     MdInlineCode, MdInlineEmphasis, MdInlineHtml, MdInlineImage, MdInlineItalic, MdInlineItemList,
-    MdInlineLink, MdLinkBlock, MdLinkDestination, MdLinkLabel, MdLinkReferenceDefinition,
-    MdLinkTitle, MdOrderedListItem, MdParagraph, MdQuote, MdReferenceImage, MdReferenceLink,
+    MdInlineLink, MdLinkDestination, MdLinkLabel, MdLinkReferenceDefinition, MdLinkTitle,
+    MdOrderedListItem, MdParagraph, MdQuote, MdReferenceImage, MdReferenceLink,
     MdReferenceLinkLabel, MdSetextHeader, MdSoftBreak, MdTextual, MdThematicBreakBlock,
 };
 use biome_rowan::{AstNode, AstNodeList, Direction, SyntaxNode, TextRange, WalkEvent};
@@ -761,9 +761,7 @@ impl<'a> HtmlRenderer<'a> {
             return;
         }
 
-        if MdLinkReferenceDefinition::cast(node.clone()).is_some()
-            || MdLinkBlock::cast(node.clone()).is_some()
-        {
+        if MdLinkReferenceDefinition::cast(node.clone()).is_some() {
             self.opaque_depth = Some(self.depth);
             return;
         }
