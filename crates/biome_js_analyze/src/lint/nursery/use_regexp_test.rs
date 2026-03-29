@@ -38,8 +38,6 @@ declare_lint_rule! {
     ///
     /// ```js
     /// if (/hello/.test("hello world")) {}
-    ///
-    /// const result = "hello world".match(/hello/);
     /// ```
     ///
     pub UseRegexpTest {
