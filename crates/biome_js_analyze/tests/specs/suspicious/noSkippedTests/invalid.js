@@ -31,3 +31,9 @@ test["skip"]("bracket notation", async () => {});
 test("bare skip", async () => {
     test.skip();
 });
+
+// Conditional skip/fixme inside a test body
+test("conditional skip", async ({ browserName }) => {
+    test.skip(browserName === "firefox", "Still working on it");
+    test.fixme(browserName === "webkit");
+});

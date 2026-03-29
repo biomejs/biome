@@ -38,6 +38,12 @@ test("bare skip", async () => {
     test.skip();
 });
 
+// Conditional skip/fixme inside a test body
+test("conditional skip", async ({ browserName }) => {
+    test.skip(browserName === "firefox", "Still working on it");
+    test.fixme(browserName === "webkit");
+});
+
 ```
 
 # Diagnostics
@@ -556,5 +562,41 @@ invalid.js:32:10 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━�
     33 33 │   });
     34 34 │   
   
+
+```
+```
+invalid.js:37:10 lint/suspicious/noSkippedTests ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+
+    35 │ // Conditional skip/fixme inside a test body
+    36 │ test("conditional skip", async ({ browserName }) => {
+  > 37 │     test.skip(browserName === "firefox", "Still working on it");
+       │          ^^^^
+    38 │     test.fixme(browserName === "webkit");
+    39 │ });
+
+  i Disabling tests is useful when debugging or creating placeholder while working.
+
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+
+
+```
+
+```
+invalid.js:38:10 lint/suspicious/noSkippedTests ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+
+    36 │ test("conditional skip", async ({ browserName }) => {
+    37 │     test.skip(browserName === "firefox", "Still working on it");
+  > 38 │     test.fixme(browserName === "webkit");
+       │          ^^^^^
+    39 │ });
+
+  i Disabling tests is useful when debugging or creating placeholder while working.
+
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+
 
 ```

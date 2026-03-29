@@ -93,6 +93,7 @@ impl Rule for NoSkippedTests {
                 return Some(SkipState {
                     range: function_name.text_trimmed_range(),
                     annotation,
+                    can_fix: true,
                 });
             }
         }
@@ -121,6 +122,10 @@ impl Rule for NoSkippedTests {
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
+        if !state.can_fix {
+            return None;
+        }
+
         let node = ctx.query();
         let callee = node.callee().ok()?;
 
@@ -169,6 +174,7 @@ pub struct SkipState {
     range: TextRange,
     /// The type of annotation: "skip" or "fixme".
     annotation: &'static str,
+    can_fix: bool,
 }
 
 /// Detects bare `test.skip()` / `test.fixme()` calls that don't pass `is_test_call_expression()`
@@ -245,6 +251,7 @@ fn detect_bare_skip_call(
                 return Some(SkipState {
                     range: name_range,
                     annotation,
+                    can_fix: true,
                 });
             }
             // 1-2 arg conditional skip
@@ -252,6 +259,7 @@ fn detect_bare_skip_call(
                 return Some(SkipState {
                     range: name_range,
                     annotation,
+                    can_fix: false,
                 });
             }
             // Bracket notation with standard test args: test["skip"]("name", fn)
@@ -259,6 +267,7 @@ fn detect_bare_skip_call(
                 return Some(SkipState {
                     range: name_range,
                     annotation,
+                    can_fix: true,
                 });
             }
             // Standard static member: handled by Path 1
@@ -272,6 +281,7 @@ fn detect_bare_skip_call(
             return Some(SkipState {
                 range: name_range,
                 annotation,
+                can_fix: true,
             });
         }
     }
@@ -281,6 +291,7 @@ fn detect_bare_skip_call(
     Some(SkipState {
         range: name_range,
         annotation,
+        can_fix: true,
     })
 }
 
