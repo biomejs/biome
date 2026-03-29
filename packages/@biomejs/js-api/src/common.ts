@@ -87,15 +87,18 @@ export interface PrintDiagnosticsOptions {
 const initialized = new WeakSet();
 
 export class BiomeCommon<Configuration, Diagnostic> {
-	private readonly workspace: Workspace<Configuration, Diagnostic>;
+	protected readonly workspace: Workspace<Configuration, Diagnostic>;
 
-	constructor(private readonly module: Module<Configuration, Diagnostic>) {
+	constructor(
+		protected readonly module: Module<Configuration, Diagnostic>,
+		workspace = new module.Workspace(),
+	) {
 		if (!initialized.has(module)) {
 			module.main();
 			initialized.add(module);
 		}
 
-		this.workspace = new module.Workspace();
+		this.workspace = workspace;
 	}
 
 	/**
