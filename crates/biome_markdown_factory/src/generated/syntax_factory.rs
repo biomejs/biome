@@ -604,39 +604,6 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                 }
                 slots.into_node(MD_INLINE_LINK, children)
             }
-            MD_LINK_BLOCK => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element
-                    && MdTextual::can_cast(element.kind())
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element
-                    && MdTextual::can_cast(element.kind())
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element
-                    && MdTextual::can_cast(element.kind())
-                {
-                    slots.mark_present();
-                    current_element = elements.next();
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        MD_LINK_BLOCK.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(MD_LINK_BLOCK, children)
-            }
             MD_LINK_DESTINATION => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();

@@ -59,7 +59,6 @@ pub const MARKDOWN_KINDS_SRC: KindsSrc = KindsSrc {
         "MD_FENCED_CODE_BLOCK",
         "MD_CODE_NAME_LIST",
         "MD_HTML_BLOCK",
-        "MD_LINK_BLOCK",
         "MD_LINK_REFERENCE_DEFINITION",
         "MD_LINK_LABEL",
         "MD_LINK_DESTINATION",

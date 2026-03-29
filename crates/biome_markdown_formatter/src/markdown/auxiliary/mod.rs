@@ -19,7 +19,6 @@ pub(crate) mod inline_html;
 pub(crate) mod inline_image;
 pub(crate) mod inline_italic;
 pub(crate) mod inline_link;
-pub(crate) mod link_block;
 pub(crate) mod link_destination;
 pub(crate) mod link_label;
 pub(crate) mod link_reference_definition;

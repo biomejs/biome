@@ -312,35 +312,6 @@ impl MdInlineLinkBuilder {
         ))
     }
 }
-pub fn md_link_block(label: MdTextual, url: MdTextual) -> MdLinkBlockBuilder {
-    MdLinkBlockBuilder {
-        label,
-        url,
-        title: None,
-    }
-}
-pub struct MdLinkBlockBuilder {
-    label: MdTextual,
-    url: MdTextual,
-    title: Option<MdTextual>,
-}
-impl MdLinkBlockBuilder {
-    pub fn with_title(mut self, title: MdTextual) -> Self {
-        self.title = Some(title);
-        self
-    }
-    pub fn build(self) -> MdLinkBlock {
-        MdLinkBlock::unwrap_cast(SyntaxNode::new_detached(
-            MarkdownSyntaxKind::MD_LINK_BLOCK,
-            [
-                Some(SyntaxElement::Node(self.label.into_syntax())),
-                Some(SyntaxElement::Node(self.url.into_syntax())),
-                self.title
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-            ],
-        ))
-    }
-}
 pub fn md_link_destination(content: MdInlineItemList) -> MdLinkDestination {
     MdLinkDestination::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_LINK_DESTINATION,

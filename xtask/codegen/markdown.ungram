@@ -59,7 +59,6 @@ AnyMdLeafBlock =
 	| AnyMdCodeBlock
 	| MdHtmlBlock
 	| MdLinkReferenceDefinition
-	| MdLinkBlock
 	| MdParagraph
 	| MdNewline
 
@@ -166,10 +165,6 @@ MdLinkDestination = content: MdInlineItemList
 // Titles can contain multiple tokens
 MdLinkTitle = content: MdInlineItemList
 
-// Legacy MdLinkBlock retained for backwards compatibility
-MdLinkBlock = label: MdTextual
-                url: MdTextual
-                title: MdTextual?
 
 // > Foo
 // ^^^^^

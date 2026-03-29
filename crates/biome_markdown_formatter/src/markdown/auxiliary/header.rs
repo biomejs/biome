@@ -1,5 +1,6 @@
 use crate::markdown::auxiliary::paragraph::FormatMdParagraphOptions;
 use crate::prelude::*;
+use crate::shared::{TextPrintMode, TrimMode};
 use crate::verbatim::format_verbatim_node;
 use biome_formatter::write;
 use biome_markdown_syntax::{MdHeader, MdHeaderFields};
@@ -24,9 +25,9 @@ impl FormatNodeRule<MdHeader> for FormatMdHeader {
                 f,
                 [
                     space(),
-                    content
-                        .format()
-                        .with_options(FormatMdParagraphOptions { trim_start: true })
+                    content.format().with_options(FormatMdParagraphOptions {
+                        trim_mode: TextPrintMode::Trim(TrimMode::Start)
+                    })
                 ]
             )?;
         }

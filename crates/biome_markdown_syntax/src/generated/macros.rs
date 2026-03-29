@@ -92,10 +92,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::MdInlineLink::new_unchecked(node) };
                     $body
                 }
-                $crate::MarkdownSyntaxKind::MD_LINK_BLOCK => {
-                    let $pattern = unsafe { $crate::MdLinkBlock::new_unchecked(node) };
-                    $body
-                }
                 $crate::MarkdownSyntaxKind::MD_LINK_DESTINATION => {
                     let $pattern = unsafe { $crate::MdLinkDestination::new_unchecked(node) };
                     $body
