@@ -19,9 +19,7 @@ info: markdown/spec/example-85.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -1 +1,4 @@
-+
-+
+@@ -1 +1,2 @@
      foo
 +
 ```
@@ -29,8 +27,6 @@ info: markdown/spec/example-85.md
 # Output
 
 ```md
-
-
     foo
 
 ```

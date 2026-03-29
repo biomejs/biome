@@ -23,13 +23,11 @@ info: markdown/spec/example-46.md
 @@ -1,7 +1,5 @@
  <!-- placeholder for continuous thematic breaks not being treated as yaml -->
  
-----
+ ---
 -
-+****
  ## foo
 -
-----
-+****
+ ---
 ```
 
 # Output
@@ -37,7 +35,7 @@ info: markdown/spec/example-46.md
 ```md
 <!-- placeholder for continuous thematic breaks not being treated as yaml -->
 
-****
+---
 ## foo
-****
+---
 ```

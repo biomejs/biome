@@ -20,19 +20,19 @@ info: markdown/spec/example-282.md
 --- Prettier
 +++ Biome
 @@ -1,4 +1,4 @@
--- foo
+ - foo
 -  - bar
-+* foo
-+  * bar
++- bar
  
-   baz
+-  baz
++baz
 ```
 
 # Output
 
 ```md
-* foo
-  * bar
+- foo
+- bar
 
-  baz
+baz
 ```

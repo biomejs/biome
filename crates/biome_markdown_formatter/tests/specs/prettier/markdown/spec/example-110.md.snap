@@ -20,22 +20,20 @@ end
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,5 +1,5 @@
+@@ -1,4 +1,4 @@
 -```ruby startline=3 $%@#$
-+~~~    ruby startline=3 $%@#$
++```    ruby startline=3 $%@#$
  def foo(x)
    return 3
  end
--```
-+~~~
 ```
 
 # Output
 
 ```md
-~~~    ruby startline=3 $%@#$
+```    ruby startline=3 $%@#$
 def foo(x)
   return 3
 end
-~~~
+```
 ```
