@@ -29,8 +29,9 @@ fn load_fixtures() -> Vec<(String, String, String)> {
     let mut cases = Vec::new();
 
     fn visit(dir: &Path, root: &Path, cases: &mut Vec<(String, String, String)>) {
-        let entries = fs::read_dir(dir)
-            .unwrap_or_else(|err| panic!("failed to read benchmark fixtures directory {dir:?}: {err}"));
+        let entries = fs::read_dir(dir).unwrap_or_else(|err| {
+            panic!("failed to read benchmark fixtures directory {dir:?}: {err}")
+        });
 
         for entry in entries {
             let entry = entry.unwrap_or_else(|err| {
@@ -55,8 +56,9 @@ fn load_fixtures() -> Vec<(String, String, String)> {
                     .and_then(|s| s.to_str())
                     .unwrap_or_default()
                     .to_string();
-                let content = fs::read_to_string(&path)
-                    .unwrap_or_else(|err| panic!("failed to read benchmark fixture {path:?}: {err}"));
+                let content = fs::read_to_string(&path).unwrap_or_else(|err| {
+                    panic!("failed to read benchmark fixture {path:?}: {err}")
+                });
                 cases.push((group, name, content));
             }
         }
