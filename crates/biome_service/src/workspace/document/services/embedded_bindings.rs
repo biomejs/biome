@@ -1,8 +1,10 @@
+use biome_html_syntax::{HtmlRoot, SvelteAwaitBlock, SvelteEachBlock, SvelteSnippetBlock};
+use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsBindingPattern, AnyJsExpression, AnyJsModuleItem,
-    AnyJsObjectBindingPatternMember, AnyJsObjectMember, AnyJsRoot, AnyJsStatement,
-    AnyTsIdentifierBinding, AnyTsType, JsCallExpression, JsExport, JsImport, JsModuleItemList,
-    JsVariableStatement,
+    AnyJsObjectBindingPatternMember, AnyJsObjectMember, AnyJsParameter, AnyJsRoot, AnyJsStatement,
+    AnyTsIdentifierBinding, AnyTsType, JsCallExpression, JsExport, JsFileSource,
+    JsFunctionDeclaration, JsImport, JsModuleItemList, JsParameters, JsVariableStatement,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange, TokenText, WalkEvent};
 use rustc_hash::FxHashMap;
@@ -49,6 +51,20 @@ impl EmbeddedBuilder {
                     }
                 }
                 WalkEvent::Leave(_) => {}
+            }
+        }
+    }
+
+    /// To call when visiting an HTML root, where Svelte blocks can define bindings
+    /// that are visible from nested template expressions.
+    pub(crate) fn visit_html_root(&mut self, root: &HtmlRoot) {
+        for node in root.syntax().descendants() {
+            if let Some(each_block) = SvelteEachBlock::cast_ref(&node) {
+                self.visit_svelte_each_block(each_block);
+            } else if let Some(await_block) = SvelteAwaitBlock::cast_ref(&node) {
+                self.visit_svelte_await_block(await_block);
+            } else if let Some(snippet_block) = SvelteSnippetBlock::cast_ref(&node) {
+                self.visit_svelte_snippet_block(snippet_block);
             }
         }
     }
@@ -134,6 +150,72 @@ impl EmbeddedBuilder {
         }
 
         Some(())
+    }
+
+    fn visit_svelte_each_block(&mut self, block: &SvelteEachBlock) {
+        let Some(opening_block) = block.opening_block().ok() else {
+            return;
+        };
+        let Some(item) = opening_block.item() else {
+            return;
+        };
+
+        if let Some(each_item) = item.as_svelte_each_as_keyed_item() {
+            let binding_text = each_item
+                .name()
+                .ok()
+                .map(|name| name.syntax().text_trimmed());
+            if let Some(binding_text) = binding_text {
+                let binding_text = binding_text.to_string();
+                self.track_binding_pattern_text(&binding_text);
+            }
+
+            if let Some(index) = each_item.index()
+                && let Ok(index_name) = index.value()
+                && let Ok(token) = index_name.ident_token()
+            {
+                self.js_bindings
+                    .insert(token.text_trimmed_range(), token.token_text_trimmed());
+            }
+        } else if let Some(keyed_item) = item.as_svelte_each_keyed_item()
+            && let Some(index) = keyed_item.index()
+            && let Ok(index_name) = index.value()
+            && let Ok(token) = index_name.ident_token()
+        {
+            self.js_bindings
+                .insert(token.text_trimmed_range(), token.token_text_trimmed());
+        }
+    }
+
+    fn visit_svelte_await_block(&mut self, block: &SvelteAwaitBlock) {
+        let Some(opening_block) = block.opening_block().ok() else {
+            return;
+        };
+
+        if let Some(then_clause) = opening_block.then_clause()
+            && let Ok(name) = then_clause.name()
+        {
+            let binding_text = name.syntax().text_trimmed().to_string();
+            self.track_binding_pattern_text(&binding_text);
+        }
+
+        if let Some(catch_clause) = opening_block.catch_clause()
+            && let Ok(name) = catch_clause.name()
+        {
+            let binding_text = name.syntax().text_trimmed().to_string();
+            self.track_binding_pattern_text(&binding_text);
+        }
+    }
+
+    fn visit_svelte_snippet_block(&mut self, block: &SvelteSnippetBlock) {
+        let Some(opening_block) = block.opening_block().ok() else {
+            return;
+        };
+        let Some(expression) = opening_block.expression().ok() else {
+            return;
+        };
+        let signature_text = expression.syntax().text_trimmed().to_string();
+        self.track_svelte_snippet_signature(&signature_text);
     }
 
     /// Handles `export default { props: { ... } }` patterns from Vue Options API.
@@ -264,14 +346,14 @@ impl EmbeddedBuilder {
                             ) => {
                                 self.visit_any_js_binding_pattern(VecDeque::from([element
                                     .pattern()
-                                    .ok()?]))?;
+                                    .ok()?]));
                             }
                             AnyJsArrayBindingPatternElement::JsArrayBindingPatternRestElement(
                                 rest,
                             ) => {
                                 self.visit_any_js_binding_pattern(VecDeque::from([rest
                                     .pattern()
-                                    .ok()?]))?;
+                                    .ok()?]));
                             }
                             AnyJsArrayBindingPatternElement::JsArrayHole(_) => {}
                         }
@@ -380,6 +462,68 @@ impl EmbeddedBuilder {
         }
     }
 
+    fn track_binding_pattern_text(&mut self, binding_text: &str) {
+        let source = format!("function __biome_placeholder__({binding_text}) {{}}");
+        let parsed = parse(&source, JsFileSource::ts(), JsParserOptions::default());
+        let Some(function) = parsed
+            .tree()
+            .syntax()
+            .descendants()
+            .find_map(JsFunctionDeclaration::cast)
+        else {
+            return;
+        };
+        let Some(parameters) = function.parameters().ok() else {
+            return;
+        };
+
+        self.visit_js_parameters(&parameters);
+    }
+
+    fn track_svelte_snippet_signature(&mut self, signature_text: &str) {
+        let source = format!("function {signature_text} {{}}");
+        let parsed = parse(&source, JsFileSource::ts(), JsParserOptions::default());
+        let Some(function) = parsed
+            .tree()
+            .syntax()
+            .descendants()
+            .find_map(JsFunctionDeclaration::cast)
+        else {
+            return;
+        };
+
+        self.register_js_binding(function.id());
+
+        let Some(parameters) = function.parameters().ok() else {
+            return;
+        };
+
+        self.visit_js_parameters(&parameters);
+    }
+
+    fn visit_js_parameters(&mut self, parameters: &JsParameters) {
+        for parameter in parameters.items().iter().flatten() {
+            match parameter {
+                AnyJsParameter::AnyJsFormalParameter(formal_parameter) => {
+                    let Some(formal_parameter) = formal_parameter.as_js_formal_parameter() else {
+                        continue;
+                    };
+                    let Some(binding) = formal_parameter.binding().ok() else {
+                        continue;
+                    };
+                    self.visit_any_js_binding_pattern(VecDeque::from([binding]));
+                }
+                AnyJsParameter::JsRestParameter(rest_parameter) => {
+                    let Some(binding) = rest_parameter.binding().ok() else {
+                        continue;
+                    };
+                    self.visit_any_js_binding_pattern(VecDeque::from([binding]));
+                }
+                AnyJsParameter::TsThisParameter(_) => {}
+            }
+        }
+    }
+
     fn visit_object_binding_pattern_member(
         &mut self,
         property: AnyJsObjectBindingPatternMember,
@@ -388,7 +532,7 @@ impl EmbeddedBuilder {
             AnyJsObjectBindingPatternMember::JsBogusBinding(_) => {}
             AnyJsObjectBindingPatternMember::JsMetavariable(_) => {}
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(property) => {
-                self.visit_any_js_binding_pattern(VecDeque::from([property.pattern().ok()?]))?;
+                self.visit_any_js_binding_pattern(VecDeque::from([property.pattern().ok()?]));
             }
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternRest(rest) => {
                 let binding = rest.binding().ok()?;
@@ -409,15 +553,16 @@ impl EmbeddedBuilder {
         Some(())
     }
 
-    fn visit_any_js_binding_pattern(
-        &mut self,
-        mut queue: VecDeque<AnyJsBindingPattern>,
-    ) -> Option<()> {
+    fn visit_any_js_binding_pattern(&mut self, mut queue: VecDeque<AnyJsBindingPattern>) {
         while let Some(pattern) = queue.pop_front() {
             match pattern {
                 AnyJsBindingPattern::AnyJsBinding(binding) => {
-                    let identifier = binding.as_js_identifier_binding()?;
-                    let token = identifier.name_token().ok()?;
+                    let Some(identifier) = binding.as_js_identifier_binding() else {
+                        continue;
+                    };
+                    let Some(token) = identifier.name_token().ok() else {
+                        continue;
+                    };
                     self.js_bindings
                         .insert(token.text_trimmed_range(), token.token_text_trimmed());
                 }
@@ -427,13 +572,17 @@ impl EmbeddedBuilder {
                             AnyJsArrayBindingPatternElement::JsArrayBindingPatternElement(
                                 element,
                             ) => {
-                                let pattern = element.pattern().ok()?;
+                                let Some(pattern) = element.pattern().ok() else {
+                                    continue;
+                                };
                                 queue.push_back(pattern);
                             }
                             AnyJsArrayBindingPatternElement::JsArrayBindingPatternRestElement(
                                 rest_element,
                             ) => {
-                                let pattern = rest_element.pattern().ok()?;
+                                let Some(pattern) = rest_element.pattern().ok() else {
+                                    continue;
+                                };
                                 queue.push_back(pattern);
                             }
                             AnyJsArrayBindingPatternElement::JsArrayHole(_) => {}
@@ -442,13 +591,11 @@ impl EmbeddedBuilder {
                 }
                 AnyJsBindingPattern::JsObjectBindingPattern(object) => {
                     for property in object.properties().iter().flatten() {
-                        self.visit_object_binding_pattern_member(property)?;
+                        self.visit_object_binding_pattern_member(property);
                     }
                 }
             }
         }
-
-        Some(())
     }
 }
 
@@ -669,5 +816,57 @@ const props = defineProps(['foo'])
         visit_js_root(&mut builder, &parse_js(source));
         service.finish(builder);
         assert!(contains_binding(&service, "foo"));
+    }
+
+    #[test]
+    fn tracks_svelte_snippet_bindings_from_html_root() {
+        use biome_html_parser::{HtmlParserOptions, parse_html};
+
+        let source = r#"
+{#snippet user({ name, age }, ...rest)}
+  <p>{name} is {age} years old</p>
+{/snippet}
+
+{@render user({ name: "John", age: 42 })}
+"#;
+
+        let parsed = parse_html(source, HtmlParserOptions::default().with_svelte());
+
+        let mut service = EmbeddedExportedBindings::default();
+        let mut builder = service.builder();
+        builder.visit_html_root(&parsed.tree());
+        service.finish(builder);
+
+        assert!(contains_binding(&service, "user"));
+        assert!(contains_binding(&service, "name"));
+        assert!(contains_binding(&service, "age"));
+        assert!(contains_binding(&service, "rest"));
+    }
+
+    #[test]
+    fn tracks_svelte_each_and_await_bindings_from_html_root() {
+        use biome_html_parser::{HtmlParserOptions, parse_html};
+
+        let source = r#"
+{#each items as { value }, index}
+  <span>{value}</span>
+{/each}
+
+{#await promise then result catch error}
+  <span>{result}{error}</span>
+{/await}
+"#;
+
+        let parsed = parse_html(source, HtmlParserOptions::default().with_svelte());
+
+        let mut service = EmbeddedExportedBindings::default();
+        let mut builder = service.builder();
+        builder.visit_html_root(&parsed.tree());
+        service.finish(builder);
+
+        assert!(contains_binding(&service, "value"));
+        assert!(contains_binding(&service, "index"));
+        assert!(contains_binding(&service, "result"));
+        assert!(contains_binding(&service, "error"));
     }
 }

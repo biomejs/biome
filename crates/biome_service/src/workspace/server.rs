@@ -484,6 +484,12 @@ impl WorkspaceServer {
         } else {
             Default::default()
         };
+        if source.to_html_file_source().is_some()
+            && let Some(Ok(any_parse)) = &syntax
+        {
+            let html_root: HtmlRoot = any_parse.tree();
+            builder.visit_html_root(&html_root);
+        }
         exported_bindings.finish(builder);
         services.set_embedded_bindings(exported_bindings);
 
@@ -1622,6 +1628,10 @@ impl Workspace for WorkspaceServer {
             }
         }
 
+        if document_source.to_html_file_source().is_some() {
+            let html_root: HtmlRoot = parsed.any_parse.tree();
+            builder.visit_html_root(&html_root);
+        }
         exported_bindings.finish(builder);
         services.set_embedded_bindings(exported_bindings);
 

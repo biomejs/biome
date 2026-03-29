@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-svelte-snippet-bindings.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+{#snippet user(name, age)}
+  <p>{name} is {age} years old</p>
+{/snippet}
+
+{@render user("John", 42)}
+
+```
