@@ -8124,7 +8124,7 @@ export type UseGuardForInOptions = {};
 export type UseIsArrayOptions = {};
 export interface UseIterableCallbackReturnOptions {
 	/**
-	* When `true`, callbacks of methods that require a return value may use `return;`.
+	 * When `true`, callbacks of methods that require a return value may use `return;`.
 	 */
 	allowImplicit?: boolean;
 	/**
