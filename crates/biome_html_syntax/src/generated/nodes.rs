@@ -217,6 +217,7 @@ impl AngularTemplateRefVariable {
         AngularTemplateRefVariableFields {
             hash_token: self.hash_token(),
             name: self.name(),
+            initializer: self.initializer(),
         }
     }
     pub fn hash_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -224,6 +225,9 @@ impl AngularTemplateRefVariable {
     }
     pub fn name(&self) -> SyntaxResult<AngularBindingName> {
         support::required_node(&self.syntax, 1usize)
+    }
+    pub fn initializer(&self) -> Option<HtmlAttributeInitializerClause> {
+        support::node(&self.syntax, 2usize)
     }
 }
 impl Serialize for AngularTemplateRefVariable {
@@ -238,6 +242,7 @@ impl Serialize for AngularTemplateRefVariable {
 pub struct AngularTemplateRefVariableFields {
     pub hash_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<AngularBindingName>,
+    pub initializer: Option<HtmlAttributeInitializerClause>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct AngularTwoWayBinding {
@@ -4981,6 +4986,10 @@ impl std::fmt::Debug for AngularTemplateRefVariable {
             f.debug_struct("AngularTemplateRefVariable")
                 .field("hash_token", &support::DebugSyntaxResult(self.hash_token()))
                 .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "initializer",
+                    &support::DebugOptionalElement(self.initializer()),
+                )
                 .finish()
         } else {
             f.debug_struct("AngularTemplateRefVariable").finish()

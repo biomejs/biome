@@ -803,10 +803,11 @@ AngularStructuralDirective =
 	name: AngularBindingName
 	initializer: HtmlAttributeInitializerClause?
 
-// <ng-template #tmpl>
+// <ng-template #tmpl="exportAsName">
 //               ^^^^^
 AngularTemplateRefVariable =
 	'#'
 	name: AngularBindingName
+	initializer: HtmlAttributeInitializerClause?
 
 AngularBindingName = value: 'html_literal'

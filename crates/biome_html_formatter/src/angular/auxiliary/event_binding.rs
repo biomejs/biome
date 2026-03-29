@@ -16,8 +16,8 @@ impl FormatNodeRule<AngularEventBinding> for FormatAngularEventBinding {
             [
                 l_paren_token.format(),
                 name.format(),
-                initializer.format(),
-                r_paren_token.format()
+                r_paren_token.format(),
+                initializer.format()
             ]
         )
     }

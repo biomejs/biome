@@ -9,7 +9,14 @@ impl FormatNodeRule<AngularTemplateRefVariable> for FormatAngularTemplateRefVari
         node: &AngularTemplateRefVariable,
         f: &mut HtmlFormatter,
     ) -> FormatResult<()> {
-        let AngularTemplateRefVariableFields { hash_token, name } = node.as_fields();
-        write!(f, [hash_token.format(), name.format()])
+        let AngularTemplateRefVariableFields {
+            hash_token,
+            name,
+            initializer,
+        } = node.as_fields();
+        write!(
+            f,
+            [hash_token.format(), name.format(), initializer.format()]
+        )
     }
 }

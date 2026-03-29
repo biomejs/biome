@@ -158,7 +158,7 @@ impl SyntaxFactory for HtmlSyntaxFactory {
             }
             ANGULAR_TEMPLATE_REF_VARIABLE => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
                     && element.kind() == T ! [#]
@@ -169,6 +169,13 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 slots.next_slot();
                 if let Some(element) = &current_element
                     && AngularBindingName::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && HtmlAttributeInitializerClause::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();

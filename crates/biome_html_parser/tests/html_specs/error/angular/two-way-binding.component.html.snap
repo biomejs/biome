@@ -1,0 +1,108 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```angular
+<app-counter [(count="initialCount"></app-counter>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..13 "app-counter" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    AngularTwoWayBinding {
+                        l_bracket_paren_token: L_BRACKET_PAREN@13..15 "[(" [] [],
+                        name: AngularBindingName {
+                            value_token: HTML_LITERAL@15..20 "count" [] [],
+                        },
+                        r_bracket_paren_token: missing (required),
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@20..21 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@21..35 "\"initialCount\"" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@35..36 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@36..37 "<" [] [],
+                slash_token: SLASH@37..38 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@38..49 "app-counter" [] [],
+                },
+                r_angle_token: R_ANGLE@49..50 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@50..51 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..51
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..50
+    0: HTML_ELEMENT@0..50
+      0: HTML_OPENING_ELEMENT@0..36
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..13
+          0: HTML_LITERAL@1..13 "app-counter" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@13..35
+          0: ANGULAR_TWO_WAY_BINDING@13..35
+            0: L_BRACKET_PAREN@13..15 "[(" [] []
+            1: ANGULAR_BINDING_NAME@15..20
+              0: HTML_LITERAL@15..20 "count" [] []
+            2: (empty)
+            3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@20..35
+              0: EQ@20..21 "=" [] []
+              1: HTML_STRING@21..35
+                0: HTML_STRING_LITERAL@21..35 "\"initialCount\"" [] []
+        3: R_ANGLE@35..36 ">" [] []
+      1: HTML_ELEMENT_LIST@36..36
+      2: HTML_CLOSING_ELEMENT@36..50
+        0: L_ANGLE@36..37 "<" [] []
+        1: SLASH@37..38 "/" [] []
+        2: HTML_TAG_NAME@38..49
+          0: HTML_LITERAL@38..49 "app-counter" [] []
+        3: R_ANGLE@49..50 ">" [] []
+  4: EOF@50..51 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+two-way-binding.component.html:1:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)]` but instead found `=`
+  
+  > 1 │ <app-counter [(count="initialCount"></app-counter>
+      │                     ^
+    2 │ 
+  
+  i Remove =
+  
+```

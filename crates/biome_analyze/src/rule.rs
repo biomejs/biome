@@ -587,8 +587,6 @@ pub enum RuleDomain {
     Qwik,
     /// Vue.js framework rules
     Vue,
-    /// Angular framework rules
-    Angular,
     /// For rules that require querying multiple files inside a project
     Project,
     /// Tailwind CSS rules
@@ -612,7 +610,6 @@ impl Display for RuleDomain {
             Self::Next => fmt.write_str("next"),
             Self::Qwik => fmt.write_str("qwik"),
             Self::Vue => fmt.write_str("vue"),
-            Self::Angular => fmt.write_str("angular"),
             Self::Project => fmt.write_str("project"),
             Self::Tailwind => fmt.write_str("tailwind"),
             Self::Turborepo => fmt.write_str("turborepo"),
@@ -655,7 +652,6 @@ impl RuleDomain {
                 &("@qwik.dev/core", ">=2.0.0"),
             ],
             Self::Vue => &[&("vue", ">=3.0.0")],
-            Self::Angular => &[&("@angular/core", ">=21.0.0")],
             Self::Project => &[],
             Self::Tailwind => &[&("tailwindcss", ">=3.0.0")],
             Self::Turborepo => &[&("turbo", ">=1.0.0")],
@@ -697,7 +693,6 @@ impl RuleDomain {
             Self::Next => &[],
             Self::Qwik => &[],
             Self::Vue => &[],
-            Self::Angular => &[],
             Self::Project => &[],
             Self::Tailwind => &[],
             Self::Turborepo => &[],
@@ -715,7 +710,6 @@ impl RuleDomain {
             Self::Next => "next",
             Self::Qwik => "qwik",
             Self::Vue => "vue",
-            Self::Angular => "angular",
             Self::Project => "project",
             Self::Tailwind => "tailwind",
             Self::Turborepo => "turborepo",
@@ -737,7 +731,6 @@ impl FromStr for RuleDomain {
             "next" => Ok(Self::Next),
             "qwik" => Ok(Self::Qwik),
             "vue" => Ok(Self::Vue),
-            "angular" => Ok(Self::Angular),
             "project" => Ok(Self::Project),
             "tailwind" => Ok(Self::Tailwind),
             "turborepo" => Ok(Self::Turborepo),

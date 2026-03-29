@@ -31,7 +31,7 @@ pub enum HtmlVariant {
     Vue,
     /// Use this variant to parse a Svelte file
     Svelte,
-    /// Use this variant to parse a Angular file
+    /// Use this variant to parse an Angular file
     Angular,
 }
 
@@ -122,13 +122,6 @@ impl HtmlFileSource {
 
     /// Try to return the HTML file source corresponding to this file name from well-known files
     pub fn try_from_well_known(path: &Utf8Path) -> Result<Self, FileSourceError> {
-        // Be careful with definition files, because `Path::extension()` only
-        // returns the extension after the _last_ dot:
-        let file_name = path.file_name().ok_or(FileSourceError::MissingFileName)?;
-        if file_name.ends_with(".component.html") {
-            return Self::try_from_extension("component.html");
-        }
-
         match path.extension() {
             Some(extension) => Self::try_from_extension(extension),
             None => Err(FileSourceError::MissingFileExtension),
@@ -143,7 +136,6 @@ impl HtmlFileSource {
             "astro" => Ok(Self::astro()),
             "vue" => Ok(Self::vue()),
             "svelte" => Ok(Self::svelte()),
-            "component.html" => Ok(Self::angular()),
             _ => Err(FileSourceError::UnknownExtension),
         }
     }

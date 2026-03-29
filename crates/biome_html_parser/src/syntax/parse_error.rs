@@ -118,7 +118,7 @@ pub(crate) fn expected_vue_directive_argument(p: &HtmlParser, range: TextRange) 
 }
 
 pub(crate) fn disabled_angular(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
-    p.err_builder("This looks like Angular syntax, but this is not a Angular file.", range).with_hint(markup!("Remove it or rename this file to have the "<Emphasis>".component.html"</Emphasis>" file extension."))
+    p.err_builder("This looks like Angular syntax, but this is not an Angular file.", range).with_hint(markup!("Remove it or rename this file to have the "<Emphasis>".component.html"</Emphasis>" file extension."))
 }
 
 pub(crate) fn expected_angular_name(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {

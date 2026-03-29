@@ -8,18 +8,6 @@ use biome_parser::Parser;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
 
-fn parse_angular_binding_name(p: &mut HtmlParser) -> ParsedSyntax {
-    let m = p.start();
-
-    if p.at(HTML_LITERAL) {
-        p.bump_with_context(HTML_LITERAL, HtmlLexContext::InsideTagAngular);
-    } else {
-        p.error(expected_angular_name(p, p.cur_range()));
-    }
-
-    Present(m.complete(p, ANGULAR_BINDING_NAME))
-}
-
 pub(crate) fn parse_angular_event_binding(p: &mut HtmlParser) -> ParsedSyntax {
     if !p.at(T!['(']) {
         return Absent;
@@ -35,6 +23,18 @@ pub(crate) fn parse_angular_event_binding(p: &mut HtmlParser) -> ParsedSyntax {
     }
 
     Present(m.complete(p, ANGULAR_EVENT_BINDING))
+}
+
+fn parse_angular_binding_name(p: &mut HtmlParser) -> ParsedSyntax {
+    let m = p.start();
+
+    if p.at(HTML_LITERAL) {
+        p.bump_with_context(HTML_LITERAL, HtmlLexContext::InsideTagAngular);
+    } else {
+        p.error(expected_angular_name(p, p.cur_range()));
+    }
+
+    Present(m.complete(p, ANGULAR_BINDING_NAME))
 }
 
 pub(crate) fn parse_angular_property_binding(p: &mut HtmlParser) -> ParsedSyntax {
@@ -96,6 +96,9 @@ pub(crate) fn parse_angular_template_ref(p: &mut HtmlParser) -> ParsedSyntax {
 
     p.bump_with_context(T![#], HtmlLexContext::InsideTagAngular);
     parse_angular_binding_name(p).ok();
+    if p.at(T![=]) {
+        parse_attribute_initializer(p).ok();
+    }
 
     Present(m.complete(p, ANGULAR_TEMPLATE_REF_VARIABLE))
 }

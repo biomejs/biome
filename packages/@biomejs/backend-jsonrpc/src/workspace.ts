@@ -1079,7 +1079,6 @@ export type RuleDomain =
 	| "next"
 	| "qwik"
 	| "vue"
-	| "angular"
 	| "project"
 	| "tailwind"
 	| "turborepo"

@@ -119,14 +119,34 @@ impl AngularStructuralDirectiveBuilder {
 pub fn angular_template_ref_variable(
     hash_token: SyntaxToken,
     name: AngularBindingName,
-) -> AngularTemplateRefVariable {
-    AngularTemplateRefVariable::unwrap_cast(SyntaxNode::new_detached(
-        HtmlSyntaxKind::ANGULAR_TEMPLATE_REF_VARIABLE,
-        [
-            Some(SyntaxElement::Token(hash_token)),
-            Some(SyntaxElement::Node(name.into_syntax())),
-        ],
-    ))
+) -> AngularTemplateRefVariableBuilder {
+    AngularTemplateRefVariableBuilder {
+        hash_token,
+        name,
+        initializer: None,
+    }
+}
+pub struct AngularTemplateRefVariableBuilder {
+    hash_token: SyntaxToken,
+    name: AngularBindingName,
+    initializer: Option<HtmlAttributeInitializerClause>,
+}
+impl AngularTemplateRefVariableBuilder {
+    pub fn with_initializer(mut self, initializer: HtmlAttributeInitializerClause) -> Self {
+        self.initializer = Some(initializer);
+        self
+    }
+    pub fn build(self) -> AngularTemplateRefVariable {
+        AngularTemplateRefVariable::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::ANGULAR_TEMPLATE_REF_VARIABLE,
+            [
+                Some(SyntaxElement::Token(self.hash_token)),
+                Some(SyntaxElement::Node(self.name.into_syntax())),
+                self.initializer
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn angular_two_way_binding(
     l_bracket_paren_token: SyntaxToken,

@@ -22,7 +22,6 @@ domains.json:4:7 deserialize ━━━━━━━━━━━━━━━━━
   - next
   - qwik
   - vue
-  - angular
   - project
   - tailwind
   - turborepo
