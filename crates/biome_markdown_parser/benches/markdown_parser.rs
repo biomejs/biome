@@ -22,49 +22,41 @@ static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 #[global_allocator]
 static GLOBAL: std::alloc::System = std::alloc::System;
 
-/// Recursively load `.md` files from the fixtures directory.
+/// Load `.md` files from the benchmark fixture directories.
 /// Returns `(group_name, file_name, content)` tuples.
 fn load_fixtures() -> Vec<(String, String, String)> {
     let fixtures_root = Path::new(env!("CARGO_MANIFEST_DIR")).join("benches/fixtures");
     let mut cases = Vec::new();
 
-    fn visit(dir: &Path, root: &Path, cases: &mut Vec<(String, String, String)>) {
-        let entries = fs::read_dir(dir).unwrap_or_else(|err| {
-            panic!("failed to read benchmark fixtures directory {dir:?}: {err}")
+    for group in ["real", "spec", "synthetic"] {
+        let group_dir = fixtures_root.join(group);
+        let entries = fs::read_dir(&group_dir).unwrap_or_else(|err| {
+            panic!("failed to read benchmark fixtures directory {group_dir:?}: {err}")
         });
 
         for entry in entries {
             let entry = entry.unwrap_or_else(|err| {
-                panic!("failed to read benchmark fixture entry in {dir:?}: {err}")
+                panic!("failed to read benchmark fixture entry in {group_dir:?}: {err}")
             });
             let path = entry.path();
-            if path.is_dir() {
-                visit(&path, root, cases);
-            } else if path.is_file() {
-                if !matches!(path.extension().and_then(|e| e.to_str()), Some("md")) {
-                    continue;
-                }
-                let rel = path.strip_prefix(root).unwrap_or(&path);
-                let group = rel
-                    .iter()
-                    .next()
-                    .and_then(|s| s.to_str())
-                    .unwrap_or("root")
-                    .to_string();
-                let name = path
-                    .file_name()
-                    .and_then(|s| s.to_str())
-                    .unwrap_or_default()
-                    .to_string();
-                let content = fs::read_to_string(&path).unwrap_or_else(|err| {
-                    panic!("failed to read benchmark fixture {path:?}: {err}")
-                });
-                cases.push((group, name, content));
+            if !path.is_file() {
+                continue;
             }
+            if !matches!(path.extension().and_then(|e| e.to_str()), Some("md")) {
+                continue;
+            }
+
+            let name = path
+                .file_name()
+                .and_then(|s| s.to_str())
+                .unwrap_or_default()
+                .to_string();
+            let content = fs::read_to_string(&path)
+                .unwrap_or_else(|err| panic!("failed to read benchmark fixture {path:?}: {err}"));
+            cases.push((group.to_string(), name, content));
         }
     }
 
-    visit(&fixtures_root, &fixtures_root, &mut cases);
     assert!(
         !cases.is_empty(),
         "no markdown benchmark fixtures found in {fixtures_root:?}"

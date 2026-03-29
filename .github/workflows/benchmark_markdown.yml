@@ -73,5 +73,5 @@ jobs:
         timeout-minutes: 50
         with:
           mode: simulation
-          run: cargo codspeed run
+          run: cargo codspeed run -p biome_markdown_parser --bench markdown_parser
           token: ${{ secrets.CODSPEED_TOKEN }}
