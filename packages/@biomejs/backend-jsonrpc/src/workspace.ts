@@ -9254,6 +9254,7 @@ export type CssVariant = "standard" | "cssModules" | "tailwindCss";
 export type GraphqlVariant = "standard";
 export type HtmlVariant =
 	| { Standard: HtmlTextExpressions }
+	| "Angular"
 	| "Astro"
 	| "Vue"
 	| "Svelte";
