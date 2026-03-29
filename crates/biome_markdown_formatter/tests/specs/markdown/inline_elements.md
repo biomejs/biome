@@ -13,3 +13,9 @@ __bold underscore__
 *italic with `code` inside*
 
 **bold with *italic* inside**
+
+*italic***bold**
+
+`` `backtick` ``
+
+`code1``code2`

@@ -22,6 +22,12 @@ __bold underscore__
 
 **bold with *italic* inside**
 
+*italic***bold**
+
+`` `backtick` ``
+
+`code1``code2`
+
 ```
 
 
@@ -43,5 +49,11 @@ __bold underscore__
 *italic with `code` inside*
 
 **bold with *italic* inside**
+
+*italic***bold**
+
+`` `backtick` ``
+
+`code1``code2`
 
 ```
