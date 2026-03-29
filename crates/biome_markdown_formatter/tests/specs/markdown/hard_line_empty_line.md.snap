@@ -1,0 +1,33 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/hard_line_empty_line.md
+---
+
+# Input
+
+```md
+keep-space  
+next
+
+trim-space  
+
+keep-backslash\
+next
+
+trim-backslash\
+```
+
+
+# Formatted
+
+```md
+keep-space  
+next
+
+trim-space
+
+keep-backslash\
+next
+
+trim-backslash
+```
