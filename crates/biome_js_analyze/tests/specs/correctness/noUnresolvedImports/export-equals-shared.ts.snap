@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: export-equals-shared.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+import { useState } from "./export-equals-shared-binding";
+
+export const state = useState;
+
+```

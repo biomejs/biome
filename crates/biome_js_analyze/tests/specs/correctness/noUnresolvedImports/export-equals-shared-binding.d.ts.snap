@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: export-equals-shared-binding.d.ts
+---
+# Input
+```ts
+declare namespace shared {
+	type State = string;
+}
+
+declare const shared: {
+	useState(): shared.State;
+};
+
+export = shared;
+
+```
