@@ -29,36 +29,44 @@ fn load_fixtures() -> Vec<(String, String, String)> {
     let mut cases = Vec::new();
 
     fn visit(dir: &Path, root: &Path, cases: &mut Vec<(String, String, String)>) {
-        if let Ok(entries) = fs::read_dir(dir) {
-            for entry in entries.flatten() {
-                let path = entry.path();
-                if path.is_dir() {
-                    visit(&path, root, cases);
-                } else if path.is_file() {
-                    if !matches!(path.extension().and_then(|e| e.to_str()), Some("md")) {
-                        continue;
-                    }
-                    let rel = path.strip_prefix(root).unwrap_or(&path);
-                    let group = rel
-                        .iter()
-                        .next()
-                        .and_then(|s| s.to_str())
-                        .unwrap_or("root")
-                        .to_string();
-                    let name = path
-                        .file_name()
-                        .and_then(|s| s.to_str())
-                        .unwrap_or_default()
-                        .to_string();
-                    if let Ok(content) = fs::read_to_string(&path) {
-                        cases.push((group, name, content));
-                    }
+        let entries = fs::read_dir(dir)
+            .unwrap_or_else(|err| panic!("failed to read benchmark fixtures directory {dir:?}: {err}"));
+
+        for entry in entries {
+            let entry = entry.unwrap_or_else(|err| {
+                panic!("failed to read benchmark fixture entry in {dir:?}: {err}")
+            });
+            let path = entry.path();
+            if path.is_dir() {
+                visit(&path, root, cases);
+            } else if path.is_file() {
+                if !matches!(path.extension().and_then(|e| e.to_str()), Some("md")) {
+                    continue;
                 }
+                let rel = path.strip_prefix(root).unwrap_or(&path);
+                let group = rel
+                    .iter()
+                    .next()
+                    .and_then(|s| s.to_str())
+                    .unwrap_or("root")
+                    .to_string();
+                let name = path
+                    .file_name()
+                    .and_then(|s| s.to_str())
+                    .unwrap_or_default()
+                    .to_string();
+                let content = fs::read_to_string(&path)
+                    .unwrap_or_else(|err| panic!("failed to read benchmark fixture {path:?}: {err}"));
+                cases.push((group, name, content));
             }
         }
     }
 
     visit(&fixtures_root, &fixtures_root, &mut cases);
+    assert!(
+        !cases.is_empty(),
+        "no markdown benchmark fixtures found in {fixtures_root:?}"
+    );
     cases
 }
 
