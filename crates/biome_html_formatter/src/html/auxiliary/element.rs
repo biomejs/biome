@@ -4,8 +4,8 @@ use crate::verbatim::{format_html_leading_comments, format_html_leading_comments
 use crate::{html::lists::element_list::FormatHtmlElementList, prelude::*};
 use biome_formatter::{CstFormatContext, FormatRefWithRule, FormatRuleWithOptions, write};
 use biome_html_syntax::{
-    AnyHtmlTagName, HtmlElement, HtmlElementFields, HtmlElementList, HtmlRoot,
-    HtmlSelfClosingElement, HtmlSyntaxToken,
+    AnyHtmlAttribute, AnyHtmlTagName, AnyVueDirective, HtmlElement, HtmlElementFields,
+    HtmlElementList, HtmlOpeningElement, HtmlRoot, HtmlSelfClosingElement, HtmlSyntaxToken,
 };
 use biome_rowan::TokenText;
 use biome_string_case::StrLikeExtension;
@@ -141,6 +141,7 @@ impl FormatHtmlElement {
         // If `<template>` is at the root level, force multiline formatting of its children.
         let is_template_element = get_tag_name_text(&tag_name)
             .is_some_and(|tt| tt.to_ascii_lowercase_cow() == "template");
+        let is_vue_slot_template = is_vue_slot_template(&opening_element, &tag_name);
 
         let should_be_verbatim = match tag_name {
             AnyHtmlTagName::HtmlComponentName(_) | AnyHtmlTagName::HtmlMemberName(_) => false,
@@ -175,8 +176,11 @@ impl FormatHtmlElement {
                 .ok()
                 .is_some_and(|tok| tok.has_leading_whitespace_or_newline());
 
-        let forces_break_children =
-            should_force_break_content || (is_root_element_list && is_template_element);
+        // Vue slot templates read poorly when a single child gets flattened into
+        // `<template #slot> <p>...</p> </template>`, so keep their children expanded.
+        let forces_break_children = should_force_break_content
+            || (is_root_element_list && is_template_element)
+            || is_vue_slot_template;
 
         // "Borrowing" in this context refers to tokens in nodes that would normally be
         // formatted by that node's formatter, but are instead formatted by a sibling
@@ -271,6 +275,29 @@ impl FormatHtmlElement {
 
         Ok(())
     }
+}
+
+fn is_vue_slot_template(opening_element: &HtmlOpeningElement, tag_name: &AnyHtmlTagName) -> bool {
+    let is_template_element =
+        get_tag_name_text(tag_name).is_some_and(|tt| tt.to_ascii_lowercase_cow() == "template");
+
+    if !is_template_element {
+        return false;
+    }
+
+    opening_element
+        .attributes()
+        .iter()
+        .any(|attribute| match attribute {
+            AnyHtmlAttribute::AnyVueDirective(directive) => match directive {
+                AnyVueDirective::VueVSlotShorthandDirective(_) => true,
+                AnyVueDirective::VueDirective(directive) => directive
+                    .name_token()
+                    .is_ok_and(|token| token.text_trimmed().eq_ignore_ascii_case("v-slot")),
+                _ => false,
+            },
+            _ => false,
+        })
 }
 
 /// Determines if an element should force line breaks between all its children.

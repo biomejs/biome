@@ -1,0 +1,51 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/issue-9450/issue-9450.vue
+---
+
+# Input
+
+```vue
+<template>
+	<Dialog>
+		<template #body>
+			<p>{{ text }}</p>
+		</template>
+	</Dialog>
+</template>
+
+```
+
+
+# Options
+
+```json
+{
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "tab",
+    "lineWidth": 120,
+    "lineEnding": "lf"
+  },
+  "html": {
+    "formatter": {
+      "enabled": true
+    },
+    "experimentalFullSupportEnabled": true
+  }
+}
+```
+
+# Formatted
+
+```vue
+<template>
+	<Dialog>
+		<template #body>
+			<p>{{ text }}</p>
+		</template>
+	</Dialog>
+</template>
+
+```
+
