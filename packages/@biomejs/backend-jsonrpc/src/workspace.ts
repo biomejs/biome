@@ -2342,6 +2342,11 @@ See https://biomejs.dev/linter/rules/no-useless-return
 	 */
 	noUselessReturn?: NoUselessReturnConfiguration;
 	/**
+	* Disallow type conversions that do not change the type of an expression.
+See https://biomejs.dev/linter/rules/no-useless-type-conversion 
+	 */
+	noUselessTypeConversion?: NoUselessTypeConversionConfiguration;
+	/**
 	* Disallows using arrow functions when defining a watcher.
 See https://biomejs.dev/linter/rules/no-vue-arrow-func-in-watch 
 	 */
@@ -4296,6 +4301,9 @@ export type NoUntrustedLicensesConfiguration =
 export type NoUselessReturnConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessReturnOptions;
+export type NoUselessTypeConversionConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUselessTypeConversionOptions;
 export type NoVueArrowFuncInWatchConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueArrowFuncInWatchOptions;
@@ -6026,6 +6034,10 @@ export interface RuleWithNoUselessReturnOptions {
 	level: RulePlainConfiguration;
 	options?: NoUselessReturnOptions;
 }
+export interface RuleWithNoUselessTypeConversionOptions {
+	level: RulePlainConfiguration;
+	options?: NoUselessTypeConversionOptions;
+}
 export interface RuleWithNoVueArrowFuncInWatchOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -7582,6 +7594,7 @@ Defaults to `false`.
 	requireOsiApproved?: boolean;
 }
 export type NoUselessReturnOptions = {};
+export type NoUselessTypeConversionOptions = {};
 export type NoVueArrowFuncInWatchOptions = {};
 export type NoVueOptionsApiOptions = {};
 export type NoVueRefAsOperandOptions = {};
@@ -8647,6 +8660,7 @@ export type Category =
 	| "lint/nursery/noUnwantedPolyfillio"
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessReturn"
+	| "lint/nursery/noUselessTypeConversion"
 	| "lint/nursery/noVueArrowFuncInWatch"
 	| "lint/nursery/noVueOptionsApi"
 	| "lint/nursery/noVueRefAsOperand"

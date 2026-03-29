@@ -288,6 +288,7 @@ pub mod no_useless_switch_case;
 pub mod no_useless_ternary;
 pub mod no_useless_this_alias;
 pub mod no_useless_type_constraint;
+pub mod no_useless_type_conversion;
 pub mod no_useless_undefined;
 pub mod no_useless_undefined_initialization;
 pub mod no_value_at_rule;

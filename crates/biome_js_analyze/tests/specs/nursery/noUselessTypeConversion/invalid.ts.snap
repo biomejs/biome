@@ -1,0 +1,602 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+String("asdf");
+"asdf".toString();
+"" + "asdf";
+"asdf" + "";
+
+let str = "asdf";
+str += "";
+
+let otherStr = "asdf";
+"asdf" + (otherStr += "");
+
+Number(123);
++123;
+Boolean(true);
+!!true;
+BigInt(3n);
+~~3n;
+
+function stringIdentity<T extends string>(x: T) {
+    return String(x);
+}
+
+function numberIdentity<T extends number>(x: T) {
+    return Number(x);
+}
+
+function booleanIdentity<T extends boolean>(x: T) {
+    return Boolean(x);
+}
+
+function bigintIdentity<T extends bigint>(x: T) {
+    return BigInt(x);
+}
+
+String("a" + "b").length;
+("a" + "b").toString().length;
+2 * +(2 + 2);
+2 * Number(2 + 2);
+false && !!(false || true);
+false && Boolean(false || true);
+2n * BigInt(2n + 2n);
+
+~~1;
+~~-1;
+
+declare const threeOrFour: 3 | 4;
+~~threeOrFour;
+
+declare const threeOrFourBigInt: 3n | 4n;
+~~threeOrFourBigInt;
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:1 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling `String()` on a string value.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ String("asdf");
+      │ ^^^^^^
+    3 │ "asdf".toString();
+    4 │ "" + "asdf";
+  
+  i This expression already evaluates to a string.
+  
+  i Remove the conversion and use the value directly.
+  
+  i Redundant conversions make it harder to see that the value already has the expected string type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:3:8 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling `toString()` on a string value.
+  
+    1 │ /* should generate diagnostics */
+    2 │ String("asdf");
+  > 3 │ "asdf".toString();
+      │        ^^^^^^^^
+    4 │ "" + "asdf";
+    5 │ "asdf" + "";
+  
+  i This expression already evaluates to a string.
+  
+  i Remove the conversion and use the value directly.
+  
+  i Redundant conversions make it harder to see that the value already has the expected string type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:4:1 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid concatenating a string value with an empty string.
+  
+    2 │ String("asdf");
+    3 │ "asdf".toString();
+  > 4 │ "" + "asdf";
+      │ ^^^^^^^^^^^
+    5 │ "asdf" + "";
+    6 │ 
+  
+  i This expression already evaluates to a string.
+  
+  i This expression already evaluates to a string, so the empty string has no effect.
+  
+  i Redundant conversions make it harder to see that the value already has the expected string type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:5:1 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid concatenating a string value with an empty string.
+  
+    3 │ "asdf".toString();
+    4 │ "" + "asdf";
+  > 5 │ "asdf" + "";
+      │ ^^^^^^^^^^^
+    6 │ 
+    7 │ let str = "asdf";
+  
+  i This expression already evaluates to a string.
+  
+  i This expression already evaluates to a string, so the empty string has no effect.
+  
+  i Redundant conversions make it harder to see that the value already has the expected string type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:8:1 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid appending an empty string to a string value.
+  
+     7 │ let str = "asdf";
+   > 8 │ str += "";
+       │ ^^^^^^^^^
+     9 │ 
+    10 │ let otherStr = "asdf";
+  
+  i This expression already evaluates to a string.
+  
+  i This expression already evaluates to a string, so the empty string has no effect.
+  
+  i Redundant conversions make it harder to see that the value already has the expected string type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:11:11 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid appending an empty string to a string value.
+  
+    10 │ let otherStr = "asdf";
+  > 11 │ "asdf" + (otherStr += "");
+       │           ^^^^^^^^^^^^^^
+    12 │ 
+    13 │ Number(123);
+  
+  i This expression already evaluates to a string.
+  
+  i This expression already evaluates to a string, so the empty string has no effect.
+  
+  i Redundant conversions make it harder to see that the value already has the expected string type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:13:1 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling `Number()` on a number value.
+  
+    11 │ "asdf" + (otherStr += "");
+    12 │ 
+  > 13 │ Number(123);
+       │ ^^^^^^
+    14 │ +123;
+    15 │ Boolean(true);
+  
+  i This expression already evaluates to a number.
+  
+  i Remove the conversion and use the value directly.
+  
+  i Redundant conversions make it harder to see that the value already has the expected number type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:14:1 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid applying unary `+` to a number value.
+  
+    13 │ Number(123);
+  > 14 │ +123;
+       │ ^^^^
+    15 │ Boolean(true);
+    16 │ !!true;
+  
+  i This expression already evaluates to a number.
+  
+  i This expression already evaluates to a number, so the unary operator has no effect.
+  
+  i Redundant conversions make it harder to see that the value already has the expected number type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:15:1 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling `Boolean()` on a boolean value.
+  
+    13 │ Number(123);
+    14 │ +123;
+  > 15 │ Boolean(true);
+       │ ^^^^^^^
+    16 │ !!true;
+    17 │ BigInt(3n);
+  
+  i This expression already evaluates to a boolean.
+  
+  i Remove the conversion and use the value directly.
+  
+  i Redundant conversions make it harder to see that the value already has the expected boolean type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:16:1 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid applying `!!` to a boolean value.
+  
+    14 │ +123;
+    15 │ Boolean(true);
+  > 16 │ !!true;
+       │ ^^^^^^
+    17 │ BigInt(3n);
+    18 │ ~~3n;
+  
+  i This expression already evaluates to a boolean.
+  
+  i This expression already evaluates to a boolean, so the double negation has no effect.
+  
+  i Redundant conversions make it harder to see that the value already has the expected boolean type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:17:1 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling `BigInt()` on a bigint value.
+  
+    15 │ Boolean(true);
+    16 │ !!true;
+  > 17 │ BigInt(3n);
+       │ ^^^^^^
+    18 │ ~~3n;
+    19 │ 
+  
+  i This expression already evaluates to a bigint.
+  
+  i Remove the conversion and use the value directly.
+  
+  i Redundant conversions make it harder to see that the value already has the expected bigint type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:18:1 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid applying `~~` to a bigint value.
+  
+    16 │ !!true;
+    17 │ BigInt(3n);
+  > 18 │ ~~3n;
+       │ ^^^^
+    19 │ 
+    20 │ function stringIdentity<T extends string>(x: T) {
+  
+  i This expression already evaluates to a bigint.
+  
+  i This expression already evaluates to a bigint, so the double bitwise NOT has no effect.
+  
+  i Redundant conversions make it harder to see that the value already has the expected bigint type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:36:1 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling `String()` on a string value.
+  
+    34 │ }
+    35 │ 
+  > 36 │ String("a" + "b").length;
+       │ ^^^^^^
+    37 │ ("a" + "b").toString().length;
+    38 │ 2 * +(2 + 2);
+  
+  i This expression already evaluates to a string.
+  
+  i Remove the conversion and use the value directly.
+  
+  i Redundant conversions make it harder to see that the value already has the expected string type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:37:13 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling `toString()` on a string value.
+  
+    36 │ String("a" + "b").length;
+  > 37 │ ("a" + "b").toString().length;
+       │             ^^^^^^^^
+    38 │ 2 * +(2 + 2);
+    39 │ 2 * Number(2 + 2);
+  
+  i This expression already evaluates to a string.
+  
+  i Remove the conversion and use the value directly.
+  
+  i Redundant conversions make it harder to see that the value already has the expected string type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:38:5 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid applying unary `+` to a number value.
+  
+    36 │ String("a" + "b").length;
+    37 │ ("a" + "b").toString().length;
+  > 38 │ 2 * +(2 + 2);
+       │     ^^^^^^^^
+    39 │ 2 * Number(2 + 2);
+    40 │ false && !!(false || true);
+  
+  i This expression already evaluates to a number.
+  
+  i This expression already evaluates to a number, so the unary operator has no effect.
+  
+  i Redundant conversions make it harder to see that the value already has the expected number type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:39:5 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling `Number()` on a number value.
+  
+    37 │ ("a" + "b").toString().length;
+    38 │ 2 * +(2 + 2);
+  > 39 │ 2 * Number(2 + 2);
+       │     ^^^^^^
+    40 │ false && !!(false || true);
+    41 │ false && Boolean(false || true);
+  
+  i This expression already evaluates to a number.
+  
+  i Remove the conversion and use the value directly.
+  
+  i Redundant conversions make it harder to see that the value already has the expected number type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:40:10 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid applying `!!` to a boolean value.
+  
+    38 │ 2 * +(2 + 2);
+    39 │ 2 * Number(2 + 2);
+  > 40 │ false && !!(false || true);
+       │          ^^^^^^^^^^^^^^^^^
+    41 │ false && Boolean(false || true);
+    42 │ 2n * BigInt(2n + 2n);
+  
+  i This expression already evaluates to a boolean.
+  
+  i This expression already evaluates to a boolean, so the double negation has no effect.
+  
+  i Redundant conversions make it harder to see that the value already has the expected boolean type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:41:10 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling `Boolean()` on a boolean value.
+  
+    39 │ 2 * Number(2 + 2);
+    40 │ false && !!(false || true);
+  > 41 │ false && Boolean(false || true);
+       │          ^^^^^^^
+    42 │ 2n * BigInt(2n + 2n);
+    43 │ 
+  
+  i This expression already evaluates to a boolean.
+  
+  i Remove the conversion and use the value directly.
+  
+  i Redundant conversions make it harder to see that the value already has the expected boolean type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:42:6 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid calling `BigInt()` on a bigint value.
+  
+    40 │ false && !!(false || true);
+    41 │ false && Boolean(false || true);
+  > 42 │ 2n * BigInt(2n + 2n);
+       │      ^^^^^^
+    43 │ 
+    44 │ ~~1;
+  
+  i This expression already evaluates to a bigint.
+  
+  i Remove the conversion and use the value directly.
+  
+  i Redundant conversions make it harder to see that the value already has the expected bigint type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:44:1 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid applying `~~` to an integer value.
+  
+    42 │ 2n * BigInt(2n + 2n);
+    43 │ 
+  > 44 │ ~~1;
+       │ ^^^
+    45 │ ~~-1;
+    46 │ 
+  
+  i This expression already evaluates to an integer-like number.
+  
+  i This expression already evaluates to an integer-like number, so the double bitwise NOT has no effect.
+  
+  i Redundant conversions make it harder to see that the value already has the expected number type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:48:1 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid applying `~~` to an integer value.
+  
+    47 │ declare const threeOrFour: 3 | 4;
+  > 48 │ ~~threeOrFour;
+       │ ^^^^^^^^^^^^^
+    49 │ 
+    50 │ declare const threeOrFourBigInt: 3n | 4n;
+  
+  i This expression already evaluates to an integer-like number.
+  
+  i This expression already evaluates to an integer-like number, so the double bitwise NOT has no effect.
+  
+  i Redundant conversions make it harder to see that the value already has the expected number type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:51:1 lint/nursery/noUselessTypeConversion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid applying `~~` to a bigint value.
+  
+    50 │ declare const threeOrFourBigInt: 3n | 4n;
+  > 51 │ ~~threeOrFourBigInt;
+       │ ^^^^^^^^^^^^^^^^^^^
+    52 │ 
+  
+  i This expression already evaluates to a bigint.
+  
+  i This expression already evaluates to a bigint, so the double bitwise NOT has no effect.
+  
+  i Redundant conversions make it harder to see that the value already has the expected bigint type.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9752 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

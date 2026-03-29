@@ -5723,6 +5723,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUselessTypeConversionConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUselessTypeConversionOptions" }
+			]
+		},
+		"NoUselessTypeConversionOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUselessUndefinedConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6325,6 +6335,13 @@
 					"description": "Disallow redundant return statements.\nSee https://biomejs.dev/linter/rules/no-useless-return",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUselessReturnConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUselessTypeConversion": {
+					"description": "Disallow type conversions that do not change the type of an expression.\nSee https://biomejs.dev/linter/rules/no-useless-type-conversion",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUselessTypeConversionConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9914,6 +9931,15 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUselessTypeConstraintOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUselessTypeConversionOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUselessTypeConversionOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
