@@ -100,14 +100,14 @@ impl AnyJsFunctionOrMethod {
         false
     }
 
-    fn is_function_expression(&self) -> bool {
+    fn is_unbound_function_expression(&self) -> bool {
         matches!(
             self,
             Self::AnyJsFunction(
                 AnyJsFunction::JsArrowFunctionExpression(_)
                     | AnyJsFunction::JsFunctionExpression(_)
             )
-        )
+        ) && self.name().is_none()
     }
 
     fn name(&self) -> Option<Text> {
@@ -590,7 +590,7 @@ impl Rule for UseHookAtTopLevel {
         }
 
         if enclosing_function_if_call_is_at_top_level(call).is_some_and(|function| {
-            !function.is_react_component_or_hook() && !function.is_function_expression()
+            !function.is_react_component_or_hook() && !function.is_unbound_function_expression()
         }) {
             return Some(Suggestion {
                 hook_name_range: get_hook_name_range()?,

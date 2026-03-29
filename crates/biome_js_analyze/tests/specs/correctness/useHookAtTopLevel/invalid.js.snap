@@ -197,6 +197,10 @@ function useRecursiveHookB() {
     useRecursiveHookA();
 }
 
+const clearlyNotAHookOrComponent = () => {
+    useEffect();
+};
+
 ```
 
 _Note: The parser emitted 3 diagnostics which are not shown here._
@@ -914,5 +918,21 @@ invalid.js:191:5 lint/correctness/useHookAtTopLevel ━━━━━━━━━�
   
   i See https://react.dev/reference/rules/rules-of-hooks
   
+
+```
+```
+invalid.js:196:5 lint/correctness/useHookAtTopLevel ââââââââââââââââââââââââââââââââââââââââââââ
+
+  Ã This hook is being called from within a function or method that is not a hook or component.
+
+    195 â const clearlyNotAHookOrComponent = () => {
+  > 196 â     useEffect();
+      â     ^^^^^^^^^
+    197 â };
+
+  i Move the hook call into the top level of a hook or component in order to use it.
+
+  i See https://react.dev/reference/rules/rules-of-hooks
+
 
 ```
