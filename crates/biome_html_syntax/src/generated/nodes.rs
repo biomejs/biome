@@ -9868,16 +9868,16 @@ impl AstNode for AnySvelteBindingAssignmentBinding {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            Self::AnySvelteDestructuredName(it) => it.syntax(),
             Self::SvelteName(it) => it.syntax(),
             Self::SvelteRestBinding(it) => it.syntax(),
+            Self::AnySvelteDestructuredName(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            Self::AnySvelteDestructuredName(it) => it.into_syntax(),
             Self::SvelteName(it) => it.into_syntax(),
             Self::SvelteRestBinding(it) => it.into_syntax(),
+            Self::AnySvelteDestructuredName(it) => it.into_syntax(),
         }
     }
 }
