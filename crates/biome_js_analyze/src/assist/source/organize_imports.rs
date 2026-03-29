@@ -705,16 +705,21 @@ impl Rule for OrganizeImports {
     type Signals = Option<Self::State>;
     type Options = OrganizeImportsOptions;
 
-    fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {
+    fn text_range(ctx: &RuleContext<Self>, state: &Self::State) -> Option<TextRange> {
+        let first_issue_slot = state
+            .iter()
+            .filter_map(|issue| match issue {
+                Issue::AddLeadingNewline { slot_index }
+                | Issue::UnorganizedItem { slot_index, .. } => Some(*slot_index),
+                Issue::UnsortedChunkPrefix { slot_indexes } => Some(slot_indexes.start),
+            })
+            .min()?;
+
         ctx.query()
             .items()
             .into_iter()
-            .find(|item| {
-                matches!(
-                    item,
-                    AnyJsModuleItem::JsImport(_) | AnyJsModuleItem::JsExport(_)
-                )
-            })
+            .skip(first_issue_slot as usize)
+            .next()
             .map(|item| item.range())
     }
 

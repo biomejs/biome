@@ -158,3 +158,74 @@ function App() {
     // Should not report any errors because h and Fragment are used as JSX factory functions
     assert_eq!(error_ranges.as_slice(), &[]);
 }
+
+#[test]
+fn organize_imports_reports_unsorted_exports_at_export_chunk() {
+    const FILENAME: &str = "issue9530.ts";
+    const SOURCE: &str = r#"import "a";
+import "b";
+
+
+const a = "a";
+const b = "b";
+
+export { b, a };
+"#;
+
+    let parsed = parse(SOURCE, JsFileSource::ts(), JsParserOptions::default());
+    let file_path = Utf8PathBuf::from(FILENAME);
+    let options = AnalyzerOptions::default().with_file_path(file_path);
+    let rule_filter = RuleFilter::Rule("source", "organizeImports");
+    let services = JsAnalyzerServices::default();
+
+    let mut diagnostics = Vec::new();
+    let mut organized_code = None;
+
+    analyze(
+        &parsed.tree(),
+        AnalysisFilter {
+            enabled_rules: Some(slice::from_ref(&rule_filter)),
+            ..AnalysisFilter::default()
+        },
+        &options,
+        &[],
+        services,
+        |signal| {
+            if let Some(diag) = signal.diagnostic() {
+                let error = diag
+                    .with_severity(Severity::Warning)
+                    .with_file_path(FILENAME)
+                    .with_file_source_code(SOURCE);
+                diagnostics.push(print_diagnostic_to_string(&error));
+            }
+
+            for action in signal.actions(ActionFilter::all()) {
+                if !action.is_suppression() {
+                    organized_code = Some(action.mutation.commit());
+                }
+            }
+
+            ControlFlow::<Never>::Continue(())
+        },
+    );
+
+    let diagnostic = diagnostics.join("\n");
+    assert!(
+        diagnostic.contains("issue9530.ts:8:1 assist/source/organizeImports"),
+        "unexpected diagnostic output: {diagnostic}",
+    );
+    assert_eq!(
+        organized_code.as_deref(),
+        Some(
+            r#"import "a";
+import "b";
+
+
+const a = "a";
+const b = "b";
+
+export { a, b };
+"#,
+        ),
+    );
+}
