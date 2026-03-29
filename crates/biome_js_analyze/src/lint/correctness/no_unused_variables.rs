@@ -534,7 +534,7 @@ fn is_namespace_merged_with_used_value(
 
     for scope_binding in scope.bindings() {
         let other = scope_binding.tree();
-        if let Some(is_used) = is_namespace_merge_value_used(model, binding, &other, &name) {
+        if let Some(is_used) = is_namespace_merge_value_used(model, binding, &other, name) {
             return Some(is_used);
         }
     }
