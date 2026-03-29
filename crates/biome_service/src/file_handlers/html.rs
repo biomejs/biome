@@ -486,6 +486,50 @@ fn parse_embedded_nodes(
             }
         }
 
+        HtmlVariant::Angular => {
+            for element in html_root.syntax().descendants() {
+                if let Some(html_element) = HtmlElement::cast_ref(&element)
+                    && let Some(candidate) = build_html_candidate(&html_element)
+                    && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
+                        HostLanguage::Html,
+                        &candidate,
+                        &doc_file_source,
+                    )
+                    && let Some(parsed) =
+                        parse_matched_embed(&candidate, &embed_match, &mut ctx, None)
+                {
+                    nodes.push(parsed.node);
+                }
+
+                if let Some(text_expression) = HtmlDoubleTextExpression::cast_ref(&element)
+                    && let Ok(expression) = text_expression.expression()
+                    && let Some(candidate) = build_text_expression_candidate(&expression)
+                    && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
+                        HostLanguage::Html,
+                        &candidate,
+                        &doc_file_source,
+                    )
+                    && let Some(parsed) =
+                        parse_matched_embed(&candidate, &embed_match, &mut ctx, None)
+                {
+                    nodes.push(parsed.node);
+                }
+
+                if let Some(attribute) = HtmlAttribute::cast_ref(&element)
+                    && let Some(candidate) = build_angular_binding_candidate(&attribute)
+                    && let Some(embed_match) = EmbedDetectorsRegistry::detect_match(
+                        HostLanguage::Html,
+                        &candidate,
+                        &doc_file_source,
+                    )
+                    && let Some(parsed) =
+                        parse_matched_embed(&candidate, &embed_match, &mut ctx, None)
+                {
+                    nodes.push(parsed.node);
+                }
+            }
+        }
+
         HtmlVariant::Astro => {
             for element in html_root.syntax().descendants() {
                 // Astro frontmatter → registry
@@ -1037,6 +1081,50 @@ fn build_vue_directive_candidate(
     })
 }
 
+/// Build an `EmbedCandidate::Directive` from an Angular binding attribute.
+///
+/// Angular bindings are stored as regular HTML attributes in the parser:
+/// - `[prop]="expr"`
+/// - `(event)="statement"`
+/// - `[(model)]="expr"`
+/// - `*ngIf="expr"`
+fn build_angular_binding_candidate(attribute: &HtmlAttribute) -> Option<EmbedCandidate> {
+    let name_token = attribute.name().ok()?.value_token().ok()?;
+    let name = name_token.text_trimmed();
+    if !is_angular_binding_name(name) {
+        return None;
+    }
+
+    let initializer = attribute.initializer()?;
+    let value_node = initializer.value().ok()?;
+    let html_string = value_node.as_html_string()?;
+    let content_token = html_string.value_token().ok()?;
+    let inner_text = html_string.inner_string_text().ok()?;
+    let token_range = content_token.text_trimmed_range();
+    let inner_offset = token_range.start() + TextSize::from(1);
+
+    Some(EmbedCandidate::Directive {
+        content: EmbedContent {
+            element_range: initializer.range(),
+            content_range: token_range,
+            content_offset: inner_offset,
+            text: inner_text,
+        },
+        is_event_handler: is_angular_event_binding(name),
+    })
+}
+
+fn is_angular_binding_name(name: &str) -> bool {
+    name.starts_with('*')
+        || (name.starts_with("[(") && name.ends_with(")]") && name.len() > 4)
+        || (name.starts_with('[') && name.ends_with(']') && name.len() > 2)
+        || (name.starts_with('(') && name.ends_with(')') && name.len() > 2)
+}
+
+fn is_angular_event_binding(name: &str) -> bool {
+    name.starts_with('(') && name.ends_with(')')
+}
+
 /// Build an `EmbedCandidate::Directive` from a Svelte directive initializer clause.
 ///
 /// Svelte directives use curly brace text expressions (`on:click={handler}`).
@@ -1185,7 +1273,7 @@ fn parse_matched_embed(
                         js_source = efs;
                     }
                     match ctx.host_file_source.variant() {
-                        HtmlVariant::Standard(_) => {}
+                        HtmlVariant::Standard(_) | HtmlVariant::Angular => {}
                         HtmlVariant::Astro => {
                             js_source = js_source
                                 .with_embedding_kind(EmbeddingKind::Astro { frontmatter: false });

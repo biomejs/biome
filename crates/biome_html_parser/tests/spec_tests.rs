@@ -2,7 +2,7 @@ mod spec_test;
 
 use biome_html_factory::syntax::HtmlElement;
 use biome_html_parser::{HtmlParserOptions, parse_html};
-use biome_html_syntax::ScriptType;
+use biome_html_syntax::{HtmlDoubleTextExpression, HtmlFileSource, ScriptType};
 use biome_rowan::AstNode;
 
 mod ok {
@@ -116,4 +116,33 @@ fn test_is_javascript_tag() {
 
     assert!(!element.is_javascript_tag());
     assert_eq!(element.get_script_type(), Some(ScriptType::ImportMap));
+}
+
+#[test]
+fn parses_angular_component_templates() {
+    let html = r#"
+        <input
+            [value]="value"
+            (input)="handleInput($event)"
+            [(ngModel)]="model"
+            *ngIf="visible"
+        />
+        <p>{{ theme }}</p>
+    "#;
+    let syntax = parse_html(html, HtmlParserOptions::from(&HtmlFileSource::angular()));
+
+    assert!(
+        syntax.diagnostics().is_empty(),
+        "expected Angular component template sample to parse without diagnostics: {:?}",
+        syntax.diagnostics()
+    );
+    assert!(
+        syntax
+            .tree()
+            .syntax()
+            .descendants()
+            .find_map(HtmlDoubleTextExpression::cast)
+            .is_some(),
+        "expected Angular component template sample to contain a double text expression"
+    );
 }

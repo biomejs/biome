@@ -48,6 +48,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     let mut snapshot = String::new();
     let code_block = match file_source.variant() {
         HtmlVariant::Standard(_) => "html",
+        HtmlVariant::Angular => "angular",
         HtmlVariant::Astro => "astro",
         HtmlVariant::Vue => "vue",
         HtmlVariant::Svelte => "svelte",

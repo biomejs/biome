@@ -854,3 +854,59 @@ const highlight = foo`some tagged template` // unknown tagged template
 
     insta::assert_snapshot!(result.as_code());
 }
+
+#[test]
+fn format_angular_component_html_with_embedded_bindings() {
+    const FILE_PATH: &str = "/project/app.component.html";
+    const FILE_CONTENT: &str = r#"<button [disabled]=" foo && bar " (click)=" doThing( ) " *ngIf=" visible ">{{theme}}</button>"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let file_source = workspace.get_file_source(FILE_PATH.into(), false);
+    let html_source = file_source
+        .to_html_file_source()
+        .expect("expected Angular component template to resolve as HTML");
+    assert!(html_source.is_angular());
+
+    let result = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: Utf8PathBuf::from(FILE_PATH).into(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    insta::assert_snapshot!(result.as_code(), @r#"
+    <button [disabled]="foo && bar" (click)="doThing()" *ngIf="visible">{{ theme }}</button>
+    "#);
+}

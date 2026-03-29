@@ -177,6 +177,9 @@ impl From<&HtmlFileSource> for HtmlParserOptions {
                 }
                 HtmlTextExpressions::None => options.is_html = true,
             },
+            HtmlVariant::Angular => {
+                options = options.with_double_text_expression();
+            }
             HtmlVariant::Astro => {
                 options = options.with_single_text_expression().with_frontmatter();
             }

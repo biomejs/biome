@@ -25,6 +25,8 @@ pub enum HtmlTextExpressions {
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize)]
 pub enum HtmlVariant {
     Standard(HtmlTextExpressions),
+    /// Use this variant to parse an Angular component template file
+    Angular,
     /// Use this variant to parse an Astro file
     Astro,
     /// Use this variant to parse a Vue file
@@ -46,10 +48,17 @@ impl HtmlFileSource {
         }
     }
 
-    /// Returns `true` if the current file is `.html` and doesn't support
-    /// any text expression capability
+    /// Returns `true` if the current file uses the standard HTML parser pipeline
+    /// instead of a framework-specific super language like Vue, Svelte, or Astro.
     pub const fn is_html(&self) -> bool {
-        matches!(self.variant, HtmlVariant::Standard(_))
+        matches!(
+            self.variant,
+            HtmlVariant::Standard(_) | HtmlVariant::Angular
+        )
+    }
+
+    pub const fn is_angular(&self) -> bool {
+        matches!(self.variant, HtmlVariant::Angular)
     }
 
     pub const fn is_vue(&self) -> bool {
@@ -65,7 +74,7 @@ impl HtmlFileSource {
     }
 
     pub const fn supports_components(&self) -> bool {
-        self.is_vue() || self.is_svelte() || self.is_astro()
+        self.is_vue() || self.is_svelte() || self.is_astro() || self.is_angular()
     }
 
     pub fn variant(&self) -> &HtmlVariant {
@@ -83,6 +92,12 @@ impl HtmlFileSource {
     pub fn html_with_text_expressions() -> Self {
         Self {
             variant: HtmlVariant::Standard(HtmlTextExpressions::Double),
+        }
+    }
+
+    pub fn angular() -> Self {
+        Self {
+            variant: HtmlVariant::Angular,
         }
     }
 
@@ -105,6 +120,13 @@ impl HtmlFileSource {
 
     /// Try to return the HTML file source corresponding to this file name from well-known files
     pub fn try_from_well_known(path: &Utf8Path) -> Result<Self, FileSourceError> {
+        if path
+            .file_name()
+            .is_some_and(|file_name| file_name.ends_with(".component.html"))
+        {
+            return Ok(Self::angular());
+        }
+
         let Some(extension) = path.extension() else {
             return Err(FileSourceError::MissingFileExtension);
         };
@@ -136,6 +158,7 @@ impl HtmlFileSource {
     pub fn try_from_language_id(language_id: &str) -> Result<Self, FileSourceError> {
         match language_id {
             "html" => Ok(Self::html()),
+            "angular" => Ok(Self::angular()),
             "astro" => Ok(Self::astro()),
             "vuejs" | "vue" => Ok(Self::vue()),
             "svelte" => Ok(Self::svelte()),
@@ -158,5 +181,29 @@ impl TryFrom<&Utf8Path> for HtmlFileSource {
         // We assume the file extensions are case-insensitive
         // and we use the lowercase form of them for pattern matching
         Self::try_from_extension(&extension.to_ascii_lowercase_cow())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::HtmlFileSource;
+    use camino::Utf8Path;
+
+    #[test]
+    fn recognizes_angular_component_template_paths() {
+        let source = HtmlFileSource::try_from(Utf8Path::new("src/app/app.component.html"))
+            .expect("angular component template should be recognized");
+
+        assert!(source.is_angular());
+        assert!(source.is_html());
+        assert!(source.supports_components());
+    }
+
+    #[test]
+    fn recognizes_angular_language_id() {
+        let source = HtmlFileSource::try_from_language_id("angular")
+            .expect("angular language id should be recognized");
+
+        assert!(source.is_angular());
     }
 }
