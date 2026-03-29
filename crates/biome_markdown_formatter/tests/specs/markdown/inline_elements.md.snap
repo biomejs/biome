@@ -1,0 +1,47 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/inline_elements.md
+---
+
+# Input
+
+```md
+`inline code`
+
+``double tick code``
+
+*italic text*
+
+_italic underscore_
+
+**bold text**
+
+__bold underscore__
+
+*italic with `code` inside*
+
+**bold with *italic* inside**
+
+```
+
+
+# Formatted
+
+```md
+`inline code`
+
+``double tick code``
+
+*italic text*
+
+_italic underscore_
+
+**bold text**
+
+__bold underscore__
+
+*italic with `code` inside*
+
+**bold with *italic* inside**
+
+```
