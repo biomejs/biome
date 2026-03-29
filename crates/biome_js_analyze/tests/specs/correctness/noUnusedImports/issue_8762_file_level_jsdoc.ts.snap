@@ -1,0 +1,25 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue_8762_file_level_jsdoc.ts
+---
+# Input
+```ts
+// See https://github.com/biomejs/biome/issues/8762
+
+/**
+ * {@linkcode TopLevelDoc}
+ * @module
+ */
+import type { EndOfFileDoc, StatementDoc, TopLevelDoc } from "mod";
+
+/**
+ * {@linkcode StatementDoc}
+ */
+void 0;
+
+/**
+ * {@linkcode EndOfFileDoc}
+ * @packageDocumentation
+ */
+
+```

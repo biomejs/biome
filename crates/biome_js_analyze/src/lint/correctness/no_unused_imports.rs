@@ -18,15 +18,14 @@ use biome_js_factory::make;
 use biome_js_factory::make::{js_identifier_binding, js_module, js_module_item_list};
 use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::{
-    AnyJsBinding, AnyJsClassMember, AnyJsCombinedSpecifier, AnyJsDeclaration, AnyJsExportClause,
-    AnyJsExportNamedSpecifier, AnyJsImportClause, AnyJsModuleItem, AnyJsNamedImportSpecifier,
-    AnyJsObjectMember, AnyTsTypeMember, EmbeddingKind, JsExport, JsFileSource, JsLanguage,
-    JsNamedImportSpecifiers, JsStaticMemberAssignment, JsSyntaxNode, T, TsEnumMember,
+    AnyJsBinding, AnyJsCombinedSpecifier, AnyJsExportClause, AnyJsExportNamedSpecifier,
+    AnyJsImportClause, AnyJsModuleItem, AnyJsNamedImportSpecifier, EmbeddingKind, JsFileSource,
+    JsLanguage, JsNamedImportSpecifiers, JsSyntaxNode, T,
 };
 use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedElement, AstSeparatedList, BatchMutationExt, Language,
-    NodeOrToken, SyntaxNode, TextRange, TriviaPieceKind, WalkEvent, declare_node_union,
+    Direction, NodeOrToken, SyntaxNode, TextRange, TriviaPieceKind, WalkEvent,
 };
 use regex::Regex;
 use rustc_hash::FxHashSet;
@@ -134,10 +133,6 @@ struct JsDocTypeCollectorVisitor {
     jsdoc_types: JsDocTypeModel,
 }
 
-declare_node_union! {
-    pub AnyJsWithTypeReferencingJsDoc = AnyJsDeclaration | AnyJsClassMember | AnyJsObjectMember | AnyTsTypeMember | TsEnumMember | JsExport | JsStaticMemberAssignment
-}
-
 impl Visitor for JsDocTypeCollectorVisitor {
     type Language = JsLanguage;
     fn visit(
@@ -147,8 +142,8 @@ impl Visitor for JsDocTypeCollectorVisitor {
     ) {
         match event {
             WalkEvent::Enter(node) => {
-                if AnyJsWithTypeReferencingJsDoc::can_cast(node.kind()) {
-                    load_jsdoc_types_from_node(&mut self.jsdoc_types, node);
+                if node.parent().is_none() {
+                    load_jsdoc_types_from_file(&mut self.jsdoc_types, node);
                 }
             }
             WalkEvent::Leave(_) => {}
@@ -160,10 +155,19 @@ impl Visitor for JsDocTypeCollectorVisitor {
     }
 }
 
-fn load_jsdoc_types_from_node(model: &mut JsDocTypeModel, node: &SyntaxNode<JsLanguage>) {
-    JsdocComment::for_each(node, |comment| {
-        load_jsdoc_types_from_jsdoc_comment(model, comment)
-    });
+fn load_jsdoc_types_from_file(model: &mut JsDocTypeModel, node: &SyntaxNode<JsLanguage>) {
+    for token in node.descendants_tokens(Direction::Next) {
+        for trivia in token.leading_trivia().pieces() {
+            let text = trivia.text();
+            if matches!(
+                trivia.kind(),
+                TriviaPieceKind::SingleLineComment | TriviaPieceKind::MultiLineComment
+            ) && JsdocComment::text_is_jsdoc_comment(text)
+            {
+                load_jsdoc_types_from_jsdoc_comment(model, text);
+            }
+        }
+    }
 }
 
 static JSDOC_INLINE_TAG_REGEX: LazyLock<Regex> = LazyLock::new(|| {
