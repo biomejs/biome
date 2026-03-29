@@ -276,6 +276,33 @@ fn is_top_level_call(call: &JsCallExpression) -> bool {
         .any(|node| AnyJsFunctionOrMethod::can_cast(node.kind()))
 }
 
+fn is_member_hook_call(call: &JsCallExpression) -> bool {
+    call.callee()
+        .ok()
+        .is_some_and(|callee| callee.as_js_static_member_expression().is_some())
+}
+
+fn nearest_enclosing_function(call: &JsCallExpression) -> Option<AnyJsFunctionOrMethod> {
+    call.syntax()
+        .ancestors()
+        .find_map(AnyJsFunctionOrMethod::cast)
+}
+
+fn has_react_member_hook_context(
+    call: &JsCallExpression,
+    is_member_hook_call: bool,
+    is_enclosed_in_component_or_hook: bool,
+) -> bool {
+    if !is_member_hook_call || is_enclosed_in_component_or_hook {
+        return true;
+    }
+
+    nearest_enclosing_function(call).is_some_and(|function| {
+        function.is_react_component_or_hook()
+            || is_nested_function_inside_component_or_hook(&function)
+    })
+}
+
 /// Model for tracking which function calls are preceded by an early return.
 ///
 /// The keys in the model are call sites and each value is the text range of an
@@ -466,6 +493,7 @@ impl Rule for UseHookAtTopLevel {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let FunctionCall(call) = ctx.query();
+        let is_member_hook_call = is_member_hook_call(call);
         let get_hook_name_range = || match call.callee() {
             Ok(callee) => Some(AnyJsExpression::syntax(&callee).text_trimmed_range()),
             Err(_) => None,
@@ -505,6 +533,9 @@ impl Rule for UseHookAtTopLevel {
         }
 
         if is_top_level_call(call) {
+            if !has_react_member_hook_context(call, is_member_hook_call, false) {
+                return None;
+            }
             return Some(Suggestion {
                 hook_name_range: get_hook_name_range()?,
                 path: vec![call.syntax().text_range_with_trivia()],
@@ -521,6 +552,7 @@ impl Rule for UseHookAtTopLevel {
             is_enclosed_in_component_or_hook: false,
         };
         let mut calls = vec![root];
+        let mut saw_react_context = !is_member_hook_call;
 
         while let Some(CallPath {
             call,
@@ -529,8 +561,18 @@ impl Rule for UseHookAtTopLevel {
         }) = calls.pop()
         {
             let range = call.syntax().text_range_with_trivia();
+            let has_react_context = has_react_member_hook_context(
+                &call,
+                is_member_hook_call,
+                is_enclosed_in_component_or_hook,
+            );
+
+            saw_react_context |= has_react_context;
 
             if path.contains(&range) {
+                if !has_react_context {
+                    continue;
+                }
                 return Some(Suggestion {
                     hook_name_range: get_hook_name_range()?,
                     path,
@@ -553,6 +595,9 @@ impl Rule for UseHookAtTopLevel {
                 }
 
                 if let Some(early_return) = early_returns.get(&call) {
+                    if !has_react_context {
+                        continue;
+                    }
                     return Some(Suggestion {
                         hook_name_range: get_hook_name_range()?,
                         path,
@@ -578,6 +623,9 @@ impl Rule for UseHookAtTopLevel {
                 // Avoid duplicate diagnostics if this path already passed through
                 // a component/hook. We still keep previously enqueued paths to
                 // allow recursion detection elsewhere.
+                if !has_react_context {
+                    continue;
+                }
                 if is_enclosed_in_component_or_hook {
                     continue;
                 }
@@ -592,6 +640,9 @@ impl Rule for UseHookAtTopLevel {
         if enclosing_function_if_call_is_at_top_level(call).is_some_and(|function| {
             !function.is_react_component_or_hook() && !function.is_function_expression()
         }) {
+            if !saw_react_context {
+                return None;
+            }
             return Some(Suggestion {
                 hook_name_range: get_hook_name_range()?,
                 path: vec![call.syntax().text_range_with_trivia()],
