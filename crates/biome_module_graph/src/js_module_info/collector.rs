@@ -1,19 +1,20 @@
 use std::{borrow::Cow, sync::Arc};
 
 use biome_js_semantic::{
-    BindingId, ScopeId, SemanticEvent, SemanticEventExtractor, TsBindingReference,
+    BindingId, JsDeclarationKind, ScopeId, SemanticEvent, SemanticEventExtractor,
+    TsBindingReference,
 };
 use biome_js_syntax::{
     AnyJsCombinedSpecifier, AnyJsDeclaration, AnyJsExportDefaultDeclaration, AnyJsExpression,
     AnyJsImportClause, JsAssignmentExpression, JsForVariableDeclaration, JsFormalParameter,
     JsIdentifierBinding, JsRestParameter, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
-    JsVariableDeclaration, TsIdentifierBinding, TsTypeParameter, TsTypeParameterName,
-    inner_string_text,
+    JsVariableDeclaration, TsDeclareFunctionDeclaration, TsIdentifierBinding, TsTypeParameter,
+    TsTypeParameterName, inner_string_text,
 };
 use biome_js_type_info::{
-    FunctionParameter, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, GenericTypeParameter, MAX_FLATTEN_DEPTH,
-    Module, Namespace, Resolvable, ResolvedTypeData, ResolvedTypeId, TypeData, TypeId,
-    TypeImportQualifier, TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier,
+    FunctionParameter, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, GenericTypeParameter, Interface,
+    MAX_FLATTEN_DEPTH, Module, Namespace, Resolvable, ResolvedTypeData, ResolvedTypeId, TypeData,
+    TypeId, TypeImportQualifier, TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier,
     TypeResolver, TypeResolverLevel, TypeStore, UnionCollector,
 };
 use biome_jsdoc_comment::JsdocComment;
@@ -130,6 +131,12 @@ pub(super) enum JsCollectedExport {
         /// Re-export definition.
         reexport: JsReexport,
     },
+}
+
+#[derive(Clone, Copy, Eq, PartialEq)]
+enum FunctionBindingKind {
+    Implementation,
+    Signature,
 }
 
 impl JsModuleInfoCollector {
@@ -1145,16 +1152,20 @@ impl JsModuleInfoCollector {
     ///
     /// Maps binding ranges to their type information and JSDoc comments.
     fn build_binding_type_data(
-        &self,
+        &mut self,
         _semantic_model: &biome_js_semantic::SemanticModel,
     ) -> FxHashMap<TextRange, super::BindingTypeData> {
         let mut binding_type_data = FxHashMap::default();
 
-        for binding in &self.bindings {
+        for index in 0..self.bindings.len() {
+            let binding = self.bindings[index].clone();
+            let ty = self
+                .overload_type_for_binding(index)
+                .unwrap_or_else(|| binding.ty.clone());
             binding_type_data.insert(
                 binding.range,
                 super::BindingTypeData {
-                    ty: binding.ty.clone(),
+                    ty,
                     jsdoc: binding.jsdoc.clone(),
                     export_ranges: binding.export_ranges.clone(),
                 },
@@ -1162,6 +1173,84 @@ impl JsModuleInfoCollector {
         }
 
         binding_type_data
+    }
+
+    fn overload_type_for_binding(&mut self, binding_index: usize) -> Option<TypeReference> {
+        let binding = self.bindings.get(binding_index)?.clone();
+        let binding_kind = self.function_binding_kind(&binding)?;
+
+        let overload_bindings: Vec<_> = self
+            .bindings
+            .iter()
+            .filter(|candidate| {
+                candidate.name == binding.name
+                    && candidate.scope_id == binding.scope_id
+                    && candidate.declaration_kind == JsDeclarationKind::HoistedValue
+            })
+            .filter_map(|candidate| {
+                self.function_binding_kind(candidate)
+                    .map(|kind| (candidate.clone(), kind))
+            })
+            .collect();
+
+        if overload_bindings.len() < 2 {
+            return None;
+        }
+
+        let last_binding = overload_bindings.last()?;
+        if last_binding.0.range != binding.range {
+            return None;
+        }
+
+        let signature_bindings: Vec<_> = overload_bindings
+            .iter()
+            .filter(|(_, kind)| *kind == FunctionBindingKind::Signature)
+            .map(|(binding, _)| binding)
+            .collect();
+
+        if signature_bindings.is_empty() {
+            return None;
+        }
+
+        if binding_kind == FunctionBindingKind::Signature
+            && overload_bindings
+                .iter()
+                .any(|(_, kind)| *kind == FunctionBindingKind::Implementation)
+        {
+            return None;
+        }
+
+        let interface = Interface {
+            name: binding.name.clone(),
+            type_parameters: [].into(),
+            extends: [].into(),
+            members: signature_bindings
+                .into_iter()
+                .map(|binding| TypeMember {
+                    kind: TypeMemberKind::CallSignature,
+                    ty: binding.ty.clone(),
+                })
+                .collect(),
+        };
+
+        Some(self.reference_to_owned_data(TypeData::from(interface)))
+    }
+
+    fn function_binding_kind(&self, binding: &JsBindingData) -> Option<FunctionBindingKind> {
+        if binding.declaration_kind != JsDeclarationKind::HoistedValue {
+            return None;
+        }
+
+        let node = self.binding_node_by_start.get(&binding.range.start())?;
+        node.ancestors().find_map(|ancestor| {
+            if biome_js_syntax::JsFunctionDeclaration::can_cast(ancestor.kind()) {
+                Some(FunctionBindingKind::Implementation)
+            } else if TsDeclareFunctionDeclaration::can_cast(ancestor.kind()) {
+                Some(FunctionBindingKind::Signature)
+            } else {
+                None
+            }
+        })
     }
 }
 

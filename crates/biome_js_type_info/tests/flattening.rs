@@ -320,6 +320,62 @@ fn infer_flattened_type_from_static_promise_function() {
 }
 
 #[test]
+fn infer_flattened_type_from_overloaded_callable_uses_matching_signature() {
+    const CODE: &str = r#"interface BestEffort {
+    <T>(cb: () => Promise<T>): Promise<T | undefined>;
+    <T>(cb: () => T): T | undefined;
+}
+
+bestEffort(() => 1)"#;
+
+    let root = parse_ts(CODE);
+    let decl = get_interface_declaration(&root);
+    let mut resolver = GlobalsResolver::default();
+    let interface_ty =
+        TypeData::from_ts_interface_declaration(&mut resolver, ScopeId::GLOBAL, &decl)
+            .expect("interface must be inferred");
+    resolver.run_inference();
+
+    let expr = get_expression(&root);
+    let mut resolver = HardcodedSymbolResolver::new("bestEffort", interface_ty, resolver);
+    let expr_ty = TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expr);
+    let expr_ty = expr_ty.inferred(&mut resolver);
+
+    let TypeData::Union(union) = expr_ty else {
+        panic!("expected overload resolution to produce a union, got: {expr_ty}");
+    };
+
+    assert!(
+        union
+            .types()
+            .iter()
+            .any(|ty| resolver.resolve_and_get(ty).is_some_and(|resolved| {
+                matches!(
+                    resolved.as_raw_data(),
+                    TypeData::Literal(_) | TypeData::Number
+                )
+            })),
+        "expected a non-promise return variant, got: {union:?}",
+    );
+    assert!(
+        union.types().iter().any(|ty| {
+            resolver
+                .resolve_and_get(ty)
+                .is_some_and(|resolved| matches!(resolved.as_raw_data(), TypeData::Undefined))
+        }),
+        "expected overload resolution to preserve undefined, got: {union:?}",
+    );
+    assert!(
+        !union.types().iter().any(|ty| {
+            resolver
+                .resolve_and_get(ty)
+                .is_some_and(|resolved| resolved.is_promise_instance(&resolver))
+        }),
+        "expected overload resolution to avoid the promise overload, got: {union:?}",
+    );
+}
+
+#[test]
 fn infer_flattened_type_of_destructured_array_element() {
     const CODE: &str = r#"const [a]: Array<string> = [];"#;
 

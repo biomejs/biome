@@ -353,39 +353,199 @@ pub(super) fn flattened_expression(
 /// `Interface`, `Object`) until a `Function` is found, bounded by
 /// [`MAX_FLATTEN_DEPTH`] iterations.
 ///
-/// Returns `None` if no function can be reached.
+/// Returns the first call signature compatible with the arguments in `expr`,
+/// falling back to the first reachable call signature when compatibility
+/// cannot be determined.
 fn resolve_callee_to_function(
+    expr: &TypeofCallExpression,
     callee: TypeData,
     resolver: &mut dyn TypeResolver,
 ) -> Option<Box<Function>> {
-    let mut callee = callee;
+    let functions = collect_callee_functions(callee, resolver)?;
+    functions
+        .iter()
+        .find(|function| call_matches_function(expr, function, resolver))
+        .cloned()
+        .or_else(|| functions.into_iter().next())
+}
+
+fn collect_callee_functions(
+    callee: TypeData,
+    resolver: &mut dyn TypeResolver,
+) -> Option<Vec<Box<Function>>> {
+    let mut current = vec![callee];
+
     for _ in 0..MAX_FLATTEN_DEPTH {
-        match callee {
-            TypeData::Function(function) => return Some(function),
-            TypeData::InstanceOf(instance) => {
-                let instance_callee = resolver.resolve_and_get(&instance.ty)?;
-                callee = if instance_callee.is_function() {
-                    instance_callee.to_data()
-                } else {
-                    instance_callee
-                        .find_member(resolver, |member| member.kind().is_call_signature())
-                        .map(ResolvedTypeMember::to_member)
-                        .and_then(|member| resolver.resolve_and_get(&member.deref_ty(resolver)))?
-                        .to_data()
-                };
+        let mut functions = Vec::new();
+        let mut next = Vec::new();
+
+        for callee in current {
+            match callee {
+                TypeData::Function(function) => functions.push(function),
+                TypeData::InstanceOf(instance) => {
+                    let instance_callee = resolver.resolve_and_get(&instance.ty)?;
+                    if instance_callee.is_function() {
+                        next.push(instance_callee.to_data());
+                    } else {
+                        functions.extend(call_signature_functions(instance_callee, resolver));
+                    }
+                }
+                TypeData::Interface(_) | TypeData::Object(_) => {
+                    let resolved =
+                        ResolvedTypeData::from((ResolverId::from_level(resolver.level()), &callee));
+                    functions.extend(call_signature_functions(resolved, resolver));
+                }
+                _ => {}
             }
-            TypeData::Interface(_) | TypeData::Object(_) => {
-                callee =
-                    ResolvedTypeData::from((ResolverId::from_level(resolver.level()), &callee))
-                        .find_member(resolver, |member| member.kind().is_call_signature())
-                        .map(ResolvedTypeMember::to_member)
-                        .and_then(|member| resolver.resolve_and_get(&member.deref_ty(resolver)))?
-                        .to_data();
-            }
-            _ => break,
         }
+
+        if !functions.is_empty() {
+            return Some(functions);
+        }
+        if next.is_empty() {
+            return None;
+        }
+
+        current = next;
     }
+
     None
+}
+
+fn call_signature_functions(
+    resolved: ResolvedTypeData,
+    resolver: &dyn TypeResolver,
+) -> Vec<Box<Function>> {
+    resolved
+        .all_members(resolver)
+        .filter(|member| member.kind().is_call_signature())
+        .filter_map(|member| resolver.resolve_and_get(&member.deref_ty(resolver)))
+        .filter_map(|resolved| match resolved.to_data() {
+            TypeData::Function(function) => Some(function),
+            _ => None,
+        })
+        .collect()
+}
+
+fn call_matches_function(
+    expr: &TypeofCallExpression,
+    function: &Function,
+    resolver: &dyn TypeResolver,
+) -> bool {
+    let provided_args = expr.arguments.len();
+    let required_params = function
+        .parameters
+        .iter()
+        .filter(|param| match param {
+            FunctionParameter::Named(param) => !param.is_optional && !param.is_rest,
+            FunctionParameter::Pattern(param) => !param.is_optional && !param.is_rest,
+        })
+        .count();
+    let has_rest = function.parameters.iter().any(|param| match param {
+        FunctionParameter::Named(param) => param.is_rest,
+        FunctionParameter::Pattern(param) => param.is_rest,
+    });
+
+    if provided_args < required_params {
+        return false;
+    }
+    if !has_rest && provided_args > function.parameters.len() {
+        return false;
+    }
+
+    function
+        .parameters
+        .iter()
+        .zip(expr.arguments.iter())
+        .all(|(param, arg)| parameter_accepts_argument(param, arg, resolver))
+}
+
+fn parameter_accepts_argument(
+    parameter: &FunctionParameter,
+    argument: &CallArgumentType,
+    resolver: &dyn TypeResolver,
+) -> bool {
+    let CallArgumentType::Argument(argument) = argument else {
+        return true;
+    };
+
+    let Some(parameter_ty) = resolver.resolve_and_get(parameter.ty()) else {
+        return true;
+    };
+    let Some(argument_ty) = resolver.resolve_and_get(argument) else {
+        return true;
+    };
+
+    if let (Some(expected), Some(actual)) = (
+        first_callable_function(parameter_ty.to_data(), resolver),
+        first_callable_function(argument_ty.to_data(), resolver),
+    ) {
+        return callback_signature_matches(&expected, &actual, resolver);
+    }
+
+    !parameter_ty.is_promise_instance(resolver) || argument_ty.is_promise_instance(resolver)
+}
+
+fn first_callable_function(callee: TypeData, resolver: &dyn TypeResolver) -> Option<Box<Function>> {
+    let mut current = vec![callee];
+
+    for _ in 0..MAX_FLATTEN_DEPTH {
+        let mut next = Vec::new();
+
+        for callee in current {
+            match callee {
+                TypeData::Function(function) => return Some(function),
+                TypeData::InstanceOf(instance) => {
+                    let instance_callee = resolver.resolve_and_get(&instance.ty)?;
+                    if instance_callee.is_function() {
+                        next.push(instance_callee.to_data());
+                    } else {
+                        return call_signature_functions(instance_callee, resolver)
+                            .into_iter()
+                            .next();
+                    }
+                }
+                TypeData::Interface(_) | TypeData::Object(_) => {
+                    let resolved =
+                        ResolvedTypeData::from((ResolverId::from_level(resolver.level()), &callee));
+                    return call_signature_functions(resolved, resolver)
+                        .into_iter()
+                        .next();
+                }
+                _ => {}
+            }
+        }
+
+        if next.is_empty() {
+            return None;
+        }
+
+        current = next;
+    }
+
+    None
+}
+
+fn callback_signature_matches(
+    expected: &Function,
+    actual: &Function,
+    resolver: &dyn TypeResolver,
+) -> bool {
+    let Some(expected_return_ty) = expected.return_type.as_type() else {
+        return true;
+    };
+    let Some(actual_return_ty) = actual.return_type.as_type() else {
+        return true;
+    };
+    let Some(expected_return_ty) = resolver.resolve_and_get(expected_return_ty) else {
+        return true;
+    };
+    let Some(actual_return_ty) = resolver.resolve_and_get(actual_return_ty) else {
+        return true;
+    };
+
+    !expected_return_ty.is_promise_instance(resolver)
+        || actual_return_ty.is_promise_instance(resolver)
 }
 
 fn flattened_call(
@@ -415,7 +575,8 @@ fn flattened_call(
                     }
                     _ => {}
                 }
-                if let Some(function) = resolve_callee_to_function(resolved.to_data(), resolver)
+                if let Some(function) =
+                    resolve_callee_to_function(expr, resolved.to_data(), resolver)
                     && let Some(result) = flattened_function_call(expr, &function, resolver)
                 {
                     return_types.push(result);
@@ -437,7 +598,7 @@ fn flattened_call(
             }
         }
         callee => {
-            let function = resolve_callee_to_function(callee, resolver)?;
+            let function = resolve_callee_to_function(expr, callee, resolver)?;
             flattened_function_call(expr, &function, resolver)
         }
     }
