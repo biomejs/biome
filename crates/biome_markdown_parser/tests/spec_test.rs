@@ -241,4 +241,10 @@ pub fn quick_test() {
         "- one\n\n+ two\n",
         "<ul>\n<li>\n<p>one</p>\n</li>\n</ul>\n<ul>\n<li>\n<p>two</p>\n</li>\n</ul>\n",
     );
+    // #9725: fenced code block inside list item with 4-space indent
+    test_example(
+        9725,
+        "- aaa\n\n    ```js\n    const a = 1;\n    ```\n",
+        "<ul>\n<li>\n<p>aaa</p>\n<pre><code class=\"language-js\">const a = 1;\n</code></pre>\n</li>\n</ul>\n",
+    );
 }
