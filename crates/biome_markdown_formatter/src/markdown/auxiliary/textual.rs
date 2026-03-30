@@ -45,8 +45,8 @@ impl FormatNodeRule<MdTextual> for FormatMdTextual {
                 // Whitespace-only — normalize to a single hard_space.
                 write!(f, [format_replaced(&value_token, &hard_space())])
             } else {
-                let has_leading_ws = raw.starts_with(|c: char| c.is_ascii_whitespace());
-                let has_trailing_ws = raw.ends_with(|c: char| c.is_ascii_whitespace());
+                let has_leading_ws = raw.starts_with(char::is_whitespace);
+                let has_trailing_ws = raw.ends_with(char::is_whitespace);
                 let position = value_token.text_trimmed_range().start();
                 write!(
                     f,
