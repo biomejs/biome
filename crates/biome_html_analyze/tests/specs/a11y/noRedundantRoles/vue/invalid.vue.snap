@@ -4,8 +4,8 @@ expression: invalid.vue
 ---
 # Input
 ```vue
+<!-- should generate diagnostics -->
 <template>
-  <!-- Native elements with redundant roles should still trigger -->
   <article role="article"></article>
   <button role="button"></button>
   <h1 role="heading" aria-level="1">title</h1>
@@ -20,8 +20,8 @@ invalid.vue:3:12 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
 
   × Using the role attribute 'article' on the 'article' element is redundant, because it is implied by its semantics.
   
-    1 │ <template>
-    2 │   <!-- Native elements with redundant roles should still trigger -->
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
   > 3 │   <article role="article"></article>
       │            ^^^^^^^^^^^^^^
     4 │   <button role="button"></button>
@@ -39,7 +39,7 @@ invalid.vue:4:11 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
 
   × Using the role attribute 'button' on the 'button' element is redundant, because it is implied by its semantics.
   
-    2 │   <!-- Native elements with redundant roles should still trigger -->
+    2 │ <template>
     3 │   <article role="article"></article>
   > 4 │   <button role="button"></button>
       │           ^^^^^^^^^^^^^

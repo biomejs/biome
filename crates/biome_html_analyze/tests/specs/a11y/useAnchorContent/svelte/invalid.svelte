@@ -1,4 +1,4 @@
-<!-- Native anchors without accessible content should trigger -->
+<!-- should generate diagnostics -->
 <a></a>
 <a>    </a>
 <a aria-hidden="true">content</a>

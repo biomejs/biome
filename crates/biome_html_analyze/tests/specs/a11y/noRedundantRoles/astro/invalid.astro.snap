@@ -4,11 +4,10 @@ expression: invalid.astro
 ---
 # Input
 ```astro
+<!-- should generate diagnostics -->
 ---
 // Astro frontmatter
 ---
-
-<!-- Native elements with redundant roles should still trigger -->
 <article role="article"></article>
 <button role="button"></button>
 <h1 role="heading" aria-level="1">title</h1>
@@ -18,75 +17,76 @@ expression: invalid.astro
 
 # Diagnostics
 ```
-invalid.astro:6:10 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.astro:5:10 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Using the role attribute 'article' on the 'article' element is redundant, because it is implied by its semantics.
   
-    5 │ <!-- Native elements with redundant roles should still trigger -->
-  > 6 │ <article role="article"></article>
+    3 │ // Astro frontmatter
+    4 │ ---
+  > 5 │ <article role="article"></article>
       │          ^^^^^^^^^^^^^^
-    7 │ <button role="button"></button>
-    8 │ <h1 role="heading" aria-level="1">title</h1>
+    6 │ <button role="button"></button>
+    7 │ <h1 role="heading" aria-level="1">title</h1>
   
   i Unsafe fix: Remove the role attribute.
   
-    6 │ <article·role="article"></article>
+    5 │ <article·role="article"></article>
       │          --------------           
 
 ```
 
 ```
-invalid.astro:7:9 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.astro:6:9 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Using the role attribute 'button' on the 'button' element is redundant, because it is implied by its semantics.
   
-    5 │ <!-- Native elements with redundant roles should still trigger -->
-    6 │ <article role="article"></article>
-  > 7 │ <button role="button"></button>
+    4 │ ---
+    5 │ <article role="article"></article>
+  > 6 │ <button role="button"></button>
       │         ^^^^^^^^^^^^^
-    8 │ <h1 role="heading" aria-level="1">title</h1>
-    9 │ <nav role="navigation"></nav>
+    7 │ <h1 role="heading" aria-level="1">title</h1>
+    8 │ <nav role="navigation"></nav>
   
   i Unsafe fix: Remove the role attribute.
   
-    7 │ <button·role="button"></button>
+    6 │ <button·role="button"></button>
       │         -------------          
 
 ```
 
 ```
-invalid.astro:8:5 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.astro:7:5 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Using the role attribute 'heading' on the 'h1' element is redundant, because it is implied by its semantics.
   
-     6 │ <article role="article"></article>
-     7 │ <button role="button"></button>
-   > 8 │ <h1 role="heading" aria-level="1">title</h1>
-       │     ^^^^^^^^^^^^^^
-     9 │ <nav role="navigation"></nav>
-    10 │ 
+    5 │ <article role="article"></article>
+    6 │ <button role="button"></button>
+  > 7 │ <h1 role="heading" aria-level="1">title</h1>
+      │     ^^^^^^^^^^^^^^
+    8 │ <nav role="navigation"></nav>
+    9 │ 
   
   i Unsafe fix: Remove the role attribute.
   
-    8 │ <h1·role="heading"·aria-level="1">title</h1>
+    7 │ <h1·role="heading"·aria-level="1">title</h1>
       │     ---------------                         
 
 ```
 
 ```
-invalid.astro:9:6 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.astro:8:6 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Using the role attribute 'navigation' on the 'nav' element is redundant, because it is implied by its semantics.
   
-     7 │ <button role="button"></button>
-     8 │ <h1 role="heading" aria-level="1">title</h1>
-   > 9 │ <nav role="navigation"></nav>
-       │      ^^^^^^^^^^^^^^^^^
-    10 │ 
+    6 │ <button role="button"></button>
+    7 │ <h1 role="heading" aria-level="1">title</h1>
+  > 8 │ <nav role="navigation"></nav>
+      │      ^^^^^^^^^^^^^^^^^
+    9 │ 
   
   i Unsafe fix: Remove the role attribute.
   
-    9 │ <nav·role="navigation"></nav>
+    8 │ <nav·role="navigation"></nav>
       │      -----------------       
 
 ```

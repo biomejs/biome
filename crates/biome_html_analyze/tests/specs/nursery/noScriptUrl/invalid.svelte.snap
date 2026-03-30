@@ -4,7 +4,7 @@ expression: invalid.svelte
 ---
 # Input
 ```svelte
-<!-- Svelte invalid cases - should trigger the rule -->
+<!-- should generate diagnostics -->
 
 <a href="javascript:void(0)">Void</a>
 <a href=" javascript:confirm('XSS') ">Confirm</a>
@@ -18,7 +18,7 @@ invalid.svelte:3:8 lint/nursery/noScriptUrl ━━━━━━━━━━━━
 
   × Avoid using javascript: URLs, as they can be a security risk.
   
-    1 │ <!-- Svelte invalid cases - should trigger the rule -->
+    1 │ <!-- should generate diagnostics -->
     2 │ 
   > 3 │ <a href="javascript:void(0)">Void</a>
       │        ^^^^^^^^^^^^^^^^^^^^^

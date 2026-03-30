@@ -1,6 +1,5 @@
+<!-- should generate diagnostics -->
 <template>
-  <!-- should generate diagnostics -->
-
   <!-- onmouseover without onfocus -->
   <div onmouseover="handleMouseOver()"></div>
 
