@@ -1,8 +1,8 @@
 use crate::bool::Bool;
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
-    AttributePosition, BracketSameLine, BracketSpacing, Expand, IndentStyle, IndentWidth,
-    LineEnding, LineWidth, QuoteStyle, TrailingNewline,
+    AttributePosition, BracketSameLine, BracketSpacing, DelimiterSpacing, Expand, IndentStyle,
+    IndentWidth, LineEnding, LineWidth, QuoteStyle, TrailingNewline,
 };
 use biome_js_formatter::context::{
     ArrowParentheses, OperatorLinebreak, QuoteProperties, Semicolons,
@@ -107,6 +107,20 @@ pub struct JsFormatterConfiguration {
     #[bpaf(long("javascript-formatter-bracket-spacing"), argument("true|false"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bracket_spacing: Option<BracketSpacing>,
+
+    // it's also a top-level configurable property.
+    /// Whether to insert spaces inside delimiters (after the opening delimiter and before the
+    /// closing delimiter). Only applies when the content fits on a single line. Spaces are not
+    /// added before the opening delimiter (e.g., `function f()` stays `function f()`, not
+    /// `function f ()`), and empty delimiters are not affected (e.g., `fn()` stays `fn()`).
+    /// For JavaScript and TypeScript, affects parentheses (e.g., `foo( a, b )`), square brackets
+    /// (e.g., `[ a, b ]`), template literal interpolations (e.g., `${ expr }`), TypeScript angle
+    /// brackets (e.g., `foo< T >()`), JSX expression braces (e.g., `{ value }`), and the logical
+    /// NOT operator (e.g., `! x`, but in chains only after the last one: `!! x`). Defaults to
+    /// false.
+    #[bpaf(long("javascript-formatter-delimiter-spacing"), argument("true|false"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub delimiter_spacing: Option<DelimiterSpacing>,
 
     /// Whether to expand arrays and objects on multiple lines.
     /// When set to `auto`, object literals are formatted on multiple lines if the first property has a newline,

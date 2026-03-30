@@ -42,19 +42,35 @@ impl<'a> FormatComputedMemberLookup<'a> {
 
 impl Format<JsFormatContext> for FormatComputedMemberLookup<'_> {
     fn fmt(&self, f: &mut Formatter<JsFormatContext>) -> FormatResult<()> {
+        let should_insert_space = f.options().delimiter_spacing().value();
+
         match self.0.member()? {
             AnyJsExpression::AnyJsLiteralExpression(
                 AnyJsLiteralExpression::JsNumberLiteralExpression(literal),
             ) => {
-                write!(
-                    f,
-                    [
-                        self.0.optional_chain_token().format(),
-                        self.0.l_brack_token().format(),
-                        literal.format(),
-                        self.0.r_brack_token().format()
-                    ]
-                )
+                if should_insert_space {
+                    write!(
+                        f,
+                        [
+                            self.0.optional_chain_token().format(),
+                            self.0.l_brack_token().format(),
+                            space(),
+                            literal.format(),
+                            space(),
+                            self.0.r_brack_token().format()
+                        ]
+                    )
+                } else {
+                    write!(
+                        f,
+                        [
+                            self.0.optional_chain_token().format(),
+                            self.0.l_brack_token().format(),
+                            literal.format(),
+                            self.0.r_brack_token().format()
+                        ]
+                    )
+                }
             }
             member => {
                 write![
@@ -62,7 +78,7 @@ impl Format<JsFormatContext> for FormatComputedMemberLookup<'_> {
                     [group(&format_args![
                         self.0.optional_chain_token().format(),
                         self.0.l_brack_token().format(),
-                        soft_block_indent(&member.format()),
+                        soft_block_indent_with_maybe_space(&member.format(), should_insert_space),
                         self.0.r_brack_token().format()
                     ])]
                 ]

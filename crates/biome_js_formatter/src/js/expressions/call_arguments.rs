@@ -71,17 +71,25 @@ impl FormatNodeRule<JsCallArguments> for FormatJsCallArguments {
             || is_react_hook_with_deps_array(node, f.comments())
             || (is_test_call? && is_first_arg_string_literal_or_template)
         {
+            let should_insert_space = f.options().delimiter_spacing().value();
             return write!(
                 f,
                 [
                     l_paren_token.format(),
                     format_with(|f| {
+                        if should_insert_space {
+                            write!(f, [space()])?;
+                        }
                         f.join_with(space())
                             .entries(
                                 args.format_separated(",")
                                     .with_trailing_separator(TrailingSeparator::Omit),
                             )
-                            .finish()
+                            .finish()?;
+                        if should_insert_space {
+                            write!(f, [space()])?;
+                        }
+                        Ok(())
                     }),
                     r_paren_token.format()
                 ]
@@ -108,6 +116,8 @@ impl FormatNodeRule<JsCallArguments> for FormatJsCallArguments {
             })
             .collect();
 
+        let should_insert_space = f.options().delimiter_spacing().value();
+
         if has_empty_line || is_function_composition_args(node) {
             return write!(
                 f,
@@ -117,20 +127,25 @@ impl FormatNodeRule<JsCallArguments> for FormatJsCallArguments {
                     r_paren: &r_paren_token.format(),
                     node,
                     expand: true,
+                    should_insert_space,
                 }]
             );
         }
 
         if let Some(group_layout) = arguments_grouped_layout(&args, f.comments()) {
-            write_grouped_arguments(node, arguments, group_layout, f)
+            write_grouped_arguments(node, arguments, group_layout, should_insert_space, f)
         } else if is_long_curried_call(call_expression.as_ref()) {
+            // For the "long" call in a curried chain (the one with more arguments),
+            // use delimiter spacing. The curried continuation (outer call with fewer args)
+            // is handled by the `is_curried_continuation` check above.
             write!(
                 f,
                 [
                     l_paren_token.format(),
-                    soft_block_indent(&format_once(|f| {
-                        write_arguments_multi_line(arguments.iter(), f)
-                    })),
+                    soft_block_indent_with_maybe_space(
+                        &format_once(|f| { write_arguments_multi_line(arguments.iter(), f) }),
+                        should_insert_space
+                    ),
                     r_paren_token.format(),
                 ]
             )
@@ -143,6 +158,7 @@ impl FormatNodeRule<JsCallArguments> for FormatJsCallArguments {
                     r_paren: &r_paren_token.format(),
                     node,
                     expand: false,
+                    should_insert_space,
                 }]
             )
         }
@@ -333,6 +349,7 @@ fn write_grouped_arguments(
     call_arguments: &JsCallArguments,
     mut arguments: Vec<FormatCallArgument>,
     group_layout: GroupedCallArgumentLayout,
+    should_insert_space: bool,
     f: &mut JsFormatter,
 ) -> FormatResult<()> {
     let l_paren_token = call_arguments.l_paren_token();
@@ -364,6 +381,7 @@ fn write_grouped_arguments(
                     r_paren: &r_paren_token.format(),
                     node: call_arguments,
                     expand: true,
+                    should_insert_space,
                 }]
             );
         }
@@ -406,6 +424,7 @@ fn write_grouped_arguments(
                 r_paren: &r_paren,
                 node: call_arguments,
                 expand: true,
+                should_insert_space,
             }]
         )?;
         buffer.write_element(FormatElement::Tag(Tag::EndBestFittingEntry))?;
@@ -444,8 +463,41 @@ fn write_grouped_arguments(
         })
         .collect::<Vec<_>>();
 
-    // Write the most flat variant with the first or last argument grouped.
-    let most_flat = {
+    // Write flat variant WITH delimiter spacing (tried first if should_insert_space is true)
+    let most_flat_with_spaces = if should_insert_space {
+        let snapshot = f.state_snapshot();
+        let mut buffer = VecBuffer::new(f.state_mut());
+        buffer.write_element(FormatElement::Tag(Tag::StartBestFittingEntry))?;
+
+        let result = write!(
+            buffer,
+            [
+                l_paren,
+                format_with(|f| {
+                    write!(f, [space()])?;
+                    f.join_with(soft_line_break_or_space())
+                        .entries(grouped.iter())
+                        .finish()?;
+                    write!(f, [space()])
+                }),
+                r_paren
+            ]
+        );
+
+        if matches!(result, Err(FormatError::PoorLayout)) {
+            drop(buffer);
+            f.restore_state_snapshot(snapshot);
+            None
+        } else {
+            buffer.write_element(FormatElement::Tag(Tag::EndBestFittingEntry))?;
+            Some(buffer.into_vec())
+        }
+    } else {
+        None
+    };
+
+    // Write flat variant WITHOUT delimiter spacing (fallback for boundary cases)
+    let most_flat_no_spaces = {
         let snapshot = f.state_snapshot();
         let mut buffer = VecBuffer::new(f.state_mut());
         buffer.write_element(FormatElement::Tag(Tag::StartBestFittingEntry))?;
@@ -486,8 +538,48 @@ fn write_grouped_arguments(
         buffer.into_vec()
     };
 
-    // Write the second variant that forces the group of the first/last argument to expand.
-    let middle_variant = {
+    // Write middle variant WITH delimiter spacing (tried first if should_insert_space is true)
+    let middle_variant_with_spaces = if should_insert_space {
+        let mut buffer = VecBuffer::new(f.state_mut());
+
+        buffer.write_element(FormatElement::Tag(Tag::StartBestFittingEntry))?;
+
+        write!(
+            buffer,
+            [
+                l_paren,
+                format_with(|f| {
+                    write!(f, [space()])?;
+                    let mut joiner = f.join_with(soft_line_break_or_space());
+
+                    match group_layout {
+                        GroupedCallArgumentLayout::GroupedFirstArgument => {
+                            joiner.entry(&group(&grouped[0]).should_expand(true));
+                            joiner.entries(&grouped[1..]).finish()?;
+                        }
+                        GroupedCallArgumentLayout::GroupedLastArgument => {
+                            let last_index = grouped.len() - 1;
+                            joiner.entries(&grouped[..last_index]);
+                            joiner
+                                .entry(&group(&grouped[last_index]).should_expand(true))
+                                .finish()?;
+                        }
+                    }
+                    write!(f, [space()])
+                }),
+                r_paren
+            ]
+        )?;
+
+        buffer.write_element(FormatElement::Tag(Tag::EndBestFittingEntry))?;
+
+        Some(buffer.into_vec())
+    } else {
+        None
+    };
+
+    // Write middle variant WITHOUT delimiter spacing (fallback for boundary cases)
+    let middle_variant_no_spaces = {
         let mut buffer = VecBuffer::new(f.state_mut());
 
         buffer.write_element(FormatElement::Tag(Tag::StartBestFittingEntry))?;
@@ -522,16 +614,43 @@ fn write_grouped_arguments(
         buffer.into_vec()
     };
 
-    // If the grouped content breaks, then we can skip the most_flat variant,
-    // since we already know that it won't be fitting on a single line.
+    // If the grouped content breaks, then we can skip the most_flat variants,
+    // since we already know that they won't be fitting on a single line.
     let variants = if grouped_breaks {
         write!(f, [expand_parent()])?;
-        let mut variants = middle_variant;
+        // Build variants in order of preference:
+        // 1. Middle variant with delimiter spacing (if available)
+        // 2. Middle variant without delimiter spacing (only if with-spaces had PoorLayout)
+        // 3. Most expanded
+        let mut variants = Vec::new();
+        if let Some(middle_with_spaces) = middle_variant_with_spaces {
+            variants.extend(middle_with_spaces);
+        } else {
+            // Only use no-spaces variant if with-spaces variant had a PoorLayout error
+            variants.extend(middle_variant_no_spaces);
+        }
         variants.extend(most_expanded);
         variants
     } else {
-        let mut variants = most_flat;
-        variants.extend(middle_variant);
+        // Build variants in order of preference:
+        // 1. Flat with delimiter spacing (if available)
+        // 2. Flat without delimiter spacing (only if with-spaces had PoorLayout)
+        // 3. Middle variant with delimiter spacing (if available)
+        // 4. Middle variant without delimiter spacing (only if with-spaces had PoorLayout)
+        // 5. Most expanded
+        let mut variants = Vec::new();
+        if let Some(flat_with_spaces) = most_flat_with_spaces {
+            variants.extend(flat_with_spaces);
+        } else {
+            // Only use no-spaces variant if with-spaces variant had a PoorLayout error
+            variants.extend(most_flat_no_spaces);
+        }
+        if let Some(middle_with_spaces) = middle_variant_with_spaces {
+            variants.extend(middle_with_spaces);
+        } else {
+            // Only use no-spaces variant if with-spaces variant had a PoorLayout error
+            variants.extend(middle_variant_no_spaces);
+        }
         variants.extend(most_expanded);
         variants
     };
@@ -726,6 +845,7 @@ struct FormatAllArgsBrokenOut<'a> {
     r_paren: &'a dyn Format<JsFormatContext>,
     expand: bool,
     node: &'a JsCallArguments,
+    should_insert_space: bool,
 }
 
 impl Format<JsFormatContext> for FormatAllArgsBrokenOut<'_> {
@@ -736,23 +856,26 @@ impl Format<JsFormatContext> for FormatAllArgsBrokenOut<'_> {
             f,
             [group(&format_args![
                 self.l_paren,
-                soft_block_indent(&format_with(|f| {
-                    for (index, entry) in self.args.iter().enumerate() {
-                        if index > 0 {
-                            match entry.leading_lines() {
-                                0 | 1 => write!(f, [soft_line_break_or_space()])?,
-                                _ => write!(f, [empty_line()])?,
+                soft_block_indent_with_maybe_space(
+                    &format_with(|f| {
+                        for (index, entry) in self.args.iter().enumerate() {
+                            if index > 0 {
+                                match entry.leading_lines() {
+                                    0 | 1 => write!(f, [soft_line_break_or_space()])?,
+                                    _ => write!(f, [empty_line()])?,
+                                }
                             }
+
+                            write!(f, [entry])?;
                         }
 
-                        write!(f, [entry])?;
-                    }
-
-                    if !is_inside_import {
-                        write!(f, [FormatTrailingCommas::All])?;
-                    }
-                    Ok(())
-                })),
+                        if !is_inside_import {
+                            write!(f, [FormatTrailingCommas::All])?;
+                        }
+                        Ok(())
+                    }),
+                    self.should_insert_space
+                ),
                 self.r_paren,
             ])
             .should_expand(self.expand)]

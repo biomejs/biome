@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 use crate::utils::FormatStatementBody;
-use biome_formatter::{format_args, write};
+use biome_formatter::write;
 use biome_js_syntax::JsForInStatement;
 use biome_js_syntax::JsForInStatementFields;
 
@@ -20,25 +20,34 @@ impl FormatNodeRule<JsForInStatement> for FormatJsForInStatement {
             body,
         } = node.as_fields();
 
-        let for_token = for_token.format();
-        let initializer = initializer.format();
-        let in_token = in_token.format();
-        let expression = expression.format();
+        let body = body?;
+        let should_insert_space = f.options().delimiter_spacing().value();
 
-        write!(
-            f,
-            [group(&format_args!(
-                for_token,
-                space(),
-                l_paren_token.format(),
-                initializer,
-                space(),
-                in_token,
-                space(),
-                expression,
-                r_paren_token.format(),
-                FormatStatementBody::new(&body?)
-            ))]
-        )
+        let format_inner = format_with(|f| {
+            write!(f, [for_token.format(), space(), l_paren_token.format()])?;
+
+            if should_insert_space {
+                write!(f, [space()])?;
+            }
+
+            write!(
+                f,
+                [
+                    initializer.format(),
+                    space(),
+                    in_token.format(),
+                    space(),
+                    expression.format(),
+                ]
+            )?;
+
+            if should_insert_space {
+                write!(f, [space()])?;
+            }
+
+            write!(f, [r_paren_token.format(), FormatStatementBody::new(&body)])
+        });
+
+        write!(f, [group(&format_inner)])
     }
 }

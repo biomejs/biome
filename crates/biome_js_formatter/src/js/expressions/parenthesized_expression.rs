@@ -24,6 +24,7 @@ impl FormatNodeRule<JsParenthesizedExpression> for FormatJsParenthesizedExpressi
         let l_paren_token = l_paren_token?;
         let expression = expression?;
         let comments = f.context().comments();
+        let should_insert_space = f.options().delimiter_spacing().value();
 
         let should_hug = !comments.has_comments(expression.syntax())
             && (matches!(
@@ -32,20 +33,33 @@ impl FormatNodeRule<JsParenthesizedExpression> for FormatJsParenthesizedExpressi
             ));
 
         if should_hug {
-            write!(
-                f,
-                [
-                    l_paren_token.format(),
-                    expression.format(),
-                    r_paren_token.format()
-                ]
-            )
+            if should_insert_space {
+                write!(
+                    f,
+                    [
+                        l_paren_token.format(),
+                        space(),
+                        expression.format(),
+                        space(),
+                        r_paren_token.format()
+                    ]
+                )
+            } else {
+                write!(
+                    f,
+                    [
+                        l_paren_token.format(),
+                        expression.format(),
+                        r_paren_token.format()
+                    ]
+                )
+            }
         } else {
             write!(
                 f,
                 [group(&format_args![
                     l_paren_token.format(),
-                    soft_block_indent(&expression.format()),
+                    soft_block_indent_with_maybe_space(&expression.format(), should_insert_space),
                     r_paren_token.format()
                 ])]
             )
