@@ -121,6 +121,44 @@ impl IntoFormat<MarkdownFormatContext> for biome_markdown_syntax::MdBulletListIt
         )
     }
 }
+impl FormatRule<biome_markdown_syntax::MdContinuationIndent>
+    for crate::markdown::auxiliary::continuation_indent::FormatMdContinuationIndent
+{
+    type Context = MarkdownFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_markdown_syntax::MdContinuationIndent,
+        f: &mut MarkdownFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_markdown_syntax::MdContinuationIndent>::fmt(self, node, f)
+    }
+}
+impl AsFormat<MarkdownFormatContext> for biome_markdown_syntax::MdContinuationIndent {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_markdown_syntax::MdContinuationIndent,
+        crate::markdown::auxiliary::continuation_indent::FormatMdContinuationIndent,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::markdown::auxiliary::continuation_indent::FormatMdContinuationIndent::default(),
+        )
+    }
+}
+impl IntoFormat<MarkdownFormatContext> for biome_markdown_syntax::MdContinuationIndent {
+    type Format = FormatOwnedWithRule<
+        biome_markdown_syntax::MdContinuationIndent,
+        crate::markdown::auxiliary::continuation_indent::FormatMdContinuationIndent,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::markdown::auxiliary::continuation_indent::FormatMdContinuationIndent::default(),
+        )
+    }
+}
 impl FormatRule<biome_markdown_syntax::MdDocument>
     for crate::markdown::auxiliary::document::FormatMdDocument
 {

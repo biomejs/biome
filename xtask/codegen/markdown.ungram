@@ -63,6 +63,7 @@ AnyMdLeafBlock =
 	| MdLinkReferenceDefinition
 	| MdParagraph
 	| MdNewline
+	| MdContinuationIndent
 
 AnyMdContainerBlock =
 	MdQuote
@@ -370,6 +371,11 @@ MdThematicBreakBlock = parts: MdThematicBreakPartList
 // This preserves NEWLINEs in the CST without creating "newline-only paragraphs".
 // Used when a NEWLINE appears between blocks and isn't part of inline content.
 MdNewline = value: 'NEWLINE'
+
+// Block-level continuation indent for list item content.
+// Wraps the structural indent that check_continuation_indent consumes
+// before block detection.
+MdContinuationIndent = indent: MdIndentTokenList
 
 MdHardLine = value: 'md_hard_line_literal'
 MdSoftBreak = value: 'md_soft_break_literal'

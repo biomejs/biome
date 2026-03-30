@@ -103,5 +103,6 @@ pub const MARKDOWN_KINDS_SRC: KindsSrc = KindsSrc {
         "MD_LIST_MARKER_PREFIX",
         "MD_THEMATIC_BREAK_CHAR",
         "MD_THEMATIC_BREAK_PART_LIST",
+        "MD_CONTINUATION_INDENT",
     ],
 };

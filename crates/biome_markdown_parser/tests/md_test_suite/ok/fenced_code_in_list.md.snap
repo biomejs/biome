@@ -45,10 +45,20 @@ MdDocument {
                         MdNewline {
                             value_token: NEWLINE@6..7 "\n" [] [],
                         },
+                        MdContinuationIndent {
+                            indent: MdIndentTokenList [
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@7..8 " " [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@8..9 " " [] [],
+                                },
+                            ],
+                        },
                         MdFencedCodeBlock {
                             indent: MdIndentTokenList [
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@7..10 " " [Whitespace(" "), Whitespace(" ")] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@9..10 " " [] [],
                                 },
                                 MdIndentToken {
                                     md_indent_char_token: MD_INDENT_CHAR@10..11 " " [] [],
@@ -135,10 +145,16 @@ MdDocument {
               1: (empty)
             1: MD_NEWLINE@6..7
               0: NEWLINE@6..7 "\n" [] []
-            2: MD_FENCED_CODE_BLOCK@7..41
-              0: MD_INDENT_TOKEN_LIST@7..11
-                0: MD_INDENT_TOKEN@7..10
-                  0: MD_INDENT_CHAR@7..10 " " [Whitespace(" "), Whitespace(" ")] []
+            2: MD_CONTINUATION_INDENT@7..9
+              0: MD_INDENT_TOKEN_LIST@7..9
+                0: MD_INDENT_TOKEN@7..8
+                  0: MD_INDENT_CHAR@7..8 " " [] []
+                1: MD_INDENT_TOKEN@8..9
+                  0: MD_INDENT_CHAR@8..9 " " [] []
+            3: MD_FENCED_CODE_BLOCK@9..41
+              0: MD_INDENT_TOKEN_LIST@9..11
+                0: MD_INDENT_TOKEN@9..10
+                  0: MD_INDENT_CHAR@9..10 " " [] []
                 1: MD_INDENT_TOKEN@10..11
                   0: MD_INDENT_CHAR@10..11 " " [] []
               1: TRIPLE_BACKTICK@11..14 "```" [] []

@@ -44,11 +44,11 @@
 
 use biome_markdown_syntax::{
     AnyMdBlock, AnyMdBulletListMember, AnyMdCodeBlock, AnyMdInline, AnyMdLeafBlock,
-    MarkdownLanguage, MdAutolink, MdBlockList, MdBullet, MdBulletListItem, MdDocument,
-    MdEntityReference, MdFencedCodeBlock, MdHardLine, MdHeader, MdHtmlBlock, MdIndentCodeBlock,
-    MdInlineCode, MdInlineEmphasis, MdInlineHtml, MdInlineImage, MdInlineItalic, MdInlineItemList,
-    MdInlineLink, MdLinkDestination, MdLinkLabel, MdLinkReferenceDefinition, MdLinkTitle,
-    MdOrderedListItem, MdParagraph, MdQuote, MdReferenceImage, MdReferenceLink,
+    MarkdownLanguage, MdAutolink, MdBlockList, MdBullet, MdBulletListItem, MdContinuationIndent,
+    MdDocument, MdEntityReference, MdFencedCodeBlock, MdHardLine, MdHeader, MdHtmlBlock,
+    MdIndentCodeBlock, MdInlineCode, MdInlineEmphasis, MdInlineHtml, MdInlineImage, MdInlineItalic,
+    MdInlineItemList, MdInlineLink, MdLinkDestination, MdLinkLabel, MdLinkReferenceDefinition,
+    MdLinkTitle, MdOrderedListItem, MdParagraph, MdQuote, MdReferenceImage, MdReferenceLink,
     MdReferenceLinkLabel, MdSetextHeader, MdSoftBreak, MdTextual, MdThematicBreakBlock,
 };
 use biome_rowan::{AstNode, AstNodeList, Direction, SyntaxNode, TextRange, WalkEvent};
@@ -526,6 +526,11 @@ impl<'a> HtmlRenderer<'a> {
     }
 
     fn enter(&mut self, node: SyntaxNode<MarkdownLanguage>) {
+        if MdContinuationIndent::cast(node.clone()).is_some() {
+            self.opaque_depth = Some(self.depth);
+            return;
+        }
+
         if MdInlineItemList::cast(node.clone()).is_some()
             && self
                 .suppressed_inline_nodes
@@ -622,7 +627,16 @@ impl<'a> HtmlRenderer<'a> {
 
         if let Some(bullet) = MdBullet::cast(node.clone()) {
             let list_is_tight = self.list_stack.last().is_some_and(|state| state.is_tight);
-            let blocks: Vec<_> = bullet.content().iter().collect();
+            let blocks: Vec<_> = bullet
+                .content()
+                .iter()
+                .filter(|b| {
+                    !matches!(
+                        b,
+                        AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdContinuationIndent(_),)
+                    )
+                })
+                .collect();
             let item_has_blank_line = blocks
                 .windows(2)
                 .any(|pair| is_newline_block(&pair[0]) && is_newline_block(&pair[1]));
@@ -1173,12 +1187,12 @@ fn render_fenced_code_block(
 ) {
     out.push_str("<pre><code");
 
-    // Determine the fence indentation from the explicit indent slot
+    // Determine the fence indentation from the explicit indent slot.
+    // The indent list only contains the fence's own 0-3 spaces;
+    // list/quote indent is handled separately via container_indent.
     let fence_leading_indent = indent_list_width(&code.indent());
     let container_indent = list_indent + quote_indent;
-    let fence_indent = fence_leading_indent
-        .saturating_sub(container_indent)
-        .min(MAX_BLOCK_PREFIX_INDENT);
+    let fence_indent = fence_leading_indent.min(MAX_BLOCK_PREFIX_INDENT);
     let content_indent = container_indent + fence_indent;
 
     // Get info string (language) - process escapes
@@ -1749,11 +1763,13 @@ fn is_paragraph_block(block: &AnyMdBlock) -> bool {
     )
 }
 
-/// Check if a block is a newline (produces no output).
+/// Check if a block is a newline or continuation indent (produces no output).
 fn is_newline_block(block: &AnyMdBlock) -> bool {
     matches!(
         block,
-        AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(_))
+        AnyMdBlock::AnyMdLeafBlock(
+            AnyMdLeafBlock::MdNewline(_) | AnyMdLeafBlock::MdContinuationIndent(_),
+        )
     )
 }
 

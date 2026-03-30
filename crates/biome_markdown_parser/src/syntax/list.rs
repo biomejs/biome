@@ -2041,10 +2041,11 @@ fn check_continuation_indent(
                 };
             }
 
-            // Consume the structural indent as trivia so that block
-            // detection (at_bullet_list_item, etc.) works on the
-            // de-indented content. See §5.2 continuation lines.
-            p.skip_line_indent(state.required_indent);
+            // Emit continuation indent as an explicit MdContinuationIndent
+            // node so it appears in the CST rather than as skipped trivia.
+            let ci_m = p.start();
+            p.emit_line_indent(state.required_indent);
+            ci_m.complete(p, MD_CONTINUATION_INDENT);
             p.set_virtual_line_start();
 
             return ContinuationResult {

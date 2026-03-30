@@ -161,10 +161,20 @@ MdDocument {
                         MdNewline {
                             value_token: NEWLINE@59..60 "\n" [] [],
                         },
+                        MdContinuationIndent {
+                            indent: MdIndentTokenList [
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@60..61 " " [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@61..62 " " [] [],
+                                },
+                            ],
+                        },
                         MdParagraph {
                             list: MdInlineItemList [
                                 MdTextual {
-                                    value_token: MD_TEXTUAL_LITERAL@60..65 "baz" [Whitespace(" "), Whitespace(" ")] [],
+                                    value_token: MD_TEXTUAL_LITERAL@62..65 "baz" [] [],
                                 },
                                 MdTextual {
                                     value_token: MD_TEXTUAL_LITERAL@65..66 "\n" [] [],
@@ -275,10 +285,16 @@ MdDocument {
               1: MD_SETEXT_UNDERLINE_LITERAL@56..59 "---" [] []
             1: MD_NEWLINE@59..60
               0: NEWLINE@59..60 "\n" [] []
-            2: MD_PARAGRAPH@60..66
-              0: MD_INLINE_ITEM_LIST@60..66
-                0: MD_TEXTUAL@60..65
-                  0: MD_TEXTUAL_LITERAL@60..65 "baz" [Whitespace(" "), Whitespace(" ")] []
+            2: MD_CONTINUATION_INDENT@60..62
+              0: MD_INDENT_TOKEN_LIST@60..62
+                0: MD_INDENT_TOKEN@60..61
+                  0: MD_INDENT_CHAR@60..61 " " [] []
+                1: MD_INDENT_TOKEN@61..62
+                  0: MD_INDENT_CHAR@61..62 " " [] []
+            3: MD_PARAGRAPH@62..66
+              0: MD_INLINE_ITEM_LIST@62..66
+                0: MD_TEXTUAL@62..65
+                  0: MD_TEXTUAL_LITERAL@62..65 "baz" [] []
                 1: MD_TEXTUAL@65..66
                   0: MD_TEXTUAL_LITERAL@65..66 "\n" [] []
               1: (empty)

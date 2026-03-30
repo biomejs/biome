@@ -215,10 +215,20 @@ MdDocument {
                         MdNewline {
                             value_token: NEWLINE@355..356 "\n" [] [],
                         },
+                        MdContinuationIndent {
+                            indent: MdIndentTokenList [
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@356..357 " " [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@357..358 " " [] [],
+                                },
+                            ],
+                        },
                         MdParagraph {
                             list: MdInlineItemList [
                                 MdTextual {
-                                    value_token: MD_TEXTUAL_LITERAL@356..467 "NOTE: the shape of the JSON is considered experimental, and the shape of the JSON might change in the future." [Whitespace(" "), Whitespace(" ")] [],
+                                    value_token: MD_TEXTUAL_LITERAL@358..467 "NOTE: the shape of the JSON is considered experimental, and the shape of the JSON might change in the future." [] [],
                                 },
                                 MdTextual {
                                     value_token: MD_TEXTUAL_LITERAL@467..468 "\n" [] [],
@@ -229,11 +239,21 @@ MdDocument {
                         MdNewline {
                             value_token: NEWLINE@468..469 "\n" [] [],
                         },
+                        MdContinuationIndent {
+                            indent: MdIndentTokenList [
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@469..470 " " [] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@470..471 " " [] [],
+                                },
+                            ],
+                        },
                         MdHtmlBlock {
                             indent: MdIndentTokenList [],
                             content: MdInlineItemList [
                                 MdTextual {
-                                    value_token: MD_TEXTUAL_LITERAL@469..472 "<" [Whitespace(" "), Whitespace(" ")] [],
+                                    value_token: MD_TEXTUAL_LITERAL@471..472 "<" [] [],
                                 },
                                 MdTextual {
                                     value_token: MD_TEXTUAL_LITERAL@472..479 "details" [] [],
@@ -2302,20 +2322,32 @@ MdDocument {
               1: (empty)
             1: MD_NEWLINE@355..356
               0: NEWLINE@355..356 "\n" [] []
-            2: MD_PARAGRAPH@356..468
-              0: MD_INLINE_ITEM_LIST@356..468
-                0: MD_TEXTUAL@356..467
-                  0: MD_TEXTUAL_LITERAL@356..467 "NOTE: the shape of the JSON is considered experimental, and the shape of the JSON might change in the future." [Whitespace(" "), Whitespace(" ")] []
+            2: MD_CONTINUATION_INDENT@356..358
+              0: MD_INDENT_TOKEN_LIST@356..358
+                0: MD_INDENT_TOKEN@356..357
+                  0: MD_INDENT_CHAR@356..357 " " [] []
+                1: MD_INDENT_TOKEN@357..358
+                  0: MD_INDENT_CHAR@357..358 " " [] []
+            3: MD_PARAGRAPH@358..468
+              0: MD_INLINE_ITEM_LIST@358..468
+                0: MD_TEXTUAL@358..467
+                  0: MD_TEXTUAL_LITERAL@358..467 "NOTE: the shape of the JSON is considered experimental, and the shape of the JSON might change in the future." [] []
                 1: MD_TEXTUAL@467..468
                   0: MD_TEXTUAL_LITERAL@467..468 "\n" [] []
               1: (empty)
-            3: MD_NEWLINE@468..469
+            4: MD_NEWLINE@468..469
               0: NEWLINE@468..469 "\n" [] []
-            4: MD_HTML_BLOCK@469..2001
-              0: MD_INDENT_TOKEN_LIST@469..469
-              1: MD_INLINE_ITEM_LIST@469..2001
-                0: MD_TEXTUAL@469..472
-                  0: MD_TEXTUAL_LITERAL@469..472 "<" [Whitespace(" "), Whitespace(" ")] []
+            5: MD_CONTINUATION_INDENT@469..471
+              0: MD_INDENT_TOKEN_LIST@469..471
+                0: MD_INDENT_TOKEN@469..470
+                  0: MD_INDENT_CHAR@469..470 " " [] []
+                1: MD_INDENT_TOKEN@470..471
+                  0: MD_INDENT_CHAR@470..471 " " [] []
+            6: MD_HTML_BLOCK@471..2001
+              0: MD_INDENT_TOKEN_LIST@471..471
+              1: MD_INLINE_ITEM_LIST@471..2001
+                0: MD_TEXTUAL@471..472
+                  0: MD_TEXTUAL_LITERAL@471..472 "<" [] []
                 1: MD_TEXTUAL@472..479
                   0: MD_TEXTUAL_LITERAL@472..479 "details" [] []
                 2: MD_TEXTUAL@479..480

@@ -141,6 +141,41 @@ pub struct MdBulletListItemFields {
     pub md_bullet_list: MdBulletList,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct MdContinuationIndent {
+    pub(crate) syntax: SyntaxNode,
+}
+impl MdContinuationIndent {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> MdContinuationIndentFields {
+        MdContinuationIndentFields {
+            indent: self.indent(),
+        }
+    }
+    pub fn indent(&self) -> MdIndentTokenList {
+        support::list(&self.syntax, 0usize)
+    }
+}
+impl Serialize for MdContinuationIndent {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct MdContinuationIndentFields {
+    pub indent: MdIndentTokenList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct MdDocument {
     pub(crate) syntax: SyntaxNode,
 }
@@ -1847,6 +1882,7 @@ impl AnyMdInline {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyMdLeafBlock {
     AnyMdCodeBlock(AnyMdCodeBlock),
+    MdContinuationIndent(MdContinuationIndent),
     MdHeader(MdHeader),
     MdHtmlBlock(MdHtmlBlock),
     MdLinkReferenceDefinition(MdLinkReferenceDefinition),
@@ -1859,6 +1895,12 @@ impl AnyMdLeafBlock {
     pub fn as_any_md_code_block(&self) -> Option<&AnyMdCodeBlock> {
         match &self {
             Self::AnyMdCodeBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_md_continuation_indent(&self) -> Option<&MdContinuationIndent> {
+        match &self {
+            Self::MdContinuationIndent(item) => Some(item),
             _ => None,
         }
     }
@@ -2071,6 +2113,53 @@ impl From<MdBulletListItem> for SyntaxNode {
 }
 impl From<MdBulletListItem> for SyntaxElement {
     fn from(n: MdBulletListItem) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for MdContinuationIndent {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MD_CONTINUATION_INDENT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MD_CONTINUATION_INDENT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for MdContinuationIndent {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdContinuationIndent")
+                .field("indent", &self.indent())
+                .finish()
+        } else {
+            f.debug_struct("MdContinuationIndent").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<MdContinuationIndent> for SyntaxNode {
+    fn from(n: MdContinuationIndent) -> Self {
+        n.syntax
+    }
+}
+impl From<MdContinuationIndent> for SyntaxElement {
+    fn from(n: MdContinuationIndent) -> Self {
         n.syntax.into()
     }
 }
@@ -4382,6 +4471,11 @@ impl From<AnyMdInline> for SyntaxElement {
         node.into()
     }
 }
+impl From<MdContinuationIndent> for AnyMdLeafBlock {
+    fn from(node: MdContinuationIndent) -> Self {
+        Self::MdContinuationIndent(node)
+    }
+}
 impl From<MdHeader> for AnyMdLeafBlock {
     fn from(node: MdHeader) -> Self {
         Self::MdHeader(node)
@@ -4420,6 +4514,7 @@ impl From<MdThematicBreakBlock> for AnyMdLeafBlock {
 impl AstNode for AnyMdLeafBlock {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyMdCodeBlock::KIND_SET
+        .union(MdContinuationIndent::KIND_SET)
         .union(MdHeader::KIND_SET)
         .union(MdHtmlBlock::KIND_SET)
         .union(MdLinkReferenceDefinition::KIND_SET)
@@ -4429,7 +4524,8 @@ impl AstNode for AnyMdLeafBlock {
         .union(MdThematicBreakBlock::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            MD_HEADER
+            MD_CONTINUATION_INDENT
+            | MD_HEADER
             | MD_HTML_BLOCK
             | MD_LINK_REFERENCE_DEFINITION
             | MD_NEWLINE
@@ -4442,6 +4538,7 @@ impl AstNode for AnyMdLeafBlock {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            MD_CONTINUATION_INDENT => Self::MdContinuationIndent(MdContinuationIndent { syntax }),
             MD_HEADER => Self::MdHeader(MdHeader { syntax }),
             MD_HTML_BLOCK => Self::MdHtmlBlock(MdHtmlBlock { syntax }),
             MD_LINK_REFERENCE_DEFINITION => {
@@ -4462,6 +4559,7 @@ impl AstNode for AnyMdLeafBlock {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            Self::MdContinuationIndent(it) => it.syntax(),
             Self::MdHeader(it) => it.syntax(),
             Self::MdHtmlBlock(it) => it.syntax(),
             Self::MdLinkReferenceDefinition(it) => it.syntax(),
@@ -4474,6 +4572,7 @@ impl AstNode for AnyMdLeafBlock {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            Self::MdContinuationIndent(it) => it.into_syntax(),
             Self::MdHeader(it) => it.into_syntax(),
             Self::MdHtmlBlock(it) => it.into_syntax(),
             Self::MdLinkReferenceDefinition(it) => it.into_syntax(),
@@ -4489,6 +4588,7 @@ impl std::fmt::Debug for AnyMdLeafBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::AnyMdCodeBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::MdContinuationIndent(it) => std::fmt::Debug::fmt(it, f),
             Self::MdHeader(it) => std::fmt::Debug::fmt(it, f),
             Self::MdHtmlBlock(it) => std::fmt::Debug::fmt(it, f),
             Self::MdLinkReferenceDefinition(it) => std::fmt::Debug::fmt(it, f),
@@ -4503,6 +4603,7 @@ impl From<AnyMdLeafBlock> for SyntaxNode {
     fn from(n: AnyMdLeafBlock) -> Self {
         match n {
             AnyMdLeafBlock::AnyMdCodeBlock(it) => it.into_syntax(),
+            AnyMdLeafBlock::MdContinuationIndent(it) => it.into_syntax(),
             AnyMdLeafBlock::MdHeader(it) => it.into_syntax(),
             AnyMdLeafBlock::MdHtmlBlock(it) => it.into_syntax(),
             AnyMdLeafBlock::MdLinkReferenceDefinition(it) => it.into_syntax(),
@@ -4625,6 +4726,11 @@ impl std::fmt::Display for MdBullet {
     }
 }
 impl std::fmt::Display for MdBulletListItem {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for MdContinuationIndent {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

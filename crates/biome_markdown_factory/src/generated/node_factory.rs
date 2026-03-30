@@ -35,6 +35,12 @@ pub fn md_bullet_list_item(md_bullet_list: MdBulletList) -> MdBulletListItem {
         [Some(SyntaxElement::Node(md_bullet_list.into_syntax()))],
     ))
 }
+pub fn md_continuation_indent(indent: MdIndentTokenList) -> MdContinuationIndent {
+    MdContinuationIndent::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_CONTINUATION_INDENT,
+        [Some(SyntaxElement::Node(indent.into_syntax()))],
+    ))
+}
 pub fn md_document(value: MdBlockList, eof_token: SyntaxToken) -> MdDocumentBuilder {
     MdDocumentBuilder {
         value,
