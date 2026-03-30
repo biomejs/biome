@@ -229,4 +229,16 @@ pub fn quick_test() {
         "- outer item\n  - inner item\n    inner continuation\n  outer continuation at parent indentation\n\n- next outer item\n",
         "<ul>\n<li>\n<p>outer item</p>\n<ul>\n<li>inner item\ninner continuation</li>\n</ul>\n<p>outer continuation at parent indentation</p>\n</li>\n<li>\n<p>next outer item</p>\n</li>\n</ul>\n",
     );
+    // Mixed ordered delimiters across blank lines produce separate lists
+    test_example(
+        10005,
+        "1. one\n\n2) two\n",
+        "<ol>\n<li>\n<p>one</p>\n</li>\n</ol>\n<ol start=\"2\">\n<li>\n<p>two</p>\n</li>\n</ol>\n",
+    );
+    // Mixed bullet markers across blank lines produce separate lists
+    test_example(
+        10006,
+        "- one\n\n+ two\n",
+        "<ul>\n<li>\n<p>one</p>\n</li>\n</ul>\n<ul>\n<li>\n<p>two</p>\n</li>\n</ul>\n",
+    );
 }
