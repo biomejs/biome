@@ -138,7 +138,7 @@ quote                        = "1.0.45"
 rayon                        = "1.11.0"
 regex                        = "1.12.3"
 rust-lapper                  = "1.2.0"
-rustc-hash                   = "2.1.1"
+rustc-hash                   = "2.1.2"
 schemars                     = { version = "1.2.1", features = ["indexmap2", "smallvec1"] }
 serde                        = { version = "1.0.228", features = ["derive"] }
 serde_json                   = "1.0.149"
