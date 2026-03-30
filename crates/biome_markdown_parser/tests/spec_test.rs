@@ -247,4 +247,10 @@ pub fn quick_test() {
         "- aaa\n\n    ```js\n    const a = 1;\n    ```\n",
         "<ul>\n<li>\n<p>aaa</p>\n<pre><code class=\"language-js\">const a = 1;\n</code></pre>\n</li>\n</ul>\n",
     );
+    // #9736: HTML block inside list item continuation
+    test_example(
+        9736,
+        "- item\n\n  <details>\n  <summary>Info</summary>\n  content\n  </details>\n",
+        "<ul>\n<li>\n<p>item</p>\n<details>\n<summary>Info</summary>\ncontent\n</details>\n</li>\n</ul>\n",
+    );
 }
