@@ -17,14 +17,30 @@ impl FormatNodeRule<TwCustomVariantShorthand> for FormatTwCustomVariantShorthand
             semicolon_token,
         } = node.as_fields();
 
-        write!(
-            f,
-            [
-                l_paren_token.format(),
-                selector.format(),
-                r_paren_token.format(),
-                semicolon_token.format()
-            ]
-        )
+        let should_insert_space = f.options().delimiter_spacing().value();
+
+        if should_insert_space {
+            write!(
+                f,
+                [
+                    l_paren_token.format(),
+                    space(),
+                    selector.format(),
+                    space(),
+                    r_paren_token.format(),
+                    semicolon_token.format()
+                ]
+            )
+        } else {
+            write!(
+                f,
+                [
+                    l_paren_token.format(),
+                    selector.format(),
+                    r_paren_token.format(),
+                    semicolon_token.format()
+                ]
+            )
+        }
     }
 }

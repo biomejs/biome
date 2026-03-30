@@ -1732,6 +1732,12 @@ impl OverrideSettingPattern {
         if let Some(quote_style) = css_formatter.quote_style {
             options.set_quote_style(quote_style);
         }
+        if let Some(delimiter_spacing) = css_formatter
+            .delimiter_spacing
+            .or(formatter.delimiter_spacing)
+        {
+            options.set_delimiter_spacing(delimiter_spacing);
+        }
         if let Some(trailing_newline) = css_formatter
             .trailing_newline
             .or(formatter.trailing_newline)
