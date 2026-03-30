@@ -103,7 +103,7 @@ biome_unicode_table          = { path = "./crates/biome_unicode_table", version 
 biome_yaml_factory           = { path = "./crates/biome_yaml_factory", version = "0.0.1" }
 biome_yaml_parser            = { path = "./crates/biome_yaml_parser", version = "0.0.1" }
 biome_yaml_syntax            = { path = "./crates/biome_yaml_syntax", version = "0.0.1" }
-boa_engine                   = "0.21.0"
+boa_engine                   = "0.21.1"
 boxcar                       = "0.2.14"
 bpaf                         = { version = "0.9.24", features = ["derive"] }
 camino                       = "1.2.2"
