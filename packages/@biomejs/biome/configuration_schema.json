@@ -259,7 +259,7 @@
 					]
 				},
 				"useHeadingContent": {
-					"description": "Enforce that heading elements (h1, h2, etc.) have content and that the content is accessible to screen readers. Accessible means that it is not hidden using the aria-hidden prop.\nSee https://biomejs.dev/linter/rules/use-heading-content",
+					"description": "Enforce that heading elements (h1, h2, etc.) have content and that the content is accessible to screen readers.\nSee https://biomejs.dev/linter/rules/use-heading-content",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseHeadingContentConfiguration" },
 						{ "type": "null" }
