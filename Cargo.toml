@@ -126,7 +126,7 @@ insta                        = "1.46.3"
 jiff                         = "0.2.23"
 libc                         = "0.2.183"
 mimalloc                     = "0.1.48"
-papaya                       = "0.2.3"
+papaya                       = "0.2.4"
 path-absolutize              = { version = "3.1.1", features = ["use_unix_paths_on_wasm"], optional = false }
 phf                          = { version = "0.13.1", features = ["macros"] }
 prettyplease                 = "0.2.37"
