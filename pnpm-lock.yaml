@@ -21,8 +21,8 @@ importers:
         specifier: 24.12.0
         version: 24.12.0
       tombi:
-        specifier: 0.9.7
-        version: 0.9.7
+        specifier: 0.9.8
+        version: 0.9.8
 
   benchmark:
     devDependencies:
@@ -899,54 +899,54 @@ packages:
   '@tokenizer/token@0.3.0':
     resolution: {integrity: sha512-OvjF+z51L3ov0OyAU0duzsYuvO01PH7x4t6DJx+guahgTnBHkhJdG7soQeTSFLWN3efnHyibZ4Z8l2EuWwJN3A==}
 
-  '@tombi-toml/cli-darwin-arm64@0.9.7':
-    resolution: {integrity: sha512-AS3NlE8CYGY+qTecCpBEbG58x13U5e/FwhKG7dn8iTOaULvM3PwALmXoPoqHrP5lWHHWHGFghxM7nmsXVUTOLQ==}
+  '@tombi-toml/cli-darwin-arm64@0.9.8':
+    resolution: {integrity: sha512-/nw+wrlEt+8JI3t3gttNCnnkrPK0e+zTGMprpLe1Wtzd6aXl1I9E62hy//Lm8zeUcVg2dvPvjEj3b3UinXLCtg==}
     engines: {node: '>=14.0.0'}
     cpu: [arm64]
     os: [darwin]
 
-  '@tombi-toml/cli-darwin-x64@0.9.7':
-    resolution: {integrity: sha512-R7V1byxyj7z2zvgF3HxSpDUNnznwD8+B2PslpYs+f6XF4JwS+xenjkaqUOQeTHDMHCxzbnJBiTQm8v2+YUf5gg==}
+  '@tombi-toml/cli-darwin-x64@0.9.8':
+    resolution: {integrity: sha512-TzoiHEyhUksBR/5bZX96B1byZ2ePI9QcG12q8D5STC8OaIMO3hLnKj/XtztvdfHb9Mjor6MsTv2JpONMX0wbfg==}
     engines: {node: '>=14.0.0'}
     cpu: [x64]
     os: [darwin]
 
-  '@tombi-toml/cli-linux-arm64-musl@0.9.7':
-    resolution: {integrity: sha512-D7HolqiNP9Eq80OSDg1sja379qo74TAcyq+AtH8bNGTgtE7mc8QsyjluzGyPoE1a0V/9IjHSJkdMmsc5/ek9Cw==}
+  '@tombi-toml/cli-linux-arm64-musl@0.9.8':
+    resolution: {integrity: sha512-bLbYJZYj/Iq+DjyKfk8+Di2+MGI76e18yRsBPqZTjUXSvTNB6sNdxcIPlgmM0toc2l5JCguIIQYNNK9YjQBhfg==}
     engines: {node: '>=14.0.0'}
     cpu: [arm64]
     os: [linux]
     libc: [musl]
 
-  '@tombi-toml/cli-linux-arm64@0.9.7':
-    resolution: {integrity: sha512-iVSIy7IztYS4+gMd35+frqzJlnN2/LB2BF3Soop33ERXjsF0+27Hj7OaXwlDsu+dP2AscnQKK8+hgJ8wkYVQDg==}
+  '@tombi-toml/cli-linux-arm64@0.9.8':
+    resolution: {integrity: sha512-aLIC+GDXGdRWPWqPp2H3w1UIiClxPtW3yHaRqH0n7+5tfQhGYZknQFyu4t1GzsltLVU8SwFcEN220VgtZB9KHg==}
     engines: {node: '>=14.0.0'}
     cpu: [arm64]
     os: [linux]
     libc: [glibc]
 
-  '@tombi-toml/cli-linux-x64-musl@0.9.7':
-    resolution: {integrity: sha512-I8bFHcWZqzpSlTVrV3+9CRxp2mtkgnku9k6OvXFw1wYiqdWmu48gyEMbJEk9dfHLorsnRHuKt7vZsVTNL27iqw==}
+  '@tombi-toml/cli-linux-x64-musl@0.9.8':
+    resolution: {integrity: sha512-nkXQuKHl7Fc03AZdspPXqTuY9UWCYQxOonjDRZfin6jW3pKHZlymP28Tab7rv5fdZ6ESkNNjr6jZtkV/L+rnGA==}
     engines: {node: '>=14.0.0'}
     cpu: [x64]
     os: [linux]
     libc: [musl]
 
-  '@tombi-toml/cli-linux-x64@0.9.7':
-    resolution: {integrity: sha512-+4fAynTfhdlSy+lE9332OngVUjIos/4yR/aADDSGA3HdFP7x4nGJV7FB+zfBp8Ul04jUbEttuLt/UPKe5wFOnw==}
+  '@tombi-toml/cli-linux-x64@0.9.8':
+    resolution: {integrity: sha512-GQW7XdnewtAyKhpD/aTrUu6Ura5bs4xO+hwvYwGOiQ8PeOFWigiEKunMI75Aavpz26qPCV1VhWyiBPo2mW2OTg==}
     engines: {node: '>=14.0.0'}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
 
-  '@tombi-toml/cli-win32-arm64@0.9.7':
-    resolution: {integrity: sha512-lA6Fb81jzMEwuRDkCLgjL9IfI4+cSfBGr6eANjosf5WRxrsLDLPc8GIPCT3R9DhPjH/83feKIbwtXmlXUnfPDQ==}
+  '@tombi-toml/cli-win32-arm64@0.9.8':
+    resolution: {integrity: sha512-eLlX9XqN3LDwLke22mi19oTzlWSQzeoK4JGUr8USg1vYFHDooSDWDxAmHkQGRNx3ddrsDU0DoW5UF5Nxcza7iQ==}
     engines: {node: '>=14.0.0'}
     cpu: [arm64]
     os: [win32]
 
-  '@tombi-toml/cli-win32-x64@0.9.7':
-    resolution: {integrity: sha512-OMxQ/8nGjkM8l5wrzpwctCJo9N7XMSYKehy6Ia1VYv1H8Mpz2SnN2P73Ol8hmM6KWvqCeBSxmtu3+TFeVQ5bXA==}
+  '@tombi-toml/cli-win32-x64@0.9.8':
+    resolution: {integrity: sha512-PfILLqN3nlVw/fHzaK+0rwdG1CxVRaRqJQgyFgEREoJxuC801aALOk0kqj31lGaTeVvskD6V4187Jcc6bhStgA==}
     engines: {node: '>=14.0.0'}
     cpu: [x64]
     os: [win32]
@@ -2014,8 +2014,8 @@ packages:
     resolution: {integrity: sha512-6udB24Q737UD/SDsKAHI9FCRP7Bqc9D/MQUV02ORQg5iskjtLJlZJNdN4kKtcdtwCeWIwIHDGaUsTsCCAa8sFQ==}
     engines: {node: '>=10'}
 
-  tombi@0.9.7:
-    resolution: {integrity: sha512-D8/5vwKE9DruZ7UIWR5IV6tzM9tpI1P+BdSJBfjuE5iEkAZ5Z7c78IEMrpAHvuh8NAoF5NxzycVkXDbv9ssDpQ==}
+  tombi@0.9.8:
+    resolution: {integrity: sha512-gQbRnKFHSBPHNM46NIN4SkbMuPiiA1QLg97jNYLG1iZXo9pE1K0V8A7We+rHotj2YpoGY7NP5LCUqZVqV8DU2w==}
     engines: {node: '>=14.0.0'}
     hasBin: true
 
@@ -2945,28 +2945,28 @@ snapshots:
 
   '@tokenizer/token@0.3.0': {}
 
-  '@tombi-toml/cli-darwin-arm64@0.9.7':
+  '@tombi-toml/cli-darwin-arm64@0.9.8':
     optional: true
 
-  '@tombi-toml/cli-darwin-x64@0.9.7':
+  '@tombi-toml/cli-darwin-x64@0.9.8':
     optional: true
 
-  '@tombi-toml/cli-linux-arm64-musl@0.9.7':
+  '@tombi-toml/cli-linux-arm64-musl@0.9.8':
     optional: true
 
-  '@tombi-toml/cli-linux-arm64@0.9.7':
+  '@tombi-toml/cli-linux-arm64@0.9.8':
     optional: true
 
-  '@tombi-toml/cli-linux-x64-musl@0.9.7':
+  '@tombi-toml/cli-linux-x64-musl@0.9.8':
     optional: true
 
-  '@tombi-toml/cli-linux-x64@0.9.7':
+  '@tombi-toml/cli-linux-x64@0.9.8':
     optional: true
 
-  '@tombi-toml/cli-win32-arm64@0.9.7':
+  '@tombi-toml/cli-win32-arm64@0.9.8':
     optional: true
 
-  '@tombi-toml/cli-win32-x64@0.9.7':
+  '@tombi-toml/cli-win32-x64@0.9.8':
     optional: true
 
   '@types/chai@5.2.2':
@@ -4070,16 +4070,16 @@ snapshots:
       '@tokenizer/token': 0.3.0
       ieee754: 1.2.1
 
-  tombi@0.9.7:
+  tombi@0.9.8:
     optionalDependencies:
-      '@tombi-toml/cli-darwin-arm64': 0.9.7
-      '@tombi-toml/cli-darwin-x64': 0.9.7
-      '@tombi-toml/cli-linux-arm64': 0.9.7
-      '@tombi-toml/cli-linux-arm64-musl': 0.9.7
-      '@tombi-toml/cli-linux-x64': 0.9.7
-      '@tombi-toml/cli-linux-x64-musl': 0.9.7
-      '@tombi-toml/cli-win32-arm64': 0.9.7
-      '@tombi-toml/cli-win32-x64': 0.9.7
+      '@tombi-toml/cli-darwin-arm64': 0.9.8
+      '@tombi-toml/cli-darwin-x64': 0.9.8
+      '@tombi-toml/cli-linux-arm64': 0.9.8
+      '@tombi-toml/cli-linux-arm64-musl': 0.9.8
+      '@tombi-toml/cli-linux-x64': 0.9.8
+      '@tombi-toml/cli-linux-x64-musl': 0.9.8
+      '@tombi-toml/cli-win32-arm64': 0.9.8
+      '@tombi-toml/cli-win32-x64': 0.9.8
 
   tr46@0.0.3: {}
 
