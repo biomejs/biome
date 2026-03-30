@@ -155,10 +155,21 @@ fn has_accessible_content(children: &HtmlElementList, is_astro: bool) -> bool {
         AnyHtmlElement::AnyHtmlContent(content) => is_accessible_text_content(content),
         AnyHtmlElement::HtmlElement(element) => {
             if html_element_has_truthy_aria_hidden(element) {
-                false
-            } else {
-                has_accessible_content(&element.children(), is_astro)
+                return false;
             }
+            // PascalCase paired components (e.g. <MyComponent></MyComponent>) may
+            // render accessible content at runtime — treat them as accessible.
+            let tag_text = element
+                .opening_element()
+                .ok()
+                .and_then(|o| o.name().ok())
+                .and_then(|n| n.token_text_trimmed());
+            if matches!(tag_text.as_ref().map(|t| t.as_ref()),
+                Some(name) if name.starts_with(|c: char| c.is_uppercase()))
+            {
+                return true;
+            }
+            has_accessible_content(&element.children(), is_astro)
         }
         AnyHtmlElement::HtmlSelfClosingElement(element) => {
             if html_self_closing_element_has_truthy_aria_hidden(element) {

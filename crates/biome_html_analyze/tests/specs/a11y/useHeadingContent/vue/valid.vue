@@ -13,4 +13,8 @@
   <!-- PascalCase: custom components, should NOT trigger the rule -->
   <H1></H1>
   <MyHeading></MyHeading>
+
+  <!-- Paired PascalCase child: may render accessible content at runtime -->
+  <h1><MyComponent></MyComponent></h1>
+  <h2><Icon></Icon> label</h2>
 </template>
