@@ -1,3 +1,10 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 120
+expression: valid.html
+---
+# Input
+```html
 <!-- should not generate diagnostics -->
 <!-- Heading with text content -->
 <h1>heading</h1>
@@ -30,3 +37,5 @@
 <!-- Case-insensitive img in HTML: IMG and Img are the native element -->
 <h1><IMG alt="Logo" /></h1>
 <h1><Img alt="Logo" /></h1>
+
+```

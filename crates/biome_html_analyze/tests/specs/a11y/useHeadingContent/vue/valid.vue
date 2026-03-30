@@ -17,4 +17,7 @@
   <!-- Paired PascalCase child: may render accessible content at runtime -->
   <h1><MyComponent></MyComponent></h1>
   <h2><Icon></Icon> label</h2>
+
+  <!-- PascalCase self-closing: custom component, NOT native <img> -->
+  <h1><Img /></h1>
 </template>

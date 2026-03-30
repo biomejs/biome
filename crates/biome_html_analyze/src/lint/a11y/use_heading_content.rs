@@ -118,8 +118,9 @@ impl Rule for UseHeadingContent {
                 if html_element.opening_element().is_err() {
                     return None;
                 }
+                let is_html = source_type.is_html();
                 let is_astro = source_type.is_astro();
-                if has_accessible_content(&html_element.children(), is_astro) {
+                if has_accessible_content(&html_element.children(), is_html, is_astro) {
                     None
                 } else {
                     Some(())
@@ -150,26 +151,31 @@ impl Rule for UseHeadingContent {
 ///
 /// Text nodes, text expressions, and embedded content are considered accessible.
 /// Child elements with `aria-hidden` are excluded.
-fn has_accessible_content(children: &HtmlElementList, is_astro: bool) -> bool {
+fn has_accessible_content(children: &HtmlElementList, is_html: bool, is_astro: bool) -> bool {
     children.into_iter().any(|child| match &child {
         AnyHtmlElement::AnyHtmlContent(content) => is_accessible_text_content(content),
         AnyHtmlElement::HtmlElement(element) => {
             if html_element_has_truthy_aria_hidden(element) {
                 return false;
             }
-            // PascalCase paired components (e.g. <MyComponent></MyComponent>) may
+            // In component files (Vue/Svelte/Astro), PascalCase paired elements
+            // (e.g. <MyComponent></MyComponent>) are custom components that may
             // render accessible content at runtime — treat them as accessible.
-            let tag_text = element
-                .opening_element()
-                .ok()
-                .and_then(|o| o.name().ok())
-                .and_then(|n| n.token_text_trimmed());
-            if matches!(tag_text.as_ref().map(|t| t.as_ref()),
-                Some(name) if name.starts_with(|c: char| c.is_uppercase()))
-            {
-                return true;
+            // In plain HTML, all tags are case-insensitive so PascalCase has no
+            // special meaning and must not bypass the content check.
+            if !is_html {
+                let tag_text = element
+                    .opening_element()
+                    .ok()
+                    .and_then(|o| o.name().ok())
+                    .and_then(|n| n.token_text_trimmed());
+                if matches!(tag_text.as_ref().map(|t| t.as_ref()),
+                    Some(name) if name.starts_with(|c: char| c.is_uppercase()))
+                {
+                    return true;
+                }
             }
-            has_accessible_content(&element.children(), is_astro)
+            has_accessible_content(&element.children(), is_html, is_astro)
         }
         AnyHtmlElement::HtmlSelfClosingElement(element) => {
             if html_self_closing_element_has_truthy_aria_hidden(element) {
@@ -183,14 +189,18 @@ fn has_accessible_content(children: &HtmlElementList, is_astro: bool) -> bool {
             let tag_text = element.name().ok().and_then(|n| n.token_text_trimmed());
 
             match tag_text.as_ref().map(|t| t.as_ref()) {
+                // In HTML, tag names are case-insensitive; in component files,
+                // only lowercase "img" is the native element — "Img" is a component.
                 Some(name)
-                    if name.eq_ignore_ascii_case("img")
+                    if (is_html && name.eq_ignore_ascii_case("img"))
+                        || (!is_html && name == "img")
                         || (is_astro && name == "Image") =>
                 {
                     html_self_closing_element_has_non_empty_attribute(element, "alt")
                 }
-                // Custom components (PascalCase) may render accessible content
-                Some(name) if name.starts_with(|c: char| c.is_uppercase()) => true,
+                // In component files, PascalCase self-closing elements are custom
+                // components that may render accessible content at runtime.
+                Some(name) if !is_html && name.starts_with(|c: char| c.is_uppercase()) => true,
                 _ => false,
             }
         }
