@@ -1,6 +1,5 @@
+<!-- should not generate diagnostics -->
 <template>
-  <!-- should not generate diagnostics -->
-
   <!-- Heading with content -->
   <h1>heading</h1>
   <h2>Sub heading</h2>

@@ -1,5 +1,5 @@
+<!-- should generate diagnostics -->
 <template>
-  <!-- should generate diagnostics -->
   <h1></h1>
   <h2>   </h2>
   <h1 aria-hidden="true">invisible content</h1>

@@ -5,8 +5,8 @@ expression: invalid.vue
 ---
 # Input
 ```vue
+<!-- should generate diagnostics -->
 <template>
-  <!-- should generate diagnostics -->
   <h1></h1>
   <h2>   </h2>
   <h1 aria-hidden="true">invisible content</h1>
@@ -22,8 +22,8 @@ invalid.vue:3:3 lint/a11y/useHeadingContent ━━━━━━━━━━━━
 
   × Provide screen reader accessible content when using heading elements.
   
-    1 │ <template>
-    2 │   <!-- should generate diagnostics -->
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
   > 3 │   <h1></h1>
       │   ^^^^^^^^^
     4 │   <h2>   </h2>
@@ -39,7 +39,7 @@ invalid.vue:4:3 lint/a11y/useHeadingContent ━━━━━━━━━━━━
 
   × Provide screen reader accessible content when using heading elements.
   
-    2 │   <!-- should generate diagnostics -->
+    2 │ <template>
     3 │   <h1></h1>
   > 4 │   <h2>   </h2>
       │   ^^^^^^^^^^^^
