@@ -253,4 +253,10 @@ pub fn quick_test() {
         "- item\n\n  <details>\n  <summary>Info</summary>\n  content\n  </details>\n",
         "<ul>\n<li>\n<p>item</p>\n<details>\n<summary>Info</summary>\ncontent\n</details>\n</li>\n</ul>\n",
     );
+    // #9727: multi-byte characters must not panic in emphasis context
+    test_example(
+        9727,
+        ">💡 Biomeは、[Prettierのオプションに対する考え方](https://prettier.io/docs/en/option-philosophy)と同様のアプローチを採用しています。\n",
+        "<blockquote>\n<p>💡 Biomeは、<a href=\"https://prettier.io/docs/en/option-philosophy\">Prettierのオプションに対する考え方</a>と同様のアプローチを採用しています。</p>\n</blockquote>\n",
+    );
 }

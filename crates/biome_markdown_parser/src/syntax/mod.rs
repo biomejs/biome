@@ -1222,9 +1222,13 @@ fn set_inline_emphasis_context(p: &mut MarkdownParser) -> Option<EmphasisContext
 // #region inline list length scanning
 
 /// Compute the byte length of the inline list starting at the current token.
+///
+/// Uses source positions rather than accumulated token text lengths so
+/// that trivia between tokens is included and the result always falls
+/// on a char boundary.
 fn inline_list_source_len(p: &mut MarkdownParser) -> usize {
+    let start: usize = p.cur_range().start().into();
     p.lookahead(|p| {
-        let mut len = 0usize;
         let mut has_content = false;
 
         loop {
@@ -1233,7 +1237,7 @@ fn inline_list_source_len(p: &mut MarkdownParser) -> usize {
             }
 
             if p.at(NEWLINE) {
-                if scan_newline_in_inline_list(p, has_content, &mut len) {
+                if scan_newline_in_inline_list(p, has_content) {
                     break;
                 }
                 continue;
@@ -1255,11 +1259,11 @@ fn inline_list_source_len(p: &mut MarkdownParser) -> usize {
                 has_content = true;
             }
 
-            len += p.cur_text().len();
             p.bump(p.cur());
         }
 
-        len
+        let end: usize = p.cur_range().start().into();
+        end.saturating_sub(start)
     })
 }
 
@@ -1267,14 +1271,12 @@ fn inline_list_source_len(p: &mut MarkdownParser) -> usize {
 ///
 /// Returns `true` if the scan should stop (paragraph boundary reached),
 /// `false` if scanning should continue to the next line.
-fn scan_newline_in_inline_list(p: &mut MarkdownParser, has_content: bool, len: &mut usize) -> bool {
+fn scan_newline_in_inline_list(p: &mut MarkdownParser, has_content: bool) -> bool {
     if p.at_blank_line() {
-        *len += p.cur_text().len();
         p.bump(NEWLINE);
         return true;
     }
 
-    *len += p.cur_text().len();
     p.bump(NEWLINE);
 
     let quote_depth = p.state().block_quote_depth;
@@ -1295,7 +1297,7 @@ fn scan_newline_in_inline_list(p: &mut MarkdownParser, has_content: bool, len: &
     }
 
     if quote_depth > 0 && p.at(R_ANGLE) && !has_quote_prefix(p, quote_depth) {
-        consume_partial_quote_prefix_lookahead(p, quote_depth, len);
+        consume_partial_quote_prefix_lookahead(p, quote_depth);
     }
 
     if at_paragraph_break(p, has_content) {
@@ -1309,7 +1311,7 @@ fn scan_newline_in_inline_list(p: &mut MarkdownParser, has_content: bool, len: &
             return true;
         }
 
-        scan_list_indent(p, required_indent, len);
+        scan_list_indent(p, required_indent);
 
         // After stripping list indent, re-check setext/thematic markers
         // to mirror newline handling in the parse path. Without this,
@@ -1335,7 +1337,7 @@ fn scan_newline_in_inline_list(p: &mut MarkdownParser, has_content: bool, len: &
 /// byte lengths to `len`. Stops when the required indent is reached, a
 /// non-whitespace token is encountered, or consuming the next token would
 /// exceed the indent budget.
-fn scan_list_indent(p: &mut MarkdownParser, required_indent: usize, len: &mut usize) {
+fn scan_list_indent(p: &mut MarkdownParser, required_indent: usize) {
     let mut consumed = 0usize;
     while consumed < required_indent && p.at(MD_TEXTUAL_LITERAL) {
         let text = p.cur_text();
@@ -1353,7 +1355,6 @@ fn scan_list_indent(p: &mut MarkdownParser, required_indent: usize, len: &mut us
         }
 
         consumed += indent;
-        *len += text.len();
         p.bump(MD_TEXTUAL_LITERAL);
     }
 }
@@ -1408,19 +1409,13 @@ fn consume_partial_quote_prefix(p: &mut MarkdownParser, depth: usize) -> bool {
     consumed > 0
 }
 
-fn consume_partial_quote_prefix_lookahead(
-    p: &mut MarkdownParser,
-    depth: usize,
-    len: &mut usize,
-) -> bool {
+fn consume_partial_quote_prefix_lookahead(p: &mut MarkdownParser, depth: usize) -> bool {
     let mut consumed = 0usize;
     while consumed < depth && p.at(R_ANGLE) {
-        *len += p.cur_text().len();
         p.bump(R_ANGLE);
         if p.at(MD_TEXTUAL_LITERAL) {
             let text = p.cur_text();
             if text == " " || text == "\t" {
-                *len += text.len();
                 p.bump(MD_TEXTUAL_LITERAL);
             }
         }
