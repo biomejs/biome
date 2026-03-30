@@ -1,5 +1,59 @@
 # @biomejs/biome
 
+## 2.4.10
+
+### Patch Changes
+
+- [#8838](https://github.com/biomejs/biome/pull/8838) [`f3a6a6b`](https://github.com/biomejs/biome/commit/f3a6a6ba446aaac59119453e5becd657e509e22f) Thanks [@baeseokjae](https://github.com/baeseokjae)! - Added new lint nursery rule [`noImpliedEval`](https://biomejs.dev/linter/rules/no-implied-eval/).
+
+  The rule detects implied `eval()` usage through functions like `setTimeout`, `setInterval`, and `setImmediate` when called with string arguments.
+
+  ```js
+  // Invalid
+  setTimeout("alert('Hello');", 100);
+
+  // Valid
+  setTimeout(() => alert("Hello"), 100);
+  ```
+
+- [#9320](https://github.com/biomejs/biome/pull/9320) [`93c3b6c`](https://github.com/biomejs/biome/commit/93c3b6ca52d4966db2c5b9c37d73c049ffccd1a5) Thanks [@taberoajorge](https://github.com/taberoajorge)! - Fixed [#7664](https://github.com/biomejs/biome/issues/7664): [`noUnusedVariables`](https://biomejs.dev/linter/rules/no-unused-variables/) no longer reports false positives for TypeScript namespace declarations that participate in declaration merging with an exported or used value declaration (`const`, `function`, or `class`) of the same name. The reverse direction is also handled: a value declaration merged with an exported namespace is no longer flagged.
+
+- [#9630](https://github.com/biomejs/biome/pull/9630) [`1dd4a56`](https://github.com/biomejs/biome/commit/1dd4a560a567d0a47784f9d5014ee8bc073b6912) Thanks [@raashish1601](https://github.com/raashish1601)! - Fixed [#9629](https://github.com/biomejs/biome/issues/9629): [`noNegationElse`](https://biomejs.dev/linter/rules/no-negation-else/) now keeps ternary branch comments attached to the correct branch when applying its fixer.
+
+- [#9216](https://github.com/biomejs/biome/pull/9216) [`04243b0`](https://github.com/biomejs/biome/commit/04243b0535dfb65fd106f5a760ab24668786dcaf) Thanks [@FrederickStempfle](https://github.com/FrederickStempfle)! - Fixed [#9061](https://github.com/biomejs/biome/issues/9061): `noProcessEnv` now also detects `process.env` when `process` is imported from the `"process"` or `"node:process"` modules.
+
+  Previously, only the global `process` object was flagged:
+
+  ```js
+  import process from "node:process";
+  // This was not flagged, but now it is:
+  console.log(process.env.NODE_ENV);
+  ```
+
+- [#9692](https://github.com/biomejs/biome/pull/9692) [`61b7ec5`](https://github.com/biomejs/biome/commit/61b7ec5afd5949c109949557ace5508da1ea7ed9) Thanks [@mkosei](https://github.com/mkosei)! - Fixed Svelte `#each` destructuring parsing and formatting for nested patterns such as `[key, { a, b }]`.
+
+- [#9627](https://github.com/biomejs/biome/pull/9627) [`06a0f35`](https://github.com/biomejs/biome/commit/06a0f351d4885385f90f64604b6f391e5012f2c3) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#191](https://github.com/biomejs/biome-zed/issues/191): Improved the performance of how the Biome Language Server pulls code actions and diagnostics.
+
+  Before, code actions were pulled and computed all at once in one request. This approach couldn't work in big files, and caused Biome to stale and have CPU usage spikes up to 100%.
+
+  Now, code actions are pulled and computed lazily, and Biome won't choke anymore in big files.
+
+- [#9643](https://github.com/biomejs/biome/pull/9643) [`5bfee36`](https://github.com/biomejs/biome/commit/5bfee368e3c3482d815fe43c166a40a71be7b731) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#9347](https://github.com/biomejs/biome/issues/9347): [`useVueValidVBind`](https://biomejs.dev/linter/rules/use-vue-valid-v-bind/) no longer reports valid object bindings like `v-bind="props"`.
+
+- [#9627](https://github.com/biomejs/biome/pull/9627) [`06a0f35`](https://github.com/biomejs/biome/commit/06a0f351d4885385f90f64604b6f391e5012f2c3) Thanks [@ematipico](https://github.com/ematipico)! - Fixed assist diagnostics being invisible when using `--diagnostic-level=error`. Enforced assist violations (e.g. `useSortedKeys`) were filtered out before being promoted to errors, causing `biome check` to incorrectly return success.
+
+- [#9695](https://github.com/biomejs/biome/pull/9695) [`9856a87`](https://github.com/biomejs/biome/commit/9856a873aa35aed8367030ec264a0dcfc6088ab0) Thanks [@dyc3](https://github.com/dyc3)! - Added the new nursery rule [`noUnsafePlusOperands`](https://biomejs.dev/linter/rules/no-unsafe-plus-operands/), which reports `+` and `+=` operations that use object-like, `symbol`, `unknown`, or `never` operands, or that mix `number` with `bigint`.
+
+- [#9627](https://github.com/biomejs/biome/pull/9627) [`06a0f35`](https://github.com/biomejs/biome/commit/06a0f351d4885385f90f64604b6f391e5012f2c3) Thanks [@ematipico](https://github.com/ematipico)! - Fixed duplicate parse errors in `check` and `ci` output. When a file had syntax errors, the same parse error was printed twice and the error count was inflated.
+
+- [#9627](https://github.com/biomejs/biome/pull/9627) [`06a0f35`](https://github.com/biomejs/biome/commit/06a0f351d4885385f90f64604b6f391e5012f2c3) Thanks [@ematipico](https://github.com/ematipico)! - Improved the performance of the commands `lint` and `check` when they are called with `--write`.
+
+- [#9627](https://github.com/biomejs/biome/pull/9627) [`06a0f35`](https://github.com/biomejs/biome/commit/06a0f351d4885385f90f64604b6f391e5012f2c3) Thanks [@ematipico](https://github.com/ematipico)! - Fixed `--diagnostic-level` not fully filtering diagnostics. Setting `--diagnostic-level=error` now correctly excludes warnings and infos from both the output and the summary counts.
+
+- [#9623](https://github.com/biomejs/biome/pull/9623) [`13b3261`](https://github.com/biomejs/biome/commit/13b3261fde0748c07b1fe4f25527a4e744f4a223) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#9258](https://github.com/biomejs/biome/issues/9258): `--skip` no longer causes `suppressions/unused` warnings for suppression comments targeting skipped rules or domains.
+
+- [#9631](https://github.com/biomejs/biome/pull/9631) [`599dd04`](https://github.com/biomejs/biome/commit/599dd04cf813776fbddc2217393fafd5d79691e1) Thanks [@raashish1601](https://github.com/raashish1601)! - Fixed [#9625](https://github.com/biomejs/biome/issues/9625): `experimentalEmbeddedSnippetsEnabled` no longer crashes when a file mixes formatable CSS-in-JS templates with tagged templates that the embedded formatter can't currently delegate, such as a styled-components interpolation returning `css```.
+
 ## 2.4.9
 
 ### Patch Changes

@@ -72,7 +72,7 @@ declare_lint_rule! {
     /// - [MDN eval() documentation](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval#never_use_direct_eval!)
     ///
     pub NoImpliedEval {
-        version: "next",
+        version: "2.4.10",
         name: "noImpliedEval",
         language: "js",
         sources: &[

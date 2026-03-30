@@ -56,7 +56,7 @@ declare_lint_rule! {
     /// total += 2n;
     /// ```
     pub NoUnsafePlusOperands {
-        version: "next",
+        version: "2.4.10",
         name: "noUnsafePlusOperands",
         language: "js",
         sources: &[RuleSource::EslintTypeScript("restrict-plus-operands").same()],
