@@ -209,4 +209,24 @@ pub fn quick_test() {
         "- foo\n   ---\n",
         "<ul>\n<li>\n<h2>foo</h2>\n</li>\n</ul>\n",
     );
+    test_example(
+        10001,
+        " - foo\n   - bar\n\t - baz\n",
+        "<ul>\n<li>foo\n<ul>\n<li>bar\n<ul>\n<li>baz</li>\n</ul>\n</li>\n</ul>\n</li>\n</ul>\n",
+    );
+    test_example(
+        10002,
+        "1.  A paragraph\n    with two lines.\n\n        indented code\n\n    > A block quote.\n",
+        "<ol>\n<li>\n<p>A paragraph\nwith two lines.</p>\n<pre><code>indented code\n</code></pre>\n<blockquote>\n<p>A block quote.</p>\n</blockquote>\n</li>\n</ol>\n",
+    );
+    test_example(
+        10003,
+        "- a\n  - b\n  - c\n\n- d\n  - e\n  - f\n",
+        "<ul>\n<li>\n<p>a</p>\n<ul>\n<li>b</li>\n<li>c</li>\n</ul>\n</li>\n<li>\n<p>d</p>\n<ul>\n<li>e</li>\n<li>f</li>\n</ul>\n</li>\n</ul>\n",
+    );
+    test_example(
+        10004,
+        "- outer item\n  - inner item\n    inner continuation\n  outer continuation at parent indentation\n\n- next outer item\n",
+        "<ul>\n<li>\n<p>outer item</p>\n<ul>\n<li>inner item\ninner continuation</li>\n</ul>\n<p>outer continuation at parent indentation</p>\n</li>\n<li>\n<p>next outer item</p>\n</li>\n</ul>\n",
+    );
 }

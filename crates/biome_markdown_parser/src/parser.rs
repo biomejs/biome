@@ -73,6 +73,8 @@ pub(crate) struct MarkdownParserState {
     pub(crate) list_item_indents: Vec<ListItemIndent>,
     /// Recorded quote marker indents keyed by quote node range.
     pub(crate) quote_indents: Vec<QuoteIndent>,
+    /// Whether the most recently parsed list ended with a blank line.
+    pub(crate) last_list_ends_with_blank: bool,
     /// Virtual line start override for container prefixes (e.g., block quotes).
     pub(crate) virtual_line_start: Option<TextSize>,
     /// Flag to unwind quote parsing when nesting exceeds the maximum depth.
@@ -190,6 +192,14 @@ impl<'source> MarkdownParser<'source> {
 
     pub(crate) fn record_quote_indent(&mut self, range: TextRange, indent: usize) {
         self.state.quote_indents.push(QuoteIndent { range, indent });
+    }
+
+    pub(crate) fn set_last_list_ends_with_blank(&mut self, value: bool) {
+        self.state.last_list_ends_with_blank = value;
+    }
+
+    pub(crate) fn take_last_list_ends_with_blank(&mut self) -> bool {
+        std::mem::take(&mut self.state.last_list_ends_with_blank)
     }
 
     /// Re-lex the current token using LinkDefinition context.

@@ -935,8 +935,9 @@ fn break_for_setext_after_inline_newline(
     false
 }
 
-/// Returns `true` when list-item indentation exposes a block interrupt or
-/// nested list marker that must terminate the current paragraph.
+/// Break the paragraph when the next line is a block interrupt at
+/// `required_indent`, or when a nested item's continuation drops to
+/// the parent's indent level (§5.2 ownership, depth >= 2).
 fn break_for_list_interrupt_after_inline_newline(
     p: &mut MarkdownParser,
     required_indent: usize,
@@ -1006,6 +1007,22 @@ fn handle_inline_newline(p: &mut MarkdownParser, has_content: bool) -> InlineNew
 
     if break_for_list_interrupt_after_inline_newline(p, required_indent) {
         return InlineNewlineAction::Break;
+    }
+
+    // Inside a nested list item (depth >= 2), break the paragraph when the
+    // continuation line's indent drops to or below the marker column.
+    // Such lines belong to a parent item, not lazy continuation.
+    // We only check nesting depth, not marker_indent alone, because a
+    // top-level list with leading whitespace (e.g. `  1.  text`) still
+    // allows lazy continuation at indent 0 per CommonMark §5.2.
+    if required_indent > 0 && p.state().list_nesting_depth >= 2 {
+        let marker_indent = p.state().list_item_marker_indent;
+        if marker_indent > 0 {
+            let indent = p.line_start_leading_indent();
+            if indent < required_indent && indent <= marker_indent {
+                return InlineNewlineAction::Break;
+            }
+        }
     }
 
     // Check for block-level constructs that can interrupt paragraphs.
