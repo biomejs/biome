@@ -13,7 +13,9 @@ pub(crate) struct FormatMdInlineItemList {
 impl FormatRule<MdInlineItemList> for FormatMdInlineItemList {
     type Context = MarkdownFormatContext;
     fn fmt(&self, node: &MdInlineItemList, f: &mut MarkdownFormatter) -> FormatResult<()> {
-        if self.print_mode.is_all() {
+        if self.print_mode.is_normalize_words() {
+            return self.fmt_normalize_words(node, f);
+        } else if self.print_mode.is_all() {
             return self.fmt_trim_all(node, f);
         } else if self.print_mode.is_pristine() {
             return self.fmt_pristine(node, f);
@@ -140,6 +142,33 @@ impl FormatMdInlineItemList {
             } else {
                 // Inside content boundaries: keep as-is.
                 joiner.entry(&item.format());
+            }
+        }
+
+        joiner.finish()
+    }
+
+    /// Normalizes all whitespace in textual nodes to `hard_space`.
+    ///
+    /// For example, `[  Foo   Bar  ]` becomes `[ Foo Bar ]`.
+    fn fmt_normalize_words(
+        &self,
+        node: &MdInlineItemList,
+        f: &mut MarkdownFormatter,
+    ) -> FormatResult<()> {
+        let mut joiner = f.join();
+
+        for item in node.iter() {
+            match item {
+                AnyMdInline::MdTextual(text) => {
+                    joiner.entry(&text.format().with_options(FormatMdTextualOptions {
+                        print_mode: TextPrintMode::Trim(TrimMode::NormalizeWords),
+                        ..Default::default()
+                    }));
+                }
+                _ => {
+                    joiner.entry(&item.format());
+                }
             }
         }
 

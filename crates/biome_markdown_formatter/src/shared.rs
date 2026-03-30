@@ -35,6 +35,9 @@ pub(crate) enum TrimMode {
     Start,
     /// Trim start and end of the list
     All,
+    /// This mode works similarly to [TrimMode::All], however, text that contains
+    /// words and have more than trailing/leading spaces are normalized to one
+    NormalizeWords,
     /// Don't trim anything
     #[default]
     None,
@@ -47,6 +50,10 @@ impl TextPrintMode {
 
     pub(crate) const fn is_all(&self) -> bool {
         matches!(self, Self::Trim(TrimMode::All))
+    }
+
+    pub(crate) const fn is_normalize_words(&self) -> bool {
+        matches!(self, Self::Trim(TrimMode::NormalizeWords))
     }
 
     pub(crate) const fn is_pristine(&self) -> bool {

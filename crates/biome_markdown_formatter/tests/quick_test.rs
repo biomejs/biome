@@ -4,13 +4,8 @@ use biome_markdown_parser::parse_markdown;
 #[ignore]
 #[test]
 fn quick_test() {
-    let source = r#"``````````
-
-```js
-console.log("hello world!");
-```
-
-``````````"#;
+    let source = r#"[   See   `AsyncGeneratorFunction`]: ./index.html
+"#;
     let parse = parse_markdown(source);
 
     // Print CST

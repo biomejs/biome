@@ -1033,16 +1033,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  
  ## What does Prettier do?
  
-@@ -111,19 +110,19 @@
- original styling is preserved when practical—see [empty lines] and [multi-line
- objects]._
- 
--[empty lines]: Rationale.md#empty-lines
--[multi-line objects]: Rationale.md#multi-line-objects
-+[empty lines]:Rationale.md#empty-lines
-+[multi-line objects]:Rationale.md#multi-line-objects
- 
- If you want to learn more, these two conference talks are great introductions:
+@@ -118,12 +117,12 @@
  
  <a href="https://www.youtube.com/watch?v=hkfBvpEfWdA"><img width="298" src="https://cloud.githubusercontent.com/assets/197597/24886367/dda8a6f0-1e08-11e7-865b-22492450f10f.png"></a> <a href="https://www.youtube.com/watch?v=0Q4kUNx85_4"><img width="298" src="https://cloud.githubusercontent.com/assets/197597/24886368/ddacd6f8-1e08-11e7-806a-9febd23cbf47.png"></a>
  
@@ -1263,19 +1254,19 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  Use single quotes instead of double quotes.
  
  Notes:
-+* Quotes in JSX will always be double and ignore this setting.
-+* If the number of quotes outweighs the other quote, the quote which is less used will be used to format the string - Example: `"I'm double quoted"` results in `"I'm double quoted"` and `"This \"example\" is single quoted"` results in `'This "example" is single quoted'`.
- 
+-
 -- Quotes in JSX will always be double and ignore this setting.
 -- If the number of quotes outweighs the other quote, the quote which is less used will be used to format the string - Example: `"I'm double quoted"` results in `"I'm double quoted"` and `"This \"example\" is single quoted"` results in `'This "example" is single quoted'`.
-+Default | CLI Override | API Override
-+--------|--------------|-------------
-+`false` |  `--single-quote` | `singleQuote: <bool>`
++* Quotes in JSX will always be double and ignore this setting.
++* If the number of quotes outweighs the other quote, the quote which is less used will be used to format the string - Example: `"I'm double quoted"` results in `"I'm double quoted"` and `"This \"example\" is single quoted"` results in `'This "example" is single quoted'`.
  
 -| Default | CLI Override     | API Override          |
 -| ------- | ---------------- | --------------------- |
 -| `false` | `--single-quote` | `singleQuote: <bool>` |
--
++Default | CLI Override | API Override
++--------|--------------|-------------
++`false` |  `--single-quote` | `singleQuote: <bool>`
+ 
  ### Trailing Commas
 -
  Print trailing commas wherever possible when multi-line. (A single-line array,
@@ -1289,14 +1280,14 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 -- `"none"` - No trailing commas.
 -- `"es5"` - Trailing commas where valid in ES5 (objects, arrays, etc.)
 -- `"all"` - Trailing commas wherever possible (including function arguments). This requires node 8 or a [transform](https://babeljs.io/docs/plugins/syntax-trailing-function-commas/).
--
--| Default  | CLI Override                                           | API Override                                           |
--| -------- | ------------------------------------------------------ | ------------------------------------------------------ |
--| `"none"` | <code>--trailing-comma <none&#124;es5&#124;all></code> | <code>trailingComma: "<none&#124;es5&#124;all>"</code> |
 +Default | CLI Override | API Override
 +--------|--------------|-------------
 +`"none"` | <code>--trailing-comma <none&#124;es5&#124;all></code> | <code>trailingComma: "<none&#124;es5&#124;all>"</code>
  
+-| Default  | CLI Override                                           | API Override                                           |
+-| -------- | ------------------------------------------------------ | ------------------------------------------------------ |
+-| `"none"` | <code>--trailing-comma <none&#124;es5&#124;all></code> | <code>trailingComma: "<none&#124;es5&#124;all>"</code> |
+-
  ### Bracket Spacing
 -
  Print spaces between brackets in object literals.
@@ -1353,6 +1344,13 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  Both the `babylon` and `flow` parsers support the same set of JavaScript features (including Flow). Prettier automatically infers the parser from the input file path, so you shouldn't have to change this setting.
  
  Built-in parsers:
+-
+-- [`babylon`](https://github.com/babel/babylon/)
+-- [`flow`](https://github.com/facebook/flow/tree/master/src/parser)
+-- [`typescript`](https://github.com/eslint/typescript-eslint-parser) _Since v1.4.0_
+-- [`postcss`](https://github.com/postcss/postcss) _Since v1.4.0_
+-- [`json`](https://github.com/babel/babylon/tree/f09eb3200f57ea94d51c2a5b1facf2149fb406bf#babylonparseexpressioncode-options) _Since v1.5.0_
+-- [`graphql`](https://github.com/graphql/graphql-js/tree/master/src/language) _Since v1.5.0_
 + * [`babylon`](https://github.com/babel/babylon/)
 + * [`flow`](https://github.com/facebook/flow/tree/master/src/parser)
 + * [`typescript`](https://github.com/eslint/typescript-eslint-parser) _Since v1.4.0_
@@ -1360,16 +1358,9 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 + * [`json`](https://github.com/babel/babylon/tree/f09eb3200f57ea94d51c2a5b1facf2149fb406bf#babylonparseexpressioncode-options) _Since v1.5.0_
 + * [`graphql`](https://github.com/graphql/graphql-js/tree/master/src/language) _Since v1.5.0_
  
--- [`babylon`](https://github.com/babel/babylon/)
--- [`flow`](https://github.com/facebook/flow/tree/master/src/parser)
--- [`typescript`](https://github.com/eslint/typescript-eslint-parser) _Since v1.4.0_
--- [`postcss`](https://github.com/postcss/postcss) _Since v1.4.0_
--- [`json`](https://github.com/babel/babylon/tree/f09eb3200f57ea94d51c2a5b1facf2149fb406bf#babylonparseexpressioncode-options) _Since v1.5.0_
--- [`graphql`](https://github.com/graphql/graphql-js/tree/master/src/language) _Since v1.5.0_
+-[Custom parsers](#custom-parser-api) are also supported. _Since v1.5.0_
 +[Custom parsers](#custom-parser-api) are also supported.  _Since v1.5.0_
  
--[Custom parsers](#custom-parser-api) are also supported. _Since v1.5.0_
--
 -| Default   | CLI Override                                    | API Override                                               |
 -| --------- | ----------------------------------------------- | ---------------------------------------------------------- |
 -| `babylon` | `--parser <string>`<br />`--parser ./my-parser` | `parser: "<string>"`<br />`parser: require("./my-parser")` |
@@ -1579,8 +1570,8 @@ into account, wrapping code when necessary.
 original styling is preserved when practical—see [empty lines] and [multi-line
 objects]._
 
-[empty lines]:Rationale.md#empty-lines
-[multi-line objects]:Rationale.md#multi-line-objects
+[empty lines]: Rationale.md#empty-lines
+[multi-line objects]: Rationale.md#multi-line-objects
 
 If you want to learn more, these two conference talks are great introductions:
 

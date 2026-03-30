@@ -15,7 +15,7 @@ impl FormatNodeRule<MdLinkTitle> for FormatMdLinkTitle {
             [content
                 .format()
                 .with_options(FormatMdFormatInlineItemListOptions {
-                    print_mode: TextPrintMode::Trim(TrimMode::None)
+                    print_mode: TextPrintMode::Trim(TrimMode::All)
                 })]
         )
     }
