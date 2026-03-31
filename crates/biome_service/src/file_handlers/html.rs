@@ -6,12 +6,12 @@ use super::{
     SearchCapabilities, UpdateSnippetsNodes,
 };
 use crate::configuration::to_analyzer_rules;
-use crate::workspace::FixFileMode;
 use crate::embed::registry::{EmbedDetectorsRegistry, EmbedMatch};
 use crate::embed::types::{EmbedCandidate, EmbedContent, GuestLanguage, HostLanguage};
 use crate::settings::{
     OverrideSettings, SettingsWithEditor, check_feature_activity, check_override_feature_activity,
 };
+use crate::workspace::FixFileMode;
 use crate::workspace::document::AnyEmbeddedSnippet;
 use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
 use crate::workspace::{
@@ -1462,14 +1462,18 @@ fn lint(params: LintParams) -> LintResults {
     );
     let tree = params.parse.tree();
 
-    let AnalyzerVisitorResult { enabled_rules, disabled_rules, analyzer_options, .. } =
-        AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
-            .with_only(params.only)
-            .with_skip(params.skip)
-            .with_path(params.path.as_path())
-            .with_enabled_selectors(params.enabled_selectors)
-            .with_project_layout(params.project_layout.clone())
-            .finish();
+    let AnalyzerVisitorResult {
+        enabled_rules,
+        disabled_rules,
+        analyzer_options,
+        ..
+    } = AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
+        .with_only(params.only)
+        .with_skip(params.skip)
+        .with_path(params.path.as_path())
+        .with_enabled_selectors(params.enabled_selectors)
+        .with_project_layout(params.project_layout.clone())
+        .finish();
 
     let filter = AnalysisFilter {
         categories: params.categories,
@@ -1525,14 +1529,18 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     let analyzer_options =
         settings.analyzer_options::<HtmlLanguage>(path, &language, suppression_reason.as_deref());
     let mut actions = Vec::new();
-    let AnalyzerVisitorResult { enabled_rules, disabled_rules, analyzer_options, .. } =
-        AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
-            .with_only(only)
-            .with_skip(skip)
-            .with_path(path.as_path())
-            .with_enabled_selectors(rules)
-            .with_project_layout(project_layout)
-            .finish();
+    let AnalyzerVisitorResult {
+        enabled_rules,
+        disabled_rules,
+        analyzer_options,
+        ..
+    } = AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
+        .with_only(only)
+        .with_skip(skip)
+        .with_path(path.as_path())
+        .with_enabled_selectors(rules)
+        .with_project_layout(project_layout)
+        .finish();
 
     let filter = AnalysisFilter {
         categories,
@@ -1626,10 +1634,9 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         loop {
             let mut pending_actions = Vec::new();
 
-            let (_, _) =
-                analyze(&tree, filter, &analyzer_options, source_type, |signal| {
-                    process_fix_all.collect_signal(signal, &mut pending_actions)
-                });
+            let (_, _) = analyze(&tree, filter, &analyzer_options, source_type, |signal| {
+                process_fix_all.collect_signal(signal, &mut pending_actions)
+            });
 
             let result = process_fix_all.process_batch_actions(pending_actions, |root| {
                 tree = match HtmlRoot::cast(root) {
@@ -1681,9 +1688,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             fixable_filter,
             &analyzer_options,
             source_type,
-            |signal| {
-                process_fix_all.collect_signal_fixes_only(signal, &mut pending_actions)
-            },
+            |signal| process_fix_all.collect_signal_fixes_only(signal, &mut pending_actions),
         );
 
         let result = process_fix_all.process_batch_actions(pending_actions, |root| {

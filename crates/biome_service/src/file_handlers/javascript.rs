@@ -1,8 +1,8 @@
 use super::{
     AnalyzerCapabilities, AnalyzerVisitorBuilder, AnalyzerVisitorResult, CodeActionsParams,
     DebugCapabilities, DiagnosticsAndActionsParams, EnabledForPath, ExtensionHandler,
-    FormatEmbedNode, FormatterCapabilities, LintParams, LintResults, ParseEmbedResult,
-    ParseResult, ParserCapabilities, ProcessDiagnosticsAndActions, ProcessFixAll, ProcessLint,
+    FormatEmbedNode, FormatterCapabilities, LintParams, LintResults, ParseEmbedResult, ParseResult,
+    ParserCapabilities, ProcessDiagnosticsAndActions, ProcessFixAll, ProcessLint,
     SearchCapabilities, UpdateSnippetsNodes, search,
 };
 use crate::configuration::to_analyzer_rules;
@@ -12,11 +12,11 @@ use crate::embed::types::{
     EmbedCandidate, EmbedContent, GuestLanguage, HostLanguage, TemplateTagKind,
 };
 use crate::file_handlers::FixAllParams;
-use crate::workspace::FixFileMode;
 use crate::settings::{
     OverrideSettings, Settings, SettingsWithEditor, check_feature_activity,
     check_override_feature_activity,
 };
+use crate::workspace::FixFileMode;
 use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
 use crate::workspace::{DocumentFileSource, EmbeddedSnippet, PullDiagnosticsAndActionsResult};
 use crate::{
@@ -960,14 +960,18 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
         &params.language,
         params.suppression_reason.as_deref(),
     );
-    let AnalyzerVisitorResult { enabled_rules, disabled_rules, analyzer_options, .. } =
-        AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
-            .with_only(params.only)
-            .with_skip(params.skip)
-            .with_path(params.path.as_path())
-            .with_enabled_selectors(params.enabled_selectors)
-            .with_project_layout(params.project_layout.clone())
-            .finish();
+    let AnalyzerVisitorResult {
+        enabled_rules,
+        disabled_rules,
+        analyzer_options,
+        ..
+    } = AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
+        .with_only(params.only)
+        .with_skip(params.skip)
+        .with_path(params.path.as_path())
+        .with_enabled_selectors(params.enabled_selectors)
+        .with_project_layout(params.project_layout.clone())
+        .finish();
 
     let filter = AnalysisFilter {
         categories: params.categories,
@@ -1041,14 +1045,18 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     let analyzer_options =
         settings.analyzer_options::<JsLanguage>(path, &language, suppression_reason.as_deref());
     let mut actions = Vec::new();
-    let AnalyzerVisitorResult { enabled_rules, disabled_rules, analyzer_options, .. } =
-        AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
-            .with_only(only)
-            .with_skip(skip)
-            .with_path(path.as_path())
-            .with_enabled_selectors(rules)
-            .with_project_layout(project_layout.clone())
-            .finish();
+    let AnalyzerVisitorResult {
+        enabled_rules,
+        disabled_rules,
+        analyzer_options,
+        ..
+    } = AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
+        .with_only(only)
+        .with_skip(skip)
+        .with_path(path.as_path())
+        .with_enabled_selectors(rules)
+        .with_project_layout(project_layout.clone())
+        .finish();
     let filter = AnalysisFilter {
         categories,
         enabled_rules: Some(enabled_rules.as_slice()),
@@ -1463,14 +1471,18 @@ pub(crate) fn pull_diagnostics_and_actions(
     let tree = parse.tree();
     let analyzer_options =
         settings.analyzer_options::<JsLanguage>(path, &language, suppression_reason.as_deref());
-    let AnalyzerVisitorResult { enabled_rules, disabled_rules, analyzer_options, .. } =
-        AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
-            .with_only(only)
-            .with_skip(skip)
-            .with_path(path.as_path())
-            .with_enabled_selectors(enabled_selectors)
-            .with_project_layout(project_layout.clone())
-            .finish();
+    let AnalyzerVisitorResult {
+        enabled_rules,
+        disabled_rules,
+        analyzer_options,
+        ..
+    } = AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
+        .with_only(only)
+        .with_skip(skip)
+        .with_path(path.as_path())
+        .with_enabled_selectors(enabled_selectors)
+        .with_project_layout(project_layout.clone())
+        .finish();
     let filter = AnalysisFilter {
         categories,
         enabled_rules: Some(enabled_rules.as_slice()),

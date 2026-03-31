@@ -1957,7 +1957,13 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
         }
     }
 
-    fn finish(mut self) -> (Vec<RuleFilter<'a>>, Vec<RuleFilter<'a>>, Vec<RuleFilter<'a>>) {
+    fn finish(
+        mut self,
+    ) -> (
+        Vec<RuleFilter<'a>>,
+        Vec<RuleFilter<'a>>,
+        Vec<RuleFilter<'a>>,
+    ) {
         let has_only_filter = self.only.is_none_or(|only| !only.is_empty());
         let rules = self
             .settings
