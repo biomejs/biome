@@ -224,6 +224,7 @@ define_categories! {
     "lint/nursery/noPlaywrightWaitForTimeout": "https://biomejs.dev/linter/rules/no-playwright-wait-for-timeout",
     "lint/nursery/noProto": "https://biomejs.dev/linter/rules/no-proto",
     "lint/nursery/noRedundantDefaultExport": "https://biomejs.dev/linter/rules/no-redundant-default-export",
+    "lint/nursery/noRedundantTypeArguments": "https://biomejs.dev/linter/rules/no-redundant-type-arguments",
     "lint/nursery/noReturnAssign": "https://biomejs.dev/linter/rules/no-return-assign",
     "lint/nursery/noRootType": "https://biomejs.dev/linter/rules/no-root-type",
     "lint/nursery/noScriptUrl": "https://biomejs.dev/linter/rules/no-script-url",

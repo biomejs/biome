@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.tsx
+---
+# Input
+```tsx
+/* should not generate diagnostics */
+
+function Button<T = string>() {
+  return <div></div>;
+}
+
+const button = <Button<number> />;
+
+```

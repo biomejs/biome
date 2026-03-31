@@ -23,6 +23,7 @@ use biome_graphql_syntax::GraphqlLanguage;
 use biome_html_parser::HtmlParserOptions;
 use biome_html_syntax::HtmlLanguage;
 use biome_js_parser::JsParserOptions;
+use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, TextSize};
 use biome_json_analyze::JsonAnalyzeServices;
 use biome_json_factory::make;
@@ -348,8 +349,9 @@ fn assert_lint(
                 };
 
                 let options = test.create_analyzer_options::<JsLanguage>(config)?;
-
-                let services = services_builder.build_for_js_file_source(file_source);
+                let semantic_model = semantic_model(&root, SemanticModelOptions::default());
+                let services =
+                    services_builder.build_for_js_file_source(file_source, Some(semantic_model));
 
                 biome_js_analyze::analyze(&root, filter, &options, &[], services, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {

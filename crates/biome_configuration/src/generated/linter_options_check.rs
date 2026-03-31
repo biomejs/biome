@@ -942,6 +942,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_redundant_roles::NoRedundantRolesOptions>(),
     ));
     result.push((
+        "nursery",
+        "noRedundantTypeArguments",
+        TypeId::of::<
+            biome_rule_options::no_redundant_type_arguments::NoRedundantTypeArgumentsOptions,
+        >(),
+    ));
+    result.push((
         "suspicious",
         "noRedundantUseStrict",
         TypeId::of::<biome_rule_options::no_redundant_use_strict::NoRedundantUseStrictOptions>(),

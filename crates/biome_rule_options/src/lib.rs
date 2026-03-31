@@ -202,6 +202,7 @@ pub mod no_redeclare;
 pub mod no_redundant_alt;
 pub mod no_redundant_default_export;
 pub mod no_redundant_roles;
+pub mod no_redundant_type_arguments;
 pub mod no_redundant_use_strict;
 pub mod no_render_return_value;
 pub mod no_restricted_elements;
