@@ -238,13 +238,15 @@ mod tests {
 
     #[test]
     fn vue_file_source_attr_with_gt_in_quotes() {
-        let src = "<script lang=\"ts\" data-info=\"a>b\">\nimport type { Foo } from \"bar\";\n</script>";
+        let src =
+            "<script lang=\"ts\" data-info=\"a>b\">\nimport type { Foo } from \"bar\";\n</script>";
         assert!(VueFileHandler::file_source(src).is_typescript());
     }
 
     #[test]
     fn vue_input_with_gt_in_attr() {
-        let src = "<script lang=\"ts\" data-info=\"a>b\">\nimport type { Foo } from \"bar\";\n</script>";
+        let src =
+            "<script lang=\"ts\" data-info=\"a>b\">\nimport type { Foo } from \"bar\";\n</script>";
         let input = VueFileHandler::input(src);
         assert_eq!(input, "import type { Foo } from \"bar\";\n");
     }
