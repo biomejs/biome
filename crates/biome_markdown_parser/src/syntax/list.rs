@@ -96,7 +96,7 @@ fn compute_marker_indent(p: &MarkdownParser) -> usize {
         }
 
         // Virtual line start: compute actual column from source text.
-        // The leading whitespace was skipped as trivia, but we need the
+        // The leading whitespace was consumed as trivia, but we need the
         // real column for indented code block detection in nested lists.
         let source = p.source().source_text();
         let pos: usize = p.cur_range().start().into();

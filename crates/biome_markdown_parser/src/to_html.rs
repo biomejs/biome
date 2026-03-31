@@ -1132,7 +1132,7 @@ fn header_level(header: &MdHeader) -> usize {
     // Count total hash characters in the before list.
     // The lexer emits all consecutive `#` chars as a single HASH token,
     // so we sum the text lengths of all hash tokens.
-    // Use text_trimmed() to exclude any leading trivia (skipped indentation spaces).
+    // Use text_trimmed() to exclude any leading trivia (indentation whitespace).
     header
         .before()
         .iter()
@@ -1303,7 +1303,7 @@ fn render_html_block(
 /// Render textual content.
 fn render_textual(text: &MdTextual, out: &mut String) {
     if let Ok(token) = text.value_token() {
-        // Use text_trimmed() to exclude skipped trivia (e.g., indentation stripped during parsing)
+        // Use text_trimmed() to exclude trivia (e.g., indentation stripped during parsing)
         let raw = token.text_trimmed();
         // Process backslash escapes and escape HTML
         let processed = process_escapes(raw);

@@ -86,11 +86,7 @@ pub(crate) fn parse_quote(p: &mut MarkdownParser) -> ParsedSyntax {
         // so they don't attach as Skipped trivia on normal content nodes.
         let bogus_m = p.start();
         p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
-        if p.at(T![>]) {
-            p.bump(T![>]);
-        } else if p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == ">" {
-            p.bump_remap(T![>]);
-        }
+        try_bump_quote_marker(p);
         let has_indented_code = at_quote_indented_code_start(p);
         emit_optional_marker_space(p, has_indented_code);
         return Present(bogus_m.complete(p, MD_BOGUS_BLOCK));
