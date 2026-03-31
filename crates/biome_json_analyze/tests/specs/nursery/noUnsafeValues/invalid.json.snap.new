@@ -1,0 +1,296 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+assertion_line: 99
+expression: invalid.json
+---
+# Input
+```json
+{
+  "a": 2e308,
+  "b": -2e308,
+  "c": "\ud83d",
+  "d": "\\ud83d",
+  "e": "\udd25",
+  "f": "\\udd25",
+  "g": "\ud83d\ud83d",
+  "h": 1e-400,
+  "i": 1E-400,
+  "j": -1e-400,
+  "k": 0.01e-400,
+  "l": -0.01e-400,
+  "m": 10.0e-402,
+  "n": -10.0e-402,
+  "o": 0.00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001,
+  "p": 9007199254740992,
+  "q": -9007199254740992,
+  "r": 2.2250738585072009e-308,
+  "s": -2.2250738585072009e-308
+}
+
+```
+
+# Diagnostics
+```
+invalid.json:2:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The number will evaluate to Infinity.
+  
+    1 │ {
+  > 2 │   "a": 2e308,
+      │        ^^^^^
+    3 │   "b": -2e308,
+    4 │   "c": "\ud83d",
+  
+  i This note will give you more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.json:3:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The number will evaluate to Infinity.
+  
+    1 │ {
+    2 │   "a": 2e308,
+  > 3 │   "b": -2e308,
+      │        ^^^^^^
+    4 │   "c": "\ud83d",
+    5 │   "d": "\\ud83d",
+  
+  i This note will give you more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.json:9:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The number will evaluate to zero.
+  
+     7 │   "f": "\\udd25",
+     8 │   "g": "\ud83d\ud83d",
+   > 9 │   "h": 1e-400,
+       │        ^^^^^^
+    10 │   "i": 1E-400,
+    11 │   "j": -1e-400,
+  
+  i This note will give you more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.json:10:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The number will evaluate to zero.
+  
+     8 │   "g": "\ud83d\ud83d",
+     9 │   "h": 1e-400,
+  > 10 │   "i": 1E-400,
+       │        ^^^^^^
+    11 │   "j": -1e-400,
+    12 │   "k": 0.01e-400,
+  
+  i This note will give you more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.json:11:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The number will evaluate to zero.
+  
+     9 │   "h": 1e-400,
+    10 │   "i": 1E-400,
+  > 11 │   "j": -1e-400,
+       │        ^^^^^^^
+    12 │   "k": 0.01e-400,
+    13 │   "l": -0.01e-400,
+  
+  i This note will give you more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.json:12:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The number will evaluate to zero.
+  
+    10 │   "i": 1E-400,
+    11 │   "j": -1e-400,
+  > 12 │   "k": 0.01e-400,
+       │        ^^^^^^^^^
+    13 │   "l": -0.01e-400,
+    14 │   "m": 10.0e-402,
+  
+  i This note will give you more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.json:13:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The number will evaluate to zero.
+  
+    11 │   "j": -1e-400,
+    12 │   "k": 0.01e-400,
+  > 13 │   "l": -0.01e-400,
+       │        ^^^^^^^^^^
+    14 │   "m": 10.0e-402,
+    15 │   "n": -10.0e-402,
+  
+  i This note will give you more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.json:14:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The number will evaluate to zero.
+  
+    12 │   "k": 0.01e-400,
+    13 │   "l": -0.01e-400,
+  > 14 │   "m": 10.0e-402,
+       │        ^^^^^^^^^
+    15 │   "n": -10.0e-402,
+    16 │   "o": 0.00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001,
+  
+  i This note will give you more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.json:15:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The number will evaluate to zero.
+  
+    13 │   "l": -0.01e-400,
+    14 │   "m": 10.0e-402,
+  > 15 │   "n": -10.0e-402,
+       │        ^^^^^^^^^^
+    16 │   "o": 0.00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001,
+    17 │   "p": 9007199254740992,
+  
+  i This note will give you more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.json:16:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The number will evaluate to zero.
+  
+    14 │   "m": 10.0e-402,
+    15 │   "n": -10.0e-402,
+  > 16 │   "o": 0.00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001,
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │   "p": 9007199254740992,
+    18 │   "q": -9007199254740992,
+  
+  i This note will give you more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.json:17:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The integer is outside the safe integer range.
+  
+    15 │   "n": -10.0e-402,
+    16 │   "o": 0.00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001,
+  > 17 │   "p": 9007199254740992,
+       │        ^^^^^^^^^^^^^^^^
+    18 │   "q": -9007199254740992,
+    19 │   "r": 2.2250738585072009e-308,
+  
+  i This note will give you more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.json:18:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The integer is outside the safe integer range.
+  
+    16 │   "o": 0.00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001,
+    17 │   "p": 9007199254740992,
+  > 18 │   "q": -9007199254740992,
+       │        ^^^^^^^^^^^^^^^^^
+    19 │   "r": 2.2250738585072009e-308,
+    20 │   "s": -2.2250738585072009e-308
+  
+  i This note will give you more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.json:19:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected subnormal number found, which may cause interoperability issues.
+  
+    17 │   "p": 9007199254740992,
+    18 │   "q": -9007199254740992,
+  > 19 │   "r": 2.2250738585072009e-308,
+       │        ^^^^^^^^^^^^^^^^^^^^^^^
+    20 │   "s": -2.2250738585072009e-308
+    21 │ }
+  
+  i This note will give you more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.json:20:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected subnormal number found, which may cause interoperability issues.
+  
+    18 │   "q": -9007199254740992,
+    19 │   "r": 2.2250738585072009e-308,
+  > 20 │   "s": -2.2250738585072009e-308
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ }
+    22 │ 
+  
+  i This note will give you more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
