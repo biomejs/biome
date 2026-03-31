@@ -173,6 +173,12 @@ pub fn quick_test() {
         "<h1>foo <em>bar</em> *baz*</h1>\n",
     );
     test_example(73, "### foo ###     \n", "<h3>foo</h3>\n");
+    // Heading content with 3+ trailing spaces (would be hard break in paragraph).
+    // In headings, trailing spaces are stripped per §4.2 — no hard break produced.
+    test_example(69, "# foo  \n", "<h1>foo</h1>\n");
+    test_example(10007, "## bar   \n", "<h2>bar</h2>\n");
+    // Heading trailing hashes with spaces + newline
+    test_example(10008, "# foo #   \n", "<h1>foo</h1>\n");
     test_example(
         93,
         "> foo\nbar\n===\n",

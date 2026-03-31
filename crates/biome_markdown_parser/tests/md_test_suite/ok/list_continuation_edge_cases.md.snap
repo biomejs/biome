@@ -356,7 +356,7 @@ MdDocument {
                         MdParagraph {
                             list: MdInlineItemList [
                                 MdTextual {
-                                    value_token: MD_TEXTUAL_LITERAL@323..365 "outer continuation at parent indentation" [Skipped(" "), Skipped(" ")] [],
+                                    value_token: MD_TEXTUAL_LITERAL@323..365 "outer continuation at parent indentation" [Whitespace(" "), Whitespace(" ")] [],
                                 },
                                 MdTextual {
                                     value_token: MD_TEXTUAL_LITERAL@365..366 "\n" [] [],
@@ -694,7 +694,7 @@ MdDocument {
             2: MD_PARAGRAPH@323..366
               0: MD_INLINE_ITEM_LIST@323..366
                 0: MD_TEXTUAL@323..365
-                  0: MD_TEXTUAL_LITERAL@323..365 "outer continuation at parent indentation" [Skipped(" "), Skipped(" ")] []
+                  0: MD_TEXTUAL_LITERAL@323..365 "outer continuation at parent indentation" [Whitespace(" "), Whitespace(" ")] []
                 1: MD_TEXTUAL@365..366
                   0: MD_TEXTUAL_LITERAL@365..366 "\n" [] []
               1: (empty)

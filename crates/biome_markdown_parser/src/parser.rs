@@ -238,6 +238,15 @@ impl<'source> MarkdownParser<'source> {
         self.source.re_lex(MarkdownReLexContext::EmphasisInline)
     }
 
+    /// Re-lex the current token in HeadingContent context.
+    ///
+    /// Splits MD_HARD_LINE_LITERAL (trailing spaces + newline) into
+    /// MD_TEXTUAL_LITERAL (spaces only) + separate NEWLINE. Use this in
+    /// heading parsing where trailing spaces are not hard breaks (§4.2).
+    pub(crate) fn force_relex_heading_content(&mut self) -> MarkdownSyntaxKind {
+        self.source.force_relex_heading_content()
+    }
+
     pub(crate) fn set_force_ordered_list_marker(&mut self, value: bool) {
         self.source.set_force_ordered_list_marker(value);
     }
@@ -384,8 +393,12 @@ impl<'source> MarkdownParser<'source> {
         did_emit
     }
 
-    /// Skip an optional indentation token at line start if it is whitespace-only
-    /// and does not exceed `max_indent` columns.
+    /// Consume optional indentation whitespace at line start, up to `max_indent`
+    /// columns. Each whitespace token is consumed as `Whitespace` trivia
+    /// (attached to the next real token).
+    ///
+    /// This avoids producing `Skipped` trivia, which should be reserved for
+    /// error-recovery paths.
     pub fn skip_line_indent(&mut self, max_indent: usize) -> bool {
         if !self.at_line_start() {
             return false;
@@ -411,10 +424,24 @@ impl<'source> MarkdownParser<'source> {
 
             consumed += indent;
             did_skip = true;
-            self.parse_as_skipped_trivia_tokens(|p| p.bump(MarkdownSyntaxKind::MD_TEXTUAL_LITERAL));
+            self.consume_as_whitespace_trivia();
         }
 
         did_skip
+    }
+
+    /// Consume the current token as `Whitespace` trivia (not `Skipped`).
+    ///
+    /// Use this for spec-driven structural whitespace that should be consumed
+    /// but not appear as explicit CST nodes. The token is removed from the
+    /// event stream and attached as `Whitespace` trivia on the next real token.
+    pub fn consume_as_whitespace_trivia(&mut self) {
+        use biome_parser::token_source::BumpWithContext;
+        use biome_rowan::TriviaPieceKind;
+        self.source_mut().skip_as_trivia_of_kind_with_context(
+            TriviaPieceKind::Whitespace,
+            MarkdownLexContext::Regular,
+        );
     }
 
     /// Returns true if inline content should stop parsing.

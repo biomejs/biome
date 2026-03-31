@@ -158,8 +158,9 @@ fn skip_leading_whitespace_tokens(p: &mut MarkdownParser) {
 }
 
 fn skip_list_marker_indent(p: &mut MarkdownParser) {
+    // Consume whitespace as whitespace trivia (structural, no skipped trivia).
     while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
-        p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_TEXTUAL_LITERAL));
+        p.consume_as_whitespace_trivia();
     }
 }
 
@@ -2505,10 +2506,11 @@ fn at_blank_line_after_prefix(p: &mut MarkdownParser) -> bool {
 }
 
 fn consume_blank_line(p: &mut MarkdownParser) {
+    // Consume blank-line whitespace as whitespace trivia (structural, no skipped trivia).
     while p.at(MD_TEXTUAL_LITERAL) {
         let text = p.cur_text();
         if text == " " || text == "\t" {
-            p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_TEXTUAL_LITERAL));
+            p.consume_as_whitespace_trivia();
         } else {
             break;
         }

@@ -782,7 +782,7 @@ MdDocument {
                         MdParagraph {
                             list: MdInlineItemList [
                                 MdTextual {
-                                    value_token: MD_TEXTUAL_LITERAL@742..759 "outer continued" [Skipped(" "), Skipped(" ")] [],
+                                    value_token: MD_TEXTUAL_LITERAL@742..759 "outer continued" [Whitespace(" "), Whitespace(" ")] [],
                                 },
                                 MdTextual {
                                     value_token: MD_TEXTUAL_LITERAL@759..760 "\n" [] [],
@@ -1350,7 +1350,7 @@ MdDocument {
             2: MD_PARAGRAPH@742..760
               0: MD_INLINE_ITEM_LIST@742..760
                 0: MD_TEXTUAL@742..759
-                  0: MD_TEXTUAL_LITERAL@742..759 "outer continued" [Skipped(" "), Skipped(" ")] []
+                  0: MD_TEXTUAL_LITERAL@742..759 "outer continued" [Whitespace(" "), Whitespace(" ")] []
                 1: MD_TEXTUAL@759..760
                   0: MD_TEXTUAL_LITERAL@759..760 "\n" [] []
               1: (empty)

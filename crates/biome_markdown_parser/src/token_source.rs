@@ -177,6 +177,16 @@ impl<'source> MarkdownTokenSource<'source> {
         self.bump_with_context(MarkdownLexContext::ThematicBreakParts);
     }
 
+    /// Re-lex the current token in HeadingContent context and return the new kind.
+    ///
+    /// In this context, trailing spaces before a newline are NOT bundled with the
+    /// newline into MD_HARD_LINE_LITERAL. Instead, the spaces are emitted as
+    /// MD_TEXTUAL_LITERAL and the newline is emitted separately on the next bump.
+    pub fn force_relex_heading_content(&mut self) -> MarkdownSyntaxKind {
+        self.lexer
+            .force_relex_in_context(MarkdownLexContext::HeadingContent)
+    }
+
     /// Creates a checkpoint to which it can later return using [Self::rewind].
     pub fn checkpoint(&self) -> MarkdownTokenSourceCheckpoint {
         MarkdownTokenSourceCheckpoint {
@@ -241,6 +251,19 @@ impl BumpWithContext for MarkdownTokenSource<'_> {
                 self.current_range(),
                 false,
             ));
+
+            self.next_non_trivia_token(context, true)
+        }
+    }
+
+    fn skip_as_trivia_of_kind_with_context(
+        &mut self,
+        kind: TriviaPieceKind,
+        context: Self::Context,
+    ) {
+        if self.current() != EOF {
+            self.trivia_list
+                .push(Trivia::new(kind, self.current_range(), false));
 
             self.next_non_trivia_token(context, true)
         }

@@ -48,7 +48,7 @@ MdDocument {
                         MdFencedCodeBlock {
                             indent: MdIndentTokenList [
                                 MdIndentToken {
-                                    md_indent_char_token: MD_INDENT_CHAR@7..10 " " [Skipped(" "), Skipped(" ")] [],
+                                    md_indent_char_token: MD_INDENT_CHAR@7..10 " " [Whitespace(" "), Whitespace(" ")] [],
                                 },
                                 MdIndentToken {
                                     md_indent_char_token: MD_INDENT_CHAR@10..11 " " [] [],
@@ -138,7 +138,7 @@ MdDocument {
             2: MD_FENCED_CODE_BLOCK@7..41
               0: MD_INDENT_TOKEN_LIST@7..11
                 0: MD_INDENT_TOKEN@7..10
-                  0: MD_INDENT_CHAR@7..10 " " [Skipped(" "), Skipped(" ")] []
+                  0: MD_INDENT_CHAR@7..10 " " [Whitespace(" "), Whitespace(" ")] []
                 1: MD_INDENT_TOKEN@10..11
                   0: MD_INDENT_CHAR@10..11 " " [] []
               1: TRIPLE_BACKTICK@11..14 "```" [] []

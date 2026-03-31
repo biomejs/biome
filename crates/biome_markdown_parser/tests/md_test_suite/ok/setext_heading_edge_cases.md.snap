@@ -164,7 +164,7 @@ MdDocument {
                         MdParagraph {
                             list: MdInlineItemList [
                                 MdTextual {
-                                    value_token: MD_TEXTUAL_LITERAL@60..65 "baz" [Skipped(" "), Skipped(" ")] [],
+                                    value_token: MD_TEXTUAL_LITERAL@60..65 "baz" [Whitespace(" "), Whitespace(" ")] [],
                                 },
                                 MdTextual {
                                     value_token: MD_TEXTUAL_LITERAL@65..66 "\n" [] [],
@@ -278,7 +278,7 @@ MdDocument {
             2: MD_PARAGRAPH@60..66
               0: MD_INLINE_ITEM_LIST@60..66
                 0: MD_TEXTUAL@60..65
-                  0: MD_TEXTUAL_LITERAL@60..65 "baz" [Skipped(" "), Skipped(" ")] []
+                  0: MD_TEXTUAL_LITERAL@60..65 "baz" [Whitespace(" "), Whitespace(" ")] []
                 1: MD_TEXTUAL@65..66
                   0: MD_TEXTUAL_LITERAL@65..66 "\n" [] []
               1: (empty)

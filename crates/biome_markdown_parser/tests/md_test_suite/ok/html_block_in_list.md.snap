@@ -218,7 +218,7 @@ MdDocument {
                         MdParagraph {
                             list: MdInlineItemList [
                                 MdTextual {
-                                    value_token: MD_TEXTUAL_LITERAL@356..467 "NOTE: the shape of the JSON is considered experimental, and the shape of the JSON might change in the future." [Skipped(" "), Skipped(" ")] [],
+                                    value_token: MD_TEXTUAL_LITERAL@356..467 "NOTE: the shape of the JSON is considered experimental, and the shape of the JSON might change in the future." [Whitespace(" "), Whitespace(" ")] [],
                                 },
                                 MdTextual {
                                     value_token: MD_TEXTUAL_LITERAL@467..468 "\n" [] [],
@@ -233,7 +233,7 @@ MdDocument {
                             indent: MdIndentTokenList [],
                             content: MdInlineItemList [
                                 MdTextual {
-                                    value_token: MD_TEXTUAL_LITERAL@469..472 "<" [Skipped(" "), Skipped(" ")] [],
+                                    value_token: MD_TEXTUAL_LITERAL@469..472 "<" [Whitespace(" "), Whitespace(" ")] [],
                                 },
                                 MdTextual {
                                     value_token: MD_TEXTUAL_LITERAL@472..479 "details" [] [],
@@ -2305,7 +2305,7 @@ MdDocument {
             2: MD_PARAGRAPH@356..468
               0: MD_INLINE_ITEM_LIST@356..468
                 0: MD_TEXTUAL@356..467
-                  0: MD_TEXTUAL_LITERAL@356..467 "NOTE: the shape of the JSON is considered experimental, and the shape of the JSON might change in the future." [Skipped(" "), Skipped(" ")] []
+                  0: MD_TEXTUAL_LITERAL@356..467 "NOTE: the shape of the JSON is considered experimental, and the shape of the JSON might change in the future." [Whitespace(" "), Whitespace(" ")] []
                 1: MD_TEXTUAL@467..468
                   0: MD_TEXTUAL_LITERAL@467..468 "\n" [] []
               1: (empty)
@@ -2315,7 +2315,7 @@ MdDocument {
               0: MD_INDENT_TOKEN_LIST@469..469
               1: MD_INLINE_ITEM_LIST@469..2001
                 0: MD_TEXTUAL@469..472
-                  0: MD_TEXTUAL_LITERAL@469..472 "<" [Skipped(" "), Skipped(" ")] []
+                  0: MD_TEXTUAL_LITERAL@469..472 "<" [Whitespace(" "), Whitespace(" ")] []
                 1: MD_TEXTUAL@472..479
                   0: MD_TEXTUAL_LITERAL@472..479 "details" [] []
                 2: MD_TEXTUAL@479..480

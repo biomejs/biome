@@ -94,6 +94,21 @@ pub trait BumpWithContext: TokenSource {
 
     /// Skips the current token as skipped token trivia
     fn skip_as_trivia_with_context(&mut self, context: Self::Context);
+
+    /// Skips the current token as trivia of the given kind.
+    ///
+    /// Use `TriviaPieceKind::Whitespace` for spec-driven structural whitespace
+    /// (indentation, trailing spaces, post-marker spaces) and
+    /// `TriviaPieceKind::Skipped` for error-recovery paths.
+    ///
+    /// Default implementation delegates to `skip_as_trivia_with_context` (Skipped).
+    fn skip_as_trivia_of_kind_with_context(
+        &mut self,
+        _kind: TriviaPieceKind,
+        context: Self::Context,
+    ) {
+        self.skip_as_trivia_with_context(context);
+    }
 }
 
 pub trait TokenSourceWithBufferedLexer<Lex>: TokenSource {

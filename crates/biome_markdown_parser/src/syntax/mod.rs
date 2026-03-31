@@ -233,10 +233,11 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
         return Present(m.complete(p, MD_NEWLINE));
     }
     if at_blank_line_start(p) {
+        // Consume blank-line whitespace as whitespace trivia (structural).
         while p.at(MD_TEXTUAL_LITERAL) {
             let text = p.cur_text();
             if text == " " || text == "\t" {
-                p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_TEXTUAL_LITERAL));
+                p.consume_as_whitespace_trivia();
             } else {
                 break;
             }
@@ -566,10 +567,11 @@ fn at_blank_line_start(p: &mut MarkdownParser) -> bool {
 }
 
 fn consume_blank_line(p: &mut MarkdownParser) {
+    // Consume blank-line whitespace as whitespace trivia (structural).
     while p.at(MD_TEXTUAL_LITERAL) {
         let text = p.cur_text();
         if text == " " || text == "\t" {
-            p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_TEXTUAL_LITERAL));
+            p.consume_as_whitespace_trivia();
         } else {
             break;
         }
@@ -1122,13 +1124,13 @@ pub(crate) fn parse_inline_item_list(p: &mut MarkdownParser) {
         let after_hard_break = matches!(&parsed, Present(cm) if cm.kind(p) == MD_HARD_LINE);
 
         // Per CommonMark §6.7: after a hard line break, leading spaces on the
-        // next line are ignored. Skip whitespace-only textual tokens as trivia.
+        // next line are ignored. Consume as whitespace trivia (structural).
         if after_hard_break
             && p.at(MD_TEXTUAL_LITERAL)
             && p.cur_text().chars().all(|c| c == ' ' || c == '\t')
         {
             while p.at(MD_TEXTUAL_LITERAL) && p.cur_text().chars().all(|c| c == ' ' || c == '\t') {
-                p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_TEXTUAL_LITERAL));
+                p.consume_as_whitespace_trivia();
             }
         }
 
