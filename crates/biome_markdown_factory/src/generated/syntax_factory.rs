@@ -14,7 +14,7 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
         children: ParsedChildren<Self::Kind>,
     ) -> RawSyntaxNode<Self::Kind> {
         match kind {
-            MD_BOGUS => RawSyntaxNode::new(kind, children.into_iter().map(Some)),
+            MD_BOGUS | MD_BOGUS_BLOCK => RawSyntaxNode::new(kind, children.into_iter().map(Some)),
             MD_AUTOLINK => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();

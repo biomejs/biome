@@ -39,6 +39,7 @@ SyntaxElement = SyntaxElement
 
 // Needed by the infrastructure
 MdBogus = SyntaxElement*
+MdBogusBlock = SyntaxElement*
 
 MdDocument =
   bom: 'UNICODE_BOM'?
@@ -51,6 +52,7 @@ AnyMdBlock =
 	AnyMdLeafBlock
 	| AnyMdContainerBlock
 	| MdQuotePrefix
+	| MdBogusBlock
 
 AnyMdLeafBlock =
 	MdThematicBreakBlock

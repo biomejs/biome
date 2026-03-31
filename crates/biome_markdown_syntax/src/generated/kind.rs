@@ -56,6 +56,7 @@ pub enum MarkdownSyntaxKind {
     TAB,
     BOGUS,
     MD_BOGUS,
+    MD_BOGUS_BLOCK,
     MD_BOGUS_BULLET,
     MD_DOCUMENT,
     MD_BLOCK_LIST,

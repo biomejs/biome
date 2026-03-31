@@ -1673,6 +1673,44 @@ impl IntoFormat<MarkdownFormatContext> for biome_markdown_syntax::MdBogus {
         )
     }
 }
+impl FormatRule<biome_markdown_syntax::MdBogusBlock>
+    for crate::markdown::bogus::bogus_block::FormatMdBogusBlock
+{
+    type Context = MarkdownFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_markdown_syntax::MdBogusBlock,
+        f: &mut MarkdownFormatter,
+    ) -> FormatResult<()> {
+        FormatBogusNodeRule::<biome_markdown_syntax::MdBogusBlock>::fmt(self, node, f)
+    }
+}
+impl AsFormat<MarkdownFormatContext> for biome_markdown_syntax::MdBogusBlock {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_markdown_syntax::MdBogusBlock,
+        crate::markdown::bogus::bogus_block::FormatMdBogusBlock,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::markdown::bogus::bogus_block::FormatMdBogusBlock::default(),
+        )
+    }
+}
+impl IntoFormat<MarkdownFormatContext> for biome_markdown_syntax::MdBogusBlock {
+    type Format = FormatOwnedWithRule<
+        biome_markdown_syntax::MdBogusBlock,
+        crate::markdown::bogus::bogus_block::FormatMdBogusBlock,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::markdown::bogus::bogus_block::FormatMdBogusBlock::default(),
+        )
+    }
+}
 impl AsFormat<MarkdownFormatContext> for biome_markdown_syntax::AnyMdBlock {
     type Format<'a> = FormatRefWithRule<
         'a,

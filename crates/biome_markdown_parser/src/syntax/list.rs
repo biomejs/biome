@@ -624,31 +624,33 @@ pub(crate) fn parse_bullet_list_item(p: &mut MarkdownParser) -> ParsedSyntax {
     // Check depth limit before parsing
     let max_nesting_depth = p.options().max_nesting_depth;
     if p.state().list_nesting_depth >= max_nesting_depth {
-        // Emit diagnostic and treat as content
+        // Wrap recovery tokens in MdBogusBlock (a valid AnyMdBlock child)
+        // so they don't attach as Skipped trivia on normal content nodes.
         let range = p.cur_range();
         p.error(list_nesting_too_deep(p, range, max_nesting_depth));
+        let bogus_m = p.start();
         skip_list_marker_indent(p);
         if p.at(MD_SETEXT_UNDERLINE_LITERAL) {
-            p.parse_as_skipped_trivia_tokens(|p| p.bump_remap(T![-]));
+            p.bump_remap(T![-]);
         } else if p.at(MD_TEXTUAL_LITERAL) {
             let text = p.cur_text();
             if text == "-" {
-                p.parse_as_skipped_trivia_tokens(|p| p.bump_remap(T![-]));
+                p.bump_remap(T![-]);
             } else if text == "*" {
-                p.parse_as_skipped_trivia_tokens(|p| p.bump_remap(T![*]));
+                p.bump_remap(T![*]);
             } else if text == "+" {
-                p.parse_as_skipped_trivia_tokens(|p| p.bump_remap(T![+]));
+                p.bump_remap(T![+]);
             }
         } else if p.at(T![-]) || p.at(T![*]) || p.at(T![+]) {
-            p.parse_as_skipped_trivia_tokens(|p| p.bump(p.cur()));
+            p.bump_any();
         }
         if p.at(MD_TEXTUAL_LITERAL) {
             let text = p.cur_text();
             if text.starts_with(' ') || text.starts_with('\t') {
-                p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_TEXTUAL_LITERAL));
+                p.bump(MD_TEXTUAL_LITERAL);
             }
         }
-        return Absent;
+        return Present(bogus_m.complete(p, MD_BOGUS_BLOCK));
     }
 
     let item_m = p.start();
@@ -946,20 +948,22 @@ pub(crate) fn parse_order_list_item(p: &mut MarkdownParser) -> ParsedSyntax {
     // Check depth limit before parsing
     let max_nesting_depth = p.options().max_nesting_depth;
     if p.state().list_nesting_depth >= max_nesting_depth {
-        // Emit diagnostic and treat as content
+        // Wrap recovery tokens in MdBogusBlock (a valid AnyMdBlock child)
+        // so they don't attach as Skipped trivia on normal content nodes.
         let range = p.cur_range();
         p.error(list_nesting_too_deep(p, range, max_nesting_depth));
+        let bogus_m = p.start();
         skip_list_marker_indent(p);
         if p.at(MD_ORDERED_LIST_MARKER) {
-            p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_ORDERED_LIST_MARKER));
+            p.bump(MD_ORDERED_LIST_MARKER);
         }
         if p.at(MD_TEXTUAL_LITERAL) {
             let text = p.cur_text();
             if text.starts_with(' ') || text.starts_with('\t') {
-                p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_TEXTUAL_LITERAL));
+                p.bump(MD_TEXTUAL_LITERAL);
             }
         }
-        return Absent;
+        return Present(bogus_m.complete(p, MD_BOGUS_BLOCK));
     }
 
     let item_m = p.start();

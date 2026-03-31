@@ -728,3 +728,13 @@ where
         slots,
     ))
 }
+pub fn md_bogus_block<I>(slots: I) -> MdBogusBlock
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    MdBogusBlock::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_BOGUS_BLOCK,
+        slots,
+    ))
+}

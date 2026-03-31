@@ -1634,6 +1634,7 @@ pub struct MdThematicBreakCharFields {
 pub enum AnyMdBlock {
     AnyMdContainerBlock(AnyMdContainerBlock),
     AnyMdLeafBlock(AnyMdLeafBlock),
+    MdBogusBlock(MdBogusBlock),
     MdQuotePrefix(MdQuotePrefix),
 }
 impl AnyMdBlock {
@@ -1646,6 +1647,12 @@ impl AnyMdBlock {
     pub fn as_any_md_leaf_block(&self) -> Option<&AnyMdLeafBlock> {
         match &self {
             Self::AnyMdLeafBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_md_bogus_block(&self) -> Option<&MdBogusBlock> {
+        match &self {
+            Self::MdBogusBlock(item) => Some(item),
             _ => None,
         }
     }
@@ -3867,6 +3874,11 @@ impl From<MdThematicBreakChar> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl From<MdBogusBlock> for AnyMdBlock {
+    fn from(node: MdBogusBlock) -> Self {
+        Self::MdBogusBlock(node)
+    }
+}
 impl From<MdQuotePrefix> for AnyMdBlock {
     fn from(node: MdQuotePrefix) -> Self {
         Self::MdQuotePrefix(node)
@@ -3876,10 +3888,11 @@ impl AstNode for AnyMdBlock {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyMdContainerBlock::KIND_SET
         .union(AnyMdLeafBlock::KIND_SET)
+        .union(MdBogusBlock::KIND_SET)
         .union(MdQuotePrefix::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            MD_QUOTE_PREFIX => true,
+            MD_BOGUS_BLOCK | MD_QUOTE_PREFIX => true,
             k if AnyMdContainerBlock::can_cast(k) => true,
             k if AnyMdLeafBlock::can_cast(k) => true,
             _ => false,
@@ -3887,6 +3900,7 @@ impl AstNode for AnyMdBlock {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            MD_BOGUS_BLOCK => Self::MdBogusBlock(MdBogusBlock { syntax }),
             MD_QUOTE_PREFIX => Self::MdQuotePrefix(MdQuotePrefix { syntax }),
             _ => {
                 let syntax = match AnyMdContainerBlock::try_cast(syntax) {
@@ -3905,6 +3919,7 @@ impl AstNode for AnyMdBlock {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            Self::MdBogusBlock(it) => it.syntax(),
             Self::MdQuotePrefix(it) => it.syntax(),
             Self::AnyMdContainerBlock(it) => it.syntax(),
             Self::AnyMdLeafBlock(it) => it.syntax(),
@@ -3912,6 +3927,7 @@ impl AstNode for AnyMdBlock {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            Self::MdBogusBlock(it) => it.into_syntax(),
             Self::MdQuotePrefix(it) => it.into_syntax(),
             Self::AnyMdContainerBlock(it) => it.into_syntax(),
             Self::AnyMdLeafBlock(it) => it.into_syntax(),
@@ -3923,6 +3939,7 @@ impl std::fmt::Debug for AnyMdBlock {
         match self {
             Self::AnyMdContainerBlock(it) => std::fmt::Debug::fmt(it, f),
             Self::AnyMdLeafBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::MdBogusBlock(it) => std::fmt::Debug::fmt(it, f),
             Self::MdQuotePrefix(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -3932,6 +3949,7 @@ impl From<AnyMdBlock> for SyntaxNode {
         match n {
             AnyMdBlock::AnyMdContainerBlock(it) => it.into_syntax(),
             AnyMdBlock::AnyMdLeafBlock(it) => it.into_syntax(),
+            AnyMdBlock::MdBogusBlock(it) => it.into_syntax(),
             AnyMdBlock::MdQuotePrefix(it) => it.into_syntax(),
         }
     }
@@ -4842,7 +4860,63 @@ impl From<MdBogus> for SyntaxElement {
         n.syntax.into()
     }
 }
-biome_rowan::declare_node_union! { pub AnyMdBogusNode = MdBogus }
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub struct MdBogusBlock {
+    syntax: SyntaxNode,
+}
+impl MdBogusBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for MdBogusBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MD_BOGUS_BLOCK as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MD_BOGUS_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for MdBogusBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("MdBogusBlock")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<MdBogusBlock> for SyntaxNode {
+    fn from(n: MdBogusBlock) -> Self {
+        n.syntax
+    }
+}
+impl From<MdBogusBlock> for SyntaxElement {
+    fn from(n: MdBogusBlock) -> Self {
+        n.syntax.into()
+    }
+}
+biome_rowan::declare_node_union! { pub AnyMdBogusNode = MdBogus | MdBogusBlock }
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub struct MdBlockList {
     syntax_list: SyntaxList,

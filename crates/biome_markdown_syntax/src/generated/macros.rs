@@ -173,6 +173,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::MdBogus::new_unchecked(node) };
                     $body
                 }
+                $crate::MarkdownSyntaxKind::MD_BOGUS_BLOCK => {
+                    let $pattern = unsafe { $crate::MdBogusBlock::new_unchecked(node) };
+                    $body
+                }
                 $crate::MarkdownSyntaxKind::MD_BLOCK_LIST => {
                     let $pattern = unsafe { $crate::MdBlockList::new_unchecked(node) };
                     $body

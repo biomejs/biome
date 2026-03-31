@@ -82,15 +82,18 @@ pub(crate) fn parse_quote(p: &mut MarkdownParser) -> ParsedSyntax {
         let range = p.cur_range();
         p.error(quote_nesting_too_deep(p, range, max_nesting_depth));
         p.state_mut().quote_depth_exceeded = true;
+        // Wrap recovery tokens in MdBogusBlock (a valid AnyMdBlock child)
+        // so they don't attach as Skipped trivia on normal content nodes.
+        let bogus_m = p.start();
         p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
         if p.at(T![>]) {
-            p.parse_as_skipped_trivia_tokens(|p| p.bump(T![>]));
+            p.bump(T![>]);
         } else if p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == ">" {
-            p.parse_as_skipped_trivia_tokens(|p| p.bump_remap(T![>]));
+            p.bump_remap(T![>]);
         }
         let has_indented_code = at_quote_indented_code_start(p);
-        skip_optional_marker_space(p, has_indented_code);
-        return Absent;
+        emit_optional_marker_space(p, has_indented_code);
+        return Present(bogus_m.complete(p, MD_BOGUS_BLOCK));
     }
 
     let m = p.start();
@@ -553,25 +556,6 @@ fn parse_code_block_textual(p: &mut MarkdownParser) {
     let text_m = p.start();
     p.bump_remap(MD_TEXTUAL_LITERAL);
     text_m.complete(p, MD_TEXTUAL);
-}
-
-pub(crate) fn skip_optional_marker_space(p: &mut MarkdownParser, preserve_tab: bool) -> bool {
-    if !p.at(MD_TEXTUAL_LITERAL) {
-        return false;
-    }
-
-    let text = p.cur_text();
-    if text == " " {
-        p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_TEXTUAL_LITERAL));
-        return true;
-    }
-    if text == "\t" {
-        if !preserve_tab {
-            p.parse_as_skipped_trivia_tokens(|p| p.bump(MD_TEXTUAL_LITERAL));
-        }
-        return true;
-    }
-    false
 }
 
 /// Emit the optional space/tab after a `>` quote marker as an explicit CST node.
