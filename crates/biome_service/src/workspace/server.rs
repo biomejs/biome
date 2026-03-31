@@ -484,7 +484,9 @@ impl WorkspaceServer {
         } else {
             Default::default()
         };
-
+        
+        // Svelte snippet parameters are introduced in the HTML AST, so collect them
+        // before finishing the embedded bindings for JS-based analysis.
         if let Some(html_file_source) = source.to_html_file_source()
             && html_file_source.is_svelte()
             && let Some(Ok(any_parse)) = &syntax
