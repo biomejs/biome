@@ -8,6 +8,7 @@ use crate::syntax::value::function::{
 use crate::syntax::value::parse_error::expected_url_modifier;
 use crate::syntax::{ValueParsingContext, ValueParsingMode};
 use crate::syntax::{is_at_identifier, is_at_string, parse_regular_identifier, parse_string};
+use crate::syntax::scss::{is_at_scss_interpolated_string, parse_scss_interpolated_string};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseNodeList;
@@ -134,7 +135,7 @@ fn parse_url_modifier_function_with_context(
 /// or a string.
 #[inline]
 pub(crate) fn is_at_url_value(p: &mut CssParser) -> bool {
-    is_at_url_value_raw(p) || is_at_string(p)
+    is_at_url_value_raw(p) || is_at_string(p) || is_at_scss_interpolated_string(p)
 }
 
 /// Parses a URL value from the current position of the CSS parser.
@@ -149,6 +150,8 @@ pub(crate) fn parse_url_value(p: &mut CssParser) -> ParsedSyntax {
 
     if is_at_string(p) {
         parse_string(p)
+    } else if is_at_scss_interpolated_string(p) {
+        parse_scss_interpolated_string(p)
     } else {
         parse_url_value_raw(p)
     }

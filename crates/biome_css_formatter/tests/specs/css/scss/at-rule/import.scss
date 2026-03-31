@@ -1,5 +1,7 @@
 @import"theme";
 
+@import "#{$file}.scss";
+
 @import "rounded-corners",
 "text-shadow";
 

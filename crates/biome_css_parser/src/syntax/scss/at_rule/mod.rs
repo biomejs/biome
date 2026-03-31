@@ -20,7 +20,9 @@ mod warn;
 mod while_at_rule;
 
 use crate::parser::CssParser;
-use crate::syntax::scss::{expected_scss_expression, parse_scss_expression_until};
+use crate::syntax::scss::{
+    expected_scss_expression, parse_scss_expression_until,
+};
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;

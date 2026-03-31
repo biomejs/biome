@@ -5,6 +5,7 @@ use crate::syntax::at_rule::{
     parse_import_url,
 };
 use crate::syntax::parse_error::expected_string;
+use crate::syntax::scss::{is_at_scss_interpolated_string, parse_scss_interpolated_string};
 use crate::syntax::value::url::is_at_url_function;
 use crate::syntax::{is_at_string, parse_string};
 use biome_css_syntax::CssSyntaxKind::*;
@@ -188,15 +189,23 @@ impl ParseSeparatedList for ScssImportItemList {
 
 #[inline]
 fn parse_scss_import_item(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_import_url(p) {
-        return Absent;
-    }
-
     if is_at_url_function(p) {
         parse_scss_plain_import(p)
+    } else if is_at_scss_interpolated_string(p) {
+        parse_scss_interpolated_string(p)
     } else {
         parse_scss_string_import_item(p)
     }
+}
+
+#[inline]
+fn is_nth_at_scss_import_item(p: &mut CssParser, n: usize) -> bool {
+    is_nth_at_import_url(p, n) || is_nth_at_scss_interpolated_string(p, n)
+}
+
+#[inline]
+fn is_nth_at_scss_interpolated_string(p: &mut CssParser, n: usize) -> bool {
+    p.nth_at(n, SCSS_STRING_QUOTE)
 }
 
 struct ScssImportMediaQueryList;
@@ -211,7 +220,7 @@ impl ParseSeparatedList for ScssImportMediaQueryList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![;]) || (p.at(T![,]) && is_nth_at_import_url(p, 1))
+        p.at(T![;]) || (p.at(T![,]) && is_nth_at_scss_import_item(p, 1))
     }
 
     fn recover(

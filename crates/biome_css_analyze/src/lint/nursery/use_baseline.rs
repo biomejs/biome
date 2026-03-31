@@ -556,7 +556,7 @@ fn check_media_condition(
     options: &UseBaselineOptions,
 ) -> Option<UseBaselineState> {
     let name_node = feature.name().ok()?;
-    let tok = name_node.value_token().ok()?;
+    let tok = name_node.as_css_identifier()?.value_token().ok()?;
     let name = tok.token_text_trimmed();
 
     if in_allow_list(&name, &options.allow_media_conditions) {

@@ -409,6 +409,7 @@ dependencies = [
  "mimalloc",
  "quickcheck",
  "quickcheck_macros",
+ "smallvec",
  "tests_macros",
  "tikv-jemallocator",
  "tracing",

@@ -40,6 +40,7 @@ serde                    = { workspace = true, features = ["derive"] }
 
 [dev-dependencies]
 biome_css_parser    = { path = "../biome_css_parser" }
+biome_css_syntax    = { path = "../biome_css_syntax", features = ["scss"] }
 biome_fs            = { path = "../biome_fs" }
 biome_plugin_loader = { path = "../biome_plugin_loader" }
 biome_test_utils    = { path = "../biome_test_utils" }

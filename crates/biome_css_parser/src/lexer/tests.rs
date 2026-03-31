@@ -2,8 +2,8 @@
 #![expect(unused_mut, unused_variables)]
 
 use super::{CssLexer, TextSize};
-use biome_css_syntax::CssSyntaxKind::EOF;
 use crate::lexer::CssLexContext;
+use biome_css_syntax::CssSyntaxKind::EOF;
 use crate::CssParserOptions;
 use biome_parser::lexer::Lexer;
 use quickcheck_macros::quickcheck;

@@ -1,0 +1,130 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+assertion_line: 208
+expression: snapshot
+---
+
+## Input
+
+```css
+$plain: "plain";
+$interpolated: "hello #{$name}";
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        ScssDeclaration {
+            name: ScssIdentifier {
+                dollar_token: DOLLAR@0..1 "$" [] [],
+                name: CssIdentifier {
+                    value_token: IDENT@1..6 "plain" [] [],
+                },
+            },
+            colon_token: COLON@6..8 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    CssString {
+                        value_token: CSS_STRING_LITERAL@8..15 "\"plain\"" [] [],
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@15..16 ";" [] [],
+        },
+        ScssDeclaration {
+            name: ScssIdentifier {
+                dollar_token: DOLLAR@16..18 "$" [Newline("\n")] [],
+                name: CssIdentifier {
+                    value_token: IDENT@18..30 "interpolated" [] [],
+                },
+            },
+            colon_token: COLON@30..32 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    ScssInterpolatedString {
+                        opening_quote_token: SCSS_STRING_QUOTE@32..33 "\"" [] [],
+                        parts: ScssInterpolatedStringPartList [
+                            ScssStringText {
+                                value_token: SCSS_STRING_CONTENT_LITERAL@33..39 "hello " [] [],
+                            },
+                            ScssInterpolation {
+                                hash_token: HASH@39..40 "#" [] [],
+                                l_curly_token: L_CURLY@40..41 "{" [] [],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        ScssIdentifier {
+                                            dollar_token: DOLLAR@41..42 "$" [] [],
+                                            name: CssIdentifier {
+                                                value_token: IDENT@42..46 "name" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                                r_curly_token: R_CURLY@46..47 "}" [] [],
+                            },
+                        ],
+                        closing_quote_token: SCSS_STRING_QUOTE@47..48 "\"" [] [],
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@48..49 ";" [] [],
+        },
+    ],
+    eof_token: EOF@49..50 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..50
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..49
+    0: SCSS_DECLARATION@0..16
+      0: SCSS_IDENTIFIER@0..6
+        0: DOLLAR@0..1 "$" [] []
+        1: CSS_IDENTIFIER@1..6
+          0: IDENT@1..6 "plain" [] []
+      1: COLON@6..8 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@8..15
+        0: SCSS_EXPRESSION_ITEM_LIST@8..15
+          0: CSS_STRING@8..15
+            0: CSS_STRING_LITERAL@8..15 "\"plain\"" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@15..15
+      4: SEMICOLON@15..16 ";" [] []
+    1: SCSS_DECLARATION@16..49
+      0: SCSS_IDENTIFIER@16..30
+        0: DOLLAR@16..18 "$" [Newline("\n")] []
+        1: CSS_IDENTIFIER@18..30
+          0: IDENT@18..30 "interpolated" [] []
+      1: COLON@30..32 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@32..48
+        0: SCSS_EXPRESSION_ITEM_LIST@32..48
+          0: SCSS_INTERPOLATED_STRING@32..48
+            0: SCSS_STRING_QUOTE@32..33 "\"" [] []
+            1: SCSS_INTERPOLATED_STRING_PART_LIST@33..47
+              0: SCSS_STRING_TEXT@33..39
+                0: SCSS_STRING_CONTENT_LITERAL@33..39 "hello " [] []
+              1: SCSS_INTERPOLATION@39..47
+                0: HASH@39..40 "#" [] []
+                1: L_CURLY@40..41 "{" [] []
+                2: SCSS_EXPRESSION@41..46
+                  0: SCSS_EXPRESSION_ITEM_LIST@41..46
+                    0: SCSS_IDENTIFIER@41..46
+                      0: DOLLAR@41..42 "$" [] []
+                      1: CSS_IDENTIFIER@42..46
+                        0: IDENT@42..46 "name" [] []
+                3: R_CURLY@46..47 "}" [] []
+            2: SCSS_STRING_QUOTE@47..48 "\"" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@48..48
+      4: SEMICOLON@48..49 ";" [] []
+  2: EOF@49..50 "" [Newline("\n")] []
+
+```

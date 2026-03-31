@@ -1,7 +1,7 @@
 use crate::parser::CssParser;
 use crate::syntax::declaration::{is_at_declaration_important, parse_declaration_important};
 use crate::syntax::property::parse_generic_component_value;
-use crate::syntax::scss::{parse_scss_fallback_value, parse_scss_regular_interpolation};
+use crate::syntax::scss::{parse_scss_parent_selector_value, parse_scss_regular_interpolation};
 use biome_css_syntax::T;
 use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax;
@@ -29,7 +29,7 @@ pub(super) fn parse_scss_primary_expression(p: &mut CssParser) -> ParsedSyntax {
     } else {
         let value = parse_generic_component_value(p);
         if value.is_absent() {
-            parse_scss_fallback_value(p)
+            parse_scss_parent_selector_value(p)
         } else {
             value
         }

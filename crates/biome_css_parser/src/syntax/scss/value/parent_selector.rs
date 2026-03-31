@@ -26,17 +26,3 @@ pub(crate) fn parse_scss_parent_selector_value(p: &mut CssParser) -> ParsedSynta
     p.bump(T![&]);
     Present(m.complete(p, SCSS_PARENT_SELECTOR_VALUE))
 }
-
-/// Parses SCSS-only fallback values that are valid expression items but not
-/// generic CSS values.
-///
-/// Example:
-/// ```scss
-/// $sel: &:hover;
-/// ```
-///
-/// Docs: https://sass-lang.com/documentation/style-rules/parent-selector
-#[inline]
-pub(crate) fn parse_scss_fallback_value(p: &mut CssParser) -> ParsedSyntax {
-    parse_scss_parent_selector_value(p)
-}

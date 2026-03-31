@@ -127,6 +127,14 @@ pub(super) fn parse_scss_inner_expression_until(
 }
 
 #[inline]
+pub(crate) fn parse_scss_inner_expression_in_string_until(
+    p: &mut CssParser,
+    end_ts: TokenSet<CssSyntaxKind>,
+) -> ParsedSyntax {
+    parse_scss_expression_with_options(p, ScssExpressionOptions::value_in_string(end_ts))
+}
+
+#[inline]
 pub(crate) fn complete_empty_scss_expression(p: &mut CssParser) -> CompletedMarker {
     let expression = p.start();
     let expression_items = p.start();
@@ -279,6 +287,7 @@ fn parse_scss_keyword_argument(p: &mut CssParser, options: ScssExpressionOptions
             allows_keyword_arguments: false,
             allows_ellipsis: false,
             stops_before_variable_modifiers: false,
+            stops_at_string_quote: false,
         },
     )
     .or_add_diagnostic(p, expected_component_value);

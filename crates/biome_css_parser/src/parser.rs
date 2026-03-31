@@ -1,4 +1,4 @@
-use crate::lexer::CssReLexContext;
+use crate::lexer::{CssReLexContext, CssStringQuote};
 use crate::state::CssParserState;
 use crate::token_source::{CssTokenSource, CssTokenSourceCheckpoint};
 use biome_css_syntax::{CssFileSource, CssSyntaxKind};
@@ -133,6 +133,17 @@ impl<'source> CssParser<'source> {
 
     pub(crate) fn state_mut(&mut self) -> &mut CssParserState {
         &mut self.state
+    }
+
+    pub(crate) fn with_scss_string_interpolation_recovery<T>(
+        &mut self,
+        quote: CssStringQuote,
+        f: impl FnOnce(&mut Self) -> T,
+    ) -> T {
+        self.source.enter_scss_string_interpolation(quote);
+        let result = f(self);
+        self.source.exit_scss_string_interpolation();
+        result
     }
 
     pub fn checkpoint(&self) -> CssParserCheckpoint {
