@@ -5,12 +5,46 @@ expression: unsorted.vue
 # Input
 ```html
 <p v-text="msg" v-show="ok" dir="auto" v-foo:bar.baz id="hello" class="flex"></p>
-<div v-slot:default v-on:click="doThis" v-once v-bind="{ id: someProp, 'other-attr': otherProp } "
+
+<div 
+  v-slot:default
+  v-on:click="doThis"
+  v-once
+  ref="my-ref"
+  :key="item.id"
   v-bind:src="'/path/to/images/' + fileName"
-    spellcheck="true"
+  spellcheck="true"
+  v-for="item in items"
   tabindex="-1"
+  @scroll.passive="onScroll"
+  :is="tabs[currentTab]"
+  v-text="msg"
   dir="auto"
-  v-bind:class="{ red: isRed }"></div>
+  v-model="countModel"
+  v-if="awesome"
+  :class="{ red: isRed }"
+></div>
+
+<!-- with v-bind="object" -->
+<div 
+  v-slot:default
+  v-on:click="doThis"
+  v-once
+  ref="my-ref"
+  v-bind="{ id: someProp, 'other-attr': otherProp }"
+  :key="item.id"
+  v-bind:src="'/path/to/images/' + fileName"
+  spellcheck="true"
+  v-for="item in items"
+  tabindex="-1"
+  @scroll.passive="onScroll"
+  :is="tabs[currentTab]"
+  v-text="msg"
+  dir="auto"
+  v-model="countModel"
+  v-if="awesome"
+  :class="{ red: isRed }"
+></div>
 
 ```
 
@@ -22,47 +56,158 @@ unsorted.vue:1:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━�
   
   > 1 │ <p v-text="msg" v-show="ok" dir="auto" v-foo:bar.baz id="hello" class="flex"></p>
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    2 │ <div v-slot:default v-on:click="doThis" v-once v-bind="{ id: someProp, 'other-attr': otherProp } "
-    3 │   v-bind:src="'/path/to/images/' + fileName"
+    2 │ 
+    3 │ <div·
   
   i Safe fix: Sort the HTML attributes.
   
-    1   │ - <p·v-text="msg"·v-show="ok"·dir="auto"·v-foo:bar.baz·id="hello"·class="flex"></p>
-      1 │ + <p·v-text="msg"·v-show="ok"·dir="auto"·v-foo:bar.baz·class="flex"id="hello"·></p>
-    2 2 │   <div v-slot:default v-on:click="doThis" v-once v-bind="{ id: someProp, 'other-attr': otherProp } "
-    3 3 │     v-bind:src="'/path/to/images/' + fileName"
+     1    │ - <p·v-text="msg"·v-show="ok"·dir="auto"·v-foo:bar.baz·id="hello"·class="flex"></p>
+        1 │ + <p·class="flex"dir="auto"·id="hello"·v-show="ok"·v-foo:bar.baz·v-text="msg"·></p>
+     2  2 │   
+     3  3 │   <div·
   
 
 ```
 
 ```
-unsorted.vue:2:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.vue:3:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The attributes are not sorted.
   
-    1 │ <p v-text="msg" v-show="ok" dir="auto" v-foo:bar.baz id="hello" class="flex"></p>
-  > 2 │ <div v-slot:default v-on:click="doThis" v-once v-bind="{ id: someProp, 'other-attr': otherProp } "
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 3 │   v-bind:src="'/path/to/images/' + fileName"
-  > 4 │     spellcheck="true"
-  > 5 │   tabindex="-1"
-  > 6 │   dir="auto"
-  > 7 │   v-bind:class="{ red: isRed }"></div>
-      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    8 │ 
+     1 │ <p v-text="msg" v-show="ok" dir="auto" v-foo:bar.baz id="hello" class="flex"></p>
+     2 │ 
+   > 3 │ <div·
+       │ ^^^^^
+   > 4 │   v-slot:default
+        ...
+  > 19 │   :class="{ red: isRed }"
+  > 20 │ ></div>
+       │ ^
+    21 │ 
+    22 │ <!-- with v-bind="object" -->
   
   i Safe fix: Sort the HTML attributes.
   
-    2 2 │   <div v-slot:default v-on:click="doThis" v-once v-bind="{ id: someProp, 'other-attr': otherProp } "
-    3 3 │     v-bind:src="'/path/to/images/' + fileName"
-    4   │ - ····spellcheck="true"
-    5   │ - ··tabindex="-1"
-    6   │ - ··dir="auto"
-      4 │ + ··dir="auto"
-      5 │ + ····spellcheck="true"
-      6 │ + ··tabindex="-1"
-    7 7 │     v-bind:class="{ red: isRed }"></div>
-    8 8 │   
+     2  2 │   
+     3  3 │   <div·
+     4    │ - ··v-slot:default
+     5    │ - ··v-on:click="doThis"
+     6    │ - ··v-once
+     7    │ - ··ref="my-ref"
+     8    │ - ··:key="item.id"
+     9    │ - ··v-bind:src="'/path/to/images/'·+·fileName"
+    10    │ - ··spellcheck="true"
+    11    │ - ··v-for="item·in·items"
+    12    │ - ··tabindex="-1"
+    13    │ - ··@scroll.passive="onScroll"
+    14    │ - ··:is="tabs[currentTab]"
+    15    │ - ··v-text="msg"
+    16    │ - ··dir="auto"
+    17    │ - ··v-model="countModel"
+    18    │ - ··v-if="awesome"
+    19    │ - ··:class="{·red:·isRed·}"
+        4 │ + ··dir="auto"
+        5 │ + ··spellcheck="true"
+        6 │ + ··tabindex="-1"
+        7 │ + ··:is="tabs[currentTab]"
+        8 │ + ··v-for="item·in·items"
+        9 │ + ··v-if="awesome"
+       10 │ + ··v-once
+       11 │ + ··ref="my-ref"
+       12 │ + ··:key="item.id"
+       13 │ + ··v-slot:default
+       14 │ + ··v-model="countModel"
+       15 │ + ··v-bind:src="'/path/to/images/'·+·fileName"
+       16 │ + ··:class="{·red:·isRed·}"
+       17 │ + ··v-on:click="doThis"
+       18 │ + ··@scroll.passive="onScroll"
+       19 │ + ··v-text="msg"
+    20 20 │   ></div>
+    21 21 │   
+  
+
+```
+
+```
+unsorted.vue:23:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+    22 │ <!-- with v-bind="object" -->
+  > 23 │ <div·
+       │ ^^^^^
+  > 24 │   v-slot:default
+        ...
+  > 39 │   v-if="awesome"
+  > 40 │   :class="{ red: isRed }"
+  > 41 │ ></div>
+       │ ^
+    42 │ 
+  
+  i Safe fix: Sort the HTML attributes.
+  
+    27 27 │     ref="my-ref"
+    28 28 │     v-bind="{ id: someProp, 'other-attr': otherProp }"
+    29    │ - ··:key="item.id"
+    30    │ - ··v-bind:src="'/path/to/images/'·+·fileName"
+    31    │ - ··spellcheck="true"
+    32    │ - ··v-for="item·in·items"
+    33    │ - ··tabindex="-1"
+    34    │ - ··@scroll.passive="onScroll"
+    35    │ - ··:is="tabs[currentTab]"
+    36    │ - ··v-text="msg"
+    37    │ - ··dir="auto"
+    38    │ - ··v-model="countModel"
+    39    │ - ··v-if="awesome"
+    40    │ - ··:class="{·red:·isRed·}"
+       29 │ + ··dir="auto"
+       30 │ + ··spellcheck="true"
+       31 │ + ··tabindex="-1"
+       32 │ + ··:is="tabs[currentTab]"
+       33 │ + ··v-for="item·in·items"
+       34 │ + ··v-if="awesome"
+       35 │ + ··:key="item.id"
+       36 │ + ··v-model="countModel"
+       37 │ + ··v-bind:src="'/path/to/images/'·+·fileName"
+       38 │ + ··:class="{·red:·isRed·}"
+       39 │ + ··@scroll.passive="onScroll"
+       40 │ + ··v-text="msg"
+    41 41 │   ></div>
+    42 42 │   
+  
+
+```
+
+```
+unsorted.vue:23:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+    22 │ <!-- with v-bind="object" -->
+  > 23 │ <div·
+       │ ^^^^^
+  > 24 │   v-slot:default
+        ...
+  > 39 │   v-if="awesome"
+  > 40 │   :class="{ red: isRed }"
+  > 41 │ ></div>
+       │ ^
+    42 │ 
+  
+  i Safe fix: Sort the HTML attributes.
+  
+    22 22 │   <!-- with v-bind="object" -->
+    23 23 │   <div·
+    24    │ - ··v-slot:default
+    25    │ - ··v-on:click="doThis"
+    26    │ - ··v-once
+    27    │ - ··ref="my-ref"
+       24 │ + ··v-once
+       25 │ + ··ref="my-ref"
+       26 │ + ··v-slot:default
+       27 │ + ··v-on:click="doThis"
+    28 28 │     v-bind="{ id: someProp, 'other-attr': otherProp }"
+    29 29 │     :key="item.id"
   
 
 ```

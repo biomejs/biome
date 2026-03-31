@@ -12,7 +12,7 @@ use biome_js_syntax::{
     AnyJsxAttribute, JsLanguage, JsxAttribute, JsxAttributeList, JsxOpeningElement,
     JsxSelfClosingElement,
 };
-use biome_rowan::{AstNode, BatchMutationExt, SyntaxResult, SyntaxToken};
+use biome_rowan::{AstNode, BatchMutationExt, SyntaxToken};
 use biome_rule_options::use_sorted_attributes::{SortOrder, UseSortedAttributesOptions};
 
 use crate::JsRuleAction;
@@ -181,7 +181,7 @@ pub struct SortableJsxAttribute {
 impl SortableAttribute for SortableJsxAttribute {
     type Language = JsLanguage;
 
-    fn name(&self) -> SyntaxResult<SyntaxToken<Self::Language>> {
-        self.attr.name()?.name_token()
+    fn name(&self) -> Option<SyntaxToken<Self::Language>> {
+        self.attr.name().ok()?.name_token().ok()
     }
 }

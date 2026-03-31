@@ -7,6 +7,22 @@
   tabindex="-1"
   dir="auto"
   define:vars={vars}
+  set:html={rawHTMLString}
+  server:defer
+  id="myid"
+/>
+
+<Component
+  client:load
+  class:list={classes}
+  set:text={text}
+  is:raw
+  {...props}
+  spellcheck="true"
+  tabindex="-1"
+  dir="auto"
+  define:vars={vars}
+  set:html={rawHTMLString}
   server:defer
   id="myid"
 />

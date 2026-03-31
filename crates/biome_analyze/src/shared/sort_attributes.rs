@@ -1,30 +1,32 @@
-use biome_rowan::{Language, SyntaxResult, SyntaxToken};
+use biome_rowan::{Language, SyntaxToken};
 use biome_string_case::StrLikeExtension;
 use std::cmp::Ordering;
 
 pub trait SortableAttribute {
     type Language: Language;
 
-    fn name(&self) -> SyntaxResult<SyntaxToken<Self::Language>>;
+    fn name(&self) -> Option<SyntaxToken<Self::Language>>;
 
     fn ascii_nat_cmp(&self, other: &Self) -> Ordering {
-        let (Ok(self_name), Ok(other_name)) = (self.name(), other.name()) else {
-            return Ordering::Equal;
-        };
-
-        self_name
-            .text_trimmed()
-            .ascii_nat_cmp(other_name.text_trimmed())
+        match (self.name(), other.name()) {
+            (Some(self_name), Some(other_name)) => self_name
+                .text_trimmed()
+                .ascii_nat_cmp(other_name.text_trimmed()),
+            (Some(_), None) => Ordering::Less,
+            (None, Some(_)) => Ordering::Greater,
+            (None, None) => Ordering::Equal,
+        }
     }
 
     fn lexicographic_cmp(&self, other: &Self) -> Ordering {
-        let (Ok(self_name), Ok(other_name)) = (self.name(), other.name()) else {
-            return Ordering::Equal;
-        };
-
-        self_name
-            .text_trimmed()
-            .lexicographic_cmp(other_name.text_trimmed())
+        match (self.name(), other.name()) {
+            (Some(self_name), Some(other_name)) => self_name
+                .text_trimmed()
+                .lexicographic_cmp(other_name.text_trimmed()),
+            (Some(_), None) => Ordering::Less,
+            (None, Some(_)) => Ordering::Greater,
+            (None, None) => Ordering::Equal,
+        }
     }
 }
 
