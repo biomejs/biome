@@ -812,10 +812,8 @@ impl<'src> CssLexer<'src> {
         for issue in issues {
             match issue {
                 StringIssue::InvalidEscape(range) => {
-                    self.diagnostics.push(ParseDiagnostic::new(
-                        "Invalid escape sequence",
-                        *range,
-                    ));
+                    self.diagnostics
+                        .push(ParseDiagnostic::new("Invalid escape sequence", *range));
                 }
             }
         }
@@ -923,7 +921,8 @@ impl<'src> CssLexer<'src> {
 
     fn scan_hex_escape(&self, offset: usize) -> (usize, char) {
         debug_assert!(
-            self.byte_at(offset).is_some_and(|byte| byte.is_ascii_hexdigit()),
+            self.byte_at(offset)
+                .is_some_and(|byte| byte.is_ascii_hexdigit()),
             "hex escape scanning must start on a hex digit"
         );
 
@@ -944,7 +943,10 @@ impl<'src> CssLexer<'src> {
             cursor += 1;
         }
 
-        if self.byte_at(cursor).is_some_and(|byte| matches!(byte, b'\t' | b' ')) {
+        if self
+            .byte_at(cursor)
+            .is_some_and(|byte| matches!(byte, b'\t' | b' '))
+        {
             cursor += 1;
         }
 

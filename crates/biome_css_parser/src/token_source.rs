@@ -98,9 +98,7 @@ impl<'src> CssTokenSource<'src> {
             context,
             self.scss_string_interpolation_quotes.last().copied(),
         ) {
-            (CssLexContext::Regular, Some(quote)) => {
-                CssLexContext::ScssStringInterpolation(quote)
-            }
+            (CssLexContext::Regular, Some(quote)) => CssLexContext::ScssStringInterpolation(quote),
             _ => context,
         }
     }

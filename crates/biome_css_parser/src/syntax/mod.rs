@@ -20,8 +20,8 @@ use crate::syntax::parse_error::{
 use crate::syntax::property::color::{is_at_color, parse_color};
 use crate::syntax::property::unicode_range::{is_at_unicode_range, parse_unicode_range};
 use crate::syntax::scss::{
-    is_at_scss_declaration, is_at_scss_identifier, is_at_scss_parent_selector_value,
-    is_at_scss_qualified_name, is_at_scss_interpolated_string, parse_scss_declaration,
+    is_at_scss_declaration, is_at_scss_identifier, is_at_scss_interpolated_string,
+    is_at_scss_parent_selector_value, is_at_scss_qualified_name, parse_scss_declaration,
     parse_scss_identifier, parse_scss_interpolated_string, parse_scss_parent_selector_value,
     parse_scss_qualified_name,
 };

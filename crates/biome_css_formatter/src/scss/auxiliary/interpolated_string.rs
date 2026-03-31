@@ -4,10 +4,7 @@ use biome_css_syntax::{
     AnyScssInterpolatedStringPart, CssSyntaxToken, ScssInterpolatedString,
     ScssInterpolatedStringFields, ScssStringText,
 };
-use biome_formatter::{
-    QuoteStyle,
-    token::string::normalize_string,
-};
+use biome_formatter::{QuoteStyle, token::string::normalize_string};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatScssInterpolatedString;
@@ -56,11 +53,13 @@ fn preferred_quote_style(
     chosen_quote: QuoteStyle,
 ) -> QuoteStyle {
     preferred_quote_style_for_contents(
-        parts.iter().filter_map(|part| match part {
-            AnyScssInterpolatedStringPart::ScssStringText(text) => text.value_token().ok(),
-            AnyScssInterpolatedStringPart::ScssInterpolation(_) => None,
-        })
-        .map(|token| token.token_text_trimmed()),
+        parts
+            .iter()
+            .filter_map(|part| match part {
+                AnyScssInterpolatedStringPart::ScssStringText(text) => text.value_token().ok(),
+                AnyScssInterpolatedStringPart::ScssInterpolation(_) => None,
+            })
+            .map(|token| token.token_text_trimmed()),
         chosen_quote,
     )
 }

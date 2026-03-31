@@ -1,6 +1,7 @@
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 
+use crate::syntax::scss::{is_at_scss_interpolated_string, parse_scss_interpolated_string};
 use crate::syntax::value::function::{
     is_at_css_function, is_at_function, is_nth_at_css_function, is_nth_at_function,
     parse_css_function, parse_function,
@@ -8,7 +9,6 @@ use crate::syntax::value::function::{
 use crate::syntax::value::parse_error::expected_url_modifier;
 use crate::syntax::{ValueParsingContext, ValueParsingMode};
 use crate::syntax::{is_at_identifier, is_at_string, parse_regular_identifier, parse_string};
-use crate::syntax::scss::{is_at_scss_interpolated_string, parse_scss_interpolated_string};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseNodeList;
