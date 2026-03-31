@@ -7,7 +7,6 @@ use biome_html_syntax::AnyHtmlAttributeInitializer;
 pub(crate) struct FormatAnyHtmlAttributeInitializer {
     compact: bool,
 }
-
 impl FormatRule<AnyHtmlAttributeInitializer> for FormatAnyHtmlAttributeInitializer {
     type Context = HtmlFormatContext;
     fn fmt(&self, node: &AnyHtmlAttributeInitializer, f: &mut HtmlFormatter) -> FormatResult<()> {
@@ -15,9 +14,7 @@ impl FormatRule<AnyHtmlAttributeInitializer> for FormatAnyHtmlAttributeInitializ
             AnyHtmlAttributeInitializer::HtmlAttributeSingleTextExpression(node) => {
                 node.format().with_options(self.compact).fmt(f)
             }
-            AnyHtmlAttributeInitializer::HtmlString(node) => {
-                node.format().with_options(self.compact).fmt(f)
-            }
+            AnyHtmlAttributeInitializer::HtmlString(node) => node.format().fmt(f),
         }
     }
 }

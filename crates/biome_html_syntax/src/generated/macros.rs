@@ -305,9 +305,22 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::SvelteSnippetClosingBlock::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::SVELTE_SNIPPET_EXPRESSION => {
+                    let $pattern = unsafe { $crate::SvelteSnippetExpression::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::SVELTE_SNIPPET_OPENING_BLOCK => {
                     let $pattern =
                         unsafe { $crate::SvelteSnippetOpeningBlock::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::SVELTE_SNIPPET_PARAMETER => {
+                    let $pattern = unsafe { $crate::SvelteSnippetParameter::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::SVELTE_SNIPPET_PARAMETER_DEFAULT_VALUE => {
+                    let $pattern =
+                        unsafe { $crate::SvelteSnippetParameterDefaultValue::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::SVELTE_SQUARE_DESTRUCTURED_NAME => {
@@ -423,6 +436,11 @@ macro_rules! map_syntax_node {
                 }
                 $crate::HtmlSyntaxKind::SVELTE_ELSE_IF_CLAUSE_LIST => {
                     let $pattern = unsafe { $crate::SvelteElseIfClauseList::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::SVELTE_SNIPPET_PARAMETER_LIST => {
+                    let $pattern =
+                        unsafe { $crate::SvelteSnippetParameterList::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::VUE_MODIFIER_LIST => {

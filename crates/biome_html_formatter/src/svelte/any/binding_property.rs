@@ -5,9 +5,7 @@ use biome_formatter::FormatRuleWithOptions;
 use biome_html_syntax::AnySvelteBindingProperty;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatAnySvelteBindingProperty {
-    /// Whether it should be formatted in compact mode. In compact mode, all tokens and children
-    /// are removed
-    pub compact: bool,
+    compact: bool,
 }
 impl FormatRule<AnySvelteBindingProperty> for FormatAnySvelteBindingProperty {
     type Context = HtmlFormatContext;

@@ -1,5 +1,6 @@
 ---
 source: crates/biome_html_parser/tests/spec_test.rs
+assertion_line: 145
 expression: snapshot
 ---
 
@@ -28,9 +29,14 @@ HtmlRoot {
         SvelteSnippetBlock {
             opening_block: SvelteSnippetOpeningBlock {
                 sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
-                snippet_token: SNIPPET_KW@2..9 "snippet" [] [],
-                expression: HtmlTextExpression {
-                    html_literal_token: HTML_LITERAL@9..17 " outer()" [] [],
+                snippet_token: SNIPPET_KW@2..10 "snippet" [] [Whitespace(" ")],
+                expression: SvelteSnippetExpression {
+                    name: SvelteName {
+                        ident_token: IDENT@10..15 "outer" [] [],
+                    },
+                    l_paren_token: L_PAREN@15..16 "(" [] [],
+                    parameters: SvelteSnippetParameterList [],
+                    r_paren_token: R_PAREN@16..17 ")" [] [],
                 },
                 r_curly_token: R_CURLY@17..18 "}" [] [],
                 children: HtmlElementList [
@@ -47,9 +53,14 @@ HtmlRoot {
                             SvelteSnippetBlock {
                                 opening_block: SvelteSnippetOpeningBlock {
                                     sv_curly_hash_token: SV_CURLY_HASH@26..33 "{#" [Newline("\n"), Whitespace("    ")] [],
-                                    snippet_token: SNIPPET_KW@33..40 "snippet" [] [],
-                                    expression: HtmlTextExpression {
-                                        html_literal_token: HTML_LITERAL@40..48 " inner()" [] [],
+                                    snippet_token: SNIPPET_KW@33..41 "snippet" [] [Whitespace(" ")],
+                                    expression: SvelteSnippetExpression {
+                                        name: SvelteName {
+                                            ident_token: IDENT@41..46 "inner" [] [],
+                                        },
+                                        l_paren_token: L_PAREN@46..47 "(" [] [],
+                                        parameters: SvelteSnippetParameterList [],
+                                        r_paren_token: R_PAREN@47..48 ")" [] [],
                                     },
                                     r_curly_token: R_CURLY@48..49 "}" [] [],
                                     children: HtmlElementList [
@@ -118,9 +129,13 @@ HtmlRoot {
     0: SVELTE_SNIPPET_BLOCK@0..111
       0: SVELTE_SNIPPET_OPENING_BLOCK@0..100
         0: SV_CURLY_HASH@0..2 "{#" [] []
-        1: SNIPPET_KW@2..9 "snippet" [] []
-        2: HTML_TEXT_EXPRESSION@9..17
-          0: HTML_LITERAL@9..17 " outer()" [] []
+        1: SNIPPET_KW@2..10 "snippet" [] [Whitespace(" ")]
+        2: SVELTE_SNIPPET_EXPRESSION@10..17
+          0: SVELTE_NAME@10..15
+            0: IDENT@10..15 "outer" [] []
+          1: L_PAREN@15..16 "(" [] []
+          2: SVELTE_SNIPPET_PARAMETER_LIST@16..16
+          3: R_PAREN@16..17 ")" [] []
         3: R_CURLY@17..18 "}" [] []
         4: HTML_ELEMENT_LIST@18..100
           0: HTML_ELEMENT@18..100
@@ -134,9 +149,13 @@ HtmlRoot {
               0: SVELTE_SNIPPET_BLOCK@26..91
                 0: SVELTE_SNIPPET_OPENING_BLOCK@26..76
                   0: SV_CURLY_HASH@26..33 "{#" [Newline("\n"), Whitespace("    ")] []
-                  1: SNIPPET_KW@33..40 "snippet" [] []
-                  2: HTML_TEXT_EXPRESSION@40..48
-                    0: HTML_LITERAL@40..48 " inner()" [] []
+                  1: SNIPPET_KW@33..41 "snippet" [] [Whitespace(" ")]
+                  2: SVELTE_SNIPPET_EXPRESSION@41..48
+                    0: SVELTE_NAME@41..46
+                      0: IDENT@41..46 "inner" [] []
+                    1: L_PAREN@46..47 "(" [] []
+                    2: SVELTE_SNIPPET_PARAMETER_LIST@47..47
+                    3: R_PAREN@47..48 ")" [] []
                   3: R_CURLY@48..49 "}" [] []
                   4: HTML_ELEMENT_LIST@49..76
                     0: HTML_ELEMENT@49..76

@@ -1,5 +1,6 @@
 ---
 source: crates/biome_html_parser/tests/spec_test.rs
+assertion_line: 145
 expression: snapshot
 ---
 
@@ -24,9 +25,26 @@ HtmlRoot {
         SvelteSnippetBlock {
             opening_block: SvelteSnippetOpeningBlock {
                 sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
-                snippet_token: SNIPPET_KW@2..9 "snippet" [] [],
-                expression: HtmlTextExpression {
-                    html_literal_token: HTML_LITERAL@9..34 " greeting(name = 'World')" [] [],
+                snippet_token: SNIPPET_KW@2..10 "snippet" [] [Whitespace(" ")],
+                expression: SvelteSnippetExpression {
+                    name: SvelteName {
+                        ident_token: IDENT@10..18 "greeting" [] [],
+                    },
+                    l_paren_token: L_PAREN@18..19 "(" [] [],
+                    parameters: SvelteSnippetParameterList [
+                        SvelteSnippetParameter {
+                            binding: SvelteName {
+                                ident_token: IDENT@19..24 "name" [] [Whitespace(" ")],
+                            },
+                            default: SvelteSnippetParameterDefaultValue {
+                                eq_token: EQ@24..25 "=" [] [],
+                                value: HtmlTextExpression {
+                                    html_literal_token: HTML_LITERAL@25..33 " 'World'" [] [],
+                                },
+                            },
+                        },
+                    ],
+                    r_paren_token: R_PAREN@33..34 ")" [] [],
                 },
                 r_curly_token: R_CURLY@34..35 "}" [] [],
                 children: HtmlElementList [
@@ -87,9 +105,20 @@ HtmlRoot {
     0: SVELTE_SNIPPET_BLOCK@0..70
       0: SVELTE_SNIPPET_OPENING_BLOCK@0..59
         0: SV_CURLY_HASH@0..2 "{#" [] []
-        1: SNIPPET_KW@2..9 "snippet" [] []
-        2: HTML_TEXT_EXPRESSION@9..34
-          0: HTML_LITERAL@9..34 " greeting(name = 'World')" [] []
+        1: SNIPPET_KW@2..10 "snippet" [] [Whitespace(" ")]
+        2: SVELTE_SNIPPET_EXPRESSION@10..34
+          0: SVELTE_NAME@10..18
+            0: IDENT@10..18 "greeting" [] []
+          1: L_PAREN@18..19 "(" [] []
+          2: SVELTE_SNIPPET_PARAMETER_LIST@19..33
+            0: SVELTE_SNIPPET_PARAMETER@19..33
+              0: SVELTE_NAME@19..24
+                0: IDENT@19..24 "name" [] [Whitespace(" ")]
+              1: SVELTE_SNIPPET_PARAMETER_DEFAULT_VALUE@24..33
+                0: EQ@24..25 "=" [] []
+                1: HTML_TEXT_EXPRESSION@25..33
+                  0: HTML_LITERAL@25..33 " 'World'" [] []
+          3: R_PAREN@33..34 ")" [] []
         3: R_CURLY@34..35 "}" [] []
         4: HTML_ELEMENT_LIST@35..59
           0: HTML_ELEMENT@35..59

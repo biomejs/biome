@@ -712,14 +712,26 @@ fn parse_snippet_block(p: &mut HtmlParser, parent_marker: Marker) -> ParsedSynta
     Present(m.complete(p, SVELTE_SNIPPET_BLOCK))
 }
 
+fn parse_snippet_expression_content(p: &mut HtmlParser) -> ParsedSyntax {
+    let m = p.start();
+
+    parse_svelte_name(p).or_add_diagnostic(p, expected_name);
+
+    p.expect_with_context(T!['('], HtmlLexContext::Svelte);
+    SvelteSnippetParameterList.parse_list(p);
+    p.expect_with_context(T![')'], HtmlLexContext::Svelte);
+
+    Present(m.complete(p, SVELTE_SNIPPET_EXPRESSION))
+}
+
 fn parse_snippet_opening_block(p: &mut HtmlParser, parent_marker: Marker) -> ParsedSyntax {
     if !p.at(T![snippet]) {
         parent_marker.abandon(p);
         return Absent;
     }
-    p.bump_with_context(T![snippet], HtmlLexContext::single_expression());
+    p.bump_with_context(T![snippet], HtmlLexContext::Svelte);
 
-    parse_single_text_expression_content(p).or_add_diagnostic(p, |p, range| {
+    parse_snippet_expression_content(p).or_add_diagnostic(p, |p, range| {
         expected_expression(p, range.sub_start(parent_marker.start()))
     });
 
@@ -1108,6 +1120,80 @@ impl ParseSeparatedList for SvelteBindingAssignmentBindingList {
     fn expect_separator(&mut self, p: &mut Self::Parser<'_>) -> bool {
         p.expect_with_context(self.separating_element_kind(), HtmlLexContext::Svelte)
     }
+}
+
+#[derive(Debug)]
+struct SvelteSnippetParameterList;
+
+impl ParseSeparatedList for SvelteSnippetParameterList {
+    type Kind = HtmlSyntaxKind;
+    type Parser<'source> = HtmlParser<'source>;
+    const LIST_KIND: Self::Kind = SVELTE_SNIPPET_PARAMETER_LIST;
+
+    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        parse_snippet_parameter(p)
+    }
+
+    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at(T![')'])
+    }
+
+    fn recover(
+        &mut self,
+        p: &mut Self::Parser<'_>,
+        parsed_element: ParsedSyntax,
+    ) -> RecoveryResult {
+        parsed_element.or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(SVELTE_BOGUS_BLOCK, BLOCK_RECOVER),
+            expected_svelte_closing_block,
+        )
+    }
+
+    fn separating_element_kind(&mut self) -> Self::Kind {
+        T![,]
+    }
+
+    fn expect_separator(&mut self, p: &mut Self::Parser<'_>) -> bool {
+        p.expect_with_context(self.separating_element_kind(), HtmlLexContext::Svelte)
+    }
+}
+
+fn parse_snippet_parameter(p: &mut HtmlParser) -> ParsedSyntax {
+    let m = p.start();
+
+    if p.at(T![...]) {
+        parse_rest_name(p).or_add_diagnostic(p, expected_name);
+    } else if p.at(T!['{']) {
+        parse_curly_destructured_name(p).or_add_diagnostic(p, expected_name);
+        p.re_lex(HtmlReLexContext::Svelte);
+    } else if p.at(T!['[']) {
+        parse_square_destructured_name(p).or_add_diagnostic(p, expected_name);
+        p.re_lex(HtmlReLexContext::Svelte);
+    } else {
+        parse_svelte_name(p).or_add_diagnostic(p, expected_name);
+    }
+
+    parse_snippet_parameter_default_value(p).ok();
+
+    Present(m.complete(p, SVELTE_SNIPPET_PARAMETER))
+}
+
+fn parse_snippet_parameter_default_value(p: &mut HtmlParser) -> ParsedSyntax {
+    if !p.at(T![=]) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump_with_context(
+        T![=],
+        HtmlLexContext::restricted_expression(RestrictedExpressionStopAt::CommaOrClosingParen),
+    );
+
+    parse_single_text_expression_content(p).or_add_diagnostic(p, expected_text_expression);
+    p.re_lex(HtmlReLexContext::Svelte);
+
+    Present(m.complete(p, SVELTE_SNIPPET_PARAMETER_DEFAULT_VALUE))
 }
 
 // #region Directives parsing functions

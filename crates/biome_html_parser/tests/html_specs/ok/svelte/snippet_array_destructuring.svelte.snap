@@ -1,5 +1,6 @@
 ---
 source: crates/biome_html_parser/tests/spec_test.rs
+assertion_line: 145
 expression: snapshot
 ---
 
@@ -24,9 +25,31 @@ HtmlRoot {
         SvelteSnippetBlock {
             opening_block: SvelteSnippetOpeningBlock {
                 sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
-                snippet_token: SNIPPET_KW@2..9 "snippet" [] [],
-                expression: HtmlTextExpression {
-                    html_literal_token: HTML_LITERAL@9..24 " coords([x, y])" [] [],
+                snippet_token: SNIPPET_KW@2..10 "snippet" [] [Whitespace(" ")],
+                expression: SvelteSnippetExpression {
+                    name: SvelteName {
+                        ident_token: IDENT@10..16 "coords" [] [],
+                    },
+                    l_paren_token: L_PAREN@16..17 "(" [] [],
+                    parameters: SvelteSnippetParameterList [
+                        SvelteSnippetParameter {
+                            binding: SvelteSquareDestructuredName {
+                                l_brack_token: L_BRACKET@17..18 "[" [] [],
+                                names: SvelteBindingAssignmentBindingList [
+                                    SvelteName {
+                                        ident_token: IDENT@18..19 "x" [] [],
+                                    },
+                                    COMMA@19..21 "," [] [Whitespace(" ")],
+                                    SvelteName {
+                                        ident_token: IDENT@21..22 "y" [] [],
+                                    },
+                                ],
+                                r_brack_token: R_BRACKET@22..23 "]" [] [],
+                            },
+                            default: missing (optional),
+                        },
+                    ],
+                    r_paren_token: R_PAREN@23..24 ")" [] [],
                 },
                 r_curly_token: R_CURLY@24..25 "}" [] [],
                 children: HtmlElementList [
@@ -94,9 +117,24 @@ HtmlRoot {
     0: SVELTE_SNIPPET_BLOCK@0..64
       0: SVELTE_SNIPPET_OPENING_BLOCK@0..53
         0: SV_CURLY_HASH@0..2 "{#" [] []
-        1: SNIPPET_KW@2..9 "snippet" [] []
-        2: HTML_TEXT_EXPRESSION@9..24
-          0: HTML_LITERAL@9..24 " coords([x, y])" [] []
+        1: SNIPPET_KW@2..10 "snippet" [] [Whitespace(" ")]
+        2: SVELTE_SNIPPET_EXPRESSION@10..24
+          0: SVELTE_NAME@10..16
+            0: IDENT@10..16 "coords" [] []
+          1: L_PAREN@16..17 "(" [] []
+          2: SVELTE_SNIPPET_PARAMETER_LIST@17..23
+            0: SVELTE_SNIPPET_PARAMETER@17..23
+              0: SVELTE_SQUARE_DESTRUCTURED_NAME@17..23
+                0: L_BRACKET@17..18 "[" [] []
+                1: SVELTE_BINDING_ASSIGNMENT_BINDING_LIST@18..22
+                  0: SVELTE_NAME@18..19
+                    0: IDENT@18..19 "x" [] []
+                  1: COMMA@19..21 "," [] [Whitespace(" ")]
+                  2: SVELTE_NAME@21..22
+                    0: IDENT@21..22 "y" [] []
+                2: R_BRACKET@22..23 "]" [] []
+              1: (empty)
+          3: R_PAREN@23..24 ")" [] []
         3: R_CURLY@24..25 "}" [] []
         4: HTML_ELEMENT_LIST@25..53
           0: HTML_ELEMENT@25..53

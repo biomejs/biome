@@ -1,5 +1,6 @@
 ---
 source: crates/biome_html_parser/tests/spec_test.rs
+assertion_line: 145
 expression: snapshot
 ---
 
@@ -24,9 +25,31 @@ HtmlRoot {
         SvelteSnippetBlock {
             opening_block: SvelteSnippetOpeningBlock {
                 sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
-                snippet_token: SNIPPET_KW@2..9 "snippet" [] [],
-                expression: HtmlTextExpression {
-                    html_literal_token: HTML_LITERAL@9..29 " user({ name, age })" [] [],
+                snippet_token: SNIPPET_KW@2..10 "snippet" [] [Whitespace(" ")],
+                expression: SvelteSnippetExpression {
+                    name: SvelteName {
+                        ident_token: IDENT@10..14 "user" [] [],
+                    },
+                    l_paren_token: L_PAREN@14..15 "(" [] [],
+                    parameters: SvelteSnippetParameterList [
+                        SvelteSnippetParameter {
+                            binding: SvelteCurlyDestructuredName {
+                                l_curly_token: L_CURLY@15..17 "{" [] [Whitespace(" ")],
+                                names: SvelteBindingAssignmentBindingList [
+                                    SvelteName {
+                                        ident_token: IDENT@17..21 "name" [] [],
+                                    },
+                                    COMMA@21..23 "," [] [Whitespace(" ")],
+                                    SvelteName {
+                                        ident_token: IDENT@23..27 "age" [] [Whitespace(" ")],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@27..28 "}" [] [],
+                            },
+                            default: missing (optional),
+                        },
+                    ],
+                    r_paren_token: R_PAREN@28..29 ")" [] [],
                 },
                 r_curly_token: R_CURLY@29..30 "}" [] [],
                 children: HtmlElementList [
@@ -94,9 +117,24 @@ HtmlRoot {
     0: SVELTE_SNIPPET_BLOCK@0..76
       0: SVELTE_SNIPPET_OPENING_BLOCK@0..65
         0: SV_CURLY_HASH@0..2 "{#" [] []
-        1: SNIPPET_KW@2..9 "snippet" [] []
-        2: HTML_TEXT_EXPRESSION@9..29
-          0: HTML_LITERAL@9..29 " user({ name, age })" [] []
+        1: SNIPPET_KW@2..10 "snippet" [] [Whitespace(" ")]
+        2: SVELTE_SNIPPET_EXPRESSION@10..29
+          0: SVELTE_NAME@10..14
+            0: IDENT@10..14 "user" [] []
+          1: L_PAREN@14..15 "(" [] []
+          2: SVELTE_SNIPPET_PARAMETER_LIST@15..28
+            0: SVELTE_SNIPPET_PARAMETER@15..28
+              0: SVELTE_CURLY_DESTRUCTURED_NAME@15..28
+                0: L_CURLY@15..17 "{" [] [Whitespace(" ")]
+                1: SVELTE_BINDING_ASSIGNMENT_BINDING_LIST@17..27
+                  0: SVELTE_NAME@17..21
+                    0: IDENT@17..21 "name" [] []
+                  1: COMMA@21..23 "," [] [Whitespace(" ")]
+                  2: SVELTE_NAME@23..27
+                    0: IDENT@23..27 "age" [] [Whitespace(" ")]
+                2: R_CURLY@27..28 "}" [] []
+              1: (empty)
+          3: R_PAREN@28..29 ")" [] []
         3: R_CURLY@29..30 "}" [] []
         4: HTML_ELEMENT_LIST@30..65
           0: HTML_ELEMENT@30..65

@@ -1222,10 +1222,26 @@ pub fn svelte_snippet_closing_block(
         ],
     ))
 }
+pub fn svelte_snippet_expression(
+    name: SvelteName,
+    l_paren_token: SyntaxToken,
+    parameters: SvelteSnippetParameterList,
+    r_paren_token: SyntaxToken,
+) -> SvelteSnippetExpression {
+    SvelteSnippetExpression::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_SNIPPET_EXPRESSION,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(parameters.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
 pub fn svelte_snippet_opening_block(
     sv_curly_hash_token: SyntaxToken,
     snippet_token: SyntaxToken,
-    expression: HtmlTextExpression,
+    expression: SvelteSnippetExpression,
     r_curly_token: SyntaxToken,
     children: HtmlElementList,
 ) -> SvelteSnippetOpeningBlock {
@@ -1237,6 +1253,46 @@ pub fn svelte_snippet_opening_block(
             Some(SyntaxElement::Node(expression.into_syntax())),
             Some(SyntaxElement::Token(r_curly_token)),
             Some(SyntaxElement::Node(children.into_syntax())),
+        ],
+    ))
+}
+pub fn svelte_snippet_parameter(
+    binding: AnySvelteBindingAssignmentBinding,
+) -> SvelteSnippetParameterBuilder {
+    SvelteSnippetParameterBuilder {
+        binding,
+        default: None,
+    }
+}
+pub struct SvelteSnippetParameterBuilder {
+    binding: AnySvelteBindingAssignmentBinding,
+    default: Option<SvelteSnippetParameterDefaultValue>,
+}
+impl SvelteSnippetParameterBuilder {
+    pub fn with_default(mut self, default: SvelteSnippetParameterDefaultValue) -> Self {
+        self.default = Some(default);
+        self
+    }
+    pub fn build(self) -> SvelteSnippetParameter {
+        SvelteSnippetParameter::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::SVELTE_SNIPPET_PARAMETER,
+            [
+                Some(SyntaxElement::Node(self.binding.into_syntax())),
+                self.default
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn svelte_snippet_parameter_default_value(
+    eq_token: SyntaxToken,
+    value: HtmlTextExpression,
+) -> SvelteSnippetParameterDefaultValue {
+    SvelteSnippetParameterDefaultValue::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_SNIPPET_PARAMETER_DEFAULT_VALUE,
+        [
+            Some(SyntaxElement::Token(eq_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
         ],
     ))
 }
@@ -1575,6 +1631,27 @@ where
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn svelte_snippet_parameter_list<I, S>(items: I, separators: S) -> SvelteSnippetParameterList
+where
+    I: IntoIterator<Item = SvelteSnippetParameter>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = HtmlSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    SvelteSnippetParameterList::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::SVELTE_SNIPPET_PARAMETER_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
     ))
 }
 pub fn vue_modifier_list<I>(items: I) -> VueModifierList

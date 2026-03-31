@@ -522,9 +522,28 @@ SvelteSnippetBlock =
 SvelteSnippetOpeningBlock =
 	'{#'
 	'snippet'
-	expression: HtmlTextExpression
+	expression: SvelteSnippetExpression
 	'}'
 	children: HtmlElementList
+
+// f(name, age)
+// ^^^^^^^^^^^^
+SvelteSnippetExpression =
+	name: SvelteName
+	'('
+	parameters: SvelteSnippetParameterList
+	')'
+
+SvelteSnippetParameterList =
+	(SvelteSnippetParameter (',' SvelteSnippetParameter)*)
+
+SvelteSnippetParameter =
+	binding: AnySvelteBindingAssignmentBinding
+	default: SvelteSnippetParameterDefaultValue?
+
+SvelteSnippetParameterDefaultValue =
+	'='
+	value: HtmlTextExpression
 
 // {#snippet f()} ... {/snippet}
 //                   ^^^^^^^^^^
