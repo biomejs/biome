@@ -16,13 +16,24 @@ declare_lint_rule! {
     ///
     /// ## Options
     ///
-    /// Use the `drizzleObjectName` option to specify the variable names that represent Drizzle
-    /// ORM instances.
+    /// Use the `drizzleObjectName` option to specify the variable names or object paths that
+    /// represent Drizzle ORM instances.
     ///
     /// ```json,options
     /// {
     ///   "options": {
     ///     "drizzleObjectName": ["db"]
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// The option supports both simple identifiers (e.g., `db`) and member expressions
+    /// (e.g., `context.db`):
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "drizzleObjectName": ["context.db"]
     ///   }
     /// }
     /// ```

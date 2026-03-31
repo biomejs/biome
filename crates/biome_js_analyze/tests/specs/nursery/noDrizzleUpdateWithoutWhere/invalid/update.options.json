@@ -6,7 +6,10 @@
 				"noDrizzleUpdateWithoutWhere": {
 					"level": "error",
 					"options": {
-						"drizzleObjectName": ["db"]
+						"drizzleObjectName": [
+							"db",
+							"nested.db"
+						]
 					}
 				}
 			}

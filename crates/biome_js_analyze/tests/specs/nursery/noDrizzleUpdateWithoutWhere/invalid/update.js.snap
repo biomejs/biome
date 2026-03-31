@@ -8,15 +8,19 @@ expression: update.js
 
 // update with set but no where
 await db.update(users).set({ name: "John" });
+await nested.db.update(users).set({ name: "John" });
 
 // update without where, no await
 db.update(users).set({ name: "John" });
+nested.db.update(users).set({ name: "John" });
 
 // update assigned to variable without where
 const result = db.update(users).set({ active: false });
+const result2 = nested.db.update(users).set({ active: false });
 
 // .where as property access (not called) should still trigger
 db.update(users).set({ name: "John" }).where;
+nested.db.update(users).set({ name: "John" }).where;
 
 ```
 
@@ -29,8 +33,8 @@ update.js:4:7 lint/nursery/noDrizzleUpdateWithoutWhere ━━━━━━━━�
     3 │ // update with set but no where
   > 4 │ await db.update(users).set({ name: "John" });
       │       ^^^^^^^^^^^^^^^^
-    5 │ 
-    6 │ // update without where, no await
+    5 │ await nested.db.update(users).set({ name: "John" });
+    6 │ 
   
   i Add a .where() clause to update only the intended rows, or use .where(sql`1=1`) to explicitly update all rows.
   
@@ -40,15 +44,16 @@ update.js:4:7 lint/nursery/noDrizzleUpdateWithoutWhere ━━━━━━━━�
 ```
 
 ```
-update.js:7:1 lint/nursery/noDrizzleUpdateWithoutWhere ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+update.js:5:7 lint/nursery/noDrizzleUpdateWithoutWhere ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i .update() is used without .where(). This will update all rows in the table.
   
-    6 │ // update without where, no await
-  > 7 │ db.update(users).set({ name: "John" });
-      │ ^^^^^^^^^^^^^^^^
-    8 │ 
-    9 │ // update assigned to variable without where
+    3 │ // update with set but no where
+    4 │ await db.update(users).set({ name: "John" });
+  > 5 │ await nested.db.update(users).set({ name: "John" });
+      │       ^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ // update without where, no await
   
   i Add a .where() clause to update only the intended rows, or use .where(sql`1=1`) to explicitly update all rows.
   
@@ -58,32 +63,107 @@ update.js:7:1 lint/nursery/noDrizzleUpdateWithoutWhere ━━━━━━━━�
 ```
 
 ```
-update.js:10:16 lint/nursery/noDrizzleUpdateWithoutWhere ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+update.js:8:1 lint/nursery/noDrizzleUpdateWithoutWhere ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i .update() is used without .where(). This will update all rows in the table.
   
-     9 │ // update assigned to variable without where
-  > 10 │ const result = db.update(users).set({ active: false });
-       │                ^^^^^^^^^^^^^^^^
-    11 │ 
-    12 │ // .where as property access (not called) should still trigger
-  
-  i Add a .where() clause to update only the intended rows, or use .where(sql`1=1`) to explicitly update all rows.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-update.js:13:1 lint/nursery/noDrizzleUpdateWithoutWhere ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i .update() is used without .where(). This will update all rows in the table.
-  
-    12 │ // .where as property access (not called) should still trigger
-  > 13 │ db.update(users).set({ name: "John" }).where;
+     7 │ // update without where, no await
+   > 8 │ db.update(users).set({ name: "John" });
        │ ^^^^^^^^^^^^^^^^
+     9 │ nested.db.update(users).set({ name: "John" });
+    10 │ 
+  
+  i Add a .where() clause to update only the intended rows, or use .where(sql`1=1`) to explicitly update all rows.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+update.js:9:1 lint/nursery/noDrizzleUpdateWithoutWhere ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i .update() is used without .where(). This will update all rows in the table.
+  
+     7 │ // update without where, no await
+     8 │ db.update(users).set({ name: "John" });
+   > 9 │ nested.db.update(users).set({ name: "John" });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+    11 │ // update assigned to variable without where
+  
+  i Add a .where() clause to update only the intended rows, or use .where(sql`1=1`) to explicitly update all rows.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+update.js:12:16 lint/nursery/noDrizzleUpdateWithoutWhere ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i .update() is used without .where(). This will update all rows in the table.
+  
+    11 │ // update assigned to variable without where
+  > 12 │ const result = db.update(users).set({ active: false });
+       │                ^^^^^^^^^^^^^^^^
+    13 │ const result2 = nested.db.update(users).set({ active: false });
     14 │ 
+  
+  i Add a .where() clause to update only the intended rows, or use .where(sql`1=1`) to explicitly update all rows.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+update.js:13:17 lint/nursery/noDrizzleUpdateWithoutWhere ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i .update() is used without .where(). This will update all rows in the table.
+  
+    11 │ // update assigned to variable without where
+    12 │ const result = db.update(users).set({ active: false });
+  > 13 │ const result2 = nested.db.update(users).set({ active: false });
+       │                 ^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 
+    15 │ // .where as property access (not called) should still trigger
+  
+  i Add a .where() clause to update only the intended rows, or use .where(sql`1=1`) to explicitly update all rows.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+update.js:16:1 lint/nursery/noDrizzleUpdateWithoutWhere ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i .update() is used without .where(). This will update all rows in the table.
+  
+    15 │ // .where as property access (not called) should still trigger
+  > 16 │ db.update(users).set({ name: "John" }).where;
+       │ ^^^^^^^^^^^^^^^^
+    17 │ nested.db.update(users).set({ name: "John" }).where;
+    18 │ 
+  
+  i Add a .where() clause to update only the intended rows, or use .where(sql`1=1`) to explicitly update all rows.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+update.js:17:1 lint/nursery/noDrizzleUpdateWithoutWhere ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i .update() is used without .where(). This will update all rows in the table.
+  
+    15 │ // .where as property access (not called) should still trigger
+    16 │ db.update(users).set({ name: "John" }).where;
+  > 17 │ nested.db.update(users).set({ name: "John" }).where;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ 
   
   i Add a .where() clause to update only the intended rows, or use .where(sql`1=1`) to explicitly update all rows.
   

@@ -1,10 +1,23 @@
 use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsStaticMemberExpression, JsSyntaxKind};
-use biome_rowan::{AstNode, SyntaxNode};
+use biome_rowan::{AstNode, RawSyntaxKind, SyntaxNode, TokenText};
 
-pub(crate) fn get_identifier_name(expr: &AnyJsExpression) -> Option<biome_rowan::TokenText> {
+pub(crate) fn get_identifier_name(expr: &AnyJsExpression) -> Option<TokenText> {
     match expr {
         AnyJsExpression::JsIdentifierExpression(id) => {
             Some(id.name().ok()?.value_token().ok()?.token_text_trimmed())
+        }
+        AnyJsExpression::JsStaticMemberExpression(member) => {
+            let object = member.object().ok()?;
+            let object_name = get_identifier_name(&object)?;
+            let member_name = member
+                .member()
+                .ok()?
+                .as_js_name()?
+                .value_token()
+                .ok()?
+                .token_text_trimmed();
+            let full_name = format!("{}.{}", object_name, member_name);
+            Some(TokenText::new_raw(RawSyntaxKind(0), &full_name))
         }
         _ => None,
     }
