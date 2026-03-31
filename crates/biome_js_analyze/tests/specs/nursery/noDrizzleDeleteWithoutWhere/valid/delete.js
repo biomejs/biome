@@ -2,7 +2,7 @@
 
 // delete with where
 await db.delete(users).where(eq(users.id, 1));
-nested.db.delete(users).where(eq(users.id, 1));
+await nested.db.delete(users).where(eq(users.id, 1));
 
 // delete with where, no await
 db.delete(users).where(eq(users.id, 1));
