@@ -22,7 +22,7 @@ use tracing::{debug, error};
 #[derive(Debug, Default, PartialEq, Eq)]
 pub struct SvelteFileHandler;
 
-// https://regex101.com/r/E4n4hh/6
+// https://regex101.com/r/oV6XMO/1
 pub static SVELTE_FENCE: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r#"(?ixs)(?<opening><script(?:\s+(?:[^>"']*|"[^"]*"|'[^']*')*)?>)\r?\n?(?<script>(?U:.*))</script>"#).unwrap()
 });
