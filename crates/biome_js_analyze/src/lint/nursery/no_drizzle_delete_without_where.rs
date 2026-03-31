@@ -22,18 +22,7 @@ declare_lint_rule! {
     /// ```json,options
     /// {
     ///   "options": {
-    ///     "drizzleObjectName": ["db"]
-    ///   }
-    /// }
-    /// ```
-    ///
-    /// The option supports both simple identifiers (e.g., `db`) and member expressions
-    /// (e.g., `context.db`):
-    ///
-    /// ```json,options
-    /// {
-    ///   "options": {
-    ///     "drizzleObjectName": ["context.db"]
+    ///     "drizzleObjectName": ["db", "context.db"]
     ///   }
     /// }
     /// ```
