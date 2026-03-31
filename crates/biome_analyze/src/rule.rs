@@ -816,9 +816,7 @@ impl RuleMetadata {
                 ActionCategory::QuickFix(Cow::Owned(format!("{}.{}", group, self.name)))
             }
             RuleCategory::Action => match self.name {
-                "organizeImports" => {
-                    ActionCategory::Source(SourceActionKind::OrganizeImports)
-                }
+                "organizeImports" => ActionCategory::Source(SourceActionKind::OrganizeImports),
                 other => ActionCategory::Source(SourceActionKind::Other(Cow::Borrowed(other))),
             },
             RuleCategory::Syntax | RuleCategory::Transformation => unimplemented!(""),
