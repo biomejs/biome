@@ -229,7 +229,7 @@ fn is_thematic_break_pattern(p: &mut MarkdownParser) -> bool {
     // Determine which character to check for
     let first_char = line.trim_start().chars().next();
     let break_char = match first_char {
-        Some('*' | '-' | '_') => first_char.unwrap(),
+        Some(c @ ('*' | '-' | '_')) => c,
         _ => return false,
     };
 

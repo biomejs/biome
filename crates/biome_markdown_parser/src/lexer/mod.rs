@@ -785,7 +785,10 @@ impl<'src> MarkdownLexer<'src> {
                 b'*' => STAR,
                 b'_' => UNDERSCORE,
                 b'-' => MINUS,
-                _ => unreachable!(),
+                _ => {
+                    debug_assert!(false, "unexpected byte in emphasis marker");
+                    MD_TEXTUAL_LITERAL
+                }
             };
         }
 
@@ -796,7 +799,10 @@ impl<'src> MarkdownLexer<'src> {
             return match start_char {
                 b'*' => DOUBLE_STAR,
                 b'_' => DOUBLE_UNDERSCORE,
-                _ => unreachable!(),
+                _ => {
+                    debug_assert!(false, "unexpected byte in double emphasis marker");
+                    MD_TEXTUAL_LITERAL
+                }
             };
         }
 
@@ -806,7 +812,10 @@ impl<'src> MarkdownLexer<'src> {
             b'*' => STAR,
             b'_' => UNDERSCORE,
             b'-' => MINUS,
-            _ => unreachable!(),
+            _ => {
+                debug_assert!(false, "unexpected byte in single emphasis marker");
+                MD_TEXTUAL_LITERAL
+            }
         }
     }
 
