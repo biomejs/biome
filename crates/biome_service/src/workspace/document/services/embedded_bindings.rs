@@ -1,3 +1,7 @@
+use biome_html_syntax::{
+    AnySvelteBindingAssignmentBinding, AnySvelteDestructuredName, HtmlRoot, SvelteName,
+    SvelteSnippetBlock,
+};
 use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsBindingPattern, AnyJsExpression, AnyJsModuleItem,
     AnyJsObjectBindingPatternMember, AnyJsObjectMember, AnyJsRoot, AnyJsStatement,
@@ -49,6 +53,27 @@ impl EmbeddedBuilder {
                     }
                 }
                 WalkEvent::Leave(_) => {}
+            }
+        }
+    }
+
+    /// To call when visiting an HTML root, where Svelte snippet parameters can define bindings.
+    pub(crate) fn visit_html_root(&mut self, root: &HtmlRoot) {
+        for node in root.syntax().descendants() {
+            let Some(snippet_block) = SvelteSnippetBlock::cast_ref(&node) else {
+                continue;
+            };
+            let Ok(opening_block) = snippet_block.opening_block() else {
+                continue;
+            };
+            let Ok(expression) = opening_block.expression() else {
+                continue;
+            };
+
+            for parameter in expression.parameters().iter().flatten() {
+                if let Ok(binding) = parameter.binding() {
+                    self.visit_svelte_binding_assignment_binding(&binding);
+                }
             }
         }
     }
@@ -449,6 +474,48 @@ impl EmbeddedBuilder {
         }
 
         Some(())
+    }
+
+    fn visit_svelte_binding_assignment_binding(
+        &mut self,
+        binding: &AnySvelteBindingAssignmentBinding,
+    ) {
+        match binding {
+            AnySvelteBindingAssignmentBinding::SvelteName(name) => {
+                self.register_svelte_name(name);
+            }
+            AnySvelteBindingAssignmentBinding::SvelteRestBinding(rest) => {
+                if let Ok(name) = rest.name() {
+                    self.register_svelte_name(&name);
+                }
+            }
+            AnySvelteBindingAssignmentBinding::AnySvelteDestructuredName(destructured) => {
+                self.visit_svelte_destructured_name(destructured);
+            }
+        }
+    }
+
+    fn visit_svelte_destructured_name(&mut self, destructured: &AnySvelteDestructuredName) {
+        match destructured {
+            AnySvelteDestructuredName::SvelteCurlyDestructuredName(curly) => {
+                for binding in curly.names().iter().flatten() {
+                    self.visit_svelte_binding_assignment_binding(&binding);
+                }
+            }
+            AnySvelteDestructuredName::SvelteSquareDestructuredName(square) => {
+                for binding in square.names().iter().flatten() {
+                    self.visit_svelte_binding_assignment_binding(&binding);
+                }
+            }
+        }
+    }
+
+    fn register_svelte_name(&mut self, name: &SvelteName) {
+        let Ok(token) = name.ident_token() else {
+            return;
+        };
+        self.js_bindings
+            .insert(token.text_trimmed_range(), token.token_text_trimmed());
     }
 }
 

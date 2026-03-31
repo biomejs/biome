@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: valid-svelte-snippet-params.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+{#snippet row(user)}
+    <p>{user}</p>
+{/snippet}
+
+```
