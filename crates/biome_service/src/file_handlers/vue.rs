@@ -213,3 +213,39 @@ fn fix_all(mut params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
     }
     javascript::fix_all(params)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::VueFileHandler;
+
+    #[test]
+    fn vue_file_source_simple_ts() {
+        let src = "<script lang=\"ts\">\nimport type { Foo } from \"bar\";\n</script>";
+        assert!(VueFileHandler::file_source(src).is_typescript());
+    }
+
+    #[test]
+    fn vue_file_source_simple_js() {
+        let src = "<script>\nimport { foo } from \"bar\";\n</script>";
+        assert!(!VueFileHandler::file_source(src).is_typescript());
+    }
+
+    #[test]
+    fn vue_file_source_setup_ts() {
+        let src = "<script setup lang=\"ts\">\nimport type { Foo } from \"bar\";\n</script>";
+        assert!(VueFileHandler::file_source(src).is_typescript());
+    }
+
+    #[test]
+    fn vue_file_source_attr_with_gt_in_quotes() {
+        let src = "<script lang=\"ts\" data-info=\"a>b\">\nimport type { Foo } from \"bar\";\n</script>";
+        assert!(VueFileHandler::file_source(src).is_typescript());
+    }
+
+    #[test]
+    fn vue_input_with_gt_in_attr() {
+        let src = "<script lang=\"ts\" data-info=\"a>b\">\nimport type { Foo } from \"bar\";\n</script>";
+        let input = VueFileHandler::input(src);
+        assert_eq!(input, "import type { Foo } from \"bar\";\n");
+    }
+}
