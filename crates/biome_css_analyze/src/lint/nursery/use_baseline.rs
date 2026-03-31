@@ -325,7 +325,7 @@ impl FeatureName {
         match self {
             Self::Token(name) => name.text().to_string(),
             Self::PropertyValue(key, value) => format!("{}: {}", key.text(), value.text()),
-            Self::String(name) => name.to_string(),
+            Self::String(name) => (*name).to_string(),
         }
     }
 

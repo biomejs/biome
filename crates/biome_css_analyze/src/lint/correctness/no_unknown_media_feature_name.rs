@@ -231,7 +231,7 @@ fn has_invalid_media_feature_name(any_css_media_in_parens: AnyCssMediaInParens) 
                         }
                         return Some(true);
                     }
-                    MediaFeatureName::Dynamic => continue,
+                    MediaFeatureName::Dynamic => {}
                 }
             }
             AnyCssMediaInParens::CssMediaConditionInParens(css_media_condition_in_parens) => {
