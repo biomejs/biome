@@ -372,7 +372,11 @@ MdThematicBreakBlock = parts: MdThematicBreakPartList
 // Used when a NEWLINE appears between blocks and isn't part of inline content.
 MdNewline = value: 'NEWLINE'
 
-// Block-level continuation indent for list item content.
+// Indentation on a continuation line inside a list item, e.g. the two spaces
+// before `bar` in:
+// - foo
+//   bar
+// See CommonMark §5.2: https://spec.commonmark.org/0.31.2/#list-items
 // Wraps the structural indent that check_continuation_indent consumes
 // before block detection.
 MdContinuationIndent = indent: MdIndentTokenList

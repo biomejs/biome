@@ -2041,8 +2041,10 @@ fn check_continuation_indent(
                 };
             }
 
-            // Emit continuation indent as an explicit MdContinuationIndent
-            // node so it appears in the CST rather than as skipped trivia.
+            // Emit the indentation for a continuation line inside a list item
+            // as an explicit MdContinuationIndent node so it appears in the
+            // CST rather than as skipped trivia. See CommonMark §5.2:
+            // https://spec.commonmark.org/0.31.2/#list-items
             let ci_m = p.start();
             p.emit_line_indent(state.required_indent);
             ci_m.complete(p, MD_CONTINUATION_INDENT);
