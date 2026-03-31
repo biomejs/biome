@@ -1,7 +1,8 @@
 use crate::prelude::*;
-use crate::verbatim::format_html_verbatim_node;
-use biome_html_syntax::SvelteSnippetParameterDefaultValue;
-use biome_rowan::AstNode;
+use biome_formatter::write;
+use biome_html_syntax::{
+    SvelteSnippetParameterDefaultValue, SvelteSnippetParameterDefaultValueFields,
+};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatSvelteSnippetParameterDefaultValue;
 impl FormatNodeRule<SvelteSnippetParameterDefaultValue>
@@ -12,6 +13,8 @@ impl FormatNodeRule<SvelteSnippetParameterDefaultValue>
         node: &SvelteSnippetParameterDefaultValue,
         f: &mut HtmlFormatter,
     ) -> FormatResult<()> {
-        format_html_verbatim_node(node.syntax()).fmt(f)
+        let SvelteSnippetParameterDefaultValueFields { eq_token, value } = node.as_fields();
+
+        write!(f, [space(), eq_token.format(), space(), value.format()])
     }
 }

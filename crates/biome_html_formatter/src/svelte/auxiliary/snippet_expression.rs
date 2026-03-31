@@ -1,7 +1,6 @@
 use crate::prelude::*;
-use crate::verbatim::format_html_verbatim_node;
-use biome_html_syntax::SvelteSnippetExpression;
-use biome_rowan::AstNode;
+use biome_formatter::write;
+use biome_html_syntax::{SvelteSnippetExpression, SvelteSnippetExpressionFields};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatSvelteSnippetExpression;
 impl FormatNodeRule<SvelteSnippetExpression> for FormatSvelteSnippetExpression {
@@ -10,6 +9,21 @@ impl FormatNodeRule<SvelteSnippetExpression> for FormatSvelteSnippetExpression {
         node: &SvelteSnippetExpression,
         f: &mut HtmlFormatter,
     ) -> FormatResult<()> {
-        format_html_verbatim_node(node.syntax()).fmt(f)
+        let SvelteSnippetExpressionFields {
+            name,
+            l_paren_token,
+            parameters,
+            r_paren_token,
+        } = node.as_fields();
+
+        write!(
+            f,
+            [
+                name.format(),
+                l_paren_token.format(),
+                parameters.format(),
+                r_paren_token.format()
+            ]
+        )
     }
 }

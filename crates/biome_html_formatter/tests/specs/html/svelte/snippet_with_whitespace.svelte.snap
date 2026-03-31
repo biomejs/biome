@@ -1,5 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 240
 info: svelte/snippet_with_whitespace.svelte
 ---
 
@@ -16,7 +17,7 @@ info: svelte/snippet_with_whitespace.svelte
 # Formatted
 
 ```svelte
-{#snippet greeting(    name    )}
+{#snippet greeting(name)}
 	<p>Hello, {name}!</p>
 {/snippet}
 
