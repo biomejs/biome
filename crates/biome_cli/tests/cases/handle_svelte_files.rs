@@ -23,6 +23,18 @@ const hello  :      string      = "world";
 </script>
 <div></div>"#;
 
+const SVELTE_TS_GENERICS_FILE_UNFORMATTED: &str = r#"<script lang="ts" generics="T extends Record<string, unknown>, U extends FormPath<T>">
+import     type     { FormPath }     from "sveltekit-superforms";
+const hello  :      string      = "world";
+</script>
+<div></div>"#;
+
+const SVELTE_TS_GENERICS_FILE_FORMATTED: &str = r#"<script lang="ts" generics="T extends Record<string, unknown>, U extends FormPath<T>">
+import type { FormPath } from "sveltekit-superforms";
+const hello: string = "world";
+</script>
+<div></div>"#;
+
 const SVELTE_CARRIAGE_RETURN_LINE_FEED_FILE_UNFORMATTED: &str =
     "<script>\r\n  const a    = \"b\";\r\n</script>\r\n<div></div>";
 
@@ -537,6 +549,66 @@ fn check_stdin_write_unsafe_successfully() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "check_stdin_write_unsafe_successfully",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_svelte_ts_generics_files() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let svelte_file_path = Utf8Path::new("file.svelte");
+    fs.insert(
+        svelte_file_path.into(),
+        SVELTE_TS_GENERICS_FILE_UNFORMATTED.as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", svelte_file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, svelte_file_path, SVELTE_TS_GENERICS_FILE_UNFORMATTED);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_svelte_ts_generics_files",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_svelte_ts_generics_files_write() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let svelte_file_path = Utf8Path::new("file.svelte");
+    fs.insert(
+        svelte_file_path.into(),
+        SVELTE_TS_GENERICS_FILE_UNFORMATTED.as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", svelte_file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, svelte_file_path, SVELTE_TS_GENERICS_FILE_FORMATTED);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_svelte_ts_generics_files_write",
         fs,
         console,
         result,
