@@ -7,7 +7,7 @@ mod primary;
 use biome_css_syntax::{CssSyntaxKind, CssSyntaxKind::SCSS_RECOVERED_OUTER_STRING_QUOTE, T};
 use biome_parser::{Parser, TokenSet, token_set};
 
-use super::is_at_scss_variable_modifier_start;
+use super::is_at_scss_variable_modifier;
 
 pub(crate) use interpolation::{
     is_at_scss_interpolation, is_nth_at_scss_interpolation, parse_scss_interpolation_prefix,
@@ -109,5 +109,5 @@ pub(super) fn is_at_scss_expression_end(
     p.at_ts(options.end_ts)
         || p.at(T![')'])
         || (options.stops_at_string_quote && p.at(SCSS_RECOVERED_OUTER_STRING_QUOTE))
-        || (options.stops_before_variable_modifiers && is_at_scss_variable_modifier_start(p))
+        || (options.stops_before_variable_modifiers && is_at_scss_variable_modifier(p))
 }
