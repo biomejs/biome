@@ -19,14 +19,23 @@ use std::{borrow::Cow, cmp::Ordering, iter::zip};
 declare_source_rule! {
     /// Enforce attribute sorting in HTML elements.
     ///
-    /// This rule checks if the HTML attributes are sorted in a consistent way.
-    /// Attributes are sorted alphabetically using a [natural sort order](https://en.wikipedia.org/wiki/Natural_sort_order).
+    /// This rule checks if HTML attributes, along with Astro, Svelte, and Vue directives,
+    /// are sorted in a consistent way.
+    /// The sort order is:
+    /// - Regular HTML attributes, sorted alphabetically according to the `sortOrder` option
+    /// - Astro directives, sorted alphabetically according to `sortOrder`
+    /// - Svelte directives, sorted according to eslint-plugin-svelte's [`sort-attributes` rule](https://sveltejs.github.io/eslint-plugin-svelte/rules/sort-attributes/)
+    /// - Vue directives, sorted according to the [Vue.js Style Guide](https://eslint.vuejs.org/rules/attributes-order)
     ///
-    /// This rule will not consider spread props, Vue, Svelte, or Astro directives as sortable.
-    /// Instead, it will sort each group of consecutive HTML attributes within the element,
-    /// leaving any spread props, Vue, Svelte, or Astro directives in place.
+    /// If two attributes belong to the same category, they will be sorted alphabetically
+    /// according to `sortOrder`.
+    ///
+    /// This rule will not consider spread props or the [Vue `v-bind="object"` syntax](https://vuejs.org/guide/essentials/template-syntax.html#dynamically-binding-multiple-attributes)
+    /// as sortable.
+    /// Instead, it will sort each group of consecutive sortable attributes within the element,
+    /// leaving any spread props or `v-bind="object"` attributes in place.
     /// This prevents breaking the override of certain props using spread
-    /// props and avoids changing the behavior of Vue or Svelte code.
+    /// props or `v-bind="object"`.
     ///
     /// ## Examples
     ///
@@ -40,6 +49,22 @@ declare_source_rule! {
     /// <textarea id="mytextarea" name="textarea" rows="5" cols="20" data-1="" data-11="" data-12="" data-2="">Hello, world!</textarea>
     /// ```
     ///
+    /// ```astro,expect_diagnostic
+    ///   <svg slot="fallback" class="generic-avatar" transition:name="avatar">...</svg>
+    /// ```
+    ///
+    /// ```svelte,expect_diagnostic
+    ///   	<input type="range" bind:value={b} min="0" max="10" />
+    /// ```
+    ///
+    /// ```svelte,expect_diagnostic
+    ///   	<div bind:value2={a} bind:value1={a} {...props} style:color="red">...</div>
+    /// ```
+    ///
+    /// ```vue,expect_diagnostic
+    ///   	<input @input="onInput" :value="text" placeholder="Type here">
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```html
@@ -50,6 +75,22 @@ declare_source_rule! {
     /// <textarea cols="20" data-1="" data-2="" data-11="" data-12="" id="mytextarea" name="textarea" rows="5">Hello, world!</textarea>
     /// ```
     ///
+    /// ```astro
+    ///   <svg class="generic-avatar" slot="fallback" transition:name="avatar">...</svg>
+    /// ```
+    ///
+    /// ```svelte
+    ///   	<input max="10" min="0" type="range" bind:value={b} />
+    /// ```
+    ///
+    /// ```svelte
+    ///   	<div bind:value1={a} bind:value2={a} {...props} style:color="red">...</div>
+    /// ```
+    ///
+    /// ```vue
+    ///   	<input placeholder="Type here" :value="text" @input="onInput" >
+    /// ```
+    ///
     /// ## Options
     ///
     /// The following options are available
@@ -58,8 +99,8 @@ declare_source_rule! {
     /// The sort ordering to enforce.
     /// Values:
     ///
-    /// - `"natural"`
-    /// - `"lexicographic"`
+    /// - `"[natural](https://en.wikipedia.org/wiki/Natural_sort_order)"`
+    /// - `"[lexicographic](https://en.wikipedia.org/wiki/Lexicographic_order)"`
     ///
     /// Default: `"natural"`
     ///
@@ -81,7 +122,7 @@ declare_source_rule! {
         name: "useSortedAttributes",
         language: "html",
         recommended: false,
-        sources: &[RuleSource::HtmlEslint("sort-attrs").inspired()],
+        sources: &[RuleSource::HtmlEslint("sort-attrs").inspired(), RuleSource::EslintVueJs("attributes-order").inspired()],
         fix_kind: FixKind::Safe,
     }
 }
@@ -186,7 +227,7 @@ impl Rule for UseSortedAttributes {
 fn is_v_bind_object(attr: &AnyHtmlAttribute) -> bool {
     if let AnyHtmlAttribute::AnyVueDirective(AnyVueDirective::VueDirective(dir)) = attr {
         if let Ok(attr_name) = dir.name_token().as_ref().map(|token| token.text_trimmed()) {
-            attr_name == "v-bind" && dir.arg() == None
+            attr_name == "v-bind" && dir.arg().is_none()
         } else {
             false
         }
