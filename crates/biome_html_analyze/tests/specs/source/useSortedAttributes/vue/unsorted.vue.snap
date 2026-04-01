@@ -46,6 +46,28 @@ expression: unsorted.vue
   :class="{ red: isRed }"
 ></div>
 
+<!-- attributes within the same category  -->
+<div v-if="awesome" v-else v-else-if="type === 'B'" v-show="ok">
+</div>
+
+<!-- <div v-pre v-once></div> -->
+
+<div ref="my-ref" :key="item.id"></div>
+
+<!-- <div v-slot="{ x, y }" v-slot:default v-slot:footer #header #[dynamicSlotName]></div> -->
+
+<!-- <div v-slot:footer v-slot="{ x, y }" v-slot:default #header #[dynamicSlotName]></div> -->
+
+<!-- <div v-slot:default #[dynamicSlotName] v-slot:footer v-slot="{ x, y }" #header></div> -->
+
+<!-- <div v-mycustomdirectiveb v-mycustomdirectivea></div> -->
+
+<!-- <div v-bind:propc="foo" v-bind:propb="foo" :propa="foo"></div> -->
+
+<!-- <div @scroll.passive="onScroll" @click.stop="doThis" v-on:click="doThis" @click.prevent="doThis"></div> -->
+
+<!-- <div v-text="msg" v-html="html"></div> -->
+
 ```
 
 # Diagnostics
@@ -113,12 +135,12 @@ unsorted.vue:3:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━�
         8 │ + ··v-for="item·in·items"
         9 │ + ··v-if="awesome"
        10 │ + ··v-once
-       11 │ + ··ref="my-ref"
-       12 │ + ··:key="item.id"
+       11 │ + ··:key="item.id"
+       12 │ + ··ref="my-ref"
        13 │ + ··v-slot:default
        14 │ + ··v-model="countModel"
-       15 │ + ··v-bind:src="'/path/to/images/'·+·fileName"
-       16 │ + ··:class="{·red:·isRed·}"
+       15 │ + ··:class="{·red:·isRed·}"
+       16 │ + ··v-bind:src="'/path/to/images/'·+·fileName"
        17 │ + ··v-on:click="doThis"
        18 │ + ··@scroll.passive="onScroll"
        19 │ + ··v-text="msg"
@@ -138,11 +160,45 @@ unsorted.vue:23:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━
        │ ^^^^^
   > 24 │   v-slot:default
         ...
-  > 39 │   v-if="awesome"
   > 40 │   :class="{ red: isRed }"
   > 41 │ ></div>
        │ ^
     42 │ 
+    43 │ <!-- attributes within the same category  -->
+  
+  i Safe fix: Sort the HTML attributes.
+  
+    22 22 │   <!-- with v-bind="object" -->
+    23 23 │   <div·
+    24    │ - ··v-slot:default
+    25    │ - ··v-on:click="doThis"
+    26    │ - ··v-once
+    27    │ - ··ref="my-ref"
+       24 │ + ··v-once
+       25 │ + ··ref="my-ref"
+       26 │ + ··v-slot:default
+       27 │ + ··v-on:click="doThis"
+    28 28 │     v-bind="{ id: someProp, 'other-attr': otherProp }"
+    29 29 │     :key="item.id"
+  
+
+```
+
+```
+unsorted.vue:23:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+    22 │ <!-- with v-bind="object" -->
+  > 23 │ <div·
+       │ ^^^^^
+  > 24 │   v-slot:default
+        ...
+  > 40 │   :class="{ red: isRed }"
+  > 41 │ ></div>
+       │ ^
+    42 │ 
+    43 │ <!-- attributes within the same category  -->
   
   i Safe fix: Sort the HTML attributes.
   
@@ -168,8 +224,8 @@ unsorted.vue:23:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━
        34 │ + ··v-if="awesome"
        35 │ + ··:key="item.id"
        36 │ + ··v-model="countModel"
-       37 │ + ··v-bind:src="'/path/to/images/'·+·fileName"
-       38 │ + ··:class="{·red:·isRed·}"
+       37 │ + ··:class="{·red:·isRed·}"
+       38 │ + ··v-bind:src="'/path/to/images/'·+·fileName"
        39 │ + ··@scroll.passive="onScroll"
        40 │ + ··v-text="msg"
     41 41 │   ></div>
@@ -179,35 +235,48 @@ unsorted.vue:23:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━
 ```
 
 ```
-unsorted.vue:23:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.vue:44:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The attributes are not sorted.
   
-    22 │ <!-- with v-bind="object" -->
-  > 23 │ <div·
-       │ ^^^^^
-  > 24 │   v-slot:default
-        ...
-  > 39 │   v-if="awesome"
-  > 40 │   :class="{ red: isRed }"
-  > 41 │ ></div>
-       │ ^
-    42 │ 
+    43 │ <!-- attributes within the same category  -->
+  > 44 │ <div v-if="awesome" v-else v-else-if="type === 'B'" v-show="ok">
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    45 │ </div>
+    46 │ 
   
   i Safe fix: Sort the HTML attributes.
   
-    22 22 │   <!-- with v-bind="object" -->
-    23 23 │   <div·
-    24    │ - ··v-slot:default
-    25    │ - ··v-on:click="doThis"
-    26    │ - ··v-once
-    27    │ - ··ref="my-ref"
-       24 │ + ··v-once
-       25 │ + ··ref="my-ref"
-       26 │ + ··v-slot:default
-       27 │ + ··v-on:click="doThis"
-    28 28 │     v-bind="{ id: someProp, 'other-attr': otherProp }"
-    29 29 │     :key="item.id"
+    42 42 │   
+    43 43 │   <!-- attributes within the same category  -->
+    44    │ - <div·v-if="awesome"·v-else·v-else-if="type·===·'B'"·v-show="ok">
+       44 │ + <div·v-else·v-else-if="type·===·'B'"·v-if="awesome"·v-show="ok">
+    45 45 │   </div>
+    46 46 │   
+  
+
+```
+
+```
+unsorted.vue:49:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+    47 │ <!-- <div v-pre v-once></div> -->
+    48 │ 
+  > 49 │ <div ref="my-ref" :key="item.id"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    50 │ 
+    51 │ <!-- <div v-slot="{ x, y }" v-slot:default v-slot:footer #header #[dynamicSlotName]></div> -->
+  
+  i Safe fix: Sort the HTML attributes.
+  
+    47 47 │   <!-- <div v-pre v-once></div> -->
+    48 48 │   
+    49    │ - <div·ref="my-ref"·:key="item.id"></div>
+       49 │ + <div·:key="item.id"ref="my-ref"·></div>
+    50 50 │   
+    51 51 │   <!-- <div v-slot="{ x, y }" v-slot:default v-slot:footer #header #[dynamicSlotName]></div> -->
   
 
 ```

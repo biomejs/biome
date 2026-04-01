@@ -48,16 +48,16 @@
 
 <div ref="my-ref" :key="item.id"></div>
 
-<div v-slot="{ x, y }" v-slot:default v-slot:footer #header #[dynamicSlotName]></div>
+<!-- <div v-slot="{ x, y }" v-slot:default v-slot:footer #header #[dynamicSlotName]></div> -->
 
-<div v-slot:footer v-slot="{ x, y }" v-slot:default #header #[dynamicSlotName]></div>
+<!-- <div v-slot:footer v-slot="{ x, y }" v-slot:default #header #[dynamicSlotName]></div> -->
 
-<div v-slot:default #[dynamicSlotName] v-slot:footer v-slot="{ x, y }" #header></div>
+<!-- <div v-slot:default #[dynamicSlotName] v-slot:footer v-slot="{ x, y }" #header></div> -->
 
 <!-- <div v-mycustomdirectiveb v-mycustomdirectivea></div> -->
 
-<div v-bind:propc="foo" v-bind:propb="foo" :propa="foo"></div>
+<!-- <div v-bind:propc="foo" v-bind:propb="foo" :propa="foo"></div> -->
 
-<div @scroll.passive="onScroll" @click.stop="doThis" v-on:click="doThis" @click.prevent="doThis"></div>
+<!-- <div @scroll.passive="onScroll" @click.stop="doThis" v-on:click="doThis" @click.prevent="doThis"></div> -->
 
-<div v-text="msg" v-html="html"></div>
+<!-- <div v-text="msg" v-html="html"></div> -->

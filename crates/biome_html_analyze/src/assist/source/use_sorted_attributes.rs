@@ -168,6 +168,9 @@ impl Rule for UseSortedAttributes {
             zip(state.attrs.iter(), state.get_sorted_attributes(comparator))
         {
             // TODO make sure sorted_attr has trailing whitespace if it is not the last attribute in the group
+            // if sorted_attr.syntax().last_trailing_trivia().is_none() {
+            //     sorted_attr = sorted_attr.append_trivia_pieces([TriviaPiece::whitespace(1)]);
+            // }
             mutation.replace_node_discard_trivia(attr.clone(), sorted_attr);
         }
 
