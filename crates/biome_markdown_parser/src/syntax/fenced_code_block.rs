@@ -23,6 +23,7 @@
 //! that can be used for syntax highlighting.
 
 use crate::parser::MarkdownParser;
+use crate::token_source::find_line_start;
 use biome_markdown_syntax::{T, kind::MarkdownSyntaxKind::*};
 use biome_parser::{
     Parser,
@@ -105,26 +106,6 @@ fn bump_fence(p: &mut MarkdownParser, is_tilde_fence: bool) {
         p.bump(T!["```"]);
     } else {
         p.bump_remap(T!["```"]);
-    }
-}
-
-/// Find the start position of the current line in the source text.
-///
-/// Given a slice of text before the current position, finds the byte offset
-/// where the current line begins (after the last newline, handling CRLF).
-fn find_line_start(before: &str) -> usize {
-    let last_newline_pos = before.rfind(['\n', '\r']);
-    match last_newline_pos {
-        Some(pos) => {
-            let bytes = before.as_bytes();
-            // Handle CRLF: if we found \r and next char is \n, skip both
-            if bytes.get(pos) == Some(&b'\r') && bytes.get(pos + 1) == Some(&b'\n') {
-                pos + 2
-            } else {
-                pos + 1
-            }
-        }
-        None => 0,
     }
 }
 

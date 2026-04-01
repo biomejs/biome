@@ -43,6 +43,7 @@ use crate::syntax::parse_any_block_with_indent_code_policy;
 use crate::syntax::parse_error::quote_nesting_too_deep;
 use crate::syntax::{
     INDENT_CODE_BLOCK_SPACES, MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES, is_paragraph_like,
+    is_whitespace_only,
 };
 
 /// Check if we're at the start of a block quote (`>`).
@@ -195,11 +196,6 @@ fn emit_quote_pre_marker_indents(p: &mut MarkdownParser) {
     }
 
     indent_list_m.complete(p, MD_QUOTE_INDENT_LIST);
-}
-
-/// Check if text contains only spaces and tabs.
-fn is_whitespace_only(text: &str) -> bool {
-    !text.is_empty() && text.chars().all(|c| c == ' ' || c == '\t')
 }
 
 /// Calculate indent width accounting for tab expansion (CommonMark §2.2).

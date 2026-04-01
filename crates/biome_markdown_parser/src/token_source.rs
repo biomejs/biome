@@ -11,7 +11,7 @@ use biome_rowan::{TextRange, TriviaPieceKind};
 ///
 /// Given a slice of text, finds the byte offset where the current line begins
 /// (after the last newline, handling CRLF).
-fn find_line_start(before: &str) -> usize {
+pub(crate) fn find_line_start(before: &str) -> usize {
     let last_newline_pos = before.rfind(['\n', '\r']);
     match last_newline_pos {
         Some(pos) => {

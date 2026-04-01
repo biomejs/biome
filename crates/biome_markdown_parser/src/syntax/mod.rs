@@ -1780,7 +1780,7 @@ fn is_empty_list_item(p: &mut MarkdownParser) -> bool {
     is_empty
 }
 
-fn is_whitespace_only(text: &str) -> bool {
+pub(crate) fn is_whitespace_only(text: &str) -> bool {
     !text.is_empty() && text.chars().all(|c| c == ' ' || c == '\t')
 }
 
