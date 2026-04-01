@@ -15,16 +15,10 @@ impl FormatNodeRule<MdListMarkerPrefix> for FormatMdListMarkerPrefix {
         } = node.as_fields();
 
         let marker = marker?;
-        let marker_text = marker.text_trimmed();
         let target = self.target_marker.unwrap_or("-");
 
         write!(f, [pre_marker_indent.format()])?;
-
-        if marker_text != target {
-            write!(f, [format_replaced(&marker, &token(target))])?;
-        } else {
-            write!(f, [marker.format()])?;
-        }
+        write!(f, [format_replaced(&marker, &token(target))])?;
 
         if let Some(space) = post_marker_space_token {
             write!(f, [space.format()])?;

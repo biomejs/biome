@@ -64,7 +64,7 @@ info: markdown/inline_image.md
 
 ![This is a long alt text that describes the image in great detail for accessibility purposes](https://example.com/very/long/path/to/some/deeply/nested/image.png "And a long title too")
 
-![alt with **bold** and *italic*](image.png)
+![alt with **bold** and _italic_](image.png)
 
 ![alt with `code`](image.png)
 

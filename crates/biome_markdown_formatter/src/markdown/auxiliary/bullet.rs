@@ -1,7 +1,9 @@
 use crate::markdown::auxiliary::list_marker_prefix::FormatMdListMarkerPrefixOptions;
 use crate::prelude::*;
 use biome_formatter::write;
-use biome_markdown_syntax::{AnyMdBlock, AnyMdLeafBlock, MdBullet, MdBulletFields};
+use biome_markdown_syntax::{
+    AnyMdBlock, AnyMdLeafBlock, MarkdownSyntaxKind, MdBullet, MdBulletFields,
+};
 use biome_rowan::AstNode;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdBullet;
@@ -9,32 +11,20 @@ impl FormatNodeRule<MdBullet> for FormatMdBullet {
     fn fmt_fields(&self, node: &MdBullet, f: &mut MarkdownFormatter) -> FormatResult<()> {
         let MdBulletFields { prefix, content } = node.as_fields();
 
-        let prefix = match prefix {
-            Ok(p) => p,
-            Err(_) => return format_verbatim_node(node.syntax()).fmt(f),
-        };
+        let prefix = prefix.map_err(|_| FormatError::SyntaxError)?;
+        let marker = prefix.marker().map_err(|_| FormatError::SyntaxError)?;
+        let marker_kind = marker.kind();
 
-        let marker = match prefix.marker() {
-            Ok(m) => m,
-            Err(_) => return format_verbatim_node(node.syntax()).fmt(f),
-        };
-
-        // Only normalize `*` and `+`; `-` is already correct.
-        if marker.text_trimmed() != "*" && marker.text_trimmed() != "+" {
+        // `* - - -` is a bullet containing a thematic break. Normalizing `*`
+        // to `-` produces `- - - -` which, in CommonMark, means a thematic break
+        // which breaks the semantic. Same for `+ - - -`.
+        // So we don't want to normalize it into `-`.
+        if marker_kind != MarkdownSyntaxKind::MINUS && first_block_is_dash_thematic_break(&content)
+        {
             return format_verbatim_node(node.syntax()).fmt(f);
         }
 
-        // Guard: if the first content block is a `-`-based thematic break, normalizing
-        // the marker to `-` would produce a line like `- - - -` which is re-parsed as a
-        // thematic break (not a list item). Keep verbatim in that case.
-        if first_block_is_dash_thematic_break(&content) {
-            return format_verbatim_node(node.syntax()).fmt(f);
-        }
-
-        // Determine the target marker. Consecutive bullet lists alternate between
-        // `-` and `*` to preserve list separation (Prettier's behavior).
         let target_marker = target_marker_for_bullet(node);
-
         write!(
             f,
             [prefix
@@ -48,54 +38,47 @@ impl FormatNodeRule<MdBullet> for FormatMdBullet {
     }
 }
 
-/// Determine the target marker for a bullet based on how many preceding
-/// `MdBulletListItem` siblings exist. First list → `-`, second → `*`,
-/// third → `-`, etc. (Prettier's alternation pattern.)
+// This algorithm is based on the fact that CommonMark treats list with
+// different markers as different groups.
+// See https://spec.commonmark.org/0.31.2/#lists
+// Instead of normlalizing everything to `-`, this function walks up the tree
+// and see whether its siblings are also MD_BULLET_LIST_ITEM.
+// If so, it alternates between `-` and `*` to preserve list
+// separation.
+// The corresponding test for this is separate.md.
 fn target_marker_for_bullet(node: &MdBullet) -> &'static str {
     use biome_markdown_syntax::MarkdownSyntaxKind;
-    let Some(bullet_list) = node.syntax().parent() else {
-        return "-";
-    };
-    let Some(bullet_list_item) = bullet_list.parent() else {
-        return "-";
-    };
-    if bullet_list_item.kind() != MarkdownSyntaxKind::MD_BULLET_LIST_ITEM {
-        return "-";
-    }
-    let mut count = 0u32;
-    let mut sibling = bullet_list_item.prev_sibling();
-    while let Some(s) = sibling {
-        match s.kind() {
-            MarkdownSyntaxKind::MD_NEWLINE => {}
-            MarkdownSyntaxKind::MD_BULLET_LIST_ITEM => count += 1,
-            _ => break,
-        }
-        sibling = s.prev_sibling();
-    }
-    if count.is_multiple_of(2) { "-" } else { "*" }
+
+    let item = node
+        .syntax()
+        .parent()
+        .and_then(|n| n.parent())
+        .filter(|n| n.kind() == MarkdownSyntaxKind::MD_BULLET_LIST_ITEM);
+    let Some(item) = item else { return "-" };
+
+    let count = std::iter::successors(item.prev_sibling(), |s| s.prev_sibling())
+        .take_while(|s| {
+            matches!(
+                s.kind(),
+                MarkdownSyntaxKind::MD_NEWLINE | MarkdownSyntaxKind::MD_BULLET_LIST_ITEM
+            )
+        })
+        .filter(|s| s.kind() == MarkdownSyntaxKind::MD_BULLET_LIST_ITEM)
+        .count();
+
+    if count % 2 == 0 { "-" } else { "*" }
 }
 
-/// Returns true if the first block in `content` is a thematic break using `-` characters.
+/// Returns true if the first block in `content` is a thematic break using `-`.
 fn first_block_is_dash_thematic_break(content: &biome_markdown_syntax::MdBlockList) -> bool {
-    let Some(first_block) = content.iter().next() else {
+    let Some(AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdThematicBreakBlock(tb))) =
+        content.iter().next()
+    else {
         return false;
     };
-    let leaf = match first_block {
-        AnyMdBlock::AnyMdLeafBlock(leaf) => leaf,
-        _ => return false,
-    };
-    let thematic_break = match leaf {
-        AnyMdLeafBlock::MdThematicBreakBlock(tb) => tb,
-        _ => return false,
-    };
-    // Check if the thematic break uses `-` characters.
-    for part in thematic_break.parts() {
-        if let Some(char_node) = part.as_md_thematic_break_char() {
-            return char_node
-                .value()
-                .map(|t| t.text_trimmed() == "-")
-                .unwrap_or(false);
-        }
-    }
-    false
+    tb.parts()
+        .into_iter()
+        .find_map(|p| p.as_md_thematic_break_char().cloned())
+        .and_then(|c| c.value().ok())
+        .is_some_and(|t| t.text_trimmed() == "-")
 }

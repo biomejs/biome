@@ -1,7 +1,8 @@
 use crate::prelude::*;
 use biome_formatter::write;
 use biome_markdown_syntax::{
-    AnyMdInline, MdInlineEmphasis, MdInlineEmphasisFields, MdInlineItalic, MdInlineItalicFields,
+    AnyMdInline, MarkdownSyntaxKind, MdInlineEmphasis, MdInlineEmphasisFields, MdInlineItalic,
+    MdInlineItalicFields,
 };
 use biome_rowan::AstNode;
 #[derive(Debug, Clone, Default)]
@@ -17,20 +18,16 @@ impl FormatNodeRule<MdInlineItalic> for FormatMdInlineItalic {
         let l_fence = l_fence?;
         let r_fence = r_fence?;
 
-        // If the content subtree contains any nested italic node, keep `*` verbatim.
-        // Direct children that are italic would create `__` (= bold) adjacency when
-        // normalized to `_`. Deeper descendants (e.g. italic inside a link) also trigger
-        // this guard because Prettier keeps `*` to avoid visual ambiguity.
-        let items: Vec<_> = content.iter().collect();
-        let has_nested_italic = node.syntax().descendants().any(|d| {
-            use biome_markdown_syntax::MarkdownSyntaxKind;
-            d.kind() == MarkdownSyntaxKind::MD_INLINE_ITALIC && d != *node.syntax()
-        });
+        // If descendant is also `_`, normalizing to `_` would create `__` (bold)
+        // So we keep verbatim.
+        let has_nested_italic = node
+            .syntax()
+            .descendants()
+            .any(|d| d.kind() == MarkdownSyntaxKind::MD_INLINE_ITALIC && d != *node.syntax());
         if has_nested_italic {
             return format_verbatim_node(node.syntax()).fmt(f);
         }
 
-        // `_` has stricter CommonMark flanking rules than `*`.
         let prev_is_alphanum = l_fence
             .prev_token()
             .and_then(|t| t.text_trimmed().chars().last())
@@ -40,9 +37,8 @@ impl FormatNodeRule<MdInlineItalic> for FormatMdInlineItalic {
             .and_then(|t| t.text_trimmed().chars().next())
             .is_some_and(|c| c.is_alphanumeric());
 
-        // When the source uses `*` fences (e.g. `***x***`) and the content is a single
-        // bold node, Prettier prefers **_x_** over _**x**_ (same HTML, different nesting).
-        // Only rewrite for `*` fences so `_____x_____` is left untouched.
+        // `***x***` → `**_x_**`: Prettier prefers bold-wrapping-italic.
+        let items: Vec<_> = content.iter().collect();
         if l_fence.text_trimmed() == "*"
             && !prev_is_alphanum
             && !next_is_alphanum
@@ -52,57 +48,34 @@ impl FormatNodeRule<MdInlineItalic> for FormatMdInlineItalic {
             return fmt_italic_wrapping_emphasis(&l_fence, emphasis, &r_fence, f);
         }
 
-        if l_fence.text_trimmed() == "*" {
-            // `*` fence: if adjacent to alphanum, `_` would be invalid. Keep `*`.
-            if prev_is_alphanum || next_is_alphanum {
-                return write!(
-                    f,
-                    [
-                        format_replaced(&l_fence, &token("*")),
-                        content.format(),
-                        format_replaced(&r_fence, &token("*")),
-                    ]
-                );
-            }
-        } else {
-            // `_` fence: check for CommonMark violations.
-            // `_` cannot open if preceded by alphanumeric → convert to `*`.
-            if prev_is_alphanum {
-                return write!(
-                    f,
-                    [
-                        format_replaced(&l_fence, &token("*")),
-                        content.format(),
-                        format_replaced(&r_fence, &token("*")),
-                    ]
-                );
-            }
-            // `_` cannot close if followed by alphanumeric → escape the opening `_`.
-            if next_is_alphanum {
-                return write!(
-                    f,
-                    [
-                        format_replaced(&l_fence, &token("\\_")),
-                        content.format(),
-                        format_replaced(&r_fence, &token("_")),
-                    ]
-                );
-            }
-        }
+        // See https://spec.commonmark.org/0.31.2/#emphasis-and-strong-emphasis
+        // By default, we prefer `_` but fall back to "*"
+        // when CommonMark flanking rules make `_` invalid:
+        let (open, close) = match (prev_is_alphanum, next_is_alphanum) {
+            // `a*b*c`: Can't use `_` because `a_` won't open emphasis
+            (true, _) => ("*", "*"),
+            // `_b_2` where source is `_`: we can't't switch to `*` (which would change
+            // intended semantic), so we escape the opener: `\_b_2`
+            (false, true) if l_fence.text_trimmed() == "_" => ("\\_", "_"),
+            // e.g. `*b*2` — can't use `_` because `_2` won't close emphasis
+            (false, true) => ("*", "*"),
+            // e.g. `!*b*!` — no adjacent alphanumeric, safe to normalize to `_`
+            (false, false) => ("_", "_"),
+        };
 
         write!(
             f,
             [
-                format_replaced(&l_fence, &token("_")),
+                format_replaced(&l_fence, &token(open)),
                 content.format(),
-                format_replaced(&r_fence, &token("_")),
+                format_replaced(&r_fence, &token(close)),
             ]
         )
     }
 }
 
-/// Format an italic node whose content is a single bold (emphasis) node as `**_x_**`
-/// rather than `_**x**_`. Both render identically but Prettier prefers the former.
+/// Format `*__x__*` (italic wrapping bold) as `**_x_**` (bold wrapping italic).
+/// Both render identically but Prettier prefers the latter nesting.
 fn fmt_italic_wrapping_emphasis(
     outer_l: &biome_markdown_syntax::MarkdownSyntaxToken,
     emphasis: &MdInlineEmphasis,
@@ -114,7 +87,6 @@ fn fmt_italic_wrapping_emphasis(
         content: em_content,
         r_fence: em_r,
     } = emphasis.as_fields();
-    // Mark the emphasis node as suppression-checked since we format it manually.
     f.context()
         .comments()
         .mark_suppression_checked(emphasis.syntax());

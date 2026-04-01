@@ -21,10 +21,12 @@ bar
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,7 +1,5 @@
- ## foo
+@@ -1,7 +1,6 @@
+-## foo
 -
 -```
++foo
++---
 +~~~
  bar
 -```
@@ -36,7 +38,8 @@ bar
 # Output
 
 ```md
-## foo
+foo
+---
 ~~~
 bar
 ~~~

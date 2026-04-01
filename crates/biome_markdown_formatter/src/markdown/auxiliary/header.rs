@@ -4,11 +4,18 @@ use crate::shared::{TextPrintMode, TrimMode};
 use crate::verbatim::format_verbatim_node;
 use biome_formatter::write;
 use biome_markdown_syntax::{MdHeader, MdHeaderFields};
+use biome_rowan::AstNode;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdHeader;
 impl FormatNodeRule<MdHeader> for FormatMdHeader {
     fn fmt_fields(&self, node: &MdHeader, f: &mut MarkdownFormatter) -> FormatResult<()> {
+        // Headers inside list items can have a non-standard slot layout
+        // (e.g. missing MdIndentTokenList in slot 0). Fall back to verbatim.
+        if node.syntax().slots().next().is_none_or(|s| s.into_node().is_none()) {
+            return format_verbatim_node(node.syntax()).fmt(f);
+        }
+
         let MdHeaderFields {
             indent,
             before,
