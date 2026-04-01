@@ -217,8 +217,8 @@ fn is_at_scss_expression_sequence_end(p: &mut CssParser, options: ScssExpression
         || is_at_scss_expression_end(p, options)
         || (options.comma_separates_list() && p.at(T![,]))
         || (options.stops_at_string_quote
-        && p.at(SCSS_STRING_QUOTE)
-        && !p.is_at_scss_interpolated_string())
+            && p.at(SCSS_STRING_QUOTE)
+            && !p.is_at_scss_interpolated_string())
 }
 
 #[inline]
