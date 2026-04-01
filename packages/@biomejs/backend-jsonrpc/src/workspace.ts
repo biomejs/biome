@@ -990,7 +990,7 @@ See https://biomejs.dev/assist/actions/no-duplicate-classes
 	 */
 	noDuplicateClasses?: NoDuplicateClassesConfiguration;
 	/**
-	* Provides a code action to sort the imports and exports in the file using a built-in or custom order.
+	* Sorts and organizes import and export statements in your JavaScript and TypeScript files.
 See https://biomejs.dev/assist/actions/organize-imports 
 	 */
 	organizeImports?: OrganizeImportsConfiguration;
