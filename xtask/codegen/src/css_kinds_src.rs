@@ -323,7 +323,6 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "COMMENT",
         "MULTILINE_COMMENT",
         "GRIT_METAVARIABLE",
-        "SCSS_RECOVERED_OUTER_STRING_QUOTE",
         "SCSS_STRING_QUOTE",
     ],
     nodes: &[

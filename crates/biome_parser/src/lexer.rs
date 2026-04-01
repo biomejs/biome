@@ -508,6 +508,10 @@ impl<'l, Lex: Lexer<'l>> BufferedLexer<Lex::Kind, Lex> {
         &mut self.inner
     }
 
+    pub fn lexer(&self) -> &Lex {
+        &self.inner
+    }
+
     /// Returns the kind of the next token and any associated diagnostic.
     ///
     /// [See `Lexer.next_token`](Lexer::next_token)

@@ -632,34 +632,41 @@ impl<'src> CssLexer<'src> {
         quote: CssStringQuote,
     ) -> CssSyntaxKind {
         if current == quote.as_byte() {
-            return self.lex_or_recover_same_quote_in_interpolation(quote);
+            return match self.scan_same_quote_in_interpolation(quote) {
+                SameQuoteInInterpolation::NestedString(scan) => {
+                    match self.finish_scss_string_start(self.position, quote, scan) {
+                        StringLexResult::Token(kind) => kind,
+                        StringLexResult::Unterminated => {
+                            debug_assert!(
+                                false,
+                                "same-quote interpolation scans must classify unterminated strings as outer quotes"
+                            );
+                            self.consume_byte(SCSS_STRING_QUOTE)
+                        }
+                    }
+                }
+                SameQuoteInInterpolation::OuterQuote => self.consume_byte(SCSS_STRING_QUOTE),
+            };
         }
 
         self.consume_token(current)
     }
 
-    /// Lexes a same-quote token while inside string-origin interpolation.
+    /// Classifies a same-quote byte while inside string-origin interpolation.
     ///
     /// Inside `#{...}` from an outer interpolated string, the current quote may
     /// start a real nested string or may be the outer string closing early
-    /// before `}`. This helper speculatively lexes the nested-string path. If
-    /// that path is unterminated, it rolls back and consumes the current byte
-    /// as `SCSS_RECOVERED_OUTER_STRING_QUOTE` instead.
-    fn lex_or_recover_same_quote_in_interpolation(
-        &mut self,
-        quote: CssStringQuote,
-    ) -> CssSyntaxKind {
-        let start = self.position;
-        let diagnostics_len = self.diagnostics.len();
-        let pending_scss_string_start = self.pending_scss_string_start.clone();
+    /// before `}`. This helper performs a non-mutating scan so the valid nested
+    /// string path can reuse the scan result for real token commitment.
+    fn scan_same_quote_in_interpolation(&self, quote: CssStringQuote) -> SameQuoteInInterpolation {
+        let scan = self.scan_string_body(1, quote, true);
 
-        match self.lex_string_token(StringLexMode::ScssStart { quote }) {
-            StringLexResult::Token(kind) => kind,
-            StringLexResult::Unterminated => {
-                self.position = start;
-                self.diagnostics.truncate(diagnostics_len);
-                self.pending_scss_string_start = pending_scss_string_start;
-                self.consume_byte(SCSS_RECOVERED_OUTER_STRING_QUOTE)
+        match scan.stop {
+            StringBodyScanStop::ClosingQuote { .. } | StringBodyScanStop::Interpolation { .. } => {
+                SameQuoteInInterpolation::NestedString(scan)
+            }
+            StringBodyScanStop::Newline { .. } | StringBodyScanStop::Eof { .. } => {
+                SameQuoteInInterpolation::OuterQuote
             }
         }
     }
@@ -675,19 +682,28 @@ impl<'src> CssLexer<'src> {
                 let start = self.position;
                 // Skip the opening quote we are already on.
                 let scan = self.scan_string_body(1, quote, true);
-                if matches!(scan.stop, StringBodyScanStop::Interpolation { .. }) {
-                    self.pending_scss_string_start = Some(PendingScssInterpolatedStringStart {
-                        quote,
-                        content_start: start + 1,
-                        initial_chunk_scan: scan,
-                    });
-
-                    return StringLexResult::Token(self.consume_byte(SCSS_STRING_QUOTE));
-                }
-
-                self.commit_plain_string_literal(start, scan)
+                self.finish_scss_string_start(start, quote, scan)
             }
         }
+    }
+
+    fn finish_scss_string_start(
+        &mut self,
+        start: usize,
+        quote: CssStringQuote,
+        scan: StringBodyScan,
+    ) -> StringLexResult {
+        if matches!(scan.stop, StringBodyScanStop::Interpolation { .. }) {
+            self.pending_scss_string_start = Some(PendingScssInterpolatedStringStart {
+                quote,
+                content_start: start + 1,
+                initial_chunk_scan: scan,
+            });
+
+            return StringLexResult::Token(self.consume_byte(SCSS_STRING_QUOTE));
+        }
+
+        self.commit_plain_string_literal(start, scan)
     }
 
     fn lex_scss_string_chunk_token(&mut self, quote: CssStringQuote) -> CssSyntaxKind {
@@ -1832,6 +1848,10 @@ impl<'src> ReLexer<'src> for CssLexer<'src> {
 }
 
 impl CssLexer<'_> {
+    pub(crate) fn has_pending_scss_string_start(&self) -> bool {
+        self.pending_scss_string_start.is_some()
+    }
+
     fn consume_scss_expression_token(&mut self, current: u8) -> CssSyntaxKind {
         match current {
             b'+' => self.consume_byte(T![+]),
@@ -1893,9 +1913,6 @@ enum StringLexMode {
 }
 
 /// Result of lexing one token in a normal string lexer mode.
-///
-/// The general string driver does not expose interpolation-recovery policy
-/// here. That stays specific to the same-quote probe path.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 enum StringLexResult {
     /// The lexer committed a concrete token.
@@ -1903,6 +1920,17 @@ enum StringLexResult {
     /// The string terminated at newline or EOF before a normal closing token
     /// could be produced.
     Unterminated,
+}
+
+/// Classification of a same-quote byte while lexing string-origin
+/// interpolation.
+#[derive(Debug, Clone, Eq, PartialEq)]
+enum SameQuoteInInterpolation {
+    /// The quote starts a valid nested string and carries the reused scan
+    /// result for committing that token.
+    NestedString(StringBodyScan),
+    /// The quote should be treated as the outer string closing early.
+    OuterQuote,
 }
 
 /// Result of scanning a string body from the current lexer position.

@@ -4,7 +4,7 @@ mod map;
 mod precedence;
 mod primary;
 
-use biome_css_syntax::{CssSyntaxKind, CssSyntaxKind::SCSS_RECOVERED_OUTER_STRING_QUOTE, T};
+use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::{Parser, TokenSet, token_set};
 
 use super::is_at_scss_variable_modifier;
@@ -108,6 +108,5 @@ pub(super) fn is_at_scss_expression_end(
 ) -> bool {
     p.at_ts(options.end_ts)
         || p.at(T![')'])
-        || (options.stops_at_string_quote && p.at(SCSS_RECOVERED_OUTER_STRING_QUOTE))
         || (options.stops_before_variable_modifiers && is_at_scss_variable_modifier(p))
 }

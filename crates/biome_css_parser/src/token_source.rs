@@ -92,6 +92,10 @@ impl<'src> CssTokenSource<'src> {
         self.lexer.re_lex(mode)
     }
 
+    pub(crate) fn current_has_pending_scss_string_start(&self) -> bool {
+        self.lexer.lexer().has_pending_scss_string_start()
+    }
+
     #[inline]
     fn effective_context(&self, context: CssLexContext) -> CssLexContext {
         match (

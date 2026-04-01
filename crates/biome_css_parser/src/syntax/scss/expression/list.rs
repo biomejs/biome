@@ -9,7 +9,7 @@ use crate::syntax::scss::{
 use biome_css_syntax::CssSyntaxKind::{
     CSS_BOGUS_PROPERTY_VALUE, EOF, SCSS_ARBITRARY_ARGUMENT, SCSS_EXPRESSION,
     SCSS_EXPRESSION_ITEM_LIST, SCSS_KEYWORD_ARGUMENT, SCSS_LIST_EXPRESSION,
-    SCSS_LIST_EXPRESSION_ELEMENT, SCSS_LIST_EXPRESSION_ELEMENT_LIST,
+    SCSS_LIST_EXPRESSION_ELEMENT, SCSS_LIST_EXPRESSION_ELEMENT_LIST, SCSS_STRING_QUOTE,
 };
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_recovery::ParseRecoveryTokenSet;
@@ -216,6 +216,9 @@ fn is_at_scss_expression_sequence_end(p: &mut CssParser, options: ScssExpression
     p.at(EOF)
         || is_at_scss_expression_end(p, options)
         || (options.comma_separates_list() && p.at(T![,]))
+        || (options.stops_at_string_quote
+        && p.at(SCSS_STRING_QUOTE)
+        && !p.is_at_scss_interpolated_string())
 }
 
 #[inline]

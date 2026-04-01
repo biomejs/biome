@@ -8,8 +8,7 @@ use crate::syntax::scss::expression::{
 use crate::syntax::scss::{expected_scss_expression, is_at_scss_interpolation};
 use biome_css_syntax::CssSyntaxKind::{
     CSS_BOGUS, SCSS_INTERPOLATED_STRING, SCSS_INTERPOLATED_STRING_PART_LIST, SCSS_INTERPOLATION,
-    SCSS_RECOVERED_OUTER_STRING_QUOTE, SCSS_STRING_CONTENT_LITERAL, SCSS_STRING_QUOTE,
-    SCSS_STRING_TEXT,
+    SCSS_STRING_CONTENT_LITERAL, SCSS_STRING_QUOTE, SCSS_STRING_TEXT,
 };
 use biome_css_syntax::{CssSyntaxKind, T, TextRange};
 use biome_parser::Parser;
@@ -51,8 +50,6 @@ pub(crate) fn parse_scss_interpolated_string(p: &mut CssParser) -> ParsedSyntax 
 
     if p.at(SCSS_STRING_QUOTE) {
         p.bump_with_context(SCSS_STRING_QUOTE, CssLexContext::Regular);
-    } else if p.at(SCSS_RECOVERED_OUTER_STRING_QUOTE) {
-        p.bump_remap_with_context(SCSS_STRING_QUOTE, CssLexContext::Regular);
     }
 
     Present(m.complete(p, SCSS_INTERPOLATED_STRING))
@@ -91,7 +88,7 @@ impl ParseNodeList for ScssInterpolatedStringPartList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(SCSS_STRING_QUOTE) || p.at(SCSS_RECOVERED_OUTER_STRING_QUOTE)
+        p.at(SCSS_STRING_QUOTE)
     }
 
     fn recover(
@@ -131,9 +128,9 @@ fn parse_scss_string_text(p: &mut CssParser, quote: CssStringQuote) -> ParsedSyn
 /// Parses a `#{...}` interpolation inside an SCSS quoted string.
 ///
 /// While parsing the inner expression, this enables recovery for the outer
-/// string quote. If the outer quote is recovered before a closing `}`, this
-/// helper emits the missing-`}` diagnostic and leaves the recovered quote for
-/// the surrounding string parser to consume.
+/// string quote. If the outer quote is reached before a closing `}`, this
+/// helper emits the missing-`}` diagnostic and leaves that quote for the
+/// surrounding string parser to consume.
 #[inline]
 fn parse_scss_string_interpolation(p: &mut CssParser, quote: CssStringQuote) -> ParsedSyntax {
     let Some(m) = parse_scss_interpolation_prefix(p) else {
@@ -145,7 +142,7 @@ fn parse_scss_string_interpolation(p: &mut CssParser, quote: CssStringQuote) -> 
             .or_add_diagnostic(p, expected_scss_expression);
     });
 
-    if p.at(SCSS_RECOVERED_OUTER_STRING_QUOTE) {
+    if p.at(SCSS_STRING_QUOTE) {
         p.error(expected_interpolation_end_before_closing_quote(p));
         return Present(m.complete(p, SCSS_INTERPOLATION));
     }
@@ -155,7 +152,7 @@ fn parse_scss_string_interpolation(p: &mut CssParser, quote: CssStringQuote) -> 
 }
 
 const SCSS_INTERPOLATED_STRING_PART_LIST_RECOVERY_SET: biome_parser::TokenSet<CssSyntaxKind> =
-    token_set![T![#], SCSS_STRING_QUOTE, SCSS_RECOVERED_OUTER_STRING_QUOTE];
+    token_set![T![#], SCSS_STRING_QUOTE];
 
 fn expected_scss_string_part(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expected_string(p, range).with_hint("Expected string text or interpolation.")
