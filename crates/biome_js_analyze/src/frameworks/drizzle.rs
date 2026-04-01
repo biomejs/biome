@@ -1,5 +1,5 @@
 use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsStaticMemberExpression, JsSyntaxKind};
-use biome_rowan::{AstNode, RawSyntaxKind, SyntaxNode, TokenText};
+use biome_rowan::{AstNode, SyntaxNode, TokenText};
 
 pub(crate) fn get_identifier_name(expr: &AnyJsExpression) -> Option<TokenText> {
     match expr {
@@ -7,17 +7,9 @@ pub(crate) fn get_identifier_name(expr: &AnyJsExpression) -> Option<TokenText> {
             Some(id.name().ok()?.value_token().ok()?.token_text_trimmed())
         }
         AnyJsExpression::JsStaticMemberExpression(member) => {
-            let object = member.object().ok()?;
-            let object_name = get_identifier_name(&object)?;
-            let member_name = member
-                .member()
-                .ok()?
-                .as_js_name()?
-                .value_token()
-                .ok()?
-                .token_text_trimmed();
-            let full_name = format!("{}.{}", object_name, member_name);
-            Some(TokenText::new_raw(RawSyntaxKind(0), &full_name))
+            let m = member.member().ok()?;
+            let member_name = m.as_js_name()?;
+            Some(member_name.value_token().ok()?.token_text_trimmed())
         }
         _ => None,
     }
