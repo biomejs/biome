@@ -26,7 +26,7 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```json,expect_diagnostic
+    /// ```jsonc,expect_diagnostic
     /// [
     /// 	2e308, // Number evaluating to Infinity
     ///
@@ -44,7 +44,7 @@ declare_lint_rule! {
     ///
     /// ### Valid
     ///
-    /// ```json
+    /// ```jsonc
     /// [
     /// 	123,
     /// 	1234,
