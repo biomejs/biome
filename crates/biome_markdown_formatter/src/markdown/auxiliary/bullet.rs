@@ -38,14 +38,14 @@ impl FormatNodeRule<MdBullet> for FormatMdBullet {
     }
 }
 
-// This algorithm is based on the fact that CommonMark treats list with
-// different markers as different groups.
-// See https://spec.commonmark.org/0.31.2/#lists
-// Instead of normlalizing everything to `-`, this function walks up the tree
-// and see whether its siblings are also MD_BULLET_LIST_ITEM.
-// If so, it alternates between `-` and `*` to preserve list
-// separation.
-// The corresponding test for this is separate.md.
+/// This algorithm is based on the fact that CommonMark treats list with
+/// different markers as different groups.
+/// See https://spec.commonmark.org/0.31.2/#lists
+/// Instead of normlalizing everything to `-`, this function walks up the tree
+/// and see whether its siblings are also MD_BULLET_LIST_ITEM.
+/// If so, it alternates between `-` and `*` to preserve list
+/// separation.
+/// The corresponding test for this is separate.md.
 fn target_marker_for_bullet(node: &MdBullet) -> &'static str {
     use biome_markdown_syntax::MarkdownSyntaxKind;
 
