@@ -367,14 +367,6 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
 
     if start == p.cur_range().start() {
         let range = p.cur_range();
-        if std::env::var("CMARK_HANG_DEBUG").is_ok() {
-            eprintln!(
-                "parse_any_block made no progress at {:?} {:?} => {:?}",
-                p.cur(),
-                p.cur_text(),
-                parsed
-            );
-        }
         p.error(parse_error::parse_any_block_no_progress(p, range));
         if !p.at(T![EOF]) {
             p.bump_any();
@@ -458,7 +450,6 @@ pub(crate) fn parse_indent_code_block(p: &mut MarkdownParser) -> ParsedSyntax {
             let text_m = p.start();
             p.bump_remap(MD_TEXTUAL_LITERAL);
             text_m.complete(p, MD_TEXTUAL);
-            p.set_virtual_line_start();
             p.set_virtual_line_start();
             continue;
         }
