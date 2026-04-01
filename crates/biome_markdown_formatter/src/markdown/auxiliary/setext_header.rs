@@ -49,7 +49,8 @@ impl FormatNodeRule<MdSetextHeader> for FormatMdSetextHeader {
                     f,
                     [text.format().with_options(FormatMdTextualOptions {
                         should_remove: true,
-                        trime_start: false,
+                        trim_start: false,
+                        ..Default::default()
                     })]
                 )?;
                 continue;
@@ -63,7 +64,8 @@ impl FormatNodeRule<MdSetextHeader> for FormatMdSetextHeader {
                         f,
                         [text.format().with_options(FormatMdTextualOptions {
                             should_remove: true,
-                            trime_start: false,
+                            trim_start: false,
+                            ..Default::default()
                         })]
                     )?;
                 }

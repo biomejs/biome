@@ -1,4 +1,3 @@
-use crate::markdown::lists::inline_item_list::FormatMdFormatInlineItemListOptions;
 use crate::prelude::*;
 use biome_formatter::write;
 use biome_markdown_syntax::{MdFencedCodeBlock, MdFencedCodeBlockFields};
