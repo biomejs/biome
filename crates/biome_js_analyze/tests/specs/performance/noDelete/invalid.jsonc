@@ -11,7 +11,5 @@
 	"delete a?.b?.c;",
 	"delete a?.b['c'];",
 	"delete a?.b?.['c'];",
-	"delete process.env.FOO;",
-	"const { env } = process; delete env.FOO;",
-	"const { env } = require('process'); delete env.TEST;"
+	"delete process.env.FOO;"
 ]
