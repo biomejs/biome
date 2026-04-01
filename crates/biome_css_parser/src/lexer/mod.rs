@@ -921,7 +921,15 @@ impl<'src> CssLexer<'src> {
         let quote = quote.as_byte();
         let next = offset + 1;
         match self.byte_at(next) {
-            Some(b'\n' | b'\r') => (next + 1, false),
+            Some(b'\n') => (next + 1, false),
+            Some(b'\r') => {
+                let len = if self.byte_at(next + 1) == Some(b'\n') {
+                    2
+                } else {
+                    1
+                };
+                (next + len, false)
+            }
             Some(byte) if byte == quote => (next + 1, false),
             Some(byte) if byte.is_ascii_hexdigit() => {
                 let (next_offset, escaped) = self.scan_hex_escape(next);
@@ -959,10 +967,9 @@ impl<'src> CssLexer<'src> {
             cursor += 1;
         }
 
-        if self
-            .byte_at(cursor)
-            .is_some_and(|byte| matches!(byte, b'\t' | b' '))
-        {
+        if self.byte_at(cursor).is_some_and(|byte| {
+            matches!(byte, b'\t' | b' ' | b'\n' | b'\r' | 0x0C)
+        }) {
             cursor += 1;
         }
 

@@ -180,6 +180,16 @@ fn string() {
         CSS_STRING_LITERAL:12
     }
 
+    assert_lex! {
+        "\"a\\\r\nb\"",
+        CSS_STRING_LITERAL:7
+    }
+
+    assert_lex! {
+        "\"\\41\nb\"",
+        CSS_STRING_LITERAL:7
+    }
+
     // invalid escape sequence
     assert_lex! {
         r"'\0'",
