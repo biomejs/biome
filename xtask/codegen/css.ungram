@@ -1682,7 +1682,7 @@ CssImportAtRule =
 //             ^^^^^^^^^^^^
 // @import "./test.scss";
 //         ^^^^^^^^^^^^^
-AnyCssImportUrl = CssUrlFunction | CssString
+AnyCssImportUrl = CssUrlFunction | CssString | ScssInterpolatedString
 
 AnyCssImportLayer =
 	CssImportAnonymousLayer

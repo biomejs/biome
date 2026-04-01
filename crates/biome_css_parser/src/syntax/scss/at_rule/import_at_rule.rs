@@ -85,6 +85,26 @@ fn parse_scss_string_import_item(p: &mut CssParser) -> ParsedSyntax {
     }
 }
 
+#[inline]
+fn parse_scss_interpolated_string_import_item(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_scss_interpolated_string(p) {
+        return Absent;
+    }
+
+    // Guarded by `is_at_scss_interpolated_string` above.
+    let Some(import_string) = parse_scss_interpolated_string(p).ok() else {
+        return Absent;
+    };
+
+    if is_at_import_modifier(p) {
+        let m = import_string.precede(p);
+        parse_scss_plain_import_modifiers(p);
+        Present(m.complete(p, SCSS_PLAIN_IMPORT))
+    } else {
+        Present(import_string)
+    }
+}
+
 /// Parses a single plain-CSS import item inside an SCSS `@import` list.
 ///
 /// # Example
@@ -192,7 +212,7 @@ fn parse_scss_import_item(p: &mut CssParser) -> ParsedSyntax {
     if is_at_url_function(p) {
         parse_scss_plain_import(p)
     } else if is_at_scss_interpolated_string(p) {
-        parse_scss_interpolated_string(p)
+        parse_scss_interpolated_string_import_item(p)
     } else {
         parse_scss_string_import_item(p)
     }

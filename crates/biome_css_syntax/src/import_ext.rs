@@ -23,6 +23,7 @@ impl AnyCssImportUrl {
                     AnyCssUrlValue::ScssInterpolatedString(_) => None,
                 })
             }
+            Self::ScssInterpolatedString(_) => None,
         }
     }
 }

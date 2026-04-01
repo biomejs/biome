@@ -1,6 +1,7 @@
 @import"theme";
 
 @import "#{$file}.scss";
+@import "#{$file}.css"print;
 
 @import "rounded-corners",
 "text-shadow";

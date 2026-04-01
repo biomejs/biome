@@ -13900,6 +13900,7 @@ impl AnyCssImportSupportsCondition {
 pub enum AnyCssImportUrl {
     CssString(CssString),
     CssUrlFunction(CssUrlFunction),
+    ScssInterpolatedString(ScssInterpolatedString),
 }
 impl AnyCssImportUrl {
     pub fn as_css_string(&self) -> Option<&CssString> {
@@ -13911,6 +13912,12 @@ impl AnyCssImportUrl {
     pub fn as_css_url_function(&self) -> Option<&CssUrlFunction> {
         match &self {
             Self::CssUrlFunction(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_interpolated_string(&self) -> Option<&ScssInterpolatedString> {
+        match &self {
+            Self::ScssInterpolatedString(item) => Some(item),
             _ => None,
         }
     }
@@ -35276,16 +35283,29 @@ impl From<CssUrlFunction> for AnyCssImportUrl {
         Self::CssUrlFunction(node)
     }
 }
+impl From<ScssInterpolatedString> for AnyCssImportUrl {
+    fn from(node: ScssInterpolatedString) -> Self {
+        Self::ScssInterpolatedString(node)
+    }
+}
 impl AstNode for AnyCssImportUrl {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssString::KIND_SET.union(CssUrlFunction::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = CssString::KIND_SET
+        .union(CssUrlFunction::KIND_SET)
+        .union(ScssInterpolatedString::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_STRING | CSS_URL_FUNCTION)
+        matches!(
+            kind,
+            CSS_STRING | CSS_URL_FUNCTION | SCSS_INTERPOLATED_STRING
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_STRING => Self::CssString(CssString { syntax }),
             CSS_URL_FUNCTION => Self::CssUrlFunction(CssUrlFunction { syntax }),
+            SCSS_INTERPOLATED_STRING => {
+                Self::ScssInterpolatedString(ScssInterpolatedString { syntax })
+            }
             _ => return None,
         };
         Some(res)
@@ -35294,12 +35314,14 @@ impl AstNode for AnyCssImportUrl {
         match self {
             Self::CssString(it) => it.syntax(),
             Self::CssUrlFunction(it) => it.syntax(),
+            Self::ScssInterpolatedString(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssString(it) => it.into_syntax(),
             Self::CssUrlFunction(it) => it.into_syntax(),
+            Self::ScssInterpolatedString(it) => it.into_syntax(),
         }
     }
 }
@@ -35308,6 +35330,7 @@ impl std::fmt::Debug for AnyCssImportUrl {
         match self {
             Self::CssString(it) => std::fmt::Debug::fmt(it, f),
             Self::CssUrlFunction(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssInterpolatedString(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -35316,6 +35339,7 @@ impl From<AnyCssImportUrl> for SyntaxNode {
         match n {
             AnyCssImportUrl::CssString(it) => it.into_syntax(),
             AnyCssImportUrl::CssUrlFunction(it) => it.into_syntax(),
+            AnyCssImportUrl::ScssInterpolatedString(it) => it.into_syntax(),
         }
     }
 }
