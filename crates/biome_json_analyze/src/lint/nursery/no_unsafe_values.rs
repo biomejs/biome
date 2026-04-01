@@ -2,6 +2,7 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::{MarkupBuf, markup};
+use biome_deserialize::json::unescape_json_string;
 use biome_json_syntax::{JsonNumberValue, JsonStringValue};
 use biome_rowan::{AstNode, declare_node_union};
 use biome_rule_options::no_unsafe_values::NoUnsafeValuesOptions;
@@ -118,10 +119,13 @@ impl Rule for NoUnsafeValues {
             }
             NoUnsafeValuesQuery::JsonStringValue(string) => {
                 let value = string.inner_string_text().ok()?;
-                let surrogate_regex =
-                    Regex::new(r"[\xD800-\xDBFF][\xDC00-\xDFFF]?|[\xDC00-\xDFFF]").unwrap();
+                let raw = value.text();
+                if has_lone_surrogate_escape(raw.as_bytes()) {
+                    return Some(NoUnsafeValuesIssueKind::LoneSurrogate);
+                }
 
-                if surrogate_regex.find_iter(value.trim()).any(|p| p.len() < 2) {
+                let unescaped = unescape_json_string(value);
+                if has_lone_surrogate_escape(unescaped.as_bytes()) {
                     return Some(NoUnsafeValuesIssueKind::LoneSurrogate);
                 }
 
@@ -133,9 +137,10 @@ impl Rule for NoUnsafeValues {
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let span = ctx.query().range();
         Some(
-            RuleDiagnostic::new(rule_category!(), span, state.message()).note(markup! {
-                "This note will give you more information."
-            }),
+            RuleDiagnostic::new(rule_category!(), span, state.message())
+                .note(markup! {
+                    "Certain values can cause interoperability issues between different parsers and environments. Replace this value with a safe alternative."
+                }),
         )
     }
 }
@@ -170,4 +175,61 @@ impl NoUnsafeValuesIssueKind {
             }
         }
     }
+}
+
+fn is_high_surrogate(u: &u16) -> bool {
+    (0xD800..=0xDBFF).contains(u)
+}
+
+fn is_low_surrogate(u: &u16) -> bool {
+    (0xDC00..=0xDFFF).contains(u)
+}
+
+fn parse_unicode_escape(bytes: &[u8], i: usize) -> Option<u16> {
+    if i + 6 > bytes.len() || bytes[i] != b'\\' || bytes[i + 1] != b'u' {
+        return None;
+    }
+
+    // `\u` is an escape only when this backslash is not itself escaped.
+    let mut slash_run = 1;
+    let mut j = i;
+    while j > 0 && bytes[j - 1] == b'\\' {
+        slash_run += 1;
+        j -= 1;
+    }
+    if slash_run % 2 == 0 {
+        return None;
+    }
+
+    std::str::from_utf8(&bytes[i + 2..i + 6])
+        .ok()
+        .and_then(|s| u16::from_str_radix(s, 16).ok())
+}
+
+fn has_lone_surrogate_escape(bytes: &[u8]) -> bool {
+    let mut i = 0;
+    while i < bytes.len() {
+        if let Some(val) = parse_unicode_escape(bytes, i) {
+            if is_high_surrogate(&val) {
+                let is_paired =
+                    parse_unicode_escape(bytes, i + 6).is_some_and(|next| is_low_surrogate(&next));
+                if !is_paired {
+                    return true;
+                }
+                i += 12;
+                continue;
+            }
+
+            if is_low_surrogate(&val) {
+                return true;
+            }
+
+            i += 6;
+            continue;
+        }
+
+        i += 1;
+    }
+
+    false
 }

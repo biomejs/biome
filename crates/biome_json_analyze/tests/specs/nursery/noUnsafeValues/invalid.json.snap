@@ -1,6 +1,5 @@
 ---
 source: crates/biome_json_analyze/tests/spec_tests.rs
-assertion_line: 99
 expression: invalid.json
 ---
 # Input
@@ -41,7 +40,7 @@ invalid.json:2:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━�
     3 │   "b": -2e308,
     4 │   "c": "\ud83d",
   
-  i This note will give you more information.
+  i Certain values can cause interoperability issues between different parsers and environments. Replace this value with a safe alternative.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -60,7 +59,102 @@ invalid.json:3:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━�
     4 │   "c": "\ud83d",
     5 │   "d": "\\ud83d",
   
-  i This note will give you more information.
+  i Certain values can cause interoperability issues between different parsers and environments. Replace this value with a safe alternative.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.json:4:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Lone surrogate found.
+  
+    2 │   "a": 2e308,
+    3 │   "b": -2e308,
+  > 4 │   "c": "\ud83d",
+      │        ^^^^^^^^
+    5 │   "d": "\\ud83d",
+    6 │   "e": "\udd25",
+  
+  i Certain values can cause interoperability issues between different parsers and environments. Replace this value with a safe alternative.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.json:5:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Lone surrogate found.
+  
+    3 │   "b": -2e308,
+    4 │   "c": "\ud83d",
+  > 5 │   "d": "\\ud83d",
+      │        ^^^^^^^^^
+    6 │   "e": "\udd25",
+    7 │   "f": "\\udd25",
+  
+  i Certain values can cause interoperability issues between different parsers and environments. Replace this value with a safe alternative.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.json:6:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Lone surrogate found.
+  
+    4 │   "c": "\ud83d",
+    5 │   "d": "\\ud83d",
+  > 6 │   "e": "\udd25",
+      │        ^^^^^^^^
+    7 │   "f": "\\udd25",
+    8 │   "g": "\ud83d\ud83d",
+  
+  i Certain values can cause interoperability issues between different parsers and environments. Replace this value with a safe alternative.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.json:7:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Lone surrogate found.
+  
+    5 │   "d": "\\ud83d",
+    6 │   "e": "\udd25",
+  > 7 │   "f": "\\udd25",
+      │        ^^^^^^^^^
+    8 │   "g": "\ud83d\ud83d",
+    9 │   "h": 1e-400,
+  
+  i Certain values can cause interoperability issues between different parsers and environments. Replace this value with a safe alternative.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.json:8:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Lone surrogate found.
+  
+     6 │   "e": "\udd25",
+     7 │   "f": "\\udd25",
+   > 8 │   "g": "\ud83d\ud83d",
+       │        ^^^^^^^^^^^^^^
+     9 │   "h": 1e-400,
+    10 │   "i": 1E-400,
+  
+  i Certain values can cause interoperability issues between different parsers and environments. Replace this value with a safe alternative.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -79,7 +173,7 @@ invalid.json:9:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━�
     10 │   "i": 1E-400,
     11 │   "j": -1e-400,
   
-  i This note will give you more information.
+  i Certain values can cause interoperability issues between different parsers and environments. Replace this value with a safe alternative.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -98,7 +192,7 @@ invalid.json:10:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━�
     11 │   "j": -1e-400,
     12 │   "k": 0.01e-400,
   
-  i This note will give you more information.
+  i Certain values can cause interoperability issues between different parsers and environments. Replace this value with a safe alternative.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -117,7 +211,7 @@ invalid.json:11:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━�
     12 │   "k": 0.01e-400,
     13 │   "l": -0.01e-400,
   
-  i This note will give you more information.
+  i Certain values can cause interoperability issues between different parsers and environments. Replace this value with a safe alternative.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -136,7 +230,7 @@ invalid.json:12:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━�
     13 │   "l": -0.01e-400,
     14 │   "m": 10.0e-402,
   
-  i This note will give you more information.
+  i Certain values can cause interoperability issues between different parsers and environments. Replace this value with a safe alternative.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -155,7 +249,7 @@ invalid.json:13:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━�
     14 │   "m": 10.0e-402,
     15 │   "n": -10.0e-402,
   
-  i This note will give you more information.
+  i Certain values can cause interoperability issues between different parsers and environments. Replace this value with a safe alternative.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -174,7 +268,7 @@ invalid.json:14:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━�
     15 │   "n": -10.0e-402,
     16 │   "o": 0.00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001,
   
-  i This note will give you more information.
+  i Certain values can cause interoperability issues between different parsers and environments. Replace this value with a safe alternative.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -193,7 +287,7 @@ invalid.json:15:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━�
     16 │   "o": 0.00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001,
     17 │   "p": 9007199254740992,
   
-  i This note will give you more information.
+  i Certain values can cause interoperability issues between different parsers and environments. Replace this value with a safe alternative.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -212,7 +306,7 @@ invalid.json:16:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━�
     17 │   "p": 9007199254740992,
     18 │   "q": -9007199254740992,
   
-  i This note will give you more information.
+  i Certain values can cause interoperability issues between different parsers and environments. Replace this value with a safe alternative.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -231,7 +325,7 @@ invalid.json:17:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━�
     18 │   "q": -9007199254740992,
     19 │   "r": 2.2250738585072009e-308,
   
-  i This note will give you more information.
+  i Certain values can cause interoperability issues between different parsers and environments. Replace this value with a safe alternative.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -250,7 +344,7 @@ invalid.json:18:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━�
     19 │   "r": 2.2250738585072009e-308,
     20 │   "s": -2.2250738585072009e-308
   
-  i This note will give you more information.
+  i Certain values can cause interoperability issues between different parsers and environments. Replace this value with a safe alternative.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -269,7 +363,7 @@ invalid.json:19:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━�
     20 │   "s": -2.2250738585072009e-308
     21 │ }
   
-  i This note will give you more information.
+  i Certain values can cause interoperability issues between different parsers and environments. Replace this value with a safe alternative.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -288,7 +382,7 @@ invalid.json:20:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━�
     21 │ }
     22 │ 
   
-  i This note will give you more information.
+  i Certain values can cause interoperability issues between different parsers and environments. Replace this value with a safe alternative.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
