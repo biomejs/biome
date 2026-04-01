@@ -85,6 +85,16 @@ fn parse_scss_string_import_item(p: &mut CssParser) -> ParsedSyntax {
     }
 }
 
+/// Parses an SCSS `@import` item whose URL is an interpolated string.
+///
+/// When import modifiers follow, such as media queries, this produces a
+/// `ScssPlainImport` item rather than a bare interpolated string.
+///
+/// Example:
+///
+/// ```scss
+/// @import "#{$file}.css" print;
+/// ```
 #[inline]
 fn parse_scss_interpolated_string_import_item(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_scss_interpolated_string(p) {
