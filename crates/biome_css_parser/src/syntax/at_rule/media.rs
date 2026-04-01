@@ -248,7 +248,7 @@ fn parse_media_and_condition(p: &mut CssParser, lhs: CompletedMarker) -> Complet
     let recovery_result = parse_any_media_in_parens(p)
         .or_recover(
             p,
-            &AnyInParensChainParseRecovery::new(T![and]),
+            &AnyInParensChainParseRecovery::new(T![and]).with_stop_kind(T![')']),
             expected_any_media_in_parens,
         )
         .map(|rhs| parse_media_and_condition(p, rhs));
@@ -276,7 +276,7 @@ fn parse_media_or_condition(p: &mut CssParser, lhs: CompletedMarker) -> Complete
     let recovery_result = parse_any_media_in_parens(p)
         .or_recover(
             p,
-            &AnyInParensChainParseRecovery::new(T![or]),
+            &AnyInParensChainParseRecovery::new(T![or]).with_stop_kind(T![')']),
             expected_any_media_in_parens,
         )
         .map(|rhs| parse_media_or_condition(p, rhs));
