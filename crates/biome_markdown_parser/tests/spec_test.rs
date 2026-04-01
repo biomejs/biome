@@ -247,6 +247,25 @@ pub fn quick_test() {
         "- one\n\n+ two\n",
         "<ul>\n<li>\n<p>one</p>\n</li>\n</ul>\n<ul>\n<li>\n<p>two</p>\n</li>\n</ul>\n",
     );
+    // Nested list items separated by blank lines stay in the same nested list.
+    test_example(
+        10009,
+        "- top\n  - sub a\n\n  - sub b\n",
+        "<ul>\n<li>top\n<ul>\n<li>\n<p>sub a</p>\n</li>\n<li>\n<p>sub b</p>\n</li>\n</ul>\n</li>\n</ul>\n",
+    );
+    // Double blank line between nested list siblings must not emit diagnostics
+    // and must keep items in the same nested list.
+    test_example(
+        10010,
+        "- top\n  - sub a\n\n\n  - sub b\n",
+        "<ul>\n<li>top\n<ul>\n<li>\n<p>sub a</p>\n</li>\n<li>\n<p>sub b</p>\n</li>\n</ul>\n</li>\n</ul>\n",
+    );
+    // Triple blank line between nested list siblings
+    test_example(
+        10011,
+        "- top\n  - sub a\n\n\n\n  - sub b\n",
+        "<ul>\n<li>top\n<ul>\n<li>\n<p>sub a</p>\n</li>\n<li>\n<p>sub b</p>\n</li>\n</ul>\n</li>\n</ul>\n",
+    );
     // #9725: fenced code block inside list item with 4-space indent
     test_example(
         9725,
