@@ -6,9 +6,10 @@ use biome_analyze::{
 use biome_aria_metadata::AriaAttribute;
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlAttribute, AnyHtmlElement};
-use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
+use biome_html_syntax::{AnyHtmlAttribute, AnyVueDirective};
+use biome_rowan::{AstNode, BatchMutationExt, TokenText};
 use biome_rule_options::use_valid_aria_props::UseValidAriaPropsOptions;
+use biome_string_case::StrLikeExtension;
 
 use crate::HtmlRuleAction;
 
@@ -48,61 +49,46 @@ declare_lint_rule! {
 }
 
 impl Rule for UseValidAriaProps {
-    type Query = Ast<AnyHtmlElement>;
-    type State = String;
-    type Signals = Box<[Self::State]>;
+    type Query = Ast<AnyHtmlAttribute>;
+    type State = ();
+    type Signals = Option<Self::State>;
     type Options = UseValidAriaPropsOptions;
 
-    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let node = ctx.query();
-        let Some(attributes) = node.attributes() else {
-            return Vec::new().into_boxed_slice();
-        };
-
-        let invalid_attrs: Vec<_> = attributes
-            .iter()
-            .filter_map(|attr: AnyHtmlAttribute| {
-                let attribute = attr.as_html_attribute()?;
-                let name_token = attribute.name().ok()?.value_token().ok()?;
-                let name = name_token.text_trimmed();
-                let name_lower = name.to_ascii_lowercase();
-                if name_lower.starts_with("aria-")
-                    && AriaAttribute::from_str(&name_lower).is_err()
-                {
-                    Some(name.to_string())
-                } else {
-                    None
-                }
-            })
-            .collect();
-
-        invalid_attrs.into_boxed_slice()
+    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
+        let attr = ctx.query();
+        let name = extract_attribute_name(attr)?;
+        let name_lower = name.to_ascii_lowercase_cow();
+        if name_lower.starts_with("aria-") && AriaAttribute::from_str(&name_lower).is_err() {
+            Some(())
+        } else {
+            None
+        }
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, attr_name: &Self::State) -> Option<RuleDiagnostic> {
-        let node = ctx.query();
+    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
+        let attr = ctx.query();
+        let name = extract_attribute_name(attr)?;
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                node.range(),
+                attr.range(),
                 markup! {
-                    "The element contains invalid ARIA attribute(s)"
+                    "The element contains an invalid ARIA attribute."
                 },
             )
             .detail(
-                node.find_attribute_by_name(attr_name)?.range(),
+                attr.range(),
                 markup! {
-                    <Emphasis>{attr_name}</Emphasis>" is not a valid ARIA attribute."
+                    <Emphasis>{name.text()}</Emphasis>" is not a valid ARIA attribute."
                 },
             ),
         )
     }
 
-    fn action(ctx: &RuleContext<Self>, attr_name: &Self::State) -> Option<HtmlRuleAction> {
-        let node = ctx.query();
-        let attribute = node.find_attribute_by_name(attr_name)?;
+    fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<HtmlRuleAction> {
+        let attr = ctx.query();
         let mut mutation = ctx.root().begin();
-        mutation.remove_node(attribute);
+        mutation.remove_node(attr.clone());
         Some(HtmlRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
@@ -111,5 +97,41 @@ impl Rule for UseValidAriaProps {
                 .to_owned(),
             mutation,
         ))
+    }
+}
+
+fn extract_attribute_name(attr: &AnyHtmlAttribute) -> Option<TokenText> {
+    match attr {
+        AnyHtmlAttribute::HtmlAttribute(a) => {
+            Some(a.name().ok()?.value_token().ok()?.token_text_trimmed())
+        }
+        AnyHtmlAttribute::AnyVueDirective(vue) => match vue {
+            AnyVueDirective::VueVBindShorthandDirective(d) => Some(
+                d.arg()
+                    .ok()?
+                    .arg()
+                    .ok()?
+                    .as_vue_static_argument()?
+                    .name_token()
+                    .ok()?
+                    .token_text_trimmed(),
+            ),
+            AnyVueDirective::VueDirective(d) => {
+                if d.name_token().ok()?.text_trimmed() != "v-bind" {
+                    return None;
+                }
+                Some(
+                    d.arg()?
+                        .arg()
+                        .ok()?
+                        .as_vue_static_argument()?
+                        .name_token()
+                        .ok()?
+                        .token_text_trimmed(),
+                )
+            }
+            _ => None,
+        },
+        _ => None,
     }
 }
