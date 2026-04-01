@@ -65,7 +65,10 @@ impl Rule for UseValidAriaProps {
                 let attribute = attr.as_html_attribute()?;
                 let name_token = attribute.name().ok()?.value_token().ok()?;
                 let name = name_token.text_trimmed();
-                if name.starts_with("aria-") && AriaAttribute::from_str(name).is_err() {
+                let name_lower = name.to_ascii_lowercase();
+                if name_lower.starts_with("aria-")
+                    && AriaAttribute::from_str(&name_lower).is_err()
+                {
                     Some(name.to_string())
                 } else {
                     None
