@@ -967,9 +967,10 @@ impl<'src> CssLexer<'src> {
             cursor += 1;
         }
 
-        if self.byte_at(cursor).is_some_and(|byte| {
-            matches!(byte, b'\t' | b' ' | b'\n' | b'\r' | 0x0C)
-        }) {
+        if self
+            .byte_at(cursor)
+            .is_some_and(|byte| matches!(byte, b'\t' | b' ' | b'\n' | b'\r' | 0x0C))
+        {
             cursor += 1;
         }
 
