@@ -23,11 +23,13 @@ ___
 @@ -1,7 +1,5 @@
  <!-- placeholder for continuous thematic breaks not being treated as yaml -->
  
++***
  ---
 -
- ---
+----
 -
- ---
+----
++___
 ```
 
 # Output
@@ -35,7 +37,7 @@ ___
 ```md
 <!-- placeholder for continuous thematic breaks not being treated as yaml -->
 
+***
 ---
----
----
+___
 ```

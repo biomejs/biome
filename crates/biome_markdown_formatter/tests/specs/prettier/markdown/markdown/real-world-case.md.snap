@@ -917,6 +917,15 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  - JavaScript, including [ES2017](https://github.com/tc39/proposals/blob/master/finished-proposals.md)
  - [JSX](https://facebook.github.io/jsx/)
  - [Flow](https://flow.org/)
+@@ -74,7 +73,7 @@
+ 
+ </details>
+ 
+----
++--------------------------------------------------------------------------------
+ 
+ ## What does Prettier do?
+ 
 @@ -118,12 +117,12 @@
  
  <a href="https://www.youtube.com/watch?v=hkfBvpEfWdA"><img width="298" src="https://cloud.githubusercontent.com/assets/197597/24886367/dda8a6f0-1e08-11e7-865b-22492450f10f.png"></a> <a href="https://www.youtube.com/watch?v=0Q4kUNx85_4"><img width="298" src="https://cloud.githubusercontent.com/assets/197597/24886368/ddacd6f8-1e08-11e7-806a-9febd23cbf47.png"></a>
@@ -1167,14 +1176,14 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  
 -- `true` - Example: `{ foo: bar }`.
 -- `false` - Example: `{foo: bar}`.
+-
+-| Default | CLI Override           | API Override             |
+-| ------- | ---------------------- | ------------------------ |
+-| `true`  | `--no-bracket-spacing` | `bracketSpacing: <bool>` |
 +Default | CLI Override | API Override
 +--------|--------------|-------------
 +`true` | `--no-bracket-spacing` | `bracketSpacing: <bool>`
  
--| Default | CLI Override           | API Override             |
--| ------- | ---------------------- | ------------------------ |
--| `true`  | `--no-bracket-spacing` | `bracketSpacing: <bool>` |
--
  ### JSX Brackets
 -
  Put the `>` of a multi-line JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).
@@ -1211,13 +1220,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  Both the `babylon` and `flow` parsers support the same set of JavaScript features (including Flow). Prettier automatically infers the parser from the input file path, so you shouldn't have to change this setting.
  
  Built-in parsers:
--
--- [`babylon`](https://github.com/babel/babylon/)
--- [`flow`](https://github.com/facebook/flow/tree/master/src/parser)
--- [`typescript`](https://github.com/eslint/typescript-eslint-parser) _Since v1.4.0_
--- [`postcss`](https://github.com/postcss/postcss) _Since v1.4.0_
--- [`json`](https://github.com/babel/babylon/tree/f09eb3200f57ea94d51c2a5b1facf2149fb406bf#babylonparseexpressioncode-options) _Since v1.5.0_
--- [`graphql`](https://github.com/graphql/graphql-js/tree/master/src/language) _Since v1.5.0_
 + - [`babylon`](https://github.com/babel/babylon/)
 + - [`flow`](https://github.com/facebook/flow/tree/master/src/parser)
 + - [`typescript`](https://github.com/eslint/typescript-eslint-parser) _Since v1.4.0_
@@ -1225,9 +1227,16 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 + - [`json`](https://github.com/babel/babylon/tree/f09eb3200f57ea94d51c2a5b1facf2149fb406bf#babylonparseexpressioncode-options) _Since v1.5.0_
 + - [`graphql`](https://github.com/graphql/graphql-js/tree/master/src/language) _Since v1.5.0_
  
--[Custom parsers](#custom-parser-api) are also supported. _Since v1.5.0_
+-- [`babylon`](https://github.com/babel/babylon/)
+-- [`flow`](https://github.com/facebook/flow/tree/master/src/parser)
+-- [`typescript`](https://github.com/eslint/typescript-eslint-parser) _Since v1.4.0_
+-- [`postcss`](https://github.com/postcss/postcss) _Since v1.4.0_
+-- [`json`](https://github.com/babel/babylon/tree/f09eb3200f57ea94d51c2a5b1facf2149fb406bf#babylonparseexpressioncode-options) _Since v1.5.0_
+-- [`graphql`](https://github.com/graphql/graphql-js/tree/master/src/language) _Since v1.5.0_
 +[Custom parsers](#custom-parser-api) are also supported.  _Since v1.5.0_
  
+-[Custom parsers](#custom-parser-api) are also supported. _Since v1.5.0_
+-
 -| Default   | CLI Override                                    | API Override                                               |
 -| --------- | ----------------------------------------------- | ---------------------------------------------------------- |
 -| `babylon` | `--parser <string>`<br />`--parser ./my-parser` | `parser: "<string>"`<br />`parser: require("./my-parser")` |
@@ -1370,7 +1379,7 @@ conforms to a consistent style. (See this [blog post](http://jlongster.com/A-Pre
 
 </details>
 
----
+--------------------------------------------------------------------------------
 
 ## What does Prettier do?
 

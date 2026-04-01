@@ -21,8 +21,9 @@ info: markdown/spec/example-28.md
 @@ -1,5 +1,3 @@
  - Foo
 -
- ---
+----
 -
++* * *
  - Bar
 ```
 
@@ -30,6 +31,6 @@ info: markdown/spec/example-28.md
 
 ```md
 - Foo
----
+* * *
 - Bar
 ```

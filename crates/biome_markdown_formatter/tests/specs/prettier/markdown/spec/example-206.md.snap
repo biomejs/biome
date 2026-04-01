@@ -21,8 +21,9 @@ info: markdown/spec/example-206.md
 @@ -1,5 +1,3 @@
  > aaa
 -
- ---
+----
 -
++***
  > bbb
 ```
 
@@ -30,6 +31,6 @@ info: markdown/spec/example-206.md
 
 ```md
 > aaa
----
+***
 > bbb
 ```

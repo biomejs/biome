@@ -63,9 +63,9 @@ info: markdown/list/tab.md
 -  ```
 -  foo
 -  ```
-+ 	`
++ 	```
 + 	foo
-+ 	`
++ 	```
  
  - Text
  
@@ -92,9 +92,9 @@ info: markdown/list/tab.md
 
 - Text
 
- 	`
+ 	```
  	foo
- 	`
+ 	```
 
 - Text
 

@@ -19,13 +19,13 @@ foo
 +++ Biome
 @@ -1,2 +1,2 @@
 -`aa`
-+` aa `
++``` aa ```
  foo
 ```
 
 # Output
 
 ```md
-` aa `
+``` aa ```
 foo
 ```

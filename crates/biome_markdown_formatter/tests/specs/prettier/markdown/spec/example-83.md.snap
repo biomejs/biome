@@ -30,7 +30,8 @@ Heading
 -
      foo
 -
- ---
+----
++----
 ```
 
 # Output
@@ -40,5 +41,5 @@ Heading
     foo
 ## Heading
     foo
----
+----
 ```
