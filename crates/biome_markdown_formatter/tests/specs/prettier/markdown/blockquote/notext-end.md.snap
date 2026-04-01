@@ -43,16 +43,15 @@ info: markdown/blockquote/notext-end.md
 -> > `B`
 +>> `A`
 +>> `B`
-+
-+> *a*
-+>> # foo
-+>> `a` > `b`
  
--> _a_
+ > _a_
 ->
 -> > # foo
 -> >
 -> > `a` > `b`
++>> # foo
++>> `a` > `b`
++
  
  > This is a quote with an italic _across multuple lines
  > which should just work_. So make sure there is no > if we set
@@ -68,7 +67,7 @@ info: markdown/blockquote/notext-end.md
 >> `A`
 >> `B`
 
-> *a*
+> _a_
 >> # foo
 >> `a` > `b`
 

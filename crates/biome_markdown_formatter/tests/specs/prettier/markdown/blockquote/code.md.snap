@@ -39,15 +39,14 @@ info: markdown/blockquote/code.md
  >  "extends": [
  >    "unobtrusive",
  >    "unobtrusive/import",
-@@ -11,5 +10,6 @@
+@@ -11,5 +10,5 @@
  >  "env": {
  >    "browser": true
  >  }
 -> }
 -> ```
 +>}
-+>
-+```
++>```
 ```
 
 # Output
@@ -66,8 +65,7 @@ info: markdown/blockquote/code.md
 >    "browser": true
 >  }
 >}
->
-```
+>```
 ```
 
 # Lines exceeding max width of 80 characters

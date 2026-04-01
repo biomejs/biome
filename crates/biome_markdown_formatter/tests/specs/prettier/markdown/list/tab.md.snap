@@ -42,35 +42,35 @@ info: markdown/list/tab.md
  - Text
  
 -  [title](link)
-+	[title](link)
++ 	[title](link)
  
  - Text
 -  - foo
 -  - foo
 -  - bar
  
-+	- foo
++ 	- foo
 + 	- foo
 + 	- bar
 +
  - Text
  
 -  # foo
-+	# foo
++ 	# foo
  
  - Text
  
 -  ```
 -  foo
 -  ```
-+	`
++ 	`
 + 	foo
 + 	`
  
  - Text
  
 -  `foo`
-+	`foo`
++ 	`foo`
 ```
 
 # Output
@@ -78,25 +78,25 @@ info: markdown/list/tab.md
 ```md
 - Text
 
-	[title](link)
+ 	[title](link)
 
 - Text
 
-	- foo
+ 	- foo
  	- foo
  	- bar
 
 - Text
 
-	# foo
+ 	# foo
 
 - Text
 
-	`
+ 	`
  	foo
  	`
 
 - Text
 
-	`foo`
+ 	`foo`
 ```

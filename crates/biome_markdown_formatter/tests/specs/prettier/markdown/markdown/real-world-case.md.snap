@@ -917,55 +917,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  - JavaScript, including [ES2017](https://github.com/tc39/proposals/blob/master/finished-proposals.md)
  - [JSX](https://facebook.github.io/jsx/)
  - [Flow](https://flow.org/)
-@@ -27,7 +26,7 @@
- 
- - [What does Prettier do?](#what-does-prettier-do)
- - [Why Prettier?](#why-prettier)
--  - [Building and enforcing a style guide](#building-and-enforcing-a-style-guide)
-+- [Building and enforcing a style guide](#building-and-enforcing-a-style-guide)
-   - [Helping Newcomers](#helping-newcomers)
-   - [Writing code](#writing-code)
-   - [Easy to adopt](#easy-to-adopt)
-@@ -35,13 +34,13 @@
-   - [Ride the hype train](#ride-the-hype-train)
- - [How does it compare to ESLint (or TSLint, stylelint...)?](#how-does-it-compare-to-eslint-or-tslint-stylelint)
- - [Usage](#usage)
--  - [CLI](#cli)
-+- [CLI](#cli)
-   - [ESLint](#eslint)
-   - [Pre-commit Hook](#pre-commit-hook)
-   - [API](#api)
-   - [Excluding code from formatting](#excluding-code-from-formatting)
- - [Options](#options)
--  - [Print Width](#print-width)
-+- [Print Width](#print-width)
-   - [Tab Width](#tab-width)
-   - [Tabs](#tabs)
-   - [Semicolons](#semicolons)
-@@ -53,11 +52,11 @@
-   - [Parser](#parser)
-   - [Filepath](#filepath)
- - [Configuration File](#configuration-file)
--  - [Basic Configuration](#basic-configuration)
-+- [Basic Configuration](#basic-configuration)
-   - [Configuration Overrides](#configuration-overrides)
-   - [Configuration Schema](#configuration-schema)
- - [Editor Integration](#editor-integration)
--  - [Atom](#atom)
-+- [Atom](#atom)
-   - [Emacs](#emacs)
-   - [Vim](#vim)
-   - [Visual Studio Code](#visual-studio-code)
-@@ -111,19 +110,19 @@
- original styling is preserved when practical—see [empty lines] and [multi-line
- objects]._
- 
--[empty lines]: Rationale.md#empty-lines
--[multi-line objects]: Rationale.md#multi-line-objects
-+[empty lines]:Rationale.md#empty-lines
-+[multi-line objects]:Rationale.md#multi-line-objects
- 
- If you want to learn more, these two conference talks are great introductions:
+@@ -118,12 +117,12 @@
  
  <a href="https://www.youtube.com/watch?v=hkfBvpEfWdA"><img width="298" src="https://cloud.githubusercontent.com/assets/197597/24886367/dda8a6f0-1e08-11e7-865b-22492450f10f.png"></a> <a href="https://www.youtube.com/watch?v=0Q4kUNx85_4"><img width="298" src="https://cloud.githubusercontent.com/assets/197597/24886368/ddacd6f8-1e08-11e7-806a-9febd23cbf47.png"></a>
  
@@ -1190,39 +1142,39 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  for example, never gets trailing commas.)
  
  Valid options:
+-
+-- `"none"` - No trailing commas.
+-- `"es5"` - Trailing commas where valid in ES5 (objects, arrays, etc.)
+-- `"all"` - Trailing commas wherever possible (including function arguments). This requires node 8 or a [transform](https://babeljs.io/docs/plugins/syntax-trailing-function-commas/).
 + - `"none"` - No trailing commas.
 + - `"es5"` - Trailing commas where valid in ES5 (objects, arrays, etc.)
 + - `"all"` - Trailing commas wherever possible (including function arguments). This requires node 8 or a [transform](https://babeljs.io/docs/plugins/syntax-trailing-function-commas/).
  
--- `"none"` - No trailing commas.
--- `"es5"` - Trailing commas where valid in ES5 (objects, arrays, etc.)
--- `"all"` - Trailing commas wherever possible (including function arguments). This requires node 8 or a [transform](https://babeljs.io/docs/plugins/syntax-trailing-function-commas/).
+-| Default  | CLI Override                                           | API Override                                           |
+-| -------- | ------------------------------------------------------ | ------------------------------------------------------ |
+-| `"none"` | <code>--trailing-comma <none&#124;es5&#124;all></code> | <code>trailingComma: "<none&#124;es5&#124;all>"</code> |
 +Default | CLI Override | API Override
 +--------|--------------|-------------
 +`"none"` | <code>--trailing-comma <none&#124;es5&#124;all></code> | <code>trailingComma: "<none&#124;es5&#124;all>"</code>
  
--| Default  | CLI Override                                           | API Override                                           |
--| -------- | ------------------------------------------------------ | ------------------------------------------------------ |
--| `"none"` | <code>--trailing-comma <none&#124;es5&#124;all></code> | <code>trailingComma: "<none&#124;es5&#124;all>"</code> |
--
  ### Bracket Spacing
 -
  Print spaces between brackets in object literals.
  
  Valid options:
--
--- `true` - Example: `{ foo: bar }`.
--- `false` - Example: `{foo: bar}`.
 + - `true` - Example: `{ foo: bar }`.
 + - `false` - Example: `{foo: bar}`.
  
--| Default | CLI Override           | API Override             |
--| ------- | ---------------------- | ------------------------ |
--| `true`  | `--no-bracket-spacing` | `bracketSpacing: <bool>` |
+-- `true` - Example: `{ foo: bar }`.
+-- `false` - Example: `{foo: bar}`.
 +Default | CLI Override | API Override
 +--------|--------------|-------------
 +`true` | `--no-bracket-spacing` | `bracketSpacing: <bool>`
  
+-| Default | CLI Override           | API Override             |
+-| ------- | ---------------------- | ------------------------ |
+-| `true`  | `--no-bracket-spacing` | `bracketSpacing: <bool>` |
+-
  ### JSX Brackets
 -
  Put the `>` of a multi-line JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).
@@ -1371,7 +1323,7 @@ conforms to a consistent style. (See this [blog post](http://jlongster.com/A-Pre
 
 - [What does Prettier do?](#what-does-prettier-do)
 - [Why Prettier?](#why-prettier)
-- [Building and enforcing a style guide](#building-and-enforcing-a-style-guide)
+  - [Building and enforcing a style guide](#building-and-enforcing-a-style-guide)
   - [Helping Newcomers](#helping-newcomers)
   - [Writing code](#writing-code)
   - [Easy to adopt](#easy-to-adopt)
@@ -1379,13 +1331,13 @@ conforms to a consistent style. (See this [blog post](http://jlongster.com/A-Pre
   - [Ride the hype train](#ride-the-hype-train)
 - [How does it compare to ESLint (or TSLint, stylelint...)?](#how-does-it-compare-to-eslint-or-tslint-stylelint)
 - [Usage](#usage)
-- [CLI](#cli)
+  - [CLI](#cli)
   - [ESLint](#eslint)
   - [Pre-commit Hook](#pre-commit-hook)
   - [API](#api)
   - [Excluding code from formatting](#excluding-code-from-formatting)
 - [Options](#options)
-- [Print Width](#print-width)
+  - [Print Width](#print-width)
   - [Tab Width](#tab-width)
   - [Tabs](#tabs)
   - [Semicolons](#semicolons)
@@ -1397,11 +1349,11 @@ conforms to a consistent style. (See this [blog post](http://jlongster.com/A-Pre
   - [Parser](#parser)
   - [Filepath](#filepath)
 - [Configuration File](#configuration-file)
-- [Basic Configuration](#basic-configuration)
+  - [Basic Configuration](#basic-configuration)
   - [Configuration Overrides](#configuration-overrides)
   - [Configuration Schema](#configuration-schema)
 - [Editor Integration](#editor-integration)
-- [Atom](#atom)
+  - [Atom](#atom)
   - [Emacs](#emacs)
   - [Vim](#vim)
   - [Visual Studio Code](#visual-studio-code)
@@ -2248,6 +2200,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
     9: - JavaScript, including [ES2017](https://github.com/tc39/proposals/blob/master/finished-proposals.md)
    17: It removes all original styling[\*](#styling-footnote) and ensures that all outputted code
    18: conforms to a consistent style. (See this [blog post](http://jlongster.com/A-Prettier-Formatter))
+   29:   - [Building and enforcing a style guide](#building-and-enforcing-a-style-guide)
    35: - [How does it compare to ESLint (or TSLint, stylelint...)?](#how-does-it-compare-to-eslint-or-tslint-stylelint)
    65:   - [JetBrains WebStorm, PHPStorm, PyCharm...](#jetbrains-webstorm-phpstorm-pycharm)
    80: Prettier takes your code and reprints it from scratch by taking the line length into account.
