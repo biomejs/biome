@@ -834,7 +834,11 @@ impl ParseNodeList for OrderedList {
     type Kind = MarkdownSyntaxKind;
     type Parser<'source> = MarkdownParser<'source>;
 
-    const LIST_KIND: Self::Kind = MD_BULLET_LIST; // Reuse bullet list node structure
+    // The Markdown grammar defines a single MdBulletList node kind for both
+    // bullet and ordered lists — the marker type distinguishes them, not the
+    // CST node kind. This keeps the grammar simpler and avoids duplicating
+    // the entire list/item node hierarchy.
+    const LIST_KIND: Self::Kind = MD_BULLET_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         parse_list_element_common(
