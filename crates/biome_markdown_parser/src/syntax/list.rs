@@ -2077,16 +2077,6 @@ fn check_continuation_indent(
             };
         }
 
-        // If the line's indent falls strictly below the nested marker column,
-        // it belongs to the parent item. Lines at exactly marker_indent may
-        // still lazily continue the nested paragraph per CommonMark §5.2.
-        if state.marker_indent > 0 && indent < state.marker_indent {
-            return ContinuationResult {
-                action: LoopAction::Break,
-                restore: VirtualLineRestore::None,
-            };
-        }
-
         // Lazy continuation per CommonMark §5.2
         if !state.last_block_was_paragraph {
             return ContinuationResult {
