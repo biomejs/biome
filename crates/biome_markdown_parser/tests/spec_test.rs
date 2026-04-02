@@ -3,8 +3,9 @@ use biome_console::markup;
 use biome_diagnostics::DiagnosticExt;
 use biome_diagnostics::display::PrintDiagnostic;
 use biome_diagnostics::termcolor;
-use biome_markdown_parser::parse_markdown;
-use biome_rowan::SyntaxKind;
+use biome_markdown_parser::{document_to_html, parse_markdown};
+use biome_markdown_syntax::{MarkdownSyntaxKind, MdDocument};
+use biome_rowan::{AstNode, SyntaxKind, SyntaxSlot};
 use biome_test_utils::{has_bogus_nodes_or_empty_slots, validate_eof_token};
 use std::fmt::Write;
 use std::fs;
@@ -115,6 +116,65 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
             if has_bogus_nodes_or_empty_slots(&syntax) {
                 panic!("modified tree has bogus nodes or empty slots:\n{syntax:#?} \n\n {syntax}")
             }
+
+            // Optional reference HTML comparison: if a .html sidecar exists,
+            // render via document_to_html and compare against the reference.
+            let html_path = test_case_path.with_extension("html");
+            if html_path.exists()
+                && let Some(doc) = MdDocument::cast(parsed.syntax())
+            {
+                let actual = document_to_html(
+                    &doc,
+                    parsed.list_tightness(),
+                    parsed.list_item_indents(),
+                    parsed.quote_indents(),
+                );
+                let expected =
+                    fs::read_to_string(&html_path).expect("Failed to read reference HTML file");
+                let actual_normalized = normalize_html(&actual);
+                let expected_normalized = normalize_html(&expected);
+                assert_eq!(
+                    expected_normalized, actual_normalized,
+                    "HTML mismatch for {file_name}.\nExpected:\n{expected}\nActual:\n{actual}"
+                );
+            }
+
+            // Structural invariant: MdContinuationIndent children must all be MdIndentToken.
+            for node in parsed.syntax().descendants() {
+                if node.kind() == MarkdownSyntaxKind::MD_CONTINUATION_INDENT {
+                    for child in node.children() {
+                        if child.kind() == MarkdownSyntaxKind::MD_INDENT_TOKEN_LIST {
+                            for token_node in child.children() {
+                                assert_eq!(
+                                    token_node.kind(),
+                                    MarkdownSyntaxKind::MD_INDENT_TOKEN,
+                                    "MdContinuationIndent invariant: expected MD_INDENT_TOKEN, got {:?} in {file_name} at {:?}",
+                                    token_node.kind(),
+                                    token_node.kind()
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Structural invariant: MdHeader inside list items must have a present indent field.
+            for node in parsed.syntax().descendants() {
+                if node.kind() == MarkdownSyntaxKind::MD_HEADER {
+                    let in_list = node.ancestors().any(|a| {
+                        let k = a.kind();
+                        k == MarkdownSyntaxKind::MD_BULLET_LIST_ITEM
+                            || k == MarkdownSyntaxKind::MD_ORDERED_LIST_ITEM
+                    });
+                    if in_list {
+                        assert!(
+                            !matches!(node.slots().next(), Some(SyntaxSlot::Empty { .. })),
+                            "MdHeader indent invariant: MD_HEADER inside list item is missing indent slot in {file_name} at {:?}",
+                            node.kind()
+                        );
+                    }
+                }
+            }
         }
         ExpectedOutcome::Fail => {
             if parsed.diagnostics().is_empty() {
@@ -130,6 +190,29 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     }, {
         insta::assert_snapshot!(file_name, snapshot);
     });
+}
+
+/// Normalize HTML for comparison, preserving whitespace inside `<pre>` blocks.
+/// Matches the normalization in `xtask/coverage/src/markdown/commonmark.rs`.
+fn normalize_html(html: &str) -> String {
+    let mut result = Vec::new();
+    let mut in_pre = false;
+
+    for line in html.lines() {
+        if line.contains("<pre") {
+            in_pre = true;
+        }
+        if in_pre {
+            result.push(line.to_string());
+        } else {
+            result.push(line.trim_end().to_string());
+        }
+        if line.contains("</pre>") {
+            in_pre = false;
+        }
+    }
+
+    result.join("\n").trim().to_string() + "\n"
 }
 
 #[test]
