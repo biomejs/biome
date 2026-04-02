@@ -1902,6 +1902,10 @@ fn parse_first_line_atx_heading(p: &mut MarkdownParser, state: &mut ListItemLoop
 
     let header_m = p.start();
 
+    // Emit the required MdIndentTokenList slot (slot 0) so the CST matches the grammar.
+    // In list context we are never at line start, so this produces an empty list node.
+    p.emit_line_indent(MAX_BLOCK_PREFIX_INDENT);
+
     // Can't reuse header::parse_hash_list(): in list context `#` may be lexed as
     // MD_TEXTUAL_LITERAL and requires bump_remap. Keep in sync with parse_hash_list().
     let hash_list_m = p.start();
