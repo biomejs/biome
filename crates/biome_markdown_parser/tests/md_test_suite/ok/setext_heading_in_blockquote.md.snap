@@ -1,0 +1,215 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+> Foo
+> ---
+
+> Bar
+> ===
+
+> > Nested
+> > ---
+
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdQuote {
+            prefix: MdQuotePrefix {
+                pre_marker_indent: MdQuoteIndentList [],
+                marker_token: R_ANGLE@0..1 ">" [] [],
+                post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@1..2 " " [] [],
+            },
+            content: MdBlockList [
+                MdSetextHeader {
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@2..5 "Foo" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@5..6 "\n" [] [],
+                        },
+                        MdQuotePrefix {
+                            pre_marker_indent: MdQuoteIndentList [],
+                            marker_token: R_ANGLE@6..7 ">" [] [],
+                            post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@7..8 " " [] [],
+                        },
+                    ],
+                    underline_token: MD_SETEXT_UNDERLINE_LITERAL@8..11 "---" [] [],
+                },
+                MdNewline {
+                    value_token: NEWLINE@11..12 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@12..13 "\n" [] [],
+        },
+        MdQuote {
+            prefix: MdQuotePrefix {
+                pre_marker_indent: MdQuoteIndentList [],
+                marker_token: R_ANGLE@13..14 ">" [] [],
+                post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@14..15 " " [] [],
+            },
+            content: MdBlockList [
+                MdSetextHeader {
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@15..18 "Bar" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@18..19 "\n" [] [],
+                        },
+                        MdQuotePrefix {
+                            pre_marker_indent: MdQuoteIndentList [],
+                            marker_token: R_ANGLE@19..20 ">" [] [],
+                            post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@20..21 " " [] [],
+                        },
+                    ],
+                    underline_token: MD_SETEXT_UNDERLINE_LITERAL@21..24 "===" [] [],
+                },
+                MdNewline {
+                    value_token: NEWLINE@24..25 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@25..26 "\n" [] [],
+        },
+        MdQuote {
+            prefix: MdQuotePrefix {
+                pre_marker_indent: MdQuoteIndentList [],
+                marker_token: R_ANGLE@26..27 ">" [] [],
+                post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@27..28 " " [] [],
+            },
+            content: MdBlockList [
+                MdQuote {
+                    prefix: MdQuotePrefix {
+                        pre_marker_indent: MdQuoteIndentList [],
+                        marker_token: R_ANGLE@28..29 ">" [] [],
+                        post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@29..30 " " [] [],
+                    },
+                    content: MdBlockList [
+                        MdSetextHeader {
+                            content: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@30..36 "Nested" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@36..37 "\n" [] [],
+                                },
+                                MdQuotePrefix {
+                                    pre_marker_indent: MdQuoteIndentList [],
+                                    marker_token: R_ANGLE@37..38 ">" [] [],
+                                    post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@38..39 " " [] [],
+                                },
+                                MdQuotePrefix {
+                                    pre_marker_indent: MdQuoteIndentList [],
+                                    marker_token: R_ANGLE@39..40 ">" [] [],
+                                    post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@40..41 " " [] [],
+                                },
+                            ],
+                            underline_token: MD_SETEXT_UNDERLINE_LITERAL@41..44 "---" [] [],
+                        },
+                        MdNewline {
+                            value_token: NEWLINE@44..45 "\n" [] [],
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@45..45 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..45
+  0: (empty)
+  1: MD_BLOCK_LIST@0..45
+    0: MD_QUOTE@0..12
+      0: MD_QUOTE_PREFIX@0..2
+        0: MD_QUOTE_INDENT_LIST@0..0
+        1: R_ANGLE@0..1 ">" [] []
+        2: MD_QUOTE_POST_MARKER_SPACE@1..2 " " [] []
+      1: MD_BLOCK_LIST@2..12
+        0: MD_SETEXT_HEADER@2..11
+          0: MD_INLINE_ITEM_LIST@2..8
+            0: MD_TEXTUAL@2..5
+              0: MD_TEXTUAL_LITERAL@2..5 "Foo" [] []
+            1: MD_TEXTUAL@5..6
+              0: MD_TEXTUAL_LITERAL@5..6 "\n" [] []
+            2: MD_QUOTE_PREFIX@6..8
+              0: MD_QUOTE_INDENT_LIST@6..6
+              1: R_ANGLE@6..7 ">" [] []
+              2: MD_QUOTE_POST_MARKER_SPACE@7..8 " " [] []
+          1: MD_SETEXT_UNDERLINE_LITERAL@8..11 "---" [] []
+        1: MD_NEWLINE@11..12
+          0: NEWLINE@11..12 "\n" [] []
+    1: MD_NEWLINE@12..13
+      0: NEWLINE@12..13 "\n" [] []
+    2: MD_QUOTE@13..25
+      0: MD_QUOTE_PREFIX@13..15
+        0: MD_QUOTE_INDENT_LIST@13..13
+        1: R_ANGLE@13..14 ">" [] []
+        2: MD_QUOTE_POST_MARKER_SPACE@14..15 " " [] []
+      1: MD_BLOCK_LIST@15..25
+        0: MD_SETEXT_HEADER@15..24
+          0: MD_INLINE_ITEM_LIST@15..21
+            0: MD_TEXTUAL@15..18
+              0: MD_TEXTUAL_LITERAL@15..18 "Bar" [] []
+            1: MD_TEXTUAL@18..19
+              0: MD_TEXTUAL_LITERAL@18..19 "\n" [] []
+            2: MD_QUOTE_PREFIX@19..21
+              0: MD_QUOTE_INDENT_LIST@19..19
+              1: R_ANGLE@19..20 ">" [] []
+              2: MD_QUOTE_POST_MARKER_SPACE@20..21 " " [] []
+          1: MD_SETEXT_UNDERLINE_LITERAL@21..24 "===" [] []
+        1: MD_NEWLINE@24..25
+          0: NEWLINE@24..25 "\n" [] []
+    3: MD_NEWLINE@25..26
+      0: NEWLINE@25..26 "\n" [] []
+    4: MD_QUOTE@26..45
+      0: MD_QUOTE_PREFIX@26..28
+        0: MD_QUOTE_INDENT_LIST@26..26
+        1: R_ANGLE@26..27 ">" [] []
+        2: MD_QUOTE_POST_MARKER_SPACE@27..28 " " [] []
+      1: MD_BLOCK_LIST@28..45
+        0: MD_QUOTE@28..45
+          0: MD_QUOTE_PREFIX@28..30
+            0: MD_QUOTE_INDENT_LIST@28..28
+            1: R_ANGLE@28..29 ">" [] []
+            2: MD_QUOTE_POST_MARKER_SPACE@29..30 " " [] []
+          1: MD_BLOCK_LIST@30..45
+            0: MD_SETEXT_HEADER@30..44
+              0: MD_INLINE_ITEM_LIST@30..41
+                0: MD_TEXTUAL@30..36
+                  0: MD_TEXTUAL_LITERAL@30..36 "Nested" [] []
+                1: MD_TEXTUAL@36..37
+                  0: MD_TEXTUAL_LITERAL@36..37 "\n" [] []
+                2: MD_QUOTE_PREFIX@37..39
+                  0: MD_QUOTE_INDENT_LIST@37..37
+                  1: R_ANGLE@37..38 ">" [] []
+                  2: MD_QUOTE_POST_MARKER_SPACE@38..39 " " [] []
+                3: MD_QUOTE_PREFIX@39..41
+                  0: MD_QUOTE_INDENT_LIST@39..39
+                  1: R_ANGLE@39..40 ">" [] []
+                  2: MD_QUOTE_POST_MARKER_SPACE@40..41 " " [] []
+              1: MD_SETEXT_UNDERLINE_LITERAL@41..44 "---" [] []
+            1: MD_NEWLINE@44..45
+              0: NEWLINE@44..45 "\n" [] []
+  2: EOF@45..45 "" [] []
+
+```

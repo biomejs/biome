@@ -380,4 +380,10 @@ pub fn quick_test() {
         "Allowed: <div class=\"a\"\n>ok</div> tag.\n",
         "<p>Allowed: &lt;div class=&quot;a&quot;</p>\n<blockquote>\n<p>ok</div> tag.</p>\n</blockquote>\n",
     );
+    // Setext heading inside blockquote
+    test_example(
+        20002,
+        "> Foo\n> ---\n",
+        "<blockquote>\n<h2>Foo</h2>\n</blockquote>\n",
+    );
 }

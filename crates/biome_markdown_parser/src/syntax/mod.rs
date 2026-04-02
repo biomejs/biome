@@ -788,6 +788,9 @@ fn classify_quote_break_after_newline(
     p.lookahead(|p| {
         consume_quote_prefix_without_virtual(p, quote_depth);
         with_virtual_line_start(p, p.cur_range().start(), |p| {
+            // Re-lex at line start so the lexer produces block-level tokens
+            // (e.g. MD_THEMATIC_BREAK_LITERAL for `---`) instead of MINUS.
+            p.force_relex_at_line_start();
             if p.at(MD_SETEXT_UNDERLINE_LITERAL)
                 || (p.at(MD_THEMATIC_BREAK_LITERAL) && is_dash_only_thematic_break(p))
             {
@@ -865,9 +868,10 @@ fn break_for_quote_prefix_after_inline_newline(p: &mut MarkdownParser, quote_dep
     if has_quote_prefix(p, quote_depth) {
         let break_kind = classify_quote_break_after_newline(p, quote_depth);
         if matches!(break_kind, QuoteBreakKind::SetextUnderline) {
-            // Consume the quote prefix so the setext underline is visible
-            // to the paragraph parser.
+            // Consume the quote prefix and re-lex at line start so the
+            // paragraph parser sees MD_THEMATIC_BREAK_LITERAL for `---`.
             consume_quote_prefix(p, quote_depth);
+            p.force_relex_at_line_start();
         }
         match break_kind {
             QuoteBreakKind::SetextUnderline | QuoteBreakKind::Other => return true,

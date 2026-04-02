@@ -217,6 +217,15 @@ impl<'source> MarkdownParser<'source> {
             .force_relex_in_context(MarkdownLexContext::Regular);
     }
 
+    /// Re-lex the current token in Regular context, treating the position as
+    /// a line start. After consuming a blockquote prefix, the lexer's
+    /// `after_newline` flag is false, which prevents it from producing
+    /// line-start-gated tokens like `MD_THEMATIC_BREAK_LITERAL`. This method
+    /// overrides that flag so the lexer behaves as if at line start.
+    pub(crate) fn force_relex_at_line_start(&mut self) {
+        self.source.force_relex_at_line_start();
+    }
+
     /// Force re-lex the current token in CodeSpan context.
     /// In this context, backslash is literal (not an escape character).
     /// Used for autolinks where `\>` should be `\` + `>` as separate tokens.
