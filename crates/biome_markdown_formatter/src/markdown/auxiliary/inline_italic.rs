@@ -1,8 +1,8 @@
 use crate::prelude::*;
 use biome_formatter::write;
 use biome_markdown_syntax::{
-    AnyMdInline, MarkdownSyntaxKind, MdInlineEmphasis, MdInlineEmphasisFields, MdInlineItalic,
-    MdInlineItalicFields,
+    AnyMdInline, MarkdownSyntaxKind, MarkdownSyntaxToken, MdInlineEmphasis, MdInlineEmphasisFields,
+    MdInlineItalic, MdInlineItalicFields,
 };
 use biome_rowan::AstNode;
 #[derive(Debug, Clone, Default)]
@@ -77,9 +77,9 @@ impl FormatNodeRule<MdInlineItalic> for FormatMdInlineItalic {
 /// Format `*__x__*` (italic wrapping bold) as `**_x_**` (bold wrapping italic).
 /// Both render identically but Prettier prefers the latter nesting.
 fn fmt_italic_wrapping_emphasis(
-    outer_l: &biome_markdown_syntax::MarkdownSyntaxToken,
+    outer_l: &MarkdownSyntaxToken,
     emphasis: &MdInlineEmphasis,
-    outer_r: &biome_markdown_syntax::MarkdownSyntaxToken,
+    outer_r: &MarkdownSyntaxToken,
     f: &mut MarkdownFormatter,
 ) -> FormatResult<()> {
     let MdInlineEmphasisFields {

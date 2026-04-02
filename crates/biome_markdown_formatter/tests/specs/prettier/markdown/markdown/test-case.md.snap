@@ -259,10 +259,10 @@ This paragraph has some `code` in it.
      ##### Header 5
      ###### Header 6
  
--# Header 1
- 
 +
-+# Header 1
++
+ # Header 1
+-
  ## Header 2
 -
  ### Header 3
@@ -303,17 +303,18 @@ This paragraph has some `code` in it.
  - Blue
  
 -* Red
-+
-+- Red
- * Green
- * Blue
+-* Green
+-* Blue
  
--- Red
-+
-+* Red
+ - Red
  - Green
  - Blue
  
++
++- Red
++- Green
++- Blue
++
 +
  ```markdown
  - Red
@@ -482,11 +483,11 @@ Header 2
 
 
 - Red
-* Green
-* Blue
+- Green
+- Blue
 
 
-* Red
+- Red
 - Green
 - Blue
 

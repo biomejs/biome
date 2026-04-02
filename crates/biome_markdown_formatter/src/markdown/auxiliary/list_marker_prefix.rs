@@ -3,6 +3,7 @@ use biome_formatter::{FormatRuleWithOptions, write};
 use biome_markdown_syntax::{MdListMarkerPrefix, MdListMarkerPrefixFields};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdListMarkerPrefix {
+    /// Target marker to replace with (e.g. `"-"`). `None` keeps the original.
     target_marker: Option<&'static str>,
 }
 impl FormatNodeRule<MdListMarkerPrefix> for FormatMdListMarkerPrefix {
@@ -15,10 +16,15 @@ impl FormatNodeRule<MdListMarkerPrefix> for FormatMdListMarkerPrefix {
         } = node.as_fields();
 
         let marker = marker?;
-        let target = self.target_marker.unwrap_or("-");
 
         write!(f, [pre_marker_indent.format()])?;
-        write!(f, [format_replaced(&marker, &token(target))])?;
+        // Note that for `-   `, the parser treats the indent as part of the marker, not the content
+        // This is a parser bug that causes a regression
+        // in crates/biome_markdown_formatter/tests/specs/prettier/markdown/spec/example-242.md.snap
+        match self.target_marker {
+            Some(target) => write!(f, [format_replaced(&marker, &token(target))])?,
+            None => write!(f, [marker.format()])?,
+        }
 
         if let Some(space) = post_marker_space_token {
             write!(f, [space.format()])?;
@@ -28,14 +34,15 @@ impl FormatNodeRule<MdListMarkerPrefix> for FormatMdListMarkerPrefix {
 }
 
 pub(crate) struct FormatMdListMarkerPrefixOptions {
-    pub(crate) target_marker: &'static str,
+    /// Target marker to replace with (e.g. `Some("-")`). `None` keeps the original.
+    pub(crate) target_marker: Option<&'static str>,
 }
 
 impl FormatRuleWithOptions<MdListMarkerPrefix> for FormatMdListMarkerPrefix {
     type Options = FormatMdListMarkerPrefixOptions;
 
     fn with_options(mut self, options: Self::Options) -> Self {
-        self.target_marker = Some(options.target_marker);
+        self.target_marker = options.target_marker;
         self
     }
 }
