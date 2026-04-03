@@ -135,7 +135,8 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
                 let actual_normalized = normalize_html(&actual);
                 let expected_normalized = normalize_html(&expected);
                 similar_asserts::assert_eq!(
-                    expected_normalized, actual_normalized,
+                    expected_normalized,
+                    actual_normalized,
                     "HTML mismatch for {file_name}. Update the .html sidecar or fix the renderer in document_to_html()."
                 );
             }
