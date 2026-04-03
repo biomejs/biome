@@ -7653,20 +7653,8 @@ Default: "property"
 	 */
 	style?: MethodSignatureStyle;
 }
-/**
-	* Options for the `useDestructuring` rule.
-
-Allows configuring which contexts (declarations, assignments) and which
-types (array, object) should enforce destructuring. 
-	 */
 export interface UseDestructuringOptions {
-	/**
-	 * Enforce destructuring in assignment expressions.
-	 */
 	assignmentExpression?: DestructuringConfig;
-	/**
-	 * Enforce destructuring in variable declarations (`var`/`let`/`const`).
-	 */
 	variableDeclarator?: DestructuringConfig;
 }
 /**
@@ -8225,17 +8213,8 @@ export type AvailabilityTarget = AvailabilityNamed | number;
  */
 export type UseConsistentGraphqlDescriptionsStyle = "block" | "inline";
 export type MethodSignatureStyle = "property" | "method";
-/**
- * Configuration for which destructuring types to enforce.
- */
 export interface DestructuringConfig {
-	/**
-	 * Enforce array destructuring.
-	 */
 	array?: boolean;
-	/**
-	 * Enforce object destructuring.
-	 */
 	object?: boolean;
 }
 export type CheckInputType = "off" | "loose" | "strict";
