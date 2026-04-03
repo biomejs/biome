@@ -141,8 +141,7 @@ fn force_relex_thematic_break_after_quote_prefix(p: &mut MarkdownParser) {
         || p.at(T![*])
         || p.at(UNDERSCORE)
         || p.at(DOUBLE_UNDERSCORE)
-        || (p.at(MD_TEXTUAL_LITERAL)
-            && is_thematic_break_candidate_text(p.cur_text()));
+        || (p.at(MD_TEXTUAL_LITERAL) && is_thematic_break_candidate_text(p.cur_text()));
 
     if is_thematic_break_candidate {
         p.force_relex_at_line_start();
