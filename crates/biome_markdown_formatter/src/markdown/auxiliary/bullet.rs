@@ -17,10 +17,10 @@ impl FormatNodeRule<MdBullet> for FormatMdBullet {
         // to `-` produces `- - - -` which CommonMark 4.1 parses as a thematic
         // break, not a list item. Same for `+ - - -`. Skip normalization for marker
         // but still format content through child formatters.
-        let target_marker = if marker.kind() == MarkdownSyntaxKind::MINUS {
-            None // already `-`, no replacement needed
-        } else if first_block_is_dash_thematic_break(&content) {
-            None // keep `*`/`+` as-is
+        let target_marker = if marker.kind() == MarkdownSyntaxKind::MINUS
+            || first_block_is_dash_thematic_break(&content)
+        {
+            None
         } else {
             Some("-")
         };
