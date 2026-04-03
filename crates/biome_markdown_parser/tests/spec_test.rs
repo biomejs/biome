@@ -386,4 +386,5 @@ pub fn quick_test() {
         "> Foo\n> ---\n",
         "<blockquote>\n<h2>Foo</h2>\n</blockquote>\n",
     );
+    test_example(20003, "> ---\n", "<blockquote>\n<hr />\n</blockquote>\n");
 }

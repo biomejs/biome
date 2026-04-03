@@ -97,6 +97,7 @@ pub(crate) fn parse_quote(p: &mut MarkdownParser) -> ParsedSyntax {
     p.state_mut().block_quote_depth += 1;
 
     let marker_space = emit_quote_prefix_node(p);
+    force_relex_thematic_break_after_quote_prefix(p);
     p.set_virtual_line_start();
 
     parse_quote_block_list(p);
@@ -123,6 +124,27 @@ fn emit_quote_prefix_node(p: &mut MarkdownParser) -> bool {
 
     prefix_m.complete(p, MD_QUOTE_PREFIX);
     marker_space
+}
+
+/// After consuming a quote prefix, selectively re-lex the current token as if
+/// it were at line start when the remaining line could form a thematic break.
+///
+/// Re-lexing unconditionally perturbs ordinary quoted text tokenization by
+/// splitting leading spaces into separate tokens. We only need line-start
+/// semantics here for thematic-break candidates like `> ---`.
+fn force_relex_thematic_break_after_quote_prefix(p: &mut MarkdownParser) {
+    let is_thematic_break_candidate = p.at(T![-])
+        || p.at(T![*])
+        || p.at(UNDERSCORE)
+        || p.at(DOUBLE_UNDERSCORE)
+        || (p.at(MD_TEXTUAL_LITERAL)
+            && p.cur_text()
+                .chars()
+                .all(|c| c == ' ' || c == '\t' || c == '-' || c == '*' || c == '_'));
+
+    if is_thematic_break_candidate {
+        p.force_relex_at_line_start();
+    }
 }
 
 /// Emit one quote prefix token sequence: [indent?] `>` [optional space/tab].
@@ -273,6 +295,7 @@ impl QuoteBlockList {
         {
             if has_quote_prefix(p, self.depth) {
                 consume_quote_prefix(p, self.depth);
+                force_relex_thematic_break_after_quote_prefix(p);
                 self.line_started_with_prefix = true;
             } else {
                 return false;
