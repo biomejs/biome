@@ -57,6 +57,11 @@ declare_lint_rule! {
     /// delete f(); // uncovered by this rule.
     ///```
     ///
+    /// ```js
+    /// delete process.env.FOO;
+    /// // `delete` is the documented way to remove env vars in Node.js.
+    ///```
+    ///
     pub NoDelete {
         version: "1.0.0",
         name: "noDelete",
