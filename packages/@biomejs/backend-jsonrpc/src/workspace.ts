@@ -1424,7 +1424,7 @@ See https://biomejs.dev/linter/rules/use-media-caption
 	 */
 	useMediaCaption?: UseMediaCaptionConfiguration;
 	/**
-	* It detects the use of role attributes in JSX elements and suggests using semantic elements instead.
+	* It detects the use of role attributes in HTML elements and suggests using semantic elements instead.
 See https://biomejs.dev/linter/rules/use-semantic-elements 
 	 */
 	useSemanticElements?: UseSemanticElementsConfiguration;
