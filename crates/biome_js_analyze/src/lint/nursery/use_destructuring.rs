@@ -66,7 +66,7 @@ impl Rule for UseDestructuring {
         match query {
             UseDestructuringQuery::JsAssignmentExpression(node) => {
                 let config = options.assignment_expression();
-                if !config.array && !config.object {
+                if !config.array() && !config.object() {
                     return None;
                 }
 
@@ -84,10 +84,10 @@ impl Rule for UseDestructuring {
                     let ident = expr.name_token().ok()?;
                     let state = should_suggest_destructuring(ident.text_trimmed(), &right)?;
                     return match state {
-                        UseDestructuringState::Array if config.array => {
+                        UseDestructuringState::Array if config.array() => {
                             Some(UseDestructuringState::Array)
                         }
-                        UseDestructuringState::Object { .. } if config.object => {
+                        UseDestructuringState::Object { .. } if config.object() => {
                             Some(UseDestructuringState::Object {
                                 is_assignment: true,
                             })
@@ -100,7 +100,7 @@ impl Rule for UseDestructuring {
             }
             UseDestructuringQuery::JsVariableDeclarator(node) => {
                 let config = options.variable_declarator();
-                if !config.array && !config.object {
+                if !config.array() && !config.object() {
                     return None;
                 }
 
@@ -124,10 +124,10 @@ impl Rule for UseDestructuring {
                     let ident = expr.name_token().ok()?;
                     let state = should_suggest_destructuring(ident.text_trimmed(), &right)?;
                     return match state {
-                        UseDestructuringState::Array if config.array => {
+                        UseDestructuringState::Array if config.array() => {
                             Some(UseDestructuringState::Array)
                         }
-                        UseDestructuringState::Object { .. } if config.object => {
+                        UseDestructuringState::Object { .. } if config.object() => {
                             Some(UseDestructuringState::Object {
                                 is_assignment: false,
                             })
