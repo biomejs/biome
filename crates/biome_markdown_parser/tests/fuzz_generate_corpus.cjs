@@ -36,12 +36,12 @@ function render(md) {
 }
 
 // #region Seeded PRNG (xorshift32)
-let rngState = seed;
+let rngState = seed === 0 ? 1 : seed;
 function rand() {
   rngState ^= rngState << 13;
   rngState ^= rngState >> 17;
   rngState ^= rngState << 5;
-  return (rngState >>> 0) / 0xffffffff;
+  return (rngState >>> 0) / 0x100000000;
 }
 function randInt(min, max) {
   return min + Math.floor(rand() * (max - min + 1));

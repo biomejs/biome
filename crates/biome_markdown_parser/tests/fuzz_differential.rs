@@ -45,6 +45,12 @@ fn content_hash(s: &str) -> String {
     format!("{hash:016x}")
 }
 
+#[derive(serde::Deserialize)]
+struct SeedCase {
+    markdown: String,
+    html: String,
+}
+
 struct Failure {
     hash: String,
     markdown: String,
@@ -53,13 +59,8 @@ struct Failure {
 }
 
 fn run_corpus(path: &Path) -> (Vec<Failure>, usize) {
-    let content = match fs::read_to_string(path) {
-        Ok(c) => c,
-        Err(e) => {
-            eprintln!("Skipping {}: {e}", path.display());
-            return (vec![], 0);
-        }
-    };
+    let content = fs::read_to_string(path)
+        .unwrap_or_else(|e| panic!("Failed to read corpus {}: {e}", path.display()));
 
     let mut failures = vec![];
     let mut total = 0usize;
@@ -69,16 +70,11 @@ fn run_corpus(path: &Path) -> (Vec<Failure>, usize) {
             continue;
         }
 
-        let entry: serde_json::Value = match serde_json::from_str(line) {
-            Ok(v) => v,
-            Err(e) => {
-                eprintln!("Skipping line {i}: {e}");
-                continue;
-            }
-        };
+        let entry: SeedCase = serde_json::from_str(line)
+            .unwrap_or_else(|e| panic!("Malformed JSON at {}:{}: {e}", path.display(), i + 1));
 
-        let markdown = entry["markdown"].as_str().unwrap_or("");
-        let expected_html = entry["html"].as_str().unwrap_or("");
+        let markdown = &entry.markdown;
+        let expected_html = &entry.html;
         total += 1;
 
         let parsed = parse_markdown(markdown);
