@@ -238,17 +238,11 @@ test-markdown-conformance:
 	cargo run -p xtask_coverage -- --suites=markdown/commonmark
 
 # Generate differential fuzz corpus for the markdown parser using commonmark.js
+# Requires `pnpm install` from the repo root (commonmark is a root devDependency).
 fuzz-markdown-generate count="1000" seed="42":
-	#!/usr/bin/env bash
-	set -euo pipefail
-	REPO_ROOT="$(pwd)"
-	FUZZ_TMPDIR=$(mktemp -d)
-	cd "$FUZZ_TMPDIR" && npm init -y > /dev/null 2>&1 && npm install --silent commonmark > /dev/null 2>&1
-	cp "$REPO_ROOT/crates/biome_markdown_parser/tests/fuzz_generate_corpus.cjs" "$FUZZ_TMPDIR/"
-	cd "$FUZZ_TMPDIR" && node fuzz_generate_corpus.cjs \
+	node crates/biome_markdown_parser/tests/fuzz_generate_corpus.cjs \
 		--count={{count}} --seed={{seed}} \
-		--output="$REPO_ROOT/crates/biome_markdown_parser/tests/fuzz_corpus/corpus.jsonl"
-	rm -rf "$FUZZ_TMPDIR"
+		--output=crates/biome_markdown_parser/tests/fuzz_corpus/corpus.jsonl
 
 # Run differential fuzzer comparing Biome markdown output against commonmark.js
 # Runs the checked-in seed corpus plus any generated corpus.jsonl

@@ -6,8 +6,7 @@
 // Usage:
 //   node fuzz_generate_corpus.cjs [--count=N] [--seed=N] [--output=path]
 //
-// Run from a directory with commonmark in node_modules (the justfile
-// recipe handles this by installing to a temp dir and running from there).
+// Requires `pnpm install` from the repo root (commonmark is a root devDependency).
 
 "use strict";
 
