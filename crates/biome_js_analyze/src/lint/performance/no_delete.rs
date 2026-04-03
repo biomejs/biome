@@ -99,6 +99,11 @@ impl Rule for NoDelete {
                         return None;
                     }
                 }
+                // Skip `delete process.env.FOO` — it is the documented way
+                // to remove environment variables in Node.js.
+                if is_process_env(&static_member_expression) {
+                    return None;
+                }
                 true
             } else {
                 // if `argument` is not a computed or static member,
@@ -124,42 +129,6 @@ impl Rule for NoDelete {
     fn action(ctx: &RuleContext<Self>, argument: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
 
-        // Do not suggest `undefined` assignment for `process.env` properties.
-        // `delete process.env.FOO` is the official documented way to remove env vars,
-        // and replacing it with `process.env.FOO = undefined` has different behavior.
-        if let Some(static_expr) = argument.as_js_static_member_expression() {
-            if let Ok(object) = static_expr.object() {
-                if let Some(static_obj) = object.as_js_static_member_expression() {
-                    if let Ok(obj_member) = static_obj.member() {
-                        if let Some(name) = obj_member.as_js_name() {
-                            if let Some(outer_object) = static_obj.object().ok().and_then(|o| o.as_js_static_member_expression()) {
-                                if let Ok(outer_member) = outer_object.member() {
-                                    if let Some(outer_name) = outer_member.as_js_name() {
-                                        if outer_name.to_trimmed_text().text() == "process"
-                                            && name.to_trimmed_text().text() == "env"
-                                        {
-                                            return None;
-                                        }
-                                    }
-                                }
-                            }
-                            if name.to_trimmed_text().text() == "env" {
-                                if let Some(ident) = object.as_js_identifier_expression() {
-                                    if let Ok(name_ref) = ident.name() {
-                                        if let Some(name) = name_ref.as_js_reference_identifier() {
-                                            if name.to_trimmed_text().text() == "process" {
-                                                return None;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
         let assignment = to_assignment(argument).ok()?;
         let mut mutation = ctx.root().begin();
         mutation.replace_node(
@@ -179,6 +148,28 @@ impl Rule for NoDelete {
             mutation,
         ))
     }
+}
+
+/// Check if a static member expression targets `process.env.*`.
+fn is_process_env(expr: &biome_js_syntax::JsStaticMemberExpression) -> bool {
+    // Check direct `process.env.FOO`
+    if let Ok(object) = expr.object() {
+        if let Some(static_obj) = object.as_js_static_member_expression() {
+            if let Ok(obj_member) = static_obj.member() {
+                if let Some(name) = obj_member.as_js_name() {
+                    if name.to_trimmed_text().text() == "env" {
+                        let obj = static_obj.object().ok();
+                        if let Some(obj_ref) = obj.as_ref().and_then(|o| o.as_js_identifier_expression()) {
+                            if let Ok(name_ref) = obj_ref.name() {
+                                return name_ref.to_trimmed_text().text() == "process";
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    false
 }
 
 fn to_assignment(expr: &AnyJsExpression) -> Result<AnyJsAssignment, ()> {
