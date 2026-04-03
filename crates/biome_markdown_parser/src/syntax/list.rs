@@ -514,7 +514,7 @@ impl ParseNodeList for BulletList {
             at_bullet_list_item,
             current_bullet_marker,
             has_bullet_item_after_blank_lines,
-            |p, _marker_kind| {
+            |p, marker_kind| {
                 let next_is_bullet_at_indent = p.lookahead(|p| {
                     p.bump(NEWLINE);
                     // Don't set virtual_line_start here — it would cause
@@ -523,12 +523,20 @@ impl ParseNodeList for BulletList {
                     at_bullet_list_item_with_base_indent(p, marker_indent)
                 });
                 if next_is_bullet_at_indent {
+                    // Per CommonMark §5.3, a change in bullet marker across
+                    // a blank line starts a new list.
+                    if marker_changes_after_newline(p, marker_kind) {
+                        return Some(true);
+                    }
                     Some(false)
                 } else {
                     // Check if bullet after blank lines is at correct indent
                     let has_item = p.lookahead(|p| {
                         has_bullet_item_after_blank_lines_at_indent(p, marker_indent)
                     });
+                    if has_item && marker_changes_after_blank_lines(p, marker_kind) {
+                        return Some(true);
+                    }
                     Some(!has_item)
                 }
             },
@@ -594,6 +602,49 @@ fn current_bullet_marker(p: &mut MarkdownParser) -> Option<MarkdownSyntaxKind> {
 
         None
     })
+}
+
+/// Check if the bullet marker on the next line differs from the current list's marker.
+fn marker_changes_after_newline(
+    p: &mut MarkdownParser,
+    marker_kind: Option<MarkdownSyntaxKind>,
+) -> bool {
+    let Some(current) = marker_kind else {
+        return false;
+    };
+    let next = p.lookahead(|p| {
+        p.bump(NEWLINE);
+        current_bullet_marker(p)
+    });
+    matches!(next, Some(next) if current != next)
+}
+
+/// Check if the bullet marker after blank lines differs from the current list's marker.
+fn marker_changes_after_blank_lines(
+    p: &mut MarkdownParser,
+    marker_kind: Option<MarkdownSyntaxKind>,
+) -> bool {
+    let Some(current) = marker_kind else {
+        return false;
+    };
+    let next = p.lookahead(|p| {
+        // Skip blank lines
+        loop {
+            if !p.at(NEWLINE) {
+                break;
+            }
+            p.bump(NEWLINE);
+            // Skip whitespace-only lines
+            while p.at(MD_TEXTUAL_LITERAL) && p.cur_text().chars().all(|c| c == ' ' || c == '\t') {
+                p.bump(MD_TEXTUAL_LITERAL);
+            }
+            if !p.at(NEWLINE) {
+                break;
+            }
+        }
+        current_bullet_marker(p)
+    });
+    matches!(next, Some(next) if current != next)
 }
 
 /// Error builder for bullet list recovery
