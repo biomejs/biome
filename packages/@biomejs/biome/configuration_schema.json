@@ -1550,8 +1550,8 @@
 		"DestructuringConfig": {
 			"type": "object",
 			"properties": {
-				"array": { "type": "boolean", "default": true },
-				"object": { "type": "boolean", "default": true }
+				"array": { "type": ["boolean", "null"] },
+				"object": { "type": ["boolean", "null"] }
 			},
 			"additionalProperties": false
 		},
