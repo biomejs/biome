@@ -4,7 +4,9 @@ use crate::{
     utils::{css_display::get_css_display_from_tag, metadata::should_lowercase_html_tag},
 };
 use biome_formatter::{FormatRuleWithOptions, GroupId, trivia::format_dangling_comments, write};
-use biome_html_syntax::{HtmlElement, HtmlOpeningElement, HtmlOpeningElementFields, HtmlSyntaxToken};
+use biome_html_syntax::{
+    HtmlElement, HtmlOpeningElement, HtmlOpeningElementFields, HtmlSyntaxToken,
+};
 use biome_rowan::AstNode;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlOpeningElement {
