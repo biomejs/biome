@@ -1,9 +1,6 @@
 use crate::prelude::*;
 use biome_formatter::write;
-use biome_markdown_syntax::{
-    AnyMdInline, MarkdownSyntaxKind, MarkdownSyntaxToken, MdInlineEmphasis, MdInlineEmphasisFields,
-    MdInlineItalic, MdInlineItalicFields,
-};
+use biome_markdown_syntax::{MarkdownSyntaxKind, MdInlineItalic, MdInlineItalicFields};
 use biome_rowan::AstNode;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdInlineItalic;
@@ -18,13 +15,16 @@ impl FormatNodeRule<MdInlineItalic> for FormatMdInlineItalic {
         let l_fence = l_fence?;
         let r_fence = r_fence?;
 
-        // If descendant is also `_`, normalizing to `_` would create `__` (bold)
-        // So we keep verbatim.
-        let has_nested_italic = node
+        // Nested italic anywhere in the subtree → keep entire node verbatim.
+        // Normalizing to `_` could create `__` (bold) adjacency: `_*foo*_` → `__foo__`.
+        if node
             .syntax()
             .descendants()
-            .any(|d| d.kind() == MarkdownSyntaxKind::MD_INLINE_ITALIC && d != *node.syntax());
-        if has_nested_italic {
+            .any(|d| d.kind() == MarkdownSyntaxKind::MD_INLINE_ITALIC && d != *node.syntax())
+        {
+            // TODO: instead of format_verbatim_node, pass options to child formatters so
+            // other normalizations (bold, code, etc.) still run inside nested italic content.
+            // See example-383.md for a case where Prettier handles escapes inside italic.
             return format_verbatim_node(node.syntax()).fmt(f);
         }
 
@@ -37,67 +37,35 @@ impl FormatNodeRule<MdInlineItalic> for FormatMdInlineItalic {
             .and_then(|t| t.text_trimmed().chars().next())
             .is_some_and(|c| c.is_alphanumeric());
 
-        // `***x***` → `**_x_**`: Prettier prefers bold-wrapping-italic.
-        let items: Vec<_> = content.iter().collect();
-        if l_fence.text_trimmed() == "*"
-            && !prev_is_alphanum
-            && !next_is_alphanum
-            && items.len() == 1
-            && let Some(AnyMdInline::MdInlineEmphasis(emphasis)) = items.first()
-        {
-            return fmt_italic_wrapping_emphasis(&l_fence, emphasis, &r_fence, f);
-        }
-
         // See https://spec.commonmark.org/0.31.2/#emphasis-and-strong-emphasis
-        // By default, we prefer `_` but fall back to "*"
-        // when CommonMark flanking rules make `_` invalid:
-        let (open, close) = match (prev_is_alphanum, next_is_alphanum) {
-            // `a*b*c`: Can't use `_` because `a_` won't open emphasis
-            (true, _) => ("*", "*"),
-            // `_b_2` where source is `_`: we can't't switch to `*` (which would change
-            // intended semantic), so we escape the opener: `\_b_2`
-            (false, true) if l_fence.text_trimmed() == "_" => ("\\_", "_"),
-            // e.g. `*b*2` — can't use `_` because `_2` won't close emphasis
-            (false, true) => ("*", "*"),
-            // e.g. `!*b*!` — no adjacent alphanumeric, safe to normalize to `_`
-            (false, false) => ("_", "_"),
+        // Prefer `_` but use `*` when adjacent to alphanumeric
+        // For example, `a_b_c` won't parse `b` as italic, but `a*b*c` will).
+        let target_kind = if prev_is_alphanum || next_is_alphanum {
+            MarkdownSyntaxKind::STAR
+        } else {
+            MarkdownSyntaxKind::UNDERSCORE
         };
 
-        write!(
-            f,
-            [
-                format_replaced(&l_fence, &token(open)),
-                content.format(),
-                format_replaced(&r_fence, &token(close)),
-            ]
-        )
+        write_fence(&l_fence, target_kind, f)?;
+        write!(f, [content.format()])?;
+        write_fence(&r_fence, target_kind, f)
     }
 }
 
-/// Format `*__x__*` (italic wrapping bold) as `**_x_**` (bold wrapping italic).
-/// Both render identically but Prettier prefers the latter nesting.
-fn fmt_italic_wrapping_emphasis(
-    outer_l: &MarkdownSyntaxToken,
-    emphasis: &MdInlineEmphasis,
-    outer_r: &MarkdownSyntaxToken,
+/// Write a fence token, reusing it if it already matches the target kind.
+fn write_fence(
+    fence: &biome_markdown_syntax::MarkdownSyntaxToken,
+    target_kind: MarkdownSyntaxKind,
     f: &mut MarkdownFormatter,
 ) -> FormatResult<()> {
-    let MdInlineEmphasisFields {
-        l_fence: em_l,
-        content: em_content,
-        r_fence: em_r,
-    } = emphasis.as_fields();
-    f.context()
-        .comments()
-        .mark_suppression_checked(emphasis.syntax());
-    write!(
-        f,
-        [
-            format_replaced(outer_l, &token("**")),
-            format_replaced(&em_l?, &token("_")),
-            em_content.format(),
-            format_replaced(&em_r?, &token("_")),
-            format_replaced(outer_r, &token("**")),
-        ]
-    )
+    if fence.kind() == target_kind {
+        write!(f, [fence.format()])
+    } else {
+        let text = if target_kind == MarkdownSyntaxKind::STAR {
+            "*"
+        } else {
+            "_"
+        };
+        write!(f, [format_replaced(fence, &token(text))])
+    }
 }

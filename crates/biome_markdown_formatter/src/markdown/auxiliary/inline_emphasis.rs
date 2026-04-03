@@ -10,14 +10,22 @@ impl FormatNodeRule<MdInlineEmphasis> for FormatMdInlineEmphasis {
             content,
             r_fence,
         } = node.as_fields();
+        use biome_markdown_syntax::MarkdownSyntaxKind;
 
-        write!(
-            f,
-            [
-                format_replaced(&l_fence?, &token("**")),
-                content.format(),
-                format_replaced(&r_fence?, &token("**")),
-            ]
-        )
+        let l_fence = l_fence?;
+        let r_fence = r_fence?;
+
+        if l_fence.kind() == MarkdownSyntaxKind::DOUBLE_STAR {
+            write!(f, [l_fence.format(), content.format(), r_fence.format()])
+        } else {
+            write!(
+                f,
+                [
+                    format_replaced(&l_fence, &token("**")),
+                    content.format(),
+                    format_replaced(&r_fence, &token("**")),
+                ]
+            )
+        }
     }
 }

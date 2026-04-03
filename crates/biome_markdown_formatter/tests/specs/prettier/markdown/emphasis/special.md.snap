@@ -50,7 +50,7 @@ info: markdown/emphasis/special.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -16,17 +16,17 @@
+@@ -16,20 +16,20 @@
  
  0_1_2
  
@@ -72,6 +72,10 @@ info: markdown/emphasis/special.md
  
  ！_1_！
  
+ 1***2***3
+ 
+-1 **_2_** 3
++1 _**2**_ 3
 ```
 
 # Output
@@ -111,5 +115,5 @@ info: markdown/emphasis/special.md
 
 1***2***3
 
-1 **_2_** 3
+1 _**2**_ 3
 ```
