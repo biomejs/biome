@@ -2,6 +2,7 @@ use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::parse_error::{
     expected_keyframes_item, expected_keyframes_item_selector,
+    expected_percentage_after_timeline_range_name,
 };
 use crate::syntax::block::{ParseBlockBody, parse_declaration_block};
 use crate::syntax::css_modules::{
@@ -365,7 +366,8 @@ fn parse_keyframes_item_selector(p: &mut CssParser) -> ParsedSyntax {
 
     let kind = if is_at_timeline_range_name(p) {
         p.bump_ts(TIMELINE_RANGE_NAME_SET);
-        parse_percentage_dimension(p).ok();
+        parse_percentage_dimension(p)
+            .or_add_diagnostic(p, expected_percentage_after_timeline_range_name);
         CSS_KEYFRAMES_RANGE_SELECTOR
     } else if is_at_percentage_dimension(p) {
         parse_percentage_dimension(p).ok();

@@ -24,6 +24,13 @@ pub(crate) fn expected_keyframes_item_selector(p: &CssParser, range: TextRange) 
     .into_diagnostic(p)
 }
 
+pub(crate) fn expected_percentage_after_timeline_range_name(
+    p: &CssParser,
+    range: TextRange,
+) -> ParseDiagnostic {
+    expected_node("percentage after timeline-range-name", range, p)
+}
+
 pub(crate) fn expected_page_selector(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expected_node("<ident-token>? <pseudo-page>*", range, p)
 }
