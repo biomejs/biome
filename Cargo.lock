@@ -1366,6 +1366,7 @@ dependencies = [
  "quickcheck_macros",
  "serde",
  "serde_json",
+ "similar-asserts",
  "tests_macros",
  "tikv-jemallocator",
  "tracing",

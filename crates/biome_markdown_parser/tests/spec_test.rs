@@ -122,7 +122,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
             let html_path = test_case_path.with_extension("html");
             if html_path.exists() {
                 let doc = MdDocument::cast(parsed.syntax()).unwrap_or_else(|| {
-                    panic!("Expected MdDocument root for HTML reference test {file_name}")
+                    panic!("Failed to cast parsed output to MdDocument for {file_name}. Check that the .md test input is syntactically valid and re-run with `cargo t -p biome_markdown_parser` to see parser diagnostics.")
                 });
                 let actual = document_to_html(
                     &doc,
@@ -134,9 +134,9 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
                     fs::read_to_string(&html_path).expect("Failed to read reference HTML file");
                 let actual_normalized = normalize_html(&actual);
                 let expected_normalized = normalize_html(&expected);
-                assert_eq!(
+                similar_asserts::assert_eq!(
                     expected_normalized, actual_normalized,
-                    "HTML mismatch for {file_name}.\nExpected:\n{expected}\nActual:\n{actual}"
+                    "HTML mismatch for {file_name}. Update the .html sidecar or fix the renderer in document_to_html()."
                 );
             }
 
@@ -149,8 +149,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
                                 assert_eq!(
                                     token_node.kind(),
                                     MarkdownSyntaxKind::MD_INDENT_TOKEN,
-                                    "MdContinuationIndent invariant: expected MD_INDENT_TOKEN, got {:?} in {file_name} at {:?}",
-                                    token_node.kind(),
+                                    "Structural invariant violation in {file_name}: MdContinuationIndent contains {:?} instead of MD_INDENT_TOKEN. Check the parser's continuation indent logic in syntax/list.rs.",
                                     token_node.kind()
                                 );
                             }
