@@ -81,8 +81,8 @@ fn run_corpus(path: &Path) -> (Vec<Failure>, usize) {
         let Some(doc) = MdDocument::cast(parsed.syntax()) else {
             failures.push(Failure {
                 hash: content_hash(markdown),
-                markdown: markdown.to_string(),
-                expected: expected_html.to_string(),
+                markdown: markdown.clone(),
+                expected: expected_html.clone(),
                 actual: "<parse failed>".to_string(),
             });
             continue;
@@ -101,8 +101,8 @@ fn run_corpus(path: &Path) -> (Vec<Failure>, usize) {
         if expected_normalized != actual_normalized {
             failures.push(Failure {
                 hash: content_hash(markdown),
-                markdown: markdown.to_string(),
-                expected: expected_html.to_string(),
+                markdown: markdown.clone(),
+                expected: expected_html.clone(),
                 actual,
             });
         }
