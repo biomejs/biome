@@ -14,12 +14,12 @@ pub struct UseDestructuringOptions {
 
 impl UseDestructuringOptions {
     pub fn variable_declarator(&self) -> &DestructuringConfig {
-        static DEFAULT: DestructuringConfig = DestructuringConfig::DECLARATOR_DEFAULT;
+        static DEFAULT: DestructuringConfig = DestructuringConfig::new();
         self.variable_declarator.as_ref().unwrap_or(&DEFAULT)
     }
 
     pub fn assignment_expression(&self) -> &DestructuringConfig {
-        static DEFAULT: DestructuringConfig = DestructuringConfig::ASSIGNMENT_DEFAULT;
+        static DEFAULT: DestructuringConfig = DestructuringConfig::new();
         self.assignment_expression.as_ref().unwrap_or(&DEFAULT)
     }
 }
@@ -34,21 +34,15 @@ pub struct DestructuringConfig {
 
 impl Default for DestructuringConfig {
     fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl DestructuringConfig {
+    const fn new() -> Self {
         Self {
             array: true,
             object: true,
         }
     }
-}
-
-impl DestructuringConfig {
-    const DECLARATOR_DEFAULT: Self = Self {
-        array: true,
-        object: true,
-    };
-
-    const ASSIGNMENT_DEFAULT: Self = Self {
-        array: false,
-        object: false,
-    };
 }

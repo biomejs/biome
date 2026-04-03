@@ -76,3 +76,12 @@
 	var foo = object.foo,
 		/* comment */ a;
 }
+{
+	foo = array[0];
+}
+{
+	foo = object.foo;
+}
+{
+	foo = object['foo'];
+}

@@ -82,6 +82,15 @@ expression: invalid.js
 	var foo = object.foo,
 		/* comment */ a;
 }
+{
+	foo = array[0];
+}
+{
+	foo = object.foo;
+}
+{
+	foo = object['foo'];
+}
 
 ```
 
@@ -520,6 +529,48 @@ invalid.js:76:6 lint/nursery/useDestructuring ━━━━━━━━━━━�
   i Object destructuring is more readable and expressive than accessing individual properties.
   
   i Replace the property access with object destructuring syntax.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:80:2 lint/nursery/useDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use array destructuring instead of accessing array elements by index.
+  
+    78 │ }
+    79 │ {
+  > 80 │ 	foo = array[0];
+       │ 	^^^^^^^^^^^^^^
+    81 │ }
+    82 │ {
+  
+  i Array destructuring is more readable and expressive than accessing individual elements by index.
+  
+  i Replace the array index access with array destructuring syntax.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:83:2 lint/nursery/useDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use object destructuring instead of accessing object properties.
+  
+    81 │ }
+    82 │ {
+  > 83 │ 	foo = object.foo;
+       │ 	^^^^^^^^^^^^^^^^
+    84 │ }
+    85 │ {
+  
+  i Object destructuring is more readable and expressive than accessing individual properties.
+  
+  i Wrap the assignment in parentheses to use object destructuring: ({ prop } = object).
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
