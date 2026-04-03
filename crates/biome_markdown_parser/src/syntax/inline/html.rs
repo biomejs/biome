@@ -258,13 +258,15 @@ fn parse_html_attribute_value(bytes: &[u8], mut i: usize) -> Option<usize> {
             let start = i;
             while i < bytes.len() {
                 let b = bytes[i];
-                if biome_unicode_table::lookup_byte(b) == biome_unicode_table::Dispatch::WHS
-                    || b == b'"'
-                    || b == b'\''
-                    || b == b'='
-                    || b == b'<'
-                    || b == b'>'
-                    || b == b'`'
+                if matches!(
+                    biome_unicode_table::lookup_byte(b),
+                    biome_unicode_table::Dispatch::WHS
+                        | biome_unicode_table::Dispatch::QOT
+                        | biome_unicode_table::Dispatch::EQL
+                        | biome_unicode_table::Dispatch::LSS
+                        | biome_unicode_table::Dispatch::MOR
+                        | biome_unicode_table::Dispatch::TPL
+                )
                 {
                     break;
                 }
