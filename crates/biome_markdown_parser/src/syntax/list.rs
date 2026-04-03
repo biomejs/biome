@@ -664,10 +664,7 @@ fn marker_changes_after_blank_lines(
 }
 
 /// Check if the ordered delimiter after blank lines differs from the current list's delimiter.
-fn delim_changes_after_blank_lines(
-    p: &mut MarkdownParser,
-    marker_delim: Option<char>,
-) -> bool {
+fn delim_changes_after_blank_lines(p: &mut MarkdownParser, marker_delim: Option<char>) -> bool {
     let Some(current) = marker_delim else {
         return false;
     };
@@ -993,8 +990,7 @@ impl ParseNodeList for OrderedList {
                         p.bump(NEWLINE);
                         current_ordered_delim(p)
                     });
-                    if let (Some(current_delim), Some(next_delim)) =
-                        (marker_delim, next_delim)
+                    if let (Some(current_delim), Some(next_delim)) = (marker_delim, next_delim)
                         && current_delim != next_delim
                     {
                         return Some(true);
@@ -1599,7 +1595,13 @@ fn blank_line_phase_non_quote_classify(
         return None;
     }
 
-    let action = classify_blank_line(p, state.required_indent, state.marker_indent, state.parent_marker_kind, state.parent_ordered_delim);
+    let action = classify_blank_line(
+        p,
+        state.required_indent,
+        state.marker_indent,
+        state.parent_marker_kind,
+        state.parent_ordered_delim,
+    );
     let is_blank = list_newline_is_blank_line(p);
     let result = apply_blank_line_action(p, state, action, is_blank);
     Some(BlankLineOutcome::resolved(result))
@@ -1691,7 +1693,13 @@ fn blank_line_phase_after_prefix(
         let action = if quote_depth > 0 {
             classify_blank_line_in_quote(p, state.required_indent, state.marker_indent, quote_depth)
         } else {
-            classify_blank_line(p, state.required_indent, state.marker_indent, state.parent_marker_kind, state.parent_ordered_delim)
+            classify_blank_line(
+                p,
+                state.required_indent,
+                state.marker_indent,
+                state.parent_marker_kind,
+                state.parent_ordered_delim,
+            )
         };
         let result = apply_blank_line_action_with_prefix(
             p,
@@ -2537,8 +2545,7 @@ fn classify_blank_line(
         // If next non-blank line starts a new list item, this is a blank line between items.
         let next_is_bullet = at_bullet_list_item_with_base_indent(p, marker_indent);
         let next_is_ordered = at_order_list_item_with_base_indent(p, marker_indent);
-        if indent <= marker_indent + MAX_BLOCK_PREFIX_INDENT
-            && (next_is_bullet || next_is_ordered)
+        if indent <= marker_indent + MAX_BLOCK_PREFIX_INDENT && (next_is_bullet || next_is_ordered)
         {
             // Per CommonMark §5.3, a marker/type change means a new list starts.
             // The blank line is a list boundary, not an item boundary — don't
