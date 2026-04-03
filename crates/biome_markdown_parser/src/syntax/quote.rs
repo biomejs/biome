@@ -132,19 +132,50 @@ fn emit_quote_prefix_node(p: &mut MarkdownParser) -> bool {
 /// Re-lexing unconditionally perturbs ordinary quoted text tokenization by
 /// splitting leading spaces into separate tokens. We only need line-start
 /// semantics here for thematic-break candidates like `> ---`.
+///
+/// A candidate is any line whose non-whitespace bytes are all the **same**
+/// thematic break character (`-`, `*`, or `_`). Per CommonMark §4.1, mixing
+/// different break characters (e.g. `_*-`) does **not** form a thematic break.
 fn force_relex_thematic_break_after_quote_prefix(p: &mut MarkdownParser) {
     let is_thematic_break_candidate = p.at(T![-])
         || p.at(T![*])
         || p.at(UNDERSCORE)
         || p.at(DOUBLE_UNDERSCORE)
         || (p.at(MD_TEXTUAL_LITERAL)
-            && p.cur_text()
-                .chars()
-                .all(|c| c == ' ' || c == '\t' || c == '-' || c == '*' || c == '_'));
+            && is_thematic_break_candidate_text(p.cur_text()));
 
     if is_thematic_break_candidate {
         p.force_relex_at_line_start();
     }
+}
+
+/// Check if `text` could be a thematic break: all non-whitespace bytes must be
+/// the **same** thematic break character (`-`, `*`, or `_`).
+fn is_thematic_break_candidate_text(text: &str) -> bool {
+    use biome_unicode_table::{Dispatch::WHS, lookup_byte};
+
+    let mut break_char: Option<u8> = None;
+    for &b in text.as_bytes() {
+        // Skip whitespace (space, tab, etc.) via the shared lookup table.
+        if lookup_byte(b) == WHS {
+            continue;
+        }
+        match b {
+            b'-' | b'*' | b'_' => {
+                if let Some(expected) = break_char {
+                    // Mixed break characters like `_*-` are not valid.
+                    if b != expected {
+                        return false;
+                    }
+                } else {
+                    break_char = Some(b);
+                }
+            }
+            // Any other non-whitespace byte disqualifies the line.
+            _ => return false,
+        }
+    }
+    break_char.is_some()
 }
 
 /// Emit one quote prefix token sequence: [indent?] `>` [optional space/tab].
