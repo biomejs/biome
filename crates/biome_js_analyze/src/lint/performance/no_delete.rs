@@ -101,7 +101,7 @@ impl Rule for NoDelete {
                 }
                 // Skip `delete process.env.FOO` — it is the documented way
                 // to remove environment variables in Node.js.
-                if is_process_env(&static_member_expression) {
+                if is_process_env(&static_member_expression).unwrap_or(false) {
                     return None;
                 }
                 true
@@ -151,25 +151,18 @@ impl Rule for NoDelete {
 }
 
 /// Check if a static member expression targets `process.env.*`.
-fn is_process_env(expr: &biome_js_syntax::JsStaticMemberExpression) -> bool {
-    // Check direct `process.env.FOO`
-    if let Ok(object) = expr.object() {
-        if let Some(static_obj) = object.as_js_static_member_expression() {
-            if let Ok(obj_member) = static_obj.member() {
-                if let Some(name) = obj_member.as_js_name() {
-                    if name.to_trimmed_text().text() == "env" {
-                        let obj = static_obj.object().ok();
-                        if let Some(obj_ref) = obj.as_ref().and_then(|o| o.as_js_identifier_expression()) {
-                            if let Ok(name_ref) = obj_ref.name() {
-                                return name_ref.to_trimmed_text().text() == "process";
-                            }
-                        }
-                    }
-                }
-            }
-        }
+fn is_process_env(expr: &biome_js_syntax::JsStaticMemberExpression) -> Option<bool> {
+    let object = expr.object().ok()?;
+    let static_obj = object.as_js_static_member_expression()?;
+    let member = static_obj.member().ok()?;
+    let name = member.as_js_name()?;
+    if name.to_trimmed_text().text() != "env" {
+        return Some(false);
     }
-    false
+    let inner_obj = static_obj.object().ok()?;
+    let ident = inner_obj.as_js_identifier_expression()?;
+    let name_ref = ident.name().ok()?;
+    Some(name_ref.to_trimmed_text().text() == "process")
 }
 
 fn to_assignment(expr: &AnyJsExpression) -> Result<AnyJsAssignment, ()> {
