@@ -1691,7 +1691,14 @@ fn blank_line_phase_after_prefix(
         }
         let marker_line_break = state.first_line;
         let action = if quote_depth > 0 {
-            classify_blank_line_in_quote(p, state.required_indent, state.marker_indent, quote_depth, state.parent_marker_kind, state.parent_ordered_delim)
+            classify_blank_line_in_quote(
+                p,
+                state.required_indent,
+                state.marker_indent,
+                quote_depth,
+                state.parent_marker_kind,
+                state.parent_ordered_delim,
+            )
         } else {
             classify_blank_line(
                 p,
