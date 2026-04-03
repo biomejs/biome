@@ -266,8 +266,7 @@ fn parse_html_attribute_value(bytes: &[u8], mut i: usize) -> Option<usize> {
                         | biome_unicode_table::Dispatch::LSS
                         | biome_unicode_table::Dispatch::MOR
                         | biome_unicode_table::Dispatch::TPL
-                )
-                {
+                ) {
                     break;
                 }
                 i += 1;
