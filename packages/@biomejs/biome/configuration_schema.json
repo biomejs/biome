@@ -1547,6 +1547,23 @@
 				}
 			]
 		},
+		"DestructuringConfig": {
+			"description": "Configuration for which destructuring types to enforce.",
+			"type": "object",
+			"properties": {
+				"array": {
+					"description": "Enforce array destructuring.",
+					"type": "boolean",
+					"default": true
+				},
+				"object": {
+					"description": "Enforce object destructuring.",
+					"type": "boolean",
+					"default": true
+				}
+			},
+			"additionalProperties": false
+		},
 		"Expand": {
 			"oneOf": [
 				{
@@ -13713,7 +13730,24 @@
 			]
 		},
 		"UseDestructuringOptions": {
+			"description": "Options for the `useDestructuring` rule.\n\nAllows configuring which contexts (declarations, assignments) and which\ntypes (array, object) should enforce destructuring.",
 			"type": "object",
+			"properties": {
+				"assignmentExpression": {
+					"description": "Enforce destructuring in assignment expressions.",
+					"anyOf": [
+						{ "$ref": "#/$defs/DestructuringConfig" },
+						{ "type": "null" }
+					]
+				},
+				"variableDeclarator": {
+					"description": "Enforce destructuring in variable declarations (`var`/`let`/`const`).",
+					"anyOf": [
+						{ "$ref": "#/$defs/DestructuringConfig" },
+						{ "type": "null" }
+					]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseEnumInitializersConfiguration": {

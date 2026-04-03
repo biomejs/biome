@@ -61,9 +61,15 @@ impl Rule for UseDestructuring {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let query = ctx.query();
+        let options = ctx.options();
 
         match query {
             UseDestructuringQuery::JsAssignmentExpression(node) => {
+                let config = options.assignment_expression();
+                if !config.array && !config.object {
+                    return None;
+                }
+
                 let op = node.operator().ok()?;
                 if op != JsAssignmentOperator::Assign {
                     return None;
@@ -76,12 +82,28 @@ impl Rule for UseDestructuring {
                 ) = left
                 {
                     let ident = expr.name_token().ok()?;
-                    return should_suggest_destructuring(ident.text_trimmed(), &right);
+                    let state = should_suggest_destructuring(ident.text_trimmed(), &right)?;
+                    return match state {
+                        UseDestructuringState::Array if config.array => {
+                            Some(UseDestructuringState::Array)
+                        }
+                        UseDestructuringState::Object { .. } if config.object => {
+                            Some(UseDestructuringState::Object {
+                                is_assignment: true,
+                            })
+                        }
+                        _ => None,
+                    };
                 }
 
                 None
             }
             UseDestructuringQuery::JsVariableDeclarator(node) => {
+                let config = options.variable_declarator();
+                if !config.array && !config.object {
+                    return None;
+                }
+
                 let initializer = node.initializer()?;
                 let declaration = JsVariableDeclaration::cast(node.syntax().parent()?.parent()?)?;
                 let has_await_using = declaration.await_token().is_some();
@@ -100,7 +122,18 @@ impl Rule for UseDestructuring {
                     left
                 {
                     let ident = expr.name_token().ok()?;
-                    return should_suggest_destructuring(ident.text_trimmed(), &right);
+                    let state = should_suggest_destructuring(ident.text_trimmed(), &right)?;
+                    return match state {
+                        UseDestructuringState::Array if config.array => {
+                            Some(UseDestructuringState::Array)
+                        }
+                        UseDestructuringState::Object { .. } if config.object => {
+                            Some(UseDestructuringState::Object {
+                                is_assignment: false,
+                            })
+                        }
+                        _ => None,
+                    };
                 }
 
                 None
@@ -128,22 +161,27 @@ impl Rule for UseDestructuring {
                     }),
                 )
             }
-            UseDestructuringState::Object => {
-                Some(
-                    RuleDiagnostic::new(
-                        rule_category!(),
-                        node.range(),
-                        markup! {
-                            "Use object destructuring instead of accessing object properties."
-                        },
-                    )
-                    .note(markup! {
-                        "Object destructuring is more readable and expressive than accessing individual properties."
-                    })
-                    .note(markup! {
-                        "Replace the property access with object destructuring syntax."
-                    }),
+            UseDestructuringState::Object { is_assignment } => {
+                let diagnostic = RuleDiagnostic::new(
+                    rule_category!(),
+                    node.range(),
+                    markup! {
+                        "Use object destructuring instead of accessing object properties."
+                    },
                 )
+                .note(markup! {
+                    "Object destructuring is more readable and expressive than accessing individual properties."
+                });
+
+                Some(if *is_assignment {
+                    diagnostic.note(markup! {
+                        "Wrap the assignment in parentheses to use object destructuring: "<Emphasis>"({ prop } = object)"</Emphasis>"."
+                    })
+                } else {
+                    diagnostic.note(markup! {
+                        "Replace the property access with object destructuring syntax."
+                    })
+                })
             }
         }
     }
@@ -172,7 +210,7 @@ fn should_suggest_destructuring(
                 let value = expr.value_token().ok()?;
 
                 if left == value.text_trimmed() {
-                    return Some(UseDestructuringState::Object);
+                    return Some(UseDestructuringState::Object { is_assignment: false });
                 }
             }
 
@@ -190,7 +228,7 @@ fn should_suggest_destructuring(
             }
             let member = expr.member().ok()?.value_token().ok()?;
             if left == member.text_trimmed() {
-                return Some(UseDestructuringState::Object);
+                return Some(UseDestructuringState::Object { is_assignment: false });
             }
             None
         }
@@ -199,6 +237,6 @@ fn should_suggest_destructuring(
 }
 
 pub enum UseDestructuringState {
-    Object,
+    Object { is_assignment: bool },
     Array,
 }
