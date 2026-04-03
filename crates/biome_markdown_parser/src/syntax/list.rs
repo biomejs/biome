@@ -1691,7 +1691,7 @@ fn blank_line_phase_after_prefix(
         }
         let marker_line_break = state.first_line;
         let action = if quote_depth > 0 {
-            classify_blank_line_in_quote(p, state.required_indent, state.marker_indent, quote_depth)
+            classify_blank_line_in_quote(p, state.required_indent, state.marker_indent, quote_depth, state.parent_marker_kind, state.parent_ordered_delim)
         } else {
             classify_blank_line(
                 p,
@@ -2588,6 +2588,8 @@ fn classify_blank_line_in_quote(
     required_indent: usize,
     marker_indent: usize,
     quote_depth: usize,
+    parent_marker_kind: Option<MarkdownSyntaxKind>,
+    parent_ordered_delim: Option<char>,
 ) -> BlankLineAction {
     p.lookahead(|p| {
         loop {
@@ -2651,6 +2653,31 @@ fn classify_blank_line_in_quote(
         }
 
         if indent <= marker_indent + MAX_BLOCK_PREFIX_INDENT {
+            let next_is_bullet = at_bullet_list_item_with_base_indent(p, marker_indent);
+            let next_is_ordered = at_order_list_item_with_base_indent(p, marker_indent);
+
+            if next_is_bullet || next_is_ordered {
+                // Per CommonMark §5.3, a marker/type change means a new list starts.
+                if let Some(current) = parent_marker_kind {
+                    if next_is_ordered {
+                        return BlankLineAction::EndItemBeforeBlank;
+                    }
+                    let next = current_bullet_marker(p);
+                    if matches!(next, Some(next) if current != next) {
+                        return BlankLineAction::EndItemBeforeBlank;
+                    }
+                } else if let Some(current_delim) = parent_ordered_delim {
+                    if next_is_bullet {
+                        return BlankLineAction::EndItemBeforeBlank;
+                    }
+                    let next_delim = current_ordered_delim(p);
+                    if matches!(next_delim, Some(next) if current_delim != next) {
+                        return BlankLineAction::EndItemBeforeBlank;
+                    }
+                }
+                return BlankLineAction::EndItemAfterBlank;
+            }
+
             let is_list_marker = p.lookahead(|p| {
                 skip_leading_whitespace_tokens(p);
 
