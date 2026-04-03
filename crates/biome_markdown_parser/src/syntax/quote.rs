@@ -589,16 +589,30 @@ fn parse_code_block_newline(p: &mut MarkdownParser, depth: usize) -> bool {
         return false;
     }
 
+    let continues_code_block = p.lookahead(|p| {
+        consume_quote_prefix(p, depth);
+
+        // Blank lines (consecutive newlines) are allowed in indented code.
+        if p.at(NEWLINE) {
+            return true;
+        }
+
+        at_quote_indented_code_start(p)
+    });
+
+    if !continues_code_block {
+        return false;
+    }
+
     consume_quote_prefix(p, depth);
     relex_after_quote_prefix_consumed(p);
 
-    // Blank lines (consecutive newlines) are allowed in indented code
+    // Blank lines (consecutive newlines) are allowed in indented code.
     if p.at(NEWLINE) {
         return true;
     }
 
-    // Next line must still be indented to continue the code block
-    at_quote_indented_code_start(p)
+    true
 }
 
 /// Parse a single textual token in an indented code block.
