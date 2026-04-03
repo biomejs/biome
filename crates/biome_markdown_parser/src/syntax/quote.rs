@@ -97,7 +97,7 @@ pub(crate) fn parse_quote(p: &mut MarkdownParser) -> ParsedSyntax {
     p.state_mut().block_quote_depth += 1;
 
     let marker_space = emit_quote_prefix_node(p);
-    force_relex_thematic_break_after_quote_prefix(p);
+    relex_after_quote_prefix_consumed(p);
     p.set_virtual_line_start();
 
     parse_quote_block_list(p);
@@ -146,6 +146,10 @@ fn force_relex_thematic_break_after_quote_prefix(p: &mut MarkdownParser) {
     if is_thematic_break_candidate {
         p.force_relex_at_line_start();
     }
+}
+
+fn relex_after_quote_prefix_consumed(p: &mut MarkdownParser) {
+    force_relex_thematic_break_after_quote_prefix(p);
 }
 
 /// Check if `text` could be a thematic break: all non-whitespace bytes must be
@@ -325,7 +329,7 @@ impl QuoteBlockList {
         {
             if has_quote_prefix(p, self.depth) {
                 consume_quote_prefix(p, self.depth);
-                force_relex_thematic_break_after_quote_prefix(p);
+                relex_after_quote_prefix_consumed(p);
                 self.line_started_with_prefix = true;
             } else {
                 return false;
@@ -586,6 +590,7 @@ fn parse_code_block_newline(p: &mut MarkdownParser, depth: usize) -> bool {
     }
 
     consume_quote_prefix(p, depth);
+    relex_after_quote_prefix_consumed(p);
 
     // Blank lines (consecutive newlines) are allowed in indented code
     if p.at(NEWLINE) {

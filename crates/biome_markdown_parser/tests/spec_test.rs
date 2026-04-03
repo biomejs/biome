@@ -288,6 +288,12 @@ pub fn quick_test() {
         "> ```\n> hello\n> ```\n",
         "<blockquote>\n<pre><code>hello\n</code></pre>\n</blockquote>\n",
     );
+    // Quoted indented code must terminate before a quoted thematic break.
+    test_example(
+        99921,
+        ">     code\n> ---\n",
+        "<blockquote>\n<pre><code>code\n</code></pre>\n<hr />\n</blockquote>\n",
+    );
     test_example(
         9993,
         "- foo\n  - bar\n",
