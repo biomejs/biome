@@ -1200,6 +1200,7 @@ CssKeyframesSelectorList =  (AnyCssKeyframesSelector (',' AnyCssKeyframesSelecto
 AnyCssKeyframesSelector =
 	CssKeyframesIdentSelector
 	| CssKeyframesPercentageSelector
+	| CssKeyframesRangeSelector
 	| CssBogusSelector
 
 // @keyframes "something" { from {} to {} }
@@ -1213,6 +1214,14 @@ CssKeyframesIdentSelector =
 //                          ^^^  ^^^
 CssKeyframesPercentageSelector =
 	selector: CssPercentage
+
+// @keyframes reveal { entry 0% {} exit 100% {} }
+//                     ^^^^^^^^^   ^^^^^^^^^^
+// Scroll-driven animations: <timeline-range-name> <percentage>
+// Valid names: cover, contain, entry, exit, entry-crossing, exit-crossing
+CssKeyframesRangeSelector =
+	name: ('cover' | 'contain' | 'entry' | 'exit' | 'entry-crossing' | 'exit-crossing')
+	percentage: CssPercentage
 
 // https://drafts.csswg.org/mediaqueries-5/#media-query
 // <media-query> = <media-condition>

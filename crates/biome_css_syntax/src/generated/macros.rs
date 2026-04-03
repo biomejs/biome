@@ -403,6 +403,11 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::CssKeyframesPercentageSelector::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_KEYFRAMES_RANGE_SELECTOR => {
+                    let $pattern =
+                        unsafe { $crate::CssKeyframesRangeSelector::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_KEYFRAMES_SCOPE_FUNCTION => {
                     let $pattern =
                         unsafe { $crate::CssKeyframesScopeFunction::new_unchecked(node) };

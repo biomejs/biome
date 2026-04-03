@@ -1395,6 +1395,18 @@ pub fn css_keyframes_percentage_selector(
         [Some(SyntaxElement::Node(selector.into_syntax()))],
     ))
 }
+pub fn css_keyframes_range_selector(
+    name_token: SyntaxToken,
+    percentage: CssPercentage,
+) -> CssKeyframesRangeSelector {
+    CssKeyframesRangeSelector::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_KEYFRAMES_RANGE_SELECTOR,
+        [
+            Some(SyntaxElement::Token(name_token)),
+            Some(SyntaxElement::Node(percentage.into_syntax())),
+        ],
+    ))
+}
 pub fn css_keyframes_scope_function(
     scope_token: SyntaxToken,
     l_paren_token: SyntaxToken,

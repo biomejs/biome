@@ -1,0 +1,63 @@
+/* Scroll-driven animations: timeline-range-name keyframe selectors */
+@keyframes reveal-up {
+	entry 0% {
+		opacity: 0;
+		transform: translateY(2rem);
+	}
+	entry 60% {
+		opacity: 1;
+		transform: translateY(0);
+	}
+	exit 60% {
+		opacity: 1;
+	}
+	exit 100% {
+		opacity: 0;
+	}
+}
+
+@keyframes cover-animation {
+	cover 0% {
+		opacity: 0;
+	}
+	cover 100% {
+		opacity: 1;
+	}
+}
+
+@keyframes contain-animation {
+	contain 0% {
+		transform: scale(0);
+	}
+	contain 100% {
+		transform: scale(1);
+	}
+}
+
+@keyframes crossing-animation {
+	entry-crossing 0% {
+		opacity: 0;
+	}
+	entry-crossing 100% {
+		opacity: 1;
+	}
+	exit-crossing 0% {
+		opacity: 1;
+	}
+	exit-crossing 100% {
+		opacity: 0;
+	}
+}
+
+/* Mixed selectors: timeline-range-name with from/to and percentages */
+@keyframes mixed {
+	from {
+		opacity: 0;
+	}
+	entry 50% {
+		opacity: 0.5;
+	}
+	to {
+		opacity: 1;
+	}
+}
