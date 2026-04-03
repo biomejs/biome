@@ -101,7 +101,7 @@ impl Rule for NoDelete {
                 }
                 // Skip `delete process.env.FOO` — it is the documented way
                 // to remove environment variables in Node.js.
-                if is_process_env(&static_member_expression).unwrap_or(false) {
+                if is_process_env(&static_member_expression).unwrap_or_default() {
                     return None;
                 }
                 true
