@@ -23,6 +23,8 @@ declare_lint_rule! {
     /// The only legitimate use of `delete` is on an object that behaves like a _map_.
     /// To allow this pattern, this rule does not report `delete` on computed properties that are not literal values.
     /// Consider using [Map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map) instead of an object.
+    /// An exception is [`delete process.env.NAME`](https://nodejs.org/api/process.html#processenv),
+    /// which Node.js documents as the way to remove environment variables.
     ///
     /// ## Examples
     ///
@@ -59,7 +61,6 @@ declare_lint_rule! {
     ///
     /// ```js
     /// delete process.env.FOO;
-    /// // `delete` is the documented way to remove env vars in Node.js.
     ///```
     ///
     pub NoDelete {
@@ -104,8 +105,9 @@ impl Rule for NoDelete {
                         return None;
                     }
                 }
-                // Skip `delete process.env.FOO` — it is the documented way
-                // to remove environment variables in Node.js.
+                // Skip `delete process.env.FOO`: Node.js documents `delete` as the way
+                // to remove environment variables.
+                // https://nodejs.org/api/process.html#processenv
                 if is_process_env(static_member_expression).unwrap_or_default() {
                     return None;
                 }
@@ -161,13 +163,16 @@ fn is_process_env(expr: &biome_js_syntax::JsStaticMemberExpression) -> Option<bo
     let static_obj = object.as_js_static_member_expression()?;
     let member = static_obj.member().ok()?;
     let name = member.as_js_name()?;
-    if name.to_trimmed_text().text() != "env" {
+    if name
+        .value_token()
+        .is_ok_and(|token| token.text_trimmed() != "env")
+    {
         return Some(false);
     }
     let inner_obj = static_obj.object().ok()?;
     let ident = inner_obj.as_js_identifier_expression()?;
     let name_ref = ident.name().ok()?;
-    Some(name_ref.to_trimmed_text().text() == "process")
+    Some(name_ref.has_name("process"))
 }
 
 fn to_assignment(expr: &AnyJsExpression) -> Result<AnyJsAssignment, ()> {
