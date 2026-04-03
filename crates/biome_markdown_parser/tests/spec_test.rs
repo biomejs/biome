@@ -233,7 +233,7 @@ pub fn quick_test() {
     test_example(
         10004,
         "- outer item\n  - inner item\n    inner continuation\n  outer continuation at parent indentation\n\n- next outer item\n",
-        "<ul>\n<li>\n<p>outer item</p>\n<ul>\n<li>inner item\ninner continuation</li>\n</ul>\n<p>outer continuation at parent indentation</p>\n</li>\n<li>\n<p>next outer item</p>\n</li>\n</ul>\n",
+        "<ul>\n<li>\n<p>outer item</p>\n<ul>\n<li>inner item\ninner continuation\nouter continuation at parent indentation</li>\n</ul>\n</li>\n<li>\n<p>next outer item</p>\n</li>\n</ul>\n",
     );
     // Mixed ordered delimiters across blank lines produce separate lists
     test_example(
@@ -283,5 +283,11 @@ pub fn quick_test() {
         9727,
         ">💡 Biomeは、[Prettierのオプションに対する考え方](https://prettier.io/docs/en/option-philosophy)と同様のアプローチを採用しています。\n",
         "<blockquote>\n<p>💡 Biomeは、<a href=\"https://prettier.io/docs/en/option-philosophy\">Prettierのオプションに対する考え方</a>と同様のアプローチを採用しています。</p>\n</blockquote>\n",
+    );
+    // Lazy continuation at exactly the nested marker indent
+    test_example(
+        20001,
+        "- a\n  - b\n  lazy\n",
+        "<ul>\n<li>a\n<ul>\n<li>b\nlazy</li>\n</ul>\n</li>\n</ul>\n",
     );
 }

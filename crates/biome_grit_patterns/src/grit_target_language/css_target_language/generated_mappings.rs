@@ -130,6 +130,7 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssKeyframesPercentageSelector" => {
             lang::CssKeyframesPercentageSelector::KIND_SET.iter().next()
         }
+        "CssKeyframesRangeSelector" => lang::CssKeyframesRangeSelector::KIND_SET.iter().next(),
         "CssKeyframesScopeFunction" => lang::CssKeyframesScopeFunction::KIND_SET.iter().next(),
         "CssKeyframesScopePrefix" => lang::CssKeyframesScopePrefix::KIND_SET.iter().next(),
         "CssKeyframesScopedName" => lang::CssKeyframesScopedName::KIND_SET.iter().next(),

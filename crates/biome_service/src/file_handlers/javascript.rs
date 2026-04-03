@@ -1,7 +1,7 @@
 use super::{
-    AnalyzerCapabilities, AnalyzerVisitorBuilder, CodeActionsParams, DebugCapabilities,
-    DiagnosticsAndActionsParams, EnabledForPath, ExtensionHandler, FormatEmbedNode,
-    FormatterCapabilities, LintParams, LintResults, ParseEmbedResult, ParseResult,
+    AnalyzerCapabilities, AnalyzerVisitorBuilder, AnalyzerVisitorResult, CodeActionsParams,
+    DebugCapabilities, DiagnosticsAndActionsParams, EnabledForPath, ExtensionHandler,
+    FormatEmbedNode, FormatterCapabilities, LintParams, LintResults, ParseEmbedResult, ParseResult,
     ParserCapabilities, ProcessDiagnosticsAndActions, ProcessFixAll, ProcessLint,
     SearchCapabilities, UpdateSnippetsNodes, search,
 };
@@ -16,6 +16,7 @@ use crate::settings::{
     OverrideSettings, Settings, SettingsWithEditor, check_feature_activity,
     check_override_feature_activity,
 };
+use crate::workspace::FixFileMode;
 use crate::workspace::document::services::embedded_bindings::EmbeddedBuilder;
 use crate::workspace::{DocumentFileSource, EmbeddedSnippet, PullDiagnosticsAndActionsResult};
 use crate::{
@@ -959,14 +960,18 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
         &params.language,
         params.suppression_reason.as_deref(),
     );
-    let (enabled_rules, disabled_rules, analyzer_options) =
-        AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
-            .with_only(params.only)
-            .with_skip(params.skip)
-            .with_path(params.path.as_path())
-            .with_enabled_selectors(params.enabled_selectors)
-            .with_project_layout(params.project_layout.clone())
-            .finish();
+    let AnalyzerVisitorResult {
+        enabled_rules,
+        disabled_rules,
+        analyzer_options,
+        ..
+    } = AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
+        .with_only(params.only)
+        .with_skip(params.skip)
+        .with_path(params.path.as_path())
+        .with_enabled_selectors(params.enabled_selectors)
+        .with_project_layout(params.project_layout.clone())
+        .finish();
 
     let filter = AnalysisFilter {
         categories: params.categories,
@@ -1040,14 +1045,18 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     let analyzer_options =
         settings.analyzer_options::<JsLanguage>(path, &language, suppression_reason.as_deref());
     let mut actions = Vec::new();
-    let (enabled_rules, disabled_rules, analyzer_options) =
-        AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
-            .with_only(only)
-            .with_skip(skip)
-            .with_path(path.as_path())
-            .with_enabled_selectors(rules)
-            .with_project_layout(project_layout.clone())
-            .finish();
+    let AnalyzerVisitorResult {
+        enabled_rules,
+        disabled_rules,
+        analyzer_options,
+        ..
+    } = AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
+        .with_only(only)
+        .with_skip(skip)
+        .with_path(path.as_path())
+        .with_enabled_selectors(rules)
+        .with_project_layout(project_layout.clone())
+        .finish();
     let filter = AnalysisFilter {
         categories,
         enabled_rules: Some(enabled_rules.as_slice()),
@@ -1128,14 +1137,18 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         &params.document_file_source,
         params.suppression_reason.as_deref(),
     );
-    let (enabled_rules, disabled_rules, analyzer_options) =
-        AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
-            .with_only(params.only)
-            .with_skip(params.skip)
-            .with_path(params.biome_path.as_path())
-            .with_enabled_selectors(params.enabled_rules)
-            .with_project_layout(params.project_layout.clone())
-            .finish();
+    let AnalyzerVisitorResult {
+        enabled_rules,
+        disabled_rules,
+        analyzer_options,
+        fixable_rules,
+    } = AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
+        .with_only(params.only)
+        .with_skip(params.skip)
+        .with_path(params.biome_path.as_path())
+        .with_enabled_selectors(params.enabled_rules)
+        .with_project_layout(params.project_layout.clone())
+        .finish();
 
     let filter = AnalysisFilter {
         categories: params.rule_categories,
@@ -1158,6 +1171,74 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         tree.syntax().text_range_with_trivia().len().into(),
     );
 
+    if matches!(params.fix_file_mode, FixFileMode::ApplySuppressions) {
+        // Suppressions apply to all rules -- keep original single-phase loop
+        loop {
+            let mut services = JsAnalyzerServices::from((
+                params.module_graph.clone(),
+                params.project_layout.clone(),
+                file_source,
+            ));
+
+            if let Some(embedded_bindings) = params.document_services.embedded_bindings() {
+                services.set_embedded_bindings(embedded_bindings.bindings)
+            }
+
+            if let Some(value_refs) = params.document_services.embedded_value_references() {
+                services.set_embedded_value_references(value_refs.references)
+            }
+
+            let mut pending_actions = Vec::new();
+
+            let (_, _) = analyze(
+                &tree,
+                filter,
+                &analyzer_options,
+                &params.plugins,
+                services,
+                |signal| process_fix_all.collect_signal(signal, &mut pending_actions),
+            );
+
+            let result = process_fix_all.process_batch_actions(pending_actions, |root| {
+                tree = match AnyJsRoot::cast(root) {
+                    Some(tree) => tree,
+                    None => return None,
+                };
+                Some(tree.syntax().text_range_with_trivia().len().into())
+            })?;
+
+            if result.is_none() {
+                return process_fix_all.finish(
+                    || {
+                        Ok(if params.should_format {
+                            Either::Left(format_node(
+                                params.settings.format_options::<JsLanguage>(
+                                    params.biome_path,
+                                    &params.document_file_source,
+                                ),
+                                tree.syntax(),
+                                false,
+                            ))
+                        } else {
+                            Either::Right(tree.syntax().to_string())
+                        })
+                    },
+                    params.embeds_initial_indent,
+                );
+            }
+        }
+    }
+
+    // Two-phase fix-all: Phase 1 runs only fixable rules, Phase 2 runs all rules for diagnostics.
+
+    // Phase 1: fix loop with fixable-only rules
+    let fixable_filter = AnalysisFilter {
+        categories: params.rule_categories,
+        enabled_rules: Some(fixable_rules.as_slice()),
+        disabled_rules: &disabled_rules,
+        range: None,
+    };
+
     loop {
         let mut services = JsAnalyzerServices::from((
             params.module_graph.clone(),
@@ -1177,11 +1258,11 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
 
         let (_, _) = analyze(
             &tree,
-            filter,
+            fixable_filter,
             &analyzer_options,
             &params.plugins,
             services,
-            |signal| process_fix_all.collect_signal(signal, &mut pending_actions),
+            |signal| process_fix_all.collect_signal_fixes_only(signal, &mut pending_actions),
         );
 
         let result = process_fix_all.process_batch_actions(pending_actions, |root| {
@@ -1193,25 +1274,53 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         })?;
 
         if result.is_none() {
-            return process_fix_all.finish(
-                || {
-                    Ok(if params.should_format {
-                        Either::Left(format_node(
-                            params.settings.format_options::<JsLanguage>(
-                                params.biome_path,
-                                &params.document_file_source,
-                            ),
-                            tree.syntax(),
-                            false,
-                        ))
-                    } else {
-                        Either::Right(tree.syntax().to_string())
-                    })
-                },
-                params.embeds_initial_indent,
-            );
+            break;
         }
     }
+
+    // Phase 2: run all rules on the fixed tree for final diagnostics
+    {
+        let mut services = JsAnalyzerServices::from((
+            params.module_graph.clone(),
+            params.project_layout.clone(),
+            file_source,
+        ));
+
+        if let Some(embedded_bindings) = params.document_services.embedded_bindings() {
+            services.set_embedded_bindings(embedded_bindings.bindings)
+        }
+
+        if let Some(value_refs) = params.document_services.embedded_value_references() {
+            services.set_embedded_value_references(value_refs.references)
+        }
+
+        let (_, _) = analyze(
+            &tree,
+            filter,
+            &analyzer_options,
+            &params.plugins,
+            services,
+            |signal| process_fix_all.collect_diagnostic_only(signal),
+        );
+    }
+
+    process_fix_all.finish(
+        || {
+            Ok(if params.should_format {
+                Either::Left(format_node(
+                    params.settings.format_options::<JsLanguage>(
+                        params.biome_path,
+                        &params.document_file_source,
+                    ),
+                    tree.syntax(),
+                    false,
+                ))
+            } else {
+                Either::Right(tree.syntax().to_string())
+            })
+        },
+        params.embeds_initial_indent,
+    )
 }
 
 pub(crate) fn format(
@@ -1362,14 +1471,18 @@ pub(crate) fn pull_diagnostics_and_actions(
     let tree = parse.tree();
     let analyzer_options =
         settings.analyzer_options::<JsLanguage>(path, &language, suppression_reason.as_deref());
-    let (enabled_rules, disabled_rules, analyzer_options) =
-        AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
-            .with_only(only)
-            .with_skip(skip)
-            .with_path(path.as_path())
-            .with_enabled_selectors(enabled_selectors)
-            .with_project_layout(project_layout.clone())
-            .finish();
+    let AnalyzerVisitorResult {
+        enabled_rules,
+        disabled_rules,
+        analyzer_options,
+        ..
+    } = AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
+        .with_only(only)
+        .with_skip(skip)
+        .with_path(path.as_path())
+        .with_enabled_selectors(enabled_selectors)
+        .with_project_layout(project_layout.clone())
+        .finish();
     let filter = AnalysisFilter {
         categories,
         enabled_rules: Some(enabled_rules.as_slice()),

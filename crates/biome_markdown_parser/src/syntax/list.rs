@@ -1902,6 +1902,10 @@ fn parse_first_line_atx_heading(p: &mut MarkdownParser, state: &mut ListItemLoop
 
     let header_m = p.start();
 
+    // Emit the required MdIndentTokenList slot (slot 0) so the CST matches the grammar.
+    // In list context we are never at line start, so this produces an empty list node.
+    p.emit_line_indent(MAX_BLOCK_PREFIX_INDENT);
+
     // Can't reuse header::parse_hash_list(): in list context `#` may be lexed as
     // MD_TEXTUAL_LITERAL and requires bump_remap. Keep in sync with parse_hash_list().
     let hash_list_m = p.start();
@@ -2073,16 +2077,6 @@ fn check_continuation_indent(
             };
         }
 
-        // Once a nested item's continuation drops back to its marker column,
-        // the line belongs to the parent item rather than lazily extending
-        // the nested paragraph.
-        if state.marker_indent > 0 && indent <= state.marker_indent {
-            return ContinuationResult {
-                action: LoopAction::Break,
-                restore: VirtualLineRestore::None,
-            };
-        }
-
         // Lazy continuation per CommonMark §5.2
         if !state.last_block_was_paragraph {
             return ContinuationResult {
@@ -2090,6 +2084,21 @@ fn check_continuation_indent(
                 restore: VirtualLineRestore::None,
             };
         }
+
+        // Lazy continuation accepted — emit the available indent as a
+        // structural MdContinuationIndent node, matching the sufficient-indent
+        // path above.
+        let prev_virtual = p.state().virtual_line_start;
+        p.state_mut().virtual_line_start = Some(p.cur_range().start());
+        let ci_m = p.start();
+        p.emit_line_indent(indent);
+        ci_m.complete(p, MD_CONTINUATION_INDENT);
+        p.set_virtual_line_start();
+
+        return ContinuationResult {
+            action: LoopAction::FallThrough,
+            restore: VirtualLineRestore::Restore(prev_virtual),
+        };
     }
 
     ContinuationResult {

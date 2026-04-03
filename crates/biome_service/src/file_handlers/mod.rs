@@ -18,7 +18,7 @@ use crate::workspace::{
 };
 use biome_analyze::{
     ActionFilter, AnalyzerAction, AnalyzerDiagnostic, AnalyzerOptions, AnalyzerPluginVec,
-    AnalyzerSignal, ControlFlow, GroupCategory, Never, Queryable, RegistryVisitor, Rule,
+    AnalyzerSignal, ControlFlow, FixKind, GroupCategory, Never, Queryable, RegistryVisitor, Rule,
     RuleCategories, RuleCategory, RuleError, RuleFilter, RuleGroup,
 };
 use biome_configuration::Rules;
@@ -871,6 +871,60 @@ impl<'a> ProcessFixAll<'a> {
         ControlFlow::Continue(())
     }
 
+    /// Phase 1 callback: collect applicable fix actions without counting errors.
+    /// Error counting is deferred to Phase 2 where all rules run on the final tree.
+    pub(crate) fn collect_signal_fixes_only<L: biome_rowan::Language>(
+        &mut self,
+        signal: &dyn AnalyzerSignal<L>,
+        pending: &mut Vec<AnalyzerAction<L>>,
+    ) -> ControlFlow<Never> {
+        let action_filter = match self.fix_file_mode {
+            FixFileMode::ApplySuppressions => ActionFilter::inline_suppression(),
+            FixFileMode::SafeFixes | FixFileMode::SafeAndUnsafeFixes => ActionFilter::rule_fix(),
+        };
+        for action in signal.actions(action_filter) {
+            match self.fix_file_mode {
+                FixFileMode::ApplySuppressions => {
+                    if action.is_suppression() {
+                        pending.push(action);
+                        break;
+                    }
+                }
+                FixFileMode::SafeFixes => {
+                    if action.applicability == Applicability::MaybeIncorrect {
+                        self.skipped_suggested_fixes += 1;
+                    }
+                    if action.applicability == Applicability::Always {
+                        pending.push(action);
+                    }
+                }
+                FixFileMode::SafeAndUnsafeFixes => {
+                    if matches!(
+                        action.applicability,
+                        Applicability::Always | Applicability::MaybeIncorrect
+                    ) {
+                        pending.push(action);
+                    }
+                }
+            }
+        }
+
+        ControlFlow::Continue(())
+    }
+
+    /// Phase 2 callback: count remaining errors on the fixed tree without collecting actions.
+    pub(crate) fn collect_diagnostic_only<L: biome_rowan::Language>(
+        &mut self,
+        signal: &dyn AnalyzerSignal<L>,
+    ) -> ControlFlow<Never> {
+        if let Some(diagnostic) = signal.diagnostic().as_ref()
+            && is_diagnostic_error(diagnostic, self.rules.as_deref())
+        {
+            self.errors += 1;
+        }
+        ControlFlow::Continue(())
+    }
+
     /// Merge pending actions from the same rule into one mutation and commit.
     ///
     /// Only actions matching the first rule are merged and applied. Remaining
@@ -1465,6 +1519,9 @@ impl RegistryVisitor<HtmlLanguage> for SyntaxVisitor<'_> {
 struct LintVisitor<'a, 'b> {
     pub(crate) enabled_rules: FxHashSet<RuleFilter<'a>>,
     pub(crate) disabled_rules: FxHashSet<RuleFilter<'a>>,
+    /// Set of rules that have a code fix, regardless of whether they are enabled.
+    /// Used after `finish()` to derive the fixable subset of `enabled_rules`.
+    pub(crate) rules_with_fix: FxHashSet<RuleFilter<'a>>,
     // lint_params: &'b LintParams<'a>,
     only: Option<&'b [AnalyzerSelector]>,
     skip: Option<&'b [AnalyzerSelector]>,
@@ -1486,6 +1543,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         Self {
             enabled_rules: Default::default(),
             disabled_rules: Default::default(),
+            rules_with_fix: Default::default(),
             only,
             skip,
             settings,
@@ -1538,7 +1596,6 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
 
                 if matches_a_dependency {
                     self.enabled_rules.insert(rule_filter);
-
                     self.analyzer_options
                         .push_globals(domain.globals().iter().copied().map(Into::into));
                 }
@@ -1592,7 +1649,6 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
                 match configured_domain_value {
                     RuleDomainValue::All => {
                         self.enabled_rules.insert(rule_filter);
-
                         self.analyzer_options.push_globals(
                             configured_domain.globals().iter().copied().map(Into::into),
                         );
@@ -1603,7 +1659,6 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
                     RuleDomainValue::Recommended => {
                         if R::METADATA.recommended {
                             self.enabled_rules.insert(rule_filter);
-
                             self.analyzer_options.push_globals(
                                 configured_domain.globals().iter().copied().map(Into::into),
                             );
@@ -1614,7 +1669,13 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         }
     }
 
-    fn finish(mut self) -> (FxHashSet<RuleFilter<'a>>, FxHashSet<RuleFilter<'a>>) {
+    fn finish(
+        mut self,
+    ) -> (
+        FxHashSet<RuleFilter<'a>>,
+        FxHashSet<RuleFilter<'a>>,
+        Vec<RuleFilter<'a>>,
+    ) {
         let has_only_filter = self.only.is_none_or(|only| !only.is_empty());
         let rules = self
             .settings
@@ -1624,7 +1685,13 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
             self.enabled_rules.extend(rules.as_enabled_rules());
             self.disabled_rules.extend(rules.as_disabled_rules());
         }
-        (self.enabled_rules, self.disabled_rules)
+        let fixable_rules = self
+            .enabled_rules
+            .iter()
+            .filter(|rule| self.rules_with_fix.contains(rule))
+            .copied()
+            .collect();
+        (self.enabled_rules, self.disabled_rules, fixable_rules)
     }
 
     fn push_rule<R, L>(&mut self, rule_filter: Option<RuleFilter<'static>>)
@@ -1678,6 +1745,10 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
                     }
                 }
             }
+        }
+
+        if R::METADATA.fix_kind != FixKind::None {
+            self.rules_with_fix.insert(rule_filter);
         }
     }
 }
@@ -1804,6 +1875,9 @@ struct AssistsVisitor<'a, 'b> {
     settings: &'b Settings,
     enabled_rules: Vec<RuleFilter<'a>>,
     disabled_rules: Vec<RuleFilter<'a>>,
+    /// Set of rules that have a code fix, regardless of whether they are enabled.
+    /// Used after `finish()` to derive the fixable subset of `enabled_rules`.
+    rules_with_fix: FxHashSet<RuleFilter<'a>>,
     only: Option<&'b [AnalyzerSelector]>,
     skip: Option<&'b [AnalyzerSelector]>,
     path: Option<&'b Utf8Path>,
@@ -1819,6 +1893,7 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
         Self {
             enabled_rules: vec![],
             disabled_rules: vec![],
+            rules_with_fix: Default::default(),
             settings,
             path,
             only,
@@ -1873,9 +1948,22 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
                 }
             }
         }
+
+        if R::METADATA.fix_kind != FixKind::None {
+            self.rules_with_fix.insert(RuleFilter::Rule(
+                <R::Group as RuleGroup>::NAME,
+                R::METADATA.name,
+            ));
+        }
     }
 
-    fn finish(mut self) -> (Vec<RuleFilter<'a>>, Vec<RuleFilter<'a>>) {
+    fn finish(
+        mut self,
+    ) -> (
+        Vec<RuleFilter<'a>>,
+        Vec<RuleFilter<'a>>,
+        Vec<RuleFilter<'a>>,
+    ) {
         let has_only_filter = self.only.is_none_or(|only| !only.is_empty());
         let rules = self
             .settings
@@ -1885,7 +1973,13 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
             self.enabled_rules.extend(rules.as_enabled_rules());
             self.disabled_rules.extend(rules.as_disabled_rules());
         }
-        (self.enabled_rules, self.disabled_rules)
+        let fixable_rules = self
+            .enabled_rules
+            .iter()
+            .filter(|rule| self.rules_with_fix.contains(rule))
+            .copied()
+            .collect();
+        (self.enabled_rules, self.disabled_rules, fixable_rules)
     }
 }
 
@@ -1968,6 +2062,15 @@ impl RegistryVisitor<HtmlLanguage> for AssistsVisitor<'_, '_> {
     }
 }
 
+/// Result of building the analyzer visitor: the resolved rule filters and options.
+pub(crate) struct AnalyzerVisitorResult<'a> {
+    pub(crate) enabled_rules: Vec<RuleFilter<'a>>,
+    pub(crate) disabled_rules: Vec<RuleFilter<'a>>,
+    pub(crate) analyzer_options: AnalyzerOptions,
+    /// Subset of `enabled_rules` that have a code fix (`FixKind::Safe` or `FixKind::Unsafe`).
+    pub(crate) fixable_rules: Vec<RuleFilter<'a>>,
+}
+
 pub(crate) struct AnalyzerVisitorBuilder<'a> {
     settings: &'a Settings,
     only: Option<&'a [AnalyzerSelector]>,
@@ -2022,7 +2125,7 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
     }
 
     #[must_use]
-    pub(crate) fn finish(self) -> (Vec<RuleFilter<'b>>, Vec<RuleFilter<'b>>, AnalyzerOptions) {
+    pub(crate) fn finish(self) -> AnalyzerVisitorResult<'b> {
         let mut analyzer_options = self.analyzer_options;
         let mut disabled_rules = vec![];
         let mut enabled_rules = vec![];
@@ -2095,7 +2198,7 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
         biome_json_analyze::visit_registry(&mut lint);
         biome_graphql_analyze::visit_registry(&mut lint);
         biome_html_analyze::visit_registry(&mut lint);
-        let (linter_enabled_rules, linter_disabled_rules) = lint.finish();
+        let (linter_enabled_rules, linter_disabled_rules, linter_fixable_rules) = lint.finish();
         enabled_rules.extend(linter_enabled_rules);
         disabled_rules.extend(linter_disabled_rules);
 
@@ -2106,10 +2209,19 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
         biome_json_analyze::visit_registry(&mut assist);
         biome_graphql_analyze::visit_registry(&mut assist);
         biome_html_analyze::visit_registry(&mut assist);
-        let (assists_enabled_rules, assists_disabled_rules) = assist.finish();
+        let (assists_enabled_rules, assists_disabled_rules, assists_fixable_rules) =
+            assist.finish();
         enabled_rules.extend(assists_enabled_rules);
         disabled_rules.extend(assists_disabled_rules);
 
-        (enabled_rules, disabled_rules, analyzer_options)
+        let mut fixable_rules = linter_fixable_rules;
+        fixable_rules.extend(assists_fixable_rules);
+
+        AnalyzerVisitorResult {
+            enabled_rules,
+            disabled_rules,
+            analyzer_options,
+            fixable_rules,
+        }
     }
 }

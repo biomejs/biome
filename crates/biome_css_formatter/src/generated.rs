@@ -2996,6 +2996,38 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssKeyframesPercentageSe
         FormatOwnedWithRule :: new (self , crate :: css :: selectors :: keyframes_percentage_selector :: FormatCssKeyframesPercentageSelector :: default ())
     }
 }
+impl FormatRule<biome_css_syntax::CssKeyframesRangeSelector>
+    for crate::css::selectors::keyframes_range_selector::FormatCssKeyframesRangeSelector
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssKeyframesRangeSelector,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssKeyframesRangeSelector>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssKeyframesRangeSelector {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssKeyframesRangeSelector,
+        crate::css::selectors::keyframes_range_selector::FormatCssKeyframesRangeSelector,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: selectors :: keyframes_range_selector :: FormatCssKeyframesRangeSelector :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssKeyframesRangeSelector {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssKeyframesRangeSelector,
+        crate::css::selectors::keyframes_range_selector::FormatCssKeyframesRangeSelector,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: selectors :: keyframes_range_selector :: FormatCssKeyframesRangeSelector :: default ())
+    }
+}
 impl FormatRule<biome_css_syntax::CssKeyframesScopeFunction>
     for crate::css::auxiliary::keyframes_scope_function::FormatCssKeyframesScopeFunction
 {
