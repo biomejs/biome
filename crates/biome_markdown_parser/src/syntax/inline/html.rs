@@ -291,6 +291,36 @@ fn parse_self_close(bytes: &[u8], i: usize) -> Option<usize> {
 
 // #region Shared helpers
 
+/// Check if an inline HTML span contains a `>` immediately after a newline
+/// (with optional 0-3 leading spaces). In that position `>` is a blockquote
+/// marker per CommonMark §5.1, not part of the HTML tag.
+fn inline_html_crosses_blockquote_marker(span: &str) -> bool {
+    let bytes = span.as_bytes();
+    let mut i = 0;
+    while i < bytes.len() {
+        if bytes[i] == b'\n' || bytes[i] == b'\r' {
+            i += 1;
+            // Skip \r\n
+            if i < bytes.len() && bytes[i - 1] == b'\r' && bytes[i] == b'\n' {
+                i += 1;
+            }
+            // Skip 0-3 spaces
+            let mut spaces = 0;
+            while i < bytes.len() && bytes[i] == b' ' && spaces < 3 {
+                i += 1;
+                spaces += 1;
+            }
+            // Check for `>` at this position
+            if i < bytes.len() && bytes[i] == b'>' {
+                return true;
+            }
+        } else {
+            i += 1;
+        }
+    }
+    false
+}
+
 fn is_html_space(b: u8) -> bool {
     matches!(b, b' ' | b'\t' | b'\n' | b'\r' | b'\x0c')
 }
@@ -327,13 +357,21 @@ pub(crate) fn parse_inline_html(p: &mut MarkdownParser) -> ParsedSyntax {
         return Absent;
     }
 
-    // Get the source text starting from current position
-    let source = p.source_after_current();
-
-    // Check if this is valid inline HTML
-    let html_len = match is_inline_html(source) {
-        Some(len) => len,
-        None => return Absent,
+    // Check if this is valid inline HTML and whether it crosses a blockquote
+    // marker. Both checks use the source text, so scope the borrow here.
+    let html_len = {
+        let source = p.source_after_current();
+        let len = match is_inline_html(source) {
+            Some(len) => len,
+            None => return Absent,
+        };
+        // Reject spans where `>` immediately follows a newline (optionally
+        // preceded by 0-3 spaces). In that position `>` is a blockquote
+        // marker per §5.1, not the closing bracket of an open tag.
+        if inline_html_crosses_blockquote_marker(&source[..len]) {
+            return Absent;
+        }
+        len
     };
 
     // Per CommonMark §4.3, setext heading underlines take priority over inline HTML.

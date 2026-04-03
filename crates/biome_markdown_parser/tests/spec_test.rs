@@ -290,4 +290,10 @@ pub fn quick_test() {
         "- a\n  - b\n  lazy\n",
         "<ul>\n<li>a\n<ul>\n<li>b\nlazy</li>\n</ul>\n</li>\n</ul>\n",
     );
+    // Multiline open tag where > at line start is a blockquote marker
+    test_example(
+        20003,
+        "Allowed: <div class=\"a\"\n>ok</div> tag.\n",
+        "<p>Allowed: &lt;div class=&quot;a&quot;</p>\n<blockquote>\n<p>ok</div> tag.</p>\n</blockquote>\n",
+    );
 }
