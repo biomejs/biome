@@ -120,9 +120,10 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
             // Optional reference HTML comparison: if a .html sidecar exists,
             // render via document_to_html and compare against the reference.
             let html_path = test_case_path.with_extension("html");
-            if html_path.exists()
-                && let Some(doc) = MdDocument::cast(parsed.syntax())
-            {
+            if html_path.exists() {
+                let doc = MdDocument::cast(parsed.syntax()).unwrap_or_else(|| {
+                    panic!("Expected MdDocument root for HTML reference test {file_name}")
+                });
                 let actual = document_to_html(
                     &doc,
                     parsed.list_tightness(),
