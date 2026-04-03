@@ -337,6 +337,18 @@ pub fn quick_test() {
         "- one\n\n+ two\n",
         "<ul>\n<li>one</li>\n</ul>\n<ul>\n<li>two</li>\n</ul>\n",
     );
+    // Bullet → ordered across blank lines produce separate lists
+    test_example(
+        10012,
+        "- bullet\n\n1. ordered\n",
+        "<ul>\n<li>bullet</li>\n</ul>\n<ol>\n<li>ordered</li>\n</ol>\n",
+    );
+    // Ordered → bullet across blank lines produce separate lists
+    test_example(
+        10013,
+        "1. ordered\n\n- bullet\n",
+        "<ol>\n<li>ordered</li>\n</ol>\n<ul>\n<li>bullet</li>\n</ul>\n",
+    );
     // Nested list items separated by blank lines stay in the same nested list.
     test_example(
         10009,
