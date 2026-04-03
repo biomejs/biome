@@ -6335,7 +6335,7 @@
 					]
 				},
 				"noUnsafeValues": {
-					"description": "Disallow JSON values that are unsafe for interchange.\nSee https://biomejs.dev/linter/rules/no-unsafe-values",
+					"description": "Disallow unsafe JSON values that may cause interoperability issues.\nSee https://biomejs.dev/linter/rules/no-unsafe-values",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnsafeValuesConfiguration" },
 						{ "type": "null" }

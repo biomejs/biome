@@ -2332,7 +2332,7 @@ See https://biomejs.dev/linter/rules/no-unsafe-plus-operands
 	 */
 	noUnsafePlusOperands?: NoUnsafePlusOperandsConfiguration;
 	/**
-	* Disallow JSON values that are unsafe for interchange.
+	* Disallow unsafe JSON values that may cause interoperability issues.
 See https://biomejs.dev/linter/rules/no-unsafe-values 
 	 */
 	noUnsafeValues?: NoUnsafeValuesConfiguration;

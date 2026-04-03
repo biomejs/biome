@@ -6,7 +6,7 @@ Added the nursery rule [`noUnsafeValues`](https://biomejs.dev/linter/rules/no-un
 
 **Invalid:**
 
-```json
+```json5
 [
   2e308, // Number evaluating to Infinity
   -2e308, // Number evaluating to -Infinity

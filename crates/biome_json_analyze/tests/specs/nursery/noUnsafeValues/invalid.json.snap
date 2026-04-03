@@ -32,7 +32,7 @@ expression: invalid.json
 ```
 invalid.json:2:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The number will evaluate to Infinity.
+  ! The number will evaluate to Infinity.
   
     1 │ {
   > 2 │   "a": 2e308,
@@ -50,7 +50,7 @@ invalid.json:2:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━�
 ```
 invalid.json:3:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The number will evaluate to Infinity.
+  ! The number will evaluate to Infinity.
   
     1 │ {
     2 │   "a": 2e308,
@@ -69,7 +69,7 @@ invalid.json:3:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━�
 ```
 invalid.json:4:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Lone surrogate found.
+  ! Lone surrogate found.
   
     2 │   "a": 2e308,
     3 │   "b": -2e308,
@@ -88,7 +88,7 @@ invalid.json:4:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━�
 ```
 invalid.json:5:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Lone surrogate found.
+  ! Lone surrogate found.
   
     3 │   "b": -2e308,
     4 │   "c": "\ud83d",
@@ -107,7 +107,7 @@ invalid.json:5:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━�
 ```
 invalid.json:6:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Lone surrogate found.
+  ! Lone surrogate found.
   
     4 │   "c": "\ud83d",
     5 │   "d": "\\ud83d",
@@ -126,7 +126,7 @@ invalid.json:6:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━�
 ```
 invalid.json:7:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Lone surrogate found.
+  ! Lone surrogate found.
   
     5 │   "d": "\\ud83d",
     6 │   "e": "\udd25",
@@ -145,7 +145,7 @@ invalid.json:7:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━�
 ```
 invalid.json:8:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Lone surrogate found.
+  ! Lone surrogate found.
   
      6 │   "e": "\udd25",
      7 │   "f": "\\udd25",
@@ -164,7 +164,7 @@ invalid.json:8:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━�
 ```
 invalid.json:9:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The number will evaluate to zero.
+  ! The number will evaluate to zero.
   
      7 │   "f": "\\udd25",
      8 │   "g": "\ud83d\ud83d",
@@ -183,7 +183,7 @@ invalid.json:9:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━�
 ```
 invalid.json:10:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The number will evaluate to zero.
+  ! The number will evaluate to zero.
   
      8 │   "g": "\ud83d\ud83d",
      9 │   "h": 1e-400,
@@ -202,7 +202,7 @@ invalid.json:10:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━�
 ```
 invalid.json:11:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The number will evaluate to zero.
+  ! The number will evaluate to zero.
   
      9 │   "h": 1e-400,
     10 │   "i": 1E-400,
@@ -221,7 +221,7 @@ invalid.json:11:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━�
 ```
 invalid.json:12:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The number will evaluate to zero.
+  ! The number will evaluate to zero.
   
     10 │   "i": 1E-400,
     11 │   "j": -1e-400,
@@ -240,7 +240,7 @@ invalid.json:12:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━�
 ```
 invalid.json:13:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The number will evaluate to zero.
+  ! The number will evaluate to zero.
   
     11 │   "j": -1e-400,
     12 │   "k": 0.01e-400,
@@ -259,7 +259,7 @@ invalid.json:13:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━�
 ```
 invalid.json:14:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The number will evaluate to zero.
+  ! The number will evaluate to zero.
   
     12 │   "k": 0.01e-400,
     13 │   "l": -0.01e-400,
@@ -278,7 +278,7 @@ invalid.json:14:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━�
 ```
 invalid.json:15:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The number will evaluate to zero.
+  ! The number will evaluate to zero.
   
     13 │   "l": -0.01e-400,
     14 │   "m": 10.0e-402,
@@ -297,7 +297,7 @@ invalid.json:15:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━�
 ```
 invalid.json:16:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The number will evaluate to zero.
+  ! The number will evaluate to zero.
   
     14 │   "m": 10.0e-402,
     15 │   "n": -10.0e-402,
@@ -316,7 +316,7 @@ invalid.json:16:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━�
 ```
 invalid.json:17:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The integer is outside the safe integer range.
+  ! The integer is outside the safe integer range.
   
     15 │   "n": -10.0e-402,
     16 │   "o": 0.00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001,
@@ -335,7 +335,7 @@ invalid.json:17:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━�
 ```
 invalid.json:18:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The integer is outside the safe integer range.
+  ! The integer is outside the safe integer range.
   
     16 │   "o": 0.00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001,
     17 │   "p": 9007199254740992,
@@ -354,7 +354,7 @@ invalid.json:18:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━�
 ```
 invalid.json:19:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected subnormal number found, which may cause interoperability issues.
+  ! Unexpected subnormal number found, which may cause interoperability issues.
   
     17 │   "p": 9007199254740992,
     18 │   "q": -9007199254740992,
@@ -373,7 +373,7 @@ invalid.json:19:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━�
 ```
 invalid.json:20:8 lint/nursery/noUnsafeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected subnormal number found, which may cause interoperability issues.
+  ! Unexpected subnormal number found, which may cause interoperability issues.
   
     18 │   "q": -9007199254740992,
     19 │   "r": 2.2250738585072009e-308,
