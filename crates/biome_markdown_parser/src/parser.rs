@@ -63,6 +63,12 @@ pub(crate) struct MarkdownParserState {
     /// Indentation column where the current list marker starts.
     /// Used to detect sibling list items after blank lines.
     pub(crate) list_item_marker_indent: usize,
+    /// The bullet marker kind of the parent list (e.g. `-`, `*`, `+`).
+    /// Used to detect marker changes at blank-line boundaries.
+    pub(crate) list_item_marker_kind: Option<MarkdownSyntaxKind>,
+    /// The ordered list delimiter of the parent list (`.` or `)`).
+    /// Used to detect delimiter changes at blank-line boundaries.
+    pub(crate) list_item_ordered_delim: Option<char>,
     /// Emphasis parsing context for the current inline item list.
     pub(crate) emphasis_context: Option<EmphasisContext>,
     /// Normalized link reference definitions collected in a prepass.

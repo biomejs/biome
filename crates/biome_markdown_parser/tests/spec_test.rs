@@ -325,17 +325,17 @@ pub fn quick_test() {
         "- outer item\n  - inner item\n    inner continuation\n  outer continuation at parent indentation\n\n- next outer item\n",
         "<ul>\n<li>\n<p>outer item</p>\n<ul>\n<li>inner item\ninner continuation\nouter continuation at parent indentation</li>\n</ul>\n</li>\n<li>\n<p>next outer item</p>\n</li>\n</ul>\n",
     );
-    // Mixed ordered delimiters across blank lines produce separate lists
+    // Mixed ordered delimiters across blank lines produce separate tight lists
     test_example(
         10005,
         "1. one\n\n2) two\n",
-        "<ol>\n<li>\n<p>one</p>\n</li>\n</ol>\n<ol start=\"2\">\n<li>\n<p>two</p>\n</li>\n</ol>\n",
+        "<ol>\n<li>one</li>\n</ol>\n<ol start=\"2\">\n<li>two</li>\n</ol>\n",
     );
-    // Mixed bullet markers across blank lines produce separate lists
+    // Mixed bullet markers across blank lines produce separate tight lists
     test_example(
         10006,
         "- one\n\n+ two\n",
-        "<ul>\n<li>\n<p>one</p>\n</li>\n</ul>\n<ul>\n<li>\n<p>two</p>\n</li>\n</ul>\n",
+        "<ul>\n<li>one</li>\n</ul>\n<ul>\n<li>two</li>\n</ul>\n",
     );
     // Nested list items separated by blank lines stay in the same nested list.
     test_example(
@@ -393,4 +393,11 @@ pub fn quick_test() {
         "<blockquote>\n<h2>Foo</h2>\n</blockquote>\n",
     );
     test_example(20003, "> ---\n", "<blockquote>\n<hr />\n</blockquote>\n");
+
+    // Single-item lists split by marker change should be tight
+    test_example(
+        20008,
+        "* item one\n\n- item two\n",
+        "<ul>\n<li>item one</li>\n</ul>\n<ul>\n<li>item two</li>\n</ul>\n",
+    );
 }

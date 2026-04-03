@@ -486,7 +486,16 @@ impl ParseNodeList for BulletList {
     const LIST_KIND: Self::Kind = MD_BULLET_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_list_element_common(
+        // Detect marker before setting state so first-item content parsing
+        // knows its parent marker kind for boundary detection.
+        if self.marker_kind.is_none() {
+            self.marker_kind = current_bullet_marker(p);
+        }
+        let prev_marker_kind = p.state().list_item_marker_kind;
+        let prev_ordered_delim = p.state().list_item_ordered_delim;
+        p.state_mut().list_item_marker_kind = self.marker_kind;
+        p.state_mut().list_item_ordered_delim = None;
+        let result = parse_list_element_common(
             p,
             &mut self.marker_kind,
             current_bullet_marker,
@@ -494,7 +503,10 @@ impl ParseNodeList for BulletList {
             |p| has_bullet_item_after_blank_lines_at_indent(p, self.marker_indent),
             &mut self.is_tight,
             &mut self.last_item_ends_with_blank,
-        )
+        );
+        p.state_mut().list_item_marker_kind = prev_marker_kind;
+        p.state_mut().list_item_ordered_delim = prev_ordered_delim;
+        result
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
@@ -647,6 +659,33 @@ fn marker_changes_after_blank_lines(
             }
         }
         current_bullet_marker(p)
+    });
+    matches!(next, Some(next) if current != next)
+}
+
+/// Check if the ordered delimiter after blank lines differs from the current list's delimiter.
+fn delim_changes_after_blank_lines(
+    p: &mut MarkdownParser,
+    marker_delim: Option<char>,
+) -> bool {
+    let Some(current) = marker_delim else {
+        return false;
+    };
+    let next = p.lookahead(|p| {
+        // Skip blank lines (same pattern as marker_changes_after_blank_lines)
+        loop {
+            if !p.at(NEWLINE) {
+                break;
+            }
+            p.bump(NEWLINE);
+            while p.at(MD_TEXTUAL_LITERAL) && p.cur_text().chars().all(|c| c == ' ' || c == '\t') {
+                p.bump(MD_TEXTUAL_LITERAL);
+            }
+            if !p.at(NEWLINE) {
+                break;
+            }
+        }
+        current_ordered_delim(p)
     });
     matches!(next, Some(next) if current != next)
 }
@@ -896,7 +935,16 @@ impl ParseNodeList for OrderedList {
     const LIST_KIND: Self::Kind = MD_BULLET_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_list_element_common(
+        // Detect delimiter before setting state so first-item content parsing
+        // knows its parent ordered delim for boundary detection.
+        if self.marker_delim.is_none() {
+            self.marker_delim = current_ordered_delim(p);
+        }
+        let prev_marker_kind = p.state().list_item_marker_kind;
+        let prev_ordered_delim = p.state().list_item_ordered_delim;
+        p.state_mut().list_item_marker_kind = None;
+        p.state_mut().list_item_ordered_delim = self.marker_delim;
+        let result = parse_list_element_common(
             p,
             &mut self.marker_delim,
             current_ordered_delim,
@@ -904,14 +952,28 @@ impl ParseNodeList for OrderedList {
             |p| has_ordered_item_after_blank_lines_at_indent(p, self.marker_indent),
             &mut self.is_tight,
             &mut self.last_item_ends_with_blank,
-        )
+        );
+        p.state_mut().list_item_marker_kind = prev_marker_kind;
+        p.state_mut().list_item_ordered_delim = prev_ordered_delim;
+        result
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
         let marker_indent = self.marker_indent;
+        let marker_delim = self.marker_delim;
 
         if p.at_line_start() && at_blank_line_start(p) {
-            return !has_ordered_item_after_blank_lines_at_indent(p, marker_indent);
+            // Check if there's an ordered item after blank lines
+            let has_item = has_ordered_item_after_blank_lines_at_indent(p, marker_indent);
+            if has_item {
+                // Per CommonMark §5.3, a delimiter change across blank lines
+                // starts a new list.
+                if delim_changes_after_blank_lines(p, marker_delim) {
+                    return true;
+                }
+                return false;
+            }
+            return true;
         }
 
         is_at_list_end_common(
@@ -926,18 +988,28 @@ impl ParseNodeList for OrderedList {
                     at_order_list_item_with_base_indent(p, marker_indent)
                 });
                 if next_is_ordered {
+                    // Check delimiter after bumping past the NEWLINE
+                    let next_delim = p.lookahead(|p| {
+                        p.bump(NEWLINE);
+                        current_ordered_delim(p)
+                    });
                     if let (Some(current_delim), Some(next_delim)) =
-                        (marker_delim, current_ordered_delim(p))
+                        (marker_delim, next_delim)
                         && current_delim != next_delim
                     {
                         return Some(true);
                     }
                     return Some(false);
                 }
-                Some(!has_ordered_item_after_blank_lines_at_indent(
-                    p,
-                    marker_indent,
-                ))
+                // Check if there's an ordered item after blank lines
+                let has_item = has_ordered_item_after_blank_lines_at_indent(p, marker_indent);
+                if has_item {
+                    if delim_changes_after_blank_lines(p, marker_delim) {
+                        return Some(true);
+                    }
+                    return Some(false);
+                }
+                Some(true)
             },
         )
     }
@@ -1369,6 +1441,8 @@ struct ListItemLoopState {
     first_line: bool,
     required_indent: usize,
     marker_indent: usize,
+    parent_marker_kind: Option<MarkdownSyntaxKind>,
+    parent_ordered_delim: Option<char>,
 }
 
 impl ListItemLoopState {
@@ -1380,6 +1454,8 @@ impl ListItemLoopState {
             first_line: true,
             required_indent: p.state().list_item_required_indent,
             marker_indent: p.state().list_item_marker_indent,
+            parent_marker_kind: p.state().list_item_marker_kind,
+            parent_ordered_delim: p.state().list_item_ordered_delim,
         }
     }
 
@@ -1523,7 +1599,7 @@ fn blank_line_phase_non_quote_classify(
         return None;
     }
 
-    let action = classify_blank_line(p, state.required_indent, state.marker_indent);
+    let action = classify_blank_line(p, state.required_indent, state.marker_indent, state.parent_marker_kind, state.parent_ordered_delim);
     let is_blank = list_newline_is_blank_line(p);
     let result = apply_blank_line_action(p, state, action, is_blank);
     Some(BlankLineOutcome::resolved(result))
@@ -1615,7 +1691,7 @@ fn blank_line_phase_after_prefix(
         let action = if quote_depth > 0 {
             classify_blank_line_in_quote(p, state.required_indent, state.marker_indent, quote_depth)
         } else {
-            classify_blank_line(p, state.required_indent, state.marker_indent)
+            classify_blank_line(p, state.required_indent, state.marker_indent, state.parent_marker_kind, state.parent_ordered_delim)
         };
         let result = apply_blank_line_action_with_prefix(
             p,
@@ -2172,7 +2248,47 @@ fn parse_continuation_block(
 ) {
     let is_blank_line = p.at_blank_line();
     if is_blank_line {
-        state.record_blank();
+        // Don't record as blank if the blank line is actually the boundary
+        // before a different-marker list (CommonMark §5.3). The blank line
+        // belongs to the inter-list gap, not this item.
+        let is_marker_boundary = is_blank_line
+            && (state.parent_marker_kind.is_some() || state.parent_ordered_delim.is_some())
+            && {
+                let mk = state.parent_marker_kind;
+                let od = state.parent_ordered_delim;
+                let mi = state.marker_indent;
+                p.lookahead(|p| {
+                    // Skip blank lines
+                    while p.at_blank_line() {
+                        p.bump(NEWLINE);
+                    }
+                    let next_is_bullet = at_bullet_list_item_with_base_indent(p, mi);
+                    let next_is_ordered = at_order_list_item_with_base_indent(p, mi);
+                    if let Some(cur) = mk {
+                        // Parent is bullet list
+                        if next_is_ordered {
+                            return true; // bullet → ordered
+                        }
+                        if next_is_bullet {
+                            let next = current_bullet_marker(p);
+                            return matches!(next, Some(nxt) if cur != nxt);
+                        }
+                    } else if let Some(cur_delim) = od {
+                        // Parent is ordered list
+                        if next_is_bullet {
+                            return true; // ordered → bullet
+                        }
+                        if next_is_ordered {
+                            let next_delim = current_ordered_delim(p);
+                            return matches!(next_delim, Some(nxt) if cur_delim != nxt);
+                        }
+                    }
+                    false
+                })
+            };
+        if !is_marker_boundary {
+            state.record_blank();
+        }
     } else {
         state.last_was_blank = false;
     }
@@ -2186,7 +2302,8 @@ fn parse_continuation_block(
     } else {
         false
     };
-    if p.take_last_list_ends_with_blank() {
+    let last_list_blank = p.take_last_list_ends_with_blank();
+    if last_list_blank {
         state.has_blank_line = true;
         state.last_was_blank = true;
     }
@@ -2363,6 +2480,8 @@ fn classify_blank_line(
     p: &mut MarkdownParser,
     required_indent: usize,
     marker_indent: usize,
+    parent_marker_kind: Option<MarkdownSyntaxKind>,
+    parent_ordered_delim: Option<char>,
 ) -> BlankLineAction {
     p.lookahead(|p| {
         // Skip ALL consecutive blank lines (not just one).
@@ -2416,10 +2535,35 @@ fn classify_blank_line(
         }
 
         // If next non-blank line starts a new list item, this is a blank line between items.
+        let next_is_bullet = at_bullet_list_item_with_base_indent(p, marker_indent);
+        let next_is_ordered = at_order_list_item_with_base_indent(p, marker_indent);
         if indent <= marker_indent + MAX_BLOCK_PREFIX_INDENT
-            && (at_bullet_list_item_with_base_indent(p, marker_indent)
-                || at_order_list_item_with_base_indent(p, marker_indent))
+            && (next_is_bullet || next_is_ordered)
         {
+            // Per CommonMark §5.3, a marker/type change means a new list starts.
+            // The blank line is a list boundary, not an item boundary — don't
+            // count it toward looseness of the current list.
+            if let Some(current) = parent_marker_kind {
+                // Parent is a bullet list
+                if next_is_ordered {
+                    // Bullet → ordered: different list type
+                    return BlankLineAction::EndItemBeforeBlank;
+                }
+                let next = current_bullet_marker(p);
+                if matches!(next, Some(next) if current != next) {
+                    return BlankLineAction::EndItemBeforeBlank;
+                }
+            } else if let Some(current_delim) = parent_ordered_delim {
+                // Parent is an ordered list
+                if next_is_bullet {
+                    // Ordered → bullet: different list type
+                    return BlankLineAction::EndItemBeforeBlank;
+                }
+                let next_delim = current_ordered_delim(p);
+                if matches!(next_delim, Some(next) if current_delim != next) {
+                    return BlankLineAction::EndItemBeforeBlank;
+                }
+            }
             // The first "blank line" is just the item-ending newline.
             // Only report actual blank lines if more than 1 was found.
             if blank_lines_found > 1 {
