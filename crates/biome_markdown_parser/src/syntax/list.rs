@@ -635,7 +635,11 @@ fn marker_changes_after_blank_lines(
             }
             p.bump(NEWLINE);
             // Skip whitespace-only lines
-            while p.at(MD_TEXTUAL_LITERAL) && p.cur_text().bytes().all(|b| biome_unicode_table::lookup_byte(b) == biome_unicode_table::Dispatch::WHS) {
+            while p.at(MD_TEXTUAL_LITERAL)
+                && p.cur_text().bytes().all(|b| {
+                    biome_unicode_table::lookup_byte(b) == biome_unicode_table::Dispatch::WHS
+                })
+            {
                 p.bump(MD_TEXTUAL_LITERAL);
             }
             if !p.at(NEWLINE) {
