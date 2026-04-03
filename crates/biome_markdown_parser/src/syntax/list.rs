@@ -2273,9 +2273,12 @@ fn parse_continuation_block(
                 let od = state.parent_ordered_delim;
                 let mi = state.marker_indent;
                 p.lookahead(|p| {
-                    // Skip blank lines
+                    // Skip blank lines (including whitespace-only tokens between newlines)
                     while p.at_blank_line() {
                         p.bump(NEWLINE);
+                        while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
+                            p.bump(MD_TEXTUAL_LITERAL);
+                        }
                     }
                     let next_is_bullet = at_bullet_list_item_with_base_indent(p, mi);
                     let next_is_ordered = at_order_list_item_with_base_indent(p, mi);
