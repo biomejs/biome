@@ -20,7 +20,8 @@ impl FormatNodeRule<MdInlineItalic> for FormatMdInlineItalic {
         if node
             .syntax()
             .descendants()
-            .any(|d| d.kind() == MarkdownSyntaxKind::MD_INLINE_ITALIC && d != *node.syntax())
+            .skip(1)
+            .any(|d| d.kind() == MarkdownSyntaxKind::MD_INLINE_ITALIC)
         {
             // TODO: instead of format_verbatim_node, pass options to child formatters so
             // other normalizations (bold, code, etc.) still run inside nested italic content.
