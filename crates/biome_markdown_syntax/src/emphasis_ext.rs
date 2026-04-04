@@ -12,8 +12,8 @@ pub enum MdEmphasisFence {
 impl MdEmphasisFence {
     pub fn as_str(&self) -> &'static str {
         match self {
-            MdEmphasisFence::DoubleStar => "**",
-            MdEmphasisFence::DoubleUnderscore => "__",
+            Self::DoubleStar => "**",
+            Self::DoubleUnderscore => "__",
         }
     }
 }
