@@ -118,7 +118,6 @@ expression: valid.js
 {
 	await using foo = object.foo;
 }
-
 /* assignment result used as value should not trigger */
 {
 	return foo = object.foo;
