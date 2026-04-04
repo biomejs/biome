@@ -5,7 +5,7 @@ use biome_console::markup;
 use biome_js_syntax::{
     AnyJsAssignment, AnyJsAssignmentPattern, AnyJsBinding, AnyJsBindingPattern, AnyJsExpression,
     AnyJsLiteralExpression, AnyJsName, JsAssignmentExpression, JsAssignmentOperator,
-    JsVariableDeclaration, JsVariableDeclarator,
+    JsExpressionStatement, JsVariableDeclaration, JsVariableDeclarator,
 };
 use biome_rowan::{AstNode, declare_node_union};
 use biome_rule_options::use_destructuring::UseDestructuringOptions;
@@ -44,12 +44,42 @@ declare_lint_rule! {
     /// const foo: string = object.foo;
     /// ```
     ///
+    /// ## Options
+    ///
+    /// The rule provides separate configuration for variable declarations and assignment expressions.
+    ///
+    /// ```json
+    /// {
+    ///     "options": {
+    ///         "variableDeclarator": {
+    ///             "array": true,
+    ///             "object": true
+    ///         },
+    ///         "assignmentExpression": {
+    ///             "array": true,
+    ///             "object": true
+    ///         }
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ### variableDeclarator
+    ///
+    /// Controls whether to enforce destructuring in variable declarations (e.g., `var foo = object.foo`).
+    /// Both `array` and `object` default to `true`.
+    ///
+    /// ### assignmentExpression
+    ///
+    /// Controls whether to enforce destructuring in assignment expressions (e.g., `foo = object.foo`).
+    /// Both `array` and `object` default to `true`.
+    /// When enabled for objects, the diagnostic instructs users to wrap in parentheses: `({ prop } = object)`.
+    ///
     pub UseDestructuring {
         version: "2.3.9",
         name: "useDestructuring",
         language: "js",
         recommended: false,
-        sources: &[RuleSource::Eslint("prefer-destructuring").same()],
+        sources: &[RuleSource::Eslint("prefer-destructuring").inspired()],
     }
 }
 
@@ -67,6 +97,15 @@ impl Rule for UseDestructuring {
             UseDestructuringQuery::JsAssignmentExpression(node) => {
                 let config = options.assignment_expression.unwrap_or_default();
                 if !config.array() && !config.object() {
+                    return None;
+                }
+
+                // Only suggest destructuring when the assignment result is discarded.
+                // `foo = obj.foo` evaluates to `obj.foo`, but `({ foo } = obj)` evaluates to `obj`.
+                // Suggesting destructuring when the result is used (e.g., return, call argument)
+                // would change program behavior.
+                let parent = node.syntax().parent()?;
+                if !JsExpressionStatement::can_cast(parent.kind()) {
                     return None;
                 }
 
