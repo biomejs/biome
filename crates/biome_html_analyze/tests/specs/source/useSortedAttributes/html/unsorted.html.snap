@@ -9,9 +9,9 @@ expression: unsorted.html
 <textarea id="mytextarea" name="textarea" rows="5" cols="20" data-1="" data-11="" data-12="" data-2="">
 Hello, world!</textarea>
 
-<!-- <input type="checkbox" name="" id="" required readonly checked> -->
+<input type="checkbox" name="" id="" required readonly checked>
 
-<!-- <input type="checkbox" name="" id="" checked> -->
+<input type="checkbox" name="" id="" checked>
 
 ```
 
@@ -55,9 +55,55 @@ unsorted.html:3:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━
     1 1 │   <!-- should generate diagnostics -->
     2 2 │   <input type="text" id="name" name="name" />
     3   │ - <textarea·id="mytextarea"·name="textarea"·rows="5"·cols="20"·data-1=""·data-11=""·data-12=""·data-2="">
-      3 │ + <textarea·cols="20"·data-1=""·data-2=""data-11=""·data-12=""·id="mytextarea"·name="textarea"·rows="5"·>
+      3 │ + <textarea·cols="20"·data-1=""·data-2=""·data-11=""·data-12=""·id="mytextarea"·name="textarea"·rows="5"·>
     4 4 │   Hello, world!</textarea>
     5 5 │   
+  
+
+```
+
+```
+unsorted.html:6:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+    4 │ Hello, world!</textarea>
+    5 │ 
+  > 6 │ <input type="checkbox" name="" id="" required readonly checked>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ <input type="checkbox" name="" id="" checked>
+  
+  i Safe fix: Sort the HTML attributes.
+  
+    4 4 │   Hello, world!</textarea>
+    5 5 │   
+    6   │ - <input·type="checkbox"·name=""·id=""·required·readonly·checked>
+      6 │ + <input·checked·id=""·name=""·readonly·required·type="checkbox"·>
+    7 7 │   
+    8 8 │   <input type="checkbox" name="" id="" checked>
+  
+
+```
+
+```
+unsorted.html:8:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+    6 │ <input type="checkbox" name="" id="" required readonly checked>
+    7 │ 
+  > 8 │ <input type="checkbox" name="" id="" checked>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    9 │ 
+  
+  i Safe fix: Sort the HTML attributes.
+  
+    6 6 │   <input type="checkbox" name="" id="" required readonly checked>
+    7 7 │   
+    8   │ - <input·type="checkbox"·name=""·id=""·checked>
+      8 │ + <input·checked·id=""·name=""·type="checkbox"·>
+    9 9 │   
   
 
 ```

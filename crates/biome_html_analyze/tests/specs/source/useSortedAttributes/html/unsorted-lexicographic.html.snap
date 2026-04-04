@@ -51,7 +51,7 @@ unsorted-lexicographic.html:3:1 assist/source/useSortedAttributes  FIXABLE  ━�
     1 1 │   <!-- should generate diagnostics -->
     2 2 │   <input type="text" id="name" name="name" />
     3   │ - <textarea·id="mytextarea"·name="textarea"·rows="5"·cols="20"·data-1=""·data-2=""·data-11=""·data-12="">
-      3 │ + <textarea·cols="20"·data-1=""·data-11=""·data-12=""data-2=""·id="mytextarea"·name="textarea"·rows="5"·>
+      3 │ + <textarea·cols="20"·data-1=""·data-11=""·data-12=""·data-2=""·id="mytextarea"·name="textarea"·rows="5"·>
     4 4 │   Hello, world!</textarea>
     5 5 │   
   

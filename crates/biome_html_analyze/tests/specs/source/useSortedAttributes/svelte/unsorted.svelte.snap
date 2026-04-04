@@ -99,7 +99,7 @@ unsorted.svelte:2:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━�
   
      1  1 │   <input type="checkbox" spellcheck="true" tabindex="-1" dir="auto" bind:checked={accepted} />
      2    │ - <input·type="checkbox"·spellcheck="true"·tabindex="-1"·dir="auto"·bind:checked·defaultChecked={true}>
-        2 │ + <input·defaultChecked={true}dir="auto"·spellcheck="true"·tabindex="-1"·type="checkbox"·bind:checked·>
+        2 │ + <input·defaultChecked={true}·dir="auto"·spellcheck="true"·tabindex="-1"·type="checkbox"·bind:checked·>
      3  3 │   <div style:color="red" spellcheck="true" tabindex="-1" dir="auto" class="mydiv">some text</div>
      4  4 │   
   
@@ -123,7 +123,7 @@ unsorted.svelte:3:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━�
      1  1 │   <input type="checkbox" spellcheck="true" tabindex="-1" dir="auto" bind:checked={accepted} />
      2  2 │   <input type="checkbox" spellcheck="true" tabindex="-1" dir="auto" bind:checked defaultChecked={true}>
      3    │ - <div·style:color="red"·spellcheck="true"·tabindex="-1"·dir="auto"·class="mydiv">some·text</div>
-        3 │ + <div·class="mydiv"dir="auto"·spellcheck="true"·tabindex="-1"·style:color="red"·>some·text</div>
+        3 │ + <div·class="mydiv"·dir="auto"·spellcheck="true"·tabindex="-1"·style:color="red"·>some·text</div>
      4  4 │   
      5  5 │   <img use:myaction={data} spellcheck="true" tabindex="-1" dir="auto" {src} alt="some alt text" />
   

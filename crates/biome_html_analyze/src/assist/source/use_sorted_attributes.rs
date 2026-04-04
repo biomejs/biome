@@ -12,7 +12,7 @@ use biome_html_syntax::{
     AnyVueDirective, AnyVueDirectiveArgument, AstroDirectiveValue, HtmlAttributeList, HtmlLanguage,
     HtmlOpeningElement, HtmlSelfClosingElement, SvelteDirectiveValue,
 };
-use biome_rowan::{AstNode, BatchMutationExt, SyntaxToken};
+use biome_rowan::{AstNode, AstNodeExt, BatchMutationExt, SyntaxToken};
 use biome_rule_options::use_sorted_attributes::{SortOrder, UseSortedAttributesOptions};
 use std::{borrow::Cow, cmp::Ordering, iter::zip};
 
@@ -206,12 +206,8 @@ impl Rule for UseSortedAttributes {
         let comparator = get_comparator(sort_by);
 
         for (SortableHtmlAttribute(attr), SortableHtmlAttribute(sorted_attr)) in
-            zip(state.attrs.iter(), state.get_sorted_attributes(comparator))
+            zip(state.attrs.iter(), state.get_sorted_attributes(comparator)?)
         {
-            // TODO make sure sorted_attr has trailing whitespace if it is not the last attribute in the group
-            // if sorted_attr.syntax().last_trailing_trivia().is_none() {
-            //     sorted_attr = sorted_attr.append_trivia_pieces([TriviaPiece::whitespace(1)]);
-            // }
             mutation.replace_node_discard_trivia(attr.clone(), sorted_attr);
         }
 
@@ -506,6 +502,24 @@ impl SortableAttribute for SortableHtmlAttribute {
             }
             _ => None,
         }
+    }
+
+    fn node(&self) -> &impl AstNode<Language = Self::Language> {
+        &self.0
+    }
+
+    fn replace_token(
+        self,
+        prev_token: SyntaxToken<Self::Language>,
+        next_token: SyntaxToken<Self::Language>,
+    ) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        Some(Self(
+            self.0
+                .replace_token_discard_trivia(prev_token, next_token)?,
+        ))
     }
 }
 

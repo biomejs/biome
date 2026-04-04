@@ -12,7 +12,7 @@ use biome_js_syntax::{
     AnyJsxAttribute, JsLanguage, JsxAttribute, JsxAttributeList, JsxOpeningElement,
     JsxSelfClosingElement,
 };
-use biome_rowan::{AstNode, BatchMutationExt, SyntaxToken};
+use biome_rowan::{AstNode, AstNodeExt, BatchMutationExt, SyntaxToken};
 use biome_rule_options::use_sorted_attributes::{SortOrder, UseSortedAttributesOptions};
 
 use crate::JsRuleAction;
@@ -107,7 +107,7 @@ impl Rule for UseSortedAttributes {
         for prop in props {
             match prop {
                 AnyJsxAttribute::JsxAttribute(attr) => {
-                    current_prop_group.attrs.push(SortableJsxAttribute { attr });
+                    current_prop_group.attrs.push(SortableJsxAttribute(attr));
                 }
                 // spread prop reset sort order
                 AnyJsxAttribute::JsxSpreadAttribute(_) => {
@@ -158,8 +158,8 @@ impl Rule for UseSortedAttributes {
             SortOrder::Lexicographic => SortableJsxAttribute::lexicographic_cmp,
         };
 
-        for (SortableJsxAttribute { attr }, SortableJsxAttribute { attr: sorted_attr }) in
-            zip(state.attrs.iter(), state.get_sorted_attributes(comparator))
+        for (SortableJsxAttribute(attr), SortableJsxAttribute(sorted_attr)) in
+            zip(state.attrs.iter(), state.get_sorted_attributes(comparator)?)
         {
             mutation.replace_node_discard_trivia(attr.clone(), sorted_attr);
         }
@@ -174,14 +174,30 @@ impl Rule for UseSortedAttributes {
 }
 
 #[derive(PartialEq, Eq, Clone)]
-pub struct SortableJsxAttribute {
-    attr: JsxAttribute,
-}
+pub struct SortableJsxAttribute(JsxAttribute);
 
 impl SortableAttribute for SortableJsxAttribute {
     type Language = JsLanguage;
 
     fn name(&self) -> Option<SyntaxToken<Self::Language>> {
-        self.attr.name().ok()?.name_token().ok()
+        self.0.name().ok()?.name_token().ok()
+    }
+
+    fn node(&self) -> &impl AstNode<Language = Self::Language> {
+        &self.0
+    }
+
+    fn replace_token(
+        self,
+        prev_token: SyntaxToken<Self::Language>,
+        next_token: SyntaxToken<Self::Language>,
+    ) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        Some(Self(
+            self.0
+                .replace_token_discard_trivia(prev_token, next_token)?,
+        ))
     }
 }
