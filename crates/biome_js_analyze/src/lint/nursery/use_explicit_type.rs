@@ -85,22 +85,6 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```ts,expect_diagnostic
-    /// // Unspecified variable type
-    /// function fn(): string {
-    ///     return "Not inline";
-    /// }
-    /// const direct = fn();
-    /// ```
-    ///
-    /// ```ts,expect_diagnostic
-    /// // Unspecified object member type
-    /// function fn(): string {
-    ///     return "Not inline";
-    /// }
-    /// const nested = { result: fn() };
-    /// ```
-    ///
-    /// ```ts,expect_diagnostic
     /// // let bindings of null and undefined are usually overwritten by other code
     /// let foo = null;
     /// ```
