@@ -1,4 +1,4 @@
-/* should generate diagnostics */
+/* should generate diagnostics for object cases only */
 /* array disabled, but object should still fire */
 {
 	var foo = array[0];

@@ -82,12 +82,12 @@ impl Rule for UseDestructuring {
                 ) = left
                 {
                     let ident = expr.name_token().ok()?;
-                    let state = should_suggest_destructuring(ident.text_trimmed(), &right)?;
-                    return match state {
-                        UseDestructuringState::Array if config.array() => {
+                    let kind = should_suggest_destructuring(ident.text_trimmed(), &right)?;
+                    return match kind {
+                        DestructuringKind::Array if config.array() => {
                             Some(UseDestructuringState::Array)
                         }
-                        UseDestructuringState::Object { .. } if config.object() => {
+                        DestructuringKind::Object if config.object() => {
                             Some(UseDestructuringState::Object {
                                 is_assignment: true,
                             })
@@ -122,12 +122,12 @@ impl Rule for UseDestructuring {
                     left
                 {
                     let ident = expr.name_token().ok()?;
-                    let state = should_suggest_destructuring(ident.text_trimmed(), &right)?;
-                    return match state {
-                        UseDestructuringState::Array if config.array() => {
+                    let kind = should_suggest_destructuring(ident.text_trimmed(), &right)?;
+                    return match kind {
+                        DestructuringKind::Array if config.array() => {
                             Some(UseDestructuringState::Array)
                         }
-                        UseDestructuringState::Object { .. } if config.object() => {
+                        DestructuringKind::Object if config.object() => {
                             Some(UseDestructuringState::Object {
                                 is_assignment: false,
                             })
@@ -191,10 +191,15 @@ declare_node_union! {
     pub UseDestructuringQuery = JsVariableDeclarator |  JsAssignmentExpression
 }
 
+enum DestructuringKind {
+    Array,
+    Object,
+}
+
 fn should_suggest_destructuring(
     left: &str,
     right: &AnyJsExpression,
-) -> Option<UseDestructuringState> {
+) -> Option<DestructuringKind> {
     match right {
         AnyJsExpression::JsComputedMemberExpression(expr) => {
             if expr.is_optional_chain() {
@@ -204,13 +209,13 @@ fn should_suggest_destructuring(
             let member = expr.member().ok()?;
             if let AnyJsExpression::AnyJsLiteralExpression(expr) = member {
                 if matches!(expr, AnyJsLiteralExpression::JsNumberLiteralExpression(_)) {
-                    return Some(UseDestructuringState::Array);
+                    return Some(DestructuringKind::Array);
                 }
 
                 let value = expr.value_token().ok()?;
 
                 if left == value.text_trimmed() {
-                    return Some(UseDestructuringState::Object { is_assignment: false });
+                    return Some(DestructuringKind::Object);
                 }
             }
 
@@ -228,7 +233,7 @@ fn should_suggest_destructuring(
             }
             let member = expr.member().ok()?.value_token().ok()?;
             if left == member.text_trimmed() {
-                return Some(UseDestructuringState::Object { is_assignment: false });
+                return Some(DestructuringKind::Object);
             }
             None
         }
